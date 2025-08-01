@@ -4,13 +4,15 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "build": "tailwindcss -i ./styles.css -o ./dist/styles.css --minify && cp -n ./*.html ./dist/ && cp -r ./blog ./dist/ && cp -r ./images ./dist/ && cp -r ./fonts ./dist/ && cp ./main.js ./dist/ && cp ./robots.txt ./dist/ && cp ./_headers ./dist/ && cp ./sitemap.xml ./dist/"
+    "build:css": "tailwindcss -i ./styles.css -o ./dist/styles.css --minify",
+    "copy:assets": "cpx \"./**/*.{html,js,webp,png,jpg,svg,woff2,txt,xml}\" dist && cpx \"./_headers\" dist",
+    "build": "npm run build:css && npm run copy:assets"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-  "tailwindcss": "^3.4.1",
-  "cpx": "^1.5.0"
-}
+    "tailwindcss": "^3.4.1",
+    "cpx": "^1.5.0"
+  }
 }
