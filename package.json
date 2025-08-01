@@ -2,10 +2,11 @@
   "name": "sideline-project",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-   "scripts": {
-   "build": "tailwindcss -i ./styles.css -o ./dist/styles.css && cp *.html ./dist/ && cp -r blog ./dist/ && cp -r images ./dist/ && cp -r fonts ./dist/ && cp main.js ./dist/ && cp robots.txt ./dist/ && cp _headers ./dist/ && cp sitemap.xml ./dist/"
-     "keywords": [],
+  "main": "main.js",
+  "scripts": {
+    "build": "tailwindcss -i ./styles.css -o ./dist/styles.css --minify && cp -n ./*.html ./dist/ && cp -r ./blog ./dist/ && cp -r ./images ./dist/ && cp -r ./fonts ./dist/ && cp ./main.js ./dist/ && cp ./robots.txt ./dist/ && cp ./_headers ./dist/ && cp ./sitemap.xml ./dist/"
+  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
