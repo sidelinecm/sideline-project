@@ -1,5 +1,12 @@
-"scripts": {
-  "build": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
-  "postbuild": "cp dist/output.css styles.css",
-  "build-and-fix": "npm run build && npm run postbuild"
+{
+  "name": "sideline-project",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
+    "postbuild": "cp dist/output.css styles.css",
+    "build-and-fix": "npm run build && npm run postbuild"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
 }
