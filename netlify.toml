@@ -1,9 +1,6 @@
 [build]
-  publish = "."  # ตำแหน่งไฟล์ index.html
-  command = "npm run build-and-fix"
-
-[build.environment]
-  NODE_VERSION = "20"
+  publish = "."
+  command = "npm run build"
 
 [[redirects]]
   from = "/*"
