@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "build": "tailwindcss -i ./styles.css -o ./dist/styles.css --minify"
-  },
+   "scripts": {
+   "build": "tailwindcss -i ./styles.css -o ./dist/styles.css && cp index.html ./dist/ && cp main.js ./dist/"
+ },
   "keywords": [],
   "author": "",
   "license": "ISC",
