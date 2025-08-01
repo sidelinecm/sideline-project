@@ -38,23 +38,21 @@
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- CRITICAL CSS: Inlined for INSTANT rendering of above-the-fold content -->
+    <!-- CRITICAL CSS -->
     <style id="critical-css">
       :root{--background:220 20% 98%;--foreground:220 15% 25%;--card:0 0% 100%;--primary:340 85% 58%;--primary-glow:340 85% 65%;--secondary:260 85% 65%;--muted:220 25% 94%;--muted-foreground:220 10% 45%;--border:220 20% 92%;--accent:220 60% 96%}html.dark{--background:225 15% 10%;--foreground:220 20% 90%;--card:225 15% 16%;--primary:340 90% 68%;--primary-glow:340 95% 72%;--secondary:260 90% 75%;--muted:225 15% 20%;--border:225 12% 25%;--accent:225 15% 20%}body{font-family:'Prompt','Sarabun',sans-serif;background-color:hsl(var(--background));color:hsl(var(--foreground));-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}#page-header{position:fixed;top:0;left:0;width:100%;z-index:40;border-bottom:1px solid transparent;transition:background-color .3s,border-color .3s,box-shadow .3s}.container{width:100%;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}#page-header .container{height:4.5rem;display:flex;align-items:center;justify-content:space-between}.text-primary{text-shadow:0 0 15px hsl(var(--primary-glow)/.6),0 0 3px hsl(var(--primary-glow)/.8)}.text-secondary{text-shadow:0 0 15px hsl(var(--secondary-glow)/.5),0 0 3px hsl(var(--secondary-glow)/.7)}
     </style>
 
-  <!-- ✅ โหลด Tailwind output.css -->
-<link rel="stylesheet" href="dist/output.css">
+    <!-- SECTION 5: STYLESHEETS (Simple & Direct Path) -->
+    <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="/styles.css" ... >
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    </noscript>
+</head>
 
-<!-- ✅ Lazy-load Font Awesome เพื่อไม่ block rendering -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
-
-<!-- ✅ Fallback เฉพาะ Font Awesome (ไม่ต้อง fallback output.css เพราะถูกโหลดด้านบนอยู่แล้ว) -->
-<noscript>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-</noscript>
-
-    
+<body class="antialiased opacity-0" data-page="home">
   <!-- Age Verification Modal (Initially hidden, controlled by JS) -->
   <div id="age-verification-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
     <div class="age-modal-content relative space-y-6">
