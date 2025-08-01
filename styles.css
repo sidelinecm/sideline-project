@@ -130,7 +130,7 @@ body.loaded { opacity: 1; }
  */
 
 /* --- General Smooth Transitions --- */
-a, button, input, select, details {
+a, button, input, select, details, .blog-card, .location-card {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -146,9 +146,6 @@ a, button, input, select, details {
 }
 
 /* --- Upgraded Buttons --- */
-.btn-primary, .btn-secondary, .btn-line-shared {
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
-}
 .btn-primary:hover, .btn-secondary:hover, .btn-line-shared:hover {
   transform: translateY(-3px) scale(1.03);
   box-shadow: 0 8px 25px -5px hsl(var(--primary-glow) / 0.5), 0 4px 10px hsl(var(--primary-glow) / 0.3);
@@ -184,8 +181,7 @@ a, button, input, select, details {
   transform: translateY(0); 
 }
 
-/* --- Staggered Animation for Child Elements (Optional, but very cool!) --- */
-/* How to use: Add 'stagger-children' class to the parent container */
+/* --- Staggered Animation for Child Elements --- */
 .stagger-children > * {
   transition-delay: calc(var(--stagger-index, 0) * 80ms);
 }
@@ -200,4 +196,3 @@ a, button, input, select, details {
 .modal-content { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4); }
 
 /* ... (โค้ดที่เหลือทั้งหมดของคุณจะทำงานร่วมกับ Tailwind ได้อย่างสมบูรณ์) ... */
-/* ... Age Verification, Sidebar, Cards, Buttons, etc ... */
