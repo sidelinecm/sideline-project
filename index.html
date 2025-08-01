@@ -33,29 +33,20 @@
     <!-- ================================================================== -->
 
     <!-- 1. Preconnect to essential domains -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+        <!-- 1. Preconnect to essential domains -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
 
     <!-- 2. Preload critical fonts -->
     <link rel="preload" href="fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-
-    <!-- 3. TailwindCSS Just-in-Time Engine Script -->
-    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 4. Load stylesheets (วิธีที่เสถียรที่สุด) -->
+    <!-- 3. Load Stylesheets ที่ถูกต้อง -->
     <!-- Font Awesome (สำหรับไอคอน) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <!-- Your Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- Noscript fallback -->
-    <noscript>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-      <link rel="stylesheet" href="styles.css">
-    </noscript>
+    <!-- Tailwind CSS ที่ Build เสร็จแล้วจากโฟลเดอร์ dist -->
+    <link href="/dist/output.css" rel="stylesheet">
 
     <!-- ================================================================== -->
     <!-- =============== END: FINAL WORKING CODE ==================== -->
@@ -186,7 +177,7 @@
   </div>
 
   
-    <script type="module" src="main.js"></script>
+    <script type="module" src="main.js" defer></script>
   
     <!-- Third-party analytics script, loaded asynchronously not to block main thread -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3BT9WPRK5"></script>
