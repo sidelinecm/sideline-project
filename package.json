@@ -1,18 +1,16 @@
 {
   "name": "sideline-project",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sideline Chiangmai Website Project",
   "main": "main.js",
   "scripts": {
-    "build:css": "tailwindcss -i ./styles.css -o ./dist/styles.css --minify",
-    "copy:assets": "cpx \"./**/*.{html,js,webp,png,jpg,svg,woff2,txt,xml}\" dist && cpx \"./_headers\" dist",
-    "build": "npm run build:css && npm run copy:assets"
+    "build:css": "tailwindcss -i ./styles.css -o ./dist/output.css",
+    "watch": "tailwindcss -i ./styles.css -o ./dist/output.css --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "tailwindcss": "^3.4.1",
-    "cpx": "^1.5.0"
+    "tailwindcss": "^3.4.1"
   }
 }
