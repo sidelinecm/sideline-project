@@ -1,15 +1,6 @@
-# Netlify build configuration
-
 [build]
-  # Command to build the site
-  # Netlify automatically runs 'npm install' before this.
-  command = "npm run build:css"
-
-  # The directory to publish (deploy)
-  # "." means the root of the project, which is correct
-  # because your HTML files are in the root.
-  publish = "."
+  command = "npm run build"
+  publish = "dist"
 
 [build.environment]
-  # Specify the Node.js version to ensure compatibility
   NODE_VERSION = "18"
