@@ -1,15 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./*.html",
-    "./blog/*.html",
+    './*.html',
+    './blog/**/*.html',
+    './main.js'
   ],
   theme: {
-    extend: {
-      fontFamily: {
-        'prompt': ['Prompt', 'sans-serif'],
-      },
-    },
+    extend: {},
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

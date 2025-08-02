@@ -1,22 +1,14 @@
-#
-#  Strict cache control + GZIP
-#
-
-# Critical Font
-/fonts/*.woff2
+# Cache immutable assets for 1 year
+/fonts/*
   Cache-Control: public, max-age=31536000, immutable
-
-# Image lazyload
 /images/*
   Cache-Control: public, max-age=31536000, immutable
-
-# CSS/JS Assets
-/dist/output.css
+/dist/*
   Cache-Control: public, max-age=31536000, immutable
 /main.js
   Cache-Control: public, max-age=31536000, immutable
 
-# HTML no-cache
+# Do not cache HTML files
 /index.html
   Cache-Control: no-cache
 /about.html
@@ -26,6 +18,10 @@
 /locations.html
   Cache-Control: no-cache
 /faq.html
-  Cache-control: no-cache
+  Cache-Control: no-cache
 /blog.html
-  Cache-control: no-cache
+  Cache-Control: no-cache
+/privacy-policy.html
+  Cache-Control: no-cache
+/404.html
+  Cache-Control: no-cache
