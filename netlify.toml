@@ -1,6 +1,11 @@
+# Netlify Build Settings
 [build]
+  # คำสั่งที่ Netlify จะใช้ในการ build โปรเจกต์
   command = "npm run build"
-  publish = "." 
+  
+  # โฟลเดอร์ที่ Netlify จะนำไป publish (ต้องตรงกับผลลัพธ์ของคำสั่ง build)
+  publish = "dist"
 
+# (Optional but Recommended) กำหนดเวอร์ชัน Node.js
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "16"
