@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SidelineCM Stylesheet - FINAL & FULLY CORRECTED VERSION
+   SidelineCM Stylesheet - ABSOLUTELY FINAL & CORRECTED VERSION
    ========================================================================== */
 
 /* 1. Tailwind Directives */
@@ -9,22 +9,51 @@
 
 /* 2. Font Definitions & Color Variables */
 @layer base {
-  /* [FIXED] แก้ไข Font Path ให้เป็นแบบ Relative */
+  /* [CORRECT] Font Path แบบ Relative */
   @font-face {
     font-family: 'Prompt';
     font-style: normal;
     font-weight: 400;
+    font-display: swap;
     src: url('fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
   }
-  /* ... (font-face อื่นๆ เหมือนเดิม) ... */
+  @font-face {
+    font-family: 'Prompt';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('fonts/prompt-v11-latin_thai-500.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Prompt';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Prompt';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Sarabun';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fonts/sarabun-v16-latin_thai-regular.woff2') format('woff2');
+  }
   @font-face {
     font-family: 'Sarabun';
     font-style: normal;
     font-weight: 700;
+    font-display: swap;
     src: url('fonts/sarabun-v16-latin_thai-700.woff2') format('woff2');
   }
 
-  /* [COMPLETE] กำหนดตัวแปรสีหลักที่นี่ที่เดียว */
+  /* [CORRECT] กำหนดตัวแปรสีหลัก */
   :root {
     --radius: 1rem;
     --background: 220 20% 98%;
@@ -52,10 +81,12 @@
     --accent: 225 15% 20%;
   }
 
-  /* [FIXED] ใช้ @apply เรียกสีจาก config */
+  /* [CORRECTED] แยกการใช้ @apply ออกจากการกำหนดสี */
   body {
-    @apply bg-background text-foreground antialiased relative overflow-x-hidden transition-opacity duration-700 ease-in-out;
+    @apply antialiased relative overflow-x-hidden transition-opacity duration-700 ease-in-out;
     font-family: 'Prompt', 'Sarabun', sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     opacity: 0;
   }
 }
@@ -67,20 +98,34 @@
   .age-modal-content {
     @apply relative space-y-6 text-center text-gray-200 p-10 rounded-2xl max-w-lg;
     background: linear-gradient(145deg, rgba(40, 42, 54, 0.95), rgba(30, 32, 42, 0.98));
-    @apply border border-white/10 shadow-2xl;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   }
   .age-badge-inline {
-    @apply inline-flex items-center justify-center w-9 h-9 bg-primary text-white rounded-full text-base font-extrabold mx-2 align-middle -translate-y-0.5 border-2 border-primary/50;
+    @apply inline-flex items-center justify-center w-9 h-9 text-white rounded-full text-base font-extrabold mx-2 align-middle -translate-y-0.5 border-2;
+    background-color: hsl(var(--primary));
+    border-color: hsla(var(--primary), 0.5);
     box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
   }
   .age-btn { @apply p-3 rounded-lg font-bold transition-all duration-300 border border-transparent flex-grow cursor-pointer; }
   .age-btn-cancel { @apply bg-transparent text-gray-400 border-gray-600 hover:bg-gray-700/50 hover:text-gray-200; }
   .age-btn-confirm {
-    @apply bg-primary text-white hover:opacity-90;
+    @apply text-white hover:opacity-90;
+    background-color: hsl(var(--primary));
     box-shadow: 0 0 25px hsl(var(--primary) / 0.4);
   }
+
   .btn-line-shared { @apply inline-flex items-center gap-3 py-3 px-8 bg-green-600 text-white font-bold rounded-full transition-transform duration-200 hover:scale-105; }
-  .btn-close-premium { @apply flex items-center justify-center w-11 h-11 rounded-full bg-foreground/5 text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary hover:scale-110 hover:rotate-90; }
+  
+  .btn-close-premium {
+    @apply flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 hover:scale-110 hover:rotate-90;
+    color: hsl(var(--muted-foreground));
+    background-color: hsla(var(--foreground), 0.05);
+  }
+  .btn-close-premium:hover {
+    color: hsl(var(--primary));
+    background-color: hsla(var(--primary), 0.1);
+  }
   
   .profile-card-new { @apply rounded-2xl overflow-hidden relative aspect-[3/4]; }
   .profile-card-new .card-image { @apply absolute inset-0 w-full h-full object-cover transition-transform duration-500; }
@@ -90,7 +135,10 @@
     background: linear-gradient(to top, hsla(225, 15%, 8%, 0.95) 0%, hsla(225, 15%, 8%, 0.7) 40%, transparent 70%);
   }
 
-  .skeleton-card { @apply bg-muted rounded-2xl overflow-hidden relative aspect-[3/4]; }
+  .skeleton-card {
+    @apply rounded-2xl overflow-hidden relative aspect-[3/4];
+    background-color: hsl(var(--muted));
+  }
   .skeleton-card::after {
     content: ''; @apply absolute inset-0;
     transform: translateX(-100%);
@@ -99,27 +147,59 @@
   }
   html.dark .skeleton-card::after { background-image: linear-gradient(90deg, hsla(0,0%,0%,0) 0, hsla(0,0%,100%,0.02) 20%, hsla(0,0%,100%,0.05) 60%, hsla(0,0%,0%,0)); }
   .error-state { @apply flex flex-col items-center gap-2; }
-  .error-icon { @apply text-primary text-4xl mb-2 opacity-70; }
-  .retry-btn { @apply bg-primary text-white py-2.5 px-6 rounded-full font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-glow;
+  .error-icon {
+    @apply text-4xl mb-2 opacity-70;
+    color: hsl(var(--primary));
+  }
+  .retry-btn {
+    @apply text-white py-2.5 px-6 rounded-full font-semibold transition-all duration-200;
+    background-color: hsl(var(--primary));
     box-shadow: 0 4px 15px -2px hsl(var(--primary-glow) / 0.4);
   }
-  .retry-btn:hover { box-shadow: 0 6px 20px -3px hsl(var(--primary-glow) / 0.5); }
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -3px hsl(var(--primary-glow) / 0.5);
+    background-color: hsl(var(--primary-glow));
+  }
   
   [data-animate-on-scroll] { @apply opacity-0 translate-y-8 transition-all duration-700 ease-out; }
   [data-animate-on-scroll].is-visible { @apply opacity-100 translate-y-0; }
 
-  .modal-content { @apply bg-card; }
-  .overlay-backdrop { @apply bg-background/70; backdrop-filter: blur(4px); }
-  .hero-image-container { @apply bg-muted rounded-lg overflow-hidden aspect-[3/4]; }
+  .modal-content {
+    background-color: hsl(var(--card));
+  }
+  .overlay-backdrop {
+    background-color: hsla(var(--background), 0.7);
+    backdrop-filter: blur(4px);
+  }
+  .hero-image-container {
+    @apply rounded-lg overflow-hidden aspect-[3/4];
+    background-color: hsl(var(--muted));
+  }
   #lightboxHeroImage { @apply w-full h-full object-cover; }
   .thumbnail-strip { @apply flex gap-2 justify-center; }
   .thumbnail { @apply w-14 h-14 object-cover rounded-md cursor-pointer border-2 border-transparent transition-all duration-200 opacity-60 hover:opacity-100; }
-  .thumbnail.active { @apply border-primary opacity-100 scale-105; }
+  .thumbnail.active {
+    @apply opacity-100 scale-105;
+    border-color: hsl(var(--primary));
+  }
   .detail-list-item { @apply flex items-center gap-2.5 text-sm; }
-  .detail-list-item-icon { @apply text-primary/80 w-5 h-5; }
-  .stats-grid { @apply grid grid-cols-3 gap-2 text-center my-3 py-3 border-y border-border; }
-  .stat-item .label { @apply text-muted-foreground text-xs; }
-  .stat-item .value { @apply text-foreground font-semibold; }
+  .detail-list-item-icon {
+    @apply w-5 h-5;
+    color: hsla(var(--primary), 0.8);
+  }
+  .stats-grid {
+    @apply grid grid-cols-3 gap-2 text-center my-3 py-3 border-y;
+    border-color: hsl(var(--border));
+  }
+  .stat-item .label {
+    @apply text-xs;
+    color: hsl(var(--muted-foreground));
+  }
+  .stat-item .value {
+    @apply font-semibold;
+    color: hsl(var(--foreground));
+  }
   .availability-badge { @apply text-sm font-bold px-4 py-2 rounded-full text-center; }
 }
 

@@ -1,14 +1,6 @@
 # Netlify Build & Deploy Settings
-# ไฟล์นี้จะควบคุมการตั้งค่าทั้งหมด ทำให้ไม่ต้องไปคลิกในเว็บอีก
-
 [build]
-  # คำสั่งที่ Netlify จะใช้ในการ build โปรเจกต์ (ตรงกับใน package.json)
   command = "npm run build"
-  
-  # โฟลเดอร์ที่ Netlify จะนำไปแสดงผลหลัง build เสร็จ
   publish = "dist"
-
-# การตั้งค่าสำหรับสภาพแวดล้อม (Environment)
 [build.environment]
-  # ล็อคเวอร์ชันของ Node.js เพื่อป้องกันปัญหาในอนาคต
   NODE_VERSION = "16"
