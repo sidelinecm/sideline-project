@@ -1,10 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./**/*.{html,js}", // แก้ไขให้ค้นหาทุกไฟล์ .html และ .js ในทุกโฟลเดอร์ย่อย
+    "./*.html",
+    "./blog/*.html",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'prompt': ['Prompt', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 }
