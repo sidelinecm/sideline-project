@@ -185,7 +185,18 @@
       </div>
   </footer>
   
-  <script type="module" src="/main.js"></script>
-
+  <!-- (ส่วนที่เหลือของ body เหมือนเดิมทั้งหมด) -->
+  
+  <!-- Scripts (VERSIONED) -->
+  <script type="module" src="/main.js?v=1.0.0"></script>
+  
+  <!-- Third-party analytics script, loaded asynchronously not to block main thread -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3BT9WPRK5"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-H3BT9WPRK5');
+  </script>
 </body>
 </html>
