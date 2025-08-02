@@ -126,6 +126,9 @@
   }
 
   /* --- Profile Card --- */
+  .profile-card-new {
+    @apply rounded-2xl overflow-hidden relative aspect-[3/4];
+  }
   .profile-card-new .card-image {
     @apply absolute inset-0 w-full h-full object-cover;
     transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -180,5 +183,53 @@
   [data-animate-on-scroll].is-visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /* --- Lightbox Custom Styles --- */
+  .modal-content {
+    background-color: hsl(var(--card));
+  }
+  .overlay-backdrop {
+    background-color: hsla(var(--background), 0.7);
+    backdrop-filter: blur(4px);
+  }
+  .hero-image-container {
+    @apply rounded-lg overflow-hidden aspect-[3/4] bg-muted;
+  }
+  #lightboxHeroImage {
+    @apply w-full h-full object-cover;
+  }
+  .thumbnail-strip {
+    @apply flex gap-2 justify-center;
+  }
+  .thumbnail {
+    @apply w-14 h-14 object-cover rounded-md cursor-pointer border-2 border-transparent transition-all duration-200 opacity-60 hover:opacity-100;
+  }
+  .thumbnail.active {
+    @apply border-primary opacity-100 scale-105;
+  }
+  .detail-list-item {
+    @apply flex items-center gap-2.5 text-sm;
+  }
+  .detail-list-item-icon {
+    @apply w-5 h-5 text-primary/80;
+  }
+  .stats-grid {
+    @apply grid grid-cols-3 gap-2 text-center my-3 py-3 border-y border-border;
+  }
+  .stat-item .label {
+    @apply text-xs text-muted-foreground;
+  }
+  .stat-item .value {
+    @apply font-semibold text-foreground;
+  }
+  .availability-badge {
+    @apply text-sm font-bold px-4 py-2 rounded-full text-center;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }
