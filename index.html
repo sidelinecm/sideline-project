@@ -1,18 +1,15 @@
 <!doctype html>
 <html lang="th" class="scroll-smooth light">
 <head>
-    <!-- SECTION 1: CORE METADATA -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1D202D" media="(prefers-color-scheme: dark)">
-
-    <!-- SECTION 2: SEO & SOCIAL MEDIA -->
     <title>ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟนตรงปก 100% - SidelineChiangmai</title>
+    
+    <!-- SEO & Metadata -->
     <meta name="description" content="ศูนย์รวมโปรไฟล์น้องๆ SidelineCM รับงานฟีลแฟนในเชียงใหม่, ลำปาง, เชียงราย การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ บริการระดับ VIP">
-    <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <meta name="robots" content="index, follow">
     <meta property="og:title" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟนตรงปก 100% - SidelineChiangmai">
     <meta property="og:description" content="รวมโปรไฟล์น้องๆ รับงานฟีลแฟน การันตีตรงปก เชียงใหม่ ปลอดภัย ไม่ต้องโอนมัดจำ">
     <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
@@ -24,39 +21,44 @@
     <meta name="twitter:title" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟนตรงปก 100%">
     <meta name="twitter:description" content="น้องรับงานเชียงใหม่ การันตีฟีลแฟน ตรงปก 100% ไม่ต้องโอนมัดจำ ปลอดภัย">
     <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
-    <meta name="robots" content="index, follow">
-    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
+    
+    <!-- Favicons (ใช้ Path ที่ถูกต้อง) -->
+    <link rel="icon" href="images/favicon.ico" sizes="any">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 
-    <!-- SECTION 3: FAVICONS & ICONS -->
-    <link rel="icon" href="/images/favicon.ico" sizes="any">
-    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-
-    <!-- SECTION 4: PERFORMANCE OPTIMIZATION -->
+    <!-- ================================================================== -->
+    <!-- ============== START: FINAL WORKING CODE =================== -->
+    <!-- ================================================================== -->
+    <!-- 1. Preconnect to essential domains -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+
+    <!-- 2. Preload critical fonts -->
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- CRITICAL CSS -->
-    <style id="critical-css">
-      :root{--background:220 20% 98%;--foreground:220 15% 25%;--card:0 0% 100%;--primary:340 85% 58%;--primary-glow:340 85% 65%;--secondary:260 85% 65%;--muted:220 25% 94%;--muted-foreground:220 10% 45%;--border:220 20% 92%;--accent:220 60% 96%}html.dark{--background:225 15% 10%;--foreground:220 20% 90%;--card:225 15% 16%;--primary:340 90% 68%;--primary-glow:340 95% 72%;--secondary:260 90% 75%;--muted:225 15% 20%;--border:225 12% 25%;--accent:225 15% 20%}body{font-family:'Prompt','Sarabun',sans-serif;background-color:hsl(var(--background));color:hsl(var(--foreground));-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}#page-header{position:fixed;top:0;left:0;width:100%;z-index:40;border-bottom:1px solid transparent;transition:background-color .3s,border-color .3s,box-shadow .3s}.container{width:100%;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}#page-header .container{height:4.5rem;display:flex;align-items:center;justify-content:space-between}.text-primary{text-shadow:0 0 15px hsl(var(--primary-glow)/.6),0 0 3px hsl(var(--primary-glow)/.8)}.text-secondary{text-shadow:0 0 15px hsl(var(--secondary-glow)/.5),0 0 3px hsl(var(--secondary-glow)/.7)}
-    </style>
+    <!-- 3. Load Stylesheets -->
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="/dist/output.css" media="print" onload="this.media='all'">
 
-    <!-- SECTION 5: STYLESHEETS (Simple & Direct Path) -->
-    <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+
+    <!-- 4. Noscript Fallback -->
     <noscript>
-      <link rel="stylesheet" href="/styles.css" ... >
+      <link rel="stylesheet" href="/dist/output.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     </noscript>
 </head>
 
-<body class="antialiased opacity-0" data-page="home">
-  <!-- Age Verification Modal (Initially hidden, controlled by JS) -->
+<body class="antialiased" data-page="home">
+    
+  <!-- Age Verification Modal -->
   <div id="age-verification-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
     <div class="age-modal-content relative space-y-6">
-      <h2 class="text-2xl font-bold uppercase leading-tight"><span class="text-primary">Sideline Chiangmai</span> is an Adults Only <span class="age-badge-inline">20+</span> Website!</h2>
+      <h2 class="text-2xl font-bold uppercase leading-tight"><span class="text-primary">Sideline Chiangmai</span> is an Adults Only <span class="age-badge-inline">20+</span> Website! </h2>
       <p class="text-sm text-gray-300 leading-relaxed">คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 20 ปีบริบูรณ์</p>
       <div class="flex gap-4 pt-2">
         <button id="cancelAgeButton" class="age-btn age-btn-cancel">ออก</button>
@@ -66,8 +68,9 @@
   </div>
 
   <!-- Header -->
-  <header id="page-header">
-    <div class="container mx-auto px-4">
+  <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
+    <div class="container mx-auto px-4 h-18 flex items-center justify-between">
+      <!-- Optimization: This logo is the main LCP element. It MUST be loaded eagerly to render as fast as possible. -->
       <a href="/" aria-label="SidelineChiangmai หน้าแรก">
         <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiangmai" class="h-[30px] w-auto" width="245" height="30" loading="eager" fetchpriority="high">
       </a>
@@ -79,13 +82,13 @@
         <a href="blog.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
       </nav>
       <div class="flex items-center gap-2">
-        <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label="เปลี่ยนโหมดสี"></button>
+        <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label="เปลี่ยนโหมดสี"><i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i></button>
         <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label="เปิดเมนู" aria-haspopup="true" aria-controls="sidebar"><i class="fas fa-bars text-xl" aria-hidden="true"></i></button>
       </div>
     </div>
   </header>
 
-  <!-- Sidebar -->
+  <!-- Sidebar (No changes needed) -->
   <div id="menu-backdrop" class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden="true"></div>
   <aside id="sidebar" class="fixed top-0 right-0 w-64 sm:w-72 h-dvh bg-card text-foreground border-l border-border shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" aria-labelledby="sidebar-nav-heading" aria-hidden="true" tabindex="-1">
     <div class="flex justify-between items-center p-4 border-b border-border shrink-0"><h3 id="sidebar-nav-heading" class="text-lg font-bold text-secondary">เมนู</h3><button id="close-sidebar-btn" class="btn-close-premium" aria-label="ปิดเมนู"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
@@ -93,7 +96,7 @@
     <div class="p-4 border-t border-border shrink-0"><a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener" class="btn-line-shared"><i class="fab fa-line text-lg" aria-hidden="true"></i><span>ติดต่อผ่าน LINE</span></a></div>
   </aside>
 
-  <!-- Main Content -->
+  <!-- Main Content (The content of your page remains the same) -->
   <main id="main-content" class="pt-20">
     <div class="container mx-auto px-4 space-y-12 md:space-y-16">
       <section aria-labelledby="hero-h1">
@@ -105,7 +108,7 @@
                     <div class="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium text-muted-foreground"><span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500" aria-hidden="true"></i> การันตีตรงปก 100% </span><span class="flex items-center gap-2"><i class="fas fa-shield-alt text-blue-500" aria-hidden="true"></i> ปลอดภัย ไม่ต้องโอนมัดจำ </span><span class="flex items-center gap-2"><i class="fas fa-user-check text-indigo-500" aria-hidden="true"></i> คัดกรองโปรไฟล์คุณภาพ </span></div>
                 </div>
                 <div id="hero-form">
-                    <form id="search-form" action="profiles.html" method="GET" aria-labelledby="search-form-heading"><h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2><div class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"><div class="relative sm:col-span-2 lg:col-span-1"><label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg></span><input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..." class="w-full pl-10 pr-4 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"></div></div><div class="relative"><label for="search-province" class="sr-only">เลือกจังหวัด</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654-.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z"></path></svg></span><select id="search-province" name="province" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"><option value="">ทุกจังหวัด</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div><div class="relative"><label for="search-availability" class="sr-only">เลือกสถานะ</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"></path></svg></span><select id="search-availability" name="availability" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"><option value="">สถานะ (ทั้งหมด)</option><option value="ว่าง">ว่าง</option><option value="รับงาน">รับงาน</option><option value="รับงานบางวัน">รับงานบางวัน</option><option value="สอบถามคิว">สอบถามคิว</option><option value="ไม่ว่าง">ไม่ว่าง</option><option value="พัก">พัก</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div></div><div class="flex flex-wrap items-center justify-center sm:justify-between gap-3 pt-2"><div class="relative"><label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z"></path></svg></span><select id="search-featured" name="featured" class="w-full appearance-none pl-10 pr-10 py-2 border border-border rounded-full text-xs focus:outline-none transition"><option value="">แนะนำ (ทั้งหมด)</option><option value="true">แนะนำเท่านั้น</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div><div class="flex items-center gap-3"><button type="reset" id="reset-search-btn" class="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full hover:bg-border transition text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M15.312 11.342a1.25 1.25 0 010 1.768l-2.5 2.5a1.25 1.25 0 11-1.768-1.768L12.053 13H9.25a3.75 3.75 0 01-3.75-3.75V8.5A.75.75 0 016.25 8.5v.75a2.25 2.25 0 002.25 2.25h2.803l-1.01-1.01a1.25 1.25 0 011.768-1.768l2.5 2.5zM3.5 6.25a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75z"></path></svg><span>ล้างค่า</span></button><button type="submit" id="keyword-search-btn" class="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition text-sm font-semibold"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg><span>ค้นหา</span></button></div></div></div></form>
+                    <form id="search-form" action="profiles.html" method="GET" aria-labelledby="search-form-heading"><h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2><div class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"><div class="relative sm:col-span-2 lg:col-span-1"><label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg></span><input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..." class="w-full pl-10 pr-4 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"></div></div><div class="relative"><label for="search-province" class="sr-only">เลือกจังหวัด</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z"></path></svg></span><select id="search-province" name="province" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"><option value="">ทุกจังหวัด</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div><div class="relative"><label for="search-availability" class="sr-only">เลือกสถานะ</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"></path></svg></span><select id="search-availability" name="availability" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"><option value="">สถานะ (ทั้งหมด)</option><option value="ว่าง">ว่าง</option><option value="รับงาน">รับงาน</option><option value="รับงานบางวัน">รับงานบางวัน</option><option value="สอบถามคิว">สอบถามคิว</option><option value="ไม่ว่าง">ไม่ว่าง</option><option value="พัก">พัก</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div></div><div class="flex flex-wrap items-center justify-center sm:justify-between gap-3 pt-2"><div class="relative"><label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z"></path></svg></span><select id="search-featured" name="featured" class="w-full appearance-none pl-10 pr-10 py-2 border border-border rounded-full text-xs focus:outline-none transition"><option value="">แนะนำ (ทั้งหมด)</option><option value="true">แนะนำเท่านั้น</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div><div class="flex items-center gap-3"><button type="reset" id="reset-search-btn" class="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full hover:bg-border transition text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M15.312 11.342a1.25 1.25 0 010 1.768l-2.5 2.5a1.25 1.25 0 11-1.768-1.768L12.053 13H9.25a3.75 3.75 0 01-3.75-3.75V8.5A.75.75 0 016.25 8.5v.75a2.25 2.25 0 002.25 2.25h2.803l-1.01-1.01a1.25 1.25 0 011.768-1.768l2.5 2.5zM3.5 6.25a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75z"></path></svg><span>ล้างค่า</span></button><button type="submit" id="keyword-search-btn" class="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition text-sm font-semibold"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg><span>ค้นหา</span></button></div></div></div></form>
                 </div>
             </div>
         </div>
@@ -122,9 +125,11 @@
         <h2 class="sr-only">รายการโปรไฟล์ทั้งหมด</h2>
         <div id="loading-profiles-placeholder" role="status" aria-live="polite"><div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div></div>
         <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
+        <div id="load-more-container" class="hidden text-center mt-12"><button id="load-more-btn" class="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition font-semibold"> แสดงเพิ่มเติม </button></div>
         <div id="fetch-error-message" class="hidden text-center py-12 px-4 bg-accent rounded-lg"><div class="error-state"><div class="error-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2zm0-8h2v6h-2z"></path></svg></div><h3 class="error-title">เกิดข้อผิดพลาด</h3><p class="error-description">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ในขณะนี้</p><button id="retry-fetch-btn" class="retry-btn">ลองอีกครั้ง</button></div></div>
         <div id="no-results-message" class="hidden text-center py-12 text-muted-foreground bg-accent rounded-lg"><span class="block mb-4 text-muted-foreground/50"><svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg></span><p class="text-lg font-semibold">ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข</p><p class="text-sm">ลองปรับคำค้นหาหรือตัวกรองใหม่อีกครั้ง</p></div>
       </section>
+
     </div>
   </main>
 
@@ -134,6 +139,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
             <div>
                 <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
+                    <!-- Optimization: Lazy load below-the-fold images like the footer logo -->
                     <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
                 </a>
                 <h3 class="font-semibold text-foreground mb-2">เกี่ยวกับ sidelineChiangmai</h3>
@@ -160,7 +166,7 @@
     </div>
   </footer>
 
-  <!-- Lightbox -->
+  <!-- Lightbox (No changes needed) -->
   <div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
     <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
       <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิด"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
@@ -170,16 +176,16 @@
     </div>
   </div>
 
-  <!-- Main script is deferred to run after the page is interactive -->
-  <script type="module" src="main.js" defer></script>
   
-  <!-- Optional: Third-party scripts, also deferred/async -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3BT9WPRK5"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-H3BT9WPRK5');
-  </script>
+    <script type="module" src="main.js"></script>
+  
+    <!-- Third-party analytics script, loaded asynchronously not to block main thread -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3BT9WPRK5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-H3BT9WPRK5');
+    </script>
 </body>
 </html>
