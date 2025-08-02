@@ -1,13 +1,13 @@
 /* ==========================================================================
-   SidelineCM Stylesheet - v15.0 FINAL "Build" Edition
+   SidelineCM Stylesheet - FINAL COMPLETE BUILD VERSION
    ========================================================================== */
 
-/* 1. Tailwind Directives: ดึงสไตล์พื้นฐานทั้งหมดของ Tailwind CSS มาใช้งาน */
+/* 1. Tailwind Directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 2. Font Definitions: บอกให้เบราว์เซอร์รู้จักและใช้งานฟอนต์ที่โหลดมา */
+/* 2. Font Definitions & Custom Base Styles */
 @layer base {
   @font-face {
     font-family: 'Prompt';
@@ -53,21 +53,8 @@
   }
 }
 
-/* 3. Custom Styles & Components: สไตล์ที่คุณออกแบบเองทั้งหมด */
+/* 3. Custom Component Classes */
 @layer components {
-  /* --- Animations --- */
-  @keyframes aurora-1 {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-  }
-  @keyframes aurora-2 {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(-360deg); }
-  }
-  @keyframes shimmer {
-    100% { transform: translateX(100%); }
-  }
-
   /* --- Color Variables --- */
   :root {
     --radius: 1rem;
@@ -98,102 +85,19 @@
 
   /* --- Base & Layout --- */
   body {
-    @apply antialiased relative overflow-x-hidden;
+    @apply antialiased relative overflow-x-hidden transition-opacity duration-700 ease-in-out;
     font-family: 'Prompt', 'Sarabun', sans-serif;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     opacity: 0;
-    transition: opacity 0.8s ease-in-out;
   }
   body.loaded {
-    opacity: 1;
+    @apply opacity-100;
   }
   
-  /* --- Animated Background --- */
-  body::before, body::after {
-    content: '';
-    @apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10;
-    filter: blur(150px);
-    opacity: 0.15;
-  }
-  html:not(.dark) body::before {
-    background: radial-gradient(circle, hsl(var(--primary)) 0%, transparent 40%);
-    animation: aurora-1 30s linear infinite;
-  }
-  html:not(.dark) body::after {
-    background: radial-gradient(circle, hsl(var(--secondary)) 0%, transparent 40%);
-    animation: aurora-2 40s linear infinite reverse;
-  }
-  html.dark body::before {
-    @apply opacity-20;
-    background: radial-gradient(circle, hsl(var(--primary-glow)) 0%, transparent 40%);
-    animation: aurora-1 30s linear infinite;
-  }
-  html.dark body::after {
-    opacity: 0.15;
-    background: radial-gradient(circle, hsl(var(--secondary-glow)) 0%, transparent 40%);
-    animation: aurora-2 40s linear infinite reverse;
-  }
-
-  /* --- Header & Sections --- */
-  #page-header.scrolled {
-    background-color: hsl(var(--background) / 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom-color: hsl(var(--border) / 0.5);
-    box-shadow: 0 2px 10px -5px hsl(var(--foreground) / 0.1);
-  }
-  .section-header-card, .section-content-wrapper {
-    @apply relative rounded-3xl overflow-hidden border;
-    background-color: hsl(var(--card)); 
-    border-color: hsl(var(--border));
-    box-shadow: 0 8px 32px 0 hsl(var(--foreground) / 0.07);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-  }
-
-  /* --- Profile Cards --- */
-  .profile-card-new-container {
-    perspective: 1000px;
-  }
-  .profile-card-new {
-    @apply rounded-2xl overflow-hidden relative aspect-[3/4] cursor-pointer;
-    background-color: hsl(var(--muted));
-    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    box-shadow: 0 10px 30px -10px hsl(var(--foreground) / 0.15);
-    transform-style: preserve-3d;
-  }
-  .profile-card-new:hover {
-    transform: rotateY(var(--rotate-y)) rotateX(var(--rotate-x)) scale(1.05);
-    box-shadow: 0 25px 50px -15px hsl(var(--foreground) / 0.3);
-  }
-  .profile-card-new .card-image {
-    @apply absolute inset-0 w-full h-full object-cover;
-    filter: saturate(1.05) contrast(1.05);
-    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-  }
-  .profile-card-new:hover .card-image {
-    transform: scale(1.1);
-  }
-  .profile-card-new .card-overlay {
-    @apply absolute inset-0 p-4 flex flex-col justify-end text-white z-10;
-    background: linear-gradient(to top, hsla(225, 15%, 8%, 0.95) 0%, hsla(225, 15%, 8%, 0.7) 40%, transparent 70%);
-  }
-  .profile-card-new .card-info {
-    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    transform: translateZ(20px);
-  }
-  .profile-card-new:hover .card-info {
-    transform: translateZ(50px) translateY(-5px);
-  }
-
   /* --- Age Verification Modal --- */
-  #age-verification-overlay {
-    background-color: rgba(10, 10, 15, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
   .age-modal-content {
-    @apply text-center text-gray-200 p-10 rounded-2xl max-w-lg;
+    @apply relative space-y-6 text-center text-gray-200 p-10 rounded-2xl max-w-lg;
     background: linear-gradient(145deg, rgba(40, 42, 54, 0.95), rgba(30, 32, 42, 0.98));
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
@@ -212,14 +116,29 @@
     @apply text-white bg-primary hover:opacity-90;
     box-shadow: 0 0 25px hsl(var(--primary) / 0.4);
   }
-  
-  /* --- Other Components --- */
+
+  /* --- Buttons & Links --- */
   .btn-line-shared {
     @apply inline-flex items-center gap-3 py-3 px-8 bg-green-600 text-white font-bold rounded-full transition-transform duration-200 hover:scale-105;
   }
   .btn-close-premium {
     @apply flex items-center justify-center w-11 h-11 rounded-full bg-foreground/5 text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary hover:scale-110 hover:rotate-90;
   }
+
+  /* --- Profile Card --- */
+  .profile-card-new .card-image {
+    @apply absolute inset-0 w-full h-full object-cover;
+    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+  .profile-card-new:hover .card-image {
+    transform: scale(1.1);
+  }
+  .profile-card-new .card-overlay {
+    @apply absolute inset-0 p-4 flex flex-col justify-end text-white z-10;
+    background: linear-gradient(to top, hsla(225, 15%, 8%, 0.95) 0%, hsla(225, 15%, 8%, 0.7) 40%, transparent 70%);
+  }
+
+  /* --- Error & Skeleton States --- */
   .skeleton-card {
     @apply rounded-2xl overflow-hidden relative aspect-[3/4];
     background-color: hsl(var(--muted));
@@ -252,6 +171,7 @@
     background-color: hsl(var(--primary-glow));
   }
   
+  /* --- Scroll Animations --- */
   [data-animate-on-scroll] {
     opacity: 0;
     transform: translateY(30px);
