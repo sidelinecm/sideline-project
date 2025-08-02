@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SidelineCM Stylesheet - FINAL COMPLETE BUILD VERSION
+   SidelineCM Stylesheet - COMPLETE & CORRECTED VERSION
    ========================================================================== */
 
 /* 1. Tailwind Directives */
@@ -9,47 +9,48 @@
 
 /* 2. Font Definitions & Custom Base Styles */
 @layer base {
+  /* --- [FIXED] แก้ไข Font Path ให้เป็นแบบ Relative --- */
   @font-face {
     font-family: 'Prompt';
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
+    src: url('fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
   }
   @font-face {
     font-family: 'Prompt';
     font-style: normal;
     font-weight: 500;
     font-display: swap;
-    src: url('/fonts/prompt-v11-latin_thai-500.woff2') format('woff2');
+    src: url('fonts/prompt-v11-latin_thai-500.woff2') format('woff2');
   }
   @font-face {
     font-family: 'Prompt';
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
+    src: url('fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
   }
   @font-face {
     font-family: 'Prompt';
     font-style: normal;
     font-weight: 800;
     font-display: swap;
-    src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
+    src: url('fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
   }
   @font-face {
     font-family: 'Sarabun';
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('/fonts/sarabun-v16-latin_thai-regular.woff2') format('woff2');
+    src: url('fonts/sarabun-v16-latin_thai-regular.woff2') format('woff2');
   }
   @font-face {
     font-family: 'Sarabun';
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('/fonts/sarabun-v16-latin_thai-700.woff2') format('woff2');
+    src: url('fonts/sarabun-v16-latin_thai-700.woff2') format('woff2');
   }
 }
 
@@ -121,8 +122,14 @@
   .btn-line-shared {
     @apply inline-flex items-center gap-3 py-3 px-8 bg-green-600 text-white font-bold rounded-full transition-transform duration-200 hover:scale-105;
   }
+
+  /* --- [FIXED] แก้ไข Syntax ที่ทำให้ Build ล้มเหลว --- */
   .btn-close-premium {
-    @apply flex items-center justify-center w-11 h-11 rounded-full bg-foreground/5 text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary hover:scale-110 hover:rotate-90;
+    @apply flex items-center justify-center w-11 h-11 rounded-full text-muted-foreground transition-all duration-300 hover:text-primary hover:scale-110 hover:rotate-90;
+    background-color: hsla(var(--foreground), 0.05);
+  }
+  .btn-close-premium:hover {
+    background-color: hsla(var(--primary), 0.1);
   }
 
   /* --- Profile Card --- */
