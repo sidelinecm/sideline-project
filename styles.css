@@ -1,9 +1,7 @@
 /*
   ==================================================================
-  ===      SIDELINE CHIANGMAI - COMPLETE SOURCE STYLESHEET       ===
+  ===      SIDELINE CHIANGMAI - FINAL CORRECTED STYLESHEET       ===
   ==================================================================
-  This is the source file. Run `npm run build` to generate the
-  final `dist/output.css` file.
 */
 
 /* --- 1. Tailwind Core Layers --- */
@@ -41,10 +39,14 @@
   }
 
   body {
-    @apply bg-background text-foreground font-prompt antialiased relative overflow-x-hidden;
+    /* CORRECTED: Use direct CSS for base colors */
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    /* Continue using @apply for other utilities */
+    @apply font-prompt antialiased relative overflow-x-hidden;
   }
 
-  /* Smooth fade-in for the body after JS loads */
+  /* ... (ส่วนที่เหลือของ @layer base ถูกต้องแล้ว) ... */
   body.opacity-0 {
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
@@ -52,13 +54,10 @@
   body:not(.opacity-0) {
     opacity: 1;
   }
-  
-  /* Base for scroll animations */
   [data-animate-on-scroll] {
     @apply opacity-0 translate-y-[30px] transition-opacity duration-500 ease-out;
     transition-property: opacity, transform;
   }
-
   [data-animate-on-scroll].is-visible {
     @apply opacity-100 translate-y-0;
   }
@@ -66,8 +65,7 @@
 
 /* --- 3. Components Layer: Reusable Element Styles --- */
 @layer components {
-  
-  /* --- Header --- */
+  /* ... (ส่วน Components ทั้งหมดของคุณถูกต้องดีอยู่แล้ว) ... */
   #page-header {
     @apply fixed top-0 left-0 w-full z-40 border-b border-transparent;
     transition: background-color .3s, border-color .3s, box-shadow .3s;
@@ -78,8 +76,6 @@
   nav a.active-nav-link {
     @apply text-primary font-semibold;
   }
-  
-  /* --- Age Verification Modal --- */
   #age-verification-overlay { @apply overlay-backdrop; }
   .age-modal-content {
     @apply max-w-lg w-full p-6 sm:p-8 text-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white border border-gray-700 shadow-2xl rounded-2xl;
@@ -92,12 +88,8 @@
   }
   .age-btn-confirm { @apply bg-primary text-white; }
   .age-btn-cancel { @apply bg-gray-600 text-gray-200 hover:bg-gray-700; }
-
-  /* --- Sections & Cards --- */
   .section-header-card { @apply text-center p-8; }
   .section-content-wrapper { @apply bg-card rounded-2xl shadow-sm border border-border; }
-
-  /* --- Profile Card --- */
   .profile-card-new {
     @apply relative overflow-hidden rounded-xl bg-card shadow-md transition-transform duration-300 ease-in-out hover:shadow-lg hover:scale-105;
   }
@@ -113,8 +105,6 @@
   .skeleton-card {
     @apply w-full aspect-[3/4] rounded-xl bg-muted animate-pulse;
   }
-  
-  /* --- Lightbox Modal --- */
   .overlay-backdrop { @apply bg-[--overlay-backdrop] backdrop-blur-sm; }
   .modal-content { @apply bg-card rounded-2xl shadow-2xl; }
   .btn-close-premium { @apply w-10 h-10 flex items-center justify-center rounded-full bg-background/50 text-foreground/70 transition-colors hover:bg-muted hover:text-foreground; }
@@ -122,8 +112,6 @@
   .thumbnail-strip { @apply flex gap-2 mt-3; }
   .thumbnail { @apply w-16 h-16 rounded-md object-cover cursor-pointer border-2 border-transparent transition hover:border-primary/70 opacity-60; }
   .thumbnail.active { @apply border-primary opacity-100; }
-  
-  /* Lightbox Details */
   #lightboxDetailsCompact { @apply space-y-4 pt-5 border-t border-border; }
   .availability-badge { @apply font-semibold px-4 py-1.5 rounded-full text-center text-sm; }
   .stats-grid { @apply grid grid-cols-3 gap-3 bg-accent p-3 rounded-lg; }
@@ -133,11 +121,7 @@
   .detail-list-item { @apply flex items-center gap-3 py-1; }
   .detail-list-item-icon { @apply text-primary/80; }
   .detail-list-item .value { @apply font-medium text-sm text-foreground; }
-
-  /* --- Buttons --- */
   .btn-line-shared { @apply w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-green-500 text-white font-semibold transition hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-card; }
-  
-  /* --- Error States --- */
   .error-state { @apply flex flex-col items-center justify-center gap-4; }
   .error-icon { @apply w-16 h-16 text-red-500/50; }
   .error-title { @apply text-xl font-bold text-foreground; }
