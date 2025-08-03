@@ -7,7 +7,7 @@
     "dev": "tailwindcss -i ./styles.css -o ./dist/output.css --watch",
     "build": "npm run build:css && npm run build:copy",
     "build:css": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
-    "build:copy": "copyfiles ./*.html fonts/**/* images/**/* _headers _redirects dist"
+    "build:copy": "copyfiles ./*.html main.js fonts/**/* images/**/* _headers _redirects dist"
   },
   "devDependencies": {
     "copyfiles": "^2.4.1",
