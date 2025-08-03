@@ -1,6 +1,20 @@
-# Netlify Build & Deploy Settings
+# ==================================================
+# ===  Netlify Configuration File (Corrected)    ===
+# ==================================================
+
 [build]
+  # คำสั่งสำหรับ Build โปรเจกต์ (ถูกต้อง)
   command = "npm run build"
-  publish = "dist"
+  
+  # โฟลเดอร์ผลลัพธ์ที่จะนำขึ้นแสดงผล (แก้ไขจาก "." เป็น "dist")
+  publish = "dist" 
+
 [build.environment]
-  NODE_VERSION = "16"
+  # กำหนดเวอร์ชันของ Node.js เพื่อความเสถียร (ยอดเยี่ยม)
+  NODE_VERSION = "18"
+
+# ตัวอย่างการทำ Redirects (เผื่อใช้ในอนาคต)
+# [[redirects]]
+#   from = "/old-page"
+#   to = "/new-page"
+#   status = 301

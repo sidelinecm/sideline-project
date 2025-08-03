@@ -1,31 +1,31 @@
-# Cache immutable assets for 1 year
-/fonts/*
+# ============================================
+# === Custom Headers for Netlify           ===
+# ============================================
+
+# --- Cache Policies ---
+# Cache fonts, images, and built assets "forever" in the browser
+/fonts/*.woff2
   Cache-Control: public, max-age=31536000, immutable
 /images/*
   Cache-Control: public, max-age=31536000, immutable
-
-# Cache CSS for 1 day, allowing for updates
-/dist/*
-  Cache-Control: public, max-age=86400
-
-# Cache main.js for 1 day, allowing for updates (REMOVED immutable)
+/dist/output.css
+  Cache-Control: public, max-age=31536000, immutable
 /main.js
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=31536000, immutable
 
-# Do not cache HTML files to ensure users always get the latest version
-/index.html
+# Do not cache HTML files, always check for a new version
+/
   Cache-Control: no-cache
-/about.html
+/*.html
   Cache-Control: no-cache
-/profiles.html
-  Cache-Control: no-cache
-/locations.html
-  Cache-Control: no-cache
-/faq.html
-  Cache-Control: no-cache
-/blog.html
-  Cache-Control: no-cache
-/privacy-policy.html
-  Cache-Control: no-cache
-/404.html
-  Cache-Control: no-cache
+
+# --- Security Headers ---
+/*
+  # Prevents clickjacking
+  X-Frame-Options: DENY
+  # Prevents content type sniffing
+  X-Content-Type-Options: nosniff
+  # Controls information shared with other sites
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Enables browser's XSS protection
+  X-XSS-Protection: 1; mode=block
