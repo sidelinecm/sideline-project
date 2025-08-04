@@ -1,4 +1,3 @@
-// main.js (เวอร์ชันแก้ไขสมบูรณ์)
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
@@ -6,9 +5,8 @@ import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTr
 
 gsap.registerPlugin(ScrollTrigger);
 
-// --- ค่าคงที่และตัวแปร ---
-const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 const STORAGE_BUCKET = 'profile-images';
 const PROFILES_PER_PROVINCE_ON_INDEX = 8;
 const SKELETON_CARD_COUNT = 8;
@@ -36,8 +34,9 @@ const dom = {
     featuredContainer: document.getElementById('featured-profiles-container'),
 };
 
-// --- ฟังก์ชันหลักในการเริ่มต้นการทำงาน ---
 async function initializeApp() {
+    if (!dom.body) return;
+
     initThemeToggle();
     initMobileMenu();
     initAgeVerification();
@@ -79,6 +78,7 @@ async function initializeApp() {
 
     const yearSpan = document.getElementById('currentYearDynamic');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+    
     dom.body.classList.add('loaded');
 }
 
@@ -117,13 +117,24 @@ async function fetchData() {
         (provincesRes.data || []).forEach(p => provincesMap.set(p.key, p.nameThai));
 
         allProfiles = (profilesRes.data || []).map(p => {
-            const imageUrls = [p.imagePath, ...(p.galleryPaths || [])].filter(Boolean).map(path => {
-                const originalUrl = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
-                return `${originalUrl}?width=600&quality=80`;
+            const allImagePaths = [p.imagePath, ...(p.galleryPaths || [])].filter(Boolean);
+            
+            const images = allImagePaths.map(path => {
+                const { data: { publicUrl } } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+                return {
+                    small: `${publicUrl}?width=400&quality=80`,
+                    medium: `${publicUrl}?width=600&quality=80`,
+                    large: `${publicUrl}?width=800&quality=85`
+                };
             });
-            if (imageUrls.length === 0) imageUrls.push('/images/placeholder-profile-card.webp');
+            
+            if (images.length === 0) {
+                const placeholder = '/images/placeholder-profile-card.webp';
+                images.push({ small: placeholder, medium: placeholder, large: placeholder });
+            }
+
             const altText = p.altText || `โปรไฟล์ไซด์ไลน์ ${p.name} จังหวัด ${provincesMap.get(p.provinceKey) || ''}`;
-            return { ...p, images: imageUrls, altText };
+            return { ...p, images, altText };
         });
 
         if (dom.provinceSelect && dom.provinceSelect.options.length <= 1) {
@@ -263,7 +274,11 @@ function createProfileCard(profile) {
     const locationIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
 
     card.innerHTML = `
-    <img src="${mainImage}" alt="${profile.altText}" class="card-image" loading="lazy" decoding="async" width="300" height="400" onerror="this.onerror=null;this.src='/images/placeholder-profile.webp';">
+    <img src="${mainImage.medium}" 
+         srcset="${mainImage.small} 400w, ${mainImage.medium} 600w"
+         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+         alt="${profile.altText}" class="card-image" loading="lazy" decoding="async" width="300" height="400" 
+         onerror="this.onerror=null;this.srcset=null;this.src='/images/placeholder-profile.webp';">
     <div class="absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10">
         <span class="${availabilityClass} text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg">${availabilityText}</span>
         ${profile.isfeatured ? `<span class="bg-yellow-400 text-black text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg">${starIcon}แนะนำ</span>` : ''}
@@ -478,7 +493,7 @@ function populateLightbox(profileData) {
 
     headerTitleEl.textContent = `โปรไฟล์: ${profileData.name || 'N/A'}`;
     nameMainEl.textContent = profileData.name || 'N/A';
-    heroImageEl.src = profileData.images[0];
+    heroImageEl.src = profileData.images[0].large;
     heroImageEl.alt = profileData.altText;
     heroImageEl.width = 800;
     heroImageEl.height = 1067;
@@ -489,16 +504,16 @@ function populateLightbox(profileData) {
     thumbnailStripEl.innerHTML = '';
     const hasGallery = profileData.images.length > 1;
     if (hasGallery) {
-        profileData.images.forEach((imgSrc, index) => {
+        profileData.images.forEach((img, index) => {
             const thumb = document.createElement('img');
-            thumb.src = imgSrc;
+            thumb.src = img.small;
             thumb.alt = `รูปตัวอย่างที่ ${index + 1} ของ ${profileData.name}`;
             thumb.width = 60;
             thumb.height = 60;
             thumb.className = 'thumbnail';
             if (index === 0) thumb.classList.add('active');
             thumb.addEventListener('click', () => {
-                heroImageEl.src = imgSrc;
+                heroImageEl.src = img.large;
                 thumbnailStripEl.querySelector('.thumbnail.active')?.classList.remove('active');
                 thumb.classList.add('active');
             });
@@ -610,5 +625,4 @@ function generateFullSchema() {
     document.head.appendChild(schemaContainer);
 }
 
-// --- เรียกใช้ฟังก์ชันหลักเมื่อสคริปต์พร้อมทำงาน ---
 initializeApp();
