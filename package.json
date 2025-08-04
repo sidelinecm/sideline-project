@@ -4,10 +4,10 @@
   "description": "A modern web project built with Tailwind CSS.",
   "private": true,
   "scripts": {
-    "dev": "tailwindcss -i ./app/styles.css -o ./app/output.css --watch",
+    "dev": "tailwindcss -i ./styles.css -o ./dist/output.css --watch",
     "clean": "rimraf dist",
-    "build:css": "tailwindcss -i ./app/styles.css -o ./dist/output.css --minify",
-    "build:copy": "copyfiles -u 1 \"app/**/*.html\" \"app/main.js\" \"app/fonts/**/*\" \"app/images/**/*\" \"app/_headers\" \"app/_redirects\" \"app/netlify.toml\" dist/",
+    "build:css": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
+    "build:copy": "copyfiles -u 1 \"app/**/*.html\" \"app/main.js\" \"app/fonts/**/*\" \"app/images/**/*\" \"app/_headers\" \"app/_redirects\" \"app/netlify.toml\" \"app/robots.txt\" \"app/sitemap.xml\" dist/",
     "build": "npm-run-all clean -p build:css build:copy"
   },
   "devDependencies": {

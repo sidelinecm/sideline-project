@@ -3,10 +3,10 @@ const { fontFamily } = require('tailwindcss/defaultTheme');
 
 module.exports = {
   content: [
-    './*.html', // สแกนไฟล์ .html ทั้งหมดในโฟลเดอร์หลัก
-    './main.js',   // สแกนไฟล์ JavaScript หลัก
+    './app/**/*.html', // สแกนไฟล์ .html ทั้งหมดในโฟลเดอร์ app
+    './app/main.js',   // สแกนไฟล์ JavaScript หลักในโฟลเดอร์ app
   ],
-  darkMode: 'class', // เปิดใช้งาน Dark Mode โดยอิงจาก class 'dark' ใน <html>
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -34,9 +34,10 @@ module.exports = {
         card: 'hsl(var(--card))',
       },
       height: {
-        '18': '4.5rem', // 72px (สำหรับ Header)
+        '18': '4.5rem',
       }
     },
   },
   plugins: [],
 };
+
