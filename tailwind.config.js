@@ -1,21 +1,18 @@
-
-const { fontFamily } = require('tailwindcss/defaultTheme');
-
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './app/**/*.html', // สแกนไฟล์ .html ทั้งหมดในโฟลเดอร์ app
-    './app/main.js',   // สแกนไฟล์ JavaScript หลักในโฟลเดอร์ app
+    "./*.{html,js}", // สแกนไฟล์ .html และ .js ทั้งหมดที่ root
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        prompt: ['Prompt', ...fontFamily.sans],
+        prompt: ['Prompt', 'sans-serif'],
+        sarabun: ['Sarabun', 'sans-serif'],
       },
       colors: {
-        border: 'hsl(var(--border))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        card: 'hsl(var(--card))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           glow: 'hsl(var(--primary-glow))',
@@ -28,16 +25,10 @@ module.exports = {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
         },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-        },
-        card: 'hsl(var(--card))',
+        border: 'hsl(var(--border))',
+        accent: 'hsl(var(--accent))',
       },
-      height: {
-        '18': '4.5rem',
-      }
     },
   },
   plugins: [],
-};
-
+}
