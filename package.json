@@ -7,7 +7,7 @@
     "dev": "tailwindcss -i ./styles.css -o ./dist/output.css --watch",
     "clean": "rimraf dist",
     "build:css": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
-    "build:copy": "copyfiles \"src/**/*.html\" \"src/main.js\" \"src/fonts/**/*\" \"src/images/**/*\" \"src/_headers\" \"src/_redirects\" \"src/netlify.toml\" \"src/robots.txt\" \"src/sitemap.xml\" dist/",
+    "build:copy": "copyfiles \"*.html\" \"main.js\" \"fonts/**/*\" \"images/**/*\" \"_headers\" \"netlify.toml\" \"robots.txt\" \"sitemap.xml\" dist/",
     "build": "npm-run-all clean -p build:css build:copy"
   },
   "devDependencies": {
