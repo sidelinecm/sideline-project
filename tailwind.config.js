@@ -1,34 +1,28 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./*.{html,js}", // สแกนไฟล์ .html และ .js ทั้งหมดที่ root
+    "./**/*.{html,js}",
   ],
   theme: {
     extend: {
-      fontFamily: {
-        prompt: ['Prompt', 'sans-serif'],
-        sarabun: ['Sarabun', 'sans-serif'],
-      },
+      // เพิ่มส่วนนี้เข้าไป เพื่อให้ Tailwind สร้างคลาสสำหรับสีที่เรากำหนดเอง
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: 'hsl(var(--card))',
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          glow: 'hsl(var(--primary-glow))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          glow: 'hsl(var(--secondary-glow))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
+        primary: 'hsl(var(--primary))',
+        'primary-glow': 'hsl(var(--primary-glow))',
+        secondary: 'hsl(var(--secondary))',
+        muted: 'hsl(var(--muted))',
+        'muted-foreground': 'hsl(var(--muted-foreground))',
         border: 'hsl(var(--border))',
         accent: 'hsl(var(--accent))',
       },
+      fontFamily: {
+        prompt: ['Prompt', 'sans-serif'],
+      }
     },
   },
   plugins: [],
 }
+

@@ -1,21 +1,14 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
-import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
+// main.js (เวอร์ชันปรับปรุง Performance ขั้นสูงสุด)
 
-gsap.registerPlugin(ScrollTrigger);
+// --- ประกาศตัวแปรเปล่าไว้ก่อน ---
+let createClient, gsap, ScrollTrigger, supabase;
 
-// --- START: ADVANCED FIX FOR SUPABASE CONNECTION ---
-// แก้ไขปัญหาโดยการใส่ URL และ Public Anon Key โดยตรง
-// นี่เป็นวิธีที่ถูกต้องและปลอดภัยสำหรับโปรเจกต์ประเภทนี้
-// ความปลอดภัยของข้อมูลจะถูกจัดการโดย Row Level Security (RLS) ใน Supabase
+// --- ค่าคงที่และตัวแปร ---
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
-// --- END: ADVANCED FIX ---
-
 const STORAGE_BUCKET = 'profile-images';
 const PROFILES_PER_PROVINCE_ON_INDEX = 8;
 const SKELETON_CARD_COUNT = 8;
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allProfiles = [];
 let provincesMap = new Map();
@@ -39,8 +32,10 @@ const dom = {
     featuredContainer: document.getElementById('featured-profiles-container'),
 };
 
+// --- ฟังก์ชันหลักในการเริ่มต้นการทำงาน ---
 async function initializeApp() {
-    if (!dom.body) return;
+    // โหลดสคริปต์หนักๆ หลังจากที่หน้าเว็บพร้อมแล้ว
+    await loadHeavyScripts();
 
     initThemeToggle();
     initMobileMenu();
@@ -54,7 +49,6 @@ async function initializeApp() {
         showLoadingState();
         const success = await fetchData();
         hideLoadingState();
-
         if (success) {
             initSearchAndFilters();
             initLightbox();
@@ -83,10 +77,22 @@ async function initializeApp() {
 
     const yearSpan = document.getElementById('currentYearDynamic');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-    
     dom.body.classList.add('loaded');
 }
 
+async function loadHeavyScripts() {
+    const supabaseModule = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    createClient = supabaseModule.createClient;
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const gsapModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm");
+    gsap = gsapModule.gsap;
+    const scrollTriggerModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm");
+    ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+    gsap.registerPlugin(ScrollTrigger);
+}
+
+// --- (คัดลอกฟังก์ชันที่เหลือทั้งหมดของคุณมาวางต่อจากตรงนี้: showLoadingState, hideLoadingState, ..., generateFullSchema) ---
 function showLoadingState() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
     if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
@@ -302,7 +308,7 @@ function createProvinceSection(key, name, provinceProfiles) {
     const sectionWrapper = document.createElement('div');
     sectionWrapper.className = 'section-content-wrapper bg-secondary-soft';
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
-    const mapIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="text-xl" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
+    const mapIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="text-xl" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654-.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
     const arrowIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="ml-1 text-xs inline" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 6.28a.75.75 0 111.04-1.06l4.5 4.25a.75.75 0 010 1.06l-4.5 4.25a.75.75 0 11-1.04-1.06l4.158-3.94H3.75A.75.75 0 013 10z" clip-rule="evenodd" /></svg>`;
     sectionWrapper.innerHTML = `
         <div class="p-6 md:p-8">
@@ -547,22 +553,37 @@ function populateLightbox(profileData) {
         availabilityClass = 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300';
     }
 
-    const paletteIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="detail-list-item-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 4zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zM5.932 7.033a.75.75 0 011.05-1.07l1.5 1.5a.75.75 0 01-1.05 1.07l-1.5-1.5zM12.95 14.05a.75.75 0 01-1.05 1.07l-1.5-1.5a.75.75 0 011.05-1.07l1.5 1.5zM4 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 014 10zM13.75 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM7.033 12.95a.75.75 0 011.07-1.05l1.5 1.5a.75.75 0 01-1.07 1.05l-1.5-1.5zM14.05 7.05a.75.75 0 01-1.07-1.05l1.5-1.5a.75.75 0 011.07 1.05l-1.5 1.5z"/></svg>`;
-    const mapIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="detail-list-item-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654-.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
-    const moneyIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="detail-list-item-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 10.837a1 1 0 00-1.5 0 1 1 0 000 1.413l.001.001 2.25 2.25a1 1 0 001.414 0l.001-.001 2.688-2.688a1 1 0 000-1.414 1 1 0 00-1.414 0l-1.937 1.937-1.5-1.5z" /><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1a.5.5 0 000 1h8a.5.5 0 000-1H5z" clip-rule="evenodd" /></svg>`;
-
     detailsEl.innerHTML = `
         <div class="availability-badge ${availabilityClass}">${availabilityText}</div>
         <div class="stats-grid">
-            <div class="stat-item"><div class="label">อายุ</div><div class="value">${profileData.age || '-'} ปี</div></div>
-            <div class="stat-item"><div class="label">สัดส่วน</div><div class="value">${profileData.stats || '-'}</div></div>
-            <div class="stat-item"><div class="label">สูง/หนัก</div><div class="value">${profileData.height || '-'}/${profileData.weight || '-'}</div></div>
+            <div class="stat-item">
+                <div class="label">อายุ</div>
+                <div class="value">${profileData.age || '-'} ปี</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">สัดส่วน</div>
+                <div class="value">${profileData.stats || '-'}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">สูง/หนัก</div>
+                <div class="value">${profileData.height || '-'}/${profileData.weight || '-'}</div>
+            </div>
         </div>
-        <div class="space-y-1">
-            <div class="detail-list-item">${paletteIcon}<div class="value">ผิว: ${profileData.skinTone || '-'}</div></div>
-            <div class="detail-list-item">${mapIcon}<div class="value">จังหวัด: ${provincesMap.get(profileData.provinceKey) || ''} (${profileData.location || 'ไม่ระบุ'})</div></div>
-            <div class="detail-list-item">${moneyIcon}<div class="value">เรท: ${profileData.rate || 'สอบถาม'}</div></div>
-        </div>`;
+        <dl class="space-y-2 text-sm">
+            <div class="detail-list-item">
+                <dt class="flex-shrink-0"><i class="fas fa-palette w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt>
+                <dd class="value">ผิว: ${profileData.skinTone || '-'}</dd>
+            </div>
+            <div class="detail-list-item">
+                <dt class="flex-shrink-0"><i class="fas fa-map-marker-alt w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt>
+                <dd class="value">จังหวัด: ${provincesMap.get(profileData.provinceKey) || ''} (${profileData.location || 'ไม่ระบุ'})</dd>
+            </div>
+            <div class="detail-list-item">
+                <dt class="flex-shrink-0"><i class="fas fa-money-bill-wave w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt>
+                <dd class="value">เรท: ${profileData.rate || 'สอบถาม'}</dd>
+            </div>
+        </dl>
+    `;
 
     if (profileData.lineId) {
         lineLink.href = profileData.lineId.startsWith('http') ? profileData.lineId : `https://line.me/ti/p/${profileData.lineId}`;
@@ -630,6 +651,5 @@ function generateFullSchema() {
     document.head.appendChild(schemaContainer);
 }
 
-initializeApp();
+document.addEventListener('DOMContentLoaded', initializeApp);
 
-// Force update 1.0
