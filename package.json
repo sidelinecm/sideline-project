@@ -4,11 +4,11 @@
   "description": "A modern web project built with Tailwind CSS.",
   "private": true,
   "scripts": {
-    "dev": "tailwindcss -i ./styles.css -o ./dist/output.css --watch",
     "clean": "rimraf dist",
+    "watch:css": "tailwindcss -i ./styles.css -o ./dist/output.css --watch",
     "build:css": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
-    "build:copy": "copyfiles \"*.html\" \"main.js\" \"fonts/**/*\" \"images/**/*\" \"_headers\" \"netlify.toml\" \"robots.txt\" \"sitemap.xml\" dist/",
-    "build": "npm-run-all clean -p build:css build:copy"
+    "copy": "copyfiles -u 0 \"*.html\" \"main.js\" \"sw.js\" \"manifest.webmanifest\" \"robots.txt\" \"sitemap.xml\" \"_headers\" \"netlify.toml\" \"fonts/**/*\" \"images/**/*\" \"icons/**/*\" dist/",
+    "build": "npm-run-all clean build:css copy"
   },
   "devDependencies": {
     "copyfiles": "^2.4.1",

@@ -1,11 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./**/*.{html,js}",
+    "./*.{html,js}", // <-- แก้ไข: ให้มองหาไฟล์ .html และ .js ที่ระดับบนสุด
   ],
   theme: {
     extend: {
-      // เพิ่มส่วนนี้เข้าไป เพื่อให้ Tailwind สร้างคลาสสำหรับสีที่เรากำหนดเอง
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -25,4 +24,3 @@ module.exports = {
   },
   plugins: [],
 }
-
