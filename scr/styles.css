@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer base {
+  /* --- Keyframes (เหมือนเดิม) --- */
   @keyframes aurora-1 {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
@@ -19,16 +20,17 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* --- Color Variables (เหมือนเดิมที่ปรับแก้แล้ว) --- */
   :root {
     --background: 220 20% 98%;
     --foreground: 220 15% 25%;
     --card: 0 0% 100%;
-    --primary: 340 85% 58%;
-    --primary-glow: 340 85% 65%;
-    --secondary: 260 85% 65%;
-    --secondary-glow: 260 85% 70%;
+    --primary: 340 85% 55%; /* #c51a5f */
+    --primary-glow: 340 85% 62%;
+    --secondary: 260 85% 55%; /* #672ff0 */
+    --secondary-glow: 260 85% 65%;
     --muted: 220 25% 94%;
-    --muted-foreground: 220 10% 45%;
+    --muted-foreground: 220 10% 35%; /* #4f5663 */
     --border: 220 20% 92%;
     --accent: 220 60% 96%;
     --overlay-backdrop: 225 15% 10% / 0.6;
@@ -48,14 +50,19 @@
     --overlay-backdrop: 225 15% 10% / 0.8;
   }
 
+  /* --- Body & Font Rendering --- */
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    /* *** แก้ไขจุดนี้ *** */
     font-family: theme('fontFamily.prompt');
     @apply antialiased relative overflow-x-hidden;
     opacity: 0;
     transition: opacity 0.4s ease-in-out;
+    
+    /* เพิ่ม: ทำให้ Font คมชัดสูงสุด */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   body.loaded {
     opacity: 1;
@@ -65,9 +72,15 @@
     @apply outline-none ring-2 ring-offset-2 ring-primary ring-offset-background;
   }
 
-  .text-primary, h1.text-primary { text-shadow: 0 0 15px hsl(var(--primary-glow) / 0.6), 0 0 3px hsl(var(--primary-glow) / 0.8); }
-  .text-secondary, h1 .text-secondary { text-shadow: 0 0 15px hsl(var(--secondary-glow) / 0.5), 0 0 3px hsl(var(--secondary-glow) / 0.7); }
+  /* ปรับปรุง: Text Shadow ให้คมชัดและมีมิติมากขึ้น */
+  .text-primary, h1.text-primary { 
+    text-shadow: 0 0 12px hsl(var(--primary-glow) / 0.6), 0 1px 2px hsl(var(--primary) / 0.5); 
+  }
+  .text-secondary, h1 .text-secondary { 
+    text-shadow: 0 0 12px hsl(var(--secondary-glow) / 0.5), 0 1px 2px hsl(var(--secondary) / 0.4); 
+  }
 
+  /* --- Background Aurora Effect (เหมือนเดิม) --- */
   body::before, body::after {
     content: '';
     @apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10 blur-[150px] opacity-15;
@@ -93,6 +106,7 @@
 }
 
 @layer components {
+  /* --- General UI Components (ส่วนใหญ่เหมือนเดิม เพิ่ม transition) --- */
   .skip-link {
     @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:text-foreground focus:font-semibold focus:rounded-lg;
   }
@@ -122,18 +136,46 @@
 
   #age-verification-overlay { @apply overlay-backdrop; }
   .age-modal-content { @apply max-w-lg w-full p-6 sm:p-8 text-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white border border-gray-700 shadow-2xl rounded-2xl; }
+  @media screen and (max-width: 480px) {
+    .age-modal-content { @apply p-5; }
+    .age-modal-content h2 { @apply text-xl leading-snug; }
+  }
+
   .age-badge-inline { @apply inline-block bg-red-600 text-white text-base font-bold px-3 py-1 rounded-md align-middle mx-1; }
   .age-btn { @apply w-full rounded-full py-3 text-base font-bold transition-transform duration-200 hover:scale-105; }
-  .age-btn-confirm { @apply bg-primary text-white; }
+  .age-btn-confirm { background-color: hsl(var(--primary)); color: white; }
   .age-btn-cancel { @apply bg-gray-600 text-gray-200 hover:bg-gray-700; }
 
   .section-header-card { @apply text-center p-8; }
   .section-content-wrapper { @apply bg-card rounded-2xl shadow-sm border border-border; }
 
-  .profile-card-new { @apply relative overflow-hidden rounded-xl bg-card shadow-md transition-transform duration-300 ease-in-out hover:shadow-lg hover:scale-105; }
-  .card-image { @apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out group-hover:scale-110; }
-  .card-overlay { @apply absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end p-4 text-white; }
+  /* --- Profile Card (ปรับปรุงครั้งใหญ่) --- */
+  .profile-card-new { 
+    @apply relative overflow-hidden rounded-xl bg-card shadow-md transition-all duration-300 ease-in-out; 
+  }
+  /* เพิ่ม Hover Effect ให้โดดเด่น */
+  .profile-card-new:hover {
+    @apply shadow-xl -translate-y-1;
+  }
+
+  .card-image { 
+    @apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out;
+    /* เพิ่มเงาด้านในให้รูปภาพมีมิติ */
+    box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.15);
+  }
+  .group:hover .card-image {
+    @apply scale-110;
+  }
+  
+  /* ปรับปรุง Gradient ให้เข้มขึ้นที่ด้านล่าง */
+  .card-overlay { 
+    @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 text-white; 
+    /* เพิ่มเงาให้ข้อความคมชัดขึ้น */
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  }
   .card-info { @apply transition-transform duration-300 ease-out group-hover:-translate-y-1; }
+  
+  /* --- Skeleton & Error States (เหมือนเดิม) --- */
   .skeleton-card { @apply relative w-full aspect-[3/4] rounded-xl bg-muted overflow-hidden; }
   .skeleton-card::after { 
     content: '';
@@ -144,10 +186,22 @@
     background-image: linear-gradient(90deg, transparent, hsla(0,0%,0%,0.04), transparent);
   }
 
+  /* --- Lightbox (ปรับปรุง) --- */
   .hero-image-container { @apply w-full aspect-square overflow-hidden rounded-lg bg-muted; }
+  /* เพิ่มเงาและเส้นขอบให้รูปภาพหลัก */
+  #lightboxHeroImage {
+    @apply border-4 border-card shadow-lg;
+  }
   .thumbnail-strip { @apply flex gap-2 mt-3; }
-  .thumbnail { @apply w-16 h-16 rounded-md object-cover cursor-pointer border-2 border-transparent transition hover:border-primary/70 opacity-60; }
-  .thumbnail.active { @apply border-primary opacity-100; }
+  .thumbnail { 
+    @apply w-16 h-16 rounded-md object-cover cursor-pointer border-2 border-transparent transition-all duration-200 opacity-60 hover:opacity-100 hover:border-primary/70; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  /* เพิ่มวงแหวนให้ Thumbnail ที่ถูกเลือก */
+  .thumbnail.active { 
+    @apply border-primary opacity-100 ring-2 ring-offset-2 ring-primary ring-offset-card;
+  }
+
   #lightboxDetailsCompact { @apply space-y-4 pt-5 border-t border-border; }
   .availability-badge { @apply font-semibold px-4 py-1.5 rounded-full text-center text-sm; }
   .stats-grid { @apply grid grid-cols-3 gap-3 bg-accent p-3 rounded-lg; }
@@ -158,7 +212,11 @@
   .detail-list-item-icon { @apply text-primary/80; }
   .detail-list-item .value { @apply font-medium text-sm text-foreground; }
 
-  .btn-line-shared { @apply w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-green-500 text-white font-semibold transition hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-card; }
+  /* ปรับปรุงปุ่ม LINE ให้โดดเด่นขึ้น */
+  .btn-line-shared { 
+      @apply w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-[#06C755] text-white font-semibold transition-all duration-200 hover:bg-[#05a546] hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-card; 
+  }
+
   .retry-btn { @apply mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary/90 transition; }
   
   .error-state { @apply flex flex-col items-center justify-center gap-4; }
