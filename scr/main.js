@@ -47,17 +47,34 @@ const dom = {
     yearSpan: document.getElementById('currentYearDynamic')
 };
 
-// --- ฟังก์ชันหลักในการเริ่มต้นแอป ---
+// --- ฟังก์ชันหลักในการเริ่มต้นแอป (ฉบับแก้ไขเพื่อทดสอบปัญหา) ---
 async function initializeApp() {
+    // --- ส่วน UI พื้นฐานที่ "ไม่ใช้" GSAP จะยังทำงานตามปกติ ---
     initThemeToggle();
-    initMobileMenu();
     initHeaderScrollEffect();
     updateActiveNavLinks();
     generateFullSchema();
 
+    // โหลดข้อมูลซึ่งเป็นหัวใจหลักของเว็บ
     await loadCoreScripts();
-    initAgeVerification();
 
+    // --- ส่วนที่ "ปิดการใช้งานชั่วคราว" เพื่อทดสอบ ---
+    // เราจะปิดทุกฟังก์ชันที่เรียกใช้ GSAP ซึ่งเป็นผู้ต้องสงสัยหลัก
+    
+    // 1. ปิดการทำงานของเมนูมือถือที่มี Animation
+    // initMobileMenu(); 
+    
+    // 2. ปิดการทำงานของหน้ายืนยันอายุที่มี Animation
+    // initAgeVerification();
+
+    // 3. ปิดการทำงานของ Lightbox ที่มี Animation
+    // initLightbox();
+
+    // 4. ปิดการทำงานของ Scroll Animation ทั้งหมด (ผู้ต้องสงสัยอันดับ 1)
+    // initScrollAnimations();
+
+
+    // --- ส่วนการโหลดข้อมูลและ Render จะยังทำงานตามปกติ แต่ไม่มี Animation ---
     const currentPage = dom.body.dataset.page;
     if (['home', 'profiles'].includes(currentPage)) {
         showLoadingState();
@@ -65,8 +82,8 @@ async function initializeApp() {
         hideLoadingState();
 
         if (success) {
-            initSearchAndFilters();
-            initLightbox();
+            initSearchAndFilters(); // ส่วนนี้สำคัญ ต้องทำงานเพื่อแสดงผลโปรไฟล์
+            // initLightbox(); // ถูกปิดไปด้านบนแล้ว
             if (dom.retryFetchBtn) {
                 dom.retryFetchBtn.addEventListener('click', handleRetry);
             }
@@ -75,8 +92,7 @@ async function initializeApp() {
         }
     }
     
-    initScrollAnimations();
-
+    // --- จัดการส่วนที่เหลือที่ไม่มีปัญหา ---
     if (dom.yearSpan) dom.yearSpan.textContent = new Date().getFullYear();
     dom.body.classList.add('loaded');
 }
