@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist",
-    // ตรวจสอบ path ใน copy commands ให้ชี้ไปที่ scr/
     "copy:assets": "copyfiles -u 1 \"scr/**/!(*.css|*.html|*.js|*.webmanifest|*.txt|*.xml|*.toml)\" dist",
     "copy:root": "copyfiles -u 1 \"scr/*.html\" \"scr/*.js\" \"scr/*.webmanifest\" \"scr/*.txt\" \"scr/*.xml\" \"scr/_headers\" \"scr/netlify.toml\" dist",
     "watch:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
