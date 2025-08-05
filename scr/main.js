@@ -1,4 +1,4 @@
-// --- main.js (เวอร์ชันสมบูรณ์ จัดเต็ม) ---
+// --- main.js (เวอร์ชันแก้ไขสมบูรณ์ขั้นสุดท้าย) ---
 
 // ประกาศตัวแปรไว้ด้านบนสุด แต่ยังไม่ import
 let createClient, gsap, ScrollTrigger, supabase;
@@ -49,20 +49,15 @@ const dom = {
 
 // --- ฟังก์ชันหลักในการเริ่มต้นแอป ---
 async function initializeApp() {
-    // 1. เริ่มการทำงานของ UI พื้นฐานที่ไม่ต้องใช้ Script หนักๆ ทันที
     initThemeToggle();
     initMobileMenu();
     initHeaderScrollEffect();
     updateActiveNavLinks();
     generateFullSchema();
 
-    // 2. โหลด Supabase ซึ่งจำเป็นสำหรับการดึงข้อมูล
     await loadCoreScripts();
-
-    // 3. เริ่มการทำงานของ Age Verification ซึ่งจะโหลด GSAP แบบ Dynamic
     initAgeVerification();
 
-    // 4. ตรวจสอบว่าเป็นหน้าที่ต้องโหลดข้อมูลโปรไฟล์หรือไม่
     const currentPage = dom.body.dataset.page;
     if (['home', 'profiles'].includes(currentPage)) {
         showLoadingState();
@@ -72,13 +67,14 @@ async function initializeApp() {
         if (success) {
             initSearchAndFilters();
             initLightbox();
-            dom.retryFetchBtn?.addEventListener('click', handleRetry);
+            if (dom.retryFetchBtn) {
+                dom.retryFetchBtn.addEventListener('click', handleRetry);
+            }
         } else {
             showErrorState();
         }
     }
     
-    // 5. เริ่มการทำงานของ Scroll Animation (ซึ่งจะโหลด GSAP แบบ Dynamic)
     initScrollAnimations();
 
     if (dom.yearSpan) dom.yearSpan.textContent = new Date().getFullYear();
@@ -100,7 +96,7 @@ async function loadCoreScripts() {
 }
 
 async function loadAnimationScripts() {
-    if (gsap) return; // ถ้าโหลดมาแล้ว ไม่ต้องทำอะไร
+    if (gsap) return;
     try {
         const [gsapModule, scrollTriggerModule] = await Promise.all([
             import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm"),
@@ -116,8 +112,8 @@ async function loadAnimationScripts() {
 
 // --- UI State Management ---
 function showLoadingState() {
-    dom.fetchErrorMessage?.classList.add('hidden');
-    dom.noResultsMessage?.classList.add('hidden');
+    if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
+    if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
     if (dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
     
     if (dom.loadingPlaceholder) {
@@ -130,12 +126,12 @@ function showLoadingState() {
 }
 
 function hideLoadingState() {
-    dom.loadingPlaceholder?.style.setProperty('display', 'none');
+    if (dom.loadingPlaceholder) dom.loadingPlaceholder.style.setProperty('display', 'none');
 }
 
 function showErrorState() {
     hideLoadingState();
-    dom.fetchErrorMessage?.classList.remove('hidden');
+    if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.remove('hidden');
 }
 
 async function handleRetry() {
@@ -144,7 +140,7 @@ async function handleRetry() {
     hideLoadingState();
     if (success) {
         applyFilters();
-        dom.fetchErrorMessage?.classList.add('hidden');
+        if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
     } else {
         showErrorState();
     }
@@ -200,7 +196,6 @@ async function fetchData() {
 }
 
 // --- Search & Profile Rendering ---
-// ... (ส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว) ...
 function initSearchAndFilters() {
     if (!dom.searchForm) {
         applyFilters();
@@ -217,25 +212,27 @@ function initSearchAndFilters() {
         e.preventDefault();
         applyFilters();
     });
-    dom.resetSearchBtn?.addEventListener('click', () => {
-        dom.searchForm.reset();
-        applyFilters();
-    });
-    dom.searchInput?.addEventListener('input', debouncedFilter);
-    dom.provinceSelect?.addEventListener('change', applyFilters);
-    dom.availabilitySelect?.addEventListener('change', applyFilters);
-    dom.featuredSelect?.addEventListener('change', applyFilters);
+    if (dom.resetSearchBtn) {
+        dom.resetSearchBtn.addEventListener('click', () => {
+            dom.searchForm.reset();
+            applyFilters();
+        });
+    }
+    if (dom.searchInput) dom.searchInput.addEventListener('input', debouncedFilter);
+    if (dom.provinceSelect) dom.provinceSelect.addEventListener('change', applyFilters);
+    if (dom.availabilitySelect) dom.availabilitySelect.addEventListener('change', applyFilters);
+    if (dom.featuredSelect) dom.featuredSelect.addEventListener('change', applyFilters);
     applyFilters();
 }
 
 function applyFilters() {
-    const searchTerm = dom.searchInput?.value.toLowerCase().trim() || '';
-    const selectedProvince = dom.provinceSelect?.value || '';
-    const selectedAvailability = dom.availabilitySelect?.value || '';
-    const isFeaturedOnly = dom.featuredSelect?.value === 'true';
+    const searchTerm = dom.searchInput ? dom.searchInput.value.toLowerCase().trim() : '';
+    const selectedProvince = dom.provinceSelect ? dom.provinceSelect.value : '';
+    const selectedAvailability = dom.availabilitySelect ? dom.availabilitySelect.value : '';
+    const isFeaturedOnly = dom.featuredSelect ? dom.featuredSelect.value === 'true' : false;
 
     const filtered = allProfiles.filter(p =>
-        (!searchTerm || p.name?.toLowerCase().includes(searchTerm) || p.location?.toLowerCase().includes(searchTerm) || p.styleTags?.some(t => t.toLowerCase().includes(searchTerm))) &&
+        (!searchTerm || (p.name && p.name.toLowerCase().includes(searchTerm)) || (p.location && p.location.toLowerCase().includes(searchTerm)) || (p.styleTags && p.styleTags.some(t => t.toLowerCase().includes(searchTerm)))) &&
         (!selectedProvince || p.provinceKey === selectedProvince) &&
         (!selectedAvailability || p.availability === selectedAvailability) &&
         (!isFeaturedOnly || p.isfeatured)
@@ -248,7 +245,7 @@ function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     const currentPage = dom.body.dataset.page;
     dom.profilesDisplayArea.innerHTML = '';
-    dom.noResultsMessage?.classList.add('hidden');
+    if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
 
     const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
     if (dom.featuredSection && dom.featuredContainer) {
@@ -263,7 +260,7 @@ function renderProfiles(filteredProfiles, isSearching) {
 
     if (filteredProfiles.length === 0) {
         if (['home', 'profiles'].includes(currentPage)) {
-            dom.noResultsMessage?.classList.remove('hidden');
+            if (dom.noResultsMessage) dom.noResultsMessage.classList.remove('hidden');
         }
         initScrollAnimations();
         return;
@@ -290,7 +287,7 @@ function renderProfiles(filteredProfiles, isSearching) {
                 dynamicProvinceOrder = [priorityLocation, ...dynamicProvinceOrder.filter(pKey => pKey !== priorityLocation)];
             }
             
-            let accumulatedIndex = dom.featuredContainer?.children.length || 0;
+            let accumulatedIndex = dom.featuredContainer ? dom.featuredContainer.children.length : 0;
 
             dynamicProvinceOrder.forEach(provinceKey => {
                 if (!provinceKey) return;
@@ -304,7 +301,7 @@ function renderProfiles(filteredProfiles, isSearching) {
     }
     initScrollAnimations();
 }
-// ... (ส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว) ...
+
 function createProfileCard(profile, index) {
     const card = document.createElement('div');
     card.className = 'profile-card-new group cursor-pointer';
@@ -362,7 +359,6 @@ function createProfileCard(profile, index) {
 
 
 // --- UI Interaction Handlers ---
-// ... โค้ดส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว ...
 function initThemeToggle() {
     const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
     if (themeToggleBtns.length === 0) return;
@@ -385,7 +381,7 @@ function initThemeToggle() {
         });
     });
 }
-// ... โค้ดส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว ...
+
 function initMobileMenu() {
     if (!dom.menuToggle || !dom.sidebar || !dom.backdrop || !dom.closeSidebarBtn) return;
     
@@ -397,7 +393,9 @@ function initMobileMenu() {
         dom.sidebar.setAttribute('aria-hidden', 'false');
         dom.sidebar.classList.remove('translate-x-full');
         dom.backdrop.classList.remove('hidden');
-        gsap.to(dom.backdrop, { opacity: 1, duration: 0.3 });
+        if (gsap) {
+            gsap.to(dom.backdrop, { opacity: 1, duration: 0.3 });
+        }
         dom.body.style.overflow = 'hidden';
         dom.sidebar.focus();
     };
@@ -407,16 +405,24 @@ function initMobileMenu() {
         isMenuOpen = false;
         await loadAnimationScripts();
         
-        gsap.to(dom.backdrop, {
-            opacity: 0,
-            duration: 0.3,
-            onComplete: () => {
-                dom.backdrop.classList.add('hidden');
-                dom.sidebar.classList.add('translate-x-full');
-                dom.sidebar.setAttribute('aria-hidden', 'true');
-                dom.body.style.overflow = '';
-            }
-        });
+        if (gsap) {
+            gsap.to(dom.backdrop, {
+                opacity: 0,
+                duration: 0.3,
+                onComplete: () => {
+                    dom.backdrop.classList.add('hidden');
+                    dom.sidebar.classList.add('translate-x-full');
+                    dom.sidebar.setAttribute('aria-hidden', 'true');
+                    dom.body.style.overflow = '';
+                }
+            });
+        } else {
+            // Fallback for when GSAP fails to load
+            dom.backdrop.classList.add('hidden');
+            dom.sidebar.classList.add('translate-x-full');
+            dom.sidebar.setAttribute('aria-hidden', 'true');
+            dom.body.style.overflow = '';
+        }
     };
 
     dom.menuToggle.addEventListener('click', openMenu);
@@ -426,7 +432,7 @@ function initMobileMenu() {
         if (e.key === 'Escape' && isMenuOpen) closeMenu();
     });
 }
-// ... โค้ดส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว ...
+
 async function initAgeVerification() {
     if (!dom.ageVerificationOverlay) return;
     if (sessionStorage.getItem('ageVerified') === 'true') {
@@ -459,10 +465,10 @@ async function initAgeVerification() {
         }
     };
     
-    dom.confirmAgeButton?.addEventListener('click', () => closeAction(true));
-    dom.cancelAgeButton?.addEventListener('click', () => closeAction(false));
+    if (dom.confirmAgeButton) dom.confirmAgeButton.addEventListener('click', () => closeAction(true));
+    if (dom.cancelAgeButton) dom.cancelAgeButton.addEventListener('click', () => closeAction(false));
 }
-// ... โค้ดส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว ...
+
 async function initLightbox() {
     if (!dom.lightbox || !dom.lightboxContentWrapperEl || !dom.closeLightboxBtn) return;
 
@@ -483,7 +489,10 @@ async function initLightbox() {
                 gsap.to(dom.lightbox, { opacity: 1, duration: 0.3 });
                 gsap.fromTo(dom.lightboxContentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power2.out' });
             }
-            dom.lightbox.querySelector('button, [href]')?.focus();
+            const focusableEl = dom.lightbox.querySelector('button, [href]');
+            if (focusableEl) {
+                focusableEl.focus();
+            }
         }
     };
 
@@ -506,7 +515,9 @@ async function initLightbox() {
             dom.lightbox.classList.add('hidden');
             dom.body.style.overflow = '';
         }
-        lastFocusedElement?.focus();
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+        }
     };
 
     document.body.addEventListener('click', (event) => {
@@ -529,7 +540,7 @@ async function initLightbox() {
         if (e.target === dom.lightbox) closeAction();
     });
 }
-// ... โค้ดส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว ...
+
 function populateLightbox(profileData) {
     const nameMainEl = document.getElementById('lightbox-profile-name-main');
     const heroImageEl = document.getElementById('lightboxHeroImage');
@@ -546,7 +557,6 @@ function populateLightbox(profileData) {
     nameMainEl.textContent = profileData.name || 'N/A';
     heroImageEl.src = profileData.images[0].large;
     heroImageEl.alt = profileData.altText;
-    // ปรับปรุง: เพิ่ม width และ height ให้รูปภาพหลักใน Lightbox ป้องกัน CLS
     heroImageEl.width = 800;
     heroImageEl.height = 1067;
     quoteEl.textContent = profileData.quote ? `"${profileData.quote}"` : '';
@@ -560,14 +570,14 @@ function populateLightbox(profileData) {
             const thumb = document.createElement('img');
             thumb.src = img.small;
             thumb.alt = `รูปตัวอย่างที่ ${index + 1} ของ ${profileData.name}`;
-            // ปรับปรุง: เพิ่ม width และ height ให้รูป thumbnail ป้องกัน CLS
             thumb.width = 60;
-            thumb.height = 60;
+            thumb.height = 80;
             thumb.className = 'thumbnail';
             if (index === 0) thumb.classList.add('active');
             thumb.addEventListener('click', () => {
                 heroImageEl.src = img.large;
-                thumbnailStripEl.querySelector('.thumbnail.active')?.classList.remove('active');
+                const activeThumb = thumbnailStripEl.querySelector('.thumbnail.active');
+                if (activeThumb) activeThumb.classList.remove('active');
                 thumb.classList.add('active');
             });
             thumbnailStripEl.appendChild(thumb);
@@ -641,21 +651,19 @@ async function initScrollAnimations() {
     await loadAnimationScripts();
     if (!gsap) return;
 
-    // รีเฟรช ScrollTrigger เพื่อให้รู้จัก Element ใหม่ๆ ที่เพิ่มเข้ามาหลังการ filter
+    // *** FIX: 1. ทำลาย ScrollTrigger ของเก่าทั้งหมดทิ้งก่อน เพื่อป้องกัน Memory Leak ***
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+    // 2. Refresh เพื่อให้ GSAP รู้จักขนาดและตำแหน่งล่าสุดของทุก Element
     ScrollTrigger.refresh();
 
-    // ค้นหาเฉพาะ Element ที่ยังไม่ถูกแสดงผล
+    // 3. สร้าง Animation สำหรับ Element ที่รอการ Scroll มาถึง
     const animatedElements = document.querySelectorAll('[data-animate-on-scroll]:not(.is-visible)');
-    
     animatedElements.forEach(el => {
-        // ล้าง Animation เก่าๆ ที่อาจค้างอยู่ (ถ้ามี)
-        if (el._gsap) {
-            el._gsap.kill();
-        }
         gsap.from(el, {
             scrollTrigger: {
                 trigger: el,
-                start: "top 90%", // เริ่ม animation เมื่อเห็น 10% ของ element
+                start: "top 90%",
                 once: true,
                 onEnter: () => el.classList.add('is-visible'),
             },
@@ -665,9 +673,11 @@ async function initScrollAnimations() {
             ease: "power2.out",
         });
     });
-    // Animation สำหรับ Hero Section ในหน้าแรก
-    if (dom.body.dataset.page === 'home') {
-        const heroElements = ['#hero-h1', '#hero-p', '#hero-form'].map(sel => document.querySelector(sel)).filter(Boolean);
+    
+    // 4. สร้าง Animation สำหรับ Hero Section (ทำเพียงครั้งเดียว)
+    const heroH1 = document.querySelector('#hero-h1');
+    if (heroH1 && !heroH1._gsap) { // เช็ค _gsap เพื่อให้แน่ใจว่า animation นี้ยังไม่เคยถูกสร้าง
+        const heroElements = [heroH1, document.querySelector('#hero-p'), document.querySelector('#hero-form')].filter(Boolean);
         gsap.from(heroElements, { 
             y: 20, 
             opacity: 0, 
@@ -678,7 +688,7 @@ async function initScrollAnimations() {
         });
     }
 }
-// ... โค้ดส่วนอื่นๆ ที่เหมือนเดิม (initHeaderScrollEffect, updateActiveNavLinks, etc.) ...
+
 function initHeaderScrollEffect() {
     const header = document.getElementById('page-header');
     if (!header) return;
@@ -697,15 +707,20 @@ function updateActiveNavLinks() {
     const currentPath = window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) || '/' : window.location.pathname;
     const navLinks = document.querySelectorAll('#sidebar nav a, header nav a');
     navLinks.forEach(link => {
-        const linkPath = new URL(link.href).pathname.endsWith('/') ? new URL(link.href).pathname.slice(0, -1) || '/' : new URL(link.href).pathname;
-        const isActive = linkPath === currentPath;
-        link.classList.toggle('active-nav-link', isActive);
+        try {
+            const linkPath = new URL(link.href).pathname.endsWith('/') ? new URL(link.href).pathname.slice(0, -1) || '/' : new URL(link.href).pathname;
+            const isActive = linkPath === currentPath;
+            link.classList.toggle('active-nav-link', isActive);
+        } catch(e) {
+            console.warn("Could not parse nav link href:", link.href);
+        }
     });
 }
-// ... โค้ดส่วนนี้เหมือนเดิมทุกประการ เนื่องจากสมบูรณ์อยู่แล้ว ...
+
 function generateFullSchema() {
     const pageTitle = document.title;
-    const canonicalUrl = document.querySelector("link[rel='canonical']")?.href || window.location.href;
+    const canonicalLink = document.querySelector("link[rel='canonical']");
+    const canonicalUrl = canonicalLink ? canonicalLink.href : window.location.href;
     const siteUrl = "https://sidelinechiangmai.netlify.app/";
     const orgName = "SidelineChiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
     const mainSchema = {
