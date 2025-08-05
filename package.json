@@ -1,3 +1,4 @@
+
 {
   "name": "sideline-project",
   "version": "1.0.0",
@@ -6,20 +7,18 @@
   "scripts": {
     "clean": "rimraf dist",
     "copy:assets": "copyfiles -u 1 \"scr/**/!(*.css|*.html|*.js|*.webmanifest|*.txt|*.xml|*.toml)\" dist",
-    "copy:blog": "copyfiles -u 1 \"scr/blog/**/*.html\" dist/blog",  /* <-- เพิ่ม Script นี้ */
+    "copy:blog": "copyfiles -u 1 \"scr/blog/**/*.html\" dist/blog",
     "copy:root": "copyfiles -u 1 \"scr/*.html\" \"scr/*.js\" \"scr/*.webmanifest\" \"scr/*.txt\" \"scr/*.xml\" \"scr/_headers\" \"scr/netlify.toml\" dist",
     "watch:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
     "serve": "live-server dist --wait=100",
     "dev": "npm-run-all clean -p watch:css serve \"copy:** --watch\"",
     "build:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --minify",
-    /* ปรับปรุง: เพิ่ม copy:blog เข้าไปในคำสั่ง build */
     "build": "npm-run-all clean build:css copy:assets copy:blog copy:root",
     "start": "http-server dist",
     "format": "prettier --write \"scr/**/*.{html,js,css}\""
   },
   "devDependencies": {
-    /* เพิ่ม: @tailwindcss/typography หลังจากรัน npm install */
-    "@tailwindcss/typography": "^0.5.13", 
+    "@tailwindcss/typography": "^0.5.13",
     "copyfiles": "^2.4.1",
     "http-server": "^14.1.1",
     "live-server": "^1.2.2",
