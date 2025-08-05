@@ -1,0 +1,18 @@
+
+
+[build]
+  # คำสั่งสำหรับ Build โปรเจกต์ (ถูกต้อง)
+  command = "npm run build"
+  
+  # โฟลเดอร์ผลลัพธ์ที่จะนำขึ้นแสดงผล (ถูกต้อง)
+  publish = "dist" 
+
+[build.environment]
+  # กำหนดเวอร์ชันของ Node.js เพื่อความเสถียร (ยอดเยี่ยม)
+  NODE_VERSION = "18"
+
+# ตัวอย่างการทำ Redirects (เผื่อใช้ในอนาคต)
+# [[redirects]]
+#   from = "/old-page"
+#   to = "/new-page"
+#   status = 301
