@@ -1,5 +1,6 @@
-// main.js (เวอร์ชันสมบูรณ์แบบ: PWA, Performance, Accessibility, SEO)
+// main.js (เวอร์ชันปรับปรุง)
 
+// (โค้ดส่วนบนสุดจนถึงฟังก์ชัน createProfileCard ไม่มีการเปลี่ยนแปลง)
 let createClient, gsap, ScrollTrigger, supabase;
 
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
@@ -281,6 +282,7 @@ function renderProfiles(filteredProfiles, isSearching) {
     initScrollAnimations();
 }
 
+// --- START: การเปลี่ยนแปลงใน main.js ---
 function createProfileCard(profile, index) {
     const card = document.createElement('div');
     card.className = 'profile-card-new group cursor-pointer';
@@ -306,6 +308,7 @@ function createProfileCard(profile, index) {
     const starIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z" clip-rule="evenodd" /></svg>`;
     const locationIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654-.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
 
+    // ปรับปรุง: เพิ่ม width="300" height="400" เพื่อป้องกัน CLS
     card.innerHTML = `
     <img src="${mainImage.medium}" 
          srcset="${mainImage.small} 400w, ${mainImage.medium} 600w"
@@ -327,6 +330,7 @@ function createProfileCard(profile, index) {
     return card;
 }
 
+// (โค้ดระหว่าง createProfileCard และ populateLightbox ไม่มีการเปลี่ยนแปลง)
 function createProvinceSection(key, name, provinceProfiles, baseIndex) {
     const totalCount = provinceProfiles.length;
     const sectionWrapper = document.createElement('div');
@@ -509,6 +513,7 @@ function initLightbox() {
     });
 }
 
+
 function populateLightbox(profileData) {
     const nameMainEl = document.getElementById('lightbox-profile-name-main');
     const heroImageEl = document.getElementById('lightboxHeroImage');
@@ -525,6 +530,7 @@ function populateLightbox(profileData) {
     nameMainEl.textContent = profileData.name || 'N/A';
     heroImageEl.src = profileData.images[0].large;
     heroImageEl.alt = profileData.altText;
+    // ปรับปรุง: เพิ่ม width และ height ให้รูปภาพหลักใน Lightbox ป้องกัน CLS
     heroImageEl.width = 800;
     heroImageEl.height = 1067;
     quoteEl.textContent = profileData.quote ? `"${profileData.quote}"` : '';
@@ -538,6 +544,7 @@ function populateLightbox(profileData) {
             const thumb = document.createElement('img');
             thumb.src = img.small;
             thumb.alt = `รูปตัวอย่างที่ ${index + 1} ของ ${profileData.name}`;
+            // ปรับปรุง: เพิ่ม width และ height ให้รูป thumbnail ป้องกัน CLS
             thumb.width = 60;
             thumb.height = 60;
             thumb.className = 'thumbnail';
@@ -612,7 +619,10 @@ function populateLightbox(profileData) {
         lineLink.style.display = 'none';
     }
 }
+// --- END: การเปลี่ยนแปลงใน main.js ---
 
+
+// (โค้ดส่วนที่เหลือของ main.js ตั้งแต่ initHeaderScrollEffect จนจบ ไม่มีการเปลี่ยนแปลง)
 function initHeaderScrollEffect() {
     const header = document.getElementById('page-header');
     if (!header) return;
@@ -671,4 +681,3 @@ function generateFullSchema() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);
-
