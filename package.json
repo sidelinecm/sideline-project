@@ -1,4 +1,3 @@
-
 {
   "name": "sideline-project",
   "version": "1.0.0",
@@ -8,12 +7,13 @@
     "clean": "rimraf dist",
     "copy:assets": "copyfiles -u 1 \"scr/**/!(*.css|*.html|*.js|*.webmanifest|*.txt|*.xml|*.toml)\" dist",
     "copy:blog": "copyfiles -u 1 \"scr/blog/**/*.html\" dist/blog",
-    "copy:root": "copyfiles -u 1 \"scr/*.html\" \"scr/*.js\" \"scr/*.webmanifest\" \"scr/*.txt\" \"scr/*.xml\" \"scr/_headers\" \"scr/netlify.toml\" dist",
-    "watch:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
-    "serve": "live-server dist --wait=100",
-    "dev": "npm-run-all clean -p watch:css serve \"copy:** --watch\"",
+    "copy:root": "copyfiles -u 1 \"scr/*.html\" \"scr/*.js\" \"scr/*.webmanifest\" \"scr/*.txt\" \"scr/*.xml\" dist",
+    "copy:config": "copyfiles -u 1 scr/_headers scr/netlify.toml dist",
     "build:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --minify",
-    "build": "npm-run-all clean build:css copy:assets copy:blog copy:root",
+    "build": "npm-run-all -s clean build:css copy:*",
+    "serve": "live-server dist --wait=100",
+    "watch:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
+    "dev": "npm-run-all clean -p watch:css serve",
     "start": "http-server dist",
     "format": "prettier --write \"scr/**/*.{html,js,css}\""
   },
@@ -23,8 +23,8 @@
     "http-server": "^14.1.1",
     "live-server": "^1.2.2",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.2.5",
-    "rimraf": "^5.0.5",
-    "tailwindcss": "^3.4.1"
+    "prettier": "^3.3.2",
+    "rimraf": "^5.0.7",
+    "tailwindcss": "^3.4.4"
   }
 }
