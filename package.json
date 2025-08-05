@@ -1,18 +1,26 @@
 {
   "name": "sideline-project",
   "version": "1.0.0",
-  "description": "A modern web project built with Tailwind CSS.",
+  "description": "A modern, performance-optimized PWA built with Tailwind CSS.",
   "private": true,
   "scripts": {
     "clean": "rimraf dist",
-    "watch:css": "tailwindcss -i ./styles.css -o ./dist/output.css --watch",
-    "build:css": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
-    "copy": "copyfiles -u 0 \"*.html\" \"main.js\" \"sw.js\" \"manifest.webmanifest\" \"robots.txt\" \"sitemap.xml\" \"_headers\" \"netlify.toml\" \"fonts/**/*\" \"images/**/*\" \"icons/**/*\" dist/",
-    "build": "npm-run-all clean build:css copy"
+    "copy:assets": "copyfiles -u 1 \"src/**/!(*.css|*.html|*.js|*.webmanifest|*.txt|*.xml|*.toml)\" dist",
+    "copy:root": "copyfiles -u 1 \"src/*.html\" \"src/*.js\" \"src/*.webmanifest\" \"src/*.txt\" \"src/*.xml\" \"src/_headers\" \"src/netlify.toml\" dist",
+    "watch:css": "tailwindcss -i ./src/styles.css -o ./dist/output.css --watch",
+    "serve": "live-server dist --wait=100",
+    "dev": "npm-run-all clean -p watch:css serve \"copy:** --watch\"",
+    "build:css": "tailwindcss -i ./src/styles.css -o ./dist/output.css --minify",
+    "build": "npm-run-all clean build:css copy:assets copy:root",
+    "start": "http-server dist",
+    "format": "prettier --write \"src/**/*.{html,js,css}\""
   },
   "devDependencies": {
     "copyfiles": "^2.4.1",
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2",
     "npm-run-all": "^4.1.5",
+    "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
     "tailwindcss": "^3.4.1"
   }
