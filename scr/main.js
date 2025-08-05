@@ -1,4 +1,4 @@
-// main.js (เวอร์ชันปรับปรุง Performance, LCP, และ PWA ขั้นสูงสุด)
+// main.js (เวอร์ชันสมบูรณ์แบบ: PWA, Performance, Accessibility, SEO)
 
 let createClient, gsap, ScrollTrigger, supabase;
 
@@ -11,7 +11,9 @@ const ABOVE_THE_FOLD_COUNT = 6;
 
 let allProfiles = [];
 let provincesMap = new Map();
-let lastFocusedElement;
+let lastFocusedElement = null;
+let isMenuOpen = false;
+let isLightboxOpen = false;
 
 const dom = {
     body: document.body,
@@ -29,6 +31,17 @@ const dom = {
     resetSearchBtn: document.getElementById('reset-search-btn'),
     featuredSection: document.getElementById('featured-profiles'),
     featuredContainer: document.getElementById('featured-profiles-container'),
+    menuToggle: document.getElementById('menu-toggle'),
+    sidebar: document.getElementById('sidebar'),
+    closeSidebarBtn: document.getElementById('close-sidebar-btn'),
+    backdrop: document.getElementById('menu-backdrop'),
+    ageVerificationOverlay: document.getElementById('age-verification-overlay'),
+    confirmAgeButton: document.getElementById('confirmAgeButton'),
+    cancelAgeButton: document.getElementById('cancelAgeButton'),
+    lightbox: document.getElementById('lightbox'),
+    lightboxContentWrapperEl: document.getElementById('lightbox-content-wrapper-el'),
+    closeLightboxBtn: document.getElementById('closeLightboxBtn'),
+    yearSpan: document.getElementById('currentYearDynamic')
 };
 
 async function initializeApp() {
@@ -55,7 +68,7 @@ async function initializeApp() {
                     hideLoadingState();
                     if (retrySuccess) {
                         applyFilters();
-                        if (dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
+                        if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
                     } else {
                         showErrorState();
                     }
@@ -71,25 +84,30 @@ async function initializeApp() {
         initScrollAnimations();
     }
 
-    const yearSpan = document.getElementById('currentYearDynamic');
-    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+    if (dom.yearSpan) dom.yearSpan.textContent = new Date().getFullYear();
     dom.body.classList.add('loaded');
 }
 
 async function loadHeavyScripts() {
-    const supabaseModule = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-    createClient = supabaseModule.createClient;
-    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    try {
+        const supabaseModule = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        createClient = supabaseModule.createClient;
+        supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const gsapModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm");
-    gsap = gsapModule.gsap;
-    const scrollTriggerModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm");
-    ScrollTrigger = scrollTriggerModule.ScrollTrigger;
-    gsap.registerPlugin(ScrollTrigger);
+        const gsapModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm");
+        gsap = gsapModule.gsap;
+        const scrollTriggerModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm");
+        ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+        gsap.registerPlugin(ScrollTrigger);
+        console.log('GSAP and Supabase loaded successfully.');
+    } catch (error) {
+        console.error('Error loading heavy scripts:', error);
+        // Optionally handle error, e.g., display a message to the user
+    }
 }
 
 function showLoadingState() {
-    if (dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
+    if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
     if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
     if (dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
     if (dom.loadingPlaceholder) {
@@ -107,7 +125,7 @@ function hideLoadingState() {
 
 function showErrorState() {
     if (dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
-    if (dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'block';
+    if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.remove('hidden');
 }
 
 async function fetchData() {
@@ -414,7 +432,7 @@ function initMobileMenu() {
 }
 
 function initAgeVerification() {
-    const overlay = document.getElementById('age-verification-overlay');
+    const overlay = dom.ageVerificationOverlay;
     if (!overlay) return;
     const modalContent = overlay.querySelector('.age-modal-content');
     if (!modalContent || sessionStorage.getItem('ageVerified') === 'true') {
@@ -424,28 +442,23 @@ function initAgeVerification() {
     overlay.classList.remove('hidden');
     gsap.to(overlay, { opacity: 1, duration: 0.3 });
     gsap.fromTo(modalContent, { scale: 0.9, opacity: 0, y: -20 }, { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.1 });
-    const confirmBtn = document.getElementById('confirmAgeButton');
-    const cancelBtn = document.getElementById('cancelAgeButton');
     const closeAction = () => {
         gsap.to(modalContent, { scale: 0.95, opacity: 0, y: 10, duration: 0.3, ease: 'power2.in' });
         gsap.to(overlay, { opacity: 0, duration: 0.3, delay: 0.1, onComplete: () => overlay.classList.add('hidden') });
     }
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', () => {
+    if (dom.confirmAgeButton) {
+        dom.confirmAgeButton.addEventListener('click', () => {
             sessionStorage.setItem('ageVerified', 'true');
             closeAction();
         });
     }
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', closeAction);
+    if (dom.cancelAgeButton) {
+        dom.cancelAgeButton.addEventListener('click', closeAction);
     }
 }
 
 function initLightbox() {
-    const lightbox = document.getElementById('lightbox');
-    const wrapper = document.getElementById('lightbox-content-wrapper-el');
-    const closeBtn = document.getElementById('closeLightboxBtn');
-    if (!lightbox || !wrapper || !closeBtn) return;
+    if (!dom.lightbox || !dom.lightboxContentWrapperEl || !dom.closeLightboxBtn) return;
 
     const openAction = (triggerElement) => {
         if (!triggerElement) return;
@@ -454,24 +467,24 @@ function initLightbox() {
         if (profileData) {
             lastFocusedElement = triggerElement;
             populateLightbox(profileData);
-            lightbox.classList.remove('hidden');
+            dom.lightbox.classList.remove('hidden');
             dom.body.style.overflow = 'hidden';
-            gsap.to(lightbox, { opacity: 1, duration: 0.3 });
-            gsap.fromTo(wrapper, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power2.out' });
-            wrapper.querySelector('button, [href]')?.focus();
+            gsap.to(dom.lightbox, { opacity: 1, duration: 0.3 });
+            gsap.fromTo(dom.lightboxContentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power2.out' });
+            dom.lightbox.querySelector('button, [href]')?.focus();
         }
     };
     const closeAction = () => {
-        if (lightbox.classList.contains('hidden')) return;
-        gsap.to(lightbox, {
+        if (dom.lightbox.classList.contains('hidden')) return;
+        gsap.to(dom.lightbox, {
             opacity: 0,
             duration: 0.3,
             onComplete: () => {
-                lightbox.classList.add('hidden');
+                dom.lightbox.classList.add('hidden');
                 dom.body.style.overflow = '';
             }
         });
-        gsap.to(wrapper, { scale: 0.95, opacity: 0, duration: 0.3, ease: 'power2.in' });
+        gsap.to(dom.lightboxContentWrapperEl, { scale: 0.95, opacity: 0, duration: 0.3, ease: 'power2.in' });
         lastFocusedElement?.focus();
     };
 
@@ -486,13 +499,13 @@ function initLightbox() {
         if (event.key === 'Enter' && event.target.closest('.profile-card-new')) {
             event.preventDefault();
             openAction(event.target.closest('.profile-card-new'));
-        } else if (event.key === 'Escape' && !lightbox.classList.contains('hidden')) {
+        } else if (event.key === 'Escape' && !dom.lightbox.classList.contains('hidden')) {
             closeAction();
         }
     });
-    closeBtn.addEventListener('click', closeAction);
-    lightbox.addEventListener('click', e => {
-        if (e.target === lightbox) closeAction();
+    dom.closeLightboxBtn.addEventListener('click', closeAction);
+    dom.lightbox.addEventListener('click', e => {
+        if (e.target === dom.lightbox) closeAction();
     });
 }
 
@@ -644,7 +657,7 @@ function generateFullSchema() {
     const pageTitle = document.title;
     const canonicalUrl = document.querySelector("link[rel='canonical']")?.href || window.location.href;
     const siteUrl = "https://sidelinechiangmai.netlify.app/";
-    const orgName = "Sideline Chiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
+    const orgName = "SidelineChiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
     const mainSchema = {
         "@context": "https://schema.org",
         "@graph": [{"@type":"Organization","@id":`${siteUrl}#organization`,"name":orgName,"url":siteUrl,"logo":{"@type":"ImageObject","url":`${siteUrl}images/logo-sideline-chiangmai.webp`,"width":164,"height":40},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","url":"https://line.me/ti/p/_faNcjQ3xx"}},{"@type":"WebSite","@id":`${siteUrl}#website`,"url":siteUrl,"name":orgName,"description":"รวมโปรไฟล์ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย คุณภาพ บริการฟีลแฟน การันตีตรงปก 100% ปลอดภัย ไม่ต้องมัดจำ","publisher":{"@id":`${siteUrl}#organization`},"inLanguage":"th-TH"},{"@type":"WebPage","@id":`${canonicalUrl}#webpage`,"url":canonicalUrl,"name":pageTitle,"isPartOf":{"@id":`${siteUrl}#website`},"primaryImageOfPage":{"@type":"ImageObject","url":`${siteUrl}images/sideline-chiangmai-social-preview.webp`},"breadcrumb":{"@id":`${canonicalUrl}#breadcrumb`}},{"@type":"LocalBusiness","@id":`${siteUrl}#localbusiness`,"name":"SidelineChiangmai - ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก","image":`${siteUrl}images/sideline-chiangmai-social-preview.webp`,"url":siteUrl,"priceRange":"฿฿","address":{"@type":"PostalAddress","streetAddress":"เจ็ดยอด","addressLocality":"ช้างเผือก","addressRegion":"เชียงใหม่","postalCode":"50300","addressCountry":"TH"},"geo":{"@type":"GeoCoordinates","latitude":"18.814361","longitude":"98.972389"},"hasMap":"https://maps.app.goo.gl/3y8gyAtamm8YSagi9","openingHours":["Mo-Su 00:00-24:00"],"areaServed":[{"@type":"City","name":"Chiang Mai"},{"@type":"City","name":"Bangkok"},{"@type":"City","name":" Lampang"},{"@type":"City","name":"Chiang Rai"},{"@type":"City","name":"Pattaya"},{"@type":"City","name":"Phuket"}]},{"@type":"BreadcrumbList","@id":`${canonicalUrl}#breadcrumb`,"itemListElement":[{"@type":"ListItem","position":1,"name":"หน้าแรก","item":siteUrl}]},{"@type":"FAQPage","@id":`${siteUrl}#faq`,"mainEntity":[{"@type":"Question","name":"บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?","acceptedAnswer":{"@type":"Answer","text":"Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้าทุกท่าน ข้อมูลการติดต่อและการจองของท่านจะถูกเก็บรักษาเป็นความลับอย่างเข้มงวด"}},{"@type":"Question","name":"จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการไซด์ไลน์หรือไม่?","acceptedAnswer":{"@type":"Answer","text":"เพื่อความสบายใจของลูกค้าทุกท่าน ท่านไม่จำเป็นต้องโอนเงินมัดจำใดๆ ทั้งสิ้น สามารถชำระค่าบริการเต็มจำนวนโดยตรงกับน้องๆ ที่หน้างานได้เลย"}},{"@type":"Question","name":"น้องๆ ไซด์ไลน์เชียงใหม่ตรงปกตามรูปที่แสดงในโปรไฟล์จริงหรือ?","acceptedAnswer":{"@type":"Answer","text":"เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพของน้องๆ ทุกคนอย่างละเอียด Sideline Chiang Mai กล้าการันตีว่าน้องๆ ตรงปก 100% หากพบปัญหาใดๆ สามารถแจ้งทีมงานเพื่อดำเนินการแก้ไขได้ทันที"}}]}]
@@ -658,3 +671,4 @@ function generateFullSchema() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);
+
