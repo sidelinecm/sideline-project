@@ -1,10 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./scr/**/*.{html,js}", // ตรวจสอบให้แน่ใจว่า path นี้ถูกต้อง
+    "./scr/**/*.{html,js}",
     "./scr/**/*.html",
     "./scr/**/*.js",
-    // เพิ่มไฟล์อื่นๆ ที่ Tailwind ต้องสแกนหากมี
+    "./scr/blog/**/*.html", // <-- เพิ่มบรรทัดนี้เข้าไป
   ],
   theme: {
     extend: {
@@ -14,8 +14,6 @@ module.exports = {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        card: 'hsl(var(--card))',
-        primary: 'hsl(var(--primary))',
         'primary-glow': 'hsl(var(--primary-glow))',
         secondary: 'hsl(var(--secondary))',
         'secondary-glow': 'hsl(var(--secondary-glow))',
@@ -26,5 +24,7 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'), // <-- เพิ่ม Plugin นี้
+  ],
 }
