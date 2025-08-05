@@ -5,15 +5,15 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist",
-    "copy:assets": "copyfiles -u 1 \"src/**/!(*.css|*.html|*.js|*.webmanifest|*.txt|*.xml|*.toml)\" dist",
-    "copy:root": "copyfiles -u 1 \"src/*.html\" \"src/*.js\" \"src/*.webmanifest\" \"src/*.txt\" \"src/*.xml\" \"src/_headers\" \"src/netlify.toml\" dist",
-    "watch:css": "tailwindcss -i ./src/styles.css -o ./dist/output.css --watch",
+    "copy:assets": "copyfiles -u 1 \"scr/**/!(*.css|*.html|*.js|*.webmanifest|*.txt|*.xml|*.toml)\" dist",
+    "copy:root": "copyfiles -u 1 \"scr/*.html\" \"scr/*.js\" \"scr/*.webmanifest\" \"scr/*.txt\" \"scr/*.xml\" \"scr/_headers\" \"scr/netlify.toml\" dist",
+    "watch:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
     "serve": "live-server dist --wait=100",
     "dev": "npm-run-all clean -p watch:css serve \"copy:** --watch\"",
-    "build:css": "tailwindcss -i ./src/styles.css -o ./dist/output.css --minify",
+    "build:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --minify",
     "build": "npm-run-all clean build:css copy:assets copy:root",
     "start": "http-server dist",
-    "format": "prettier --write \"src/**/*.{html,js,css}\""
+    "format": "prettier --write \"scr/**/*.{html,js,css}\""
   },
   "devDependencies": {
     "copyfiles": "^2.4.1",
