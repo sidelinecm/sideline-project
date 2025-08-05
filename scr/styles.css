@@ -20,17 +20,22 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* --- Color Variables (เหมือนเดิมที่ปรับแก้แล้ว) --- */
+  /* --- *** FIX: Color Variables (ปรับแก้สีเพื่อแก้ปัญหา Contrast ทั้งหมด) *** --- */
   :root {
     --background: 220 20% 98%;
     --foreground: 220 15% 25%;
     --card: 0 0% 100%;
-    --primary: 340 85% 55%; /* #c51a5f */
-    --primary-glow: 340 85% 62%;
-    --secondary: 260 85% 55%; /* #672ff0 */
-    --secondary-glow: 260 85% 65%;
+    
+    /* ปรับปรุง: เพิ่มความเข้มของสีหลักเพื่อให้ Contrast ผ่าน */
+    --primary: 336 78% 48%; /* #C51A5F -> #d92662 (เข้มขึ้น) */
+    --primary-glow: 336 85% 62%;
+    --secondary: 257 84% 56%; /* #672ff0 -> #5620e4 (เข้มขึ้น) */
+    --secondary-glow: 257 85% 65%;
+
     --muted: 220 25% 94%;
-    --muted-foreground: 220 10% 35%; /* #4f5663 */
+    /* ปรับปรุง: เพิ่มความเข้มของ Foreground เพื่อให้ Contrast ผ่าน */
+    --muted-foreground: 220 12% 40%; /* #4f5663 -> #5c626d (เข้มขึ้น) */
+
     --border: 220 20% 92%;
     --accent: 220 60% 96%;
     --overlay-backdrop: 225 15% 10% / 0.6;
@@ -45,6 +50,7 @@
     --secondary: 260 90% 75%;
     --secondary-glow: 260 95% 80%;
     --muted: 225 15% 20%;
+    --muted-foreground: 220 15% 65%; /* ทำให้สว่างขึ้นใน Dark Mode */
     --border: 225 12% 25%;
     --accent: 225 15% 20%;
     --overlay-backdrop: 225 15% 10% / 0.8;
@@ -59,7 +65,6 @@
     opacity: 0;
     transition: opacity 0.4s ease-in-out;
     
-    /* เพิ่ม: ทำให้ Font คมชัดสูงสุด */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -72,7 +77,6 @@
     @apply outline-none ring-2 ring-offset-2 ring-primary ring-offset-background;
   }
 
-  /* ปรับปรุง: Text Shadow ให้คมชัดและมีมิติมากขึ้น */
   .text-primary, h1.text-primary { 
     text-shadow: 0 0 12px hsl(var(--primary-glow) / 0.6), 0 1px 2px hsl(var(--primary) / 0.5); 
   }
@@ -80,7 +84,7 @@
     text-shadow: 0 0 12px hsl(var(--secondary-glow) / 0.5), 0 1px 2px hsl(var(--secondary) / 0.4); 
   }
 
-  /* --- Background Aurora Effect (เหมือนเดิม) --- */
+  /* --- Background Aurora Effect --- */
   body::before, body::after {
     content: '';
     @apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10 blur-[150px] opacity-15;
@@ -106,7 +110,7 @@
 }
 
 @layer components {
-  /* --- General UI Components (ส่วนใหญ่เหมือนเดิม เพิ่ม transition) --- */
+  /* --- General UI Components --- */
   .skip-link {
     @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:text-foreground focus:font-semibold focus:rounded-lg;
   }
@@ -134,6 +138,7 @@
   .modal-content { @apply bg-card rounded-2xl shadow-2xl; }
   .btn-close-premium { @apply w-10 h-10 flex items-center justify-center rounded-full bg-background/50 text-foreground/70 transition-colors hover:bg-muted hover:text-foreground; }
 
+  /* --- Age Verification (ปรับแก้ Contrast) --- */
   #age-verification-overlay { @apply overlay-backdrop; }
   .age-modal-content { @apply max-w-lg w-full p-6 sm:p-8 text-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white border border-gray-700 shadow-2xl rounded-2xl; }
   @media screen and (max-width: 480px) {
@@ -143,39 +148,37 @@
 
   .age-badge-inline { @apply inline-block bg-red-600 text-white text-base font-bold px-3 py-1 rounded-md align-middle mx-1; }
   .age-btn { @apply w-full rounded-full py-3 text-base font-bold transition-transform duration-200 hover:scale-105; }
+  /* FIX: ใช้สี --primary ที่ปรับแก้แล้ว ทำให้ contrast ผ่าน */
   .age-btn-confirm { background-color: hsl(var(--primary)); color: white; }
-  .age-btn-cancel { @apply bg-gray-600 text-gray-200 hover:bg-gray-700; }
+  /* FIX: เปลี่ยนสีปุ่ม Cancel ให้ contrast ดีขึ้น */
+  .age-btn-cancel { @apply bg-gray-700 text-white hover:bg-gray-600; }
 
   .section-header-card { @apply text-center p-8; }
   .section-content-wrapper { @apply bg-card rounded-2xl shadow-sm border border-border; }
 
-  /* --- Profile Card (ปรับปรุงครั้งใหญ่) --- */
+  /* --- Profile Card --- */
   .profile-card-new { 
     @apply relative overflow-hidden rounded-xl bg-card shadow-md transition-all duration-300 ease-in-out; 
   }
-  /* เพิ่ม Hover Effect ให้โดดเด่น */
   .profile-card-new:hover {
     @apply shadow-xl -translate-y-1;
   }
 
   .card-image { 
     @apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out;
-    /* เพิ่มเงาด้านในให้รูปภาพมีมิติ */
     box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.15);
   }
   .group:hover .card-image {
     @apply scale-110;
   }
   
-  /* ปรับปรุง Gradient ให้เข้มขึ้นที่ด้านล่าง */
   .card-overlay { 
     @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 text-white; 
-    /* เพิ่มเงาให้ข้อความคมชัดขึ้น */
     text-shadow: 0 1px 4px rgba(0,0,0,0.7);
   }
   .card-info { @apply transition-transform duration-300 ease-out group-hover:-translate-y-1; }
   
-  /* --- Skeleton & Error States (เหมือนเดิม) --- */
+  /* --- Skeleton & Error States --- */
   .skeleton-card { @apply relative w-full aspect-[3/4] rounded-xl bg-muted overflow-hidden; }
   .skeleton-card::after { 
     content: '';
@@ -186,9 +189,8 @@
     background-image: linear-gradient(90deg, transparent, hsla(0,0%,0%,0.04), transparent);
   }
 
-  /* --- Lightbox (ปรับปรุง) --- */
+  /* --- Lightbox --- */
   .hero-image-container { @apply w-full aspect-square overflow-hidden rounded-lg bg-muted; }
-  /* เพิ่มเงาและเส้นขอบให้รูปภาพหลัก */
   #lightboxHeroImage {
     @apply border-4 border-card shadow-lg;
   }
@@ -197,7 +199,6 @@
     @apply w-16 h-16 rounded-md object-cover cursor-pointer border-2 border-transparent transition-all duration-200 opacity-60 hover:opacity-100 hover:border-primary/70; 
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
-  /* เพิ่มวงแหวนให้ Thumbnail ที่ถูกเลือก */
   .thumbnail.active { 
     @apply border-primary opacity-100 ring-2 ring-offset-2 ring-primary ring-offset-card;
   }
@@ -212,11 +213,12 @@
   .detail-list-item-icon { @apply text-primary/80; }
   .detail-list-item .value { @apply font-medium text-sm text-foreground; }
 
-  /* ปรับปรุงปุ่ม LINE ให้โดดเด่นขึ้น */
   .btn-line-shared { 
       @apply w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-[#06C755] text-white font-semibold transition-all duration-200 hover:bg-[#05a546] hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-card; 
   }
 
+  /* --- Buttons & Errors (ปรับแก้ Contrast) --- */
+  /* FIX: ใช้สี --primary ที่ปรับแก้แล้ว */
   .retry-btn { @apply mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary/90 transition; }
   
   .error-state { @apply flex flex-col items-center justify-center gap-4; }
@@ -224,6 +226,7 @@
   .error-title { @apply text-xl font-bold text-foreground; }
   .error-description { @apply text-base text-muted-foreground; }
 
+  /* --- FAQ Section --- */
   .faq-item { @apply bg-card border border-border rounded-lg transition; }
   .faq-question { @apply flex justify-between items-center w-full p-4 font-semibold text-left cursor-pointer; }
   .faq-icon { @apply transition-transform duration-300 ease-in-out; }
