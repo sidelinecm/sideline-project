@@ -1,0 +1,33 @@
+{
+  "name": "sideline-project",
+  "version": "1.0.0",
+  "description": "A modern, performance-optimized PWA built with Tailwind CSS for sideline profiles.",
+  "author": "Your Name",
+  "license": "ISC",
+  "private": true,
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "npm-run-all -s build -p watch serve",
+    "build": "npm-run-all -s clean copy build:css",
+    "serve": "live-server dist --wait=100",
+    "clean": "rimraf dist",
+    "watch": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
+    "build:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --minify",
+    "copy": "npm-run-all -p copy:*",
+    "copy:assets": "copyfiles -u 1 \"scr/**/!(*.css|*.html|*.js|*.webmanifest|*.txt|*.xml|*.toml)\" dist",
+    "copy:html": "copyfiles -u 1 \"scr/**/*.html\" dist",
+    "copy:js": "copyfiles -u 1 \"scr/**/*.js\" dist",
+    "copy:manifest": "copyfiles -u 1 \"scr/**/*.webmanifest\" dist",
+    "copy:configs": "copyfiles -u 1 \"scr/_headers\" \"scr/netlify.toml\" \"scr/*.txt\" \"scr/*.xml\" dist",
+    "format": "prettier --write \"scr/**/*.{html,js,css}\""
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.13",
+    "copyfiles": "^2.4.1",
+    "live-server": "^1.2.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.3.2",
+    "rimraf": "^5.0.7",
+    "tailwindcss": "^3.4.4"
+  }
+}

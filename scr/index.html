@@ -68,8 +68,9 @@
     <noscript><link rel="stylesheet" href="/output.css"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
+        <!-- ...โค้ดอื่นๆ... -->
+
+      
 </head>
 <body class="antialiased" data-page="home">
     
@@ -218,23 +219,13 @@
 
     
 
-    
- <!-- โหลดไลบรารี Supabase จากไฟล์ในเครื่องก่อน -->
+  <!-- คัดลอก/ตัด 6 บรรทัดนี้ออกมาจาก <head> -->
 <script src="/libs/supabase.js"></script>
-
-<!-- โหลดสคริปต์หลักของเราทีหลัง -->
-<script type="module" src="/main.js"></script>
-
-<!-- Service Worker Register -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(err => {
-        console.error('SW registration failed:', err);
-      });
-    });
-  }
-</script>
+<script src="/libs/gsap.min.js"></script>
+<script src="/libs/ScrollTrigger.min.js"></script>
+<script src="/main.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
 
   </body>
 </html>
