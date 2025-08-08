@@ -1,53 +1,79 @@
 <!doctype html>
 <html lang="th" class="scroll-smooth light">
 <head>
-    <!-- SECTION 1: CORE METADATA & PWA -->
+    <!-- ================================================================= -->
+    <!-- SECTION 1: CORE METADATA & VIEWPORT                             -->
+    <!-- ================================================================= -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#db2777">
-    <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- SECTION 2: SEO & SOCIAL MEDIA -->
+    <!-- ================================================================= -->
+    <!-- SECTION 2: SEO (Search Engine Optimization)                     -->
+    <!-- ================================================================= -->
     <title>ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก 100% ไม่ต้องโอนมัดจำ</title>
     <meta name="description" content="ค้นหาน้องๆ ไซด์ไลน์เชียงใหม่ (SidelineCM) รับงานฟีลแฟน บริการระดับพรีเมียมในเชียงใหม่, ลำปาง, เชียงราย การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ">
     <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
-    <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg">
     <meta name="robots" content="index, follow">
+    <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg">
+    
+    <!-- Social Media / Open Graph -->
     <meta property="og:title" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก 100% ไม่ต้องโอนมัดจำ">
     <meta property="og:description" content="รวมโปรไฟล์น้องๆ รับงานฟีลแฟน การันตีตรงปก เชียงใหม่ ปลอดภัย ไม่ต้องโอนมัดจำ">
     <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
 
-    <!-- SECTION 3: FAVICONS -->
+    <!-- ================================================================= -->
+    <!-- SECTION 3: ICONS & PWA (Progressive Web App)                    -->
+    <!-- ================================================================= -->
     <link rel="icon" href="/images/favicon.ico" sizes="any">
     <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- SECTION 4: PERFORMANCE OPTIMIZATION -->
+    <!-- ================================================================= -->
+    <!-- SECTION 4: PERFORMANCE - PRECONNECT                             -->
+    <!-- ================================================================= -->
+    <!-- Preconnect to critical domains to speed up initial connection -->
     <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="/output.css" as="style">
-    <!-- Preload Fonts ทั้งหมดที่ใช้งาน -->
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-500.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-800.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/sarabun-v16-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
+    <!-- ================================================================= -->
+    <!-- SECTION 5: STYLESHEETS (OPTIMIZED FOR PERFORMANCE)              -->
+    <!-- ================================================================= -->
+    
+    <!-- 
+      หมายเหตุ: Critical CSS ถูกย้ายไปที่ไฟล์ styles.css เพื่อให้ Tailwind จัดการ
+      ส่วนนี้จะถูกสร้างขึ้นมาใหม่โดยอัตโนมัติเมื่อคุณ Build โปรเจกต์
+      แต่เพื่อความสมบูรณ์ นี่คือเวอร์ชันที่ถูกต้องหลังจาก Build เสร็จ
+    -->
+    <style>
+      /* 
+        ส่วนนี้จะถูกเติมโดยอัตโนมัติจากการ Build หรือคุณสามารถใช้
+        Critical CSS ที่เคยสร้างไว้มาวางที่นี่ได้เลย
+        
+        ตัวอย่าง Critical CSS ที่เคยสร้างไว้:
+      */
+      *,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal}body{margin:0;line-height:inherit}h1,h2,h3,h4{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}button,input,select{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button{-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}h1,h2,h3,h4,p{margin:0}ul{list-style:none;margin:0;padding:0}input::-moz-placeholder{opacity:1;color:#9ca3af}img,svg{display:block;vertical-align:middle}img{max-width:100%;height:auto}
+    </style>
+    
+    <!-- Asynchronously load the full stylesheet generated by Tailwind -->
+    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/output.css"></noscript>
 
-    <!-- SECTION 5: STYLESHEETS -->
-    <link rel="stylesheet" href="/output.css">
+    <!-- Asynchronously load Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+
 </head>
 
 <body class="antialiased" data-page="home">
     
+  
     <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
 
     <div id="age-verification-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
@@ -203,13 +229,11 @@
         </div>
     </div>
 
-    <!-- SECTION 6: SCRIPTS -->
-  <script type="module" src="/main.js"></script>
+    
+    <script type="module" src="/main.js"></script>
 
-
-    <!-- ปรับปรุง: เพิ่ม defer ให้ gtag เพื่อไม่ให้ block rendering -->
+    <!-- Google Analytics Script with defer for non-blocking load -->
     <script defer src="https://www.googletagmanager.com/gtag/js?id=G-H3BT9WPRK5"></script>
-
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
@@ -217,6 +241,7 @@
         gtag('config', 'G-H3BT9WPRK5');
     </script>
     
+    <!-- Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

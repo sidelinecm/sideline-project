@@ -3,7 +3,72 @@
 @tailwind utilities;
 
 @layer base {
-  /* --- Keyframes (เหมือนเดิม) --- */
+  /* ================================================================= */
+  /* SECTION A: OPTIMIZED FONT LOADING                               */
+  /* ================================================================= */
+  /* 
+    นี่คือส่วนที่สำคัญที่สุดที่เพิ่มเข้ามา:
+    1. @font-face: ประกาศให้ Tailwind รู้จักไฟล์ฟอนต์ของคุณ
+    2. font-display: swap: บอกเบราว์เซอร์ให้แสดงฟอนต์สำรองไปก่อน
+       แล้วค่อยสลับเมื่อฟอนต์หลักโหลดเสร็จ เพื่อลดอาการ "ตัวหนังสือกระพริบ" (FOUT)
+  */
+
+  /* Prompt Font Family */
+  @font-face {
+    font-family: 'Prompt';
+    font-style: normal;
+    font-weight: 400; /* regular */
+    src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Prompt';
+    font-style: normal;
+    font-weight: 500; /* medium */
+    src: url('/fonts/prompt-v11-latin_thai-500.woff2') format('woff2');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Prompt';
+    font-style: normal;
+    font-weight: 700; /* bold */
+    src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Prompt';
+    font-style: normal;
+    font-weight: 800; /* extrabold */
+    src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
+    font-display: swap;
+  }
+
+  /* Sarabun Font Family (เผื่อใช้ในหน้าอื่น) */
+  @font-face {
+    font-family: 'Sarabun';
+    font-style: normal;
+    font-weight: 400; /* regular */
+    src: url('/fonts/sarabun-v16-latin_thai-regular.woff2') format('woff2');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Sarabun';
+    font-style: normal;
+    font-weight: 700; /* bold */
+    src: url('/fonts/sarabun-v16-latin_thai-700.woff2') format('woff2');
+    font-display: swap;
+  }
+
+  /* ================================================================= */
+  /* SECTION B: CORE SETUP & ENHANCEMENTS                            */
+  /* ================================================================= */
+
+  html {
+    /* เพิ่มเติม: ปรับปรุงประสบการณ์ใช้งานบน Mobile */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* --- Keyframes --- */
   @keyframes aurora-1 {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
@@ -20,22 +85,17 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* --- *** FIX: Color Variables (ปรับแก้สีเพื่อแก้ปัญหา Contrast ทั้งหมด) *** --- */
+  /* --- Color Variables --- */
   :root {
     --background: 220 20% 98%;
     --foreground: 220 15% 25%;
     --card: 0 0% 100%;
-    
-    /* ปรับปรุง: เพิ่มความเข้มของสีหลักเพื่อให้ Contrast ผ่าน */
-    --primary: 336 78% 48%; /* #C51A5F -> #d92662 (เข้มขึ้น) */
+    --primary: 336 78% 48%;
     --primary-glow: 336 85% 62%;
-    --secondary: 257 84% 56%; /* #672ff0 -> #5620e4 (เข้มขึ้น) */
+    --secondary: 257 84% 56%;
     --secondary-glow: 257 85% 65%;
-
     --muted: 220 25% 94%;
-    /* ปรับปรุง: เพิ่มความเข้มของ Foreground เพื่อให้ Contrast ผ่าน */
-    --muted-foreground: 220 12% 40%; /* #4f5663 -> #5c626d (เข้มขึ้น) */
-
+    --muted-foreground: 220 12% 40%;
     --border: 220 20% 92%;
     --accent: 220 60% 96%;
     --overlay-backdrop: 225 15% 10% / 0.6;
@@ -50,7 +110,7 @@
     --secondary: 260 90% 75%;
     --secondary-glow: 260 95% 80%;
     --muted: 225 15% 20%;
-    --muted-foreground: 220 15% 65%; /* ทำให้สว่างขึ้นใน Dark Mode */
+    --muted-foreground: 220 15% 65%;
     --border: 225 12% 25%;
     --accent: 225 15% 20%;
     --overlay-backdrop: 225 15% 10% / 0.8;
@@ -60,14 +120,20 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: theme('fontFamily.prompt');
+    /* 
+      font-family ถูกกำหนดโดย Utility Class จาก Tailwind ('font-prompt')
+      ซึ่งจะไปเรียกใช้ theme('fontFamily.prompt') ที่ตั้งค่าใน tailwind.config.js
+      การประกาศ @font-face ด้านบน จะทำให้ Tailwind รู้จัก 'Prompt' และ 'Sarabun'
+    */
+    font-family: theme('fontFamily.prompt'), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     @apply antialiased relative overflow-x-hidden;
+    
+    /* 
+      เทคนิคนี้ใช้ร่วมกับ JavaScript (body.classList.add('loaded')) 
+      เพื่อป้องกันการกระพริบของเนื้อหาที่ยังไม่มีสไตล์ (FOUC)
+    */
     opacity: 0;
     transition: opacity 0.4s ease-in-out;
-    
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
   }
   body.loaded {
     opacity: 1;
@@ -110,6 +176,7 @@
 }
 
 @layer components {
+  /* ... ส่วนที่เหลือของไฟล์เหมือนเดิมทุกประการ ... */
   /* --- General UI Components --- */
   .skip-link {
     @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:text-foreground focus:font-semibold focus:rounded-lg;

@@ -1,33 +1,83 @@
 <!doctype html>
 <html lang="th" class="scroll-smooth light">
 <head>
+    <!-- ================================================================= -->
+    <!-- SECTION 1: CORE METADATA & VIEWPORT                             -->
+    <!-- ================================================================= -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#db2777">
+
+    <!-- ================================================================= -->
+    <!-- SECTION 2: SEO                                                  -->
+    <!-- ================================================================= -->
     <title>พิกัดและพื้นที่บริการ - ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย | SidelineCM</title>
-    
-    <!-- SEO & Metadata -->
     <meta name="description" content="ค้นหาพิกัดและพื้นที่ให้บริการของ SidelineCM ทั้งในตัวเมืองเชียงใหม่, นิมมาน, ลำปาง, เชียงราย และจังหวัดใกล้เคียง พร้อมให้บริการระดับพรีเมียม">
     <link rel="canonical" href="https://sidelinechiangmai.netlify.app/locations.html">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="พิกัดและพื้นที่บริการ - ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย | SidelineCM">
+    <meta property="og:description" content="ค้นหาพิกัดและพื้นที่ให้บริการของ SidelineCM ทั้งในตัวเมืองเชียงใหม่, นิมมาน, ลำปาง, เชียงราย และจังหวัดใกล้เคียง พร้อมให้บริการระดับพรีเมียม">
+    <meta property="og:url" content="https://sidelinechiangmai.netlify.app/locations.html">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
 
-    <!-- Favicons -->
+    <!-- ================================================================= -->
+    <!-- SECTION 3: ICONS & PWA                                          -->
+    <!-- ================================================================= -->
     <link rel="icon" href="/images/favicon.ico" sizes="any">
     <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Performance -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <!-- ================================================================= -->
+    <!-- SECTION 4: PERFORMANCE - PRECONNECT                             -->
+    <!-- ================================================================= -->
     <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-    <!-- Stylesheets -->
+    <!-- ================================================================= -->
+    <!-- SECTION 5: STYLESHEETS                                          -->
+    <!-- ================================================================= -->
     <link rel="stylesheet" href="/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
 
-    <!-- Schema Markup -->
-    <script type="application/ld+json"> { "@context": "https://schema.org", "@type": "Service", "serviceType": "ไซด์ไลน์ฟีลแฟน", "provider": { "@type": "Organization", "name": "SidelineChiangmai", "url": "https://sidelinechiangmai.netlify.app/" }, "areaServed": [ { "@type": "City", "name": "เชียงใหม่" }, { "@type": "City", "name": "ลำปาง" }, { "@type": "City", "name": "เชียงราย" } ], "description": "บริการไซด์ไลน์ระดับพรีเมียมในพื้นที่เชียงใหม่, ลำปาง, และเชียงราย การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ", "name": "พิกัดและพื้นที่บริการ SidelineCM" } </script>
+    <!-- ================================================================= -->
+    <!-- SECTION 6: SCHEMA MARKUP                                        -->
+    <!-- ================================================================= -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "serviceType": "ไซด์ไลน์ฟีลแฟน",
+      "provider": {
+        "@type": "Organization",
+        "name": "SidelineChiangmai",
+        "url": "https://sidelinechiangmai.netlify.app/"
+      },
+      "areaServed": [
+        {
+          "@type": "City",
+          "name": "เชียงใหม่"
+        },
+        {
+          "@type": "City",
+          "name": "ลำปาง"
+        },
+        {
+          "@type": "City",
+          "name": "เชียงราย"
+        }
+      ],
+      "description": "บริการไซด์ไลน์ระดับพรีเมียมในพื้นที่เชียงใหม่, ลำปาง, และเชียงราย การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ",
+      "name": "พิกัดและพื้นที่บริการ SidelineCM"
+    }
+    </script>
 </head>
 <body class="antialiased" data-page="locations">
 
