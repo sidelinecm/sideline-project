@@ -23,7 +23,7 @@
     "copy:images": "copyfiles -u 1 \"images/**/*.*\" dist/images",
     "copy:icons": "copyfiles -u 1 \"icons/**/*.*\" dist/icons",
     "copy:manifest": "copyfiles -u 1 manifest.webmanifest dist",
-    "copy:configs": "copyfiles -u 1 _headers netlify.toml robots.txt sitemap.xml dist",
+    "copy:configs": "copyfiles -u 1 \"_static/**/*\" dist",
     "format": "prettier --write \"**/*.{html,js,css}\""
   },
   "devDependencies": {
