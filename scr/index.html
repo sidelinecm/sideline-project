@@ -230,7 +230,13 @@
     });
   }
 </script>
-
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            requestAnimationFrame(() => {
+                document.body.classList.add('loaded');
+            });
+        });
+    </script>
 
   </body>
 </html>
