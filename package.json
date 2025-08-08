@@ -1,3 +1,10 @@
+{
+  "name": "sideline-project",
+  "version": "1.0.0",
+  "description": "A modern, performance-optimized PWA built with Tailwind CSS for sideline profiles.",
+  "author": "Your Name",
+  "license": "ISC",
+  "private": true,
   "scripts": {
     "start": "npm run dev",
     "dev": "npm-run-all -s build -p watch serve",
@@ -19,3 +26,13 @@
     "copy:configs": "copyfiles -u 1 _headers netlify.toml robots.txt sitemap.xml dist",
     "format": "prettier --write \"**/*.{html,js,css}\""
   },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.13",
+    "copyfiles": "^2.4.1",
+    "live-server": "^1.2.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.3.2",
+    "rimraf": "^5.0.7",
+    "tailwindcss": "^3.4.4"
+  }
+}
