@@ -35,15 +35,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- ================================================================= -->
-    <!-- SECTION 4: PERFORMANCE - PRECONNECT                             -->
+    <!-- SECTION 4: PERFORMANCE - PRECONNECT & PRELOAD                     -->
     <!-- ================================================================= -->
     <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- ================================================================= -->
-    <!-- SECTION 5: STYLESHEETS                                          -->
+    <!-- SECTION 5: STYLESHEETS (Non-blocking)                             -->
     <!-- ================================================================= -->
-    <link rel="stylesheet" href="/output.css">
+    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/output.css"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
 
@@ -55,50 +57,7 @@
       "@context": "https://schema.org",
       "@type": "Blog",
       "name": "บทความ - SidelineChiangmai",
-      "url": "https://sidelinechiangmai.netlify.app/blog.html",
-      "description": "ติดตามบทความและข่าวสารล่าสุดจาก SidelineChiangmai",
-      "publisher": {
-        "@type": "Organization",
-        "name": "SidelineChiangmai"
-      },
-      "blogPost": [
-        {
-          "@type": "BlogPosting",
-          "headline": "คู่มือความปลอดภัยฉบับสมบูรณ์: ใช้บริการไซด์ไลน์ครั้งแรกอย่างไรให้ปลอดภัย 100%",
-          "url": "https://sidelinechiangmai.netlify.app/blog/safety-tips.html",
-          "datePublished": "2025-07-30",
-          "author": {
-            "@type": "Organization",
-            "name": "SidelineCM"
-          },
-          "image": "https://sidelinechiangmai.netlify.app/images/blog/safety-tips.webp",
-          "description": "สร้างความมั่นใจสูงสุดในการนัดหมายครั้งแรก! อ่านคู่มือความปลอดภัยจาก SidelineCM ตั้งแต่การเลือกเว็บ, วิธีสังเกตมิจฉาชีพ, จนถึง Checklist ก่อนเจอตัวจริง"
-        },
-        {
-          "@type": "BlogPosting",
-          "headline": "การันตีตรงปก 100% คืออะไร? เบื้องหลังคำมั่นสัญญาจาก SidelineCM",
-          "url": "https://sidelinechiangmai.netlify.app/blog/what-is-trong-pok.html",
-          "datePublished": "2025-07-29",
-          "author": {
-            "@type": "Organization",
-            "name": "SidelineCM"
-          },
-          "image": "https://sidelinechiangmai.netlify.app/images/blog/guarantee-concept.webp",
-          "description": "ไขข้อสงสัย 'ตรงปก' ในความหมายของ SidelineCM อ่านเบื้องหลังนโยบายและกระบวนการคัดกรองที่ทำให้เรากล้าการันตี 100% ว่าคุณจะได้พบกับน้องที่ตรงปกจริงๆ"
-        },
-        {
-          "@type": "BlogPosting",
-          "headline": "คู่มือเดทที่นิมมาน (ฉบับสมบูรณ์): ร้านอาหาร บาร์ลับ แผนเดทโรแมนติก",
-          "url": "https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide.html",
-          "datePublished": "2025-07-28",
-          "author": {
-            "@type": "Organization",
-            "name": "SidelineCM"
-          },
-          "image": "https://sidelinechiangmai.netlify.app/images/blog/nimman-guide.webp",
-          "description": "ยกระดับเดทของคุณที่นิมมาน! อ่านแผนการเดทฉบับสมบูรณ์จาก SidelineCM ตั้งแต่ร้านอาหารหรู, บาร์ลับบรรยากาศดี, พร้อมช่วงราคาและลิงก์แผนที่"
-        }
-      ]
+      "url": "https://sidelinechiangmai.netlify.app/blog.html"
     }
     </script>
 </head>

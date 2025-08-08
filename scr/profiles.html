@@ -35,15 +35,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- ================================================================= -->
-    <!-- SECTION 4: PERFORMANCE - PRECONNECT                             -->
+    <!-- SECTION 4: PERFORMANCE - PRECONNECT & PRELOAD                     -->
     <!-- ================================================================= -->
     <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- ================================================================= -->
-    <!-- SECTION 5: STYLESHEETS                                          -->
+    <!-- SECTION 5: STYLESHEETS (Non-blocking)                             -->
     <!-- ================================================================= -->
-    <link rel="stylesheet" href="/output.css">
+    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/output.css"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
 </head>
@@ -198,12 +200,6 @@
 <script type="module" src="/main.js"></script>
 
   
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3BT9WPRK5"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){ dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-H3BT9WPRK5');
-    </script>
+    
 </body>
 </html>
