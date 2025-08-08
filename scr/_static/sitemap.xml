@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    
+    <!-- หน้าหลัก (สำคัญที่สุด) -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    
+    <!-- หน้ารวมโปรไฟล์ (สำคัญรองลงมา) -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/profiles.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <!-- หน้ารวมบทความ -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- *** เพิ่ม: หน้าบทความย่อย (มีความสำคัญสูง) *** -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog/safety-tips.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog/what-is-trong-pok.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- หน้าพิกัดบริการ -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/locations.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    
+    <!-- หน้าเกี่ยวกับเรา -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/about.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+    
+    <!-- หน้าคำถามที่พบบ่อย -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/faq.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+
+    <!-- เพิ่ม: หน้านโยบายความเป็นส่วนตัว -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/privacy-policy.html</loc>
+        <lastmod>2025-08-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
+</urlset>

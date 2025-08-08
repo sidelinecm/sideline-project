@@ -1,1 +1,10 @@
-
+/*
+  # Best practices security headers
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # Content Security Policy (CSP)
+  # ปรับแก้ 'self' และ URL ต่างๆ ให้ตรงกับที่คุณใช้งานจริง
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co https://www.google-analytics.com;
