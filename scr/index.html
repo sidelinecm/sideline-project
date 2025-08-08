@@ -206,11 +206,22 @@
 
     
 
-  <!-- คัดลอก/ตัด 6 บรรทัดนี้ออกมาจาก <head> -->
-<script src="/libs/supabase.js"></script>
-<script src="/libs/gsap.min.js"></script>
-<script src="/libs/ScrollTrigger.min.js"></script>
-<script src="/main.js"></script> 
+ <!-- สคริปต์หลักของเว็บ -->
+    <script src="/libs/supabase.js"></script>
+    <script src="/libs/gsap.min.js"></script>
+    <script src="/libs/ScrollTrigger.min.js"></script>
+    <script src="/main.js"></script>
+
+    <!-- [วางโค้ดส่วนนี้ที่นี่] -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => {
+            console.error('Service Worker registration failed:', err);
+          });
+        });
+      }
+    </script>
 
   </body>
 </html>
