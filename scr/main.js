@@ -1,8 +1,7 @@
-// --- main.js v5.0 (Self-Hosted Edition) ---
+// --- main.js v5.1 (Self-Hosted Edition with Fix) ---
 // ผู้สร้าง: Gemini (ปรับปรุงสำหรับ sidelinechiangmai.netlify.app)
-// เวอร์ชัน: 5.0 (Self-Hosted & Ultimate Stability)
-// คำอธิบาย: เวอร์ชันสมบูรณ์ที่สุด แก้ไขปัญหาการโหลดไลบรารีจาก CDN โดยเปลี่ยนมาใช้ไฟล์ Supabase ที่เก็บไว้ในโปรเจกต์เอง (Self-Hosting)
-// ทำให้เว็บมีความเสถียรสูงสุดและทำงานได้ในทุกสภาพเครือข่ายโดยไม่ต้องพึ่งพาเซิร์ฟเวอร์ภายนอก
+// เวอร์ชัน: 5.1 (แก้ไขปัญหาการแสดงผลเมนูบนมือถือ)
+// คำอธิบาย: เวอร์ชันนี้แก้ไขข้อบกพร่องที่เมนูไม่แสดงเนื้อหา โดยการเพิ่ม/ลบ คลาส 'open' ให้กับ sidebar ขณะเปิด/ปิด
 
 "use strict";
 
@@ -68,7 +67,7 @@ async function initializeApp() {
     if (dom.yearSpan) dom.yearSpan.textContent = new Date().getFullYear();
 
     try {
-        await loadCoreScripts(); // [MODIFIED] แก้ไขให้โหลดจากไฟล์ในเครื่อง
+        await loadCoreScripts();
         
         const currentPage = dom.body.dataset.page;
         if (['home', 'profiles'].includes(currentPage)) {
@@ -110,16 +109,13 @@ async function initializeProfilePage() {
 // SECTION 3: SCRIPT & DATA HANDLING
 // =================================================================
 
-// [MODIFIED] แก้ไขให้ไม่ต้อง import จากเน็ต แต่ให้ใช้ object ที่โหลดจากไฟล์ใน HTML แทน
 async function loadCoreScripts() {
     if (state.supabase) return;
     
-    // ตรวจสอบว่า `supabase` object ถูกโหลดมาจากไฟล์ <script src="/libs/supabase.js"> ใน HTML แล้วหรือยัง
     if (window.supabase) {
         const { createClient } = window.supabase;
         state.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     } else {
-        // ถ้าไม่เจอ แสดงว่าไฟล์ supabase.js โหลดไม่สำเร็จ
         console.error('CRITICAL: ไม่สามารถโหลด Supabase client จากไฟล์ในเครื่องได้');
         throw new Error('Supabase client local file not found or failed to load.');
     }
@@ -182,7 +178,7 @@ function loadDelayedScripts() {
 
 
 // =================================================================
-// SECTION 4: UI RENDERING (No changes needed here)
+// SECTION 4: UI RENDERING
 // =================================================================
 
 function showLoadingState() { 
@@ -349,7 +345,7 @@ function createProfileCard(profile, index, isEager = false) {
 
 
 // =================================================================
-// SECTION 5: EVENT HANDLERS & HELPERS (No changes needed here)
+// SECTION 5: EVENT HANDLERS & HELPERS
 // =================================================================
 
 async function handleRetry() {
@@ -431,8 +427,42 @@ function initAgeVerification() {
 }
 
 function initThemeToggle() { const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn'); if (themeToggleBtns.length === 0) return; const html = document.documentElement; const sunIcon = `<i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i>`; const moonIcon = `<i class="fas fa-moon theme-toggle-icon text-lg" aria-hidden="true"></i>`; const applyTheme = (theme) => { html.classList.toggle('dark', theme === 'dark'); themeToggleBtns.forEach(btn => btn.innerHTML = theme === 'dark' ? moonIcon : sunIcon); }; const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); applyTheme(savedTheme); themeToggleBtns.forEach(btn => { btn.addEventListener('click', () => { const newTheme = html.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); }); }); }
-function initMobileMenu() { if (!dom.menuToggle || !dom.sidebar || !dom.backdrop || !dom.closeSidebarBtn) return; const openMenu = () => { if (state.isMenuOpen) return; state.isMenuOpen = true; state.lastFocusedElement = document.activeElement; dom.menuToggle.setAttribute('aria-expanded', 'true'); dom.sidebar.setAttribute('aria-hidden', 'false'); dom.sidebar.classList.remove('translate-x-full'); dom.backdrop.classList.remove('hidden'); dom.backdrop.style.opacity = '1'; dom.body.style.overflow = 'hidden'; setTimeout(() => dom.closeSidebarBtn.focus(), 50); }; const closeMenu = () => { if (!state.isMenuOpen) return; state.isMenuOpen = false; dom.menuToggle.setAttribute('aria-expanded', 'false'); dom.sidebar.setAttribute('aria-hidden', 'true'); dom.sidebar.classList.add('translate-x-full'); dom.backdrop.style.opacity = '0'; dom.body.style.overflow = ''; setTimeout(() => dom.backdrop.classList.add('hidden'), 300); if (state.lastFocusedElement) state.lastFocusedElement.focus(); }; dom.menuToggle.addEventListener('click', openMenu); dom.closeSidebarBtn.addEventListener('click', closeMenu); dom.backdrop.addEventListener('click', closeMenu); document.addEventListener('keydown', (e) => e.key === 'Escape' && state.isMenuOpen && closeMenu()); }
-function initLightbox() { if (!dom.lightbox) return; const openAction = async (triggerElement) => { if (state.isLightboxOpen || !triggerElement) return; const profileId = parseInt(triggerElement.dataset.profileId, 10); if (isNaN(profileId)) return; const profileData = state.allProfiles.find(p => p.id === profileId); if (profileData) { state.isLightboxOpen = true; state.lastFocusedElement = triggerElement; populateLightbox(profileData); dom.lightbox.classList.remove('hidden'); dom.body.style.overflow = 'hidden'; await loadAnimationScripts(); if (state.gsap) { state.gsap.to(dom.lightbox, { opacity: 1, duration: 0.3 }); state.gsap.fromTo(dom.lightboxContentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'power2.out' }); } else { dom.lightbox.style.opacity = '1'; dom.lightboxContentWrapperEl.style.transform = 'scale(1)'; } setTimeout(() => dom.closeLightboxBtn.focus(), 50); } }; const closeAction = () => { if (!state.isLightboxOpen) return; state.isLightboxOpen = false; const onComplete = () => { dom.lightbox.classList.add('hidden'); dom.body.style.overflow = ''; if (state.lastFocusedElement) state.lastFocusedElement.focus(); }; if (state.gsap && dom.lightboxContentWrapperEl) { state.gsap.to(dom.lightboxContentWrapperEl, { scale: 0.95, opacity: 0, duration: 0.3, ease: 'power2.in' }); state.gsap.to(dom.lightbox, { opacity: 0, duration: 0.3, onComplete }); } else { dom.lightbox.style.opacity = '0'; if (dom.lightboxContentWrapperEl) dom.lightboxContentWrapperEl.style.transform = 'scale(0.95)'; setTimeout(onComplete, 300); } }; document.body.addEventListener('click', (event) => { const trigger = event.target.closest('.profile-card-new'); if (trigger) { event.preventDefault(); openAction(trigger); } }); document.body.addEventListener('keydown', (event) => { const trigger = event.target.closest('.profile-card-new'); if (event.key === 'Enter' && trigger) { event.preventDefault(); openAction(trigger); } else if (event.key === 'Escape' && state.isLightboxOpen) { closeAction(); } }); if(dom.closeLightboxBtn) dom.closeLightboxBtn.addEventListener('click', closeAction); dom.lightbox.addEventListener('click', e => e.target === dom.lightbox && closeAction()); }
+
+// [แก้ไข] เพิ่ม/ลบ คลาส 'open' เพื่อให้ CSS แสดงผลลิงก์ในเมนูได้อย่างถูกต้อง
+function initMobileMenu() { 
+    if (!dom.menuToggle || !dom.sidebar || !dom.backdrop || !dom.closeSidebarBtn) return; 
+    const openMenu = () => { 
+        if (state.isMenuOpen) return; 
+        state.isMenuOpen = true; 
+        state.lastFocusedElement = document.activeElement; 
+        dom.sidebar.classList.add('open'); // <-- เพิ่มคลาส open
+        dom.menuToggle.setAttribute('aria-expanded', 'true'); 
+        dom.sidebar.setAttribute('aria-hidden', 'false'); 
+        dom.sidebar.classList.remove('translate-x-full'); 
+        dom.backdrop.classList.remove('hidden'); 
+        dom.backdrop.style.opacity = '1'; 
+        dom.body.style.overflow = 'hidden'; 
+        setTimeout(() => dom.closeSidebarBtn.focus(), 50); 
+    }; 
+    const closeMenu = () => { 
+        if (!state.isMenuOpen) return; 
+        state.isMenuOpen = false; 
+        dom.sidebar.classList.remove('open'); // <-- ลบคลาส open
+        dom.menuToggle.setAttribute('aria-expanded', 'false'); 
+        dom.sidebar.setAttribute('aria-hidden', 'true'); 
+        dom.sidebar.classList.add('translate-x-full'); 
+        dom.backdrop.style.opacity = '0'; 
+        dom.body.style.overflow = ''; 
+        setTimeout(() => dom.backdrop.classList.add('hidden'), 300); 
+        if (state.lastFocusedElement) state.lastFocusedElement.focus(); 
+    }; 
+    dom.menuToggle.addEventListener('click', openMenu); 
+    dom.closeSidebarBtn.addEventListener('click', closeMenu); 
+    dom.backdrop.addEventListener('click', closeMenu); 
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && state.isMenuOpen && closeMenu()); 
+}
+
+function initLightbox() { if (!dom.lightbox) return; const openAction = async (triggerElement) => { if (state.isLightboxOpen || !triggerElement) return; const profileId = parseInt(triggerElement.dataset.profileId, 10); if (isNaN(profileId)) return; const profileData = state.allProfiles.find(p => p.id === profileId); if (profileData) { state.isLightboxOpen = true; state.lastFocusedElement = triggerElement; populateLightbox(profileData); dom.lightbox.classList.remove('hidden'); dom.body.style.overflow = 'hidden'; dom.lightbox.style.opacity = '1'; dom.lightboxContentWrapperEl.style.transform = 'scale(1)'; setTimeout(() => dom.closeLightboxBtn.focus(), 50); } }; const closeAction = () => { if (!state.isLightboxOpen) return; state.isLightboxOpen = false; const onComplete = () => { dom.lightbox.classList.add('hidden'); dom.body.style.overflow = ''; if (state.lastFocusedElement) state.lastFocusedElement.focus(); }; dom.lightbox.style.opacity = '0'; if (dom.lightboxContentWrapperEl) dom.lightboxContentWrapperEl.style.transform = 'scale(0.95)'; setTimeout(onComplete, 300); }; document.body.addEventListener('click', (event) => { const trigger = event.target.closest('.profile-card-new'); if (trigger) { event.preventDefault(); openAction(trigger); } }); document.body.addEventListener('keydown', (event) => { const trigger = event.target.closest('.profile-card-new'); if (event.key === 'Enter' && trigger) { event.preventDefault(); openAction(trigger); } else if (event.key === 'Escape' && state.isLightboxOpen) { closeAction(); } }); if(dom.closeLightboxBtn) dom.closeLightboxBtn.addEventListener('click', closeAction); dom.lightbox.addEventListener('click', e => e.target === dom.lightbox && closeAction()); }
 function populateLightbox(profileData) { const setContent = (id, content) => { const el = document.getElementById(id); if (el) el.innerHTML = content; }; const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; }; const setAttr = (id, attr, value) => { const el = document.getElementById(id); if (el) el[attr] = value; }; const setStyle = (id, prop, value) => { const el = document.getElementById(id); if(el) el.style[prop] = value; }; setText('lightbox-header-title', `โปรไฟล์: ${profileData.name || 'N/A'}`); setText('lightbox-profile-name-main', profileData.name || 'N/A'); setAttr('lightboxHeroImage', 'src', profileData.images[0]?.large || PLACEHOLDER_IMAGE); setAttr('lightboxHeroImage', 'alt', profileData.altText); setText('lightboxQuote', profileData.quote ? `"${profileData.quote}"` : ''); setStyle('lightboxQuote', 'display', profileData.quote ? 'block' : 'none'); setContent('lightboxDescriptionVal', profileData.description ? profileData.description.replace(/\n/g, '<br>') : 'ไม่มีรายละเอียดเพิ่มเติม'); const thumbnailStripEl = document.getElementById('lightboxThumbnailStrip'); if(thumbnailStripEl){ thumbnailStripEl.innerHTML = ''; const hasGallery = profileData.images.length > 1; if (hasGallery) { profileData.images.forEach((img, index) => { const thumb = document.createElement('img'); thumb.src = img.small; thumb.alt = `รูปตัวอย่างที่ ${index + 1} ของ ${profileData.name || ''}`; thumb.width = 60; thumb.height = 80; thumb.className = 'thumbnail'; if (index === 0) thumb.classList.add('active'); thumb.addEventListener('click', () => { setAttr('lightboxHeroImage', 'src', img.large); thumbnailStripEl.querySelector('.thumbnail.active')?.classList.remove('active'); thumb.classList.add('active'); }); thumbnailStripEl.appendChild(thumb); }); } thumbnailStripEl.style.display = hasGallery ? 'flex' : 'none'; } const tagsEl = document.getElementById('lightboxTags'); if (tagsEl) { tagsEl.innerHTML = ''; const hasTags = profileData.styleTags && profileData.styleTags.length > 0; if (hasTags) { tagsEl.innerHTML = profileData.styleTags.map(tag => `<span class="bg-accent text-accent-foreground text-xs font-medium px-3 py-1.5 rounded-full">${tag}</span>`).join(''); } tagsEl.style.display = hasTags ? 'flex' : 'none'; } const detailsEl = document.getElementById('lightboxDetailsCompact'); if(detailsEl) { let availabilityText = profileData.availability || "สอบถามคิว"; let availabilityClass = 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'; if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) { availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300'; } else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) { availabilityClass = 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300'; } detailsEl.innerHTML = ` <div class="availability-badge ${availabilityClass}">${availabilityText}</div> <div class="stats-grid"> <div class="stat-item"><div class="label">อายุ</div><div class="value">${profileData.age || '-'} ปี</div></div> <div class="stat-item"><div class="label">สัดส่วน</div><div class="value">${profileData.stats || '-'}</div></div> <div class="stat-item"><div class="label">สูง/หนัก</div><div class="value">${profileData.height || '-'}/${profileData.weight || '-'}</div></div> </div> <dl class="space-y-2 text-sm"> <div class="detail-list-item"><dt class="flex-shrink-0"><i class="fas fa-palette w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt><dd class="value">ผิว: ${profileData.skinTone || '-'}</dd></div> <div class="detail-list-item"><dt class="flex-shrink-0"><i class="fas fa-map-marker-alt w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt><dd class="value">จังหวัด: ${state.provincesMap.get(profileData.provinceKey) || ''} (${profileData.location || 'ไม่ระบุ'})</dd></div> <div class="detail-list-item"><dt class="flex-shrink-0"><i class="fas fa-money-bill-wave w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt><dd class="value">เรท: ${profileData.rate || 'สอบถาม'}</dd></div> </dl> `; } const lineLink = document.getElementById('lightboxLineLink'); if (lineLink) { if (profileData.lineId) { lineLink.href = profileData.lineId.startsWith('http') ? profileData.lineId : `https://line.me/ti/p/${profileData.lineId}`; lineLink.style.display = 'inline-flex'; setText('lightboxLineLinkText', `ติดต่อ ${profileData.name || ''} ผ่าน LINE`); } else { lineLink.style.display = 'none'; } } }
 function initHeaderScrollEffect() { if (!dom.pageHeader) return; let isTicking = false; const handleScroll = () => { if (!isTicking) { window.requestAnimationFrame(() => { dom.pageHeader.classList.toggle('scrolled', window.scrollY > 20); isTicking = false; }); isTicking = true; } }; window.addEventListener('scroll', handleScroll, { passive: true }); handleScroll(); }
 function updateActiveNavLinks() { const currentPath = window.location.pathname.replace(/\/$/, "") || "/"; const navLinks = document.querySelectorAll('#sidebar nav a, header nav a'); navLinks.forEach(link => { try { const linkPath = new URL(link.href).pathname.replace(/\/$/, "") || "/"; link.classList.toggle('active-nav-link', linkPath === currentPath); } catch(e) {} }); }
@@ -441,7 +471,23 @@ function updateActiveNavLinks() { const currentPath = window.location.pathname.r
 // SECTION 6: ANIMATIONS & SEO
 // =================================================================
 
-async function loadAnimationScripts() { if (state.gsap) return; try { const [gsapModule, scrollTriggerModule] = await Promise.all([ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm"), import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm") ]); state.gsap = gsapModule.gsap; state.ScrollTrigger = scrollTriggerModule.ScrollTrigger; state.gsap.registerPlugin(state.ScrollTrigger); } catch (error) { console.error('Error loading animation scripts (GSAP). Animations will be disabled.', error); } }
+async function loadAnimationScripts() {
+    if (state.gsap) return;
+    // เนื่องจากการใช้ GSAP แบบ self-hosted ผ่าน <script> ทำให้ไม่สามารถ import แบบ module ได้
+    // เราจะตรวจสอบว่า object `gsap` และ `ScrollTrigger` ถูกโหลดมาใน window object หรือไม่
+    if (window.gsap && window.ScrollTrigger) {
+        state.gsap = window.gsap;
+        state.ScrollTrigger = window.ScrollTrigger;
+        try {
+            state.gsap.registerPlugin(state.ScrollTrigger);
+        } catch (e) {
+            console.error("GSAP or ScrollTrigger might be loaded but failed to register.", e);
+        }
+    } else {
+        console.error('Error loading animation scripts (GSAP). Animations will be disabled.');
+    }
+}
+
 async function initScrollAnimations() { await loadAnimationScripts(); if (!state.gsap) return; state.ScrollTrigger.getAll().forEach(trigger => trigger.kill()); state.ScrollTrigger.refresh(); const animatedElements = document.querySelectorAll('[data-animate-on-scroll]'); animatedElements.forEach(el => { state.gsap.from(el, { scrollTrigger: { trigger: el, start: "top 95%", toggleActions: "play none none none", }, opacity: 0, y: 30, duration: 0.6, ease: "power2.out", }); }); const heroH1 = document.querySelector('#hero-h1'); if (heroH1 && !heroH1.classList.contains('gsap-animated')) { heroH1.classList.add('gsap-animated'); const heroElements = [heroH1, document.querySelector('#hero-p'), document.querySelector('#hero-form')].filter(Boolean); state.gsap.from(heroElements, { y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.2 }); } }
 function generateFullSchema() {
     const pageTitle = document.title;
