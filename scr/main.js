@@ -1,21 +1,17 @@
-// --- main.js (ฉบับสมบูรณ์ พร้อมใช้งาน) ---
-// เวอร์ชันนี้ได้แก้ไขเรื่องความปลอดภัยและปรับปรุงโค้ดให้สมบูรณ์แล้ว
-// **ข้อกำหนดก่อนใช้งาน:** คุณต้องตั้งค่า Environment Variables 2 ตัวนี้ใน Netlify ก่อน:
-//   1. VITE_SUPABASE_URL
-//   2. VITE_SUPABASE_KEY
+// --- main.js (เวอร์ชัน Hybrid Rendering ขั้นสูง - สมบูรณ์แบบ) ---
+// ไฟล์นี้ถูกปรับปรุงให้ทำงานร่วมกับ Static Fallback Content ใน index.html
+// เพื่อแก้ปัญหา NO_FCP, เพิ่มประสิทธิภาพ Core Web Vitals, และดีต่อ SEO
 
 // --- การประกาศตัวแปรส่วนกลาง ---
 let createClient, gsap, ScrollTrigger, supabase;
 
 // --- ค่าคงที่และตัวแปรหลักของแอปพลิเคชัน ---
-// [แก้ไข] ดึงค่า Key และ URL มาจาก Environment Variables ที่ตั้งค่าไว้ใน Netlify เพื่อความปลอดภัยสูงสุด
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
-
+const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
 const STORAGE_BUCKET = 'profile-images';
 const PROFILES_PER_PROVINCE_ON_INDEX = 8;
 const SKELETON_CARD_COUNT = 8;
-const ABOVE_THE_FOLD_COUNT = 4;
+const ABOVE_THE_FOLD_COUNT = 4; // ควรมีค่าเท่ากับจำนวน Static Fallback Cards ใน index.html
 
 let allProfiles = [];
 let provincesMap = new Map();
@@ -58,19 +54,12 @@ const dom = {
  */
 async function initializeApp() {
     performance.mark('initializeApp-start');
-
-    // [ตรวจสอบ] เช็คว่า Key ถูกตั้งค่ามาหรือไม่ ถ้าไม่ จะไม่ทำงานต่อเพื่อป้องกันข้อผิดพลาด
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-        console.error('CRITICAL: VITE_SUPABASE_URL หรือ VITE_SUPABASE_KEY ไม่ได้ถูกตั้งค่าใน Environment Variables ของ Netlify');
-        showErrorState("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาติดต่อผู้ดูแลเว็บไซต์");
-        return;
-    }
-
+    
     initThemeToggle();
     initMobileMenu();
     initHeaderScrollEffect();
     updateActiveNavLinks();
-
+    
     await loadCoreScripts();
     initAgeVerification();
 
@@ -78,7 +67,7 @@ async function initializeApp() {
     if (['home', 'profiles'].includes(currentPage)) {
         showLoadingState();
         const success = await fetchData();
-
+        
         if (success) {
             initSearchAndFilters();
             initLightbox();
@@ -93,7 +82,7 @@ async function initializeApp() {
 
     if (dom.yearSpan) dom.yearSpan.textContent = new Date().getFullYear();
     dom.body.classList.add('loaded');
-
+    
     performance.mark('initializeApp-end');
     performance.measure('initializeApp', 'initializeApp-start', 'initializeApp-end');
 }
@@ -110,7 +99,7 @@ async function loadCoreScripts() {
         }
     } catch (error) {
         console.error('CRITICAL: ไม่สามารถโหลด Supabase client ได้', error);
-        showErrorState('เกิดข้อผิดพลาดในการโหลดไลบรารีหลัก');
+        showErrorState();
     }
 }
 
@@ -138,7 +127,7 @@ async function loadAnimationScripts() {
 function showLoadingState() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
     if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
-
+    
     if (dom.loadingPlaceholder) {
         const grid = dom.loadingPlaceholder.querySelector('.grid');
         if (grid && grid.innerHTML === '') {
@@ -158,17 +147,12 @@ function hideLoadingState() {
 /**
  * แสดงสถานะเมื่อการดึงข้อมูลล้มเหลว
  */
-function showErrorState(customMessage = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ในขณะนี้") {
+function showErrorState() {
     hideLoadingState();
     if (dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
     if (dom.featuredSection) dom.featuredSection.classList.add('hidden');
-    if (dom.fetchErrorMessage) {
-        const errorDesc = dom.fetchErrorMessage.querySelector('.error-description');
-        if (errorDesc) errorDesc.textContent = customMessage;
-        dom.fetchErrorMessage.classList.remove('hidden');
-    }
+    if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.remove('hidden');
 }
-
 
 /**
  * จัดการการกดปุ่ม "ลองอีกครั้ง"
@@ -202,7 +186,7 @@ async function fetchData() {
         if (provincesRes.error) throw provincesRes.error;
 
         provincesRes.data.forEach(p => provincesMap.set(p.key, p.nameThai));
-
+        
         allProfiles = (profilesRes.data || []).map(p => {
             const allImagePaths = [p.imagePath, ...(p.galleryPaths || [])].filter(Boolean);
             const images = allImagePaths.map(path => {
@@ -244,7 +228,7 @@ function initSearchAndFilters() {
         if(allProfiles.length > 0) applyFilters();
         return;
     }
-
+    
     const debouncedFilter = (() => {
         let timeout;
         return () => {
@@ -287,21 +271,21 @@ function applyFilters() {
         (!selectedAvailability || p.availability === selectedAvailability) &&
         (!isFeaturedOnly || p.isfeatured)
     );
-
+    
     const isSearching = searchTerm || selectedProvince || selectedAvailability || isFeaturedOnly;
-
+    
     renderProfiles(filtered, isSearching);
 }
 
 /**
- * แสดงผลโปรไฟล์บนหน้าเว็บ
+ * [HYDRATION VERSION] แสดงผลโปรไฟล์บนหน้าเว็บ
  */
 function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     const currentPage = dom.body.dataset.page;
     if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
     hideLoadingState();
-
+    
     const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
     if (dom.featuredSection && dom.featuredContainer) {
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
@@ -324,7 +308,7 @@ function renderProfiles(filteredProfiles, isSearching) {
             gridContainer.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6';
             gridContainer.append(...filteredProfiles.map((profile, index) => createProfileCard(profile, index)));
             dom.profilesDisplayArea.appendChild(gridContainer);
-        }
+        } 
         else if (currentPage === 'home') {
             if (isSearching) {
                 const searchResultWrapper = document.createElement('div');
@@ -336,7 +320,7 @@ function renderProfiles(filteredProfiles, isSearching) {
                     (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
                     return acc;
                 }, {});
-
+                
                 let dynamicProvinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
                 let accumulatedIndex = dom.featuredContainer ? dom.featuredContainer.children.length : 0;
 
@@ -349,7 +333,7 @@ function renderProfiles(filteredProfiles, isSearching) {
                     const provinceSectionEl = document.createElement('section');
                     provinceSectionEl.className = 'province-section';
                     provinceSectionEl.setAttribute('aria-labelledby', `province-heading-${provinceKey}`);
-
+                    
                     const gridContainer = document.createElement('div');
                     gridContainer.className = 'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
                     gridContainer.append(...provinceProfiles.slice(0, PROFILES_PER_PROVINCE_ON_INDEX).map(p => createProfileCard(p, accumulatedIndex++)));
@@ -361,7 +345,7 @@ function renderProfiles(filteredProfiles, isSearching) {
             }
         }
     }
-
+    
     initScrollAnimations();
 }
 
@@ -396,12 +380,12 @@ function createProfileCard(profile, index, isEager = false) {
     } else {
         img.loading = 'lazy';
     }
-
+    
     img.onerror = () => { img.onerror = null; img.src = '/images/placeholder-profile.webp'; img.srcset = ''; };
 
     let availabilityText = profile.availability || "สอบถามคิว";
     let availabilityClass = 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
-    if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) { availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300'; }
+    if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) { availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300'; } 
     else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) { availabilityClass = 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300'; }
 
     const starIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z" clip-rule="evenodd" /></svg>`;
@@ -428,7 +412,7 @@ function createProfileCard(profile, index, isEager = false) {
 function initThemeToggle() {
     const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
     if (themeToggleBtns.length === 0) return;
-
+    
     const html = document.documentElement;
     const sunIcon = `<i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i>`;
     const moonIcon = `<i class="fas fa-moon theme-toggle-icon text-lg" aria-hidden="true"></i>`;
@@ -457,26 +441,26 @@ function initThemeToggle() {
  */
 function initMobileMenu() {
     if (!dom.menuToggle || !dom.sidebar || !dom.backdrop || !dom.closeSidebarBtn) return;
-
+    
     const openMenu = () => {
         if (isMenuOpen) return;
         isMenuOpen = true;
         lastFocusedElement = document.activeElement;
-
+        
         dom.menuToggle.setAttribute('aria-expanded', 'true');
         dom.sidebar.setAttribute('aria-hidden', 'false');
         dom.sidebar.classList.remove('translate-x-full');
         dom.backdrop.classList.remove('hidden');
         dom.backdrop.style.opacity = '1';
         dom.body.style.overflow = 'hidden';
-
+        
         setTimeout(() => dom.closeSidebarBtn.focus(), 50);
     };
 
     const closeMenu = () => {
         if (!isMenuOpen) return;
         isMenuOpen = false;
-
+        
         dom.menuToggle.setAttribute('aria-expanded', 'false');
         dom.sidebar.setAttribute('aria-hidden', 'true');
         dom.sidebar.classList.add('translate-x-full');
@@ -518,7 +502,7 @@ async function initAgeVerification() {
         if (verified) {
             sessionStorage.setItem('ageVerified', 'true');
         }
-
+        
         const onComplete = () => {
             dom.ageVerificationOverlay.classList.add('hidden');
             if (!verified) {
@@ -534,7 +518,7 @@ async function initAgeVerification() {
             setTimeout(onComplete, 300);
         }
     };
-
+    
     if (dom.confirmAgeButton) dom.confirmAgeButton.addEventListener('click', () => closeAction(true));
     if (dom.cancelAgeButton) dom.cancelAgeButton.addEventListener('click', () => closeAction(false));
 }
@@ -545,20 +529,18 @@ async function initAgeVerification() {
 async function initLightbox() {
     if (!dom.lightbox || !dom.lightboxContentWrapperEl || !dom.closeLightboxBtn) return;
 
-    await loadAnimationScripts();
-
     const openAction = (triggerElement) => {
         if (isLightboxOpen || !triggerElement) return;
         const profileId = parseInt(triggerElement.dataset.profileId, 10);
         if (isNaN(profileId)) return;
-
+        
         const profileData = allProfiles.find(p => p.id === profileId);
-
+        
         if (profileData) {
             isLightboxOpen = true;
             lastFocusedElement = triggerElement;
             populateLightbox(profileData);
-
+            
             dom.lightbox.classList.remove('hidden');
             dom.body.style.overflow = 'hidden';
 
@@ -576,7 +558,7 @@ async function initLightbox() {
     const closeAction = () => {
         if (!isLightboxOpen) return;
         isLightboxOpen = false;
-
+        
         const onComplete = () => {
             dom.lightbox.classList.add('hidden');
             dom.body.style.overflow = '';
@@ -609,13 +591,12 @@ async function initLightbox() {
             closeAction();
         }
     });
-
+    
     dom.closeLightboxBtn.addEventListener('click', closeAction);
     dom.lightbox.addEventListener('click', e => {
         if (e.target === dom.lightbox) closeAction();
     });
 }
-
 
 /**
  * เติมข้อมูลของโปรไฟล์ที่เลือกลงใน Lightbox
@@ -684,7 +665,7 @@ function populateLightbox(profileData) {
     if (detailsEl) {
         let availabilityText = profileData.availability || "สอบถามคิว";
         let availabilityClass = 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
-        if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) { availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300'; }
+        if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) { availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300'; } 
         else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) { availabilityClass = 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300'; }
 
         detailsEl.innerHTML = `
@@ -738,18 +719,18 @@ async function initScrollAnimations() {
             ease: "power2.out",
         });
     });
-
+    
     const heroH1 = document.querySelector('#hero-h1');
     if (heroH1 && !heroH1.classList.contains('gsap-animated')) {
         heroH1.classList.add('gsap-animated');
         const heroElements = [heroH1, document.querySelector('#hero-p'), document.querySelector('#hero-form')].filter(Boolean);
-        gsap.from(heroElements, {
-            y: 20,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.15,
-            ease: 'power2.out',
-            delay: 0.3
+        gsap.from(heroElements, { 
+            y: 20, 
+            opacity: 0, 
+            duration: 0.6, 
+            stagger: 0.15, 
+            ease: 'power2.out', 
+            delay: 0.3 
         });
     }
 }
@@ -802,7 +783,7 @@ function generateFullSchema() {
     const orgName = "SidelineChiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
     const mainSchema = {
         "@context": "https://schema.org",
-        "@graph": [{"@type":"Organization","@id":`${siteUrl}#organization`,"name":orgName,"url":siteUrl,"logo":{"@type":"ImageObject","url":`${siteUrl}images/logo-sideline-chiangmai.webp`,"width":245,"height":30},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","url":"https://line.me/ti/p/_faNcjQ3xx"}},{"@type":"WebSite","@id":`${siteUrl}#website`,"url":siteUrl,"name":orgName,"description":"รวมโปรไฟล์ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย คุณภาพ บริการฟีลแฟน การันตีตรงปก 100% ปลอดภัย ไม่ต้องมัดจำ","publisher":{"@id":`${siteUrl}#organization`},"inLanguage":"th-TH"},{"@type":"WebPage","@id":`${canonicalUrl}#webpage`,"url":canonicalUrl,"name":pageTitle,"isPartOf":{"@id":`${siteUrl}#website`},"primaryImageOfPage":{"@type":"ImageObject","url":`${site.url}images/sideline-chiangmai-social-preview.webp`},"breadcrumb":{"@id":`${canonicalUrl}#breadcrumb`}},{"@type":"LocalBusiness","@id":`${siteUrl}#localbusiness`,"name":"SidelineChiangmai - ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก","image":`${siteUrl}images/sideline-chiangmai-social-preview.webp`,"url":siteUrl,"priceRange":"฿฿","address":{"@type":"PostalAddress","streetAddress":"เจ็ดยอด","addressLocality":"ช้างเผือก","addressRegion":"เชียงใหม่","postalCode":"50300","addressCountry":"TH"},"geo":{"@type":"GeoCoordinates","latitude":"18.814361","longitude":"98.972389"},"hasMap":"https://maps.app.goo.gl/3y8gyAtamm8YSagi9","openingHours":["Mo-Su 00:00-24:00"],"areaServed":[{"@type":"City","name":"Chiang Mai"},{"@type":"City","name":" Lampang"},{"@type":"City","name":"Chiang Rai"}]},{"@type":"BreadcrumbList","@id":`${canonicalUrl}#breadcrumb`,"itemListElement":[{"@type":"ListItem","position":1,"name":"หน้าแรก","item":siteUrl}]},{"@type":"FAQPage","@id":`${siteUrl}faq.html#faq`,"mainEntity":[{"@type":"Question","name":"บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?","acceptedAnswer":{"@type":"Answer","text":"Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้าทุกท่าน ข้อมูลการติดต่อและการจองของท่านจะถูกเก็บรักษาเป็นความลับอย่างเข้มงวด"}},{"@type":"Question","name":"จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการไซด์ไลน์หรือไม่?","acceptedAnswer":{"@type":"Answer","text":"เพื่อความสบายใจของลูกค้าทุกท่าน ท่านไม่จำเป็นต้องโอนเงินมัดจำใดๆ ทั้งสิ้น สามารถชำระค่าบริการเต็มจำนวนโดยตรงกับน้องๆ ที่หน้างานได้เลย"}},{"@type":"Question","name":"น้องๆ ไซด์ไลน์เชียงใหม่ตรงปกตามรูปที่แสดงในโปรไฟล์จริงหรือ?","acceptedAnswer":{"@type":"Answer","text":"เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพของน้องๆ ทุกคนอย่างละเอียด Sideline Chiang Mai กล้าการันตีว่าน้องๆ ตรงปก 100% หากพบปัญหาใดๆ สามารถแจ้งทีมงานเพื่อดำเนินการแก้ไขได้ทันที"}}]}]
+        "@graph": [{"@type":"Organization","@id":`${siteUrl}#organization`,"name":orgName,"url":siteUrl,"logo":{"@type":"ImageObject","url":`${siteUrl}images/logo-sideline-chiangmai.webp`,"width":245,"height":30},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","url":"https://line.me/ti/p/_faNcjQ3xx"}},{"@type":"WebSite","@id":`${siteUrl}#website`,"url":siteUrl,"name":orgName,"description":"รวมโปรไฟล์ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย คุณภาพ บริการฟีลแฟน การันตีตรงปก 100% ปลอดภัย ไม่ต้องมัดจำ","publisher":{"@id":`${siteUrl}#organization`},"inLanguage":"th-TH"},{"@type":"WebPage","@id":`${canonicalUrl}#webpage`,"url":canonicalUrl,"name":pageTitle,"isPartOf":{"@id":`${siteUrl}#website`},"primaryImageOfPage":{"@type":"ImageObject","url":`${siteUrl}images/sideline-chiangmai-social-preview.webp`},"breadcrumb":{"@id":`${canonicalUrl}#breadcrumb`}},{"@type":"LocalBusiness","@id":`${siteUrl}#localbusiness`,"name":"SidelineChiangmai - ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก","image":`${siteUrl}images/sideline-chiangmai-social-preview.webp`,"url":siteUrl,"priceRange":"฿฿","address":{"@type":"PostalAddress","streetAddress":"เจ็ดยอด","addressLocality":"ช้างเผือก","addressRegion":"เชียงใหม่","postalCode":"50300","addressCountry":"TH"},"geo":{"@type":"GeoCoordinates","latitude":"18.814361","longitude":"98.972389"},"hasMap":"https://maps.app.goo.gl/3y8gyAtamm8YSagi9","openingHours":["Mo-Su 00:00-24:00"],"areaServed":[{"@type":"City","name":"Chiang Mai"},{"@type":"City","name":" Lampang"},{"@type":"City","name":"Chiang Rai"}]},{"@type":"BreadcrumbList","@id":`${canonicalUrl}#breadcrumb`,"itemListElement":[{"@type":"ListItem","position":1,"name":"หน้าแรก","item":siteUrl}]},{"@type":"FAQPage","@id":`${siteUrl}faq.html#faq`,"mainEntity":[{"@type":"Question","name":"บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?","acceptedAnswer":{"@type":"Answer","text":"Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้าทุกท่าน ข้อมูลการติดต่อและการจองของท่านจะถูกเก็บรักษาเป็นความลับอย่างเข้มงวด"}},{"@type":"Question","name":"จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการไซด์ไลน์หรือไม่?","acceptedAnswer":{"@type":"Answer","text":"เพื่อความสบายใจของลูกค้าทุกท่าน ท่านไม่จำเป็นต้องโอนเงินมัดจำใดๆ ทั้งสิ้น สามารถชำระค่าบริการเต็มจำนวนโดยตรงกับน้องๆ ที่หน้างานได้เลย"}},{"@type":"Question","name":"น้องๆ ไซด์ไลน์เชียงใหม่ตรงปกตามรูปที่แสดงในโปรไฟล์จริงหรือ?","acceptedAnswer":{"@type":"Answer","text":"เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพของน้องๆ ทุกคนอย่างละเอียด Sideline Chiang Mai กล้าการันตีว่าน้องๆ ตรงปก 100% หากพบปัญหาใดๆ สามารถแจ้งทีมงานเพื่อดำเนินการแก้ไขได้ทันที"}}]}]
     };
     const oldSchema = document.querySelector('script[type="application/ld+json"]');
     if (oldSchema) oldSchema.remove();
