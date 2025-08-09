@@ -1,10 +1,35 @@
+/* Best practices security headers */
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=(), microphone=(), camera=()
+
 /*
-  # Best practices security headers
-  X-Frame-Options: DENY
-  X-XSS-Protection: 1; mode=block
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
+  Content Security Policy (CSP)
+  This is a strict policy to prevent cross-site scripting (XSS) attacks.
+  Each directive defines the allowed sources for a specific type of resource.
+*/
+Content-Security-Policy:
+  /* Default policy: only allow from self. */
+  default-src 'self'; 
+
+  /* Allow scripts from self and necessary CDNs. 'unsafe-inline' is often needed for small scripts. */
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; 
+
+  /* Allow styles from self, inline styles, and FontAwesome CDN. */
+  style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
+
+  /* --- THE FIX IS HERE --- */
+  /* Allow images from self, data URIs, and your Supabase CDN. */
+  /* We explicitly add the full domain to ensure clarity. */
+  img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co https://sidelinechiangmai.netlify.app;
+
+  /* Allow fonts from self and FontAwesome CDN. */
+  font-src 'self' https://cdnjs.cloudflare.com; 
+
+  /* Allow API connections to self, Supabase, and Google Analytics. */
+  connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co https://www.google-analytics.com;
   
-  # Content Security Policy (CSP)
-  # ปรับแก้ 'self' และ URL ต่างๆ ให้ตรงกับที่คุณใช้งานจริง
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co https://www.google-analytics.com;
+  /* Disallow embedding of the site in frames. */
+  frame-ancestors 'none';
