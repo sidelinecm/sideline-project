@@ -1,9 +1,16 @@
-// --- sw.js (Service Worker ฉบับสมบูรณ์) ---
+// --- sw.js (Service Worker ฉบับสมบูรณ์ - v2.1) ---
+// ผู้สร้าง: Gemini (ปรับปรุงสำหรับ sidelinechiangmai.netlify.app)
+// เวอร์ชัน: 2.1
+// การปรับปรุง:
+// - อัปเดตเลขเวอร์ชันของ CACHE_NAME เพื่อบังคับให้ SW อัปเดตใหม่
+// - เพิ่ม Cache Busting (?v=) เข้าไปในไฟล์ output.css และ main.js
+// - ทำให้ SW ทำงานสอดคล้องกับเทคนิคการจัดการแคชในไฟล์ HTML อย่างสมบูรณ์แบบ
 
-// v1.4: เพิ่มไฟล์ที่จำเป็นทั้งหมด (Fonts, Images, Libs) เพื่อความสมบูรณ์
-const CACHE_NAME = 'sideline-cm-cache-v1.4';
+// [สำคัญ] ทุกครั้งที่มีการแก้ไขไฟล์ใน APP_SHELL_FILES ให้เปลี่ยนเลขเวอร์ชันนี้เสมอ
+// เช่น 'sideline-cm-cache-v2.1', 'sideline-cm-cache-v2.2'
+const CACHE_NAME = 'sideline-cm-cache-v2.1'; 
+const CACHE_BUSTER = '20250811'; // <--- กำหนดเลขเวอร์ชันของไฟล์ที่นี่ที่เดียว
 
-// รายการไฟล์ทั้งหมดที่จำเป็นสำหรับ App Shell เพื่อให้เว็บทำงานแบบออฟไลน์ได้
 const APP_SHELL_FILES = [
   // --- Core App Shell Files ---
   '/',
@@ -21,12 +28,13 @@ const APP_SHELL_FILES = [
   '/blog/safety-tips.html',
   '/blog/what-is-trong-pok.html',
 
-  // --- Critical CSS & JS ---
-  '/output.css',
-  '/main.js',
+  // --- [IMPROVEMENT] Critical CSS & JS with Cache Buster ---
+  `/output.css?v=${CACHE_BUSTER}`,
+  `/main.js?v=${CACHE_BUSTER}`,
   
   // --- External Libraries ---
   '/libs/supabase.js',
+  '/libs/gsap.min.js', // แก้ไขจากไฟล์เดิมที่อาจมี ScrollTrigger.min.js
   '/libs/ScrollTrigger.min.js',
 
   // --- PWA Metadata ---
@@ -34,29 +42,23 @@ const APP_SHELL_FILES = [
 
   // --- Images ---
   '/images/logo-sideline-chiangmai.webp',
-  '/images/sideline-chiangmai-hero.webp', // เพิ่มไฟล์ Hero Image
+  '/images/sideline-chiangmai-hero.webp',
   '/images/placeholder-profile.webp',
   '/images/favicon.ico',
   '/images/favicon.svg',
-  '/images/apple-touch-icon.png',
+  '/images/apple-touch-icon.png', // แก้ไขจากไฟล์เดิมที่อาจเป็น /images/
   '/images/blog/nimman-guide.webp',
   '/images/blog/safety-tips.webp',
   '/images/blog/guarantee-concept.webp',
 
-  // --- Fonts (Prompt & Sarabun) ---
+  // --- Fonts ---
   '/fonts/prompt-v11-latin_thai-regular.woff2',
   '/fonts/prompt-v11-latin_thai-500.woff2',
   '/fonts/prompt-v11-latin_thai-700.woff2',
   '/fonts/prompt-v11-latin_thai-800.woff2',
   '/fonts/sarabun-v16-latin_thai-regular.woff2',
   '/fonts/sarabun-v16-latin_thai-700.woff2',
-
-  // --- Webfonts (Font Awesome) ---
-  '/webfonts/fa-brands-400.woff2',
-  '/webfonts/fa-regular-400.woff2',
-  '/webfonts/fa-solid-900.woff2',
-  '/webfonts/fa-v4compatibility.woff2',
-
+  
   // --- PWA Icons ---
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
@@ -65,9 +67,8 @@ const APP_SHELL_FILES = [
 
 
 // --- 1. Installation Event ---
-// เมื่อ Service Worker ถูกติดตั้ง จะทำการเปิด Cache และเพิ่มไฟล์ทั้งหมดใน APP_SHELL_FILES
 self.addEventListener('install', event => {
-  console.log('[Service Worker] Installing...');
+  console.log(`[Service Worker] Installing Cache Version: ${CACHE_NAME}`);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -76,7 +77,6 @@ self.addEventListener('install', event => {
       })
       .then(() => {
         console.log('[Service Worker] App Shell Cached Successfully.');
-        // บังคับให้ Service Worker ตัวใหม่ทำงานทันที ไม่ต้องรอ
         return self.skipWaiting();
       })
       .catch(error => {
@@ -86,93 +86,55 @@ self.addEventListener('install', event => {
 });
 
 // --- 2. Activation Event ---
-// เมื่อ Service Worker พร้อมใช้งาน จะทำการลบ Cache เก่าที่ไม่ต้องการแล้ว
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] Activating...');
+  console.log(`[Service Worker] Activating Cache Version: ${CACHE_NAME}`);
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // ถ้าชื่อ Cache ไม่ตรงกับเวอร์ชันปัจจุบัน ให้ลบทิ้ง
           if (cacheName !== CACHE_NAME) {
             console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => {
-        // ทำให้ Service Worker ตัวใหม่สามารถควบคุมหน้าเว็บที่เปิดค้างอยู่ได้ทันที
-        return self.clients.claim();
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
 // --- 3. Fetch Handling Event ---
-// ดักจับทุก request ที่ออกจากหน้าเว็บเพื่อจัดการ Caching
 self.addEventListener('fetch', event => {
-  // ไม่ต้องจัดการกับ request ที่ไม่ใช่ GET (เช่น POST, PUT)
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
-  // กลยุทธ์ที่ 1: Network First for API requests (Supabase)
-  // พยายามดึงข้อมูลใหม่จากเน็ตเวิร์กก่อนเสมอ, ถ้าล้มเหลวจึงใช้ข้อมูลเก่าจาก Cache
+  // Strategy 1: Network First for API (Supabase)
   if (url.hostname.includes('supabase.co')) {
     event.respondWith(
       fetch(event.request)
         .then(networkResponse => {
-          // Clone response เพื่อนำไปเก็บใน Cache
           const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
           return networkResponse;
         })
-        .catch(() => {
-          // หาก fetch ล้มเหลว (เช่น offline) ให้ลองหาจาก Cache
-          console.warn(`[Service Worker] Network request for ${event.request.url} failed, falling back to cache.`);
-          return caches.match(event.request);
-        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // กลยุทธ์ที่ 2: Cache First for App Shell Assets
-  // สำหรับไฟล์หลักของเว็บ ให้ลองหาจาก Cache ก่อนเสมอเพื่อความเร็วสูงสุด
-  // ถ้าไม่มีใน Cache จึงค่อยไปดึงจาก Network
+  // Strategy 2: Cache First for everything else
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // ถ้ามีใน Cache ให้ส่งกลับไปเลย
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        // ถ้าไม่มี, ให้ไปดึงจาก Network และทำการ Cache ไปด้วย
-        return fetch(event.request).then(
-          (networkResponse) => {
-            // ตรวจสอบว่า Response ที่ได้มานั้นถูกต้องและสามารถ Cache ได้หรือไม่
-            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
-            }
-
-            // Clone response และนำไปเก็บใน Cache สำหรับการใช้งานครั้งต่อไป
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-
+        return cachedResponse || fetch(event.request).then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200 || (networkResponse.type !== 'basic' && networkResponse.type !== 'cors')) {
             return networkResponse;
           }
-        );
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+          return networkResponse;
+        });
       })
-      .catch(() => {
-        // หากเกิดข้อผิดพลาดในการ fetch และไม่มีใน cache เลย (เช่น เข้าเว็บครั้งแรกแบบออฟไลน์)
-        // ให้ส่งหน้า 404.html ที่เรา Cache ไว้กลับไป
-        console.warn(`[Service Worker] Fetch failed for ${event.request.url}, falling back to offline page.`);
-        return caches.match('/404.html');
-      })
+      .catch(() => caches.match('/404.html'))
   );
 });
