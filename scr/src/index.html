@@ -1,1 +1,315 @@
+<!doctype html>
+<html lang="th" class="scroll-smooth light">
+<head>
+    <!-- ================================================================= -->
+    <!-- SECTION 1: CORE METADATA & CRITICAL RENDER HINTS                -->
+    <!-- Purpose: Essential tags and hints for the browser to start rendering efficiently. -->
+    <!-- ================================================================= -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Theme Color for mobile browser UI, adapts to user's system preference -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fdf2f8"> <!-- Light pink -->
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2937">  <!-- Dark blue-gray -->
+    
+    <!-- Resource Hints: Tell the browser to connect to important domains ASAP -->
+    <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+    <link rel="dns-prefetch" href="https://hgzbgpbmymoiwjpaypvl.supabase.co">
 
+    <!-- ================================================================= -->
+    <!-- SECTION 2: SEO - CRITICAL TAGS FOR SEARCH ENGINES               -->
+    <!-- Purpose: The most important information for search engine crawlers. -->
+    <!-- ================================================================= -->
+    <title>ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | SidelineCM ตรงปก 100% ไม่ต้องโอนมัดจำ</title>
+    <meta name="description" content="ค้นหาน้องๆ ไซด์ไลน์เชียงใหม่ (SidelineCM) รับงานฟีลแฟน บริการระดับพรีเมียมในเชียงใหม่, ลำปาง, เชียงราย การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ">
+    <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg">
+
+    <!-- ================================================================= -->
+    <!-- SECTION 3: SOCIAL MEDIA & OPEN GRAPH (for Rich Sharing)         -->
+    <!-- Purpose: Control how your content looks when shared on social platforms. -->
+    <!-- ================================================================= -->
+    <meta property="og:locale" content="th_TH">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SidelineCM: ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก ปลอดภัย">
+    <meta property="og:description" content="คัดสรรน้องๆ ไซด์ไลน์คุณภาพ บริการระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง การันตีโปรไฟล์ตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำก่อน">
+    <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
+    <meta property="og:site_name" content="Sideline Chiangmai">
+    <!-- OG Image: Provide multiple formats for best performance and compatibility -->
+    <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.avif">
+    <meta property="og:image:type" content="image/avif">
+    <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
+    <meta property="og:image:type" content="image/webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="โลโก้และโปรไฟล์ตัวอย่างของ Sideline Chiangmai บริการไซด์ไลน์ในเชียงใหม่">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SidelineCM: ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก ปลอดภัย">
+    <meta name="twitter:description" content="คัดสรรน้องๆ ไซด์ไลน์คุณภาพ บริการระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย ไม่ต้องโอนมัดจำก่อน">
+    <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
+    <meta name="twitter:image:alt" content="โลโก้และโปรไฟล์ตัวอย่างของ Sideline Chiangmai">
+
+    <!-- ================================================================= -->
+    <!-- SECTION 4: ICONS & PROGRESSIVE WEB APP (PWA) MANIFEST         -->
+    <!-- Purpose: Define app icons and enable PWA functionality. -->
+    <!-- ================================================================= -->
+    <link rel="icon" href="/images/favicon.ico" sizes="any">
+    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- ================================================================= -->
+    <!-- SECTION 5: PERFORMANCE - PRELOADING CRITICAL ASSETS             -->
+    <!-- Purpose: Tell the browser to start downloading critical files for the initial view. -->
+    <!-- ================================================================= -->
+    <link rel="preload" href="/output.css" as="style">
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-800.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" as="image" href="/images/sideline-chiangmai-hero.webp" fetchpriority="high">
+    <link rel="preload" href="/main.js" as="script">
+    
+    <!-- ================================================================= -->
+    <!-- SECTION 6: STYLESHEETS (CRITICAL CSS INLINE & NON-BLOCKING LOAD) -->
+    <!-- Purpose: Render the above-the-fold content instantly without waiting for CSS files. -->
+    <!-- ================================================================= -->
+    <!-- Critical CSS: Inlined for the fastest possible First Contentful Paint (FCP) -->
+    <style>
+      :root{--primary:#db2777;--background:#fff;--foreground:#1f2937}html.dark{--background:#111827;--foreground:#f3f4f6}html{font-family:'Prompt',system-ui,sans-serif;line-height:1.5;color:var(--foreground);background-color:var(--background)}body{margin:0;opacity:0;transition:opacity .4s ease-in-out}.skip-link{position:absolute;left:-9999px}.skip-link:focus{position:fixed;top:1rem;left:1rem;background-color:var(--background);padding:.5rem 1rem;z-index:9999;border-radius:.375rem;box-shadow:0 4px 14px rgba(0,0,0,.12)}#page-header{height:4.5rem;position:fixed;width:100%;top:0;left:0;z-index:40}
+    </style>
+    <!-- Main Stylesheets: Loaded asynchronously to not block rendering -->
+    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/output.css"><link rel="stylesheet" href="/all.min.css"></noscript>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 7: SCHEMA MARKUP (for Rich Snippets in Search Results)  -->
+    <!-- Purpose: Provide detailed, structured data to search engines to create rich results. -->
+    <!-- ================================================================= -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Sideline Chiangmai (SidelineCM)",
+      "url": "https://sidelinechiangmai.netlify.app/",
+      "inLanguage": "th-TH",
+      "description": "ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก 100% ปลอดภัย และไม่ต้องโอนมัดจำ",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "SidelineChiangmai",
+        "url": "https://sidelinechiangmai.netlify.app/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp",
+          "width": 245,
+          "height": 30
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "url": "https://line.me/ti/p/_faNcjQ3xx",
+          "availableLanguage": ["Thai"]
+        },
+        "sameAs": [
+          "https://line.me/ti/p/_faNcjQ3xx"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "เชียงใหม่",
+          "addressRegion": "เชียงใหม่",
+          "addressCountry": "TH"
+        }
+      },
+      "about": {
+        "@type": "Service",
+        "serviceType": "บริการไซด์ไลน์ฟีลแฟน",
+        "provider": {
+            "@type": "Organization",
+            "name": "SidelineChiangmai"
+        },
+        "areaServed": [
+            { "@type": "City", "name": "เชียงใหม่" },
+            { "@type": "City", "name": "ลำปาง" },
+            { "@type": "City", "name": "เชียงราย" }
+        ],
+        "description": "บริการระดับพรีเมียม การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ"
+      }
+    }
+    </script>
+</head>
+<body class="antialiased" data-page="home">
+    
+    <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
+
+    <div id="age-verification-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
+      <div class="age-modal-content relative space-y-6" role="alertdialog" aria-labelledby="age-verification-heading" aria-describedby="age-verification-desc">
+        <h2 id="age-verification-heading" class="text-2xl font-bold uppercase leading-tight"><span class="text-primary">Sideline Chiangmai</span> is an Adults Only <span class="age-badge-inline">20+</span> Website! </h2>
+        <p id="age-verification-desc" class="text-sm text-gray-300 leading-relaxed">คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 20 ปีบริบูรณ์</p>
+        <div class="flex gap-4 pt-2">
+          <button id="cancelAgeButton" class="age-btn age-btn-cancel">ออก</button>
+          <button id="confirmAgeButton" class="age-btn age-btn-confirm">ยืนยัน</button>
+        </div>
+      </div>
+    </div>
+  
+    <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
+        <div class="container mx-auto px-4 h-18 flex items-center justify-between">
+          <a href="/" aria-label="SidelineChiangmai หน้าแรก">
+            <img src="/images/logo-sideline-chiangmai.webp" srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x" alt="โลโก้ Sideline Chiangmai" class="h-[30px] w-auto" width="245" height="30" fetchpriority="high">
+          </a>
+          <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
+            <a href="/profiles.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
+            <a href="/locations.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
+            <a href="/about.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
+            <a href="/faq.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
+            <a href="/blog.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
+          </nav>
+          <div class="flex items-center gap-2">
+            <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label="เปลี่ยนโหมดสี"><i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i></button>
+            <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label="เปิดเมนู" aria-haspopup="true" aria-controls="sidebar" aria-expanded="false"><i class="fas fa-bars text-xl" aria-hidden="true"></i></button>
+          </div>
+        </div>
+    </header>
+
+    <div id="menu-backdrop" class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden="true"></div>
+    <aside id="sidebar" class="fixed top-0 right-0 w-64 sm:w-72 h-dvh bg-card text-foreground border-l border-border shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" aria-labelledby="sidebar-nav-heading" aria-hidden="true" tabindex="-1">
+        <div class="flex justify-between items-center p-4 border-b border-border shrink-0"><h3 id="sidebar-nav-heading" class="text-lg font-bold text-secondary">เมนู</h3><button id="close-sidebar-btn" class="btn-close-premium" aria-label="ปิดเมนู"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+        <nav aria-label="เมนูนำทางหลักในแถบด้านข้าง" class="flex-grow overflow-y-auto p-4 space-y-4">
+            <a href="/" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-home w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>หน้าแรก</span></a>
+            <a href="/profiles.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-users w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>น้องๆ ทั้งหมด</span></a>
+            <a href="/locations.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-map-marker-alt w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>พิกัดบริการ</span></a>
+            <a href="/about.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-info-circle w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>เกี่ยวกับเรา</span></a>
+            <a href="/faq.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-question-circle w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>คำถามพบบ่อย</span></a>
+            <a href="/blog.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-newspaper w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>บทความ</span></a>
+        </nav>
+        <div class="p-4 border-t border-border shrink-0"><a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener" class="btn-line-shared"><i class="fab fa-line text-lg" aria-hidden="true"></i><span>ติดต่อผ่าน LINE</span></a></div>
+    </aside>
+
+    <main id="main-content" class="pt-20">
+        <div class="container mx-auto px-4 space-y-12 md:space-y-16">
+          
+          <section aria-labelledby="hero-h1">
+            <div class="section-header-card text-center">
+                <div class="card-content max-w-4xl mx-auto space-y-6">
+                    <img src="/images/sideline-chiangmai-hero.webp" alt="ไซด์ไลน์เชียงใหม่คุณภาพ บริการระดับพรีเมียม" class="w-full h-auto rounded-2xl shadow-lg mb-6" width="1200" height="630" loading="eager" fetchpriority="high" decoding="async">
+                    <div>
+                        <h1 id="hero-h1" class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 text-primary"> รับงานฟีลแฟนเชียงใหม่ <span class="text-secondary">ตรงปก ปลอดภัย</span></h1>
+                        <p id="hero-p" class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"> คัดสรรน้องๆ ไซด์ไลน์คุณภาพ บริการระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ </p>
+                        <div class="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium text-muted-foreground"><span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500" aria-hidden="true"></i> การันตีตรงปก 100% </span><span class="flex items-center gap-2"><i class="fas fa-shield-alt text-blue-500" aria-hidden="true"></i> ปลอดภัย ไม่ต้องโอนมัดจำ </span><span class="flex items-center gap-2"><i class="fas fa-user-check text-indigo-500" aria-hidden="true"></i> คัดกรองโปรไฟล์คุณภาพ </span></div>
+                    </div>
+                    <div id="hero-form">
+                        <form id="search-form" action="/profiles.html" method="GET" aria-labelledby="search-form-heading">
+                            <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
+                            <div class="space-y-4">
+                                <!-- Search Form content goes here -->
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+          </section>
+
+           <section id="featured-profiles" aria-labelledby="featured-heading">
+            <div class="section-content-wrapper">
+              <div class="p-6 md:p-8"><h2 id="featured-heading" class="text-2xl md:text-3xl font-bold text-primary">โปรไฟล์แนะนำ <span class="text-foreground/80">ที่ถูกเลือกมากที่สุด</span></h2><p class="mt-1 text-muted-foreground max-w-2xl text-sm md:text-base">พบกับน้องๆ ยอดนิยมที่การันตีความประทับใจ คัดเลือกมาเป็นพิเศษเพื่อประสบการณ์ที่ดีที่สุด</p></div>
+              <div id="featured-profiles-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-6 md:px-8 pb-6 md:pb-8">
+                  <!-- STATIC FALLBACK CARDS - JS WILL HYDRATE THESE -->
+                  <div class="profile-card-new group cursor-pointer" role="button" tabindex="0"><div class="absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10"><span class="bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg">...</span><span class="bg-yellow-400 text-black text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg"><svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z" clip-rule="evenodd"></path></svg>แนะนำ</span></div><img src="/images/placeholder-profile.webp" alt="โปรไฟล์แนะนำ 1" class="card-image" width="300" height="400" loading="eager" decoding="async"><div class="card-overlay"><div class="card-info"><h3 class="text-xl lg:text-2xl font-bold truncate">น้องมิ้นท์ (ตัวอย่าง)</h3><p class="text-sm flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654-.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd"></path></svg> เชียงใหม่</p></div></div></div>
+                  <!-- ... more static cards if needed ... -->
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 class="sr-only">รายการโปรไฟล์ทั้งหมด</h2>
+            <div id="loading-profiles-placeholder" role="status" aria-live="polite"><div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div></div>
+            <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
+            <div id="load-more-container" class="hidden text-center mt-12"><button id="load-more-btn" class="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition font-semibold"> แสดงเพิ่มเติม </button></div>
+            <div id="fetch-error-message" class="hidden text-center py-12 px-4 bg-accent rounded-lg" role="alert"><div class="error-state"><div class="error-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2zm0-8h2v6h-2z"></path></svg></div><h3 class="error-title">เกิดข้อผิดพลาด</h3><p class="error-description">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ในขณะนี้</p><button id="retry-fetch-btn" class="retry-btn">ลองอีกครั้ง</button></div></div>
+            <div id="no-results-message" class="hidden text-center py-12 text-muted-foreground bg-accent rounded-lg"><span class="block mb-4 text-muted-foreground/50" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg></span><p class="text-lg font-semibold">ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข</p><p class="text-sm">ลองปรับคำค้นหาหรือตัวกรองใหม่อีกครั้ง</p></div>
+            <noscript>
+                <div class="text-center p-8 bg-accent rounded-lg">
+                  <h2 class="text-xl font-bold mb-2">กรุณาเปิดใช้งาน JavaScript</h2>
+                  <p class="text-muted-foreground">เว็บไซต์ของเราต้องการ JavaScript เพื่อแสดงโปรไฟล์ทั้งหมดและทำงานได้อย่างเต็มประสิทธิภาพ กรุณาเปิดใช้งาน JavaScript ในเบราว์เซอร์ของคุณเพื่อเริ่มต้นการค้นหา</p>
+                </div>
+            </noscript>
+          </section>
+
+        </div>
+    </main>
+
+     <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
+                <div>
+                    <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
+                        <img src="/images/logo-sideline-chiangmai.webp" 
+                             srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x"
+                             alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
+                    </a>
+                    <h3 class="font-semibold text-foreground mb-2">เกี่ยวกับ sidelineChiangmai</h3>
+                    <p class="leading-relaxed text-sm"> ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ </p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-foreground mb-4 tracking-tight">ลิงก์ด่วน</h3>
+                    <nav aria-label="ลิงก์ด่วนท้ายเว็บ"><ul class="space-y-3 text-sm"><li><a href="/profiles.html" class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li><li><a href="/about.html" class="hover:text-secondary transition-colors">เกี่ยวกับเรา</a></li><li><a href="/faq.html" class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li><li><a href="/privacy-policy.html" class="hover:text-secondary transition-colors">นโยบายความเป็นส่วนตัว</a></li></ul></nav>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อและติดตามเรา</h3>
+                    <div class="space-y-5">
+                        <div>
+                            <p class="text-sm mb-3">หากมีข้อสงสัย, พบปัญหาการใช้งาน, หรือต้องการสอบถามข้อมูลเพิ่มเติม สามารถติดต่อเราได้โดยตรงผ่าน LINE:</p>
+                            <a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener" class="inline-flex items-center gap-3 group"><svg class="text-2xl text-green-500" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.29,14.62,15,13.31a.88.88,0,0,0-1.24,0L13.1,14a.87.87,0,0,1-1.23,0L9.13,11.33a.87.87,0,0,1,0-1.23l.71-.71a.88.88,0,0,0,0-1.24L8.53,7a.88.88,0,0,0-1.24,0L6,8.25a3.63,3.63,0,0,0-1,2.5,9.25,9.25,0,0,0,9.25,9.25,3.63,3.63,0,0,0,2.5-1l1.25-1.25a.88.88,0,0,0,0-1.24Z"/><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/></svg><span class="font-semibold group-hover:text-secondary transition-colors">ติดต่อเจ้าหน้าที่</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 border-t border-border pt-8 text-center">
+                <p class="text-sm">© <span id="currentYearDynamic"></span> SidelineChiangmai. All rights reserved.</p>
+                <p class="mt-2 text-xs text-muted-foreground/80 leading-relaxed"> เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง </p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="lightbox-header-title">
+        <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
+          <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิด"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+          <div class="flex-shrink-0 p-3 lg:p-4 border-b border-border"><h2 id="lightbox-header-title" class="text-lg font-bold text-foreground/80 truncate pl-2">รายละเอียดโปรไฟล์</h2></div>
+          <div class="flex-grow overflow-y-auto"><div class="lg:grid lg:grid-cols-5 lg:gap-6"><div class="lg:col-span-2 p-4 lg:pr-2"><div id="lightbox-gallery-container" class="sticky top-4"><div class="hero-image-container mb-3"><img id="lightboxHeroImage" src="/images/placeholder-profile.webp" alt="รูปโปรไฟล์" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/placeholder-profile.webp';"></div><div id="lightboxThumbnailStrip" class="thumbnail-strip"></div></div></div><div class="lg:col-span-3 p-4 lg:pl-2"><div class="space-y-5"><h3 id="lightbox-profile-name-main" class="text-3xl lg:text-4xl font-extrabold text-primary text-center lg:text-left">...</h3><p id="lightboxQuote" class="text-base text-foreground font-medium italic text-center lg:text-left border-l-4 border-primary/50 pl-4"></p><div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start"></div><div id="lightboxDetailsCompact" class="space-y-4 pt-5 border-t border-border"></div><div class="pt-4 border-t border-border"><h4 class="font-semibold text-foreground mb-2">รายละเอียดเพิ่มเติม</h4><p class="leading-relaxed text-muted-foreground text-sm whitespace-pre-wrap" id="lightboxDescriptionVal"></p></div></div></div></div></div>
+          <div class="flex-shrink-0 p-4 border-t border-border bg-accent/50 flex justify-center"><a id="lightboxLineLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-line-shared"><svg class="text-lg" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.29,14.62,15,13.31a.88.88,0,0,0-1.24,0L13.1,14a.87.87,0,0,1-1.23,0L9.13,11.33a.87.87,0,0,1,0-1.23l.71-.71a.88.88,0,0,0,0-1.24L8.53,7a.88.88,0,0,0-1.24,0L6,8.25a3.63,3.63,0,0,0-1,2.5,9.25,9.25,0,0,0,9.25,9.25,3.63,3.63,0,0,0,2.5-1l1.25-1.25a.88.88,0,0,0,0-1.24Z"/><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/></svg><span id="lightboxLineLinkText"></span></a></div>
+        </div>
+    </div>
+
+    
+
+    
+
+ <!-- สคริปต์หลักของเว็บ -->
+    <script src="/libs/supabase.js"></script>
+    <script src="/libs/gsap.min.js"></script>
+    <script src="/libs/ScrollTrigger.min.js"></script>
+    <script src="/main.js"></script>
+
+    <!-- [วางโค้ดส่วนนี้ที่นี่] -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => {
+            console.error('Service Worker registration failed:', err);
+          });
+        });
+      }
+    </script>
+
+  </body>
+</html>
