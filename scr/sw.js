@@ -1,7 +1,7 @@
 // --- sw.js (Service Worker ฉบับสมบูรณ์) ---
 
-// v1.3: เพิ่มหน้าบทความย่อยและรูปภาพประกอบ, เพิ่มฟอนต์ทั้งหมด
-const CACHE_NAME = 'sideline-cm-cache-v1.3';
+// v1.4: เพิ่มไฟล์ที่จำเป็นทั้งหมด (Fonts, Images, Libs) เพื่อความสมบูรณ์
+const CACHE_NAME = 'sideline-cm-cache-v1.4';
 
 // รายการไฟล์ทั้งหมดที่จำเป็นสำหรับ App Shell เพื่อให้เว็บทำงานแบบออฟไลน์ได้
 const APP_SHELL_FILES = [
@@ -21,15 +21,20 @@ const APP_SHELL_FILES = [
   '/blog/safety-tips.html',
   '/blog/what-is-trong-pok.html',
 
-  // --- Critical Assets ---
+  // --- Critical CSS & JS ---
   '/output.css',
   '/main.js',
+  
+  // --- External Libraries ---
+  '/libs/supabase.js',
+  '/libs/ScrollTrigger.min.js',
 
   // --- PWA Metadata ---
   '/manifest.webmanifest',
 
-  // --- Critical Images ---
+  // --- Images ---
   '/images/logo-sideline-chiangmai.webp',
+  '/images/sideline-chiangmai-hero.webp', // เพิ่มไฟล์ Hero Image
   '/images/placeholder-profile.webp',
   '/images/favicon.ico',
   '/images/favicon.svg',
@@ -38,7 +43,7 @@ const APP_SHELL_FILES = [
   '/images/blog/safety-tips.webp',
   '/images/blog/guarantee-concept.webp',
 
-  // --- Fonts (ครบทุกไฟล์) ---
+  // --- Fonts (Prompt & Sarabun) ---
   '/fonts/prompt-v11-latin_thai-regular.woff2',
   '/fonts/prompt-v11-latin_thai-500.woff2',
   '/fonts/prompt-v11-latin_thai-700.woff2',
@@ -46,11 +51,18 @@ const APP_SHELL_FILES = [
   '/fonts/sarabun-v16-latin_thai-regular.woff2',
   '/fonts/sarabun-v16-latin_thai-700.woff2',
 
+  // --- Webfonts (Font Awesome) ---
+  '/webfonts/fa-brands-400.woff2',
+  '/webfonts/fa-regular-400.woff2',
+  '/webfonts/fa-solid-900.woff2',
+  '/webfonts/fa-v4compatibility.woff2',
+
   // --- PWA Icons ---
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
   '/icons/maskable-icon-512x512.png'
 ];
+
 
 // --- 1. Installation Event ---
 // เมื่อ Service Worker ถูกติดตั้ง จะทำการเปิด Cache และเพิ่มไฟล์ทั้งหมดใน APP_SHELL_FILES
@@ -138,7 +150,7 @@ self.addEventListener('fetch', event => {
           return cachedResponse;
         }
 
-        // ถ้าไม่มี, ให้ไปดึงจาก Network
+        // ถ้าไม่มี, ให้ไปดึงจาก Network และทำการ Cache ไปด้วย
         return fetch(event.request).then(
           (networkResponse) => {
             // ตรวจสอบว่า Response ที่ได้มานั้นถูกต้องและสามารถ Cache ได้หรือไม่
@@ -159,7 +171,7 @@ self.addEventListener('fetch', event => {
       .catch(() => {
         // หากเกิดข้อผิดพลาดในการ fetch และไม่มีใน cache เลย (เช่น เข้าเว็บครั้งแรกแบบออฟไลน์)
         // ให้ส่งหน้า 404.html ที่เรา Cache ไว้กลับไป
-        console.warn('[Service Worker] Fetch failed, falling back to offline page.');
+        console.warn(`[Service Worker] Fetch failed for ${event.request.url}, falling back to offline page.`);
         return caches.match('/404.html');
       })
   );

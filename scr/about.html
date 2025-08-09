@@ -52,25 +52,37 @@
     <!-- ================================================================= -->
     <!-- SECTION 6: SCHEMA MARKUP                                        -->
     <!-- ================================================================= -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "AboutPage",
-      "name": "เกี่ยวกับเรา - เบื้องหลังและพันธกิจของ SidelineCM เชียงใหม่",
-      "url": "https://sidelinechiangmai.netlify.app/about.html",
-      "mainEntity": {
-        "@type": "Organization",
-        "name": "SidelineChiangmai",
-        "url": "https://sidelinechiangmai.netlify.app/",
-        "logo": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp",
-        "description": "SidelineCM คือศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย และไม่ต้องโอนมัดจำ",
-        "founder": {
-          "@type": "Person",
-          "name": "ทีมงานผู้ก่อตั้ง SidelineCM"
-        }
-      }
-    }
-    </script>
+    <!-- about.html -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "เกี่ยวกับเรา - เบื้องหลังและพันธกิจของ SidelineCM เชียงใหม่",
+  "url": "https://sidelinechiangmai.netlify.app/about.html",
+  "mainEntity": {
+    "@type": "Organization",
+    "name": "SidelineChiangmai",
+    "url": "https://sidelinechiangmai.netlify.app/",
+    "logo": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp",
+    "description": "SidelineCM คือศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย และไม่ต้องโอนมัดจำ",
+    "founder": {
+      "@type": "Person",
+      "name": "ทีมงานผู้ก่อตั้ง SidelineCM"
+    },
+    // --- ส่วนที่แนะนำให้เพิ่ม ---
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "url": "https://line.me/ti/p/_faNcjQ3xx", // URL ติดต่อหลัก
+      "availableLanguage": ["Thai"]
+    },
+    "sameAs": [
+      "https://line.me/ti/p/_faNcjQ3xx" // หากมี Social Media อื่นๆ สามารถใส่เพิ่มได้
+    ]
+    // --- สิ้นสุดส่วนที่แนะนำ ---
+  }
+}
+</script>
 </head>
 <body class="antialiased" data-page="about">
   

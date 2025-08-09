@@ -1,37 +1,60 @@
-
 <!doctype html>
 <html lang="th" class="scroll-smooth light">
 <head>
-    <!-- SECTION 1: CORE METADATA -->
+    <!-- ================================================================= -->
+    <!-- SECTION 1: CORE METADATA & CRITICAL RENDER HINTS                -->
+    <!-- Purpose: Essential tags and hints for the browser to start rendering efficiently. -->
+    <!-- ================================================================= -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#db2777">
+    <!-- Theme Color for mobile browser UI, adapts to user's system preference -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fdf2f8"> <!-- Light pink -->
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2937">  <!-- Dark blue-gray -->
+    
+    <!-- Resource Hints: Tell the browser to connect to important domains ASAP -->
+    <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+    <link rel="dns-prefetch" href="https://hgzbgpbmymoiwjpaypvl.supabase.co">
 
-    <!-- SECTION 2: SEO - CRITICAL TAGS -->
-    <title>ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก 100% ไม่ต้องโอนมัดจำ</title>
+    <!-- ================================================================= -->
+    <!-- SECTION 2: SEO - CRITICAL TAGS FOR SEARCH ENGINES               -->
+    <!-- Purpose: The most important information for search engine crawlers. -->
+    <!-- ================================================================= -->
+    <title>ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | SidelineCM ตรงปก 100% ไม่ต้องโอนมัดจำ</title>
     <meta name="description" content="ค้นหาน้องๆ ไซด์ไลน์เชียงใหม่ (SidelineCM) รับงานฟีลแฟน บริการระดับพรีเมียมในเชียงใหม่, ลำปาง, เชียงราย การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ">
     <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg">
 
-    <!-- SECTION 3: SOCIAL MEDIA & OPEN GRAPH -->
+    <!-- ================================================================= -->
+    <!-- SECTION 3: SOCIAL MEDIA & OPEN GRAPH (for Rich Sharing)         -->
+    <!-- Purpose: Control how your content looks when shared on social platforms. -->
+    <!-- ================================================================= -->
     <meta property="og:locale" content="th_TH">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก 100% ไม่ต้องโอนมัดจำ">
-    <meta property="og:description" content="รวมโปรไฟล์น้องๆ รับงานฟีลแฟน การันตีตรงปก เชียงใหม่ ปลอดภัย ไม่ต้องโอนมัดจำ">
+    <meta property="og:title" content="SidelineCM: ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก ปลอดภัย">
+    <meta property="og:description" content="คัดสรรน้องๆ ไซด์ไลน์คุณภาพ บริการระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง การันตีโปรไฟล์ตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำก่อน">
     <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
     <meta property="og:site_name" content="Sideline Chiangmai">
+    <!-- OG Image: Provide multiple formats for best performance and compatibility -->
+    <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.avif">
+    <meta property="og:image:type" content="image/avif">
     <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
+    <meta property="og:image:type" content="image/webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="โลโก้และโปรไฟล์ตัวอย่างของ Sideline Chiangmai">
+    <meta property="og:image:alt" content="โลโก้และโปรไฟล์ตัวอย่างของ Sideline Chiangmai บริการไซด์ไลน์ในเชียงใหม่">
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก 100% ไม่ต้องโอนมัดจำ">
-    <meta name="twitter:description" content="ค้นหาน้องๆ ไซด์ไลน์เชียงใหม่ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ">
+    <meta name="twitter:title" content="SidelineCM: ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน | ตรงปก ปลอดภัย">
+    <meta name="twitter:description" content="คัดสรรน้องๆ ไซด์ไลน์คุณภาพ บริการระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย ไม่ต้องโอนมัดจำก่อน">
     <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
+    <meta name="twitter:image:alt" content="โลโก้และโปรไฟล์ตัวอย่างของ Sideline Chiangmai">
 
-    <!-- SECTION 4: ICONS & PWA -->
+    <!-- ================================================================= -->
+    <!-- SECTION 4: ICONS & PROGRESSIVE WEB APP (PWA) MANIFEST         -->
+    <!-- Purpose: Define app icons and enable PWA functionality. -->
+    <!-- ================================================================= -->
     <link rel="icon" href="/images/favicon.ico" sizes="any">
     <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
@@ -39,25 +62,90 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- SECTION 5: PERFORMANCE & STYLESHEETS (Self-Hosted) -->
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/main.js" as="script">
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/images/sideline-chiangmai-hero.webp" as="image" fetchpriority="high">
+    <!-- ================================================================= -->
+    <!-- SECTION 5: PERFORMANCE - PRELOADING CRITICAL ASSETS             -->
+    <!-- Purpose: Tell the browser to start downloading critical files for the initial view. -->
+    <!-- ================================================================= -->
     <link rel="preload" href="/output.css" as="style">
-    <link rel="preload" href="/all.min.css" as="style">
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-800.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" as="image" href="/images/sideline-chiangmai-hero.webp" fetchpriority="high">
+    <link rel="preload" href="/main.js" as="script">
     
-    <!-- Preconnect to Supabase CDN for faster data fetching -->
-    <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-
-    <!-- Critical CSS (Inline for fastest render) -->
+    <!-- ================================================================= -->
+    <!-- SECTION 6: STYLESHEETS (CRITICAL CSS INLINE & NON-BLOCKING LOAD) -->
+    <!-- Purpose: Render the above-the-fold content instantly without waiting for CSS files. -->
+    <!-- ================================================================= -->
+    <!-- Critical CSS: Inlined for the fastest possible First Contentful Paint (FCP) -->
     <style>
-      :root{--primary:#db2777}html,body{height:100%;margin:0}body{font-family:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,Arial;-webkit-font-smoothing:antialiased;color:#111;background:#fff}.container{max-width:1200px;margin:0 auto;padding:0 1rem}.hero-wrapper{width:100%;aspect-ratio:1200/630;overflow:hidden;border-radius:1rem}.hero-img{width:100%;height:100%;object-fit:cover;display:block}h1{font-size:clamp(1.6rem,4vw,2.6rem);margin:0 0 .5rem;line-height:1.05}.skip-link{position:absolute;left:-9999px}.skip-link:focus{left:1rem;top:1rem;background:#fff;padding:.5rem 1rem;border-radius:.375rem;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+      :root{--primary:#db2777;--background:#fff;--foreground:#1f2937}html.dark{--background:#111827;--foreground:#f3f4f6}html{font-family:'Prompt',system-ui,sans-serif;line-height:1.5;color:var(--foreground);background-color:var(--background)}body{margin:0;opacity:0;transition:opacity .4s ease-in-out}.skip-link{position:absolute;left:-9999px}.skip-link:focus{position:fixed;top:1rem;left:1rem;background-color:var(--background);padding:.5rem 1rem;z-index:9999;border-radius:.375rem;box-shadow:0 4px 14px rgba(0,0,0,.12)}#page-header{height:4.5rem;position:fixed;width:100%;top:0;left:0;z-index:40}
     </style>
+    <!-- Main Stylesheets: Loaded asynchronously to not block rendering -->
+    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/output.css"><link rel="stylesheet" href="/all.min.css"></noscript>
 
-    <!-- Main Stylesheets (Load normally for simplicity and reliability) -->
-    <link rel="stylesheet" href="/output.css">
-    <link rel="stylesheet" href="/all.min.css">
+    <!-- ================================================================= -->
+    <!-- SECTION 7: SCHEMA MARKUP (for Rich Snippets in Search Results)  -->
+    <!-- Purpose: Provide detailed, structured data to search engines to create rich results. -->
+    <!-- ================================================================= -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Sideline Chiangmai (SidelineCM)",
+      "url": "https://sidelinechiangmai.netlify.app/",
+      "inLanguage": "th-TH",
+      "description": "ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก 100% ปลอดภัย และไม่ต้องโอนมัดจำ",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "SidelineChiangmai",
+        "url": "https://sidelinechiangmai.netlify.app/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp",
+          "width": 245,
+          "height": 30
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "url": "https://line.me/ti/p/_faNcjQ3xx",
+          "availableLanguage": ["Thai"]
+        },
+        "sameAs": [
+          "https://line.me/ti/p/_faNcjQ3xx"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "เชียงใหม่",
+          "addressRegion": "เชียงใหม่",
+          "addressCountry": "TH"
+        }
+      },
+      "about": {
+        "@type": "Service",
+        "serviceType": "บริการไซด์ไลน์ฟีลแฟน",
+        "provider": {
+            "@type": "Organization",
+            "name": "SidelineChiangmai"
+        },
+        "areaServed": [
+            { "@type": "City", "name": "เชียงใหม่" },
+            { "@type": "City", "name": "ลำปาง" },
+            { "@type": "City", "name": "เชียงราย" }
+        ],
+        "description": "บริการระดับพรีเมียม การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ"
+      }
+    }
+    </script>
 </head>
 <body class="antialiased" data-page="home">
     
