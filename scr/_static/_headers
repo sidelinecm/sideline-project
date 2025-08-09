@@ -1,35 +1,22 @@
-/* Best practices security headers */
+/* 
+  SECURITY AND PERFORMANCE HEADERS
+  This file configures essential HTTP headers for the site.
+*/
+
+# --- Best practices security headers ---
+# Prevents the site from being embedded in iframes.
 X-Frame-Options: DENY
+# Enables the browser's built-in XSS protection.
 X-XSS-Protection: 1; mode=block
+# Prevents the browser from MIME-sniffing the content type.
 X-Content-Type-Options: nosniff
+# Controls how much referrer information is sent.
 Referrer-Policy: strict-origin-when-cross-origin
+# Disables features like camera, microphone by default.
 Permissions-Policy: geolocation=(), microphone=(), camera=()
 
-/*
-  Content Security Policy (CSP)
-  This is a strict policy to prevent cross-site scripting (XSS) attacks.
-  Each directive defines the allowed sources for a specific type of resource.
-*/
-Content-Security-Policy:
-  /* Default policy: only allow from self. */
-  default-src 'self'; 
 
-  /* Allow scripts from self and necessary CDNs. 'unsafe-inline' is often needed for small scripts. */
-  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; 
-
-  /* Allow styles from self, inline styles, and FontAwesome CDN. */
-  style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
-
-  /* --- THE FIX IS HERE --- */
-  /* Allow images from self, data URIs, and your Supabase CDN. */
-  /* We explicitly add the full domain to ensure clarity. */
-  img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co https://sidelinechiangmai.netlify.app;
-
-  /* Allow fonts from self and FontAwesome CDN. */
-  font-src 'self' https://cdnjs.cloudflare.com; 
-
-  /* Allow API connections to self, Supabase, and Google Analytics. */
-  connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co https://www.google-analytics.com;
-  
-  /* Disallow embedding of the site in frames. */
-  frame-ancestors 'none';
+# --- Content Security Policy (CSP) ---
+# This is a single, robust line that tells the browser what resources are safe to load.
+# It is the primary fix for images and icons not displaying.
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co; frame-ancestors 'none';
