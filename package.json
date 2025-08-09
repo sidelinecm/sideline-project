@@ -11,11 +11,11 @@
     "url": "https://github.com/sidelinecm/sideline-project.git"
   },
   "scripts": {
-    "start": "live-server dist --wait=100",
+    "start": "live-server dist",
     "watch": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
-    "build": "npm-run-all -s clean build:copy build:css",
+    "build": "npm-run-all -s clean copy build:css",
     "clean": "rimraf dist",
-    "build:copy": "npm-run-all -s copy:*",
+    "copy": "npm-run-all -s copy:*",
     "build:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --minify",
     "copy:html": "copyfiles -u 1 \"scr/**/*.html\" dist",
     "copy:js": "copyfiles -u 1 \"scr/main.js\" \"scr/sw.js\" dist",
