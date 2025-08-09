@@ -50,13 +50,12 @@
   }
 
   /* ================================================================= */
-  /* SECTION B: CORE SETUP & ENHANCEMENTS                            */
+  /* SECTION B: CORE SETUP, THEME & ENHANCEMENTS                     */
   /* ================================================================= */
   html {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* --- Keyframes, Color Variables, etc. --- */
   @keyframes aurora-1{0%{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(1turn)}}@keyframes aurora-2{0%{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-1turn)}}@keyframes shimmer{to{transform:translateX(100%)}}@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
   
   :root {
@@ -68,7 +67,8 @@
     --secondary: 257 84% 56%;
     --secondary-glow: 257 85% 65%;
     --muted: 220 25% 94%;
-    --muted-foreground: 220 12% 45%; 
+    /* [IMPROVEMENT] ปรับสีให้เข้มขึ้นเล็กน้อยเพื่อเพิ่ม Contrast */
+    --muted-foreground: 220 12% 40%; 
     --border: 220 20% 92%;
     --accent: 220 60% 96%;
     --overlay-backdrop: 225 15% 10%/0.6;
@@ -103,21 +103,33 @@
 }
 
 @layer components {
-  .skip-link{@apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:text-foreground focus:font-semibold focus:rounded-lg}
+  /* --- A: Layout & Navigation --- */
+  .skip-link{@apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 px-4 py-2 bg-card text-foreground font-semibold rounded-lg}
   #page-header{@apply fixed top-0 left-0 w-full z-40 border-b border-transparent;transition:background-color .3s,border-color .3s,box-shadow .3s}
   #page-header.scrolled{@apply bg-card/80 border-border shadow-lg backdrop-blur-sm dark:bg-background/80}
   nav a.active-nav-link{@apply text-primary font-semibold}
   
-  /* --- START: ส่วนที่แก้ไขการแสดงผล Sidebar Menu --- */
-  /* 1. กำหนดสไตล์เริ่มต้นของเมนู (ตอนที่ซ่อนอยู่) */
-  #sidebar nav a{@apply opacity-0 translate-x-[15px] rounded-lg transition-all duration-300 ease-in-out}
-  /* 2. กำหนดสไตล์เมื่อ Sidebar ถูกเปิด (เพิ่ม class .open) ซึ่งจะเขียนทับสไตล์เริ่มต้น */
-  #sidebar.open nav a{@apply opacity-100 translate-x-0}
-  /* --- END: ส่วนที่แก้ไขการแสดงผล Sidebar Menu --- */
+  /* [CRITICAL FIX] ลบโค้ดอนิเมชันของ Sidebar ที่ขัดแย้งกับ JS ทิ้งไป */
+  /* JavaScript (main.js) จะเป็นผู้รับผิดชอบอนิเมชันของลิงก์เมนูทั้งหมด */
 
   #sidebar nav a:hover{@apply text-primary bg-accent}
   #sidebar nav a.active-nav-link,#sidebar nav a:active{@apply text-primary bg-accent font-bold}
   #sidebar nav a.active-nav-link .text-muted-foreground{@apply text-primary}
+
+  /* --- B: Cards & Loaders --- */
+  .section-header-card{@apply text-center p-8}
+  .section-content-wrapper{@apply bg-card rounded-2xl shadow-sm border border-border}
+  .profile-card-new{@apply relative overflow-hidden rounded-xl bg-card shadow-md transition-all duration-300 ease-in-out}
+  .profile-card-new:hover{@apply shadow-xl -translate-y-1}
+  .card-image{@apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out;box-shadow:inset 0 0 15px 5px rgba(0,0,0,.15)}
+  .group:hover .card-image{@apply scale-110}
+  .card-overlay{@apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 text-white;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+  .card-info{@apply transition-transform duration-300 ease-out group-hover:-translate-y-1}
+  .skeleton-card{@apply relative w-full aspect-[3/4] rounded-xl bg-muted overflow-hidden}
+  .skeleton-card:after{content:'';@apply absolute top-0 right-0 bottom-0 left-0 translate-x-[-100%] animate-[shimmer_2s_infinite];background-image:linear-gradient(90deg,transparent,hsla(0,0%,100%,.05),transparent)}
+  html:not(.dark) .skeleton-card:after{background-image:linear-gradient(90deg,transparent,hsla(0,0%,0%,.04),transparent)}
+
+  /* --- C: Modals & Overlays (Age-Verification, Lightbox) --- */
   .overlay-backdrop{@apply bg-[--overlay-backdrop] backdrop-blur-sm}
   .modal-content{@apply bg-card rounded-2xl shadow-2xl}
   .btn-close-premium{@apply w-10 h-10 flex items-center justify-center rounded-full bg-background/50 text-foreground/70 transition-colors hover:bg-muted hover:text-foreground}
@@ -131,23 +143,12 @@
     transform: scale(0.95);
     transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
   }
-  
   @media screen and (max-width:480px){.age-modal-content{@apply p-5}.age-modal-content h2{@apply text-xl leading-snug}}
   .age-badge-inline{@apply inline-block bg-red-600 text-white text-base font-bold px-3 py-1 rounded-md align-middle mx-1}
   .age-btn{@apply w-full rounded-full py-3 text-base font-bold transition-transform duration-200 hover:scale-105}
   .age-btn-confirm{background-color:hsl(var(--primary));color:#fff}
   .age-btn-cancel{@apply bg-gray-700 text-white hover:bg-gray-600}
-  .section-header-card{@apply text-center p-8}
-  .section-content-wrapper{@apply bg-card rounded-2xl shadow-sm border border-border}
-  .profile-card-new{@apply relative overflow-hidden rounded-xl bg-card shadow-md transition-all duration-300 ease-in-out}
-  .profile-card-new:hover{@apply shadow-xl -translate-y-1}
-  .card-image{@apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out;box-shadow:inset 0 0 15px 5px rgba(0,0,0,.15)}
-  .group:hover .card-image{@apply scale-110}
-  .card-overlay{@apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 text-white;text-shadow:0 1px 4px rgba(0,0,0,.7)}
-  .card-info{@apply transition-transform duration-300 ease-out group-hover:-translate-y-1}
-  .skeleton-card{@apply relative w-full aspect-[3/4] rounded-xl bg-muted overflow-hidden}
-  .skeleton-card:after{content:'';@apply absolute top-0 right-0 bottom-0 left-0 translate-x-[-100%] animate-[shimmer_2s_infinite];background-image:linear-gradient(90deg,transparent,hsla(0,0%,100%,.05),transparent)}
-  html:not(.dark) .skeleton-card:after{background-image:linear-gradient(90deg,transparent,hsla(0,0%,0%,.04),transparent)}
+
   .hero-image-container{@apply w-full aspect-square overflow-hidden rounded-lg bg-muted}
   #lightboxHeroImage{@apply border-4 border-card shadow-lg}
   .thumbnail-strip{@apply flex gap-2 mt-3}
@@ -163,16 +164,20 @@
   .detail-list-item-icon{@apply text-primary/80}
   .detail-list-item .value{@apply font-medium text-sm text-foreground}
   
+  /* --- D: Buttons & Interactive Elements --- */
   .btn-line-shared{
     @apply w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-[#06C755] text-white font-semibold transition-all duration-200 hover:bg-[#05a546] hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-card;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   }
-  
   .retry-btn{@apply mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary/90 transition}
+
+  /* --- E: Error State & Messages --- */
   .error-state{@apply flex flex-col items-center justify-center gap-4}
   .error-icon{@apply w-16 h-16 text-red-500/50}
   .error-title{@apply text-xl font-bold text-foreground}
   .error-description{@apply text-base text-muted-foreground}
+
+  /* --- F: FAQ Component --- */
   .faq-item{@apply bg-card border border-border rounded-lg transition}
   .faq-question{@apply flex justify-between items-center w-full p-4 font-semibold text-left cursor-pointer}
   .faq-icon{@apply transition-transform duration-300 ease-in-out}
