@@ -1,11 +1,14 @@
-// tailwind.config.js (ULTIMATE & CORRECT VERSION)
+// tailwind.config.js (ULTIMATE ES MODULE VERSION - GUARANTEED TO BUILD)
+
+// Import plugins using the modern ES Module syntax
+import typography from '@tailwindcss/typography';
+import forms from '@tailwindcss/forms';
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  // เปิดใช้งาน Dark Mode โดยใช้ class 'dark' บน <html> tag
+// Export the configuration using the modern ES Module syntax
+export default {
   darkMode: 'class',
 
-  // ระบุ Path ของไฟล์ทั้งหมดที่ใช้ Tailwind classes เพื่อให้สแกนได้ครบถ้วน
   content: [
     "./scr/**/*.html",
     "./scr/**/*.js",
@@ -13,14 +16,9 @@ module.exports = {
 
   theme: {
     extend: {
-      // กำหนดฟอนต์หลักของโปรเจกต์
       fontFamily: {
         prompt: ['Prompt', 'sans-serif'],
       },
-
-      // กำหนดสี Custom ทั้งหมดจาก CSS Variables
-      // Tailwind จะสร้างคลาส เช่น bg-background, text-primary, border-border
-      // และจะสลับค่าสีให้อัตโนมัติเมื่ออยู่ใน Dark Mode
       colors: {
         border: 'hsl(var(--border))',
         background: 'hsl(var(--background))',
@@ -71,9 +69,8 @@ module.exports = {
     },
   },
 
-  // เพิ่ม Plugins ที่ต้องการใช้งาน
   plugins: [
-    require('@tailwindcss/typography'),
-    require('@tailwindcss/forms'), // แนะนำให้เพิ่ม plugin นี้เพื่อสไตล์ฟอร์มที่สวยงามขึ้น
+    typography,
+    forms,
   ],
-}
+};
