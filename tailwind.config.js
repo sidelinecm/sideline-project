@@ -1,26 +1,22 @@
-// tailwind.config.js (ULTIMATE ES MODULE VERSION)
-
-import typography from '@tailwindcss/typography';
-import forms from '@tailwindcss/forms';
-
 /** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  content: [ "./scr/**/*.html", "./scr/**/*.js" ],
+module.exports = {
   theme: {
     extend: {
-      // ... (เนื้อหา extend ทั้งหมดเหมือนเดิม) ...
-      colors: {
-        border: 'hsl(var(--border))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        // ... (สีทั้งหมดเหมือนเดิม) ...
+      keyframes: {
+        "aurora-1": {
+          "0%, 100%": { transform: "translateX(-10%) translateY(5%)" },
+          "50%": { transform: "translateX(10%) translateY(-5%)" },
+        },
+        "aurora-2": {
+          "0%, 100%": { transform: "translateX(10%) translateY(-5%)" },
+          "50%": { transform: "translateX(-10%) translateY(5%)" },
+        },
+      },
+      animation: {
+        "aurora-1": "aurora-1 20s ease-in-out infinite",
+        "aurora-2": "aurora-2 20s ease-in-out infinite",
       },
     },
   },
-  plugins: [
-    typography,
-    forms,
-  ],
+  plugins: [],
 };
-
