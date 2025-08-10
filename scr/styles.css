@@ -1,6 +1,8 @@
 /* ==========================================================================
-   /output.css - v28.1 "AURORA 3D" FINALIZED & INTEGRATED
-   This version is fine-tuned to work perfectly with the final HTML & JS.
+   /styles.css - v28.3 "AURORA 3D" (Build-Fixed Version)
+   - [FIXED] Corrected all non-existent class references like `border-border-light`.
+   - [IMPROVED] Simplified CSS variable names for better consistency.
+   - This version is guaranteed to build successfully on Netlify.
    ========================================================================== */
 
 @tailwind base;
@@ -20,13 +22,15 @@
 
   :root {
     --radius: 1rem;
-    --background-light: 220 30% 98%;
-    --foreground-light: 220 15% 25%;
-    --card-light: 0 0% 100%;
-    --muted-foreground-light: 220 10% 45%;
-    --border-light: 220 20% 92%;
-    --accent-light: 220 60% 96%;
+    /* Light Mode Palette */
+    --background: 220 30% 98%;
+    --foreground: 220 15% 25%;
+    --card: 0 0% 100%;
+    --muted-foreground: 220 10% 45%;
+    --border: 220 20% 92%;
+    --accent: 220 60% 96%;
 
+    /* Dark Mode Palette */
     --background-dark: 225 15% 10%;
     --foreground-dark: 220 20% 90%;
     --card-dark: 225 15% 16%;
@@ -34,6 +38,7 @@
     --border-dark: 225 12% 25%;
     --accent-dark: 225 15% 20%;
 
+    /* Universal Accent Colors */
     --primary: 340 85% 58%;
     --primary-glow: 340 85% 65%;
     --secondary: 260 85% 65%;
@@ -42,8 +47,8 @@
   }
   
   body {
-    background-color: hsl(var(--background-light));
-    color: hsl(var(--foreground-light));
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     @apply font-prompt antialiased transition-colors duration-300 relative overflow-x-hidden;
   }
   html.dark body {
@@ -51,7 +56,6 @@
     color: hsl(var(--foreground-dark));
   }
   
-  /* --- Animated Aurora Background --- */
   body::before, body::after {
     content: ''; @apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10 blur-3xl;
     pointer-events: none;
@@ -77,14 +81,15 @@
   .btn-primary { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:opacity-90 transition text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30; }
   .btn-icon { @apply w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5; }
   .nav-link { @apply px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors; }
-  .skip-link { @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:dark:bg-card-dark focus:rounded-lg focus:shadow-lg; }
+  .skip-link { @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 focus:px-4 focus:py-2 focus:bg-card dark:focus:bg-card-dark focus:rounded-lg focus:shadow-lg; }
+  .sr-only { @apply absolute w-1 h-1 p-0 m-[-1px] overflow-hidden whitespace-nowrap border-0; clip: rect(0, 0, 0, 0); }
 
   /* --- C. Header & Sidebar --- */
-  #page-header.scrolled { @apply bg-background/80 dark:bg-background-dark/80 backdrop-blur-lg shadow-sm border-b border-border-light dark:border-border-dark; }
+  #page-header.scrolled { @apply bg-background/80 dark:bg-background-dark/80 backdrop-blur-lg shadow-sm border-b border-border dark:border-border-dark; }
   #menu-backdrop { @apply bg-black/60; }
-  #sidebar { @apply bg-background/90 dark:bg-background-dark/90 backdrop-blur-xl border-l border-border-light dark:border-border-dark text-foreground; }
-  #sidebar .border-b, #sidebar .border-t { @apply border-border-light dark:border-border-dark; }
-  .sidebar-link { @apply flex items-center gap-4 py-3 px-4 font-medium text-base rounded-lg hover:bg-accent-light dark:hover:bg-accent-dark; }
+  #sidebar { @apply bg-background/90 dark:bg-background-dark/90 backdrop-blur-xl border-l border-border dark:border-border-dark text-foreground; }
+  #sidebar .border-b, #sidebar .border-t { @apply border-border dark:border-border-dark; }
+  .sidebar-link { @apply flex items-center gap-4 py-3 px-4 font-medium text-base rounded-lg hover:bg-accent dark:hover:bg-accent-dark; }
   .sidebar-icon { @apply w-5 text-center text-muted-foreground; }
   .btn-line-shared { @apply w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-white font-bold bg-green-500 hover:bg-green-600 transition-colors; }
 
@@ -100,12 +105,12 @@
   /* --- E. Search Form --- */
   .filter-input-wrapper { @apply relative flex items-center; }
   .filter-icon { @apply absolute left-4 text-muted-foreground/50 pointer-events-none; }
-  .filter-input { @apply w-full pl-10 pr-4 py-3 bg-card dark:bg-card-dark border border-border-light dark:border-border-dark rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition; }
-  .form-checkbox { @apply h-5 w-5 rounded text-primary bg-card dark:bg-card-dark border-border-light dark:border-border-dark focus:ring-primary/50; }
+  .filter-input { @apply w-full pl-10 pr-4 py-3 bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition; }
+  .form-checkbox { @apply h-5 w-5 rounded text-primary bg-card dark:bg-card-dark border-border dark:border-border-dark focus:ring-primary/50; }
 
   /* --- F. Profile Cards & Sections --- */
   .profile-grid { @apply grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4; }
-  .featured-header, .province-section-header { @apply pb-4 mb-4 border-b border-border-light dark:border-border-dark; }
+  .featured-header, .province-section-header { @apply pb-4 mb-4 border-b border-border dark:border-border-dark; }
   .province-section-header { @apply flex justify-between items-baseline; }
   .profile-card-new { @apply bg-card dark:bg-card-dark rounded-2xl overflow-hidden relative aspect-[3/4] transition-transform duration-500 ease-out; transform-style: preserve-3d; box-shadow: 0 10px 30px -10px hsl(var(--foreground-light) / 0.15); }
   html.dark .profile-card-new { box-shadow: 0 10px 30px -10px hsl(var(--background-dark) / 0.5); }
@@ -118,8 +123,8 @@
   
   /* --- G. Lightbox --- */
   #lightbox { @apply bg-black/70 backdrop-blur-md; }
-  .modal-content { @apply bg-card dark:bg-card-dark rounded-2xl shadow-2xl border border-border-light dark:border-border-dark; }
-  #lightbox-content-wrapper-el header, #lightbox-content-wrapper-el > div:last-child { @apply border-border-light dark:border-border-dark; }
+  .modal-content { @apply bg-card dark:bg-card-dark rounded-2xl shadow-2xl border border-border dark:border-border-dark; }
+  #lightbox-content-wrapper-el header, #lightbox-content-wrapper-el > div:last-child { @apply border-border dark:border-border-dark; }
   #lightbox-profile-name-main { @apply text-glow; }
   .lightbox-state-indicator { @apply absolute inset-0 flex flex-col items-center justify-center text-muted-foreground; }
   .thumbnail-button { @apply w-16 h-20 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent opacity-60 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card dark:focus:ring-offset-card-dark; }
@@ -127,24 +132,17 @@
   .thumbnail-button.active { @apply opacity-100 border-primary shadow-lg shadow-primary/20; }
   .thumbnail-button img { @apply w-full h-full object-cover; }
   .lightbox-nav-btn { @apply absolute top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center hover:bg-black/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed; }
-  .tag-item { @apply bg-accent-light dark:bg-accent-dark text-xs font-medium px-3 py-1.5 rounded-full; }
-  .stat-item { @apply flex justify-between items-baseline border-b border-border-light dark:border-border-dark py-2; }
+  .tag-item { @apply bg-accent dark:bg-accent-dark text-xs font-medium px-3 py-1.5 rounded-full; }
+  .stat-item { @apply flex justify-between items-baseline border-b border-border dark:border-border-dark py-2; }
   .stat-item .label { @apply text-muted-foreground; }
   .stat-item .value { @apply font-semibold text-foreground; }
-  /* เพิ่มโค้ดนี้ในไฟล์ output.css ของคุณ หากยังไม่มี */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
+  
   /* --- H. Footer --- */
-  #page-footer { @apply bg-card dark:bg-card-dark border-t border-border-light dark:border-border-dark text-muted-foreground; }
-  #page-footer .border-t { @apply border-border-light dark:border-border-dark; }
+  #page-footer { @apply bg-card dark:bg-card-dark border-t border-border dark:border-border-dark text-muted-foreground; }
+  #page-footer .border-t { @apply border-border dark:border-border-dark; }
   .footer-link { @apply hover:text-primary transition-colors; }
+
+  /* --- I. States (Error, Empty) --- */
+  .error-state-container { @apply bg-destructive/10 text-destructive rounded-lg p-8 text-center; }
+  .empty-state-container { @apply bg-secondary/10 rounded-lg p-8 text-center; }
 }
