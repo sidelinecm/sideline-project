@@ -46,35 +46,62 @@
     <!-- SECTION 5: ADVANCED PERFORMANCE OPTIMIZATION                    -->
     <!-- ================================================================= -->
     <!-- 1. Preconnect to critical origins -->
-    <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <!-- ===================================================================== -->
+<!-- SECTION 5: ADVANCED PERFORMANCE & RESOURCE OPTIMIZATION           -->
+<!-- ===================================================================== -->
 
-    <!-- 2. Preload critical assets: LCP Image (Responsive) & Fonts -->
-    <link rel="preload" as="image" fetchpriority="high"
-        href="/images/sideline-chiangmai-hero.webp"
-        imagesrcset="/images/sideline-chiangmai-hero-480.webp 480w, /images/sideline-chiangmai-hero-800.webp 800w, /images/sideline-chiangmai-hero-1200.webp 1200w"
-        imagesizes="100vw">
+<!-- 1. WARM UP CRITICAL CONNECTIONS -->
+<!-- Preconnect helps establish an early connection, including DNS lookup, TCP handshake, and TLS negotiation. -->
+<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+<!-- 2. PRELOAD CRITICAL "ABOVE-THE-FOLD" ASSETS -->
+<!-- This entire block tells the browser to fetch the most important render-blocking assets with the highest priority. -->
+
+<!-- LCP Image (Responsive): Fetches the most appropriate image size based on viewport width. -->
+<link rel="preload" as="image" fetchpriority="high"
+      href="/images/sideline-chiangmai-hero-1200.webp"
+      imagesrcset="/images/sideline-chiangmai-hero-480.webp 480w, /images/sideline-chiangmai-hero-800.webp 800w, /images/sideline-chiangmai-hero-1200.webp 1200w"
+      imagesizes="100vw">
     
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Core Fonts: Preload the fonts needed for immediate text rendering. -->
+<link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- 3. Inline Critical CSS -->
-    <style>
-      :root{--primary:#db2777;--background:#fff;--foreground:#111827}html.dark{--background:#111827;--foreground:#f3f4f6}html{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.5;background-color:var(--background);color:var(--foreground)}body{margin:0;opacity:0;transition:opacity .4s ease-in-out}.loaded body{opacity:1}#page-header{position:sticky;top:0;z-index:40;height:4.5rem;width:100%}.hero-section h1{font-size:1.875rem;font-weight:800}
-    </style>
+<!-- Main Stylesheet & Script: Ensure they are fetched early without blocking. -->
+<link rel="preload" href="/output.css" as="style">
+<link rel="preload" href="/main.js" as="script">
 
-    <!-- 4. Preload main stylesheet non-blocking -->
-    <link rel="preload" href="/output.css" as="style">
-    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
-    <noscript>
-      <link rel="stylesheet" href="/output.css">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    </noscript>
 
-    <!-- Preload main script -->
-    <link rel="preload" href="/main.js" as="script">
 
+<!-- This minimal CSS block is essential for preventing a "Flash of Unstyled Content" (FOUC). -->
+<style>
+  :root{--primary:#db2777;--background:#fff;--foreground:#111827}
+  html.dark{--background:#111827;--foreground:#f3f4f6}
+  html{font-family:system-ui,-apple-system,sans-serif;line-height:1.5;background-color:var(--background);color:var(--foreground)}
+  body{margin:0;opacity:0;transition:opacity .5s ease-in-out; will-change: opacity;}
+  .loaded body{opacity:1}
+  #page-header{position:sticky;top:0;z-index:40;height:4.5rem;width:100%}
+  .hero-section h1{font-size:1.875rem;font-weight:800}
+</style>
+
+
+<!-- 4. ASYNCHRONOUSLY LOAD NON-CRITICAL STYLESHEETS -->
+<!-- These stylesheets are loaded in a non-blocking way to ensure the fastest possible page render. -->
+
+<!-- Main Stylesheet (non-blocking) -->
+<link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+
+<!-- Font Awesome Icons (non-blocking) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" 
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" 
+      crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
+
+<!-- Fallback for users with JavaScript disabled -->
+<noscript>
+  <link rel="stylesheet" href="/output.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</noscript>
     <!-- ================================================================= -->
     <!-- SECTION 7: SCHEMA MARKUP (JSON-LD)                              -->
     <!-- ================================================================= -->

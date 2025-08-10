@@ -1,8 +1,8 @@
 /* ========================================================================
-   /src/styles.css - THE DEFINITIVE "CINEMATIC" VERSION
+   /src/styles.css - THE DEFINITIVE "CINEMATIC" VERSION (ACCESSIBILITY REFINED)
    
    Design Philosophy: Immersive, Premium, and Emotionally Engaging.
-   This stylesheet elevates the user experience to a new level of polish.
+   This version includes refined color tokens for perfect contrast and readability.
    ======================================================================== */
 
 /* 1. Import Tailwind's core layers */
@@ -34,7 +34,7 @@
     font-display: swap;
   }
   
-  /* --- B: THEME VARIABLES (NEW "LUXURY" PALETTE) --- */
+  /* --- B: THEME VARIABLES (REFINED LUXURY PALETTE) --- */
   :root {
     --background: 220 40% 98%;      /* Brighter, cleaner white */
     --foreground: 224 20% 25%;      /* Softer, deep blue-gray text */
@@ -44,10 +44,13 @@
     --secondary: 260 90% 60%;        /* Electric Violet */
     --secondary-glow: 260 100% 75%;
     --muted: 220 30% 95%;            /* Subtle light gray */
-    --muted-foreground: 220 15% 50%; /* Clearer muted text */
+
+    /* [ACCESSIBILITY FIX] Increased contrast for muted text */
+    --muted-foreground: 220 15% 40%; /* Darker for better readability */
+
     --border: 220 25% 90%;
     --accent: 345 100% 97%;          /* Very light pink accent */
-    --overlay-backdrop: 225 15% 10%/0.5; /* Lighter backdrop */
+    --overlay-backdrop: 225 15% 10%/0.5;
   }
   
   html.dark {
@@ -59,17 +62,19 @@
     --secondary: 260 100% 80%;       /* Bright Violet */
     --secondary-glow: 260 100% 85%;
     --muted: 225 15% 18%;
-    --muted-foreground: 220 15% 60%;
+
+    /* [ACCESSIBILITY FIX] Increased contrast for muted text in dark mode */
+    --muted-foreground: 220 15% 65%; /* Brighter for better readability */
+    
     --border: 225 15% 20%;
     --accent: 225 15% 15%;
-    --overlay-backdrop: 225 10% 5%/.8; /* Darker backdrop with more blur */
+    --overlay-backdrop: 225 10% 5%/.8;
   }
 
   /* --- C: ADVANCED GLOBAL STYLES & ANIMATIONS --- */
   @keyframes aurora-1 { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1.2); } 100% { transform: translate(-50%, -50%) rotate(360deg) scale(1.2); } }
   @keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); } 100% { transform: translate(-50%, -50%) rotate(-360deg) scale(1); } }
-  @keyframes subtle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-
+  
   html { -webkit-tap-highlight-color: transparent; }
   
   body {
@@ -83,7 +88,7 @@
   body.loaded { opacity: 1; }
   *:focus-visible { @apply outline-none ring-2 ring-offset-2 ring-primary ring-offset-background; }
   
-  /* Cinematic Aurora Background: More dynamic and colorful */
+  /* Cinematic Aurora Background */
   body:after, body:before {
     content:'';
     @apply fixed top-1/2 left-1/2 w-[100vmax] h-[100vmax] rounded-full -z-10 blur-[200px] opacity-[0.15] will-change-transform;
@@ -164,7 +169,6 @@
     @apply bg-card/60 dark:bg-card/80 backdrop-blur-sm border-2 border-transparent focus:border-primary;
   }
   
-  /* Replace default form button with premium button */
   #search-form button[type="submit"] {
     @apply btn-premium py-2;
   }
@@ -188,7 +192,3 @@
     box-shadow: 0 0 15px hsla(var(--primary-glow)/0.5);
   }
 }
-
-
-
-
