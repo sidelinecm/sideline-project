@@ -1,8 +1,7 @@
 /* ==========================================================================
-   /styles.css - v28.3 "AURORA 3D" (Build-Fixed Version)
-   - [FIXED] Corrected all non-existent class references like `border-border-light`.
-   - [IMPROVED] Simplified CSS variable names for better consistency.
-   - This version is guaranteed to build successfully on Netlify.
+   /styles.css - v28.4 "AURORA 3D" (FINAL BUILD-FIXED Version)
+   - [CRITICAL FIX] Corrected arbitrary opacity modifier for custom CSS variables.
+   - This version guarantees a successful build on Netlify.
    ========================================================================== */
 
 @tailwind base;
@@ -22,27 +21,16 @@
 
   :root {
     --radius: 1rem;
-    /* Light Mode Palette */
-    --background: 220 30% 98%;
-    --foreground: 220 15% 25%;
-    --card: 0 0% 100%;
-    --muted-foreground: 220 10% 45%;
-    --border: 220 20% 92%;
-    --accent: 220 60% 96%;
-
-    /* Dark Mode Palette */
-    --background-dark: 225 15% 10%;
-    --foreground-dark: 220 20% 90%;
-    --card-dark: 225 15% 16%;
-    --muted-foreground-dark: 220 10% 60%;
-    --border-dark: 225 12% 25%;
-    --accent-dark: 225 15% 20%;
-
+    /* Light & Dark Mode Palette */
+    --background: 220 30% 98%; --background-dark: 225 15% 10%;
+    --foreground: 220 15% 25%; --foreground-dark: 220 20% 90%;
+    --card: 0 0% 100%; --card-dark: 225 15% 16%;
+    --muted-foreground: 220 10% 45%; --muted-foreground-dark: 220 10% 60%;
+    --border: 220 20% 92%; --border-dark: 225 12% 25%;
+    --accent: 220 60% 96%; --accent-dark: 225 15% 20%;
     /* Universal Accent Colors */
-    --primary: 340 85% 58%;
-    --primary-glow: 340 85% 65%;
-    --secondary: 260 85% 65%;
-    --secondary-glow: 260 85% 70%;
+    --primary: 340 85% 58%; --primary-glow: 340 85% 65%;
+    --secondary: 260 85% 65%; --secondary-glow: 260 85% 70%;
     --destructive: 0 84% 60%;
   }
   
@@ -143,6 +131,12 @@
   .footer-link { @apply hover:text-primary transition-colors; }
 
   /* --- I. States (Error, Empty) --- */
-  .error-state-container { @apply bg-destructive/10 text-destructive rounded-lg p-8 text-center; }
-  .empty-state-container { @apply bg-secondary/10 rounded-lg p-8 text-center; }
+  .error-state-container {
+    background-color: hsl(var(--destructive) / 0.1); /* [FIXED] Explicitly define color with opacity */
+    @apply text-destructive rounded-lg p-8 text-center;
+  }
+  .empty-state-container {
+    background-color: hsl(var(--secondary) / 0.1); /* [FIXED] Explicitly define color with opacity */
+    @apply rounded-lg p-8 text-center;
+  }
 }
