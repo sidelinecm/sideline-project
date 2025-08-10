@@ -1,201 +1,136 @@
-/* ========================================================================
-   /src/styles.css - THE DEFINITIVE "CINEMATIC" VERSION (ACCESSIBILITY REFINED)
-   
-   Design Philosophy: Immersive, Premium, and Emotionally Engaging.
-   This version includes refined color tokens for perfect contrast and readability.
-   This is the complete and final source file for the Tailwind CSS build process.
-   ======================================================================== */
+/* ==========================================================================
+   /src/styles.css - v17.0 "MIDNIGHT NEON" EDITION
+   Design based on the "Velocity" layout with a new Pink/Purple/Black Glow theme.
+   ========================================================================== */
 
-/* 1. Import Tailwind's core layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 2. Define the core design system in the 'base' layer */
 @layer base {
-  /* --- A: OPTIMIZED FONT LOADING (Self-hosted) --- */
+  /* --- A: Font Loading --- */
   @font-face {
     font-family: 'Prompt'; font-style: normal; font-weight: 400;
-    src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Prompt'; font-style: normal; font-weight: 500;
-    src: url('/fonts/prompt-v11-latin_thai-500.woff2') format('woff2');
-    font-display: swap;
+    src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2'); font-display: swap;
   }
   @font-face {
     font-family: 'Prompt'; font-style: normal; font-weight: 700;
-    src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
-    font-display: swap;
+    src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2'); font-display: swap;
   }
   @font-face {
     font-family: 'Prompt'; font-style: normal; font-weight: 800;
-    src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
-    font-display: swap;
+    src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2'); font-display: swap;
   }
-  
-  /* --- B: THEME VARIABLES (REFINED LUXURY PALETTE) --- */
+
+  /* --- B: "MIDNIGHT NEON" DESIGN TOKENS --- */
   :root {
-    --background: 220 40% 98%;      /* Brighter, cleaner white */
-    --foreground: 224 20% 25%;      /* Softer, deep blue-gray text */
-    --card: 0 0% 100%;               /* Pure white for cards */
-    --primary: 345 90% 55%;          /* Vibrant, deep Magenta */
-    --primary-glow: 345 100% 70%;
-    --secondary: 260 90% 60%;        /* Electric Violet */
-    --secondary-glow: 260 100% 75%;
-    --muted: 220 30% 95%;            /* Subtle light gray */
-
-    /* [ACCESSIBILITY FIX] Increased contrast for muted text */
-    --muted-foreground: 220 15% 40%; /* Darker for better readability */
-
-    --border: 220 25% 90%;
-    --accent: 345 100% 97%;          /* Very light pink accent */
-    --overlay-backdrop: 225 15% 10%/0.5;
+    --radius: 1rem;
+    /* Light mode will be a variation of the dark theme */
+    --background: 225 20% 98%;      /* Off-white */
+    --foreground: 225 15% 15%;      /* Near-black text */
+    --card: 0 0% 100%;               /* Pure White */
+    --primary: 335 90% 50%;          /* Strong Pink */
+    --primary-glow: 335 95% 60%;
+    --secondary: 270 80% 55%;        /* Strong Purple */
+    --secondary-glow: 270 85% 65%;
+    --muted: 225 25% 95%;
+    --muted-foreground: 225 10% 40%;
+    --border: 225 20% 90%;
+    --soft-shadow-dark: hsl(225 15% 80%);
+    --soft-shadow-light: hsl(0 0% 100%);
   }
-  
   html.dark {
-    --background: 225 15% 8%;       /* Richer, deeper black */
-    --foreground: 220 25% 94%;
-    --card: 225 15% 12%;             /* Slightly lighter card */
-    --primary: 345 100% 75%;         /* Vivid Pink */
-    --primary-glow: 345 100% 80%;
-    --secondary: 260 100% 80%;       /* Bright Violet */
-    --secondary-glow: 260 100% 85%;
-    --muted: 225 15% 18%;
-
-    /* [ACCESSIBILITY FIX] Increased contrast for muted text in dark mode */
-    --muted-foreground: 220 15% 65%; /* Brighter for better readability */
-    
-    --border: 225 15% 20%;
-    --accent: 225 15% 15%;
-    --overlay-backdrop: 225 10% 5%/.8;
+    --background: 225 10% 4%;       /* True, deep black */
+    --foreground: 225 15% 88%;      /* Bright, clear text */
+    --card: 225 10% 9%;              /* Very dark card background */
+    --primary: 335 100% 70%;         /* Neon Pink */
+    --primary-glow: 335 100% 75%;
+    --secondary: 270 100% 75%;       /* Neon Purple */
+    --secondary-glow: 270 100% 80%;
+    --muted: 225 10% 12%;
+    --muted-foreground: 225 10% 60%;
+    --border: 225 10% 15%;
+    --soft-shadow-dark: hsl(225 10% 2%);
+    --soft-shadow-light: hsl(225 10% 12%);
   }
-
-  /* --- C: ADVANCED GLOBAL STYLES & ANIMATIONS --- */
-  @keyframes aurora-1 { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1.2); } 100% { transform: translate(-50%, -50%) rotate(360deg) scale(1.2); } }
-  @keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); } 100% { transform: translate(-50%, -50%) rotate(-360deg) scale(1); } }
   
-  html { -webkit-tap-highlight-color: transparent; }
-  
+  /* --- C: Global Styles --- */
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: theme('fontFamily.prompt'), system-ui, -apple-system, sans-serif;
-    @apply antialiased relative overflow-x-hidden;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    font-family: 'Prompt', sans-serif;
+    @apply antialiased;
   }
-  body.loaded { opacity: 1; }
-  *:focus-visible { @apply outline-none ring-2 ring-offset-2 ring-primary ring-offset-background; }
-  
-  /* Cinematic Aurora Background */
-  body:after, body:before {
-    content:'';
-    @apply fixed top-1/2 left-1/2 w-[100vmax] h-[100vmax] rounded-full -z-10 blur-[200px] opacity-[0.15] will-change-transform;
-  }
-  html.dark body:after, html.dark body:before { @apply opacity-25; }
-
-  body:before {
-    background: radial-gradient(circle, hsl(var(--primary-glow)) 0, transparent 40%);
-    animation: aurora-1 45s linear infinite;
-  }
-  body:after {
-    background: radial-gradient(circle, hsl(var(--secondary-glow)) 0, transparent 40%);
-    animation: aurora-2 55s linear infinite reverse;
-  }
+  h1, h2, h3 { font-weight: 800; }
 }
 
-/* 3. Define high-polish custom components */
 @layer components {
-  /* --- A: Cinematic Header & Navigation --- */
-  .skip-link {
-    @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-[9998] px-4 py-2 bg-card text-foreground font-semibold rounded-lg shadow-2xl;
-  }
-  #page-header {
-    @apply fixed top-0 left-0 w-full z-[9999] border-b border-transparent transition-all duration-300;
-  }
+  /* --- A: Core Layout & Header --- */
   #page-header.scrolled {
-    @apply bg-card/70 border-border shadow-xl backdrop-blur-xl dark:bg-background/70;
+    @apply bg-card/80 border-border shadow-md backdrop-blur-lg dark:bg-background/80;
   }
-  nav a.active-nav-link {
-    @apply text-primary font-bold;
+  .text-glow {
+    text-shadow: 0 0 25px hsl(var(--primary-glow) / 0.7), 0 0 8px hsl(var(--primary-glow) / 0.9);
+  }
+  
+  /* --- B: Soft UI "Glassmorphic" Components --- */
+  .soft-ui-card {
+    background-color: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px hsl(var(--soft-shadow-dark) / 0.3);
+    @apply transition-shadow duration-300;
+  }
+  .soft-ui-inset {
+    background-color: hsl(var(--muted));
+    border-radius: var(--radius);
+    box-shadow: inset 3px 3px 6px var(--soft-shadow-dark), inset -3px -3px 6px var(--soft-shadow-light);
   }
 
-  /* --- B: Premium Profile Cards --- */
+  /* --- C: Search Form & Filters --- */
+  #search-form-container { @apply soft-ui-card p-6; }
+  .filter-input { @apply w-full flex items-center gap-3 soft-ui-inset text-muted-foreground p-3 text-sm; }
+  .filter-input input, .filter-input select { @apply w-full bg-transparent border-none focus:ring-0; }
+  .filter-button { @apply px-6 py-2 rounded-full font-semibold transition-all duration-300; }
+  
+  .btn-search {
+    @apply filter-button text-white;
+    background: linear-gradient(145deg, hsl(var(--secondary)), hsl(var(--primary)));
+    box-shadow: 0 5px 20px -5px hsl(var(--primary-glow) / 0.6);
+  }
+  .btn-search:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 30px -5px hsl(var(--primary-glow) / 0.7);
+  }
+
+  /* --- D: Profile Cards --- */
   .profile-card-new {
-    @apply relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur-md transition-all duration-300 ease-out border border-white/10 dark:border-white/5;
-    box-shadow: 0 8px 32px 0 hsla(var(--foreground)/0.1);
+    @apply soft-ui-card overflow-hidden relative;
   }
-  .profile-card-new::before { /* Gradient Border on Hover */
-    content: "";
-    @apply absolute -inset-px rounded-2xl p-px opacity-0 transition-opacity duration-300;
-    background: linear-gradient(45deg, hsl(var(--secondary-glow)), hsl(var(--primary-glow)));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
+  .card-image { @apply w-full h-full object-cover aspect-[3/4]; }
+  .card-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4 text-white;
   }
-  .profile-card-new:hover::before { @apply opacity-100; }
-  .profile-card-new:hover { @apply shadow-2xl -translate-y-2; }
-  .card-image {
-    @apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out;
-  }
-  .group:hover .card-image { @apply scale-110 rotate-[-1deg]; }
-
-  /* --- C: Refined Typography --- */
-  h1, h2, #lightbox-profile-name-main {
-    @apply tracking-tighter bg-clip-text text-transparent;
-    background-image: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-  }
-  html.dark h1, html.dark h2, html.dark #lightbox-profile-name-main {
-    background-image: linear-gradient(45deg, hsl(var(--primary-glow)), white);
-  }
-
-  /* --- D: Immersive Modals --- */
-  .overlay-backdrop { @apply bg-[--overlay-backdrop] backdrop-blur-lg; }
-  .modal-content {
-    @apply bg-card/80 dark:bg-card/90 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl;
-  }
-  .age-modal-content {
-    @apply max-w-lg w-full p-8 text-center bg-gradient-to-br from-gray-900 via-[hsl(var(--secondary))] to-black text-white border-2 border-white/10 shadow-2xl rounded-2xl;
+  .card-badges { @apply absolute top-3 right-3 flex flex-col gap-2; }
+  .badge { @apply text-xs font-semibold px-3 py-1 rounded-full shadow-sm; }
+  .badge-yellow { @apply bg-yellow-400/80 text-yellow-900 backdrop-blur-sm border border-white/10; }
+  
+  /* --- E: Modals & Sidebar --- */
+  .overlay-backdrop { @apply bg-black/60 backdrop-blur-md; }
+  #sidebar { @apply bg-card/80 backdrop-blur-lg border-l border-border; }
+  #sidebar a { @apply soft-ui-card flex items-center gap-4 py-3 px-4 font-semibold text-base transition-all duration-200; }
+  #sidebar a:active, #sidebar a.active-nav-link {
+    @apply text-primary;
+    box-shadow: inset 4px 4px 8px var(--soft-shadow-dark), inset -4px -4px 8px var(--soft-shadow-light);
   }
   
-  /* --- E: Superior Buttons & Forms --- */
-  .btn-premium {
-    @apply w-full flex items-center justify-center gap-2 px-8 py-3 rounded-full text-base font-semibold text-white transition-all duration-300 ease-out;
-    background-size: 200% auto;
-    background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 100%);
-    box-shadow: 0 4px 15px 0 hsla(var(--primary)/0.4);
+  #age-verification-overlay .age-modal-content {
+    @apply bg-gray-900/80 backdrop-blur-xl border border-white/10 text-white rounded-2xl shadow-2xl p-8;
   }
-  .btn-premium:hover {
-    background-position: right center;
-    box-shadow: 0 8px 25px 0 hsla(var(--secondary)/0.4);
-    transform: translateY(-2px);
-  }
-  
-  #search-form input[type="search"] {
-    @apply bg-card/60 dark:bg-card/80 backdrop-blur-sm border-2 border-transparent focus:border-primary;
-  }
-  
-  #search-form button[type="submit"] {
-    @apply btn-premium py-2;
-  }
-
-  .btn-line-shared {
-    @apply w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-[#06C755] text-white font-semibold transition-all duration-200 hover:bg-[#05a546] hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-card;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  }
-
-  /* --- F: Lightbox Details Enhancement --- */
-  .thumbnail {
-    @apply w-16 h-16 rounded-lg object-cover cursor-pointer border-2 border-transparent transition-all duration-200 opacity-60 hover:opacity-100;
-    filter: saturate(0.8);
-  }
-  .thumbnail:hover, .thumbnail.active {
-    filter: saturate(1);
-    border-color: hsl(var(--primary));
-    transform: scale(1.05);
-  }
-  .thumbnail.active {
-    box-shadow: 0 0 15px hsla(var(--primary-glow)/0.5);
+  #age-verification-overlay .age-btn-confirm {
+    background: linear-gradient(145deg, hsl(var(--secondary)), hsl(var(--primary)));
+    @apply text-white border-none;
   }
 }
