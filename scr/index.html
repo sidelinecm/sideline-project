@@ -2,73 +2,72 @@
 <html lang="th" class="scroll-smooth">
 <head>
     <!-- ===================================================================== -->
-    <!-- SECTION 1: CORE METADATA & BROWSER HINTS                            -->
+    <!-- SECTION 1: CORE METADATA, SEO & VIEWPORT                            -->
     <!-- ===================================================================== -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-    <!-- ===================================================================== -->
-    <!-- SECTION 2: SEO - DEFINITIVE VERSION                                 -->
-    <!-- ===================================================================== -->
+    
+    <!-- SEO - Search Engine Optimization -->
     <title>SidelineCM: ไซด์ไลน์เชียงใหม่ พรีเมียม | ค้นหาตรงใจ ปลอดภัย 100%</title>
     <meta name="description" content="ค้นหาและสัมผัสประสบการณ์ไซด์ไลน์เชียงใหม่ (SidelineCM) ระดับพรีเมียม! น้องๆ ผ่านการคัดสรรมาอย่างดีในเชียงใหม่, ลำปาง, เชียงราย การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ">
     <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    
+
     <!-- ===================================================================== -->
-    <!-- SECTION 3: SOCIAL MEDIA & RICH SHARING (OG & Twitter Card)          -->
+    <!-- SECTION 2: SOCIAL MEDIA & RICH SHARING (OG & TWITTER CARD)          -->
     <!-- ===================================================================== -->
     <meta property="og:locale" content="th_TH">
     <meta property="og:site_name" content="Sideline Chiangmai">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
     <meta property="og:title" content="SidelineCM: ไซด์ไลน์เชียงใหม่ บริการฟีลแฟนระดับพรีเมียม">
     <meta property="og:description" content="คัดสรรน้องๆ ไซด์ไลน์คุณภาพในเชียงใหม่และจังหวัดใกล้เคียง การันตีโปรไฟล์ตรงปก 100% ปลอดภัย และไม่ต้องโอนมัดจำ">
-    <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
     <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
+    <!-- แนะนำให้เพิ่มขนาดรูปภาพสำหรับ OG Image เพื่อการแสดงผลที่ดีขึ้น -->
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
+    <!-- แนะนำให้เพิ่ม Twitter-specific tags หากต้องการควบคุมการแสดงผลบน Twitter โดยเฉพาะ -->
+    <meta name="twitter:title" content="SidelineCM: ไซด์ไลน์เชียงใหม่ บริการฟีลแฟนระดับพรีเมียม">
+    <meta name="twitter:description" content="คัดสรรน้องๆ ไซด์ไลน์คุณภาพในเชียงใหม่และจังหวัดใกล้เคียง การันตีโปรไฟล์ตรงปก 100% ปลอดภัย และไม่ต้องโอนมัดจำ">
+    <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
 
     <!-- ===================================================================== -->
-    <!-- SECTION 4: ICONS, PWA & THEME                                       -->
+    <!-- SECTION 3: ICONS, PWA & THEME                                       -->
     <!-- ===================================================================== -->
     <link rel="icon" href="/images/favicon.ico" sizes="any">
     <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     <link rel="manifest" href="/manifest.webmanifest">
+    
+    <!-- Theme Color สำหรับเบราว์เซอร์บนมือถือ -->
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f8fc">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121417">
 
     <!-- ===================================================================== -->
-    <!-- SECTION 5: ULTIMATE PERFORMANCE OPTIMIZATION                        -->
+    <!-- SECTION 4: PERFORMANCE - RESOURCE HINTS & STYLESHEETS             -->
     <!-- ===================================================================== -->
-      <!-- ===================================================================== -->
-    <!-- SECTION 5: ULTIMATE PERFORMANCE OPTIMIZATION                        -->
-    <!-- ===================================================================== -->
-
-    <!-- 1. อุ่นเครื่องการเชื่อมต่อล่วงหน้าไปยังโดเมนที่สำคัญ -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <!-- 4.1: อุ่นเครื่องการเชื่อมต่อล่วงหน้าไปยังโดเมนที่สำคัญ (DNS-Prefetch, Preconnect) -->
     <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-    <!-- 2. โหลดทรัพยากรที่สำคัญที่สุดล่วงหน้า (Preload) -->
+    <!-- 4.2: โหลดทรัพยากรที่สำคัญต่อการแสดงผลแรก (LCP) ล่วงหน้า -->
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-800.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/output.css" as="style">
-    <link rel="preload" href="/main.js" as="script">
-
-    <!-- 3. โหลด Stylesheets แบบไม่ขัดขวางการแสดงผล (Async CSS) เพื่อความเร็วสูงสุด -->
-    <!-- ไฟล์ CSS หลักของคุณ -->
-    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
     
-    <!-- ไฟล์ Font Awesome จาก CDN -->
+    <!-- 4.3: โหลด Stylesheets ที่จำเป็น (Standard Blocking CSS) -->
+    <!-- วิธีนี้คือวิธีที่ถูกต้องและเชื่อถือได้ที่สุด ทำให้มั่นใจว่าสไตล์จะถูกนำมาใช้ก่อนแสดงผล -->
+    <link rel="stylesheet" href="/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" 
           integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
+          crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- 4. Fallback สำหรับเบราว์เซอร์ที่ปิด JavaScript -->
-    <noscript>
-      <link rel="stylesheet" href="/output.css">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    </noscript>
-  <script type="application/ld+json">
+    <!-- ===================================================================== -->
+    <!-- SECTION 5: SCHEMA MARKUP (JSON-LD)                                  -->
+    <!-- ===================================================================== -->
+    <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
