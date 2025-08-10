@@ -1,13 +1,46 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // Add the content configuration here
+  // ตรวจสอบให้แน่ใจว่า path ถูกต้องตรงกับโครงสร้างโปรเจกต์ของคุณ
   content: [
     "./scr/**/*.{html,js}",
-    "./dist/**/*.html" // Also include output directory in case of post-processing
+    "./dist/**/*.html" 
   ],
   
   theme: {
     extend: {
+      // --- เพิ่มส่วนนี้เข้าไป ---
+      colors: {
+        border: 'hsl(var(--border))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+          glow: 'hsl(var(--primary-glow))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+          glow: 'hsl(var(--secondary-glow))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+      },
+      // --- สิ้นสุดส่วนที่เพิ่ม ---
       keyframes: {
         "aurora-1": {
           "0%, 100%": { transform: "translateX(-10%) translateY(5%)" },
@@ -24,5 +57,9 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  // เพิ่ม plugins ที่จำเป็นซึ่งมีอยู่ใน package.json ของคุณแล้ว
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+  ],
 };
