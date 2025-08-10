@@ -1,22 +1,37 @@
-/* 
-  SECURITY AND PERFORMANCE HEADERS
-  This file configures essential HTTP headers for the site.
-*/
-
-# --- Best practices security headers ---
-# Prevents the site from being embedded in iframes.
+# =================================================================
+# SECURITY HEADERS - แนวปฏิบัติที่ดีที่สุดเพื่อความปลอดภัย
+# =================================================================
 X-Frame-Options: DENY
-# Enables the browser's built-in XSS protection.
 X-XSS-Protection: 1; mode=block
-# Prevents the browser from MIME-sniffing the content type.
 X-Content-Type-Options: nosniff
-# Controls how much referrer information is sent.
 Referrer-Policy: strict-origin-when-cross-origin
-# Disables features like camera, microphone by default.
 Permissions-Policy: geolocation=(), microphone=(), camera=()
 
+# =================================================================
+# CONTENT SECURITY POLICY (CSP) - ควบคุมการโหลดทรัพยากร
+# **สำคัญมาก: แก้ปัญหาไอคอนและรูปภาพจาก CDN/Supabase ไม่แสดง**
+# =================================================================
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' wss://*.supabase.co https://*.supabase.co; frame-ancestors 'none';
 
-# --- Content Security Policy (CSP) ---
-# This is a single, robust line that tells the browser what resources are safe to load.
-# It is the primary fix for images and icons not displaying.
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co; frame-ancestors 'none';
+# =================================================================
+# CACHING POLICY - กำหนดการ Cache ให้มีประสิทธิภาพสูงสุด
+# =================================================================
+# ไฟล์ asset ที่ไม่ค่อยเปลี่ยน ให้ cache ค้างไว้ที่ browser นานที่สุด
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+/libs/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ไฟล์ HTML ให้ browser ตรวจสอบใหม่ทุกครั้งที่เข้ามา
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/profiles.html
+  Cache-Control: public, max-age=0, must-revalidate
