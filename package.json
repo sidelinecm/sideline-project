@@ -5,6 +5,7 @@
   "author": "sidelinecm",
   "license": "ISC",
   "private": true,
+  "type": "module",  
   "homepage": "https://sidelinechiangmai.netlify.app",
   "repository": {
     "type": "git",
@@ -15,25 +16,22 @@
     "watch": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --watch",
     "build": "npm-run-all -s clean copy build:css",
     "clean": "rimraf dist",
-    "copy": "npm-run-all -s copy:*",
+    "copy": "npm-run-all -p copy:*", 
     "build:css": "tailwindcss -i ./scr/styles.css -o ./dist/output.css --minify",
     "copy:html": "copyfiles -u 1 \"scr/**/*.html\" dist",
     "copy:js": "copyfiles -u 1 \"scr/main.js\" \"scr/sw.js\" dist",
-    "copy:css": "copyfiles -u 1 \"scr/all.min.css\" dist",
-    "copy:libs": "copyfiles -u 1 \"scr/libs/**/*.*\" dist",
     "copy:fonts": "copyfiles -u 1 \"scr/fonts/**/*.*\" dist",
-    "copy:webfonts": "copyfiles -u 1 \"scr/webfonts/**/*.*\" dist",
     "copy:images": "copyfiles -u 1 \"scr/images/**/*.*\" dist",
     "copy:icons": "copyfiles -u 1 \"scr/icons/**/*.*\" dist",
-    "copy:manifest": "copyfiles -u 1 \"scr/manifest.webmanifest\" dist",
-    "copy:configs": "copyfiles -u 1 \"scr/_headers\" dist"
+    "copy:manifest": "copyfiles -u 1 \"scr/manifest.webmanifest\" dist"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
     "copyfiles": "^2.4.1",
     "live-server": "^1.2.2",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.3.2",
+    "postcss": "^8.4.38",
     "rimraf": "^5.0.7",
     "tailwindcss": "^3.4.4"
   }
