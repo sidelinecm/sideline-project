@@ -3,6 +3,7 @@
    
    Design Philosophy: Immersive, Premium, and Emotionally Engaging.
    This version includes refined color tokens for perfect contrast and readability.
+   This is the complete and final source file for the Tailwind CSS build process.
    ======================================================================== */
 
 /* 1. Import Tailwind's core layers */
@@ -107,12 +108,18 @@
 
 /* 3. Define high-polish custom components */
 @layer components {
-  /* --- A: Cinematic Header --- */
+  /* --- A: Cinematic Header & Navigation --- */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-[9998] px-4 py-2 bg-card text-foreground font-semibold rounded-lg shadow-2xl;
+  }
   #page-header {
-    @apply fixed top-0 left-0 w-full z-40 border-b border-transparent transition-all duration-300;
+    @apply fixed top-0 left-0 w-full z-[9999] border-b border-transparent transition-all duration-300;
   }
   #page-header.scrolled {
     @apply bg-card/70 border-border shadow-xl backdrop-blur-xl dark:bg-background/70;
+  }
+  nav a.active-nav-link {
+    @apply text-primary font-bold;
   }
 
   /* --- B: Premium Profile Cards --- */
