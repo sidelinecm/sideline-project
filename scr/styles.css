@@ -1,142 +1,105 @@
 /* ==========================================================================
-   /styles.css - v28.4 "AURORA 3D" (FINAL BUILD-FIXED Version)
-   - [CRITICAL FIX] Corrected arbitrary opacity modifier for custom CSS variables.
-   - This version guarantees a successful build on Netlify.
+   /styles.css - v29.1 "TAILWIND NATIVE" (Guaranteed Build Success)
+   - CSS variables are defined here for both light and dark modes.
+   - Tailwind's config reads these variables to generate all utility classes.
+   - This is the most robust and standard way to work with Tailwind CSS.
    ========================================================================== */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- Keyframe Animations --- */
-@keyframes aurora-1 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-@keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
-@keyframes spin { to { transform: rotate(360deg); } }
-
 @layer base {
-  /* --- Font Loading & Design Tokens --- */
+  /* --- Base Font Loading --- */
   @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 400; src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2'); font-display: swap; }
   @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 700; src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2'); font-display: swap; }
   @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 800; src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2'); font-display: swap; }
 
+  /* --- CSS Variables for Tailwind Config --- */
   :root {
+    /* Light Mode Variables */
+    --background: 220 30% 98%; --foreground: 220 15% 25%;
+    --card: 0 0% 100%; --card-foreground: 220 15% 25%;
+    --muted: 220 30% 96%; --muted-foreground: 220 10% 45%;
+    --accent: 220 60% 96%; --accent-foreground: 220 15% 25%;
+    --border: 220 20% 92%;
     --radius: 1rem;
-    /* Light & Dark Mode Palette */
-    --background: 220 30% 98%; --background-dark: 225 15% 10%;
-    --foreground: 220 15% 25%; --foreground-dark: 220 20% 90%;
-    --card: 0 0% 100%; --card-dark: 225 15% 16%;
-    --muted-foreground: 220 10% 45%; --muted-foreground-dark: 220 10% 60%;
-    --border: 220 20% 92%; --border-dark: 225 12% 25%;
-    --accent: 220 60% 96%; --accent-dark: 225 15% 20%;
-    /* Universal Accent Colors */
-    --primary: 340 85% 58%; --primary-glow: 340 85% 65%;
-    --secondary: 260 85% 65%; --secondary-glow: 260 85% 70%;
-    --destructive: 0 84% 60%;
+
+    /* Universal Colors */
+    --primary: 340 85% 58%; --primary-foreground: 340 85% 98%; --primary-glow: 340 85% 65%;
+    --secondary: 260 85% 65%; --secondary-foreground: 260 85% 98%; --secondary-glow: 260 85% 70%;
+    --destructive: 0 84% 60%; --destructive-foreground: 0 84% 98%;
   }
-  
+
+  .dark {
+    /* Dark Mode Variables */
+    --background: 225 15% 10%; --foreground: 220 20% 90%;
+    --card: 225 15% 16%; --card-foreground: 220 20% 90%;
+    --muted: 225 15% 20%; --muted-foreground: 220 10% 60%;
+    --accent: 225 15% 20%; --accent-foreground: 220 20% 90%;
+    --border: 225 12% 25%;
+  }
+
+  /* --- Base Body & Aurora Background --- */
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    @apply font-prompt antialiased transition-colors duration-300 relative overflow-x-hidden;
-  }
-  html.dark body {
-    background-color: hsl(var(--background-dark));
-    color: hsl(var(--foreground-dark));
+    @apply bg-background text-foreground;
   }
   
   body::before, body::after {
-    content: ''; @apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10 blur-3xl;
-    pointer-events: none;
+    content: ''; @apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10 blur-3xl pointer-events-none;
   }
-  html:not(.dark) body::before { @apply bg-[radial-gradient(circle,hsl(var(--primary))_0%,transparent_40%)] opacity-10; animation: aurora-1 30s linear infinite; }
-  html:not(.dark) body::after { @apply bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_40%)] opacity-10; animation: aurora-2 40s linear infinite reverse; }
-  html.dark body::before { @apply bg-[radial-gradient(circle,hsl(var(--primary-glow))_0%,transparent_40%)] opacity-20; animation: aurora-1 30s linear infinite; }
-  html.dark body::after { @apply bg-[radial-gradient(circle,hsl(var(--secondary-glow))_0%,transparent_40%)] opacity-10; animation: aurora-2 40s linear infinite reverse; }
+  html:not(.dark) body::before { @apply bg-[radial-gradient(circle,hsl(var(--primary))_0%,transparent_40%)] opacity-10 animate-aurora-1; }
+  html:not(.dark) body::after { @apply bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_40%)] opacity-10 animate-aurora-2; }
+  html.dark body::before { @apply bg-[radial-gradient(circle,hsl(var(--primary-glow))_0%,transparent_40%)] opacity-20 animate-aurora-1; }
+  html.dark body::after { @apply bg-[radial-gradient(circle,hsl(var(--secondary-glow))_0%,transparent_40%)] opacity-10 animate-aurora-2; }
 
-  .text-glow { text-shadow: 0 0 15px hsl(var(--primary-glow) / 0.6), 0 0 3px hsl(var(--primary-glow) / 0.8); }
+  .text-glow { @apply text-primary-glow; text-shadow: 0 0 15px hsl(var(--primary-glow) / 0.6), 0 0 3px hsl(var(--primary-glow) / 0.8); }
 }
 
 @layer components {
-  /* --- A. Preloader & Initial State --- */
-  .preloader { @apply fixed inset-0 z-[9999] bg-background-dark flex items-center justify-center transition-all duration-500 ease-in-out; }
-  .preloader-spinner { @apply w-12 h-12 border-4 border-white/20 border-t-primary rounded-full; animation: spin 1s linear infinite; }
+  /* --- Preloader & Initial State --- */
+  .preloader { @apply fixed inset-0 z-[9999] bg-background flex items-center justify-center transition-all duration-500 ease-in-out; }
+  .preloader-spinner { @apply w-12 h-12 border-4 border-border border-t-primary rounded-full animate-spin; }
   .preloader.loaded { @apply opacity-0 invisible; }
   body.init > *:not(#preloader) { @apply opacity-0 transition-opacity duration-500 ease-in-out; }
   body.ready > *:not(#preloader) { @apply opacity-100; }
   
-  /* --- B. General UI Components --- */
+  /* --- General UI Components --- */
   .container { @apply w-full max-w-7xl; }
-  .btn-primary { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:opacity-90 transition text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30; }
-  .btn-icon { @apply w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5; }
-  .nav-link { @apply px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors; }
-  .skip-link { @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 focus:px-4 focus:py-2 focus:bg-card dark:focus:bg-card-dark focus:rounded-lg focus:shadow-lg; }
-  .sr-only { @apply absolute w-1 h-1 p-0 m-[-1px] overflow-hidden whitespace-nowrap border-0; clip: rect(0, 0, 0, 0); }
-
-  /* --- C. Header & Sidebar --- */
-  #page-header.scrolled { @apply bg-background/80 dark:bg-background-dark/80 backdrop-blur-lg shadow-sm border-b border-border dark:border-border-dark; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full hover:opacity-90 transition text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30; }
+  .btn-icon { @apply w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent; }
+  .nav-link { @apply px-4 py-2 rounded-full transition-colors hover:bg-accent; }
+  .skip-link { @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 focus:px-4 focus:py-2 focus:bg-card focus:rounded-lg focus:shadow-lg; }
+  
+  /* --- Header & Sidebar --- */
+  #page-header.scrolled { @apply bg-background/80 backdrop-blur-lg shadow-sm border-b border-border; }
   #menu-backdrop { @apply bg-black/60; }
-  #sidebar { @apply bg-background/90 dark:bg-background-dark/90 backdrop-blur-xl border-l border-border dark:border-border-dark text-foreground; }
-  #sidebar .border-b, #sidebar .border-t { @apply border-border dark:border-border-dark; }
-  .sidebar-link { @apply flex items-center gap-4 py-3 px-4 font-medium text-base rounded-lg hover:bg-accent dark:hover:bg-accent-dark; }
+  #sidebar { @apply bg-background/90 backdrop-blur-xl border-l border-border text-foreground; }
+  #sidebar .border-b, #sidebar .border-t { @apply border-border; }
+  .sidebar-link { @apply flex items-center gap-4 py-3 px-4 font-medium text-base rounded-lg hover:bg-accent; }
   .sidebar-icon { @apply w-5 text-center text-muted-foreground; }
   .btn-line-shared { @apply w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-white font-bold bg-green-500 hover:bg-green-600 transition-colors; }
 
-  /* --- D. Age Verification Modal --- */
-  #age-verification-overlay { @apply bg-background-dark/80 backdrop-blur-lg; }
-  .age-modal-content { @apply bg-gradient-to-br from-card-dark/90 to-background-dark/90 border border-white/10 text-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center; }
-  .age-modal-content h2 .text-primary { text-shadow: 0 0 20px hsl(var(--primary-glow) / 0.9); }
-  .age-badge-inline { @apply inline-block bg-red-600 text-white font-bold px-3 py-1 rounded-md; }
-  .age-btn { @apply w-full rounded-lg py-3 text-base font-bold transition-all duration-300 transform hover:scale-105; }
-  .age-btn-confirm { @apply text-white border border-transparent; background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary))); box-shadow: 0 6px 20px hsl(var(--primary) / 0.3); }
-  .age-btn-cancel { @apply bg-white/10 text-muted-foreground-dark border border-white/20 hover:bg-white/20; }
+  /* --- Age Verification Modal --- */
+  .age-modal-content { @apply bg-gradient-to-br from-card/90 to-background/90 border border-white/10 text-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center; }
   
-  /* --- E. Search Form --- */
+  /* --- Search Form --- */
   .filter-input-wrapper { @apply relative flex items-center; }
   .filter-icon { @apply absolute left-4 text-muted-foreground/50 pointer-events-none; }
-  .filter-input { @apply w-full pl-10 pr-4 py-3 bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition; }
-  .form-checkbox { @apply h-5 w-5 rounded text-primary bg-card dark:bg-card-dark border-border dark:border-border-dark focus:ring-primary/50; }
+  .filter-input { @apply w-full pl-10 pr-4 py-3 bg-card border border-border rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition; }
+  .form-checkbox { @apply h-5 w-5 rounded text-primary bg-card border-border focus:ring-primary/50; }
 
-  /* --- F. Profile Cards & Sections --- */
+  /* --- Profile Cards & Sections --- */
   .profile-grid { @apply grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4; }
-  .featured-header, .province-section-header { @apply pb-4 mb-4 border-b border-border dark:border-border-dark; }
+  .featured-header, .province-section-header { @apply pb-4 mb-4 border-b border-border; }
   .province-section-header { @apply flex justify-between items-baseline; }
-  .profile-card-new { @apply bg-card dark:bg-card-dark rounded-2xl overflow-hidden relative aspect-[3/4] transition-transform duration-500 ease-out; transform-style: preserve-3d; box-shadow: 0 10px 30px -10px hsl(var(--foreground-light) / 0.15); }
+  .profile-card-new { @apply bg-card rounded-2xl overflow-hidden relative aspect-[3/4] transition-transform duration-500 ease-out; transform-style: preserve-3d; box-shadow: 0 10px 30px -10px hsl(var(--foreground-light) / 0.15); }
   html.dark .profile-card-new { box-shadow: 0 10px 30px -10px hsl(var(--background-dark) / 0.5); }
-  .profile-card-new:hover { box-shadow: 0 25px 50px -15px hsl(var(--foreground-light) / 0.3); transform: translateZ(20px); }
-  html.dark .profile-card-new:hover { box-shadow: 0 25px 50px -15px hsl(var(--background-dark) / 0.8); }
-  .card-image { @apply absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out; }
-  .profile-card-new:hover .card-image { @apply scale-110; }
-  .card-overlay { @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 flex flex-col justify-end text-white z-10; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-  .view-more-btn { @apply bg-primary text-white font-semibold py-2.5 px-6 rounded-full hover:opacity-90 transition-opacity; }
   
-  /* --- G. Lightbox --- */
-  #lightbox { @apply bg-black/70 backdrop-blur-md; }
-  .modal-content { @apply bg-card dark:bg-card-dark rounded-2xl shadow-2xl border border-border dark:border-border-dark; }
-  #lightbox-content-wrapper-el header, #lightbox-content-wrapper-el > div:last-child { @apply border-border dark:border-border-dark; }
-  #lightbox-profile-name-main { @apply text-glow; }
-  .lightbox-state-indicator { @apply absolute inset-0 flex flex-col items-center justify-center text-muted-foreground; }
-  .thumbnail-button { @apply w-16 h-20 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent opacity-60 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card dark:focus:ring-offset-card-dark; }
-  .thumbnail-button:hover { @apply opacity-100 border-primary/50; }
-  .thumbnail-button.active { @apply opacity-100 border-primary shadow-lg shadow-primary/20; }
-  .thumbnail-button img { @apply w-full h-full object-cover; }
-  .lightbox-nav-btn { @apply absolute top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center hover:bg-black/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed; }
-  .tag-item { @apply bg-accent dark:bg-accent-dark text-xs font-medium px-3 py-1.5 rounded-full; }
-  .stat-item { @apply flex justify-between items-baseline border-b border-border dark:border-border-dark py-2; }
-  .stat-item .label { @apply text-muted-foreground; }
-  .stat-item .value { @apply font-semibold text-foreground; }
+  /* --- Lightbox --- */
+  .modal-content { @apply bg-card rounded-2xl shadow-2xl border border-border; }
   
-  /* --- H. Footer --- */
-  #page-footer { @apply bg-card dark:bg-card-dark border-t border-border dark:border-border-dark text-muted-foreground; }
-  #page-footer .border-t { @apply border-border dark:border-border-dark; }
-  .footer-link { @apply hover:text-primary transition-colors; }
-
-  /* --- I. States (Error, Empty) --- */
-  .error-state-container {
-    background-color: hsl(var(--destructive) / 0.1); /* [FIXED] Explicitly define color with opacity */
-    @apply text-destructive rounded-lg p-8 text-center;
-  }
-  .empty-state-container {
-    background-color: hsl(var(--secondary) / 0.1); /* [FIXED] Explicitly define color with opacity */
-    @apply rounded-lg p-8 text-center;
-  }
+  /* --- States (Error, Empty) --- */
+  .error-state-container { @apply bg-destructive/10 text-destructive rounded-lg p-8 text-center; }
+  .empty-state-container { @apply bg-secondary/10 text-secondary-foreground rounded-lg p-8 text-center; }
 }
