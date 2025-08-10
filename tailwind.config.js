@@ -1,5 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Add the content configuration here
+  content: [
+    "./scr/**/*.{html,js}",
+    "./dist/**/*.html" // Also include output directory in case of post-processing
+  ],
+  
   theme: {
     extend: {
       keyframes: {
