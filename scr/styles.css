@@ -1,93 +1,76 @@
+/* ========================================================================
+   /src/styles.css - THE DEFINITIVE "CINEMATIC" VERSION
+   
+   Design Philosophy: Immersive, Premium, and Emotionally Engaging.
+   This stylesheet elevates the user experience to a new level of polish.
+   ======================================================================== */
+
+/* 1. Import Tailwind's core layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* 2. Define the core design system in the 'base' layer */
 @layer base {
-  /* ================================================================= */
-  /* SECTION A: OPTIMIZED FONT LOADING                               */
-  /* ================================================================= */
+  /* --- A: OPTIMIZED FONT LOADING (Self-hosted) --- */
   @font-face {
-    font-family: 'Prompt';
-    font-style: normal;
-    font-weight: 400; /* regular */
+    font-family: 'Prompt'; font-style: normal; font-weight: 400;
     src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
     font-display: swap;
   }
   @font-face {
-    font-family: 'Prompt';
-    font-style: normal;
-    font-weight: 500; /* medium */
+    font-family: 'Prompt'; font-style: normal; font-weight: 500;
     src: url('/fonts/prompt-v11-latin_thai-500.woff2') format('woff2');
     font-display: swap;
   }
   @font-face {
-    font-family: 'Prompt';
-    font-style: normal;
-    font-weight: 700; /* bold */
+    font-family: 'Prompt'; font-style: normal; font-weight: 700;
     src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
     font-display: swap;
   }
   @font-face {
-    font-family: 'Prompt';
-    font-style: normal;
-    font-weight: 800; /* extrabold */
+    font-family: 'Prompt'; font-style: normal; font-weight: 800;
     src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
     font-display: swap;
   }
-  @font-face {
-    font-family: 'Sarabun';
-    font-style: normal;
-    font-weight: 400; /* regular */
-    src: url('/fonts/sarabun-v16-latin_thai-regular.woff2') format('woff2');
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Sarabun';
-    font-style: normal;
-    font-weight: 700; /* bold */
-    src: url('/fonts/sarabun-v16-latin_thai-700.woff2') format('woff2');
-    font-display: swap;
-  }
-
-  /* ================================================================= */
-  /* SECTION B: CORE SETUP, THEME & ENHANCEMENTS                     */
-  /* ================================================================= */
-  html {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  @keyframes aurora-1{0%{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(1turn)}}@keyframes aurora-2{0%{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-1turn)}}@keyframes shimmer{to{transform:translateX(100%)}}@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
   
+  /* --- B: THEME VARIABLES (NEW "LUXURY" PALETTE) --- */
   :root {
-    --background: 220 20% 98%;
-    --foreground: 220 15% 25%;
-    --card: 0 0% 100%;
-    --primary: 336 78% 48%;
-    --primary-glow: 336 85% 62%;
-    --secondary: 257 84% 56%;
-    --secondary-glow: 257 85% 65%;
-    --muted: 220 25% 94%;
-    /* [IMPROVEMENT] ปรับสีให้เข้มขึ้นเล็กน้อยเพื่อเพิ่ม Contrast */
-    --muted-foreground: 220 12% 40%; 
-    --border: 220 20% 92%;
-    --accent: 220 60% 96%;
-    --overlay-backdrop: 225 15% 10%/0.6;
+    --background: 220 40% 98%;      /* Brighter, cleaner white */
+    --foreground: 224 20% 25%;      /* Softer, deep blue-gray text */
+    --card: 0 0% 100%;               /* Pure white for cards */
+    --primary: 345 90% 55%;          /* Vibrant, deep Magenta */
+    --primary-glow: 345 100% 70%;
+    --secondary: 260 90% 60%;        /* Electric Violet */
+    --secondary-glow: 260 100% 75%;
+    --muted: 220 30% 95%;            /* Subtle light gray */
+    --muted-foreground: 220 15% 50%; /* Clearer muted text */
+    --border: 220 25% 90%;
+    --accent: 345 100% 97%;          /* Very light pink accent */
+    --overlay-backdrop: 225 15% 10%/0.5; /* Lighter backdrop */
   }
   
   html.dark {
-    --background: 225 15% 10%;
-    --foreground: 220 20% 90%;
-    --card: 225 15% 16%;
-    --primary: 340 90% 68%;
-    --primary-glow: 340 95% 72%;
-    --secondary: 260 90% 75%;
-    --secondary-glow: 260 95% 80%;
-    --muted: 225 15% 20%;
-    --muted-foreground: 220 15% 70%;
-    --border: 225 12% 25%;
-    --accent: 225 15% 20%;
-    --overlay-backdrop: 225 15% 10%/.8;
+    --background: 225 15% 8%;       /* Richer, deeper black */
+    --foreground: 220 25% 94%;
+    --card: 225 15% 12%;             /* Slightly lighter card */
+    --primary: 345 100% 75%;         /* Vivid Pink */
+    --primary-glow: 345 100% 80%;
+    --secondary: 260 100% 80%;       /* Bright Violet */
+    --secondary-glow: 260 100% 85%;
+    --muted: 225 15% 18%;
+    --muted-foreground: 220 15% 60%;
+    --border: 225 15% 20%;
+    --accent: 225 15% 15%;
+    --overlay-backdrop: 225 10% 5%/.8; /* Darker backdrop with more blur */
   }
+
+  /* --- C: ADVANCED GLOBAL STYLES & ANIMATIONS --- */
+  @keyframes aurora-1 { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1.2); } 100% { transform: translate(-50%, -50%) rotate(360deg) scale(1.2); } }
+  @keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); } 100% { transform: translate(-50%, -50%) rotate(-360deg) scale(1); } }
+  @keyframes subtle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  html { -webkit-tap-highlight-color: transparent; }
   
   body {
     background-color: hsl(var(--background));
@@ -95,92 +78,117 @@
     font-family: theme('fontFamily.prompt'), system-ui, -apple-system, sans-serif;
     @apply antialiased relative overflow-x-hidden;
     opacity: 0;
-    transition: opacity 0.4s ease-in-out;
+    transition: opacity 0.5s ease-in-out;
   }
   body.loaded { opacity: 1; }
   *:focus-visible { @apply outline-none ring-2 ring-offset-2 ring-primary ring-offset-background; }
-  .text-primary,h1.text-primary{text-shadow:0 0 12px hsl(var(--primary-glow)/.6),0 1px 2px hsl(var(--primary)/.5)}.text-secondary,h1 .text-secondary{text-shadow:0 0 12px hsl(var(--secondary-glow)/.5),0 1px 2px hsl(var(--secondary)/.4)}body:after,body:before{content:'';@apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10 blur-[150px] opacity-15}html:not(.dark) body:before{background:radial-gradient(circle,hsl(var(--primary)) 0,transparent 40%);animation:aurora-1 30s linear infinite}html:not(.dark) body:after{background:radial-gradient(circle,hsl(var(--secondary)) 0,transparent 40%);animation:aurora-2 40s linear infinite reverse}html.dark body:before{@apply opacity-20;background:radial-gradient(circle,hsl(var(--primary-glow)) 0,transparent 40%);animation:aurora-1 30s linear infinite}html.dark body:after{@apply opacity-15;background:radial-gradient(circle,hsl(var(--secondary-glow)) 0,transparent 40%);animation:aurora-2 40s linear infinite reverse}
+  
+  /* Cinematic Aurora Background: More dynamic and colorful */
+  body:after, body:before {
+    content:'';
+    @apply fixed top-1/2 left-1/2 w-[100vmax] h-[100vmax] rounded-full -z-10 blur-[200px] opacity-[0.15] will-change-transform;
+  }
+  html.dark body:after, html.dark body:before { @apply opacity-25; }
+
+  body:before {
+    background: radial-gradient(circle, hsl(var(--primary-glow)) 0, transparent 40%);
+    animation: aurora-1 45s linear infinite;
+  }
+  body:after {
+    background: radial-gradient(circle, hsl(var(--secondary-glow)) 0, transparent 40%);
+    animation: aurora-2 55s linear infinite reverse;
+  }
 }
 
+/* 3. Define high-polish custom components */
 @layer components {
-  /* --- A: Layout & Navigation --- */
-  .skip-link{@apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 px-4 py-2 bg-card text-foreground font-semibold rounded-lg}
-  #page-header{@apply fixed top-0 left-0 w-full z-40 border-b border-transparent;transition:background-color .3s,border-color .3s,box-shadow .3s}
-  #page-header.scrolled{@apply bg-card/80 border-border shadow-lg backdrop-blur-sm dark:bg-background/80}
-  nav a.active-nav-link{@apply text-primary font-semibold}
-  
-  /* [CRITICAL FIX] ลบโค้ดอนิเมชันของ Sidebar ที่ขัดแย้งกับ JS ทิ้งไป */
-  /* JavaScript (main.js) จะเป็นผู้รับผิดชอบอนิเมชันของลิงก์เมนูทั้งหมด */
-
-  #sidebar nav a:hover{@apply text-primary bg-accent}
-  #sidebar nav a.active-nav-link,#sidebar nav a:active{@apply text-primary bg-accent font-bold}
-  #sidebar nav a.active-nav-link .text-muted-foreground{@apply text-primary}
-
-  /* --- B: Cards & Loaders --- */
-  .section-header-card{@apply text-center p-8}
-  .section-content-wrapper{@apply bg-card rounded-2xl shadow-sm border border-border}
-  .profile-card-new{@apply relative overflow-hidden rounded-xl bg-card shadow-md transition-all duration-300 ease-in-out}
-  .profile-card-new:hover{@apply shadow-xl -translate-y-1}
-  .card-image{@apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out;box-shadow:inset 0 0 15px 5px rgba(0,0,0,.15)}
-  .group:hover .card-image{@apply scale-110}
-  .card-overlay{@apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4 text-white;text-shadow:0 1px 4px rgba(0,0,0,.7)}
-  .card-info{@apply transition-transform duration-300 ease-out group-hover:-translate-y-1}
-  .skeleton-card{@apply relative w-full aspect-[3/4] rounded-xl bg-muted overflow-hidden}
-  .skeleton-card:after{content:'';@apply absolute top-0 right-0 bottom-0 left-0 translate-x-[-100%] animate-[shimmer_2s_infinite];background-image:linear-gradient(90deg,transparent,hsla(0,0%,100%,.05),transparent)}
-  html:not(.dark) .skeleton-card:after{background-image:linear-gradient(90deg,transparent,hsla(0,0%,0%,.04),transparent)}
-
-  /* --- C: Modals & Overlays (Age-Verification, Lightbox) --- */
-  .overlay-backdrop{@apply bg-[--overlay-backdrop] backdrop-blur-sm}
-  .modal-content{@apply bg-card rounded-2xl shadow-2xl}
-  .btn-close-premium{@apply w-10 h-10 flex items-center justify-center rounded-full bg-background/50 text-foreground/70 transition-colors hover:bg-muted hover:text-foreground}
-  
-  #age-verification-overlay{
-    @apply overlay-backdrop;
-    transition: opacity 0.3s ease-in-out;
+  /* --- A: Cinematic Header --- */
+  #page-header {
+    @apply fixed top-0 left-0 w-full z-40 border-b border-transparent transition-all duration-300;
   }
-  .age-modal-content{
-    @apply max-w-lg w-full p-6 sm:p-8 text-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white border border-gray-700 shadow-2xl rounded-2xl;
-    transform: scale(0.95);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  #page-header.scrolled {
+    @apply bg-card/70 border-border shadow-xl backdrop-blur-xl dark:bg-background/70;
   }
-  @media screen and (max-width:480px){.age-modal-content{@apply p-5}.age-modal-content h2{@apply text-xl leading-snug}}
-  .age-badge-inline{@apply inline-block bg-red-600 text-white text-base font-bold px-3 py-1 rounded-md align-middle mx-1}
-  .age-btn{@apply w-full rounded-full py-3 text-base font-bold transition-transform duration-200 hover:scale-105}
-  .age-btn-confirm{background-color:hsl(var(--primary));color:#fff}
-  .age-btn-cancel{@apply bg-gray-700 text-white hover:bg-gray-600}
 
-  .hero-image-container{@apply w-full aspect-square overflow-hidden rounded-lg bg-muted}
-  #lightboxHeroImage{@apply border-4 border-card shadow-lg}
-  .thumbnail-strip{@apply flex gap-2 mt-3}
-  .thumbnail{@apply w-16 h-16 rounded-md object-cover cursor-pointer border-2 border-transparent transition-all duration-200 opacity-60 hover:opacity-100 hover:border-primary/70;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-  .thumbnail.active{@apply border-primary opacity-100 ring-2 ring-offset-2 ring-primary ring-offset-card}
-  #lightboxDetailsCompact{@apply space-y-4 pt-5 border-t border-border}
-  .availability-badge{@apply font-semibold px-4 py-1.5 rounded-full text-center text-sm}
-  .stats-grid{@apply grid grid-cols-3 gap-3 bg-accent p-3 rounded-lg}
-  .stat-item{@apply text-center}
-  .stat-item .label{@apply text-xs text-muted-foreground mb-0.5}
-  .stat-item .value{@apply font-bold text-sm text-foreground}
-  .detail-list-item{@apply flex items-center gap-3 py-1}
-  .detail-list-item-icon{@apply text-primary/80}
-  .detail-list-item .value{@apply font-medium text-sm text-foreground}
+  /* --- B: Premium Profile Cards --- */
+  .profile-card-new {
+    @apply relative overflow-hidden rounded-2xl bg-card/50 backdrop-blur-md transition-all duration-300 ease-out border border-white/10 dark:border-white/5;
+    box-shadow: 0 8px 32px 0 hsla(var(--foreground)/0.1);
+  }
+  .profile-card-new::before { /* Gradient Border on Hover */
+    content: "";
+    @apply absolute -inset-px rounded-2xl p-px opacity-0 transition-opacity duration-300;
+    background: linear-gradient(45deg, hsl(var(--secondary-glow)), hsl(var(--primary-glow)));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+  }
+  .profile-card-new:hover::before { @apply opacity-100; }
+  .profile-card-new:hover { @apply shadow-2xl -translate-y-2; }
+  .card-image {
+    @apply w-full h-full object-cover aspect-[3/4] transition-transform duration-500 ease-in-out;
+  }
+  .group:hover .card-image { @apply scale-110 rotate-[-1deg]; }
+
+  /* --- C: Refined Typography --- */
+  h1, h2, #lightbox-profile-name-main {
+    @apply tracking-tighter bg-clip-text text-transparent;
+    background-image: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+  }
+  html.dark h1, html.dark h2, html.dark #lightbox-profile-name-main {
+    background-image: linear-gradient(45deg, hsl(var(--primary-glow)), white);
+  }
+
+  /* --- D: Immersive Modals --- */
+  .overlay-backdrop { @apply bg-[--overlay-backdrop] backdrop-blur-lg; }
+  .modal-content {
+    @apply bg-card/80 dark:bg-card/90 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl;
+  }
+  .age-modal-content {
+    @apply max-w-lg w-full p-8 text-center bg-gradient-to-br from-gray-900 via-[hsl(var(--secondary))] to-black text-white border-2 border-white/10 shadow-2xl rounded-2xl;
+  }
   
-  /* --- D: Buttons & Interactive Elements --- */
-  .btn-line-shared{
+  /* --- E: Superior Buttons & Forms --- */
+  .btn-premium {
+    @apply w-full flex items-center justify-center gap-2 px-8 py-3 rounded-full text-base font-semibold text-white transition-all duration-300 ease-out;
+    background-size: 200% auto;
+    background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 100%);
+    box-shadow: 0 4px 15px 0 hsla(var(--primary)/0.4);
+  }
+  .btn-premium:hover {
+    background-position: right center;
+    box-shadow: 0 8px 25px 0 hsla(var(--secondary)/0.4);
+    transform: translateY(-2px);
+  }
+  
+  #search-form input[type="search"] {
+    @apply bg-card/60 dark:bg-card/80 backdrop-blur-sm border-2 border-transparent focus:border-primary;
+  }
+  
+  /* Replace default form button with premium button */
+  #search-form button[type="submit"] {
+    @apply btn-premium py-2;
+  }
+
+  .btn-line-shared {
     @apply w-full flex items-center justify-center gap-3 py-3 px-5 rounded-full bg-[#06C755] text-white font-semibold transition-all duration-200 hover:bg-[#05a546] hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-card;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   }
-  .retry-btn{@apply mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary/90 transition}
 
-  /* --- E: Error State & Messages --- */
-  .error-state{@apply flex flex-col items-center justify-center gap-4}
-  .error-icon{@apply w-16 h-16 text-red-500/50}
-  .error-title{@apply text-xl font-bold text-foreground}
-  .error-description{@apply text-base text-muted-foreground}
-
-  /* --- F: FAQ Component --- */
-  .faq-item{@apply bg-card border border-border rounded-lg transition}
-  .faq-question{@apply flex justify-between items-center w-full p-4 font-semibold text-left cursor-pointer}
-  .faq-icon{@apply transition-transform duration-300 ease-in-out}
-  .faq-item[open]>summary .faq-icon{@apply rotate-180}
-  .faq-answer{@apply px-4 pb-4 text-muted-foreground;animation:fadeIn .3s ease-in-out}
+  /* --- F: Lightbox Details Enhancement --- */
+  .thumbnail {
+    @apply w-16 h-16 rounded-lg object-cover cursor-pointer border-2 border-transparent transition-all duration-200 opacity-60 hover:opacity-100;
+    filter: saturate(0.8);
+  }
+  .thumbnail:hover, .thumbnail.active {
+    filter: saturate(1);
+    border-color: hsl(var(--primary));
+    transform: scale(1.05);
+  }
+  .thumbnail.active {
+    box-shadow: 0 0 15px hsla(var(--primary-glow)/0.5);
+  }
 }
+
+
+
+
