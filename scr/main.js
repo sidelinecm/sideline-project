@@ -42,141 +42,299 @@
                 currentPage: 'home'
             };
 
-            // Bind 'this' for all class methods used as event handlers
-            this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
-            this.handleViewMore = this.handleViewMore.bind(this);
-            this.handleFilterChange = this.handleFilterChange.bind(this);
-            this.handleFilterReset = this.handleFilterReset.bind(this);
-            this.handleLightboxInteraction = this.handleLightboxInteraction.bind(this);
-            this.handleMobileMenuInteraction = this.handleMobileMenuInteraction.bind(this);
+/* ---------- Paste these lines into your class constructor and class body ---------- */
 
-            this.init();
-        }
+/* ----------------- In constructor (bind handlers + start init) ----------------- */
+const handlersToBind = [
+  'handleGlobalKeydown',
+  'handleViewMore',
+  'handleFilterChange',
+  'handleFilterReset',
+  'handleLightboxInteraction',
+  'handleMobileMenuInteraction'
+];
 
-        init() {
-            try {
-                this.cacheDOMElements();
-                if (!this.dom.body) throw new Error("CRITICAL: <body> element not found.");
-                
-                this.state.currentPage = this.dom.body.dataset.page || 'home';
-                
-                this.initImmediateUI();
-                this.initCoreLogic();
-                this.init3DCardEffect(); // <<< 3D EFFECT IS INITIALIZED HERE
-            } catch (error) {
-                console.error("FATAL: App initialization failed:", error);
-            }
-        }
-        
-        initImmediateUI() {
-            if(this.dom.yearSpan) this.dom.yearSpan.textContent = new Date().getFullYear();
-            this.dom.body.classList.add('js-loaded');
-            this.initThemeToggle();
-            this.initMobileMenu();
-            this.initHeaderScrollEffect();
-            this.initBackToTop();
-        }
+handlersToBind.forEach(name => {
+  if (typeof this[name] === 'function') this[name] = this[name].bind(this);
+});
 
-        async initCoreLogic() {
-            try {
-                this.showContentState('loading');
-                await this.loadSupabaseClient();
-                await this.initAgeVerification();
-                
-                const success = await this.fetchData();
-                if (success) {
-                    this.initFilters();
-                    this.initLightbox();
-                    this.applyFiltersFromURL();
-                    this.initDeferredTasks();
-                    this.generateFullSchema();
-                } else {
-                    this.showContentState('error');
-                }
-            } catch (error) {
-                console.error("Error in initCoreLogic:", error);
-                this.showContentState('error', "เกิดข้อผิดพลาดในการโหลดข้อมูลหลัก");
-            }
-        }
-        
-        initDeferredTasks() {
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(() => this.loadAnimationScripts(), { timeout: 2000 });
-            } else {
-                setTimeout(() => this.loadAnimationScripts(), 1500);
-            }
-        }
+// Ensure internal handler store exists (used to avoid duplicate listeners)
+this._handlers = this._handlers || {};
 
-        // --- 2. DOM & EVENT SETUP ---
+// Start initialization
+this.init();
 
-        cacheDOMElements() {
-            const selectors = {
-                body: document.body,
-                yearSpan: '#currentYearDynamic',
-                pageHeader: '#page-header',
-                profilesContentArea: '#profiles-display-area',
-                featuredSection: '#featured-profiles',
-                featuredContainer: '#featured-profiles-container',
-                filterForm: '#search-form',
-                filterKeyword: '#search-keyword',
-                filterProvince: '#search-province',
-                filterAvailability: '#search-availability',
-                filterFeatured: '#search-featured',
-                resetFiltersBtn: '#reset-search-btn',
-                menuToggle: '#menu-toggle',
-                sidebar: '#sidebar',
-                closeSidebarBtn: '#close-sidebar-btn',
-                backdrop: '#menu-backdrop',
-                ageVerificationOverlay: '#age-verification-overlay',
-                confirmAgeButton: '#confirmAgeButton',
-                cancelAgeButton: '#cancelAgeButton',
-                lightbox: '#lightbox',
-                lightboxContentWrapper: '#lightbox-content-wrapper-el',
-                closeLightboxBtn: '#closeLightboxBtn',
-                lightboxHeaderTitle: '#lightbox-header-title',
-                lightboxHeroImage: '#lightboxHeroImage',
-                lightboxProfileName: '#lightbox-profile-name-main',
-                lightboxQuote: '#lightboxQuote',
-                lightboxTags: '#lightboxTags',
-                lightboxDetails: '#lightboxDetailsCompact',
-                lightboxDescription: '#lightboxDescriptionVal',
-                lightboxLineLink: '#lightboxLineLink',
-                lightboxLineLinkText: '#lightboxLineLinkText',
-                lightboxPrevBtn: '#lightbox-prev-btn',
-                lightboxNextBtn: '#lightbox-next-btn',
-                lightboxThumbnailStrip: '#lightboxThumbnailStrip',
-                backToTopBtn: document.getElementById('back-to-top'),
-                noResultsMessage: '#no-results-message',
-                fetchErrorMessage: '#fetch-error-message'
-            };
-            for (const key in selectors) {
-                try {
-                    this.dom[key] = document.querySelector(selectors[key]);
-                } catch (e) { this.dom[key] = null; }
-            }
-        }
 
-        initFilters() {
-            if (!this.dom.filterForm) return;
-            const debouncedFilter = this.debounce(this.handleFilterChange, this.CONFIG.DEBOUNCE_DELAY);
-            this.dom.filterForm.addEventListener('input', debouncedFilter);
-            this.dom.filterForm.addEventListener('reset', this.handleFilterReset);
-        }
-        
-        initLightbox() {
-            if (!this.dom.lightbox) return;
-            this.dom.body.addEventListener('click', this.handleLightboxInteraction);
-            document.addEventListener('keydown', this.handleGlobalKeydown);
-        }
+init() {
+  try {
+    // Resolve DOM refs safely
+    this.cacheDOMElements();
 
-        initMobileMenu() {
-            if (!this.dom.menuToggle || !this.dom.sidebar) return;
-            this.dom.menuToggle.addEventListener('click', this.handleMobileMenuInteraction);
-            this.dom.closeSidebarBtn.addEventListener('click', this.handleMobileMenuInteraction);
-            this.dom.backdrop.addEventListener('click', this.handleMobileMenuInteraction);
-            document.addEventListener('keydown', this.handleGlobalKeydown);
-        }
+    // Ensure body fallback (defensive: sometimes cacheDOMElements may fail early)
+    if (!this.dom || !this.dom.body) {
+      this.dom = this.dom || {};
+      this.dom.body = document.body || document.querySelector('body') || null;
+    }
 
+    if (!this.dom.body) throw new Error("CRITICAL: <body> element not found.");
+
+    // safe dataset read
+    try {
+      this.state = this.state || {};
+      this.state.currentPage = (this.dom.body.dataset && this.dom.body.dataset.page) ? this.dom.body.dataset.page : 'home';
+    } catch (e) {
+      this.state = this.state || {};
+      this.state.currentPage = 'home';
+    }
+
+    // Immediate UI updates (should be quick and resilient)
+    this.initImmediateUI();
+
+    // Start heavy or async logic but don't block painting; catch any unexpected rejections
+    (async () => {
+      try {
+        await this.initCoreLogic();
+      } catch (e) {
+        // initCoreLogic has its own try/catch, but guard here to avoid unhandled rejection
+        console.error('initCoreLogic (outer) error:', e);
+      }
+    })();
+
+    // 3D card effect — non-blocking, isolated try/catch so it cannot break init
+    try {
+      if (typeof this.init3DCardEffect === 'function') this.init3DCardEffect();
+    } catch (e) {
+      console.warn('init3DCardEffect failed (non-fatal):', e);
+    }
+
+  } catch (error) {
+    console.error("FATAL: App initialization failed:", error);
+    // Optional: show friendly error UI / remove hiding class so user sees something
+    try { document.body && document.body.classList.remove('opacity-0'); } catch(e){}
+  }
+}
+
+initImmediateUI() {
+  // Year stamp
+  try {
+    if (this.dom && this.dom.yearSpan && 'textContent' in this.dom.yearSpan) {
+      this.dom.yearSpan.textContent = new Date().getFullYear();
+    }
+  } catch (e) { console.warn('initImmediateUI: yearSpan error', e); }
+
+  // Mark JS loaded (if body exists)
+  try {
+    if (this.dom && this.dom.body && this.dom.body.classList) {
+      this.dom.body.classList.add('js-loaded');
+      // If you used a hide-on-load class such as opacity-0, remove it here defensively
+      this.dom.body.classList.remove('opacity-0');
+    }
+  } catch (e) { console.warn('initImmediateUI: body class error', e); }
+
+  // Initialize small UI bits but protect each call (so one failure won't stop others)
+  try { if (typeof this.initThemeToggle === 'function') this.initThemeToggle(); } catch(e){ console.warn('initThemeToggle failed', e); }
+  try { if (typeof this.initMobileMenu === 'function') this.initMobileMenu(); } catch(e){ console.warn('initMobileMenu failed', e); }
+  try { if (typeof this.initHeaderScrollEffect === 'function') this.initHeaderScrollEffect(); } catch(e){ console.warn('initHeaderScrollEffect failed', e); }
+  try { if (typeof this.initBackToTop === 'function') this.initBackToTop(); } catch(e){ console.warn('initBackToTop failed', e); }
+}
+
+async initCoreLogic() {
+  try {
+    this.showContentState && this.showContentState('loading');
+    await this.loadSupabaseClient && this.loadSupabaseClient();
+    await this.initAgeVerification && this.initAgeVerification();
+
+    const success = await (this.fetchData ? this.fetchData() : Promise.resolve(false));
+    if (success) {
+      // Filters & UI that depend on data — attach safely
+      try { this.initFilters(); } catch(e){ console.warn('initFilters failed', e); }
+      try { this.initLightbox(); } catch(e){ console.warn('initLightbox failed', e); }
+      try { this.applyFiltersFromURL && this.applyFiltersFromURL(); } catch(e){ console.warn('applyFiltersFromURL failed', e); }
+      try { this.initDeferredTasks(); } catch(e){ console.warn('initDeferredTasks failed', e); }
+      try { this.generateFullSchema && this.generateFullSchema(); } catch(e){ console.warn('generateFullSchema failed', e); }
+      this.showContentState && this.showContentState('ready');
+    } else {
+      this.showContentState && this.showContentState('error');
+    }
+  } catch (error) {
+    console.error("Error in initCoreLogic:", error);
+    this.showContentState && this.showContentState('error', "เกิดข้อผิดพลาดในการโหลดข้อมูลหลัก");
+  }
+}
+
+initDeferredTasks() {
+  const load = () => {
+    try { if (typeof this.loadAnimationScripts === 'function') this.loadAnimationScripts(); } catch(e){ console.warn('loadAnimationScripts failed', e); }
+  };
+
+  if ('requestIdleCallback' in window) {
+    try { requestIdleCallback(load, { timeout: 2000 }); } catch (e) { setTimeout(load, 1500); }
+  } else {
+    setTimeout(load, 1500);
+  }
+}
+
+
+
+cacheDOMElements() {
+  // Ensure this.dom exists and is a clean container (but preserve if already has useful refs)
+  this.dom = this.dom || {};
+
+  // Define selectors (strings preferred) — if you passed element references earlier they will be accepted too
+  const selectors = {
+    body: document.body, // OK to use direct reference (will be handled)
+    yearSpan: '#currentYearDynamic',
+    pageHeader: '#page-header',
+    profilesContentArea: '#profiles-display-area',
+    featuredSection: '#featured-profiles',
+    featuredContainer: '#featured-profiles-container',
+    filterForm: '#search-form',
+    filterKeyword: '#search-keyword',
+    filterProvince: '#search-province',
+    filterAvailability: '#search-availability',
+    filterFeatured: '#search-featured',
+    resetFiltersBtn: '#reset-search-btn',
+    menuToggle: '#menu-toggle',
+    sidebar: '#sidebar',
+    closeSidebarBtn: '#close-sidebar-btn',
+    backdrop: '#menu-backdrop',
+    ageVerificationOverlay: '#age-verification-overlay',
+    confirmAgeButton: '#confirmAgeButton',
+    cancelAgeButton: '#cancelAgeButton',
+    lightbox: '#lightbox',
+    lightboxContentWrapper: '#lightbox-content-wrapper-el',
+    closeLightboxBtn: '#closeLightboxBtn',
+    lightboxHeaderTitle: '#lightbox-header-title',
+    lightboxHeroImage: '#lightboxHeroImage',
+    lightboxProfileName: '#lightbox-profile-name-main',
+    lightboxQuote: '#lightboxQuote',
+    lightboxTags: '#lightboxTags',
+    lightboxDetails: '#lightboxDetailsCompact',
+    lightboxDescription: '#lightboxDescriptionVal',
+    lightboxLineLink: '#lightboxLineLink',
+    lightboxLineLinkText: '#lightboxLineLinkText',
+    lightboxPrevBtn: '#lightbox-prev-btn',
+    lightboxNextBtn: '#lightbox-next-btn',
+    lightboxThumbnailStrip: '#lightboxThumbnailStrip',
+    backToTopBtn: () => document.getElementById('back-to-top'), // function-return fallback
+    noResultsMessage: '#no-results-message',
+    fetchErrorMessage: '#fetch-error-message'
+  };
+
+  for (const key in selectors) {
+    const val = selectors[key];
+    try {
+      // null/undefined guard
+      if (val == null) { this.dom[key] = null; continue; }
+
+      // If a string selector — use querySelector
+      if (typeof val === 'string') {
+        try {
+          this.dom[key] = document.querySelector(val) || null;
+        } catch (e) {
+          // in case of invalid selector syntax
+          console.warn(`cacheDOMElements: invalid selector for "${key}":`, val, e);
+          this.dom[key] = null;
+        }
+        continue;
+      }
+
+      // If a function — call it (useful for getElementById that must run after DOM ready)
+      if (typeof val === 'function') {
+        try {
+          const result = val();
+          this.dom[key] = result instanceof Node ? result : (result && result.length ? result : (result || null));
+        } catch (e) {
+          console.warn(`cacheDOMElements: function selector failed for "${key}"`, e);
+          this.dom[key] = null;
+        }
+        continue;
+      }
+
+      // NodeList or Array => keep as-is
+      if (NodeList && val instanceof NodeList) { this.dom[key] = val; continue; }
+      if (Array.isArray(val)) { this.dom[key] = val; continue; }
+
+      // Element / Document / Window / Node
+      if (val instanceof Element || val instanceof Document || val instanceof Window || (val && typeof val.nodeType === 'number')) {
+        this.dom[key] = val;
+        continue;
+      }
+
+      // Fallback: try to string-convert and query
+      try {
+        const maybe = String(val);
+        this.dom[key] = maybe ? (document.querySelector(maybe) || null) : null;
+      } catch (e) {
+        this.dom[key] = null;
+      }
+
+    } catch (e) {
+      console.warn(`cacheDOMElements: unexpected resolution error for "${key}"`, e);
+      this.dom[key] = null;
+    }
+  }
+}
+
+/* --------------------- Filters, Lightbox, Mobile Menu (safe) --------------------- */
+
+initFilters() {
+  if (!this.dom || !this.dom.filterForm) return;
+
+  // Keep a stable reference to the debounced handler so we can remove it later if needed
+  this._handlers = this._handlers || {};
+  if (!this._handlers.debouncedFilter) {
+    const delay = (this.CONFIG && this.CONFIG.DEBOUNCE_DELAY) ? this.CONFIG.DEBOUNCE_DELAY : 300;
+    this._handlers.debouncedFilter = this.debounce ? this.debounce(this.handleFilterChange, delay) : this.handleFilterChange;
+  }
+
+  // Remove previous listeners (idempotent) then add
+  try { this.dom.filterForm.removeEventListener('input', this._handlers.debouncedFilter); } catch(e){}
+  this.dom.filterForm.addEventListener('input', this._handlers.debouncedFilter);
+
+  try { this.dom.filterForm.removeEventListener('reset', this.handleFilterReset); } catch(e){}
+  this.dom.filterForm.addEventListener('reset', this.handleFilterReset);
+}
+
+initLightbox() {
+  if (!this.dom || !this.dom.lightbox) return;
+
+  this._handlers = this._handlers || {};
+
+  // Attach body click only once (delegated)
+  if (!this._handlers.lightboxClick) {
+    this._handlers.lightboxClick = this.handleLightboxInteraction;
+    try { this.dom.body.addEventListener('click', this._handlers.lightboxClick); } catch(e){ console.warn('initLightbox: body click attach failed', e); }
+  }
+
+  // Global keydown for navigation / escape — attach once
+  if (!this._handlers.globalKeydown) {
+    this._handlers.globalKeydown = this.handleGlobalKeydown;
+    try { document.addEventListener('keydown', this._handlers.globalKeydown); } catch(e){ console.warn('initLightbox: keydown attach failed', e); }
+  }
+}
+
+initMobileMenu() {
+  if (!this.dom || !this.dom.menuToggle || !this.dom.sidebar) return;
+
+  this._handlers = this._handlers || {};
+
+  // Single handler reference for mobile menu interactions
+  if (!this._handlers.mobileMenuInteraction) {
+    this._handlers.mobileMenuInteraction = this.handleMobileMenuInteraction;
+    try { this.dom.menuToggle.addEventListener('click', this._handlers.mobileMenuInteraction); } catch(e){ console.warn('initMobileMenu: menuToggle attach failed', e); }
+    try { if (this.dom.closeSidebarBtn) this.dom.closeSidebarBtn.addEventListener('click', this._handlers.mobileMenuInteraction); } catch(e){ console.warn('initMobileMenu: closeSidebarBtn attach failed', e); }
+    try { if (this.dom.backdrop) this.dom.backdrop.addEventListener('click', this._handlers.mobileMenuInteraction); } catch(e){ console.warn('initMobileMenu: backdrop attach failed', e); }
+  }
+
+  // Global keydown (avoid double-binding if already attached)
+  if (!this._handlers.globalKeydown) {
+    this._handlers.globalKeydown = this.handleGlobalKeydown;
+    try { document.addEventListener('keydown', this._handlers.globalKeydown); } catch(e){ console.warn('initMobileMenu: keydown attach failed', e); }
+  }
+}
+
+/* ---------- End of paste block ---------- */
         // --- 3. DYNAMIC SCRIPT LOADING ---
         
         async loadSupabaseClient() {
