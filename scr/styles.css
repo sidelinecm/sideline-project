@@ -1,7 +1,6 @@
 /* ==========================================================================
-   /src/styles.css - v28.0 "AURORA 3D" ULTIMATE DESIGN
-   This version integrates the high-tech, 3D, and vivid aesthetics from
-   the latest provided code, elevating the final version to a new level.
+   /output.css - v28.1 "AURORA 3D" FINALIZED & INTEGRATED
+   This version is fine-tuned to work perfectly with the final HTML & JS.
    ========================================================================== */
 
 @tailwind base;
@@ -11,25 +10,23 @@
 /* --- Keyframe Animations --- */
 @keyframes aurora-1 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 @keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
-@keyframes shimmer { 100% { transform: translateX(100%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 @layer base {
-  /* --- A: Font Loading & Advanced Design Tokens --- */
+  /* --- Font Loading & Design Tokens --- */
   @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 400; src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2'); font-display: swap; }
   @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 700; src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2'); font-display: swap; }
   @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 800; src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2'); font-display: swap; }
 
   :root {
     --radius: 1rem;
-    /* Light Mode Palette */
-    --background: 220 30% 98%;
-    --foreground: 220 15% 25%;
-    --card: 0 0% 100%;
-    --muted-foreground: 220 10% 45%;
-    --border: 220 20% 92%;
-    --accent: 220 60% 96%;
+    --background-light: 220 30% 98%;
+    --foreground-light: 220 15% 25%;
+    --card-light: 0 0% 100%;
+    --muted-foreground-light: 220 10% 45%;
+    --border-light: 220 20% 92%;
+    --accent-light: 220 60% 96%;
 
-    /* Dark Mode Palette */
     --background-dark: 225 15% 10%;
     --foreground-dark: 220 20% 90%;
     --card-dark: 225 15% 16%;
@@ -37,16 +34,16 @@
     --border-dark: 225 12% 25%;
     --accent-dark: 225 15% 20%;
 
-    /* Universal Accent Colors */
     --primary: 340 85% 58%;
     --primary-glow: 340 85% 65%;
     --secondary: 260 85% 65%;
     --secondary-glow: 260 85% 70%;
+    --destructive: 0 84% 60%;
   }
   
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: hsl(var(--background-light));
+    color: hsl(var(--foreground-light));
     @apply font-prompt antialiased transition-colors duration-300 relative overflow-x-hidden;
   }
   html.dark body {
@@ -57,6 +54,7 @@
   /* --- Animated Aurora Background --- */
   body::before, body::after {
     content: ''; @apply fixed top-1/2 left-1/2 w-[150vmax] h-[150vmax] rounded-full -z-10 blur-3xl;
+    pointer-events: none;
   }
   html:not(.dark) body::before { @apply bg-[radial-gradient(circle,hsl(var(--primary))_0%,transparent_40%)] opacity-10; animation: aurora-1 30s linear infinite; }
   html:not(.dark) body::after { @apply bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_40%)] opacity-10; animation: aurora-2 40s linear infinite reverse; }
@@ -67,14 +65,30 @@
 }
 
 @layer components {
-  /* --- Base UI Components --- */
-  .section-wrapper { @apply bg-card/50 dark:bg-card-dark/50 border border-border dark:border-border-dark rounded-2xl shadow-lg backdrop-blur-sm; }
-  .btn-primary { @apply flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:bg-opacity-90 transition text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30; }
+  /* --- A. Preloader & Initial State --- */
+  .preloader { @apply fixed inset-0 z-[9999] bg-background-dark flex items-center justify-center transition-all duration-500 ease-in-out; }
+  .preloader-spinner { @apply w-12 h-12 border-4 border-white/20 border-t-primary rounded-full; animation: spin 1s linear infinite; }
+  .preloader.loaded { @apply opacity-0 invisible; }
+  body.init > *:not(#preloader) { @apply opacity-0 transition-opacity duration-500 ease-in-out; }
+  body.ready > *:not(#preloader) { @apply opacity-100; }
+  
+  /* --- B. General UI Components --- */
+  .container { @apply w-full max-w-7xl; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:opacity-90 transition text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30; }
+  .btn-icon { @apply w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5; }
+  .nav-link { @apply px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors; }
+  .skip-link { @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:dark:bg-card-dark focus:rounded-lg focus:shadow-lg; }
 
-  /* --- Header --- */
-  #page-header.scrolled { @apply bg-background/80 dark:bg-background-dark/80 backdrop-blur-lg shadow-sm border-b border-border dark:border-border-dark; }
+  /* --- C. Header & Sidebar --- */
+  #page-header.scrolled { @apply bg-background/80 dark:bg-background-dark/80 backdrop-blur-lg shadow-sm border-b border-border-light dark:border-border-dark; }
+  #menu-backdrop { @apply bg-black/60; }
+  #sidebar { @apply bg-background/90 dark:bg-background-dark/90 backdrop-blur-xl border-l border-border-light dark:border-border-dark text-foreground; }
+  #sidebar .border-b, #sidebar .border-t { @apply border-border-light dark:border-border-dark; }
+  .sidebar-link { @apply flex items-center gap-4 py-3 px-4 font-medium text-base rounded-lg hover:bg-accent-light dark:hover:bg-accent-dark; }
+  .sidebar-icon { @apply w-5 text-center text-muted-foreground; }
+  .btn-line-shared { @apply w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-white font-bold bg-green-500 hover:bg-green-600 transition-colors; }
 
-  /* --- Age Verification Modal (High-Tech Design) --- */
+  /* --- D. Age Verification Modal --- */
   #age-verification-overlay { @apply bg-background-dark/80 backdrop-blur-lg; }
   .age-modal-content { @apply bg-gradient-to-br from-card-dark/90 to-background-dark/90 border border-white/10 text-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center; }
   .age-modal-content h2 .text-primary { text-shadow: 0 0 20px hsl(var(--primary-glow) / 0.9); }
@@ -83,45 +97,54 @@
   .age-btn-confirm { @apply text-white border border-transparent; background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary))); box-shadow: 0 6px 20px hsl(var(--primary) / 0.3); }
   .age-btn-cancel { @apply bg-white/10 text-muted-foreground-dark border border-white/20 hover:bg-white/20; }
   
-  /* --- Hero & Search Form (High-Tech Design) --- */
-  #search-form input, #search-form select { @apply bg-background dark:bg-background-dark border-border dark:border-border-dark rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20; }
+  /* --- E. Search Form --- */
+  .filter-input-wrapper { @apply relative flex items-center; }
+  .filter-icon { @apply absolute left-4 text-muted-foreground/50 pointer-events-none; }
+  .filter-input { @apply w-full pl-10 pr-4 py-3 bg-card dark:bg-card-dark border border-border-light dark:border-border-dark rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition; }
+  .form-checkbox { @apply h-5 w-5 rounded text-primary bg-card dark:bg-card-dark border-border-light dark:border-border-dark focus:ring-primary/50; }
 
-  /* --- 3D Profile Cards --- */
-  .profile-card-container { @apply perspective-1000; }
-  .profile-card-new {
-    @apply bg-muted-foreground/10 rounded-2xl overflow-hidden relative aspect-[3/4] transition-transform duration-500 ease-out;
-    transform-style: preserve-3d;
-    box-shadow: 0 10px 30px -10px hsl(var(--foreground) / 0.15);
-  }
-  .profile-card-new:hover { box-shadow: 0 25px 50px -15px hsl(var(--foreground) / 0.3); }
+  /* --- F. Profile Cards & Sections --- */
+  .profile-grid { @apply grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4; }
+  .featured-header, .province-section-header { @apply pb-4 mb-4 border-b border-border-light dark:border-border-dark; }
+  .province-section-header { @apply flex justify-between items-baseline; }
+  .profile-card-new { @apply bg-card dark:bg-card-dark rounded-2xl overflow-hidden relative aspect-[3/4] transition-transform duration-500 ease-out; transform-style: preserve-3d; box-shadow: 0 10px 30px -10px hsl(var(--foreground-light) / 0.15); }
+  html.dark .profile-card-new { box-shadow: 0 10px 30px -10px hsl(var(--background-dark) / 0.5); }
+  .profile-card-new:hover { box-shadow: 0 25px 50px -15px hsl(var(--foreground-light) / 0.3); transform: translateZ(20px); }
+  html.dark .profile-card-new:hover { box-shadow: 0 25px 50px -15px hsl(var(--background-dark) / 0.8); }
   .card-image { @apply absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out; }
   .profile-card-new:hover .card-image { @apply scale-110; }
-  .card-overlay { @apply absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-4 flex flex-col justify-end text-white z-10; }
-  .card-info { @apply transition-transform duration-500 ease-out; transform: translateZ(20px); }
-  .profile-card-new:hover .card-info { transform: translateZ(50px) translateY(-5px); }
-  .card-info h3 { @apply font-bold text-lg text-shadow; }
-  .text-shadow { text-shadow: 0 2px 5px rgba(0,0,0,0.7); }
-
-  /* --- Sidebar (High-Tech Design) --- */
-  #sidebar { @apply bg-background/90 dark:bg-background-dark/90 backdrop-blur-xl border-l border-border dark:border-border-dark; }
-  #sidebar nav a { @apply rounded-lg hover:bg-accent dark:hover:bg-accent-dark; }
-  #sidebar nav a.active-nav-link { @apply text-primary bg-primary/10 font-bold; }
-  .btn-line-shared { @apply bg-green-500 hover:bg-green-600 transition-colors; }
-
-  /* --- Lightbox (High-Tech Design) --- */
-  #lightbox .modal-content { @apply bg-card dark:bg-card-dark rounded-2xl shadow-xl; }
-  #lightboxHeaderTitle, #lightbox-profile-name-main { @apply font-extrabold; }
-  #lightboxThumbnailStrip { @apply flex gap-2 pt-3; }
-  .thumbnail { @apply w-16 h-16 rounded-lg object-cover cursor-pointer border-2 border-transparent opacity-60 transition-all; }
-  .thumbnail:hover { @apply opacity-100 border-primary/50; }
-  .thumbnail.active { @apply opacity-100 border-primary shadow-lg shadow-primary/20; }
+  .card-overlay { @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 flex flex-col justify-end text-white z-10; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+  .view-more-btn { @apply bg-primary text-white font-semibold py-2.5 px-6 rounded-full hover:opacity-90 transition-opacity; }
   
-  /* --- States (Loading, Empty, Error) --- */
-  .skeleton-card { @apply bg-accent dark:bg-accent-dark rounded-2xl relative overflow-hidden; }
-  .skeleton-card::after { content: ''; @apply absolute inset-0 -translate-x-full; background-image: linear-gradient(90deg, transparent, hsl(var(--border) / 0.5), transparent); animation: shimmer 1.5s infinite; }
-  .empty-state-container, .error-state-container { @apply text-center section-wrapper p-8; }
-  
-  /* --- Animations --- */
-  [data-animate-on-scroll] { @apply opacity-0 translate-y-5 transition-all duration-700 ease-out; }
-  [data-animate-on-scroll].is-visible { @apply opacity-100 translate-y-0; }
+  /* --- G. Lightbox --- */
+  #lightbox { @apply bg-black/70 backdrop-blur-md; }
+  .modal-content { @apply bg-card dark:bg-card-dark rounded-2xl shadow-2xl border border-border-light dark:border-border-dark; }
+  #lightbox-content-wrapper-el header, #lightbox-content-wrapper-el > div:last-child { @apply border-border-light dark:border-border-dark; }
+  #lightbox-profile-name-main { @apply text-glow; }
+  .lightbox-state-indicator { @apply absolute inset-0 flex flex-col items-center justify-center text-muted-foreground; }
+  .thumbnail-button { @apply w-16 h-20 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent opacity-60 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card dark:focus:ring-offset-card-dark; }
+  .thumbnail-button:hover { @apply opacity-100 border-primary/50; }
+  .thumbnail-button.active { @apply opacity-100 border-primary shadow-lg shadow-primary/20; }
+  .thumbnail-button img { @apply w-full h-full object-cover; }
+  .lightbox-nav-btn { @apply absolute top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center hover:bg-black/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed; }
+  .tag-item { @apply bg-accent-light dark:bg-accent-dark text-xs font-medium px-3 py-1.5 rounded-full; }
+  .stat-item { @apply flex justify-between items-baseline border-b border-border-light dark:border-border-dark py-2; }
+  .stat-item .label { @apply text-muted-foreground; }
+  .stat-item .value { @apply font-semibold text-foreground; }
+  /* เพิ่มโค้ดนี้ในไฟล์ output.css ของคุณ หากยังไม่มี */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+  /* --- H. Footer --- */
+  #page-footer { @apply bg-card dark:bg-card-dark border-t border-border-light dark:border-border-dark text-muted-foreground; }
+  #page-footer .border-t { @apply border-border-light dark:border-border-dark; }
+  .footer-link { @apply hover:text-primary transition-colors; }
 }
