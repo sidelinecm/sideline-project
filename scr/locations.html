@@ -44,9 +44,10 @@
     <!-- ================================================================= -->
     <!-- SECTION 5: STYLESHEETS (Non-blocking)                             -->
     <!-- ================================================================= -->
- <!-- นี่คือแบบที่ถูกต้อง 100% -->
-<link rel="stylesheet" href="/output.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/output.css"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
 
     <!-- ================================================================= -->
     <!-- SECTION 6: SCHEMA MARKUP                                        -->
@@ -185,14 +186,23 @@
   
     
     </footer>
- <!-- Main application script is the single entry point -->
-<script src="/main.js" type="module"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(err => console.error('Service Worker registration failed:', err));
-        });
-      }
-    </script>
+  
+  <!-- ดีที่สุด: โหลดทุกไฟล์พร้อมกันแบบไม่บล็อก และรันตามลำดับที่ถูกต้อง -->
+<script src="/libs/supabase.js" defer></script>
+<script src="/libs/gsap.min.js" defer></script>
+<script src="/libs/ScrollTrigger.min.js" defer></script>
+<script src="/main.js" defer></script>
+
+<!-- โค้ด Service Worker ไม่ต้องเปลี่ยน วางไว้ที่เดิมได้เลย -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.error('Service Worker registration failed:', err);
+      });
+    });
+  }
+</script>
+
 </body>
 </html>
