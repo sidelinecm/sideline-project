@@ -1,17 +1,17 @@
-// --- main.js (เวอร์ชัน Hybrid Rendering ขั้นสูง - สมบูรณ์แบบ) ---
-// ไฟล์นี้ถูกปรับปรุงให้ทำงานร่วมกับ Static Fallback Content ใน index.html
-// เพื่อแก้ปัญหา NO_FCP, เพิ่มประสิทธิภาพ Core Web Vitals, และดีต่อ SEO
+// --- main.js (เวอร์ชัน Performance-First Architecture) ---
+// แก้ไขปัญหา Main-Thread Blocking โดยการแยกส่วน Critical และ Non-Critical
+// ผู้ใช้จะสามารถโต้ตอบกับเว็บได้ก่อน แล้ว Animation จะถูกโหลดและทำงานทีหลัง
 
 // --- การประกาศตัวแปรส่วนกลาง ---
 let createClient, gsap, ScrollTrigger, supabase;
 
 // --- ค่าคงที่และตัวแปรหลักของแอปพลิเคชัน ---
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
+const SUPABASE_KEY = 'eyJhbGciOiJIJiUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
 const STORAGE_BUCKET = 'profile-images';
 const PROFILES_PER_PROVINCE_ON_INDEX = 8;
 const SKELETON_CARD_COUNT = 8;
-const ABOVE_THE_FOLD_COUNT = 4; // ควรมีค่าเท่ากับจำนวน Static Fallback Cards ใน index.html
+const ABOVE_THE_FOLD_COUNT = 4;
 
 let allProfiles = [];
 let provincesMap = new Map();
@@ -50,18 +50,28 @@ const dom = {
 };
 
 /**
- * ฟังก์ชันหลักในการเริ่มต้นแอปพลิเคชัน
+ * ▼▼▼ [การเปลี่ยนแปลงที่ 1] สร้างฟังก์ชันสำหรับงานที่ไม่รีบด่วน (Non-Critical) ▼▼▼
+ * ฟังก์ชันนี้จะถูกเรียกใช้หลังจากที่หน้าเว็บแสดงผลและพร้อมใช้งานแล้ว
+ */
+async function initializeNonCriticalFeatures() {
+    await loadAnimationScripts();
+    initAgeVerification(); // ย้ายการตรวจสอบอายุมาไว้ที่นี่ เพราะไม่จำเป็นต้องบล็อกการแสดงผล
+    initScrollAnimations();
+    generateFullSchema(); // Schema ไม่ได้รีบ สามารถสร้างทีหลังได้
+}
+
+
+/**
+ * ฟังก์ชันหลักในการเริ่มต้นแอปพลิเคชัน (เวอร์ชันใหม่)
  */
 async function initializeApp() {
-    performance.mark('initializeApp-start');
-    
+    // --- ส่วนที่ต้องทำงานทันที (Critical Path) ---
     initThemeToggle();
     initMobileMenu();
     initHeaderScrollEffect();
     updateActiveNavLinks();
     
     await loadCoreScripts();
-    initAgeVerification();
 
     const currentPage = dom.body.dataset.page;
     if (['home', 'profiles'].includes(currentPage)) {
@@ -70,6 +80,7 @@ async function initializeApp() {
         
         if (success) {
             initSearchAndFilters();
+            applyFilters(); // แสดงผลข้อมูลทันที
             initLightbox();
             if (dom.retryFetchBtn) dom.retryFetchBtn.addEventListener('click', handleRetry);
         } else {
@@ -77,19 +88,17 @@ async function initializeApp() {
         }
     }
 
-    generateFullSchema();
-    initScrollAnimations();
-
     if (dom.yearSpan) dom.yearSpan.textContent = new Date().getFullYear();
     dom.body.classList.add('loaded');
     
-    performance.mark('initializeApp-end');
-    performance.measure('initializeApp', 'initializeApp-start', 'initializeApp-end');
+    // --- ▼▼▼ [การเปลี่ยนแปลงที่ 2] เรียกใช้งานฟังก์ชัน Non-Critical ทีหลังสุด ▼▼▼ ---
+    // ใช้ setTimeout เล็กน้อยเพื่อให้เบราว์เซอร์มีเวลา "หายใจ" และวาดหน้าจอให้เสร็จก่อน
+    setTimeout(initializeNonCriticalFeatures, 100); 
 }
 
-/**
- * โหลดสคริปต์หลักที่จำเป็น (Supabase)
- */
+
+// ... (ฟังก์ชันอื่นๆ ส่วนใหญ่ยังคงเหมือนเดิม) ...
+
 async function loadCoreScripts() {
     try {
         if (!createClient) {
@@ -103,9 +112,6 @@ async function loadCoreScripts() {
     }
 }
 
-/**
- * โหลดสคริปต์สำหรับ Animation (GSAP)
- */
 async function loadAnimationScripts() {
     if (gsap) return;
     try {
@@ -121,9 +127,6 @@ async function loadAnimationScripts() {
     }
 }
 
-/**
- * แสดงสถานะกำลังโหลด (Skeleton UI)
- */
 function showLoadingState() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
     if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
@@ -137,16 +140,10 @@ function showLoadingState() {
     }
 }
 
-/**
- * ซ่อนสถานะกำลังโหลด
- */
 function hideLoadingState() {
     if (dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
 }
 
-/**
- * แสดงสถานะเมื่อการดึงข้อมูลล้มเหลว
- */
 function showErrorState() {
     hideLoadingState();
     if (dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
@@ -154,9 +151,6 @@ function showErrorState() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.remove('hidden');
 }
 
-/**
- * จัดการการกดปุ่ม "ลองอีกครั้ง"
- */
 async function handleRetry() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
     showLoadingState();
@@ -168,9 +162,6 @@ async function handleRetry() {
     }
 }
 
-/**
- * ดึงข้อมูลโปรไฟล์และจังหวัดจาก Supabase
- */
 async function fetchData() {
     if (!supabase) {
         console.error("Supabase client is not available. Cannot fetch data.");
@@ -220,14 +211,8 @@ async function fetchData() {
     }
 }
 
-/**
- * เริ่มต้นการทำงานของระบบค้นหาและฟิลเตอร์
- */
 function initSearchAndFilters() {
-    if (!dom.searchForm) {
-        if(allProfiles.length > 0) applyFilters();
-        return;
-    }
+    if (!dom.searchForm) return;
     
     const debouncedFilter = (() => {
         let timeout;
@@ -252,22 +237,14 @@ function initSearchAndFilters() {
     if (dom.provinceSelect) dom.provinceSelect.addEventListener('change', applyFilters);
     if (dom.availabilitySelect) dom.availabilitySelect.addEventListener('change', applyFilters);
     if (dom.featuredSelect) dom.featuredSelect.addEventListener('change', applyFilters);
-
-    applyFilters();
 }
 
-/**
- * กรองข้อมูลโปรไฟล์
- */
+
 function applyFilters() {
     const searchTerm = dom.searchInput ? dom.searchInput.value.toLowerCase().trim() : '';
     const selectedProvince = dom.provinceSelect ? dom.provinceSelect.value : '';
     const selectedAvailability = dom.availabilitySelect ? dom.availabilitySelect.value : '';
-    
-    // ▼▼▼ นี่คือส่วนที่แก้ไข ▼▼▼
-    // ตรวจสอบก่อนว่า dom.featuredSelect มีอยู่จริงหรือไม่ ถ้าไม่มี ให้ถือว่าเป็น false
     const isFeaturedOnly = dom.featuredSelect ? dom.featuredSelect.value === 'true' : false;
-    // ▲▲▲ จบส่วนที่แก้ไข ▲▲▲
 
     const filtered = allProfiles.filter(p =>
         (!searchTerm || (p.name && p.name.toLowerCase().includes(searchTerm)) || (p.location && p.location.toLowerCase().includes(searchTerm)) || (p.styleTags && p.styleTags.some(t => t.toLowerCase().includes(searchTerm)))) &&
@@ -280,9 +257,7 @@ function applyFilters() {
     
     renderProfiles(filtered, isSearching);
 }
-/**
- * [HYDRATION VERSION] แสดงผลโปรไฟล์บนหน้าเว็บ
- */
+
 function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     const currentPage = dom.body.dataset.page;
@@ -349,12 +324,18 @@ function renderProfiles(filteredProfiles, isSearching) {
         }
     }
     
-    initScrollAnimations();
+    // ▼▼▼ [การเปลี่ยนแปลงที่ 3] ย้ายการเรียกใช้ Animation มาไว้หลังสุด ▼▼▼
+    // ทำให้มั่นใจว่า DOM ถูกสร้างเสร็จแล้วจริงๆ ก่อนที่จะเริ่มคำนวณ Animation
+    if (gsap) {
+        initScrollAnimations();
+    }
 }
 
-/**
- * สร้าง HTML Element สำหรับการ์ดโปรไฟล์
- */
+
+// ... (โค้ดส่วนที่เหลือยังคงเหมือนเดิมทั้งหมด) ...
+// ... initThemeToggle, initMobileMenu, createProfileCard, etc. ...
+// ... ให้คัดลอกส่วนที่เหลือจากไฟล์เดิมของคุณมาวางต่อจากนี้ได้เลย ...
+
 function createProfileCard(profile, index, isEager = false) {
     const card = document.createElement('div');
     card.className = 'profile-card-new group cursor-pointer';
@@ -409,9 +390,6 @@ function createProfileCard(profile, index, isEager = false) {
     return card;
 }
 
-/**
- * เริ่มต้นการทำงานของปุ่มสลับ Theme
- */
 function initThemeToggle() {
     const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
     if (themeToggleBtns.length === 0) return;
@@ -439,9 +417,6 @@ function initThemeToggle() {
     });
 }
 
-/**
- * เริ่มต้นการทำงานของเมนูสำหรับมือถือ
- */
 function initMobileMenu() {
     if (!dom.menuToggle || !dom.sidebar || !dom.backdrop || !dom.closeSidebarBtn) return;
     
@@ -482,15 +457,12 @@ function initMobileMenu() {
     });
 }
 
-/**
- * เริ่มต้นการทำงานของ Modal ตรวจสอบอายุ
- */
 async function initAgeVerification() {
     if (!dom.ageVerificationOverlay || sessionStorage.getItem('ageVerified') === 'true') {
         return;
     }
 
-    await loadAnimationScripts();
+    if (!gsap) await loadAnimationScripts();
     const modalContent = dom.ageVerificationOverlay.querySelector('.age-modal-content');
     dom.ageVerificationOverlay.classList.remove('hidden');
 
@@ -526,9 +498,6 @@ async function initAgeVerification() {
     if (dom.cancelAgeButton) dom.cancelAgeButton.addEventListener('click', () => closeAction(false));
 }
 
-/**
- * เริ่มต้นการทำงานของ Lightbox
- */
 async function initLightbox() {
     if (!dom.lightbox || !dom.lightboxContentWrapperEl || !dom.closeLightboxBtn) return;
 
@@ -601,9 +570,6 @@ async function initLightbox() {
     });
 }
 
-/**
- * เติมข้อมูลของโปรไฟล์ที่เลือกลงใน Lightbox
- */
 function populateLightbox(profileData) {
     const nameMainEl = document.getElementById('lightbox-profile-name-main');
     const heroImageEl = document.getElementById('lightboxHeroImage');
@@ -697,11 +663,8 @@ function populateLightbox(profileData) {
     }
 }
 
-/**
- * เริ่มต้น Animation ที่จะทำงานเมื่อ scroll
- */
 async function initScrollAnimations() {
-    await loadAnimationScripts();
+    if (!gsap) await loadAnimationScripts();
     if (!gsap) return;
 
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -738,9 +701,6 @@ async function initScrollAnimations() {
     }
 }
 
-/**
- * เพิ่ม/ลดเงาที่ Header เมื่อ scroll
- */
 function initHeaderScrollEffect() {
     const header = dom.pageHeader;
     if (!header) return;
@@ -759,9 +719,6 @@ function initHeaderScrollEffect() {
     window.addEventListener('scroll', handleScroll, { passive: true });
 }
 
-/**
- * อัปเดตสถานะ "active" ของลิงก์ใน Navigation Bar
- */
 function updateActiveNavLinks() {
     const currentPath = window.location.pathname.replace(/\/$/, "") || "/";
     const navLinks = document.querySelectorAll('#sidebar nav a, header nav a');
@@ -775,9 +732,6 @@ function updateActiveNavLinks() {
     });
 }
 
-/**
- * สร้าง JSON-LD Schema สำหรับ SEO
- */
 function generateFullSchema() {
     const pageTitle = document.title;
     const canonicalLink = document.querySelector("link[rel='canonical']");
