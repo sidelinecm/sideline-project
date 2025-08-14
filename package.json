@@ -29,6 +29,7 @@
     "copy:configs": "copyfiles -u 1 \"scr/_headers\" dist"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.13",
     "copyfiles": "^2.4.1",
     "live-server": "^1.2.2",
