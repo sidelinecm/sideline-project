@@ -67,7 +67,6 @@
     --secondary: 257 84% 56%;
     --secondary-glow: 257 85% 65%;
     --muted: 220 25% 94%;
-    /* [IMPROVEMENT] ปรับสีให้เข้มขึ้นเล็กน้อยเพื่อเพิ่ม Contrast */
     --muted-foreground: 220 12% 40%; 
     --border: 220 20% 92%;
     --accent: 220 60% 96%;
@@ -109,9 +108,6 @@
   #page-header.scrolled{@apply bg-card/80 border-border shadow-lg backdrop-blur-sm dark:bg-background/80}
   nav a.active-nav-link{@apply text-primary font-semibold}
   
-  /* [CRITICAL FIX] ลบโค้ดอนิเมชันของ Sidebar ที่ขัดแย้งกับ JS ทิ้งไป */
-  /* JavaScript (main.js) จะเป็นผู้รับผิดชอบอนิเมชันของลิงก์เมนูทั้งหมด */
-
   #sidebar nav a:hover{@apply text-primary bg-accent}
   #sidebar nav a.active-nav-link,#sidebar nav a:active{@apply text-primary bg-accent font-bold}
   #sidebar nav a.active-nav-link .text-muted-foreground{@apply text-primary}
@@ -186,7 +182,6 @@
 }
 /* ======================================================================== */
 /* SECTION H: WAWAI'S ULTIMATE FIX FOR IMAGE LOADING & CARD STABILITY */
-/* โค้ดแก้ไขปัญหาภาพล่องหน, ลด CLS, และเพิ่มความเสถียรในการแสดงผลการ์ด */
 /* ======================================================================== */
 @layer components {
   /* ใช้ Container นี้จองพื้นที่และแสดง Shimmer effect ตอนโหลด */
@@ -204,7 +199,8 @@
 
   /* ควบคุมการแสดงผลของรูปภาพจริง */
   .profile-img {
-    @apply h-full w-full object-cover transition-opacity duration-400 ease-in-out;
+    /* ⭐⭐⭐ FIX: แก้ไขจาก duration-400 ที่ไม่มีอยู่จริง เป็น duration-300 ⭐⭐⭐ */
+    @apply h-full w-full object-cover transition-opacity duration-300 ease-in-out;
     opacity: 0; /* ซ่อนไว้ก่อนเป็นค่าเริ่มต้น */
   }
   .profile-img.is-loaded {
@@ -214,7 +210,7 @@
     @apply object-contain p-4 opacity-50; /* จัดสไตล์ให้สวยงามเมื่อเป็นภาพ placeholder */
   }
 
-  /* แก้ไขเล็กน้อยสำหรับ Profile Card เพื่อให้ Overlay ทำงานได้ดีที่สุด */
+  /* ไม่จำเป็นต้องแก้ไขส่วนนี้ */
   .profile-card-new {
     @apply relative; /* ทำให้เป็น Stacking Context สำหรับ Overlay */
   }
@@ -222,5 +218,9 @@
     @apply absolute inset-0 z-10;
   }
 }
-/* ใน output.css ของคุณ (หรือไฟล์ที่ build) */
-.profile-grid { content-visibility: auto; contain-intrinsic-size: 1200px; }
+
+/* เทคนิค Performance สำหรับ Grid ที่มีรายการจำนวนมาก */
+.profile-grid { 
+    content-visibility: auto; 
+    contain-intrinsic-size: 1200px; 
+}
