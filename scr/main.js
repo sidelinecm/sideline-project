@@ -354,14 +354,15 @@ function renderProfiles(filteredProfiles, isSearching) {
 }
 
 /**
- * [ULTIMATE HYBRID VERSION] สร้าง HTML Element สำหรับการ์ดโปรไฟล์
+ * [ULTIMATE HYBRID VERSION - FINAL FIX] สร้าง HTML Element สำหรับการ์ดโปรไฟล์
  * ผสานการจองพื้นที่ (CLS), การโหลดรูปภาพแบบ Lazy-load, และการแสดงผลแบบ Fade-in
- * เพื่อประสิทธิภาพและประสบการณ์ผู้ใช้สูงสุด
+ * แก้ไขปัญหาการแสดงผลโดยรวม Class ที่จำเป็นทั้งหมดไว้ในที่เดียว
  */
 function createProfileCard(profile, index, isEager = false) {
-    // 1. สร้าง Container หลัก: ใช้คลาสที่เตรียมไว้ใน CSS เพื่อจองพื้นที่และแสดง Shimmer Effect
+    // 1. สร้าง Container หลัก และใส่ Class ที่จำเป็นทั้งหมด
     const cardContainer = document.createElement('div');
-    cardContainer.className = 'profile-card-container group cursor-pointer'; // ใช้ .profile-card-container แก้ปัญหา CLS
+    // ⭐⭐⭐ นี่คือบรรทัดที่แก้ไขแล้ว: เราได้เพิ่ม 'profile-card-new' เข้าไป ⭐⭐⭐
+    cardContainer.className = 'profile-card-container profile-card-new group cursor-pointer'; 
     cardContainer.dataset.profileId = profile.id;
     cardContainer.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name}`);
     cardContainer.setAttribute('role', 'button');
@@ -371,9 +372,9 @@ function createProfileCard(profile, index, isEager = false) {
     const mainImage = profile.images[0];
     const isAboveTheFold = index < ABOVE_THE_FOLD_COUNT;
 
-    // 2. สร้าง Element รูปภาพ: กำหนดคลาสเริ่มต้นเพื่อซ่อนไว้ก่อนโหลดเสร็จ
+    // 2. สร้าง Element รูปภาพพร้อม Logic การโหลด
     const img = document.createElement('img');
-    img.className = "profile-img"; // คลาสนี้ทำให้ opacity: 0 ในตอนแรก
+    img.className = "profile-img"; 
     img.src = mainImage.medium;
     img.srcset = `${mainImage.small} 400w, ${mainImage.medium} 600w`;
     img.sizes = "(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw";
@@ -382,7 +383,6 @@ function createProfileCard(profile, index, isEager = false) {
     img.width = 300;
     img.height = 400;
 
-    // จัดการ Eager vs Lazy loading เหมือนเดิม
     if (isAboveTheFold || isEager) {
         img.loading = 'eager';
         img.setAttribute('fetchpriority', 'high');
@@ -390,24 +390,21 @@ function createProfileCard(profile, index, isEager = false) {
         img.loading = 'lazy';
     }
 
-    // 3. จัดการสถานะการโหลดรูปภาพ (ส่วนที่สำคัญที่สุด)
-    // เมื่อรูปภาพโหลดสำเร็จ:
+    // เมื่อรูปโหลดเสร็จ ให้แสดงผลแบบ Fade-in
     img.onload = () => {
-        // เพิ่มคลาส is-loaded เพื่อให้ CSS ทำงาน (opacity: 1) ทำให้รูป fade-in อย่างนุ่มนวล
         img.classList.add('is-loaded');
     };
-    // เมื่อรูปภาพโหลดไม่สำเร็จ (ลิงก์เสีย, 404, etc.):
+    // เมื่อรูปโหลดไม่สำเร็จ ให้แสดง Placeholder
     img.onerror = () => {
-        img.onerror = null; // ป้องกันการวนลูปหากรูป placeholder ก็โหลดไม่ได้
-        img.src = '/images/placeholder-profile.webp'; // กำหนดรูปสำรอง
-        img.srcset = ''; // ล้าง srcset ที่อาจมีปัญหา
-        // เพิ่มคลาส is-loaded เพื่อให้แสดงผล และ is-error เพื่อให้ CSS จัดสไตล์เฉพาะ (เช่น ทำให้จางลง)
+        img.onerror = null; 
+        img.src = '/images/placeholder-profile.webp'; 
+        img.srcset = ''; 
         img.classList.add('is-loaded', 'is-error');
     };
 
-    // 4. สร้าง Overlay และข้อมูลต่างๆ
+    // 3. สร้าง Overlay พร้อมข้อมูล
     const overlay = document.createElement('div');
-    overlay.className = 'card-overlay'; // คลาสนี้ทำให้ซ้อนทับบนรูปภาพ
+    overlay.className = 'card-overlay'; 
 
     let availabilityText = profile.availability || "สอบถามคิว";
     let availabilityClass = 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
@@ -420,7 +417,6 @@ function createProfileCard(profile, index, isEager = false) {
     const starIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z" clip-rule="evenodd" /></svg>`;
     const locationIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654-.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
 
-    // ใช้ innerHTML กับ overlay เพื่อความสะดวกในการสร้าง HTML ที่ซับซ้อน
     overlay.innerHTML = `
     <div class="absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10">
         <span class="${availabilityClass} text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg">${availabilityText}</span>
@@ -431,10 +427,9 @@ function createProfileCard(profile, index, isEager = false) {
         <p class="text-sm flex items-center gap-1.5">${locationIcon} ${provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'}</p>
     </div>`;
 
-    // 5. ประกอบร่างทั้งหมดเข้าด้วยกัน
+    // 4. ประกอบร่างทั้งหมด
     cardContainer.append(img, overlay);
 
-    // 6. ส่งคืน Element ที่สมบูรณ์แล้ว
     return cardContainer;
 }
 /**
