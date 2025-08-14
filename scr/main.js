@@ -1,6 +1,6 @@
 // =================================================================
 // SidelineCM: Ultimate Production-Ready Main Script
-// Version: 4.0 (Final & Complete)
+// Version: 5.0 (Final & Complete)
 // This script is a complete, production-ready solution, combining all features,
 // performance optimizations, accessibility enhancements, and robust error handling.
 // No parts have been omitted.
@@ -275,15 +275,15 @@
         if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
         
         const featuredProfiles = state.allProfiles.filter(p => p.isfeatured);
-        if (dom.featuredSection && dom.featuredContainer) {
+        if (dom.featuredProfiles && dom.featuredProfilesContainer) {
             if (dom.body.dataset.page === 'home' && !isSearching && featuredProfiles.length > 0) {
                 const fragment = document.createDocumentFragment();
                 featuredProfiles.slice(0, 4).forEach((p, i) => fragment.appendChild(createProfileCard(p, i, true)));
-                dom.featuredContainer.innerHTML = '';
-                dom.featuredContainer.appendChild(fragment);
-                dom.featuredSection.classList.remove('hidden');
+                dom.featuredProfilesContainer.innerHTML = '';
+                dom.featuredProfilesContainer.appendChild(fragment);
+                dom.featuredProfiles.classList.remove('hidden');
             } else {
-                dom.featuredSection.classList.add('hidden');
+                dom.featuredProfiles.classList.add('hidden');
             }
         }
 
@@ -310,7 +310,7 @@
             }, {});
             
             const provinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
-            let accumulatedIndex = dom.featuredContainer ? dom.featuredContainer.children.length : 0;
+            let accumulatedIndex = dom.featuredProfilesContainer ? dom.featuredProfilesContainer.children.length : 0;
             const mainFragment = document.createDocumentFragment();
 
             provinceOrder.forEach(provinceKey => {
@@ -410,7 +410,7 @@
         initMobileMenu();
         initHeaderScrollEffect();
         updateActiveNavLinks();
-        if (dom.yearSpan) dom.yearSpan.textContent = new Date().getFullYear();
+        if (dom.currentYearDynamic) dom.currentYearDynamic.textContent = new Date().getFullYear();
     }
 
     function initThemeToggle() {
@@ -435,9 +435,9 @@
             state.lastFocusedElement = document.activeElement;
             dom.menuToggle.setAttribute('aria-expanded', 'true');
             dom.sidebar.classList.remove('translate-x-full');
-            dom.backdrop.classList.remove('hidden');
-            dom.backdrop.style.opacity = '1';
-            dom.body.style.overflow = 'hidden';
+            dom.menuBackdrop.classList.remove('hidden');
+            dom.menuBackdrop.style.opacity = '1';
+            dom.body.classList.add('body-no-scroll');
             trapFocus(dom.sidebar);
             setTimeout(() => dom.closeSidebarBtn.focus(), 50);
         };
@@ -446,14 +446,16 @@
             state.isMenuOpen = false;
             dom.menuToggle.setAttribute('aria-expanded', 'false');
             dom.sidebar.classList.add('translate-x-full');
-            dom.backdrop.style.opacity = '0';
-            dom.body.style.overflow = '';
-            setTimeout(() => dom.backdrop.classList.add('hidden'), 300);
+            dom.menuBackdrop.style.opacity = '0';
+            if (!state.isLightboxOpen) {
+                dom.body.classList.remove('body-no-scroll');
+            }
+            setTimeout(() => dom.menuBackdrop.classList.add('hidden'), 300);
             if (state.lastFocusedElement) state.lastFocusedElement.focus();
         };
         dom.menuToggle.addEventListener('click', openMenu);
         dom.closeSidebarBtn.addEventListener('click', closeMenu);
-        dom.backdrop.addEventListener('click', closeMenu);
+        dom.menuBackdrop.addEventListener('click', closeMenu);
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && state.isMenuOpen) closeMenu();
         });
@@ -498,7 +500,7 @@
             state.lastFocusedElement = triggerElement;
             populateLightbox(profileData);
             dom.lightbox.classList.remove('hidden');
-            dom.body.style.overflow = 'hidden';
+            dom.body.classList.add('body-no-scroll');
             trapFocus(dom.lightbox);
             if(state.gsap) {
                 state.gsap.to(dom.lightbox, { opacity: 1, duration: 0.3 });
@@ -514,7 +516,9 @@
             state.isLightboxOpen = false;
             const onComplete = () => {
                 dom.lightbox.classList.add('hidden');
-                dom.body.style.overflow = '';
+                if (!state.isMenuOpen) {
+                    dom.body.classList.remove('body-no-scroll');
+                }
                 if (state.lastFocusedElement) state.lastFocusedElement.focus();
             };
             if(state.gsap) {
@@ -627,7 +631,7 @@
             if (profileData.lineId) {
                 lineLink.href = profileData.lineId.startsWith('http') ? profileData.lineId : `https://line.me/ti/p/${profileData.lineId}`;
                 lineLink.target = '_blank';
-                lineLink.rel = 'noopener nofollow ugc';
+                lineLink.rel = 'noopener noreferrer nofollow ugc';
                 lineLink.style.display = 'inline-flex';
                 lineLinkText.textContent = `ติดต่อ ${profileData.name} ผ่าน LINE`;
             } else {
