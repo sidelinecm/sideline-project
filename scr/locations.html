@@ -187,14 +187,13 @@
     
     </footer>
   
- <script src="/libs/supabase.js"></script>
-    <script src="/libs/gsap.min.js" defer></script>
-    <script src="/libs/ScrollTrigger.min.js" defer></script>
-    <script src="/main.js" type="module"></script>
+  <script src="main.js" type="module" defer></script>
+    
     <script>
+      // Service worker registration
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(err => console.error('Service Worker registration failed:', err));
+          navigator.serviceWorker.register('sw.js').catch(err => console.error('Service Worker registration failed:', err));
         });
       }
     </script>
