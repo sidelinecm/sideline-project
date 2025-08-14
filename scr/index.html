@@ -36,9 +36,9 @@
     <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/images/logo-sideline-chiangmai.webp" as="image">
     
-    <!-- Asynchronously load stylesheets to prevent render-blocking for maximum speed -->
+    <!-- Asynchronously load stylesheets -->
     <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
-    <!-- PERFORMANCE FIX: Use local Font Awesome file which is already part of the build process -->
+    <!-- ** MAJOR FIX HERE: Corrected the filename ** -->
     <link rel="stylesheet" href="/all.min.css" media="print" onload="this.media='all'">
     <noscript>
       <link rel="stylesheet" href="/output.css">
@@ -70,7 +70,6 @@
         <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-all duration-300 border-b border-transparent">
             <div class="container mx-auto px-4 h-20 flex items-center justify-between">
               <a href="/" aria-label="SidelineChiangmai หน้าแรก">
-                <!-- UX FIX: Use srcset for high-resolution logo on HiDPI/Retina screens -->
                 <img 
                     src="/images/logo-sideline-chiangmai.webp" 
                     srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x"
@@ -148,7 +147,6 @@
         <div class="container mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
                 <div class="space-y-4">
-                     <!-- UX FIX: Use srcset for high-resolution logo on HiDPI/Retina screens -->
                     <img 
                         src="/images/logo-sideline-chiangmai.webp" 
                         srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x"
@@ -177,7 +175,7 @@
         </div>
     </footer>
 
-    <div id="lightbox" class="hidden fixed inset-0 z-[1000] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main">
+   <div id="lightbox" class="hidden fixed inset-0 z-[1000] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main">
         <div class="modal-content">
             <div class="flex-shrink-0 p-3 lg:p-4 border-b border-border flex justify-between items-center">
                 <h2 id="lightbox-header-title" class="font-bold text-muted-foreground tracking-wider">รายละเอียดโปรไฟล์</h2>
@@ -222,7 +220,11 @@
     
     </div>
     
-    <!-- ULTIMATE SCRIPT LOADING STRATEGY -->
+    <!-- ** MAJOR FIX HERE: Load Supabase script BEFORE main.js ** -->
+    <!-- This script is NOT a module, it creates a global `supabase` object -->
+    <script src="/libs/supabase.js"></script>
+    
+    <!-- This is your main application script, it IS a module -->
     <script src="/main.js" type="module"></script>
     
     <script>

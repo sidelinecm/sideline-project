@@ -1,36 +1,34 @@
 // =================================================================================
-//  main.js (DEFINITIVE FINAL VERSION - UNABRIDGED & SECURED)
+//  main.js (DEFINITIVE FINAL VERSION - CORRECTED & STABLE)
 //
-//  VERSION: 10.1 "Production Ready & Secure"
+//  VERSION: 10.2 "Stable & Corrected Imports"
 //
-//  - CRITICAL SECURITY FIX: Supabase keys are now loaded from environment variables (import.meta.env) instead of being hardcoded. This is essential for production security.
-//  - CRITICAL JS FIX: Corrected GSAP ScrollTrigger import. It's a bare import for side effects, not a named import, resolving the fatal console error.
-//  - ACCESSIBILITY FIX: Implemented robust focus management and trapping for the mobile sidebar to meet accessibility standards.
-//  - UX ENHANCEMENT: Features a professional Skeleton Loading UI and a perfectly executed, async-blocking Age Verification modal.
-//  - PERFORMANCE: Optimized 3D card effect for maximum performance with a premium elastic reset animation.
-//  - COMPLETENESS: All filter logic is fully implemented, including rating, with seamless URL state synchronization.
+//  - CRITICAL JS FIX: Supabase is now loaded via a standard <script> tag in index.html, creating a global `supabase` object. This file now correctly uses that global object (`const { createClient } = supabase`), resolving the fatal "does not provide an export" error.
+//  - CRITICAL JS FIX: Corrected GSAP ScrollTrigger import. It's a bare import for side effects.
+//  - SECURITY: Supabase keys are correctly loaded from environment variables.
 // =================================================================================
 
-// CRITICAL FIX: Using absolute paths from the site root to prevent 404 errors on deployment.
-import { createClient } from '/libs/supabase.js';
+// GSAP modules are correctly imported as ES Modules
 import { gsap } from '/libs/gsap.min.js';
-// CRITICAL JS FIX: ScrollTrigger is a plugin that registers itself. It's imported for its side effects, not as a named module.
 import '/libs/ScrollTrigger.min.js';
 
 (function() {
     'use strict';
 
+    // ** MAJOR FIX HERE **
+    // We access `createClient` from the global `supabase` object
+    // that was loaded by the <script> tag in index.html.
+    const { createClient } = supabase;
+
     class SidelineWebApp {
         // --- 1. INITIALIZATION & CONFIGURATION ---
         constructor() {
             // CRITICAL SECURITY FIX: Load keys from environment variables.
-            // These must be set in your Netlify build environment settings.
             const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
             const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
             
             if (!SUPABASE_URL || !SUPABASE_KEY) {
                 console.error("FATAL: Supabase URL or Key is not defined in environment variables.");
-                // You might want to show an error message to the user here as well.
                 document.body.innerHTML = '<div style="padding: 2rem; text-align: center;"><h1>Configuration Error</h1><p>The application could not be loaded due to a configuration error. Please contact support.</p></div>';
             }
 
@@ -47,8 +45,7 @@ import '/libs/ScrollTrigger.min.js';
             this.dom = {};
             this.state = {
                 supabase: null,
-                gsap: gsap, // GSAP is already imported
-                // ScrollTrigger is registered globally, no need to keep it in state
+                gsap: gsap,
                 allProfiles: [],
                 provincesMap: new Map(),
                 filteredProfiles: [],
@@ -61,12 +58,10 @@ import '/libs/ScrollTrigger.min.js';
                 currentPage: 'home'
             };
 
-            // Bind all 'handle' methods to the class instance for correct 'this' context.
             Object.getOwnPropertyNames(Object.getPrototypeOf(this))
                 .filter(prop => typeof this[prop] === 'function' && prop.startsWith('handle'))
                 .forEach(method => { this[method] = this[method].bind(this); });
 
-            // Defer execution until the DOM is fully loaded.
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', this.init.bind(this));
             } else {
@@ -74,9 +69,6 @@ import '/libs/ScrollTrigger.min.js';
             }
         }
 
-        /**
-         * Main initialization sequence.
-         */
         async init() {
             try {
                 this.cacheDOMElements();
@@ -92,9 +84,6 @@ import '/libs/ScrollTrigger.min.js';
             }
         }
         
-        /**
-         * Initializes UI elements that do not depend on asynchronous data.
-         */
         initImmediateUI() {
             if(this.dom.yearSpan) this.dom.yearSpan.textContent = new Date().getFullYear();
             this.dom.body.classList.add('js-loaded');
@@ -104,24 +93,18 @@ import '/libs/ScrollTrigger.min.js';
             this.initBackToTop();
         }
 
-        /**
-         * Initializes core application logic, including data fetching and main feature setup.
-         */
         async initCoreLogic() {
-            // This is the first and most critical check. The app will not proceed until this promise resolves.
             await this.initAgeVerification();
             
             this.showContentState('loading');
             
-            // Check if keys were loaded correctly before creating client
-            if (!this.CONFIG.SUPABASE_URL || !this.CONFIG.SUPABASE_KEY) {
+            if (!this.CONFIG.SUPABASE_URL || !this.CONFIG.SUPABASE_KEY || typeof createClient !== 'function') {
+                 console.error("Supabase client is not available.");
                  this.showContentState('error');
-                 return; // Stop execution if config is missing
+                 return;
             }
             this.state.supabase = createClient(this.CONFIG.SUPABASE_URL, this.CONFIG.SUPABASE_KEY);
             
-            // CRITICAL JS FIX: Register the ScrollTrigger plugin correctly.
-            // It's available globally after the bare import.
             gsap.registerPlugin(ScrollTrigger);
             
             const success = await this.fetchData();
@@ -129,7 +112,7 @@ import '/libs/ScrollTrigger.min.js';
             if (success) {
                 this.initFilters();
                 this.initLightbox();
-                this.applyFiltersFromURL(); // This triggers the first render
+                this.applyFiltersFromURL();
                 this.initScrollAnimations();
                 this.init3DCardEffect();
                 this.generateFullSchema();
@@ -138,7 +121,6 @@ import '/libs/ScrollTrigger.min.js';
             }
         }
         
-        // --- 2. DOM & EVENT SETUP ---
         cacheDOMElements() {
             const selectors = {
                 body: document.body,
@@ -203,10 +185,9 @@ import '/libs/ScrollTrigger.min.js';
                 el?.addEventListener('click', this.handleMobileMenuInteraction);
             });
             document.addEventListener('keydown', this.handleGlobalKeydown);
-            this.updateSidebarFocusability(false); // A11Y: Initially non-focusable
+            this.updateSidebarFocusability(false);
         }
 
-        // --- 3. DATA FETCHING & PROCESSING ---
         async fetchData() {
             if (this.state.isFetching) return false;
             this.state.isFetching = true;
@@ -251,7 +232,6 @@ import '/libs/ScrollTrigger.min.js';
             return this.state.allProfiles.find(p => p.id === id);
         }
         
-        // --- 4. FILTERING & RENDERING LOGIC ---
         applyFiltersFromURL() {
             const params = new URLSearchParams(window.location.search);
             if (this.dom.filterKeyword) this.dom.filterKeyword.value = params.get('q') || '';
@@ -287,7 +267,6 @@ import '/libs/ScrollTrigger.min.js';
         render() {
             if (!this.dom.profilesContentArea) return;
             
-            // Clear previous dynamic content but preserve the static message divs
             Array.from(this.dom.profilesContentArea.children).forEach(child => {
                 if (!child.id.endsWith('-message')) {
                     child.remove();
@@ -299,7 +278,7 @@ import '/libs/ScrollTrigger.min.js';
                  return;
             }
             
-            this.showContentState('success'); // Hides error/empty messages
+            this.showContentState('success');
             
             const byProvince = this.state.filteredProfiles.reduce((acc, p) => {
                 (acc[p.provinceKey] = acc[p.provinceKey] || []).push(p);
@@ -327,10 +306,8 @@ import '/libs/ScrollTrigger.min.js';
                 const skeletonContainer = document.createElement('div');
                 skeletonContainer.className = 'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
                 skeletonContainer.innerHTML = Array(this.CONFIG.SKELETON_COUNT).fill(this.createSkeletonCardHTML()).join('');
-                // Clear area before adding skeletons
                 this.dom.profilesContentArea.innerHTML = ''; 
                 this.dom.profilesContentArea.appendChild(skeletonContainer);
-                // Re-append message divs so they are not lost
                 Object.values(messageElements).forEach(el => el && this.dom.profilesContentArea.appendChild(el));
             } else if (messageElements[state]) {
                 const skeletonGrid = this.dom.profilesContentArea.querySelector('.profile-grid');
@@ -342,7 +319,6 @@ import '/libs/ScrollTrigger.min.js';
             }
         }
         
-        // --- 5. HTML GENERATION ---
         createSectionHTML(id, title, profiles) {
             const section = document.createElement('section');
             section.className = 'province-section space-y-6';
@@ -359,10 +335,6 @@ import '/libs/ScrollTrigger.min.js';
                     ${profiles.length > 0 ? `<a href="/profiles.html?province=${id}" class="text-sm font-semibold text-primary hover:underline">ดูทั้งหมด (${profiles.length})</a>` : ''}
                 </div>`;
             section.appendChild(gridContainer);
-            
-            if (profiles.length > initialLimit) {
-                // "View More" button logic would go here
-            }
             
             return section;
         }
@@ -422,7 +394,6 @@ import '/libs/ScrollTrigger.min.js';
             return 'bg-yellow-200 text-yellow-800';
         }
 
-        // --- 6. MODALS, OVERLAYS & FOCUS MANAGEMENT ---
         async initAgeVerification() {
             if (this.state.isAgeVerified || !this.dom.ageVerificationOverlay) {
                 this.dom.ageVerificationOverlay?.remove();
@@ -449,7 +420,7 @@ import '/libs/ScrollTrigger.min.js';
                             sessionStorage.setItem('ageVerified', 'true');
                             this.state.isAgeVerified = true;
                             overlay.remove();
-                            resolve(); // Critical for app to continue
+                            resolve(); 
                         } else {
                             overlay.innerHTML = `<div class="age-modal-content"><p class="text-lg">ขออภัย, คุณต้องมีอายุ 20 ปีขึ้นไปเพื่อเข้าใช้งาน</p></div>`;
                             setTimeout(() => window.location.href = 'about:blank', 2000);
@@ -508,7 +479,7 @@ import '/libs/ScrollTrigger.min.js';
             this.toggleBodyModalOpen(true);
             this.dom.backdrop.style.display = 'block';
             this.dom.sidebar.setAttribute('aria-hidden', 'false');
-            this.updateSidebarFocusability(true); // A11Y: Make focusable
+            this.updateSidebarFocusability(true);
 
             gsap.to(this.dom.backdrop, { opacity: 1, duration: 0.3 });
             gsap.to(this.dom.sidebar, { x: 0, duration: 0.3, ease: 'power2.out' });
@@ -520,7 +491,7 @@ import '/libs/ScrollTrigger.min.js';
             this.state.isMenuOpen = false;
             
             this.dom.sidebar.setAttribute('aria-hidden', 'true');
-            this.updateSidebarFocusability(false); // A11Y: Make non-focusable
+            this.updateSidebarFocusability(false);
             
             gsap.to(this.dom.backdrop, { 
                 opacity: 0, 
@@ -548,10 +519,9 @@ import '/libs/ScrollTrigger.min.js';
             this.dom.body.classList.toggle('is-modal-open', isOpen);
         }
 
-        // --- 7. ADVANCED UI EFFECTS ---
         init3DCardEffect() {
             const container = this.dom.profilesContentArea;
-            if (!container || window.matchMedia('(pointer: coarse)').matches) return; // Disable on touch devices
+            if (!container || window.matchMedia('(pointer: coarse)').matches) return;
 
             container.addEventListener('mousemove', (e) => {
                 const card = e.target.closest('.profile-card-new');
@@ -579,12 +549,11 @@ import '/libs/ScrollTrigger.min.js';
                     rotationY: 0,
                     scale: 1,
                     duration: 1.2,
-                    ease: 'elastic.out(1, 0.5)' // Professional elastic reset
+                    ease: 'elastic.out(1, 0.5)'
                 });
             });
         }
         
-        // --- 8. UTILITIES & EVENT HANDLERS ---
         debounce(func, delay) {
             let timeout;
             return (...args) => {
@@ -639,7 +608,6 @@ import '/libs/ScrollTrigger.min.js';
             }
         }
 
-        // --- 9. OTHER INITIALIZERS & HELPERS ---
         initThemeToggle() {
             const themeToggleBtn = document.querySelector('.theme-toggle-btn');
             if (!themeToggleBtn) return;
@@ -795,8 +763,7 @@ import '/libs/ScrollTrigger.min.js';
             document.head.appendChild(schemaContainer);
         }
     }
-    
-    // --- SCRIPT EXECUTION ENTRY POINT ---
+
     new SidelineWebApp();
 
 })();
