@@ -38,10 +38,11 @@
     
     <!-- Asynchronously load stylesheets to prevent render-blocking for maximum speed -->
     <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
+    <!-- PERFORMANCE FIX: Use local Font Awesome file which is already part of the build process -->
+    <link rel="stylesheet" href="/all.min.css" media="print" onload="this.media='all'">
     <noscript>
       <link rel="stylesheet" href="/output.css">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer">
+      <link rel="stylesheet" href="/all.min.css">
     </noscript>
     
     <!-- SCHEMA MARKUP is generated dynamically by main.js -->
@@ -69,7 +70,16 @@
         <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-all duration-300 border-b border-transparent">
             <div class="container mx-auto px-4 h-20 flex items-center justify-between">
               <a href="/" aria-label="SidelineChiangmai หน้าแรก">
-                <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiangmai" class="h-[30px] w-auto" width="245" height="30" fetchpriority="high" decoding="async">
+                <!-- UX FIX: Use srcset for high-resolution logo on HiDPI/Retina screens -->
+                <img 
+                    src="/images/logo-sideline-chiangmai.webp" 
+                    srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x"
+                    alt="โลโก้ ไซด์ไลน์ เชียงใหม่" 
+                    class="h-[30px] w-auto" 
+                    width="245" 
+                    height="30" 
+                    fetchpriority="high" 
+                    decoding="async">
               </a>
               <nav class="hidden md:flex items-center gap-2 text-base font-medium" aria-label="เมนูหลัก">
                 <a href="/profiles.html" class="px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">น้องๆ ทั้งหมด</a>
@@ -138,7 +148,16 @@
         <div class="container mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
                 <div class="space-y-4">
-                    <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
+                     <!-- UX FIX: Use srcset for high-resolution logo on HiDPI/Retina screens -->
+                    <img 
+                        src="/images/logo-sideline-chiangmai.webp" 
+                        srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x"
+                        alt="โลโก้ Sideline Chiang Mai" 
+                        class="h-[30px] w-auto mx-auto md:mx-0" 
+                        width="245" 
+                        height="30" 
+                        loading="lazy" 
+                        decoding="async">
                     <p class="leading-relaxed text-sm">ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ</p>
                 </div>
                 <div>
