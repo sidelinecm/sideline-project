@@ -1,9 +1,9 @@
 /* =================================================================================
- *  styles.css (ULTIMATE SOURCE FILE FOR PREMIUM BUILD)
+ *  styles.css (ADVANCED & FINAL VERSION)
  *
- *  - This is the INPUT file for the Tailwind CSS build process.
- *  - It contains all necessary directives, variables, custom fonts,
- *    and ENHANCED component styles to achieve the premium design.
+ *  - The definitive source file for the Tailwind CSS build process.
+ *  - Contains enhanced styles for a premium UX: Age Verification, Skeleton Loaders,
+ *    and smooth, accessible focus states and transitions.
  *  - Run `npm run build` to generate the final `output.css` from this file.
  * ================================================================================= */
 
@@ -12,7 +12,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 2. Custom Styles, Fonts, and Variables (The "Recipe") */
+/* 2. Custom Fonts, Variables, and Base Styles */
 @layer base {
     /* Custom Font Faces */
     @font-face {
@@ -43,10 +43,13 @@
         --background: #f7f8fc;
         --foreground: #3a3f4b;
         --card: #ffffff;
+        --card-foreground: var(--foreground);
         --muted-foreground: #6b7280;
         --border: #e5e7eb;
         --accent: #f3f4f6;
+        --accent-foreground: #3a3f4b;
         --primary: #dd257b;
+        --primary-foreground: #ffffff;
         --primary-glow: #e64a95;
         --secondary: #8b5cf6;
         --secondary-glow: #a78bfa;
@@ -55,18 +58,26 @@
         --background: #121417;
         --foreground: #e5e7eb;
         --card: #1f2937;
+        --card-foreground: var(--foreground);
         --muted-foreground: #9ca3af;
         --border: #374151;
         --accent: #374151;
+        --accent-foreground: var(--foreground);
     }
 
-    /* ENHANCED Base Body & Background Styles */
+    /* Base Body, Background, and Global Styles */
     body {
         @apply bg-background text-foreground antialiased;
         font-family: 'Prompt', sans-serif;
         transition: background-color 0.3s, color 0.3s;
     }
 
+    /* Utility class to prevent scrolling when modals are open */
+    body.is-modal-open {
+        @apply overflow-hidden;
+    }
+
+    /* Aurora background effect */
     body::before, body::after {
         content: "";
         position: fixed;
@@ -89,33 +100,38 @@
     @keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
 }
 
+/* 3. Reusable Component Styles */
 @layer components {
-    /* ENHANCED Custom Component Classes */
-    
+    /* Accessibility Skip Link */
     .skip-link {
-        @apply absolute -top-96 left-2 bg-primary text-white p-2 rounded-b-lg z-[9999] transition-all duration-300;
+        @apply absolute -top-96 left-2 bg-primary text-white p-3 rounded-b-lg z-[9999] transition-all duration-300 font-semibold;
     }
     .skip-link:focus {
         @apply top-0;
     }
     
+    /* [CRITICAL FIX & ENHANCEMENT] Age Verification Overlay */
+    #age-verification-overlay {
+        @apply fixed inset-0 z-[2000] flex items-center justify-center bg-gray-900/80 p-4 transition-opacity duration-300 ease-in-out;
+        backdrop-filter: blur(8px);
+    }
     .age-modal-content {
-        @apply w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/90 p-8 text-center text-white shadow-2xl backdrop-blur-sm;
+        @apply w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/90 p-8 text-center text-white shadow-2xl;
     }
     .age-badge-inline {
         @apply inline-block rounded-full bg-red-600 px-3 py-1 text-base font-bold text-white;
     }
     .age-btn {
-        @apply w-full rounded-lg py-3 font-bold transition-transform duration-200 hover:scale-105;
+        @apply w-full rounded-lg py-3 font-bold transition-all duration-200 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900;
     }
     .age-btn-confirm {
-        @apply bg-primary text-white;
+        @apply bg-primary text-white focus-visible:ring-primary;
     }
     .age-btn-cancel {
-        @apply bg-white/10 text-muted-foreground;
+        @apply bg-white/10 text-muted-foreground hover:bg-white/20 focus-visible:ring-white;
     }
 
-    /* ENHANCED Soft UI Form Elements */
+    /* ENHANCED Soft UI Form Elements with better focus states */
     .filter-input.soft-ui-inset {
         @apply relative flex items-center rounded-full bg-accent transition-shadow duration-300;
         box-shadow: inset 5px 5px 10px #d1d5db, inset -5px -5px 10px #ffffff;
@@ -124,11 +140,11 @@
         box-shadow: inset 5px 5px 10px #0d0f13, inset -5px -5px 10px #353945;
     }
     .filter-input.soft-ui-inset > i {
-        @apply pl-4 text-muted-foreground/50;
+        @apply pl-4 text-muted-foreground/50 pointer-events-none;
     }
     .filter-input.soft-ui-inset > input, 
     .filter-input.soft-ui-inset > select {
-        @apply w-full appearance-none bg-transparent border-none py-3.5 px-4 pl-3 text-foreground;
+        @apply w-full appearance-none bg-transparent border-none py-3.5 px-4 pl-3 text-foreground focus:ring-0;
     }
     .filter-input.soft-ui-inset:focus-within {
         box-shadow: inset 3px 3px 6px #d1d5db, inset -3px -3px 6px #ffffff, 0 0 0 2px var(--primary);
@@ -136,4 +152,27 @@
     html.dark .filter-input.soft-ui-inset:focus-within {
         box-shadow: inset 3px 3px 6px #0d0f13, inset -3px -3px 6px #353945, 0 0 0 2px var(--primary);
     }
+
+    /* [NEW UX ENHANCEMENT] Skeleton Card for Loading State */
+    .skeleton-card {
+        @apply bg-card/80 p-2 rounded-xl shadow-sm space-y-3;
+    }
+    .skeleton-card .skeleton-img {
+        @apply aspect-[3/4] w-full bg-accent rounded-lg animate-pulse;
+    }
+    .skeleton-card .skeleton-text {
+        @apply h-5 bg-accent rounded-md animate-pulse;
+    }
+    .skeleton-card .skeleton-text-sm {
+        @apply h-4 bg-accent rounded-md animate-pulse;
+    }
+
+    /* [UI ENHANCEMENT] 3D Card Effect Container */
+     .profile-grid-container {
+        perspective: 1500px;
+     }
+     .profile-card-new {
+        transform-style: preserve-3d;
+        @apply transition-transform duration-700;
+     }
 }
