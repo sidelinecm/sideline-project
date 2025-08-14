@@ -32,7 +32,6 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     <link rel="manifest" href="/manifest.webmanifest">
     
-    <!-- Improvement: Preload key images for better LCP -->
     <link rel="preload" as="image" href="/images/sideline-chiangmai-hero.webp" fetchpriority="high">
     <link rel="preload" as="image" href="/images/placeholder-profile.webp" fetchpriority="high">
     
@@ -46,13 +45,8 @@
       :root{--primary:#db2777;--background:#fff;--foreground:#1f2937}html.dark{--background:#111827;--foreground:#f3f4f6}html{font-family:'Prompt',system-ui,sans-serif;line-height:1.5;color:var(--foreground);background-color:var(--background)}body{margin:0;opacity:0;transition:opacity .4s ease-in-out}.skip-link{position:absolute;left:-9999px}.skip-link:focus{position:fixed;top:1rem;left:1rem;background-color:var(--background);padding:.5rem 1rem;z-index:9999;border-radius:.375rem;box-shadow:0 4px 14px rgba(0,0,0,.12)}#page-header{height:4.5rem;position:fixed;width:100%;top:0;left:0;z-index:40}
     </style>
 
-    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
-
-    <noscript>
-      <link rel="stylesheet" href="/output.css">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    </noscript>
+    <link rel="stylesheet" href="/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body class="antialiased" data-page="home">
     
@@ -115,19 +109,37 @@
                         <h1 id="hero-h1" class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 text-primary">ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน</h1>
                         <p id="hero-p" class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">คัดสรรน้องๆ ไซด์ไลน์คุณภาพ บริการระดับพรีเมียม การันตีโปรไฟล์ตรงปก 100%, ปลอดภัย และไม่ต้องโอนมัดจำก่อน</p>
                     </div>
+                    
+                    <div id="hero-form" class="pt-6">
+                        <form id="search-form-home" action="/profiles.html" method="GET" aria-labelledby="search-form-heading-home">
+                            <h2 id="search-form-heading-home" class="sr-only">ฟอร์มค้นหาโปรไฟล์</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-2xl mx-auto">
+                                <div class="relative md:col-span-2">
+                                    <label for="search-keyword-home" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
+                                    <div class="relative">
+                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none" aria-hidden="true">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg>
+                                        </span>
+                                        <input id="search-keyword-home" name="q" type="search" placeholder="ค้นหาจากชื่อ, สไตล์, หรือจังหวัด..." class="w-full pl-10 pr-4 py-3 border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition text-sm">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full flex items-center justify-center gap-2 px-5 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition text-sm font-semibold">
+                                    <span>ค้นหา</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
           </section>
 
-          <!-- Improvement: Added 'hidden' class to prevent FOUC -->
-         <section id="featured-profiles" class="hidden" aria-labelledby="featured-heading">
+         <section id="featured-profiles" aria-labelledby="featured-heading">
             <div class="section-content-wrapper">
               <div class="p-6 md:p-8">
                 <h2 id="featured-heading" class="text-2xl md:text-3xl font-bold text-primary">โปรไฟล์แนะนำ <span class="text-foreground/80">ที่ถูกเลือกมากที่สุด</span></h2>
                 <p class="mt-1 text-muted-foreground max-w-2xl text-sm md:text-base">พบกับน้องๆ ยอดนิยมที่การันตีความประทับใจ คัดเลือกมาเป็นพิเศษเพื่อประสบการณ์ที่ดีที่สุด</p>
               </div>
               <div id="featured-profiles-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-6 md:px-8 pb-6 md:pb-8">
-                  <!-- Skeletons for CLS reduction. JS will replace this. -->
                   <div class="profile-card-container"></div>
                   <div class="profile-card-container"></div>
                   <div class="profile-card-container"></div>
@@ -136,25 +148,19 @@
             </div>
           </section>
 
-          <!-- All Profiles Section with NoScript Fallback -->
           <section id="all-profiles-section" aria-labelledby="all-profiles-heading">
               <div class="text-center mb-10">
                 <h2 id="all-profiles-heading" class="text-3xl font-bold">เลือกชมน้องๆ ในพื้นที่ของคุณ</h2>
                 <p class="text-muted-foreground mt-2 max-w-xl mx-auto">เรามีน้องๆ พร้อมให้บริการในหลากหลายจังหวัด ค้นหาโปรไฟล์ที่ใช่สำหรับคุณได้เลย</p>
               </div>
               
-              <!-- Improvement: Added aria-busy for accessibility -->
               <div id="profiles-display-area" class="space-y-12 md:space-y-16" aria-busy="true">
-                  <!-- JavaScript will populate this area. -->
               </div>
               
-              <!-- Loading/Error/NoScript states -->
               <div id="loading-profiles-placeholder" class="hidden" role="status" aria-live="polite">
                   <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mt-8">
-                    <div class="profile-card-container"></div>
-                    <div class="profile-card-container"></div>
-                    <div class="profile-card-container"></div>
-                    <div class="profile-card-container"></div>
+                    <div class="profile-card-container"></div><div class="profile-card-container"></div><div class="profile-card-container"></div><div class="profile-card-container"></div>
+                    <div class="profile-card-container"></div><div class="profile-card-container"></div><div class="profile-card-container"></div><div class="profile-card-container"></div>
                   </div>
               </div>
               <div id="fetch-error-message" class="hidden text-center py-12 px-4 bg-accent rounded-lg mt-8" role="alert">
@@ -175,7 +181,6 @@
         </div>
     </main>
     
-    <!-- FOOTER -->
     <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16">
         <div class="container mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
@@ -202,7 +207,6 @@
         </div>
     </footer>
 
-    <!-- LIGHTBOX -->
     <div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="lightbox-header-title">
         <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
           <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิด"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
@@ -212,10 +216,10 @@
         </div>
     </div>
     
-    <script src="/libs/supabase.js" defer></script>
+    <script src="/libs/supabase.js"></script>
     <script src="/libs/gsap.min.js" defer></script>
     <script src="/libs/ScrollTrigger.min.js" defer></script>
-    <script src="/main.js" defer></script>
+    <script src="/main.js" type="module"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -223,6 +227,5 @@
         });
       }
     </script>
-
 </body>
 </html>
