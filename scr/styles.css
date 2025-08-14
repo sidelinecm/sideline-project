@@ -184,3 +184,43 @@
   .faq-item[open]>summary .faq-icon{@apply rotate-180}
   .faq-answer{@apply px-4 pb-4 text-muted-foreground;animation:fadeIn .3s ease-in-out}
 }
+/* ======================================================================== */
+/* SECTION H: WAWAI'S ULTIMATE FIX FOR IMAGE LOADING & CARD STABILITY */
+/* โค้ดแก้ไขปัญหาภาพล่องหน, ลด CLS, และเพิ่มความเสถียรในการแสดงผลการ์ด */
+/* ======================================================================== */
+@layer components {
+  /* ใช้ Container นี้จองพื้นที่และแสดง Shimmer effect ตอนโหลด */
+  .profile-card-container {
+    @apply relative block aspect-[3/4] w-full overflow-hidden rounded-xl bg-muted;
+  }
+  .profile-card-container::after {
+    content: '';
+    @apply absolute inset-0 translate-x-[-100%] animate-[shimmer_2s_infinite];
+    background-image: linear-gradient(90deg, transparent, hsla(0,0%,100%,.05), transparent);
+  }
+  html:not(.dark) .profile-card-container::after {
+    background-image: linear-gradient(90deg, transparent, hsla(0,0%,0%,.04), transparent);
+  }
+
+  /* ควบคุมการแสดงผลของรูปภาพจริง */
+  .profile-img {
+    @apply h-full w-full object-cover transition-opacity duration-400 ease-in-out;
+    opacity: 0; /* ซ่อนไว้ก่อนเป็นค่าเริ่มต้น */
+  }
+  .profile-img.is-loaded {
+    opacity: 1; /* แสดงผลเมื่อโหลดเสร็จ */
+  }
+  .profile-img.is-error {
+    @apply object-contain p-4 opacity-50; /* จัดสไตล์ให้สวยงามเมื่อเป็นภาพ placeholder */
+  }
+
+  /* แก้ไขเล็กน้อยสำหรับ Profile Card เพื่อให้ Overlay ทำงานได้ดีที่สุด */
+  .profile-card-new {
+    @apply relative; /* ทำให้เป็น Stacking Context สำหรับ Overlay */
+  }
+  .profile-card-new .card-overlay {
+    @apply absolute inset-0 z-10;
+  }
+}
+/* ใน output.css ของคุณ (หรือไฟล์ที่ build) */
+.profile-grid { content-visibility: auto; contain-intrinsic-size: 1200px; }
