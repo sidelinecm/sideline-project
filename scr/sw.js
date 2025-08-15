@@ -1,111 +1,140 @@
-// sw.js - A Robust Service Worker by Wawai
-const CACHE_VERSION = 'v1.4'; // *** เปลี่ยนเลขเวอร์ชันทุกครั้งที่อัปเดตไฟล์สำคัญ ***
-const CORE_CACHE_NAME = `sidelinecm-core-${CACHE_VERSION}`;
-const IMAGE_CACHE_NAME = `sidelinecm-images-${CACHE_VERSION}`;
-const FONT_CACHE_NAME = `sidelinecm-fonts-${CACHE_VERSION}`;
+// --- sw.js (Service Worker ฉบับสมบูรณ์ - v2.1) ---
+// ผู้สร้าง: Gemini (ปรับปรุงสำหรับ sidelinechiangmai.netlify.app)
+// เวอร์ชัน: 2.1
+// การปรับปรุง:
+// - อัปเดตเลขเวอร์ชันของ CACHE_NAME เพื่อบังคับให้ SW อัปเดตใหม่
+// - เพิ่ม Cache Busting (?v=) เข้าไปในไฟล์ output.css และ main.js
+// - ทำให้ SW ทำงานสอดคล้องกับเทคนิคการจัดการแคชในไฟล์ HTML อย่างสมบูรณ์แบบ
 
-const CORE_ASSETS = [
-    '/',
-    '/index.html',
-    '/profiles.html',
-    '/output.css',
-    '/main.js',
-    '/images/logo-sideline-chiangmai.webp',
-    '/images/favicon.ico',
-    '/images/placeholder-profile.webp' // สำคัญมาก: ต้องแคชรูป Placeholder
+// [สำคัญ] ทุกครั้งที่มีการแก้ไขไฟล์ใน APP_SHELL_FILES ให้เปลี่ยนเลขเวอร์ชันนี้เสมอ
+// เช่น 'sideline-cm-cache-v2.1', 'sideline-cm-cache-v2.2'
+const CACHE_NAME = 'sideline-cm-cache-v2.1'; 
+const CACHE_BUSTER = '20250811'; // <--- กำหนดเลขเวอร์ชันของไฟล์ที่นี่ที่เดียว
+
+const APP_SHELL_FILES = [
+  // --- Core App Shell Files ---
+  '/',
+  '/index.html',
+  '/about.html',
+  '/faq.html',
+  '/locations.html',
+  '/blog.html',
+  '/profiles.html',
+  '/privacy-policy.html',
+  '/404.html',
+
+  // --- Blog Post Pages ---
+  '/blog/nimman-feel-fan-guide.html',
+  '/blog/safety-tips.html',
+  '/blog/what-is-trong-pok.html',
+
+  // --- [IMPROVEMENT] Critical CSS & JS with Cache Buster ---
+  `/output.css?v=${CACHE_BUSTER}`,
+  `/main.js?v=${CACHE_BUSTER}`,
+  
+  // --- External Libraries ---
+  '/libs/supabase.js',
+  '/libs/gsap.min.js', // แก้ไขจากไฟล์เดิมที่อาจมี ScrollTrigger.min.js
+  '/libs/ScrollTrigger.min.js',
+
+  // --- PWA Metadata ---
+  '/manifest.webmanifest',
+
+  // --- Images ---
+  '/images/logo-sideline-chiangmai.webp',
+  '/images/sideline-chiangmai-hero.webp',
+  '/images/placeholder-profile.webp',
+  '/images/favicon.ico',
+  '/images/favicon.svg',
+  '/images/apple-touch-icon.png', // แก้ไขจากไฟล์เดิมที่อาจเป็น /images/
+  '/images/blog/nimman-guide.webp',
+  '/images/blog/safety-tips.webp',
+  '/images/blog/guarantee-concept.webp',
+
+  // --- Fonts ---
+  '/fonts/prompt-v11-latin_thai-regular.woff2',
+  '/fonts/prompt-v11-latin_thai-500.woff2',
+  '/fonts/prompt-v11-latin_thai-700.woff2',
+  '/fonts/prompt-v11-latin_thai-800.woff2',
+  '/fonts/sarabun-v16-latin_thai-regular.woff2',
+  '/fonts/sarabun-v16-latin_thai-700.woff2',
+  
+  // --- PWA Icons ---
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/icons/maskable-icon-512x512.png'
 ];
 
-// ติดตั้ง Service Worker และแคชไฟล์หลัก
+
+// --- 1. Installation Event ---
 self.addEventListener('install', event => {
-    self.skipWaiting(); // บังคับให้ SW ใหม่ทำงานทันที
-    event.waitUntil(
-        caches.open(CORE_CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
-    );
+  console.log(`[Service Worker] Installing Cache Version: ${CACHE_NAME}`);
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('[Service Worker] Caching App Shell...');
+        return cache.addAll(APP_SHELL_FILES);
+      })
+      .then(() => {
+        console.log('[Service Worker] App Shell Cached Successfully.');
+        return self.skipWaiting();
+      })
+      .catch(error => {
+        console.error('[Service Worker] Caching failed:', error);
+      })
+  );
 });
 
-// จัดการกับ request ทั้งหมด
-self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
-
-    // 1. สำหรับรูปภาพจาก Supabase หรือ CDN อื่นๆ (ใช้ Stale-While-Revalidate)
-    if (event.request.destination === 'image') {
-        event.respondWith(staleWhileRevalidate(event.request, IMAGE_CACHE_NAME, '/images/placeholder-profile.webp'));
-        return;
-    }
-    
-    // 2. สำหรับฟอนต์ (ใช้ Cache First)
-    if (event.request.destination === 'font' || url.hostname.includes('cloudflare')) {
-        event.respondWith(cacheFirst(event.request, FONT_CACHE_NAME));
-        return;
-    }
-
-    // 3. สำหรับหน้าเว็บและไฟล์หลัก (ใช้ Network First)
-    if (event.request.mode === 'navigate' || CORE_ASSETS.some(path => url.pathname.endsWith(path))) {
-         event.respondWith(networkFirst(event.request, CORE_CACHE_NAME));
-         return;
-    }
-    
-    // Request อื่นๆ ให้ทำตามปกติ
-});
-
-// กลยุทธ์: Stale-While-Revalidate
-async function staleWhileRevalidate(request, cacheName, fallbackUrl) {
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
-    
-    const fetchPromise = fetch(request).then(networkResponse => {
-        if (networkResponse.ok) {
-            cache.put(request, networkResponse.clone());
-        }
-        return networkResponse;
-    }).catch(async () => {
-        if (fallbackUrl) return caches.match(fallbackUrl);
-    });
-
-    return cachedResponse || fetchPromise;
-}
-
-// กลยุทธ์: Network First
-async function networkFirst(request, cacheName) {
-    try {
-        const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
-            const cache = await caches.open(cacheName);
-            cache.put(request, networkResponse.clone());
-        }
-        return networkResponse;
-    } catch (error) {
-        const cachedResponse = await caches.match(request);
-        return cachedResponse || Response.error();
-    }
-}
-
-// กลยุทธ์: Cache First
-async function cacheFirst(request, cacheName) {
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
-    if (cachedResponse) return cachedResponse;
-    
-    try {
-        const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
-            cache.put(request, networkResponse.clone());
-        }
-        return networkResponse;
-    } catch (error) {
-        return Response.error();
-    }
-}
-
-
-// ลบ Cache เก่าที่ไม่ใช้งานแล้ว
+// --- 2. Activation Event ---
 self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.filter(name => !name.endsWith(CACHE_VERSION))
-                          .map(name => caches.delete(name))
-            );
-        }).then(() => self.clients.claim()) // ให้ SW ควบคุมหน้าเว็บทั้งหมดทันที
+  console.log(`[Service Worker] Activating Cache Version: ${CACHE_NAME}`);
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// --- 3. Fetch Handling Event ---
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  // Strategy 1: Network First for API (Supabase)
+  if (url.hostname.includes('supabase.co')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(networkResponse => {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
     );
+    return;
+  }
+
+  // Strategy 2: Cache First for everything else
+  event.respondWith(
+    caches.match(event.request)
+      .then(cachedResponse => {
+        return cachedResponse || fetch(event.request).then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200 || (networkResponse.type !== 'basic' && networkResponse.type !== 'cors')) {
+            return networkResponse;
+          }
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+          return networkResponse;
+        });
+      })
+      .catch(() => caches.match('/404.html'))
+  );
 });

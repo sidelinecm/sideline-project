@@ -1,178 +1,199 @@
-/* =================================================================================
- *  styles.css (ADVANCED & FINAL VERSION)
- *
- *  - The definitive source file for the Tailwind CSS build process.
- *  - Contains enhanced styles for a premium UX: Age Verification, Skeleton Loaders,
- *    and smooth, accessible focus states and transitions.
- *  - Run `npm run build` to generate the final `output.css` from this file.
- * ================================================================================= */
+/*
+=================================================================
+ styles.css (Master Source File for Building)
+=================================================================
+ This is the definitive source file for your project's styles.
+ Use this file with the Tailwind CLI to generate the final output.css.
+ It contains all custom components, animations, and theme adjustments.
+*/
 
-/* 1. Tailwind Directives (Essential) */
+/* 1. Import Tailwind's base, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 2. Custom Fonts, Variables, and Base Styles */
-@layer base {
-    /* Custom Font Faces */
-    @font-face {
-        font-family: 'Prompt';
-        font-style: normal;
-        font-weight: 400; /* Regular */
-        src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
-        font-display: swap;
-    }
-    @font-face {
-        font-family: 'Prompt';
-        font-style: normal;
-        font-weight: 700; /* Bold */
-        src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
-        font-display: swap;
-    }
-    @font-face {
-        font-family: 'Prompt';
-        font-style: normal;
-        font-weight: 800; /* Extra Bold */
-        src: url('/fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
-        font-display: swap;
-    }
-
-    /* ENHANCED Theming Variables */
-    :root {
-        --radius: 1rem;
-        --background: #f7f8fc;
-        --foreground: #3a3f4b;
-        --card: #ffffff;
-        --card-foreground: var(--foreground);
-        --muted-foreground: #6b7280;
-        --border: #e5e7eb;
-        --accent: #f3f4f6;
-        --accent-foreground: #3a3f4b;
-        --primary: #dd257b;
-        --primary-foreground: #ffffff;
-        --primary-glow: #e64a95;
-        --secondary: #8b5cf6;
-        --secondary-glow: #a78bfa;
-    }
-    html.dark {
-        --background: #121417;
-        --foreground: #e5e7eb;
-        --card: #1f2937;
-        --card-foreground: var(--foreground);
-        --muted-foreground: #9ca3af;
-        --border: #374151;
-        --accent: #374151;
-        --accent-foreground: var(--foreground);
-    }
-
-    /* Base Body, Background, and Global Styles */
-    body {
-        @apply bg-background text-foreground antialiased;
-        font-family: 'Prompt', sans-serif;
-        transition: background-color 0.3s, color 0.3s;
-    }
-
-    /* Utility class to prevent scrolling when modals are open */
-    body.is-modal-open {
-        @apply overflow-hidden;
-    }
-
-    /* Aurora background effect */
-    body::before, body::after {
-        content: "";
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        z-index: -10;
-        width: 150vmax;
-        height: 150vmax;
-        border-radius: 9999px;
-        filter: blur(150px);
-        opacity: 0.15;
-        animation: aurora-1 40s linear infinite;
-    }
-    html:not(.dark) body::before { background: radial-gradient(circle, var(--primary) 0, transparent 40%); }
-    html:not(.dark) body::after { background: radial-gradient(circle, var(--secondary) 0, transparent 40%); animation-name: aurora-2; animation-direction: reverse; }
-    html.dark body::before { background: radial-gradient(circle, var(--primary-glow) 0, transparent 40%); opacity: 0.2; }
-    html.dark body::after { background: radial-gradient(circle, var(--secondary-glow) 0, transparent 40%); opacity: 0.1; animation-name: aurora-2; animation-direction: reverse; }
-
-    @keyframes aurora-1 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-    @keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
-}
-
-/* 3. Reusable Component Styles */
+/* 2. Define Custom Components and Styles in the '@layer components' */
 @layer components {
-    /* Accessibility Skip Link */
-    .skip-link {
-        @apply absolute -top-96 left-2 bg-primary text-white p-3 rounded-b-lg z-[9999] transition-all duration-300 font-semibold;
+  /* Header Styles */
+  #page-header.scrolled {
+    @apply border-border bg-card/80 shadow-lg backdrop-blur-lg;
+  }
+  @media (prefers-color-scheme: dark) {
+    #page-header.scrolled {
+      @apply bg-background/80;
     }
-    .skip-link:focus {
-        @apply top-0;
-    }
-    
-    /* [CRITICAL FIX & ENHANCEMENT] Age Verification Overlay */
-    #age-verification-overlay {
-        @apply fixed inset-0 z-[2000] flex items-center justify-center bg-gray-900/80 p-4 transition-opacity duration-300 ease-in-out;
-        backdrop-filter: blur(8px);
-    }
-    .age-modal-content {
-        @apply w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/90 p-8 text-center text-white shadow-2xl;
-    }
-    .age-badge-inline {
-        @apply inline-block rounded-full bg-red-600 px-3 py-1 text-base font-bold text-white;
-    }
-    .age-btn {
-        @apply w-full rounded-lg py-3 font-bold transition-all duration-200 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900;
-    }
-    .age-btn-confirm {
-        @apply bg-primary text-white focus-visible:ring-primary;
-    }
-    .age-btn-cancel {
-        @apply bg-white/10 text-muted-foreground hover:bg-white/20 focus-visible:ring-white;
-    }
+  }
 
-    /* ENHANCED Soft UI Form Elements with better focus states */
-    .filter-input.soft-ui-inset {
-        @apply relative flex items-center rounded-full bg-accent transition-shadow duration-300;
-        box-shadow: inset 5px 5px 10px #d1d5db, inset -5px -5px 10px #ffffff;
-    }
-    html.dark .filter-input.soft-ui-inset {
-        box-shadow: inset 5px 5px 10px #0d0f13, inset -5px -5px 10px #353945;
-    }
-    .filter-input.soft-ui-inset > i {
-        @apply pl-4 text-muted-foreground/50 pointer-events-none;
-    }
-    .filter-input.soft-ui-inset > input, 
-    .filter-input.soft-ui-inset > select {
-        @apply w-full appearance-none bg-transparent border-none py-3.5 px-4 pl-3 text-foreground focus:ring-0;
-    }
-    .filter-input.soft-ui-inset:focus-within {
-        box-shadow: inset 3px 3px 6px #d1d5db, inset -3px -3px 6px #ffffff, 0 0 0 2px var(--primary);
-    }
-    html.dark .filter-input.soft-ui-inset:focus-within {
-        box-shadow: inset 3px 3px 6px #0d0f13, inset -3px -3px 6px #353945, 0 0 0 2px var(--primary);
-    }
+  /* General UI Elements */
+  .text-glow {
+    text-shadow: 0 0 25px hsl(var(--primary-glow)/.7), 0 0 8px hsl(var(--primary-glow)/.9);
+  }
 
-    /* [NEW UX ENHANCEMENT] Skeleton Card for Loading State */
-    .skeleton-card {
-        @apply bg-card/80 p-2 rounded-xl shadow-sm space-y-3;
-    }
-    .skeleton-card .skeleton-img {
-        @apply aspect-[3/4] w-full bg-accent rounded-lg animate-pulse;
-    }
-    .skeleton-card .skeleton-text {
-        @apply h-5 bg-accent rounded-md animate-pulse;
-    }
-    .skeleton-card .skeleton-text-sm {
-        @apply h-4 bg-accent rounded-md animate-pulse;
-    }
+  .soft-ui-card {
+    background-color: hsl(var(--card) / 0.8);
+    @apply backdrop-blur-md border border-border/50 rounded-2xl transition-shadow duration-300;
+    box-shadow: 0 8px 32px hsl(var(--soft-shadow-dark) / 0.3);
+  }
 
-    /* [UI ENHANCEMENT] 3D Card Effect Container */
-     .profile-grid-container {
-        perspective: 1500px;
-     }
-     .profile-card-new {
-        transform-style: preserve-3d;
-        @apply transition-transform duration-700;
-     }
+  .overlay-backdrop {
+    background-color: rgba(0,0,0,0.6);
+    @apply backdrop-blur-lg;
+  }
+
+  /* Search Form */
+  #search-form-container {
+    @apply soft-ui-card p-6 md:p-10;
+  }
+
+  .filter-input {
+    background-color: hsl(var(--muted));
+    box-shadow: inset 3px 3px 6px var(--soft-shadow-dark), inset -3px -3px 6px var(--soft-shadow-light);
+    @apply flex w-full items-center gap-3 rounded-xl p-4 text-base text-muted-foreground;
+  }
+  .filter-input input, .filter-input select {
+    @apply w-full border-none bg-transparent focus:outline-none focus:ring-0;
+  }
+  
+  .filter-button {
+    @apply w-full rounded-full py-3 px-6 font-bold transition-all duration-300;
+  }
+  .btn-search {
+    @apply filter-button text-white;
+    background: linear-gradient(145deg, hsl(var(--secondary)), hsl(var(--primary)));
+    box-shadow: 0 5px 20px -5px hsl(var(--primary-glow) / 0.6);
+  }
+  .btn-search:hover {
+    @apply scale-[1.03] -translate-y-0.5;
+    box-shadow: 0 8px 30px -5px hsl(var(--primary-glow) / 0.7);
+  }
+
+  /* Profile Cards */
+  .profile-card-new {
+    @apply soft-ui-card relative cursor-pointer overflow-hidden transition-all duration-300 group;
+  }
+  .profile-card-new:hover {
+    @apply -translate-y-1.5;
+    box-shadow: 0 12px 40px hsl(var(--soft-shadow-dark) / 0.4);
+  }
+  .card-image {
+    @apply aspect-[3/4] h-full w-full object-cover transition-transform duration-500 ease-out;
+  }
+  .group:hover .card-image {
+    @apply scale-105;
+  }
+  .card-overlay {
+    @apply absolute inset-0 flex flex-col justify-end p-4 text-white;
+    background-image: linear-gradient(to top, rgba(0,0,0,0.85), transparent 60%);
+  }
+  .card-badges {
+    @apply absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5;
+  }
+  .card-info {
+    @apply translate-y-2 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100;
+  }
+
+  /* Badges with Colors */
+  .badge {
+    @apply rounded-full px-3 py-1 text-xs font-semibold shadow-sm;
+  }
+  .badge-yellow {
+    background-color: hsla(48, 96%, 53%, 0.8);
+    @apply badge border border-white/10 text-yellow-900 backdrop-blur-sm;
+  }
+  .badge-green {
+    background-color: hsla(145, 63%, 49%, 0.8);
+    @apply badge border border-white/10 text-white backdrop-blur-sm;
+  }
+  .badge-red {
+    background-color: hsla(0, 72%, 51%, 0.8);
+    @apply badge border border-white/10 text-white backdrop-blur-sm;
+  }
+
+  /* Navigation Links */
+  .nav-link {
+    @apply rounded-full py-2 px-4 transition-colors duration-200;
+  }
+  .nav-link:hover {
+    @apply bg-accent;
+  }
+  .nav-link.active-nav-link {
+    @apply bg-primary/10 font-bold text-primary;
+  }
+  
+  /* Sidebar */
+  #sidebar {
+    background-color: hsl(var(--card) / 0.8);
+    @apply border-l border-border backdrop-blur-xl;
+  }
+  .sidebar-link {
+    @apply flex items-center gap-4 rounded-lg p-3 font-medium transition-colors duration-200;
+  }
+  .sidebar-link:hover {
+    @apply bg-muted text-primary;
+  }
+  .sidebar-link.active-nav-link {
+    @apply bg-primary/10 font-bold text-primary;
+  }
+
+  /* Age Verification Modal */
+  #age-verification-overlay .age-modal-content {
+    @apply soft-ui-card w-full max-w-sm p-8 text-center text-white backdrop-blur-2xl;
+  }
+  .age-btn {
+    @apply w-full rounded-full border py-3 px-4 font-bold transition-all duration-200;
+  }
+  .age-btn-cancel {
+    @apply border-muted-foreground text-muted-foreground;
+  }
+  .age-btn-cancel:hover {
+    @apply border-foreground bg-muted text-foreground;
+  }
+  .age-btn-confirm {
+    @apply border-transparent text-white;
+    background: linear-gradient(145deg, hsl(var(--secondary)), hsl(var(--primary)));
+  }
+  .age-btn-confirm:hover { @apply opacity-90; }
+  .age-badge-inline {
+    @apply ml-2 inline-block -translate-y-0.5 rounded-md border-2 border-primary bg-primary/10 px-2 pt-0.5 pb-0.5 text-xl font-extrabold text-primary;
+  }
+
+  /* Section Titles */
+  .section-title {
+    @apply text-3xl font-extrabold text-foreground md:text-4xl;
+  }
+  .section-subtitle {
+    @apply mt-2 text-muted-foreground;
+  }
+
+  /* Skeleton Loader */
+  .skeleton-card {
+    @apply aspect-[3/4] animate-pulse rounded-2xl bg-muted;
+  }
+  
+  /* Lightbox Styles */
+  .btn-close-premium {
+    @apply h-10 w-10 flex items-center justify-center rounded-full bg-card/50 text-foreground/80 transition-all duration-200 hover:bg-muted hover:scale-110 hover:rotate-90;
+  }
+  .profile-tag {
+    @apply rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary;
+  }
+  .stats-grid {
+    @apply grid grid-cols-2 gap-4 pt-4 border-t border-border sm:grid-cols-3 md:grid-cols-4;
+  }
+  .stats-grid-item {
+    @apply flex items-center gap-3 rounded-lg bg-muted/70 p-3;
+  }
+  .stat-icon-wrapper {
+    @apply flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-background;
+  }
+  .stat-label {
+    @apply text-xs font-medium text-muted-foreground;
+  }
+  .stat-value {
+    @apply text-sm font-bold text-foreground;
+  }
+  .btn-line-shared {
+    @apply inline-flex items-center justify-center gap-3 rounded-full bg-green-500 px-8 py-3 font-bold text-white transition-transform duration-200 hover:scale-105;
+    box-shadow: 0 4px 20px -5px rgba(34, 197, 94, 0.6);
+  }
 }
