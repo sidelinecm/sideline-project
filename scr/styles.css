@@ -2,52 +2,15 @@
 =================================================================
  styles.css (Master Source File for Building)
 =================================================================
+ This is the definitive source file for your project's styles.
+ Use this file with the Tailwind CLI to generate the final output.css.
+ It contains all custom components, animations, and theme adjustments.
 */
-
-/* ✅ [แก้ไข] เพิ่มการประกาศค่าตัวแปร CSS ทั้งหมดที่นี่ */
-@layer base {
-  :root {
-    --background: 225 10% 4%;
-    --foreground: 225 15% 88%;
-    --card: 225 12% 8%;
-    --card-foreground: 225 15% 88%;
-    --primary: 335 100% 70%;
-    --primary-glow: 335 100% 70%;
-    --primary-foreground: 335 100% 10%;
-    --secondary: 280 100% 75%;
-    --secondary-glow: 280 100% 75%;
-    --muted: 225 15% 15%;
-    --muted-foreground: 225 15% 60%;
-    --border: 225 15% 18%;
-    --radius: 1.25rem; /* 20px */
-    --soft-shadow-light: hsl(225, 20%, 98%, 0.05);
-    --soft-shadow-dark: hsl(0, 0%, 0%, 0.6);
-  }
-
-  .light {
-    --background: 225 20% 98%;
-    --foreground: 225 15% 15%;
-    --card: 225 20% 100%;
-    --card-foreground: 225 15% 15%;
-    --primary: 335 90% 50%;
-    --primary-glow: 335 90% 50%;
-    --primary-foreground: 335 90% 98%;
-    --secondary: 280 90% 60%;
-    --secondary-glow: 280 90% 60%;
-    --muted: 225 20% 92%;
-    --muted-foreground: 225 15% 45%;
-    --border: 225 20% 88%;
-    --soft-shadow-light: hsl(0, 0%, 100%, 0.7);
-    --soft-shadow-dark: hsl(225, 15%, 75%, 0.5);
-  }
-}
 
 /* 1. Import Tailwind's base, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ... ส่วนที่เหลือของไฟล์ styles.css เหมือนเดิม ... */
 
 /* 2. Define Custom Components and Styles in the '@layer components' */
 @layer components {
