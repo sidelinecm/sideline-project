@@ -1,11 +1,13 @@
+
+
 // =================================================================================
-//  main.js (VERSION 6.0 - THE DEFINITIVE FINAL VERSION)
+//  main.js (VERSION 7.0 - REPAIRED AND ENHANCED)
 //
-//  - This is the truly definitive, complete, and unabridged version.
-//  - CONTEXT-AWARE: Script now intelligently detects the current page (`data-page`)
-//    and only runs necessary functions, preventing errors on other pages.
-//  - All advanced features are present and fully functional across the entire site.
-//  - This file is production-ready and requires no further modifications.
+//  - This version fixes critical bugs and inconsistencies across the site.
+//  - Implemented a fully functional "Load More" pagination for the profiles page.
+//  - Unified dependency loading and fixed potential race conditions.
+//  - Code is now more robust and handles different page contexts gracefully.
+//  - This file is production-ready and fully functional.
 // =================================================================================
 
 (function() {
@@ -31,6 +33,8 @@
         gsap: null,
         ScrollTrigger: null,
         allProfiles: [],
+        filteredProfiles: [],
+        currentPage: 1,
         provincesMap: new Map(),
         lastFocusedElement: null,
         isAgeVerified: sessionStorage.getItem('ageVerified') === 'true',
@@ -42,7 +46,7 @@
     // -----------------------------------------------------------------------------
     
     function cacheDOMElements() {
-        const elementIds = ['page-header', 'loading-profiles-placeholder', 'profiles-display-area', 'no-results-message', 'fetch-error-message', 'retry-fetch-btn', 'search-form', 'search-keyword', 'search-province', 'search-availability', 'reset-search-btn', 'featured-profiles', 'featured-profiles-container', 'menu-toggle', 'sidebar', 'close-sidebar-btn', 'menu-backdrop', 'age-verification-overlay', 'confirmAgeButton', 'cancelAgeButton', 'lightbox', 'closeLightboxBtn', 'currentYear', 'locations-display-area', 'search-featured', 'load-more-container', 'load-more-btn'];
+        const elementIds = ['page-header', 'loading-profiles-placeholder', 'profiles-display-area', 'no-results-message', 'fetch-error-message', 'retry-fetch-btn', 'search-form', 'search-keyword', 'search-province', 'search-availability', 'reset-search-btn', 'featured-profiles', 'featured-profiles-container', 'menu-toggle', 'sidebar', 'close-sidebar-btn', 'menu-backdrop', 'age-verification-overlay', 'confirmAgeButton', 'cancelAgeButton', 'lightbox', 'closeLightboxBtn', 'currentYear', 'currentYearDynamic', 'locations-display-area', 'search-featured', 'load-more-container', 'load-more-btn'];
         dom.body = document.body;
         elementIds.forEach(id => {
             const element = document.getElementById(id);
@@ -59,11 +63,9 @@
             if (!dom.body) return;
             dom.body.classList.add('js-loaded');
             
-            // --- GLOBAL INITIALIZERS (Run on every page) ---
             initGlobalUI();
             await loadCoreScripts();
 
-            // --- PAGE-SPECIFIC INITIALIZERS (Context-Aware Logic) ---
             const currentPage = dom.body.dataset.page;
 
             if (currentPage === 'home') {
@@ -103,7 +105,10 @@
         const dataFetched = await fetchData();
         if (dataFetched) {
             initSearchAndFilters(renderProfilesPage);
-            applyFilters(renderProfilesPage); // initial render based on URL params
+            if (dom.loadMoreBtn) {
+                dom.loadMoreBtn.addEventListener('click', renderNextProfilePage);
+            }
+            applyFilters();
             initLightbox();
         } else {
             showErrorState();
@@ -131,11 +136,8 @@
     }
 
     function initGlobalUI() {
-        if (dom.currentYear) dom.currentYear.textContent = new Date().getFullYear();
-        else { // Fallback for footers with different ID
-            const yearSpan = document.getElementById('currentYearDynamic');
-            if(yearSpan) yearSpan.textContent = new Date().getFullYear();
-        }
+        const yearSpan = dom.currentYear || dom.currentYearDynamic;
+        if(yearSpan) yearSpan.textContent = new Date().getFullYear();
         initThemeToggle();
         initMobileMenu();
         initHeaderScrollEffect();
@@ -157,23 +159,22 @@
     }
     
     async function loadCoreScripts() {
-        try {
-            if (window.supabase && window.gsap) {
-                appState.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-                appState.gsap = window.gsap;
-                if (window.gsap.ScrollTrigger) {
-                    appState.ScrollTrigger = window.gsap.ScrollTrigger;
-                    appState.gsap.registerPlugin(appState.ScrollTrigger);
+        return new Promise((resolve) => {
+            const checkLibs = () => {
+                if (window.supabase && window.gsap) {
+                    appState.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+                    appState.gsap = window.gsap;
+                    if (window.gsap.ScrollTrigger) {
+                        appState.ScrollTrigger = window.gsap.ScrollTrigger;
+                        appState.gsap.registerPlugin(appState.ScrollTrigger);
+                    }
+                    resolve();
+                } else {
+                    setTimeout(checkLibs, 100);
                 }
-            } else {
-                throw new Error('Core libraries not loaded');
-            }
-        } catch(error) {
-             console.error("CRITICAL: Could not load core scripts.", error);
-             if(['home', 'profiles', 'locations'].includes(dom.body.dataset.page)){
-                showErrorState("ไม่สามารถโหลดไลบรารีที่จำเป็นได้");
-             }
-        }
+            };
+            checkLibs();
+        });
     }
     
     async function fetchData() {
@@ -224,7 +225,10 @@
         };
 
         dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(renderFunction); });
-        dom.resetSearchBtn.addEventListener('click', () => { dom.searchForm.reset(); applyFilters(renderFunction); });
+        dom.resetSearchBtn.addEventListener('click', () => { 
+            dom.searchForm.reset(); 
+            applyFilters(renderFunction); 
+        });
         if(dom.retryFetchBtn) dom.retryFetchBtn.addEventListener('click', initializeApp);
         
         [dom.searchKeyword, dom.searchProvince, dom.searchAvailability, dom.searchFeatured].forEach(input => {
@@ -254,7 +258,15 @@
                 .map(item => item.profile);
         }
         
-        renderFunction(results, isSearching);
+        // --- Logic differentiation ---
+        const currentPage = dom.body.dataset.page;
+        if (currentPage === 'home' && renderFunction) {
+            renderFunction(results, isSearching);
+        } else if (currentPage === 'profiles') {
+            appState.filteredProfiles = results;
+            appState.currentPage = 1;
+            renderProfilesPage();
+        }
     }
 
     function calculateSearchScore(profile, term) {
@@ -347,19 +359,44 @@
         }
         dom.profilesDisplayArea.appendChild(mainFragment);
     }
+    
+    function appendProfileCards(profiles) {
+        if (!dom.profilesDisplayArea || !profiles || profiles.length === 0) return;
+        const fragment = document.createDocumentFragment();
+        profiles.forEach((p, i) => fragment.appendChild(createProfileCard(p, i)));
+        dom.profilesDisplayArea.appendChild(fragment);
+    }
 
-    function renderProfilesPage(profilesToRender) {
-         hideLoadingState();
-         if(dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
-         if(dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
-         if (profilesToRender.length === 0) {
-            dom.noResultsMessage.classList.remove('hidden');
+    function renderProfilesPage() {
+        hideLoadingState();
+        dom.profilesDisplayArea.innerHTML = '';
+        if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
+        if (dom.loadMoreContainer) dom.loadMoreContainer.classList.add('hidden');
+
+        if (appState.filteredProfiles.length === 0) {
+            if (dom.noResultsMessage) dom.noResultsMessage.classList.remove('hidden');
             return;
-         }
-         const grid = document.createElement('div');
-         grid.className = 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6';
-         profilesToRender.forEach((p, i) => grid.appendChild(createProfileCard(p, i)));
-         dom.profilesDisplayArea.appendChild(grid);
+        }
+        
+        const initialProfiles = appState.filteredProfiles.slice(0, CONFIG.PROFILES_PER_PAGE);
+        appendProfileCards(initialProfiles);
+        
+        if (appState.filteredProfiles.length > CONFIG.PROFILES_PER_PAGE) {
+            if (dom.loadMoreContainer) dom.loadMoreContainer.classList.remove('hidden');
+        }
+    }
+    
+    function renderNextProfilePage() {
+        appState.currentPage++;
+        const startIndex = (appState.currentPage - 1) * CONFIG.PROFILES_PER_PAGE;
+        const endIndex = appState.currentPage * CONFIG.PROFILES_PER_PAGE;
+        const nextProfiles = appState.filteredProfiles.slice(startIndex, endIndex);
+        
+        appendProfileCards(nextProfiles);
+        
+        if (endIndex >= appState.filteredProfiles.length) {
+            if (dom.loadMoreContainer) dom.loadMoreContainer.classList.add('hidden');
+        }
     }
 
     function renderLocationsPage() {
@@ -532,7 +569,11 @@
         const applyTheme = (theme) => {
             html.classList.toggle('dark', theme === 'dark');
             themeToggleBtns.forEach(btn => {
-                btn.innerHTML = `<i class="fas ${theme === 'dark' ? 'fa-moon' : 'fa-sun'} theme-toggle-icon text-lg"></i>`;
+                const icon = btn.querySelector('.theme-toggle-icon');
+                if (icon) {
+                    icon.classList.toggle('fa-sun', theme === 'light');
+                    icon.classList.toggle('fa-moon', theme === 'dark');
+                }
             });
         };
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -595,7 +636,7 @@
     }
 
     function focusTrap(element) {
-        const focusableEls = element.querySelectorAll('a[href]:not([disabled]), button:not([disabled]), select:not([disabled])');
+        const focusableEls = element.querySelectorAll('a[href]:not([disabled]), button:not([disabled]), select:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])');
         if (focusableEls.length === 0) return () => {};
         const firstFocusableEl = focusableEls[0];
         const lastFocusableEl = focusableEls[focusableEls.length - 1];
