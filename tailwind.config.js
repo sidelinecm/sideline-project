@@ -1,65 +1,47 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // ตรวจสอบให้แน่ใจว่า path ถูกต้องตรงกับโครงสร้างโปรเจกต์ของคุณ
+  // ✅ [แก้ไขแล้ว] เพิ่ม './main.js' เพื่อให้ Tailwind สแกนคลาสที่สร้างจาก JavaScript ด้วย
   content: [
-    "./scr/**/*.{html,js}",
-    "./dist/**/*.html" 
+    './*.html',
+    './main.js', 
   ],
-  
+  darkMode: 'class',
   theme: {
     extend: {
-      // --- เพิ่มส่วนนี้เข้าไป ---
+      fontFamily: {
+        sans: ['Prompt', 'sans-serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          glow: 'hsl(var(--primary-glow))',
+          foreground: 'hsl(var(--primary-foreground))',
         },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          glow: 'hsl(var(--secondary-glow))',
+        },
+        card: 'hsl(var(--card))',
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
         },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-          glow: 'hsl(var(--primary-glow))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-          glow: 'hsl(var(--secondary-glow))',
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
+        accent: 'hsl(var(--muted))',
       },
-      // --- สิ้นสุดส่วนที่เพิ่ม ---
-      keyframes: {
-        "aurora-1": {
-          "0%, 100%": { transform: "translateX(-10%) translateY(5%)" },
-          "50%": { transform: "translateX(10%) translateY(-5%)" },
-        },
-        "aurora-2": {
-          "0%, 100%": { transform: "translateX(10%) translateY(-5%)" },
-          "50%": { transform: "translateX(-10%) translateY(5%)" },
-        },
+      // ✅ [ปรับปรุง] เพิ่มขนาดความโค้งมนให้ครบตามดีไซน์
+      borderRadius: {
+        '2xl': 'var(--radius)',
+        'xl': 'calc(var(--radius) - 4px)',
+        'lg': 'calc(var(--radius) - 8px)',
       },
-      animation: {
-        "aurora-1": "aurora-1 20s ease-in-out infinite",
-        "aurora-2": "aurora-2 20s ease-in-out infinite",
-      },
+      // ✅ [ปรับปรุง] เพิ่มค่า scale ที่ใช้บ่อย เพื่อให้เรียกใช้งานง่าย
+      scale: {
+        '103': '1.03',
+      }
     },
   },
-  // เพิ่ม plugins ที่จำเป็นซึ่งมีอยู่ใน package.json ของคุณแล้ว
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-  ],
-};
+  plugins: [],
+}
