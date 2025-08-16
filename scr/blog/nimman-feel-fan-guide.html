@@ -1,60 +1,78 @@
 <!doctype html>
 <html lang="th" class="scroll-smooth light">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ================================================================= -->
+    <!-- SECTION 1: CORE METADATA & VIEWPORT                             -->
+    <!-- ================================================================= -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- SEO -->
-  <title>คู่มือเดทที่นิมมาน (ฉบับสมบูรณ์): ร้านอาหาร บาร์ลับ แผนเดทโรแมนติก | SidelineCM</title>
-  <meta name="description" content="ยกระดับเดทของคุณที่นิมมาน! อ่านแผนการเดทฉบับสมบูรณ์จาก SidelineCM ตั้งแต่ร้านอาหารหรู, บาร์ลับบรรยากาศดี, พร้อมช่วงราคาและลิงก์แผนที่">
-  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide.html">
+    <!-- ================================================================= -->
+    <!-- SECTION 2: SEO                                                  -->
+    <!-- ================================================================= -->
+    <title>คู่มือเดทที่นิมมาน (ฉบับสมบูรณ์): ร้านอาหาร บาร์ลับ แผนเดทโรแมนติก | SidelineCM</title>
+    <meta name="description" content="ยกระดับเดทของคุณที่นิมมาน! อ่านแผนการเดทฉบับสมบูรณ์จาก SidelineCM ตั้งแต่ร้านอาหารหรู, บาร์ลับบรรยากาศดี, พร้อมช่วงราคาและลิงก์แผนที่">
+    <link rel="canonical" href="https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide.html">
 
-  <!-- Favicons -->
-  <link rel="icon" href="/images/favicon.ico" sizes="any">
-  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <!-- ================================================================= -->
+    <!-- SECTION 3: SOCIAL MEDIA SHARING (Open Graph & Twitter)          -->
+    <!-- ================================================================= -->
+    <meta property="og:title" content="คู่มือเดทที่นิมมาน (ฉบับสมบูรณ์): ร้านอาหาร บาร์ลับ | SidelineCM">
+    <meta property="og:description" content="ยกระดับเดทของคุณที่นิมมาน! อ่านแผนการเดทฉบับสมบูรณ์จาก SidelineCM ตั้งแต่ร้านอาหารหรู, บาร์ลับบรรยากาศดี, พร้อมช่วงราคาและลิงก์แผนที่">
+    <meta property="og:url" content="https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/blog/nimman-guide.webp">
+    <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Performance -->
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-  <link rel="preload" href="/output.css" as="style">
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- ================================================================= -->
+    <!-- SECTION 4: ICONS, PWA & THEME                                   -->
+    <!-- ================================================================= -->
+    <meta name="theme-color" content="#db2777">
+    <link rel="icon" href="/images/favicon.ico" sizes="any">
+    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    
+    <!-- ================================================================= -->
+    <!-- SECTION 5: PERFORMANCE - PRECONNECT & PRELOAD                     -->
+    <!-- ================================================================= -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="/output.css" as="style">
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="/output.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    <!-- ================================================================= -->
+    <!-- SECTION 6: STYLESHEETS (Non-blocking)                             -->
+    <!-- ================================================================= -->
+    <link rel="stylesheet" href="/output.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/output.css"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
 
-  <!-- SEO: Article Schema -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide.html"
-    },
-    "headline": "คู่มือวางแผนเดทที่นิมมาน (ฉบับสมบูรณ์): ร้านอาหาร, บาร์ลับ, แผนการเดทโรแมนติก",
-    "description": "ยกระดับเดทของคุณที่นิมมาน! อ่านแผนการเดทฉบับสมบูรณ์จาก SidelineCM ตั้งแต่ร้านอาหารหรู, บาร์ลับบรรยากาศดี, พร้อมช่วงราคาและลิงก์แผนที่",
-    "image": "https://sidelinechiangmai.netlify.app/images/blog/nimman-guide.webp",  
-    "author": {
-      "@type": "Organization",
-      "name": "SidelineCM",
-      "url": "https://sidelinechiangmai.netlify.app/"
-    },  
-    "publisher": {
-      "@type": "Organization",
-      "name": "SidelineCM",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp"
-      }
-    },
-    "datePublished": "2025-07-28"
-  }
-  </script>
+    <!-- ================================================================= -->
+    <!-- SECTION 7: SCHEMA MARKUP (Structured Data)                      -->
+    <!-- ================================================================= -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide.html"
+      },
+      "headline": "คู่มือวางแผนเดทที่นิมมาน (ฉบับสมบูรณ์): ร้านอาหาร, บาร์ลับ, แผนการเดทโรแมนติก",
+      "description": "ยกระดับเดทของคุณที่นิมมาน! อ่านแผนการเดทฉบับสมบูรณ์จาก SidelineCM ตั้งแต่ร้านอาหารหรู, บาร์ลับบรรยากาศดี, พร้อมช่วงราคาและลิงก์แผนที่",
+      "image": "https://sidelinechiangmai.netlify.app/images/blog/nimman-guide.webp",  
+      "author": { "@type": "Organization", "name": "SidelineCM", "url": "https://sidelinechiangmai.netlify.app/" },  
+      "publisher": {
+        "@type": "Organization",
+        "name": "SidelineCM",
+        "logo": { "@type": "ImageObject", "url": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp" }
+      },
+      "datePublished": "2025-07-28"
+    }
+    </script>
 </head>
 <body class="antialiased" data-page="blog-post">
 
@@ -190,44 +208,87 @@
       </article>
     </div>
   </main>
-
-  <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16">
-    <div class="container mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
-            <div>
-                <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
-                    <img src="/images/logo-sideline-chiangmai.webp" srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" loading="lazy" decoding="async">
-                </a>
-                <h3 class="font-semibold text-foreground mb-2">เกี่ยวกับ sidelineChiangmai</h3>
-                <p class="leading-relaxed text-sm"> ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ </p>
-            </div>
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">ลิงก์ด่วน</h3>
-                <nav aria-label="ลิงก์ด่วนท้ายเว็บ"><ul class="space-y-3 text-sm"><li><a href="/profiles.html" class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li><li><a href="/about.html" class="hover:text-secondary transition-colors">เกี่ยวกับเรา</a></li><li><a href="/faq.html" class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li><li><a href="/privacy-policy.html" class="hover:text-secondary transition-colors">นโยบายความเป็นส่วนตัว</a></li></ul></nav>
-            </div>
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อและติดตามเรา</h3>
-                <div class="space-y-5">
-                    <div>
-                        <p class="text-sm mb-3">หากมีข้อสงสัย, พบปัญหาการใช้งาน, หรือต้องการสอบถามข้อมูลเพิ่มเติม สามารถติดต่อเราได้โดยตรงผ่าน LINE:</p>
-                        <a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener" class="btn-line-shared"><i class="fab fa-line text-lg" aria-hidden="true"></i><span>ติดต่อเจ้าหน้าที่</span></a>
+ <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16">
+        <div class="container mx-auto">
+            <!-- Main Footer Content Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center md:text-left mb-12">
+                
+                <!-- Column 1: Brand Info -->
+                <div class="lg:col-span-1">
+                    <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
+                        <img src="/images/logo-sideline-chiangmai.webp" 
+                             srcset="/images/logo-sideline-chiangmai.webp 1x, /images/logo-sideline-chiangmai@2x.webp 2x"
+                             alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" 
+                             width="245" height="30" loading="lazy" decoding="async">
+                    </a>
+                    <p class="leading-relaxed text-sm">
+                        ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
+                    </p>
+                </div>
+    
+                <!-- Column 2: Explore Links -->
+                <div>
+                    <p class="font-semibold text-foreground mb-4 tracking-tight">สำรวจเว็บไซต์</p>
+                    <nav aria-label="เมนูสำรวจเว็บไซต์ท้ายเว็บ">
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="/profiles.html" class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li>
+                            <li><a href="/locations.html" class="hover:text-secondary transition-colors">พิกัดบริการ</a></li>
+                            <li><a href="/faq.html" class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li>
+                            <li><a href="/blog.html" class="hover:text-secondary transition-colors">บทความและเคล็ดลับ</a></li>
+                        </ul>
+                    </nav>
+                </div>
+    
+                <!-- Column 3: About Us Links -->
+                <div>
+                    <p class="font-semibold text-foreground mb-4 tracking-tight">เกี่ยวกับเรา</p>
+                    <nav aria-label="เมนูเกี่ยวกับเราท้ายเว็บ">
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="/about.html" class="hover:text-secondary transition-colors">เรื่องราวของเรา</a></li>
+                            <li><a href="/privacy-policy.html" class="hover:text-secondary transition-colors">นโยบายความเป็นส่วนตัว</a></li>
+                            <li><a href="/#all-profiles-section" class="hover:text-secondary transition-colors">บริการในพื้นที่</a></li>
+                        </ul>
+                    </nav>
+                </div>
+    
+                <!-- Column 4: Contact & Social -->
+                <div>
+                    <p class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อเรา</p>
+                    <div class="space-y-5">
+                        <div>
+                            <p class="text-sm mb-3">หากมีข้อสงสัย, พบปัญหาการใช้งาน, หรือต้องการสอบถามข้อมูลเพิ่มเติม สามารถติดต่อเราได้โดยตรงผ่าน LINE:</p>
+                            <a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener" class="inline-flex items-center gap-3 group">
+                                <svg class="text-2xl text-green-500" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.29,14.62,15,13.31a.88.88,0,0,0-1.24,0L13.1,14a.87.87,0,0,1-1.23,0L9.13,11.33a.87.87,0,0,1,0-1.23l.71-.71a.88.88,0,0,0,0-1.24L8.53,7a.88.88,0,0,0-1.24,0L6,8.25a3.63,3.63,0,0,0-1,2.5,9.25,9.25,0,0,0,9.25,9.25,3.63,3.63,0,0,0,2.5-1l1.25-1.25a.88.88,0,0,0,0-1.24Z"/><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/></svg>
+                                <span class="font-semibold group-hover:text-secondary transition-colors">ติดต่อเจ้าหน้าที่</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Bottom Bar: Copyright & Legal -->
+            <div class="mt-12 border-t border-border pt-8 text-center">
+                <p class="text-sm">
+                    Copyright © <span id="currentYearDynamic">2025</span> SidelineChiangmai. All Rights Reserved.
+                </p>
+                <p class="mt-2 text-xs text-muted-foreground/80 leading-relaxed">
+                    เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง
+                </p>
+            </div>
         </div>
-        <div class="mt-12 border-t border-border pt-8 text-center">
-            <p class="text-sm">© <span id="currentYearDynamic"></span> SidelineChiangmai. All rights reserved.</p>
-            <p class="mt-2 text-xs text-muted-foreground/80 leading-relaxed"> เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง </p>
-        </div>
-    </div>
-  </footer>
-<!-- คัดลอก/ตัด 6 บรรทัดนี้ออกมาจาก <head> -->
-<script src="/libs/supabase.js"></script>
-<script src="/libs/gsap.min.js"></script>
-<script src="/libs/ScrollTrigger.min.js"></script>
-<script src="/main.js"></script> 
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
+    </footer>
 
-  </body>
+
+<!-- Scripts -->
+<script src="/main.js" type="module"></script> 
+
+<!-- Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.error('Service Worker registration failed:', err));
+    });
+  }
+</script>
+</body>
 </html>
