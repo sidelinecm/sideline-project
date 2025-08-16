@@ -1,99 +1,45 @@
-// --- sw.js (Service Worker ฉบับสมบูรณ์ - v2.1) ---
-// ผู้สร้าง: Gemini (ปรับปรุงสำหรับ sidelinechiangmai.netlify.app)
-// เวอร์ชัน: 2.1
-// การปรับปรุง:
-// - อัปเดตเลขเวอร์ชันของ CACHE_NAME เพื่อบังคับให้ SW อัปเดตใหม่
-// - เพิ่ม Cache Busting (?v=) เข้าไปในไฟล์ output.css และ main.js
-// - ทำให้ SW ทำงานสอดคล้องกับเทคนิคการจัดการแคชในไฟล์ HTML อย่างสมบูรณ์แบบ
+// sw.js - Service Worker for SidelineCM - v1.0.0
 
-// [สำคัญ] ทุกครั้งที่มีการแก้ไขไฟล์ใน APP_SHELL_FILES ให้เปลี่ยนเลขเวอร์ชันนี้เสมอ
-// เช่น 'sideline-cm-cache-v2.1', 'sideline-cm-cache-v2.2'
-const CACHE_NAME = 'sideline-cm-cache-v2.1'; 
-const CACHE_BUSTER = '20250811'; // <--- กำหนดเลขเวอร์ชันของไฟล์ที่นี่ที่เดียว
+const CACHE_NAME = 'sidelinecm-cache-v1';
+const API_CACHE_NAME = 'sidelinecm-api-cache-v1';
 
-const APP_SHELL_FILES = [
-  // --- Core App Shell Files ---
+// รายการไฟล์พื้นฐานของแอป (App Shell) ที่ต้องมีเสมอ
+const PRECACHE_ASSETS = [
   '/',
   '/index.html',
+  '/profiles.html',
   '/about.html',
   '/faq.html',
-  '/locations.html',
   '/blog.html',
-  '/profiles.html',
+  '/locations.html',
   '/privacy-policy.html',
   '/404.html',
-
-  // --- Blog Post Pages ---
-  '/blog/nimman-feel-fan-guide.html',
-  '/blog/safety-tips.html',
-  '/blog/what-is-trong-pok.html',
-
-  // --- [IMPROVEMENT] Critical CSS & JS with Cache Buster ---
-  `/output.css?v=${CACHE_BUSTER}`,
-  `/main.js?v=${CACHE_BUSTER}`,
-  
-  // --- External Libraries ---
-  '/libs/supabase.js',
-  '/libs/gsap.min.js', // แก้ไขจากไฟล์เดิมที่อาจมี ScrollTrigger.min.js
-  '/libs/ScrollTrigger.min.js',
-
-  // --- PWA Metadata ---
+  '/output.css',
+  '/js/main.js',
   '/manifest.webmanifest',
-
-  // --- Images ---
   '/images/logo-sideline-chiangmai.webp',
   '/images/sideline-chiangmai-hero.webp',
   '/images/placeholder-profile.webp',
-  '/images/favicon.ico',
-  '/images/favicon.svg',
-  '/images/apple-touch-icon.png', // แก้ไขจากไฟล์เดิมที่อาจเป็น /images/
-  '/images/blog/nimman-guide.webp',
-  '/images/blog/safety-tips.webp',
-  '/images/blog/guarantee-concept.webp',
-
-  // --- Fonts ---
-  '/fonts/prompt-v11-latin_thai-regular.woff2',
-  '/fonts/prompt-v11-latin_thai-500.woff2',
-  '/fonts/prompt-v11-latin_thai-700.woff2',
-  '/fonts/prompt-v11-latin_thai-800.woff2',
-  '/fonts/sarabun-v16-latin_thai-regular.woff2',
-  '/fonts/sarabun-v16-latin_thai-700.woff2',
-  
-  // --- PWA Icons ---
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/icons/maskable-icon-512x512.png'
+  '/icons/icon-512x512.png'
 ];
 
-
-// --- 1. Installation Event ---
+// Event: Install - ติดตั้ง Service Worker และ Cache ไฟล์พื้นฐาน
 self.addEventListener('install', event => {
-  console.log(`[Service Worker] Installing Cache Version: ${CACHE_NAME}`);
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[Service Worker] Caching App Shell...');
-        return cache.addAll(APP_SHELL_FILES);
-      })
-      .then(() => {
-        console.log('[Service Worker] App Shell Cached Successfully.');
-        return self.skipWaiting();
-      })
-      .catch(error => {
-        console.error('[Service Worker] Caching failed:', error);
-      })
+      .then(cache => cache.addAll(PRECACHE_ASSETS))
+      .then(() => self.skipWaiting()) // Activate a new service worker immediately
   );
 });
 
-// --- 2. Activation Event ---
+// Event: Activate - ลบ Cache เวอร์ชันเก่าที่ไม่จำเป็นออก
 self.addEventListener('activate', event => {
-  console.log(`[Service Worker] Activating Cache Version: ${CACHE_NAME}`);
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
+          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
@@ -102,39 +48,47 @@ self.addEventListener('activate', event => {
   );
 });
 
-// --- 3. Fetch Handling Event ---
+// Event: Fetch - จัดการกับทุก Request ที่เกิดขึ้น
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
+  const { request } = event;
+  const url = new URL(request.url);
 
-  const url = new URL(event.request.url);
-
-  // Strategy 1: Network First for API (Supabase)
-  if (url.hostname.includes('supabase.co')) {
+  // กลยุทธ์ที่ 1: Stale-While-Revalidate สำหรับ API (Supabase)
+  // - ตอบกลับจาก Cache ทันที (ถ้ามี) เพื่อความเร็ว
+  // - จากนั้นไปดึงข้อมูลใหม่จาก Network มาอัปเดต Cache ไว้สำหรับครั้งต่อไป
+  if (url.origin === 'https://hgzbgpbmymoiwjpaypvl.supabase.co') {
     event.respondWith(
-      fetch(event.request)
-        .then(networkResponse => {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
-          return networkResponse;
+      caches.open(API_CACHE_NAME).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          const fetchPromise = fetch(request).then(networkResponse => {
+            cache.put(request, networkResponse.clone());
+            return networkResponse;
+          });
+          return cachedResponse || fetchPromise;
         })
-        .catch(() => caches.match(event.request))
+      })
     );
     return;
   }
 
-  // Strategy 2: Cache First for everything else
+  // กลยุทธ์ที่ 2: Cache First สำหรับไฟล์ App Shell และรูปภาพ
+  // - ถ้าเจอใน Cache ให้ใช้จาก Cache เลย
+  // - ถ้าไม่เจอ ค่อยไปโหลดจาก Network แล้วเก็บลง Cache
   event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        return cachedResponse || fetch(event.request).then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200 || (networkResponse.type !== 'basic' && networkResponse.type !== 'cors')) {
+    caches.match(request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(request).then(networkResponse => {
+        // Cache รูปภาพที่โหลดมาใหม่
+        if (request.destination === 'image') {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, networkResponse.clone());
             return networkResponse;
-          }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
-          return networkResponse;
-        });
-      })
-      .catch(() => caches.match('/404.html'))
+          });
+        }
+        return networkResponse;
+      });
+    })
   );
 });
