@@ -1,9 +1,18 @@
 /* ==========================================================================
-   1. นำเข้า Tailwind base, components, utilities
+   1. นำเข้า Tailwind และประกาศตัวแปรสี (แก้ไขไวยากรณ์แล้ว)
    ========================================================================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 
+  จุดที่แก้ไขสำคัญ: ตัวแปร CSS ทั้งหมดจะต้องถูกประกาศไว้ใน Selector
+  สำหรับตัวแปรที่จะใช้ทั้งเว็บ เราจะใช้ :root 
+*/
+:root {
+  /* --- Core Sizing --- */
+  --radius: 1rem; /* ความโค้งมนหลัก */
+
   /* --- Light Mode Colors --- */
   --background: 220 20% 98%;
   --foreground: 220 15% 25%;
@@ -22,10 +31,10 @@
   --color-busy: 38 92% 50%;       /* ส้มอำพัน (ไม่ว่าง) */
   --color-ask: 217 91% 60%;      /* น้ำเงิน (สอบถาม) */
   --color-gold: 45 93% 57%;       /* ทอง (VIP) */
+}
 
-
-/* --- Dark Mode Colors --- */
 html.dark {
+  /* --- Dark Mode Colors --- */
   --background: 225 15% 10%;
   --foreground: 220 20% 90%;
   --card: 225 15% 16%;
@@ -132,8 +141,8 @@ html.dark body::after { background: radial-gradient(circle, hsl(var(--secondary-
   overflow: hidden; position: relative; aspect-ratio: 3/4;
   transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
   transform-style: preserve-3d;
-  /* ใช้เงาขั้นสูงที่เราสร้างไว้ */
-  composes: card-shadow-elevated; 
+  /* จุดที่แก้ไขสำคัญ: เปลี่ยนจาก composes ที่ไม่ถูกต้อง เป็น @apply ของ Tailwind */
+  @apply card-shadow-elevated; 
 }
 
 .profile-card-new::before { /* แสงสะท้อนเมื่อ hover */
@@ -216,7 +225,8 @@ html.dark .signature-spotlight-section {
   overflow: hidden;
   scroll-snap-align: center; /* ทำให้การ์ดอยู่ตรงกลางเมื่อหยุดเลื่อน */
   transition: transform 0.4s ease;
-  composes: card-shadow-elevated; /* ใช้เงาแบบเดียวกับการ์ดหลักเพื่อความสอดคล้อง */
+  /* จุดที่แก้ไขสำคัญ: เปลี่ยนจาก composes ที่ไม่ถูกต้อง เป็น @apply ของ Tailwind */
+  @apply card-shadow-elevated;
 }
 .spotlight-card:hover {
   transform: translateY(-8px) scale(1.03);
