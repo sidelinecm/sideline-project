@@ -24,8 +24,8 @@
   --color-gold: 45 93% 57%;       /* ทอง (VIP) */
 }
 
+/* --- Dark Mode Colors --- */
 html.dark {
-  /* --- Dark Mode Colors --- */
   --background: 225 15% 10%;
   --foreground: 220 20% 90%;
   --card: 225 15% 16%;
