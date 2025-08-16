@@ -1,8 +1,9 @@
-/* 1. นำเข้า Tailwind base, components, utilities */ @tailwind base; @tailwind components; @tailwind utilities; ========================================================================== */
-:root {
-  /* --- Core Sizing --- */
-  --radius: 1rem; /* ความโค้งมนหลัก */
-
+/* ==========================================================================
+   1. นำเข้า Tailwind base, components, utilities
+   ========================================================================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
   /* --- Light Mode Colors --- */
   --background: 220 20% 98%;
   --foreground: 220 15% 25%;
