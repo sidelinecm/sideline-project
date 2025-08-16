@@ -1,10 +1,4 @@
-# Allow all user agents
 User-agent: *
-Disallow:
+Allow: /
 
-# Disallow admin or private directories if any
-# Disallow: /admin/
-# Disallow: /private/
-
-# Point to the sitemap file
 Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml

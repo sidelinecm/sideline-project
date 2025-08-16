@@ -1,37 +1,21 @@
-# =================================================================
-# SECURITY HEADERS - แนวปฏิบัติที่ดีที่สุดเพื่อความปลอดภัย
-# =================================================================
-X-Frame-Options: DENY
-X-XSS-Protection: 1; mode=block
-X-Content-Type-Options: nosniff
-Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: geolocation=(), microphone=(), camera=()
+/*
+  Strict cache control + GZIP
+*/
 
-# =================================================================
-# CONTENT SECURITY POLICY (CSP) - ควบคุมการโหลดทรัพยากร
-# **สำคัญมาก: แก้ปัญหาไอคอนและรูปภาพจาก CDN/Supabase ไม่แสดง**
-# =================================================================
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https://hgzbgpbmymoiwjpaypvl.supabase.co; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' wss://*.supabase.co https://*.supabase.co; frame-ancestors 'none';
+/* Critical Font */
+/fonts/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
 
-# =================================================================
-# CACHING POLICY - กำหนดการ Cache ให้มีประสิทธิภาพสูงสุด
-# =================================================================
-# ไฟล์ asset ที่ไม่ค่อยเปลี่ยน ให้ cache ค้างไว้ที่ browser นานที่สุด
-/fonts/*
-  Cache-Control: public, max-age=31536000, immutable
-/css/*
-  Cache-Control: public, max-age=31536000, immutable
-/js/*
-  Cache-Control: public, max-age=31536000, immutable
+/* Image lazyload */
 /images/*
   Cache-Control: public, max-age=31536000, immutable
-/icons/*
+
+/* CSS/JS Assets */
+/styles.css
   Cache-Control: public, max-age=31536000, immutable
-/libs/*
+/main.js
   Cache-Control: public, max-age=31536000, immutable
 
-# ไฟล์ HTML ให้ browser ตรวจสอบใหม่ทุกครั้งที่เข้ามา
+/* HTML no-cache */
 /index.html
-  Cache-Control: public, max-age=0, must-revalidate
-/profiles.html
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache
