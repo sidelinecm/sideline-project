@@ -1,0 +1,264 @@
+/* ==========================================================================
+   1. นำเข้า Tailwind และประกาศตัวแปรสี
+   ========================================================================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* --- Core Sizing --- */
+  --radius: 1rem; /* ความโค้งมนหลัก */
+
+  /* --- Light Mode Colors --- */
+  --background: 220 20% 98%;
+  --foreground: 220 15% 25%;
+  --card: 0 0% 100%;
+  --primary: 340 85% 58%; /* สีชมพู Magenta หลัก */
+  --primary-glow: 340 85% 65%;
+  --secondary: 260 85% 65%; /* สีม่วงรอง */
+  --secondary-glow: 260 85% 70%;
+  --muted: 220 25% 94%; /* สีเทาอ่อน */
+  --muted-foreground: 220 10% 45%;
+  --border: 220 20% 92%;
+  --accent: 220 60% 96%;
+
+  /* --- Strategic Colors --- */
+  --color-available: 158 75% 45%; /* เขียวสด (ว่าง) */
+  --color-busy: 38 92% 50%;       /* ส้มอำพัน (ไม่ว่าง) */
+  --color-ask: 217 91% 60%;      /* น้ำเงิน (สอบถาม) */
+  --color-gold: 45 93% 57%;       /* ทอง (VIP) */
+}
+
+html.dark {
+  /* --- Dark Mode Colors --- */
+  --background: 225 15% 10%;
+  --foreground: 220 20% 90%;
+  --card: 225 15% 16%;
+  --primary: 340 90% 68%;
+  --primary-glow: 340 95% 72%;
+  --secondary: 260 90% 75%;
+  --secondary-glow: 260 95% 80%;
+  --muted: 225 15% 20%;
+  --border: 225 12% 25%;
+  --accent: 225 15% 20%;
+}
+
+/* ==========================================================================
+   2. BASE STYLES & ATMOSPHERIC LAYOUT
+   ========================================================================== */
+@keyframes aurora-1 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes aurora-2 { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 hsla(var(--color-available), 0.7); } 50% { box-shadow: 0 0 0 8px hsla(var(--color-available), 0); } }
+
+body {
+  font-family: 'Prompt', 'Sarabun', system-ui, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- พื้นหลัง Aurora --- */
+body::before, body::after {
+  content: ''; position: fixed; top: 50%; left: 50%;
+  width: 150vmax; height: 150vmax; border-radius: 50%;
+  z-index: -1; filter: blur(150px);
+}
+html:not(.dark) body::before { background: radial-gradient(circle, hsl(var(--primary)) 0%, transparent 40%); animation: aurora-1 30s linear infinite; opacity: 0.15; }
+html:not(.dark) body::after  { background: radial-gradient(circle, hsl(var(--secondary)) 0%, transparent 40%); animation: aurora-2 40s linear infinite reverse; opacity: 0.15; }
+html.dark body::before { background: radial-gradient(circle, hsl(var(--primary-glow)) 0%, transparent 40%); animation: aurora-1 30s linear infinite; opacity: 0.2; }
+html.dark body::after { background: radial-gradient(circle, hsl(var(--secondary-glow)) 0%, transparent 40%); animation: aurora-2 40s linear infinite reverse; opacity: 0.15; }
+
+/* --- Text Glow Effects --- */
+.text-primary { text-shadow: 0 0 15px hsl(var(--primary-glow) / 0.6), 0 0 3px hsl(var(--primary-glow) / 0.8); color: hsl(var(--primary)); }
+.text-secondary { text-shadow: 0 0 15px hsl(var(--secondary-glow) / 0.5), 0 0 3px hsl(var(--secondary-glow) / 0.7); color: hsl(var(--secondary)); }
+
+/* ==========================================================================
+   3. ADVANCED SHADOWS & CORE COMPONENTS
+   ========================================================================== */
+.card-shadow-elevated {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 
+    0 2.8px 2.2px hsl(var(--foreground) / 0.02),
+    0 6.7px 5.3px hsl(var(--foreground) / 0.028),
+    0 12.5px 10px hsl(var(--foreground) / 0.035),
+    0 22.3px 17.9px hsl(var(--foreground) / 0.042),
+    0 41.8px 33.4px hsl(var(--foreground) / 0.05),
+    0 100px 80px hsl(var(--foreground) / 0.07);
+}
+.card-shadow-elevated:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 4px 3px hsl(var(--foreground) / 0.025),
+    0 9px 7px hsl(var(--foreground) / 0.035),
+    0 18px 15px hsl(var(--foreground) / 0.045),
+    0 32px 27px hsl(var(--foreground) / 0.055),
+    0 60px 50px hsl(var(--foreground) / 0.07),
+    0 120px 100px hsl(var(--foreground) / 0.1);
+}
+
+.btn-primary-gradient {
+  background: linear-gradient(125deg, hsl(var(--secondary)), hsl(var(--primary)));
+  background-size: 200% 200%;
+  transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 20px -5px hsl(var(--primary-glow) / 0.6);
+  color: white; font-weight: 700;
+}
+.btn-primary-gradient:hover {
+  background-position: 100% 0;
+  transform: translateY(-3px);
+  box-shadow: 0 7px 25px -5px hsl(var(--primary-glow) / 0.8);
+}
+
+#page-header.scrolled {
+  background-color: hsl(var(--background) / 0.7);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: hsl(var(--border) / 0.5);
+  box-shadow: 0 2px 10px -5px hsl(var(--foreground) / 0.1);
+}
+#age-verification-overlay { background-color: rgba(10, 10, 15, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.age-modal-content { background: linear-gradient(145deg, rgba(40, 42, 54, 0.9), rgba(30, 32, 42, 0.95)); border: 1px solid rgba(255, 255, 255, 0.1); color: #f0f0f5; text-align: center; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); }
+
+/* ==========================================================================
+   4. PROFILE CARD MAXIMIZATION
+   ========================================================================== */
+.profile-card-new-container { perspective: 1000px; }
+.profile-card-new {
+  background-color: hsl(var(--muted)); border-radius: var(--radius);
+  overflow: hidden; position: relative; aspect-ratio: 3/4;
+  transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform-style: preserve-3d;
+  @apply card-shadow-elevated; 
+}
+
+.profile-card-new::before { /* แสงสะท้อนเมื่อ hover */
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle 250px at var(--mouse-x) var(--mouse-y), hsla(0,0%,100%,0.15), transparent);
+  opacity: 0; transition: opacity 0.4s ease; z-index: 2;
+}
+.profile-card-new:hover { 
+  transform: translateY(-8px) rotateY(var(--rotate-y)) rotateX(var(--rotate-x)) scale(1.05); 
+}
+.profile-card-new:hover::before { opacity: 1; }
+.profile-card-new .card-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.05) contrast(1.05); transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.profile-card-new:hover .card-image { transform: scale(1.1); }
+.profile-card-new .card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(225, 15%, 8%, 0.95) 0%, hsla(225, 15%, 8%, 0.7) 40%, transparent 70%); padding: 1rem; display: flex; flex-direction: column; justify-content: flex-end; color: white; z-index: 1; }
+.profile-card-new .card-info { transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); transform: translateZ(20px); }
+.profile-card-new:hover .card-info { transform: translateZ(50px) translateY(-5px); }
+.profile-card-new .card-info h3 { font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+
+.premium-frame { position: relative; }
+.premium-frame::after {
+  content: ''; position: absolute; inset: -2px; z-index: 0;
+  border-radius: calc(var(--radius) + 2px);
+  background: linear-gradient(145deg, hsl(var(--color-gold)), hsl(var(--primary)));
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+.premium-frame:hover::after {
+  transform: scale(1.02);
+  filter: brightness(1.2) blur(3px);
+}
+
+.vip-badge {
+  position: absolute; top: 12px; right: 12px; z-index: 3;
+  background: linear-gradient(135deg, hsl(var(--color-gold)), #f97316);
+  color: #422006; padding: 0.2rem 0.6rem; border-radius: 0.375rem;
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px hsla(var(--color-gold), 0.5);
+}
+
+.online-indicator {
+  position: absolute; bottom: 12px; left: 12px; z-index: 3;
+  width: 12px; height: 12px;
+  background-color: hsl(var(--color-available));
+  border-radius: 50%;
+  border: 2px solid hsl(var(--card));
+  animation: pulse 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+/* ==========================================================================
+   5. SIGNATURE SECTION: "SPOTLIGHT SHOWCASE"
+   ========================================================================== */
+.signature-spotlight-section {
+  padding: 4rem 0;
+  background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+  border-top: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  overflow: hidden;
+}
+html.dark .signature-spotlight-section {
+  background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--card)) 100%);
+}
+
+.spotlight-container {
+  display: flex; gap: 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 1rem 2rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.spotlight-container::-webkit-scrollbar { display: none; }
+
+.spotlight-card {
+  flex: 0 0 320px;
+  height: 420px;
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  scroll-snap-align: center;
+  transition: transform 0.4s ease;
+  @apply card-shadow-elevated;
+}
+.spotlight-card:hover {
+  transform: translateY(-8px) scale(1.03);
+}
+.spotlight-card .card-image {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.spotlight-card:hover .card-image { transform: scale(1.1); }
+.spotlight-card .card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, hsla(0,0%,0%,0.8) 0%, transparent 60%);
+  display: flex; align-items: flex-end;
+  padding: 1.5rem; color: white;
+}
+
+/* ==========================================================================
+   6. LOADING STATES & SKELETONS (เพิ่มเข้ามาใหม่)
+   ========================================================================== */
+.skeleton-card {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--border)) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius);
+  aspect-ratio: 3 / 4;
+  animation: skeleton-loading 1.5s infinite linear;
+}
+
+/* ทำให้ Skeleton รองรับ Dark Mode อัตโนมัติผ่านตัวแปร */
+html.dark .skeleton-card {
+   background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--border)) 50%,
+    hsl(var(--muted)) 75%
+  );
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
