@@ -2,8 +2,8 @@
 module.exports = {
   darkMode: 'class', // เปิด dark mode แบบ class
   content: [
-    "./scr/**/*.{html,js}",
-    "./scr/**/*.{ts,jsx,tsx,vue,svelte,mdx}",
+    "./src/**/*.{html,js}",
+    "./src/**/*.{ts,jsx,tsx,vue,svelte,mdx}",
   ],
   safelist: [
     'bg-primary', 'bg-secondary', 'text-primary', 'text-secondary', 
