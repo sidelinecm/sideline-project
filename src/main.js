@@ -1,4 +1,4 @@
-// --- main.js (เวอร์ชัน Hybrid Rendering ขั้นสูง - สมบูรณ์แบบ) ---
+// --- main.js (เวอร์ชันแก้ไขสมบูรณ์) ---
 // ไฟล์นี้ถูกปรับปรุงให้ทำงานร่วมกับ Static Fallback Content ใน index.html
 // เพื่อแก้ปัญหา NO_FCP, เพิ่มประสิทธิภาพ Core Web Vitals, และดีต่อ SEO
 
@@ -11,7 +11,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const STORAGE_BUCKET = 'profile-images';
 const PROFILES_PER_PROVINCE_ON_INDEX = 8;
 const SKELETON_CARD_COUNT = 8;
-const ABOVE_THE_FOLD_COUNT = 4; // ควรมีค่าเท่ากับจำนวน Static Fallback Cards ใน index.html
+const ABOVE_THE_FOLD_COUNT = 4;
 
 let allProfiles = [];
 let provincesMap = new Map();
@@ -49,19 +49,9 @@ const dom = {
     yearSpan: document.getElementById('currentYearDynamic')
 };
 
-/**
- * ฟังก์ชันหลักในการเริ่มต้นแอปพลิเคชัน
- * - เริ่มต้น UI พื้นฐานที่ทำงานทุกหน้า
- * - ตรวจสอบประเภทของหน้าปัจจุบัน (จาก data-page)
- * - โหลดไลบรารี่ Supabase และดึงข้อมูลเฉพาะในหน้าที่จำเป็นเท่านั้น
- * - โหลดไลบรารี่ Animation และเริ่มการทำงานหลังจากทุกอย่างพร้อม
- */
 async function initializeApp() {
-    // ใช้ performance.mark เพื่อวัดความเร็วในการทำงาน
     performance.mark('initializeApp-start');
 
-    // --- ขั้นตอนที่ 1: เริ่มต้น UI พื้นฐานที่ทำงานทุกหน้าทันที ---
-    // ฟังก์ชันเหล่านี้ไม่ขึ้นอยู่กับข้อมูลใดๆ และสามารถทำงานได้เลย
     initThemeToggle();
     initMobileMenu();
     initHeaderScrollEffect();
@@ -70,60 +60,63 @@ async function initializeApp() {
         dom.yearSpan.textContent = new Date().getFullYear();
     }
 
-    // --- ขั้นตอนที่ 2: โหลดไลบรารี่ Animation ในเบื้องหลัง ---
-    // เราสั่งให้เริ่มโหลด GSAP ล่วงหน้า แต่จะยังไม่ใช้งานมัน
     const animationScriptsPromise = loadAnimationScripts();
-
-    // --- ขั้นตอนที่ 3: เริ่มต้นการตรวจสอบอายุ ---
-    // ใช้ GSAP ที่กำลังโหลดอยู่ ถ้าโหลดเสร็จทันก็จะมี Animation สวยงาม
     initAgeVerification();
 
-    // --- ขั้นตอนที่ 4: ตรวจสอบและทำงานกับส่วนที่ต้องใช้ข้อมูล ---
     const currentPage = dom.body.dataset.page;
-    const pagesRequiringData = ['home', 'profiles', 'locations']; // <-- เพิ่ม 'locations' ถ้าหน้านี้ต้องใช้ข้อมูลด้วย
+    const pagesRequiringData = ['home', 'profiles', 'locations'];
 
     if (pagesRequiringData.includes(currentPage)) {
-        // แสดง UI กำลังโหลดให้ผู้ใช้เห็นทันที
         showLoadingState();
-
-        // โหลด Supabase และดึงข้อมูล (ทำเฉพาะในหน้านี้เท่านั้น)
         const dataLoadedSuccessfully = await initSupabaseAndFetchData();
-
         if (dataLoadedSuccessfully) {
-            // ถ้าข้อมูลมาครบแล้ว ค่อยเริ่มต้นฟังก์ชันที่ต้องใช้ข้อมูลเหล่านั้น
             initSearchAndFilters();
             initLightbox();
             if (dom.retryFetchBtn) {
                 dom.retryFetchBtn.addEventListener('click', handleRetry);
             }
         } else {
-            // หากโหลดหรือดึงข้อมูลล้มเหลว ให้แสดงหน้า Error
             showErrorState();
         }
     }
 
-    // --- ขั้นตอนที่ 5: เริ่มต้นส่วนที่ไม่ขึ้นกับข้อมูล แต่ต้องการให้หน้าเว็บพร้อม ---
-    
-    // สร้าง Schema สำหรับ SEO
     generateFullSchema();
-
-    // (สำคัญ) รอให้ไลบรารี่ Animation โหลดเสร็จสมบูรณ์ก่อน
     await animationScriptsPromise; 
-    
-    // จากนั้นค่อยเริ่ม Animation ที่ใช้การเลื่อนหน้าจอ
     initScrollAnimations();
-
-    // --- ขั้นตอนสุดท้าย: ทำให้หน้าเว็บแสดงผล ---
-    // การเพิ่ม class 'loaded' จะทำให้ opacity ของ body เป็น 1 (จาก CSS)
+    
     dom.body.classList.add('loaded');
     
     performance.mark('initializeApp-end');
     performance.measure('initializeApp', 'initializeApp-start', 'initializeApp-end');
 }
 
+// =========================================================================
+// --- START: ฟังก์ชันที่แก้ไขและเพิ่มเข้ามา ---
+// =========================================================================
+
 /**
- * โหลดสคริปต์หลักที่จำเป็น (Supabase)
+ * ฟังก์ชันที่ขาดหายไป: ทำหน้าที่โหลด Supabase client และดึงข้อมูล
+ * นี่คือฟังก์ชันที่แก้ไขปัญหา ReferenceError
  */
+async function initSupabaseAndFetchData() {
+    try {
+        await loadCoreScripts(); // 1. โหลด Supabase ก่อน
+        if (!supabase) {
+            throw new Error("Supabase client failed to initialize.");
+        }
+        const success = await fetchData(); // 2. ถ้าโหลดสำเร็จ ค่อยดึงข้อมูล
+        return success;
+    } catch (error) {
+        console.error("Failed during Supabase initialization or data fetch:", error);
+        showErrorState();
+        return false;
+    }
+}
+
+// =========================================================================
+// --- END: ฟังก์ชันที่แก้ไขและเพิ่มเข้ามา ---
+// =========================================================================
+
 async function loadCoreScripts() {
     try {
         if (!createClient) {
@@ -133,13 +126,11 @@ async function loadCoreScripts() {
         }
     } catch (error) {
         console.error('CRITICAL: ไม่สามารถโหลด Supabase client ได้', error);
-        showErrorState();
+        // ไม่ต้อง call showErrorState ที่นี่ เพราะ initSupabaseAndFetchData จะจัดการ
+        throw error; // ส่ง error ออกไปให้ตัวเรียกใช้จัดการ
     }
 }
 
-/**
- * โหลดสคริปต์สำหรับ Animation (GSAP)
- */
 async function loadAnimationScripts() {
     if (gsap) return;
     try {
@@ -155,9 +146,6 @@ async function loadAnimationScripts() {
     }
 }
 
-/**
- * แสดงสถานะกำลังโหลด (Skeleton UI)
- */
 function showLoadingState() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
     if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
@@ -171,16 +159,10 @@ function showLoadingState() {
     }
 }
 
-/**
- * ซ่อนสถานะกำลังโหลด
- */
 function hideLoadingState() {
     if (dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
 }
 
-/**
- * แสดงสถานะเมื่อการดึงข้อมูลล้มเหลว
- */
 function showErrorState() {
     hideLoadingState();
     if (dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
@@ -188,9 +170,6 @@ function showErrorState() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.remove('hidden');
 }
 
-/**
- * จัดการการกดปุ่ม "ลองอีกครั้ง"
- */
 async function handleRetry() {
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
     showLoadingState();
@@ -202,9 +181,6 @@ async function handleRetry() {
     }
 }
 
-/**
- * ดึงข้อมูลโปรไฟล์และจังหวัดจาก Supabase
- */
 async function fetchData() {
     if (!supabase) {
         console.error("Supabase client is not available. Cannot fetch data.");
@@ -254,9 +230,6 @@ async function fetchData() {
     }
 }
 
-/**
- * เริ่มต้นการทำงานของระบบค้นหาและฟิลเตอร์
- */
 function initSearchAndFilters() {
     if (!dom.searchForm) {
         if(allProfiles.length > 0) applyFilters();
@@ -290,9 +263,6 @@ function initSearchAndFilters() {
     applyFilters();
 }
 
-/**
- * กรองข้อมูลโปรไฟล์
- */
 function applyFilters() {
     const searchTerm = dom.searchInput ? dom.searchInput.value.toLowerCase().trim() : '';
     const selectedProvince = dom.provinceSelect ? dom.provinceSelect.value : '';
@@ -311,9 +281,6 @@ function applyFilters() {
     renderProfiles(filtered, isSearching);
 }
 
-/**
- * [HYDRATION VERSION] แสดงผลโปรไฟล์บนหน้าเว็บ
- */
 function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     const currentPage = dom.body.dataset.page;
@@ -383,9 +350,6 @@ function renderProfiles(filteredProfiles, isSearching) {
     initScrollAnimations();
 }
 
-/**
- * สร้าง HTML Element สำหรับการ์ดโปรไฟล์
- */
 function createProfileCard(profile, index, isEager = false) {
     const card = document.createElement('div');
     card.className = 'profile-card-new group cursor-pointer';
@@ -440,9 +404,6 @@ function createProfileCard(profile, index, isEager = false) {
     return card;
 }
 
-/**
- * เริ่มต้นการทำงานของปุ่มสลับ Theme
- */
 function initThemeToggle() {
     const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
     if (themeToggleBtns.length === 0) return;
@@ -470,9 +431,6 @@ function initThemeToggle() {
     });
 }
 
-/**
- * เริ่มต้นการทำงานของเมนูสำหรับมือถือ
- */
 function initMobileMenu() {
     if (!dom.menuToggle || !dom.sidebar || !dom.backdrop || !dom.closeSidebarBtn) return;
     
@@ -513,9 +471,6 @@ function initMobileMenu() {
     });
 }
 
-/**
- * เริ่มต้นการทำงานของ Modal ตรวจสอบอายุ
- */
 async function initAgeVerification() {
     if (!dom.ageVerificationOverlay || sessionStorage.getItem('ageVerified') === 'true') {
         return;
@@ -557,9 +512,6 @@ async function initAgeVerification() {
     if (dom.cancelAgeButton) dom.cancelAgeButton.addEventListener('click', () => closeAction(false));
 }
 
-/**
- * เริ่มต้นการทำงานของ Lightbox
- */
 async function initLightbox() {
     if (!dom.lightbox || !dom.lightboxContentWrapperEl || !dom.closeLightboxBtn) return;
 
@@ -632,9 +584,6 @@ async function initLightbox() {
     });
 }
 
-/**
- * เติมข้อมูลของโปรไฟล์ที่เลือกลงใน Lightbox
- */
 function populateLightbox(profileData) {
     const nameMainEl = document.getElementById('lightbox-profile-name-main');
     const heroImageEl = document.getElementById('lightboxHeroImage');
@@ -728,9 +677,6 @@ function populateLightbox(profileData) {
     }
 }
 
-/**
- * เริ่มต้น Animation ที่จะทำงานเมื่อ scroll
- */
 async function initScrollAnimations() {
     await loadAnimationScripts();
     if (!gsap) return;
@@ -769,9 +715,6 @@ async function initScrollAnimations() {
     }
 }
 
-/**
- * เพิ่ม/ลดเงาที่ Header เมื่อ scroll
- */
 function initHeaderScrollEffect() {
     const header = dom.pageHeader;
     if (!header) return;
@@ -790,9 +733,6 @@ function initHeaderScrollEffect() {
     window.addEventListener('scroll', handleScroll, { passive: true });
 }
 
-/**
- * อัปเดตสถานะ "active" ของลิงก์ใน Navigation Bar
- */
 function updateActiveNavLinks() {
     const currentPath = window.location.pathname.replace(/\/$/, "") || "/";
     const navLinks = document.querySelectorAll('#sidebar nav a, header nav a');
@@ -806,9 +746,6 @@ function updateActiveNavLinks() {
     });
 }
 
-/**
- * สร้าง JSON-LD Schema สำหรับ SEO
- */
 function generateFullSchema() {
     const pageTitle = document.title;
     const canonicalLink = document.querySelector("link[rel='canonical']");
@@ -827,8 +764,8 @@ function generateFullSchema() {
     document.head.appendChild(schemaContainer);
 }
 
-// --- จุดเริ่มต้นการทำงานของสคริปต์ ---
-window.addEventListener('load', () => {
+// --- จุดเริ่มต้นการทำงานของสคริปต์ (ปรับปรุงเพื่อประสิทธิภาพ) ---
+document.addEventListener('DOMContentLoaded', () => {
   initializeApp().catch((e) => {
     document.body.classList.add('loaded');
     console.error('App init error:', e);
