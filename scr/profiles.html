@@ -221,17 +221,97 @@
         </div>
     </footer>
 
-    <div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="lightbox-header-title">
-        <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
-          <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิด"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-          <div class="flex-shrink-0 p-3 lg:p-4 border-b border-border"><h2 id="lightbox-header-title" class="text-lg font-bold text-foreground/80 truncate pl-2">รายละเอียดโปรไฟล์</h2></div>
-          <div class="flex-grow overflow-y-auto"><div class="lg:grid lg:grid-cols-5 lg:gap-6"><div class="lg:col-span-2 p-4 lg:pr-2"><div id="lightbox-gallery-container" class="sticky top-4"><div class="hero-image-container mb-3"><img id="lightboxHeroImage" src="/images/placeholder-profile.webp" alt="รูปโปรไฟล์" width="600" height="800" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/placeholder-profile.webp';"></div><div id="lightboxThumbnailStrip" class="thumbnail-strip"></div></div></div><div class="lg:col-span-3 p-4 lg:pl-2"><div class="space-y-5"><h3 id="lightbox-profile-name-main" class="text-3xl lg:text-4xl font-extrabold text-primary text-center lg:text-left">...</h3><p id="lightboxQuote" class="text-base text-foreground font-medium italic text-center lg:text-left border-l-4 border-primary/50 pl-4"></p><div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start"></div><div id="lightboxDetailsCompact" class="space-y-4 pt-5 border-t border-border"></div><div class="pt-4 border-t border-border"><h4 class="font-semibold text-foreground mb-2">รายละเอียดเพิ่มเติม</h4><p class="leading-relaxed text-muted-foreground text-sm whitespace-pre-wrap" id="lightboxDescriptionVal"></p></div></div></div></div></div>
-          <div class="flex-shrink-0 p-4 border-t border-border bg-accent/50 flex justify-center"><a id="lightboxLineLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-line-shared"><svg class="text-lg" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.29,14.62,15,13.31a.88.88,0,0,0-1.24,0L13.1,14a.87.87,0,0,1-1.23,0L9.13,11.33a.87.87,0,0,1,0-1.23l.71-.71a.88.88,0,0,0,0-1.24L8.53,7a.88.88,0,0,0-1.24,0L6,8.25a3.63,3.63,0,0,0-1,2.5,9.25,9.25,0,0,0,9.25,9.25,3.63,3.63,0,0,0,2.5-1l1.25-1.25a.88.88,0,0,0,0-1.24Z"/><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/></svg><span id="lightboxLineLinkText"></span></a></div>
-        </div>
-    </div>
+  <!-- ================================================================= -->
+<!-- LIGHTBOX / MODAL (ฉบับสมบูรณ์พร้อม Skeleton UI)                  -->
+<!-- ================================================================= -->
+<div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop" role="dialog" aria-modal="true" aria-labelledby="lightbox-header-title">
+    <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
+      
+      <!-- Close Button -->
+      <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิด">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      
+      <!-- Header -->
+      <div class="flex-shrink-0 p-3 lg:p-4 border-b border-border">
+        <h2 id="lightbox-header-title" class="text-lg font-bold text-foreground/80 truncate pl-2">รายละเอียดโปรไฟล์</h2>
+      </div>
+      
+      <!-- Main Content Area (Scrollable) -->
+      <div class="flex-grow overflow-y-auto">
+        <div class="lg:grid lg:grid-cols-5 lg:gap-6">
+          
+          <!-- Column 1: Gallery -->
+          <div class="lg:col-span-2 p-4 lg:pr-2">
+            <div id="lightbox-gallery-container" class="sticky top-4">
+              <div class="hero-image-container mb-3 aspect-[3/4] bg-muted rounded-lg">
+                <img 
+                    id="lightboxHeroImage" 
+                    src="/images/placeholder-profile.webp" 
+                    alt="รูปโปรไฟล์หลัก" 
+                    class="w-full h-full object-cover rounded-lg"
+                    width="600" 
+                    height="800" 
+                    loading="lazy" 
+                    decoding="async" 
+                    onerror="this.onerror=null;this.src='/images/placeholder-profile.webp';">
+              </div>
+              <div id="lightboxThumbnailStrip" class="thumbnail-strip">
+                <!-- JavaScript will populate thumbnails here -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Column 2: Profile Details -->
+          <div class="lg:col-span-3 p-4 lg:pl-2">
+            <div class="space-y-5">
+              <h3 id="lightbox-profile-name-main" class="text-3xl lg:text-4xl font-extrabold text-primary text-center lg:text-left min-h-[44px]">...</h3>
+              <p id="lightboxQuote" class="text-base text-foreground font-medium italic text-center lg:text-left border-l-4 border-primary/50 pl-4 min-h-[24px]"></p>
+              <div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start">
+                <!-- JavaScript will populate tags here -->
+              </div>
+              
+              <!-- 📌 [เพิ่มเติม] Skeleton UI สำหรับรายละเอียด -->
+              <div id="lightboxDetailsCompact" class="space-y-4 pt-5 border-t border-border">
+                <!-- Skeleton for Availability Badge -->
+                <div class="availability-badge skeleton-badge animate-pulse">กำลังโหลด...</div>
+                <!-- Skeleton for Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-item"><div class="label">อายุ</div><div class="value skeleton-text animate-pulse">-- ปี</div></div>
+                    <div class="stat-item"><div class="label">สัดส่วน</div><div class="value skeleton-text animate-pulse">--/--/--</div></div>
+                    <div class="stat-item"><div class="label">สูง/หนัก</div><div class="value skeleton-text animate-pulse">--/--</div></div>
+                </div>
+                <!-- Skeleton for Details List -->
+                <dl class="space-y-2 text-sm">
+                    <div class="detail-list-item"><dt class="flex-shrink-0"><i class="fas fa-palette w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt><dd class="value skeleton-text animate-pulse">ผิว: กำลังโหลด</dd></div>
+                    <div class="detail-list-item"><dt class="flex-shrink-0"><i class="fas fa-map-marker-alt w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt><dd class="value skeleton-text animate-pulse">จังหวัด: กำลังโหลด</dd></div>
+                    <div class="detail-list-item"><dt class="flex-shrink-0"><i class="fas fa-money-bill-wave w-5 text-center detail-list-item-icon" aria-hidden="true"></i></dt><dd class="value skeleton-text animate-pulse">เรท: กำลังโหลด</dd></div>
+                </dl>
+              </div>
 
-    
-  <!-- Scripts -->
+              <div class="pt-4 border-t border-border">
+                <h4 class="font-semibold text-foreground mb-2">รายละเอียดเพิ่มเติม</h4>
+                <p class="leading-relaxed text-muted-foreground text-sm whitespace-pre-wrap min-h-[40px]" id="lightboxDescriptionVal"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer / Action Button -->
+      <div class="flex-shrink-0 p-4 border-t border-border bg-accent/50 flex justify-center">
+        <a id="lightboxLineLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-line-shared">
+          <!-- 📌 [แก้ไข] SVG ที่ขาดหายไป ถูกทำให้สมบูรณ์แล้ว -->
+          <svg class="text-lg" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16.29,14.62,15,13.31a.88.88,0,0,0-1.24,0L13.1,14a.87.87,0,0,1-1.23,0L9.13,11.33a.87.87,0,0,1,0-1.23l.71-.71a.88.88,0,0,0,0-1.24L8.53,7a.88.88,0,0,0-1.24,0L6,8.25a3.63,3.63,0,0,0-1,2.5,9.25,9.25,0,0,0,9.25,9.25,3.63,3.63,0,0,0,2.5-1l1.25-1.25a.88.88,0,0,0,0-1.24Z"/>
+            <path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/>
+          </svg>
+          <span id="lightboxLineLinkText">ติดต่อผ่าน LINE</span>
+        </a>
+      </div>
+
+    </div>
+</div>
 <!-- Scripts -->
 <script src="/main.js" type="module"></script> <!-- ✨ สำคัญ: เพิ่ม type="module" -->
 
