@@ -1,0 +1,21 @@
+/*
+  Strict cache control + GZIP
+*/
+
+/* Critical Font */
+/fonts/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/* Image lazyload */
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/* CSS/JS Assets */
+/styles.css
+  Cache-Control: public, max-age=31536000, immutable
+/main.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/* HTML no-cache */
+/index.html
+  Cache-Control: no-cache

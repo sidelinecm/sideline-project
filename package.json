@@ -21,7 +21,7 @@
     "copy:js": "copyfiles -u 1 \"src/main.js\" \"src/sw.js\" dist",
     "copy:fonts": "copyfiles -u 1 \"src/fonts/**/*.*\" dist/fonts",
     "copy:webfonts": "copyfiles -u 1 \"src/webfonts/**/*.*\" dist/webfonts",
-    "copy:images": "copyfiles -u 1 \"src/images/**/*.*\" dist/images",
+    "copy:images": "copyfiles -u 2 \"src/images/images/**/*.*\" dist/images",
     "copy:icons": "copyfiles -u 1 \"src/icons/**/*.*\" dist/icons",
     "copy:blog": "copyfiles -u 1 \"src/blog/**/*.*\" dist/blog",
     "copy:manifest": "copyfiles -u 1 \"src/manifest.webmanifest\" dist",
