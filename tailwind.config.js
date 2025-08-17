@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{html,js}"], // สั่งให้ Tailwind สแกนไฟล์ในโฟลเดอร์ src
+  content: ["./scr/**/*.{html,js}"], // ใช้ scr แทน src ให้ตรง repo จริง
   theme: {
     extend: {
       colors: {
@@ -22,6 +22,7 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/typography'), // Plugin สำหรับจัดสไตล์หน้าบทความ
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
   ],
 }
