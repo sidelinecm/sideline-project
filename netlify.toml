@@ -1,94 +1,21 @@
-# =============================================================================
-# Netlify Configuration File (v2.3 - Final & Fully Functional)
-#
-# This version has a corrected CSP and build path to ensure full functionality
-# for the sidelinechiangmai project.
-# =============================================================================
-
-
-  # Asset optimization settings will be applied by Netlify automatically.
-  [build.processing]
-    skip_processing = false
-  [build.processing.css]
-    bundle = true
-    minify = true
-  [build.processing.js]
-    bundle = true
-    minify = true
-  [build.processing.html]
-    pretty_urls = true
-  [build.processing.images]
-    compress = true
-
-# =========================
-# 2. Redirects & SEO
-# =========================
-[[redirects]]
-  # Force non-www version for SEO canonicalization
-  from = "https://www.sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  # Custom 404 page
-  from = "/*"
-  to = "/404.html"
-  status = 404
-
-# =========================
-# 3. Security & Performance Headers (Global)
-# =========================
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-
-    # ✅ [FIXED CSP] This policy is now correctly configured to allow all
-    # necessary resources (Supabase images, FontAwesome styles, GSAP scripts).
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co; frame-ancestors 'none';"
-
-# =========================
-# 4. Caching Policy
-# =========================
-# These settings are already optimized and correct.
-[[headers]]
-  for = "/fonts/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-[[headers]]
-  for = "/output.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-[[headers]]
-  for = "/main.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-[[headers]]
+  # Revalidate HTML and core files on every visit to ensure freshness.
   for = "/*.html"
   [headers.values]
-    Cache-Control = "no-cache"
+    Cache-Control = "public, max-age=0, must-revalidate"
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    Cache-Control = "no-cache" 
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 [[headers]]
+  # Cache PWA and SEO files for a day.
   for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "public, max-age=86400"
 [[headers]]
   for = "/robots.txt"
   [headers.values]
-    Cache-Control = "public, max-age=86400"
+    Cache-control = "public, max-age=86400"
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
