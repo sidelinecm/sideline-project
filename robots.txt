@@ -1,0 +1,11 @@
+# This file tells search engine crawlers which pages they can or cannot crawl.
+# For more information, see https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+
+# Disallow specific paths if you have admin pages or private areas in the future
+# Disallow: /admin/
+# Disallow: /private/
+
+Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml
