@@ -1,21 +1,61 @@
-  # Revalidate HTML and core files on every visit to ensure freshness.
+# =============================================================================
+# 1. การตั้งค่า Deploy (สำหรับเว็บที่ไม่ต้อง Build)
+#    นี่คือส่วนที่แก้ไขปัญหาหลักของคุณ
+# =============================================================================
+[build]
+  # ไม่ต้องมี command
+  # บอกให้ Netlify รู้ว่าไฟล์เว็บไซต์ของคุณอยู่ที่โฟลเดอร์ราก (root)
+  publish = "."
+
+
+# =============================================================================
+# 2. การตั้งค่า Headers (ฉบับรวมและสมบูรณ์)
+#    รวมการตั้งค่าจาก _headers และ netlify.toml เดิมมาไว้ที่นี่ที่เดียว
+# =============================================================================
+
+# -- กฎสำหรับไฟล์ HTML: ไม่ต้อง Cache เพื่อให้สดใหม่เสมอ --
+[[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate" # เหมือน no-cache แต่ดีกว่าสำหรับ CDN
+
+# -- กฎสำหรับไฟล์ Assets: Cache ให้นานที่สุดเพื่อความเร็ว --
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/main.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# -- กฎสำหรับไฟล์ PWA และ SEO: Cache 1 วัน --
 [[headers]]
-  # Cache PWA and SEO files for a day.
   for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "public, max-age=86400"
+
 [[headers]]
   for = "/robots.txt"
   [headers.values]
-    Cache-control = "public, max-age=86400"
+    Cache-Control = "public, max-age=86400"
+
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
