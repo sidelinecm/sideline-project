@@ -5,13 +5,6 @@
 # for the sidelinechiangmai project.
 # =============================================================================
 
-# =========================
-# 1. Build Settings
-# =========================
-[build]
-  # ✅ This setting tells Netlify where your final website files are located.
-  # It must match the name of the folder you drag and drop.
-  publish = "distsideline"
 
   # Asset optimization settings will be applied by Netlify automatically.
   [build.processing]
