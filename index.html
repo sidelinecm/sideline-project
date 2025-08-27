@@ -93,25 +93,12 @@
   <!-- ================================================================ -->
   <!-- 5. PERFORMANCE & STYLESHEETS                                     -->
   <!-- ================================================================ -->
-  <!-- Preconnect & Preload -->
+<!-- Preconnect -->
 <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
 
-<!-- Preload Prompt -->
+<!-- Preload Fonts -->
 <link rel="preload" href="fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-
-<!-- Preload Sarabun -->
-<link rel="preload" href="fonts/sarabun-v16-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-
-<!-- Tailwind via CDN -->
-
-
-<!-- Preload Prompt -->
-<link rel="preload" href="fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-
-<!-- Preload Sarabun -->
 <link rel="preload" href="fonts/sarabun-v16-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
@@ -120,7 +107,7 @@
 
 <!-- Custom Styles -->
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="css/all.min.css">
+<link rel="preload" href="css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"> <noscript><link rel="stylesheet" href="css/all.min.css"></noscript>
 </head>
 <body class="antialiased" data-page="home">
 
