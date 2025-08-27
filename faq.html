@@ -7,23 +7,25 @@
   <title>คำถามที่พบบ่อย (FAQ) - ตอบทุกข้อสงสัย | SidelineCM</title>
   <meta name="description" content="ตอบทุกข้อสงสัยเกี่ยวกับการใช้บริการไซด์ไลน์เชียงใหม่กับ SidelineCM ทั้งเรื่องความปลอดภัย, การชำระเงิน, การันตีตรงปก, และขั้นตอนการนัดหมาย">
   <link rel="canonical" href="https://sidelinechiangmai.netlify.app/faq.html">
-  <link rel="icon" href="/images/favicon.ico" sizes="any">
+  <link rel="icon" href="images/favicon.ico" sizes="any">
 
-  <!-- Stylesheets -->
-   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preload" href="styles.css" as="style">
-  <link rel="stylesheet" href="styles.css">
-  
-  <!-- Scripts -->
-  
+  <!-- Preconnect & Preload -->
+<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
 
-   <!-- Preload critical fonts -->
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/webfonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
-  
-  <!-- ✅ REMOVED Google Fonts link to use local fonts via styles.css -->
+<!-- Preload Prompt -->
+<link rel="preload" href="fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Preload Sarabun -->
+<link rel="preload" href="fonts/sarabun-v16-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Tailwind via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Custom Styles -->
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/all.min.css">
 
   <!-- ✅ [SEO ขั้นสูง] Structured Data for FAQ Page -->
   <script type="application/ld+json">
@@ -212,51 +214,77 @@
     </div>
 </main>
     
-<!-- Footer -->
-<footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16">
-    <div class="container mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
-            <div>
-                <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
-                    <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" loading="lazy" decoding="async">
-                </a>
-                <h3 class="font-semibold text-foreground mb-2">เกี่ยวกับ SidelineCM</h3>
-                <p class="leading-relaxed text-sm">
-                    ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
-                </p>
-            </div>
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">ลิงก์ด่วน</h3>
-                <nav aria-label="ลิงก์ด่วนท้ายเว็บ">
-                  <ul class="space-y-3 text-sm">
-                    <li><a href="profiles.html" class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li>
-                    <li><a href="about.html" class="hover:text-secondary transition-colors">เกี่ยวกับเรา</a></li>
-                    <li><a href="faq.html" class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li>
-                    <li><a href="privacy-policy.html" class="hover:text-secondary transition-colors">นโยบายความเป็นส่วนตัว</a></li>
-                </ul>
-                </nav>
-            </div>
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อและติดตามเรา</h3>
-                <div class="space-y-5">
-                    <div>
-                         <p class="text-sm mb-3">หากมีข้อสงสัย, พบปัญหาการใช้งาน, หรือต้องการสอบถามข้อมูลเพิ่มเติม สามารถติดต่อเราได้โดยตรงผ่าน LINE:</p>
-                         <a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener" class="inline-flex items-center gap-3 group">
+ <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16 content-fade-in">
+  
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center md:text-left mb-12">
+                
+                <!-- Column 1: Brand Info -->
+                <div class="lg:col-span-1">
+                    <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
+                        <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
+                    </a>
+                    <p class="leading-relaxed text-sm">
+                        ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
+                    </p>
+                </div>
+
+                <!-- Column 2: Quick Links -->
+                <div>
+                    <h3 class="font-semibold text-foreground mb-4 tracking-tight">ลิงก์ด่วน</h3>
+                    <nav aria-label="ลิงก์ด่วนท้ายเว็บ">
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="/profiles.html" class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li>
+                            <li><a href="/about.html" class="hover:text-secondary transition-colors">เกี่ยวกับเรา</a></li>
+                            <li><a href="/faq.html" class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li>
+                            <li><a href="/blog.html" class="hover:text-secondary transition-colors">บทความ</a></li>
+                            <li><a href="/privacy-policy.html" class="hover:text-secondary transition-colors">นโยบายความเป็นส่วนตัว</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Column 3: Contact Info -->
+                <div>
+                    <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อสอบถาม (24 ชม.)</h3>
+                    <address class="not-italic space-y-3 text-sm">
+                        <p>สำหรับจองคิว, สอบถามรายละเอียดเพิ่มเติม, หรือแจ้งปัญหาการใช้งาน:</p>
+                        <a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener nofollow" class="inline-flex items-center gap-2 group font-semibold">
                             <i class="fab fa-line text-2xl text-green-500" aria-hidden="true"></i>
-                            <span class="font-semibold group-hover:text-secondary transition-colors">ติดต่อเจ้าหน้าที่</span>
+                            <span class="group-hover:text-secondary transition-colors">ติดต่อเจ้าหน้าที่ผ่าน LINE</span>
+                        </a>
+                    </address>
+                </div>
+
+                <!-- Column 4: Social Media -->
+                <div>
+                    <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดตามเรา</h3>
+                    <div class="flex justify-center md:justify-start gap-5 text-xl">
+                        <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" aria-label="Tiktok ของ SidelineCM" class="hover:text-primary transition-colors">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                        <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow" aria-label="Bio Site ของ SidelineCM" class="hover:text-primary transition-colors">
+                            <i class="fas fa-link"></i> <!-- ใช้ไอคอน link ทั่วไป -->
+                        </a>
+                        <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" aria-label="Linktree ของ SidelineCM" class="hover:text-primary transition-colors">
+                            <i class="fas fa-tree"></i> <!-- ใช้ไอคอนต้นไม้สำหรับ Linktree -->
+                        </a>
+                        <!-- BlueSky ยังไม่มีไอคอนใน Font Awesome เราอาจจะใช้ไอคอนทั่วไปแทน -->
+                        <a href="https://@sidelinechiangmai.bsky.social" target="_blank" rel="noopener nofollow" aria-label="Bluesky ของ SidelineCM" class="hover:text-primary transition-colors">
+                           <i class="fas fa-cloud"></i> <!-- ใช้ไอคอนก้อนเมฆสำหรับ Bluesky -->
                         </a>
                     </div>
                 </div>
+
+            </div>
+
+            <!-- Bottom Bar: Copyright & Legal Disclaimer -->
+            <div class="mt-12 border-t border-border pt-8 text-center">
+                <p class="text-sm">Copyright © <span id="currentYearDynamic"></span> SidelineChiangmai. All Rights Reserved.</p>
+                <p class="mt-2 text-xs text-muted-foreground/80 leading-relaxed">เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง</p>
             </div>
         </div>
-        <div class="mt-12 border-t border-border pt-8 text-center">
-            <p class="text-sm">© <span id="currentYearDynamic"></span> SidelineChiangmai. All rights reserved.</p>
-            <p class="mt-2 text-xs text-muted-foreground/80 leading-relaxed">
-                เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง
-            </p>
-        </div>
-    </div>
-</footer>
+    </footer>
+
 <script type="module" src="main.js"></script>
 <script>
       document.body.onload = () => { document.body.classList.add('loaded'); };

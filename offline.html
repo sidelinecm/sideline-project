@@ -9,10 +9,10 @@
     <meta name="robots" content="noindex, nofollow">
 
     <!-- Icons & PWA -->
-    <link rel="icon" href="/images/favicon.ico" sizes="any">
-    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/favicon.ico" sizes="any">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#db2777">
 
     <!-- Critical CSS (Inlined) เพื่อให้แน่ใจว่าหน้าเว็บแสดงผลได้เสมอแม้ออฟไลน์ -->
@@ -44,14 +44,27 @@
     </style>
     
     <!-- โหลด Font Awesome แบบ Non-blocking (ถ้ามี Cache ก็จะแสดงผล) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+  <!-- Preload Prompt -->
+<link rel="preload" href="fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Preload Sarabun -->
+<link rel="preload" href="fonts/sarabun-v16-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Tailwind via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Custom Styles -->
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/all.min.css">
 </head>
 <body class="antialiased">
 
     <main>
         <div class="container">
             <a href="/" aria-label="กลับสู่หน้าแรก">
-                <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiangmai" style="height: 30px; width: auto; margin: 0 auto;">
+                <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiangmai" style="height: 30px; width: auto; margin: 0 auto;">
             </a>
             
             <div class="icon" aria-hidden="true">
