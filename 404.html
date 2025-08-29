@@ -6,23 +6,30 @@
   <title>404 - ไม่พบหน้า | SidelineCM</title>
   <meta name="robots" content="noindex">
 
-  <link rel="icon" href="/images/favicon.ico" sizes="any"> <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<!-- ✅ Preconnect: สร้างการเชื่อมต่อล่วงหน้าไปยังเซิร์ฟเวอร์ที่สำคัญ -->
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <!-- ✅ Preload: ดาวน์โหลดทรัพยากรที่สำคัญที่สุดสำหรับ First Paint & LCP -->
+  <link rel="preload" href="css/all.min.css" as="style">
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="main.js" as="script" crossorigin>
+  
+  <!-- ================================================================ -->
+  <!-- 4. STYLESHEETS (หัวใจของการแสดงผลที่รวดเร็ว)                      -->
+  <!-- ================================================================ -->
+
+  <!-- ✅ STEP 1: โหลด CSS สำหรับไอคอนแบบปกติ (บล็อกแต่จำเป็น) -->
+  <link rel="stylesheet" href="css/all.min.css">
+
+  <!-- ✅ STEP 2: โหลด CSS หลักแบบไม่บล็อกการแสดงผล (Async) -->
+  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+<link rel="icon" href="/images/favicon.ico" sizes="any">
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-<!-- Preconnect -->
-<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-
-<!-- Preload Fonts -->
-<link rel="preload" href="fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/sarabun-v16-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-
-<!-- Tailwind via CDN -->
-
-
-<!-- Custom Styles -->
-<link rel="stylesheet" href="styles.css">
-<link rel="preload" href="css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"> <noscript><link rel="stylesheet" href="css/all.min.css"></noscript>
+  <link rel="manifest" href="manifest.webmanifest">
 </head>
 
 <body class="antialiased" data-page="404">
@@ -30,7 +37,23 @@
 <!-- Header -->
 <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
     <div class="container mx-auto px-4 h-18 flex items-center justify-between">
-         <a href="/" aria-label="SidelineChiangmai หน้าแรก"><img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiangmai" class="h-[30px] w-auto" width="245" height="30" loading="eager" fetchpriority="high"></a>
+         <a href="/" aria-label="SidelineChiangmai หน้าแรก">
+<img 
+  src="images/logo-sideline-chiangmai-128.webp" 
+  srcset="images/logo-sideline-chiangmai-64.webp 64w,
+          images/logo-sideline-chiangmai-128.webp 128w,
+          images/logo-sideline-chiangmai-256.webp 256w,
+          images/logo-sideline-chiangmai-512.webp 512w" 
+  sizes="(max-width: 640px) 64px, 
+         (max-width: 1024px) 128px, 
+         (max-width: 1440px) 256px,
+         512px"
+  alt="โลโก้ Sideline Chiangmai"
+  width="256" height="30"
+  class="h-[30px] w-auto"
+  loading="eager"
+  fetchpriority="high">
+</a>
         <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
             <a href="/profiles.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
             <a href="/locations.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
@@ -76,6 +99,27 @@
         </a>
     </div>
 </main>
-  <script type="module" src="main.js"></script>
+ 
+
+<script type="module" src="main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('loaded');
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => navigator.serviceWorker.register('/sw.js'));
+      } else {
+        setTimeout(() => navigator.serviceWorker.register('/sw.js'), 1500);
+      }
+    });
+  }
+</script>
 </body>
 </html>
+
+
+
+

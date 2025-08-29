@@ -1,13 +1,13 @@
 
-// sw.js
+// sw.js - FINAL & OPTIMIZED VERSION
 
-// กำหนดชื่อและเวอร์ชันของแคช
-// การเปลี่ยนเวอร์ชันจะทำให้ Service Worker ติดตั้งใหม่และแคชไฟล์ล่าสุด
-const CACHE_NAME = 'sideline-cm-cache-v2.2'; 
+// --- Configuration ---
+const APP_CACHE_NAME = 'sideline-cm-app-shell-v2';    // แคชสำหรับไฟล์หลักของแอป
+const IMMUTABLE_CACHE_NAME = 'sideline-cm-assets-v2'; // แคชสำหรับไฟล์ที่ไม่ค่อยเปลี่ยน
 
-// รายการไฟล์ที่จำเป็นสำหรับ App Shell (โครงสร้างพื้นฐานของเว็บ)
+// รายการไฟล์ App Shell ที่เป็นโครงสร้างหลักและอาจเปลี่ยนบ่อย
 const APP_SHELL_URLS = [
-  '/', // แคชหน้าแรก
+  '/',
   '/index.html',
   '/profiles.html',
   '/locations.html',
@@ -18,99 +18,86 @@ const APP_SHELL_URLS = [
   '/blog/nimman-feel-fan-guide.html',
   '/blog/what-is-trong-pok.html',
   '/privacy-policy.html',
-  '/offline.html', // หน้าแสดงผลเมื่อออฟไลน์ (สำคัญมาก)
+  '/offline.html',
   '/manifest.webmanifest',
-  '/styles.css', // ✅ แก้ไขจาก output.css เป็น styles.css
-  '/css/all.min.css',
-  '/main.js',
-  
+  '/css/all.min.css', // ✅ ไฟล์ไอคอน
+  '/styles.css',      // ✅ ไฟล์สไตล์หลัก
+  '/main.js'
+];
+
+// รายการไฟล์ที่ไม่ค่อยเปลี่ยนแปลง (ฟอนต์, รูปภาพหลัก)
+const IMMUTABLE_URLS = [
   // รูปภาพหลักและไอคอน
   '/images/logo-sideline-chiangmai.webp',
   '/images/placeholder-profile.webp',
   '/images/favicon.ico',
-  '/images/apple-touch-icon.png', // เพิ่มไอคอนสำหรับ iOS
-  
-  // ไอคอนสำหรับ PWA (จาก manifest.webmanifest)
-  // ‼️ ตรวจสอบให้แน่ใจว่าคุณได้สร้างโฟลเดอร์ /icons/ และมีไฟล์เหล่านี้อยู่จริง
+  '/images/favicon.svg',
+  '/images/apple-touch-icon.png',
+  // ไอคอน PWA
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
   '/icons/maskable-icon-512x512.png',
-
   // รูปภาพบทความ
   '/images/blog/safety-tips.webp',
   '/images/blog/nimman-guide.webp',
   '/images/blog/guarantee-concept.webp',
-
-  // Web Fonts
+  // ฟอนต์ภาษาไทย
   '/fonts/prompt-v11-latin_thai-regular.woff2',
   '/fonts/prompt-v11-latin_thai-700.woff2',
   '/fonts/sarabun-v16-latin_thai-regular.woff2',
   '/fonts/sarabun-v16-latin_thai-700.woff2',
+  // ฟอนต์ไอคอน (Font Awesome) - ✅ ใช้ Path ที่ถูกต้อง
   '/webfonts/fa-brands-400.woff2',
   '/webfonts/fa-regular-400.woff2',
   '/webfonts/fa-solid-900.woff2',
   '/webfonts/fa-v4compatibility.woff2'
 ];
 
-// Event: install - เกิดขึ้นเมื่อ Service Worker ถูกติดตั้ง
-self.addEventListener('install', (event) => {
-  console.log(`[Service Worker] Installing Cache Version: ${CACHE_NAME}`);
-  
-  // รอจนกว่าการแคชไฟล์ App Shell ทั้งหมดจะเสร็จสิ้น
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Caching App Shell...');
-        return cache.addAll(APP_SHELL_URLS);
-      })
-      .catch(error => {
-        console.error('[Service Worker] Caching failed:', error);
-      })
-  );
-});
+// --- Service Worker Lifecycle ---
 
-// Event: activate - เกิดขึ้นเมื่อ Service Worker เริ่มทำงาน
-self.addEventListener('activate', (event) => {
-  console.log(`[Service Worker] Activating Cache Version: ${CACHE_NAME}`);
-  
-  // จัดการแคชเก่าที่ไม่จำเป็นแล้ว
+self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Install event');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log(`[Service Worker] Deleting old cache: ${cacheName}`);
-            return caches.delete(cacheName);
-          }
-        })
-      );
+    Promise.all([
+      caches.open(APP_CACHE_NAME).then((cache) => cache.addAll(APP_SHELL_URLS)),
+      caches.open(IMMUTABLE_CACHE_NAME).then((cache) => cache.addAll(IMMUTABLE_URLS))
+    ]).catch(error => {
+      console.error('[Service Worker] Caching failed during install:', error);
     })
   );
 });
 
-// Event: fetch - จัดการกับการร้องขอ (request) ทั้งหมดของหน้าเว็บ
+self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activate event');
+  event.waitUntil(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames
+          .filter(name => name !== APP_CACHE_NAME && name !== IMMUTABLE_CACHE_NAME)
+          .map(name => caches.delete(name))
+      )
+    )
+  );
+  return self.clients.claim();
+});
+
 self.addEventListener('fetch', (event) => {
-  // ใช้กลยุทธ์ "Cache falling back to network"
-  // คือพยายามหาจากแคชก่อน ถ้าไม่เจอก็จะไปโหลดจากเน็ตเวิร์ก
+  const { request } = event;
+  if (request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // ถ้าเจอในแคช, ส่ง response จากแคชกลับไปเลย
-        if (response) {
-          return response;
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(request).catch(() => {
+        if (request.mode === 'navigate') {
+          return caches.match('/offline.html');
         }
-        
-        // ถ้าไม่เจอในแคช, ให้ไปโหลดจากเน็ตเวิร์ก
-        return fetch(event.request).catch(() => {
-          // หากการโหลดจากเน็ตเวิร์กล้มเหลว (เช่น ออฟไลน์)
-          // ให้แสดงหน้า offline.html แทน
-          // เฉพาะกับการร้องขอหน้าเว็บ (navigate) เท่านั้น
-          if (event.request.mode === 'navigate') {
-            return caches.match('/offline.html');
-          }
-        });
-      })
+      });
+    })
   );
 });
+
 
 
