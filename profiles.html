@@ -25,22 +25,19 @@
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-  <!-- ✅ Preload: ดาวน์โหลดทรัพยากรที่สำคัญที่สุดสำหรับ First Paint & LCP -->
-  <link rel="preload" href="css/all.min.css" as="style">
-  <link rel="preload" href="styles.css" as="style">
-  <link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="main.js" as="script" crossorigin>
-  
-  <!-- ================================================================ -->
-  <!-- 4. STYLESHEETS (หัวใจของการแสดงผลที่รวดเร็ว)                      -->
-  <!-- ================================================================ -->
+  <!-- Preload สิ่งสำคัญที่สุด -->
+<link rel="preload" href="css/all.min.css" as="style">
+<link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="main.js" as="script" crossorigin>
 
-  <!-- ✅ STEP 1: โหลด CSS สำหรับไอคอนแบบปกติ (บล็อกแต่จำเป็น) -->
-  <link rel="stylesheet" href="css/all.min.css">
+<!-- CSS จำเป็น (block render เล็กน้อย แต่จำเป็น) -->
+<link rel="stylesheet" href="css/all.min.css">
 
-  <!-- ✅ STEP 2: โหลด CSS หลักแบบไม่บล็อกการแสดงผล (Async) -->
-  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+<!-- CSS Non-critical แบบ async -->
+<noscript><link rel="stylesheet" href="styles.css"></noscript>
+
+
 </head>
 
 <body class="antialiased" data-page="profiles">

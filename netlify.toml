@@ -1,78 +1,66 @@
-
-
 # =============================================================================
-# Netlify Configuration (v2.0 - Optimized for Performance & Security)
+# 1. การตั้งค่า Deploy (เว็บ Static ไม่ต้อง Build)
 # =============================================================================
-
-# --- 1. การตั้งค่า Build ---
 [build]
-  # ระบุว่าไฟล์เว็บไซต์ที่พร้อมใช้งานอยู่ในโฟลเดอร์ root
-  publish = "."
+  publish = "."   # ใช้ root folder เป็นโฟลเดอร์ deploy
 
 # =============================================================================
-# 2. การตั้งค่า Headers (หัวใจสำคัญ)
+# 2. การตั้งค่า Redirects (เลือกใช้ตามต้องการ)
+# =============================================================================
+# [[redirects]]
+#   from = "https://sidelinechiangmai.netlify.app/*"
+#   to = "https://www.sidelinechiangmai.netlify.app/:splat"
+#   status = 301
+#   force = true
+
+# =============================================================================
+# 3. การตั้งค่า Headers (ฉบับรวมสมบูรณ์)
 # =============================================================================
 
-# --- Global Security Headers (ใช้กับทุกหน้าและทุกไฟล์) ---
-# นี่คือชุด Headers ด้านความปลอดภัยที่แนะนำสำหรับทุกเว็บไซต์
-[[headers]]
-  for = "/*"
-  [headers.values]
-    # ป้องกันการคลิกจาก iframe ในเว็บอื่น (Clickjacking)
-    X-Frame-Options = "DENY"
-    # ป้องกันเบราว์เซอร์จากการเดาประเภทไฟล์ผิด ซึ่งอาจนำไปสู่ช่องโหว่
-    X-Content-Type-Options = "nosniff"
-    # ควบคุมข้อมูลที่ส่งไปยังเว็บอื่นเมื่อมีการคลิกลิงก์ (เพื่อความเป็นส่วนตัว)
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    # จำกัดฟีเจอร์ของเบราว์เซอร์ที่เว็บไซต์สามารถร้องขอได้
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    # Content Security Policy (CSP): กำหนดแหล่งที่มาของทรัพยากรที่เชื่อถือได้
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co data:; font-src 'self'; connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self';"
-
-# --- Caching Policies (นโยบายการเก็บแคชสำหรับไฟล์แต่ละประเภท) ---
-
-# HTML: ไม่เก็บแคชเลย เพื่อให้ผู้ใช้ได้รับข้อมูลอัปเดตล่าสุดเสมอ
+# --- HTML (ไม่ cache เก็บสดใหม่เสมอ) ---
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# CSS & JS: เก็บแคชไว้นาน 1 ปีเต็ม เพราะไฟล์เหล่านี้มักไม่เปลี่ยนชื่อ
-# immutable บอกเบราว์เซอร์ว่าถ้าชื่อไฟล์ไม่เปลี่ยน เนื้อหาก็ไม่เปลี่ยนแน่นอน
+# --- CSS (cache 1 วัน เพื่อลด stale asset) ---
 [[headers]]
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=86400"
 
+# --- JS (cache 1 วัน ป้องกัน bug เวลาอัพเดท script) ---
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=86400"
 
-# FONTS, IMAGES, ICONS: เก็บแคชไว้นาน 1 ปีเต็ม
+# --- Fonts (cache ยาวสุด 1 ปี, immutable) ---
 [[headers]]
   for = "/fonts/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# --- Images (cache ยาวสุด 1 ปี, immutable) ---
 [[headers]]
   for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# --- Icons (cache ยาวสุด 1 ปี, immutable) ---
 [[headers]]
   for = "/icons/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# SERVICE WORKER: ห้ามเก็บแคชเด็ดขาด! ต้องโหลดใหม่ทุกครั้งเพื่อตรวจสอบการอัปเดต
+# --- Service Worker (ห้าม cache, ให้โหลดใหม่เสมอ) ---
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
     Service-Worker-Allowed = "/"
 
-# PWA & SEO FILES: เก็บแคชไว้ 1 วัน เผื่อมีการเปลี่ยนแปลง
+# --- PWA / SEO files (cache 1 วัน) ---
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
@@ -87,6 +75,3 @@
   for = "/sitemap.xml"
   [headers.values]
     Cache-Control = "public, max-age=86400"
-
-
-
