@@ -394,28 +394,60 @@ gsap.registerPlugin(ScrollTrigger);
         return wrapper;
     }
 
-    // --- OTHER INITIALIZERS & UTILITIES ---
 
-    // ✅ [UX] Initialize 3D hover effect for profile cards
-    function init3dCardHover() {
-        document.body.addEventListener('mousemove', (e) => {
-            const cards = document.querySelectorAll('.profile-card-new');
-            cards.forEach(card => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -7; // Max rotation 7 degrees
-                const rotateY = ((x - centerX) / centerX) * 7;  // Max rotation 7 degrees
 
-                card.style.setProperty('--mouse-x', `${x}px`);
-                card.style.setProperty('--mouse-y', `${y}px`);
-                card.style.setProperty('--rotate-x', `${rotateX}deg`);
-                card.style.setProperty('--rotate-y', `${rotateY}deg`);
-            });
-        });
-    }
+// ✅ [PERFORMANCE] Optimized 3D hover effect for profile cards
+function init3dCardHover() {
+    // ใช้ container ที่เก็บโปรไฟล์ทั้งหมดเป็นตัวดักจับ event
+    const cardContainer = document.getElementById('profiles-display-area') || document.body;
+    let currentCard = null; // เก็บการ์ดที่กำลัง active อยู่
+
+    cardContainer.addEventListener('mousemove', (e) => {
+        // หาการ์ดที่เมาส์กำลังชี้อยู่เท่านั้น
+        const targetCard = e.target.closest('.profile-card-new');
+
+        // ถ้าเมาส์ไม่ได้อยู่บนการ์ดใบไหน
+        if (!targetCard) {
+            // ถ้าเคยมีการ์ดที่ active อยู่ ให้ reset ค่ามันกลับเป็นปกติ
+            if (currentCard) {
+                currentCard.style.removeProperty('--rotate-x');
+                currentCard.style.removeProperty('--rotate-y');
+                currentCard.style.removeProperty('--mouse-x');
+                currentCard.style.removeProperty('--mouse-y');
+                currentCard = null;
+            }
+            return; // จบการทำงาน
+        }
+
+        // คำนวณตำแหน่งและอัปเดตสไตล์เฉพาะการ์ดใบที่ active อยู่เท่านั้น!
+        currentCard = targetCard;
+        const rect = currentCard.getBoundingClientRect(); // <--- คำนวณแค่ใบเดียว ไม่ใช่ทั้งหมด
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -7;
+        const rotateY = ((x - centerX) / centerX) * 7;
+
+        currentCard.style.setProperty('--mouse-x', `${x}px`);
+        currentCard.style.setProperty('--mouse-y', `${y}px`);
+        currentCard.style.setProperty('--rotate-x', `${rotateX}deg`);
+        currentCard.style.setProperty('--rotate-y', `${rotateY}deg`);
+    });
+
+    // เพิ่ม event listener เพื่อ reset การ์ดเมื่อเมาส์ออกจากพื้นที่ container
+    cardContainer.addEventListener('mouseleave', () => {
+        if (currentCard) {
+            currentCard.style.removeProperty('--rotate-x');
+            currentCard.style.removeProperty('--rotate-y');
+            currentCard.style.removeProperty('--mouse-x');
+            currentCard.style.removeProperty('--mouse-y');
+            currentCard = null;
+        }
+    });
+}
+
+
 
     // ... (The rest of the initializers remain the same) ...
     function initThemeToggle() {
