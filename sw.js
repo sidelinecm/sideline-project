@@ -16,7 +16,7 @@ if (workbox) {
 
   // ✅ Step 3: Pre-caching - แคชไฟล์โครงสร้างหลักของเว็บ (App Shell)
   // **หมายเหตุ:** ในโปรเจกต์จริง revision ควรถูกสร้างโดย Build Tool (เช่น Vite, Webpack) 
-  // เพื่อให้ Workbox รู้ว่าไฟล์มีการเปลี่ยนแปลงหรือไม่ (เช่น 'revision: 'a1b2c337'')
+  // เพื่อให้ Workbox รู้ว่าไฟล์มีการเปลี่ยนแปลงหรือไม่ (เช่น 'revision: 'a1b2'')
   // การใช้ 'revision: null' เหมาะสำหรับตอนเริ่มต้น
   workbox.precaching.precacheAndRoute([
     { url: '/offline.html', revision: null },
