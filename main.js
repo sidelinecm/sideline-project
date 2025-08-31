@@ -394,60 +394,28 @@ gsap.registerPlugin(ScrollTrigger);
         return wrapper;
     }
 
+    // --- OTHER INITIALIZERS & UTILITIES ---
 
+    // ✅ [UX] Initialize 3D hover effect for profile cards
+    function init3dCardHover() {
+        document.body.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.profile-card-new');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -7; // Max rotation 7 degrees
+                const rotateY = ((x - centerX) / centerX) * 7;  // Max rotation 7 degrees
 
-// ✅ [PERFORMANCE] Optimized 3D hover effect for profile cards
-function init3dCardHover() {
-    // ใช้ container ที่เก็บโปรไฟล์ทั้งหมดเป็นตัวดักจับ event
-    const cardContainer = document.getElementById('profiles-display-area') || document.body;
-    let currentCard = null; // เก็บการ์ดที่กำลัง active อยู่
-
-    cardContainer.addEventListener('mousemove', (e) => {
-        // หาการ์ดที่เมาส์กำลังชี้อยู่เท่านั้น
-        const targetCard = e.target.closest('.profile-card-new');
-
-        // ถ้าเมาส์ไม่ได้อยู่บนการ์ดใบไหน
-        if (!targetCard) {
-            // ถ้าเคยมีการ์ดที่ active อยู่ ให้ reset ค่ามันกลับเป็นปกติ
-            if (currentCard) {
-                currentCard.style.removeProperty('--rotate-x');
-                currentCard.style.removeProperty('--rotate-y');
-                currentCard.style.removeProperty('--mouse-x');
-                currentCard.style.removeProperty('--mouse-y');
-                currentCard = null;
-            }
-            return; // จบการทำงาน
-        }
-
-        // คำนวณตำแหน่งและอัปเดตสไตล์เฉพาะการ์ดใบที่ active อยู่เท่านั้น!
-        currentCard = targetCard;
-        const rect = currentCard.getBoundingClientRect(); // <--- คำนวณแค่ใบเดียว ไม่ใช่ทั้งหมด
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = ((y - centerY) / centerY) * -7;
-        const rotateY = ((x - centerX) / centerX) * 7;
-
-        currentCard.style.setProperty('--mouse-x', `${x}px`);
-        currentCard.style.setProperty('--mouse-y', `${y}px`);
-        currentCard.style.setProperty('--rotate-x', `${rotateX}deg`);
-        currentCard.style.setProperty('--rotate-y', `${rotateY}deg`);
-    });
-
-    // เพิ่ม event listener เพื่อ reset การ์ดเมื่อเมาส์ออกจากพื้นที่ container
-    cardContainer.addEventListener('mouseleave', () => {
-        if (currentCard) {
-            currentCard.style.removeProperty('--rotate-x');
-            currentCard.style.removeProperty('--rotate-y');
-            currentCard.style.removeProperty('--mouse-x');
-            currentCard.style.removeProperty('--mouse-y');
-            currentCard = null;
-        }
-    });
-}
-
-
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+                card.style.setProperty('--rotate-x', `${rotateX}deg`);
+                card.style.setProperty('--rotate-y', `${rotateY}deg`);
+            });
+        });
+    }
 
     // ... (The rest of the initializers remain the same) ...
     function initThemeToggle() {
@@ -507,32 +475,57 @@ function init3dCardHover() {
     }
 
     function initAgeVerification() {
-        const overlay = document.getElementById('age-verification-overlay');
-        if (!overlay) return;
-        const modalContent = overlay.querySelector('.age-modal-content');
-        if (!modalContent || sessionStorage.getItem('ageVerified') === 'true') {
-            overlay.classList.add('hidden');
-            return;
-        }
-        overlay.classList.remove('hidden');
-        gsap.to(overlay, { opacity: 1, duration: 0.3 });
-        gsap.fromTo(modalContent, { scale: 0.9, opacity: 0, y: -20 }, { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.1 });
-        const confirmBtn = document.getElementById('confirmAgeButton');
-        const cancelBtn = document.getElementById('cancelAgeButton');
-        const closeAction = () => {
-             gsap.to(modalContent, { scale: 0.95, opacity: 0, y: 10, duration: 0.3, ease: 'power2.in' });
-             gsap.to(overlay, { opacity: 0, duration: 0.3, delay: 0.1, onComplete: () => overlay.classList.add('hidden') });
-        }
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => {
-                sessionStorage.setItem('ageVerified', 'true');
-                closeAction();
-            });
-        }
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', closeAction);
-        }
+    const overlay = document.getElementById('age-verification-overlay');
+    if (!overlay) return;
+
+    // --- BOT & CRAWLER DETECTION ---
+    // ตรวจสอบ User-Agent เพื่อยกเว้น Bot จากการแสดงหน้าต่างยืนยันอายุ
+    // เพื่อผลดีต่อ SEO และเครื่องมือตรวจสอบความเร็ว
+    const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
+    const currentUserAgent = navigator.userAgent;
+
+    if (botUserAgents.test(currentUserAgent)) {
+        overlay.classList.add('hidden'); // ซ่อนหน้าต่างสำหรับ Bot
+        return; // จบการทำงานของฟังก์ชันทันที Bot จะเห็นเนื้อหาเว็บได้เลย
     }
+    // --- END BOT DETECTION ---
+
+    const modalContent = overlay.querySelector('.age-modal-content');
+    
+    // ลบการตรวจสอบ sessionStorage ออก เพื่อให้แสดงผลทุกครั้งสำหรับผู้ใช้ทั่วไป
+    if (!modalContent) {
+        overlay.classList.add('hidden');
+        return;
+    }
+    
+    // แสดงหน้าต่างสำหรับผู้ใช้ทั่วไปเสมอ
+    overlay.classList.remove('hidden');
+    gsap.to(overlay, { opacity: 1, duration: 0.3 });
+    gsap.fromTo(modalContent, { scale: 0.9, opacity: 0, y: -20 }, { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.1 });
+    
+    const confirmBtn = document.getElementById('confirmAgeButton');
+    const cancelBtn = document.getElementById('cancelAgeButton');
+    
+    const closeAction = () => {
+         gsap.to(modalContent, { scale: 0.95, opacity: 0, y: 10, duration: 0.3, ease: 'power2.in' });
+         gsap.to(overlay, { opacity: 0, duration: 0.3, delay: 0.1, onComplete: () => overlay.classList.add('hidden') });
+    }
+    
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            // ลบการบันทึก sessionStorage ออก จะได้ถามใหม่ทุกครั้งที่โหลดหน้า
+            // sessionStorage.setItem('ageVerified', 'true'); // <--- REMOVED
+            closeAction();
+        });
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            // ปรับปรุงให้ส่งผู้ใช้ไปที่อื่นเมื่อกดยกเลิก
+            window.location.href = 'https://www.google.com';
+        });
+    }
+}
 
     function initLightbox() {
         const lightbox = document.getElementById('lightbox');

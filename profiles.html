@@ -1,49 +1,144 @@
-
 <!doctype html>
 <html lang="th" class="scroll-smooth light">
 <head>
+  <!-- ================================================================ -->
+  <!-- 1. BASIC & ESSENTIALS -->
+  <!-- ================================================================ -->
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>น้องๆ ทั้งหมด - SidelineChiangmai</title>
-  <meta name="description" content="เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่ และจังหวัดใกล้เคียง พร้อมรายละเอียดและรูปภาพ">
+  <!-- Title: ควรมีความยาว 50-60 ตัวอักษรและมี Keyword หลัก [1] -->
+  <title>น้องๆ ไซด์ไลน์เชียงใหม่ทั้งหมด - โปรไฟล์ล่าสุด | SidelineChiangmai</title>
   
+  <!-- Description: ควรมีความยาว 150-160 ตัวอักษรเพื่อการแสดงผลที่ดีในหน้าค้นหา [1, 19] -->
+  <meta name="description" content="เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่และจังหวัดใกล้เคียงล่าสุด อัปเดตทุกวัน พร้อมรายละเอียด รูปภาพ และข้อมูลการติดต่อที่ครบถ้วน">
+  
+  <!-- Theme Color: สำหรับปรับสี UI ของเบราว์เซอร์ -->
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+
+  <!-- ================================================================ -->
+  <!-- 2. SEO (Search Engine Optimization) -->
+  <!-- ================================================================ -->
+  <!-- Canonical URL: ป้องกันปัญหาเนื้อหาซ้ำซ้อน [1, 8, 12] -->
   <link rel="canonical" href="https://sidelinechiangmai.netlify.app/profiles.html">
-  <!-- Default fallback (Lighthouse will detect this) -->
-<meta name="theme-color" content="#FFFFFF">
+  
+  <!-- Robots Meta Tag: ควบคุมการทำงานของ Search Engine Bots [3, 4] -->
+  <meta name="robots" content="index, follow">
+  
+  <!-- Google Specific: ป้องกันไม่ให้ Google แปลภาษามั่ว -->
+  <meta name="google" content="notranslate">
+  
+  <!-- Geographic Targeting (ถ้ามีกลุ่มเป้าหมายชัดเจน) -->
+  <meta name="geo.region" content="TH-50">
+  <meta name="geo.placename" content="Chiang Mai">
+  <meta name="geo.position" content="18.7883;98.9853">
+  <meta name="ICBM" content="18.7883, 98.9853">
 
-<!-- Light / Dark mode -->
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827">
-  <!-- Favicon -->
-  <link rel="icon" href="/images/favicon.ico" sizes="any"> <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <!-- ================================================================ -->
+  <!-- 3. SOCIAL MEDIA & OPEN GRAPH -->
+  <!-- ================================================================ -->
+  <!-- Facebook Open Graph -->
+  <meta property="og:title" content="น้องๆ ไซด์ไลน์เชียงใหม่ทั้งหมด - โปรไฟล์ล่าสุด | SidelineChiangmai">
+  <meta property="og:description" content="เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่และจังหวัดใกล้เคียงล่าสุด พร้อมรายละเอียด รูปภาพ และข้อมูลการติดต่อ">
+  <meta property="og:url" content="https://sidelinechiangmai.netlify.app/profiles.html">
+  <meta property="og:site_name" content="SidelineChiangmai">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="th_TH">
 
-  <!-- Preconnect -->
-<!-- ✅ Preconnect: สร้างการเชื่อมต่อล่วงหน้าไปยังเซิร์ฟเวอร์ที่สำคัญ -->
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="น้องๆ ไซด์ไลน์เชียงใหม่ทั้งหมด - โปรไฟล์ล่าสุด | SidelineChiangmai">
+  <meta name="twitter:description" content="เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่และจังหวัดใกล้เคียงล่าสุด พร้อมรายละเอียด รูปภาพ และข้อมูลการติดต่อ">
+  <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/twitter-card-image.jpg">
+  <!-- <meta name="twitter:site" content="@yourtwitterhandle"> -->
+  <!-- <meta name="twitter:creator" content="@creatorhandle"> -->
+
+  <!-- ================================================================ -->
+  <!-- 4. ICONS & MANIFEST -->
+  <!-- ================================================================ -->
+  <link rel="icon" href="/images/favicon.ico" sizes="any">
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <!-- ================================================================ -->
+  <!-- 5. PERFORMANCE HINTS & PRELOADING -->
+  <!-- ================================================================ -->
+  <!-- Preconnect to critical third-party origins -->
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
-  <!-- ✅ Preload: ดาวน์โหลดทรัพยากรที่สำคัญที่สุดสำหรับ First Paint & LCP -->
-  <link rel="preload" href="css/all.min.css" as="style">
-  <link rel="preload" href="styles.css" as="style">
-  <link rel="preload" href="fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="main.js" as="script" crossorigin>
   
-  <!-- ================================================================ -->
-  <!-- 4. STYLESHEETS (หัวใจของการแสดงผลที่รวดเร็ว)                      -->
-  <!-- ================================================================ -->
+  <!-- DNS Prefetch (Fallback for older browsers) -->
+  <link rel="dns-prefetch" href="https://hgzbgpbmymoiwjpaypvl.supabase.co">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  
+  <!-- Preload critical assets for the initial render [28] -->
+  <link rel="preload" href="/styles.css" as="style">
+  <link rel="preload" href="/main.js" as="script">
+  <link rel="preload" href="/fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- ✅ STEP 1: โหลด CSS สำหรับไอคอนแบบปกติ (บล็อกแต่จำเป็น) -->
-  <link rel="stylesheet" href="css/all.min.css">
+  <!-- ================================================================ -->
+  <!-- 6. SECURITY HEADERS -->
+  <!-- ================================================================ -->
+  <!-- Content Security Policy (CSP): ป้องกัน XSS (ต้องปรับ policy ให้เข้ากับเว็บของคุณ) [11, 25] -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self';"> -->
+  
+  <!-- Referrer Policy: ควบคุมข้อมูลที่ส่งไปกับ referer header [25] -->
+  <meta name="referrer" content="origin-when-cross-origin">
 
-  <!-- ✅ STEP 2: โหลด CSS หลักแบบไม่บล็อกการแสดงผล (Async) -->
-  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+ 
+
+  <!-- ================================================================ -->
+  <!-- 7. STYLESHEETS & SCRIPTS -->
+  <!-- ================================================================ -->
+  <!-- Async CSS Loading Pattern -->
+  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+
+  <!-- ================================================================ -->
+  <!-- 8. STRUCTURED DATA (JSON-LD) -->
+  <!-- ================================================================ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "น้องๆ ทั้งหมด - SidelineChiangmai",
+    "description": "เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่ และจังหวัดใกล้เคียง พร้อมรายละเอียดและรูปภาพ",
+    "url": "https://sidelinechiangmai.netlify.app/profiles.html",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "name": "หน้าแรก",
+        "item": "https://sidelinechiangmai.netlify.app/"
+      },{
+        "@type": "ListItem",
+        "position": 2,
+        "name": "น้องๆ ทั้งหมด"
+      }]
+    }
+  }
+  </script>
+
 </head>
 
+
+
 <body class="antialiased" data-page="profiles">
+
+  <!-- ✅ ADD: Element ที่จำเป็นสำหรับเอฟเฟกต์ -->
+  <div class="aurora-container">
+      <div class="aurora-blob aurora-blob-1"></div>
+      <div class="aurora-blob aurora-blob-2"></div>
+  </div>
+  <div id="custom-cursor-dot" class="custom-cursor"></div>
+  <div id="custom-cursor-circle" class="custom-cursor"></div>
 
 <!-- Age Verification Modal -->
 <div id="age-verification-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
@@ -53,7 +148,7 @@
             <span class="age-badge-inline">20+</span> 
             Website!
         </h2>
-        <p class="text-sm text-gray-300 leading-relaxed">คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 20 ปีบริบูรณ์</p>
+        <p class="text-sm text-gray-300 leading-relaxed">คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 18+ ปีบริบูรณ์</p>
         <div class="flex gap-4 pt-2">
             <button id="cancelAgeButton" class="age-btn age-btn-cancel">ออก</button>
             <button id="confirmAgeButton" class="age-btn age-btn-confirm">ยืนยัน</button>
@@ -64,7 +159,7 @@
 <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
     <div class="container mx-auto px-4 h-18 flex items-center justify-between">
         <a href="/" aria-label="SidelineChiangmai หน้าแรก">
-<img src="images/logo-sideline-chiangmai-128.webp" srcset="images/logo-sideline-chiangmai-64.webp 64w, images/logo-sideline-chiangmai-128.webp 128w, images/logo-sideline-chiangmai-256.webp 256w, images/logo-sideline-chiangmai-512.webp 512w" sizes="256px" alt="โลโก้ Sideline Chiangmai" width="256" height="30" class="h-[30px] w-auto" loading="eager" fetchpriority="high">
+ <img src="/images/logo-sideline-chiangmai-128.webp" srcset="/images/logo-sideline-chiangmai-64.webp 64w, /images/logo-sideline-chiangmai-128.webp 128w, /images/logo-sideline-chiangmai-256.webp 256w, /images/logo-sideline-chiangmai-512.webp 512w" sizes="(max-width: 320px) 200px, 256px" alt="โลโก้ Sideline Chiangmai" width="256" height="30" class="h-[30px] w-auto" loading="eager" fetchpriority="high">
 </a>
         <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
             <a href="/profiles.html" class="px-4 py-2 rounded-full bg-accent text-primary font-semibold">น้องๆ ทั้งหมด</a>
@@ -204,7 +299,7 @@
             <!-- Column 1: Brand Info -->
             <div class="lg:col-span-1">
                 <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
-                    <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
+                    <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
                 </a>
                 <p class="leading-relaxed text-sm">
                     ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
@@ -300,7 +395,7 @@
 
 
 
-<script type="module" src="main.js"></script>
+<script type="module" src="/main.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('loaded');
