@@ -64,7 +64,7 @@
   <!-- ================================================================ -->
   <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
-
+ 
   <!-- ================================================================ -->
   <!-- 6. JSON-LD STRUCTURED DATA -->
   <!-- ================================================================ -->
@@ -187,103 +187,196 @@
 
 
  
+ 
 <!-- (Main Content) -->
 <main id="main-content" class="pt-20">
     <div class="container mx-auto px-4 space-y-12 md:space-y-16">
         
-        <!-- START: RESTRUCTURED & UPGRADED HERO SECTION -->
-        <section aria-labelledby="hero-h1">
+        <section aria-labelledby="hero-h1" data-animate-on-scroll itemscope itemtype="https://schema.org/Service">
+            <meta itemprop="serviceType" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน">
+            <meta itemprop="areaServed" content="เชียงใหม่, เชียงราย, ลำปาง, ลำพูน">
             <div class="section-header-card text-center">
                 <div class="card-content max-w-4xl mx-auto space-y-6">
+                    <div itemprop="provider" itemscope itemtype="https://schema.org/Organization">
+                        <meta itemprop="name" content="SidelineCM">
+                    </div>
                     <div>
-                        <h1 id="hero-h1" class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 text-primary">
-                            ไซด์ไลน์เชียงใหม่ <span class="text-secondary">รับงานฟีลแฟน</span>
+                        <h1 id="hero-h1" itemprop="name" class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 
+                            bg-gradient-to-br from-primary via-secondary to-primary bg-clip-text text-transparent">
+                            ไซด์ไลน์เชียงใหม่ <span class="text-secondary">รับงานฟีลแฟน ตรงปก ไม่ต้องมัดจำ</span>
                         </h1>
-                        <p id="hero-p" class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                            คัดสรรน้องๆ ไซด์ไลน์คุณภาพ บริการระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
+                        
+                        <p id="hero-p" itemprop="description" class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                            คัดสรรน้องๆ <strong class="text-foreground">ไซด์ไลน์เชียงใหม่</strong> คุณภาพ บริการระดับพรีเมียม การันตี<strong class="text-foreground">ตรงปก</strong> ปลอดภัย <strong class="text-foreground">ไม่ต้องโอนมัดจำ</strong>ก่อนนัดเจอ
                         </p>
                         
-                        <!-- START: TRUST BADGES -->
-                        <div class="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium text-muted-foreground">
-                            <span class="flex items-center gap-2">
-                                <i class="fas fa-check-circle text-green-500" aria-hidden="true"></i>
-                                การันตีตรงปก 100%
-                            </span>
-                            <span class="flex items-center gap-2">
-                                <i class="fas fa-shield-alt text-blue-500" aria-hidden="true"></i>
-                                ปลอดภัย ไม่ต้องโอนมัดจำ
-                            </span>
-                            <span class="flex items-center gap-2">
-                                <i class="fas fa-user-check text-indigo-500" aria-hidden="true"></i>
-                                คัดกรองโปรไฟล์คุณภาพ
-                            </span>
-                        </div>
-                        <!-- END: TRUST BADGES -->
+                        <!-- ✅ [ULTIMATE VERSION] Trust Badges - Enhanced for SEO, Content, and Accessibility -->
+                        <ul class="trust-badges-grid mt-8">
+                            
+                            <!-- Badge 1: ตรงปก 100% -->
+                            <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
+                                <div class="badge-icon icon-guarantee">
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                </div>
+                                <h3 class="badge-title" itemprop="name">การันตีตรงปก 100%</h3>
+                                <p class="badge-description" itemprop="description">
+                                    โปรไฟล์และรูปภาพผ่านการตรวจสอบอย่างเข้มงวด มั่นใจได้ว่าจะได้พบกับน้องที่ตรงใจคุณ
+                                </p>
+                            </li>
+                            
+                            <!-- Badge 2: ปลอดภัย ไม่ต้องมัดจำ -->
+                            <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
+                                <div class="badge-icon icon-secure">
+                                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                </div>
+                                <h3 class="badge-title" itemprop="name">ปลอดภัย ไม่ต้องมัดจำ</h3>
+                                <p class="badge-description" itemprop="description">
+                                    นโยบาย 'ไม่โอนก่อน' ของเราช่วยป้องกันมิจฉาชีพ 100% ชำระเงินสดที่หน้างานเพื่อความสบายใจสูงสุด
+                                </p>
+                            </li>
+
+                            <!-- Badge 3: ประสบการณ์ฟีลแฟน -->
+                            <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
+                                <div class="badge-icon icon-premium">
+                                    <i class="fas fa-gem" aria-hidden="true"></i>
+                                </div>
+                                <h3 class="badge-title" itemprop="name">ประสบการณ์ฟีลแฟน</h3>
+                                <p class="badge-description" itemprop="description">
+                                    เราคัดสรรเฉพาะน้องๆ ที่มีใจบริการและเข้าใจในความสัมพันธ์แบบฟีลแฟน เพื่อสร้างช่วงเวลาที่น่าจดจำ
+                                </p>
+                            </li>
+                            
+                        </ul>
                     </div>
 
-                    <div id="hero-form">
-                        <form id="search-form" action="profiles.html" method="GET" aria-labelledby="search-form-heading">
+                    <div id="hero-form" class="pt-4">
+                        <form id="search-form" action="profiles.html" method="GET" aria-labelledby="search-form-heading" role="search">
                             <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
                             <div class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    <div class="relative sm:col-span-2 lg:col-span-1">
+                                    
+                                    <div class="relative sm:col-span-2 lg:col-span-1 form-input-wrapper">
                                         <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
                                         <div class="relative">
-                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg></span>
-                                            <input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..." class="w-full pl-10 pr-4 py-2.5 border border-border rounded-full focus:outline-none transition text-sm">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-search"></i></span>
+                                            <input id="search-keyword" name="q" type="search" placeholder="ค้นหาจากชื่อ, พิกัด, สไตล์..." class="w-full pl-10 pr-4 py-2.5 border border-border rounded-full transition text-sm">
                                         </div>
                                     </div>
-                                    <div class="relative"><label for="search-province" class="sr-only">เลือกจังหวัด</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z"></path></svg></span><select id="search-province" name="province" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"><option value="">ทุกจังหวัด</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div>
-                                    <div class="relative"><label for="search-availability" class="sr-only">เลือกสถานะ</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"></path></svg></span><select id="search-availability" name="availability" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm"><option value="">สถานะ (ทั้งหมด)</option><option value="ว่าง">ว่าง</option><option value="รับงาน">รับงาน</option><option value="รับงานบางวัน">รับงานบางวัน</option><option value="สอบถามคิว">สอบถามคิว</option><option value="ไม่ว่าง">ไม่ว่าง</option><option value="พัก">พัก</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div>
+                                    <div class="relative form-input-wrapper">
+                                        <label for="search-province" class="sr-only">เลือกจังหวัด</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-map-marker-alt"></i></span>
+                                            <select id="search-province" name="province" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full transition text-sm">
+                                                <option value="" selected>ทุกจังหวัด</option>
+                                            </select>
+                                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="relative form-input-wrapper">
+                                        <label for="search-availability" class="sr-only">เลือกสถานะ</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-clock"></i></span>
+                                            <select id="search-availability" name="availability" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full transition text-sm">
+                                                <option value="" selected>สถานะ (ทั้งหมด)</option>
+                                                <option value="ว่าง">ว่าง</option>
+                                                <option value="รับงาน">รับงาน</option>
+                                                <option value="รับงานบางวัน">รับงานบางวัน</option>
+                                                <option value="สอบถามคิว">สอบถามคิว</option>
+                                                <option value="ไม่ว่าง">ไม่ว่าง</option>
+                                                <option value="พัก">พัก</option>
+                                            </select>
+                                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex flex-wrap items-center justify-center sm:justify-between gap-3 pt-2">
-                                    <div class="relative"><label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z"></path></svg></span><select id="search-featured" name="featured" class="w-full appearance-none pl-10 pr-10 py-2 border border-border rounded-full text-xs focus:outline-none transition"><option value="">แนะนำ (ทั้งหมด)</option><option value="true">แนะนำเท่านั้น</option></select><span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"></path></svg></span></div></div>
+                                <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 pt-2">
+                                      <div class="relative form-input-wrapper">
+                                          <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
+                                          <div class="relative">
+                                              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-star"></i></span>
+                                              <select id="search-featured" name="featured" class="w-full appearance-none pl-10 pr-10 py-2 border border-border rounded-full text-xs transition">
+                                                  <option value="" selected>แนะนำ (ทั้งหมด)</option>
+                                                  <option value="true">เฉพาะที่แนะนำ</option>
+                                              </select>
+                                              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                          </div>
+                                      </div>
                                     <div class="flex items-center gap-3">
-                                        <button type="reset" id="reset-search-btn" class="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full hover:bg-border transition text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M15.312 11.342a1.25 1.25 0 010 1.768l-2.5 2.5a1.25 1.25 0 11-1.768-1.768L12.053 13H9.25a3.75 3.75 0 01-3.75-3.75V8.5A.75.75 0 016.25 8.5v.75a2.25 2.25 0 002.25 2.25h2.803l-1.01-1.01a1.25 1.25 0 011.768-1.768l2.5 2.5zM3.5 6.25a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75z"></path></svg><span>ล้างค่า</span></button>
-                                        <button type="submit" id="keyword-search-btn" class="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition text-sm font-semibold">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg>
-                                            <span>ค้นหา</span>
+                                        <button type="reset" id="reset-search-btn" class="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full hover:bg-border transition text-xs" aria-label="ล้างค่าการค้นหา"><i class="fas fa-sync-alt"></i><span>ล้างค่า</span></button>
+                                        <button type="submit" id="keyword-search-btn" class="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full transition text-sm font-semibold btn-premium">
+                                            <i class="fas fa-search"></i>
+                                            <span>ค้นหาโปรไฟล์</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </form>
                     </div>
-
                 </div>
             </div>
         </section>
-       
-        <section id="featured-profiles" class="hidden" aria-labelledby="featured-heading">
+     
+        <section id="featured-profiles" class="hidden featured-section" aria-labelledby="featured-heading" data-animate-on-scroll>
             <div class="section-content-wrapper">
-                <div class="p-6 md:p-8">
-                    <h2 id="featured-heading" class="text-2xl md:text-3xl font-bold text-primary">โปรไฟล์แนะนำ <span class="text-foreground/80">ที่ถูกเลือกมากที่สุด</span></h2>
-                    <p class="mt-1 text-muted-foreground max-w-2xl text-sm md:text-base">พบกับน้องๆ ยอดนิยมที่การันตีความประทับใจ คัดเลือกมาเป็นพิเศษเพื่อประสบการณ์ที่ดีที่สุด</p>
+                <div class="p-6 md:p-8 text-center">
+                    <h2 id="featured-heading" class="text-2xl md:text-3xl font-bold text-primary">⭐ โปรไฟล์แนะนำประจำสัปดาห์ ⭐</h2>
+                    <p class="mt-2 text-muted-foreground max-w-2xl text-sm md:text-base mx-auto">
+                        น้องๆ <strong class="text-foreground">ตัวท็อปยอดนิยม</strong> ที่ถูกนัดหมายมากที่สุด คัดมาเพื่อประสบการณ์<strong class="text-foreground">ฟีลแฟน</strong>ระดับพรีเมียมโดยเฉพาะ
+                    </p>
                 </div>
-                <div id="featured-profiles-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-6 md:px-8 pb-6 md:pb-8"></div>
+                
+                <div id="featured-profiles-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-6 md:px-8 pb-6 md:pb-8">
+                    <!-- JS will populate this -->
+                </div>
             </div>
         </section>
 
-        <section>
-            <h2 class="sr-only">รายการโปรไฟล์ทั้งหมด</h2>
-            <div id="loading-profiles-placeholder" role="status" aria-live="polite">
-                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div>
+        <div class="container mx-auto px-4" data-animate-on-scroll>
+            <hr class="border-border/60">
+        </div>
+
+        <section id="all-profiles-section" aria-labelledby="all-profiles-heading" class="pt-12 md:pt-16" data-animate-on-scroll>
+            <div class="text-center">
+                <h2 id="all-profiles-heading" class="text-2xl md:text-3xl font-bold">
+                    ค้นหาน้องๆ ทั้งหมด <span class="text-primary">ตามพื้นที่รับงาน</span>
+                </h2>
+                <p class="mt-2 text-muted-foreground max-w-2xl text-sm md:text-base mx-auto">
+                    เลือกดูโปรไฟล์ทั้งหมด หรือใช้ตัวกรองเพื่อค้นหาน้องๆ ที่<strong class="text-foreground">รับงานในเชียงใหม่</strong>และจังหวัดที่คุณต้องการ
+                </p>
             </div>
-            <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
-            <div id="load-more-container" class="hidden text-center mt-12">
-                 <button id="load-more-btn" class="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition font-semibold">
-                    แสดงเพิ่มเติม
-                </button>
-            </div>
-            <div id="fetch-error-message" class="hidden text-center py-12 px-4 bg-accent rounded-lg">
-                <div class="error-state">
-                    <div class="error-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2zm0-8h2v6h-2z"></path></svg></div>
-                    <h3 class="error-title">เกิดข้อผิดพลาด</h3>
-                    <p class="error-description">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ในขณะนี้</p>
-                    <button id="retry-fetch-btn" class="retry-btn">ลองอีกครั้ง</button>
+
+            <div class="mt-8" aria-live="polite">
+                <div id="loading-profiles-placeholder" role="status">
+                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        <div class="skeleton-card"><div class="shimmer"></div></div>
+                        <div class="skeleton-card"><div class="shimmer"></div></div>
+                        <div class="skeleton-card hidden md:block"><div class="shimmer"></div></div>
+                        <div class="skeleton-card hidden lg:block"><div class="shimmer"></div></div>
+                        <div class="skeleton-card"><div class="shimmer"></div></div>
+                        <div class="skeleton-card"><div class="shimmer"></div></div>
+                        <div class="skeleton-card hidden md:block"><div class="shimmer"></div></div>
+                        <div class="skeleton-card hidden lg:block"><div class="shimmer"></div></div>
+                    </div>
+                </div>
+                
+                <div id="profiles-display-area" class="space-y-12 md:space-y-16">
+                    <!-- JS will populate this -->
+                </div>
+
+                <div id="load-more-container" class="hidden text-center mt-12">
+                     <button id="load-more-btn" class="px-6 py-3 bg-primary text-white rounded-full font-semibold btn-premium">
+                        แสดงเพิ่มเติม
+                    </button>
+                </div>
+
+                <div id="fetch-error-message" class="hidden text-center py-12 px-4 bg-accent rounded-lg" role="alert">
+                    <!-- JS will populate this -->
+                </div>
+                
+                <div id="no-results-message" class="hidden text-center py-12 text-muted-foreground bg-accent rounded-lg" role="status">
+                    <!-- JS will populate this -->
                 </div>
             </div>
-            <div id="no-results-message" class="hidden text-center py-12 text-muted-foreground bg-accent rounded-lg"><span class="block mb-4 text-muted-foreground/50"><svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"></path></svg></span><p class="text-lg font-semibold">ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข</p><p class="text-sm">ลองปรับคำค้นหาหรือตัวกรองใหม่อีกครั้ง</p></div>
         </section>
     </div>
 </main>
@@ -304,7 +397,7 @@
         <!-- Column 1: Brand Info -->
         <div class="lg:col-span-1">
             <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
-                <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
+                <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
             </a>
             <p class="leading-relaxed text-sm">
                 ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
@@ -367,59 +460,112 @@
   </footer>
 
 
-  <!-- Lightbox -->
-  <div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4">
-      <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
-          <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิด">
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-          <div class="flex-shrink-0 p-3 lg:p-4 border-b border-border">
-              <h2 id="lightbox-header-title" class="text-lg font-bold text-foreground/80 truncate pl-2">Profile Details</h2>
-          </div>
-          <div class="flex-grow overflow-y-auto">
-              <div class="lg:grid lg:grid-cols-5 lg:gap-6">
-                  <div class="lg:col-span-2 p-4 lg:pr-2">
-                      <div id="lightbox-gallery-container" class="sticky top-4">
-                          <div class="hero-image-container mb-3">
-                              <img id="lightboxHeroImage" src="/images/placeholder-profile.webp" alt="รูปโปรไฟล์" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/placeholder-profile.webp';">
-                          </div>
-                          <div id="lightboxThumbnailStrip" class="thumbnail-strip"></div>
-                      </div>
-                  </div>
-                  <div class="lg:col-span-3 p-4 lg:pl-2">
-                      <div class="space-y-5">
-                         <h3 id="lightbox-profile-name-main" class="text-3xl lg:text-4xl font-extrabold text-primary text-center lg:text-left">...</h3>
-                         <p id="lightboxQuote" class="text-base text-foreground font-medium italic text-center lg:text-left border-l-4 border-primary/50 pl-4"></p>
-                         <div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start"></div>
-                         <div id="lightboxDetailsCompact" class="space-y-4 pt-5 border-t border-border"></div>
-                         <div class="pt-4 border-t border-border">
-                             <h4 class="font-semibold text-foreground mb-2">รายละเอียดเพิ่มเติม</h4>
-                             <p class="leading-relaxed text-muted-foreground text-sm whitespace-pre-wrap" id="lightboxDescriptionVal"></p>
-                         </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          <div class="flex-shrink-0 p-4 border-t border-border bg-accent/50 flex justify-center">
-              <a id="lightboxLineLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-line-shared">
-                  <svg class="text-lg" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.29,14.62,15,13.31a.88.88,0,0,0-1.24,0L13.1,14a.87.87,0,0,1-1.23,0L9.13,11.33a.87.87,0,0,1,0-1.23l.71-.71a.88.88,0,0,0,0-1.24L8.53,7a.88.88,0,0,0-1.24,0L6,8.25a3.63,3.63,0,0,0-1,2.5,9.25,9.25,0,0,0,9.25,9.25,3.63,3.63,0,0,0,2.5-1l1.25-1.25a.88.88,0,0,0,0-1.24Z"/><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/></svg>
-                  <span id="lightboxLineLinkText"></span>
-              </a>
-          </div>
-      </div>
-  </div>
 
-  <!-- ================================================================ -->
-  <!-- 7. SCRIPTS (ส่วนปรับปรุงขั้นสูง)                                     -->
-  <!-- ================================================================ -->
-<script type="module" src="/main.js"></script>
+
+
+<!-- Lightbox Main Container -->
+<div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
+    
+    <!-- Main Modal Content Wrapper -->
+    <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
+        
+        <!-- Close Button -->
+        <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิดรายละเอียดโปรไฟล์">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        
+        <!-- Scrollable Area -->
+        <div class="flex-grow overflow-y-auto">
+            
+            <!-- Grid Layout for Desktop (Left: Gallery, Right: Details) -->
+            <div class="lightbox-grid">
+
+                <!-- ===== LEFT COLUMN: GALLERY ===== -->
+                <div class="lightbox-gallery">
+                    <div class="sticky top-0 p-2 sm:p-4">
+                        <!-- Main Profile Image -->
+                        <div class="hero-image-container mb-3">
+                            <img id="lightboxHeroImage" src="/images/placeholder-profile.webp" alt="รูปโปรไฟล์หลัก" class="hero-image-main" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/placeholder-profile.webp';">
+                        </div>
+                        <!-- Thumbnail Strip -->
+                        <div id="lightboxThumbnailStrip" class="thumbnail-strip">
+                            <!-- JavaScript will populate this with thumbnail images -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== RIGHT COLUMN: DETAILS ===== -->
+                <div class="lightbox-details">
+                    <div class="p-4 sm:p-6 lg:p-8 space-y-6">
+                        
+                        <!-- Header: Name, Quote, Status -->
+                        <header class="text-center lg:text-left">
+                            <!-- เพิ่ม h2 ที่ซ่อนไว้สำหรับ id="lightbox-header-title" ที่ JS ต้องการ -->
+                            <h2 id="lightbox-header-title" class="sr-only">รายละเอียดโปรไฟล์</h2>
+
+                            <div id="lightbox-availability-badge-wrapper" class="mb-3 h-6">
+                                <!-- JS จะสร้าง badge สถานะ แต่จะไปใส่ในส่วน Details แทนตามโค้ดปัจจุบัน -->
+                            </div>
+                            <h3 id="lightbox-profile-name-main" class="text-3xl lg:text-4xl font-extrabold text-primary">
+                                <!-- JS populates name -->
+                            </h3>
+                            <p id="lightboxQuote" class="text-base text-muted-foreground italic mt-2">
+                                <!-- JS populates quote -->
+                            </p>
+                        </header>
+                        
+                        <!-- Tags Section -->
+                        <div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start">
+                            <!-- JS will populate with tag badges -->
+                        </div>
+
+                        <!-- Compact Details Grid -->
+                        <div class="pt-5 border-t border-border">
+                            <div id="lightboxDetailsCompact" class="details-grid">
+                                <!-- JS will populate this area with detail items -->
+                            </div>
+                        </div>
+                        
+                        <!-- Full Description Section -->
+                        <div class="pt-5 border-t border-border">
+                            <h4 class="detail-section-title">
+                                <i class="fas fa-book-open" aria-hidden="true"></i>
+                                <span>รายละเอียดเพิ่มเติม</span>
+                            </h4>
+                            <div class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3" id="lightboxDescriptionVal">
+                                <!-- JS populates description -->
+                            </div>
+                        </div>
+
+                        <!-- เพิ่มส่วนสำหรับปุ่มติดต่อ LINE ที่ JS ต้องการ -->
+                        <div class="pt-5 border-t border-border text-center">
+                             <a id="lightboxLineLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700" style="display: none;">
+                                <!-- ไอคอน LINE SVG (ตัวอย่าง) -->
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                     <path d="M16.4 11.2c-1.2 0-2.2 1-2.2 2.2s1 2.2 2.2 2.2 2.2-1 2.2-2.2-1-2.2-2.2-2.2zm-6.8 0c-1.2 0-2.2 1-2.2 2.2s1 2.2 2.2 2.2 2.2-1 2.2-2.2-1-2.2-2.2-2.2zm-4.3-5.3c-2.3 0-4.2 1.9-4.2 4.2v.2c0 2.3 1.9 4.2 4.2 4.2h.3l.2.1.9 1.2c.1.2.3.3.5.3s.4-.1.5-.3l.9-1.2.2-.1h6.5c2.3 0 4.2-1.9 4.2-4.2v-.2c0-2.3-1.9-4.2-4.2-4.2h-10zm10 8.5h-10c-1.2 0-2.2-1-2.2-2.2v-.2c0-1.2 1-2.2 2.2-2.2h10c1.2 0 2.2 1 2.2 2.2v.2c0 1.2-1 2.2-2.2 2.2z"></path>
+                                </svg>
+                                <span id="lightboxLineLinkText">ติดต่อผ่าน LINE</span>
+                             </a>
+                        </div>
+
+                    </div>
+                </div><!-- End Right Column -->
+
+            </div><!-- End Grid -->
+        </div><!-- End Scrollable Area -->
+
+    </div><!-- End Main Modal Content Wrapper -->
+</div>
+
+
+
+<script type="module" src="main.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => { document.body.classList.add('loaded'); });
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(err => console.error('SW registration failed:', err)); }); }
   </script>
 </body>
 </html>
-
-
-
-
