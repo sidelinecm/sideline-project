@@ -574,39 +574,55 @@ gsap.registerPlugin(ScrollTrigger);
         lightbox.addEventListener('click', e => { if (e.target === lightbox) closeAction(); });
     }
     
+// ✅ [ULTIMATE VERSION] - แทนที่ฟังก์ชัน populateLightbox เดิมด้วยอันนี้
 function populateLightbox(profileData) {
-    const nameMainEl = document.getElementById('lightbox-profile-name-main');
-    const heroImageEl = document.getElementById('lightboxHeroImage');
-    const thumbnailStripEl = document.getElementById('lightboxThumbnailStrip');
-    const quoteEl = document.getElementById('lightboxQuote');
-    const tagsEl = document.getElementById('lightboxTags');
-    const detailsEl = document.getElementById('lightboxDetailsCompact');
-    const descriptionEl = document.getElementById('lightboxDescriptionVal');
-    const lineLink = document.getElementById('lightboxLineLink');
-    const lineLinkText = document.getElementById('lightboxLineLinkText');
-    const headerTitleEl = document.getElementById('lightbox-header-title');
-    headerTitleEl.textContent = `โปรไฟล์: ${profileData.name || 'N/A'}`;
+    // Cache DOM elements
+    const getEl = (id) => document.getElementById(id);
+    const nameMainEl = getEl('lightbox-profile-name-main');
+    const heroImageEl = getEl('lightboxHeroImage');
+    const thumbnailStripEl = getEl('lightboxThumbnailStrip');
+    const quoteEl = getEl('lightboxQuote');
+    const tagsEl = getEl('lightboxTags');
+    const detailsEl = getEl('lightboxDetailsCompact');
+    const descriptionEl = getEl('lightboxDescriptionVal');
+    const lineLink = getEl('lightboxLineLink');
+    const lineLinkText = getEl('lightboxLineLinkText');
+    const availabilityWrapper = getEl('lightbox-availability-badge-wrapper');
+
+    // --- Main Header ---
     nameMainEl.textContent = profileData.name || 'N/A';
-    heroImageEl.src = profileData.images[0].src;
-    heroImageEl.srcset = profileData.images[0].srcset;
-    heroImageEl.alt = profileData.altText;
-    heroImageEl.width = 800;
-    heroImageEl.height = 1067;
     quoteEl.textContent = profileData.quote ? `"${profileData.quote}"` : '';
     quoteEl.style.display = profileData.quote ? 'block' : 'none';
-    descriptionEl.innerHTML = profileData.description ? profileData.description.replace(/\n/g, '<br>') : 'ไม่มีรายละเอียดเพิ่มเติม';
+
+    // --- Availability Badge (Upgraded) ---
+    availabilityWrapper.innerHTML = ''; // Clear previous
+    let availabilityText = profileData.availability || "สอบถามคิว";
+    let availabilityStatus = 'inquire'; // default
+    if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) {
+        availabilityStatus = 'available';
+    } else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) {
+        availabilityStatus = 'busy';
+    }
+    const availabilityBadge = document.createElement('div');
+    availabilityBadge.className = `availability-badge-upgraded status-${availabilityStatus}`;
+    availabilityBadge.textContent = availabilityText;
+    availabilityWrapper.appendChild(availabilityBadge);
+    
+    // --- Gallery ---
+    heroImageEl.src = profileData.images[0]?.src || '/images/placeholder-profile.webp';
+    heroImageEl.srcset = profileData.images[0]?.srcset || '';
+    heroImageEl.alt = profileData.altText;
+    
     thumbnailStripEl.innerHTML = '';
-    const hasGallery = profileData.images.length > 1;
-    if (hasGallery) {
+    if (profileData.images.length > 1) {
         profileData.images.forEach((img, index) => {
             const thumb = document.createElement('img');
             thumb.src = img.src;
             thumb.srcset = img.srcset;
             thumb.alt = `รูปตัวอย่างที่ ${index + 1} ของ ${profileData.name}`;
-            thumb.width = 60;
-            thumb.height = 60;
             thumb.className = 'thumbnail';
             if (index === 0) thumb.classList.add('active');
+            
             thumb.addEventListener('click', () => {
                 heroImageEl.src = img.src;
                 heroImageEl.srcset = img.srcset;
@@ -615,45 +631,53 @@ function populateLightbox(profileData) {
             });
             thumbnailStripEl.appendChild(thumb);
         });
+        thumbnailStripEl.style.display = 'grid';
+    } else {
+        thumbnailStripEl.style.display = 'none';
     }
-    thumbnailStripEl.style.display = hasGallery ? 'flex' : 'none';
+
+    // --- Tags (Upgraded Class) ---
     tagsEl.innerHTML = '';
-    const hasTags = profileData.styleTags && profileData.styleTags.length > 0;
-    if (hasTags) {
+    if (profileData.styleTags?.length > 0) {
         profileData.styleTags.forEach(tag => {
             const tagEl = document.createElement('span');
-            tagEl.className = 'bg-accent text-accent-foreground text-xs font-medium px-3 py-1.5 rounded-full';
+            tagEl.className = 'tag-badge'; // Use new class from upgraded css
             tagEl.textContent = tag;
             tagsEl.appendChild(tagEl);
         });
+        tagsEl.style.display = 'flex';
+    } else {
+        tagsEl.style.display = 'none';
     }
-    tagsEl.style.display = hasTags ? 'flex' : 'none';
-    let availabilityText = profileData.availability || "สอบถามคิว";
-    let availabilityClass = 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
-    if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) {
-        availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300';
-    } else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) {
-        availabilityClass = 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300';
-    }
-    const paletteIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="detail-list-item-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 4zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zM5.932 7.033a.75.75 0 011.05-1.07l1.5 1.5a.75.75 0 01-1.05 1.07l-1.5-1.5zM12.95 14.05a.75.75 0 01-1.05 1.07l-1.5-1.5a.75.75 0 011.05-1.07l1.5 1.5zM4 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 014 10zM13.75 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM7.033 12.95a.75.75 0 011.07-1.05l1.5 1.5a.75.75 0 01-1.07 1.05l-1.5-1.5zM14.05 7.05a.75.75 0 01-1.07-1.05l1.5-1.5a.75.75 0 011.07 1.05l-1.5 1.5z"/></svg>`;
-    const mapIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="detail-list-item-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
-    const moneyIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="detail-list-item-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 10.837a1 1 0 00-1.5 0 1 1 0 000 1.413l.001.001 2.25 2.25a1 1 0 001.414 0l.001-.001 2.688-2.688a1 1 0 000-1.414 1 1 0 00-1.414 0l-1.937 1.937-1.5-1.5z" /><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1a.5.5 0 000 1h8a.5.5 0 000-1H5z" clip-rule="evenodd" /></svg>`;
+
+    // --- Details Section (Complete Redesign) ---
+    const paletteIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 4zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zM5.932 7.033a.75.75 0 011.05-1.07l1.5 1.5a.75.75 0 01-1.05 1.07l-1.5-1.5zM12.95 14.05a.75.75 0 01-1.05 1.07l-1.5-1.5a.75.75 0 011.05-1.07l1.5 1.5zM4 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 014 10zM13.75 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM7.033 12.95a.75.75 0 011.07-1.05l1.5 1.5a.75.75 0 01-1.07 1.05l-1.5-1.5zM14.05 7.05a.75.75 0 01-1.07-1.05l1.5-1.5a.75.75 0 011.07 1.05l-1.5 1.5z"/></svg>`;
+    const mapIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
+    const moneyIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 10.837a1 1 0 00-1.5 0 1 1 0 000 1.413l.001.001 2.25 2.25a1 1 0 001.414 0l.001-.001 2.688-2.688a1 1 0 000-1.414 1 1 0 00-1.414 0l-1.937 1.937-1.5-1.5z" /><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1a.5.5 0 000 1h8a.5.5 0 000-1H5z" clip-rule="evenodd" /></svg>`;
+    
     detailsEl.innerHTML = `
-        <div class="availability-badge ${availabilityClass}">${availabilityText}</div>
-        <div class="stats-grid">
-            <div class="stat-item"><div class="label">อายุ</div><div class="value">${profileData.age || '-'} ปี</div></div>
-            <div class="stat-item"><div class="label">สัดส่วน</div><div class="value">${profileData.stats || '-'}</div></div>
-            <div class="stat-item"><div class="label">สูง/หนัก</div><div class="value">${profileData.height || '-'}/${profileData.weight || '-'}</div></div>
+        <div class="details-grid-upgraded">
+            <div class="detail-item-grid"><div class="label">อายุ</div><div class="value">${profileData.age || '-'} ปี</div></div>
+            <div class="detail-item-grid"><div class="label">สัดส่วน</div><div class="value">${profileData.stats || '-'}</div></div>
+            <div class="detail-item-grid"><div class="label">สูง/หนัก</div><div class="value">${profileData.height || '-'}/${profileData.weight || '-'}</div></div>
         </div>
-        <div class="space-y-1">
-            <div class="detail-list-item">${paletteIcon}<div class="value">ผิว: ${profileData.skinTone || '-'}</div></div>
-            <div class="detail-list-item">${mapIcon}<div class="value">จังหวัด: ${provincesMap.get(profileData.provinceKey) || ''} (${profileData.location || 'ไม่ระบุ'})</div></div>
-            <div class="detail-list-item">${moneyIcon}<div class="value">เรท: ${profileData.rate || 'สอบถาม'}</div></div>
+        <div class="detail-list-upgraded">
+            <div class="detail-item-list"><div class="detail-item-list-icon">${paletteIcon}</div><div class="value">ผิว: <strong>${profileData.skinTone || '-'}</strong></div></div>
+            <div class="detail-item-list"><div class="detail-item-list-icon">${mapIcon}</div><div class="value">จังหวัด: <strong>${provincesMap.get(profileData.provinceKey) || ''}</strong> (${profileData.location || 'ไม่ระบุ'})</div></div>
+            <div class="detail-item-list"><div class="detail-item-list-icon">${moneyIcon}</div><div class="value">เรท: <strong>${profileData.rate || 'สอบถาม'}</strong></div></div>
         </div>`;
+
+    // --- Description ---
+    descriptionEl.innerHTML = profileData.description ? profileData.description.replace(/\n/g, '<br>') : 'ไม่มีรายละเอียดเพิ่มเติม';
+
+    // --- Line Button (Upgraded) ---
+    // ✅ ADD: อัปเกรด class ของปุ่มให้สวยงาม
+    lineLink.className = "btn-line-shared-upgraded"; 
+    
     if (profileData.lineId) {
         lineLink.href = profileData.lineId.startsWith('http') ? profileData.lineId : `https://line.me/ti/p/${profileData.lineId}`;
         lineLink.style.display = 'inline-flex';
-        lineLinkText.textContent = `ติดต่อ ${profileData.name} ผ่าน LINE`;
+        lineLinkText.textContent = `ติดต่อ LINE: ${profileData.name}`;
     } else {
         lineLink.style.display = 'none';
     }

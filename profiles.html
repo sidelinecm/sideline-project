@@ -97,7 +97,8 @@
   <!-- Async CSS Loading Pattern -->
   <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
-
+<!-- ✅ ADD THIS LINE: เพิ่มไฟล์ CSS สำหรับอัปเกรด Lightbox -->
+  <link rel="stylesheet" href="/styles.upgraded.css">
   <!-- ================================================================ -->
   <!-- 8. STRUCTURED DATA (JSON-LD) -->
   <!-- ================================================================ -->
@@ -353,7 +354,12 @@
 
 
 
-<!-- Lightbox Main Container -->
+
+
+
+<!-- ================================================================ -->
+<!-- ✅ LIGHTBOX (ULTIMATE & COMPLETE VERSION)                         -->
+<!-- ================================================================ -->
 <div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
     
     <!-- Main Modal Content Wrapper -->
@@ -382,62 +388,70 @@
                         </div>
                         <!-- Thumbnail Strip -->
                         <div id="lightboxThumbnailStrip" class="thumbnail-strip">
-                            <!-- JavaScript will populate this with thumbnail images -->
+                            <!-- JavaScript will populate this area -->
                         </div>
                     </div>
                 </div>
 
                 <!-- ===== RIGHT COLUMN: DETAILS ===== -->
                 <div class="lightbox-details">
-                    <div class="p-4 sm:p-6 lg:p-8 space-y-6">
+                    <div class="p-4 sm:p-6 lg:p-8 space-y-5">
                         
                         <!-- Header: Name, Quote, Status -->
                         <header class="text-center lg:text-left">
-                            <!-- เพิ่ม h2 ที่ซ่อนไว้สำหรับ id="lightbox-header-title" ที่ JS ต้องการ -->
+                            <!-- h2 ที่ซ่อนไว้เพื่อ Accessibility -->
                             <h2 id="lightbox-header-title" class="sr-only">รายละเอียดโปรไฟล์</h2>
 
-                            <div id="lightbox-availability-badge-wrapper" class="mb-3 h-6">
-                                <!-- JS จะสร้าง badge สถานะ แต่จะไปใส่ในส่วน Details แทนตามโค้ดปัจจุบัน -->
+                            <!-- Wrapper สำหรับ Badge สถานะที่ JS จะสร้างขึ้น -->
+                            <div id="lightbox-availability-badge-wrapper" class="mb-3 h-6 flex justify-center lg:justify-start">
+                                <!-- JavaScript will populate this area -->
                             </div>
+                            
+                            <!-- ชื่อโปรไฟล์ -->
                             <h3 id="lightbox-profile-name-main" class="text-3xl lg:text-4xl font-extrabold text-primary">
-                                <!-- JS populates name -->
+                                <!-- JavaScript will populate this area -->
                             </h3>
+
+                            <!-- Quote หรือคำโปรย -->
                             <p id="lightboxQuote" class="text-base text-muted-foreground italic mt-2">
-                                <!-- JS populates quote -->
+                                <!-- JavaScript will populate this area -->
                             </p>
                         </header>
                         
                         <!-- Tags Section -->
                         <div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start">
-                            <!-- JS will populate with tag badges -->
+                            <!-- JavaScript will populate this area -->
                         </div>
 
-                        <!-- Compact Details Grid -->
+                        <!-- Compact Details Grid (Container) -->
                         <div class="pt-5 border-t border-border">
-                            <div id="lightboxDetailsCompact" class="details-grid">
-                                <!-- JS will populate this area with detail items -->
+                            <div id="lightboxDetailsCompact">
+                                <!-- JavaScript will replace all content here -->
                             </div>
                         </div>
                         
                         <!-- Full Description Section -->
                         <div class="pt-5 border-t border-border">
-                            <h4 class="detail-section-title">
-                                <i class="fas fa-book-open" aria-hidden="true"></i>
+                            <h4 class="detail-section-title text-secondary flex items-center gap-2 font-bold">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M10.75 2.75a.75.75 0 00-1.5 0V4h-3a.75.75 0 000 1.5h3v1.25a.75.75 0 001.5 0V5.5h3a.75.75 0 000-1.5h-3V2.75z" />
+                                    <path fill-rule="evenodd" d="M4 8a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2H4zm2.25 1.25a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5z" clip-rule="evenodd" />
+                                </svg>
                                 <span>รายละเอียดเพิ่มเติม</span>
                             </h4>
                             <div class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3" id="lightboxDescriptionVal">
-                                <!-- JS populates description -->
+                                <!-- JavaScript will populate this area -->
                             </div>
                         </div>
 
-                        <!-- เพิ่มส่วนสำหรับปุ่มติดต่อ LINE ที่ JS ต้องการ -->
-                        <div class="pt-5 border-t border-border text-center">
-                             <a id="lightboxLineLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700" style="display: none;">
-                                <!-- ไอคอน LINE SVG (ตัวอย่าง) -->
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                     <path d="M16.4 11.2c-1.2 0-2.2 1-2.2 2.2s1 2.2 2.2 2.2 2.2-1 2.2-2.2-1-2.2-2.2-2.2zm-6.8 0c-1.2 0-2.2 1-2.2 2.2s1 2.2 2.2 2.2 2.2-1 2.2-2.2-1-2.2-2.2-2.2zm-4.3-5.3c-2.3 0-4.2 1.9-4.2 4.2v.2c0 2.3 1.9 4.2 4.2 4.2h.3l.2.1.9 1.2c.1.2.3.3.5.3s.4-.1.5-.3l.9-1.2.2-.1h6.5c2.3 0 4.2-1.9 4.2-4.2v-.2c0-2.3-1.9-4.2-4.2-4.2h-10zm10 8.5h-10c-1.2 0-2.2-1-2.2-2.2v-.2c0-1.2 1-2.2 2.2-2.2h10c1.2 0 2.2 1 2.2 2.2v.2c0 1.2-1 2.2-2.2 2.2z"></path>
+                        <!-- LINE Contact Button Section -->
+                        <div class="pt-5 border-t border-border">
+                             <a id="lightboxLineLink" href="#" target="_blank" rel="noopener noreferrer" style="display: none;">
+                                 <!-- SVG Icon สำหรับปุ่ม LINE ที่สวยงามขึ้น -->
+                                <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                     <path d="M21.928 11.607c0-5.24-4.62-9.52-10.1-9.52-5.482 0-9.932 4.28-9.932 9.52 0 4.14 2.87 7.74 6.88 8.942v-6.26h-2.07v-2.68h2.07v-1.92c0-2.03 1.21-3.15 3.16-3.15 1.1 0 1.8.08 1.8.08v2.36h-1.4c-1.01 0-1.2.48-1.2 1.18v1.51h2.64l-.34 2.68h-2.3v6.26c4.01-1.2 6.88-4.8 6.88-8.942z"/>
                                 </svg>
-                                <span id="lightboxLineLinkText">ติดต่อผ่าน LINE</span>
+                                <span id="lightboxLineLinkText"></span>
                              </a>
                         </div>
 
@@ -449,6 +463,8 @@
 
     </div><!-- End Main Modal Content Wrapper -->
 </div>
+
+
 
 
 
