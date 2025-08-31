@@ -1,83 +1,56 @@
+
+
 # =============================================================================
-# 1. การตั้งค่า Deploy (เว็บ Static ไม่ต้อง Build)
+# netlify.toml (ฉบับปรับปรุง)
 # =============================================================================
+
+# 1. การตั้งค่า Build
 [build]
-  publish = "."   # ใช้ root folder เป็นโฟลเดอร์ deploy
+  publish = "." # โฟลเดอร์ที่ deploy (ถูกต้องแล้วสำหรับเว็บ Static)
 
-# =============================================================================
-# 2. การตั้งค่า Redirects (เลือกใช้ตามต้องการ)
-# =============================================================================
-# [[redirects]]
-#   from = "https://sidelinechiangmai.netlify.app/*"
-#   to = "https://www.sidelinechiangmai.netlify.app/:splat"
-#   status = 301
-#   force = true
+# 2. การตั้งค่า Headers (รวบให้สั้นลงและปลอดภัยขึ้น)
 
-# =============================================================================
-# 3. การตั้งค่า Headers (ฉบับแก้ไขสมบูรณ์)
-# =============================================================================
-
-# --- HTML (ไม่ cache เก็บสดใหม่เสมอ) ---
+# --- ควบคุมไฟล์หลักของเว็บ (โหลดใหม่เสมอ) ---
 [[headers]]
-  for = "/*.html"
+  for = '''
+  /*.html
+  '''
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# --- CSS (cache 1 ปี, immutable) ---
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- JS (cache 1 ปี, immutable) ---
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Fonts (cache ยาวสุด 1 ปี, immutable) ---
-[[headers]]
-  for = "/webfonts/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Fonts (cache ยาวสุด 1 ปี, immutable) ---
-[[headers]]
-  for = "/fonts/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Images (cache ยาวสุด 1 ปี, immutable) ---
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Icons (cache ยาวสุด 1 ปี, immutable) ---
-[[headers]]
-  for = "/icons/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Service Worker (ห้าม cache, ให้โหลดใหม่เสมอ) ---
+# --- ควบคุม Service Worker (ห้ามแคชเด็ดขาด) ---
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    Cache-Control = "no-cache"
+    # "no-store, no-cache, must-revalidate" เป็นคำสั่งที่เข้มงวดที่สุด
+    Cache-Control = "no-store, no-cache, must-revalidate"
     Service-Worker-Allowed = "/"
 
-# --- PWA / SEO files (cache 1 วัน) ---
+# --- ควบคุมไฟล์ Assets ที่ไม่ค่อยเปลี่ยน (ให้เบราว์เซอร์เช็คก่อน) ---
+# นี่คือวิธีที่ปลอดภัย: ให้แคชได้ 1 ปี แต่ต้องกลับมาถามเซิร์ฟเวอร์ก่อนใช้ (ETag check)
+# ถ้าไฟล์ไม่เปลี่ยน เซิร์ฟเวอร์จะตอบกลับ 304 Not Modified (เร็วมาก)
+# ถ้าไฟล์เปลี่ยน เซิร์ฟเวอร์จะส่งไฟล์ใหม่มาให้
 [[headers]]
-  for = "/manifest.webmanifest"
+  for = '''
+  /images/*
+  /icons/*
+  /fonts/*
+  /webfonts/*
+  /*.css
+  /*.js
+  '''
   [headers.values]
-    Cache-Control = "public, max-age=86400"
+    Cache-Control = "public, max-age=31536000, must-revalidate"
 
+# --- ควบคุมไฟล์ PWA/SEO (แคชได้ แต่ให้เช็คใหม่ทุกวัน) ---
 [[headers]]
-  for = "/robots.txt"
+  for = '''
+  /manifest.webmanifest
+  /robots.txt
+  /sitemap.xml
+  '''
   [headers.values]
-    Cache-Control = "public, max-age=86400"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-[[headers]]
-  for = "/sitemap.xml"
-  [headers.values]
-    Cache-Control = "public, max-age=86400"
+
+
