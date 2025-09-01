@@ -337,7 +337,10 @@ gsap.registerPlugin(ScrollTrigger);
         </div>
         <div class="card-overlay">
             <div class="card-info">
-                <h3 class="text-xl lg:text-2xl font-bold truncate">${profile.name}</h3>
+<h3 class="text-lg sm:text-xl font-semibold text-foreground line-clamp-1 sm:line-clamp-2">
+  ${profile.name}
+</h3>
+
                 <p class="text-sm flex items-center gap-1.5">${locationIcon} ${provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'}</p>
             </div>
         </div>`;
