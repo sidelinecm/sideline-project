@@ -22,14 +22,16 @@
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-  <link rel="preload" href="/css/all.min.css" as="style">
-  <link rel="preload" href="/styles.css" as="style">
-  <link rel="preload" href="/fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/main.js" as="script" crossorigin>
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   
-  <link rel="stylesheet" href="/css/all.min.css">
-  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"        
+      integrity="sha512-VrZ7Z...hash..." crossorigin="anonymous" referrerpolicy="no-referrer"        
+      onerror="this.onerror=null;this.href='css/all.min.css';">  <!-- Noscript fallback -->  
+   <!-- Preload critical assets for the initial render -->    <link rel="preload" href="/styles.css" as="style">          <!-- ================================================================ -->    <!-- 5. STYLESHEETS (Async Loading Pattern) -->    <!-- ================================================================ -->    
+  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">   
+
+   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
