@@ -35,7 +35,7 @@
   /images/*
   /icons/*
   /fonts/*
-  /webfonts/*
+ 
   /*.css
   /*.js
   '''

@@ -54,16 +54,13 @@
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   
-  <!-- Preload critical assets for the initial render -->
-  <link rel="preload" href="/styles.css" as="style">
-  <link rel="preload" href="/main.js" as="script">
-  <link rel="preload" href="/fonts/sarabun-v16-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"        
+      integrity="sha512-VrZ7Z...hash..." crossorigin="anonymous" referrerpolicy="no-referrer"        
+      onerror="this.onerror=null;this.href='css/all.min.css';">  <!-- Noscript fallback -->  
+   <!-- Preload critical assets for the initial render -->    <link rel="preload" href="/styles.css" as="style">          <!-- ================================================================ -->    <!-- 5. STYLESHEETS (Async Loading Pattern) -->    <!-- ================================================================ -->    
+  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">   
 
-  <!-- ================================================================ -->
-  <!-- 5. STYLESHEETS (Async Loading Pattern) -->
-  <!-- ================================================================ -->
-  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
  <!-- ✅ ADD THIS LINE: เพิ่มไฟล์ CSS สำหรับอัปเกรด Lightbox -->
   
   <!-- ================================================================ -->
@@ -110,13 +107,9 @@
   </script>
 </head>
 
-
-
-
-
 <body class="antialiased" data-page="home">
 
-  <!-- ✅ ADD: Element ที่จำเป็นสำหรับเอฟเฟกต์ -->
+ <!-- ✅ ADD: Element ที่จำเป็นสำหรับเอฟเฟกต์ -->
   <div class="aurora-container">
       <div class="aurora-blob aurora-blob-1"></div>
       <div class="aurora-blob aurora-blob-2"></div>
@@ -124,28 +117,22 @@
   <div id="custom-cursor-dot" class="custom-cursor"></div>
   <div id="custom-cursor-circle" class="custom-cursor"></div>
 
+
   <!-- (Age Verification Modal) -->
-<div id="age-verification-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
-  <div class="age-modal-content relative space-y-6 text-center">
-      
-      <h2 class="text-2xl font-bold uppercase leading-tight">
-          <span class="text-primary">Sideline Chiangmai</span> is an Adults Only
-          <span class="age-badge-inline">20+</span> 
-          Website!
-      </h2>
-      
-      <p class="text-base text-gray-200 leading-relaxed tracking-wide max-w-md mx-auto">
-          คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ 
-          โปรดเข้าชมต่อเมื่อคุณมีอายุอย่างน้อย 
-          <span class="font-semibold text-pink-400">20+ ปีบริบูรณ์</span>
-      </p>
-      
-      <div class="flex gap-4 pt-2 justify-center">
-          <button id="cancelAgeButton" class="age-btn age-btn-cancel">ออก</button>
-          <button id="confirmAgeButton" class="age-btn age-btn-confirm">ยืนยัน</button>
+  <div id="age-verification-overlay" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
+      <div class="age-modal-content relative space-y-6">
+          <h2 class="text-2xl font-bold uppercase leading-tight">
+              <span class="text-primary">Sideline Chiangmai</span> is an Adults Only
+              <span class="age-badge-inline">20+</span> 
+              Website!
+          </h2>
+          <p class="text-sm text-gray-300 leading-relaxed">คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 18+ ปีบริบูรณ์</p>
+          <div class="flex gap-4 pt-2">
+              <button id="cancelAgeButton" class="age-btn age-btn-cancel">ออก</button>
+              <button id="confirmAgeButton" class="age-btn age-btn-confirm">ยืนยัน</button>
+          </div>
       </div>
   </div>
-</div>
 
   <!-- (Header) -->
   <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
@@ -171,8 +158,7 @@
   <div id="menu-backdrop" class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden="true"></div>
   <aside id="sidebar" class="fixed top-0 right-0 w-64 sm:w-72 h-dvh bg-card text-foreground border-l border-border shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" aria-labelledby="sidebar-nav-heading" aria-hidden="true" tabindex="-1">
       <div class="flex justify-between items-center p-4 border-b border-border shrink-0">
-          <!-- ✅ FIX: เปลี่ยนจาก h3 เป็น div เพื่อความหมายที่ถูกต้อง -->
-          <div id="sidebar-nav-heading" class="text-lg font-bold text-secondary">เมนู</div>
+          <h3 id="sidebar-nav-heading" class="text-lg font-bold text-secondary">เมนู</h3>
           <button id="close-sidebar-btn" class="btn-close-premium" aria-label="ปิดเมนู">
               <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
@@ -190,160 +176,146 @@
       </div>
   </aside>
 
-  <!-- (Main Content) -->
+ 
+
+
+
+<!-- (Main Content) -->
   <main id="main-content" class="pt-20">
     <div class="container mx-auto px-4 space-y-12 md:space-y-16">
-        
-      <section aria-labelledby="hero-h1" data-animate-on-scroll itemscope itemtype="https://schema.org/Service">
-  <meta itemprop="serviceType" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน">
-  <meta itemprop="areaServed" content="เชียงใหม่, เชียงราย, ลำปาง, ลำพูน">
+ 
+ 
+<section aria-labelledby="hero-h1" data-animate-on-scroll itemscope itemtype="https://schema.org/Service">
+            <meta itemprop="serviceType" content="ไซด์ไลน์เชียงใหม่ รับงานฟีลแฟน">
+            <meta itemprop="areaServed" content="เชียงใหม่, เชียงราย, ลำปาง, ลำพูน">
+            <div class="section-header-card text-center">
+                <div class="card-content max-w-4xl mx-auto space-y-6">
+                    <div itemprop="provider" itemscope itemtype="https://schema.org/Organization">
+                        <meta itemprop="name" content="SidelineCM">
+                    </div>
+                    <div>
+                        <h1 id="hero-h1" itemprop="name"
+          class="hero-title font-extrabold mb-4 
+                 bg-gradient-to-br from-[#d4af37] via-[#b8860b] to-[#6b4e17] 
+                 bg-clip-text text-transparent
+                 drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]
+                 relative z-10">
+        ไซด์ไลน์เชียงใหม่
+        <span class="block text-gray-900 font-semibold mt-1 drop-shadow-sm">
+          รับงานฟีลแฟน ตรงปก ไม่ต้องมัดจำ
+        </span>
+      </h1>
+                        
+                        <p id="hero-p" itemprop="description" class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                            คัดสรรน้องๆ <strong class="text-foreground">ไซด์ไลน์เชียงใหม่</strong> คุณภาพ บริการระดับพรีเมียม การันตี<strong class="text-foreground">ตรงปก</strong> ปลอดภัย <strong class="text-foreground">ไม่ต้องโอนมัดจำ</strong>ก่อนนัดเจอ
+                        </p>
+                        
+                        <!-- ✅ [ULTIMATE VERSION] Trust Badges - Enhanced for SEO, Content, and Accessibility -->
+                        <ul class="trust-badges-grid mt-8">
+                            
+                            <!-- Badge 1: ตรงปก 100% -->
+                            <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
+                                <div class="badge-icon icon-guarantee">
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                </div>
+                                <h3 class="badge-title" itemprop="name">การันตีตรงปก 100%</h3>
+                                <p class="badge-description" itemprop="description">
+                                    โปรไฟล์และรูปภาพผ่านการตรวจสอบอย่างเข้มงวด มั่นใจได้ว่าจะได้พบกับน้องที่ตรงใจคุณ
+                                </p>
+                            </li>
+                            
+                            <!-- Badge 2: ปลอดภัย ไม่ต้องมัดจำ -->
+                            <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
+                                <div class="badge-icon icon-secure">
+                                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                </div>
+                                <h3 class="badge-title" itemprop="name">ปลอดภัย ไม่ต้องมัดจำ</h3>
+                                <p class="badge-description" itemprop="description">
+                                    นโยบาย 'ไม่โอนก่อน' ของเราช่วยป้องกันมิจฉาชีพ 100% ชำระเงินสดที่หน้างานเพื่อความสบายใจสูงสุด
+                                </p>
+                            </li>
 
-  <div class="section-header-card text-center">
-    <div class="card-content max-w-4xl mx-auto space-y-6">
+                            <!-- Badge 3: ประสบการณ์ฟีลแฟน -->
+                            <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
+                                <div class="badge-icon icon-premium">
+                                    <i class="fas fa-gem" aria-hidden="true"></i>
+                                </div>
+                                <h3 class="badge-title" itemprop="name">ประสบการณ์ฟีลแฟน</h3>
+                                <p class="badge-description" itemprop="description">
+                                    เราคัดสรรเฉพาะน้องๆ ที่มีใจบริการและเข้าใจในความสัมพันธ์แบบฟีลแฟน เพื่อสร้างช่วงเวลาที่น่าจดจำ
+                                </p>
+                            </li>
+                            
+                        </ul>
+                    </div>
 
-      <!-- Provider Schema -->
-      <div itemprop="provider" itemscope itemtype="https://schema.org/Organization">
-        <meta itemprop="name" content="SidelineCM">
-      </div>
-
-      <!-- Hero Title -->
-      <div>
-        <h1 id="hero-h1" itemprop="name"
-            class="hero-title font-extrabold mb-3 
-                   bg-gradient-to-br from-[#d4af37] via-[#b8860b] to-[#6b4e17] 
-                   bg-clip-text text-transparent"
-            style="text-shadow: 0 0 2px rgba(0,0,0,0.25);">
-          ไซด์ไลน์เชียงใหม่ 
-          <span class="text-gray-900 font-semibold">รับงานฟีลแฟน ตรงปก ไม่ต้องมัดจำ</span>
-        </h1>
-
-        <p id="hero-p" itemprop="description" class="text-base md:text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
-          คัดสรรน้องๆ <strong class="text-gray-900">ไซด์ไลน์เชียงใหม่</strong> 
-          คุณภาพ บริการระดับพรีเมียม การันตี <strong class="text-gray-900">ตรงปก</strong> 
-          ปลอดภัย <strong class="text-gray-900">ไม่ต้องโอนมัดจำ</strong> ก่อนนัดเจอ
-        </p>
-      </div>
-
-      <!-- Trust Badges -->
-      <ul class="trust-badges-grid mt-8">
-        <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
-          <div class="badge-icon icon-guarantee"><i class="fas fa-check-circle text-green-600"></i></div>
-          <p class="badge-title font-semibold text-gray-900" itemprop="name">การันตีตรงปก 100%</p>
-          <p class="badge-description text-gray-600" itemprop="description">
-            โปรไฟล์และรูปภาพผ่านการตรวจสอบอย่างเข้มงวด มั่นใจได้ว่าจะได้พบกับน้องที่ตรงใจคุณ
-          </p>
-        </li>
-        
-        <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
-          <div class="badge-icon icon-secure"><i class="fas fa-shield-alt text-blue-600"></i></div>
-          <p class="badge-title font-semibold text-gray-900" itemprop="name">ปลอดภัย ไม่ต้องมัดจำ</p>
-          <p class="badge-description text-gray-600" itemprop="description">
-            นโยบาย 'ไม่โอนก่อน' ของเราช่วยป้องกันมิจฉาชีพ 100% ชำระเงินสดที่หน้างานเพื่อความสบายใจสูงสุด
-          </p>
-        </li>
-
-        <li class="trust-badge" itemprop="serviceOutput" itemscope itemtype="https://schema.org/Thing">
-          <div class="badge-icon icon-premium"><i class="fas fa-gem text-purple-600"></i></div>
-          <p class="badge-title font-semibold text-gray-900" itemprop="name">ประสบการณ์ฟีลแฟน</p>
-          <p class="badge-description text-gray-600" itemprop="description">
-            เราคัดสรรเฉพาะน้องๆ ที่มีใจบริการและเข้าใจในความสัมพันธ์แบบฟีลแฟน เพื่อสร้างช่วงเวลาที่น่าจดจำ
-          </p>
-        </li>
-      </ul>
-
-      <!-- Search Form -->
-      <div id="hero-form" class="pt-4">
-        <form id="search-form" action="profiles.html" method="GET" aria-labelledby="search-form-heading" role="search">
-          <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
-          
-          <div class="space-y-4">
-            <!-- Inputs -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-
-              <!-- Keyword -->
-              <div class="relative sm:col-span-2 lg:col-span-1 form-input-wrapper">
-                <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
-                <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                    <i class="fas fa-search"></i>
-                  </span>
-                  <input id="search-keyword" name="q" type="search" 
-                         placeholder="ค้นหาจากชื่อ, พิกัด, สไตล์..." 
-                         class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-full focus:ring-2 focus:ring-primary transition text-sm">
+                    <div id="hero-form" class="pt-4">
+                        <form id="search-form" action="profiles.html" method="GET" aria-labelledby="search-form-heading" role="search">
+                            <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    
+                                    <div class="relative sm:col-span-2 lg:col-span-1 form-input-wrapper">
+                                        <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-search"></i></span>
+                                            <input id="search-keyword" name="q" type="search" placeholder="ค้นหาจากชื่อ, พิกัด, สไตล์..." class="w-full pl-10 pr-4 py-2.5 border border-border rounded-full transition text-sm">
+                                        </div>
+                                    </div>
+                                    <div class="relative form-input-wrapper">
+                                        <label for="search-province" class="sr-only">เลือกจังหวัด</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-map-marker-alt"></i></span>
+                                            <select id="search-province" name="province" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full transition text-sm">
+                                                <option value="" selected>ทุกจังหวัด</option>
+                                            </select>
+                                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="relative form-input-wrapper">
+                                        <label for="search-availability" class="sr-only">เลือกสถานะ</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-clock"></i></span>
+                                            <select id="search-availability" name="availability" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full transition text-sm">
+                                                <option value="" selected>สถานะ (ทั้งหมด)</option>
+                                                <option value="ว่าง">ว่าง</option>
+                                                <option value="รับงาน">รับงาน</option>
+                                                <option value="รับงานบางวัน">รับงานบางวัน</option>
+                                                <option value="สอบถามคิว">สอบถามคิว</option>
+                                                <option value="ไม่ว่าง">ไม่ว่าง</option>
+                                                <option value="พัก">พัก</option>
+                                            </select>
+                                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 pt-2">
+                                      <div class="relative form-input-wrapper">
+                                          <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
+                                          <div class="relative">
+                                              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-star"></i></span>
+                                              <select id="search-featured" name="featured" class="w-full appearance-none pl-10 pr-10 py-2 border border-border rounded-full text-xs transition">
+                                                  <option value="" selected>แนะนำ (ทั้งหมด)</option>
+                                                  <option value="true">เฉพาะที่แนะนำ</option>
+                                              </select>
+                                              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                          </div>
+                                      </div>
+                                    <div class="flex items-center gap-3">
+                                        <button type="reset" id="reset-search-btn" class="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full hover:bg-border transition text-xs" aria-label="ล้างค่าการค้นหา"><i class="fas fa-sync-alt"></i><span>ล้างค่า</span></button>
+                                        <button type="submit" id="keyword-search-btn" class="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full transition text-sm font-semibold btn-premium">
+                                            <i class="fas fa-search"></i>
+                                            <span>ค้นหาโปรไฟล์</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-              </div>
-
-              <!-- Province -->
-              <div class="relative form-input-wrapper">
-                <label for="search-province" class="sr-only">เลือกจังหวัด</label>
-                <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><i class="fas fa-map-marker-alt"></i></span>
-                  <select id="search-province" name="province" 
-                          class="w-full appearance-none pl-10 pr-10 py-2.5 border border-gray-300 rounded-full focus:ring-2 focus:ring-primary transition text-sm">
-                    <option value="" selected>ทุกจังหวัด</option>
-                  </select>
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
-                </div>
-              </div>
-
-              <!-- Availability -->
-              <div class="relative form-input-wrapper">
-                <label for="search-availability" class="sr-only">เลือกสถานะ</label>
-                <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><i class="fas fa-clock"></i></span>
-                  <select id="search-availability" name="availability" 
-                          class="w-full appearance-none pl-10 pr-10 py-2.5 border border-gray-300 rounded-full focus:ring-2 focus:ring-primary transition text-sm">
-                    <option value="" selected>สถานะ (ทั้งหมด)</option>
-                    <option value="ว่าง">ว่าง</option>
-                    <option value="รับงาน">รับงาน</option>
-                    <option value="รับงานบางวัน">รับงานบางวัน</option>
-                    <option value="สอบถามคิว">สอบถามคิว</option>
-                    <option value="ไม่ว่าง">ไม่ว่าง</option>
-                    <option value="พัก">พัก</option>
-                  </select>
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
-                </div>
-              </div>
             </div>
-
-            <!-- Filters + Buttons -->
-            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 pt-2">
-
-              <!-- Featured -->
-              <div class="relative form-input-wrapper">
-                <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
-                <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><i class="fas fa-star"></i></span>
-                  <select id="search-featured" name="featured" 
-                          class="w-full appearance-none pl-10 pr-10 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-primary text-xs transition">
-                    <option value="" selected>แนะนำ (ทั้งหมด)</option>
-                    <option value="true">เฉพาะที่แนะนำ</option>
-                  </select>
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
-                </div>
-              </div>
-
-              <!-- Buttons -->
-              <div class="flex items-center gap-3">
-                <button type="reset" id="reset-search-btn" 
-                        class="flex items-center gap-2 px-3 py-1.5 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition text-xs">
-                  <i class="fas fa-sync-alt"></i><span>ล้างค่า</span>
-                </button>
-                <button type="submit" id="keyword-search-btn" 
-                        class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-white rounded-full hover:opacity-90 transition text-sm font-semibold shadow-md">
-                  <i class="fas fa-search"></i>
-                  <span>ค้นหาโปรไฟล์</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-
-    </div>
-  </div>
-</section>
-
+        </section>
+     
      
         <section id="featured-profiles" class="hidden featured-section" aria-labelledby="featured-heading" data-animate-on-scroll>
             <div class="section-content-wrapper">
@@ -408,16 +380,22 @@
             </div>
         </section>
     </div>
-  </main>
+</main>
+
+
+
+
+
+
+
  
+
+
   <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16">
     <div class="container mx-auto">
-      
-      <!-- ✅ ADD: เพิ่ม h2 ที่ซ่อนไว้สำหรับครอบ Footer ทั้งหมด -->
-      <h2 class="sr-only">ข้อมูลท้ายเว็บและลิงก์ต่างๆ</h2>
-
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center md:text-left mb-12">
         
+        <!-- Column 1: Brand Info -->
         <div class="lg:col-span-1">
             <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
                 <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
@@ -427,6 +405,7 @@
             </p>
         </div>
 
+        <!-- Column 2: Quick Links -->
         <div>
             <h3 class="font-semibold text-foreground mb-4 tracking-tight">ลิงก์ด่วน</h3>
             <nav aria-label="ลิงก์ด่วนท้ายเว็บ">
@@ -440,6 +419,7 @@
             </nav>
         </div>
 
+        <!-- Column 3: Contact Info -->
         <div>
             <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อสอบถาม (24 ชม.)</h3>
             <address class="not-italic space-y-3 text-sm">
@@ -451,26 +431,36 @@
             </address>
         </div>
 
+        <!-- Column 4: Social Media -->
         <div>
             <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดตามเรา</h3>
-            <div class="flex justify-center md:justify-start gap-5 text-xl">
-                <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" aria-label="Tiktok ของ SidelineCM" class="hover:text-primary transition-colors">
-                    <i class="fab fa-tiktok"></i>
-                </a>
-                <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow" aria-label="Bio Site ของ SidelineCM" class="hover:text-primary transition-colors">
-                    <i class="fas fa-link"></i>
-                </a>
-                <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" aria-label="Linktree ของ SidelineCM" class="hover:text-primary transition-colors">
-                    <i class="fas fa-tree"></i>
-                </a>
-                <a href="https://@sidelinechiangmai.bsky.social" target="_blank" rel="noopener nofollow" aria-label="Bluesky ของ SidelineCM" class="hover:text-primary transition-colors">
-                   <i class="fas fa-cloud"></i>
-                </a>
-            </div>
+            <div class="flex justify-center md:justify-start gap-5 text-2xl">
+  <a href="https://tiktok.com/@sidelinecm"
+     class="hover:scale-110 transition-transform"
+     aria-label="TikTok">
+    <i class="fab fa-tiktok text-black dark:text-white"></i>
+  </a>
+  <a href="https://line.me/ti/p/_faNcjQ3xx"
+     class="hover:scale-110 transition-transform"
+     aria-label="LINE">
+    <i class="fab fa-line text-green-500"></i>
+  </a>
+  <a href="https://linktr.ee/kissmodel"
+     class="hover:scale-110 transition-transform"
+     aria-label="Linktree">
+    <i class="fas fa-link text-emerald-500"></i>
+  </a>
+  <a href="https://@sidelinechiangmai.bsky.social"
+     class="hover:scale-110 transition-transform"
+     aria-label="Bluesky">
+    <i class="fas fa-cloud text-sky-500"></i>
+  </a>
+</div>
         </div>
 
       </div>
 
+      <!-- Bottom Bar: Copyright & Legal Disclaimer -->
       <div class="mt-12 border-t border-border pt-8 text-center">
           <p class="text-sm">Copyright © <span id="currentYearDynamic"></span> SidelineChiangmai. All Rights Reserved.</p>
           <p class="mt-2 text-xs text-muted-foreground/80 leading-relaxed">เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง</p>
@@ -478,7 +468,8 @@
     </div>
   </footer>
 
-  <!-- LIGHTBOX (COMPLETE & OPTIMIZED STRUCTURE) -->
+
+   <!-- LIGHTBOX (COMPLETE & OPTIMIZED STRUCTURE) -->
   <div id="lightbox" class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
     <div id="lightbox-content-wrapper-el" class="bg-card rounded-2xl shadow-xl w-full max-w-md lg:max-w-4xl max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content">
         <button id="closeLightboxBtn" class="btn-close-premium absolute top-3 right-3 z-20" aria-label="ปิดรายละเอียดโปรไฟล์">
@@ -526,9 +517,8 @@
     </div>
 </div>
 
-
-
-<script type="module" src="main.js"></script>
+  <!-- ================================================================ -->
+<script type="module" src="/main.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('loaded');
@@ -547,5 +537,3 @@
 
 </body>
 </html>
-
-
