@@ -18,15 +18,18 @@ if (workbox) {
   // **หมายเหตุ:** ในโปรเจกต์จริง revision ควรถูกสร้างโดย Build Tool (เช่น Vite, Webpack) 
   // เพื่อให้ Workbox รู้ว่าไฟล์มีการเปลี่ยนแปลงหรือไม่ (เช่น 'revision: 'a1b2'')
   // การใช้ 'revision: null' เหมาะสำหรับตอนเริ่มต้น
-  workbox.precaching.precacheAndRoute([
-    { url: '/offline.html', revision: null },
-    { url: '/manifest.webmanifest', revision: null },
-    { url: '/images/logo-sideline-chiangmai-128.webp', revision: null }, 
-    { url: '/images/placeholder-profile.webp', revision: null },    
-    { url: '/images/favicon.svg', revision: null },
-    { url: '/icons/icon-192x192.png', revision: null },
-    { url: '/icons/icon-512x512.png', revision: null },
-  ]);
+ workbox.precaching.precacheAndRoute([
+  { url: '/offline.html', revision: 'v2' },
+  { url: '/manifest.webmanifest', revision: 'v2' },
+
+  { url: '/images/logo-sideline-chiangmai-128.webp', revision: 'v2' }, 
+{ url: '/images/logo-sideline-chiangmai-512.webp', revision: 'v2' }, 
+ { url: '/images/logo-sideline-chiangmai-256.webp', revision: 'v2' }, 
+ { url: '/images/placeholder-profile.webp', revision: 'v2' },    
+  { url: '/images/favicon.svg', revision: 'v2' },
+  { url: '/icons/icon-192x192.png', revision: 'v2' },
+  { url: '/icons/icon-512x512.png', revision: 'v2' },
+]);
 
   // ✅ Step 4: Caching Strategy - กำหนดกลยุทธ์สำหรับไฟล์และ API ประเภทต่างๆ
 

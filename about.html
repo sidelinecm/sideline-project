@@ -20,20 +20,20 @@
   <!-- ================================================================ -->
   <!-- 4. PERFORMANCE HINTS & PRELOADING -->
   <!-- ================================================================ -->
-  <!-- Preconnect to critical third-party origins -->
-  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+ 
   
-  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"        
-      integrity="sha512-VrZ7Z...hash..." crossorigin="anonymous" referrerpolicy="no-referrer"        
-      onerror="this.onerror=null;this.href='css/all.min.css';">  <!-- Noscript fallback -->  
-   <!-- Preload critical assets for the initial render -->    <link rel="preload" href="/styles.css" as="style">          <!-- ================================================================ -->    <!-- 5. STYLESHEETS (Async Loading Pattern) -->    <!-- ================================================================ -->    
-  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">   
+ <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
 
-   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</noscript>
+<link rel="preload" href="/styles.css" as="style">
+  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="/styles.css">
+</noscript>
   <!-- ✅ [SEO ขั้นสูง] Structured Data for About Page -->
   <script type="application/ld+json">
   {

@@ -1739,5 +1739,8 @@ h1.text-primary, h2.text-primary, h3.text-primary {
 html.dark .badge-description {
     color: hsl(220, 15%, 75%);
 }
-
+/* --- Global reset for heading font-size --- */
+h1, h2, h3, h4 {
+  font-size: inherit;
+}
 
