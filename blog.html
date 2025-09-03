@@ -17,23 +17,27 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- ================================================================ -->
-  <!-- 4. PERFORMANCE HINTS & PRELOADING -->
-  <!-- ================================================================ -->
- 
-  
-  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-
+ <!-- Preconnect -->
+<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+<!-- Font Awesome (async load) -->
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </noscript>
+
+<!-- Preload custom fonts -->
+<link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Stylesheet (async load) -->
 <link rel="preload" href="/styles.css" as="style">
-  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
 <noscript>
   <link rel="stylesheet" href="/styles.css">
 </noscript>
+
   <!-- ✅ [SEO ขั้นสูง] Structured Data for Blog -->
   <script type="application/ld+json">
   {
