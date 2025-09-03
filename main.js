@@ -169,80 +169,97 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     // --- SEARCH & FILTERS ---
-    function initSearchAndFilters() {
-        if (!dom.searchForm) {
-            applyFilters(false); // Initial render without updating URL
-            return;
-        }
-
-        // ✅ [UX] Populate filters from URL on page load
-        const urlParams = new URLSearchParams(window.location.search);
-        dom.searchInput.value = urlParams.get('q') || '';
-        dom.provinceSelect.value = urlParams.get('province') || '';
-        dom.availabilitySelect.value = urlParams.get('availability') || '';
-        dom.featuredSelect.value = urlParams.get('featured') || '';
-
-        // ✅ [UX] If no province in URL, try to load from localStorage for personalization
-        if (!dom.provinceSelect.value) {
-            const lastProvince = localStorage.getItem(LAST_PROVINCE_KEY);
-            if (lastProvince) {
-                dom.provinceSelect.value = lastProvince;
-            }
-        }
-
-        const debouncedFilter = (() => {
-            let timeout;
-            return () => { clearTimeout(timeout); timeout = setTimeout(() => applyFilters(true), 350); };
-        })();
-        
-        dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(true); });
-        dom.resetSearchBtn.addEventListener('click', () => { 
-            dom.searchForm.reset(); 
-            applyFilters(true); 
-        });
-
-        dom.searchInput.addEventListener('input', debouncedFilter);
-        dom.provinceSelect.addEventListener('change', () => applyFilters(true));
-        dom.availabilitySelect.addEventListener('change', () => applyFilters(true));
-        dom.featuredSelect.addEventListener('change', () => applyFilters(true));
-        
-        applyFilters(false); // Initial render based on URL/localStorage values
+function initSearchAndFilters() {
+    if (!dom.searchForm) {
+        applyFilters(false); // Initial render without updating URL
+        return;
     }
 
-    function applyFilters(updateUrl = true) {
-        const searchTerm = dom.searchInput?.value.toLowerCase().trim() || '';
-        const selectedProvince = dom.provinceSelect?.value || '';
-        const selectedAvailability = dom.availabilitySelect?.value || '';
-        const isFeaturedOnly = dom.featuredSelect?.value === 'true';
+    // ✅ [UX] Populate filters from URL on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    dom.searchInput.value = urlParams.get('q') || '';
+    dom.provinceSelect.value = urlParams.get('province') || '';
+    dom.availabilitySelect.value = urlParams.get('availability') || '';
+    dom.featuredSelect.value = urlParams.get('featured') || '';
 
-        // ✅ [UX] Save last selected province to localStorage
-        if (selectedProvince) {
-            localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
+    // ✅ [UX] If no province in URL, try to load from localStorage for personalization
+    if (!dom.provinceSelect.value) {
+        const lastProvince = localStorage.getItem(LAST_PROVINCE_KEY);
+        if (lastProvince) {
+            dom.provinceSelect.value = lastProvince;
         }
-
-        // ✅ [UX] Update URL with current filter state
-        if (updateUrl) {
-            const urlParams = new URLSearchParams();
-            if (searchTerm) urlParams.set('q', searchTerm);
-            if (selectedProvince) urlParams.set('province', selectedProvince);
-            if (selectedAvailability) urlParams.set('availability', selectedAvailability);
-            if (isFeaturedOnly) urlParams.set('featured', 'true');
-            
-            const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-            history.pushState({}, '', newUrl);
-        }
-
-        const filtered = allProfiles.filter(p => 
-            (!searchTerm || p.name?.toLowerCase().includes(searchTerm) || p.location?.toLowerCase().includes(searchTerm) || p.styleTags?.some(t => t.toLowerCase().includes(searchTerm))) &&
-            (!selectedProvince || p.provinceKey === selectedProvince) &&
-            (!selectedAvailability || p.availability === selectedAvailability) &&
-            (!isFeaturedOnly || p.isfeatured)
-        );
-
-        const isSearching = searchTerm || selectedProvince || selectedAvailability || isFeaturedOnly;
-        renderProfiles(filtered, isSearching);
     }
 
+    const debouncedFilter = (() => {
+        let timeout;
+        return () => { clearTimeout(timeout); timeout = setTimeout(() => applyFilters(true), 350); };
+    })();
+    
+    dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(true); });
+    
+    // ✅ ปุ่ม Reset ควรเรียก resetFilters() เพื่อล้างค่าทั้งหมด
+    dom.resetSearchBtn.addEventListener('click', () => {
+        resetFilters(); // เรียกฟังก์ชัน resetFilters ใหม่
+        applyFilters(true); // จากนั้น apply filters เพื่อแสดงผลทั้งหมด
+    });
+
+    dom.searchInput.addEventListener('input', debouncedFilter);
+
+    // ✅ เมื่อมีการเปลี่ยนค่าใน Select Box ใดๆ ให้ applyFilters ทันที (ไม่ต้องล้าง searchTerm)
+    dom.provinceSelect.addEventListener('change', debouncedFilter);
+    dom.availabilitySelect.addEventListener('change', debouncedFilter);
+    dom.featuredSelect.addEventListener('change', debouncedFilter);
+    
+    applyFilters(false); // Initial render based on URL/localStorage values
+}
+
+// ✅ [ฟังก์ชันใหม่] สำหรับรีเซ็ตค่า Filter ทั้งหมด
+function resetFilters() {
+    dom.searchInput.value = ''; // ล้างช่องค้นหา
+    dom.provinceSelect.value = ''; // ล้างการเลือกจังหวัด
+    dom.availabilitySelect.value = ''; // ล้างการเลือกสถานะ
+    dom.featuredSelect.value = ''; // ล้างการเลือก Featured
+    localStorage.removeItem(LAST_PROVINCE_KEY); // ลบค่าจังหวัดที่จำไว้ใน localStorage ด้วย
+    console.log("All filters have been reset.");
+}
+
+function applyFilters(updateUrl = true) {
+    const searchTerm = dom.searchInput?.value.toLowerCase().trim() || '';
+    const selectedProvince = dom.provinceSelect?.value || '';
+    const selectedAvailability = dom.availabilitySelect?.value || '';
+    const isFeaturedOnly = dom.featuredSelect?.value === 'true';
+
+    // ✅ [UX] Save last selected province to localStorage
+    if (selectedProvince) {
+        localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
+    } else {
+        // ✅ ถ้าไม่มีจังหวัดถูกเลือก ให้ลบค่าออกจาก localStorage
+        localStorage.removeItem(LAST_PROVINCE_KEY);
+    }
+
+    // ✅ [UX] Update URL with current filter state
+    if (updateUrl) {
+        const urlParams = new URLSearchParams();
+        if (searchTerm) urlParams.set('q', searchTerm);
+        if (selectedProvince) urlParams.set('province', selectedProvince);
+        if (selectedAvailability) urlParams.set('availability', selectedAvailability);
+        if (isFeaturedOnly) urlParams.set('featured', 'true');
+        
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        history.pushState({}, '', newUrl);
+    }
+
+    const filtered = allProfiles.filter(p => 
+        (!searchTerm || p.name?.toLowerCase().includes(searchTerm) || p.location?.toLowerCase().includes(searchTerm) || p.styleTags?.some(t => t.toLowerCase().includes(searchTerm))) &&
+        (!selectedProvince || p.provinceKey === selectedProvince) &&
+        (!selectedAvailability || p.availability === selectedAvailability) &&
+        (!isFeaturedOnly || p.isfeatured)
+    );
+
+    const isSearching = searchTerm || selectedProvince || selectedAvailability || isFeaturedOnly;
+    
+    renderProfiles(filtered, isSearching);
+}
     // --- RENDERING ---
     function renderProfiles(filteredProfiles, isSearching) {
         if (!dom.profilesDisplayArea) return;
@@ -337,10 +354,7 @@ gsap.registerPlugin(ScrollTrigger);
         </div>
         <div class="card-overlay">
             <div class="card-info">
-<h3 class="text-lg sm:text-xl font-semibold text-foreground line-clamp-1 sm:line-clamp-2">
-  ${profile.name}
-</h3>
-
+                <h3 class="text-xl lg:text-2xl font-bold truncate">${profile.name}</h3>
                 <p class="text-sm flex items-center gap-1.5">${locationIcon} ${provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'}</p>
             </div>
         </div>`;
