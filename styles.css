@@ -1739,21 +1739,20 @@ h1.text-primary, h2.text-primary, h3.text-primary {
     height: 1.25rem;
 }
 
-/* ============================================= */
-/* FIX: Accessibility - Color Contrast           */
-/* เพิ่มความเข้มของสีข้อความเพื่อให้ผ่านเกณฑ์ Lighthouse */
-/* ============================================= */
-.badge-description {
-    /* สีเทาเข้มขึ้นสำหรับโหมดสว่าง เพื่อให้อ่านง่ายบนพื้นหลังสีอ่อน */
-    color: hsl(220, 10%, 40%); 
+/* ------------------------------------------- */
+/* FIX: H2 สำหรับ LCP - โหลดเร็ว, สวยเหมือนเดิม */
+/* ------------------------------------------- */
+h2 {
+  font-family: "Prompt", "Inter", sans-serif;  /* ใช้ Prompt + fallback */
+  font-weight: 700;                             /* น้ำหนักเท่ากับ H1 */
+  font-size: 1.75rem;                           /* ~28px Desktop */
+  line-height: 1.25;
+  color: #b8860b;                               /* fallback สีทองเข้ม */
 }
 
-/* ทำให้สีข้อความสว่างขึ้นในโหมดมืด เพื่อให้ตัดกับพื้นหลังสีเข้ม */
-html.dark .badge-description {
-    color: hsl(220, 15%, 75%);
+/* Responsive มือถือ */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 1.5rem;  /* ~24px มือถือ */
+  }
 }
-/* --- Global reset for heading font-size --- */
-h1, h2, h3, h4 {
-  font-size: inherit;
-}
-
