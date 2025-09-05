@@ -1756,3 +1756,21 @@ h2 {
     font-size: 1.5rem;  /* ~24px มือถือ */
   }
 }
+/* ============================================= */
+/* FIX: Accessibility - Color Contrast           */
+/* ปรับสีข้อความให้ contrast สูงขึ้น ผ่าน Lighthouse */
+.badge-description {
+    color: hsl(220, 10%, 40%); /* เทาเข้ม สำหรับโหมดสว่าง */
+}
+
+html.dark .badge-description {
+    color: hsl(220, 15%, 75%); /* สว่างพอ สำหรับโหมดมืด */
+}
+
+.trust-badge {
+    color: hsl(220, 10%, 40%); /* เทาเข้ม สำหรับโหมดสว่าง */
+}
+
+html.dark .trust-badge {
+    color: hsl(220, 15%, 75%); /* สว่างพอ สำหรับโหมดมืด */
+}
