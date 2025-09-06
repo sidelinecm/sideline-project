@@ -2159,8 +2159,8 @@ html.dark .trust-badge {
 }
 }
 .logo {
-  height: 30px;
+  height: 60px;
   width: auto;
-  aspect-ratio: 256 / 30;
+  aspect-ratio: 512 / 60;
   display: block;
 }
