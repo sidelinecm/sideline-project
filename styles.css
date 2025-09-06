@@ -2151,5 +2151,16 @@ html.dark .trust-badge {
     width: 80vw;
     max-width: 95vw;
     border-radius: 10px;
-  }
+  }.logo {
+  height: 30px;
+  width: auto;
+  aspect-ratio: 256 / 30;
+  display: block;
+}
+}
+.logo {
+  height: 30px;
+  width: auto;
+  aspect-ratio: 256 / 30;
+  display: block;
 }
