@@ -1,7 +1,5 @@
-
-
 # =============================================================================
-# netlify.toml (ฉบับปรับปรุง)
+# netlify.toml (ฉบับสมบูรณ์)
 # =============================================================================
 
 # 1. การตั้งค่า Build
@@ -22,20 +20,15 @@
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    # "no-store, no-cache, must-revalidate" เป็นคำสั่งที่เข้มงวดที่สุด
     Cache-Control = "no-store, no-cache, must-revalidate"
     Service-Worker-Allowed = "/"
 
 # --- ควบคุมไฟล์ Assets ที่ไม่ค่อยเปลี่ยน (ให้เบราว์เซอร์เช็คก่อน) ---
-# นี่คือวิธีที่ปลอดภัย: ให้แคชได้ 1 ปี แต่ต้องกลับมาถามเซิร์ฟเวอร์ก่อนใช้ (ETag check)
-# ถ้าไฟล์ไม่เปลี่ยน เซิร์ฟเวอร์จะตอบกลับ 304 Not Modified (เร็วมาก)
-# ถ้าไฟล์เปลี่ยน เซิร์ฟเวอร์จะส่งไฟล์ใหม่มาให้
 [[headers]]
   for = '''
   /images/*
   /icons/*
   /fonts/*
- 
   /*.css
   /*.js
   '''
@@ -52,5 +45,23 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# 3. การตั้งค่า Redirects (จัดการลิงก์เก่าและลิงก์ผิด)
 
+# ตัวอย่าง redirect จากลิงก์เก่าไปลิงก์ใหม่
+[[redirects]]
+  from = "/old-path/*"
+  to = "/new-path/:splat"
+  status = 301
+  force = true
 
+[[redirects]]
+  from = "/old-page.html"
+  to = "/new-page.html"
+  status = 301
+  force = true
+
+# ถ้ามีลิงก์ที่ผิดพลาดหรือไม่เจอ (404) ให้ไปที่หน้า 404.html
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
