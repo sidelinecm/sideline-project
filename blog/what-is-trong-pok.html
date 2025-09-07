@@ -19,18 +19,63 @@
   
   
 
-   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <!-- PERFORMANCE & RESOURCE HINTS -->
 
+   <link rel="modulepreload" href="/main.js">
+
+ <!-- Preconnect: Establish early connections -->
+
+<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+<!-- Preload critical CSS (non-blocking load) -->
+
+<link rel="preload" href="/styles.css" as="style">
+<link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="/styles.css">
+</noscript>
+
+<!-- Async load Font Awesome (non-blocking) -->
+
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </noscript>
-<link rel="preload" href="/styles.css" as="style">
-  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
-<noscript>
-  <link rel="stylesheet" href="/styles.css">
-</noscript>
+
+<!-- Preload web fonts -->
+<link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  
+ <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sidelinechiangmai.netlify.app/blog/what-is-trong-pok.html"
+  },
+  "headline": "ตรงปกคืออะไร? ทำความเข้าใจการการันตีของ SidelineCM",
+  "description": "ไขข้อสงสัยเกี่ยวกับคำว่า 'ตรงปก' และนโยบายการันตีของเราที่ทำให้คุณมั่นใจได้ 100% ว่าจะได้พบกับน้องที่ตรงกับโปรไฟล์",
+  "image": "https://sidelinechiangmai.netlify.app/images/blog/guarantee-concept.webp",
+  "author": {
+    "@type": "Organization",
+    "name": "Sideline Chiangmai"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sideline Chiangmai",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp",
+      "width": 245,
+      "height": 30
+    }
+  },
+  "datePublished": "2024-04-01T08:00:00+07:00",
+  "dateModified": "2024-04-01T08:00:00+07:00"
+}
+</script>
 </head>
 <body class="antialiased" data-page="blog-post">
 <!-- (Age Verification Modal) -->
