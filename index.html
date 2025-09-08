@@ -338,13 +338,67 @@
           </ul>
 
           <!-- ✅ Search Form -->
-          <div id="hero-form" class="pt-4">
-            <form id="search-form" action="profiles.html" method="GET" aria-labelledby="search-form-heading" role="search">
-              <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
-              
-              <!-- [form fields as is] -->
-              <!-- ... -->
-            </form>
+          <div id="hero-form">
+                        <form id="search-form" action="/profiles.html" method="GET" aria-labelledby="search-form-heading">
+                            <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <div class="relative sm:col-span-2 lg:col-span-1">
+                                        <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-search" aria-hidden="true"></i></span>
+                                            <input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..." class="w-full pl-10 pr-4 py-2.5 border border-border rounded-full focus:outline-none transition text-sm">
+                                        </div>
+                                    </div>
+                                    <div class="relative">
+                                        <label for="search-province" class="sr-only">เลือกจังหวัด</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-map-marker-alt" aria-hidden="true"></i></span>
+                                            <select id="search-province" name="province" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm">
+                                                <option value="">ทุกจังหวัด</option>
+                                            </select>
+                                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="relative">
+                                        <label for="search-availability" class="sr-only">เลือกสถานะ</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-clock" aria-hidden="true"></i></span>
+                                            <select id="search-availability" name="availability" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-border rounded-full focus:outline-none transition text-sm">
+                                                <option value="">สถานะ (ทั้งหมด)</option>
+                                                <option value="ว่าง">ว่าง</option>
+                                                <option value="รับงาน">รับงาน</option>
+                                                <option value="รับงานบางวัน">รับงานบางวัน</option>
+                                                <option value="สอบถามคิว">สอบถามคิว</option>
+                                                <option value="ไม่ว่าง">ไม่ว่าง</option>
+                                                <option value="พัก">พัก</option>
+                                            </select>
+                                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap items-center justify-center sm:justify-between gap-3 pt-2">
+                                     <div class="relative">
+                                        <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                            <select id="search-featured" name="featured" class="w-full appearance-none pl-10 pr-10 py-2 border border-border rounded-full text-xs focus:outline-none transition">
+                                                <option value="">แนะนำ (ทั้งหมด)</option>
+                                                <option value="true">แนะนำเท่านั้น</option>
+                                            </select>
+                                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/80 pointer-events-none"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button type="reset" id="reset-search-btn" class="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full hover:bg-border transition text-xs"><i class="fas fa-sync-alt" aria-hidden="true"></i><span>ล้างค่า</span></button>
+                                        <button type="submit" id="keyword-search-btn" class="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition text-sm font-semibold">
+                                            <i class="fas fa-search" aria-hidden="true"></i>
+                                            <span>ค้นหา</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
           </div>
 
         </div>
