@@ -52,7 +52,11 @@ h1 {
   color: #b8860b;       /* ทองเข้ม หรูหรา */
   margin-bottom: 1rem;
 }
-
+/* Hero h1 override (ตรงกับ scale เรากำหนด) */
+.hero-title {
+  font-size: 2.25rem;   /* 36px base */
+  line-height: 1.2;
+}
 
  
   
@@ -2174,12 +2178,4 @@ html.dark .trust-badge {
   width: auto;
   aspect-ratio: 512 / 60;
   display: block;
-}
-
-/*Insert your CSS here*/
-body {
-  color: #202020;
-}
-.someNonCriticalSelectorForThisUrl {
-  color: red;
 }
