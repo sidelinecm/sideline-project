@@ -31,7 +31,7 @@
   
 <meta name="title" content="Sideline Chiangmai | สาวรับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟนตรงปก100% ไม่มีมัดจำ รับงาน เชียงใหม่">
 
-<meta property="og:title" content="Sideline Chiangmai | สาวรับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟนตรงปก100% ไม่มีมัดจำ รับงาน เชียงใหม่">
+<meta property="og:title" content="Sideline Chiangmai | รับงาน ไซด์ไลน์เชียงใหม่ ตรงปก100%">
 
   <meta property="og:description" content="รวมสาวรับงานเชียงใหม่ตรงปก ฟิวแฟน หญิงรับงาน เด็กรับงาน นวดนาบ คัดสรรคุณภาพ มีน้องใหม่อัปเดตทุกวัน มั่นใจโปรไฟล์จริง ปลอดภัย 100%">
   <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
@@ -57,76 +57,48 @@
   <link rel="manifest" href="/manifest.webmanifest">
   
   
-  <!-- PERFORMANCE & RESOURCE HINTS -->
+ <!-- Preconnect to CDN / APIs -->
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-   <link rel="modulepreload" href="/main.js">
+  <!-- Preload critical CSS (non-blocking) -->
+  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="/styles.css">
+  </noscript>
 
- <!-- Preconnect: Establish early connections -->
+  <!-- Async load Font Awesome -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </noscript>
 
-<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <!-- Preload web fonts -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-<!-- Preload critical CSS (non-blocking load) -->
+  <!-- JavaScript module preload -->
+  <link rel="modulepreload" href="/main.js">
 
-<link rel="preload" href="/styles.css" as="style">
-<link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
-<noscript>
-  <link rel="stylesheet" href="/styles.css">
-</noscript>
-
-<!-- Async load Font Awesome (non-blocking) -->
-
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</noscript>
-
-<!-- Preload web fonts -->
-<link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-  
- 
-  <!-- 6. STRUCTURED DATA (JSON-LD) - ADVANCED -->
-  
+  <!-- STRUCTURED DATA (JSON-LD) - ADVANCED -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "Organization",
-        "name": "Sideline Chiangmai",
-        "url": "https://sidelinechiangmai.netlify.app/",
-        "logo": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp",
-        "description": "ศูนย์รวมสาวรับงาน ไซด์ไลน์เชียงใหม่ ตรงปก ฟิวแฟน เด็กรับงาน หญิงรับงาน นวดนาบ อัปเดตใหม่ทุกวัน มั่นใจ ปลอดภัย 100%",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "customer support",
-          "url": "https://line.me/ti/p/_faNcjQ3xx",
-          "availableLanguage": ["Thai"]
-        },
-        "sameAs": [
-          "https://tiktok.com/@sidelinecm",
-          "https://bio.site/firstfiwfans.com",
-          "https://linktr.ee/kissmodel",
-          "https://@sidelinechiangmai.bsky.social"
-        ]
-      },
-      {
         "@type": "WebSite",
-        "name": "Sideline Chiangmai",
+        "name": "Sideline Chiang Mai",
         "url": "https://sidelinechiangmai.netlify.app/",
         "potentialAction": {
           "@type": "SearchAction",
-          "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}"
-          },
+          "target": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}",
           "query-input": "required name=search_term_string"
         }
       },
       {
         "@type": "LocalBusiness",
-        "name": "Sideline Chiangmai",
+        "name": "Sideline Chiang Mai",
+        "telephone": "+66912345678",
         "image": "https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp",
         "address": {
           "@type": "PostalAddress",
@@ -137,20 +109,21 @@
         "url": "https://sidelinechiangmai.netlify.app/",
         "priceRange": "฿฿",
         "areaServed": "เชียงใหม่",
-        "telephone": "+66-XXXXXXXXX",
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": "4.9",
           "reviewCount": "2100"
-        }
+        },
+        "sameAs": [
+          "https://www.facebook.com/sidelinechiangmai",
+          "https://www.instagram.com/sidelinechiangmai",
+          "https://www.tiktok.com/@168xboomx"
+        ]
       }
     ]
   }
-  </script>
-  <!-- ================================================================ -->
-  <!-- 7. ACCESSIBILITY & LANG ATTRIBUTE -->
-  <!-- ================================================================ -->
-  <!-- (แนะนำ: ใส่ lang="th" ที่ <html> ด้านนอกไฟล์นี้) -->
+  
+</script>
 </head>
 <body class="antialiased" data-page="home">
 
@@ -281,20 +254,21 @@
             <meta itemprop="name" content="SidelineCM">
           </div>
 
-          <!-- ✅ H1 -->
+          <!-- Hero Title -->
           <h1 id="hero-h1" itemprop="name"
-              class="hero-title font-extrabold mb-4 
-                     bg-gradient-to-br from-[#d4af37] via-[#b8860b] to-[#6b4e17] 
+              class="hero-title font-extrabold mb-4
+                     bg-gradient-to-br from-[#d4af37] via-[#b8860b] to-[#6b4e17]
                      bg-clip-text text-transparent
                      drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]
-                     relative z-10"
-              aria-label="Sideline Chiangmai | สาวรับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟนตรงปก100% ไม่มีมัดจำ รับงาน เชียงใหม่">
+                     leading-tight
+                     break-words
+                     text-[clamp(2.25rem,5vw,4.5rem)]"
+              aria-label="Sideline Chiangmai | น้องๆสาวๆ รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก100% ไม่มีมัดจำ รับงานเชียงใหม่">
             Sideline Chiangmai
             <span class="sr-only">
-              | สาวรับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟนตรงปก100% ไม่มีมัดจำ รับงาน เชียงใหม่
+              | สาวรับงานไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก100% ไม่มีมัดจำ รับงานเชียงใหม่
             </span>
           </h1>
-
           <!-- ✅ P: Hero description -->
           <p id="hero-p" itemprop="description" class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             คัดสรรน้องๆ <strong class="text-foreground">ไซด์ไลน์เชียงใหม่</strong> คุณภาพ บริการระดับพรีเมียม การันตี<strong class="text-foreground">ตรงปก</strong> ปลอดภัย <strong class="text-foreground">ไม่ต้องโอนมัดจำ</strong> ก่อนนัดเจอ

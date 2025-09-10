@@ -321,48 +321,115 @@ function applyFilters(updateUrl = true) {
         initScrollAnimations();
     }
 
-    // --- UI COMPONENT CREATORS ---
-    function createProfileCard(profile) {
-        const card = document.createElement('div');
-        card.className = 'profile-card-new-container'; // Wrapper for perspective
-    
-        const cardInner = document.createElement('div');
-        cardInner.className = 'profile-card-new group cursor-pointer';
-        cardInner.setAttribute('data-profile-id', profile.id);
-        cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name}`);
-        cardInner.setAttribute('role', 'button');
-        cardInner.setAttribute('tabindex', '0');
-    
-        const mainImage = profile.images[0];
-        let availabilityText = profile.availability || "สอบถามคิว";
-        let availabilityClass = 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
-        if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) {
-            availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300';
-        } else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) {
-            availabilityClass = 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300';
-        }
+// --- UI COMPONENT CREATORS ---
+function createProfileCard(profile) {
+  const card = document.createElement('div');
+  card.className = 'profile-card-new-container'; // Wrapper for perspective
 
-        const starIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z" clip-rule="evenodd" /></svg>`;
-        const locationIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
-    
-    // ✅ [PERFORMANCE] Use srcset for responsive images
-    cardInner.innerHTML = `
-        <img src="${mainImage.src}" srcset="${mainImage.srcset}" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" alt="${profile.altText}" class="card-image" loading="lazy" decoding="async" width="600" height="800" onerror="this.onerror=null;this.src='/images/placeholder-profile.webp';">
-        <div class="absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10">
-            <span class="${availabilityClass} text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg">${availabilityText}</span>
-            ${profile.isfeatured ? `<span class="bg-yellow-400 text-black text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg">${starIcon}แนะนำ</span>` : ''}
-        </div>
-        <div class="card-overlay">
-            <div class="card-info">
-                <h3 class="text-xl lg:text-2xl font-bold truncate">${profile.name}</h3>
-                <p class="text-sm flex items-center gap-1.5">${locationIcon} ${provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'}</p>
-            </div>
-        </div>`;
-        
-        card.appendChild(cardInner);
-        return card;
-    }
+  const cardInner = document.createElement('div');
+  cardInner.className = 'profile-card-new group cursor-pointer';
+  cardInner.setAttribute('data-profile-id', profile.id);
+  cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
+  cardInner.setAttribute('role', 'button');
+  cardInner.setAttribute('tabindex', '0');
 
+  // ✅ ปลอดภัย: ถ้าไม่มีรูป ใช้ placeholder
+  const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
+    src: '/images/placeholder-profile.webp',
+    srcset: '',
+    width: 600,
+    height: 800,
+    alt: profile.name || 'profile'
+  };
+
+  // ✅ กำหนดขนาด ลด CLS
+  const imgWidth = mainImage.width || 600;
+  const imgHeight = mainImage.height || 800;
+
+  // ✅ wrapper ที่จองพื้นที่ด้วย aspect-ratio
+  const imgWrapper = document.createElement('div');
+  imgWrapper.className = 'card-image-wrapper';
+  imgWrapper.style.aspectRatio = `${imgWidth}/${imgHeight}`;
+  imgWrapper.style.overflow = 'hidden';
+
+  // ✅ สร้าง <img>
+  const img = document.createElement('img');
+  img.className = 'card-image';
+  img.src = mainImage.src;
+  if (mainImage.srcset) img.srcset = mainImage.srcset;
+  img.sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw';
+  img.alt = mainImage.alt || profile.altText || profile.name || '';
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.width = imgWidth;
+  img.height = imgHeight;
+  img.setAttribute('fetchpriority', 'low');
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.objectFit = 'cover';
+  img.style.display = 'block';
+  img.onerror = function () {
+    this.onerror = null;
+    this.src = '/images/placeholder-profile.webp';
+  };
+
+  imgWrapper.appendChild(img);
+  cardInner.appendChild(imgWrapper);
+
+  // ✅ กำหนดสถานะ availability
+  let availabilityText = profile.availability || "สอบถามคิว";
+  let availabilityClass = 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
+  if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) {
+    availabilityClass = 'bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300';
+  } else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) {
+    availabilityClass = 'bg-red-200 text-red-800 dark:bg-red-900/50 dark:text-red-300';
+  }
+
+  // ✅ icons
+  const starIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c.321-.662 1.134-.662 1.456 0l2.034 4.192a.75.75 0 00.564.41l4.625.672c.728.106 1.018.995.494 1.503l-3.348 3.263a.75.75 0 00-.215.664l.79 4.607c.124.724-.636 1.285-1.288.941l-4.135-2.174a.75.75 0 00-.696 0l-4.135 2.174c-.652.344-1.412-.217-1.288-.94l.79-4.607a.75.75 0 00-.215-.665L1.15 9.66c-.524-.508-.234-1.397.494-1.503l4.625-.672a.75.75 0 00.564-.41L9.132 2.884z" clip-rule="evenodd" /></svg>`;
+  const locationIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
+
+  // ✅ badges
+  const badges = document.createElement('div');
+  badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
+
+  const availSpan = document.createElement('span');
+  availSpan.className = `${availabilityClass} text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg`;
+  availSpan.textContent = availabilityText;
+  badges.appendChild(availSpan);
+
+  if (profile.isfeatured) {
+    const feat = document.createElement('span');
+    feat.className = 'bg-yellow-400 text-black text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg';
+    feat.innerHTML = `${starIcon}แนะนำ`;
+    badges.appendChild(feat);
+  }
+
+  cardInner.appendChild(badges);
+
+  // ✅ overlay info
+  const overlay = document.createElement('div');
+  overlay.className = 'card-overlay';
+
+  const info = document.createElement('div');
+  info.className = 'card-info';
+
+  const h3 = document.createElement('h3');
+  h3.className = 'text-xl lg:text-2xl font-bold truncate';
+  h3.textContent = profile.name || 'ไม่ระบุชื่อ';
+
+  const p = document.createElement('p');
+  p.className = 'text-sm flex items-center gap-1.5';
+  p.innerHTML = `${locationIcon} ${provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'}`;
+
+  info.appendChild(h3);
+  info.appendChild(p);
+  overlay.appendChild(info);
+  cardInner.appendChild(overlay);
+
+  card.appendChild(cardInner);
+  return card;
+}
     // ... (The rest of the component creators remain the same) ...
 
     function createProvinceSection(key, name, provinceProfiles) {
@@ -495,55 +562,60 @@ function applyFilters(updateUrl = true) {
     const overlay = document.getElementById('age-verification-overlay');
     if (!overlay) return;
 
-    // --- BOT & CRAWLER DETECTION ---
-    // ตรวจสอบ User-Agent เพื่อยกเว้น Bot จากการแสดงหน้าต่างยืนยันอายุ
-    // เพื่อผลดีต่อ SEO และเครื่องมือตรวจสอบความเร็ว
+    // --- BOT & CRAWLER DETECTION (modern + fallback) ---
     const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
-    const currentUserAgent = navigator.userAgent;
 
-    if (botUserAgents.test(currentUserAgent)) {
-        overlay.classList.add('hidden'); // ซ่อนหน้าต่างสำหรับ Bot
-        return; // จบการทำงานของฟังก์ชันทันที Bot จะเห็นเนื้อหาเว็บได้เลย
+    if (navigator.userAgentData) {
+        // ✅ ใช้ API ใหม่
+        navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
+            const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
+            if (botUserAgents.test(brandInfo)) {
+                overlay.classList.add('hidden');
+                return; // Bot จะเห็นเว็บโดยไม่โดน Age Verification
+            }
+        });
+    } else {
+        // ✅ fallback สำหรับ browser เก่า (Safari, Firefox ฯลฯ)
+        const currentUserAgent = navigator.userAgent || "";
+        if (botUserAgents.test(currentUserAgent)) {
+            overlay.classList.add('hidden');
+            return;
+        }
     }
     // --- END BOT DETECTION ---
 
     const modalContent = overlay.querySelector('.age-modal-content');
-    
-    // ลบการตรวจสอบ sessionStorage ออก เพื่อให้แสดงผลทุกครั้งสำหรับผู้ใช้ทั่วไป
     if (!modalContent) {
         overlay.classList.add('hidden');
         return;
     }
-    
+
     // แสดงหน้าต่างสำหรับผู้ใช้ทั่วไปเสมอ
     overlay.classList.remove('hidden');
     gsap.to(overlay, { opacity: 1, duration: 0.3 });
-    gsap.fromTo(modalContent, { scale: 0.9, opacity: 0, y: -20 }, { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.1 });
-    
+    gsap.fromTo(modalContent, { scale: 0.9, opacity: 0, y: -20 }, 
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.1 });
+
     const confirmBtn = document.getElementById('confirmAgeButton');
     const cancelBtn = document.getElementById('cancelAgeButton');
-    
+
     const closeAction = () => {
-         gsap.to(modalContent, { scale: 0.95, opacity: 0, y: 10, duration: 0.3, ease: 'power2.in' });
-         gsap.to(overlay, { opacity: 0, duration: 0.3, delay: 0.1, onComplete: () => overlay.classList.add('hidden') });
-    }
-    
+        gsap.to(modalContent, { scale: 0.95, opacity: 0, y: 10, duration: 0.3, ease: 'power2.in' });
+        gsap.to(overlay, { opacity: 0, duration: 0.3, delay: 0.1, onComplete: () => overlay.classList.add('hidden') });
+    };
+
     if (confirmBtn) {
         confirmBtn.addEventListener('click', () => {
-            // ลบการบันทึก sessionStorage ออก จะได้ถามใหม่ทุกครั้งที่โหลดหน้า
-            // sessionStorage.setItem('ageVerified', 'true'); // <--- REMOVED
             closeAction();
         });
     }
-    
+
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => {
-            // ปรับปรุงให้ส่งผู้ใช้ไปที่อื่นเมื่อกดยกเลิก
             window.location.href = 'https://www.google.com';
         });
     }
 }
-
     function initLightbox() {
         const lightbox = document.getElementById('lightbox');
         const wrapper = document.getElementById('lightbox-content-wrapper-el');
@@ -738,6 +810,68 @@ function initHeaderScrollEffect() {
             link.classList.toggle('active-nav-link', isActive);
         });
     }
+    
+document.addEventListener("DOMContentLoaded", function() {
+    const marquee = document.querySelector('.social-marquee');
+    const wrapper = marquee.parentElement;
+    if (!marquee) return;
+
+    // clone เนื้อหาเพื่อให้เลื่อนต่อเนื่อง
+    const clone = marquee.innerHTML;
+    marquee.innerHTML += clone;
+
+    let speed = 0.5;
+    let scroll = 0;
+    let isDragging = false;
+    let startX = 0;
+    let scrollStart = 0;
+
+    function animateMarquee() {
+        if (!isDragging) {
+            scroll += speed;
+        }
+        if (scroll >= marquee.scrollWidth / 2) scroll = 0;
+        if (scroll < 0) scroll = marquee.scrollWidth / 2 - 1;
+        marquee.style.transform = `translateX(-${scroll}px)`;
+        requestAnimationFrame(animateMarquee);
+    }
+
+    animateMarquee();
+
+    // Hover pause
+    wrapper.addEventListener('mouseenter', () => { speed = 0; });
+    wrapper.addEventListener('mouseleave', () => { if(!isDragging) speed = 0.5; });
+
+    // Mouse drag
+    wrapper.addEventListener('mousedown', e => {
+        isDragging = true;
+        startX = e.pageX;
+        scrollStart = scroll;
+        speed = 0;
+        e.preventDefault();
+    });
+    wrapper.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        const delta = e.pageX - startX;
+        scroll = scrollStart - delta;
+    });
+    wrapper.addEventListener('mouseup', () => { isDragging = false; speed = 0.5; });
+    wrapper.addEventListener('mouseleave', () => { isDragging = false; speed = 0.5; });
+
+    // Touch drag
+    wrapper.addEventListener('touchstart', e => {
+        isDragging = true;
+        startX = e.touches[0].pageX;
+        scrollStart = scroll;
+        speed = 0;
+    });
+    wrapper.addEventListener('touchmove', e => {
+        if (!isDragging) return;
+        const delta = e.touches[0].pageX - startX;
+        scroll = scrollStart - delta;
+    });
+    wrapper.addEventListener('touchend', () => { isDragging = false; speed = 0.5; });
+});
 
     function generateFullSchema() {
         const pageTitle = document.title;
