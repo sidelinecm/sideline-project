@@ -321,18 +321,18 @@ function applyFilters(updateUrl = true) {
         initScrollAnimations();
     }
 
-function createProfileCard(profile) {
+function createProfileCard(profile = {}) {
   const card = document.createElement('div');
   card.className = 'profile-card-new-container';
 
   const cardInner = document.createElement('div');
   cardInner.className = 'profile-card-new group cursor-pointer';
-  cardInner.setAttribute('data-profile-id', profile.id);
-  cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name}`);
+  cardInner.setAttribute('data-profile-id', profile.id || '');
+  cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
   cardInner.setAttribute('role', 'button');
   cardInner.setAttribute('tabindex', '0');
 
-  // ปลอดภัย: ถ้าไม่มีรูป ให้ใช้ placeholder
+  // ถ้าไม่มีรูป ใช้ placeholder
   const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
     src: '/images/placeholder-profile.webp',
     srcset: '',
@@ -341,14 +341,11 @@ function createProfileCard(profile) {
     alt: profile.name || 'profile'
   };
 
-  // กำหนดขนาด (ถ้ามี metadata ให้ใช้ ถ้าไม่มีก็ใช้ fallback)
   const imgWidth = mainImage.width || 600;
   const imgHeight = mainImage.height || 800;
 
-  // wrapper ที่จองพื้นที่ด้วย aspect-ratio (ลด CLS)
   const imgWrapper = document.createElement('div');
   imgWrapper.className = 'card-image-wrapper';
-  // แทนค่าด้วย aspect-ratio สัดส่วนจริง (เช่น "3/4")
   imgWrapper.style.aspectRatio = `${imgWidth}/${imgHeight}`;
   imgWrapper.style.overflow = 'hidden';
 
@@ -356,10 +353,9 @@ function createProfileCard(profile) {
   img.className = 'card-image';
   img.src = mainImage.src;
   if (mainImage.srcset) img.srcset = mainImage.srcset;
-  // ปรับ sizes ให้สอดคล้องกับ layout grid ของคุณ:
   img.sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw';
   img.alt = mainImage.alt || profile.altText || profile.name || '';
-  img.loading = 'lazy';               // ถ้าไม่ใช่ LCP ให้ lazy
+  img.loading = 'lazy';
   img.decoding = 'async';
   img.width = imgWidth;
   img.height = imgHeight;
@@ -368,7 +364,10 @@ function createProfileCard(profile) {
   img.style.height = '100%';
   img.style.objectFit = 'cover';
   img.style.display = 'block';
-  img.onerror = function() { this.onerror = null; this.src = '/images/placeholder-profile.webp'; };
+  img.onerror = function () {
+    this.onerror = null;
+    this.src = '/images/placeholder-profile.webp';
+  };
 
   imgWrapper.appendChild(img);
   cardInner.appendChild(imgWrapper);
@@ -376,15 +375,24 @@ function createProfileCard(profile) {
   // badges
   const badges = document.createElement('div');
   badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
+
+  // ✅ availabilityClass พร้อม fallback
+  let availabilityClass = 'bg-gray-400';
+  if (profile.availability === 'ว่าง') availabilityClass = 'bg-green-500';
+  else if (profile.availability === 'ไม่ว่าง') availabilityClass = 'bg-red-500';
+  else if (profile.availability === 'รอคิว') availabilityClass = 'bg-yellow-500';
+
   const availSpan = document.createElement('span');
   availSpan.className = `${availabilityClass} text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg`;
   availSpan.textContent = profile.availability || 'สอบถามคิว';
   badges.appendChild(availSpan);
 
+  // ✅ starIcon มี fallback
   if (profile.isfeatured) {
     const feat = document.createElement('span');
     feat.className = 'bg-yellow-400 text-black text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg';
-    feat.innerHTML = `${starIcon}แนะนำ`;
+    const icon = (typeof starIcon !== 'undefined') ? starIcon : '⭐';
+    feat.innerHTML = `${icon} แนะนำ`;
     badges.appendChild(feat);
   }
   cardInner.appendChild(badges);
@@ -392,14 +400,21 @@ function createProfileCard(profile) {
   // overlay info
   const overlay = document.createElement('div');
   overlay.className = 'card-overlay';
+
   const info = document.createElement('div');
   info.className = 'card-info';
+
   const h3 = document.createElement('h3');
   h3.className = 'text-xl lg:text-2xl font-bold truncate';
   h3.textContent = profile.name || 'ไม่ระบุชื่อ';
+
   const p = document.createElement('p');
   p.className = 'text-sm flex items-center gap-1.5';
-  p.innerHTML = `${locationIcon} ${provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'}`;
+  const locIcon = (typeof locationIcon !== 'undefined') ? locationIcon : '📍';
+  const provinceName = (typeof provincesMap !== 'undefined' && provincesMap.get)
+    ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
+    : 'ไม่ระบุ';
+  p.innerHTML = `${locIcon} ${provinceName}`;
 
   info.appendChild(h3);
   info.appendChild(p);
@@ -409,6 +424,7 @@ function createProfileCard(profile) {
   card.appendChild(cardInner);
   return card;
 }
+
     // ... (The rest of the component creators remain the same) ...
 
     function createProvinceSection(key, name, provinceProfiles) {
@@ -792,8 +808,10 @@ function initHeaderScrollEffect() {
     
 document.addEventListener("DOMContentLoaded", function() {
     const marquee = document.querySelector('.social-marquee');
+    if (!marquee) return;   // ✅ ป้องกัน error ถ้าไม่เจอ element
+
     const wrapper = marquee.parentElement;
-    if (!marquee) return;
+    if (!wrapper) return;   // ✅ กันเผื่อว่ามันไม่มี parent จริง ๆ
 
     // clone เนื้อหาเพื่อให้เลื่อนต่อเนื่อง
     const clone = marquee.innerHTML;
@@ -819,7 +837,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Hover pause
     wrapper.addEventListener('mouseenter', () => { speed = 0; });
-    wrapper.addEventListener('mouseleave', () => { if(!isDragging) speed = 0.5; });
+    wrapper.addEventListener('mouseleave', () => { if (!isDragging) speed = 0.5; });
 
     // Mouse drag
     wrapper.addEventListener('mousedown', e => {
