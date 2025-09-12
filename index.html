@@ -70,8 +70,18 @@
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.webmanifest">
-
+<link rel="preload"
+      as="image"
+      type="image/webp"
+      href="/images/hero-sidelinechiangmai-600.webp"
+      imagesrcset="/images/hero-sidelinechiangmai-251.webp 251w,
+                   /images/hero-sidelinechiangmai-600.webp 600w,
+                   /images/hero-sidelinechiangmai-1200.webp 1200w"
+      imagesizes="(max-width: 640px) 160px,
+                  (max-width: 768px) 200px,
+                  (max-width: 1024px) 240px,
+                  (max-width: 1280px) 300px,
+                  360px">
   <!-- 12) Structured data (JSON-LD) -->
   <script type="application/ld+json">
   {
@@ -195,39 +205,38 @@
         <div class="card-content max-w-3xl mx-auto space-y-4">
 
           <div itemprop="provider" itemscope itemtype="https://schema.org/Organization">
-            <meta itemprop="name" content="sidelineChiangmai">
-          </div>
+  <meta itemprop="legalName" content="Sideline Chiangmai">
+</div>
 
          <!-- H1 (ซ่อน แต่ยังอยู่เพื่อ SEO/Screen Reader) -->
 <h1 id="hero-h1" class="sr-only" itemprop="name">
   Sideline Chiangmai | สาวรับงานไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก100% ไม่มีมัดจำ รับงานเชียงใหม่
 </h1>
-
-<!-- รูปภาพ (แสดงแทน h1) -->
-<a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto w-[160px] sm:w-[200px] md:w-[240px] lg:w-[300px] xl:w-[360px]">
+<a href="/" aria-label="Sideline Chiangmai หน้าแรก"
+   class="block mx-auto w-[160px] sm:w-[200px] md:w-[240px] lg:w-[300px] xl:w-[360px]">
   <img src="/images/hero-sidelinechiangmai-600.webp"
-     alt="Sideline Chiangmai"
-     class="mx-auto h-auto"
-     width="600" height="452"
-     loading="eager"
-     fetchpriority="high"
-     srcset="/images/hero-sidelinechiangmai-250.webp 251w,
-             /images/hero-sidelinechiangmai-600.webp 600w,
-             /images/hero-sidelinechiangmai-800.webp 800w,
-             /images/hero-sidelinechiangmai-1200.webp 1200w"
-     sizes="(max-width: 640px) 160px,
-            (max-width: 768px) 200px,
-            (max-width: 1024px) 240px,
-            (max-width: 1280px) 300px,
-            360px">
+       alt="Sideline Chiangmai"
+       class="mx-auto h-auto"
+       width="600" height="452"
+       loading="eager"
+       fetchpriority="high"
+       srcset="/images/hero-sidelinechiangmai-251.webp 251w,
+               /images/hero-sidelinechiangmai-600.webp 600w,
+               /images/hero-sidelinechiangmai-1200.webp 1200w"
+       sizes="(max-width: 640px) 160px,
+              (max-width: 768px) 200px,
+              (max-width: 1024px) 240px,
+              (max-width: 1280px) 300px,
+              360px">
 </a>
 
+
+
           <!-- Description -->
-           <p class="text-sm text-muted-foreground" style="margin: 0; line-height: 1.2; font-size: 0.875rem;">
-            คัดสรรน้องๆ <strong class="text-foreground">ไซด์ไลน์เชียงใหม่</strong> คุณภาพ บริการระดับพรีเมียม 
-            การันตี <strong class="text-foreground">ตรงปก</strong> ปลอดภัย 
-            <strong class="text-foreground">ไม่ต้องโอนมัดจำ</strong> ก่อนนัดเจอ
-          </p>
+           <p class="text-sm text-gray-700">
+  แหล่งรวม <strong>สาวรับงานไซด์ไลน์เชียงใหม่</strong> ตรงปก 100% ฟีลแฟนจริงจัง 
+  ไม่มีมัดจำ นัดง่าย ปลอดภัย
+</p>
 
         </div>
       </div>
@@ -343,10 +352,9 @@
 
     </div>
   </div>
-
-  <h3 class="social-disclaimer text-xs text-gray-700 max-w-xl mx-auto px-4 mt-2 leading-tight">
-    เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น 
-  </h3>
+<p class="social-disclaimer text-xs text-gray-700 max-w-xl mx-auto px-4 mt-2 leading-tight">
+  <strong>เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</strong>
+</p>
 </section>
 
 
