@@ -212,24 +212,21 @@
 
 <!-- รูปภาพ (แสดงแทน h1) -->
 <a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto w-[160px] sm:w-[200px] md:w-[240px] lg:w-[300px] xl:w-[360px]">
-  <img
-    src="/images/hero-sidelinechiangmai-600.webp"
-    alt="Sideline Chiangmai"
-    class="mx-auto h-auto"
-    width="600" height="452"
-    loading="lazy"
-    srcset="
-      /images/hero-sidelinechiangmai-250.webp 251w,
-      /images/hero-sidelinechiangmai-600.webp 600w,
-      /images/hero-sidelinechiangmai-800.webp 800w,
-      /images/hero-sidelinechiangmai-1200.webp 1200w
-    "
-    sizes="(max-width: 640px) 160px,
-           (max-width: 768px) 200px,
-           (max-width: 1024px) 240px,
-           (max-width: 1280px) 300px,
-           360px"
-  >
+  <img src="/images/hero-sidelinechiangmai-600.webp"
+     alt="Sideline Chiangmai"
+     class="mx-auto h-auto"
+     width="600" height="452"
+     loading="eager"
+     fetchpriority="high"
+     srcset="/images/hero-sidelinechiangmai-250.webp 251w,
+             /images/hero-sidelinechiangmai-600.webp 600w,
+             /images/hero-sidelinechiangmai-800.webp 800w,
+             /images/hero-sidelinechiangmai-1200.webp 1200w"
+     sizes="(max-width: 640px) 160px,
+            (max-width: 768px) 200px,
+            (max-width: 1024px) 240px,
+            (max-width: 1280px) 300px,
+            360px">
 </a>
 
           <!-- Description -->
@@ -325,9 +322,9 @@
           </a>
         </div>
       </div>
-      <h3 class="social-disclaimer text-xs text-muted-foreground/60 max-w-xl mx-auto px-4" style="margin-top: 0.5rem; line-height: 1.2; font-size: 0.75rem;">
-        เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง
-      </h3>
+      <h3 class="social-disclaimer text-xs text-gray-700 max-w-xl mx-auto px-4" style="margin-top:0.5rem; line-height:1.2; font-size:0.75rem;">
+  เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง
+</h3>
     </section>
 
 
