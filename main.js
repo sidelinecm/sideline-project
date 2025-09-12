@@ -458,21 +458,32 @@ function createProfileCard(profile = {}) {
         return sectionWrapper;
     }
     
-    function createSearchResultSection(profiles) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'section-content-wrapper bg-accent';
-        wrapper.setAttribute('data-animate-on-scroll', '');
-        wrapper.innerHTML = `
-            <div class="p-6 md:p-8">
-                <h3 class="text-xl sm:text-2xl font-bold text-foreground">ผลการค้นหา</h3>
-                <p class="mt-2 text-sm text-muted-foreground">พบ ${profiles.length} โปรไฟล์ที่ตรงกับเงื่อนไข</p>
-            </div>
-            <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-8 pb-6 md:pb-8"></div>`;
-        const grid = wrapper.querySelector('.profile-grid');
-        grid.append(...profiles.map(createProfileCard));
-        return wrapper;
-    }
+    function createSearchResultSection(profiles = []) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'section-content-wrapper bg-accent';
+  wrapper.setAttribute('data-animate-on-scroll', '');
 
+  const count = Array.isArray(profiles) ? profiles.length : 0;
+
+  wrapper.innerHTML = `
+    <div class="p-6 md:p-8">
+      <h3 class="text-xl sm:text-2xl font-bold text-foreground">ผลการค้นหา</h3>
+      <p class="mt-2 text-sm text-muted-foreground">
+        ${count > 0 ? `พบ ${count} โปรไฟล์ที่ตรงกับเงื่อนไข` : 'ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข'}
+      </p>
+    </div>
+    <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-8 pb-6 md:pb-8"></div>
+  `;
+
+  const grid = wrapper.querySelector('.profile-grid');
+
+  // เฉพาะกรณีมีข้อมูล Array จริง
+  if (Array.isArray(profiles) && profiles.length > 0) {
+    grid.append(...profiles.map(createProfileCard));
+  }
+
+  return wrapper;
+}
     // --- OTHER INITIALIZERS & UTILITIES ---
 
     // ✅ [UX] Initialize 3D hover effect for profile cards
@@ -553,64 +564,99 @@ function createProfileCard(profile = {}) {
         });
     }
 
-    function initAgeVerification() {
-    const overlay = document.getElementById('age-verification-overlay');
-    if (!overlay) return;
+// ✅ ตรวจสอบและแสดง Age Verification Overlay ทุกครั้ง (ยกเว้นบอท)
+function initAgeVerification() {
+  const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
+  const isBot = (ua) => botUserAgents.test(ua);
 
-    // --- BOT & CRAWLER DETECTION (modern + fallback) ---
-    const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
+  const showModal = () => createAgeModal();
 
-    if (navigator.userAgentData) {
-        // ✅ ใช้ API ใหม่
-        navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
-            const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
-            if (botUserAgents.test(brandInfo)) {
-                overlay.classList.add('hidden');
-                return; // Bot จะเห็นเว็บโดยไม่โดน Age Verification
-            }
-        });
-    } else {
-        // ✅ fallback สำหรับ browser เก่า (Safari, Firefox ฯลฯ)
-        const currentUserAgent = navigator.userAgent || "";
-        if (botUserAgents.test(currentUserAgent)) {
-            overlay.classList.add('hidden');
-            return;
-        }
-    }
-    // --- END BOT DETECTION ---
-
-    const modalContent = overlay.querySelector('.age-modal-content');
-    if (!modalContent) {
-        overlay.classList.add('hidden');
-        return;
-    }
-
-    // แสดงหน้าต่างสำหรับผู้ใช้ทั่วไปเสมอ
-    overlay.classList.remove('hidden');
-    gsap.to(overlay, { opacity: 1, duration: 0.3 });
-    gsap.fromTo(modalContent, { scale: 0.9, opacity: 0, y: -20 }, 
-        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.1 });
-
-    const confirmBtn = document.getElementById('confirmAgeButton');
-    const cancelBtn = document.getElementById('cancelAgeButton');
-
-    const closeAction = () => {
-        gsap.to(modalContent, { scale: 0.95, opacity: 0, y: 10, duration: 0.3, ease: 'power2.in' });
-        gsap.to(overlay, { opacity: 0, duration: 0.3, delay: 0.1, onComplete: () => overlay.classList.add('hidden') });
-    };
-
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', () => {
-            closeAction();
-        });
-    }
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            window.location.href = 'https://www.google.com';
-        });
-    }
+  if (navigator.userAgentData) {
+    navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
+      const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
+      if (!isBot(brandInfo)) showModal();
+    });
+  } else {
+    const ua = navigator.userAgent || "";
+    if (!isBot(ua)) showModal();
+  }
 }
+
+// ✅ ฟังก์ชันสร้าง modal (โครงสร้างเหมือนตอนใช้ HTML ตรงๆ)
+function createAgeModal() {
+  document.getElementById("age-verification-overlay")?.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "age-verification-overlay";
+  overlay.className =
+    "fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity opacity-0";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-labelledby", "age-modal-title");
+
+  overlay.innerHTML = `
+    <div class="age-modal-content relative space-y-6 bg-gray-900 text-white rounded-2xl p-6 max-w-md w-full shadow-2xl scale-95 opacity-0 transition-all">
+      <h2 id="age-modal-title" class="text-2xl font-bold uppercase leading-tight text-center">
+        <span class="text-primary">Sideline Chiangmai</span> is an Adults Only
+        <span class="age-badge-inline">20+</span> Website!
+      </h2>
+      <p class="text-sm text-gray-300 leading-relaxed text-center">
+        คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ 
+        คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 
+        <span class="font-bold text-red-400">20 ปีบริบูรณ์</span>
+      </p>
+      <div class="flex justify-center gap-4 pt-2">
+        <button id="cancelAgeButton" class="age-btn age-btn-cancel bg-red-600 text-white px-5 py-2 rounded-full shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
+          ออก
+        </button>
+        <button id="confirmAgeButton" class="age-btn age-btn-confirm bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
+          ยืนยัน
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const modal = overlay.querySelector(".age-modal-content");
+
+  // Animation
+  requestAnimationFrame(() => {
+    overlay.classList.remove("opacity-0");
+    modal.classList.remove("opacity-0", "scale-95");
+  });
+
+  // Focus trap
+  const focusable = modal.querySelectorAll("button");
+  let focusIndex = 0;
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      focusIndex = (focusIndex + (e.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
+      focusable[focusIndex].focus();
+    } else if (e.key === "Escape") {
+      window.location.href = "https://www.google.com";
+    }
+  });
+  focusable[0].focus();
+
+  // ปุ่ม
+  const confirmBtn = modal.querySelector("#confirmAgeButton");
+  const cancelBtn = modal.querySelector("#cancelAgeButton");
+
+  const closeModal = () => {
+    modal.classList.add("scale-95", "opacity-0");
+    overlay.classList.add("opacity-0");
+    setTimeout(() => overlay.remove(), 300);
+  };
+
+  confirmBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", () => (window.location.href = "https://www.google.com"));
+}
+
+// ✅ เริ่มทำงานเมื่อ DOM โหลดเสร็จ
+document.addEventListener("DOMContentLoaded", initAgeVerification);
+   
     function initLightbox() {
         const lightbox = document.getElementById('lightbox');
         const wrapper = document.getElementById('lightbox-content-wrapper-el');
