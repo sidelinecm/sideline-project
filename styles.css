@@ -1905,8 +1905,21 @@ html.dark .trust-badge {
 }
 
 .social-disclaimer {
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    color: #000; /* แทน red หรือ muted-foreground/60 */
+.social-disclaimer {
+    color: #b71c1c; /* dark red */
 }
+.social-disclaimer i {
+    color: #b71c1c;
+}    font-size: 14px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* option ถ้าต้องการ effect */
+    text-align: center;
+    line-height: 1.5;
+}
+.social-disclaimer i {
+    color: #000; /* แทน red */
+}
+
 /* =============================================
    Hero Search Form - Full Responsive & Modern
 ============================================= */
