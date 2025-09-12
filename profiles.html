@@ -66,27 +66,26 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- Preconnect to CDN / APIs -->
+  <!-- 1) Preconnects — วางบนสุด -->
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-  <!-- Preload critical CSS (non-blocking) -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript>
-    <link rel="stylesheet" href="/styles.css">
-  </noscript>
+  <!-- 2) Preload ฟอนต์หลัก (มาก่อน CSS) -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- Async load Font Awesome -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <!-- 3) Main stylesheet — non-blocking -->
+  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+
+  <!-- 4) Font Awesome stylesheet — non-blocking -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   </noscript>
 
-  <!-- Preload web fonts -->
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-
-  <!-- JavaScript module preload -->
+  <!-- 5) Module preload (JS) -->
   <link rel="modulepreload" href="/main.js">
 
   <script type="application/ld+json">
@@ -408,9 +407,33 @@
         </div>
     </div>
 </div>
+<!-- โหลดสคริปต์หลัก (main.js) -->
 <script type="module" src="/main.js"></script>
+
+<!-- โหลด Font Awesome แบบ deferred (ไม่บล็อก render, fallback ถ้า preload fail) -->
+<script>
+(function(){
+  function loadFA(){
+    if(document.querySelector('link[href*="font-awesome"], link[href*="fontawesome"], style[data-fa]')) return;
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
+    l.crossOrigin = 'anonymous';
+    document.head.appendChild(l);
+  }
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadFA, {timeout:2000});
+  } else {
+    window.addEventListener('load', loadFA);
+    setTimeout(loadFA, 3000);
+  }
+})();
+</script>
+
+<!-- เพิ่มคลาส .loaded หลัง DOM พร้อม + ลงทะเบียน Service Worker -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // ให้แน่ใจว่า styles.css มี .loaded { ... } เพื่อใช้กับ transition
     document.body.classList.add('loaded');
   });
 
@@ -424,6 +447,7 @@
     });
   }
 </script>
+
 
 </body>
 </html>
