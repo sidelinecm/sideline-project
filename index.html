@@ -64,12 +64,16 @@
   <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp">
   <meta name="twitter:image:alt" content="โลโก้ Sideline Chiangmai พร้อมตัวอย่างโปรไฟล์น้องๆ บนพื้นหลังสีชมพู">
 
-  <!-- 11) Theme color & icons -->
+ <!-- 11) Theme color & icons -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+
+  <!-- ✅ 11.1) Web App Manifest -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#db2777">
 <link rel="preload"
       as="image"
       type="image/webp"
@@ -534,8 +538,8 @@
     </div>
 </div>
 
+<script type="module" src="/main.js"></script>
 
-<script type="module" defer src="/main.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('loaded');
@@ -551,6 +555,7 @@
     });
   }
 </script>
+
 
 </body>
 </html>

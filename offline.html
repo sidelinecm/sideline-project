@@ -71,5 +71,25 @@
       </a>
     </div>
   </main>
+
+<script type="module" src="/main.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('loaded');
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => navigator.serviceWorker.register('/sw.js'));
+      } else {
+        setTimeout(() => navigator.serviceWorker.register('/sw.js'), 1500);
+      }
+    });
+  }
+</script>
+
+
 </body>
 </html>
