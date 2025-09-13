@@ -78,8 +78,13 @@
   <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 
-  <!-- ✅ 11.1) Web App Manifest -->
- <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1280.webp" imagesrcset="/images/hero-sidelinechiangmai-640.webp 640w, /images/hero-sidelinechiangmai-1280.webp 1280w, /images/hero-sidelinechiangmai-1920.webp 1920w" imagesizes="(max-width: 768px) 100vw, 1280px" fetchpriority="high">
+  <link rel="preload" as="image"
+      href="/images/hero-sidelinechiangmai-1280.webp"
+      imagesrcset="/images/hero-sidelinechiangmai-640.webp 640w,
+                    /images/hero-sidelinechiangmai-1280.webp 1280w,
+                    /images/hero-sidelinechiangmai-1920.webp 1920w"
+      imagesizes="(max-width: 768px) 100vw, 1280px"
+      fetchpriority="high">
   <!-- 12) Structured data (JSON-LD) -->
   <script type="application/ld+json">
   {
@@ -214,18 +219,32 @@
 </h1>
 <a href="/" aria-label="Sideline Chiangmai หน้าแรก"
    class="block mx-auto w-[160px] sm:w-[200px] md:w-[240px] lg:w-[300px] xl:w-[360px]">
- <img 
-  src="/images/hero-sidelinechiangmai-1280.webp"
-  srcset="/images/hero-sidelinechiangmai-640.webp 640w,
-          /images/hero-sidelinechiangmai-1280.webp 1280w,
-          /images/hero-sidelinechiangmai-1920.webp 1920w"
-  sizes="(max-width: 768px) 100vw, 1280px"
+ <!-- Hero Image 1200x904 -->
+<img 
+  src="/images/hero-sidelinechiangmai-1200x904.webp"
+  srcset="
+    /images/hero-sidelinechiangmai-600x452.webp 600w,
+    /images/hero-sidelinechiangmai-800x603.webp 800w,
+    /images/hero-sidelinechiangmai-1200x904.webp 1200w
+  "
+  sizes="(max-width: 768px) 100vw, 1200px"
   alt="Sideline Chiangmai - สาวไซด์ไลน์เชียงใหม่ รับงาน"
-  class="w-full h-auto object-cover"
-  width="1280" height="720"
+  class="w-full h-auto object-contain"
+  width="1200"
+  height="904"
   loading="eager"
   fetchpriority="high"
-  style="aspect-ratio: 1280 / 720">
+>
+
+<!-- Thumbnail / Small Image 256x193 -->
+<img 
+  src="/images/thumb-sidelinechiangmai-256x193.webp"
+  alt="Thumbnail Sideline Chiangmai"
+  class="w-full h-auto object-contain"
+  width="256"
+  height="193"
+  loading="lazy"
+>
 </a>
 
 
