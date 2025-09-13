@@ -566,19 +566,28 @@ function createProfileCard(profile = {}) {
 
 // ✅ ตรวจสอบและแสดง Age Verification Overlay ทุกครั้ง (ยกเว้นบอท)
 function initAgeVerification() {
-  const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
+  const botUserAgents =
+    /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
   const isBot = (ua) => botUserAgents.test(ua);
 
   const showModal = () => createAgeModal();
 
   if (navigator.userAgentData) {
-    navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
-      const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
-      if (!isBot(brandInfo)) showModal();
-    });
+    // ใช้ค่า low-entropy ที่ยังรองรับ ไม่ใช้ getHighEntropyValues
+    const brandInfo = navigator.userAgentData.brands
+      .map((b) => b.brand)
+      .join(" ");
+    const platform = navigator.userAgentData.platform || "";
+
+    if (!isBot(`${brandInfo} ${platform}`)) {
+      showModal();
+    }
   } else {
+    // fallback ไปใช้ userAgent แบบดั้งเดิม
     const ua = navigator.userAgent || "";
-    if (!isBot(ua)) showModal();
+    if (!isBot(ua)) {
+      showModal();
+    }
   }
 }
 
