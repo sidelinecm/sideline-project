@@ -14,9 +14,16 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- 3) Main stylesheet — non-blocking -->
+
+  <style>
+    body {
+  color: #202020;
+}
+  </style>
+
+
   <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+<noscript><link rel="stylesheet" href="/styles.css"></noscript>
 
   <!-- 4) Font Awesome stylesheet — non-blocking -->
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
@@ -339,7 +346,7 @@
      <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener noreferrer"
    class="social-item bio site hover:underline text-pink-600 hover:text-pink-700 font-medium"
    aria-label="Bio.site">
-   <img src="images/favicon.ico" alt="Bio.site" class="inline w-4 h-4 mr-1" />
+   <img src="images/favicon.ico" alt="Bio.site" class="inline w-4 h-4 mr-1" >
    Bio.site
 </a>
 
@@ -450,7 +457,7 @@
         
         <div class="lg:col-span-1">
             <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
-                <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
+                <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
             </a>
             <p class="text-sm text-muted-foreground" style="margin: 0; line-height: 1.2; font-size: 0.875rem;">
                 ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
