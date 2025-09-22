@@ -1,4 +1,120 @@
 
+@font-face{font-family:Prompt;font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/prompt-v11-latin_thai-regular.woff2) format("woff2")}
+
+@font-face{font-family:Prompt;font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/prompt-v11-latin_thai-700.woff2) format("woff2")}
+
+
+
+
+
+@keyframes aurora-1{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(1turn)}}
+
+@keyframes aurora-2{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(-1turn)}}
+
+:root{--font-base:"Prompt",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--font-heading:"Prompt",system-ui,sans-serif;--radius:1rem;--background:220 20% 98%;--foreground:220 15% 25%;--card:0 0% 100%;--primary:340 85% 58%;--primary-glow:340 85% 65%;--secondary:260 85% 65%;--secondary-glow:260 85% 70%;--muted:220 25% 94%;--muted-foreground:220 10% 45%;--border:220 20% 92%;--accent:220 60% 96%}
+
+html.dark{--background:225 15% 10%;--foreground:220 20% 90%;--card:225 15% 16%;--primary:340 90% 68%;--primary-glow:340 95% 72%;--secondary:260 90% 75%;--secondary-glow:260 95% 80%;--muted:225 15% 20%;--border:225 12% 25%;--accent:225 15% 20%}
+
+@media (max-width: 768px) {
+  h1 { font-size: 1.875rem; }  /* ~30px */
+  h2 { font-size: 1.5rem; }    /* ~24px */
+  h3 { font-size: 1.25rem; }   /* ~20px */
+  h4 { font-size: 1.125rem; }  /* ~18px */
+}
+
+/* Base Text */
+body {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #555; /* เทากลาง อ่านง่าย ไม่เข้มเกินไป */
+  font-family: "Inter", "Prompt", sans-serif; /* ฟอนต์ modern + รองรับไทย */
+}
+
+/* h1 - หัวข้อหลักสุด */
+h1 {
+  font-size: 2.25rem;   /* ~36px */
+  line-height: 1.2;
+  font-weight: 700;
+  color: #b8860b;       /* ทองเข้ม หรูหรา */
+  margin-bottom: 1rem;
+}
+/* Hero h1 override (ตรงกับ scale เรากำหนด) */
+.hero-title {
+  font-size: 2.25rem;   /* 36px base */
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 1.875rem; /* 30px บนมือถือ */
+  }
+}
+/* h2 - หัวข้อรอง */
+h2 {
+  font-size: 1.75rem;   /* ~28px */
+  line-height: 1.25;
+  font-weight: 700;
+  color: #222;          /* ดำเข้ม */
+  margin-bottom: 0.9rem;
+}
+
+/* h3 - หัวข้อย่อย */
+h3 {
+  font-size: 1.375rem;  /* ~22px */
+  line-height: 1.3;
+  font-weight: 600;
+  color: #333;          /* เทาเข้ม */
+  margin-bottom: 0.75rem;
+}
+
+/* h4 - หัวข้อเล็ก */
+h4 {
+  font-size: 1.125rem;  /* ~18px */
+  line-height: 1.3;
+  font-weight: 600;
+  color: #444;          /* เทากลางเข้ม */
+  margin-bottom: 0.6rem;
+}
+
+/* Paragraph */
+p {
+  font-size: 1rem;      /* ~16px */
+  line-height: 1.5;
+  font-weight: 400;
+  color: #555;          /* เทากลาง */
+  margin-bottom: 1rem;
+}
+
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.delay-150 { animation-delay: 0.15s; }
+.delay-300 { animation-delay: 0.3s; }
+
+.age-modal-content h2 {
+  color: #f0f0f5 !important;
+}
+.age-modal-content p {
+  color: #d1d5db !important; /* หรือ text-gray-300 */
+}
+p{margin:0 0 1em}
+
+.card{background:hsl(var(--card));border-radius:var(--radius);border:1px solid hsl(var(--border));padding:1rem;box-shadow:0 4px 12px hsl(var(--border)/.2);transition:background-color .3s ease,border-color .3s ease}
 
 
 
