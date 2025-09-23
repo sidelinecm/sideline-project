@@ -1283,7 +1283,6 @@ header nav a[aria-current=page]{text-shadow:0 0 10px hsl(var(--primary-glow)/.2)
 /* 1. GLOBAL STYLES, VARIABLES & ANIMATIONS
 /* =================================================================== */
 
-/* --- Base Body & HTML --- */
 html, body {
   width: 100%;
   max-width: 100vw;
@@ -1296,8 +1295,6 @@ html, body {
   transition: background-color var(--transition-medium), color var(--transition-medium);
 }
 
-/* --- Global Text & Section Colors --- */
-/* Note: These are general rules, more specific rules below will override them. */
 h1, h2, h3, h4, h5, h6 {
   color: #fff;
   text-shadow: 0 2px 8px rgba(0,0,0,0.5);
@@ -1311,17 +1308,9 @@ section {
   color: #222;
 }
 
-
-/* --- Keyframe Animations --- */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -1329,26 +1318,22 @@ section {
   to { opacity: 1; }
 }
 
-.animate-fadeInUp {
-  animation: fadeInUp 0.6s ease-in-out forwards;
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-in-out forwards;
-}
+.animate-fadeInUp { animation: fadeInUp 0.6s ease-in-out forwards; }
+.animate-fadeIn { animation: fadeIn 0.6s ease-in-out forwards; }
 
 
 /* =================================================================== */
 /* 2. HERO SECTION & SEARCH FORM
 /* =================================================================== */
 
-/* --- Hero Section General --- */
 section.hero-h1-revised {
   width: 100%;
   max-width: 100vw;
   padding: 2rem 1rem;
   margin: 0 auto;
   box-sizing: border-box;
+  position: relative;
+  z-index: 5;
 }
 
 .hero-h1-revised h1,
@@ -1372,40 +1357,37 @@ section.hero-h1-revised {
   transition: transform 0.3s ease;
 }
 
-.section-header-card img:hover {
-  transform: scale(1.05);
-}
+.section-header-card img:hover { transform: scale(1.05); }
 
-/* --- Search Form Wrapper (#search-section / #hero-form) --- */
-/* Merged styles for #hero-form and #search-section */
 #search-section,
 #hero-form {
-  background: rgba(255, 255, 255, 0.35);
+  position: relative;
+  z-index: 10;
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(18px) saturate(120%);
   -webkit-backdrop-filter: blur(18px) saturate(120%);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
   animation: fadeInUp 1s ease;
   transition: all 0.3s ease;
+  padding: 1.5rem;
 }
 
 #search-section:hover,
-#hero-form:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
-}
+#hero-form:hover { transform: translateY(-4px); }
 
-/* --- Search Form Inputs & Selects --- */
 #search-section input,
 #search-section select,
 #hero-form input,
 #hero-form select {
-  background: rgba(255,255,255,0.9);
-  border: 1px solid hsl(var(--border)); /* Using border from later definition for robustness */
+  background: rgba(255,255,255,1);
+  border: 1px solid hsl(var(--border));
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  color: #111;
 }
 
 #search-section input:focus,
@@ -1413,11 +1395,10 @@ section.hero-h1-revised {
 #hero-form input:focus,
 #hero-form select:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.5); /* Primary glow from var is preferred */
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.5);
   transform: scale(1.02);
 }
 
-/* --- Search Form Buttons --- */
 #keyword-search-btn {
   background: linear-gradient(90deg, #ec4899, #8b5cf6);
   border: none;
@@ -1427,6 +1408,7 @@ section.hero-h1-revised {
   font-weight: bold;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
 }
 
 #keyword-search-btn:hover {
@@ -1435,13 +1417,14 @@ section.hero-h1-revised {
 }
 
 #reset-search-btn {
-  background: rgba(229, 231, 235, 0.8);
+  background: rgba(229,231,235,0.8);
   border-radius: 999px;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 #reset-search-btn:hover {
-  background: rgba(209, 213, 219, 1);
+  background: rgba(209,213,219,1);
   transform: scale(1.05);
 }
 
@@ -1450,109 +1433,104 @@ section.hero-h1-revised {
 /* 3. SECTION HEADERS & CONTENT WRAPPERS
 /* =================================================================== */
 
-/* --- General Heading Styles with Glow Effects --- */
 h1.text-primary, h2.text-primary, h3.text-primary {
-  text-shadow: 0 0 25px hsl(var(--primary-glow) / 0.5),
-               0 0 5px hsl(var(--primary-glow) / 0.7);
+  text-shadow: 0 0 25px hsl(var(--primary-glow)/0.5),
+               0 0 5px hsl(var(--primary-glow)/0.7);
 }
 
-.title-accent {
-  text-shadow: 0 0 20px hsl(var(--secondary-glow) / 0.5);
-}
+.title-accent { text-shadow: 0 0 20px hsl(var(--secondary-glow)/0.5); }
 
-/* --- H2 LCP Fix & Base Style --- */
 h2 {
-  font-family: "Prompt", "Inter", sans-serif;
+  font-family: "Prompt","Inter",sans-serif;
   font-weight: 700;
   font-size: 1.75rem;
   line-height: 1.25;
-  color: #b8860b; /* Fallback color */
+  color: #b8860b;
 }
-@media (max-width: 768px) {
-  h2 { font-size: 1.5rem; }
+@media(max-width:768px){h2{font-size:1.5rem;}}
+
+.section-content-wrapper {
+  background-color: hsl(var(--card)/0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid hsl(var(--border)/0.5);
+  box-shadow: 0 8px 32px 0 hsl(var(--foreground)/0.08);
+  border-radius: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
 }
 
-/* --- Content Section Wrapper (Glassmorphism) --- */
-.section-content-wrapper {
-    background-color: hsl(var(--card) / 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: 0 8px 32px 0 hsl(var(--foreground) / 0.08);
-    border-radius: 1.5rem;
-    margin-bottom: 2.5rem;
-}
 .section-content-wrapper p {
   font-size: 0.95rem;
-  color: #f5f5f5; /* Default for glass sections */
+  color: #f5f5f5;
   line-height: 1.5;
 }
 
-/* --- Province & Search Result Headers (Consolidated to Gradient Style) --- */
 .province-section-header,
 .search-results-header {
-    font-size: clamp(1.5rem, 4vw, 1.75rem);
-    font-weight: 800;
-    background: linear-gradient(120deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 10px hsl(var(--primary-glow) / 0.1);
-    margin-bottom: 0.25rem;
-}
-/* Adding specific flex properties from another definition */
-.province-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.6rem;
-}
-
-/* --- Featured Section Header (`#featured-heading`) --- */
-#featured-heading {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin: 0 auto;
-  text-align: center;
-  font-size: clamp(1.6rem, 2.4vw + 0.6rem, 2.4rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  -webkit-font-smoothing: antialiased;
-  background: linear-gradient(90deg, #facc15, #f59e0b 60%, #f97316);
+  font-size: clamp(1.5rem,4vw,1.75rem);
+  font-weight: 800;
+  background: linear-gradient(120deg,hsl(var(--primary)) 0%,hsl(var(--secondary)) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px hsl(var(--primary-glow)/0.1);
+  margin-bottom: 0.25rem;
+}
+
+.province-section-header {
+  display:flex;
+  align-items:center;
+  gap:0.6rem;
+}
+
+#featured-heading {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.6rem;
+  margin:0 auto;
+  text-align:center;
+  font-size:clamp(1.6rem,2.4vw+0.6rem,2.4rem);
+  line-height:1.02;
+  letter-spacing:-0.02em;
+  -webkit-font-smoothing: antialiased;
+  background: linear-gradient(90deg,#facc15,#f59e0b 60%,#f97316);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
   text-shadow: 0 6px 20px rgba(250,210,70,0.12);
 }
 
 .featured-section .section-content-wrapper p,
 .featured-section .section-content-wrapper .text-muted-foreground {
-  color: rgba(17, 24, 39, 0.82);
-  font-size: clamp(.86rem, 0.9vw + .6rem, .95rem);
+  color: rgba(17,24,39,0.82);
+  font-size: clamp(.86rem,0.9vw+.6rem,.95rem);
   line-height: 1.6;
   margin: 0.5rem auto 0;
   max-width: 74ch;
   text-shadow: 0 1px 0 rgba(255,255,255,0.5);
 }
 
-/* --- Sub-headers & Meta --- */
 .featured-section .meta-row {
   display:flex;
   align-items:center;
   justify-content:center;
   gap: .8rem;
-  margin: 1rem 0 0.75rem;
-  font-weight: 600;
-  color: var(--muted-foreground, #6b7280);
+  margin:1rem 0 0.75rem;
+  font-weight:600;
+  color: var(--muted-foreground,#6b7280);
 }
 .featured-section .meta-row .pin {
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:28px; height:28px; border-radius:50%;
+  width:28px;
+  height:28px;
+  border-radius:50%;
   background: linear-gradient(135deg,#ff6b6b,#ffb86b);
-  box-shadow: 0 6px 18px rgba(255,107,107,0.12);
-  color:#fff; font-size:0.95rem;
+  box-shadow:0 6px 18px rgba(255,107,107,0.12);
+  color:#fff;
+  font-size:0.95rem;
 }
 
 
@@ -1560,68 +1538,165 @@ h2 {
 /* 4. PROFILE CARDS, COUNTERS & BADGES
 /* =================================================================== */
 
-/* --- Profile Card --- */
-.profile-card-new .card-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.5rem 0.75rem;
-  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.6));
-  border-radius: 0 0 1rem 1rem;
+.profile-card-new {
+  position:relative;
+  overflow:hidden;
+  border-radius:1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.profile-card-new .card-info h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.8);
-}
-.profile-card-new .card-info p {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #f5f5f5;
-  margin: 0.2rem 0 0;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-.profile-card-new .card-info p::before {
-  content: "📍";
-  font-size: 0.9rem;
+.profile-card-new:hover {
+  transform: scale(1.02);
+  box-shadow:0 12px 28px rgba(0,0,0,0.25);
 }
 
-/* --- Profile Statistics Grid --- */
+.profile-card-new .card-info {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:0.5rem 0.75rem;
+  background: linear-gradient(180deg,transparent,rgba(0,0,0,0.6));
+  border-radius:0 0 1rem 1rem;
+}
+.profile-card-new .card-info h3 {
+  font-size:1.1rem;
+  font-weight:700;
+  color:#fff;
+  margin:0;
+  text-shadow:0 2px 6px rgba(0,0,0,0.8);
+}
+.profile-card-new .card-info p {
+  font-size:0.85rem;
+  font-weight:500;
+  color:#f5f5f5;
+  margin:0.2rem 0 0;
+  display:flex;
+  align-items:center;
+  gap:0.3rem;
+}
+.profile-card-new .card-info p::before { content:"📍"; font-size:0.9rem; }
+
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 1rem;
-  margin: 1rem auto;
-  padding: 1rem;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
+  gap:1rem;
+  margin:1rem auto;
+  padding:1rem;
   background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border-radius: 1rem;
-  text-align: center;
+  border-radius:1rem;
+  text-align:center;
   backdrop-filter: blur(6px);
 }
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 .stat-item .value {
-  font-size: 2rem;
-  font-weight: 900;
-  background: linear-gradient(90deg, #ff3d7f, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 0.2rem;
+  font-size:2rem;
+  font-weight:900;
+  background: linear-gradient(90deg,#ff3d7f,#8b5cf6);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin-bottom:0.2rem;
 }
 .stat-item .label {
-  font-size: 0.85rem;
-  color: #eee;
-  opacity: 0.85;
+  font-size:0.85rem;
+  color:#eee;
+  opacity:0.85;
 }
 
+/* =================================================================== */
+/* 5. RESPONSIVE FIXES
+/* =================================================================== */
+@media(max-width:1024px){
+  #search-section,#hero-form{
+    padding:1rem;
+  }
+  .province-section-header,
+  .search-results-header{
+    font-size:clamp(1.35rem,5vw,1.6rem);
+  }
+}
+@media(max-width:640px){
+  .section-content-wrapper{
+    padding:1rem;
+  }
+  #keyword-search-btn,#reset-search-btn{
+    width:100%;
+    padding:0.75rem;
+  }
+}
+/* HERO FORM SECTION - FULL COLOR VERSION */
+#hero-form-section {
+  background-color: #ffffff; /* สีขาวเต็ม */
+  color: #111; /* ตัวอักษรสีเข้มอ่านง่าย */
+  border-radius: 2rem;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25); /* เงาลึกเด่น */
+  position: relative;
+  z-index: 20;
+  transition: all 0.3s ease;
+}
+
+/* FORM ELEMENTS */
+#hero-form input,
+#hero-form select {
+  background-color: #f3f4f6; /* สีพื้น input */
+  border: 1px solid #d1d5db; /* ขอบชัดเจน */
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #111;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+#hero-form input:focus,
+#hero-form select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(236,72,153,0.5);
+  transform: scale(1.02);
+}
+
+/* BUTTONS */
+#keyword-search-btn {
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
+  color: #fff;
+  padding: 0.75rem 2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(236,72,153,0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#keyword-search-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 28px rgba(236,72,153,0.4);
+}
+
+#reset-search-btn {
+  background-color: #e5e7eb; /* สีเทาชัดเจน */
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  color: #111;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+#reset-search-btn:hover {
+  background-color: #d1d5db;
+}
+
+/* ICONS INSIDE INPUT */
+#hero-form span i {
+  color: #6b7280; /* สีไอคอนชัดเจน */
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  #hero-form-section { padding: 1.5rem; }
+  #hero-form input,#hero-form select { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+  #keyword-search-btn,#reset-search-btn { width: 100%; justify-content: center; }
+}
 /* --- Badges (Availability, Featured, Profile Count) --- */
 /* Base Availability Badge Style */
 .availability-badge,
