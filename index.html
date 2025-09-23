@@ -89,14 +89,12 @@
   <link rel=manifest href=/manifest.webmanifest>
 
   
-  <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp"
-  imagesrcset="/images/hero-sidelinechiangmai-251.webp 251w,
-               /images/hero-sidelinechiangmai-600.webp 600w,
-               /images/hero-sidelinechiangmai-1200.webp 1200w"
-  imagesizes="(max-width: 640px) 160px,
-              (max-width: 768px) 200px,
-              (max-width: 1024px) 240px,
-              (max-width: 1280px) 300px,
+ <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp"
+  imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w,
+                /images/hero-sidelinechiangmai-800.webp 800w,
+                /images/hero-sidelinechiangmai-1200.webp 1200w"
+  imagesizes="(max-width: 640px) 100vw,
+              (max-width: 1024px) 80vw,
               360px"
   fetchpriority="high">
   
@@ -224,6 +222,7 @@
         <a href=https://line.me/ti/p/_faNcjQ3xx target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-line text-lg" aria-hidden=true></i><span>ติดต่อผ่าน LINE</span></a>
     </div>
 </div>
+
 <main id="main-content" class="min-h-screen pt-12">
   <div class="container mx-auto px-4 space-y-12 md:space-y-16">
 
@@ -231,18 +230,47 @@
       <h1 id="hero-heading" class="sr-only">
         Sideline Chiangmai | สาวรับงานไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก100% ไม่มีมัดจำ รับงานเชียงใหม่
       </h1>
+      
       <a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-[360px] animate-fadeIn">
-        <img src="/images/hero-sidelinechiangmai-600.webp" alt="โลโก้ Sideline Chiangmai" class="mx-auto h-auto w-full" 
-             width="600" height="452" loading="eager" fetchpriority="high" 
-             srcset="/images/hero-sidelinechiangmai-251.webp 251w, /images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w" 
-             sizes="(max-width: 640px) 160px, (max-width: 768px) 200px, (max-width: 1024px) 240px, (max-width: 1280px) 300px, 360px">
+        <!-- Desktop preload -->
+        <img 
+          src="/images/hero-sidelinechiangmai-1200.webp"
+          alt="โลโก้ Sideline Chiangmai"
+          class="hidden md:block mx-auto w-full h-auto"
+          width="1200"
+          height="904"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          srcset="
+            /images/hero-sidelinechiangmai-600.webp 600w,
+            /images/hero-sidelinechiangmai-800.webp 800w,
+            /images/hero-sidelinechiangmai-1200.webp 1200w"
+          sizes="(min-width: 1024px) 360px"
+          style="max-width:100%;height:auto;">
+
+        <!-- Mobile lazy-load -->
+        <img 
+          src="/images/hero-sidelinechiangmai-600.webp"
+          alt="โลโก้ Sideline Chiangmai"
+          class="block md:hidden mx-auto w-full h-auto"
+          width="600"
+          height="452"
+          loading="lazy"
+          decoding="async"
+          srcset="
+            /images/hero-sidelinechiangmai-600.webp 600w,
+            /images/hero-sidelinechiangmai-800.webp 800w"
+          sizes="100vw"
+          style="max-width:100%;height:auto;">
       </a>
-     <p class="text-sm text-white animate-fadeInUp [text-shadow:0_1px_3px_rgba(0,0,0,0.4)]">
-    แหล่งรวม <strong>สาวรับงานไซด์ไลน์เชียงใหม่</strong> ตรงปก 100% ฟีลแฟนจริงจัง ไม่มีมัดจำ นัดง่าย ปลอดภัย
-</p>
+
+      <p class="text-sm text-white animate-fadeInUp [text-shadow:0_1px_3px_rgba(0,0,0,0.4)]">
+        แหล่งรวม <strong>สาวรับงานไซด์ไลน์เชียงใหม่</strong> ตรงปก 100% ฟีลแฟนจริงจัง ไม่มีมัดจำ นัดง่าย ปลอดภัย
+      </p>
 
     </section>
-
+  
    <section id="search-section" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp">
   <form id="search-form" action="/profiles.html" method="GET" aria-labelledby="search-form-heading">
     <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
