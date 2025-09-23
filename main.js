@@ -554,19 +554,11 @@ function renderProfiles(filteredProfiles, isSearching) {
     initScrollAnimations();
 }
 
-/**
- * REFACTORED: สร้าง Profile Card ที่เข้ากับ styles.css เดิม
- * - ใช้ .card-overlay สำหรับเอฟเฟกต์กระจกฝ้า
- * - ใช้ระบบคลาส .availability-badge และ .status-[type] สำหรับสถานะ
- * - เพิ่ม .featured-badge สำหรับป้ายแนะนำ
- */
 function createProfileCard(profile = {}) {
     const card = document.createElement('div');
-    // ใช้คลาสจาก styles.css เดิมสำหรับ 3D effect
     card.className = 'profile-card-new-container';
 
     const cardInner = document.createElement('div');
-    // ลบคลาส shadow และ transition ที่ซ้ำซ้อนออก เพราะ styles.css จัดการอยู่แล้ว
     cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl';
     cardInner.setAttribute('data-profile-id', profile.id || '');
     cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
@@ -575,33 +567,41 @@ function createProfileCard(profile = {}) {
 
     const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
         src: '/images/placeholder-profile.webp',
-        alt: profile.name || 'profile',
+        alt: profile.name || 'โปรไฟล์',
         width: 600,
         height: 800
     };
 
+    const baseUrl = mainImage.src.split('?')[0];
+
     const img = document.createElement('img');
-    img.className = 'card-image'; // คลาสนี้ถูกใช้งานใน styles.css
-    img.src = mainImage.src;
-    img.alt = mainImage.alt || '';
-    img.loading = 'lazy';
-    img.decoding = 'async';
+    img.className = 'card-image w-full h-auto object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105';
+    img.src = `${baseUrl}?width=400&quality=80`;
+    img.srcset = `
+        ${baseUrl}?width=300&quality=80 300w,
+        ${baseUrl}?width=400&quality=80 400w,
+        ${baseUrl}?width=600&quality=80 600w
+    `;
+    img.sizes = '(max-width: 768px) 100vw, (min-width: 1024px) 300px';
+    img.alt = mainImage.alt || 'โปรไฟล์';
     img.width = mainImage.width || 600;
     img.height = mainImage.height || 800;
-    img.onerror = function() {
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.fetchPriority = profile.isFeatured ? 'high' : 'low';
+    img.style.aspectRatio = '3 / 4';
+    img.onerror = function () {
         this.onerror = null;
         this.src = '/images/placeholder-profile.webp';
     };
-
     cardInner.appendChild(img);
 
-    // --- MAJOR FIX #1: สร้าง Badges ให้เข้ากับระบบของ styles.css ---
+    // Badge overlays
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
-    // ระบบสถานะใหม่ที่เข้ากับ CSS เดิม
     const availSpan = document.createElement('span');
-    let statusClass = 'status-inquire'; // Default
+    let statusClass = 'status-inquire';
     switch (profile.availability) {
         case 'ว่าง':
             statusClass = 'status-available';
@@ -610,37 +610,38 @@ function createProfileCard(profile = {}) {
             statusClass = 'status-busy';
             break;
         case 'รอคิว':
-            statusClass = 'status-inquire'; // หรือสร้างคลาสใหม่ .status-queue
+            statusClass = 'status-inquire';
             break;
     }
-    // ใช้คลาสจาก CSS ที่มีอยู่แล้ว
-    availSpan.className = `availability-badge ${statusClass}`;
+    availSpan.className = `availability-badge ${statusClass} text-sm px-2 py-0.5 rounded-full shadow-md`;
     availSpan.textContent = profile.availability || 'สอบถามคิว';
     badges.appendChild(availSpan);
 
     if (profile.isfeatured) {
         const feat = document.createElement('span');
-        // ใช้คลาสใหม่ที่ออกแบบมาเพื่อทำงานกับธีมโดยเฉพาะ
-        feat.className = 'featured-badge';
-        feat.innerHTML = `<i class="fas fa-star" style="font-size: 0.7em; margin-right: 4px;"></i> แนะนำ`;
+        feat.className = 'featured-badge bg-yellow-400 text-black font-bold text-xs px-2 py-0.5 rounded-full shadow-md';
+        feat.innerHTML = `<i class="fas fa-star mr-1 text-xs"></i> แนะนำ`;
         badges.appendChild(feat);
     }
     cardInner.appendChild(badges);
 
-    // --- MAJOR FIX #2: ใช้ .card-overlay ที่ styles.css รออยู่ ---
+    // Overlay
     const overlay = document.createElement('div');
-    overlay.className = 'card-overlay'; // นี่คือคลาสที่ถูกต้อง!
+    overlay.className = 'card-overlay bg-gradient-to-t from-black/80 via-black/30 to-transparent';
 
     const info = document.createElement('div');
-    info.className = 'card-info'; // คลาสนี้ก็มีอยู่ใน styles.css
+    info.className = 'card-info p-4';
 
     const h3 = document.createElement('h3');
-    h3.className = 'text-lg sm:text-xl lg:text-2xl'; // ปล่อยให้ .card-info h3 ใน CSS จัดการสไตล์หลัก
+    h3.className = 'text-white font-semibold text-lg sm:text-xl lg:text-2xl leading-tight truncate';
     h3.textContent = profile.name || 'ไม่ระบุชื่อ';
 
     const p = document.createElement('p');
-    p.className = 'text-sm flex items-center gap-1.5';
-    p.innerHTML = `<i class="fas fa-map-marker-alt" style="opacity: 0.8;"></i> ${(typeof provincesMap !== 'undefined' && provincesMap.get) ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ' : 'ไม่ระบุ'}`;
+    p.className = 'text-sm text-white/90 flex items-center gap-1.5 mt-1';
+    const province = (typeof provincesMap !== 'undefined' && provincesMap.get)
+        ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
+        : 'ไม่ระบุ';
+    p.innerHTML = `<i class="fas fa-map-marker-alt text-pink-400"></i> ${province}`;
 
     info.appendChild(h3);
     info.appendChild(p);
@@ -650,7 +651,6 @@ function createProfileCard(profile = {}) {
     card.appendChild(cardInner);
     return card;
 }
-
 
 /**
  * REFACTORED: สร้าง Section จังหวัด

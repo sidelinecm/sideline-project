@@ -229,16 +229,17 @@ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-lin
   <div class="container mx-auto px-4 space-y-12 md:space-y-16">
 
     <section class="hero-h1-revised text-center space-y-4" aria-labelledby="hero-heading">
-      <h1 id="hero-heading" class="sr-only">
+      <!-- heading ซ่อนสำหรับ SEO & Screen Readers -->
+       <h1 id="hero-heading" class="sr-only">
         Sideline Chiangmai | สาวรับงานไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก100% ไม่มีมัดจำ รับงานเชียงใหม่
       </h1>
       
-      <a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-[360px] animate-fadeIn">
-        <!-- Desktop preload -->
+      <a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-[360px] animate-fadeIn" tabindex="0">
+        <!-- Desktop preload ภาพใหญ่ -->
         <img 
           src="/images/hero-sidelinechiangmai-1200.webp"
           alt="โลโก้ Sideline Chiangmai"
-          class="hidden md:block mx-auto w-full h-auto"
+          class="hidden md:block mx-auto w-full h-auto rounded-lg"
           width="1200"
           height="904"
           loading="eager"
@@ -249,31 +250,35 @@ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-lin
             /images/hero-sidelinechiangmai-800.webp 800w,
             /images/hero-sidelinechiangmai-1200.webp 1200w"
           sizes="(min-width: 1024px) 360px"
-          style="max-width:100%;height:auto;">
+          style="max-width:100%; height:auto;"
+        >
 
-        <!-- Mobile lazy-load -->
+        <!-- Mobile -->
         <img 
           src="/images/hero-sidelinechiangmai-600.webp"
           alt="โลโก้ Sideline Chiangmai"
-          class="block md:hidden mx-auto w-full h-auto"
+          class="block md:hidden mx-auto w-full h-auto rounded-lg"
           width="600"
           height="452"
-          loading="lazy"
+          loading="eager"
+          fetchpriority="high"
           decoding="async"
           srcset="
             /images/hero-sidelinechiangmai-600.webp 600w,
             /images/hero-sidelinechiangmai-800.webp 800w"
           sizes="100vw"
-          style="max-width:100%;height:auto;">
+          style="max-width:100%; height:auto;"
+        >
       </a>
 
-      <p class="text-sm text-white animate-fadeInUp [text-shadow:0_1px_3px_rgba(0,0,0,0.4)]">
+      <p class="text-sm text-white animate-fadeInUp" style="text-shadow: 0 1px 3px rgba(0,0,0,0.4);">
         แหล่งรวม <strong>สาวรับงานไซด์ไลน์เชียงใหม่</strong> ตรงปก 100% ฟีลแฟนจริงจัง ไม่มีมัดจำ นัดง่าย ปลอดภัย
       </p>
-
     </section>
+
   
-   <section id="search-section" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp">
+  
+   <section id="search-section" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp">
   <form id="search-form" action="/profiles.html" method="GET" aria-labelledby="search-form-heading">
     <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
     <div class="space-y-5">
@@ -343,7 +348,7 @@ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-lin
   </form>
 </section>
 
-<section class="social-media-section text-center py-2">
+<section class="social-media-section text-center py-8 md:py-10 bg-white/40 dark:bg-gray-800/40 rounded-2xl shadow-inner mt-8 md:mt-12">
   <div class="social-section-header mb-1">
     <h2 class="social-disclaimer text-xs text-gray-800 max-w-xl mx-auto px-4 font-semibold">
       โซเชียลมีเดีย
@@ -395,7 +400,7 @@ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-lin
 
 
   <section id="featured-profiles" 
-         class="hidden featured-section py-12 md:py-16" 
+         class="featured-section py-14 md:py-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-xl mt-12" 
          aria-labelledby="featured-heading" 
          data-animate-on-scroll>
   <div class="section-content-wrapper">
@@ -432,7 +437,7 @@ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-lin
 
 <section id="all-profiles-section" 
          aria-labelledby="all-profiles-heading" 
-         class="pt-12 md:pt-16" 
+         class="pt-16 md:pt-20 bg-white/50 dark:bg-gray-900/50 rounded-2xl shadow-lg px-4 md:px-8" 
          data-animate-on-scroll>
   <div class="text-center">
     <h2 id="all-profiles-heading" 
@@ -494,7 +499,7 @@ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-lin
 
 
 
-  <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16">
+  <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
     <div class="container mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 text-center md:text-left mb-12">
         
