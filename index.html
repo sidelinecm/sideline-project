@@ -18,8 +18,8 @@
   <link rel=modulepreload href=/main.js>
 
   
- <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-regular.woff2 as=font type=font/woff2 crossorigin>
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-700.woff2 as=font type=font/woff2 crossorigin>
 
 <!-- Critical CSS (วางบนสุดใน <head>) -->
 <style>
@@ -90,9 +90,15 @@
   <link rel=manifest href=/manifest.webmanifest>
 
   
-<link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" type="image/webp" fetchpriority="high">
-
-
+ <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp"
+      imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w,
+                    /images/hero-sidelinechiangmai-800.webp 800w,
+                    /images/hero-sidelinechiangmai-1200.webp 1200w"
+      imagesizes="(max-width: 640px) 100vw,
+                  (max-width: 1024px) 80vw,
+                  360px"
+      fetchpriority="high">
+  
   <script type=application/ld+json>
   {
     "@context": "https://schema.org",
@@ -229,24 +235,24 @@ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-lin
     Sideline Chiangmai | สาวรับงานไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก100% ไม่มีมัดจำ รับงานเชียงใหม่
   </h1>
 
- <!-- Hero Image -->
-<a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-[360px] animate-fadeIn" tabindex="0">
-  <img 
-    src="/images/hero-sidelinechiangmai-800.webp"
-    alt="ภาพสาวไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100%"
-    class="mx-auto w-full h-auto rounded-lg"
-    width="1200"
-    height="904"
-    loading="eager"
-    fetchpriority="high"
-    decoding="async"
-    srcset="
-      /images/hero-sidelinechiangmai-600.webp 600w,
-      /images/hero-sidelinechiangmai-800.webp 800w,
-      /images/hero-sidelinechiangmai-1200.webp 1200w"
-    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 360px"
-  >
-</a>
+  <!-- Hero Image -->
+  <a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-[360px] animate-fadeIn" tabindex="0">
+    <img 
+      src="/images/hero-sidelinechiangmai-800.webp"
+      alt="ภาพสาวไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100%"
+      class="mx-auto w-full h-auto rounded-lg"
+      width="1200"
+      height="904"
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+      srcset="
+        /images/hero-sidelinechiangmai-600.webp 600w,
+        /images/hero-sidelinechiangmai-800.webp 800w,
+        /images/hero-sidelinechiangmai-1200.webp 1200w"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 360px, 360px"
+    >
+  </a>
 </section>
 
   
