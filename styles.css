@@ -2287,3 +2287,21 @@ html.dark .trust-badge {
   border-radius: 5px;
   font-weight: bold;
 }
+/* Force Sidebar Text to be visible clearly */
+#sidebar nav a {
+  color: #ffffff !important;   /* ข้อความสีขาวชัดเจน */
+  font-weight: 600;
+  opacity: 1 !important;       /* ยกเลิกความโปร่งใส */
+}
+
+#sidebar nav a:hover {
+  color: #ff80ff !important;   /* สีชมพูสว่างเวลา hover */
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  font-weight: 700;
+}
+
+#sidebar nav a.active-nav-link {
+  color: #ff4dd2 !important;   /* Active link สีชมพูเด่น */
+  font-weight: 800;
+  opacity: 1 !important;
+}

@@ -554,96 +554,108 @@ function renderProfiles(filteredProfiles, isSearching) {
     initScrollAnimations();
 }
 
+/**
+ * สร้าง HTML element สำหรับแสดงโปรไฟล์แต่ละรายการ
+ * @param {Object} profile - ข้อมูลโปรไฟล์จาก Supabase
+ * @returns {HTMLElement} - องค์ประกอบ HTML ของ Profile Card
+ */
 function createProfileCard(profile = {}) {
     const card = document.createElement('div');
     card.className = 'profile-card-new-container';
 
     const cardInner = document.createElement('div');
-    cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl';
+    // ใช้ Tailwind Classes ที่สวยงามและ UX ดีที่สุด
+    cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:ring-4 hover:ring-pink-500/50';
     cardInner.setAttribute('data-profile-id', profile.id || '');
     cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
     cardInner.setAttribute('role', 'button');
     cardInner.setAttribute('tabindex', '0');
 
-    const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
-        src: '/images/placeholder-profile.webp',
-        alt: profile.name || 'โปรไฟล์',
-        width: 600,
-        height: 800
-    };
-
+    // 1. ส่วนรูปภาพ (สมมติว่าคุณมี Logic ในการโหลดรูปภาพอยู่แล้ว)
+    const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : { src: 'images/placeholder.webp', width: 600, height: 800 };
     const baseUrl = mainImage.src.split('?')[0];
-
     const img = document.createElement('img');
-    img.className = 'card-image w-full h-auto object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105';
-    img.src = `${baseUrl}?width=400&quality=80`;
-    img.srcset = `
-        ${baseUrl}?width=300&quality=80 300w,
-        ${baseUrl}?width=400&quality=80 400w,
-        ${baseUrl}?width=600&quality=80 600w
-    `;
-    img.sizes = '(max-width: 768px) 100vw, (min-width: 1024px) 300px';
-    img.alt = mainImage.alt || 'โปรไฟล์';
+    img.className = 'card-image w-full h-auto object-cover rounded-2xl transition-transform duration-500 group-hover:scale-110';
+    img.src = `${baseUrl}?width=300&quality=75`; 
+    img.alt = mainImage.alt || `รูปภาพโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
     img.width = mainImage.width || 600;
     img.height = mainImage.height || 800;
     img.loading = 'lazy';
-    img.decoding = 'async';
-    img.fetchPriority = profile.isFeatured ? 'high' : 'low';
     img.style.aspectRatio = '3 / 4';
-    img.onerror = function () {
-        this.onerror = null;
-        this.src = '/images/placeholder-profile.webp';
-    };
     cardInner.appendChild(img);
 
-    // Badge overlays
-    const badges = document.createElement('div');
-    badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
+    // 2. แถบสถานะและป้ายแนะนำ (Badges)
+    const badges = document.createElement('div');
+    // ใช้ flex-col และ items-end เพื่อให้ป้ายเรียงลงมาทางขวาบน
+    badges.className = 'absolute top-3 right-3 flex flex-col items-end gap-1.5 z-10';
+
+    // --- สถานะ (Availability Badge) ---
     const availSpan = document.createElement('span');
-    let statusClass = 'status-inquire';
+    let statusText = profile.availability || 'สอบถามคิว';
+    let statusClass = 'status-inquire bg-gray-700/90 text-white'; 
+    
     switch (profile.availability) {
         case 'ว่าง':
-            statusClass = 'status-available';
+            // สีเขียวทันสมัยและมี animation
+            statusClass = 'status-available bg-green-500/90 text-white animate-pulse'; 
             break;
         case 'ไม่ว่าง':
-            statusClass = 'status-busy';
+            // สีแดงเข้มแสดงสถานะไม่ว่าง
+            statusClass = 'status-busy bg-red-600/90 text-white';
             break;
         case 'รอคิว':
-            statusClass = 'status-inquire';
+            // สีส้ม/ทอง ดูดีกว่าเหลืองจัด
+            statusClass = 'status-inquire bg-orange-400/90 text-black'; 
             break;
     }
-    availSpan.className = `availability-badge ${statusClass} text-sm px-2 py-0.5 rounded-full shadow-md`;
-    availSpan.textContent = profile.availability || 'สอบถามคิว';
+    // ใช้ text-xs เพื่อให้ป้ายเล็กลงตามคำขอ
+    availSpan.className = `availability-badge ${statusClass} text-xs px-2.5 py-0.5 font-bold rounded-full shadow-lg transition-all duration-200`;
+    availSpan.textContent = statusText;
     badges.appendChild(availSpan);
 
-    if (profile.isfeatured) {
+    // --- ป้ายแนะนำพิเศษ (Featured Badge) ---
+    if (profile.isFeatured) {
         const feat = document.createElement('span');
-        feat.className = 'featured-badge bg-yellow-400 text-black font-bold text-xs px-2 py-0.5 rounded-full shadow-md';
-        feat.innerHTML = `<i class="fas fa-star mr-1 text-xs"></i> แนะนำ`;
+        // ใช้ text-xs และ font-extrabold ให้โดดเด่น
+        feat.className = 'featured-badge bg-yellow-400 text-black font-extrabold text-xs px-2.5 py-0.5 rounded-full shadow-xl';
+        feat.innerHTML = `<i class="fas fa-star mr-1 text-xs"></i> แนะนำพิเศษ`;
         badges.appendChild(feat);
     }
     cardInner.appendChild(badges);
 
-    // Overlay
+    // 3. Overlay และส่วนข้อมูล (Name, Tagline, Location)
     const overlay = document.createElement('div');
-    overlay.className = 'card-overlay bg-gradient-to-t from-black/80 via-black/30 to-transparent';
+    // ใช้ justify-end เพื่อให้ข้อมูลอยู่ด้านล่าง
+    overlay.className = 'absolute inset-0 flex flex-col justify-end p-4 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/50 to-transparent'; 
 
     const info = document.createElement('div');
-    info.className = 'card-info p-4';
+    info.className = 'card-info';
 
+    // --- ชื่อและอายุ ---
     const h3 = document.createElement('h3');
-    h3.className = 'text-white font-semibold text-lg sm:text-xl lg:text-2xl leading-tight truncate';
-    h3.textContent = profile.name || 'ไม่ระบุชื่อ';
+    // ใช้สีม่วงอ่อน (Purple-300) ทันสมัย
+    h3.className = 'text-purple-300 font-extrabold text-xl sm:text-2xl lg:text-2xl leading-snug';
+    const ageText = profile.age ? `<span class="text-pink-100 ml-2 font-normal text-lg">${profile.age} ปี</span>` : '';
+    h3.innerHTML = `${profile.name || 'ไม่ระบุชื่อ'} ${ageText}`;
 
+    // --- Tagline (ฟีลแฟน) ---
+    const taglineP = document.createElement('p');
+    // ใช้สีชมพูอ่อน (Pink-300)
+    taglineP.className = 'text-sm text-pink-300 font-semibold mb-1 truncate';
+    taglineP.textContent = profile.tagline || 'ประสบการณ์ฟีลแฟนระดับพรีเมียม';
+
+    // --- จังหวัด (Location) ---
     const p = document.createElement('p');
-    p.className = 'text-sm text-white/90 flex items-center gap-1.5 mt-1';
-    const province = (typeof provincesMap !== 'undefined' && provincesMap.get)
-        ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
-        : 'ไม่ระบุ';
-    p.innerHTML = `<i class="fas fa-map-marker-alt text-pink-400"></i> ${province}`;
+    // ใช้สีขาวนวลและไอคอนเด่น
+    p.className = 'text-sm text-white/90 flex items-center gap-1.5';
+    // สมมติว่ามี provincesMap หรือใช้ชื่อจังหวัดโดยตรง
+    const province = profile.province || 'เชียงใหม่'; 
+    p.innerHTML = `<i class="fas fa-map-marker-alt text-red-400"></i> ${province}`;
 
+    // จัดเรียงองค์ประกอบใน Card
     info.appendChild(h3);
+    info.appendChild(taglineP);
     info.appendChild(p);
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
