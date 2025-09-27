@@ -557,8 +557,12 @@ function renderProfiles(filteredProfiles, isSearching) {
 function createProfileCard(profile = {}) {
   const card = document.createElement('article');
   card.className = 'profile-card-new-container';
-  card.setAttribute('aria-labelledby', `profile-${profile.id || 'unknown'}`);
 
+  // สร้าง uniqueId ป้องกัน aria-labelledby ซ้ำ
+  const uniqueId = `profile-${profile.id || 'unknown'}-${Math.random().toString(36).substr(2, 9)}`;
+  card.setAttribute('aria-labelledby', uniqueId);
+
+  // --- Container ---
   const cardInner = document.createElement('div');
   cardInner.className = `
     profile-card-new group cursor-pointer relative overflow-hidden 
@@ -605,7 +609,7 @@ function createProfileCard(profile = {}) {
   };
   cardInner.appendChild(img);
 
-  // --- Badges ---
+  // --- Badges (สถานะ + Featured) ---
   const badges = document.createElement('div');
   badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
@@ -652,18 +656,23 @@ function createProfileCard(profile = {}) {
   `;
 
   const info = document.createElement('div');
-  info.className = 'card-info';
+  info.className = 'card-info space-y-1';
 
+  // ชื่อ + อายุ
   const h3 = document.createElement('h3');
-  h3.id = `profile-${profile.id || 'unknown'}`;
-  h3.className = 'text-white font-extrabold text-xl sm:text-2xl lg:text-3xl leading-snug';
-  const ageText = profile.age ? `<span class="text-pink-300 ml-2 font-normal text-lg">${profile.age} ปี</span>` : '';
-  h3.innerHTML = `${profile.name || 'ไม่ระบุชื่อ'} ${ageText}`;
+  h3.id = uniqueId;
+  h3.className = 'flex items-center gap-2 text-white font-extrabold text-xl sm:text-2xl lg:text-3xl leading-snug';
+  h3.innerHTML = `
+    <span>${profile.name || 'ไม่ระบุชื่อ'}</span>
+    ${profile.age ? `<span class="text-pink-300 font-semibold text-lg">(${profile.age} ปี)</span>` : ''}
+  `;
 
+  // tagline
   const taglineP = document.createElement('p');
-  taglineP.className = 'text-sm text-pink-400 font-semibold mb-1 truncate';
+  taglineP.className = 'text-sm text-pink-400 font-semibold truncate';
   taglineP.textContent = profile.tagline || 'ฟีลแฟน 💯 | ตรงปก';
 
+  // จังหวัด
   const p = document.createElement('p');
   p.className = 'text-sm text-white/90 flex items-center gap-1.5';
   const province = (typeof provincesMap !== 'undefined' && provincesMap.get)
