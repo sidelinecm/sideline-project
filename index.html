@@ -338,79 +338,78 @@
 
 
 <section id="featured-profiles" 
-  class="featured-section py-14 md:py-20 bg-gradient-to-b from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-2xl mt-12" 
+  class="featured-section py-16 md:py-20 bg-gradient-to-b from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-2xl mt-12" 
   aria-labelledby="featured-heading" data-animate-on-scroll>
   
-  <div class="section-content-wrapper">
-    <div class="p-6 md:p-8 text-center">
+  <div class="section-content-wrapper max-w-6xl mx-auto">
+    <div class="p-6 md:p-10 text-center space-y-5">
       
       <!-- Heading -->
-      <h2 id="featured-heading">
-        โปรไฟล์แนะนำ 
-        <span class="province">เชียงใหม่</span>
+      <h2 id="featured-heading" class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+        โปรไฟล์แนะนำน้องๆ
       </h2>
 
       <!-- Sub-heading -->
-      <h3 class="featured-sub">
-        รวมตัวท็อปยอดนิยม รับงานเชียงใหม่ ที่ฮอตที่สุดสัปดาห์นี้
+      <h3 class="featured-sub text-lg md:text-xl font-semibold text-pink-700 dark:text-pink-300">
+        รวมตัวท็อปยอดนิยม ที่ฮอตที่สุดสัปดาห์นี้
       </h3>
 
       <!-- Description -->
-      <p class="featured-desc">
-        คัดมาเฉพาะ <strong>โปรไฟล์ยอดนิยม</strong> ที่ได้รับการจองมากที่สุด 
-        การันตี <strong>ฟีลแฟนตรงปก 100%</strong> พร้อมมอบประสบการณ์ระดับพรีเมียม
+      <p class="featured-desc max-w-2xl mx-auto text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+        คัดมาเฉพาะ <strong class="font-semibold text-pink-600">โปรไฟล์ยอดนิยม</strong> ที่ได้รับการจองมากที่สุด 
+        การันตี <strong class="font-semibold text-pink-600">ฟีลแฟนตรงปก 100%</strong> 
+        พร้อมมอบประสบการณ์ระดับพรีเมียม
       </p>
     </div>
     
     <!-- Profiles Grid -->
     <div id="featured-profiles-container" 
-      class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-6 md:px-8 pb-6 md:pb-8" 
+      class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-8 px-6 md:px-10 pb-8 md:pb-12" 
       aria-live="polite" aria-labelledby="featured-heading">
     </div>
   </div>
 </section>
 
 <div class="container mx-auto px-4" data-animate-on-scroll>
-  <hr class="border-pink-300/60 my-10 md:my-14">
+  <hr class="border-pink-300/60 my-10 md:my-16">
 </div>
 
 <section id="all-profiles-section" aria-labelledby="all-profiles-heading" 
-  class="pt-16 md:pt-20 bg-white/50 dark:bg-gray-900/50 rounded-2xl shadow-lg px-4 md:px-8" 
+  class="pt-16 md:pt-20 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-6 md:px-10" 
   data-animate-on-scroll>
   
-  <div class="text-center">
-    <h2 id="all-profiles-heading">
-      ค้นหาน้องๆ รับงานทั้งหมด 
-      <span class="province">ตามพื้นที่จังหวัด</span>
+  <div class="text-center space-y-5">
+    <h2 id="all-profiles-heading" class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+      ค้นหาน้องๆ รับงานทั้งหมด
     </h2>
 
-    <p class="all-desc">
-      เลือกชม <strong>โปรไฟล์ทั้งหมด</strong> 
-      หรือใช้ <strong>ตัวกรองขั้นสูง</strong> 
+    <p class="all-desc max-w-3xl mx-auto text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+      เลือกชม <strong class="font-semibold text-pink-600">โปรไฟล์ทั้งหมด</strong> 
+      หรือใช้ <strong class="font-semibold text-pink-600">ตัวกรองขั้นสูง</strong> 
       เพื่อค้นหาน้องๆ ที่พร้อมรับงานใน 
-      <strong class="highlight">เชียงใหม่</strong> 
-      และจังหวัดอื่นๆ ที่คุณต้องการ
+      <strong class="highlight text-pink-600">จังหวัดที่คุณต้องการ</strong>
     </p>
   </div>
 
-  <div class="mt-10 md:mt-12" aria-live="polite">
+  <div class="mt-12 md:mt-16" aria-live="polite">
     <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์..."></div>
     <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
 
     <div id="load-more-container" class="hidden text-center mt-12">
-      <button id="load-more-btn">
+      <button id="load-more-btn" 
+        class="px-6 py-3 rounded-full font-semibold bg-pink-600 text-white hover:bg-pink-700 transition">
         แสดงโปรไฟล์เพิ่มเติม
       </button>
     </div>
 
     <div id="fetch-error-message" 
-      class="hidden text-center py-12 px-4 bg-red-100/80 rounded-lg font-medium text-red-700 border border-red-300" 
+      class="hidden text-center py-12 px-6 bg-red-100/80 rounded-lg font-medium text-red-700 border border-red-300 max-w-2xl mx-auto" 
       role="alert">
       เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง
     </div>
 
     <div id="no-results-message" 
-      class="hidden text-center py-12 px-4 text-pink-700 bg-pink-100/80 rounded-lg font-medium border border-pink-300" 
+      class="hidden text-center py-12 px-6 text-pink-700 bg-pink-100/80 rounded-lg font-medium border border-pink-300 max-w-2xl mx-auto" 
       role="status">
       ไม่พบโปรไฟล์ที่ตรงกับการค้นหาของคุณ ลองใช้เกณฑ์อื่น
     </div>
