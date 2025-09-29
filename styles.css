@@ -1,7 +1,3 @@
-/* =================================================================== */
-/* MASTER STYLESHEET - FULLY REVISED & INTEGRATED          */
-/* เวอร์ชันสมบูรณ์ที่รวมทุกการแก้ไขสำหรับ JS ล่าสุดแล้ว         */
-/* =================================================================== */
 
 @font-face {
   font-family: 'Prompt';
@@ -20,7 +16,6 @@
 }
 
 
-/* Variables & Base Styles */
 :root {
   --font-base: "Prompt", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-heading: "Prompt", system-ui, sans-serif;
@@ -30,32 +25,26 @@
   --card: 0 0% 100%;
   --primary: 340 85% 58%;
   --primary-glow: 340 85% 65%;
-  --secondary: 260 85% 65%;
-  --secondary-glow: 260 85% 75%;
-  --muted: 220 10% 90%;
-  --muted-foreground: 220 10% 40%;
-  --accent: 220 10% 95%;
-  --border: 220 10% 85%;
-  --transition-fast: 200ms ease;
-  --transition-medium: 350ms ease;
-  --transition-slow: 600ms ease;
+  --secondary: 260 85% 35%;
+  --accent: 340 90% 95%;
+  --muted: 220 15% 90%;
+  --border: 220 10% 90%;
+  --ring: 220 15% 50%;
+  --destructive: 0 85% 60%;
 }
 
-html.dark {
-  --background: 220 15% 10%;
-  --foreground: 220 15% 95%;
+.dark {
+  --background: 220 20% 10%;
+  --foreground: 220 15% 85%;
   --card: 220 15% 15%;
   --primary: 340 85% 58%;
   --primary-glow: 340 85% 65%;
   --secondary: 260 85% 65%;
-  --secondary-glow: 260 85% 75%;
-  --muted: 220 15% 20%;
-  --muted-foreground: 220 15% 75%;
-  --accent: 220 15% 18%;
-  --border: 220 15% 25%;
-}
-html.dark {
-    --aurora-opacity: 0.12;
+  --accent: 220 15% 20%;
+  --muted: 220 15% 30%;
+  --border: 220 10% 20%;
+  --ring: 220 15% 60%;
+  --destructive: 0 85% 70%;
 }
 
 /* พื้นหลัง Hero: ไล่สีชมพู-ม่วงพาสเทล */
@@ -176,7 +165,8 @@ h1.text-primary, h2.text-primary, h3.text-primary {
 
 html.dark{--background:225 15% 10%;--foreground:220 20% 90%;--card:225 15% 16%;--primary:340 90% 68%;--primary-glow:340 95% 72%;--secondary:260 90% 75%;--secondary-glow:260 95% 80%;--muted:225 15% 20%;--border:225 12% 25%;--accent:225 15% 20%}
 
-@keyframes aurora-1{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(1turn)}}
+
+@keyframes aurora-1{0_%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(1turn)}}
 
 @keyframes aurora-2{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(-1turn)}}
 
@@ -292,9 +282,31 @@ html.dark #sidebar nav a.active-nav-link,html.dark #sidebar nav a:active{backgro
 
 .profile-card-new-container{perspective:1000px}
 
+
+
 .profile-card-new{background-color:hsl(var(--muted));border-radius:1rem;overflow:hidden;position:relative;aspect-ratio:3/4;transition:transform .5s cubic-bezier(.165,.84,.44,1),box-shadow .5s cubic-bezier(.165,.84,.44,1);box-shadow:0 10px 30px -10px hsl(var(--foreground)/.15);transform-style:preserve-3d}
 
-.profile-card-new:before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle 250px at var(--mouse-x) var(--mouse-y),hsla(0,0%,100%,.15),transparent);opacity:0;transition:opacity .4s ease;z-index:2}
+
+
+/* แทนที่โค้ดเดิมด้วยโค้ดนี้ */
+.profile-card-new:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    /* ปรับแก้: การใช้ var() ใน radial-gradient มักจะทำให้เกิดปัญหาในการตรวจสอบ
+       ให้ตรวจสอบให้แน่ใจว่าตัวแปร --mouse-x และ --mouse-y ถูกกำหนดค่าเริ่มต้นไว้ 
+       หรือถ้าไม่จำเป็นต้องใช้เอฟเฟกต์เมาส์ ให้แทนที่ด้วยค่าคงที่ (ถ้าคุณต้องการแค่แสงคงที่)
+    */
+    background: radial-gradient(circle 250px at center, hsla(0, 0%, 100%, .15), transparent);
+    
+    opacity: 0;
+    transition: opacity .4s ease;
+    z-index: 2;
+}
 
 .profile-card-new:hover{transform:rotateY(var(--rotate-y)) rotateX(var(--rotate-x)) scale(1.05);box-shadow:0 25px 50px -15px hsl(var(--foreground)/.3)}
 
@@ -2349,6 +2361,18 @@ html.dark .trust-badge {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* --- Animations --- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.08); } 
+}
+
 /* ============================== */
 /* ADVANCED TYPOGRAPHY OPTIMIZATION */
 /* ============================== */
@@ -2356,11 +2380,11 @@ html.dark .trust-badge {
 /* H2: Section Heading */
 #featured-heading,
 #all-profiles-heading {
-  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.2rem); /* 24px → 35px */
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.2rem);
   font-weight: 800;
   line-height: 1.25;
   letter-spacing: -0.02em;
-  color: hsl(330, 50%, 20%); /* โทนเข้มอ่านง่าย */
+  color: hsl(330, 50%, 20%);
   margin-bottom: 0.75rem;
 }
 
@@ -2378,7 +2402,7 @@ html.dark .trust-badge {
 
 /* H3: Sub-heading */
 .featured-sub {
-  font-size: clamp(1rem, 0.9rem + 0.6vw, 1.4rem); /* 16px → 22px */
+  font-size: clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
   font-weight: 600;
   color: hsl(330, 45%, 35%);
   margin-bottom: 0.75rem;
@@ -2391,7 +2415,7 @@ html.dark .trust-badge {
 /* Paragraph Descriptions */
 .featured-desc,
 .all-desc {
-  font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.1rem); /* 15px → 17.5px */
+  font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.1rem);
   line-height: 1.7;
   max-width: 65ch;
   margin-left: auto;
@@ -2424,133 +2448,165 @@ html.dark .trust-badge {
 .dark .all-desc .highlight {
   color: hsl(330, 75%, 75%);
 }
-/* การ์ดโปรไฟล์ */
+
+/* =================================================================== */
+/* 1. SECTION & HEADING STYLES */
+/* =================================================================== */
+
+/* H3 Sub-heading and province repeated fix removed (already declared above) */
+
+/* =================================================================== */
+/* 2. PROFILE CARD DETAILS (Overlay, Name, Tagline, Location) */
+/* =================================================================== */
+
+/* Profile Card */
 .profile-card {
-  @apply relative rounded-2xl overflow-hidden shadow-lg bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm;
+  position: relative;
+  border-radius: 1rem; /* rounded-2xl */
+  overflow: hidden;
+  background-color: rgba(255,255,255,0.9);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease;
 }
 
-/* ภาพ */
+.dark .profile-card {
+  background-color: rgba(31, 41, 55, 0.8); /* gray-800/80 */
+}
+
+/* Profile Image */
 .profile-card img {
-  @apply w-full h-56 object-cover transition-transform duration-500 hover:scale-105;
+  width: 100%;
+  height: 14rem; /* h-56 */
+  object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
-/* Badge สถานะ */
-.profile-status {
-  @apply absolute top-3 left-3 bg-gradient-to-r from-pink-500 to-orange-400 
-         text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md;
+.profile-card img:hover {
+  transform: scale(1.05);
 }
 
-/* เนื้อหาด้านล่าง */
-.profile-content {
-  @apply p-4 text-center;
-}
-
-.profile-name {
-  @apply text-lg font-bold text-gray-800 dark:text-white truncate;
-}
-
-.profile-meta {
-  @apply text-sm text-gray-600 dark:text-gray-300 mt-1;
-}
-
-/* footer จำนวนโปรไฟล์ */
-.profile-footer {
-  @apply mt-3 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200/50 pt-2;
-}
-/* Overlay เนียนขึ้น */
+/* Overlay */
 .profile-overlay {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 1rem;
+  padding: 1.25rem;
   background: linear-gradient(to top,
-    rgba(17, 19, 23, 0.95) 0%,
-    rgba(17, 19, 23, 0.6) 40%,
+    rgba(0,0,0,1) 0%, 
+    rgba(0,0,0,0.7) 40%, 
     transparent 80%);
   transition: background 0.3s ease;
 }
 
-/* ชื่อ */
+/* Name */
 .profile-name {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.6rem;
+  font-weight: 900;
   color: #fff;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-}
-.profile-name .profile-age {
-  font-size: 0.9rem;
-  color: #f9a8d4;
-  font-weight: 600;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.9);
 }
 
-/* tagline */
+.profile-name .profile-age {
+  font-size: 1rem;
+  color: #ff99cc;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* Tagline */
 .profile-tagline {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #fbcfe8;
-  opacity: 0.95;
+  opacity: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
-/* location */
+/* Location */
 .profile-location {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: #e5e7eb;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-}
-.profile-location i {
-  color: #fb7185;
+  gap: 0.4rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
-/* Availability badges */
-.availability-badge {
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+.profile-location i {
+  color: #ff7f99;
+  font-size: 1rem;
 }
+
+/* Footer */
+.profile-footer {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  border-top: 1px solid rgba(209, 213, 219, 0.5);
+  padding-top: 0.5rem;
+}
+
+.dark .profile-footer {
+  color: #d1d5db;
+  border-top-color: rgba(209,213,219,0.3);
+}
+
+/* =================================================================== */
+/* 3. BADGES (Status & Featured) */
+/* =================================================================== */
+
+.availability-badge {
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
 .status-available {
   background: linear-gradient(135deg, #16a34a, #22c55e);
   color: #fff;
   animation: pulse 1.5s infinite;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.7);
 }
+
 .status-unavailable {
   background: linear-gradient(135deg, #dc2626, #ef4444);
   color: #fff;
 }
+
 .status-break {
   background: linear-gradient(135deg, #f59e0b, #facc15);
-  color: #fff;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.7);
 }
+
 .status-default {
   background: #6b7280;
   color: #fff;
 }
 
-/* Featured badge */
 .featured-badge {
   background: linear-gradient(135deg, #facc15, #fbbf24);
   color: #000;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 9999px;
-  box-shadow: 0 0 12px rgba(251,191,36,0.6);
+  box-shadow: 0 0 16px rgba(251,191,36,0.9);
 }
 
-/* Pulse animation */
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.05); }
-}
+/* =================================================================== */
+/* 4. UTILITY & DETAIL STYLES */
+/* =================================================================== */
 
 /* Lightbox backdrop */
 #lightbox {
@@ -2565,20 +2621,317 @@ html.dark .trust-badge {
   border-radius: 0.75rem;
 }
 
-/* Availability badge */
+/* Lightbox availability badge */
 #lightbox-availability-badge-wrapper .availability-badge {
-  font-size: 0.9rem;
-  font-weight: 700;
-  padding: 0.4rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 0.5rem 1.1rem;
   border-radius: 9999px;
   text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
 }
 
 /* Detail section title */
 .detail-section-title {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  border-left: 5px solid #ec4899;
+  padding-left: 0.7rem;
+}
+
+
+
+/* ===================== FIXES & IMPROVEMENTS ===================== */
+
+/* ---------- PROFILE CARD (แทน @apply ด้วย CSS Vanilla) ---------- */
+.profile-card {
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  overflow: hidden;
+  box-shadow: 0 4px 12px hsl(var(--border) / 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.profile-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px hsl(var(--primary-glow) / 0.3);
+}
+
+.profile-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.profile-card:hover img {
+  transform: scale(1.1);
+}
+
+.profile-footer {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  background-color: hsl(var(--muted));
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+/* ---------- PROVINCE (รวมโค้ดซ้ำ) ---------- */
+.province {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  margin-top: 0.25rem;
+}
+
+/* ---------- STATUS BADGE (Dark Mode fix) ---------- */
+.status-break {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: hsl(var(--destructive));
+  color: #fff;
+  box-shadow: 0 2px 8px -2px hsl(var(--destructive) / 0.5);
+}
+.dark .status-break {
+  background-color: hsl(var(--destructive) / 0.8);
+  color: hsl(var(--foreground));
+  box-shadow: 0 2px 8px -2px hsl(var(--foreground) / 0.4);
+}
+
+/* ---------- HEADINGS (ปรับ line-height / font-size) ---------- */
+h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+@media (min-width: 768px) {
+  h2 {
+    font-size: 2rem;
+    line-height: 1.35;
+  }
+}
+h3 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+@media (min-width: 768px) {
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+}
+
+/* ---------- NAME, STATUS, PROVINCE (UI Alignment) ---------- */
+.profile-card .name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.25rem;
+}
+.profile-card .province {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+.profile-card .status {
+  margin-top: 0.5rem;
+}
+
+/* ---------- TRANSITIONS ---------- */
+a, button {
+  transition: all 0.25s ease;
+}
+a:hover, button:hover {
+  transform: scale(1.05);
+}
+/* ---------- STATUS BADGES ---------- */
+.availability-badge {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1;
+  box-shadow: 0 2px 6px hsl(var(--foreground) / 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.availability-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px hsl(var(--primary-glow) / 0.35);
+}
+.status-available {
+  background-color: #16a34a; /* เขียว */
+  color: #fff;
+}
+.status-unavailable {
+  background-color: #9ca3af; /* เทา */
+  color: #fff;
+}
+.status-break {
+  background-color: #f97316; /* ส้ม */
+  color: #fff;
+}
+.dark .status-break {
+  background-color: #fb923c;
+  color: hsl(var(--foreground));
+}
+
+/* ---------- PROFILE NAME ---------- */
+.card-info h3 {
   font-weight: 800;
-  border-left: 4px solid #ec4899;
-  padding-left: 0.5rem;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+}
+.card-info h3 span:first-child {
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+}
+.card-info h3 span:last-child {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f9a8d4; /* pink-300 */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+/* ---------- TAGLINE ---------- */
+.card-info p {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-weight: 500;
+  color: #fbcfe8; /* pink-200 */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+
+/* ---------- PROVINCE ---------- */
+.card-info p:last-child {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.card-info p:last-child i {
+  color: #f472b6; /* pink-400 */
+}
+
+
+/* =========================
+   AVAILABILITY BADGE
+   ========================= */
+.availability-badge {
+  display: inline-block;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.availability-online {
+  background-color: #16a34a;
+  color: #fff;
+}
+.availability-busy {
+  background-color: #eab308;
+  color: #111;
+}
+.availability-offline {
+  background-color: #dc2626;
+  color: #fff;
+}
+
+/* =========================
+   PROFILE CARD TEXT
+   ========================= */
+.profile-card-new .card-info h3 {
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+  margin-bottom: .25rem;
+}
+.profile-card-new .card-info p {
+  font-size: 0.9rem;
+  color: #e5e7eb; /* Tailwind gray-200 */
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* =========================
+   AGE VERIFICATION MODAL
+   ========================= */
+.age-modal-content {
+  background: #1f2937; /* gray-800 */
+  color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  max-width: 400px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+.age-modal-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.age-badge-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ef4444, #b91c1c);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(239,68,68,0.6);
+  margin-bottom: 1rem;
+}
+.age-modal-content .age-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  margin: 0.5rem;
+  transition: background 0.2s, transform 0.2s;
+}
+.age-modal-content .age-btn.confirm {
+  background: #16a34a;
+  color: #fff;
+}
+.age-modal-content .age-btn.confirm:hover {
+  background: #15803d;
+  transform: scale(1.05);
+}
+.age-modal-content .age-btn.exit {
+  background: #dc2626;
+  color: #fff;
+}
+.age-modal-content .age-btn.exit:hover {
+  background: #b91c1c;
+  transform: scale(1.05);
+}
+
+/* =========================
+   PROVINCE BADGE
+   ========================= */
+.detail-list-item .value {
+  background: rgba(255,255,255,0.1);
+  padding: .25rem .75rem;
+  border-radius: .5rem;
+  font-weight: 600;
+  display: inline-block;
+  color: #f3f4f6; /* gray-100 */
 }

@@ -611,37 +611,41 @@ function createProfileCard(profile = {}) {
 
   // --- Badges (สถานะ + Featured) ---
   const badges = document.createElement('div');
-  badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
+  badges.className = 'absolute top-3 right-3 flex flex-col items-end gap-2 z-10';
 
+  // Availability Badge
   const availSpan = document.createElement('span');
-  let statusText = profile.availability || 'สอบถามคิว';
-  let statusClass = 'bg-gray-600/90 text-white';
-
+  let statusText = 'สอบถามคิว';
+  let statusClass = 'status-default';
   switch (profile.availability) {
     case 'ว่าง':
-      statusClass = 'bg-green-500/90 text-white animate-pulse';
+      statusText = 'พร้อมรับงาน';
+      statusClass = 'status-available';
       break;
     case 'ไม่ว่าง':
-      statusClass = 'bg-red-600/90 text-white';
+      statusText = 'ไม่ว่าง';
+      statusClass = 'status-unavailable';
       break;
     case 'รอคิว':
-      statusClass = 'bg-yellow-500/90 text-black';
+      statusText = 'รอคิวว่าง';
+      statusClass = 'status-break';
       break;
   }
   availSpan.className = `
     availability-badge ${statusClass} 
-    text-sm px-2.5 py-1 font-bold rounded-full shadow-xl transition-all duration-200
+    text-base px-3 py-1.5 font-extrabold rounded-full shadow-2xl transition-all duration-200
   `;
   availSpan.textContent = statusText;
   badges.appendChild(availSpan);
 
+  // Featured Badge
   if (profile.isFeatured) {
     const feat = document.createElement('span');
     feat.className = `
-      featured-badge bg-yellow-400 text-black font-extrabold 
-      text-xs px-2.5 py-1 rounded-full shadow-xl
+      featured-badge text-black font-extrabold 
+      text-xs px-3 py-1.5 rounded-full shadow-xl flex items-center gap-1
     `;
-    feat.innerHTML = `<i class="fas fa-star mr-1 text-xs" aria-hidden="true"></i> แนะนำพิเศษ`;
+    feat.innerHTML = `<i class="fas fa-star text-yellow-400" aria-hidden="true"></i> แนะนำพิเศษ`;
     feat.setAttribute('aria-label', 'แนะนำพิเศษ');
     badges.appendChild(feat);
   }
@@ -650,9 +654,9 @@ function createProfileCard(profile = {}) {
   // --- Overlay + Info ---
   const overlay = document.createElement('div');
   overlay.className = `
-    absolute inset-0 flex flex-col justify-end p-4 
+    absolute inset-0 flex flex-col justify-end p-5 
     transition-opacity duration-300 
-    bg-gradient-to-t from-black/90 via-black/50 to-transparent
+    bg-gradient-to-t from-black via-black/70 to-transparent
   `;
 
   const info = document.createElement('div');
@@ -661,28 +665,29 @@ function createProfileCard(profile = {}) {
   // ชื่อ + อายุ
   const h3 = document.createElement('h3');
   h3.id = uniqueId;
-  h3.className = 'flex items-center gap-2 text-white font-extrabold text-xl sm:text-2xl lg:text-3xl leading-snug';
+  h3.className = 'flex items-center gap-2 text-white font-extrabold text-2xl sm:text-3xl lg:text-4xl leading-snug drop-shadow-lg';
   h3.innerHTML = `
     <span>${profile.name || 'ไม่ระบุชื่อ'}</span>
-    ${profile.age ? `<span class="text-pink-300 font-semibold text-lg">(${profile.age} ปี)</span>` : ''}
+    ${profile.age ? `<span class="text-pink-300 font-bold text-xl drop-shadow-md">(${profile.age} ปี)</span>` : ''}
   `;
 
-  // tagline
+  // Tagline
   const taglineP = document.createElement('p');
-  taglineP.className = 'text-sm text-pink-400 font-semibold truncate';
+  taglineP.className = 'text-sm text-pink-400 font-semibold truncate drop-shadow-sm';
   taglineP.textContent = profile.tagline || 'ฟีลแฟน 💯 | ตรงปก';
 
   // จังหวัด
   const p = document.createElement('p');
-  p.className = 'text-sm text-white/90 flex items-center gap-1.5';
+  p.className = 'text-base text-white/95 flex items-center gap-1.5 font-medium drop-shadow-md';
   const province = (typeof provincesMap !== 'undefined' && provincesMap.get)
     ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
     : 'ไม่ระบุ';
-  p.innerHTML = `<i class="fas fa-map-marker-alt text-pink-400" aria-hidden="true"></i> ${province}`;
+  p.innerHTML = `<i class="fas fa-map-marker-alt text-lg text-pink-400" aria-hidden="true"></i> ${province}`;
 
   info.appendChild(h3);
   info.appendChild(taglineP);
   info.appendChild(p);
+
   overlay.appendChild(info);
   cardInner.appendChild(overlay);
 
