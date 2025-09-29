@@ -819,99 +819,104 @@ function createSearchResultSection(profiles = []) {
         });
     }
 
-    // ✅ ตรวจสอบและแสดง Age Verification Overlay ทุกครั้ง (ยกเว้นบอท)
-    function initAgeVerification() {
-      const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
-      const isBot = (ua) => botUserAgents.test(ua);
+// ✅ เริ่มตรวจสอบอายุและแสดง modal
+function initAgeVerification() {
+  const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
+  const isBot = (ua) => botUserAgents.test(ua);
 
-      const showModal = () => createAgeModal();
+  const showModal = () => createAgeModal();
 
-      if (navigator.userAgentData) {
-        navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
-          const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
-          if (!isBot(brandInfo)) showModal();
-        });
-      } else {
-        const ua = navigator.userAgent || "";
-        if (!isBot(ua)) showModal();
-      }
-    }
-
-    // ✅ ฟังก์ชันสร้าง modal (โครงสร้างเหมือนตอนใช้ HTML ตรงๆ)
-    function createAgeModal() {
-      document.getElementById("age-verification-overlay")?.remove();
-
-      const overlay = document.createElement("div");
-      overlay.id = "age-verification-overlay";
-      overlay.className =
-        "fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity opacity-0";
-      overlay.setAttribute("role", "dialog");
-      overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute("aria-labelledby", "age-modal-title");
-
-      overlay.innerHTML = `
-        <div class="age-modal-content relative space-y-6 bg-gray-900 text-white rounded-2xl p-6 max-w-md w-full shadow-2xl scale-95 opacity-0 transition-all">
-          <h2 id="age-modal-title" class="text-2xl font-bold uppercase leading-tight text-center">
-            <span class="text-primary">Sideline Chiangmai</span> is an Adults Only
-            <span class="age-badge-inline">20+</span> Website!
-          </h2>
-          <p class="text-sm text-gray-300 leading-relaxed text-center">
-            คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ 
-            คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 
-            <span class="font-bold text-red-400">20 ปีบริบูรณ์</span>
-          </p>
-          <div class="flex justify-center gap-4 pt-2">
-            <button id="cancelAgeButton" class="age-btn age-btn-cancel bg-red-600 text-white px-5 py-2 rounded-full shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
-              ออก
-            </button>
-            <button id="confirmAgeButton" class="age-btn age-btn-confirm bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
-              ยืนยัน
-            </button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(overlay);
-
-      const modal = overlay.querySelector(".age-modal-content");
-
-      // Animation
-      requestAnimationFrame(() => {
-        overlay.classList.remove("opacity-0");
-        modal.classList.remove("opacity-0", "scale-95");
+  if (navigator.userAgentData?.getHighEntropyValues) {
+    navigator.userAgentData.getHighEntropyValues(["brands", "platform"])
+      .then(ua => {
+        const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
+        if (!isBot(brandInfo)) showModal();
+      })
+      .catch(() => {
+        if (!isBot(navigator.userAgent)) showModal();
       });
+  } else {
+    if (!isBot(navigator.userAgent)) showModal();
+  }
+}
 
-      // Focus trap
-      const focusable = modal.querySelectorAll("button");
-      let focusIndex = 0;
-      modal.addEventListener("keydown", (e) => {
-        if (e.key === "Tab") {
-          e.preventDefault();
-          focusIndex = (focusIndex + (e.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
-          focusable[focusIndex].focus();
-        } else if (e.key === "Escape") {
-          window.location.href = "https://www.google.com";
-        }
-      });
-      focusable[0].focus();
+// ✅ ฟังก์ชันสร้าง modal
+function createAgeModal() {
+  document.getElementById("age-verification-overlay")?.remove();
 
-      // ปุ่ม
-      const confirmBtn = modal.querySelector("#confirmAgeButton");
-      const cancelBtn = modal.querySelector("#cancelAgeButton");
+  const overlay = document.createElement("div");
+  overlay.id = "age-verification-overlay";
+  overlay.className =
+    "fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity opacity-0";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-labelledby", "age-modal-title");
 
-      const closeModal = () => {
-        modal.classList.add("scale-95", "opacity-0");
-        overlay.classList.add("opacity-0");
-        setTimeout(() => overlay.remove(), 300);
-      };
+  overlay.innerHTML = `
+    <div class="age-modal-content relative space-y-6 bg-gray-900 text-white rounded-2xl p-6 max-w-md w-full shadow-2xl scale-95 opacity-0 transition-all duration-300">
+      <h2 id="age-modal-title" class="text-2xl font-bold uppercase leading-tight text-center
+          bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-transparent bg-clip-text">
+        Sideline Chiangmai is an Adults Only
+        <span class="age-badge-inline text-white">20+</span> Website!
+      </h2>
+<p class="text-sm text-gray-300 leading-relaxed text-center">
+  คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่
+  คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย
+  <span class="font-bold text-white">20 ปีบริบูรณ์</span>
+</p>
+      <div class="flex justify-center gap-4 pt-2">
+        <button id="cancelAgeButton" class="age-btn age-btn-cancel bg-red-600 text-white px-5 py-2 rounded-full shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
+          ออก
+        </button>
+        <button id="confirmAgeButton" class="age-btn age-btn-confirm bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
+          ยืนยัน
+        </button>
+      </div>
+    </div>
+  `;
 
-      confirmBtn.addEventListener("click", closeModal);
-      cancelBtn.addEventListener("click", () => (window.location.href = "https://www.google.com"));
+  document.body.appendChild(overlay);
+
+  const modal = overlay.querySelector(".age-modal-content");
+
+  // ✅ Animation smooth
+  requestAnimationFrame(() => {
+    overlay.classList.remove("opacity-0");
+    modal.classList.remove("opacity-0", "scale-95");
+  });
+
+  // ✅ Focus trap & accessibility
+  const focusable = modal.querySelectorAll("button");
+  let focusIndex = 0;
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      focusIndex = (focusIndex + (e.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
+      focusable[focusIndex].focus();
+    } else if (e.key === "Escape") {
+      window.location.href = "https://www.google.com";
     }
+  });
+  focusable[0].focus();
 
-    // ✅ เริ่มทำงานเมื่อ DOM โหลดเสร็จ
-    document.addEventListener("DOMContentLoaded", initAgeVerification);
-       
+  // ✅ ปุ่ม confirm/cancel
+  const confirmBtn = modal.querySelector("#confirmAgeButton");
+  const cancelBtn = modal.querySelector("#cancelAgeButton");
+
+  const closeModal = () => {
+    modal.classList.add("scale-95", "opacity-0");
+    overlay.classList.add("opacity-0");
+    setTimeout(() => overlay.remove(), 300);
+  };
+
+  confirmBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", () => (window.location.href = "https://www.google.com"));
+}
+
+// ✅ เริ่มทำงานเมื่อ DOM โหลดเสร็จ
+document.addEventListener("DOMContentLoaded", initAgeVerification);
+// ✅ เริ่มทำงานเมื่อ DOM โหลดเสร็จ
+document.addEventListener("DOMContentLoaded", initAgeVerification);
     function initLightbox() {
         const lightbox = document.getElementById('lightbox');
         const wrapper = document.getElementById('lightbox-content-wrapper-el');
