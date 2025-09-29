@@ -203,15 +203,19 @@
 
 
 <a href=/ aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-full md:max-w-[1200px] animate-fadeIn" tabindex=0>
- <img src="/images/hero-sidelinechiangmai-1200.webp" 
-    alt="ภาพสาวไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100%" 
-    class="mx-auto w-full h-auto rounded-lg" 
-    width="1200" 
-    height="904" 
-    fetchpriority="high" 
-    decoding="async" 
-    srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangm…" 
-    sizes="100vw">
+<img src="/images/hero-sidelinechiangmai-1200.webp"
+     alt="ภาพสาวไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100%"
+     class="mx-auto w-full h-auto rounded-lg"
+     width="1200"
+     height="904"
+     fetchpriority="high"
+     decoding="async"
+     srcset="/images/hero-sidelinechiangmai-600.webp 600w,
+             /images/hero-sidelinechiangmai-800.webp 800w,
+             /images/hero-sidelinechiangmai-1200.webp 1200w"
+     sizes="(max-width: 640px) 100vw, 
+            (max-width: 1024px) 80vw, 
+            1200px">
 
 </a>
   <h2 class="sr-only">
@@ -570,9 +574,10 @@
               <h2 id="lightbox-header-title" class="sr-only">รายละเอียดโปรไฟล์น้องๆ</h2>
               
               <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-3">
-                <h3 id="lightbox-profile-name-main" 
-                    class="text-3xl lg:text-4xl font-extrabold text-pink-600 dark:text-pink-400 text-center lg:text-left">
-                </h3>
+                <h3 id="lightbox-profile-name-main"
+    class="text-3xl lg:text-4xl font-extrabold text-pink-600 dark:text-pink-400 text-center lg:text-left">
+    ชื่อโปรไฟล์
+</h3>
                 <div id="lightbox-availability-badge-wrapper" class="flex-shrink-0"></div>
               </div>
 
@@ -617,8 +622,8 @@
     </div>
   </div>
 </div>
-<!-- ✅ โหลด main.js แบบเลื่อน ไม่ block -->
-<script src="/main.js" type="module" defer></script>
+<!-- ใช้ module script แบบถูกต้อง -->
+<script type="module" src="/main.js"></script>
 
 <!-- ✅ โหลด SW หลังโหลดเสร็จ -->
 <script>
