@@ -558,17 +558,13 @@ function createProfileCard(profile = {}) {
   const card = document.createElement('article');
   card.className = 'profile-card-new-container';
 
-  // สร้าง uniqueId ป้องกัน aria-labelledby ซ้ำ
+  // Unique ID สำหรับ aria-labelledby
   const uniqueId = `profile-${profile.id || 'unknown'}-${Math.random().toString(36).substr(2, 9)}`;
   card.setAttribute('aria-labelledby', uniqueId);
 
   // --- Container ---
   const cardInner = document.createElement('div');
-  cardInner.className = `
-    profile-card-new group cursor-pointer relative overflow-hidden 
-    rounded-2xl transition-all duration-300 
-    shadow-lg hover:shadow-xl hover:ring-4 hover:ring-pink-500/50
-  `;
+  cardInner.className = 'profile-card-new';
   cardInner.setAttribute('data-profile-id', profile.id || '');
   cardInner.setAttribute('role', 'button');
   cardInner.setAttribute('tabindex', '0');
@@ -584,10 +580,7 @@ function createProfileCard(profile = {}) {
   const baseUrl = mainImage.src.split('?')[0];
 
   const img = document.createElement('img');
-  img.className = `
-    card-image w-full h-auto object-cover rounded-2xl 
-    transition-transform duration-500 group-hover:scale-110
-  `;
+  img.className = 'card-image';
   img.src = `${baseUrl}?width=300&quality=75&format=webp`;
   img.srcset = `
     ${baseUrl}?width=200&quality=75&format=webp 200w,
@@ -603,15 +596,12 @@ function createProfileCard(profile = {}) {
   img.decoding = 'async';
   img.fetchPriority = profile.isFeatured ? 'high' : 'auto';
   img.style.aspectRatio = '3 / 4';
-  img.onerror = function () {
-    this.onerror = null;
-    this.src = '/images/placeholder-profile.webp';
-  };
+  img.onerror = function () { this.onerror = null; this.src = '/images/placeholder-profile.webp'; };
   cardInner.appendChild(img);
 
   // --- Badges (สถานะ + Featured) ---
   const badges = document.createElement('div');
-  badges.className = 'absolute top-3 right-3 flex flex-col items-end gap-2 z-10';
+  badges.className = 'absolute top-3 right-3';
 
   // Availability Badge
   const availSpan = document.createElement('span');
@@ -631,21 +621,15 @@ function createProfileCard(profile = {}) {
       statusClass = 'status-break';
       break;
   }
-  availSpan.className = `
-    availability-badge ${statusClass} 
-    text-base px-3 py-1.5 font-extrabold rounded-full shadow-2xl transition-all duration-200
-  `;
+  availSpan.className = `availability-badge ${statusClass}`;
   availSpan.textContent = statusText;
   badges.appendChild(availSpan);
 
   // Featured Badge
   if (profile.isFeatured) {
     const feat = document.createElement('span');
-    feat.className = `
-      featured-badge text-black font-extrabold 
-      text-xs px-3 py-1.5 rounded-full shadow-xl flex items-center gap-1
-    `;
-    feat.innerHTML = `<i class="fas fa-star text-yellow-400" aria-hidden="true"></i> แนะนำพิเศษ`;
+    feat.className = 'featured-badge';
+    feat.innerHTML = `<i class="fas fa-star" aria-hidden="true"></i> แนะนำพิเศษ`;
     feat.setAttribute('aria-label', 'แนะนำพิเศษ');
     badges.appendChild(feat);
   }
@@ -653,36 +637,29 @@ function createProfileCard(profile = {}) {
 
   // --- Overlay + Info ---
   const overlay = document.createElement('div');
-  overlay.className = `
-    absolute inset-0 flex flex-col justify-end p-5 
-    transition-opacity duration-300 
-    bg-gradient-to-t from-black via-black/70 to-transparent
-  `;
+  overlay.className = 'overlay';
 
   const info = document.createElement('div');
-  info.className = 'card-info space-y-1';
+  info.className = 'card-info';
 
   // ชื่อ + อายุ
   const h3 = document.createElement('h3');
   h3.id = uniqueId;
-  h3.className = 'flex items-center gap-2 text-white font-extrabold text-2xl sm:text-3xl lg:text-4xl leading-snug drop-shadow-lg';
   h3.innerHTML = `
     <span>${profile.name || 'ไม่ระบุชื่อ'}</span>
-    ${profile.age ? `<span class="text-pink-300 font-bold text-xl drop-shadow-md">(${profile.age} ปี)</span>` : ''}
+    ${profile.age ? `<span>(${profile.age} ปี)</span>` : ''}
   `;
 
-  // Tagline
+  // ข้อความ tagline
   const taglineP = document.createElement('p');
-  taglineP.className = 'text-sm text-pink-400 font-semibold truncate drop-shadow-sm';
   taglineP.textContent = profile.tagline || 'ฟีลแฟน 💯 | ตรงปก';
 
   // จังหวัด
   const p = document.createElement('p');
-  p.className = 'text-base text-white/95 flex items-center gap-1.5 font-medium drop-shadow-md';
   const province = (typeof provincesMap !== 'undefined' && provincesMap.get)
     ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
     : 'ไม่ระบุ';
-  p.innerHTML = `<i class="fas fa-map-marker-alt text-lg text-pink-400" aria-hidden="true"></i> ${province}`;
+  p.innerHTML = `<i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${province}`;
 
   info.appendChild(h3);
   info.appendChild(taglineP);
@@ -694,6 +671,7 @@ function createProfileCard(profile = {}) {
   card.appendChild(cardInner);
   return card;
 }
+
 /**
  * REFACTORED: สร้าง Section จังหวัด
  * - ลบ Gradient classes ที่ hard-code ออก
