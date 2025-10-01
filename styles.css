@@ -16,9 +16,8 @@
 }
 
 
-/* ========================================================
-   ROOT VARIABLES & DARK MODE
-   ======================================================== */
+
+/* Variables & Base Styles */
 :root {
   --font-base: "Prompt", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-heading: "Prompt", system-ui, sans-serif;
@@ -28,285 +27,150 @@
   --card: 0 0% 100%;
   --primary: 340 85% 58%;
   --primary-glow: 340 85% 65%;
-  --secondary: 260 85% 35%;
-  --secondary-glow: 260 85% 40%;
-  --accent: 340 90% 95%;
-  --muted: 220 15% 90%;
-  --border: 220 10% 90%;
-  --ring: 220 15% 50%;
-  --destructive: 0 85% 60%;
+  --secondary: 260 85% 65%;
+  --secondary-glow: 260 85% 75%;
+  --muted: 220 10% 90%;
+  --muted-foreground: 220 10% 40%;
+  --accent: 220 10% 95%;
+  --border: 220 10% 85%;
+  --transition-fast: 200ms ease;
+  --transition-medium: 350ms ease;
+  --transition-slow: 600ms ease;
 }
 
-.dark {
-  --background: 220 20% 10%;
-  --foreground: 220 15% 85%;
+html.dark {
+  --background: 220 15% 10%;
+  --foreground: 220 15% 95%;
   --card: 220 15% 15%;
   --primary: 340 85% 58%;
   --primary-glow: 340 85% 65%;
   --secondary: 260 85% 65%;
-  --secondary-glow: 260 90% 75%;
-  --accent: 220 15% 20%;
-  --muted: 220 15% 30%;
-  --border: 220 10% 20%;
-  --ring: 220 15% 60%;
-  --destructive: 0 85% 70%;
+  --secondary-glow: 260 85% 75%;
+  --muted: 220 15% 20%;
+  --muted-foreground: 220 15% 75%;
+  --accent: 220 15% 18%;
+  --border: 220 15% 25%;
 }
 
-/* ========================================================
-   BODY & HERO
-   ======================================================== */
-body {
-  background: linear-gradient(135deg, #ffffff 0%, #ffe6f2 20%, #ffd6eb 40%, #f2ccff 70%, #f2e6ff 100%);
-  color: #2d0a31;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  padding: 3rem 2rem;
-  text-align: center;
-  font-family: var(--font-base);
+
+html.dark{--background:225 15% 10%;--foreground:220 20% 90%;--card:225 15% 16%;--primary:340 90% 68%;--primary-glow:340 95% 72%;--secondary:260 90% 75%;--secondary-glow:260 95% 80%;--muted:225 15% 20%;--border:225 12% 25%;--accent:225 15% 20%}
+
+@media (max-width: 768px) {
+  h1 { font-size: 1.875rem; }  /* ~30px */
+  h2 { font-size: 1.5rem; }    /* ~24px */
+  h3 { font-size: 1.25rem; }   /* ~20px */
+  h4 { font-size: 1.125rem; }  /* ~18px */
 }
 
-section.hero-h1-revised {
-  background: linear-gradient(135deg, #ffffff 0%, #ffe6f2 25%, #ffb3d9 50%, #e6ccff 75%, #f2e6ff 100%);
-  color: #2d0a31;
-  padding: 3rem 2rem;
-  text-align: center;
-  border-radius: 0 0 2rem 2rem;
-  font-family: var(--font-heading);
+
+/* h1 - หัวข้อหลักสุด */
+h1 {
+  font-size: 2.25rem;   /* ~36px */
+  line-height: 1.2;
+  font-weight: 700;
+  color: #b8860b;       /* ทองเข้ม หรูหรา */
+  margin-bottom: 1rem;
+}
+/* Hero h1 override (ตรงกับ scale เรากำหนด) */
+.hero-title {
+  font-size: 2.25rem;   /* 36px base */
+  line-height: 1.2;
 }
 
-/* ========================================================
-   PROFILE CARD CONTAINER
-   ======================================================== */
+ 
+  
 
-.profile-card-new {
+
+
+
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 1.875rem; /* 30px บนมือถือ */
+  }
+}
+/* h2 - หัวข้อรอง */
+h2 {
+  font-size: 1.75rem;   /* ~28px */
+  line-height: 1.25;
+  font-weight: 700;
+  color: #222;          /* ดำเข้ม */
+  margin-bottom: 0.9rem;
+}
+
+/* h3 - หัวข้อย่อย */
+h3 {
+  font-size: 1.375rem;  /* ~22px */
+  line-height: 1.3;
+  font-weight: 600;
+  color: #333;          /* เทาเข้ม */
+  margin-bottom: 0.75rem;
+}
+
+/* h4 - หัวข้อเล็ก */
+h4 {
+  font-size: 1.125rem;  /* ~18px */
+  line-height: 1.3;
+  font-weight: 600;
+  color: #444;          /* เทากลางเข้ม */
+  margin-bottom: 0.6rem;
+}
+
+/* Paragraph */
+p {
+  font-size: 1rem;      /* ~16px */
+  line-height: 1.5;
+  font-weight: 400;
+  color: #555;          /* เทากลาง */
+  margin-bottom: 1rem;
+}
+
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.delay-150 { animation-delay: 0.15s; }
+.delay-300 { animation-delay: 0.3s; }
+
+.age-modal-content h2 {
+  color: #f0f0f5 !important;
+}
+.age-modal-content p {
+  color: #d1d5db !important; /* หรือ text-gray-300 */
+}
+p{margin:0 0 1em}
+
+
+.card-image-wrapper {
+  width: 100%;
+  background-color: #f3f4f6; /* placeholder background ขณะรอภาพ */
+  display: block;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  border-radius: var(--radius);
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  aspect-ratio: 3 / 4;
+  /* modern browsers support aspect-ratio; we set via inline style from JS */
 }
 
-.profile-card-new:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-}
-
-/* ========================================================
-   CARD IMAGE
-   ======================================================== */
 .card-image {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: var(--radius);
-  display: block;
-  position: relative;
-  z-index: 1;
-  transition: transform 0.5s ease;
 }
-
-.group:hover .card-image {
-  transform: scale(1.05);
-}
-
-/* ========================================================
-   OVERLAY & TEXT
-   ======================================================== */
-.profile-card-new .overlay,
-.profile-card-new .card-info {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.2) 60%, transparent);
-  z-index: 2;
-  transition: opacity 0.3s ease;
-}
-
-.card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  opacity: 1;
-}
-
-/* ========================================================
-   BADGES (STATUS + FEATURED)
-   ======================================================== */
-.absolute.top-3.right-3 {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-  z-index: 3;
-}
-
-.availability-badge {
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  font-weight: 800;
-  font-size: 0.875rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.status-available { background-color: #10b981; color: #fff; }
-.status-unavailable { background-color: #ef4444; color: #fff; }
-.status-break { background-color: #facc15; color: #000; }
-
-.featured-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: linear-gradient(to right, #facc15, #f59e0b);
-  color: #000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%,100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-/* ========================================================
-   TEXT INFO (NAME / AGE / TAGLINE / PROVINCE)
-   ======================================================== */
-.card-info h3 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 800;
-  line-height: 1.2;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-  font-size: 1.5rem;
-  color: #fff;
-}
-
-.card-info h3 span:last-child {
-  color: #f9a8d4;
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.card-info p {
-  margin: 0;
-  line-height: 1.3;
-  color: #fff;
-}
-
-.card-info p:nth-child(2) {
-  color: #f472b6;
-  font-weight: 600;
-  font-size: 0.875rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.card-info p:nth-child(3) {
-  color: rgba(255,255,255,0.95);
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-weight: 500;
-}
-
-.card-info p:nth-child(3) i { color: #f472b6; font-size: 1rem; }
-
-/* ========================================================
-   GRID / RESPONSIVE
-   ======================================================== */
-.profile-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem 0.875rem;
-}
-
-@media (min-width: 640px) { .profile-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1024px) { .profile-grid { grid-template-columns: repeat(4, 1fr); } }
-
-/* ========================================================
-   HOVER & FOCUS
-   ======================================================== */
-.profile-card-new:hover .card-info { opacity: 1; }
-
-.profile-card-new:focus {
-  outline: 3px solid #ec4899;
-  outline-offset: 3px;
-}
-
-/* ========================================================
-   ENHANCED HEADINGS
-   ======================================================== */
-h1.text-primary, h2.text-primary, h3.text-primary {
-  text-shadow: 0 0 25px hsl(var(--primary-glow)/0.5), 0 0 5px hsl(var(--primary-glow)/0.7);
-}
-
-.title-accent {
-  text-shadow: 0 0 20px hsl(var(--secondary-glow)/0.5);
-}
-
-/* ========================================================
-   MESSAGE BOX & SECTION
-   ======================================================== */
-.section-container {
-  background: radial-gradient(circle at 10% 10%, hsl(var(--card)/0.6), hsl(var(--card)/0.4) 80%);
-  border: 1px solid hsl(var(--border)/0.7);
-  border-radius: calc(var(--radius) * 1.5);
-  padding: 1.5rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 10px 40px -10px hsl(var(--foreground)/.05);
-  transition: background var(--transition-medium) ease, border-color var(--transition-medium) ease;
-}
-
-.section-header { text-align: center; margin-bottom: 2.5rem; }
-.section-title { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.75rem; letter-spacing: -0.02em; }
-@media (min-width: 768px) { .section-title { font-size: 2.5rem; } }
-
-.section-subtitle { font-size: 1rem; color: hsl(var(--muted-foreground)); max-width: 65ch; margin: 0 auto; line-height: 1.7; }
-
-/* MESSAGE BOX */
-.message-box-container {
-  padding: 2rem;
-  background-color: hsl(var(--muted));
-  border: 1px dashed hsl(var(--border));
-  border-radius: var(--radius);
-  text-align: center;
-}
-
-.message-box-content { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
-.message-box-icon { font-size: 2.5rem; color: hsl(var(--muted-foreground)); opacity: 0.5; }
-.message-box-title { font-size: 1.25rem; font-weight: 700; color: hsl(var(--foreground)); }
-.message-box-description { color: hsl(var(--muted-foreground)); max-width: 45ch; }
-
-.message-box-button {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: hsl(var(--primary));
-  color: white;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: background-color var(--transition-fast) ease, transform var(--transition-fast) ease;
-}
-.message-box-button:hover { background-color: hsl(var(--primary-glow)); transform: scale(1.05); }
-
-@keyframes aurora-1{0_%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(1turn)}}
+@keyframes aurora-1{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(1turn)}}
 
 @keyframes aurora-2{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(-1turn)}}
 
@@ -422,31 +286,9 @@ html.dark #sidebar nav a.active-nav-link,html.dark #sidebar nav a:active{backgro
 
 .profile-card-new-container{perspective:1000px}
 
-
-
 .profile-card-new{background-color:hsl(var(--muted));border-radius:1rem;overflow:hidden;position:relative;aspect-ratio:3/4;transition:transform .5s cubic-bezier(.165,.84,.44,1),box-shadow .5s cubic-bezier(.165,.84,.44,1);box-shadow:0 10px 30px -10px hsl(var(--foreground)/.15);transform-style:preserve-3d}
 
-
-
-/* แทนที่โค้ดเดิมด้วยโค้ดนี้ */
-.profile-card-new:before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    
-    /* ปรับแก้: การใช้ var() ใน radial-gradient มักจะทำให้เกิดปัญหาในการตรวจสอบ
-       ให้ตรวจสอบให้แน่ใจว่าตัวแปร --mouse-x และ --mouse-y ถูกกำหนดค่าเริ่มต้นไว้ 
-       หรือถ้าไม่จำเป็นต้องใช้เอฟเฟกต์เมาส์ ให้แทนที่ด้วยค่าคงที่ (ถ้าคุณต้องการแค่แสงคงที่)
-    */
-    background: radial-gradient(circle 250px at center, hsla(0, 0%, 100%, .15), transparent);
-    
-    opacity: 0;
-    transition: opacity .4s ease;
-    z-index: 2;
-}
+.profile-card-new:before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle 250px at var(--mouse-x) var(--mouse-y),hsla(0,0%,100%,.15),transparent);opacity:0;transition:opacity .4s ease;z-index:2}
 
 .profile-card-new:hover{transform:rotateY(var(--rotate-y)) rotateX(var(--rotate-x)) scale(1.05);box-shadow:0 25px 50px -15px hsl(var(--foreground)/.3)}
 
@@ -1298,53 +1140,6 @@ html.dark .aurora-blob{opacity:.2}
 
 ::selection{background:hsl(var(--primary)/.8);color:#fff}
 
-.fa,.fab,.fad,.fal,.far,.fas{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;text-rendering:auto;line-height:1}
-
-.fa-solid,.fas{font-family:Font Awesome\ 6 Free;font-weight:900}
-
-.fa-check-circle:before{content:"\f058"}
-
-.fa-shield-alt:before{content:"\f3ed"}
-
-.fa-gem:before{content:"\f3a5"}
-
-.fa-search:before{content:"\f002"}
-
-.fa-map-marker-alt:before{content:"\f3c5"}
-
-.fa-clock:before{content:"\f017"}
-
-.fa-star:before{content:"\f005"}
-
-.fa-sync-alt:before{content:"\f2f1"}
-
-.fa-chevron-down:before{content:"\f078"}
-
-.fa-sun:before{content:"\f185"}
-
-.fa-bars:before{content:"\f0c9"}
-
-.fa-home:before{content:"\f015"}
-
-.fa-users:before{content:"\f0c0"}
-
-.fa-info-circle:before{content:"\f05a"}
-
-.fa-question-circle:before{content:"\f059"}
-
-.fa-newspaper:before{content:"\f1ea"}
-
-.fa-line:before{content:"\f3c0"}
-
-.fa-tiktok:before{content:"\e07b"}
-
-.fa-link:before{content:"\f0c1"}
-
-.fa-tree:before{content:"\f1bb"}
-
-.fa-cloud:before{content:"\f0c2"}
-
-.fa-times:before{content:"\f00d"}
 
 #page-header.scrolled{background-color:hsl(var(--card)/.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom-color:hsl(var(--border)/.5);box-shadow:0 4px 30px rgba(0,0,0,.1)}
 
@@ -1438,70 +1233,35 @@ header nav a[aria-current=page]{text-shadow:0 0 10px hsl(var(--primary-glow)/.2)
 
 }
 
-/* =================================================================== */
-/* 1. GLOBAL STYLES, VARIABLES & ANIMATIONS
-/* =================================================================== */
-
-html, body {
-  width: 100%;
-  max-width: 100vw;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  font-family: var(--font-base), "Prompt", "Inter", sans-serif;
-  color: hsl(var(--foreground));
-  background-color: hsl(var(--background));
-  transition: background-color var(--transition-medium), color var(--transition-medium);
-}
-
-h1, h2, h3, h4, h5, h6 {
-  color: #fff;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
-
-p, span, li {
-  color: #222;
-}
-
-section {
-  color: #222;
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.animate-fadeInUp { animation: fadeInUp 0.6s ease-in-out forwards; }
-.animate-fadeIn { animation: fadeIn 0.6s ease-in-out forwards; }
-
 
 /* =================================================================== */
-/* 2. HERO SECTION & SEARCH FORM
+/* STYLES.UPGRADED.CSS v3.0 - "PREMIUM CLEAN EDITION"                  */
 /* =================================================================== */
 
-section.hero-h1-revised {
-  width: 100%;
-  max-width: 100vw;
-  padding: 2rem 1rem;
-  margin: 0 auto;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 5;
+
+html.dark { --aurora-opacity: 0.12; }
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #ff9ecb 0%, #d47bff 50%, #6ecbff 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main { position: relative; z-index: 1; }
+
+/* Headings */
+h1.text-primary, h2.text-primary, h3.text-primary {
+  text-shadow: 0 0 25px hsl(var(--primary-glow) / 0.5),
+               0 0 5px hsl(var(--primary-glow) / 0.7);
+}
+.title-accent {
+  text-shadow: 0 0 20px hsl(var(--secondary-glow) / 0.5);
 }
 
-.hero-h1-revised h1,
-.hero-h1-revised h2,
-.hero-h1-revised p {
-  color: #fff;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
-
+/* --- HERO SECTION --- */
 .section-header-card {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(16px);
@@ -1510,54 +1270,40 @@ section.hero-h1-revised {
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   animation: fadeInUp 0.8s ease;
 }
-
 .section-header-card img {
   filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2));
   transition: transform 0.3s ease;
 }
-
 .section-header-card img:hover { transform: scale(1.05); }
 
-#search-section,
+/* --- SEARCH FORM --- */
 #hero-form {
-  position: relative;
-  z-index: 10;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(18px) saturate(120%);
-  -webkit-backdrop-filter: blur(18px) saturate(120%);
   border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.4);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   animation: fadeInUp 1s ease;
   transition: all 0.3s ease;
-  padding: 1.5rem;
 }
-
-#search-section:hover,
-#hero-form:hover { transform: translateY(-4px); }
-
-#search-section input,
-#search-section select,
+#hero-form:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+}
 #hero-form input,
 #hero-form select {
-  background: rgba(255,255,255,1);
-  border: 1px solid hsl(var(--border));
+  background: rgba(255,255,255,0.9);
+  border: none;
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
-  padding: 0.5rem 1rem;
-  color: #111;
 }
-
-#search-section input:focus,
-#search-section select:focus,
 #hero-form input:focus,
 #hero-form select:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.5);
   transform: scale(1.02);
 }
-
 #keyword-search-btn {
   background: linear-gradient(90deg, #ec4899, #8b5cf6);
   border: none;
@@ -1567,445 +1313,124 @@ section.hero-h1-revised {
   font-weight: bold;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  cursor: pointer;
 }
-
 #keyword-search-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 18px rgba(0,0,0,0.3);
 }
-
 #reset-search-btn {
-  background: rgba(229,231,235,0.8);
+  background: rgba(229, 231, 235, 0.8);
   border-radius: 999px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-#reset-search-btn:hover {
-  background: rgba(209,213,219,1);
-  transform: scale(1.05);
-}
-
-
-/* =================================================================== */
-/* 3. SECTION HEADERS & CONTENT WRAPPERS
-/* =================================================================== */
-
-h1.text-primary, h2.text-primary, h3.text-primary {
-  text-shadow: 0 0 25px hsl(var(--primary-glow)/0.5),
-               0 0 5px hsl(var(--primary-glow)/0.7);
-}
-
-.title-accent { text-shadow: 0 0 20px hsl(var(--secondary-glow)/0.5); }
-
-h2 {
-  font-family: "Prompt","Inter",sans-serif;
-  font-weight: 700;
-  font-size: 1.75rem;
-  line-height: 1.25;
-  color: #b8860b;
-}
-@media(max-width:768px){h2{font-size:1.5rem;}}
-
-.section-content-wrapper {
-  background-color: hsl(var(--card)/0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid hsl(var(--border)/0.5);
-  box-shadow: 0 8px 32px 0 hsl(var(--foreground)/0.08);
-  border-radius: 1.5rem;
-  margin-bottom: 2.5rem;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.section-content-wrapper p {
-  font-size: 0.95rem;
-  color: #f5f5f5;
-  line-height: 1.5;
-}
-
-.province-section-header,
-.search-results-header {
-  font-size: clamp(1.5rem,4vw,1.75rem);
-  font-weight: 800;
-  background: linear-gradient(120deg,hsl(var(--primary)) 0%,hsl(var(--secondary)) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 10px hsl(var(--primary-glow)/0.1);
-  margin-bottom: 0.25rem;
-}
-
-.province-section-header {
-  display:flex;
-  align-items:center;
-  gap:0.6rem;
-}
-
-#featured-heading {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:0.6rem;
-  margin:0 auto;
-  text-align:center;
-  font-size:clamp(1.6rem,2.4vw+0.6rem,2.4rem);
-  line-height:1.02;
-  letter-spacing:-0.02em;
-  -webkit-font-smoothing: antialiased;
-  background: linear-gradient(90deg,#facc15,#f59e0b 60%,#f97316);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  text-shadow: 0 6px 20px rgba(250,210,70,0.12);
-}
-
-.featured-section .section-content-wrapper p,
-.featured-section .section-content-wrapper .text-muted-foreground {
-  color: rgba(17,24,39,0.82);
-  font-size: clamp(.86rem,0.9vw+.6rem,.95rem);
-  line-height: 1.6;
-  margin: 0.5rem auto 0;
-  max-width: 74ch;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
-}
-
-.featured-section .meta-row {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: .8rem;
-  margin:1rem 0 0.75rem;
-  font-weight:600;
-  color: var(--muted-foreground,#6b7280);
-}
-.featured-section .meta-row .pin {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  background: linear-gradient(135deg,#ff6b6b,#ffb86b);
-  box-shadow:0 6px 18px rgba(255,107,107,0.12);
-  color:#fff;
-  font-size:0.95rem;
-}
-
-
-/* =================================================================== */
-/* 4. PROFILE CARDS, COUNTERS & BADGES
-/* =================================================================== */
-
-.profile-card-new {
-  position:relative;
-  overflow:hidden;
-  border-radius:1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.profile-card-new:hover {
-  transform: scale(1.02);
-  box-shadow:0 12px 28px rgba(0,0,0,0.25);
-}
-
-.profile-card-new .card-info {
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  padding:0.5rem 0.75rem;
-  background: linear-gradient(180deg,transparent,rgba(0,0,0,0.6));
-  border-radius:0 0 1rem 1rem;
-}
-.profile-card-new .card-info h3 {
-  font-size:1.1rem;
-  font-weight:700;
-  color:#fff;
-  margin:0;
-  text-shadow:0 2px 6px rgba(0,0,0,0.8);
-}
-.profile-card-new .card-info p {
-  font-size:0.85rem;
-  font-weight:500;
-  color:#f5f5f5;
-  margin:0.2rem 0 0;
-  display:flex;
-  align-items:center;
-  gap:0.3rem;
-}
-.profile-card-new .card-info p::before { content:"📍"; font-size:0.9rem; }
-
-.stats-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
-  gap:1rem;
-  margin:1rem auto;
-  padding:1rem;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border-radius:1rem;
-  text-align:center;
-  backdrop-filter: blur(6px);
-}
-.stat-item {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-.stat-item .value {
-  font-size:2rem;
-  font-weight:900;
-  background: linear-gradient(90deg,#ff3d7f,#8b5cf6);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  margin-bottom:0.2rem;
-}
-.stat-item .label {
-  font-size:0.85rem;
-  color:#eee;
-  opacity:0.85;
-}
-
-/* =================================================================== */
-/* 5. RESPONSIVE FIXES
-/* =================================================================== */
-@media(max-width:1024px){
-  #search-section,#hero-form{
-    padding:1rem;
-  }
-  .province-section-header,
-  .search-results-header{
-    font-size:clamp(1.35rem,5vw,1.6rem);
-  }
-}
-@media(max-width:640px){
-  .section-content-wrapper{
-    padding:1rem;
-  }
-  #keyword-search-btn,#reset-search-btn{
-    width:100%;
-    padding:0.75rem;
-  }
-}
-/* HERO FORM SECTION - FULL COLOR VERSION */
-#hero-form-section {
-  background-color: #ffffff; /* สีขาวเต็ม */
-  color: #111; /* ตัวอักษรสีเข้มอ่านง่าย */
-  border-radius: 2rem;
-  padding: 2rem 2.5rem;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.25); /* เงาลึกเด่น */
-  position: relative;
-  z-index: 20;
-  transition: all 0.3s ease;
-}
-
-/* FORM ELEMENTS */
-#hero-form input,
-#hero-form select {
-  background-color: #f3f4f6; /* สีพื้น input */
-  border: 1px solid #d1d5db; /* ขอบชัดเจน */
-  border-radius: 999px;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  color: #111;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-
-#hero-form input:focus,
-#hero-form select:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(236,72,153,0.5);
-  transform: scale(1.02);
-}
-
-/* BUTTONS */
-#keyword-search-btn {
-  background: linear-gradient(90deg, #ec4899, #8b5cf6);
-  color: #fff;
-  padding: 0.75rem 2rem;
-  border-radius: 999px;
-  font-weight: 600;
-  box-shadow: 0 8px 20px rgba(236,72,153,0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-#keyword-search-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 28px rgba(236,72,153,0.4);
-}
-
-#reset-search-btn {
-  background-color: #e5e7eb; /* สีเทาชัดเจน */
-  border-radius: 999px;
-  padding: 0.75rem 1.5rem;
-  color: #111;
-  font-weight: 500;
   transition: all 0.3s ease;
 }
 #reset-search-btn:hover {
-  background-color: #d1d5db;
+  background: rgba(209, 213, 219, 1);
+  transform: scale(1.05);
 }
 
-/* ICONS INSIDE INPUT */
-#hero-form span i {
-  color: #6b7280; /* สีไอคอนชัดเจน */
+/* --- LIGHTBOX --- */
+#lightbox {
+  background-color: hsl(var(--background) / 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  #hero-form-section { padding: 1.5rem; }
-  #hero-form input,#hero-form select { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
-  #keyword-search-btn,#reset-search-btn { width: 100%; justify-content: center; }
+.lightbox-grid { display: flex; flex-direction: column; }
+@media (min-width: 1024px) {
+  .lightbox-grid { display: grid; grid-template-columns: 40% 60%; }
 }
-/* --- Badges (Availability, Featured, Profile Count) --- */
-/* Base Availability Badge Style */
-.availability-badge,
-.availability-badge-upgraded {
+.lightbox-gallery { width: 100%; }
+@media (min-width: 1024px) {
+  .lightbox-gallery { border-right: 1px solid hsl(var(--border)); }
+}
+.hero-image-container {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background-color: hsl(var(--muted));
+  box-shadow: 0 10px 30px -5px hsl(var(--foreground)/.1);
+}
+.hero-image-main {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform var(--transition-slow) cubic-bezier(0.165,0.84,0.44,1),
+              filter var(--transition-medium);
+}
+.thumbnail-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 0.75rem;
+}
+.thumbnail-strip img {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: 0.75rem; cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-fast) ease-in-out;
+  opacity: 0.6; filter: grayscale(50%);
+}
+.thumbnail-strip img:hover {
+  opacity: 1; filter: grayscale(0%);
+  transform: scale(1.08); border-color: hsl(var(--secondary-glow));
+}
+.thumbnail-strip img.active-thumbnail {
+  opacity: 1; filter: grayscale(0%);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 15px hsl(var(--primary-glow)/.6);
+}
+.availability-badge {
   display: inline-block;
   padding: 0.3rem 0.8rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em;
   border: 1px solid;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
-/* Available Status */
-.availability-badge.status-available,
-.availability-badge-upgraded.status-available {
-    background-color: hsl(var(--primary) / 0.15);
-    color: hsl(var(--primary));
-    border-color: hsl(var(--primary) / 0.4);
-    text-shadow: 0 0 5px hsl(var(--primary-glow) / 0.5);
+.availability-badge.status-available {
+  background-color: hsl(var(--primary)/.1);
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary)/.3);
 }
-/* Busy Status */
-.availability-badge.status-busy,
-.availability-badge-upgraded.status-busy {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.4);
+.availability-badge.status-busy {
+  background-color: rgba(239,68,68,.1);
+  color: #ef4444;
+  border-color: rgba(239,68,68,.3);
 }
-/* Inquire Status */
-.availability-badge.status-inquire,
-.availability-badge-upgraded.status-inquire {
-    background-color: rgba(250, 204, 21, 0.15);
-    color: #f59e0b;
-    border-color: rgba(250, 204, 21, 0.4);
+.availability-badge.status-inquire {
+  background-color: rgba(250,204,21,.1);
+  color: #f59e0b;
+  border-color: rgba(250,204,21,.3);
 }
-
-/* Featured Badge */
-.featured-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 9999px;
-    color: #fff;
-    background: linear-gradient(135deg, hsl(var(--primary-glow)), hsl(var(--primary)));
-    border: 1px solid hsl(var(--primary-glow) / 0.5);
-    box-shadow: 0 0 15px -2px hsl(var(--primary-glow) / 0.7);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
-/* Profile Count Badge (Contextual) */
-/* Generic badge */
-.profile-count-badge {
+#lightboxTags .tag-badge {
+  padding: 0.375rem 0.875rem;
   font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
-  background-color: hsl(var(--muted));
-  color: hsl(var(--muted-foreground));
+  border-radius: 9999px; font-weight: 500;
+  background-color: hsl(var(--accent)); color: hsl(var(--foreground));
   border: 1px solid hsl(var(--border));
+  transition: all var(--transition-fast) ease;
 }
-/* Badge in province header */
-.province-section-header .profile-count-badge {
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: linear-gradient(90deg, #ff3d7f, #8b5cf6);
-  color: #fff;
-  padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
-  margin-left: auto;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-}
-/* Large badge for main featured heading */
-#featured-heading .profile-count-badge,
-#featured-count.profile-count-badge {
-  min-width: 58px;
-  height: 34px;
-  padding: 0 .6rem;
-  font-size: 0.95rem;
-  font-weight: 800;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(90deg,#ff5e99,#8b5cf6);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(139,92,246,0.16);
-  transform-origin: center;
+#lightboxTags .tag-badge:hover {
+  background-color: hsl(var(--primary)/.1);
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary)/.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px -2px hsl(var(--primary)/.2);
 }
 
-/* Search Count Highlight */
-.search-count-highlight {
-    font-weight: 700;
-    font-size: 1.1em;
-    color: hsl(var(--primary));
-    text-shadow: 0 0 8px hsl(var(--primary-glow) / 0.5);
-    margin: 0 0.25rem;
-}
-
-/* --- Accessibility Fixes --- */
-.badge-description,
-.trust-badge {
-    color: hsl(220, 10%, 40%); /* Dark gray for light mode */
-}
-html.dark .badge-description,
-html.dark .trust-badge {
-    color: hsl(220, 15%, 75%); /* Lighter gray for dark mode */
-}
-
-
-
-/* =================================================================== */
-/* 6. BUTTONS & SOCIAL MEDIA
-/* =================================================================== */
-
-/* --- Upgraded LINE Button --- */
+/* --- LINE BUTTON --- */
 .btn-line-shared-upgraded {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  gap: 0.75rem;
-  padding: 0.9rem 1.75rem;
-  border-radius: 0.75rem;
-  font-weight: 700;
-  font-size: 1rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.75rem; padding: 0.9rem 1.75rem;
+  border-radius: 0.75rem; font-weight: 700; font-size: 1rem;
   color: white;
   background: linear-gradient(135deg,#06B6D4,#06C755);
-  transition: all 350ms cubic-bezier(0.25,0.8,0.25,1);
+  transition: all var(--transition-medium) cubic-bezier(0.25,0.8,0.25,1);
   box-shadow: 0 4px 20px -5px rgba(6,199,85,0.5);
-  border: none;
-  text-decoration: none;
-  will-change: transform;
-  margin-top: 0.5rem;
+  border: none; text-decoration: none; will-change: transform;
 }
 .btn-line-shared-upgraded:hover {
-  transform: translateY(-4px) scale(1.02); /* Using scale(1.02) for subtle growth */
+  transform: translateY(-4px) scale(1.05);
   box-shadow: 0 10px 30px -8px rgba(6,199,85,0.7);
 }
-.btn-line-shared-upgraded svg {
-    width: 1.25rem;
-    height: 1.25rem;
-}
 
-/* --- Social Media Section --- */
+/* --- SOCIAL MEDIA --- */
 .social-media-section {
   margin-top: 60px;
   padding: 20px 0;
@@ -2021,7 +1446,6 @@ html.dark .trust-badge {
   -webkit-text-fill-color: transparent;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
   margin-bottom: 8px;
-  color: transparent; /* Fallback for gradient text */
 }
 .social-section-header p {
   font-size: clamp(14px, 2vw, 18px);
@@ -2039,46 +1463,26 @@ html.dark .trust-badge {
   line-height: 1.5;
 }
 .social-disclaimer i { color: #b71c1c; }
-
-/* --- Social Media Marquee --- */
 .social-marquee-wrap {
-  position: relative;
-  overflow: hidden;
-  cursor: grab;
-  padding: 20px 0;
-  margin-top: 20px;
-  user-select: none;
+  position: relative; overflow: hidden; cursor: grab;
+  padding: 20px 0; margin-top: 20px; user-select: none;
 }
 .social-marquee-wrap:active { cursor: grabbing; }
 .social-marquee {
-  display: flex;
-  gap: 20px;
-  white-space: nowrap;
-  will-change: transform;
+  display: flex; gap: 20px; white-space: nowrap; will-change: transform;
 }
 .social-item {
-  flex: 0 0 auto;
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  color: white;
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  flex: 0 0 auto; width: 60px; height: 60px;
+  border-radius: 50%; color: white; font-size: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: transform 0.3s ease;
 }
-.social-item i {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
+.social-item i { font-size: 24px; margin-bottom: 4px; }
 .social-item:hover {
   transform: rotate(360deg) scale(1.1);
   transition: transform 0.6s ease;
 }
-.social-item:hover i {
-  filter: drop-shadow(0 0 6px currentColor);
-}
+.social-item:hover i { filter: drop-shadow(0 0 6px currentColor); }
 .fb { background:#1877f2; }
 .line { background:#06c755; }
 .tiktok { background:linear-gradient(135deg,#000 40%,#ff0050 100%); }
@@ -2086,432 +1490,1295 @@ html.dark .trust-badge {
 .linktree { background: linear-gradient(to right,#20c997,#107c6f); }
 .bluesky { background: linear-gradient(to right,#3b82f6,#2563eb); }
 
-
-/* =================================================================== */
-/* 7. MISCELLANEOUS (UNCATEGORIZED STYLES)
-/* =================================================================== */
-
-/* These styles were present but couldn't be categorized cleanly. */
-#featured-profiles p,
-#all-profiles-section p {
-  color: #2d2d2d; /* Dark gray, softer than pure black */
-  font-weight: 400;
-  line-height: 1.65;
+/* 1.1: BACKDROP & MAIN WRAPPER */
+#lightbox {
+    /* เพิ่มความเบลอให้ดูพรีเมียมขึ้น */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
-/* This style seems incomplete but is included as requested. */
-.some-badge-or-element { /* Added a placeholder selector */
-  display: inline-block;
-  margin-left: 6px;
-  padding: 0.2em 0.7em;
-  font-size: 0.82rem;
-  font-weight: 600;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #fde047, #facc15);
-  color: #111;
-  box-shadow: 0 2px 6px rgba(250, 204, 21, 0.45);
-}
-
-/* ---- 1. ทำให้หัวข้อหลักและข้อความย่อยอ่านง่ายขึ้น ---- */
-
-/* สำหรับหัวข้อหลัก เช่น "โปรไฟล์แนะนำประจำสัปดาห์" หรือ "ค้นหาน้องๆ" */
-.main-heading {
-  color: #FFD700;
-  font-size: 2rem;
-  font-weight: 800;
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7),
-               0 0 25px rgba(255, 215, 0, 0.5);
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  margin-bottom: 0.5rem;
-}
-
-/* สำหรับข้อความย่อย หรือคำอธิบาย */
-.sub-text {
-  color: #f9fafb;
-  font-size: 1.05rem;
-  line-height: 1.7;
-  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6);
-  margin-top: 0.5rem;
-}
-
-
-/* ---- 2. ปรับปรุงการ์ดโปรไฟล์และป้ายสถานะ ---- */
-
-/* สำหรับการ์ดโปรไฟล์ */
-.profile-card {
-  border-radius: 20px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
-  background: linear-gradient(180deg, #ffffff, #f9fafb);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.profile-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
-}
-
-/* สำหรับป้ายสถานะ เช่น "รับงาน", "แนะนำ" */
-.status-badge {
-  font-weight: bold;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  padding: 0.3rem 0.8rem;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  color: #fff;
-}
-.status-badge:hover {
-  transform: scale(1.07);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-}
-
-/* =================================================================== */
-/* 1. LIGHTBOX: MAIN OVERLAY & CONTENT WRAPPER
-/* =================================================================== */
-
-/* --- Backdrop --- */
-.overlay-backdrop {
-  background-color: hsla(0, 0%, 0%, 0.85);
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-}
-
-/* --- Content Wrapper --- */
-.modal-content {
-  background: linear-gradient(160deg, #ffffff 0%, #f8f7fb 100%);
-  color: hsl(var(--card-foreground));
-  display: flex;
-  flex-direction: column;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-  animation: fadeInUp 0.35s ease;
-}
-
-/* --- Premium Close Button --- */
-.btn-close-premium {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.35);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  cursor: pointer;
-  transition: all 0.25s ease-in-out;
-}
-.btn-close-premium:hover {
-  background-color: rgba(239, 68, 68, 0.85);
-  transform: rotate(90deg) scale(1.12);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-/* --- Lightbox Layout Grid --- */
+/* 1.2: GRID & LAYOUT */
 .lightbox-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
 }
+
 @media (min-width: 1024px) {
-  .lightbox-grid {
-    grid-template-columns: 40% 60%;
-    height: 100%;
-  }
+    .lightbox-grid {
+        display: grid;
+        /* ปรับสัดส่วนให้ฝั่งรูปภาพเล็กลงเล็กน้อย */
+        grid-template-columns: 40% 60%; 
+    }
 }
 
-/* =================================================================== */
-/* 2. LIGHTBOX: GALLERY (LEFT SIDE)
-/* =================================================================== */
-
+/* 1.3: GALLERY (LEFT COLUMN) */
 .lightbox-gallery {
-  padding: 0.75rem;
+    width: 100%;
 }
+
 @media (min-width: 1024px) {
-  .lightbox-gallery {
-    border-right: 1px solid hsl(var(--border));
-  }
+    .lightbox-gallery {
+        /* เพิ่มเส้นแบ่งระหว่างคอลัมน์ */
+        border-right: 1px solid hsl(var(--border));
+    }
 }
 
-/* --- Main Hero Image --- */
-.hero-image-container {
-  aspect-ratio: 3 / 4;
-  border-radius: 14px;
-  overflow: hidden;
-  background-color: #e5e7eb;
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-}
-.hero-image-main {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.35s ease;
-}
-.hero-image-main:hover {
-  transform: scale(1.06);
-}
-
-/* --- Thumbnail Strip --- */
 .thumbnail-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 0.6rem;
-  padding-top: 0.9rem;
+    display: grid;
+    /* จัดเรียง thumbnail ให้อัตโนมัติและสวยงาม */
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 0.75rem;
+    padding-top: 0; /* เอา padding ด้านบนออก */
 }
+
 .thumbnail-strip .thumbnail {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: 8px;
-  cursor: pointer;
-  border: 2px solid transparent;
-  opacity: 0.65;
-  filter: grayscale(25%);
-  transition: all 0.25s ease-in-out;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 200ms ease-in-out;
+    opacity: 0.6;
+    filter: grayscale(50%);
 }
+
 .thumbnail-strip .thumbnail:hover {
-  opacity: 1;
-  transform: scale(1.1);
-  border-color: #ec4899;
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.08);
+    border-color: hsl(var(--secondary-glow));
 }
+
 .thumbnail-strip .thumbnail.active {
-  opacity: 1;
-  filter: grayscale(0%);
-  border-color: #ec4899;
-  box-shadow: 0 0 18px rgba(236, 72, 153, 0.6);
+    opacity: 1;
+    filter: grayscale(0%);
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 15px hsl(var(--primary-glow)/.6);
 }
 
-/* =================================================================== */
-/* 3. LIGHTBOX: DETAILS (RIGHT SIDE)
-/* =================================================================== */
+/* 1.4: DETAILS (RIGHT COLUMN) - การปรับปรุงหลัก */
 
-.lightbox-details {
-  padding: 1.25rem 1.75rem;
-  color: #333;
-}
-@media (min-width: 1024px) {
-  .lightbox-details {
-    padding: 2rem;
-  }
+/* [NEW] Availability Badge ที่ออกแบบใหม่ */
+#lightbox-availability-badge-wrapper {
+    /* จัดให้ badge อยู่ตรงกลางหรือชิดซ้ายได้ง่าย */
+    display: flex;
+    justify-content: center;
+    lg:justify-content: flex-start;
 }
 
-/* --- Main Name & Quote --- */
-#lightbox-profile-name-main {
-  font-weight: 800;
-  background: linear-gradient(90deg, #ec4899, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  line-height: 1.25;
-  font-size: 1.8rem;
-}
-#lightboxQuote {
-  color: #6b7280;
-  font-style: italic;
-  margin-top: 0.4rem;
-}
-
-/* --- Availability Badge --- */
 .availability-badge-upgraded {
-  display: inline-block;
-  padding: 0.35rem 0.85rem;
-  border-radius: 9999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid;
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid;
 }
+
+/* สีสำหรับสถานะต่างๆ */
 .availability-badge-upgraded.status-available {
-  background-color: rgba(22, 163, 74, 0.12);
-  color: #16a34a;
-  border-color: rgba(22, 163, 74, 0.35);
+    background-color: hsl(var(--primary)/.1);
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary)/.3);
 }
+
 .availability-badge-upgraded.status-busy {
-  background-color: rgba(220, 38, 38, 0.12);
-  color: #dc2626;
-  border-color: rgba(220, 38, 38, 0.35);
+    background-color: rgba(239, 68, 68, .1); /* Red */
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, .3);
 }
+
 .availability-badge-upgraded.status-inquire {
-  background-color: rgba(217, 119, 6, 0.12);
-  color: #d97706;
-  border-color: rgba(217, 119, 6, 0.35);
+    background-color: rgba(250, 204, 21, .1); /* Yellow/Amber */
+    color: #f59e0b;
+    border-color: rgba(250, 204, 21, .3);
 }
 
-/* --- Tag Badges --- */
-.tag-badge {
-  padding: 0.4rem 0.9rem;
-  font-size: 0.82rem;
-  border-radius: 9999px;
-  font-weight: 500;
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-  transition: all 0.25s ease;
-}
-.tag-badge:hover {
-  background-color: rgba(139, 92, 246, 0.12);
-  color: #8b5cf6;
-  border-color: rgba(139, 92, 246, 0.35);
-  transform: translateY(-2px);
+/* [NEW] ดีไซน์ใหม่สำหรับ Details Compact */
+#lightboxDetailsCompact {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: 1.25rem;
 }
 
-/* --- Section Title --- */
-.detail-section-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #8b5cf6;
-  margin-bottom: 0.6rem;
-}
-
-/* --- Compact Details Section --- */
 .details-grid-upgraded {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  background-color: #f9fafb;
-  padding: 1.1rem;
-  border-radius: 14px;
-  margin-bottom: 1.3rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    background-color: hsl(var(--accent));
+    padding: 1rem;
+    border-radius: 1rem;
 }
+
 .detail-item-grid {
-  text-align: center;
+    text-align: center;
 }
+
 .detail-item-grid .label {
-  font-size: 0.82rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    color: hsl(var(--muted-foreground));
+    margin-bottom: 0.25rem;
 }
+
 .detail-item-grid .value {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #1f2937;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
 }
 
 .detail-list-upgraded {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-item-list {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: hsl(var(--muted));
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+}
+
+.detail-item-list-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: hsl(var(--secondary)/.15);
+    color: hsl(var(--secondary));
+}
+
+.detail-item-list-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.detail-item-list .value {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.detail-item-list .value strong {
+    font-weight: 600;
+    color: hsl(var(--foreground));
+}
+
+/* [NEW] Tag Badges ที่สวยงามขึ้น */
+#lightboxTags .tag-badge {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    background-color: hsl(var(--accent));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    transition: all 200ms ease;
+}
+
+#lightboxTags .tag-badge:hover {
+    background-color: hsl(var(--primary)/.1);
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary)/.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px -2px hsl(var(--primary)/.2);
+}
+
+/* --- [SECTION 2] THE ULTIMATE LINE BUTTON (FIX) --- */
+
+.btn-line-shared-upgraded {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* ทำให้ปุ่มเต็มความกว้าง */
+    gap: 0.75rem;
+    padding: 0.9rem 1.75rem;
+    border-radius: 0.75rem; /* ปรับให้เข้ากับดีไซน์ */
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    background: linear-gradient(135deg, #06B6D4, #06C755);
+    transition: all 350ms cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 20px -5px rgba(6, 199, 85, 0.5);
+    border: none;
+    text-decoration: none;
+    will-change: transform;
+    margin-top: 0.5rem;
+}
+
+.btn-line-shared-upgraded:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 30px -8px rgba(6, 199, 85, 0.7);
+}
+
+.btn-line-shared-upgraded svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* ------------------------------------------- */
+/* FIX: H2 สำหรับ LCP - โหลดเร็ว, สวยเหมือนเดิม */
+/* ------------------------------------------- */
+h2 {
+  font-family: "Prompt", "Inter", sans-serif;  /* ใช้ Prompt + fallback */
+  font-weight: 700;                             /* น้ำหนักเท่ากับ H1 */
+  font-size: 1.75rem;                           /* ~28px Desktop */
+  line-height: 1.25;
+  color: #b8860b;                               /* fallback สีทองเข้ม */
+}
+
+/* Responsive มือถือ */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 1.5rem;  /* ~24px มือถือ */
+  }
+}
+/* ============================================= */
+/* FIX: Accessibility - Color Contrast           */
+/* ปรับสีข้อความให้ contrast สูงขึ้น ผ่าน Lighthouse */
+.badge-description {
+    color: hsl(220, 10%, 40%); /* เทาเข้ม สำหรับโหมดสว่าง */
+}
+
+html.dark .badge-description {
+    color: hsl(220, 15%, 75%); /* สว่างพอ สำหรับโหมดมืด */
+}
+
+.trust-badge {
+    color: hsl(220, 10%, 40%); /* เทาเข้ม สำหรับโหมดสว่าง */
+}
+
+html.dark .trust-badge {
+    color: hsl(220, 15%, 75%); /* สว่างพอ สำหรับโหมดมืด */
+}
+
+
+body {
+  font-family: var(--font-base);
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-in-out forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-in-out forwards;
+}
+
+/* Custom Component Styles */
+#search-section {
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  transition: all var(--transition-medium);
+}
+
+#search-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+}
+
+#search-section input,
+#search-section select {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-medium);
+}
+
+#search-section input:focus,
+#search-section select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--primary-glow) / 0.5);
+  transform: scale(1.01);
+}
+
+#keyword-search-btn {
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
+  border: none;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-medium);
+}
+
+#keyword-search-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+#reset-search-btn {
+  background: rgba(229, 231, 235, 0.8);
+  transition: all var(--transition-medium);
+}
+
+#reset-search-btn:hover {
+  background: rgba(209, 213, 219, 1);
+  transform: scale(1.05);
+}
+
+/* ============================================= */
+/* SOCIAL MEDIA SECTION (Clean + Beautiful)     */
+/* ============================================= */
+.social-media-section {
+    margin-top: 60px;
+    padding: 20px 0;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px);
+    text-align: center;
+}
+
+/* Section Header */
+.social-section-header h2 {
+    font-size: clamp(20px, 2.5vw, 36px);
+    font-weight: 800;
+    color: #000;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    margin-bottom: 8px;
+}
+
+.social-section-header p {
+    font-size: clamp(14px, 2vw, 18px);
+    color: #000;
+    text-shadow: 0 0 2px rgba(0,0,0,0.4);
+    margin: 0 auto;
+    max-width: 600px;
+}
+
+/* Disclaimer */
+.social-disclaimer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: red;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    text-align: center;
+    line-height: 1.5;
+}
+.social-disclaimer i {
+    margin-right: 6px;
+    color: red;
+}
+
+/* ============================================= */
+/* MARQUEE WRAPPER & SCROLL                        */
+/* ============================================= */
+.social-marquee-wrap {
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    padding: 20px 0;
+    margin-top: 20px;
+    user-select: none;
+}
+
+.social-marquee-wrap:active {
+    cursor: grabbing;
+}
+
+.social-marquee {
+    display: flex;
+    gap: 20px;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+/* Marquee animation fallback */
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* ============================================= */
+/* SOCIAL ITEM                                   */
+/* ============================================= */
+.social-item {
+    flex: 0 0 auto;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.social-item i {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.social-item:hover {
+    transform: rotate(360deg) scale(1.1);
+    transition: transform 0.6s ease;
+}
+
+.social-item:hover i {
+    filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* ============================================= */
+/* BRAND COLORS                                   */
+/* ============================================= */
+.fb { background:#1877f2; }
+.line { background:#06c755; }
+.tiktok { background:linear-gradient(135deg,#000 40%,#ff0050 100%); }
+.twitter { background:#1da1f2; }
+.ig { background:radial-gradient(circle at 30% 107%, #fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%); }
+.linktree { background: linear-gradient(to right,#20c997,#107c6f); }
+.bluesky { background: linear-gradient(to right,#3b82f6,#2563eb); }
+
+/* Instagram gradient fix */
+.instagram-icon {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.social-section-header h2 {
+    font-size: clamp(20px, 2.5vw, 36px);
+    font-weight: 800;
+    background: linear-gradient(90deg, #ffd700, #ffb700, #ffdd55);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    margin-bottom: 8px;
+}
+
+.social-disclaimer {
+    color: #000; /* แทน red หรือ muted-foreground/60 */
+.social-disclaimer {
+    color: #b71c1c; /* dark red */
+}
+.social-disclaimer i {
+    color: #b71c1c;
+}    font-size: 14px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* option ถ้าต้องการ effect */
+    text-align: center;
+    line-height: 1.5;
+}
+.social-disclaimer i {
+    color: #000; /* แทน red */
+}
+
+
+
+/* =============================================
+   Hero Search Form - Modern UI/UX & Responsive
+============================================= */
+
+/* ฟอร์มหลัก */
+#pro-search-form {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* กล่องกรอกและฟิลเตอร์ */
+.pro-search-input-group,
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* กล่อง input */
+#pro-search-input {
+  flex: 1 1 300px;
+  padding: 0.85rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#pro-search-input::placeholder {
+  color: #9ca3af;
+}
+
+#pro-search-input:focus {
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+  outline: none;
+}
+
+/* ปุ่มค้นหา */
+#pro-search-button {
+  padding: 0.85rem 1.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #6366f1, #4f46e5);
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3);
+  transition: all 0.25s ease;
+}
+
+#pro-search-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+#pro-search-button:active {
+  transform: scale(0.95);
+}
+
+/* ไอคอนในปุ่ม */
+#pro-search-button i {
+  font-size: 1.1rem;
+}
+
+/* Dropdowns และปุ่มล้าง */
+.filters-row select,
+.filters-row button[type="reset"] {
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+  background: #f9fafb;
+  color: #111827;
+  transition: all 0.25s ease;
+  appearance: none;
+  position: relative;
+}
+
+.filters-row select:hover,
+.filters-row button[type="reset"]:hover {
+  background: #eef2ff;
+  border-color: #6366f1;
+}
+
+.filters-row select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* ปุ่มล้างค่า */
+.filters-row button[type="reset"] {
+  background: #f3f4f6;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filters-row button[type="reset"] i {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pro-search-input-group,
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #pro-search-input,
+  #pro-search-button,
+  .filters-row select,
+  .filters-row button[type="reset"] {
+    width: 100%;
+  }
+}
+
+
+/* Smooth Animation on focus */
+input[type="search"],
+select {
+  transition: all 0.3s ease-in-out;
+}
+
+
+.hero-h1-revised img {
+  max-width: 240px;
+  height: auto;
+  border-radius: 1rem;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+  transition: transform 0.3s ease;
+}
+.hero-h1-revised img:hover {
+  transform: scale(1.04);
+}
+
+.hero-h1-revised p {
+  margin-top: 1rem;
+  font-size: clamp(15px, 1.3vw, 18px);
+  color: #374151;
+  line-height: 1.6;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Skeleton Loader */
+.skeleton-card {
+  height: 300px;
+  background-color: hsl(var(--muted));
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+}
+
+/* =================================================================== */
+/* FINAL & CONSOLIDATED STYLES FOR PROFILE CARDS & SECTIONS       */
+/* ทำงานร่วมกับ JavaScript ที่ Refactor แล้ว               */
+/* =================================================================== */
+
+/* 1. สไตล์การ์ดโปรไฟล์หลัก (โครงสร้างและ Hover Effect)
+------------------------------------------------------------------- */
+.profile-card-new {
+    /* ใช้ค่าจาก styles.css หลัก แต่เพิ่ม transition ที่นี่เพื่อให้แน่ใจว่าทำงานได้ดี */
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+.profile-card-new:hover {
+    /* เอฟเฟกต์ตอน hover ที่สวยงามและไม่กระทบกับ 3D effect เดิม */
+    transform: translateY(-10px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
+    box-shadow: 0 20px 40px -10px hsl(var(--foreground) / 0.3);
+}
+
+.card-image {
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.profile-card-new:hover .card-image {
+    transform: scale(1.1);
+}
+
+
+/* 2. Overlay กระจกฝ้าสำหรับชื่อและข้อมูล (สำคัญที่สุด)
+------------------------------------------------------------------- */
+
+    
+    /* เอฟเฟกต์กระจกฝ้าไล่ระดับสีที่สวยงาม */
+    background: linear-gradient(0deg, rgba(17, 19, 23, 0.9) 0%, rgba(17, 19, 23, 0.7) 35%, transparent 65%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    
+    padding: 1.25rem 1rem; /* เพิ่ม padding เล็กน้อย */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: #fff;
+    z-index: 2;
+    
+    /* เพิ่มเส้นขอบบนสไตล์กระจก */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* ทำให้การเปลี่ยนสวยงามเมื่อ 3D effect ทำงาน */
+    transition: background 0.4s ease;
+}
+
+.profile-card-new:hover .card-overlay {
+    background: linear-gradient(0deg, rgba(17, 19, 23, 0.95) 0%, rgba(17, 19, 23, 0.75) 40%, transparent 70%);
+}
+
+.profile-card-new .card-info h3 {
+    font-weight: 800;
+    font-size: 1.25rem; /* 20px */
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    line-height: 1.3;
+}
+
+.profile-card-new .card-info p {
+    font-weight: 500;
+    color: #e5e7eb; /* สีเทาอ่อน */
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    margin-top: 0.25rem;
+    opacity: 0.9;
+}
+
+
+/* 3. ระบบ Badges สำหรับสถานะและป้ายแนะนำ
+------------------------------------------------------------------- */
+/* สไตล์พื้นฐานสำหรับ Badge สถานะ (ใช้ .availability-badge จาก css เดิม) */
+.availability-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+    /* เพิ่ม backdrop-filter เพื่อความสวยงาม */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* สีสำหรับสถานะต่างๆ (ใช้ .status-[type] จาก css เดิม) */
+.availability-badge.status-available {
+    background-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.4);
+    text-shadow: 0 0 5px hsl(var(--primary-glow) / 0.5);
+}
+
+.availability-badge.status-busy {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.availability-badge.status-inquire {
+    background-color: rgba(250, 204, 21, 0.15);
+    color: #f59e0b;
+    border-color: rgba(250, 204, 21, 0.4);
+}
+
+/* สไตล์สำหรับป้าย "แนะนำ" ให้ดูพรีเมียม */
+.featured-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 9999px;
+    color: #fff;
+    background: linear-gradient(135deg, hsl(var(--primary-glow)), hsl(var(--primary)));
+    border: 1px solid hsl(var(--primary-glow) / 0.5);
+    box-shadow: 0 0 15px -2px hsl(var(--primary-glow) / 0.7);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+
+/* 4. สไตล์สำหรับ Section Headers (จังหวัดและผลการค้นหา)
+------------------------------------------------------------------- */
+/* ใช้ .section-content-wrapper จาก css เดิม แต่ปรับปรุงให้เป็น Glassmorphism */
+.section-content-wrapper {
+    background-color: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--border) / 0.5);
+    box-shadow: 0 8px 32px 0 hsl(var(--foreground) / 0.08);
+    border-radius: 1.5rem;
+    margin-bottom: 2.5rem; /* เพิ่มระยะห่างระหว่าง Section */
+}
+
+/* สไตล์สำหรับหัวข้อ H3 ที่สร้างจาก JS */
+.province-section-header,
+.search-results-header {
+    font-size: clamp(1.5rem, 4vw, 1.75rem); /* Responsive font size */
+    font-weight: 800;
+    background: linear-gradient(120deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 10px hsl(var(--primary-glow) / 0.1);
+    margin-bottom: 0.25rem; /* ลดระยะห่างด้านล่าง H3 */
+}
+
+/* ป้ายนับจำนวนโปรไฟล์ */
+.profile-count-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+    border: 1px solid hsl(var(--border));
+}
+
+/* ตัวเลขไฮไลท์ในผลการค้นหา */
+.search-count-highlight {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: hsl(var(--primary));
+    text-shadow: 0 0 8px hsl(var(--primary-glow) / 0.5);
+    margin: 0 0.25rem;
+}
+/* Lightbox Upgraded UI */
+#lightbox-content-wrapper-el {
+  background: linear-gradient(180deg, #fff 0%, #fdf7ff 100%);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  margin: auto;
+  font-family: "Prompt", system-ui, sans-serif;
+}
+
+/* ชื่อ */
+#lightbox-profile-name-main {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ff4081;
+  text-align: center;
+  margin-bottom: 6px;
+}
+#lightboxQuote {
+  text-align: center;
+  font-style: italic;
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+/* สถานะ */
+.availability-badge-upgraded {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 auto 16px;
+  text-align: center;
+}
+.status-available { background: #e6f9f0; color: #16a34a; }
+.status-busy { background: #fde8e8; color: #dc2626; }
+.status-inquire { background: #fff9e6; color: #d97706; }
+
+/* Gallery */
+#lightboxHeroImage {
+  width: 100%;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+#lightboxThumbnailStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 60px);
+  gap: 6px;
+  justify-content: center;
+}
+#lightboxThumbnailStrip .thumbnail {
+  border-radius: 10px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+#lightboxThumbnailStrip .thumbnail.active,
+#lightboxThumbnailStrip .thumbnail:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Tags */
+#lightboxTags {
+  margin: 14px 0;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tag-badge {
+  background: #f0f0ff;
+  color: #4f46e5;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* Details Grid */
+.details-grid-upgraded {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.details-grid-upgraded .label {
+  font-size: 0.85rem;
+  color: #666;
+}
+.details-grid-upgraded .value {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #222;
+}
+
+/* Details List */
+.detail-list-upgraded {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 10px;
 }
 .detail-item-list {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  background-color: #f9fafb;
-  padding: 0.8rem;
-  border-radius: 14px;
-  transition: background-color 0.25s ease;
-}
-.detail-item-list:hover {
-  background-color: #f3f4f6;
+  background: #fafafa;
+  padding: 10px 14px;
+  border-radius: 12px;
 }
 .detail-item-list-icon {
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: rgba(236, 72, 153, 0.12);
-  color: #ec4899;
-}
-.detail-item-list-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  color: #7c3aed;
 }
 .detail-item-list .value {
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: #374151;
-}
-.detail-item-list .value strong {
-  font-weight: 600;
-  color: #111827;
+  font-size: 0.95rem;
+  color: #333;
 }
 
-/* --- Line Button --- */
+/* Description */
+#lightboxDescriptionVal {
+  margin: 20px 0;
+  line-height: 1.6;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+/* ปุ่ม LINE */
 .btn-line-shared-upgraded {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 0.8rem;
-  padding: 0.95rem 1.8rem;
-  border-radius: 14px;
-  font-weight: 700;
+  padding: 14px;
   font-size: 1rem;
-  color: white;
-  background: linear-gradient(135deg, #06B6D4, #06C755);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 4px 22px -6px rgba(6, 199, 85, 0.55);
-  border: none;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 12px;
   text-decoration: none;
-  will-change: transform;
-  margin-top: 0.6rem;
+  background: linear-gradient(90deg, #06c755 0%, #00d95f 100%);
+  box-shadow: 0 4px 10px rgba(6, 199, 85, 0.4);
+  transition: all 0.3s ease;
 }
 .btn-line-shared-upgraded:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 12px 32px -8px rgba(6, 199, 85, 0.75);
-}
-
-/* --- Prose for Description --- */
-.prose {
-  color: #374151;
-}
-.dark .prose-invert {
-  color: #d1d5db;
-}
-.btn-line-shared {
-  background-color: #00b900;
-  color: #ffffff;
-  padding: 10px 20px;
-  text-decoration: none;
-  border-radius: 6px;
-  font-weight: bold;
-  box-shadow: 0 3px 10px rgba(0,185,0,0.35);
-  transition: background-color 0.25s ease, transform 0.25s ease;
-}
-.btn-line-shared:hover {
-  background-color: #00a200;
   transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(6, 199, 85, 0.6);
 }
-
-/* Force Sidebar Text to be visible clearly */
-#sidebar nav a {
-  color: #ffffff !important;
-  font-weight: 600;
-  opacity: 1 !important;
-  transition: color 0.25s ease, background-color 0.25s ease;
+/* ================================================================
+   GLOBAL HEADINGS & TEXT
+================================================================ */
+h1.text-primary, h2.text-primary, h3.text-primary {
+  text-shadow: 0 0 25px hsl(var(--primary-glow) / 0.5),
+               0 0 5px hsl(var(--primary-glow) / 0.7);
 }
-
-#sidebar nav a:hover {
-  color: #ff80ff !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+.title-accent {
+  text-shadow: 0 0 20px hsl(var(--secondary-glow) / 0.5);
+}
+h2 {
+  font-family: "Prompt", "Inter", sans-serif;
   font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1.25;
+  color: #b8860b;
+}
+@media (max-width: 768px) {
+  h2 { font-size: 1.5rem; }
 }
 
-#sidebar nav a.active-nav-link {
-  color: #ff4dd2 !important;
+/* ================================================================
+   HERO SECTION + SEARCH FORM (รวม pro-search + hero-form)
+================================================================ */
+#pro-search-form, #hero-form, #search-section {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  backdrop-filter: blur(12px) saturate(120%);
+  transition: all 0.35s ease;
+}
+#pro-search-form:hover, #hero-form:hover, #search-section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 35px rgba(0,0,0,0.18);
+}
+#pro-search-form input, #hero-form input, #search-section input,
+#pro-search-form select, #hero-form select, #search-section select {
+  background: rgba(255,255,255,0.95);
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  padding: 0.9rem 1.25rem;
+  font-size: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+#pro-search-form input:focus, #hero-form input:focus, #search-section input:focus,
+#pro-search-form select:focus, #hero-form select:focus, #search-section select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(236,72,153,0.5);
+  transform: scale(1.02);
+}
+#keyword-search-btn {
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+#keyword-search-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+#reset-search-btn {
+  background: rgba(229, 231, 235, 0.9);
+  border-radius: 999px;
+  transition: all 0.3s ease;
+}
+#reset-search-btn:hover {
+  background: rgba(209, 213, 219, 1);
+  transform: scale(1.05);
+}
+
+/* ================================================================
+   LIGHTBOX (รวม + ลบซ้ำ)
+================================================================ */
+#lightbox {
+  background-color: hsl(var(--background) / 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.lightbox-grid {
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 1024px) {
+  .lightbox-grid {
+    display: grid;
+    grid-template-columns: 40% 60%;
+  }
+  .lightbox-gallery { border-right: 1px solid hsl(var(--border)); }
+}
+.hero-image-container {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background-color: hsl(var(--muted));
+  box-shadow: 0 10px 30px -5px hsl(var(--foreground)/.1);
+}
+.hero-image-main {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform var(--transition-slow) cubic-bezier(0.165,0.84,0.44,1),
+              filter var(--transition-medium);
+}
+.thumbnail-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 0.75rem;
+}
+.thumbnail-strip img,
+.thumbnail-strip .thumbnail {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 200ms ease-in-out;
+  opacity: 0.6; filter: grayscale(50%);
+}
+.thumbnail-strip img:hover, .thumbnail-strip .thumbnail:hover {
+  opacity: 1; filter: grayscale(0%);
+  transform: scale(1.08); border-color: hsl(var(--secondary-glow));
+}
+.thumbnail-strip img.active-thumbnail, .thumbnail-strip .thumbnail.active {
+  opacity: 1; filter: grayscale(0%);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 15px hsl(var(--primary-glow)/.6);
+}
+
+/* Availability Badge (รวมเวอร์ชัน) */
+.availability-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid;
+}
+.availability-badge.status-available {
+  background-color: hsl(var(--primary)/.1);
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary)/.3);
+}
+.availability-badge.status-busy {
+  background-color: rgba(239,68,68,.1);
+  color: #ef4444;
+  border-color: rgba(239,68,68,.3);
+}
+.availability-badge.status-inquire {
+  background-color: rgba(250,204,21,.1);
+  color: #f59e0b;
+  border-color: rgba(250,204,21,.3);
+}
+
+/* Tags */
+#lightboxTags .tag-badge {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  transition: all 200ms ease;
+}
+#lightboxTags .tag-badge:hover {
+  background-color: hsl(var(--primary)/.1);
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary)/.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px -2px hsl(var(--primary)/.2);
+}
+
+/* ================================================================
+   LINE BUTTON
+================================================================ */
+.btn-line-shared-upgraded {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; gap: 0.75rem;
+  padding: 0.9rem 1.75rem;
+  border-radius: 0.75rem;
+  font-weight: 700; font-size: 1rem;
+  color: white;
+  background: linear-gradient(135deg,#06B6D4,#06C755);
+  transition: all 350ms cubic-bezier(0.25,0.8,0.25,1);
+  box-shadow: 0 4px 20px -5px rgba(6,199,85,0.5);
+  border: none; text-decoration: none;
+  will-change: transform;
+  margin-top: 0.5rem;
+}
+.btn-line-shared-upgraded:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 30px -8px rgba(6,199,85,0.7);
+}
+.btn-line-shared-upgraded svg { width: 1.25rem; height: 1.25rem; }
+
+/* ================================================================
+   SOCIAL MEDIA SECTION (Clean & Unified)
+================================================================ */
+.social-media-section {
+  margin-top: 60px;
+  padding: 20px 0;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(8px);
+  text-align: center;
+}
+.social-section-header h2 {
+  font-size: clamp(20px, 2.5vw, 36px);
   font-weight: 800;
-  opacity: 1 !important;
+  background: linear-gradient(90deg, #ffd700, #ffb700, #ffdd55);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  margin-bottom: 8px;
 }
+.social-section-header p {
+  font-size: clamp(14px, 2vw, 18px);
+  color: #000;
+  text-shadow: 0 0 2px rgba(0,0,0,0.4);
+  margin: 0 auto;
+  max-width: 600px;
+}
+.social-disclaimer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #b71c1c;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  text-align: center;
+  line-height: 1.5;
+}
+.social-disclaimer i { color: #b71c1c; }
+.social-marquee-wrap {
+  position: relative; overflow: hidden; cursor: grab;
+  padding: 20px 0; margin-top: 20px; user-select: none;
+}
+.social-marquee-wrap:active { cursor: grabbing; }
+.social-marquee {
+  display: flex; gap: 20px; white-space: nowrap; will-change: transform;
+}
+.social-item {
+  flex: 0 0 auto; width: 60px; height: 60px;
+  border-radius: 50%; color: white; font-size: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: transform 0.3s ease;
+}
+.social-item i { font-size: 24px; margin-bottom: 4px; }
+.social-item:hover {
+  transform: rotate(360deg) scale(1.1);
+  transition: transform 0.6s ease;
+}
+.social-item:hover i { filter: drop-shadow(0 0 6px currentColor); }
 
-/* --- Animations --- */
+/* Brand Colors */
+.fb { background:#1877f2; }
+.line { background:#06c755; }
+.tiktok { background:linear-gradient(135deg,#000 40%,#ff0050 100%); }
+.twitter { background:#1da1f2; }
+.ig { background:radial-gradient(circle at 30% 107%, #fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%); }
+.linktree { background: linear-gradient(to right,#20c997,#107c6f); }
+.bluesky { background: linear-gradient(to right,#3b82f6,#2563eb); }
+
+/* ================================================================
+   BASE STYLES
+================================================================ */
+body {
+  font-family: var(--font-base);
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+/* Animations */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* --- Animations --- */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.08); } 
-}
+.animate-fadeInUp { animation: fadeInUp 0.6s ease-in-out forwards; }
+.animate-fadeIn { animation: fadeIn 0.6s ease-in-out forwards; }
 
 /* ============================== */
 /* ADVANCED TYPOGRAPHY OPTIMIZATION */
@@ -3007,62 +3274,7 @@ a:hover, button:hover {
   gap: 0.25rem;
 }
 
-/* =========================
-   AGE VERIFICATION MODAL
-   ========================= */
-.age-modal-content {
-  background: #1f2937; /* gray-800 */
-  color: #fff;
-  padding: 2rem;
-  border-radius: 1rem;
-  text-align: center;
-  max-width: 400px;
-  margin: auto;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-}
-.age-modal-content h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-.age-badge-inline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #ef4444, #b91c1c);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(239,68,68,0.6);
-  margin-bottom: 1rem;
-}
-.age-modal-content .age-btn {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  margin: 0.5rem;
-  transition: background 0.2s, transform 0.2s;
-}
-.age-modal-content .age-btn.confirm {
-  background: #16a34a;
-  color: #fff;
-}
-.age-modal-content .age-btn.confirm:hover {
-  background: #15803d;
-  transform: scale(1.05);
-}
-.age-modal-content .age-btn.exit {
-  background: #dc2626;
-  color: #fff;
-}
-.age-modal-content .age-btn.exit:hover {
-  background: #b91c1c;
-  transform: scale(1.05);
-}
+
 
 /* =========================
    PROVINCE BADGE
@@ -3075,3 +3287,106 @@ a:hover, button:hover {
   display: inline-block;
   color: #f3f4f6; /* gray-100 */
 }
+/* --- SEARCH FORM --- */
+/* รวม #hero-form และ #search-section (ใช้คุณสมบัติร่วมกัน) */
+#hero-form,
+#search-section {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  border-radius: 24px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  animation: fadeInUp 1s ease;
+  transition: all 0.3s ease; /* ใช้ 0.3s จาก #hero-form เพื่อให้ค่าที่ระบุชัดเจนกว่า */
+}
+
+/* คุณสมบัติเฉพาะ #hero-form */
+#hero-form {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* คุณสมบัติที่ถูก override/เพิ่มของ #search-section (จากโค้ดส่วนหลัง) */
+#search-section {
+  transition: all var(--transition-medium); /* Override transition */
+}
+
+/* การรวม :hover สำหรับฟอร์มหลัก */
+#hero-form:hover,
+#search-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+}
+
+/* การรวม input/select ของฟอร์ม (ใช้คุณสมบัติร่วมกัน) */
+#hero-form input,
+#hero-form select,
+#search-section input,
+#search-section select {
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+/* คุณสมบัติที่ถูก override/เพิ่มของ input/select ใน #search-section */
+#search-section input,
+#search-section select {
+    border: 1px solid hsl(var(--border)); /* Override border */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* Override box-shadow */
+    transition: all var(--transition-medium);
+}
+
+/* การรวม :focus input/select */
+#hero-form input:focus,
+#hero-form select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.5);
+  transform: scale(1.02);
+}
+/* คุณสมบัติที่ถูก override/เพิ่มของ :focus ใน #search-section */
+#search-section input:focus,
+#search-section select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--primary-glow) / 0.5);
+  transform: scale(1.01);
+}
+
+/* ปุ่มค้นหา (รวมคุณสมบัติที่ซ้ำกัน) */
+#keyword-search-btn {
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all var(--transition-medium); /* Override transition */
+}
+#keyword-search-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+/* ปุ่มรีเซ็ต (รวมคุณสมบัติที่ซ้ำกัน) */
+#reset-search-btn {
+  background: rgba(229, 231, 235, 0.8);
+  border-radius: 999px;
+  transition: all 0.3s ease;
+  transition: all var(--transition-medium); /* Override transition */
+}
+#reset-search-btn:hover {
+  background: rgba(209, 213, 219, 1);
+  transform: scale(1.05);
+}
+
+/* ฟอร์มหลัก #pro-search-form (ที่ไม่ได้รวมกับ #hero-form) */
+#pro-search-form {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+}
+
