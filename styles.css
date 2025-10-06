@@ -288,29 +288,98 @@ html.dark #sidebar nav a.active-nav-link,html.dark #sidebar nav a:active{backgro
 
 .location-card{background-color:hsl(var(--card));border:1px solid hsl(var(--border));box-shadow:0 4px 10px -5px hsl(var(--foreground)/.05)}
 
-.profile-card-new-container{perspective:1000px}
+/* ==== PROFILE CARD (ปรับให้ไม่หมุน + ภาพคมชัดเต็มเฟรมทุกหน้าจอ) ==== */
 
-.profile-card-new{background-color:hsl(var(--muted));border-radius:1rem;overflow:hidden;position:relative;aspect-ratio:3/4;transition:transform .5s cubic-bezier(.165,.84,.44,1),box-shadow .5s cubic-bezier(.165,.84,.44,1);box-shadow:0 10px 30px -10px hsl(var(--foreground)/.15);transform-style:preserve-3d}
+.profile-card-new-container {
+  /* ปิด perspective เพราะไม่ใช้เอฟเฟกต์หมุน 3D แล้ว */
+  perspective: none;
+}
 
-.profile-card-new:before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle 250px at var(--mouse-x) var(--mouse-y),hsla(0,0%,100%,.15),transparent);opacity:0;transition:opacity .4s ease;z-index:2}
+.profile-card-new {
+  background-color: hsl(var(--muted));
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 3/4;
+  box-shadow: 0 10px 30px -10px hsl(var(--foreground)/.15);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
 
-.profile-card-new:hover{transform:rotateY(var(--rotate-y)) rotateX(var(--rotate-x)) scale(1.05);box-shadow:0 25px 50px -15px hsl(var(--foreground)/.3)}
+/* ตอน hover: ขยายเบา ๆ ให้ดูโดดเด่น แต่ไม่หมุน */
+.profile-card-new:hover {
+  transform: scale(1.03);
+  box-shadow: 0 20px 40px -15px hsl(var(--foreground)/.25);
+}
 
-.profile-card-new:hover:before{opacity:1}
+/* ลบเอฟเฟกต์แสงเมาส์ */
+.profile-card-new:before {
+  content: none;
+}
 
-.profile-card-new .card-image{position:absolute;inset:0;width:100%;height:100%;-o-object-fit:cover;object-fit:cover;filter:saturate(1.05) contrast(1.05);transition:transform .5s cubic-bezier(.165,.84,.44,1)}
+/* รูปภาพหลัก */
+.profile-card-new .card-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;            /* แสดงเต็มเฟรม */
+  object-position: center;      /* จัดให้อยู่กึ่งกลาง */
+  filter: saturate(1.1) contrast(1.1);
+  transition: transform 0.5s ease;
+  image-rendering: auto;        /* ให้ภาพคมชัดในทุกเบราว์เซอร์ */
+}
 
-.profile-card-new:hover .card-image{transform:scale(1.1)}
+/* ขยายภาพเล็กน้อยเมื่อ hover */
+.profile-card-new:hover .card-image {
+  transform: scale(1.05);
+}
 
-.profile-card-new .card-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(17,19,23,.95) 0,rgba(17,19,23,.7) 40%,transparent 70%);padding:1rem;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;z-index:1}
+/* ชั้น overlay ด้านล่างของการ์ด */
+.profile-card-new .card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(17, 19, 23, 0.9) 0%,
+    rgba(17, 19, 23, 0.5) 50%,
+    transparent 80%
+  );
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #fff;
+  z-index: 1;
+}
 
-.profile-card-new .card-info{transition:transform .5s cubic-bezier(.165,.84,.44,1);transform:translateZ(20px)}
+/* ข้อความในการ์ด */
+.profile-card-new .card-info {
+  transform: none;
+  transition: none;
+}
 
-.profile-card-new:hover .card-info{transform:translateZ(50px) translateY(-5px)}
+/* ชื่อ / หัวข้อโปรไฟล์ */
+.profile-card-new .card-info h3 {
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
 
-.profile-card-new .card-info h3{font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+/* รายละเอียด */
+.profile-card-new .card-info p {
+  opacity: 0.95;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
+}
 
-.profile-card-new .card-info p{opacity:.9;text-shadow:0 1px 5px rgba(0,0,0,.7)}
+/* ✅ ปรับการตอบสนองให้เหมาะกับทุกขนาดจอ */
+@media (max-width: 768px) {
+  .profile-card-new {
+    aspect-ratio: 3/4;
+    border-radius: 0.75rem;
+  }
+  .profile-card-new:hover {
+    transform: scale(1.02);
+  }
+}
 
 .btn-line-shared{padding:1rem 2rem;font-size:1rem;font-weight:700;border-radius:9999px;background-color:#008335;color:#fff;box-shadow:0 4px 15px -2px rgba(8,145,65,.4),0 2px 5px rgba(8,145,65,.2);transition:transform .25s ease,box-shadow .25s ease;display:inline-flex;align-items:center;gap:.5rem}
 

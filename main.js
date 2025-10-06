@@ -42,34 +42,41 @@ gsap.registerPlugin(ScrollTrigger);
         // suggestion container will be added dynamically if needed
     };
 
-    // --- INITIALIZATION ---
-    document.addEventListener('DOMContentLoaded', main);
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', main);
 
-    async function main() {
+async function main() {
+    try {
+        // ฟังก์ชันหลักทั้งหมดของเว็บ
         initThemeToggle();
         initMobileMenu();
         initAgeVerification();
         initHeaderScrollEffect();
         updateActiveNavLinks();
         generateFullSchema();
-        init3dCardHover(); // ✅ Initialize 3D hover effect
+        
+        // ❌ ปิดระบบหมุน 3D ของการ์ดโปรไฟล์ (ป้องกันภาพหมุน)
+        // init3dCardHover();
 
         const currentPage = dom.body.dataset.page;
+
         if (currentPage === 'home' || currentPage === 'profiles') {
             showLoadingState();
             const success = await fetchData();
             hideLoadingState();
 
             if (success) {
-                initSearchAndFilters(); // Now handles URL params and localStorage
+                initSearchAndFilters(); // ใช้งานระบบค้นหาและกรองตามปกติ
                 initLightbox();
+
                 if (dom.retryFetchBtn) {
                     dom.retryFetchBtn.addEventListener('click', async () => {
                         showLoadingState();
                         const retrySuccess = await fetchData();
                         hideLoadingState();
+
                         if (retrySuccess) {
-                            applyFilters(false); // Don't update URL on retry
+                            applyFilters(false); // โหลดข้อมูลใหม่แต่ไม่รีเฟรช URL
                             if (dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
                         } else {
                             showErrorState();
@@ -80,20 +87,34 @@ gsap.registerPlugin(ScrollTrigger);
                 showErrorState();
             }
 
+            // แอนิเมชันเปิดหน้าแรก (ยังคงไว้เหมือนเดิม)
             if (currentPage === 'home' && success) {
                 gsap.from(['#hero-h1', '#hero-p', '#hero-form'], {
-                    y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.3
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.6,
+                    stagger: 0.15,
+                    ease: 'power2.out',
+                    delay: 0.3
                 });
             }
+
         } else {
+            // หน้าภายในอื่น ๆ ใช้ระบบ scroll animation ตามปกติ
             initScrollAnimations();
         }
 
+        // อัปเดตปีปัจจุบันอัตโนมัติ
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-        
+
+        // เมื่อทุกอย่างพร้อมแล้ว ค่อยโชว์เว็บ
         dom.body.classList.add('loaded');
+
+    } catch (error) {
+        console.error('Error during initialization:', error);
     }
+}
 
     // --- UI STATE FUNCTIONS ---
     function showLoadingState() {
