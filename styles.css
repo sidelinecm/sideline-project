@@ -154,7 +154,11 @@ p {
 }
 p{margin:0 0 1em}
 
-
+.logo-img {
+  height: 30px; /* กำหนดความสูงที่ต้องการ */
+  width: auto; /* ให้ความกว้างปรับตามอัตราส่วน */
+  object-fit: contain; /* ปรับให้ภาพอยู่ในกรอบโดยไม่บิดเบี้ยว */
+}
 .card-image-wrapper {
   width: 100%;
   background-color: #f3f4f6; /* placeholder background ขณะรอภาพ */
