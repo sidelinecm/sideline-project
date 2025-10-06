@@ -3390,3 +3390,62 @@ a:hover, button:hover {
   border-radius: 1rem;
 }
 
+
+
+
+/* ================================
+   ✅ FIXES FOR ISSUES (ASPECT RATIO, IMAGE QUALITY, VIEWPORT, TAP TARGETS)
+   ================================ */
+
+/* 1. Fix image aspect ratio */
+.card-image,
+.hero-image-container img,
+#lightboxHeroImage {
+  width: 100%;
+  height: auto;
+  aspect-ratio: attr(width) / attr(height);
+  object-fit: cover;
+}
+#lightboxHeroImage {
+  object-fit: contain;
+  max-height: 90vh;
+}
+
+/* 2. Improve image clarity on high DPI screens */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: high-quality;
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img {
+    transform: scale(1);
+  }
+}
+
+/* 3. Ensure viewport fits screen width */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+.container, main {
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* 4. Make tap targets large enough for touch */
+a, button, .social-item {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.social-item {
+  margin: 0.25rem;
+  border-radius: 9999px;
+}
