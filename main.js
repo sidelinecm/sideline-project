@@ -576,30 +576,27 @@ function renderProfiles(filteredProfiles, isSearching) {
 }
 
 /**
- * REFACTORED: สร้าง Profile Card ที่เข้ากับ styles.css เดิม
- * - ใช้ .card-overlay สำหรับเอฟเฟกต์กระจกฝ้า
- * - ใช้ระบบคลาส .availability-badge และ .status-[type] สำหรับสถานะ
- * - เพิ่ม .featured-badge สำหรับป้ายแนะนำ
+ * ULTRA OPTIMIZED: Profile Card ที่ดีที่สุดทุกมิติ (2025 standard)
+ * - Responsive Image (srcset + sizes)
+ * - Core Web Vitals: ป้องกัน CLS, ใช้ lazy-loading
+ * - SEO + Accessibility ครบ
+ * - เข้ากับ styles.css เดิม (card-overlay, availability-badge, featured-badge)
+ * - รองรับภาพจาก Supabase / CDN
  */
 function createProfileCard(profile = {}) {
-    // สร้าง container หลักของการ์ด
+    // 🧱 Container หลัก
     const card = document.createElement('div');
-    // ใช้คลาสจาก styles.css สำหรับ 3D effect และ layout
     card.className = 'profile-card-new-container';
 
-    // สร้าง inner container ที่เป็นกล่องหลักของโปรไฟล์
+    // 🩶 กล่องหลักของการ์ด
     const cardInner = document.createElement('div');
-    // ใช้คลาสของ styles.css สำหรับการจัดวางและความสวยงาม
     cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl';
-    // เพิ่มข้อมูล profile id สำหรับการอ้างอิง
     cardInner.setAttribute('data-profile-id', profile.id || '');
-    // เพิ่ม ARIA label สำหรับรองรับ Accessibility
     cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
-    // ทำให้สามารถใช้งานด้วยคีย์บอร์ดได้
     cardInner.setAttribute('role', 'button');
     cardInner.setAttribute('tabindex', '0');
 
-    // จัดการรูปภาพหลัก
+    // 🖼️ ข้อมูลภาพหลัก (พร้อม fallback)
     const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
         src: '/images/placeholder-profile.webp',
         alt: profile.name || 'profile',
@@ -607,29 +604,46 @@ function createProfileCard(profile = {}) {
         height: 800
     };
 
+    const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
+
+    // 🧠 Responsive Image (ขั้นสูง)
     const img = document.createElement('img');
-    img.className = 'card-image'; // คลาสใน styles.css
-    img.src = mainImage.src;
-    img.alt = mainImage.alt || '';
+    img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
+    img.src = `${baseUrl}?width=400&quality=80`;
+    img.srcset = `
+        ${baseUrl}?width=200&quality=75 200w,
+        ${baseUrl}?width=400&quality=80 400w,
+        ${baseUrl}?width=600&quality=85 600w
+    `.trim();
+    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 300px';
+    img.alt = `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
     img.loading = 'lazy';
     img.decoding = 'async';
     img.width = mainImage.width || 600;
     img.height = mainImage.height || 800;
-    // ถ้าเกิดภาพไม่โหลด ให้เปลี่ยนเป็นภาพ placeholder
+
+    // ป้องกัน CLS (layout shift)
+    img.style.aspectRatio = '3 / 4';
+    img.style.display = 'block';
+    img.style.backgroundColor = '#f3f3f3';
+
+    // Fallback เมื่อโหลดภาพไม่ได้
     img.onerror = function() {
         this.onerror = null;
         this.src = '/images/placeholder-profile.webp';
+        this.srcset = '';
     };
 
+    // 🪶 เพิ่มภาพในกล่อง
     cardInner.appendChild(img);
 
-    // --- MAJOR FIX #1: สร้าง Badge ให้เข้ากับระบบของ styles.css ---
+    // 🎖️ Badge container (สถานะ + featured)
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
-    // ระบบสถานะใหม่ที่เข้ากับ CSS เดิม
+    // 🟢 สถานะ
     const availSpan = document.createElement('span');
-    let statusClass = 'status-inquire'; // ค่าเริ่มต้น
+    let statusClass = 'status-inquire';
     switch (profile.availability) {
         case 'ว่าง':
             statusClass = 'status-available';
@@ -638,38 +652,37 @@ function createProfileCard(profile = {}) {
             statusClass = 'status-busy';
             break;
         case 'รอคิว':
-            statusClass = 'status-inquire'; // สามารถสร้างคลาสใหม่ได้ถ้าต้องการ
+            statusClass = 'status-inquire';
             break;
     }
-    // ใช้คลาสจาก CSS ที่มีอยู่แล้ว
     availSpan.className = `availability-badge ${statusClass}`;
     availSpan.textContent = profile.availability || 'สอบถามคิว';
     badges.appendChild(availSpan);
 
-    // ถ้าโปรไฟล์เป็น Featured ก็แสดง Badge ด้วย
+    // 🟡 ป้าย "แนะนำ"
     if (profile.isfeatured) {
         const feat = document.createElement('span');
         feat.className = 'featured-badge';
         feat.innerHTML = `<i class="fas fa-star" style="font-size: 0.7em; margin-right: 4px;"></i> แนะนำ`;
         badges.appendChild(feat);
     }
+
     cardInner.appendChild(badges);
 
-    // --- MAJOR FIX #2: ใช้ .card-overlay ที่ styles.css รออยู่ ---
+    // 💎 Overlay (พื้นกระจก)
     const overlay = document.createElement('div');
-    overlay.className = 'card-overlay'; // คลาสที่ออกแบบไว้แล้ว
+    overlay.className = 'card-overlay';
 
-    // ส่วนข้อมูลชื่อและตำแหน่ง
+    // 👤 ข้อมูลโปรไฟล์
     const info = document.createElement('div');
-    info.className = 'card-info'; // คลาสใน styles.css
+    info.className = 'card-info';
 
     const h3 = document.createElement('h3');
-    h3.className = 'text-lg sm:text-xl lg:text-2xl'; // จัดสไตล์ด้วย CSS
+    h3.className = 'text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow';
     h3.textContent = profile.name || 'ไม่ระบุชื่อ';
 
     const p = document.createElement('p');
-    p.className = 'text-sm flex items-center gap-1.5';
-    // ใช้ provincesMap ถ้ามี เพื่อแสดงชื่อจังหวัด
+    p.className = 'text-sm flex items-center gap-1.5 text-white/90';
     const provinceName = (typeof provincesMap !== 'undefined' && provincesMap.get)
         ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
         : 'ไม่ระบุ';
@@ -680,24 +693,24 @@ function createProfileCard(profile = {}) {
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
 
-    // รวมเข้าเป็นแผงเดียว
-    card.appendChild(cardInner);
-
-    // เพิ่ม event สำหรับคลิกหรือกด Enter
-    cardInner.addEventListener('click', () => {
-        // สามารถเปิด modal, ไปยังหน้ารายละเอียด ฯลฯ
+    // 🖱️ คลิกและคีย์บอร์ด event
+    const openProfile = () => {
         console.log('เปิดโปรไฟล์:', profile.name);
-    });
+        // TODO: เพิ่มโค้ดเปิด modal / ไปหน้าโปรไฟล์จริงได้ที่นี่
+    };
+
+    cardInner.addEventListener('click', openProfile);
     cardInner.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            // ทำสิ่งเดียวกันกับคลิก
-            console.log('เปิดโปรไฟล์:', profile.name);
+            openProfile();
         }
     });
 
+    card.appendChild(cardInner);
     return card;
 }
+
 /**
  * REFACTORED: สร้าง Section จังหวัด
  * - ลบ Gradient classes ที่ hard-code ออก
