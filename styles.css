@@ -2455,24 +2455,34 @@ select {
 .status-busy { background: #fde8e8; color: #dc2626; }
 .status-inquire { background: #fff9e6; color: #d97706; }
 
-/* Gallery */
 #lightboxHeroImage {
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
   border-radius: 16px;
-  margin-bottom: 12px;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
+
+/* thumbnail strip ใช้ flex ให้เลื่อนซ้ายขวาได้ */
 #lightboxThumbnailStrip {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 60px);
-  gap: 6px;
-  justify-content: center;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 12px;
 }
+
+/* thumbnail รูปเล็ก */
 #lightboxThumbnailStrip .thumbnail {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
   border-radius: 10px;
   opacity: 0.7;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
 }
+
 #lightboxThumbnailStrip .thumbnail.active,
 #lightboxThumbnailStrip .thumbnail:hover {
   opacity: 1;
@@ -3619,4 +3629,45 @@ a:hover, button:hover {
     font-size: 0.55rem !important;
     padding: 0.15rem 0.45rem !important;
   }
+}
+.search-count-highlight {
+  background: linear-gradient(45deg, #ff3366, #ff99aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+}
+.view-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px; /* rounded-full */
+  background: linear-gradient(to right, #ec4899, #be185d); /* from-pink-500 to-pink-700 */
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.875rem; /* text-sm */
+  color: white;
+  box-shadow: 0 10px 15px rgba(219, 39, 119, 0.7);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+  border: none;
+}
+
+.view-more-btn:hover {
+  background: linear-gradient(to right, #db2777, #9d174d); /* hover:from-pink-600 to-pink-800 */
+  box-shadow: 0 12px 20px rgba(219, 39, 119, 0.85);
+  transform: scale(1.05);
+}
+
+.view-more-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.5);
+}
+
+/* ลูกศร SVG */
+.view-more-btn svg {
+  transition: transform 0.2s ease-in-out;
+}
+
+.view-more-btn:hover svg {
+  transform: translateX(4px);
 }

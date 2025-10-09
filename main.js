@@ -602,7 +602,6 @@ function createProfileCard(profile = {}) {
     const img = document.createElement('img');
     img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
 
-    // ตั้งค่า src, srcset, sizes
     img.src = `${baseUrl}?width=400&quality=80`;
     img.srcset = `
       ${baseUrl}?width=150&quality=70 150w,
@@ -610,35 +609,56 @@ function createProfileCard(profile = {}) {
       ${baseUrl}?width=600&quality=80 600w
     `.trim();
     img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
-    img.alt = `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
+    img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
     img.loading = 'lazy';
     img.decoding = 'async';
 
-    // กำหนดขนาดและ aspect ratio เพื่อป้องกัน CLS
     img.width = mainImage.width || 600;
     img.height = mainImage.height || 800;
-
-    // ใช้ CSS ใน style เพื่อควบคุม layout
     img.style.display = 'block';
     img.style.width = '100%';
     img.style.aspectRatio = '3 / 4';
     img.style.backgroundColor = '#f3f3f3';
 
-    // fallback เมื่อโหลดภาพไม่ได้
     img.onerror = function() {
         this.onerror = null;
         this.src = '/images/placeholder-profile.webp';
         this.srcset = '';
     };
 
-    // 🪶 เพิ่มภาพในกล่อง
     cardInner.appendChild(img);
+
+    // ✅ แสดงรูปภาพทั้งหมดพร้อม alt (All Tags Gallery)
+    if (Array.isArray(profile.images) && profile.images.length > 1) {
+        const gallery = document.createElement('div');
+        gallery.className = 'profile-gallery grid grid-cols-3 gap-2 p-2';
+
+        profile.images.forEach((image, i) => {
+            const imgThumb = document.createElement('img');
+            const thumbBase = image.src?.split('?')[0] || '/images/placeholder-profile.webp';
+            imgThumb.src = `${thumbBase}?width=150&quality=70`;
+            imgThumb.alt = image.alt || `รูปที่ ${i + 1} ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
+            imgThumb.loading = 'lazy';
+            imgThumb.decoding = 'async';
+            imgThumb.width = image.width || 150;
+            imgThumb.height = image.height || 200;
+            imgThumb.className = 'rounded-md w-full h-auto object-cover aspect-[3/4] bg-gray-100';
+
+            imgThumb.onerror = function () {
+                this.onerror = null;
+                this.src = '/images/placeholder-profile.webp';
+            };
+
+            gallery.appendChild(imgThumb);
+        });
+
+        cardInner.appendChild(gallery);
+    }
 
     // 🎖️ Badge container (สถานะ + featured)
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
-    // 🟢 สถานะ
     const availSpan = document.createElement('span');
     let statusClass = 'status-inquire';
     switch (profile.availability) {
@@ -656,7 +676,6 @@ function createProfileCard(profile = {}) {
     availSpan.textContent = profile.availability || 'สอบถามคิว';
     badges.appendChild(availSpan);
 
-    // 🟡 ป้าย "แนะนำ"
     if (profile.isfeatured) {
         const feat = document.createElement('span');
         feat.className = 'featured-badge';
@@ -670,7 +689,6 @@ function createProfileCard(profile = {}) {
     const overlay = document.createElement('div');
     overlay.className = 'card-overlay';
 
-    // 👤 ข้อมูลโปรไฟล์
     const info = document.createElement('div');
     info.className = 'card-info';
 
@@ -707,41 +725,75 @@ function createProfileCard(profile = {}) {
     card.appendChild(cardInner);
     return card;
 }
-/**
- * REFACTORED: สร้าง Section จังหวัด
- * - ลบ Gradient classes ที่ hard-code ออก
- * - เพิ่มคลาสเฉพาะ .province-section-header เพื่อให้ CSS จัดการสไตล์ได้ง่าย
- */
+
 function createProvinceSection(key, name, provinceProfiles) {
     const totalCount = provinceProfiles.length;
     const sectionWrapper = document.createElement('div');
-    sectionWrapper.className = 'section-content-wrapper'; // ใช้คลาสกลางๆ ปล่อยให้ CSS จัดการ
+    sectionWrapper.className = 'section-content-wrapper'; // คลาสกลาง ๆ ปล่อยให้ CSS จัดการ
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
-    const mapIcon = `<span class="text-pink-500 text-2xl">📍</span>`;
-    const arrowIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="ml-1 text-xs inline" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 6.28a.75.75 0 111.04-1.06l4.5 4.25a.75.75 0 010 1.06l-4.5 4.25a.75.75 0 11-1.04-1.06l4.158-3.94H3.75A.75.75 0 013 10z" clip-rule="evenodd" /></svg>`;
 
-    // --- MAJOR FIX #3: ลบ Gradient classes ออกจาก h3 ---
+    const mapIcon = `<span aria-hidden="true" class="text-pink-500 text-2xl select-none">📍</span>`;
+    const arrowIcon = `
+        <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            class="ml-1 inline w-5 h-5 text-white transition-transform" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            aria-hidden="true"
+            focusable="false">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>`;
+
     sectionWrapper.innerHTML = `
         <div class="p-6 md:p-8">
-            <h3 class="province-section-header flex items-center gap-2.5">
+            <h3 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
                 ${mapIcon}
                 <span>จังหวัด ${name}</span>
-                <span class="profile-count-badge">${totalCount} โปรไฟล์</span>
+                <span class="profile-count-badge ml-2 inline-block bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded">${totalCount} โปรไฟล์</span>
             </h3>
             <p class="mt-2 text-sm text-muted-foreground">เลือกดูน้องๆ ที่พร้อมให้บริการในพื้นที่ ${name}</p>
         </div>
         <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-8 pb-6 md:pb-8"></div>
         <div class="view-more-container px-6 md:px-8 pb-6 md:pb-8 -mt-4 text-center" style="display:none;">
-            <a class="font-semibold text-pink-600 hover:underline" href="profiles.html?province=${key}">ดูน้องๆ ใน ${name} ทั้งหมด ${arrowIcon}</a>
+            <button 
+                type="button" 
+                class="view-more-btn inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-pink-700 px-6 py-2 text-sm font-semibold text-white shadow-lg hover:from-pink-600 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-transform duration-200 ease-in-out"
+                aria-label="ดูน้องๆ ในจังหวัด ${name} ทั้งหมด">
+                ดูน้องๆ ใน ${name} ทั้งหมด
+                ${arrowIcon}
+            </button>
         </div>`;
 
     const grid = sectionWrapper.querySelector('.profile-grid');
-    const profilesToDisplay = provinceProfiles.slice(0, 8); // แสดงผลเริ่มต้น (ปรับได้)
+    const profilesToDisplay = provinceProfiles.slice(0, 8);
     grid.append(...profilesToDisplay.map(createProfileCard));
+
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
-    if (viewMoreContainer && totalCount > 8) {
+    const viewMoreBtn = sectionWrapper.querySelector('.view-more-btn');
+
+    if (viewMoreContainer && totalCount > 10) {
         viewMoreContainer.style.display = 'block';
+
+        // animation เล็กน้อยเวลาชี้ปุ่ม
+        viewMoreBtn.addEventListener('mouseenter', () => {
+            const svg = viewMoreBtn.querySelector('svg');
+            if (svg) svg.style.transform = 'translateX(4px)';
+            viewMoreBtn.style.transform = 'scale(1.05)';
+            viewMoreBtn.style.boxShadow = '0 8px 15px rgba(219, 39, 119, 0.7)';
+        });
+        viewMoreBtn.addEventListener('mouseleave', () => {
+            const svg = viewMoreBtn.querySelector('svg');
+            if (svg) svg.style.transform = 'translateX(0)';
+            viewMoreBtn.style.transform = 'scale(1)';
+            viewMoreBtn.style.boxShadow = '0 4px 6px rgba(219, 39, 119, 0.5)';
+        });
+
+        viewMoreBtn.addEventListener('click', () => {
+            window.location.href = `profiles.html?province=${key}`;
+        });
     }
+
     return sectionWrapper;
 }
 
