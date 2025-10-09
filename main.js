@@ -575,14 +575,6 @@ function renderProfiles(filteredProfiles, isSearching) {
     initScrollAnimations();
 }
 
-/**
- * ULTRA OPTIMIZED: Profile Card ที่ดีที่สุดทุกมิติ (2025 standard)
- * - Responsive Image (srcset + sizes)
- * - Core Web Vitals: ป้องกัน CLS, ใช้ lazy-loading
- * - SEO + Accessibility ครบ
- * - เข้ากับ styles.css เดิม (card-overlay, availability-badge, featured-badge)
- * - รองรับภาพจาก Supabase / CDN
- */
 function createProfileCard(profile = {}) {
     // 🧱 Container หลัก
     const card = document.createElement('div');
@@ -609,25 +601,30 @@ function createProfileCard(profile = {}) {
     // 🧠 Responsive Image (ขั้นสูง)
     const img = document.createElement('img');
     img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
+
+    // ตั้งค่า src, srcset, sizes
     img.src = `${baseUrl}?width=400&quality=80`;
     img.srcset = `
-        ${baseUrl}?width=200&quality=75 200w,
-        ${baseUrl}?width=400&quality=80 400w,
-        ${baseUrl}?width=600&quality=85 600w
+      ${baseUrl}?width=150&quality=70 150w,
+      ${baseUrl}?width=250&quality=75 250w,
+      ${baseUrl}?width=600&quality=80 600w
     `.trim();
-    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 300px';
+    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
     img.alt = `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
     img.loading = 'lazy';
     img.decoding = 'async';
+
+    // กำหนดขนาดและ aspect ratio เพื่อป้องกัน CLS
     img.width = mainImage.width || 600;
     img.height = mainImage.height || 800;
 
-    // ป้องกัน CLS (layout shift)
-    img.style.aspectRatio = '3 / 4';
+    // ใช้ CSS ใน style เพื่อควบคุม layout
     img.style.display = 'block';
+    img.style.width = '100%';
+    img.style.aspectRatio = '3 / 4';
     img.style.backgroundColor = '#f3f3f3';
 
-    // Fallback เมื่อโหลดภาพไม่ได้
+    // fallback เมื่อโหลดภาพไม่ได้
     img.onerror = function() {
         this.onerror = null;
         this.src = '/images/placeholder-profile.webp';
@@ -710,7 +707,6 @@ function createProfileCard(profile = {}) {
     card.appendChild(cardInner);
     return card;
 }
-
 /**
  * REFACTORED: สร้าง Section จังหวัด
  * - ลบ Gradient classes ที่ hard-code ออก
