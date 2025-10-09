@@ -1,5 +1,5 @@
 // =================================================================================
-// Service Worker (sw.js) - ULTIMATE & PRODUCTION-READY VERSION
+// Service Worker (sw.js) - ULTIMATE & STABLE PRODUCTION VERSION (NO CACHE DATA)
 // =================================================================================
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox-sw.js');
@@ -8,111 +8,127 @@ if (workbox) {
   console.log(`[SW] Workbox v7.1.0 loaded successfully!`);
 
   // -------------------------------------------------------------------
-  // Step 1: Activate immediately and take control of pages
+  // STEP 1: Activate immediately + Clear old cache
   // -------------------------------------------------------------------
-  workbox.core.skipWaiting();
-  workbox.core.clientsClaim();
+  const CACHE_VERSION = 'v20251010'; // เปลี่ยนเลขเวอร์ชันเมื่ออัปเดตเว็บ
+
+  self.addEventListener('install', (event) => {
+    event.waitUntil(
+      caches.keys().then(keys => Promise.all(
+        keys.map(k => caches.delete(k))
+      ))
+    );
+    self.skipWaiting();
+  });
+
+  self.addEventListener('activate', (event) => {
+    event.waitUntil(
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+    );
+    self.clients.claim();
+  });
 
   // -------------------------------------------------------------------
-  // Step 2: Precache App Shell (HTML, Offline Page, Manifest, Logos, Favicon)
+  // STEP 2: Precache (Offline Essentials)
   // -------------------------------------------------------------------
   workbox.precaching.precacheAndRoute([
-    { url: '/offline.html', revision: 'v3' },
-    { url: '/manifest.webmanifest', revision: 'v3' },
-    // Logo
-    { url: '/images/logo-sidelinechiangmai.webp', revision: 'v3' },
-    { url: '/images/logo-sidelinechiangmai@2x.webp', revision: 'v3' },
-    // Placeholder / Favicon / Icons
-    { url: '/images/placeholder-profile.webp', revision: 'v3' },
-    { url: '/images/favicon.svg', revision: 'v3' },
-    { url: '/icons/icon-192x192.png', revision: 'v3' },
-    { url: '/icons/icon-512x512.png', revision: 'v3' },
-    // Hero images (responsive)
-    { url: '/images/hero-sidelinechiangmai-600.webp', revision: 'v3' },
-    { url: '/images/hero-sidelinechiangmai-800.webp', revision: 'v3' },
-    { url: '/images/hero-sidelinechiangmai-1200.webp', revision: 'v3' },
+    { url: '/offline.html', revision: CACHE_VERSION },
+    { url: '/manifest.webmanifest', revision: CACHE_VERSION },
+    { url: '/images/logo-sidelinechiangmai.webp', revision: CACHE_VERSION },
+    { url: '/images/logo-sidelinechiangmai@2x.webp', revision: CACHE_VERSION },
+    { url: '/images/placeholder-profile.webp', revision: CACHE_VERSION },
+    { url: '/images/favicon.svg', revision: CACHE_VERSION },
+    { url: '/icons/icon-192x192.png', revision: CACHE_VERSION },
+    { url: '/icons/icon-512x512.png', revision: CACHE_VERSION },
+    { url: '/images/hero-sidelinechiangmai-600.webp', revision: CACHE_VERSION },
+    { url: '/images/hero-sidelinechiangmai-800.webp', revision: CACHE_VERSION },
+    { url: '/images/hero-sidelinechiangmai-1200.webp', revision: CACHE_VERSION },
   ]);
 
   // -------------------------------------------------------------------
-  // Step 3: Caching Strategies
+  // STEP 3: Caching Strategies
   // -------------------------------------------------------------------
 
-  // --- HTML pages: NetworkFirst with fallback ---
+  // --- HTML pages ---
   workbox.routing.registerRoute(
     ({ request }) => request.mode === 'navigate',
     new workbox.strategies.NetworkFirst({
-      cacheName: 'sideline-pages',
-      networkTimeoutSeconds: 4,
-      plugins: [
-        new workbox.recipes.offlineFallback({
-          pageFallback: '/offline.html',
-        }),
-      ],
-    })
-  );
-
-  // --- Supabase Profile Images: CacheFirst 30 days ---
-  workbox.routing.registerRoute(
-    ({ url }) => url.hostname === 'hgzbgpbmymoiwjpaypvl.supabase.co',
-    new workbox.strategies.CacheFirst({
-      cacheName: 'sideline-profile-images',
+      cacheName: `pages-${CACHE_VERSION}`,
+      networkTimeoutSeconds: 5,
       plugins: [
         new workbox.expiration.ExpirationPlugin({
-          maxEntries: 150,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 วัน
-          purgeOnQuotaError: true,
+          maxEntries: 20,
+          maxAgeSeconds: 24 * 60 * 60, // 1 วัน
         }),
-        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
       ],
     })
   );
 
-  // --- JS / CSS: Stale-While-Revalidate, TTL 1 ปี ---
+ // ✅ ป้องกัน Browser cache response ของ Supabase ซ้ำ
+self.addEventListener('fetch', (event) => {
+  if (event.request.url.includes('supabase.co')) {
+    event.respondWith(
+      fetch(event.request, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
+    );
+  }
+});
+
+  // --- JS / CSS ---
   workbox.routing.registerRoute(
     ({ request }) => request.destination === 'script' || request.destination === 'style',
     new workbox.strategies.StaleWhileRevalidate({
-      cacheName: 'sideline-static-assets',
+      cacheName: `static-${CACHE_VERSION}`,
       plugins: [
         new workbox.expiration.ExpirationPlugin({
           maxEntries: 50,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 ปี
+          maxAgeSeconds: 365 * 24 * 60 * 60,
         }),
-        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
       ],
     })
   );
 
-  // --- Fonts: CacheFirst 1 ปี ---
+  // --- Fonts ---
   workbox.routing.registerRoute(
     ({ request }) => request.destination === 'font',
     new workbox.strategies.CacheFirst({
-      cacheName: 'sideline-fonts',
+      cacheName: `fonts-${CACHE_VERSION}`,
       plugins: [
         new workbox.expiration.ExpirationPlugin({
           maxEntries: 30,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 ปี
+          maxAgeSeconds: 365 * 24 * 60 * 60,
         }),
-        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
       ],
     })
   );
 
-  // --- Images (Hero, Logo, Other): CacheFirst 30 วัน ---
+  // --- Images (ทั่วไป) ---
   workbox.routing.registerRoute(
     ({ request }) => request.destination === 'image',
     new workbox.strategies.CacheFirst({
-      cacheName: 'sideline-images',
+      cacheName: `images-${CACHE_VERSION}`,
       plugins: [
         new workbox.expiration.ExpirationPlugin({
           maxEntries: 200,
           maxAgeSeconds: 30 * 24 * 60 * 60,
           purgeOnQuotaError: true,
         }),
-        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
       ],
     })
+  );
+
+  // --- Default handler ---
+  workbox.routing.setDefaultHandler(
+    new workbox.strategies.NetworkFirst()
   );
 
 } else {
   console.log(`[SW] Workbox failed to load.`);
 }
+
