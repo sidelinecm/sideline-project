@@ -1,10 +1,13 @@
-
+/* ===============================
+   FONT
+================================== */
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local("Prompt Regular"), url(/fonts/prompt-v11-latin_thai-regular.woff2) format("woff2");
+  src: local("Prompt Regular"),
+       url(/fonts/prompt-v11-latin_thai-regular.woff2) format("woff2");
 }
 
 @font-face {
@@ -12,48 +15,88 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: local("Prompt Bold"), url(/fonts/prompt-v11-latin_thai-700.woff2) format("woff2");
+  src: local("Prompt Bold"),
+       url(/fonts/prompt-v11-latin_thai-700.woff2) format("woff2");
 }
 
-
-
-/* Variables & Base Styles */
+/* ===============================
+   ROOT VARIABLES & DARK MODE
+================================== */
 :root {
   --font-base: "Prompt", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-heading: "Prompt", system-ui, sans-serif;
+
   --radius: 1rem;
-  --background: 220 20% 98%;
+
+  /* พื้นหลังโทนชมพู */
+  --background: 340 80% 98%;
   --foreground: 220 15% 25%;
   --card: 0 0% 100%;
+
   --primary: 340 85% 58%;
-  --primary-glow: 340 85% 65%;
-  --secondary: 260 85% 65%;
-  --secondary-glow: 260 85% 75%;
-  --muted: 220 10% 90%;
-  --muted-foreground: 220 10% 40%;
-  --accent: 220 10% 95%;
-  --border: 220 10% 85%;
-  --transition-fast: 200ms ease;
-  --transition-medium: 350ms ease;
-  --transition-slow: 600ms ease;
+  --primary-glow: 340 85% 70%;
+  --secondary: 320 85% 65%;
+  --secondary-glow: 320 90% 72%;
+  --accent: 340 95% 96%;
+  --muted: 220 15% 90%;
+  --border: 220 10% 90%;
+  --ring: 220 15% 50%;
+  --destructive: 0 85% 60%;
 }
 
-html.dark {
-  --background: 220 15% 10%;
-  --foreground: 220 15% 95%;
+.dark {
+  --background: 220 20% 10%;
+  --foreground: 220 15% 85%;
   --card: 220 15% 15%;
+
   --primary: 340 85% 58%;
-  --primary-glow: 340 85% 65%;
-  --secondary: 260 85% 65%;
-  --secondary-glow: 260 85% 75%;
-  --muted: 220 15% 20%;
-  --muted-foreground: 220 15% 75%;
-  --accent: 220 15% 18%;
-  --border: 220 15% 25%;
+  --primary-glow: 340 90% 68%;
+  --secondary: 320 85% 65%;
+  --secondary-glow: 320 90% 75%;
+  --accent: 320 15% 20%;
+  --muted: 220 15% 30%;
+  --border: 220 10% 20%;
+  --ring: 220 15% 60%;
+  --destructive: 0 85% 70%;
 }
 
+/* ===============================
+   BODY BACKGROUND (Aurora Pink)
+================================== */
+body {
+  font-family: var(--font-base);
+  margin: 0;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+  background: linear-gradient(135deg, #ffe6f0 0%, #ffd6eb 50%, #fff0f6 100%);
+  position: relative;
+  overflow-x: hidden;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
 
-html.dark{--background:225 15% 10%;--foreground:220 20% 90%;--card:225 15% 16%;--primary:340 90% 68%;--primary-glow:340 95% 72%;--secondary:260 90% 75%;--secondary-glow:260 95% 80%;--muted:225 15% 20%;--border:225 12% 25%;--accent:225 15% 20%}
+body.loaded { opacity: 1; }
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 150vmax;
+  height: 150vmax;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 182, 193, 0.4), transparent 70%);
+  filter: blur(140px);
+  z-index: -1;
+  animation: aurora-rotate 40s linear infinite;
+}
+
+@keyframes aurora-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
 @media (max-width: 768px) {
   h1 { font-size: 1.875rem; }  /* ~30px */
@@ -174,6 +217,142 @@ p{margin:0 0 1em}
   height: 100%;
   object-fit: cover;
 }
+
+/* ===============================
+   PROFILE COUNT BADGE
+================================== */
+.profile-count-badge {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  box-shadow: 0 3px 12px hsl(var(--primary-glow)/0.45);
+  margin-left: 0.5rem;
+  display: inline-block;
+}
+.profile-count-badge {
+  background: linear-gradient(135deg, #ff4d94, #ff80b5);
+  color: #fff !important;
+  font-weight: 600;
+  padding: 0.3rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  display: inline-block !important;
+  box-shadow: 0 3px 10px rgba(255, 77, 148, 0.4);
+}
+
+/* ===============================
+   PROFILE CARD
+================================== */
+.profile-card-new {
+  background-color: hsl(var(--card));
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 3/4;
+  transition: transform .4s ease, box-shadow .4s ease;
+  box-shadow: 0 8px 24px -10px rgba(0,0,0,0.2);
+}
+.profile-card-new img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-card-new:hover {
+  transform: scale(1.05);
+  box-shadow: 0 16px 40px -12px rgba(0,0,0,0.3);
+}
+.lightbox-backdrop img {
+  width: 100%;
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* ===============================
+   LIGHTBOX
+================================== */
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ===============================
+   LIGHTBOX CLOSE BUTTON
+================================== */
+.btn-close-premium {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(255,255,255,0.8);
+  color: #ff4d94;
+  font-size: 1.25rem;
+  transition: all .3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
+}
+.btn-close-premium:hover {
+  background-color: #ff4d94;
+  color: #fff;
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* ===============================
+   SECTION HEADERS
+================================== */
+.province-section-header {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #ff4d94;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.search-results-header {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #ff4d94;
+}
+
+.search-count-highlight {
+  color: #ff4d94;
+  font-weight: 700;
+}
+
+/* ===============================
+   ANIMATIONS SCROLL
+================================== */
+[data-animate-on-scroll] {
+  opacity: 0;
+  transform: translateY(25px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+[data-animate-on-scroll].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 @keyframes aurora-1{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(1turn)}}
 
 @keyframes aurora-2{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(-1turn)}}
@@ -288,98 +467,29 @@ html.dark #sidebar nav a.active-nav-link,html.dark #sidebar nav a:active{backgro
 
 .location-card{background-color:hsl(var(--card));border:1px solid hsl(var(--border));box-shadow:0 4px 10px -5px hsl(var(--foreground)/.05)}
 
-/* ==== PROFILE CARD (ปรับให้ไม่หมุน + ภาพคมชัดเต็มเฟรมทุกหน้าจอ) ==== */
+.profile-card-new-container{perspective:1000px}
 
-.profile-card-new-container {
-  /* ปิด perspective เพราะไม่ใช้เอฟเฟกต์หมุน 3D แล้ว */
-  perspective: none;
-}
+.profile-card-new{background-color:hsl(var(--muted));border-radius:1rem;overflow:hidden;position:relative;aspect-ratio:3/4;transition:transform .5s cubic-bezier(.165,.84,.44,1),box-shadow .5s cubic-bezier(.165,.84,.44,1);box-shadow:0 10px 30px -10px hsl(var(--foreground)/.15);transform-style:preserve-3d}
 
-.profile-card-new {
-  background-color: hsl(var(--muted));
-  border-radius: 1rem;
-  overflow: hidden;
-  position: relative;
-  aspect-ratio: 3/4;
-  box-shadow: 0 10px 30px -10px hsl(var(--foreground)/.15);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-}
+.profile-card-new:before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle 250px at var(--mouse-x) var(--mouse-y),hsla(0,0%,100%,.15),transparent);opacity:0;transition:opacity .4s ease;z-index:2}
 
-/* ตอน hover: ขยายเบา ๆ ให้ดูโดดเด่น แต่ไม่หมุน */
-.profile-card-new:hover {
-  transform: scale(1.03);
-  box-shadow: 0 20px 40px -15px hsl(var(--foreground)/.25);
-}
+.profile-card-new:hover{transform:rotateY(var(--rotate-y)) rotateX(var(--rotate-x)) scale(1.05);box-shadow:0 25px 50px -15px hsl(var(--foreground)/.3)}
 
-/* ลบเอฟเฟกต์แสงเมาส์ */
-.profile-card-new:before {
-  content: none;
-}
+.profile-card-new:hover:before{opacity:1}
 
-/* รูปภาพหลัก */
-.profile-card-new .card-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;            /* แสดงเต็มเฟรม */
-  object-position: center;      /* จัดให้อยู่กึ่งกลาง */
-  filter: saturate(1.1) contrast(1.1);
-  transition: transform 0.5s ease;
-  image-rendering: auto;        /* ให้ภาพคมชัดในทุกเบราว์เซอร์ */
-}
+.profile-card-new .card-image{position:absolute;inset:0;width:100%;height:100%;-o-object-fit:cover;object-fit:cover;filter:saturate(1.05) contrast(1.05);transition:transform .5s cubic-bezier(.165,.84,.44,1)}
 
-/* ขยายภาพเล็กน้อยเมื่อ hover */
-.profile-card-new:hover .card-image {
-  transform: scale(1.05);
-}
+.profile-card-new:hover .card-image{transform:scale(1.1)}
 
-/* ชั้น overlay ด้านล่างของการ์ด */
-.profile-card-new .card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    0deg,
-    rgba(17, 19, 23, 0.9) 0%,
-    rgba(17, 19, 23, 0.5) 50%,
-    transparent 80%
-  );
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  color: #fff;
-  z-index: 1;
-}
+.profile-card-new .card-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(17,19,23,.95) 0,rgba(17,19,23,.7) 40%,transparent 70%);padding:1rem;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;z-index:1}
 
-/* ข้อความในการ์ด */
-.profile-card-new .card-info {
-  transform: none;
-  transition: none;
-}
+.profile-card-new .card-info{transition:transform .5s cubic-bezier(.165,.84,.44,1);transform:translateZ(20px)}
 
-/* ชื่อ / หัวข้อโปรไฟล์ */
-.profile-card-new .card-info h3 {
-  font-weight: 800;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
-}
+.profile-card-new:hover .card-info{transform:translateZ(50px) translateY(-5px)}
 
-/* รายละเอียด */
-.profile-card-new .card-info p {
-  opacity: 0.95;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
-}
+.profile-card-new .card-info h3{font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.8)}
 
-/* ✅ ปรับการตอบสนองให้เหมาะกับทุกขนาดจอ */
-@media (max-width: 768px) {
-  .profile-card-new {
-    aspect-ratio: 3/4;
-    border-radius: 0.75rem;
-  }
-  .profile-card-new:hover {
-    transform: scale(1.02);
-  }
-}
+.profile-card-new .card-info p{opacity:.9;text-shadow:0 1px 5px rgba(0,0,0,.7)}
 
 .btn-line-shared{padding:1rem 2rem;font-size:1rem;font-weight:700;border-radius:9999px;background-color:#008335;color:#fff;box-shadow:0 4px 15px -2px rgba(8,145,65,.4),0 2px 5px rgba(8,145,65,.2);transition:transform .25s ease,box-shadow .25s ease;display:inline-flex;align-items:center;gap:.5rem}
 
@@ -1306,101 +1416,150 @@ header nav a[aria-current=page]{text-shadow:0 0 10px hsl(var(--primary-glow)/.2)
 
 }
 
-
-/* =================================================================== */
-/* STYLES.UPGRADED.CSS v3.0 - "PREMIUM CLEAN EDITION"                  */
-/* =================================================================== */
-
-
-html.dark { --aurora-opacity: 0.12; }
-
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #ff9ecb 0%, #d47bff 50%, #6ecbff 100%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* ================================================================
+   SOCIAL MEDIA SECTION (Clean & Unified)
+================================================================ */
+.social-media-section {
+  margin-top: 60px;
+  padding: 20px 0;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(8px);
+  text-align: center;
 }
-main { position: relative; z-index: 1; }
-
-/* Headings */
-h1.text-primary, h2.text-primary, h3.text-primary {
-  text-shadow: 0 0 25px hsl(var(--primary-glow) / 0.5),
-               0 0 5px hsl(var(--primary-glow) / 0.7);
+.social-section-header h2 {
+  font-size: clamp(20px, 2.5vw, 36px);
+  font-weight: 800;
+  background: linear-gradient(90deg, #ffd700, #ffb700, #ffdd55);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  margin-bottom: 8px;
 }
-.title-accent {
-  text-shadow: 0 0 20px hsl(var(--secondary-glow) / 0.5);
+.social-section-header p {
+  font-size: clamp(14px, 2vw, 18px);
+  color: #000;
+  text-shadow: 0 0 2px rgba(0,0,0,0.4);
+  margin: 0 auto;
+  max-width: 600px;
 }
-
-/* --- HERO SECTION --- */
-.section-header-card {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(16px);
-  border-radius: 24px;
-  padding: 2rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  animation: fadeInUp 0.8s ease;
+.social-disclaimer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #b71c1c;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  text-align: center;
+  line-height: 1.5;
 }
-.section-header-card img {
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2));
+.social-disclaimer i { color: #b71c1c; }
+.social-marquee-wrap {
+  position: relative; overflow: hidden; cursor: grab;
+  padding: 20px 0; margin-top: 20px; user-select: none;
+}
+.social-marquee-wrap:active { cursor: grabbing; }
+.social-marquee {
+  display: flex; gap: 20px; white-space: nowrap; will-change: transform;
+}
+.social-item {
+  flex: 0 0 auto; width: 60px; height: 60px;
+  border-radius: 50%; color: white; font-size: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: transform 0.3s ease;
 }
-.section-header-card img:hover { transform: scale(1.05); }
+.social-item i { font-size: 24px; margin-bottom: 4px; }
+.social-item:hover {
+  transform: rotate(360deg) scale(1.1);
+  transition: transform 0.6s ease;
+}
+.social-item:hover i { filter: drop-shadow(0 0 6px currentColor); }
 
-/* --- SEARCH FORM --- */
-#hero-form {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(18px) saturate(120%);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  animation: fadeInUp 1s ease;
-  transition: all 0.3s ease;
-}
-#hero-form:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
-}
-#hero-form input,
-#hero-form select {
-  background: rgba(255,255,255,0.9);
-  border: none;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-#hero-form input:focus,
-#hero-form select:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.5);
-  transform: scale(1.02);
-}
-#keyword-search-btn {
-  background: linear-gradient(90deg, #ec4899, #8b5cf6);
-  border: none;
-  border-radius: 999px;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-#keyword-search-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-}
-#reset-search-btn {
-  background: rgba(229, 231, 235, 0.8);
-  border-radius: 999px;
-  transition: all 0.3s ease;
-}
-#reset-search-btn:hover {
-  background: rgba(209, 213, 219, 1);
-  transform: scale(1.05);
+/* Brand Colors */
+.fb { background:#1877f2; }
+.line { background:#06c755; }
+.tiktok { background:linear-gradient(135deg,#000 40%,#ff0050 100%); }
+.twitter { background:#1da1f2; }
+.ig { background:radial-gradient(circle at 30% 107%, #fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%); }
+.linktree { background: linear-gradient(to right,#20c997,#107c6f); }
+.bluesky { background: linear-gradient(to right,#3b82f6,#2563eb); }
+
+
+.animate-fadeInUp { animation: fadeInUp 0.6s ease-in-out forwards; }
+.animate-fadeIn { animation: fadeIn 0.6s ease-in-out forwards; }
+
+/* ============================== */
+/* ADVANCED TYPOGRAPHY OPTIMIZATION */
+/* ============================== */
+
+/* H2: Section Heading */
+#featured-heading,
+#all-profiles-heading {
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: hsl(330, 50%, 20%);
+  margin-bottom: 0.75rem;
 }
 
+.dark #featured-heading,
+.dark #all-profiles-heading {
+  color: hsl(330, 40%, 90%);
+}
+
+/* Province Highlight in Heading */
+#featured-heading .province,
+#all-profiles-heading .province {
+  color: hsl(330, 65%, 45%);
+  font-weight: 900;
+}
+
+/* H3: Sub-heading */
+.featured-sub {
+  font-size: clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
+  font-weight: 600;
+  color: hsl(330, 45%, 35%);
+  margin-bottom: 0.75rem;
+}
+
+.dark .featured-sub {
+  color: hsl(330, 40%, 80%);
+}
+
+/* Paragraph Descriptions */
+.featured-desc,
+.all-desc {
+  font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.1rem);
+  line-height: 1.7;
+  max-width: 65ch;
+  margin-left: auto;
+  margin-right: auto;
+  color: hsl(330, 20%, 25%);
+}
+
+.dark .featured-desc,
+.dark .all-desc {
+  color: hsl(330, 20%, 85%);
+}
+
+/* Highlight Text Inside Paragraphs */
+.featured-desc strong,
+.all-desc strong {
+  color: hsl(330, 65%, 40%);
+  font-weight: 700;
+}
+
+.dark .featured-desc strong,
+.dark .all-desc strong {
+  color: hsl(330, 70%, 70%);
+}
+
+.all-desc .highlight {
+  color: hsl(330, 80%, 45%);
+  font-weight: 800;
+}
+
+.dark .all-desc .highlight {
+  color: hsl(330, 75%, 75%);
+}
 /* --- LIGHTBOX --- */
 #lightbox {
   background-color: hsl(var(--background) / 0.6);
@@ -1918,740 +2077,115 @@ body {
   transform: scale(1.05);
 }
 
-/* ============================================= */
-/* SOCIAL MEDIA SECTION (Clean + Beautiful)     */
-/* ============================================= */
-.social-media-section {
-    margin-top: 60px;
-    padding: 20px 0;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(8px);
-    text-align: center;
-}
+/* =================================================================== */
+/* 1. SECTION & HEADING STYLES */
+/* =================================================================== */
 
-/* Section Header */
-.social-section-header h2 {
-    font-size: clamp(20px, 2.5vw, 36px);
-    font-weight: 800;
-    color: #000;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    margin-bottom: 8px;
-}
+/* H3 Sub-heading and province repeated fix removed (already declared above) */
 
-.social-section-header p {
-    font-size: clamp(14px, 2vw, 18px);
-    color: #000;
-    text-shadow: 0 0 2px rgba(0,0,0,0.4);
-    margin: 0 auto;
-    max-width: 600px;
-}
+/* =================================================================== */
+/* 2. PROFILE CARD DETAILS (Overlay, Name, Tagline, Location) */
+/* =================================================================== */
 
-/* Disclaimer */
-.social-disclaimer {
-    margin-top: 20px;
-    font-size: 14px;
-    color: red;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    text-align: center;
-    line-height: 1.5;
-}
-.social-disclaimer i {
-    margin-right: 6px;
-    color: red;
-}
-
-/* ============================================= */
-/* MARQUEE WRAPPER & SCROLL                        */
-/* ============================================= */
-.social-marquee-wrap {
-    position: relative;
-    overflow: hidden;
-    cursor: grab;
-    padding: 20px 0;
-    margin-top: 20px;
-    user-select: none;
-}
-
-.social-marquee-wrap:active {
-    cursor: grabbing;
-}
-
-.social-marquee {
-    display: flex;
-    gap: 20px;
-    white-space: nowrap;
-    will-change: transform;
-}
-
-/* Marquee animation fallback */
-@keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
-
-/* ============================================= */
-/* SOCIAL ITEM                                   */
-/* ============================================= */
-.social-item {
-    flex: 0 0 auto;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    color: white;
-    font-size: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-
-.social-item i {
-    font-size: 24px;
-    margin-bottom: 4px;
-}
-
-.social-item:hover {
-    transform: rotate(360deg) scale(1.1);
-    transition: transform 0.6s ease;
-}
-
-.social-item:hover i {
-    filter: drop-shadow(0 0 6px currentColor);
-}
-
-/* ============================================= */
-/* BRAND COLORS                                   */
-/* ============================================= */
-.fb { background:#1877f2; }
-.line { background:#06c755; }
-.tiktok { background:linear-gradient(135deg,#000 40%,#ff0050 100%); }
-.twitter { background:#1da1f2; }
-.ig { background:radial-gradient(circle at 30% 107%, #fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%); }
-.linktree { background: linear-gradient(to right,#20c997,#107c6f); }
-.bluesky { background: linear-gradient(to right,#3b82f6,#2563eb); }
-
-/* Instagram gradient fix */
-.instagram-icon {
-    background: radial-gradient(circle at 30% 107%, #fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.social-section-header h2 {
-    font-size: clamp(20px, 2.5vw, 36px);
-    font-weight: 800;
-    background: linear-gradient(90deg, #ffd700, #ffb700, #ffdd55);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    margin-bottom: 8px;
-}
-
-.social-disclaimer {
-    color: #000; /* แทน red หรือ muted-foreground/60 */
-.social-disclaimer {
-    color: #b71c1c; /* dark red */
-}
-.social-disclaimer i {
-    color: #b71c1c;
-}    font-size: 14px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* option ถ้าต้องการ effect */
-    text-align: center;
-    line-height: 1.5;
-}
-.social-disclaimer i {
-    color: #000; /* แทน red */
-}
-
-
-
-/* =============================================
-   Hero Search Form - Modern UI/UX & Responsive
-============================================= */
-
-/* ฟอร์มหลัก */
-#pro-search-form {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-/* กล่องกรอกและฟิลเตอร์ */
-.pro-search-input-group,
-.filters-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-/* กล่อง input */
-#pro-search-input {
-  flex: 1 1 300px;
-  padding: 0.85rem 1.25rem;
-  border-radius: 9999px;
-  border: 1px solid #ddd;
-  font-size: 1rem;
-  background: #f9fafb;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-}
-
-#pro-search-input::placeholder {
-  color: #9ca3af;
-}
-
-#pro-search-input:focus {
-  border-color: #6366f1;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-  outline: none;
-}
-
-/* ปุ่มค้นหา */
-#pro-search-button {
-  padding: 0.85rem 1.5rem;
-  border-radius: 9999px;
-  background: linear-gradient(to right, #6366f1, #4f46e5);
-  color: white;
-  font-weight: 600;
-  font-size: 0.95rem;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3);
-  transition: all 0.25s ease;
-}
-
-#pro-search-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
-}
-
-#pro-search-button:active {
-  transform: scale(0.95);
-}
-
-/* ไอคอนในปุ่ม */
-#pro-search-button i {
-  font-size: 1.1rem;
-}
-
-/* Dropdowns และปุ่มล้าง */
-.filters-row select,
-.filters-row button[type="reset"] {
-  padding: 0.75rem 1.25rem;
-  border-radius: 9999px;
-  border: 1px solid #ddd;
-  font-size: 0.9rem;
-  background: #f9fafb;
-  color: #111827;
-  transition: all 0.25s ease;
-  appearance: none;
+/* Profile Card */
+.profile-card {
   position: relative;
-}
-
-.filters-row select:hover,
-.filters-row button[type="reset"]:hover {
-  background: #eef2ff;
-  border-color: #6366f1;
-}
-
-.filters-row select:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-/* ปุ่มล้างค่า */
-.filters-row button[type="reset"] {
-  background: #f3f4f6;
-  color: #374151;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.filters-row button[type="reset"] i {
-  font-size: 0.85rem;
-  color: #9ca3af;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .pro-search-input-group,
-  .filters-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  #pro-search-input,
-  #pro-search-button,
-  .filters-row select,
-  .filters-row button[type="reset"] {
-    width: 100%;
-  }
-}
-
-
-/* Smooth Animation on focus */
-input[type="search"],
-select {
-  transition: all 0.3s ease-in-out;
-}
-
-
-.hero-h1-revised img {
-  max-width: 240px;
-  height: auto;
-  border-radius: 1rem;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+  border-radius: 1rem; /* rounded-2xl */
+  overflow: hidden;
+  background-color: rgba(255,255,255,0.9);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  backdrop-filter: blur(6px);
   transition: transform 0.3s ease;
 }
-.hero-h1-revised img:hover {
-  transform: scale(1.04);
+
+.dark .profile-card {
+  background-color: rgba(31, 41, 55, 0.8); /* gray-800/80 */
 }
 
-.hero-h1-revised p {
-  margin-top: 1rem;
-  font-size: clamp(15px, 1.3vw, 18px);
-  color: #374151;
-  line-height: 1.6;
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
-}
-
-/* Skeleton Loader */
-.skeleton-card {
-  height: 300px;
-  background-color: hsl(var(--muted));
-  border-radius: var(--radius);
-  position: relative;
-  overflow: hidden;
-}
-
-/* =================================================================== */
-/* FINAL & CONSOLIDATED STYLES FOR PROFILE CARDS & SECTIONS       */
-/* ทำงานร่วมกับ JavaScript ที่ Refactor แล้ว               */
-/* =================================================================== */
-
-/* 1. สไตล์การ์ดโปรไฟล์หลัก (โครงสร้างและ Hover Effect)
-------------------------------------------------------------------- */
-.profile-card-new {
-    /* ใช้ค่าจาก styles.css หลัก แต่เพิ่ม transition ที่นี่เพื่อให้แน่ใจว่าทำงานได้ดี */
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: transform;
-}
-
-.profile-card-new:hover {
-    /* เอฟเฟกต์ตอน hover ที่สวยงามและไม่กระทบกับ 3D effect เดิม */
-    transform: translateY(-10px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
-    box-shadow: 0 20px 40px -10px hsl(var(--foreground) / 0.3);
-}
-
-.card-image {
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.profile-card-new:hover .card-image {
-    transform: scale(1.1);
-}
-
-
-/* 2. Overlay กระจกฝ้าสำหรับชื่อและข้อมูล (สำคัญที่สุด)
-------------------------------------------------------------------- */
-
-    
-    /* เอฟเฟกต์กระจกฝ้าไล่ระดับสีที่สวยงาม */
-    background: linear-gradient(0deg, rgba(17, 19, 23, 0.9) 0%, rgba(17, 19, 23, 0.7) 35%, transparent 65%);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    
-    padding: 1.25rem 1rem; /* เพิ่ม padding เล็กน้อย */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    color: #fff;
-    z-index: 2;
-    
-    /* เพิ่มเส้นขอบบนสไตล์กระจก */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    
-    /* ทำให้การเปลี่ยนสวยงามเมื่อ 3D effect ทำงาน */
-    transition: background 0.4s ease;
-}
-
-.profile-card-new:hover .card-overlay {
-    background: linear-gradient(0deg, rgba(17, 19, 23, 0.95) 0%, rgba(17, 19, 23, 0.75) 40%, transparent 70%);
-}
-
-.profile-card-new .card-info h3 {
-    font-weight: 800;
-    font-size: 1.25rem; /* 20px */
-    color: #fff;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-    line-height: 1.3;
-}
-
-.profile-card-new .card-info p {
-    font-weight: 500;
-    color: #e5e7eb; /* สีเทาอ่อน */
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
-    margin-top: 0.25rem;
-    opacity: 0.9;
-}
-
-
-/* 3. ระบบ Badges สำหรับสถานะและป้ายแนะนำ
-------------------------------------------------------------------- */
-/* สไตล์พื้นฐานสำหรับ Badge สถานะ (ใช้ .availability-badge จาก css เดิม) */
-.availability-badge {
-    display: inline-block;
-    padding: 0.3rem 0.8rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border: 1px solid;
-    /* เพิ่ม backdrop-filter เพื่อความสวยงาม */
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
-/* สีสำหรับสถานะต่างๆ (ใช้ .status-[type] จาก css เดิม) */
-.availability-badge.status-available {
-    background-color: hsl(var(--primary) / 0.15);
-    color: hsl(var(--primary));
-    border-color: hsl(var(--primary) / 0.4);
-    text-shadow: 0 0 5px hsl(var(--primary-glow) / 0.5);
-}
-
-.availability-badge.status-busy {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.4);
-}
-
-.availability-badge.status-inquire {
-    background-color: rgba(250, 204, 21, 0.15);
-    color: #f59e0b;
-    border-color: rgba(250, 204, 21, 0.4);
-}
-
-/* สไตล์สำหรับป้าย "แนะนำ" ให้ดูพรีเมียม */
-.featured-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 9999px;
-    color: #fff;
-    background: linear-gradient(135deg, hsl(var(--primary-glow)), hsl(var(--primary)));
-    border: 1px solid hsl(var(--primary-glow) / 0.5);
-    box-shadow: 0 0 15px -2px hsl(var(--primary-glow) / 0.7);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
-
-/* 4. สไตล์สำหรับ Section Headers (จังหวัดและผลการค้นหา)
-------------------------------------------------------------------- */
-/* ใช้ .section-content-wrapper จาก css เดิม แต่ปรับปรุงให้เป็น Glassmorphism */
-.section-content-wrapper {
-    background-color: hsl(var(--card) / 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: 0 8px 32px 0 hsl(var(--foreground) / 0.08);
-    border-radius: 1.5rem;
-    margin-bottom: 2.5rem; /* เพิ่มระยะห่างระหว่าง Section */
-}
-
-/* สไตล์สำหรับหัวข้อ H3 ที่สร้างจาก JS */
-.province-section-header,
-.search-results-header {
-    font-size: clamp(1.5rem, 4vw, 1.75rem); /* Responsive font size */
-    font-weight: 800;
-    background: linear-gradient(120deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 10px hsl(var(--primary-glow) / 0.1);
-    margin-bottom: 0.25rem; /* ลดระยะห่างด้านล่าง H3 */
-}
-
-/* ป้ายนับจำนวนโปรไฟล์ */
-.profile-count-badge {
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.2rem 0.6rem;
-    border-radius: 9999px;
-    background-color: hsl(var(--muted));
-    color: hsl(var(--muted-foreground));
-    border: 1px solid hsl(var(--border));
-}
-
-/* ตัวเลขไฮไลท์ในผลการค้นหา */
-.search-count-highlight {
-    font-weight: 700;
-    font-size: 1.1em;
-    color: hsl(var(--primary));
-    text-shadow: 0 0 8px hsl(var(--primary-glow) / 0.5);
-    margin: 0 0.25rem;
-}
-/* Lightbox Upgraded UI */
-#lightbox-content-wrapper-el {
-  background: linear-gradient(180deg, #fff 0%, #fdf7ff 100%);
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  max-width: 500px;
-  margin: auto;
-  font-family: "Prompt", system-ui, sans-serif;
-}
-
-/* ชื่อ */
-#lightbox-profile-name-main {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #ff4081;
-  text-align: center;
-  margin-bottom: 6px;
-}
-#lightboxQuote {
-  text-align: center;
-  font-style: italic;
-  font-size: 1rem;
-  color: #666;
-  margin-bottom: 16px;
-}
-
-/* สถานะ */
-.availability-badge-upgraded {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 0 auto 16px;
-  text-align: center;
-}
-.status-available { background: #e6f9f0; color: #16a34a; }
-.status-busy { background: #fde8e8; color: #dc2626; }
-.status-inquire { background: #fff9e6; color: #d97706; }
-
-#lightboxHeroImage {
-  width: 100vw;
-  height: 100vh;
-  object-fit: contain;
-  border-radius: 16px;
-  margin: 0 auto 16px auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-/* thumbnail strip ใช้ flex ให้เลื่อนซ้ายขวาได้ */
-#lightboxThumbnailStrip {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-}
-
-/* thumbnail รูปเล็ก */
-#lightboxThumbnailStrip .thumbnail {
-  width: 60px;
-  height: 80px;
+/* Profile Image */
+.profile-card img {
+  width: 100%;
+  height: 14rem; /* h-56 */
   object-fit: cover;
-  border-radius: 10px;
-  opacity: 0.7;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.5s ease;
 }
 
-#lightboxThumbnailStrip .thumbnail.active,
-#lightboxThumbnailStrip .thumbnail:hover {
-  opacity: 1;
+.profile-card img:hover {
   transform: scale(1.05);
 }
 
-/* Tags */
-#lightboxTags {
-  margin: 14px 0;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.tag-badge {
-  background: #f0f0ff;
-  color: #4f46e5;
-  font-size: 0.8rem;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 500;
-}
-
-/* Details Grid */
-.details-grid-upgraded {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-  text-align: center;
-}
-.details-grid-upgraded .label {
-  font-size: 0.85rem;
-  color: #666;
-}
-.details-grid-upgraded .value {
-  font-weight: 600;
-  font-size: 1rem;
-  color: #222;
-}
-
-/* Details List */
-.detail-list-upgraded {
+/* Overlay */
+.profile-overlay {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: flex-end;
+  padding: 1.25rem;
+  background: linear-gradient(to top,
+    rgba(0,0,0,1) 0%, 
+    rgba(0,0,0,0.7) 40%, 
+    transparent 80%);
+  transition: background 0.3s ease;
 }
-.detail-item-list {
+
+/* Name */
+.profile-name {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.9);
+}
+
+.profile-name .profile-age {
+  font-size: 1rem;
+  color: #ff99cc;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* Tagline */
+.profile-tagline {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fbcfe8;
+  opacity: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* Location */
+.profile-location {
+  font-size: 0.95rem;
+  color: #e5e7eb;
   display: flex;
   align-items: center;
-  background: #fafafa;
-  padding: 10px 14px;
-  border-radius: 12px;
-}
-.detail-item-list-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
-  color: #7c3aed;
-}
-.detail-item-list .value {
-  font-size: 0.95rem;
-  color: #333;
+  gap: 0.4rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
-/* Description */
-#lightboxDescriptionVal {
-  margin: 20px 0;
-  line-height: 1.6;
-  color: #444;
-  font-size: 0.95rem;
+.profile-location i {
+  color: #ff7f99;
+  font-size: 1rem;
 }
 
-/* ปุ่ม LINE */
-.btn-line-shared-upgraded {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 14px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  border-radius: 12px;
-  text-decoration: none;
-  background: linear-gradient(90deg, #06c755 0%, #00d95f 100%);
-  box-shadow: 0 4px 10px rgba(6, 199, 85, 0.4);
-  transition: all 0.3s ease;
-}
-.btn-line-shared-upgraded:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(6, 199, 85, 0.6);
-}
-/* ================================================================
-   GLOBAL HEADINGS & TEXT
-================================================================ */
-h1.text-primary, h2.text-primary, h3.text-primary {
-  text-shadow: 0 0 25px hsl(var(--primary-glow) / 0.5),
-               0 0 5px hsl(var(--primary-glow) / 0.7);
-}
-.title-accent {
-  text-shadow: 0 0 20px hsl(var(--secondary-glow) / 0.5);
-}
-h2 {
-  font-family: "Prompt", "Inter", sans-serif;
-  font-weight: 700;
-  font-size: 1.75rem;
-  line-height: 1.25;
-  color: #b8860b;
-}
-@media (max-width: 768px) {
-  h2 { font-size: 1.5rem; }
+/* Footer */
+.profile-footer {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  border-top: 1px solid rgba(209, 213, 219, 0.5);
+  padding-top: 0.5rem;
 }
 
-/* ================================================================
-   HERO SECTION + SEARCH FORM (รวม pro-search + hero-form)
-================================================================ */
-#pro-search-form, #hero-form, #search-section {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  backdrop-filter: blur(12px) saturate(120%);
-  transition: all 0.35s ease;
+.dark .profile-footer {
+  color: #d1d5db;
+  border-top-color: rgba(209,213,219,0.3);
 }
-#pro-search-form:hover, #hero-form:hover, #search-section:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 35px rgba(0,0,0,0.18);
-}
-#pro-search-form input, #hero-form input, #search-section input,
-#pro-search-form select, #hero-form select, #search-section select {
-  background: rgba(255,255,255,0.95);
-  border: 1px solid hsl(var(--border));
-  border-radius: 999px;
-  padding: 0.9rem 1.25rem;
-  font-size: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
-}
-#pro-search-form input:focus, #hero-form input:focus, #search-section input:focus,
-#pro-search-form select:focus, #hero-form select:focus, #search-section select:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(236,72,153,0.5);
-  transform: scale(1.02);
-}
-#keyword-search-btn {
-  background: linear-gradient(90deg, #ec4899, #8b5cf6);
-  border: none;
-  border-radius: 999px;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: all 0.3s ease;
-}
-#keyword-search-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-}
-#reset-search-btn {
-  background: rgba(229, 231, 235, 0.9);
-  border-radius: 999px;
-  transition: all 0.3s ease;
-}
-#reset-search-btn:hover {
-  background: rgba(209, 213, 219, 1);
-  transform: scale(1.05);
-}
+
 
 /* ================================================================
    LIGHTBOX (รวม + ลบซ้ำ)
@@ -2776,359 +2310,6 @@ h2 {
   box-shadow: 0 10px 30px -8px rgba(6,199,85,0.7);
 }
 .btn-line-shared-upgraded svg { width: 1.25rem; height: 1.25rem; }
-
-/* ================================================================
-   SOCIAL MEDIA SECTION (Clean & Unified)
-================================================================ */
-.social-media-section {
-  margin-top: 60px;
-  padding: 20px 0;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(8px);
-  text-align: center;
-}
-.social-section-header h2 {
-  font-size: clamp(20px, 2.5vw, 36px);
-  font-weight: 800;
-  background: linear-gradient(90deg, #ffd700, #ffb700, #ffdd55);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  margin-bottom: 8px;
-}
-.social-section-header p {
-  font-size: clamp(14px, 2vw, 18px);
-  color: #000;
-  text-shadow: 0 0 2px rgba(0,0,0,0.4);
-  margin: 0 auto;
-  max-width: 600px;
-}
-.social-disclaimer {
-  margin-top: 20px;
-  font-size: 14px;
-  color: #b71c1c;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  text-align: center;
-  line-height: 1.5;
-}
-.social-disclaimer i { color: #b71c1c; }
-.social-marquee-wrap {
-  position: relative; overflow: hidden; cursor: grab;
-  padding: 20px 0; margin-top: 20px; user-select: none;
-}
-.social-marquee-wrap:active { cursor: grabbing; }
-.social-marquee {
-  display: flex; gap: 20px; white-space: nowrap; will-change: transform;
-}
-.social-item {
-  flex: 0 0 auto; width: 60px; height: 60px;
-  border-radius: 50%; color: white; font-size: 12px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: transform 0.3s ease;
-}
-.social-item i { font-size: 24px; margin-bottom: 4px; }
-.social-item:hover {
-  transform: rotate(360deg) scale(1.1);
-  transition: transform 0.6s ease;
-}
-.social-item:hover i { filter: drop-shadow(0 0 6px currentColor); }
-
-/* Brand Colors */
-.fb { background:#1877f2; }
-.line { background:#06c755; }
-.tiktok { background:linear-gradient(135deg,#000 40%,#ff0050 100%); }
-.twitter { background:#1da1f2; }
-.ig { background:radial-gradient(circle at 30% 107%, #fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%); }
-.linktree { background: linear-gradient(to right,#20c997,#107c6f); }
-.bluesky { background: linear-gradient(to right,#3b82f6,#2563eb); }
-
-/* ================================================================
-   BASE STYLES
-================================================================ */
-body {
-  font-family: var(--font-base);
-  color: hsl(var(--foreground));
-  background-color: hsl(var(--background));
-  transition: background-color var(--transition-medium), color var(--transition-medium);
-}
-/* Animations */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-fadeInUp { animation: fadeInUp 0.6s ease-in-out forwards; }
-.animate-fadeIn { animation: fadeIn 0.6s ease-in-out forwards; }
-
-/* ============================== */
-/* ADVANCED TYPOGRAPHY OPTIMIZATION */
-/* ============================== */
-
-/* H2: Section Heading */
-#featured-heading,
-#all-profiles-heading {
-  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.2rem);
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  color: hsl(330, 50%, 20%);
-  margin-bottom: 0.75rem;
-}
-
-.dark #featured-heading,
-.dark #all-profiles-heading {
-  color: hsl(330, 40%, 90%);
-}
-
-/* Province Highlight in Heading */
-#featured-heading .province,
-#all-profiles-heading .province {
-  color: hsl(330, 65%, 45%);
-  font-weight: 900;
-}
-
-/* H3: Sub-heading */
-.featured-sub {
-  font-size: clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
-  font-weight: 600;
-  color: hsl(330, 45%, 35%);
-  margin-bottom: 0.75rem;
-}
-
-.dark .featured-sub {
-  color: hsl(330, 40%, 80%);
-}
-
-/* Paragraph Descriptions */
-.featured-desc,
-.all-desc {
-  font-size: clamp(0.95rem, 0.85rem + 0.4vw, 1.1rem);
-  line-height: 1.7;
-  max-width: 65ch;
-  margin-left: auto;
-  margin-right: auto;
-  color: hsl(330, 20%, 25%);
-}
-
-.dark .featured-desc,
-.dark .all-desc {
-  color: hsl(330, 20%, 85%);
-}
-
-/* Highlight Text Inside Paragraphs */
-.featured-desc strong,
-.all-desc strong {
-  color: hsl(330, 65%, 40%);
-  font-weight: 700;
-}
-
-.dark .featured-desc strong,
-.dark .all-desc strong {
-  color: hsl(330, 70%, 70%);
-}
-
-.all-desc .highlight {
-  color: hsl(330, 80%, 45%);
-  font-weight: 800;
-}
-
-.dark .all-desc .highlight {
-  color: hsl(330, 75%, 75%);
-}
-
-/* =================================================================== */
-/* 1. SECTION & HEADING STYLES */
-/* =================================================================== */
-
-/* H3 Sub-heading and province repeated fix removed (already declared above) */
-
-/* =================================================================== */
-/* 2. PROFILE CARD DETAILS (Overlay, Name, Tagline, Location) */
-/* =================================================================== */
-
-/* Profile Card */
-.profile-card {
-  position: relative;
-  border-radius: 1rem; /* rounded-2xl */
-  overflow: hidden;
-  background-color: rgba(255,255,255,0.9);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  backdrop-filter: blur(6px);
-  transition: transform 0.3s ease;
-}
-
-.dark .profile-card {
-  background-color: rgba(31, 41, 55, 0.8); /* gray-800/80 */
-}
-
-/* Profile Image */
-.profile-card img {
-  width: 100%;
-  height: 14rem; /* h-56 */
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.profile-card img:hover {
-  transform: scale(1.05);
-}
-
-/* Overlay */
-.profile-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1.25rem;
-  background: linear-gradient(to top,
-    rgba(0,0,0,1) 0%, 
-    rgba(0,0,0,0.7) 40%, 
-    transparent 80%);
-  transition: background 0.3s ease;
-}
-
-/* Name */
-.profile-name {
-  font-size: 1.6rem;
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 0 4px 15px rgba(0,0,0,0.9);
-}
-
-.profile-name .profile-age {
-  font-size: 1rem;
-  color: #ff99cc;
-  font-weight: 700;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-}
-
-/* Tagline */
-.profile-tagline {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #fbcfe8;
-  opacity: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-}
-
-/* Location */
-.profile-location {
-  font-size: 0.95rem;
-  color: #e5e7eb;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-}
-
-.profile-location i {
-  color: #ff7f99;
-  font-size: 1rem;
-}
-
-/* Footer */
-.profile-footer {
-  margin-top: 0.75rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  border-top: 1px solid rgba(209, 213, 219, 0.5);
-  padding-top: 0.5rem;
-}
-
-.dark .profile-footer {
-  color: #d1d5db;
-  border-top-color: rgba(209,213,219,0.3);
-}
-
-/* =================================================================== */
-/* 3. BADGES (Status & Featured) */
-/* =================================================================== */
-
-.availability-badge {
-  padding: 0.4rem 0.85rem;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-}
-
-.status-available {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
-  color: #fff;
-  animation: pulse 1.5s infinite;
-  box-shadow: 0 4px 12px rgba(34,197,94,0.7);
-}
-
-.status-unavailable {
-  background: linear-gradient(135deg, #dc2626, #ef4444);
-  color: #fff;
-}
-
-.status-break {
-  background: linear-gradient(135deg, #f59e0b, #facc15);
-  color: #000;
-  box-shadow: 0 4px 12px rgba(245,158,11,0.7);
-}
-
-.status-default {
-  background: #6b7280;
-  color: #fff;
-}
-
-.featured-badge {
-  background: linear-gradient(135deg, #facc15, #fbbf24);
-  color: #000;
-  font-size: 0.8rem;
-  font-weight: 800;
-  padding: 0.4rem 0.85rem;
-  border-radius: 9999px;
-  box-shadow: 0 0 16px rgba(251,191,36,0.9);
-}
-
-/* =================================================================== */
-/* 4. UTILITY & DETAIL STYLES */
-/* =================================================================== */
-
-/* Lightbox backdrop */
-#lightbox {
-  backdrop-filter: blur(10px);
-  background: rgba(0,0,0,0.75);
-}
-
-/* Hero image */
-.hero-image-main {
-  max-height: 80vh;
-  object-fit: cover;
-  border-radius: 0.75rem;
-}
-
-/* Lightbox availability badge */
-#lightbox-availability-badge-wrapper .availability-badge {
-  font-size: 0.95rem;
-  font-weight: 800;
-  padding: 0.5rem 1.1rem;
-  border-radius: 9999px;
-  text-transform: uppercase;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-}
-
-/* Detail section title */
-.detail-section-title {
-  font-size: 1.1rem;
-  font-weight: 900;
-  border-left: 5px solid #ec4899;
-  padding-left: 0.7rem;
-}
-
 
 
 /* ===================== FIXES & IMPROVEMENTS ===================== */
@@ -3312,6 +2493,31 @@ a:hover, button:hover {
 }
 
 
+/* =========================
+   AVAILABILITY BADGE
+   ========================= */
+.availability-badge {
+  display: inline-block;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.availability-online {
+  background-color: #16a34a;
+  color: #fff;
+}
+.availability-busy {
+  background-color: #eab308;
+  color: #111;
+}
+.availability-offline {
+  background-color: #dc2626;
+  color: #fff;
+}
 
 /* =========================
    PROFILE CARD TEXT
@@ -3450,7 +2656,50 @@ a:hover, button:hover {
 
 
 
+/* ============================= */
+/* PROFILE STATUS BADGES          */
+/* ============================= */
+.status-badge {
+  display: inline-block;
+  padding: .4rem .9rem;
+  border-radius: 9999px;
+  font-size: .85rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+.status-active { background: linear-gradient(135deg,#22c55e,#16a34a); }
+.status-busy   { background: linear-gradient(135deg,#f59e0b,#d97706); }
+.status-off    { background: linear-gradient(135deg,#ef4444,#dc2626); }
 
+
+/* ============================= */
+/* LIGHTBOX FIX                   */
+/* ============================= */
+.lightbox img,
+#lightbox img,
+.lightbox-content img {
+  width: 100%;
+  height: auto;
+  max-height: 95vh;
+  object-fit: contain;
+  border-radius: .75rem;
+  box-shadow: 0 15px 40px rgba(0,0,0,.4);
+}
+.lightbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.85);
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  padding: 1rem;
+}
+.lightbox-content {
+  max-width: 90%;
+  max-height: 95%;
+}
 /* =========================================================
    ปรับโครงสร้างการ์ดโปรไฟล์ (Profile Card - Improved)
    ========================================================= */
@@ -3670,4 +2919,57 @@ a:hover, button:hover {
 
 .view-more-btn:hover svg {
   transform: translateX(4px);
+}
+/* 3. ระบบ Badges สำหรับสถานะและป้ายแนะนำ
+------------------------------------------------------------------- */
+/* สไตล์พื้นฐานสำหรับ Badge สถานะ (ใช้ .availability-badge จาก css เดิม) */
+.availability-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+    /* เพิ่ม backdrop-filter เพื่อความสวยงาม */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* สีสำหรับสถานะต่างๆ (ใช้ .status-[type] จาก css เดิม) */
+.availability-badge.status-available {
+    background-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.4);
+    text-shadow: 0 0 5px hsl(var(--primary-glow) / 0.5);
+}
+
+.availability-badge.status-busy {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.availability-badge.status-inquire {
+    background-color: rgba(250, 204, 21, 0.15);
+    color: #f59e0b;
+    border-color: rgba(250, 204, 21, 0.4);
+}
+
+/* สไตล์สำหรับป้าย "แนะนำ" ให้ดูพรีเมียม */
+.featured-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 9999px;
+    color: #fff;
+    background: linear-gradient(135deg, hsl(var(--primary-glow)), hsl(var(--primary)));
+    border: 1px solid hsl(var(--primary-glow) / 0.5);
+    box-shadow: 0 0 15px -2px hsl(var(--primary-glow) / 0.7);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }

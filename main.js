@@ -518,9 +518,12 @@ async function main() {
 function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     const currentPage = dom.body.dataset.page;
-    dom.profilesDisplayArea.innerHTML = '';
-    dom.noResultsMessage.classList.add('hidden');
 
+    // เคลียร์พื้นที่ก่อนแสดงผลใหม่
+    dom.profilesDisplayArea.innerHTML = '';
+    if (dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
+
+    // ✅ จัดการ Section แนะนำ (Featured)
     if (dom.featuredSection) {
         const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
@@ -533,6 +536,7 @@ function renderProfiles(filteredProfiles, isSearching) {
         }
     }
 
+    // ❌ กรณีไม่มีผลลัพธ์
     if (filteredProfiles.length === 0) {
         if (currentPage === 'home' || currentPage === 'profiles') {
             dom.noResultsMessage.classList.remove('hidden');
@@ -541,16 +545,70 @@ function renderProfiles(filteredProfiles, isSearching) {
         return;
     }
 
+    // 🧩 หน้ารวมโปรไฟล์ (profiles.html)
     if (currentPage === 'profiles') {
-        const gridContainer = document.createElement('div');
-        gridContainer.className = 'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
-        gridContainer.append(...filteredProfiles.map(createProfileCard));
-        dom.profilesDisplayArea.appendChild(gridContainer);
-    } else if (currentPage === 'home') {
         if (isSearching) {
+            // กรณีมีการค้นหา → แสดงผลรวม (ไม่แยกจังหวัด)
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
+            gridContainer.append(...filteredProfiles.map(createProfileCard));
+            dom.profilesDisplayArea.appendChild(gridContainer);
+        } else {
+            // ✅ แยกจังหวัดพร้อมหัวข้อจังหวัด (เหมือนหน้าแรก)
+            const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
+                (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
+                return acc;
+            }, {});
+
+            const sortedProvinceKeys = [...Object.keys(profilesByProvince)].sort((a, b) => {
+                const nameA = provincesMap.get(a) || '';
+                const nameB = provincesMap.get(b) || '';
+                return nameA.localeCompare(nameB, 'th');
+            });
+
+            sortedProvinceKeys.forEach(provinceKey => {
+                if (!provinceKey) return;
+                const provinceProfiles = profilesByProvince[provinceKey];
+                const provinceName = provincesMap.get(provinceKey) || 'ไม่ระบุจังหวัด';
+
+                // 🧱 สร้าง Section จังหวัด (SEO Friendly)
+                const sectionEl = document.createElement('section');
+                sectionEl.className = 'province-section space-y-4 py-6 md:py-8 border-b border-gray-100 dark:border-gray-800';
+                sectionEl.setAttribute('data-animate-on-scroll', '');
+                sectionEl.setAttribute('aria-label', `จังหวัด ${provinceName}`);
+
+                // 🏷️ หัวข้อจังหวัด (SEO H2)
+                const heading = document.createElement('h2');
+                heading.className = 'text-xl md:text-2xl font-bold text-pink-600 dark:text-pink-400 tracking-wide';
+                heading.textContent = `จังหวัด${provinceName}`;
+                sectionEl.appendChild(heading);
+
+                // 🧍‍♀️ แสดงการ์ดโปรไฟล์ของจังหวัดนี้
+                const grid = document.createElement('div');
+                grid.className = 'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
+                grid.append(...provinceProfiles.map(createProfileCard));
+                sectionEl.appendChild(grid);
+
+                // 🔗 ปุ่ม “ดูทั้งหมดในจังหวัดนี้” (ลิงก์ SEO-friendly)
+                const viewMoreLink = document.createElement('a');
+                viewMoreLink.href = `/profiles.html?province=${provinceKey}`;
+                viewMoreLink.className = 'block mt-3 text-sm font-medium text-pink-500 hover:text-pink-600 hover:underline transition-colors';
+                viewMoreLink.textContent = `ดูทั้งหมดในจังหวัด${provinceName}`;
+                sectionEl.appendChild(viewMoreLink);
+
+                dom.profilesDisplayArea.appendChild(sectionEl);
+            });
+        }
+    }
+
+    // 🏠 หน้าแรก (index.html)
+    else if (currentPage === 'home') {
+        if (isSearching) {
+            // กรณีค้นหา → แสดงผลรวม
             const searchResultWrapper = createSearchResultSection(filteredProfiles);
             dom.profilesDisplayArea.appendChild(searchResultWrapper);
         } else {
+            // ✅ แยกโปรไฟล์ตามจังหวัด (เฉพาะหน้าแรก)
             const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
                 (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
                 return acc;
@@ -559,6 +617,7 @@ function renderProfiles(filteredProfiles, isSearching) {
             const urlParams = new URLSearchParams(window.location.search);
             const priorityLocation = urlParams.get('location');
             let dynamicProvinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
+
             if (priorityLocation && dynamicProvinceOrder.includes(priorityLocation)) {
                 dynamicProvinceOrder = [priorityLocation, ...dynamicProvinceOrder.filter(pKey => pKey !== priorityLocation)];
             }
@@ -572,158 +631,173 @@ function renderProfiles(filteredProfiles, isSearching) {
             });
         }
     }
+
+    // ✨ รีเฟรชแอนิเมชัน scroll
     initScrollAnimations();
 }
 
 function createProfileCard(profile = {}) {
-    // 🧱 Container หลัก
-    const card = document.createElement('div');
-    card.className = 'profile-card-new-container';
+  // 🧱 Container หลัก
+  const card = document.createElement("div");
+  card.className = "profile-card-new-container";
 
-    // 🩶 กล่องหลักของการ์ด
-    const cardInner = document.createElement('div');
-    cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl';
-    cardInner.setAttribute('data-profile-id', profile.id || '');
-    cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
-    cardInner.setAttribute('role', 'button');
-    cardInner.setAttribute('tabindex', '0');
+  // 🩶 กล่องหลักของการ์ด
+  const cardInner = document.createElement("div");
+  cardInner.className =
+    "profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.015]";
+  cardInner.setAttribute("data-profile-id", profile.id || "");
+  cardInner.setAttribute("aria-label", `ดูโปรไฟล์ของ ${profile.name || "ไม่ระบุชื่อ"}`);
+  cardInner.setAttribute("role", "button");
+  cardInner.setAttribute("tabindex", "0");
 
-    // 🖼️ ข้อมูลภาพหลัก (พร้อม fallback)
-    const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
-        src: '/images/placeholder-profile.webp',
-        alt: profile.name || 'profile',
-        width: 600,
-        height: 800
-    };
+  // 🖼️ ข้อมูลภาพหลัก
+  const mainImage = (profile.images && profile.images[0]) || {
+    src: "/images/placeholder-profile.webp",
+    alt: profile.name || "profile",
+    width: 600,
+    height: 800,
+  };
 
-    const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
+  const baseUrl = mainImage.src?.split("?")[0] || "/images/placeholder-profile.webp";
 
-    // 🧠 Responsive Image (ขั้นสูง)
-    const img = document.createElement('img');
-    img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
+  // ✅ ฟังก์ชันสร้าง URL ที่เหมาะสมจาก CDN Supabase
+  const getOptimizedSrc = (url, width, quality = 70) =>
+    `${url}?width=${width}&quality=${quality}&format=webp`;
 
-    img.src = `${baseUrl}?width=400&quality=80`;
-    img.srcset = `
-      ${baseUrl}?width=150&quality=70 150w,
-      ${baseUrl}?width=250&quality=75 250w,
-      ${baseUrl}?width=600&quality=80 600w
-    `.trim();
-    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
-    img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
-    img.loading = 'lazy';
-    img.decoding = 'async';
+  // 🧠 Responsive Image (ขั้นสูงสุด)
+  const img = document.createElement("img");
+  img.className = "card-image w-full h-auto object-cover aspect-[3/4] rounded-2xl bg-gray-100";
 
-    img.width = mainImage.width || 600;
-    img.height = mainImage.height || 800;
-    img.style.display = 'block';
-    img.style.width = '100%';
-    img.style.aspectRatio = '3 / 4';
-    img.style.backgroundColor = '#f3f3f3';
+  img.src = getOptimizedSrc(baseUrl, 400, 75);
+  img.srcset = `
+    ${getOptimizedSrc(baseUrl, 150, 65)} 150w,
+    ${getOptimizedSrc(baseUrl, 300, 70)} 300w,
+    ${getOptimizedSrc(baseUrl, 600, 75)} 600w,
+    ${getOptimizedSrc(baseUrl, 900, 80)} 900w
+  `.trim();
+  img.sizes = "(max-width: 640px) 150px, (max-width: 1024px) 300px, 600px";
 
-    img.onerror = function() {
+  img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || "ไม่ระบุชื่อ"}`;
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.width = mainImage.width || 600;
+  img.height = mainImage.height || 800;
+  img.style.aspectRatio = "3 / 4";
+  img.style.backgroundColor = "#f3f3f3";
+
+  img.onerror = function () {
+    this.onerror = null;
+    this.src = "/images/placeholder-profile.webp";
+    this.srcset = "";
+  };
+
+  cardInner.appendChild(img);
+
+  // ✅ แสดงภาพทั้งหมด (Gallery)
+  if (Array.isArray(profile.images) && profile.images.length > 1) {
+    const gallery = document.createElement("div");
+    gallery.className =
+      "profile-gallery grid grid-cols-3 gap-2 p-2 bg-white/30 backdrop-blur-sm";
+
+    profile.images.forEach((image, i) => {
+      const thumbBase = image.src?.split("?")[0] || "/images/placeholder-profile.webp";
+      const imgThumb = document.createElement("img");
+      imgThumb.src = getOptimizedSrc(thumbBase, 150, 65);
+      imgThumb.srcset = `
+        ${getOptimizedSrc(thumbBase, 150, 65)} 150w,
+        ${getOptimizedSrc(thumbBase, 300, 70)} 300w
+      `.trim();
+      imgThumb.sizes = "(max-width: 640px) 150px, 300px";
+      imgThumb.alt = image.alt || `รูปที่ ${i + 1} ของ ${profile.name || "ไม่ระบุชื่อ"}`;
+      imgThumb.loading = "lazy";
+      imgThumb.decoding = "async";
+      imgThumb.width = 150;
+      imgThumb.height = 200;
+      imgThumb.className =
+        "rounded-md w-full h-auto object-cover aspect-[3/4] transition-transform duration-200 hover:scale-[1.03]";
+      imgThumb.onerror = function () {
         this.onerror = null;
-        this.src = '/images/placeholder-profile.webp';
-        this.srcset = '';
-    };
-
-    cardInner.appendChild(img);
-
-    // ✅ แสดงรูปภาพทั้งหมดพร้อม alt (All Tags Gallery)
-    if (Array.isArray(profile.images) && profile.images.length > 1) {
-        const gallery = document.createElement('div');
-        gallery.className = 'profile-gallery grid grid-cols-3 gap-2 p-2';
-
-        profile.images.forEach((image, i) => {
-            const imgThumb = document.createElement('img');
-            const thumbBase = image.src?.split('?')[0] || '/images/placeholder-profile.webp';
-            imgThumb.src = `${thumbBase}?width=150&quality=70`;
-            imgThumb.alt = image.alt || `รูปที่ ${i + 1} ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
-            imgThumb.loading = 'lazy';
-            imgThumb.decoding = 'async';
-            imgThumb.width = image.width || 150;
-            imgThumb.height = image.height || 200;
-            imgThumb.className = 'rounded-md w-full h-auto object-cover aspect-[3/4] bg-gray-100';
-
-            imgThumb.onerror = function () {
-                this.onerror = null;
-                this.src = '/images/placeholder-profile.webp';
-            };
-
-            gallery.appendChild(imgThumb);
-        });
-
-        cardInner.appendChild(gallery);
-    }
-
-    // 🎖️ Badge container (สถานะ + featured)
-    const badges = document.createElement('div');
-    badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
-
-    const availSpan = document.createElement('span');
-    let statusClass = 'status-inquire';
-    switch (profile.availability) {
-        case 'ว่าง':
-            statusClass = 'status-available';
-            break;
-        case 'ไม่ว่าง':
-            statusClass = 'status-busy';
-            break;
-        case 'รอคิว':
-            statusClass = 'status-inquire';
-            break;
-    }
-    availSpan.className = `availability-badge ${statusClass}`;
-    availSpan.textContent = profile.availability || 'สอบถามคิว';
-    badges.appendChild(availSpan);
-
-    if (profile.isfeatured) {
-        const feat = document.createElement('span');
-        feat.className = 'featured-badge';
-        feat.innerHTML = `<i class="fas fa-star" style="font-size: 0.7em; margin-right: 4px;"></i> แนะนำ`;
-        badges.appendChild(feat);
-    }
-
-    cardInner.appendChild(badges);
-
-    // 💎 Overlay (พื้นกระจก)
-    const overlay = document.createElement('div');
-    overlay.className = 'card-overlay';
-
-    const info = document.createElement('div');
-    info.className = 'card-info';
-
-    const h3 = document.createElement('h3');
-    h3.className = 'text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow';
-    h3.textContent = profile.name || 'ไม่ระบุชื่อ';
-
-    const p = document.createElement('p');
-    p.className = 'text-sm flex items-center gap-1.5 text-white/90';
-    const provinceName = (typeof provincesMap !== 'undefined' && provincesMap.get)
-        ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
-        : 'ไม่ระบุ';
-    p.innerHTML = `<i class="fas fa-map-marker-alt" style="opacity: 0.8;"></i> ${provinceName}`;
-
-    info.appendChild(h3);
-    info.appendChild(p);
-    overlay.appendChild(info);
-    cardInner.appendChild(overlay);
-
-    // 🖱️ คลิกและคีย์บอร์ด event
-    const openProfile = () => {
-        console.log('เปิดโปรไฟล์:', profile.name);
-        // TODO: เพิ่มโค้ดเปิด modal / ไปหน้าโปรไฟล์จริงได้ที่นี่
-    };
-
-    cardInner.addEventListener('click', openProfile);
-    cardInner.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openProfile();
-        }
+        this.src = "/images/placeholder-profile.webp";
+      };
+      gallery.appendChild(imgThumb);
     });
 
-    card.appendChild(cardInner);
-    return card;
+    cardInner.appendChild(gallery);
+  }
+
+  // 🎖️ Badge container (สถานะ + featured)
+  const badges = document.createElement("div");
+  badges.className = "absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10";
+
+  const availSpan = document.createElement("span");
+  let statusClass = "status-inquire";
+  switch (profile.availability) {
+    case "ว่าง":
+      statusClass = "status-available";
+      break;
+    case "ไม่ว่าง":
+      statusClass = "status-busy";
+      break;
+    case "รอคิว":
+      statusClass = "status-inquire";
+      break;
+  }
+  availSpan.className = `availability-badge ${statusClass} text-xs sm:text-sm`;
+  availSpan.textContent = profile.availability || "สอบถามคิว";
+  badges.appendChild(availSpan);
+
+  if (profile.isfeatured) {
+    const feat = document.createElement("span");
+    feat.className =
+      "featured-badge text-xs sm:text-sm bg-yellow-500/90 text-white px-2 py-0.5 rounded-md shadow";
+    feat.innerHTML = `<i class="fas fa-star mr-1 text-[0.8em]"></i> แนะนำ`;
+    badges.appendChild(feat);
+  }
+
+  cardInner.appendChild(badges);
+
+  // 💎 Overlay (พื้นกระจก)
+  const overlay = document.createElement("div");
+  overlay.className =
+    "card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300";
+
+  const info = document.createElement("div");
+  info.className = "card-info";
+
+  const h3 = document.createElement("h3");
+  h3.className =
+    "text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow-md";
+  h3.textContent = profile.name || "ไม่ระบุชื่อ";
+
+  const p = document.createElement("p");
+  p.className = "text-sm flex items-center gap-1.5 text-white/90";
+  const provinceName =
+    typeof provincesMap !== "undefined" && provincesMap.get
+      ? provincesMap.get(profile.provinceKey) || "ไม่ระบุ"
+      : "ไม่ระบุ";
+  p.innerHTML = `<i class="fas fa-map-marker-alt opacity-80"></i> ${provinceName}`;
+
+  info.appendChild(h3);
+  info.appendChild(p);
+  overlay.appendChild(info);
+  cardInner.appendChild(overlay);
+
+  // 🖱️ คลิกและคีย์บอร์ด event
+  const openProfile = () => {
+    console.log("เปิดโปรไฟล์:", profile.name);
+    // TODO: เพิ่ม modal หรือ redirect
+  };
+
+  cardInner.addEventListener("click", openProfile);
+  cardInner.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openProfile();
+    }
+  });
+
+  card.appendChild(cardInner);
+  return card;
 }
 
 function createProvinceSection(key, name, provinceProfiles) {
