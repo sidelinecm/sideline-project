@@ -2969,3 +2969,12 @@ a:hover, button:hover {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
+.profile-card-new-container {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.profile-card-new {
+  transform: rotateY(0) rotateX(0) scale(1) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+}

@@ -525,7 +525,9 @@ function renderProfiles(filteredProfiles, isSearching) {
         const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
             dom.featuredContainer.innerHTML = '';
-            dom.featuredContainer.append(...featuredProfilesList.map(createProfileCard));
+            // เลือกแค่ 12 โปรไฟล์แรก
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 12);
+            dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
             dom.featuredSection.classList.remove('hidden');
             dom.featuredSection.setAttribute('data-animate-on-scroll', '');
         } else {
@@ -560,7 +562,7 @@ function renderProfiles(filteredProfiles, isSearching) {
             const priorityLocation = urlParams.get('location');
             let dynamicProvinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
             if (priorityLocation && dynamicProvinceOrder.includes(priorityLocation)) {
-                dynamicProvinceOrder = [priorityLocation, ...dynamicProvinceOrder.filter(pKey => pKey !== priorityLocation)];
+                dynamicProvinceOrder = [priorityLocation, ...dynamicProvinceOrder.filter(p => p !== priorityLocation)];
             }
 
             dynamicProvinceOrder.forEach(provinceKey => {

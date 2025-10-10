@@ -1,97 +1,69 @@
 <!doctype html>
 <html lang=th class="scroll-smooth light">
 <head>
-  <!-- Charset & Compatibility -->
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   
-  <!-- Responsive & Viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta charset=utf-8>
+  <meta http-equiv=X-UA-Compatible content="IE=edge">
   
-  <!-- SEO: Title & Description (ปรับ dynamic ได้ server-side) -->
+  
+  <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+  
+  
   <title>Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ ฟีลแฟน</title>
-  <meta name="description" content="แหล่งรวมน้องๆสาวๆ รับงาน ไซด์ไลน์เชียงใหม่ ตรงปก100% ฟีลแฟน ปลอดภัยไม่มีมัดจำ ชำระเงินหน้างาน โปรไฟล์เด็ด ติดต่อไลน์ทันที!" />
-  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/" />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name=description content="แหล่งรวมน้องๆสาวๆ รับงาน ไซด์ไลน์เชียงใหม่ ตรงปก100% ฟีลแฟน ปลอดภัยไม่มีมัดจำ ชำระเงินหน้างาน โปรไฟล์เด็ด ติดต่อไลน์ทันที!">
+  <link rel=canonical href=https://sidelinechiangmai.netlify.app/ >
+  <meta name=robots content="index, follow, max-image-preview:large">
   
-  <!-- Open Graph / Facebook -->
-  <meta property="og:locale" content="th_TH" />
-  <meta property="og:site_name" content="Sideline Chiangmai" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ ฟีลแฟน" />
-  <meta property="og:description" content="รวมสาวรับงานเชียงใหม่ตรงปก ฟิวแฟน อัปเดตใหม่ทุกวัน" />
-  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp" />
-  <meta property="og:url" content="https://sidelinechiangmai.netlify.app/" />
   
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta property=og:locale content=th_TH>
+  <meta property=og:site_name content="Sideline Chiangmai">
+  <meta property=og:type content=website>
+  <meta property=og:title content="Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ ฟีลแฟน">
+  <meta property=og:description content="รวมสาวรับงานเชียงใหม่ตรงปก ฟิวแฟน อัปเดตใหม่ทุกวัน">
+  <meta property=og:image content=https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp>
+  <meta property=og:url content=https://sidelinechiangmai.netlify.app/ >
   
-  <!-- Hreflang / Alternative Language -->
-  <link rel="alternate" hreflang="th" href="https://sidelinechiangmai.netlify.app/" />
   
-  <!-- Theme Colors -->
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)" />
+  <meta name=twitter:card content=summary_large_image>
   
-  <!-- Favicon & App Icons -->
-  <link rel="icon" href="/images/favicon.ico" sizes="any" />
-  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
-  <link rel="manifest" href="/manifest.webmanifest" />
   
-  <!-- Preconnect & DNS Prefetch -->
-  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin />
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel=alternate hreflang=th href=https://sidelinechiangmai.netlify.app/ >
   
-  <!-- Preload Critical Assets -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/styles.css" /></noscript>
   
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin />
+  <meta name=theme-color content=#ffffff media="(prefers-color-scheme: light)">
+  <meta name=theme-color content=#111827 media="(prefers-color-scheme: dark)">
   
-  <link rel="preload" 
-        href="/images/hero-sidelinechiangmai-1200.webp" 
-        as="image"
-        imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w"
-        imagesizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-        fetchpriority="high" />
   
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
+  <link rel=icon href=/images/favicon.ico sizes=any>
+  <link rel=icon href=/images/favicon.svg type=image/svg+xml>
+  <link rel=apple-touch-icon href=/images/apple-touch-icon.png>
+  <link rel=manifest href=/manifest.webmanifest>
   
-  <!-- Preload JS Module -->
-  <link rel="modulepreload" href="/main.js" />
   
-  <!-- Inline Critical CSS for Header (ลด FOUC) -->
- <style>
-.hero-h1-revised {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  text-align: center;
-}
-.hero-h1-revised h1 {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-}
-.hero-h1-revised img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: 1200px;
-  margin: 0 auto;
-  border-radius: 0.75rem;
-  aspect-ratio: 1200/904;
-}
-
-#page-header{min-height:56px}#page-header .container{height:56px;display:flex;align-items:center}#page-header a img{display:block;width:auto;height:28px;aspect-ratio:245/30}nav[aria-label="เมนูหลัก"] a{white-space:nowrap;display:inline-block}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
-  <!-- JSON-LD Structured Data -->
-  <script type="application/ld+json">
+  <link rel=preconnect href=https://hgzbgpbmymoiwjpaypvl.supabase.co crossorigin>
+  <link rel=preconnect href=https://cdnjs.cloudflare.com crossorigin>
+  <link rel=dns-prefetch href=//cdnjs.cloudflare.com>
+  <link rel=preconnect href=https://cdn.jsdelivr.net crossorigin>
+  
+  
+  <link rel=preload href=/styles.css as=style onload='this.onload=null,this.rel="stylesheet"'>
+  <noscript><link rel=stylesheet href=/styles.css></noscript>
+  
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-700.woff2 as=font type=font/woff2 crossorigin>
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-regular.woff2 as=font type=font/woff2 crossorigin>
+  
+  <link rel=preload href=/images/hero-sidelinechiangmai-1200.webp as=image imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px" fetchpriority=high>
+  
+  <link rel=preload href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'>
+  <noscript><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css></noscript>
+  
+  
+  <link rel=modulepreload href=/main.js>
+  
+  
+ <style>.hero-h1-revised{max-width:1200px;margin:0 auto;padding:2rem 1rem;text-align:center}.hero-h1-revised h1{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;line-height:1.2;margin-bottom:1rem}.hero-h1-revised img{display:block;width:100%;height:auto;max-width:1200px;margin:0 auto;border-radius:.75rem;aspect-ratio:1200/904}#page-header{min-height:56px}#page-header .container{height:56px;display:flex;align-items:center}#page-header a img{display:block;width:auto;height:28px;aspect-ratio:245/30}nav[aria-label="เมนูหลัก"] a{white-space:nowrap;display:inline-block}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
+  
+  <script type=application/ld+json>
   {
     "@context": "https://schema.org",
     "@graph": [
@@ -154,8 +126,8 @@
   <div class="container mx-auto px-6 h-14 flex items-center justify-between">
     
     <a href=/ aria-label="กลับไปหน้าแรก SidelineChiangmai">
-<!-- ✅ โลโก้ตรงสัดส่วน -->
-<img src=/images/logo-sidelinechiangmai.webp srcset="/images/logo-sidelinechiangmai@2x.webp 2x" alt="โลโก้ Sideline Chiang Mai" width=245 height=30 class="h-[30px] w-auto mx-auto md:mx-0" decoding=async>
+
+<img src=images/hero-sidelinechiangmai-1200.webp alt="ภาพสาวไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100%" class=hero-image-main style=width:100%;aspect-ratio:1200/962;border-radius:.5rem;object-fit:cover;max-width:200px width=1200 height=962 srcset="images/hero-sidelinechiangmai-600.webp 600w, images/hero-sidelinechiangmai-800.webp 800w, images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 200px">
     </a>
 
     
@@ -222,22 +194,13 @@
     Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ ฟีลแฟน ตรงปก100% ไม่มีมัดจำ เด็กn
   </h1>
 
-<a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-full md:max-w-[1200px] animate-fadeIn" tabindex=0>
-<img
-  src="images/hero-sidelinechiangmai-1200.webp"
-  alt="ภาพสาวไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100%"
-  class="hero-image-main"
-  style="width: 100%; aspect-ratio: 1200/962; border-radius: 0.5rem; object-fit: cover; max-width: 200px;"
-  width="1200"
-  height="962"
-  srcset="images/hero-sidelinechiangmai-600.webp 600w, images/hero-sidelinechiangmai-800.webp 800w, images/hero-sidelinechiangmai-1200.webp 1200w"
-  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 200px"
-/>
+<a href=/ aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-full md:max-w-[1200px] animate-fadeIn" tabindex=0>
+ <img src=images/hero-sidelinechiangmai-1200.webp alt="ภาพสาวไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100%" class=hero-image-main style=width:100%;aspect-ratio:1200/962;border-radius:.5rem;object-fit:cover;max-width:200px width=1200 height=962 srcset="images/hero-sidelinechiangmai-600.webp 600w, images/hero-sidelinechiangmai-800.webp 800w, images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 200px">
 </a>
-  <h2 class="sr-only">
+  <h2 class=sr-only>
       สัมผัสประสบการณ์เหนือระดับ
     </h2>
- <p class="sr-only">
+ <p class=sr-only>
       บริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่ คัดสรรมาเพื่อคุณโดยเฉพาะ
       การันตีตรงปก ให้คุณได้ผ่อนคลายในบรรยากาศส่วนตัวและฟีลแฟนจริงๆ
     </p>
@@ -249,7 +212,7 @@
   
 <section id=search-section class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp">
   
-  <form id="search-form" action="/profiles.html" autocomplete="off" aria-labelledby="search-form-heading">
+  <form id=search-form action=/profiles.html autocomplete=off aria-labelledby=search-form-heading>
 
     <h2 id=search-form-heading class=sr-only>ฟอร์มค้นหาและกรองโปรไฟล์</h2>
     
@@ -345,133 +308,95 @@
 
 <section class="social-media-section text-center py-8 md:py-10 bg-white/50 dark:bg-gray-900/70 rounded-2xl shadow-inner mt-8 md:mt-12">
   
-  <!-- Header -->
+  
   <div class="social-section-header mb-2">
     <h2 class="social-disclaimer text-sm md:text-base text-gray-900 dark:text-gray-100 max-w-xl mx-auto px-4 font-extrabold" style="text-shadow:0 0 4px rgba(255,255,255,.6)">
       ติดตามเราบน Social Media 
-      <i class="fas fa-hand-point-down ml-1" aria-hidden="true"></i>
+      <i class="fas fa-hand-point-down ml-1" aria-hidden=true></i>
     </h2>
     <p class="text-sm md:text-base font-medium text-gray-800 dark:text-gray-200 m-0 leading-tight">
       อัปเดตโปรไฟล์ใหม่ล่าสุดและโปรโมชั่นพิเศษได้ก่อนใคร
     </p>
   </div>
 
-  <!-- Social Links Marquee -->
+  
   <div class="social-marquee-wrap overflow-x-auto mt-4">
     <div class="social-marquee flex flex-nowrap justify-center gap-4 text-sm sm:text-base whitespace-nowrap py-2 px-4">
 
-      <!-- Facebook -->
-      <a href="https://www.facebook.com/yourpage" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item fb inline-flex items-center font-bold text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg px-3 py-1 transition-colors duration-200"
-         title="ติดตามเราบน Facebook">
-        <i class="fab fa-facebook-f mr-1" aria-hidden="true"></i>Facebook
+      
+      <a href=https://www.facebook.com/yourpage target=_blank rel="nofollow noopener noreferrer" class="social-item fb inline-flex items-center font-bold text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ติดตามเราบน Facebook">
+        <i class="fab fa-facebook-f mr-1" aria-hidden=true></i>Facebook
       </a>
 
-      <!-- LINE -->
-     <a href="https://line.me/ti/p/ksLUWB89Y_"
-   target="_blank"
-   rel="nofollow noopener noreferrer"
-   class="social-item line inline-flex items-center font-bold text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-3 py-1 transition-colors duration-200"
-   aria-label="ติดต่อเราทาง LINE"
-   title="ติดต่อเราทาง LINE">
-  <i class="fab fa-line mr-1" aria-hidden="true"></i>LINE
+      
+     <a href=https://line.me/ti/p/ksLUWB89Y_ target=_blank rel="nofollow noopener noreferrer" class="social-item line inline-flex items-center font-bold text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-3 py-1 transition-colors duration-200" aria-label="ติดต่อเราทาง LINE" title="ติดต่อเราทาง LINE">
+  <i class="fab fa-line mr-1" aria-hidden=true></i>LINE
 </a>
 
 
-      <!-- TikTok -->
-      <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item tiktok inline-flex items-center font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-lg px-3 py-1 transition-colors duration-200"
-         title="ดูวิดีโอของเราบน TikTok">
-        <i class="fab fa-tiktok mr-1" aria-hidden="true"></i>TikTok
+      
+      <a href=https://tiktok.com/@sidelinecm target=_blank rel="nofollow noopener noreferrer" class="social-item tiktok inline-flex items-center font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ดูวิดีโอของเราบน TikTok">
+        <i class="fab fa-tiktok mr-1" aria-hidden=true></i>TikTok
       </a>
 
-      <!-- Twitter -->
-      <a href="https://twitter.com/yourtwitter" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item twitter inline-flex items-center font-bold text-white bg-sky-700 hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-400 rounded-lg px-3 py-1 transition-colors duration-200"
-         title="ติดตามเราบน Twitter">
-        <i class="fab fa-twitter mr-1" aria-hidden="true"></i>Twitter
+      
+      <a href=https://twitter.com/yourtwitter target=_blank rel="nofollow noopener noreferrer" class="social-item twitter inline-flex items-center font-bold text-white bg-sky-700 hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ติดตามเราบน Twitter">
+        <i class="fab fa-twitter mr-1" aria-hidden=true></i>Twitter
       </a>
 
-     <!-- Bio.site -->
-<a
-  href="https://bio.site/firstfiwfans.com"
-  target="_blank"
-  rel="nofollow noopener noreferrer"
-  title="เยี่ยมชม Bio.site Profile ของเรา"
-  class="social-item bio-site inline-flex items-center justify-center gap-2 font-bold text-black bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-lg px-4 py-2 transition-colors duration-300 shadow-md"
->
-  <img
-    src="/images/favicon-32x32.webp"
-    alt="โลโก้ Bio.site"
-    width="16"
-    height="16"
-    class="w-4 h-4"
-    loading="lazy"
-    decoding="async"
-  >
+     
+<a href=https://bio.site/firstfiwfans.com target=_blank rel="nofollow noopener noreferrer" title="เยี่ยมชม Bio.site Profile ของเรา" class="social-item bio-site inline-flex items-center justify-center gap-2 font-bold text-black bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-lg px-4 py-2 transition-colors duration-300 shadow-md">
+  <img src=/images/favicon-32x32.webp alt="โลโก้ Bio.site" width=16 height=16 class="w-4 h-4" loading=lazy decoding=async>
   Bio.site
 </a>
 
 
-      <!-- Linktree -->
-      <a href="https://linktr.ee/kissmodel" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item linktree inline-flex items-center font-bold text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg px-3 py-1 transition-colors duration-200"
-         title="รวมลิงก์ทั้งหมดของเราใน Linktree">
-        <i class="fas fa-link mr-1" aria-hidden="true"></i>Linktree
+      
+      <a href=https://linktr.ee/kissmodel target=_blank rel="nofollow noopener noreferrer" class="social-item linktree inline-flex items-center font-bold text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg px-3 py-1 transition-colors duration-200" title="รวมลิงก์ทั้งหมดของเราใน Linktree">
+        <i class="fas fa-link mr-1" aria-hidden=true></i>Linktree
       </a>
 
-      <!-- Bluesky -->
-      <a href="https://sidelinechiangmai.bsky.social" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item bluesky inline-flex items-center font-bold text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-1 transition-colors duration-200"
-         title="ติดตามเราบน Bluesky">
-        <i class="fas fa-cloud mr-1" aria-hidden="true"></i>Bluesky
+      
+      <a href=https://sidelinechiangmai.bsky.social target=_blank rel="nofollow noopener noreferrer" class="social-item bluesky inline-flex items-center font-bold text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ติดตามเราบน Bluesky">
+        <i class="fas fa-cloud mr-1" aria-hidden=true></i>Bluesky
       </a>
 
     </div>
   </div>
 
-  <!-- Age Disclaimer -->
-  <p class="social-disclaimer text-xs md:text-sm text-center font-extrabold text-white bg-red-800 max-w-xl mx-auto px-4 py-2 mt-4 rounded-lg shadow-md leading-tight" role="alert">
+  
+  <p class="social-disclaimer text-xs md:text-sm text-center font-extrabold text-white bg-red-800 max-w-xl mx-auto px-4 py-2 mt-4 rounded-lg shadow-md leading-tight" role=alert>
     <strong>เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</strong>
   </p>
 </section>
 
 
 
-<!-- Featured Profiles Section -->
-<section id="featured-profiles" 
-  class="featured-section py-16 md:py-20 bg-gradient-to-b from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-2xl mt-12"
-  aria-labelledby="featured-heading"
-  data-animate-on-scroll>
+<section id=featured-profiles class="featured-section py-16 md:py-20 bg-gradient-to-b from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-2xl mt-12" aria-labelledby=featured-heading data-animate-on-scroll>
   
   <div class="section-content-wrapper max-w-6xl mx-auto">
     <div class="p-6 md:p-10 text-center space-y-5">
       
-      <!-- Heading -->
-      <h2 id="featured-heading" class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+      
+      <h2 id=featured-heading class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
         โปรไฟล์แนะนำน้องๆ
       </h2>
 
-      <!-- Sub-heading -->
+      
       <h3 class="featured-sub text-lg md:text-xl font-semibold text-pink-700 dark:text-pink-300">
         รวมตัวท็อปยอดนิยม ที่ฮอตที่สุดสัปดาห์นี้
       </h3>
 
-      <!-- Description -->
+      
       <p class="featured-desc max-w-2xl mx-auto text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-        คัดมาเฉพาะ <strong class="font-semibold text-pink-600">โปรไฟล์ยอดนิยม</strong> ที่ได้รับการจองมากที่สุด
-        การันตี <strong class="font-semibold text-pink-600">ฟีลแฟนตรงปก 100%</strong>
+        คัดมาเฉพาะ <strong class="font-semibold text-pink-600">โปรไฟล์ยอดนิยม</strong> ที่ได้รับการจองมากที่สุด 
+        การันตี <strong class="font-semibold text-pink-600">ฟีลแฟนตรงปก 100%</strong> 
         พร้อมมอบประสบการณ์ระดับพรีเมียม
       </p>
     </div>
     
-    <!-- Profiles Grid -->
-    <div id="featured-profiles-container" 
-      class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-8 px-6 md:px-10 pb-8 md:pb-12" 
-      role="region"
-      aria-live="polite" 
-      aria-labelledby="featured-heading">
-      <!-- profile cards จะถูก inject ด้วย JS -->
+    
+    <div id=featured-profiles-container class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-8 px-6 md:px-10 pb-8 md:pb-12" aria-live=polite aria-labelledby=featured-heading>
     </div>
   </div>
 </section>
@@ -480,64 +405,49 @@
   <hr class="border-pink-300/60 my-10 md:my-16">
 </div>
 
-<!-- All Profiles Section -->
-<section id="all-profiles-section" 
-  aria-labelledby="all-profiles-heading" 
-  class="pt-16 md:pt-20 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-6 md:px-10"
-  data-animate-on-scroll>
+<section id=all-profiles-section aria-labelledby=all-profiles-heading class="pt-16 md:pt-20 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-6 md:px-10" data-animate-on-scroll>
   
   <div class="text-center space-y-5">
-    <h2 id="all-profiles-heading" class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+    <h2 id=all-profiles-heading class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
       ค้นหาน้องๆ รับงานทั้งหมด
     </h2>
 
     <p class="all-desc max-w-3xl mx-auto text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-      เลือกชม <strong class="font-semibold text-pink-600">โปรไฟล์ทั้งหมด</strong>
-      หรือใช้ <strong class="font-semibold text-pink-600">ตัวกรองขั้นสูง</strong>
+      เลือกชม <strong class="font-semibold text-pink-600">โปรไฟล์ทั้งหมด</strong> 
+      หรือใช้ <strong class="font-semibold text-pink-600">ตัวกรองขั้นสูง</strong> 
       เพื่อค้นหาน้องๆ ที่พร้อมรับงานใน 
       <strong class="highlight text-pink-600">จังหวัดที่คุณต้องการ</strong>
     </p>
   </div>
 
-  <div class="mt-12 md:mt-16" role="region" aria-live="polite">
-    <!-- Loading placeholder -->
-    <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์..."></div>
+  <div class="mt-12 md:mt-16" aria-live=polite>
+    <div id=loading-profiles-placeholder role=status aria-label=กำลังโหลดโปรไฟล์...></div>
+    <div id=profiles-display-area class="space-y-12 md:space-y-16"></div>
 
-    <!-- Profiles display -->
-    <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
-
-    <!-- Load More Button -->
-    <div id="load-more-container" class="hidden text-center mt-12">
-      <button id="load-more-btn" 
-        class="px-6 py-3 rounded-full font-semibold bg-pink-600 text-white hover:bg-pink-700 transition">
+    <div id=load-more-container class="hidden text-center mt-12">
+      <button id=load-more-btn class="px-6 py-3 rounded-full font-semibold bg-pink-600 text-white hover:bg-pink-700 transition">
         แสดงโปรไฟล์เพิ่มเติม
       </button>
     </div>
 
-    <!-- Error Message -->
-    <div id="fetch-error-message" 
-      class="hidden text-center py-12 px-6 bg-red-100/80 rounded-lg font-medium text-red-700 border border-red-300 max-w-2xl mx-auto" 
-      role="alert">
+    <div id=fetch-error-message class="hidden text-center py-12 px-6 bg-red-100/80 rounded-lg font-medium text-red-700 border border-red-300 max-w-2xl mx-auto" role=alert>
       เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง
     </div>
 
-    <!-- No Results Message -->
-    <div id="no-results-message" 
-      class="hidden text-center py-12 px-6 text-pink-700 bg-pink-100/80 rounded-lg font-medium border border-pink-300 max-w-2xl mx-auto" 
-      role="status">
+    <div id=no-results-message class="hidden text-center py-12 px-6 text-pink-700 bg-pink-100/80 rounded-lg font-medium border border-pink-300 max-w-2xl mx-auto" role=status>
       ไม่พบโปรไฟล์ที่ตรงกับการค้นหาของคุณ ลองใช้เกณฑ์อื่น
     </div>
   </div>
 </section>
 
 
-
-
-
     </div>
 </main>
 
 
+<iframe
+  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
+  width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
 
  <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
   <div class="container mx-auto">
@@ -605,94 +515,82 @@
 </footer>
 
  
- <!-- Lightbox Container -->
-<div id="lightbox" 
-     class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
-  <div id="lightbox-content-wrapper-el" 
-       class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-full lg:max-w-[96vw] max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content overflow-hidden">
+ 
+<div id=lightbox class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
+  <div id=lightbox-content-wrapper-el class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-full lg:max-w-[96vw] max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content overflow-hidden">
 
-    <!-- ปุ่มปิด -->
-    <button id="closeLightboxBtn" 
-            class="btn-close-premium absolute top-3 right-3 z-20 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full shadow-md hover:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-            aria-label="ปิดรายละเอียดโปรไฟล์">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1.25em" height="1.25em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
+    
+    <button id=closeLightboxBtn class="btn-close-premium absolute top-3 right-3 z-20 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full shadow-md hover:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" aria-label=ปิดรายละเอียดโปรไฟล์>
+      <svg xmlns=http://www.w3.org/2000/svg width=1.25em height=1.25em viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2.5 stroke-linecap=round stroke-linejoin=round aria-hidden=true>
+        <line x1=18 y1=6 x2=6 y2=18></line>
+        <line x1=6 y1=6 x2=18 y2=18></line>
       </svg>
     </button>
 
-    <!-- เนื้อหา -->
+    
     <div class="flex-grow overflow-y-auto">
       <div class="lightbox-grid grid lg:grid-cols-2 gap-4 lg:gap-8">
 
-        <!-- Gallery -->
+        
         <div class="lightbox-gallery bg-black lg:rounded-l-2xl">
           <div class="sticky top-0 p-2 sm:p-4">
 
-            <!-- container รูปภาพ ปรับให้กลางและสูงสุดไม่เกิน 90vh -->
+            
             <div class="hero-image-container mb-3 flex justify-center items-center max-h-[90vh] overflow-hidden">
 
-              <!-- รูปภาพหลัก ปรับเต็มขนาด ไม่ถูกตัด -->
-              <img id="lightboxHeroImage" 
-                   src="/images/placeholder-profile.webp" 
-                   alt="โปรไฟล์หลักของน้อง (ชื่อ + จังหวัด)"
-                   class="hero-image-main w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-xl shadow-lg mx-auto" 
-                   width="600" height="800" decoding="async" fetchpriority="high">
+              
+              <img id=lightboxHeroImage src=/images/placeholder-profile.webp alt="โปรไฟล์หลักของน้อง (ชื่อ + จังหวัด)" class="hero-image-main w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-xl shadow-lg mx-auto" width=600 height=800 decoding=async fetchpriority=high>
 
             </div>
 
-            <!-- Thumbnail strip -->
-            <div id="lightboxThumbnailStrip" class="thumbnail-strip flex gap-2 overflow-x-auto"></div>
+            
+            <div id=lightboxThumbnailStrip class="thumbnail-strip flex gap-2 overflow-x-auto"></div>
           </div>
         </div>
 
-        <!-- Details -->
+        
         <div class="lightbox-details flex flex-col">
           <div class="p-5 sm:p-7 lg:p-8 space-y-6">
 
-            <!-- Header -->
+            
             <header class="lightbox-header space-y-3">
-              <h2 id="lightbox-header-title" class="sr-only">รายละเอียดโปรไฟล์น้องๆ</h2>
+              <h2 id=lightbox-header-title class=sr-only>รายละเอียดโปรไฟล์น้องๆ</h2>
               
               <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-3">
-                <h3 id="lightbox-profile-name-main"
-                    class="text-3xl lg:text-4xl font-extrabold text-pink-600 dark:text-pink-400 text-center lg:text-left">
+                <h3 id=lightbox-profile-name-main class="text-3xl lg:text-4xl font-extrabold text-pink-600 dark:text-pink-400 text-center lg:text-left">
                   ชื่อโปรไฟล์
                 </h3>
-                <div id="lightbox-availability-badge-wrapper" class="flex-shrink-0"></div>
+                <div id=lightbox-availability-badge-wrapper class=flex-shrink-0></div>
               </div>
 
-              <p id="lightboxQuote" class="text-base text-gray-600 dark:text-gray-300 italic text-center lg:text-left"></p>
+              <p id=lightboxQuote class="text-base text-gray-600 dark:text-gray-300 italic text-center lg:text-left"></p>
             </header>
 
-            <!-- Tags -->
-            <div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start"></div>
+            
+            <div id=lightboxTags class="flex flex-wrap gap-2 justify-center lg:justify-start"></div>
 
-            <!-- Compact details -->
+            
             <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
-              <div id="lightboxDetailsCompact" class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"></div>
+              <div id=lightboxDetailsCompact class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"></div>
             </div>
 
-            <!-- Description -->
+            
             <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
               <h4 class="detail-section-title text-gray-900 dark:text-gray-100 flex items-center gap-2 font-bold">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg xmlns=http://www.w3.org/2000/svg class="w-5 h-5 text-pink-500" viewBox="0 0 20 20" fill=currentColor aria-hidden=true>
                   <path d="M10.75 2.75a.75.75 0 00-1.5 0V4h-3a.75.75 0 000 1.5h3v1.25a.75.75 0 001.5 0V5.5h3a.75.75 0 000-1.5h-3V2.75z"/>
-                  <path fill-rule="evenodd" d="M4 8a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2H4zm2.25 1.25a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5z" clip-rule="evenodd" />
+                  <path fill-rule=evenodd d="M4 8a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2H4zm2.25 1.25a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5z" clip-rule=evenodd />
                 </svg>
                 <span>รายละเอียดเพิ่มเติม</span>
               </h4>
-              <div id="lightboxDescriptionVal" 
-                   class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3"></div>
+              <div id=lightboxDescriptionVal class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3"></div>
             </div>
 
-            <!-- Line Contact -->
+            
             <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
-              <a id="lightboxLineLink" href="https://line.me/ti/p/xxxxxx" 
-                 target="_blank" rel="noopener noreferrer"
-                 class="inline-flex items-center gap-2 text-green-600 font-bold hover:underline">
+              <a id=lightboxLineLink href=https://line.me/ti/p/xxxxxx target=_blank rel="noopener noreferrer" class="inline-flex items-center gap-2 text-green-600 font-bold hover:underline">
                 <i class="fab fa-line text-2xl"></i>
-                <span id="lightboxLineLinkText">ติดต่อ Line</span>
+                <span id=lightboxLineLinkText>ติดต่อ Line</span>
               </a>
             </div>
 
@@ -704,31 +602,12 @@
   </div>
 </div>
 
-<!-- ใช้ module script แบบถูกต้อง -->
-<script type="module" src="/main.js"></script>
 
-<!-- ✅ โหลด SW หลังโหลดเสร็จ -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.body.classList.add("loaded");
-});
+<script type=module src=/main.js></script>
 
-// ✅ ลงทะเบียน Service Worker แบบ idle time
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const registerSW = () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('✅ SW registered:', reg.scope))
-        .catch(err => console.error('❌ SW registration failed:', err));
-    };
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(registerSW);
-    } else {
-      setTimeout(registerSW, 1500);
-    }
-  });
-}
-</script>
+
+<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{var e=()=>{navigator.serviceWorker.register("/sw.js").then(e=>console.log("✅ SW registered:",e.scope)).catch(e=>console.error("❌ SW registration failed:",e))};"requestIdleCallback"in window?requestIdleCallback(e):setTimeout(e,1500)})</script>
 </body>
 </html>
+
 
