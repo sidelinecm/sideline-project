@@ -74,5 +74,12 @@
   to = "/sitemap.xml"
   status = 200
 
-# ถ้าต้องการให้หน้า 404 ทำงานตามปกติ (ไม่ใช่ redirect ทุก URL)
-# ให้แน่ใจว่าไฟล์ 404.html อยู่ใน root ของโปรเจกต์ และอย่าใช้ redirect ทั่วไป
+
+# คำสั่ง redirect สำหรับทุก URL ไปยัง URL หลักไม่ใช้ www
+[[redirects]]
+  from = "https://*"
+  to = "https://sidelinechiangmai.netlify.app/:splat"
+  status = 301
+  force = true
+
+
