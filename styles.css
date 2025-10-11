@@ -122,7 +122,13 @@ h1 {
 
  
   
-
+.hero-image-full {
+  width: 100%;
+  height: 100vh; /* ให้เต็มความสูงของหน้าจอ */
+  object-fit: cover; /* ครอบคลุมเต็มพื้นที่โดยไม่ผิดอัตราส่วน */
+  display: block;
+  border-radius: .5rem; /* ถ้าต้องการมุมมน */
+}
 
 
 

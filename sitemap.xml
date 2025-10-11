@@ -1,62 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+<urlset 
+    xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+    xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+    xmlns:xhtml="http://www.w3.org/1999/xhtml"
+    xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
+    xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+    xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 
+    <!-- หน้าแรก -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
 
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>1.00</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/profiles</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/locations</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/about</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/faq</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/blog</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/privacy-policy</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/blog/safety-tips</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://sidelinechiangmai.netlify.app/blog/what-is-trong-pok</loc>
-  <lastmod>2025-10-10T17:43:40+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
+    <!-- About -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/about</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
 
+    <!-- Blog -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- หน้าคำถามที่พบบ่อย -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/faq</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- หน้าสถานที่ -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/locations</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- หน้าโปรไฟล์ -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/profiles</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+
+    <!-- บทความใน Blog -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog/safety-tips</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/blog/what-is-trong-pok</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- หน้า Offline (ถ้าจำเป็นต้องมี) -->
+    <!-- ลบออกถ้าไม่จำเป็น -->
+    <!--
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/offline</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+    -->
+
+    <!-- หน้า Privacy Policy (ถ้าจำเป็น) -->
+    <!-- ถ้าเป็นหน้าเนื้อหา SEO ควรเก็บไว้ -->
+    <url>
+        <loc>https://sidelinechiangmai.netlify.app/privacy-policy</loc>
+        <lastmod>2024-04-27</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.4</priority>
+    </url>
 
 </urlset>
