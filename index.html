@@ -457,37 +457,53 @@
 <!-- 🌍 แผนที่ตำแหน่งของ Sideline Chiangmai -->
 <section
   id="map-section"
-  class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-12"
+  class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-16"
   aria-labelledby="map-title"
 >
-  <h2 id="map-title" class="sr-only">แผนที่ตำแหน่งของ Sideline Chiangmai</h2>
+  <!-- 🏷️ หัวข้อแผนที่ -->
+  <header class="px-6 pt-8 pb-4 text-center border-b border-gray-100 dark:border-gray-800">
+    <h2
+      id="map-title"
+      class="text-2xl md:text-3xl font-bold tracking-tight text-gray-800 dark:text-gray-100"
+    >
+      🗺️ แผนที่ตำแหน่งของ <span class="text-pink-600 dark:text-pink-400">Sideline Chiangmai</span>
+    </h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+      เจ็ดยอด · ช้างเผือก · เมืองเชียงใหม่
+    </p>
+  </header>
 
-  <iframe
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
-    style="border:0; width: 100%; aspect-ratio: 16 / 9; border-radius: 1rem;"
-    allowfullscreen
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade"
-    title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
-    aria-label="Google Map แสดงที่ตั้งของ Sideline Chiangmai ในตำบลช้างเผือก เจ็ดยอด"
-  ></iframe>
+  <!-- 🗺️ ตัวแผนที่ -->
+  <div class="relative">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
+      class="w-full block"
+      style="aspect-ratio: 16 / 9; border: 0; border-radius: 0;"
+      allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
+      aria-label="Google Map แสดงที่ตั้งของ Sideline Chiangmai ในตำบลช้างเผือก เจ็ดยอด"
+    ></iframe>
+  </div>
 
   <!-- 🧭 ปุ่มเปิดใน Google Maps -->
-  <div class="absolute bottom-4 right-4">
+  <div class="flex justify-center py-6">
     <a
       href="https://goo.gl/maps/1sXMGupTQG8T6Cxi6"
       target="_blank"
       rel="noopener nofollow noreferrer"
-      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-pink-600 text-white shadow-md hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all"
+      class="inline-flex items-center gap-2 px-5 py-2.5 text-sm md:text-base font-medium rounded-full bg-pink-600 text-white shadow-md hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all"
       aria-label="เปิดแผนที่ Sideline Chiangmai บน Google Maps"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 01.553-1.894L9 1m0 19l6 3m0 0l5.447-2.724A2 2 0 0021 18.382V8.618a2 2 0 00-.553-1.894L15 4m0 19V4m0 0L9 1" />
       </svg>
       เปิดใน Google Maps
     </a>
   </div>
 </section>
+
 
 
  <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
