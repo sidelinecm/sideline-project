@@ -1,254 +1,300 @@
 <!doctype html>
-<html lang="th" class="scroll-smooth light">
+<html lang=th class="scroll-smooth light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>พิกัดและพื้นที่บริการ - ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย | SidelineCM</title>
-  <meta name="description" content="ค้นหาพิกัดรับงานไซด์ไลน์เชียงใหม่ เช่น เจ็ดยอด ต.ช้างเผือก ใกล้ มช. ฟีลแฟน ตรงปก ไม่มัดจำ รวมสาวรับงานเชียงใหม่ ไซด์ไลน์คุณภาพ พร้อมให้บริการ" />
-  <!-- ลิงก์ CSS และ Font Awesome -->
-  <link rel="stylesheet" href="/styles.css" />
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <meta charset=UTF-8>
+  <meta http-equiv=X-UA-Compatible content="IE=edge">
+  <meta name=viewport content="width=device-width,initial-scale=1">
   
-  <!-- Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "serviceType": "บริการไซด์ไลน์ฟีลแฟน ตรงปก ไม่มัดจำ",
-    "name": "SidelineChiangmai",
-    "description": "รวมสาวรับงานตรงปก ไซด์ไลน์เชียงใหม่ ฟีลแฟน ปลอดภัย ไม่ต้องโอนมัดจำ พร้อมให้บริการทั้งในตัวเมืองและจังหวัดใกล้เคียง เช่น ลำปาง, เชียงราย, ลำพูน",
-    "provider": {
-      "@type": "Organization",
-      "name": "SidelineChiangmai",
-      "url": "https://sidelinechiangmai.netlify.app",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai-256.webp",
-        "width": 256,
-        "height": 30
-      },
-      "sameAs": [
-        "https://tiktok.com/@sidelinecm",
-        "https://bio.site/firstfiwfans.com",
-        "https://linktr.ee/kissmodel"
-      ]
-    },
-    "areaServed": [
-      { "@type": "City", "name": "เชียงใหม่" },
-      { "@type": "City", "name": "ลำปาง" },
-      { "@type": "City", "name": "เชียงราย" },
-      { "@type": "City", "name": "ลำพูน" },
-      { "@type": "City", "name": "พะเยา" },
-      { "@type": "City", "name": "แม่ฮ่องสอน" }
-    ],
-    "audience": {
-      "@type": "PeopleAudience",
-      "name": "ผู้ใหญ่",
-      "audienceType": "20+ Adults Only"
-    },
-    "availableChannel": {
-      "@type": "ServiceChannel",
-      "serviceUrl": "https://sidelinechiangmai.netlify.app/profiles.html",
-      "availableLanguage": ["Thai", "English"],
-      "servicePhone": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "availableLanguage": "Thai"
-      },
-      "serviceSmsNumber": {
-        "@type": "ContactPoint",
-        "contactType": "LINE",
-        "url": "https://line.me/ti/p/_faNcjQ3xx"
-      }
-    },
-    "serviceOutput": "ข้อมูลโปรไฟล์และพิกัดของสาวรับงานไซด์ไลน์ในพื้นที่เชียงใหม่และใกล้เคียง",
-    "termsOfService": "https://sidelinechiangmai.netlify.app/privacy-policy.html",
-    "isAccessibleForFree": true
-  }
-  </script>
-</head>
-<body class="antialiased" data-page="locations">
+  <title>พิกัดและพื้นที่บริการ - ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย | SidelineCM</title>
+ <meta name=description content="ค้นหาพิกัดรับงานไซด์ไลน์เชียงใหม่ เช่น เจ็ดยอด ต.ช้างเผือก ใกล้ มช. ฟีลแฟน ตรงปก ไม่มัดจำ รวมสาวรับงานเชียงใหม่ ไซด์ไลน์คุณภาพ พร้อมให้บริการ">
+  
+  <link rel=canonical href=https://sidelinechiangmai.netlify.app/locations.html>
+  
+ <meta name=theme-color content=#FFFFFF media="(prefers-color-scheme: light)">
+  <meta name=theme-color content=#111827 media="(prefers-color-scheme: dark)">
+  <link rel=icon href=/images/favicon.ico sizes=any>
+  <link rel=icon href=/images/favicon.svg type=image/svg+xml>
+  <link rel=apple-touch-icon href=/images/apple-touch-icon.png>
+  <link rel=manifest href=/manifest.webmanifest>
 
-<!-- Header -->
-<header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent bg-white dark:bg-gray-900">
-  <div class="container mx-auto px-4 h-18 flex items-center justify-between">
-    <a href="/" aria-label="SidelineChiangmai หน้าแรก">
-      <img src="/images/logo-sideline-chiangmai-128.webp" alt="โลโก้ Sideline Chiangmai" width="128" height="30" class="h-[30px]" loading="eager" />
-    </a>
-    <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
-      <a href="index.html" class="px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">หน้าแรก</a>
-      <a href="profiles.html" class="px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">น้องๆ ทั้งหมด</a>
-      <a href="locations.html" class="px-4 py-2 rounded-full bg-blue-500 text-white font-semibold">พิกัดบริการ</a>
-      <a href="about.html" class="px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">เกี่ยวกับเรา</a>
-      <a href="faq.html" class="px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">FAQ</a>
-      <a href="blog.html" class="px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">บทความ</a>
-    </nav>
-    <div class="flex items-center gap-2">
-      <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-200" aria-label="เปลี่ยนโหมดสี">
-        <i class="fas fa-sun" aria-hidden="true"></i>
-      </button>
-      <button id="menu-toggle" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-200 md:hidden" aria-label="เปิดเมนู">
-        <i class="fas fa-bars" aria-hidden="true"></i>
-      </button>
+
+ 
+  <link rel=preconnect href=https://hgzbgpbmymoiwjpaypvl.supabase.co crossorigin>
+  <link rel=preconnect href=https://cdnjs.cloudflare.com crossorigin>
+
+  
+  <link rel=preload href=/styles.css as=style onload='this.onload=null,this.rel="stylesheet"'>
+  <noscript>
+    <link rel=stylesheet href=/styles.css>
+  </noscript>
+
+  
+  <link rel=preload href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'>
+  <noscript>
+    <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css>
+  </noscript>
+
+  
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-regular.woff2 as=font type=font/woff2 crossorigin>
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-700.woff2 as=font type=font/woff2 crossorigin>
+
+  
+  <link rel=modulepreload href=/main.js>
+ 
+  
+<script type=application/ld+json>
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "บริการไซด์ไลน์ฟีลแฟน ตรงปก ไม่มัดจำ",
+  "name": "SidelineChiangmai",
+  "description": "รวมสาวรับงานตรงปก ไซด์ไลน์เชียงใหม่ ฟีลแฟน ปลอดภัย ไม่ต้องโอนมัดจำก่อน พร้อมให้บริการทั้งในตัวเมืองและจังหวัดใกล้เคียง เช่น ลำปาง, เชียงราย, ลำพูน",
+  "provider": {
+    "@type": "Organization",
+    "name": "SidelineChiangmai",
+    "url": "https://sidelinechiangmai.netlify.app",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai-256.webp",
+      "width": 256,
+      "height": 30
+    },
+    "sameAs": [
+      "https://tiktok.com/@sidelinecm",
+      "https://bio.site/firstfiwfans.com",
+      "https://linktr.ee/kissmodel"
+    ]
+  },
+  "areaServed": [
+    { "@type": "City", "name": "เชียงใหม่" },
+    { "@type": "City", "name": "ลำปาง" },
+    { "@type": "City", "name": "เชียงราย" },
+    { "@type": "City", "name": "ลำพูน" },
+    { "@type": "City", "name": "พะเยา" },
+    { "@type": "City", "name": "แม่ฮ่องสอน" }
+  ],
+  "audience": {
+    "@type": "PeopleAudience",
+    "name": "ผู้ใหญ่",
+    "audienceType": "20+ Adults Only"
+  },
+  "availableChannel": {
+    "@type": "ServiceChannel",
+    "serviceUrl": "https://sidelinechiangmai.netlify.app/profiles.html",
+    "availableLanguage": ["Thai", "English"],
+    "servicePhone": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": "Thai"
+    },
+    "serviceSmsNumber": {
+      "@type": "ContactPoint",
+      "contactType": "LINE",
+      "url": "https://line.me/ti/p/_faNcjQ3xx"
+    }
+  },
+  "serviceOutput": "ข้อมูลโปรไฟล์และพิกัดของสาวรับงานไซด์ไลน์ในพื้นที่เชียงใหม่และใกล้เคียง",
+  "termsOfService": "https://sidelinechiangmai.netlify.app/privacy-policy.html",
+  "isAccessibleForFree": true
+}
+</script>
+  
+</head>
+
+<body class=antialiased data-page=locations>
+
+
+<header id=page-header class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
+    <div class="container mx-auto px-4 h-18 flex items-center justify-between">
+         <a href=/ aria-label="SidelineChiangmai หน้าแรก">
+  <img src=/images/logo-sideline-chiangmai-128.webp srcset="/images/logo-sideline-chiangmai-64.webp 64w, /images/logo-sideline-chiangmai-128.webp 128w, /images/logo-sideline-chiangmai-256.webp 256w, /images/logo-sideline-chiangmai-512.webp 512w" sizes="(max-width: 320px) 200px, 256px" alt="โลโก้ Sideline Chiangmai" width=256 height=30 class="h-[30px] w-auto" loading=eager fetchpriority=high>
+</a>
+        <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label=เมนูหลัก>
+            <a href=profiles.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
+            <a href=locations.html class="px-4 py-2 rounded-full bg-accent text-primary font-semibold">พิกัดบริการ</a>
+            <a href=about.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
+            <a href=faq.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
+            <a href=blog.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
+        </nav>
+        <div class="flex items-center gap-2">
+            <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label=เปลี่ยนโหมดสี><i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden=true></i></button>
+            <button id=menu-toggle class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label=เปิดเมนู aria-haspopup=true aria-controls=sidebar><i class="fas fa-bars text-xl" aria-hidden=true></i></button>
+        </div>
     </div>
-  </div>
 </header>
 
-<!-- Sidebar สำหรับมือถือ -->
-<div id="sidebar" class="fixed top-0 right-0 w-64 bg-white h-full shadow-lg transform translate-x-full transition-transform duration-300 z-50">
-  <div class="flex justify-between p-4 border-b">
-    <h3 class="text-lg font-bold">เมนู</h3>
-    <button id="close-sidebar" aria-label="ปิดเมนู">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <nav class="p-4 space-y-4">
-    <a href="index.html" class="block px-4 py-2 hover:bg-gray-100">หน้าแรก</a>
-    <a href="profiles.html" class="block px-4 py-2 hover:bg-gray-100">น้องๆ ทั้งหมด</a>
-    <a href="locations.html" class="block px-4 py-2 bg-blue-500 text-white">พิกัดบริการ</a>
-    <a href="about.html" class="block px-4 py-2 hover:bg-gray-100">เกี่ยวกับเรา</a>
-    <a href="faq.html" class="block px-4 py-2 hover:bg-gray-100">FAQ</a>
-    <a href="blog.html" class="block px-4 py-2 hover:bg-gray-100">บทความ</a>
-    <a href="privacy-policy.html" class="block px-4 py-2 hover:bg-gray-100">นโยบายความเป็นส่วนตัว</a>
-    <a href="terms-of-service.html" class="block px-4 py-2 hover:bg-gray-100">ข้อกำหนดการใช้บริการ</a>
-    <a href="contact.html" class="block px-4 py-2 hover:bg-gray-100">ติดต่อเรา</a>
-  </nav>
+<div id=menu-backdrop class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden=true></div>
+
+
+<div id=sidebar class="fixed top-0 right-0 w-64 sm:w-72 h-dvh bg-card text-foreground border-l border-border shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" role=dialog aria-labelledby=sidebar-nav-heading aria-hidden=true tabindex=-1>
+     
+    <div class="flex justify-between items-center p-4 border-b border-border shrink-0">
+        <h3 id=sidebar-nav-heading class="text-lg font-bold text-secondary">เมนู</h3>
+        <button id=close-sidebar-btn class=btn-close-premium aria-label=ปิดเมนู>
+            <svg xmlns=http://www.w3.org/2000/svg width=1em height=1em viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round aria-hidden=true>
+                <line x1=18 y1=6 x2=6 y2=18></line>
+                <line x1=6 y1=6 x2=18 y2=18></line>
+            </svg>
+        </button>
+    </div>
+
+    <nav aria-label=เมนูนำทางหลักในแถบด้านข้าง class="flex-grow overflow-y-auto p-4 space-y-4">
+        <a href=/ class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-home w-5 text-center text-muted-foreground" aria-hidden=true></i><span>หน้าแรก</span></a>
+        <a href=profiles.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-users w-5 text-center text-muted-foreground" aria-hidden=true></i><span>น้องๆ ทั้งหมด</span></a>
+        <a href=locations.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-map-marker-alt w-5 text-center text-muted-foreground" aria-hidden=true></i><span>พิกัดบริการ</span></a>
+        <a href=about.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-info-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>เกี่ยวกับเรา</span></a>
+        <a href=faq.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-question-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>คำถามพบบ่อย</span></a>
+        <a href=blog.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-newspaper w-5 text-center text-muted-foreground" aria-hidden=true></i><span>บทความ</span></a>
+    </nav>
+
+    <div class="p-4 border-t border-border shrink-0">
+        <a href=https://line.me/ti/p/_faNcjQ3xx target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-line text-lg" aria-hidden=true></i><span>ติดต่อผ่าน LINE</span></a>
+    </div>
 </div>
 
-<!-- เนื้อหาหลัก -->
-<main class="pt-24 pb-16 bg-gray-50">
-  <div class="container mx-auto px-4">
-    <section aria-labelledby="locations-heading" class="mb-12">
-      <div class="text-center mb-8">
-        <h1 id="locations-heading" class="text-4xl font-extrabold text-gray-800 mb-4">พิกัดและพื้นที่บริการ</h1>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          SidelineChiangmai รวมสาวรับงานตรงปก ไซด์ไลน์เชียงใหม่ ฟีลแฟน การันตีความปลอดภัย ไม่ต้องโอนมัดจำ พร้อมให้บริการทั้งในตัวเมืองและจังหวัดใกล้เคียง เช่น ลำปาง, เชียงราย, ลำพูน
-        </p>
-      </div>
-
-      <!-- พื้นที่บริการหลัก -->
-      <div>
-        <h2 class="text-2xl font-semibold text-center mb-8 text-gray-800">พื้นที่บริการหลัก</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          <!-- ตัวอย่างพื้นที่ -->
-          <div class="bg-white rounded-lg shadow p-6 border border-gray-300">
-            <h3 class="text-xl font-semibold mb-2 text-blue-600">เจ็ดยอด, ต.ช้างเผือก</h3>
-            <p class="text-gray-600 mb-4">ย่านยอดนิยมของสาวรับงานเชียงใหม่</p>
-            <ul class="list-disc list-inside mb-4 text-sm text-gray-700">
-              <li>ใกล้มหาวิทยาลัยเชียงใหม่</li>
-              <li>สาวรับงานเยอะ ตรงปก ฟีลแฟน</li>
-              <li>ไม่ต้องโอนมัดจำ ปลอดภัย</li>
-            </ul>
-            <a href="https://goo.gl/maps/xxxxxxxxxxxxxxxx" target="_blank" rel="noopener" class="text-blue-500 hover:underline inline-block mb-2">
-              📍 ดูพิกัดใน Google Maps
-            </a>
-            <div class="mt-2 aspect-w-16 aspect-h-9">
-              <iframe class="w-full h-full" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3874.569806334031!2d98.987654321!3d18.7987654321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2b0d0b0b0b0b%3A0x123456789abcdef!2sเจ็ดยอด%2C%20ต.ช้างเผือก%2C%20เชียงใหม่!5e0!3m2!1sth!2sth!4v169XXXXXX" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-            </div>
-          </div>
-
-          <!-- เพิ่มพื้นที่อื่น ๆ ได้ตามต้องการ -->
-
+<main id=main-content class=pt-20>
+  <div class="container mx-auto px-4 py-12 md:py-16">
+    <section aria-labelledby=locations-heading>
+      <div class="section-header-card text-center mb-12">
+        <div class=card-content>
+          <h1 id=locations-heading class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 text-secondary">
+            พิกัดและพื้นที่บริการ
+          </h1>
+          <p class="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
+            SidelineChiangmai รวมสาวรับงานตรงปก ไซด์ไลน์เชียงใหม่ ฟีลแฟน การันตีความปลอดภัย ไม่ต้องโอนมัดจำก่อน
+            พร้อมให้บริการทั้งในตัวเมืองและจังหวัดใกล้เคียง
+          </p>
         </div>
       </div>
 
-      <!-- ส่วนติดต่อสอบถาม -->
-      <div class="mt-16 text-center">
-        <i class="fas fa-compass fa-3x mb-4 text-gray-400"></i>
-        <h2 class="text-2xl font-semibold mb-4 text-gray-800">ไม่พบพื้นที่ของคุณ?</h2>
-        <p class="max-w-2xl mx-auto mb-6 text-gray-600">
-          เรายังขยายพื้นที่บริการอย่างต่อเนื่อง หากคุณอยู่ในจังหวัดใกล้เคียง เช่น ลำพูน, พะเยา หรือแม่ฮ่องสอน สามารถติดต่อสอบถามกับน้องๆ ได้โดยตรง
-        </p>
-        <a href="profiles.html" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-full hover:opacity-90 transition-opacity">ดูโปรไฟล์น้องๆ ทั้งหมด</a>
-      </div>
-    </section>
+      <div class=space-y-16>
+        
+        <div data-animate-on-scroll>
+          <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-foreground">พื้นที่บริการหลัก</h2>
+          <div id=locations-display-area class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-    <!-- แผนที่รวม -->
-    <section class="mb-12">
-      <h2 class="text-2xl font-semibold mb-4 text-center text-gray-800">แผนที่รวมพื้นที่บริการ</h2>
-      <div class="aspect-w-16 aspect-h-9">
-        <iframe src="https://www.google.com/maps/d/embed?mid=YOUR_MAP_ID" width="100%" height="600" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            
+            <div class="rounded-lg border border-border p-6 shadow-sm bg-card">
+              <h3 class="text-xl font-semibold mb-2 text-primary">เจ็ดยอด, ต.ช้างเผือก</h3>
+              <p class="text-muted-foreground text-sm mb-4">ย่านยอดนิยมของสาวรับงานเชียงใหม่</p>
+              <ul class="list-disc list-inside text-sm text-foreground space-y-1">
+                <li>ใกล้มหาวิทยาลัยเชียงใหม่</li>
+                <li>สาวรับงานเยอะ ตรงปก ฟีลแฟน</li>
+                <li>ไม่ต้องโอนมัดจำ ปลอดภัย</li>
+              </ul>
+              <a href=https://share.google/wTODG1PkuSoZf8Nmx target=_blank rel=noopener class="mt-4 inline-block text-primary font-medium hover:underline">
+                📍 ดูพิกัดใน Google Maps
+              </a>
+            </div>
+
+            
+
+          </div>
+        </div>
+
+        
+        <div class="section-content-wrapper text-center p-8 md:p-12" data-animate-on-scroll>
+          <i class="fas fa-compass fa-3x text-muted-foreground/30 mb-4" aria-hidden=true></i>
+          <h2 class="text-2xl font-bold mb-3 text-foreground">ไม่พบพื้นที่ของคุณ?</h2>
+          <p class="text-muted-foreground max-w-xl mx-auto mb-6">
+            เรากำลังขยายพื้นที่บริการอย่างต่อเนื่อง หากคุณอยู่ในจังหวัดใกล้เคียง เช่น ลำพูน, พะเยา หรือแม่ฮ่องสอน
+            สามารถติดต่อสอบถามกับน้องๆ ได้โดยตรง
+          </p>
+          <a href=profiles.html class="inline-block bg-primary text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity">
+            ดูโปรไฟล์น้องๆ ทั้งหมด
+          </a>
+        </div>
       </div>
     </section>
   </div>
 </main>
 
-<!-- Footer -->
-<footer class="bg-white border-t border-gray-300 text-gray-600 pt-8 pb-4">
-  <div class="container mx-auto px-4">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-      <!-- โลโก้และข้อมูล -->
-      <div>
-        <a href="/" aria-label="หน้าแรก SidelineChiangmai" class="block mb-4">
-          <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai" width="245" height="30" class="mx-auto md:mx-0" />
-        </a>
-        <p class="text-sm leading-relaxed">
-          ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
-        </p>
-      </div>
+ <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16 content-fade-in">
+  
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center md:text-left mb-12">
+                
+                
+                <div class=lg:col-span-1>
+                    <a href=/ aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
+                        <img src=/images/logo-sideline-chiangmai.webp alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width=245 height=30 loading=lazy decoding=async>
+                    </a>
+                    <p class="leading-relaxed text-sm">
+                        ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
+                    </p>
+                </div>
 
-      <!-- ลิงก์ด่วน -->
-      <div>
-        <h3 class="font-semibold mb-4">ลิงก์ด่วน</h3>
-        <ul class="space-y-2 text-sm">
-          <li><a href="index.html" class="hover:text-blue-600">หน้าแรก</a></li>
-          <li><a href="profiles.html" class="hover:text-blue-600">น้องๆ ทั้งหมด</a></li>
-          <li><a href="locations.html" class="hover:text-blue-600">พิกัดบริการ</a></li>
-          <li><a href="about.html" class="hover:text-blue-600">เกี่ยวกับเรา</a></li>
-          <li><a href="faq.html" class="hover:text-blue-600">คำถามพบบ่อย</a></li>
-          <li><a href="blog.html" class="hover:text-blue-600">บทความ</a></li>
-        </ul>
-      </div>
+                
+               
+<div>
+  <h3 class="font-semibold text-foreground mb-4 tracking-tight">ลิงก์ด่วน</h3>
+  <nav aria-label=ลิงก์ด่วนท้ายเว็บ>
+    <ul class="space-y-3 text-sm">
+      <li><a href=/ class="hover:text-secondary transition-colors">หน้าแรก</a></li>
+      <li><a href=/profiles.html class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li>
+      <li><a href=/locations.html class="hover:text-secondary transition-colors">พิกัดบริการ</a></li>
+      <li><a href=/about.html class="hover:text-secondary transition-colors">เกี่ยวกับเรา</a></li>
+      <li><a href=/faq.html class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li>
+      <li><a href=/blog.html class="hover:text-secondary transition-colors">บทความ</a></li>
+      <li><a href=/privacy-policy.html class="hover:text-secondary transition-colors">นโยบายความเป็นส่วนตัว</a></li>
+      <li><a href=/terms-of-service.html class="hover:text-secondary transition-colors">ข้อกำหนดการให้บริการ</a></li>
+      <li><a href=/contact.html class="hover:text-secondary transition-colors">ติดต่อเรา</a></li>
+    </ul>
+  </nav>
+</div>
 
-      <!-- ติดต่อ -->
-      <div>
-        <h3 class="font-semibold mb-4">ติดต่อสอบถาม (24 ชม.)</h3>
-        <address class="text-sm space-y-2">
-          <p>สำหรับจองคิว, สอบถามรายละเอียดเพิ่มเติม, หรือแจ้งปัญหาการใช้งาน:</p>
-          <a href="https://line.me/ti/p/_faNcjQ3xx" target="_blank" rel="noopener" class="flex items-center gap-2 hover:text-blue-600">
-            <i class="fab fa-line text-lg text-green-500"></i> ติดต่อลง LINE
-          </a>
-        </address>
-      </div>
+                
+                <div>
+                    <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อสอบถาม (24 ชม.)</h3>
+                    <address class="not-italic space-y-3 text-sm">
+                        <p>สำหรับจองคิว, สอบถามรายละเอียดเพิ่มเติม, หรือแจ้งปัญหาการใช้งาน:</p>
+                        <a href=https://line.me/ti/p/_faNcjQ3xx target=_blank rel="noopener nofollow" class="inline-flex items-center gap-2 group font-semibold">
+                            <i class="fab fa-line text-2xl text-green-500" aria-hidden=true></i>
+                            <span class="group-hover:text-secondary transition-colors">ติดต่อเจ้าหน้าที่ผ่าน LINE</span>
+                        </a>
 
-      <!-- ติดตามเรา -->
-      <div>
-        <h3 class="font-semibold mb-4">ติดตามเรา</h3>
-        <div class="flex gap-4 justify-center md:justify-start text-xl">
-          <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener" aria-label="Tiktok" class="hover:text-blue-600"><i class="fab fa-tiktok"></i></a>
-          <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener" aria-label="Bio" class="hover:text-blue-600"><i class="fas fa-link"></i></a>
-          <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener" aria-label="Linktree" class="hover:text-blue-600"><i class="fas fa-tree"></i></a>
-          <a href="https://@sidelinechiangmai.bsky.social" target="_blank" rel="noopener" aria-label="Bluesky" class="hover:text-blue-600"><i class="fas fa-cloud"></i></a>
+                    </address>
+                </div>
+
+                
+                <div>
+                    <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดตามเรา</h3>
+                    <div class="flex justify-center md:justify-start gap-5 text-xl">
+                        <a href=https://tiktok.com/@sidelinecm target=_blank rel="noopener nofollow" aria-label="Tiktok ของ SidelineCM" class="hover:text-primary transition-colors">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                        <a href=https://bio.site/firstfiwfans.com target=_blank rel="noopener nofollow" aria-label="Bio Site ของ SidelineCM" class="hover:text-primary transition-colors">
+                            <i class="fas fa-link"></i> 
+                        </a>
+                        <a href=https://linktr.ee/kissmodel target=_blank rel="noopener nofollow" aria-label="Linktree ของ SidelineCM" class="hover:text-primary transition-colors">
+                            <i class="fas fa-tree"></i> 
+                        </a>
+                        
+                        <a href=https://@sidelinechiangmai.bsky.social target=_blank rel="noopener nofollow" aria-label="Bluesky ของ SidelineCM" class="hover:text-primary transition-colors">
+                           <i class="fas fa-cloud"></i> 
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            
+            <div class="mt-12 border-t border-border pt-8 text-center">
+                <p class=text-sm>Copyright © <span id=currentYearDynamic></span> SidelineChiangmai. All Rights Reserved.</p>
+                <p class="mt-2 text-xs text-muted-foreground/80 leading-relaxed">เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง</p>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="border-t pt-4 text-center text-sm">
-      <p>Copyright © <span id="currentYear"></span> SidelineChiangmai. All Rights Reserved.</p>
-    </div>
-  </div>
-</footer>
+    </footer>
 
-<script type="module" src="/main.js"></script>
+ 
+<script type=module src=/main.js></script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.body.classList.add('loaded');
-  });
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => navigator.serviceWorker.register('/sw.js'));
-      } else {
-        setTimeout(() => navigator.serviceWorker.register('/sw.js'), 1500);
-      }
-    });
-  }
-</script>
+<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
 
 
 
-</body>
-</html>
+
+
+
+
+
