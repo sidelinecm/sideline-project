@@ -127,7 +127,18 @@
     
     <a href=/ aria-label="กลับไปหน้าแรก SidelineChiangmai">
 
-<img src="/images/logo-sidelinechiangmai.webp" alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงาน" class="h-[28px] w-auto" width="240" height="28" loading="eager" fetchpriority="high">
+<img
+  src="/images/logo-sidelinechiangmai.webp"
+  srcset="/images/logo-sidelinechiangmai.webp 1x, /images/logo-sidelinechiangmai@2x.webp 2x"
+  alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงาน"
+  width="240"
+  height="28"
+  class="h-[28px] w-auto"
+  loading="eager"
+  fetchpriority="high"
+  decoding="async"
+/>
+
     </a>
 
     
@@ -306,69 +317,122 @@
   </form>
 </section>
 
-<section class="social-media-section text-center py-8 md:py-10 bg-white/50 dark:bg-gray-900/70 rounded-2xl shadow-inner mt-8 md:mt-12">
-  
-  
-  <div class="social-section-header mb-2">
-    <h2 class="social-disclaimer text-sm md:text-base text-gray-900 dark:text-gray-100 max-w-xl mx-auto px-4 font-extrabold" style="text-shadow:0 0 4px rgba(255,255,255,.6)">
-      ติดตามเราบน Social Media 
-      <i class="fas fa-hand-point-down ml-1" aria-hidden=true></i>
+<!-- 🌸 ส่วน Social Media Section -->
+<section
+  id="social-media"
+  class="social-media-section relative text-center py-10 md:py-14 bg-gradient-to-b from-white/80 via-pink-50/60 to-white/80 dark:from-gray-900/90 dark:via-gray-800/90 dark:to-gray-900/90 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 mt-12 backdrop-blur-xl"
+  aria-labelledby="social-heading"
+>
+
+  <!-- หัวข้อส่วน -->
+  <div class="social-section-header mb-4">
+    <h2
+      id="social-heading"
+      class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight"
+      style="text-shadow:0 0 6px rgba(255,255,255,.5)"
+    >
+      ✨ ติดตามเราได้ทุกช่องทางบน Social Media ✨
+      <i class="fas fa-hand-point-down ml-2 text-pink-600 dark:text-pink-400" aria-hidden="true"></i>
     </h2>
-    <p class="text-sm md:text-base font-medium text-gray-800 dark:text-gray-200 m-0 leading-tight">
-      อัปเดตโปรไฟล์ใหม่ล่าสุดและโปรโมชั่นพิเศษได้ก่อนใคร
+    <p class="text-base md:text-lg font-medium text-gray-800 dark:text-gray-200 mt-2 leading-snug">
+      อัปเดตโปรไฟล์ใหม่ โปรโมชั่นพิเศษ และกิจกรรมสุด Exclusive ก่อนใคร!
     </p>
   </div>
 
-  
-  <div class="social-marquee-wrap overflow-x-auto mt-4">
-    <div class="social-marquee flex flex-nowrap justify-center gap-4 text-sm sm:text-base whitespace-nowrap py-2 px-4">
+  <!-- แถวปุ่ม Social -->
+  <div class="social-marquee-wrap overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 mt-6">
+    <div class="social-marquee flex flex-nowrap justify-center gap-4 text-sm sm:text-base whitespace-nowrap py-3 px-4">
 
-      
-      <a href=https://www.facebook.com/yourpage target=_blank rel="nofollow noopener noreferrer" class="social-item fb inline-flex items-center font-bold text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ติดตามเราบน Facebook">
-        <i class="fab fa-facebook-f mr-1" aria-hidden=true></i>Facebook
+      <!-- Facebook -->
+      <a href="https://www.facebook.com/yourpage"
+         target="_blank"
+         rel="nofollow noopener noreferrer"
+         class="social-item fb inline-flex items-center font-semibold text-white bg-[#1877F2] hover:bg-[#145dbf] focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+         aria-label="ติดตามเราบน Facebook"
+         title="ติดตามเราบน Facebook">
+        <i class="fab fa-facebook-f mr-2" aria-hidden="true"></i>Facebook
       </a>
 
-      
-     <a href=https://line.me/ti/p/ksLUWB89Y_ target=_blank rel="nofollow noopener noreferrer" class="social-item line inline-flex items-center font-bold text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-3 py-1 transition-colors duration-200" aria-label="ติดต่อเราทาง LINE" title="ติดต่อเราทาง LINE">
-  <i class="fab fa-line mr-1" aria-hidden=true></i>LINE
-</a>
-
-
-      
-      <a href=https://tiktok.com/@sidelinecm target=_blank rel="nofollow noopener noreferrer" class="social-item tiktok inline-flex items-center font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ดูวิดีโอของเราบน TikTok">
-        <i class="fab fa-tiktok mr-1" aria-hidden=true></i>TikTok
+      <!-- LINE -->
+      <a href="https://line.me/ti/p/ksLUWB89Y_"
+         target="_blank"
+         rel="nofollow noopener noreferrer"
+         class="social-item line inline-flex items-center font-semibold text-white bg-[#06C755] hover:bg-[#05a84a] focus:outline-none focus:ring-2 focus:ring-green-400 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+         aria-label="ติดต่อเราทาง LINE"
+         title="ติดต่อเราทาง LINE">
+        <i class="fab fa-line mr-2" aria-hidden="true"></i>LINE
       </a>
 
-      
-      <a href=https://twitter.com/yourtwitter target=_blank rel="nofollow noopener noreferrer" class="social-item twitter inline-flex items-center font-bold text-white bg-sky-700 hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ติดตามเราบน Twitter">
-        <i class="fab fa-twitter mr-1" aria-hidden=true></i>Twitter
+      <!-- TikTok -->
+      <a href="https://tiktok.com/@sidelinecm"
+         target="_blank"
+         rel="nofollow noopener noreferrer"
+         class="social-item tiktok inline-flex items-center font-semibold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+         aria-label="ดูวิดีโอของเราบน TikTok"
+         title="ดูวิดีโอของเราบน TikTok">
+        <i class="fab fa-tiktok mr-2" aria-hidden="true"></i>TikTok
       </a>
 
-     
-<a href=https://bio.site/firstfiwfans.com target=_blank rel="nofollow noopener noreferrer" title="เยี่ยมชม Bio.site Profile ของเรา" class="social-item bio-site inline-flex items-center justify-center gap-2 font-bold text-black bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-lg px-4 py-2 transition-colors duration-300 shadow-md">
-  <img src=/images/favicon-32x32.webp alt="โลโก้ Bio.site" width=16 height=16 class="w-4 h-4" loading=lazy decoding=async>
-  Bio.site
-</a>
-
-
-      
-      <a href=https://linktr.ee/kissmodel target=_blank rel="nofollow noopener noreferrer" class="social-item linktree inline-flex items-center font-bold text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg px-3 py-1 transition-colors duration-200" title="รวมลิงก์ทั้งหมดของเราใน Linktree">
-        <i class="fas fa-link mr-1" aria-hidden=true></i>Linktree
+      <!-- Twitter / X -->
+      <a href="https://twitter.com/yourtwitter"
+         target="_blank"
+         rel="nofollow noopener noreferrer"
+         class="social-item twitter inline-flex items-center font-semibold text-white bg-[#1DA1F2] hover:bg-[#0d8cd4] focus:outline-none focus:ring-2 focus:ring-sky-400 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+         aria-label="ติดตามเราบน X (Twitter)"
+         title="ติดตามเราบน X (Twitter)">
+        <i class="fab fa-x-twitter mr-2" aria-hidden="true"></i>X (Twitter)
       </a>
 
-      
-      <a href=https://sidelinechiangmai.bsky.social target=_blank rel="nofollow noopener noreferrer" class="social-item bluesky inline-flex items-center font-bold text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-1 transition-colors duration-200" title="ติดตามเราบน Bluesky">
-        <i class="fas fa-cloud mr-1" aria-hidden=true></i>Bluesky
+      <!-- Bio.site -->
+      <a href="https://bio.site/firstfiwfans.com"
+         target="_blank"
+         rel="nofollow noopener noreferrer"
+         class="social-item bio-site inline-flex items-center justify-center gap-2 font-semibold text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-xl px-5 py-2.5 shadow-md hover:shadow-lg transition-all duration-300"
+         aria-label="เยี่ยมชม Bio.site Profile ของเรา"
+         title="เยี่ยมชม Bio.site Profile ของเรา">
+        <img src="/images/favicon-32x32.webp"
+             alt="โลโก้ Bio.site"
+             width="16"
+             height="16"
+             class="w-4 h-4"
+             loading="lazy"
+             decoding="async" />
+        Bio.site
+      </a>
+
+      <!-- Linktree -->
+      <a href="https://linktr.ee/kissmodel"
+         target="_blank"
+         rel="nofollow noopener noreferrer"
+         class="social-item linktree inline-flex items-center font-semibold text-white bg-[#3C3C3C] hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+         aria-label="รวมลิงก์ทั้งหมดของเราใน Linktree"
+         title="รวมลิงก์ทั้งหมดของเราใน Linktree">
+        <i class="fas fa-link mr-2" aria-hidden="true"></i>Linktree
+      </a>
+
+      <!-- Bluesky -->
+      <a href="https://sidelinechiangmai.bsky.social"
+         target="_blank"
+         rel="nofollow noopener noreferrer"
+         class="social-item bluesky inline-flex items-center font-semibold text-white bg-[#0A7AFF] hover:bg-[#075ed1] focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-xl px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+         aria-label="ติดตามเราบน Bluesky"
+         title="ติดตามเราบน Bluesky">
+        <i class="fas fa-cloud mr-2" aria-hidden="true"></i>Bluesky
       </a>
 
     </div>
   </div>
 
-  
-  <p class="social-disclaimer text-xs md:text-sm text-center font-extrabold text-white bg-red-800 max-w-xl mx-auto px-4 py-2 mt-4 rounded-lg shadow-md leading-tight" role=alert>
-    <strong>เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</strong>
+  <!-- ข้อความประกาศอายุ -->
+  <p
+    class="social-disclaimer text-xs md:text-sm text-center font-extrabold text-white bg-red-700/90 backdrop-blur-md max-w-xl mx-auto px-5 py-3 mt-6 rounded-xl shadow-lg leading-tight tracking-wide"
+    role="alert"
+  >
+    🔞 <strong>เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</strong>  
+    โปรดใช้วิจารณญาณในการเข้าชม
   </p>
 </section>
+
 
 
 
@@ -445,9 +509,43 @@
 </main>
 
 
-<iframe
-  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
-  width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+<!-- 🌍 แผนที่ตำแหน่งของ Sideline Chiangmai -->
+<section
+  id="map-section"
+  class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-12"
+  aria-labelledby="map-title"
+>
+  <h2 id="map-title" class="sr-only">แผนที่ตำแหน่งของ Sideline Chiangmai</h2>
+
+  <iframe
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
+    width="100%"
+    height="450"
+    style="border:0; aspect-ratio: 16 / 9; border-radius: 1rem;"
+    allowfullscreen=""
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+    title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
+    aria-label="Google Map แสดงที่ตั้งของ Sideline Chiangmai ในตำบลช้างเผือก เจ็ดยอด"
+  ></iframe>
+
+  <!-- 🧭 ปุ่มเปิดใน Google Maps -->
+  <div class="absolute bottom-4 right-4">
+    <a
+      href="https://goo.gl/maps/1sXMGupTQG8T6Cxi6"
+      target="_blank"
+      rel="noopener nofollow noreferrer"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-pink-600 text-white shadow-md hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all"
+      aria-label="เปิดแผนที่ Sideline Chiangmai บน Google Maps"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 01.553-1.894L9 1m0 19l6 3m0 0l5.447-2.724A2 2 0 0021 18.382V8.618a2 2 0 00-.553-1.894L15 4m0 19V4m0 0L9 1" />
+      </svg>
+      เปิดใน Google Maps
+    </a>
+  </div>
+</section>
+
 
  <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
   <div class="container mx-auto">
