@@ -1,53 +1,61 @@
-# =============================================================================
-# netlify.toml (ปรับปรุงแล้ว)
-# =============================================================================
-
-# 1. การตั้งค่า Build
+# การตั้งค่าการ build ของเว็บไซต์
 [build]
-  publish = "."  # โฟลเดอร์ที่ deploy (ถูกต้องแล้วสำหรับเว็บ Static)
+  publish = "."  # โฟลเดอร์ที่เก็บไฟล์สุดท้ายของเว็บไซต์
 
-# 2. การตั้งค่า Headers (รวบให้สั้นลงและปลอดภัยขึ้น)
-
-# --- ควบคุมไฟล์หลักของเว็บ (โหลดใหม่เสมอ) ---
+# คอนฟิก Headers สำหรับการแคชและควบคุมการโหลดไฟล์ต่าง ๆ
 [[headers]]
-  for = '''
-  /*.html
-  '''
+  for = "*.html"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    cache-control = "public, max-age=600, must-revalidate"  # HTML cache 10 นาที
 
-# --- ควบคุม Service Worker (ห้ามแคชเด็ดขาด) ---
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate"
-    Service-Worker-Allowed = "/"
+    cache-control = "no-store, no-cache, must-revalidate"  # Service Worker ไม่แคช
 
-# --- ควบคุมไฟล์ Assets ที่ไม่ค่อยเปลี่ยน (ให้เบราว์เซอร์เช็คก่อน) ---
 [[headers]]
-  for = '''
+  for = "/manifest.webmanifest"
+  [headers.values]
+    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+
+# ควบคุมไฟล์ static assets ที่ไม่ค่อยเปลี่ยนแปลง ให้แคชได้นานและไม่เปลี่ยนแปลง
+[[headers]]
+  for = """
   /images/*
   /icons/*
   /fonts/*
   /*.css
   /*.js
-  '''
+  /*.woff
+  /*.woff2
+  /*.ttf
+  /*.eot
+  /*.svg
+  /*.png
+  /*.jpg
+  /*.jpeg
+  /*.gif
+  """
   [headers.values]
-    Cache-Control = "public, max-age=31536000, must-revalidate"
+    cache-control = "public, max-age=31536000, immutable"  # 1 ปีและไม่เปลี่ยนแปลง
 
-# --- ควบคุมไฟล์ PWA/SEO (แคชได้ แต่ให้เช็คใหม่ทุกวัน) ---
+# ควบคุมไฟล์ที่อัปเดตบ่อย เช่น HTML ให้แคชได้นานขึ้น แต่ยังเช็คการเปลี่ยนแปลง
 [[headers]]
-  for = '''
-  /manifest.webmanifest
-  /robots.txt
-  /sitemap.xml
-  '''
+  for = "*.html"
   [headers.values]
-    Cache-Control = "public, max-age=86400, must-revalidate"  # 1 วัน
+    cache-control = "public, max-age=600, must-revalidate"  # 10 นาที
 
-# 3. การตั้งค่า Redirects (จัดการลิงก์เก่าและลิงก์ผิด)
-
-# ตัวอย่าง redirect จากลิงก์เก่าไปลิงก์ใหม่
+# กำหนดการ redirect สำหรับลิงก์เก่าไปใหม่
 [[redirects]]
   from = "/old-path/*"
   to = "/new-path/:splat"
@@ -60,26 +68,8 @@
   status = 301
   force = true
 
-# คำสั่ง redirect สำหรับ 404 สำหรับลิงก์ที่ไม่เจอ
-# คำสั่งนี้จะไม่ควรใช้กับทุก URL เพราะจะทำให้ทุก URL ไปหน้า 404
-# เราจะลบหรือคอมเมนต์ออกเพื่อให้ URL สาธารณะทำงานปกติ
-# [[redirects]]
-#   from = "/*"
-#   to = "/404.html"
-#   status = 404
-
-# เพิ่มการ redirect สำหรับ sitemap.xml ให้เข้าถึงได้โดยตรง
+# ถ้าลิงก์ไม่พบ ให้ redirect ไปยัง 404.html
 [[redirects]]
-  from = "/sitemap.xml"
-  to = "/sitemap.xml"
-  status = 200
-
-
-# คำสั่ง redirect สำหรับทุก URL ไปยัง URL หลักไม่ใช้ www
-[[redirects]]
-  from = "https://*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
-  status = 301
-  force = true
-
-
+  from = "/*"
+  to = "/404.html"
+  status = 404
