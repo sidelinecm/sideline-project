@@ -120,15 +120,94 @@ h1 {
   line-height: 1.2;
 }
 
- 
-  
-.hero-image-full {
-  width: 100%;
-  height: 100vh; /* ให้เต็มความสูงของหน้าจอ */
-  object-fit: cover; /* ครอบคลุมเต็มพื้นที่โดยไม่ผิดอัตราส่วน */
-  display: block;
-  border-radius: .5rem; /* ถ้าต้องการมุมมน */
+ /* Container ของ profile card */
+.profile-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem; /* มุมโค้งนุ่ม */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* เงาลึกสร้างมิติ */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #fff;
 }
+
+/* Hover effect */
+.profile-card:hover {
+  transform: translateY(-5px) scale(1.02); /* ยกขึ้นเล็กน้อยและขยาย */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* รูปภาพหลัก */
+.profile-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  transition: transform 0.3s ease;
+}
+
+/* Zoom ภาพเมื่อ hover */
+.profile-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Overlay สำหรับข้อความ / ข้อมูลน้องๆ */
+.profile-card .card-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0));
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: background 0.3s ease;
+}
+
+/* ชื่อและสถานะ */
+.profile-card .card-overlay .name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.profile-card .card-overlay .status {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* Badge / ตัวชี้สถานะพิเศษ */
+.profile-card .availability-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background-color: #ff4081;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Highlight featured */
+.profile-card.featured .availability-badge {
+  background-color: gold;
+  color: #111;
+}
+
+/* สำหรับ responsive */
+@media (min-width: 768px) {
+  .profile-card .card-overlay .name {
+    font-size: 1.25rem;
+  }
+  .profile-card .card-overlay .status {
+    font-size: 0.9rem;
+  }
+}
+
+
 
 
 
@@ -293,6 +372,10 @@ p{margin:0 0 1em}
 }
 
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
 
 /* ===============================
    LIGHTBOX CLOSE BUTTON
@@ -2974,13 +3057,4 @@ a:hover, button:hover {
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-}
-.profile-card-new-container {
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-.profile-card-new {
-  transform: rotateY(0) rotateX(0) scale(1) !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
 }
