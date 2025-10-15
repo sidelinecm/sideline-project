@@ -190,194 +190,328 @@ async function main() {
         }
     }
 
-    // --- SEARCH & FILTERS (ENHANCED MERGE) ---
-    // We keep original structure but replace internal logic with full-featured smart search
-    function initSearchAndFilters() {
-        if (!dom.searchForm) {
-            applyFilters(false); // Initial render without updating URL
-            return;
-        }
+// --- SEARCH & FILTERS (ENHANCED MERGE) ---
+// ส่วนที่ 1: การจัดการการเริ่มต้นและการรีเซ็ตค่าตัวกรอง
 
-        // Populate filters from URL on page load
-        const urlParams = new URLSearchParams(window.location.search);
-        dom.searchInput.value = urlParams.get('q') || '';
-        dom.provinceSelect.value = urlParams.get('province') || '';
-        dom.availabilitySelect.value = urlParams.get('availability') || '';
-        dom.featuredSelect.value = urlParams.get('featured') || '';
+function initSearchAndFilters() {
+    if (!dom.searchForm) {
+        applyFilters(false); // Initial render without updating URL
+        return;
+    }
 
-        // Load last province from localStorage if none in URL
-        if (!dom.provinceSelect.value) {
-            const lastProvince = localStorage.getItem(LAST_PROVINCE_KEY);
-            if (lastProvince) {
-                dom.provinceSelect.value = lastProvince;
-            }
-        }
+    // *** 1. FORCE RESET FORM UI TO DEFAULT VALUES ***
+    // (ทำให้ฟอร์มกลับสู่ค่าเริ่มต้นเสมอเมื่อโหลดหน้า)
+    dom.searchInput.value = '';
+    // ใช้ 'all' เป็นค่าเริ่มต้นสำหรับ Selects
+    dom.provinceSelect.value = 'all'; 
+    dom.availabilitySelect.value = 'all';
+    dom.featuredSelect.value = 'all';
 
-        // Debounce helper
-        const debouncedFilter = (() => {
-            let timeout;
-            return () => { clearTimeout(timeout); timeout = setTimeout(() => applyFilters(true), 350); };
-        })();
+    // 2. LOAD LAST PROVINCE FROM LOCALSTORAGE
+    // โหลดจังหวัดล่าสุดมาทับค่าเริ่มต้น (ถ้ามี)
+    const lastProvince = localStorage.getItem(LAST_PROVINCE_KEY);
+    if (lastProvince) {
+        dom.provinceSelect.value = lastProvince;
+    }
 
-        dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(true); });
+    // 3. LOAD FILTERS FROM URL (OVERWRITE ALL PREVIOUS VALUES)
+    // ดึงค่าจาก URL Parameters มาทับค่าทั้งหมด หากมีการระบุไว้ใน URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlQ = urlParams.get('q');
+    const urlProvince = urlParams.get('province');
+    const urlAvailability = urlParams.get('availability');
+    const urlFeatured = urlParams.get('featured');
+    
+    // ใช้ค่าจาก URL มาตั้งค่าในฟอร์ม
+    if (urlQ !== null) dom.searchInput.value = urlQ;
+    if (urlProvince !== null) dom.provinceSelect.value = urlProvince;
+    if (urlAvailability !== null) dom.availabilitySelect.value = urlAvailability;
+    if (urlFeatured !== null) dom.featuredSelect.value = urlFeatured;
 
-        // Reset button
-        if (dom.resetSearchBtn) {
-            dom.resetSearchBtn.addEventListener('click', () => {
-                resetFilters();
-                applyFilters(true);
-            });
-        }
+    // 4. DEBOUNCE HELPER (โค้ดเดิม)
+    const debouncedFilter = (() => {
+        let timeout;
+        return () => { clearTimeout(timeout); timeout = setTimeout(() => applyFilters(true), 350); };
+    })();
 
-        // Inputs change
-        if (dom.searchInput) dom.searchInput.addEventListener('input', () => {
-            updateSuggestions();
-            debouncedFilter();
+    // 5. SET UP EVENT LISTENERS (โค้ดเดิม)
+    dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(true); });
+
+    // Reset button
+    if (dom.resetSearchBtn) {
+        dom.resetSearchBtn.addEventListener('click', () => {
+            resetFilters();
+            applyFilters(true);
         });
-        if (dom.provinceSelect) dom.provinceSelect.addEventListener('change', debouncedFilter);
-        if (dom.availabilitySelect) dom.availabilitySelect.addEventListener('change', debouncedFilter);
-        if (dom.featuredSelect) dom.featuredSelect.addEventListener('change', debouncedFilter);
-
-        // Create suggestion container if needed
-        ensureSuggestionContainer();
-
-        // Initial render
-        applyFilters(false);
     }
 
-    // Reset filters (preserve API: same name)
-    function resetFilters() {
-        dom.searchInput.value = '';
-        dom.provinceSelect.value = '';
-        dom.availabilitySelect.value = '';
-        dom.featuredSelect.value = '';
+    // Inputs change
+    if (dom.searchInput) dom.searchInput.addEventListener('input', () => {
+        // ต้องมีฟังก์ชัน updateSuggestions() อยู่ในโค้ดส่วนอื่น
+        updateSuggestions(); 
+        debouncedFilter();
+    });
+    if (dom.provinceSelect) dom.provinceSelect.addEventListener('change', debouncedFilter);
+    if (dom.availabilitySelect) dom.availabilitySelect.addEventListener('change', debouncedFilter);
+    if (dom.featuredSelect) dom.featuredSelect.addEventListener('change', debouncedFilter);
+
+    // Create suggestion container if needed
+    // ต้องมีฟังก์ชัน ensureSuggestionContainer() อยู่ในโค้ดส่วนอื่น
+    ensureSuggestionContainer(); 
+
+    // 6. INITIAL RENDER
+    applyFilters(false);
+}
+
+// Reset filters (preserve API: same name)
+function resetFilters() {
+    // ใช้ 'all' เป็นค่าเริ่มต้น
+    dom.searchInput.value = '';
+    dom.provinceSelect.value = 'all'; 
+    dom.availabilitySelect.value = 'all';
+    dom.featuredSelect.value = 'all';
+    localStorage.removeItem(LAST_PROVINCE_KEY);
+    // hide suggestions
+    if (dom.searchSuggestions) dom.searchSuggestions.style.display = 'none';
+    console.log("All filters have been reset.");
+}
+
+// --- SMART QUERY PARSING & MATCHING ---
+// ส่วนที่ 2: ฟังก์ชันตัวช่วยในการค้นหา
+
+function normalize(v) {
+    if (v === undefined || v === null) return '';
+    if (Array.isArray(v)) return v.join(' ').toString().toLowerCase();
+    return String(v).toLowerCase();
+}
+
+function parseSearchQuery(term) {
+    // returns { tokens:[], kv:[] }
+    const parts = term.split(/\s+/).filter(Boolean);
+    const kv = [];
+    const tokens = [];
+    for (const p of parts) {
+        const m = p.match(/^([a-zA-Z_]+):(.+)$/);
+        if (m) {
+            const key = m[1].toLowerCase();
+            let val = m[2];
+            // range like 18-25 or <2000 or >500
+            const rangeMatch = val.match(/^(\d+)-(\d+)$/);
+            const ltMatch = val.match(/^<(\d+)$/);
+            const gtMatch = val.match(/^>(\d+)$/);
+            if (rangeMatch) {
+                kv.push({ key, type: 'range', min: Number(rangeMatch[1]), max: Number(rangeMatch[2]) });
+            } else if (ltMatch) {
+                kv.push({ key, type: 'lt', value: Number(ltMatch[1]) });
+            } else if (gtMatch) {
+                kv.push({ key, type: 'gt', value: Number(gtMatch[1]) });
+            } else if (val === 'true' || val === 'false') {
+                kv.push({ key, type: 'bool', value: val === 'true' });
+            } else {
+                const list = val.split(',').map(x=>x.trim()).filter(Boolean);
+                kv.push({ key, type: 'list', value: list });
+            }
+        } else {
+            tokens.push(p.toLowerCase());
+        }
+    }
+    return { tokens, kv };
+}
+
+// ส่วนที่ 3: ตรรกะการค้นหาขั้นสูงสุด (Search Everything)
+
+function matchesProfile(profile, parsed) {
+    // Helper function to handle null/undefined and convert to lowercase/normalize
+    const normalize = (s) => (s ?? '').toString().toLowerCase().trim();
+
+    // Check key:value clauses first (AND logic)
+    for (const clause of parsed.kv) {
+        const k = clause.key;
+        const searchVal = normalize(clause.value);
+
+        // --- Province/ProvinceKey ---
+        if (k === 'province' || k === 'provincekey') {
+            const val = normalize(profile.provinceKey);
+            if (clause.type === 'list') {
+                if (!clause.value.some(v => val.includes(normalize(v)))) return false;
+            } else {
+                if (!val.includes(searchVal)) return false;
+            }
+        } 
+        // --- District/Area Search ---
+        else if (k === 'district' || k === 'area') {
+            const val = normalize(profile.districtName || profile.district || ''); 
+            if (!val.includes(searchVal)) return false;
+        } 
+        // --- Age ---
+        else if (k === 'age') {
+            const age = Number(profile.age) || 0;
+            if (clause.type === 'range') {
+                if (age < clause.min || age > clause.max) return false;
+            } else if (clause.type === 'lt') {
+                if (!(age < clause.value)) return false;
+            } else if (clause.type === 'gt') {
+                if (!(age > clause.value)) return false;
+            } else if (clause.type === 'list') {
+                if (!clause.value.some(v => Number(v) === age)) return false;
+            } else {
+                if (Number(clause.value) !== age) return false;
+            }
+        } 
+        // --- Featured ---
+        else if (k === 'featured' || k === 'isfeatured') {
+            const want = clause.type === 'bool' ? clause.value : (String(clause.value[0]).toLowerCase() === 'true');
+            if (Boolean(profile.isfeatured) !== want) return false;
+        } 
+        // --- Tag/Style ---
+        else if (k === 'tag' || k === 'style' || k === 'styletag' || k === 'tags') {
+            const tags = (profile.styleTags || []).map(t=>t.toLowerCase());
+            const list = clause.type === 'list' ? clause.value : [clause.value];
+            
+            const tagMatch = list.some(v => {
+                const searchV = v.toLowerCase();
+                return tags.some(t => t.includes(searchV));
+            });
+            if (!tagMatch) return false;
+        } 
+        // --- Rate/Price ---
+        else if (k === 'rate' || k === 'price') {
+            const rate = Number(profile.rate) || 0;
+            if (clause.type === 'range') {
+                if (rate < clause.min || rate > clause.max) return false;
+            } else if (clause.type === 'lt') {
+                if (!(rate < clause.value)) return false;
+            } else if (clause.type === 'gt') {
+                if (!(rate > clause.value)) return false;
+            } else if (clause.type === 'list') {
+                if (!clause.value.some(v => Number(v) === rate)) return false;
+            } else {
+                if (rate !== Number(clause.value)) return false;
+            }
+        } 
+        // --- Availability ---
+        else if (k === 'availability') {
+            const val = normalize(profile.availability);
+            if (clause.type === 'list') {
+                if (!clause.value.some(v => val.includes(v.toLowerCase()))) return false;
+            } else {
+                if (!val.includes(searchVal)) return false;
+            }
+        } 
+        // --- Fallback for other keys (Allows searching any field directly) ---
+        else {
+            const pv = normalize(profile[k] ?? profile[k.toLowerCase()] ?? '');
+            if (clause.type === 'list') {
+                if (!clause.value.some(v => pv.includes(v.toLowerCase()))) return false;
+            } else {
+                if (!pv.includes(searchVal)) return false;
+            }
+        }
+    }
+
+    // --- CRITICAL ADDITION: Check plain search tokens (Search Everything) ---
+    // ตรวจสอบว่าทุกคำค้นหาต้องปรากฏในข้อความที่รวมไว้ (AND logic)
+    if (parsed.tokens.length > 0) {
+        // รวมทุกฟิลด์ข้อความสำคัญที่ต้องการให้ค้นหาเข้าด้วยกัน
+        const searchableText = [
+            profile.name, 
+            profile.description, 
+            (profile.styleTags || []).join(' '), 
+            profile.provinceName, 
+            profile.districtName || profile.district || '' 
+        ].map(s => normalize(s || '')).join(' ');
+
+        // ตรวจสอบว่าทุกคำค้นหา (tokens) ต้องปรากฏใน searchableText
+        const allTokensMatch = parsed.tokens.every(token => {
+            return searchableText.includes(token);
+        });
+
+        if (!allTokensMatch) {
+            return false;
+        }
+    }
+
+    // If all clauses and tokens match (or no tokens/clauses provided)
+    return true;
+}
+
+// ส่วนที่ 4: ตรรกะการประมวลผลการกรอง
+
+function applyFilters(updateUrl = true) {
+    // ต้องแน่ใจว่า allProfiles และ provincesMap ถูกโหลดแล้ว
+    if (!allProfiles || !provincesMap) return; 
+
+    // --- 1. GATHER FILTER CRITERIA FROM UI ---
+    const searchTermRaw = dom.searchInput?.value?.trim() || '';
+    const selectedProvince = dom.provinceSelect?.value || 'all'; 
+    const selectedAvailability = dom.availabilitySelect?.value || 'all';
+    const selectedFeatured = dom.featuredSelect?.value || 'all';
+    const isFeaturedOnly = selectedFeatured === 'true' || selectedFeatured === 'yes';
+
+    // --- 2. UPDATE URL ---
+    const isSearching = searchTermRaw.length > 0 || selectedProvince !== 'all' || selectedAvailability !== 'all' || selectedFeatured !== 'all';
+
+    if (updateUrl) {
+        const newUrl = new URL(window.location.pathname, window.location.origin);
+        
+        // กำหนดค่า URL
+        if (searchTermRaw) newUrl.searchParams.set('q', searchTermRaw);
+        if (selectedProvince !== 'all') newUrl.searchParams.set('province', selectedProvince);
+        if (selectedAvailability !== 'all') newUrl.searchParams.set('availability', selectedAvailability);
+        if (isFeaturedOnly) newUrl.searchParams.set('featured', 'true');
+        
+        // ลบค่าที่ว่าง/ค่าเริ่มต้นออกจาก URL
+        if (!searchTermRaw) newUrl.searchParams.delete('q');
+        if (selectedProvince === 'all') newUrl.searchParams.delete('province');
+        if (selectedAvailability === 'all') newUrl.searchParams.delete('availability');
+        if (selectedFeatured === 'all' || selectedFeatured === 'no') newUrl.searchParams.delete('featured');
+
+        window.history.pushState({}, '', newUrl);
+    }
+
+    // --- 3. SAVE LAST PROVINCE ---
+    if (selectedProvince && selectedProvince !== 'all') {
+        localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
+    } else {
         localStorage.removeItem(LAST_PROVINCE_KEY);
-        // hide suggestions
-        if (dom.searchSuggestions) dom.searchSuggestions.style.display = 'none';
-        console.log("All filters have been reset.");
     }
 
-    // --- SMART QUERY PARSING & MATCHING ---
-    function normalize(v) {
-        if (v === undefined || v === null) return '';
-        if (Array.isArray(v)) return v.join(' ').toString().toLowerCase();
-        return String(v).toLowerCase();
-    }
+    // --- 4. PARSE SEARCH TERM (for advanced key:value search) ---
+    const parsed = parseSearchQuery(searchTermRaw);
 
-    function parseSearchQuery(term) {
-        // returns { tokens:[], kv:[] }
-        const parts = term.split(/\s+/).filter(Boolean);
-        const kv = [];
-        const tokens = [];
-        for (const p of parts) {
-            const m = p.match(/^([a-zA-Z_]+):(.+)$/);
-            if (m) {
-                const key = m[1].toLowerCase();
-                let val = m[2];
-                // range like 18-25 or <2000 or >500
-                const rangeMatch = val.match(/^(\d+)-(\d+)$/);
-                const ltMatch = val.match(/^<(\d+)$/);
-                const gtMatch = val.match(/^>(\d+)$/);
-                if (rangeMatch) {
-                    kv.push({ key, type: 'range', min: Number(rangeMatch[1]), max: Number(rangeMatch[2]) });
-                } else if (ltMatch) {
-                    kv.push({ key, type: 'lt', value: Number(ltMatch[1]) });
-                } else if (gtMatch) {
-                    kv.push({ key, type: 'gt', value: Number(gtMatch[1]) });
-                } else if (val === 'true' || val === 'false') {
-                    kv.push({ key, type: 'bool', value: val === 'true' });
-                } else {
-                    const list = val.split(',').map(x=>x.trim()).filter(Boolean);
-                    kv.push({ key, type: 'list', value: list });
-                }
-            } else {
-                tokens.push(p.toLowerCase());
+    // --- 5. PERFORM FILTERING ---
+    const filtered = allProfiles.filter(p => {
+        try {
+            // A. First enforce selected UI filters (Province, Availability, Featured)
+            
+            // 5.1 Filter by Province
+            if (selectedProvince !== 'all' && p.provinceKey !== selectedProvince) return false;
+
+            // 5.2 Filter by Availability
+            if (selectedAvailability === 'available' && p.availability?.toLowerCase() !== 'available') return false;
+            if (selectedAvailability === 'unavailable' && p.availability?.toLowerCase() === 'available') return false;
+
+            // 5.3 Filter by Featured
+            if (isFeaturedOnly && !p.isfeatured) return false;
+            if (selectedFeatured === 'no' && p.isfeatured) return false;
+
+            // B. Then smart match against parsed query (if any)
+            if (searchTermRaw) {
+                // ใช้ matchesProfile ซึ่งจะจัดการ Key:Value และ Plain Tokens ทั้งหมด
+                return matchesProfile(p, parsed);
             }
+            
+            return true; 
+        } catch (err) {
+            console.error('Search match error', err, p);
+            return false;
         }
-        return { tokens, kv };
-    }
+    });
 
-    function matchesProfile(profile, parsed) {
-        // Check key:value clauses first
-        for (const clause of parsed.kv) {
-            const k = clause.key;
-            if (k === 'province' || k === 'provincekey') {
-                const val = normalize(profile.provinceKey);
-                if (clause.type === 'list') {
-                    if (!clause.value.some(v => val === v.toLowerCase())) return false;
-                } else {
-                    if (!val.includes(String(clause.value).toLowerCase())) return false;
-                }
-            } else if (k === 'age') {
-                const age = Number(profile.age) || 0;
-                if (clause.type === 'range') {
-                    if (age < clause.min || age > clause.max) return false;
-                } else if (clause.type === 'lt') {
-                    if (!(age < clause.value)) return false;
-                } else if (clause.type === 'gt') {
-                    if (!(age > clause.value)) return false;
-                } else if (clause.type === 'list') {
-                    if (!clause.value.some(v => Number(v) === age)) return false;
-                } else if (clause.type === 'bool') {
-                    return false; // nonsense
-                } else {
-                    if (Number(clause.value) !== age) return false;
-                }
-            } else if (k === 'featured' || k === 'isfeatured') {
-                const want = clause.type === 'bool' ? clause.value : (String(clause.value[0]) === 'true');
-                if (Boolean(profile.isfeatured) !== want) return false;
-            } else if (k === 'tag' || k === 'style' || k === 'styletag' || k === 'tags') {
-                const tags = (profile.styleTags || []).map(t=>t.toLowerCase());
-                const list = clause.type === 'list' ? clause.value : [clause.value];
-                if (!list.some(v => tags.some(t => t.includes(v.toLowerCase())))) return false;
-            } else if (k === 'rate' || k === 'price') {
-                const rate = Number(profile.rate) || 0;
-                if (clause.type === 'range') {
-                    if (rate < clause.min || rate > clause.max) return false;
-                } else if (clause.type === 'lt') {
-                    if (!(rate < clause.value)) return false;
-                } else if (clause.type === 'gt') {
-                    if (!(rate > clause.value)) return false;
-                } else if (clause.type === 'list') {
-                    if (!clause.value.some(v => Number(v) === rate)) return false;
-                } else {
-                    if (rate !== Number(clause.value)) return false;
-                }
-            } else if (k === 'availability') {
-                const val = normalize(profile.availability);
-                if (clause.type === 'list') {
-                    if (!clause.value.some(v => val.includes(v.toLowerCase()))) return false;
-                } else {
-                    if (!val.includes(String(clause.value).toLowerCase())) return false;
-                }
-            } else {
-                // Fallback - check against multiple fields for flexible key names
-                const pv = normalize(profile[k] ?? profile[k.toLowerCase()] ?? '');
-                if (clause.type === 'list') {
-                    if (!clause.value.some(v => pv.includes(v.toLowerCase()))) return false;
-                } else {
-                    if (!pv.includes(String(clause.value).toLowerCase())) return false;
-                }
-            }
-        }
-
-        // Then check plain tokens: each token must appear in at least one searchable field
-        for (const token of parsed.tokens) {
-            const found =
-                normalize(profile.name).includes(token) ||
-                normalize(profile.description).includes(token) ||
-                normalize(profile.location).includes(token) ||
-                normalize(profile.quote).includes(token) ||
-                normalize(profile.stats).includes(token) ||
-                normalize(profile.skinTone).includes(token) ||
-                normalize(profile.provinceKey).includes(token) ||
-                normalize(profile.altText).includes(token) ||
-                (profile.styleTags || []).some(t => normalize(t).includes(token));
-            if (!found) return false;
-        }
-        return true;
-    }
-
+    // 6. RENDER RESULTS
+    // ต้องมีฟังก์ชัน renderProfiles() อยู่ในโค้ดส่วนอื่น
+    renderProfiles(filtered, isSearching); 
+}
     // --- SUGGESTIONS UI ---
     function ensureSuggestionContainer() {
         if (dom.searchSuggestions) return;
