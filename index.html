@@ -62,70 +62,97 @@
   <link rel=modulepreload href=/main.js>
   
   
- <style>.hero-h1-revised{max-width:1200px;margin:0 auto;padding:2rem 1rem;text-align:center}.hero-h1-revised h1{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;line-height:1.2;margin-bottom:1rem}.hero-h1-revised img{display:block;width:100%;height:auto;max-width:1200px;margin:0 auto;border-radius:.75rem;aspect-ratio:1200/904}#page-header{min-height:56px}#page-header .container{height:56px;display:flex;align-items:center}#page-header a img{display:block;width:auto;height:28px;aspect-ratio:245/30}nav[aria-label="เมนูหลัก"] a{white-space:nowrap;display:inline-block}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
+ 
   
-  <script type=application/ld+json>
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "name": "Sideline Chiangmai",
-        "url": "https://sidelinechiangmai.netlify.app/",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
-      },
-      {
-        "@type": "Organization",
-        "name": "Sideline Chiangmai",
-        "url": "https://sidelinechiangmai.netlify.app/",
-        "logo": "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
-        "sameAs": [
-          "https://www.facebook.com/sidelinechiangmai",
-          "https://www.instagram.com/sidelinechiangmai",
-          "https://www.tiktok.com/@sidelinecm"
-        ]
-      },
-      {
-        "@type": "LocalBusiness",
-        "name": "Sideline Chiang Mai",
-        "telephone": "+66912345678",
-        "image": "https://sidelinechiangmai.netlify.app/images/sideline-chiangmai-social-preview.webp",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "เชียงใหม่",
-          "addressRegion": "เชียงใหม่",
-          "addressCountry": "TH"
-        },
-        "url": "https://sidelinechiangmai.netlify.app/",
-        "priceRange": "฿฿",
-        "areaServed": "เชียงใหม่",
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "reviewCount": "2100"
-        },
-        "sameAs": [
-          "https://www.facebook.com/sidelinechiangmai",
-          "https://www.instagram.com/sidelinechiangmai",
-          "https://www.tiktok.com/@sidelinecm"
-        ]
+  <!-- ✅ Structured Data: Combined Schema for Sideline Chiangmai -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://sidelinechiangmai.netlify.app/#website",
+      "name": "Sideline Chiangmai",
+      "url": "https://sidelinechiangmai.netlify.app/",
+      "description": "แหล่งรวมน้องๆสาวๆ รับงาน ไซด์ไลน์เชียงใหม่ ตรงปก100% ฟีลแฟน ปลอดภัยไม่มีมัดจำ ชำระเงินหน้างาน โปรไฟล์เด็ด ติดต่อไลน์ทันที!",
+      "inLanguage": "th-TH",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
       }
-    ]
-  }
-  </script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-H3BT9WPRK5"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-H3BT9WPRK5');
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://sidelinechiangmai.netlify.app/#organization",
+      "name": "Sideline Chiangmai",
+      "url": "https://sidelinechiangmai.netlify.app/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
+        "width": 245,
+        "height": 30
+      },
+      "sameAs": [
+        "https://www.facebook.com/sidelinechiangmai",
+        "https://www.instagram.com/sidelinechiangmai",
+        "https://www.tiktok.com/@sidelinecm",
+        "https://sidelinechiangmai.bsky.social",
+        "https://linktr.ee/kissmodel"
+      ]
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://sidelinechiangmai.netlify.app/#localbusiness",
+      "name": "Sideline Chiangmai",
+      "image": [
+        "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
+        "https://sidelinechiangmai.netlify.app/images/hero-sidelinechiangmai-1200.webp"
+      ],
+      "description": "บริการไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100% เด็กใหม่ โปรไฟล์จริง อัปเดตทุกวัน",
+      "url": "https://sidelinechiangmai.netlify.app/",
+      "priceRange": "฿฿฿",
+      "telephone": "+66996523634",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก",
+        "addressLocality": "เมืองเชียงใหม่",
+        "addressRegion": "เชียงใหม่",
+        "postalCode": "50300",
+        "addressCountry": "TH"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 18.8140717,
+        "longitude": 98.9720960
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "เชียงใหม่"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"
+        ],
+        "opens": "10:00",
+        "closes": "02:00"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "128"
+      },
+      "sameAs": [
+        "https://www.facebook.com/sidelinechiangmai",
+        "https://www.instagram.com/sidelinechiangmai",
+        "https://www.tiktok.com/@sidelinecm"
+      ]
+    }
+  ]
+}
 </script>
+
 </head>
 <body class=antialiased data-page=home>
 
@@ -514,7 +541,6 @@
     </div>
 </main>
 
-<!-- 🌍 แผนที่ตำแหน่งของ Sideline Chiangmai -->
 <section
   id="map-section"
   class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-12"
@@ -522,17 +548,33 @@
 >
   <h2 id="map-title" class="sr-only">แผนที่ตำแหน่งของ Sideline Chiangmai</h2>
 
-  <iframe
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
-    style="border:0; width: 100%; aspect-ratio: 16 / 9; border-radius: 1rem;"
-    allowfullscreen
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade"
-    title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
-    aria-label="Google Map แสดงที่ตั้งของ Sideline Chiangmai ในตำบลช้างเผือก เจ็ดยอด"
-  ></iframe>
+  <!-- ข้อความที่อยู่สำหรับ Googlebot และผู้ใช้ -->
+  <div class="p-4 text-gray-700 dark:text-gray-300">
+    <p>
+      ที่ตั้ง: ไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
+      โทร: 099-XXX-XXXX
+    </p>
+  </div>
 
-  <!-- 🧭 ปุ่มเปิดใน Google Maps -->
+  <!-- container สำหรับ iframe (โหลดเฉพาะเมื่อเลื่อนถึง) -->
+  <div
+    id="map-container"
+    style="aspect-ratio: 16 / 9; width: 100%; border-radius: 1rem; position: relative;"
+    aria-label="Google Map แสดงที่ตั้งของ Sideline Chiangmai ในตำบลช้างเผือก เจ็ดยอด"
+  >
+    <noscript>
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
+        style="border:0; width: 100%; height: 100%; border-radius: 1rem;"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
+      ></iframe>
+    </noscript>
+  </div>
+
+  <!-- ปุ่มเปิดใน Google Maps -->
   <div class="absolute bottom-4 right-4">
     <a
       href="https://goo.gl/maps/1sXMGupTQG8T6Cxi6"
@@ -541,7 +583,7 @@
       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-pink-600 text-white shadow-md hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all"
       aria-label="เปิดแผนที่ Sideline Chiangmai บน Google Maps"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 01.553-1.894L9 1m0 19l6 3m0 0l5.447-2.724A2 2 0 0021 18.382V8.618a2 2 0 00-.553-1.894L15 4m0 19V4m0 0L9 1" />
       </svg>
       เปิดใน Google Maps
@@ -715,8 +757,10 @@
   </div>
 </div>
 
-<!-- ใช้ module script แบบถูกต้อง -->
-<script type="module" src="/main.js"></script>
+
+<!-- ✅ โหลด main.js แบบ Module + Async -->
+<script type="module" src="/main.js" async></script>
+
 
 <!-- ✅ โหลด SW หลังโหลดเสร็จ -->
 <script>

@@ -139,56 +139,88 @@ async function main() {
         if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'block';
     }
 
-    // --- DATA FETCHING ---
-    async function fetchData() {
-        try {
-            const [profilesRes, provincesRes] = await Promise.all([
-                supabase.from('profiles').select('*').order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false }),
-                supabase.from('provinces').select('*').order('nameThai', { ascending: true })
-            ]);
+// --- DATA FETCHING ---
+async function fetchData() {
+    try {
+        const [profilesRes, provincesRes] = await Promise.all([
+            supabase
+                .from('profiles')
+                .select('*')
+                .order('isfeatured', { ascending: false })
+                .order('lastUpdated', { ascending: false }),
+            supabase
+                .from('provinces')
+                .select('*')
+                .order('nameThai', { ascending: true })
+        ]);
 
-            if (profilesRes.error) throw profilesRes.error;
-            if (provincesRes.error) throw provincesRes.error;
+        // ตรวจสอบ error จาก Supabase
+        if (!profilesRes || profilesRes.error) throw profilesRes?.error || new Error('Unknown error fetching profiles');
+        if (!provincesRes || provincesRes.error) throw provincesRes?.error || new Error('Unknown error fetching provinces');
 
-            (provincesRes.data || []).forEach(p => provincesMap.set(p.key, p.nameThai));
+        // ตรวจสอบว่าข้อมูล provinces เป็น array
+        if (Array.isArray(provincesRes.data)) {
+            provincesRes.data.forEach(p => {
+                if (p?.key && p?.nameThai) {
+                    provincesMap.set(p.key, p.nameThai);
+                }
+            });
+        }
 
-            allProfiles = (profilesRes.data || []).map(p => {
-                const imageObjects = [p.imagePath, ...(p.galleryPaths || [])]
-                    .filter(Boolean)
-                    .map(path => {
-                        const originalUrl = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
-                        // ✅ [PERFORMANCE] Generate srcset for responsive images
-                        const srcset = [300, 600, 900]
-                            .map(width => `${originalUrl}?width=${width}&quality=80 ${width}w`)
-                            .join(', ');
-                        return {
-                            src: `${originalUrl}?width=600&quality=80`, // Fallback src
-                            srcset: srcset,
-                        };
-                    });
-                
+        // ตรวจสอบว่าข้อมูล profiles เป็น array
+        if (Array.isArray(profilesRes.data)) {
+            allProfiles = profilesRes.data.map(p => {
+                const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])]
+                    .filter(Boolean);
+
+                const imageObjects = imagePaths.map(path => {
+                    const publicUrlData = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+                    const originalUrl = publicUrlData?.data?.publicUrl || '/images/placeholder-profile-card.webp';
+
+                    const srcset = [300, 600, 900]
+                        .map(width => `${originalUrl}?width=${width}&quality=80 ${width}w`)
+                        .join(', ');
+
+                    return {
+                        src: `${originalUrl}?width=600&quality=80`,
+                        srcset: srcset,
+                    };
+                });
+
+                // fallback ถ้าไม่มีรูป
                 if (imageObjects.length === 0) {
                     imageObjects.push({ src: '/images/placeholder-profile-card.webp', srcset: '' });
                 }
 
-                const altText = p.altText || `โปรไฟล์ไซด์ไลน์ ${p.name} จังหวัด ${provincesMap.get(p.provinceKey) || ''}`;
+                const provinceName = provincesMap.get(p.provinceKey) || '';
+                const altText = p.altText || `โปรไฟล์ไซด์ไลน์ ${p.name} จังหวัด ${provinceName}`;
+
                 return { ...p, images: imageObjects, altText };
             });
+        } else {
+            console.warn('⚠️ profilesRes.data is not an array:', profilesRes.data);
+            allProfiles = [];
+        }
 
-            if (dom.provinceSelect && dom.provinceSelect.options.length <= 1) {
-                provincesRes.data.forEach(prov => {
+        // สร้าง dropdown จังหวัด
+        if (dom.provinceSelect && dom.provinceSelect.options.length <= 1 && Array.isArray(provincesRes.data)) {
+            provincesRes.data.forEach(prov => {
+                if (prov?.key && prov?.nameThai) {
                     const option = document.createElement('option');
                     option.value = prov.key;
                     option.textContent = prov.nameThai;
                     dom.provinceSelect.appendChild(option);
-                });
-            }
-            return true;
-        } catch (error) {
-            console.error('CRITICAL: Error fetching data from Supabase:', error);
-            return false;
+                }
+            });
         }
+
+        return true;
+    } catch (error) {
+        console.error('🔥 CRITICAL: Error fetching data from Supabase:', error);
+        allProfiles = []; // fallback สำรองเพื่อไม่ให้โค้ดอื่นพัง
+        return false;
     }
+}
 
     // --- SEARCH & FILTERS (ENHANCED MERGE) ---
     // We keep original structure but replace internal logic with full-featured smart search
@@ -803,7 +835,7 @@ function createProvinceSection(key, name, provinceProfiles) {
         });
 
         viewMoreBtn.addEventListener('click', () => {
-            window.location.href = `profiles.html?province=${key}`;
+            window.location.href = `profiles?province=${key}`;
         });
     }
 
