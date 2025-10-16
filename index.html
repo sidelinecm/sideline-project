@@ -112,7 +112,7 @@
       "description": "บริการไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100% เด็กใหม่ โปรไฟล์จริง อัปเดตทุกวัน",
       "url": "https://sidelinechiangmai.netlify.app/",
       "priceRange": "฿฿฿",
-      "telephone": "+66996523634",
+      "telephone": "099-423-8888",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก",
@@ -545,22 +545,27 @@
   id="map-section"
   class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-12"
   aria-labelledby="map-title"
+  role="region"
 >
-  <h2 id="map-title" class="sr-only">แผนที่ตำแหน่งของ Sideline Chiangmai</h2>
+  <h2 id="map-title" class="sr-only">
+    แผนที่ตำแหน่งของ Sideline Chiangmai
+  </h2>
 
-  <!-- ข้อความที่อยู่สำหรับ Googlebot และผู้ใช้ -->
-  <div class="p-4 text-gray-700 dark:text-gray-300">
+  <!-- ข้อความคำอธิบายสำหรับผู้ใช้และ SEO -->
+  <div class="p-4 text-gray-700 dark:text-gray-300 leading-relaxed">
     <p>
-      ที่ตั้ง: ไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
-      โทร: 099-XXX-XXXX
+      📍 ที่ตั้ง: ไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
+      ☎️ โทร: 099-423-8888
     </p>
   </div>
 
-  <!-- container สำหรับ iframe (โหลดเฉพาะเมื่อเลื่อนถึง) -->
-  <div
+  <!-- 🗺️ แผนที่ Google (Lazy-load) -->
+  <figure
     id="map-container"
-    style="aspect-ratio: 16 / 9; width: 100%; border-radius: 1rem; position: relative;"
-    aria-label="Google Map แสดงที่ตั้งของ Sideline Chiangmai ในตำบลช้างเผือก เจ็ดยอด"
+    role="group"
+    aria-labelledby="map-title"
+    class="w-full"
+    style="aspect-ratio: 16 / 9; border-radius: 1rem; position: relative;"
   >
     <noscript>
       <iframe
@@ -572,9 +577,9 @@
         title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
       ></iframe>
     </noscript>
-  </div>
+  </figure>
 
-  <!-- ปุ่มเปิดใน Google Maps -->
+  <!-- 🔗 ปุ่มเปิดใน Google Maps -->
   <div class="absolute bottom-4 right-4">
     <a
       href="https://goo.gl/maps/1sXMGupTQG8T6Cxi6"
@@ -583,14 +588,25 @@
       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-pink-600 text-white shadow-md hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all"
       aria-label="เปิดแผนที่ Sideline Chiangmai บน Google Maps"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 01.553-1.894L9 1m0 19l6 3m0 0l5.447-2.724A2 2 0 0021 18.382V8.618a2 2 0 00-.553-1.894L15 4m0 19V4m0 0L9 1" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-4 h-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 01.553-1.894L9 1m0 19l6 3m0 0l5.447-2.724A2 2 0 0021 18.382V8.618a2 2 0 00-.553-1.894L15 4m0 19V4m0 0L9 1"
+        />
       </svg>
       เปิดใน Google Maps
     </a>
   </div>
 </section>
-
 
  <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
   <div class="container mx-auto">
