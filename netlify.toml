@@ -1,25 +1,42 @@
-# การตั้งค่าการ build ของเว็บไซต์
+# =====================================
+# 🏗️  Netlify Build Configuration
+# =====================================
 [build]
-  publish = "."  # โฟลเดอร์ที่เก็บไฟล์สุดท้ายของเว็บไซต์
+  publish = "."          # โฟลเดอร์ที่เก็บไฟล์เว็บ (root)
+  command = ""           # ไม่มีคำสั่ง build (เว็บ static)
+  environment = { NODE_VERSION = "18" }
 
-# คอนฟิก Headers สำหรับการแคชและควบคุมการโหลดไฟล์ต่าง ๆ
+# =====================================
+# ⚙️  Global HTTP Security Headers
+# =====================================
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# =====================================
+# 🕸️  HTML Pages – Cache Short, Must Validate
+# =====================================
 [[headers]]
   for = "*.html"
   [headers.values]
-    cache-control = "public, max-age=600, must-revalidate"  # HTML cache 10 นาที
+    cache-control = "public, max-age=600, must-revalidate"  # 10 นาที
 
+# =====================================
+# 🧠  Service Worker / Manifest / Sitemap / Robots
+# =====================================
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    cache-control = "no-store, no-cache, must-revalidate"  # Service Worker ไม่แคช
+    cache-control = "no-store, no-cache, must-revalidate"
 
 [[headers]]
   for = "/manifest.webmanifest"
-  [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
-
-[[headers]]
-  for = "/robots.txt"
   [headers.values]
     cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
 
@@ -28,48 +45,78 @@
   [headers.values]
     cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
 
-# ควบคุมไฟล์ static assets ที่ไม่ค่อยเปลี่ยนแปลง ให้แคชได้นานและไม่เปลี่ยนแปลง
 [[headers]]
-  for = """
-  /images/*
-  /icons/*
-  /fonts/*
-  /*.css
-  /*.js
-  /*.woff
-  /*.woff2
-  /*.ttf
-  /*.eot
-  /*.svg
-  /*.png
-  /*.jpg
-  /*.jpeg
-  /*.gif
-  """
+  for = "/robots.txt"
   [headers.values]
-    cache-control = "public, max-age=31536000, immutable"  # 1 ปีและไม่เปลี่ยนแปลง
+    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
 
-# ควบคุมไฟล์ที่อัปเดตบ่อย เช่น HTML ให้แคชได้นานขึ้น แต่ยังเช็คการเปลี่ยนแปลง
+# =====================================
+# 🖼️  Static Assets (CSS / JS / Fonts / Images) – Long-term Cache
+# =====================================
 [[headers]]
-  for = "*.html"
+  for = "/images/*"
   [headers.values]
-    cache-control = "public, max-age=600, must-revalidate"  # 10 นาที
+    cache-control = "public, max-age=31536000, immutable"
 
-# กำหนดการ redirect สำหรับลิงก์เก่าไปใหม่
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
+# =====================================
+# ⚡  Performance Optimization
+# =====================================
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # เปิดการบีบอัด Brotli + Gzip โดยอัตโนมัติ
+    vary = "Accept-Encoding"
+    # เปิด HTTP Caching สำหรับ Edge CDN
+    Cache-Control = "public"
+
+# =====================================
+# 🔀  Redirect Rules
+# =====================================
+# ✅ SPA: ให้ทุก path โหลด index.html (สำคัญสุด)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ✅ ตัวอย่าง redirect เก่า → ใหม่ (ถ้ามี)
 [[redirects]]
   from = "/old-path/*"
   to = "/new-path/:splat"
   status = 301
   force = true
 
+# ✅ Redirect หน้าเก่าที่เปลี่ยนชื่อ
 [[redirects]]
   from = "/old-page.html"
   to = "/new-page.html"
   status = 301
   force = true
 
-# ถ้าลิงก์ไม่พบ ให้ redirect ไปยัง 404.html
-[[redirects]]
-  from = "/*"
-  to = "/404.html"
-  status = 404
+# =====================================
+# 🔍  Prerendering Configuration
+# =====================================
+[prerender]
+  enabled = true          # ✅ เปิดใช้ prerender (สำคัญต่อ SEO)
+  crawl = true            # ให้ระบบ prerender ลิงก์ทั้งหมด
+  cache = true            # แคชผล prerender เพื่อโหลดไวขึ้น
+
