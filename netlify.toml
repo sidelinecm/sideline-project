@@ -80,14 +80,15 @@
   to = "/index.html"
   status = 200
 
-# =====================================
-# ⚙️  Edge Functions
-# =====================================
 [[edge_functions]]
-  path = "/province/*"
+  path = "/"
   function = "prerender"
 
 [[edge_functions]]
-  path = "/profile/*"
+  path = "/index.html"
   function = "prerender"
+
+[[edge_functions]]
+  path = "/province/*"
+  function = "province-prerender"
 
