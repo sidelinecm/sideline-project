@@ -729,164 +729,71 @@ function createProfileCard(profile = {}) {
 }
 
 function createProvinceSection(key, name, provinceProfiles) {
-    const totalCount = Array.isArray(provinceProfiles) ? provinceProfiles.length : 0;
-
-    // root wrapper
+    const totalCount = provinceProfiles.length;
     const sectionWrapper = document.createElement('div');
-    sectionWrapper.className = 'section-content-wrapper';
+    sectionWrapper.className = 'section-content-wrapper'; // คลาสกลาง ๆ ปล่อยให้ CSS จัดการ
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
 
-    // header block (สร้าง DOM ด้วย textContent เพื่อป้องกัน XSS)
-    const headerWrap = document.createElement('div');
-    headerWrap.className = 'p-6 md:p-8';
+    const mapIcon = `<span aria-hidden="true" class="text-pink-500 text-2xl select-none">📍</span>`;
+    const arrowIcon = `
+        <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            class="ml-1 inline w-5 h-5 text-white transition-transform" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            aria-hidden="true"
+            focusable="false">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>`;
 
-    const h3 = document.createElement('h3');
-    h3.className = 'province-section-header flex items-center gap-2.5 text-lg font-semibold';
+    sectionWrapper.innerHTML = `
+        <div class="p-6 md:p-8">
+            <h3 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
+                ${mapIcon}
+                <span>จังหวัด ${name}</span>
+                <span class="profile-count-badge ml-2 inline-block bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded">${totalCount} โปรไฟล์</span>
+            </h3>
+            <p class="mt-2 text-sm text-muted-foreground">เลือกดูน้องๆ ที่พร้อมให้บริการในพื้นที่ ${name}</p>
+        </div>
+        <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-8 pb-6 md:pb-8"></div>
+        <div class="view-more-container px-6 md:px-8 pb-6 md:pb-8 -mt-4 text-center" style="display:none;">
+            <button 
+                type="button" 
+                class="view-more-btn inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-pink-700 px-6 py-2 text-sm font-semibold text-white shadow-lg hover:from-pink-600 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-transform duration-200 ease-in-out"
+                aria-label="ดูน้องๆ ในจังหวัด ${name} ทั้งหมด">
+                ดูน้องๆ ใน ${name} ทั้งหมด
+                ${arrowIcon}
+            </button>
+        </div>`;
 
-    const mapIcon = document.createElement('span');
-    mapIcon.setAttribute('aria-hidden', 'true');
-    mapIcon.className = 'text-pink-500 text-2xl select-none';
-    mapIcon.textContent = '📍';
+    const grid = sectionWrapper.querySelector('.profile-grid');
+    const profilesToDisplay = provinceProfiles.slice(0, 8);
+    grid.append(...profilesToDisplay.map(createProfileCard));
 
-    const titleSpan = document.createElement('span');
-    // ใส่ข้อความด้วย textContent (ปลอดภัยต่อ XSS)
-    titleSpan.textContent = `จังหวัด ${name}`;
+    const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
+    const viewMoreBtn = sectionWrapper.querySelector('.view-more-btn');
 
-    const badge = document.createElement('span');
-    badge.className = 'profile-count-badge ml-2 inline-block bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded';
-    badge.textContent = `${totalCount} โปรไฟล์`;
-
-    h3.append(mapIcon, titleSpan, badge);
-    headerWrap.appendChild(h3);
-
-    const p = document.createElement('p');
-    p.className = 'mt-2 text-sm text-muted-foreground';
-    p.textContent = `เลือกดูน้องๆ ที่พร้อมให้บริการในพื้นที่ ${name}`;
-    headerWrap.appendChild(p);
-
-    // grid container
-    const grid = document.createElement('div');
-    grid.className = 'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-8 pb-6 md:pb-8';
-
-    // append header + grid to wrapper
-    sectionWrapper.appendChild(headerWrap);
-    sectionWrapper.appendChild(grid);
-
-    // view-more container (เริ่มซ่อน)
-    const viewMoreContainer = document.createElement('div');
-    viewMoreContainer.className = 'view-more-container px-6 md:px-8 pb-6 md:pb-8 -mt-4 text-center';
-    viewMoreContainer.style.display = 'none';
-
-    const viewMoreBtn = document.createElement('button');
-    viewMoreBtn.type = 'button';
-    viewMoreBtn.className = 'view-more-btn inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-pink-700 px-6 py-2 text-sm font-semibold text-white shadow-lg hover:from-pink-600 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-transform duration-200 ease-in-out';
-    viewMoreBtn.setAttribute('aria-label', `ดูน้องๆ ในจังหวัด ${name} ทั้งหมด`);
-
-    // สร้างไอคอนลูกศรเป็น element (aria-hidden true)
-    const arrowSvgNS = 'http://www.w3.org/2000/svg';
-    const arrowSvg = document.createElementNS(arrowSvgNS, 'svg');
-    arrowSvg.setAttribute('xmlns', arrowSvgNS);
-    arrowSvg.setAttribute('viewBox', '0 0 24 24');
-    arrowSvg.setAttribute('fill', 'none');
-    arrowSvg.setAttribute('stroke', 'currentColor');
-    arrowSvg.setAttribute('aria-hidden', 'true');
-    arrowSvg.setAttribute('focusable', 'false');
-    arrowSvg.classList.add('ml-1', 'inline', 'w-5', 'h-5', 'text-white', 'transition-transform');
-
-    const arrowPath = document.createElementNS(arrowSvgNS, 'path');
-    arrowPath.setAttribute('stroke-linecap', 'round');
-    arrowPath.setAttribute('stroke-linejoin', 'round');
-    arrowPath.setAttribute('stroke-width', '2');
-    arrowPath.setAttribute('d', 'M9 5l7 7-7 7');
-
-    arrowSvg.appendChild(arrowPath);
-
-    // ปุ่มมี text + svg
-    const btnText = document.createTextNode(`ดูน้องๆ ใน ${name} ทั้งหมด`);
-    viewMoreBtn.appendChild(btnText);
-    viewMoreBtn.appendChild(arrowSvg);
-    viewMoreContainer.appendChild(viewMoreBtn);
-    sectionWrapper.appendChild(viewMoreContainer);
-
-    // --- append sample profiles ---
-    // profilesToDisplay เป็น array ของ element หรือ string — ต้องรองรับทั้งสองแบบ
-    const profilesToDisplay = Array.isArray(provinceProfiles) ? provinceProfiles.slice(0, 8) : [];
-
-    profilesToDisplay.forEach(p => {
-        // ถ้า createProfileCard คืนค่า element (หรือพ่วงมาเป็น element)
-        // แต่ถ้าเป็น string (HTML) ให้แปลงเป็น element ปลอดภัย
-        let node = null;
-        if (p instanceof Element) {
-            node = p;
-        } else if (typeof p === 'string') {
-            // ถ้า createProfileCard ให้ HTML string ทั้งนี้สมมติไม่มาจาก user input
-            const tmp = document.createElement('div');
-            tmp.innerHTML = p;
-            node = tmp.firstElementChild;
-        } else if (typeof p === 'object' && p !== null && typeof p.render === 'function') {
-            // ถ้ากลายเป็น object ที่มี method render
-            node = p.render();
-        }
-
-        // หากคุณใช้ฟังก์ชัน createProfileCard ที่คืนค่า element: ใช้แบบนี้:
-        if (!node && typeof createProfileCard === 'function') {
-            try {
-                const maybe = createProfileCard(p);
-                if (maybe instanceof Element) node = maybe;
-                else if (typeof maybe === 'string') {
-                    const tmp2 = document.createElement('div');
-                    tmp2.innerHTML = maybe;
-                    node = tmp2.firstElementChild;
-                }
-            } catch (err) {
-                // ไม่ทำให้แอพล่ม — ถ้าเกิด error ให้ข้าม และ log
-                console.error('createProfileCard failed for an item', err);
-            }
-        }
-
-        if (node) grid.appendChild(node);
-    });
-
-    // --- view more logic ---
     if (viewMoreContainer && totalCount > 10) {
         viewMoreContainer.style.display = 'block';
 
-        // hover effects
+        // animation เล็กน้อยเวลาชี้ปุ่ม
         viewMoreBtn.addEventListener('mouseenter', () => {
-            arrowSvg.style.transform = 'translateX(4px)';
+            const svg = viewMoreBtn.querySelector('svg');
+            if (svg) svg.style.transform = 'translateX(4px)';
             viewMoreBtn.style.transform = 'scale(1.05)';
             viewMoreBtn.style.boxShadow = '0 8px 15px rgba(219, 39, 119, 0.7)';
         });
         viewMoreBtn.addEventListener('mouseleave', () => {
-            arrowSvg.style.transform = 'translateX(0)';
+            const svg = viewMoreBtn.querySelector('svg');
+            if (svg) svg.style.transform = 'translateX(0)';
             viewMoreBtn.style.transform = 'scale(1)';
             viewMoreBtn.style.boxShadow = '0 4px 6px rgba(219, 39, 119, 0.5)';
         });
 
-        // click handler — รองรับทั้ง profiles / profiles.html
         viewMoreBtn.addEventListener('click', () => {
-            let baseUrl = '/profiles';
-            if (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.endsWith('.html')) {
-                baseUrl += '.html';
-            }
-            const targetUrl = `${baseUrl}?province=${encodeURIComponent(key)}`;
-            try {
-                window.location.href = targetUrl;
-            } catch (err) {
-                console.error('Redirect failed:', err);
-            }
+            window.location.href = `profiles?province=${key}`;
         });
-    }
-
-    // SEO-friendly: ถ้าหน้าปัจจุบันมี .html ให้ลบออกจาก URL แบบไม่ reload
-    try {
-        if (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.endsWith('.html')) {
-            const cleanUrl = window.location.pathname.replace('.html', '');
-            history.replaceState(null, '', cleanUrl + window.location.search);
-        }
-    } catch (err) {
-        // ไม่บังคับ — ถ้าเกิด error ให้ log แล้วไม่ทำอะไรต่อ
-        console.warn('history.replaceState failed:', err);
     }
 
     return sectionWrapper;
