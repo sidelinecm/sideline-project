@@ -20,56 +20,36 @@
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
 
 # =====================================
-# 🕸️  HTML Pages – Cache Short, Must Validate
+# 🕸️  HTML Pages
 # =====================================
 [[headers]]
   for = "*.html"
   [headers.values]
-    cache-control = "public, max-age=600, must-revalidate"  # 10 นาที
+    cache-control = "public, max-age=600, must-revalidate"
 
 # =====================================
-# 🧠  Service Worker / Manifest / Sitemap / Robots
+# 🧠  Manifest / Sitemap / Robots
 # =====================================
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    cache-control = "no-store, no-cache, must-revalidate"
-
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+    cache-control = "public, max-age=86400, must-revalidate"
 
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+    cache-control = "public, max-age=86400, must-revalidate"
 
 [[headers]]
   for = "/robots.txt"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+    cache-control = "public, max-age=86400, must-revalidate"
 
 # =====================================
-# 🖼️  Static Assets (CSS / JS / Fonts / Images) – Long-term Cache
+# 🖼️  Static Assets (CSS / JS / Images)
 # =====================================
 [[headers]]
   for = "/images/*"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/icons/*"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/fonts/*"
-  [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/css/*"
   [headers.values]
     cache-control = "public, max-age=31536000, immutable"
 
@@ -78,45 +58,36 @@
   [headers.values]
     cache-control = "public, max-age=31536000, immutable"
 
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
 # =====================================
-# ⚡  Performance Optimization
+# ⚡  Performance
 # =====================================
 [[headers]]
   for = "/*"
   [headers.values]
-    # เปิดการบีบอัด Brotli + Gzip โดยอัตโนมัติ
     vary = "Accept-Encoding"
-    # เปิด HTTP Caching สำหรับ Edge CDN
     Cache-Control = "public"
 
 # =====================================
-# 🔀  Redirect Rules
+# 🔀  Redirects
 # =====================================
-# ✅ SPA: ให้ทุก path โหลด index.html (สำคัญสุด)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# ✅ ตัวอย่าง redirect เก่า → ใหม่ (ถ้ามี)
-[[redirects]]
-  from = "/old-path/*"
-  to = "/new-path/:splat"
-  status = 301
-  force = true
-
-# ✅ Redirect หน้าเก่าที่เปลี่ยนชื่อ
-[[redirects]]
-  from = "/old-page.html"
-  to = "/new-page.html"
-  status = 301
-  force = true
-
 # =====================================
-# 🔍  Prerendering Configuration
+# ⚙️  Edge Functions
 # =====================================
-[prerender]
-  enabled = true          # ✅ เปิดใช้ prerender (สำคัญต่อ SEO)
-  crawl = true            # ให้ระบบ prerender ลิงก์ทั้งหมด
-  cache = true            # แคชผล prerender เพื่อโหลดไวขึ้น
+[[edge_functions]]
+  path = "/province/*"
+  function = "prerender"
+
+[[edge_functions]]
+  path = "/profile/*"
+  function = "prerender"
 
