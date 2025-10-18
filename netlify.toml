@@ -80,15 +80,4 @@
   to = "/index.html"
   status = 200
 
-[[edge_functions]]
-  path = "/"
-  function = "prerender"
-
-[[edge_functions]]
-  path = "/index.html"
-  function = "prerender"
-
-[[edge_functions]]
-  path = "/province/*"
-  function = "province-prerender"
 
