@@ -80,4 +80,9 @@
   to = "/index.html"
   status = 200
 
+[[redirects]]
+  from = "/profiles"
+  to = "/profiles.html"
+  status = 200
+
 
