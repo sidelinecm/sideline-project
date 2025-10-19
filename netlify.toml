@@ -73,16 +73,36 @@
     Cache-Control = "public"
 
 # =====================================
-# 🔀  Redirects
+# Redirect ทุก URL ไปยัง index.html สำหรับ SPA
 # =====================================
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+# จัดการ Error Page ต่างๆ ให้ redirect ไปยังหน้าเดียวกัน
 [[redirects]]
-  from = "/profiles"
-  to = "/profiles.html"
-  status = 200
+  from = "/404.html"
+  to = "/index.html"
+  status = 404
 
+[[redirects]]
+  from = "/502.html"
+  to = "/index.html"
+  status = 502
 
+[[redirects]]
+  from = "/503.html"
+  to = "/index.html"
+  status = 503
+
+[[redirects]]
+  from = "/504.html"
+  to = "/index.html"
+  status = 504
+
+# สำหรับ error อื่นๆ หรือสถานะที่ไม่ได้ระบุ
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 500

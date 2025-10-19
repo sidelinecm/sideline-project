@@ -139,56 +139,88 @@ async function main() {
         if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'block';
     }
 
-    // --- DATA FETCHING ---
-    async function fetchData() {
-        try {
-            const [profilesRes, provincesRes] = await Promise.all([
-                supabase.from('profiles').select('*').order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false }),
-                supabase.from('provinces').select('*').order('nameThai', { ascending: true })
-            ]);
+// --- DATA FETCHING ---
+async function fetchData() {
+    try {
+        const [profilesRes, provincesRes] = await Promise.all([
+            supabase
+                .from('profiles')
+                .select('*')
+                .order('isfeatured', { ascending: false })
+                .order('lastUpdated', { ascending: false }),
+            supabase
+                .from('provinces')
+                .select('*')
+                .order('nameThai', { ascending: true })
+        ]);
 
-            if (profilesRes.error) throw profilesRes.error;
-            if (provincesRes.error) throw provincesRes.error;
+        // ตรวจสอบ error จาก Supabase
+        if (!profilesRes || profilesRes.error) throw profilesRes?.error || new Error('Unknown error fetching profiles');
+        if (!provincesRes || provincesRes.error) throw provincesRes?.error || new Error('Unknown error fetching provinces');
 
-            (provincesRes.data || []).forEach(p => provincesMap.set(p.key, p.nameThai));
+        // ตรวจสอบว่าข้อมูล provinces เป็น array
+        if (Array.isArray(provincesRes.data)) {
+            provincesRes.data.forEach(p => {
+                if (p?.key && p?.nameThai) {
+                    provincesMap.set(p.key, p.nameThai);
+                }
+            });
+        }
 
-            allProfiles = (profilesRes.data || []).map(p => {
-                const imageObjects = [p.imagePath, ...(p.galleryPaths || [])]
-                    .filter(Boolean)
-                    .map(path => {
-                        const originalUrl = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
-                        // ✅ [PERFORMANCE] Generate srcset for responsive images
-                        const srcset = [300, 600, 900]
-                            .map(width => `${originalUrl}?width=${width}&quality=80 ${width}w`)
-                            .join(', ');
-                        return {
-                            src: `${originalUrl}?width=600&quality=80`, // Fallback src
-                            srcset: srcset,
-                        };
-                    });
-                
+        // ตรวจสอบว่าข้อมูล profiles เป็น array
+        if (Array.isArray(profilesRes.data)) {
+            allProfiles = profilesRes.data.map(p => {
+                const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])]
+                    .filter(Boolean);
+
+                const imageObjects = imagePaths.map(path => {
+                    const publicUrlData = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+                    const originalUrl = publicUrlData?.data?.publicUrl || '/images/placeholder-profile-card.webp';
+
+                    const srcset = [300, 600, 900]
+                        .map(width => `${originalUrl}?width=${width}&quality=80 ${width}w`)
+                        .join(', ');
+
+                    return {
+                        src: `${originalUrl}?width=600&quality=80`,
+                        srcset: srcset,
+                    };
+                });
+
+                // fallback ถ้าไม่มีรูป
                 if (imageObjects.length === 0) {
                     imageObjects.push({ src: '/images/placeholder-profile-card.webp', srcset: '' });
                 }
 
-                const altText = p.altText || `โปรไฟล์ไซด์ไลน์ ${p.name} จังหวัด ${provincesMap.get(p.provinceKey) || ''}`;
+                const provinceName = provincesMap.get(p.provinceKey) || '';
+                const altText = p.altText || `โปรไฟล์ไซด์ไลน์ ${p.name} จังหวัด ${provinceName}`;
+
                 return { ...p, images: imageObjects, altText };
             });
+        } else {
+            console.warn('⚠️ profilesRes.data is not an array:', profilesRes.data);
+            allProfiles = [];
+        }
 
-            if (dom.provinceSelect && dom.provinceSelect.options.length <= 1) {
-                provincesRes.data.forEach(prov => {
+        // สร้าง dropdown จังหวัด
+        if (dom.provinceSelect && dom.provinceSelect.options.length <= 1 && Array.isArray(provincesRes.data)) {
+            provincesRes.data.forEach(prov => {
+                if (prov?.key && prov?.nameThai) {
                     const option = document.createElement('option');
                     option.value = prov.key;
                     option.textContent = prov.nameThai;
                     dom.provinceSelect.appendChild(option);
-                });
-            }
-            return true;
-        } catch (error) {
-            console.error('CRITICAL: Error fetching data from Supabase:', error);
-            return false;
+                }
+            });
         }
+
+        return true;
+    } catch (error) {
+        console.error('🔥 CRITICAL: Error fetching data from Supabase:', error);
+        allProfiles = []; // fallback สำรองเพื่อไม่ให้โค้ดอื่นพัง
+        return false;
     }
+}
 
     // --- SEARCH & FILTERS (ENHANCED MERGE) ---
     // We keep original structure but replace internal logic with full-featured smart search
@@ -600,7 +632,14 @@ function createProfileCard(profile = {}) {
 
     const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
 
-    // 🧠 Responsive Image (ขั้นสูง)
+    // 🧠 Preload ภาพหลัก
+    const preloadLink = document.createElement('link');
+    preloadLink.rel = 'preload';
+    preloadLink.as = 'image';
+    preloadLink.href = `${baseUrl}?width=400&quality=80`;
+    document.head.appendChild(preloadLink);
+
+    // 🎯 สร้างภาพหลัก Responsive
     const img = document.createElement('img');
     img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
 
@@ -617,20 +656,23 @@ function createProfileCard(profile = {}) {
 
     img.width = mainImage.width || 600;
     img.height = mainImage.height || 800;
+
     img.style.display = 'block';
     img.style.width = '100%';
     img.style.aspectRatio = '3 / 4';
     img.style.backgroundColor = '#f3f3f3';
 
+    // fallback เมื่อภาพไม่โหลด
     img.onerror = function() {
         this.onerror = null;
         this.src = '/images/placeholder-profile.webp';
         this.srcset = '';
     };
 
+    // เพิ่มภาพหลักเข้า DOM
     cardInner.appendChild(img);
 
-    // ✅ แสดงรูปภาพทั้งหมดพร้อม alt (All Tags Gallery)
+    // 🎖️ แสดงภาพทั้งหมดใน Gallery ถ้ามีหลายภาพ
     if (Array.isArray(profile.images) && profile.images.length > 1) {
         const gallery = document.createElement('div');
         gallery.className = 'profile-gallery grid grid-cols-3 gap-2 p-2';
@@ -657,7 +699,7 @@ function createProfileCard(profile = {}) {
         cardInner.appendChild(gallery);
     }
 
-    // 🎖️ Badge container (สถานะ + featured)
+    // 🎖️ Badge สถานะและ Featured
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
@@ -687,7 +729,7 @@ function createProfileCard(profile = {}) {
 
     cardInner.appendChild(badges);
 
-    // 💎 Overlay (พื้นกระจก)
+    // 🎨 Overlay ข้อมูลชื่อและจังหวัด
     const overlay = document.createElement('div');
     overlay.className = 'card-overlay';
 
@@ -710,10 +752,10 @@ function createProfileCard(profile = {}) {
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
 
-    // 🖱️ คลิกและคีย์บอร์ด event
+    // 🎯 Event สำหรับเปิดโปรไฟล์
     const openProfile = () => {
         console.log('เปิดโปรไฟล์:', profile.name);
-        // TODO: เพิ่มโค้ดเปิด modal / ไปหน้าโปรไฟล์จริงได้ที่นี่
+        // เพิ่มโค้ดเปิด modal หรือ navigate ไปยังโปรไฟล์จริงได้ที่นี่
     };
 
     cardInner.addEventListener('click', openProfile);
@@ -724,6 +766,7 @@ function createProfileCard(profile = {}) {
         }
     });
 
+    // ใส่ใน container หลัก
     card.appendChild(cardInner);
     return card;
 }
