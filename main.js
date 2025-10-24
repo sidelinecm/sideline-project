@@ -553,11 +553,11 @@ function renderProfiles(filteredProfiles, isSearching) {
     dom.profilesDisplayArea.innerHTML = '';
     dom.noResultsMessage.classList.add('hidden');
 
+    // --- FEATURED SECTION (เฉพาะหน้า Home) ---
     if (dom.featuredSection) {
         const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
             dom.featuredContainer.innerHTML = '';
-            // เลือกแค่ 12 โปรไฟล์แรก
             const topFeaturedProfiles = featuredProfilesList.slice(0, 12);
             dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
             dom.featuredSection.classList.remove('hidden');
@@ -567,6 +567,7 @@ function renderProfiles(filteredProfiles, isSearching) {
         }
     }
 
+    // --- ไม่มีผลลัพธ์ ---
     if (filteredProfiles.length === 0) {
         if (currentPage === 'home' || currentPage === 'profiles') {
             dom.noResultsMessage.classList.remove('hidden');
@@ -575,16 +576,17 @@ function renderProfiles(filteredProfiles, isSearching) {
         return;
     }
 
+    // --- หน้า PROFILES ---
     if (currentPage === 'profiles') {
-        const gridContainer = document.createElement('div');
-        gridContainer.className = 'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
-        gridContainer.append(...filteredProfiles.map(createProfileCard));
-        dom.profilesDisplayArea.appendChild(gridContainer);
-    } else if (currentPage === 'home') {
+        // ถ้ามีการค้นหา ให้แสดงเป็นกริดปกติ
         if (isSearching) {
-            const searchResultWrapper = createSearchResultSection(filteredProfiles);
-            dom.profilesDisplayArea.appendChild(searchResultWrapper);
+            const gridContainer = document.createElement('div');
+            gridContainer.className =
+                'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
+            gridContainer.append(...filteredProfiles.map(createProfileCard));
+            dom.profilesDisplayArea.appendChild(gridContainer);
         } else {
+            // ✅ แสดงโปรไฟล์แยกตามจังหวัด
             const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
                 (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
                 return acc;
@@ -592,9 +594,13 @@ function renderProfiles(filteredProfiles, isSearching) {
 
             const urlParams = new URLSearchParams(window.location.search);
             const priorityLocation = urlParams.get('location');
+
             let dynamicProvinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
             if (priorityLocation && dynamicProvinceOrder.includes(priorityLocation)) {
-                dynamicProvinceOrder = [priorityLocation, ...dynamicProvinceOrder.filter(p => p !== priorityLocation)];
+                dynamicProvinceOrder = [
+                    priorityLocation,
+                    ...dynamicProvinceOrder.filter(p => p !== priorityLocation)
+                ];
             }
 
             dynamicProvinceOrder.forEach(provinceKey => {
@@ -606,6 +612,19 @@ function renderProfiles(filteredProfiles, isSearching) {
             });
         }
     }
+
+    // --- หน้า HOME ---
+    else if (currentPage === 'home') {
+        if (isSearching) {
+            // ถ้าค้นหา ให้แสดงผลลัพธ์การค้นหาเท่านั้น
+            const searchResultWrapper = createSearchResultSection(filteredProfiles);
+            dom.profilesDisplayArea.appendChild(searchResultWrapper);
+        } else {
+            // 🔸 ย้ายส่วนแสดงจังหวัดออกแล้ว เหลือเฉพาะส่วนอื่นในหน้า Home เท่านั้น
+        }
+    }
+
+    // --- เริ่มการ Animate เมื่อ Scroll ---
     initScrollAnimations();
 }
 
