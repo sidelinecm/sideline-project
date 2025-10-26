@@ -2,8 +2,8 @@
 # 🏗️  Netlify Build Configuration
 # =====================================
 [build]
-  publish = "."          # โฟลเดอร์ที่เก็บไฟล์เว็บ (root)
-  command = ""           # ไม่มีคำสั่ง build (เว็บ static)
+  publish = "."          # Root folder
+  command = ""           # ไม่มี build command สำหรับเว็บ static
   environment = { NODE_VERSION = "18" }
 
 # =====================================
@@ -18,6 +18,7 @@
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Vary = "Accept-Encoding"
 
 # =====================================
 # 🕸️  HTML Pages – Cache Short, Must Validate
@@ -25,7 +26,7 @@
 [[headers]]
   for = "*.html"
   [headers.values]
-    cache-control = "public, max-age=600, must-revalidate"  # 10 นาที
+    Cache-Control = "public, max-age=600, must-revalidate"
 
 # =====================================
 # 🧠  Service Worker / Manifest / Sitemap / Robots
@@ -33,107 +34,83 @@
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    cache-control = "no-store, no-cache, must-revalidate"
+    Cache-Control = "no-store, no-cache, must-revalidate"
 
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+    Cache-Control = "public, max-age=86400, must-revalidate"
 
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+    Cache-Control = "public, max-age=86400, must-revalidate"
 
 [[headers]]
   for = "/robots.txt"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
+    Cache-Control = "public, max-age=86400, must-revalidate"
 
 # =====================================
-# 🖼️  Static Assets (CSS / JS / Fonts / Images) – Long-term Cache
+# 🖼️  Static Assets – Long-term Cache
 # =====================================
 [[headers]]
   for = "/images/*"
   [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/icons/*"
   [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/fonts/*"
   [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/css/*"
   [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/js/*"
   [headers.values]
-    cache-control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=31536000, immutable"
 
-# =====================================
-# ⚡  Performance Optimization
-# =====================================
-[[headers]]
-  for = "/*"
-  [headers.values]
-    # เปิดการบีบอัด Brotli + Gzip โดยอัตโนมัติ
-    vary = "Accept-Encoding"
-    # เปิด HTTP Caching สำหรับ Edge CDN
-    Cache-Control = "public"
 # =====================================
 # 🔀  Redirect Rules
 # =====================================
-
-# ✅ 1. อนุญาตให้ Service Worker โหลดตรง (ไม่ redirect ไป index.html)
+# Service Worker และ PWA files ไม่ถูก SPA redirect
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
   force = true
 
-# ✅ 2. (ถ้ามี PWA ไฟล์อื่น เช่น manifest หรือ offline page)
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
   status = 200
   force = true
 
-# ✅ 3. SPA Fallback — ให้ทุก path อื่นๆ โหลด index.html
+# SPA Fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# ✅ 4. ตัวอย่าง redirect เส้นทางเก่า → ใหม่ (สามารถปรับได้)
+# ตัวอย่าง redirect เก่า → ใหม่
 [[redirects]]
   from = "/old-path/*"
   to = "/new-path/:splat"
   status = 301
   force = true
 
-# ✅ 5. Redirect หน้าเก่าที่เปลี่ยนชื่อ
-[[redirects]]
-  from = "/old-page.html"
-  to = "/new-page.html"
-  status = 301
-  force = true
-
-# =====================================
-# 🔀  Redirect Rules
-# =====================================
-# ... (กฎ Redirect เดิมของคุณ)
-
-# 🚨 กฎสำคัญ: ซ่อนเส้นทาง SEO "/seo-profiles/*" จากผู้ใช้ทั่วไป
-# เน้น: Google Bot จะข้ามกฎ 3xx/4xx Redirects/Rewrites นี้ และจะถูก Edge Function ดักจับก่อน
+# ซ่อน SEO profile path จากผู้ใช้ทั่วไป
 [[redirects]]
   from = "/seo-profiles/*"
-  to = "/404" 
-  status = 302 # ใช้ 302 เพื่อบอกว่าเป็นการ Redirect ชั่วคราว
+  to = "/404"
+  status = 302
+
