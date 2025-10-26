@@ -20,33 +20,38 @@
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
 
 # =====================================
-# 🕸️  HTML Pages
+# 🕸️  HTML Pages – Cache Short, Must Validate
 # =====================================
 [[headers]]
   for = "*.html"
   [headers.values]
-    cache-control = "public, max-age=600, must-revalidate"
+    cache-control = "public, max-age=600, must-revalidate"  # 10 นาที
 
 # =====================================
-# 🧠  Manifest / Sitemap / Robots
+# 🧠  Service Worker / Manifest / Sitemap / Robots
 # =====================================
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    cache-control = "no-store, no-cache, must-revalidate"
+
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"
+    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
 
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"
+    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
 
 [[headers]]
   for = "/robots.txt"
   [headers.values]
-    cache-control = "public, max-age=86400, must-revalidate"
+    cache-control = "public, max-age=86400, must-revalidate"  # 1 วัน
 
 # =====================================
-# 🖼️  Static Assets (CSS / JS / Images)
+# 🖼️  Static Assets (CSS / JS / Fonts / Images) – Long-term Cache
 # =====================================
 [[headers]]
   for = "/images/*"
@@ -54,7 +59,12 @@
     cache-control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/js/*"
+  for = "/icons/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
   [headers.values]
     cache-control = "public, max-age=31536000, immutable"
 
@@ -63,46 +73,67 @@
   [headers.values]
     cache-control = "public, max-age=31536000, immutable"
 
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
 # =====================================
-# ⚡  Performance
+# ⚡  Performance Optimization
 # =====================================
 [[headers]]
   for = "/*"
   [headers.values]
+    # เปิดการบีบอัด Brotli + Gzip โดยอัตโนมัติ
     vary = "Accept-Encoding"
+    # เปิด HTTP Caching สำหรับ Edge CDN
     Cache-Control = "public"
+# =====================================
+# 🔀  Redirect Rules
+# =====================================
 
-# =====================================
-# Redirect ทุก URL ไปยัง index.html สำหรับ SPA
-# =====================================
+# ✅ 1. อนุญาตให้ Service Worker โหลดตรง (ไม่ redirect ไป index.html)
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  force = true
+
+# ✅ 2. (ถ้ามี PWA ไฟล์อื่น เช่น manifest หรือ offline page)
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+  force = true
+
+# ✅ 3. SPA Fallback — ให้ทุก path อื่นๆ โหลด index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# จัดการ Error Page ต่างๆ ให้ redirect ไปยังหน้าเดียวกัน
+# ✅ 4. ตัวอย่าง redirect เส้นทางเก่า → ใหม่ (สามารถปรับได้)
 [[redirects]]
-  from = "/404.html"
-  to = "/index.html"
-  status = 404
+  from = "/old-path/*"
+  to = "/new-path/:splat"
+  status = 301
+  force = true
 
+# ✅ 5. Redirect หน้าเก่าที่เปลี่ยนชื่อ
 [[redirects]]
-  from = "/502.html"
-  to = "/index.html"
-  status = 502
+  from = "/old-page.html"
+  to = "/new-page.html"
+  status = 301
+  force = true
 
-[[redirects]]
-  from = "/503.html"
-  to = "/index.html"
-  status = 503
+# =====================================
+# 🔀  Redirect Rules
+# =====================================
+# ... (กฎ Redirect เดิมของคุณ)
 
+# 🚨 กฎสำคัญ: ซ่อนเส้นทาง SEO "/seo-profiles/*" จากผู้ใช้ทั่วไป
+# เน้น: Google Bot จะข้ามกฎ 3xx/4xx Redirects/Rewrites นี้ และจะถูก Edge Function ดักจับก่อน
 [[redirects]]
-  from = "/504.html"
-  to = "/index.html"
-  status = 504
-
-# สำหรับ error อื่นๆ หรือสถานะที่ไม่ได้ระบุ
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 500
+  from = "/seo-profiles/*"
+  to = "/404" 
+  status = 302 # ใช้ 302 เพื่อบอกว่าเป็นการ Redirect ชั่วคราว

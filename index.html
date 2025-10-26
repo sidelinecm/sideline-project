@@ -59,7 +59,7 @@
   <noscript><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css></noscript>
   
   
-  <link rel=modulepreload href=/main.js>
+  <link rel=modulepreload href=main.js>
   
   
  
@@ -254,102 +254,7 @@
 
     
   
-  
-<section id=search-section class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp">
-  
-  <form id="search-form" action="/profiles.html" autocomplete="off" aria-labelledby="search-form-heading">
-
-    <h2 id=search-form-heading class=sr-only>ฟอร์มค้นหาและกรองโปรไฟล์</h2>
-    
-    <div class=space-y-5>
-      
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        
-        
-        <div class="relative sm:col-span-2 lg:col-span-1">
-          <label for=search-keyword class=sr-only>ค้นหาด้วยคีย์เวิร์ด</label>
-          <div class=relative>
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-search" aria-hidden=true></i>
-            </span>
-           <input id=search-keyword name=q type=search placeholder="ค้นหาชื่อ, สไตล์..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400">
-          </div>
-        </div>
-
-        
-        <div class=relative>
-          <label for=search-province class=sr-only>เลือกจังหวัด</label>
-          <div class=relative>
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-map-marker-alt" aria-hidden=true></i>
-            </span>
-            <select id=search-province name=province class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-              <option value="">ทุกจังหวัด</option>
-            </select>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-chevron-down" aria-hidden=true></i>
-            </span>
-          </div>
-        </div>
-
-        
-        <div class=relative>
-          <label for=search-availability class=sr-only>เลือกสถานะ</label>
-          <div class=relative>
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-clock" aria-hidden=true></i>
-            </span>
-            <select id=search-availability name=availability class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-              <option value="">สถานะ (ทั้งหมด)</option>
-              <option value=ว่าง>ว่าง</option>
-              <option value=รับงาน>รับงาน</option>
-              <option value=รับงานบางวัน>รับงานบางวัน</option>
-              <option value=สอบถามคิว>สอบถามคิว</option>
-              <option value=ไม่ว่าง>ไม่ว่าง</option>
-              <option value=พัก>พัก</option>
-            </select>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-chevron-down" aria-hidden=true></i>
-            </span>
-          </div>
-        </div>
-      </div>
-      
-      
-      <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 pt-2">
-        
-        
-        <div class=relative>
-          <label for=search-featured class=sr-only>กรองโปรไฟล์แนะนำ</label>
-          <div class=relative>
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-star" aria-hidden=true></i>
-            </span>
-            <select id=search-featured name=featured class="w-full appearance-none pl-10 pr-10 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-xs shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-              <option value="">แนะนำ (ทั้งหมด)</option>
-              <option value=true>แนะนำเท่านั้น</option>
-            </select>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-chevron-down" aria-hidden=true></i>
-            </span>
-          </div>
-        </div>
-        
-        
-        <div class="flex items-center gap-3">
-          <button type=reset id=reset-search-btn class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-all duration-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">
-            <i class="fas fa-sync-alt" aria-hidden=true></i><span>ล้างค่า</span>
-          </button>
-          
-          <button type=submit id=keyword-search-btn class="flex items-center gap-2 px-6 py-2.5 bg-pink-500 text-white rounded-full transition-transform duration-300 text-sm font-semibold hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg hover:shadow-pink-500/20">
-            <i class="fas fa-search" aria-hidden=true></i>
-            <span>ค้นหา</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </form>
-</section>
+ 
 
 <section class="social-media-section text-center py-8 md:py-10 bg-white/50 dark:bg-gray-900/70 rounded-2xl shadow-inner mt-8 md:mt-12">
   
@@ -445,9 +350,10 @@
 </section>
 
 
-
-<!-- Featured Profiles Section -->
-<section id="featured-profiles" 
+<!-- =============================== -->
+<!-- 🌟 Featured Profiles Section -->
+<!-- =============================== -->
+<section id="featured-profiles"
   class="featured-section py-12 md:py-16 bg-gradient-to-b from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-2xl mt-12"
   aria-labelledby="featured-heading"
   data-animate-on-scroll>
@@ -484,11 +390,14 @@
   </div>
 </section>
 
+<!-- Divider -->
 <div class="container mx-auto px-4" data-animate-on-scroll>
   <hr class="border-pink-300/60 my-12 md:my-16">
 </div>
 
-<!-- All Profiles Section -->
+<!-- =============================== -->
+<!-- 👩‍💻 All Profiles Section -->
+<!-- =============================== -->
 <section id="all-profiles-section" 
   aria-labelledby="all-profiles-heading" 
   class="pt-12 md:pt-16 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-4 md:px-10"
@@ -538,49 +447,178 @@
   </div>
 </section>
 
+<!-- Divider -->
+<div class="container mx-auto px-4" data-animate-on-scroll>
+  <hr class="border-pink-300/60 my-12 md:my-16">
+</div>
+
+<!-- =============================== -->
+<!-- 🔍 Search Section -->
+<!-- =============================== -->
+<section id="search-section"
+  class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp"
+  aria-labelledby="search-form-heading"
+  data-animate-on-scroll>
+  
+  <form id="search-form" action="/profiles.html" autocomplete="off">
+
+    <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
+    
+    <div class="space-y-5">
+      
+      <!-- Filters -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Keyword -->
+        <div class="relative sm:col-span-2 lg:col-span-1">
+          <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <i class="fas fa-search" aria-hidden="true"></i>
+            </span>
+            <input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..."
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400">
+          </div>
+        </div>
+
+        <!-- Province -->
+        <div class="relative">
+          <label for="search-province" class="sr-only">เลือกจังหวัด</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+            </span>
+            <select id="search-province" name="province"
+              class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
+              <option value="">ทุกจังหวัด</option>
+            </select>
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="relative">
+          <label for="search-availability" class="sr-only">เลือกสถานะ</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <i class="fas fa-clock" aria-hidden="true"></i>
+            </span>
+            <select id="search-availability" name="availability"
+              class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
+              <option value="">สถานะ (ทั้งหมด)</option>
+              <option value="ว่าง">ว่าง</option>
+              <option value="รับงาน">รับงาน</option>
+              <option value="รับงานบางวัน">รับงานบางวัน</option>
+              <option value="สอบถามคิว">สอบถามคิว</option>
+              <option value="ไม่ว่าง">ไม่ว่าง</option>
+              <option value="พัก">พัก</option>
+            </select>
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Featured filter + buttons -->
+      <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 pt-2">
+        
+        <!-- Featured -->
+        <div class="relative">
+          <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <i class="fas fa-star" aria-hidden="true"></i>
+            </span>
+            <select id="search-featured" name="featured"
+              class="w-full appearance-none pl-10 pr-10 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-xs shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
+              <option value="">แนะนำ (ทั้งหมด)</option>
+              <option value="true">แนะนำเท่านั้น</option>
+            </select>
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
+              <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="flex items-center gap-3">
+          <button type="reset" id="reset-search-btn"
+            class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-all duration-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">
+            <i class="fas fa-sync-alt" aria-hidden="true"></i>
+            <span>ล้างค่า</span>
+          </button>
+          
+          <button type="submit" id="keyword-search-btn"
+            class="flex items-center gap-2 px-6 py-2.5 bg-pink-500 text-white rounded-full transition-transform duration-300 text-sm font-semibold hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg hover:shadow-pink-500/20">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span>ค้นหา</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>
+
     </div>
 </main>
 
+<!-- =============================== -->
+<!-- 🗺️ Map Section – Sideline Chiangmai -->
+<!-- =============================== -->
 <section
   id="map-section"
   class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-12"
   aria-labelledby="map-title"
   role="region"
+  data-animate-on-scroll
 >
-  <h2 id="map-title" class="sr-only">
-    แผนที่ตำแหน่งของ Sideline Chiangmai
+  <!-- ✅ Accessible & SEO Title -->
+  <h2 id="map-title" class="text-center text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white pt-6">
+    แผนที่และข้อมูลการติดต่อ Sideline Chiangmai
   </h2>
 
-  <!-- ข้อความคำอธิบายสำหรับผู้ใช้และ SEO -->
-  <div class="p-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-    <p>
-      📍 ที่ตั้ง: ไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
-      ☎️ โทร: 099-423-8888
+  <!-- ✅ Human-readable, SEO-friendly info -->
+  <div class="p-6 text-gray-700 dark:text-gray-300 leading-relaxed text-center">
+    <p class="max-w-2xl mx-auto">
+      📍 <strong>ที่ตั้ง:</strong> ไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
+      ☎️ <strong>โทร:</strong> <a href="tel:0994238888" class="text-pink-600 hover:underline">099-423-8888</a><br>
+      ⏰ <strong>เวลาเปิดทำการ:</strong> ทุกวัน 10:00 - 02:00 น.
     </p>
   </div>
 
-  <!-- 🗺️ แผนที่ Google (Lazy-load) -->
+  <!-- ✅ Lazy-loaded Google Map (with placeholder) -->
   <figure
     id="map-container"
     role="group"
     aria-labelledby="map-title"
-    class="w-full"
-    style="aspect-ratio: 16 / 9; border-radius: 1rem; position: relative;"
+    class="w-full aspect-[16/9] relative bg-gray-100 dark:bg-gray-800"
+    style="border-radius: 1rem;"
   >
-    <noscript>
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
-        style="border:0; width: 100%; height: 100%; border-radius: 1rem;"
-        allowfullscreen
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
-      ></iframe>
-    </noscript>
+    <!-- Placeholder -->
+    <div
+      id="map-placeholder"
+      class="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm"
+    >
+      <span>กำลังโหลดแผนที่...</span>
+    </div>
+
+    <!-- Map iframe -->
+    <iframe
+      id="google-map"
+      data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.679481493644!2d98.97209601527297!3d18.81407166253016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da2fff30dbdaed%3A0x73683efcbd4f4a19!2sไซด์ไลน์เชียงใหม่%20สวนรับงานเชียงใหม่%20ฟิวแฟน%20เจ็ดยอด%20ตำบลช้างเผือก%20เมือง%20เชียงใหม่!5e0!3m2!1sth!2sth!4v1697041383994!5m2!1sth!2sth"
+      title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
+      style="border:0; width:100%; height:100%; border-radius:1rem;"
+      allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+    ></iframe>
   </figure>
 
-  <!-- 🔗 ปุ่มเปิดใน Google Maps -->
-  <div class="absolute bottom-4 right-4">
+  <!-- ✅ CTA: Open in Google Maps -->
+  <div class="absolute bottom-4 right-4 z-10">
     <a
       href="https://goo.gl/maps/1sXMGupTQG8T6Cxi6"
       target="_blank"
@@ -588,14 +626,7 @@
       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-pink-600 text-white shadow-md hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all"
       aria-label="เปิดแผนที่ Sideline Chiangmai บน Google Maps"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-4 h-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -606,7 +637,51 @@
       เปิดใน Google Maps
     </a>
   </div>
+
+  <!-- ✅ LocalBusiness Schema for SEO -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Sideline Chiangmai",
+      "description": "บริการไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด พร้อมน้องๆคุณภาพระดับพรีเมียม",
+      "image": "https://yourdomain.com/images/logo.png",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ตำบลช้างเผือก อำเภอเมือง",
+        "addressLocality": "เชียงใหม่",
+        "postalCode": "50300",
+        "addressCountry": "TH"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 18.8140716,
+        "longitude": 98.9720960
+      },
+      "telephone": "+66994238888",
+      "url": "https://yourdomain.com",
+      "openingHours": "Mo-Su 10:00-02:00"
+    }
+  </script>
 </section>
+
+<script>
+  // ✅ Lazy-load map iframe (เพื่อ performance & SEO)
+  document.addEventListener("DOMContentLoaded", () => {
+    const iframe = document.getElementById("google-map");
+    const placeholder = document.getElementById("map-placeholder");
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          iframe.src = iframe.dataset.src;
+          placeholder.remove();
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+    observer.observe(iframe);
+  });
+</script>
 
  <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
   <div class="container mx-auto">

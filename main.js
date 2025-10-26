@@ -546,7 +546,9 @@ async function fetchData() {
         renderProfiles(filtered, isSearching);
     }
 
-// --- RENDERING ---
+// ==========================================================
+// 🔄 Rendering Profiles (SEO + UX Enhanced)
+// ==========================================================
 function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     const currentPage = dom.body.dataset.page;
@@ -578,7 +580,6 @@ function renderProfiles(filteredProfiles, isSearching) {
 
     // --- หน้า PROFILES ---
     if (currentPage === 'profiles') {
-        // ถ้ามีการค้นหา ให้แสดงเป็นกริดปกติ
         if (isSearching) {
             const gridContainer = document.createElement('div');
             gridContainer.className =
@@ -586,7 +587,6 @@ function renderProfiles(filteredProfiles, isSearching) {
             gridContainer.append(...filteredProfiles.map(createProfileCard));
             dom.profilesDisplayArea.appendChild(gridContainer);
         } else {
-            // ✅ แสดงโปรไฟล์แยกตามจังหวัด
             const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
                 (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
                 return acc;
@@ -616,24 +616,21 @@ function renderProfiles(filteredProfiles, isSearching) {
     // --- หน้า HOME ---
     else if (currentPage === 'home') {
         if (isSearching) {
-            // ถ้าค้นหา ให้แสดงผลลัพธ์การค้นหาเท่านั้น
             const searchResultWrapper = createSearchResultSection(filteredProfiles);
             dom.profilesDisplayArea.appendChild(searchResultWrapper);
-        } else {
-            // 🔸 ย้ายส่วนแสดงจังหวัดออกแล้ว เหลือเฉพาะส่วนอื่นในหน้า Home เท่านั้น
         }
     }
 
-    // --- เริ่มการ Animate เมื่อ Scroll ---
     initScrollAnimations();
 }
 
+// ==========================================================
+// 🧱 Profile Card (ไม่มี Schema)
+// ==========================================================
 function createProfileCard(profile = {}) {
-    // 🧱 Container หลัก
     const card = document.createElement('div');
     card.className = 'profile-card-new-container';
 
-    // 🩶 กล่องหลักของการ์ด
     const cardInner = document.createElement('div');
     cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl';
     cardInner.setAttribute('data-profile-id', profile.id || '');
@@ -641,99 +638,46 @@ function createProfileCard(profile = {}) {
     cardInner.setAttribute('role', 'button');
     cardInner.setAttribute('tabindex', '0');
 
-    // 🖼️ ข้อมูลภาพหลัก (พร้อม fallback)
+    // 🖼️ ภาพหลัก
     const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
         src: '/images/placeholder-profile.webp',
         alt: profile.name || 'profile',
         width: 600,
         height: 800
     };
-
     const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
 
-    // 🧠 Preload ภาพหลัก
     const preloadLink = document.createElement('link');
     preloadLink.rel = 'preload';
     preloadLink.as = 'image';
     preloadLink.href = `${baseUrl}?width=400&quality=80`;
     document.head.appendChild(preloadLink);
 
-    // 🎯 สร้างภาพหลัก Responsive
     const img = document.createElement('img');
     img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
-
     img.src = `${baseUrl}?width=400&quality=80`;
     img.srcset = `
       ${baseUrl}?width=150&quality=70 150w,
       ${baseUrl}?width=250&quality=75 250w,
       ${baseUrl}?width=600&quality=80 600w
-    `.trim();
+    `;
     img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
     img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
     img.loading = 'lazy';
     img.decoding = 'async';
+    img.onerror = function () { this.src = '/images/placeholder-profile.webp'; this.srcset = ''; };
 
-    img.width = mainImage.width || 600;
-    img.height = mainImage.height || 800;
-
-    img.style.display = 'block';
-    img.style.width = '100%';
-    img.style.aspectRatio = '3 / 4';
-    img.style.backgroundColor = '#f3f3f3';
-
-    // fallback เมื่อภาพไม่โหลด
-    img.onerror = function() {
-        this.onerror = null;
-        this.src = '/images/placeholder-profile.webp';
-        this.srcset = '';
-    };
-
-    // เพิ่มภาพหลักเข้า DOM
     cardInner.appendChild(img);
 
-    // 🎖️ แสดงภาพทั้งหมดใน Gallery ถ้ามีหลายภาพ
-    if (Array.isArray(profile.images) && profile.images.length > 1) {
-        const gallery = document.createElement('div');
-        gallery.className = 'profile-gallery grid grid-cols-3 gap-2 p-2';
-
-        profile.images.forEach((image, i) => {
-            const imgThumb = document.createElement('img');
-            const thumbBase = image.src?.split('?')[0] || '/images/placeholder-profile.webp';
-            imgThumb.src = `${thumbBase}?width=150&quality=70`;
-            imgThumb.alt = image.alt || `รูปที่ ${i + 1} ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
-            imgThumb.loading = 'lazy';
-            imgThumb.decoding = 'async';
-            imgThumb.width = image.width || 150;
-            imgThumb.height = image.height || 200;
-            imgThumb.className = 'rounded-md w-full h-auto object-cover aspect-[3/4] bg-gray-100';
-
-            imgThumb.onerror = function () {
-                this.onerror = null;
-                this.src = '/images/placeholder-profile.webp';
-            };
-
-            gallery.appendChild(imgThumb);
-        });
-
-        cardInner.appendChild(gallery);
-    }
-
-    // 🎖️ Badge สถานะและ Featured
+    // 🎖️ Badge
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
     const availSpan = document.createElement('span');
     let statusClass = 'status-inquire';
     switch (profile.availability) {
-        case 'ว่าง':
-            statusClass = 'status-available';
-            break;
-        case 'ไม่ว่าง':
-            statusClass = 'status-busy';
-            break;
-        case 'รอคิว':
-            statusClass = 'status-inquire';
-            break;
+        case 'ว่าง': statusClass = 'status-available'; break;
+        case 'ไม่ว่าง': statusClass = 'status-busy'; break;
     }
     availSpan.className = `availability-badge ${statusClass}`;
     availSpan.textContent = profile.availability || 'สอบถามคิว';
@@ -742,16 +686,14 @@ function createProfileCard(profile = {}) {
     if (profile.isfeatured) {
         const feat = document.createElement('span');
         feat.className = 'featured-badge';
-        feat.innerHTML = `<i class="fas fa-star" style="font-size: 0.7em; margin-right: 4px;"></i> แนะนำ`;
+        feat.innerHTML = `<i class="fas fa-star" style="font-size:0.7em;margin-right:4px;"></i> แนะนำ`;
         badges.appendChild(feat);
     }
-
     cardInner.appendChild(badges);
 
-    // 🎨 Overlay ข้อมูลชื่อและจังหวัด
+    // 🔤 Overlay ข้อมูล
     const overlay = document.createElement('div');
     overlay.className = 'card-overlay';
-
     const info = document.createElement('div');
     info.className = 'card-info';
 
@@ -759,73 +701,67 @@ function createProfileCard(profile = {}) {
     h3.className = 'text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow';
     h3.textContent = profile.name || 'ไม่ระบุชื่อ';
 
+    const provinceName = provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
     const p = document.createElement('p');
     p.className = 'text-sm flex items-center gap-1.5 text-white/90';
-    const provinceName = (typeof provincesMap !== 'undefined' && provincesMap.get)
-        ? provincesMap.get(profile.provinceKey) || 'ไม่ระบุ'
-        : 'ไม่ระบุ';
-    p.innerHTML = `<i class="fas fa-map-marker-alt" style="opacity: 0.8;"></i> ${provinceName}`;
+    p.innerHTML = `<i class="fas fa-map-marker-alt opacity-80"></i> ${provinceName}`;
 
     info.appendChild(h3);
     info.appendChild(p);
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
 
-    // 🎯 Event สำหรับเปิดโปรไฟล์
-    const openProfile = () => {
-        console.log('เปิดโปรไฟล์:', profile.name);
-        // เพิ่มโค้ดเปิด modal หรือ navigate ไปยังโปรไฟล์จริงได้ที่นี่
-    };
-
-    cardInner.addEventListener('click', openProfile);
-    cardInner.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openProfile();
-        }
+    // 🧠 Event
+    cardInner.addEventListener('click', () => {
+        window.location.href = `/profiles/${profile.id || ''}`;
     });
 
-    // ใส่ใน container หลัก
     card.appendChild(cardInner);
     return card;
 }
 
+// ==========================================================
+// 📍 Province Section (SEO & UX)
+// ==========================================================
 function createProvinceSection(key, name, provinceProfiles) {
     const totalCount = provinceProfiles.length;
     const sectionWrapper = document.createElement('div');
-    sectionWrapper.className = 'section-content-wrapper'; // คลาสกลาง ๆ ปล่อยให้ CSS จัดการ
+    sectionWrapper.className = 'section-content-wrapper';
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
 
-    const mapIcon = `<span aria-hidden="true" class="text-pink-500 text-2xl select-none">📍</span>`;
-    const arrowIcon = `
-        <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            class="ml-1 inline w-5 h-5 text-white transition-transform" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor" 
-            aria-hidden="true"
-            focusable="false">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>`;
+    // 🧩 Meta title + description
+    document.title = `ไซด์ไลน์ ${name} - รวมสาวสวยพร้อมให้บริการในจังหวัด${name}`;
+    const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
+    metaDesc.name = 'description';
+    metaDesc.content = `รวมสาวไซด์ไลน์ ${name} ทั้งหมด ${totalCount} โปรไฟล์ พร้อมรายละเอียดและรูปภาพครบถ้วน`;
+    if (!metaDesc.parentNode) document.head.appendChild(metaDesc);
 
+    // 🏷️ Header Province
     sectionWrapper.innerHTML = `
         <div class="p-6 md:p-8">
-            <h3 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
-                ${mapIcon}
-                <span>จังหวัด ${name}</span>
-                <span class="profile-count-badge ml-2 inline-block bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded">${totalCount} โปรไฟล์</span>
-            </h3>
-            <p class="mt-2 text-sm text-muted-foreground">เลือกดูน้องๆ ที่พร้อมให้บริการในพื้นที่ ${name}</p>
+            <h2 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
+                📍 จังหวัด ${name}
+                <span class="profile-count-badge ml-2 inline-block bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded">
+                    ${totalCount} โปรไฟล์
+                </span>
+            </h2>
+            <p class="mt-2 text-sm text-muted-foreground">
+                เลือกดูน้องๆ ที่พร้อมให้บริการในพื้นที่ ${name}
+            </p>
         </div>
-        <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-8 pb-6 md:pb-8"></div>
+        <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 
+                    sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 
+                    px-6 md:px-8 pb-6 md:pb-8"></div>
         <div class="view-more-container px-6 md:px-8 pb-6 md:pb-8 -mt-4 text-center" style="display:none;">
             <button 
-                type="button" 
-                class="view-more-btn inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-pink-700 px-6 py-2 text-sm font-semibold text-white shadow-lg hover:from-pink-600 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-transform duration-200 ease-in-out"
+                type="button"
+                class="view-more-btn inline-flex items-center gap-2 rounded-full 
+                bg-gradient-to-r from-pink-500 to-pink-700 px-6 py-2 
+                text-sm font-semibold text-white shadow-lg hover:from-pink-600 
+                hover:to-pink-800 focus:outline-none focus:ring-2 
+                focus:ring-pink-500 focus:ring-offset-2 transition-transform"
                 aria-label="ดูน้องๆ ในจังหวัด ${name} ทั้งหมด">
-                ดูน้องๆ ใน ${name} ทั้งหมด
-                ${arrowIcon}
+                ดูน้องๆ ใน ${name} ทั้งหมด →
             </button>
         </div>`;
 
@@ -838,41 +774,23 @@ function createProvinceSection(key, name, provinceProfiles) {
 
     if (viewMoreContainer && totalCount > 10) {
         viewMoreContainer.style.display = 'block';
-
-        // animation เล็กน้อยเวลาชี้ปุ่ม
-        viewMoreBtn.addEventListener('mouseenter', () => {
-            const svg = viewMoreBtn.querySelector('svg');
-            if (svg) svg.style.transform = 'translateX(4px)';
-            viewMoreBtn.style.transform = 'scale(1.05)';
-            viewMoreBtn.style.boxShadow = '0 8px 15px rgba(219, 39, 119, 0.7)';
-        });
-        viewMoreBtn.addEventListener('mouseleave', () => {
-            const svg = viewMoreBtn.querySelector('svg');
-            if (svg) svg.style.transform = 'translateX(0)';
-            viewMoreBtn.style.transform = 'scale(1)';
-            viewMoreBtn.style.boxShadow = '0 4px 6px rgba(219, 39, 119, 0.5)';
-        });
-
         viewMoreBtn.addEventListener('click', () => {
-            window.location.href = `profiles?province=${key}`;
+            window.location.href = `/province/${key}`;
         });
     }
 
     return sectionWrapper;
 }
 
-/**
- * REFACTORED: สร้าง Section ผลการค้นหา
- * - ลบสี hard-code ออก
- * - เพิ่มคลาสเฉพาะเพื่อให้ CSS จัดการได้ง่าย
- */
+// ==========================================================
+// 🔍 Search Result Section
+// ==========================================================
 function createSearchResultSection(profiles = []) {
     const wrapper = document.createElement('div');
     wrapper.className = 'section-content-wrapper';
     wrapper.setAttribute('data-animate-on-scroll', '');
     const count = Array.isArray(profiles) ? profiles.length : 0;
 
-    // --- MAJOR FIX #4: ใช้คลาสที่สื่อความหมาย ---
     wrapper.innerHTML = `
       <div class="p-6 md:p-8">
         <h3 class="search-results-header">ผลการค้นหา</h3>
@@ -880,7 +798,9 @@ function createSearchResultSection(profiles = []) {
           ${count > 0 ? `พบ <span class="search-count-highlight">${count}</span> โปรไฟล์ที่ตรงกับเงื่อนไข` : 'ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข'}
         </p>
       </div>
-      <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-8 pb-6 md:pb-8"></div>
+      <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 
+                  sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 
+                  px-6 md:px-8 pb-6 md:pb-8"></div>
     `;
 
     const grid = wrapper.querySelector('.profile-grid');
@@ -1322,21 +1242,33 @@ function createSearchResultSection(profiles = []) {
         wrapper.addEventListener('touchend', () => { isDragging = false; speed = 0.5; });
     });
 
-    function generateFullSchema() {
-        const pageTitle = document.title;
-        const canonicalUrl = document.querySelector("link[rel='canonical']")?.href || window.location.href;
-        const siteUrl = "https://sidelinechiangmai.netlify.app/";
-        const orgName = "Sideline Chiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
-        const mainSchema = {
-            "@context": "https://schema.org",
-            "@graph": [{
+function generateFullSchema() {
+    const pageTitle = document.title;
+    const canonicalUrl = document.querySelector("link[rel='canonical']")?.href || window.location.href;
+    const siteUrl = "https://sidelinechiangmai.netlify.app/";
+    const orgName = "Sideline Chiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
+
+    const mainSchema = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
                 "@type": "Organization",
                 "@id": `${siteUrl}#organization`,
                 "name": orgName,
                 "url": siteUrl,
-                "logo": { "@type": "ImageObject", "url": `${siteUrl}images/logo-sideline-chiangmai.webp`, "width": 164, "height": 40 },
-                "contactPoint": { "@type": "ContactPoint", "contactType": "customer support", "url": "https://line.me/ti/p/_faNcjQ3xx" }
-            }, {
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": `${siteUrl}images/logo-sideline-chiangmai.webp`,
+                    "width": 164,
+                    "height": 40
+                },
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer support",
+                    "url": "https://line.me/ti/p/_faNcjQ3xx"
+                }
+            },
+            {
                 "@type": "WebSite",
                 "@id": `${siteUrl}#website`,
                 "url": siteUrl,
@@ -1344,48 +1276,91 @@ function createSearchResultSection(profiles = []) {
                 "description": "รวมโปรไฟล์ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย คุณภาพ บริการฟีลแฟน การันตีตรงปก 100% ปลอดภัย ไม่ต้องมัดจำ",
                 "publisher": { "@id": `${siteUrl}#organization` },
                 "inLanguage": "th-TH"
-            }, {
+            },
+            {
                 "@type": "WebPage",
                 "@id": `${canonicalUrl}#webpage`,
                 "url": canonicalUrl,
                 "name": pageTitle,
                 "isPartOf": { "@id": `${siteUrl}#website` },
-                "primaryImageOfPage": { "@type": "ImageObject", "url": `${siteUrl}images/sideline-chiangmai-social-preview.webp` },
+                "primaryImageOfPage": {
+                    "@type": "ImageObject",
+                    "url": `${siteUrl}images/sideline-chiangmai-social-preview.webp`
+                },
                 "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
-            }, {
+            },
+            {
                 "@type": "LocalBusiness",
                 "@id": `${siteUrl}#localbusiness`,
                 "name": "SidelineChiangmai - ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก",
                 "image": `${siteUrl}images/sideline-chiangmai-social-preview.webp`,
                 "url": siteUrl,
                 "priceRange": "฿฿",
-                "address": { "@type": "PostalAddress", "streetAddress": "เจ็ดยอด", "addressLocality": "ช้างเผือก", "addressRegion": "เชียงใหม่", "postalCode": "50300", "addressCountry": "TH" },
-                "geo": { "@type": "GeoCoordinates", "latitude": "18.814361", "longitude": "98.972389" },
+                "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "เจ็ดยอด",
+                    "addressLocality": "ช้างเผือก",
+                    "addressRegion": "เชียงใหม่",
+                    "postalCode": "50300",
+                    "addressCountry": "TH"
+                },
+                "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": "18.814361",
+                    "longitude": "98.972389"
+                },
                 "hasMap": "https://maps.app.goo.gl/3y8gyAtamm8YSagi9",
                 "openingHours": ["Mo-Su 00:00-24:00"],
-                "areaServed": [{"@type":"City","name":"Chiang Mai"},{"@type":"City","name":"Bangkok"},{"@type":"City","name":" Lampang"},{"@type":"City","name":"Chiang Rai"},{"@type":"City","name":"Pattaya"},{"@type":"City","name":"Phuket"}]
-            }, {
+                "areaServed": [
+                    { "@type": "City", "name": "Chiang Mai" },
+                    { "@type": "City", "name": "Bangkok" },
+                    { "@type": "City", "name": "Lampang" },
+                    { "@type": "City", "name": "Chiang Rai" },
+                    { "@type": "City", "name": "Pattaya" },
+                    { "@type": "City", "name": "Phuket" }
+                ]
+            },
+            {
                 "@type": "BreadcrumbList",
                 "@id": `${canonicalUrl}#breadcrumb`,
-                "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": siteUrl }]
-            }, {
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": siteUrl }
+                ]
+            },
+            {
                 "@type": "FAQPage",
                 "@id": `${siteUrl}#faq`,
-                "mainEntity": [{
-                    "@type": "Question",
-                    "name": "บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?",
-                    "acceptedAnswer": { "@type": "Answer", "text": "Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้าทุกท่าน ข้อมูลการติดต่อและการจองของท่านจะถูกเก็บรักษาเป็นความลับอย่างเข้มงวด" }
-                }, {
-                    "@type": "Question",
-                    "name": "จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการไซด์ไลน์หรือไม่?",
-                    "acceptedAnswer": { "@type": "Answer", "text": "เพื่อความสบายใจของลูกค้าทุกท่าน ท่านไม่จำเป็นต้องโอนเงินมัดจำใดๆ ทั้งสิ้น สามารถชำระค่าบริการเต็มจำนวนโดยตรงกับน้องๆ ที่หน้างานได้เลย" }
-                }, {
-                    "@type": "Question",
-                    "name": "น้องๆ ไซด์ไลน์เชียงใหม่ตรงปกตามรูปที่แสดงในโปรไฟล์จริงหรือ?",
-                    "acceptedAnswer": { "@type": "Answer", "text": "เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพของน้องๆ ทุกคนอย่างละเอียด Sideline Chiang Mai กล้าการันตีว่าน้องๆ ตรงปก 100% หากพบปัญหาใดๆ สามารถแจ้งทีมงานเพื่อดำเนินการแก้ไขได้ทันที" }
-                }]
-            }]
-        };
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้าทุกท่าน ข้อมูลการติดต่อและการจองของท่านจะถูกเก็บรักษาเป็นความลับอย่างเข้มงวด"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการไซด์ไลน์หรือไม่?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "เพื่อความสบายใจของลูกค้าทุกท่าน ท่านไม่จำเป็นต้องโอนเงินมัดจำใดๆ ทั้งสิ้น สามารถชำระค่าบริการเต็มจำนวนโดยตรงกับน้องๆ ที่หน้างานได้เลย"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "น้องๆ ไซด์ไลน์เชียงใหม่ตรงปกตามรูปที่แสดงในโปรไฟล์จริงหรือ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพของน้องๆ ทุกคนอย่างละเอียด Sideline Chiang Mai กล้าการันตีว่าน้องๆ ตรงปก 100% หากพบปัญหาใดๆ สามารถแจ้งทีมงานเพื่อดำเนินการแก้ไขได้ทันที"
+                        }
+                    }
+                ]
+            }
+        ]
+    };
+
+    // ลบ script เก่าแล้วสร้างใหม่
         const schemaContainer = document.createElement('script');
         schemaContainer.type = 'application/ld+json';
         schemaContainer.textContent = JSON.stringify(mainSchema);
