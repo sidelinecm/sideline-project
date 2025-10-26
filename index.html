@@ -53,13 +53,19 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 
-  <link rel=preload href=/images/hero-sidelinechiangmai-1200.webp as=image imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px" fetchpriority=high>
-  
+  <!-- Preload LCP Image -->
+<link rel="preload" 
+      href="/images/hero-sidelinechiangmai-1200.webp" 
+      as="image" 
+      imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" 
+      imagesizes="100vw" 
+      fetchpriority="high">
+
   <link rel=preload href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'>
   <noscript><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css></noscript>
   
   
-  <link rel=modulepreload href=main.js>
+  <link rel=modulepreload href=/main.js>
   
   
  
@@ -231,16 +237,19 @@
   </h1>
 
 <a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-full md:max-w-[1200px] animate-fadeIn" tabindex=0>
-<img
-  src="images/hero-sidelinechiangmai-1200.webp"
-  alt="ภาพสาวๆไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก 100%"
-  class="hero-image-main"
-  style="width: 100%; aspect-ratio: 1200/962; border-radius: 0.5rem; object-fit: cover; max-width: 200px;"
-  width="1200"
-  height="962"
-  srcset="images/hero-sidelinechiangmai-600.webp 600w, images/hero-sidelinechiangmai-800.webp 800w, images/hero-sidelinechiangmai-1200.webp 1200w"
-  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 200px"
-/>
+
+
+  <img 
+      src="/images/hero-sidelinechiangmai-1200.webp"
+      srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 100vw"
+      alt="ภาพสาวๆไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก 100%"
+      width="1200"
+      height="962"
+      class="hero-image-main rounded-2xl object-cover w-full aspect-[1200/962]"
+      loading="eager"
+      decoding="async">
+
 </a>
   <h2 class="sr-only">
       สัมผัสประสบการณ์เหนือระดับ
@@ -256,8 +265,8 @@
   
  
 
-<section class="social-media-section text-center py-8 md:py-10 bg-white/50 dark:bg-gray-900/70 rounded-2xl shadow-inner mt-8 md:mt-12">
-  
+<section class="social-media-section text-center py-8 md:py-10 bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-inner mt-8 md:mt-12">
+
   <!-- Header -->
   <div class="social-section-header mb-2">
     <h2 class="social-disclaimer text-sm md:text-base text-gray-900 dark:text-gray-100 max-w-xl mx-auto px-4 font-extrabold" style="text-shadow:0 0 4px rgba(255,255,255,.6)">
@@ -275,21 +284,17 @@
 
       <!-- Facebook -->
       <a href="https://www.facebook.com/yourpage" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item fb inline-flex items-center font-bold text-white bg-blue-800 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg px-3 py-1 transition-colors duration-200"
+         class="social-item fb inline-flex items-center font-bold text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg px-3 py-1 transition-colors duration-200"
          title="ติดตามเราบน Facebook">
         <i class="fab fa-facebook-f mr-1" aria-hidden="true"></i>Facebook
       </a>
 
       <!-- LINE -->
-     <a href="https://line.me/ti/p/ksLUWB89Y_"
-   target="_blank"
-   rel="nofollow noopener noreferrer"
-   class="social-item line inline-flex items-center font-bold text-white bg-green-900 hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-3 py-1 transition-colors duration-200"
-   aria-label="ติดต่อเราทาง LINE"
-   title="ติดต่อเราทาง LINE">
-  <i class="fab fa-line mr-1" aria-hidden="true"></i>LINE
-</a>
-
+      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="nofollow noopener noreferrer"
+         class="social-item line inline-flex items-center font-bold text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-3 py-1 transition-colors duration-200"
+         aria-label="ติดต่อเราทาง LINE" title="ติดต่อเราทาง LINE">
+        <i class="fab fa-line mr-1" aria-hidden="true"></i>LINE
+      </a>
 
       <!-- TikTok -->
       <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="nofollow noopener noreferrer"
@@ -305,26 +310,13 @@
         <i class="fab fa-twitter mr-1" aria-hidden="true"></i>Twitter
       </a>
 
-     <!-- Bio.site -->
-<a
-  href="https://bio.site/firstfiwfans.com"
-  target="_blank"
-  rel="nofollow noopener noreferrer"
-  title="เยี่ยมชม Bio.site Profile ของเรา"
-  class="social-item bio-site inline-flex items-center justify-center gap-2 font-bold text-black bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-lg px-4 py-2 transition-colors duration-300 shadow-md"
->
-  <img
-    src="/images/favicon-32x32.webp"
-    alt="โลโก้ Bio.site"
-    width="16"
-    height="16"
-    class="w-4 h-4"
-    loading="lazy"
-    decoding="async"
-  >
-  Bio.site
-</a>
-
+      <!-- Bio.site -->
+      <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="nofollow noopener noreferrer"
+         title="เยี่ยมชม Bio.site Profile ของเรา"
+         class="social-item bio-site inline-flex items-center justify-center gap-2 font-bold text-black bg-rose-500 hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-lg px-4 py-2 transition-colors duration-300 shadow-md">
+        <img src="/images/favicon-32x32.webp" alt="โลโก้ Bio.site" width="16" height="16" class="w-4 h-4" loading="lazy" decoding="async">
+        Bio.site
+      </a>
 
       <!-- Linktree -->
       <a href="https://linktr.ee/kissmodel" target="_blank" rel="nofollow noopener noreferrer"
@@ -334,11 +326,13 @@
       </a>
 
       <!-- Bluesky -->
-      <a href="https://sidelinechiangmai.bsky.social" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item bluesky inline-flex items-center font-bold text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-1 transition-colors duration-200"
-         title="ติดตามเราบน Bluesky">
-        <i class="fas fa-cloud mr-1" aria-hidden="true"></i>Bluesky
-      </a>
+      
+<a href="https://bsky.app/profile/shebell-639.bsky.social" target="_blank" rel="nofollow noopener noreferrer"
+   class="social-item bluesky inline-flex items-center font-bold text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-1 transition-colors duration-200"
+   title="ติดตามเราบน Bluesky">
+  <i class="fas fa-cloud mr-1" aria-hidden="true"></i>Bluesky
+</a>
+
 
     </div>
   </div>
@@ -348,6 +342,7 @@
     <strong>เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</strong>
   </p>
 </section>
+
 
 
 <!-- =============================== -->
@@ -560,7 +555,25 @@
       </div>
     </div>
   </form>
+
+ 
+  
+
+
 </section>
+<!-- ❤️ View All Profiles Button - Neumorphism -->
+<section id="view-all-profiles" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mt-10">
+    <a href="/profiles.html"
+       class="view-all-btn"
+       aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
+      <i class="fas fa-users"></i>
+      <span>ดูโปรไฟล์ทั้งหมด</span>
+    </a>
+  </div>
+</section>
+
+
 
     </div>
 </main>

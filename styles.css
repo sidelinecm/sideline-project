@@ -3047,3 +3047,34 @@ a:hover, button:hover {
     -webkit-backdrop-filter: blur(6px);
 }
 .hero-h1-revised{max-width:1200px;margin:0 auto;padding:2rem 1rem;text-align:center}.hero-h1-revised h1{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;line-height:1.2;margin-bottom:1rem}.hero-h1-revised img{display:block;width:100%;height:auto;max-width:1200px;margin:0 auto;border-radius:.75rem;aspect-ratio:1200/904}#page-header{min-height:56px}#page-header .container{height:56px;display:flex;align-items:center}#page-header a img{display:block;width:auto;height:28px;aspect-ratio:245/30}nav[aria-label="เมนูหลัก"] a{white-space:nowrap;display:inline-block}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+
+.view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #fff;
+  background-color: #f56565; /* สีแดงสด */
+  border-radius: 9999px;
+  box-shadow: 4px 4px 8px rgba(0,0,0,0.2),
+              -4px -4px 8px rgba(255,255,255,0.3); /* นูนลอย */
+  transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 12px rgba(0,0,0,0.25),
+              -6px -6px 12px rgba(255,255,255,0.35);
+  background-color: #e53e3e; /* สีแดงเข้มเมื่อ hover */
+}
+
+.view-all-btn:active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2),
+              -2px -2px 5px rgba(255,255,255,0.3);
+}
+
+
