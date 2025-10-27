@@ -665,25 +665,19 @@ function createProfileCard(profile = {}) {
     return card;
 }
 
+// --- PROVINCE SECTION ---
 function createProvinceSection(key, name, provinceProfiles) {
     const totalCount = provinceProfiles.length;
-
-    // สร้าง element สำหรับ section
     const sectionWrapper = document.createElement('div');
     sectionWrapper.className = 'section-content-wrapper';
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
 
-    // อัปเดต title และ meta description
     document.title = `ไซด์ไลน์ ${name} - รวมสาวสวยพร้อมให้บริการในจังหวัด${name}`;
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-        metaDesc = document.createElement('meta');
-        metaDesc.setAttribute('name', 'description');
-        document.head.appendChild(metaDesc);
-    }
+    const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
+    metaDesc.name = 'description';
     metaDesc.content = `รวมสาวไซด์ไลน์ ${name} ทั้งหมด ${totalCount} โปรไฟล์ พร้อมรายละเอียดและรูปภาพครบถ้วน`;
+    if (!metaDesc.parentNode) document.head.appendChild(metaDesc);
 
-    // ใส่เนื้อหาใน section
     sectionWrapper.innerHTML = `
         <div class="p-6 md:p-8">
             <h2 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
@@ -712,26 +706,46 @@ function createProvinceSection(key, name, provinceProfiles) {
             </button>
         </div>`;
 
-    // เลือก grid สำหรับใส่ profile cards
     const grid = sectionWrapper.querySelector('.profile-grid');
-
-    // เลือกโปรไฟล์ที่จะแสดงผล 20 อันดับแรก
-    const profilesToDisplay = provinceProfiles.slice(0, 20);
+    const profilesToDisplay = provinceProfiles.slice(0, 8);
     grid.append(...profilesToDisplay.map(createProfileCard));
 
-    // จัดการ event สำหรับปุ่มดูเพิ่มเติม
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
     const viewMoreBtn = sectionWrapper.querySelector('.view-more-btn');
 
-    if (viewMoreContainer && totalCount > 20) {
+    if (viewMoreContainer && totalCount > 10) {
         viewMoreContainer.style.display = 'block';
         viewMoreBtn.addEventListener('click', () => {
-            // ลิ้งไปหน้ารวมโปรไฟล์ของจังหวัดนั้นๆ
             window.location.href = `/province/${key}`;
         });
     }
 
     return sectionWrapper;
+}
+
+// --- SEARCH RESULT ---
+function createSearchResultSection(profiles = []) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'section-content-wrapper';
+    wrapper.setAttribute('data-animate-on-scroll', '');
+    const count = Array.isArray(profiles) ? profiles.length : 0;
+
+    wrapper.innerHTML = `
+      <div class="p-6 md:p-8">
+        <h3 class="search-results-header">ผลการค้นหา</h3>
+        <p class="mt-2 text-sm text-muted-foreground">
+          ${count > 0 ? `พบ <span class="search-count-highlight">${count}</span> โปรไฟล์ที่ตรงกับเงื่อนไข` : 'ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข'}
+        </p>
+      </div>
+      <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 
+                  sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4"></div>
+    `;
+
+    const grid = wrapper.querySelector('.profile-grid');
+    if (count > 0) {
+        grid.append(...profiles.map(createProfileCard));
+    }
+    return wrapper;
 }
 
 // --- OTHER INITIALIZERS ---
