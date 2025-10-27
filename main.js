@@ -1085,8 +1085,15 @@ function populateLightbox(profileData) {
     } else {
         lineLink.style.display = 'none';
     }
-}
 
+    // เพิ่ม stopPropagation() ในรูปภาพทุกอัน
+    const imgs = document.querySelectorAll('#lightboxContentWrapper-el img');
+    imgs.forEach(img => {
+        img.addEventListener('click', (e) => {
+            e.stopPropagation(); // ป้องกัน event propagate ไปยัง parent
+        });
+    });
+}
     function initHeaderScrollEffect() {
         const header = document.getElementById('page-header');
         if (!header) return;
