@@ -39,7 +39,6 @@ gsap.registerPlugin(ScrollTrigger);
         resetSearchBtn: document.getElementById('reset-search-btn'),
         featuredSection: document.getElementById('featured-profiles'),
         featuredContainer: document.getElementById('featured-profiles-container'),
-        // suggestion container will be added dynamically if needed
     };
 
 // --- INITIALIZATION ---
@@ -47,16 +46,12 @@ document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
     try {
-        // ฟังก์ชันหลักทั้งหมดของเว็บ
         initThemeToggle();
         initMobileMenu();
         initAgeVerification();
         initHeaderScrollEffect();
         updateActiveNavLinks();
         generateFullSchema();
-        
-        // ❌ ปิดระบบหมุน 3D ของการ์ดโปรไฟล์ (ป้องกันภาพหมุน)
-        // init3dCardHover();
 
         const currentPage = dom.body.dataset.page;
 
@@ -66,7 +61,7 @@ async function main() {
             hideLoadingState();
 
             if (success) {
-                initSearchAndFilters(); // ใช้งานระบบค้นหาและกรองตามปกติ
+                initSearchAndFilters();
                 initLightbox();
 
                 if (dom.retryFetchBtn) {
@@ -74,9 +69,8 @@ async function main() {
                         showLoadingState();
                         const retrySuccess = await fetchData();
                         hideLoadingState();
-
                         if (retrySuccess) {
-                            applyFilters(false); // โหลดข้อมูลใหม่แต่ไม่รีเฟรช URL
+                            applyFilters(false);
                             if (dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
                         } else {
                             showErrorState();
@@ -87,7 +81,6 @@ async function main() {
                 showErrorState();
             }
 
-            // แอนิเมชันเปิดหน้าแรก (ยังคงไว้เหมือนเดิม)
             if (currentPage === 'home' && success) {
                 gsap.from(['#hero-h1', '#hero-p', '#hero-form'], {
                     y: 20,
@@ -98,9 +91,7 @@ async function main() {
                     delay: 0.3
                 });
             }
-
         } else {
-            // หน้าภายในอื่น ๆ ใช้ระบบ scroll animation ตามปกติ
             initScrollAnimations();
         }
 
@@ -108,7 +99,6 @@ async function main() {
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
-        // เมื่อทุกอย่างพร้อมแล้ว ค่อยโชว์เว็บ
         dom.body.classList.add('loaded');
 
     } catch (error) {
@@ -116,28 +106,28 @@ async function main() {
     }
 }
 
-    // --- UI STATE FUNCTIONS ---
-    function showLoadingState() {
-        if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
-        if(dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
-        if(dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
-        if(dom.loadingPlaceholder) {
-            const grid = dom.loadingPlaceholder.querySelector('.grid');
-            if (grid) {
-                grid.innerHTML = Array(SKELETON_CARD_COUNT).fill('<div class="skeleton-card"></div>').join('');
-            }
-            dom.loadingPlaceholder.style.display = 'block';
+// --- UI STATE FUNCTIONS ---
+function showLoadingState() {
+    if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
+    if(dom.noResultsMessage) dom.noResultsMessage.classList.add('hidden');
+    if(dom.profilesDisplayArea) dom.profilesDisplayArea.innerHTML = '';
+    if(dom.loadingPlaceholder) {
+        const grid = dom.loadingPlaceholder.querySelector('.grid');
+        if (grid) {
+            grid.innerHTML = Array(SKELETON_CARD_COUNT).fill('<div class="skeleton-card"></div>').join('');
         }
+        dom.loadingPlaceholder.style.display = 'block';
     }
-    
-    function hideLoadingState() {
-        if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
-    }
+}
 
-    function showErrorState() {
-        if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
-        if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'block';
-    }
+function hideLoadingState() {
+    if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
+}
+
+function showErrorState() {
+    if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
+    if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'block';
+}
 
 // --- DATA FETCHING ---
 async function fetchData() {
@@ -154,11 +144,9 @@ async function fetchData() {
                 .order('nameThai', { ascending: true })
         ]);
 
-        // ตรวจสอบ error จาก Supabase
         if (!profilesRes || profilesRes.error) throw profilesRes?.error || new Error('Unknown error fetching profiles');
         if (!provincesRes || provincesRes.error) throw provincesRes?.error || new Error('Unknown error fetching provinces');
 
-        // ตรวจสอบว่าข้อมูล provinces เป็น array
         if (Array.isArray(provincesRes.data)) {
             provincesRes.data.forEach(p => {
                 if (p?.key && p?.nameThai) {
@@ -167,7 +155,6 @@ async function fetchData() {
             });
         }
 
-        // ตรวจสอบว่าข้อมูล profiles เป็น array
         if (Array.isArray(profilesRes.data)) {
             allProfiles = profilesRes.data.map(p => {
                 const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])]
@@ -187,7 +174,6 @@ async function fetchData() {
                     };
                 });
 
-                // fallback ถ้าไม่มีรูป
                 if (imageObjects.length === 0) {
                     imageObjects.push({ src: '/images/placeholder-profile-card.webp', srcset: '' });
                 }
@@ -217,345 +203,312 @@ async function fetchData() {
         return true;
     } catch (error) {
         console.error('🔥 CRITICAL: Error fetching data from Supabase:', error);
-        allProfiles = []; // fallback สำรองเพื่อไม่ให้โค้ดอื่นพัง
+        allProfiles = [];
         return false;
     }
 }
 
-    // --- SEARCH & FILTERS (ENHANCED MERGE) ---
-    // We keep original structure but replace internal logic with full-featured smart search
-    function initSearchAndFilters() {
-        if (!dom.searchForm) {
-            applyFilters(false); // Initial render without updating URL
-            return;
-        }
-
-        // Populate filters from URL on page load
-        const urlParams = new URLSearchParams(window.location.search);
-        dom.searchInput.value = urlParams.get('q') || '';
-        dom.provinceSelect.value = urlParams.get('province') || '';
-        dom.availabilitySelect.value = urlParams.get('availability') || '';
-        dom.featuredSelect.value = urlParams.get('featured') || '';
-
-        // Load last province from localStorage if none in URL
-        if (!dom.provinceSelect.value) {
-            const lastProvince = localStorage.getItem(LAST_PROVINCE_KEY);
-            if (lastProvince) {
-                dom.provinceSelect.value = lastProvince;
-            }
-        }
-
-        // Debounce helper
-        const debouncedFilter = (() => {
-            let timeout;
-            return () => { clearTimeout(timeout); timeout = setTimeout(() => applyFilters(true), 350); };
-        })();
-
-        dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(true); });
-
-        // Reset button
-        if (dom.resetSearchBtn) {
-            dom.resetSearchBtn.addEventListener('click', () => {
-                resetFilters();
-                applyFilters(true);
-            });
-        }
-
-        // Inputs change
-        if (dom.searchInput) dom.searchInput.addEventListener('input', () => {
-            updateSuggestions();
-            debouncedFilter();
-        });
-        if (dom.provinceSelect) dom.provinceSelect.addEventListener('change', debouncedFilter);
-        if (dom.availabilitySelect) dom.availabilitySelect.addEventListener('change', debouncedFilter);
-        if (dom.featuredSelect) dom.featuredSelect.addEventListener('change', debouncedFilter);
-
-        // Create suggestion container if needed
-        ensureSuggestionContainer();
-
-        // Initial render
+// --- SEARCH & FILTERS ---
+function initSearchAndFilters() {
+    if (!dom.searchForm) {
         applyFilters(false);
+        return;
     }
 
-    // Reset filters (preserve API: same name)
-    function resetFilters() {
-        dom.searchInput.value = '';
-        dom.provinceSelect.value = '';
-        dom.availabilitySelect.value = '';
-        dom.featuredSelect.value = '';
-        localStorage.removeItem(LAST_PROVINCE_KEY);
-        // hide suggestions
-        if (dom.searchSuggestions) dom.searchSuggestions.style.display = 'none';
-        console.log("All filters have been reset.");
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    dom.searchInput.value = urlParams.get('q') || '';
+    dom.provinceSelect.value = urlParams.get('province') || '';
+    dom.availabilitySelect.value = urlParams.get('availability') || '';
+    dom.featuredSelect.value = urlParams.get('featured') || '';
 
-    // --- SMART QUERY PARSING & MATCHING ---
-    function normalize(v) {
-        if (v === undefined || v === null) return '';
-        if (Array.isArray(v)) return v.join(' ').toString().toLowerCase();
-        return String(v).toLowerCase();
-    }
-
-    function parseSearchQuery(term) {
-        // returns { tokens:[], kv:[] }
-        const parts = term.split(/\s+/).filter(Boolean);
-        const kv = [];
-        const tokens = [];
-        for (const p of parts) {
-            const m = p.match(/^([a-zA-Z_]+):(.+)$/);
-            if (m) {
-                const key = m[1].toLowerCase();
-                let val = m[2];
-                // range like 18-25 or <2000 or >500
-                const rangeMatch = val.match(/^(\d+)-(\d+)$/);
-                const ltMatch = val.match(/^<(\d+)$/);
-                const gtMatch = val.match(/^>(\d+)$/);
-                if (rangeMatch) {
-                    kv.push({ key, type: 'range', min: Number(rangeMatch[1]), max: Number(rangeMatch[2]) });
-                } else if (ltMatch) {
-                    kv.push({ key, type: 'lt', value: Number(ltMatch[1]) });
-                } else if (gtMatch) {
-                    kv.push({ key, type: 'gt', value: Number(gtMatch[1]) });
-                } else if (val === 'true' || val === 'false') {
-                    kv.push({ key, type: 'bool', value: val === 'true' });
-                } else {
-                    const list = val.split(',').map(x=>x.trim()).filter(Boolean);
-                    kv.push({ key, type: 'list', value: list });
-                }
-            } else {
-                tokens.push(p.toLowerCase());
-            }
+    if (!dom.provinceSelect.value) {
+        const lastProvince = localStorage.getItem(LAST_PROVINCE_KEY);
+        if (lastProvince) {
+            dom.provinceSelect.value = lastProvince;
         }
-        return { tokens, kv };
     }
 
-    function matchesProfile(profile, parsed) {
-        // Check key:value clauses first
-        for (const clause of parsed.kv) {
-            const k = clause.key;
-            if (k === 'province' || k === 'provincekey') {
-                const val = normalize(profile.provinceKey);
-                if (clause.type === 'list') {
-                    if (!clause.value.some(v => val === v.toLowerCase())) return false;
-                } else {
-                    if (!val.includes(String(clause.value).toLowerCase())) return false;
-                }
-            } else if (k === 'age') {
-                const age = Number(profile.age) || 0;
-                if (clause.type === 'range') {
-                    if (age < clause.min || age > clause.max) return false;
-                } else if (clause.type === 'lt') {
-                    if (!(age < clause.value)) return false;
-                } else if (clause.type === 'gt') {
-                    if (!(age > clause.value)) return false;
-                } else if (clause.type === 'list') {
-                    if (!clause.value.some(v => Number(v) === age)) return false;
-                } else if (clause.type === 'bool') {
-                    return false; // nonsense
-                } else {
-                    if (Number(clause.value) !== age) return false;
-                }
-            } else if (k === 'featured' || k === 'isfeatured') {
-                const want = clause.type === 'bool' ? clause.value : (String(clause.value[0]) === 'true');
-                if (Boolean(profile.isfeatured) !== want) return false;
-            } else if (k === 'tag' || k === 'style' || k === 'styletag' || k === 'tags') {
-                const tags = (profile.styleTags || []).map(t=>t.toLowerCase());
-                const list = clause.type === 'list' ? clause.value : [clause.value];
-                if (!list.some(v => tags.some(t => t.includes(v.toLowerCase())))) return false;
-            } else if (k === 'rate' || k === 'price') {
-                const rate = Number(profile.rate) || 0;
-                if (clause.type === 'range') {
-                    if (rate < clause.min || rate > clause.max) return false;
-                } else if (clause.type === 'lt') {
-                    if (!(rate < clause.value)) return false;
-                } else if (clause.type === 'gt') {
-                    if (!(rate > clause.value)) return false;
-                } else if (clause.type === 'list') {
-                    if (!clause.value.some(v => Number(v) === rate)) return false;
-                } else {
-                    if (rate !== Number(clause.value)) return false;
-                }
-            } else if (k === 'availability') {
-                const val = normalize(profile.availability);
-                if (clause.type === 'list') {
-                    if (!clause.value.some(v => val.includes(v.toLowerCase()))) return false;
-                } else {
-                    if (!val.includes(String(clause.value).toLowerCase())) return false;
-                }
-            } else {
-                // Fallback - check against multiple fields for flexible key names
-                const pv = normalize(profile[k] ?? profile[k.toLowerCase()] ?? '');
-                if (clause.type === 'list') {
-                    if (!clause.value.some(v => pv.includes(v.toLowerCase()))) return false;
-                } else {
-                    if (!pv.includes(String(clause.value).toLowerCase())) return false;
-                }
-            }
-        }
+    const debouncedFilter = (() => {
+        let timeout;
+        return () => { clearTimeout(timeout); timeout = setTimeout(() => applyFilters(true), 350); };
+    })();
 
-        // Then check plain tokens: each token must appear in at least one searchable field
-        for (const token of parsed.tokens) {
-            const found =
-                normalize(profile.name).includes(token) ||
-                normalize(profile.description).includes(token) ||
-                normalize(profile.location).includes(token) ||
-                normalize(profile.quote).includes(token) ||
-                normalize(profile.stats).includes(token) ||
-                normalize(profile.skinTone).includes(token) ||
-                normalize(profile.provinceKey).includes(token) ||
-                normalize(profile.altText).includes(token) ||
-                (profile.styleTags || []).some(t => normalize(t).includes(token));
-            if (!found) return false;
-        }
-        return true;
-    }
-
-    // --- SUGGESTIONS UI ---
-    function ensureSuggestionContainer() {
-        if (dom.searchSuggestions) return;
-        const wrap = dom.searchInput?.parentElement || document.body;
-        const sug = document.createElement('div');
-        sug.id = 'search-suggestions';
-        sug.style.position = 'absolute';
-        sug.style.zIndex = 9999;
-        sug.className = 'search-suggestions';
-        sug.setAttribute('role','listbox');
-        sug.style.display = 'none';
-        wrap.appendChild(sug);
-        dom.searchSuggestions = sug;
-        // minimal styles
-        const css = document.createElement('style');
-        css.textContent = `
-        .search-suggestions{background:var(--surface,white);box-shadow:0 6px 20px rgba(0,0,0,0.08);border-radius:8px;padding:6px 0;min-width:220px}
-        .search-suggestions .item{padding:8px 12px;cursor:pointer}
-        .search-suggestions .item:hover{background:rgba(0,0,0,0.03)}
-        .search-suggestions .item small{display:block;color:var(--muted,#666);font-size:12px}
-        `;
-        document.head.appendChild(css);
-    }
-
-    function updateSuggestions() {
-        if (!dom.searchSuggestions || !dom.searchInput) return;
-        const q = dom.searchInput.value.trim().toLowerCase();
-        const items = [];
-        if (!q) {
-            // show top suggested provinces and tags
-            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,8);
-            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,8);
-            provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
-            tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:`tag`}));
-            items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
-        } else {
-            // typed: produce suggestions from matching provinces / tags / quick toggles
-            const lastPart = q.split(/\s+/).pop();
-            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))]
-                                .filter(x=>x.toLowerCase().includes(lastPart)).slice(0,6);
-            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))]
-                                .filter(x=>x.toLowerCase().includes(lastPart)).slice(0,6);
-            provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
-            tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:'tag'}));
-            if ('featured'.startsWith(lastPart)) items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
-            if ('age'.startsWith(lastPart)) items.unshift({type:'template', text:'age:18-25', hint:'ช่วงอายุ'});
-            if ('rate'.startsWith(lastPart) || 'price'.startsWith(lastPart)) items.unshift({type:'template', text:'rate:500-1500', hint:'ช่วงราคา'});
-        }
-
-        const container = dom.searchSuggestions;
-        container.innerHTML = '';
-        if (!items.length) { container.style.display='none'; return; }
-        items.slice(0,12).forEach(it=>{
-            const el = document.createElement('div');
-            el.className='item';
-            el.tabIndex = 0;
-            el.innerHTML = `<div>${it.text}</div>${it.hint ? `<small>${it.hint}</small>` : ''}`;
-            el.addEventListener('click', ()=> {
-                dom.searchInput.value = dom.searchInput.value ? dom.searchInput.value + ' ' + it.text : it.text;
-                dom.searchInput.focus();
-                container.style.display = 'none';
-                applyFilters(true);
-            });
-            el.addEventListener('keydown', (e)=> {
-                if (e.key === 'Enter') { el.click(); }
-            });
-            container.appendChild(el);
+    dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(true); });
+    if (dom.resetSearchBtn) {
+        dom.resetSearchBtn.addEventListener('click', () => {
+            resetFilters();
+            applyFilters(true);
         });
-        // position under input
-        const rect = dom.searchInput.getBoundingClientRect();
-        container.style.left = rect.left + 'px';
-        container.style.top = (rect.bottom + window.scrollY + 6) + 'px';
-        container.style.minWidth = rect.width + 'px';
-        container.style.display = 'block';
     }
 
-    // Hide suggestions when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!dom.searchSuggestions) return;
-        if (!dom.searchSuggestions.contains(e.target) && e.target !== dom.searchInput) {
-            dom.searchSuggestions.style.display = 'none';
+    if (dom.searchInput) dom.searchInput.addEventListener('input', () => {
+        updateSuggestions();
+        debouncedFilter();
+    });
+    if (dom.provinceSelect) dom.provinceSelect.addEventListener('change', debouncedFilter);
+    if (dom.availabilitySelect) dom.availabilitySelect.addEventListener('change', debouncedFilter);
+    if (dom.featuredSelect) dom.featuredSelect.addEventListener('change', debouncedFilter);
+
+    ensureSuggestionContainer();
+
+    applyFilters(false);
+}
+
+function resetFilters() {
+    dom.searchInput.value = '';
+    dom.provinceSelect.value = '';
+    dom.availabilitySelect.value = '';
+    dom.featuredSelect.value = '';
+    localStorage.removeItem(LAST_PROVINCE_KEY);
+    if (dom.searchSuggestions) dom.searchSuggestions.style.display = 'none';
+    console.log("All filters have been reset.");
+}
+
+function normalize(v) {
+    if (v === undefined || v === null) return '';
+    if (Array.isArray(v)) return v.join(' ').toString().toLowerCase();
+    return String(v).toLowerCase();
+}
+
+function parseSearchQuery(term) {
+    const parts = term.split(/\s+/).filter(Boolean);
+    const kv = [];
+    const tokens = [];
+    for (const p of parts) {
+        const m = p.match(/^([a-zA-Z_]+):(.+)$/);
+        if (m) {
+            const key = m[1].toLowerCase();
+            let val = m[2];
+            const rangeMatch = val.match(/^(\d+)-(\d+)$/);
+            const ltMatch = val.match(/^<(\d+)$/);
+            const gtMatch = val.match(/^>(\d+)$/);
+            if (rangeMatch) {
+                kv.push({ key, type: 'range', min: Number(rangeMatch[1]), max: Number(rangeMatch[2]) });
+            } else if (ltMatch) {
+                kv.push({ key, type: 'lt', value: Number(ltMatch[1]) });
+            } else if (gtMatch) {
+                kv.push({ key, type: 'gt', value: Number(gtMatch[1]) });
+            } else if (val === 'true' || val === 'false') {
+                kv.push({ key, type: 'bool', value: val === 'true' });
+            } else {
+                const list = val.split(',').map(x=>x.trim()).filter(Boolean);
+                kv.push({ key, type: 'list', value: list });
+            }
+        } else {
+            tokens.push(p.toLowerCase());
+        }
+    }
+    return { tokens, kv };
+}
+
+function matchesProfile(profile, parsed) {
+    for (const clause of parsed.kv) {
+        const k = clause.key;
+        if (k === 'province' || k === 'provincekey') {
+            const val = normalize(profile.provinceKey);
+            if (clause.type === 'list') {
+                if (!clause.value.some(v => val === v.toLowerCase())) return false;
+            } else {
+                if (!val.includes(String(clause.value).toLowerCase())) return false;
+            }
+        } else if (k === 'age') {
+            const age = Number(profile.age) || 0;
+            if (clause.type === 'range') {
+                if (age < clause.min || age > clause.max) return false;
+            } else if (clause.type === 'lt') {
+                if (!(age < clause.value)) return false;
+            } else if (clause.type === 'gt') {
+                if (!(age > clause.value)) return false;
+            } else if (clause.type === 'list') {
+                if (!clause.value.some(v => Number(v) === age)) return false;
+            } else if (clause.type === 'bool') {
+                return false;
+            } else {
+                if (Number(clause.value) !== age) return false;
+            }
+        } else if (k === 'featured' || k === 'isfeatured') {
+            const want = clause.type === 'bool' ? clause.value : (String(clause.value[0]) === 'true');
+            if (Boolean(profile.isfeatured) !== want) return false;
+        } else if (k === 'tag' || k === 'style' || k === 'styletag' || k === 'tags') {
+            const tags = (profile.styleTags || []).map(t=>t.toLowerCase());
+            const list = clause.type === 'list' ? clause.value : [clause.value];
+            if (!list.some(v => tags.some(t => t.includes(v.toLowerCase())))) return false;
+        } else if (k === 'rate' || k === 'price') {
+            const rate = Number(profile.rate) || 0;
+            if (clause.type === 'range') {
+                if (rate < clause.min || rate > clause.max) return false;
+            } else if (clause.type === 'lt') {
+                if (!(rate < clause.value)) return false;
+            } else if (clause.type === 'gt') {
+                if (!(rate > clause.value)) return false;
+            } else if (clause.type === 'list') {
+                if (!clause.value.some(v => Number(v) === rate)) return false;
+            } else {
+                if (rate !== Number(clause.value)) return false;
+            }
+        } else if (k === 'availability') {
+            const val = normalize(profile.availability);
+            if (clause.type === 'list') {
+                if (!clause.value.some(v => val.includes(v.toLowerCase()))) return false;
+            } else {
+                if (!val.includes(String(clause.value).toLowerCase())) return false;
+            }
+        } else {
+            const pv = normalize(profile[k] ?? profile[k.toLowerCase()] ?? '');
+            if (clause.type === 'list') {
+                if (!clause.value.some(v => pv.includes(v.toLowerCase()))) return false;
+            } else {
+                if (!pv.includes(String(clause.value).toLowerCase())) return false;
+            }
+        }
+    }
+
+    for (const token of parsed.tokens) {
+        const found =
+            normalize(profile.name).includes(token) ||
+            normalize(profile.description).includes(token) ||
+            normalize(profile.location).includes(token) ||
+            normalize(profile.quote).includes(token) ||
+            normalize(profile.stats).includes(token) ||
+            normalize(profile.skinTone).includes(token) ||
+            normalize(profile.provinceKey).includes(token) ||
+            normalize(profile.altText).includes(token) ||
+            (profile.styleTags || []).some(t => normalize(t).includes(token));
+        if (!found) return false;
+    }
+    return true;
+}
+
+// --- SUGGESTION UI ---
+function ensureSuggestionContainer() {
+    if (dom.searchSuggestions) return;
+    const wrap = dom.searchInput?.parentElement || document.body;
+    const sug = document.createElement('div');
+    sug.id = 'search-suggestions';
+    sug.style.position = 'absolute';
+    sug.style.zIndex = 9999;
+    sug.className = 'search-suggestions';
+    sug.setAttribute('role','listbox');
+    sug.style.display = 'none';
+    wrap.appendChild(sug);
+    dom.searchSuggestions = sug;
+    const css = document.createElement('style');
+    css.textContent = `
+    .search-suggestions{background:var(--surface,white);box-shadow:0 6px 20px rgba(0,0,0,0.08);border-radius:8px;padding:6px 0;min-width:220px}
+    .search-suggestions .item{padding:8px 12px;cursor:pointer}
+    .search-suggestions .item:hover{background:rgba(0,0,0,0.03)}
+    .search-suggestions .item small{display:block;color:var(--muted,#666);font-size:12px}
+    `;
+    document.head.appendChild(css);
+}
+
+function updateSuggestions() {
+    if (!dom.searchSuggestions || !dom.searchInput) return;
+    const q = dom.searchInput.value.trim().toLowerCase();
+    const items = [];
+    if (!q) {
+        const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,8);
+        const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,8);
+        provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
+        tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:`tag`}));
+        items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
+    } else {
+        const lastPart = q.split(/\s+/).pop();
+        const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))]
+                            .filter(x=>x.toLowerCase().includes(lastPart)).slice(0,6);
+        const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))]
+                            .filter(x=>x.toLowerCase().includes(lastPart)).slice(0,6);
+        provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
+        tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:'tag'}));
+        if ('featured'.startsWith(lastPart)) items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
+        if ('age'.startsWith(lastPart)) items.unshift({type:'template', text:'age:18-25', hint:'ช่วงอายุ'});
+        if ('rate'.startsWith(lastPart) || 'price'.startsWith(lastPart)) items.unshift({type:'template', text:'rate:500-1500', hint:'ช่วงราคา'});
+    }
+
+    const container = dom.searchSuggestions;
+    container.innerHTML = '';
+    if (!items.length) { container.style.display='none'; return; }
+    items.slice(0,12).forEach(it=>{
+        const el = document.createElement('div');
+        el.className='item';
+        el.tabIndex = 0;
+        el.innerHTML = `<div>${it.text}</div>${it.hint ? `<small>${it.hint}</small>` : ''}`;
+        el.addEventListener('click', ()=> {
+            dom.searchInput.value = dom.searchInput.value ? dom.searchInput.value + ' ' + it.text : it.text;
+            dom.searchInput.focus();
+            container.style.display = 'none';
+            applyFilters(true);
+        });
+        el.addEventListener('keydown', (e)=> {
+            if (e.key === 'Enter') { el.click(); }
+        });
+        container.appendChild(el);
+    });
+    const rect = dom.searchInput.getBoundingClientRect();
+    container.style.left = rect.left + 'px';
+    container.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    container.style.minWidth = rect.width + 'px';
+    container.style.display = 'block';
+}
+
+document.addEventListener('click', (e) => {
+    if (!dom.searchSuggestions) return;
+    if (!dom.searchSuggestions.contains(e.target) && e.target !== dom.searchInput) {
+        dom.searchSuggestions.style.display = 'none';
+    }
+});
+
+// --- APPLY FILTERS ---
+function applyFilters(updateUrl = true) {
+    const searchTermRaw = dom.searchInput?.value?.trim() || '';
+    const searchTerm = searchTermRaw.toLowerCase();
+    const selectedProvince = dom.provinceSelect?.value || '';
+    const selectedAvailability = dom.availabilitySelect?.value || '';
+    const isFeaturedOnly = dom.featuredSelect?.value === 'true';
+
+    if (selectedProvince) {
+        localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
+    } else {
+        localStorage.removeItem(LAST_PROVINCE_KEY);
+    }
+
+    if (updateUrl) {
+        const urlParams = new URLSearchParams();
+        if (searchTermRaw) urlParams.set('q', searchTermRaw);
+        if (selectedProvince) urlParams.set('province', selectedProvince);
+        if (selectedAvailability) urlParams.set('availability', selectedAvailability);
+        if (isFeaturedOnly) urlParams.set('featured', 'true');
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        history.pushState({}, '', newUrl);
+    }
+
+    const parsed = parseSearchQuery(searchTermRaw);
+    const filtered = allProfiles.filter(p => {
+        try {
+            if (selectedProvince && p.provinceKey !== selectedProvince) return false;
+            if (selectedAvailability && p.availability !== selectedAvailability) return false;
+            if (isFeaturedOnly && !p.isfeatured) return false;
+            if (searchTermRaw) {
+                return matchesProfile(p, parsed);
+            }
+            return true;
+        } catch (err) {
+            console.error('Search match error', err, p);
+            return false;
         }
     });
 
-    // --- APPLY FILTERS (uses smart parsing and matchesProfile) ---
-    function applyFilters(updateUrl = true) {
-        const searchTermRaw = dom.searchInput?.value?.trim() || '';
-        const searchTerm = searchTermRaw.toLowerCase();
-        const selectedProvince = dom.provinceSelect?.value || '';
-        const selectedAvailability = dom.availabilitySelect?.value || '';
-        const isFeaturedOnly = dom.featuredSelect?.value === 'true';
+    const isSearching = !!(searchTermRaw || selectedProvince || selectedAvailability || isFeaturedOnly);
+    renderProfiles(filtered, isSearching);
+}
 
-        // Save last selected province to localStorage
-        if (selectedProvince) {
-            localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
-        } else {
-            localStorage.removeItem(LAST_PROVINCE_KEY);
-        }
-
-        // Update URL
-        if (updateUrl) {
-            const urlParams = new URLSearchParams();
-            if (searchTermRaw) urlParams.set('q', searchTermRaw);
-            if (selectedProvince) urlParams.set('province', selectedProvince);
-            if (selectedAvailability) urlParams.set('availability', selectedAvailability);
-            if (isFeaturedOnly) urlParams.set('featured', 'true');
-            const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-            history.pushState({}, '', newUrl);
-        }
-
-        // If searchTerm contains explicit filters (key:value), we let smart parser handle them.
-        const parsed = parseSearchQuery(searchTermRaw);
-
-        // Use parsed clauses and also selected UI filters (province/selects)
-        const filtered = allProfiles.filter(p => {
-            try {
-                // First enforce selected UI filters
-                if (selectedProvince && p.provinceKey !== selectedProvince) return false;
-                if (selectedAvailability && p.availability !== selectedAvailability) return false;
-                if (isFeaturedOnly && !p.isfeatured) return false;
-
-                // Then smart match against parsed query (if any)
-                if (searchTermRaw) {
-                    return matchesProfile(p, parsed);
-                }
-                return true;
-            } catch (err) {
-                console.error('Search match error', err, p);
-                return false;
-            }
-        });
-
-        const isSearching = !!(searchTermRaw || selectedProvince || selectedAvailability || isFeaturedOnly);
-        renderProfiles(filtered, isSearching);
-    }
-
-// ==========================================================
-// 🔄 Rendering Profiles (SEO + UX Enhanced)
-// ==========================================================
+// --- RENDER PROFILES ---
 function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     const currentPage = dom.body.dataset.page;
     dom.profilesDisplayArea.innerHTML = '';
     dom.noResultsMessage.classList.add('hidden');
 
-    // --- FEATURED SECTION (เฉพาะหน้า Home) ---
     if (dom.featuredSection) {
         const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
@@ -569,7 +522,6 @@ function renderProfiles(filteredProfiles, isSearching) {
         }
     }
 
-    // --- ไม่มีผลลัพธ์ ---
     if (filteredProfiles.length === 0) {
         if (currentPage === 'home' || currentPage === 'profiles') {
             dom.noResultsMessage.classList.remove('hidden');
@@ -578,7 +530,6 @@ function renderProfiles(filteredProfiles, isSearching) {
         return;
     }
 
-    // --- หน้า PROFILES ---
     if (currentPage === 'profiles') {
         if (isSearching) {
             const gridContainer = document.createElement('div');
@@ -611,10 +562,7 @@ function renderProfiles(filteredProfiles, isSearching) {
                 dom.profilesDisplayArea.appendChild(provinceSectionEl);
             });
         }
-    }
-
-    // --- หน้า HOME ---
-    else if (currentPage === 'home') {
+    } else if (currentPage === 'home') {
         if (isSearching) {
             const searchResultWrapper = createSearchResultSection(filteredProfiles);
             dom.profilesDisplayArea.appendChild(searchResultWrapper);
@@ -624,9 +572,7 @@ function renderProfiles(filteredProfiles, isSearching) {
     initScrollAnimations();
 }
 
-// ==========================================================
-// 🧱 Profile Card (ไม่มี Schema)
-// ==========================================================
+// --- PROFILE CARD ---
 function createProfileCard(profile = {}) {
     const card = document.createElement('div');
     card.className = 'profile-card-new-container';
@@ -638,7 +584,6 @@ function createProfileCard(profile = {}) {
     cardInner.setAttribute('role', 'button');
     cardInner.setAttribute('tabindex', '0');
 
-    // 🖼️ ภาพหลัก
     const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
         src: '/images/placeholder-profile.webp',
         alt: profile.name || 'profile',
@@ -669,7 +614,7 @@ function createProfileCard(profile = {}) {
 
     cardInner.appendChild(img);
 
-    // 🎖️ Badge
+    // Badge
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
@@ -691,7 +636,7 @@ function createProfileCard(profile = {}) {
     }
     cardInner.appendChild(badges);
 
-    // 🔤 Overlay ข้อมูล
+    // Overlay ข้อมูล
     const overlay = document.createElement('div');
     overlay.className = 'card-overlay';
     const info = document.createElement('div');
@@ -711,7 +656,7 @@ function createProfileCard(profile = {}) {
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
 
-    // 🧠 Event
+    // Event
     cardInner.addEventListener('click', () => {
         window.location.href = `/profiles/${profile.id || ''}`;
     });
@@ -720,23 +665,19 @@ function createProfileCard(profile = {}) {
     return card;
 }
 
-// ==========================================================
-// 📍 Province Section (SEO & UX)
-// ==========================================================
+// --- PROVINCE SECTION ---
 function createProvinceSection(key, name, provinceProfiles) {
     const totalCount = provinceProfiles.length;
     const sectionWrapper = document.createElement('div');
     sectionWrapper.className = 'section-content-wrapper';
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
 
-    // 🧩 Meta title + description
     document.title = `ไซด์ไลน์ ${name} - รวมสาวสวยพร้อมให้บริการในจังหวัด${name}`;
     const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
     metaDesc.name = 'description';
     metaDesc.content = `รวมสาวไซด์ไลน์ ${name} ทั้งหมด ${totalCount} โปรไฟล์ พร้อมรายละเอียดและรูปภาพครบถ้วน`;
     if (!metaDesc.parentNode) document.head.appendChild(metaDesc);
 
-    // 🏷️ Header Province
     sectionWrapper.innerHTML = `
         <div class="p-6 md:p-8">
             <h2 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
@@ -782,9 +723,7 @@ function createProvinceSection(key, name, provinceProfiles) {
     return sectionWrapper;
 }
 
-// ==========================================================
-// 🔍 Search Result Section
-// ==========================================================
+// --- SEARCH RESULT ---
 function createSearchResultSection(profiles = []) {
     const wrapper = document.createElement('div');
     wrapper.className = 'section-content-wrapper';
@@ -799,8 +738,7 @@ function createSearchResultSection(profiles = []) {
         </p>
       </div>
       <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 
-                  sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 
-                  px-6 md:px-8 pb-6 md:pb-8"></div>
+                  sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4"></div>
     `;
 
     const grid = wrapper.querySelector('.profile-grid');
@@ -810,31 +748,27 @@ function createSearchResultSection(profiles = []) {
     return wrapper;
 }
 
-    // --- OTHER INITIALIZERS & UTILITIES ---
-
-    // ✅ [UX] Initialize 3D hover effect for profile cards
-    function init3dCardHover() {
-        document.body.addEventListener('mousemove', (e) => {
-            const cards = document.querySelectorAll('.profile-card-new');
-            cards.forEach(card => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -7; // Max rotation 7 degrees
-                const rotateY = ((x - centerX) / centerX) * 7;  // Max rotation 7 degrees
-
-                card.style.setProperty('--mouse-x', `${x}px`);
-                card.style.setProperty('--mouse-y', `${y}px`);
-                card.style.setProperty('--rotate-x', `${rotateX}deg`);
-                card.style.setProperty('--rotate-y', `${rotateY}deg`);
-            });
+// --- OTHER INITIALIZERS ---
+function init3dCardHover() {
+    document.body.addEventListener('mousemove', (e) => {
+        const cards = document.querySelectorAll('.profile-card-new');
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -7;
+            const rotateY = ((x - centerX) / centerX) * 7;
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+            card.style.setProperty('--rotate-x', `${rotateX}deg`);
+            card.style.setProperty('--rotate-y', `${rotateY}deg`);
         });
-    }
+    });
+}
 
-    // ... (The rest of the initializers remain the same) ...
-    function initThemeToggle() {
+function initThemeToggle() {
     const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
     if (themeToggleBtns.length === 0) return;
     const html = document.documentElement;
@@ -856,133 +790,125 @@ function createSearchResultSection(profiles = []) {
         });
     });
 }
-    function initMobileMenu() {
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-        const sidebar = document.getElementById('sidebar');
-        const backdrop = document.getElementById('menu-backdrop');
-        if (!menuToggle || !sidebar || !backdrop || !closeSidebarBtn) return;
-        const openMenu = () => {
-            sidebar.classList.add('open');
-            sidebar.setAttribute('aria-hidden', 'false');
-            sidebar.classList.remove('translate-x-full');
-            backdrop.classList.remove('hidden');
-            gsap.to(backdrop, { opacity: 1, duration: 0.3 });
-            dom.body.style.overflow = 'hidden';
-            sidebar.focus();
-        };
-        const closeMenu = () => {
-            sidebar.classList.remove('open');
-            gsap.to(backdrop, {
-                opacity: 0, duration: 0.3, onComplete: () => {
-                    backdrop.classList.add('hidden');
-                    sidebar.classList.add('translate-x-full');
-                    sidebar.setAttribute('aria-hidden', 'true');
-                    dom.body.style.overflow = '';
-                }
-            });
-        };
-        menuToggle.addEventListener('click', openMenu);
-        closeSidebarBtn.addEventListener('click', closeMenu);
-        backdrop.addEventListener('click', closeMenu);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && sidebar.classList.contains('open')) closeMenu();
-        });
+
+function initMobileMenu() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('menu-backdrop');
+    if (!menuToggle || !sidebar || !backdrop || !closeSidebarBtn) return;
+    const openMenu = () => {
+        sidebar.classList.add('open');
+        sidebar.setAttribute('aria-hidden', 'false');
+        sidebar.classList.remove('translate-x-full');
+        backdrop.classList.remove('hidden');
+        gsap.to(backdrop, { opacity: 1, duration: 0.3 });
+        dom.body.style.overflow = 'hidden';
+        sidebar.focus();
+    };
+    const closeMenu = () => {
+        sidebar.classList.remove('open');
+        gsap.to(backdrop, { opacity: 0, duration: 0.3, onComplete: () => {
+            backdrop.classList.add('hidden');
+            sidebar.classList.add('translate-x-full');
+            sidebar.setAttribute('aria-hidden', 'true');
+            dom.body.style.overflow = '';
+        }});
+    };
+    menuToggle.addEventListener('click', openMenu);
+    closeSidebarBtn.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('open')) closeMenu();
+    });
+}
+
+// --- Age Verification ---
+function initAgeVerification() {
+  const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
+  const isBot = (ua) => botUserAgents.test(ua);
+
+  const showModal = () => createAgeModal();
+
+  if (navigator.userAgentData) {
+    navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
+      const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
+      if (!isBot(brandInfo)) showModal();
+    });
+  } else {
+    const ua = navigator.userAgent || "";
+    if (!isBot(ua)) showModal();
+  }
+}
+
+function createAgeModal() {
+  document.getElementById("age-verification-overlay")?.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "age-verification-overlay";
+  overlay.className =
+    "fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity opacity-0";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-labelledby", "age-modal-title");
+
+  overlay.innerHTML = `
+    <div class="age-modal-content relative space-y-6 bg-gray-900 text-white rounded-2xl p-6 max-w-md w-full shadow-2xl scale-95 opacity-0 transition-all">
+      <h2 id="age-modal-title" class="text-2xl font-bold uppercase leading-tight text-center">
+        <span class="text-primary">Sideline Chiangmai</span> is an Adults Only
+        <span class="age-badge-inline">20+</span> Website!
+      </h2>
+      <p class="text-sm text-gray-300 leading-relaxed text-center">
+        คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ 
+        คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 
+        <span class="font-bold text-red-400">20 ปีบริบูรณ์</span>
+      </p>
+      <div class="flex justify-center gap-4 pt-2">
+        <button id="cancelAgeButton" class="age-btn age-btn-cancel bg-red-600 text-white px-5 py-2 rounded-full shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
+          ออก
+        </button>
+        <button id="confirmAgeButton" class="age-btn age-btn-confirm bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
+          ยืนยัน
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  const modal = overlay.querySelector(".age-modal-content");
+  requestAnimationFrame(() => {
+    overlay.classList.remove("opacity-0");
+    modal.classList.remove("opacity-0", "scale-95");
+  });
+
+  const focusable = modal.querySelectorAll("button");
+  let focusIndex = 0;
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      focusIndex = (focusIndex + (e.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
+      focusable[focusIndex].focus();
+    } else if (e.key === "Escape") {
+      window.location.href = "https://www.google.com";
     }
+  });
+  focusable[0].focus();
 
-    // ✅ ตรวจสอบและแสดง Age Verification Overlay ทุกครั้ง (ยกเว้นบอท)
-    function initAgeVerification() {
-      const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
-      const isBot = (ua) => botUserAgents.test(ua);
+  const confirmBtn = modal.querySelector("#confirmAgeButton");
+  const cancelBtn = modal.querySelector("#cancelAgeButton");
+  const closeModal = () => {
+    modal.classList.add("scale-95", "opacity-0");
+    overlay.classList.add("opacity-0");
+    setTimeout(() => overlay.remove(), 300);
+  };
 
-      const showModal = () => createAgeModal();
+  confirmBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", () => (window.location.href = "https://www.google.com"));
+}
 
-      if (navigator.userAgentData) {
-        navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
-          const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
-          if (!isBot(brandInfo)) showModal();
-        });
-      } else {
-        const ua = navigator.userAgent || "";
-        if (!isBot(ua)) showModal();
-      }
-    }
+document.addEventListener("DOMContentLoaded", initAgeVerification);
 
-    // ✅ ฟังก์ชันสร้าง modal (โครงสร้างเหมือนตอนใช้ HTML ตรงๆ)
-    function createAgeModal() {
-      document.getElementById("age-verification-overlay")?.remove();
-
-      const overlay = document.createElement("div");
-      overlay.id = "age-verification-overlay";
-      overlay.className =
-        "fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity opacity-0";
-      overlay.setAttribute("role", "dialog");
-      overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute("aria-labelledby", "age-modal-title");
-
-      overlay.innerHTML = `
-        <div class="age-modal-content relative space-y-6 bg-gray-900 text-white rounded-2xl p-6 max-w-md w-full shadow-2xl scale-95 opacity-0 transition-all">
-          <h2 id="age-modal-title" class="text-2xl font-bold uppercase leading-tight text-center">
-            <span class="text-primary">Sideline Chiangmai</span> is an Adults Only
-            <span class="age-badge-inline">20+</span> Website!
-          </h2>
-          <p class="text-sm text-gray-300 leading-relaxed text-center">
-            คุณกำลังจะเข้าสู่เว็บไซต์ที่มีเนื้อหาสำหรับผู้ใหญ่ 
-            คุณควรเข้าเว็บไซต์นี้ก็ต่อเมื่อคุณมีอายุอย่างน้อย 
-            <span class="font-bold text-red-400">20 ปีบริบูรณ์</span>
-          </p>
-          <div class="flex justify-center gap-4 pt-2">
-            <button id="cancelAgeButton" class="age-btn age-btn-cancel bg-red-600 text-white px-5 py-2 rounded-full shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
-              ออก
-            </button>
-            <button id="confirmAgeButton" class="age-btn age-btn-confirm bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
-              ยืนยัน
-            </button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(overlay);
-
-      const modal = overlay.querySelector(".age-modal-content");
-
-      // Animation
-      requestAnimationFrame(() => {
-        overlay.classList.remove("opacity-0");
-        modal.classList.remove("opacity-0", "scale-95");
-      });
-
-      // Focus trap
-      const focusable = modal.querySelectorAll("button");
-      let focusIndex = 0;
-      modal.addEventListener("keydown", (e) => {
-        if (e.key === "Tab") {
-          e.preventDefault();
-          focusIndex = (focusIndex + (e.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
-          focusable[focusIndex].focus();
-        } else if (e.key === "Escape") {
-          window.location.href = "https://www.google.com";
-        }
-      });
-      focusable[0].focus();
-
-      // ปุ่ม
-      const confirmBtn = modal.querySelector("#confirmAgeButton");
-      const cancelBtn = modal.querySelector("#cancelAgeButton");
-
-      const closeModal = () => {
-        modal.classList.add("scale-95", "opacity-0");
-        overlay.classList.add("opacity-0");
-        setTimeout(() => overlay.remove(), 300);
-      };
-
-      confirmBtn.addEventListener("click", closeModal);
-      cancelBtn.addEventListener("click", () => (window.location.href = "https://www.google.com"));
-    }
-
-    // ✅ เริ่มทำงานเมื่อ DOM โหลดเสร็จ
-    document.addEventListener("DOMContentLoaded", initAgeVerification);
-       
+// --- Lightbox ---
     function initLightbox() {
         const lightbox = document.getElementById('lightbox');
         const wrapper = document.getElementById('lightbox-content-wrapper-el');
@@ -1242,6 +1168,7 @@ function createSearchResultSection(profiles = []) {
         wrapper.addEventListener('touchend', () => { isDragging = false; speed = 0.5; });
     });
 
+// --- Generate Schema ---
 function generateFullSchema() {
     const pageTitle = document.title;
     const canonicalUrl = document.querySelector("link[rel='canonical']")?.href || window.location.href;
@@ -1360,13 +1287,12 @@ function generateFullSchema() {
         ]
     };
 
-    // ลบ script เก่าแล้วสร้างใหม่
-        const schemaContainer = document.createElement('script');
-        schemaContainer.type = 'application/ld+json';
-        schemaContainer.textContent = JSON.stringify(mainSchema);
-        const oldSchema = document.querySelector('script[type="application/ld+json"]');
-        if (oldSchema) oldSchema.remove();
-        document.head.appendChild(schemaContainer);
-    }
+    const schemaContainer = document.createElement('script');
+    schemaContainer.type = 'application/ld+json';
+    schemaContainer.textContent = JSON.stringify(mainSchema);
+    const oldSchema = document.querySelector('script[type="application/ld+json"]');
+    if (oldSchema) oldSchema.remove();
+    document.head.appendChild(schemaContainer);
+}
 
-})(); 
+})();
