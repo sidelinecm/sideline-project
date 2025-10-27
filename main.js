@@ -665,19 +665,25 @@ function createProfileCard(profile = {}) {
     return card;
 }
 
-// --- PROVINCE SECTION ---
 function createProvinceSection(key, name, provinceProfiles) {
     const totalCount = provinceProfiles.length;
+
+    // สร้าง element สำหรับ section
     const sectionWrapper = document.createElement('div');
     sectionWrapper.className = 'section-content-wrapper';
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
 
+    // อัปเดต title และ meta description
     document.title = `ไซด์ไลน์ ${name} - รวมสาวสวยพร้อมให้บริการในจังหวัด${name}`;
-    const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
-    metaDesc.name = 'description';
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+    }
     metaDesc.content = `รวมสาวไซด์ไลน์ ${name} ทั้งหมด ${totalCount} โปรไฟล์ พร้อมรายละเอียดและรูปภาพครบถ้วน`;
-    if (!metaDesc.parentNode) document.head.appendChild(metaDesc);
 
+    // ใส่เนื้อหาใน section
     sectionWrapper.innerHTML = `
         <div class="p-6 md:p-8">
             <h2 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
@@ -706,46 +712,26 @@ function createProvinceSection(key, name, provinceProfiles) {
             </button>
         </div>`;
 
+    // เลือก grid สำหรับใส่ profile cards
     const grid = sectionWrapper.querySelector('.profile-grid');
-    const profilesToDisplay = provinceProfiles.slice(0, 8);
+
+    // เลือกโปรไฟล์ที่จะแสดงผล 20 อันดับแรก
+    const profilesToDisplay = provinceProfiles.slice(0, 20);
     grid.append(...profilesToDisplay.map(createProfileCard));
 
+    // จัดการ event สำหรับปุ่มดูเพิ่มเติม
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
     const viewMoreBtn = sectionWrapper.querySelector('.view-more-btn');
 
-    if (viewMoreContainer && totalCount > 10) {
+    if (viewMoreContainer && totalCount > 20) {
         viewMoreContainer.style.display = 'block';
         viewMoreBtn.addEventListener('click', () => {
+            // ลิ้งไปหน้ารวมโปรไฟล์ของจังหวัดนั้นๆ
             window.location.href = `/province/${key}`;
         });
     }
 
     return sectionWrapper;
-}
-
-// --- SEARCH RESULT ---
-function createSearchResultSection(profiles = []) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'section-content-wrapper';
-    wrapper.setAttribute('data-animate-on-scroll', '');
-    const count = Array.isArray(profiles) ? profiles.length : 0;
-
-    wrapper.innerHTML = `
-      <div class="p-6 md:p-8">
-        <h3 class="search-results-header">ผลการค้นหา</h3>
-        <p class="mt-2 text-sm text-muted-foreground">
-          ${count > 0 ? `พบ <span class="search-count-highlight">${count}</span> โปรไฟล์ที่ตรงกับเงื่อนไข` : 'ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข'}
-        </p>
-      </div>
-      <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 
-                  sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4"></div>
-    `;
-
-    const grid = wrapper.querySelector('.profile-grid');
-    if (count > 0) {
-        grid.append(...profiles.map(createProfileCard));
-    }
-    return wrapper;
 }
 
 // --- OTHER INITIALIZERS ---
@@ -823,25 +809,23 @@ function initMobileMenu() {
     });
 }
 
-// --- Age Verification ---
 function initAgeVerification() {
-  const botUserAgents = /Googlebot|Lighthouse|PageSpeed|AdsBot-Google|bingbot|slurp|DuckDuckBot/i;
-  const isBot = (ua) => botUserAgents.test(ua);
+  const ageKey = 'ageConfirmedTimestamp';
+  const now = Date.now();
+  const lastConfirmed = localStorage.getItem(ageKey);
+  const oneHour = 60 * 60 * 1000;
 
-  const showModal = () => createAgeModal();
-
-  if (navigator.userAgentData) {
-    navigator.userAgentData.getHighEntropyValues(["brands", "platform"]).then(ua => {
-      const brandInfo = ua.brands.map(b => b.brand).join(" ") + " " + ua.platform;
-      if (!isBot(brandInfo)) showModal();
-    });
+  if (lastConfirmed && (now - parseInt(lastConfirmed, 10) < oneHour)) {
+    // ผ่านการยืนยันในช่วง 1 ชม. ไม่ต้องแสดง modal อีก
+    return;
   } else {
-    const ua = navigator.userAgent || "";
-    if (!isBot(ua)) showModal();
+    // ยังไม่เคยยืนยันหรือหมดเวลา ต้องแสดง modal ใหม่
+    createAgeModal();
   }
 }
 
 function createAgeModal() {
+  // ลบ modal เดิมถ้ามี
   document.getElementById("age-verification-overlay")?.remove();
 
   const overlay = document.createElement("div");
@@ -892,20 +876,30 @@ function createAgeModal() {
       window.location.href = "https://www.google.com";
     }
   });
+
   focusable[0].focus();
 
   const confirmBtn = modal.querySelector("#confirmAgeButton");
   const cancelBtn = modal.querySelector("#cancelAgeButton");
+
   const closeModal = () => {
+    // บันทึก timestamp เมื่อยืนยัน
+    if (confirmBtn.contains(document.activeElement)) {
+      localStorage.setItem('ageConfirmedTimestamp', Date.now().toString());
+    }
     modal.classList.add("scale-95", "opacity-0");
     overlay.classList.add("opacity-0");
     setTimeout(() => overlay.remove(), 300);
   };
 
   confirmBtn.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", () => (window.location.href = "https://www.google.com"));
+  cancelBtn.addEventListener("click", () => {
+    // ออกไปเว็บไซต์อื่น
+    window.location.href = "https://www.google.com";
+  });
 }
 
+// เรียกใช้งานเมื่อ DOM พร้อม
 document.addEventListener("DOMContentLoaded", initAgeVerification);
 
 // --- Lightbox ---
