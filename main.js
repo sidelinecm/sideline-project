@@ -610,6 +610,7 @@ function renderProfiles(filteredProfiles, isSearching) {
 // ==========================================================
 // 🧱 Profile Card (ไม่มี Schema)
 // ==========================================================
+
 function createProfileCard(profile = {}) {
     const card = document.createElement('div');
     card.className = 'profile-card-new-container';
@@ -630,32 +631,26 @@ function createProfileCard(profile = {}) {
     };
     const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
 
-    const preloadLink = document.createElement('link');
-    preloadLink.rel = 'preload';
-    preloadLink.as = 'image';
-    preloadLink.href = `${baseUrl}?width=400&quality=80`;
-    document.head.appendChild(preloadLink);
+    // 🛑 โค้ด preload Link ถูกลบออกแล้วเพื่อเพิ่มประสิทธิภาพ (ตาม Fix 2)
 
     const img = document.createElement('img');
     img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
     img.src = `${baseUrl}?width=400&quality=80`;
-    img.srcset = `
-      ${baseUrl}?width=150&quality=70 150w,
-      ${baseUrl}?width=250&quality=75 250w,
-      ${baseUrl}?width=600&quality=80 600w
+    img.srcset = ` 
+        ${baseUrl}?width=150&quality=70 150w, 
+        ${baseUrl}?width=250&quality=75 250w, 
+        ${baseUrl}?width=600&quality=80 600w 
     `;
     img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
     img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
     img.loading = 'lazy';
     img.decoding = 'async';
     img.onerror = function () { this.src = '/images/placeholder-profile.webp'; this.srcset = ''; };
-
     cardInner.appendChild(img);
 
     // 🎖️ Badge
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
-
     const availSpan = document.createElement('span');
     let statusClass = 'status-inquire';
     switch (profile.availability) {
@@ -665,7 +660,6 @@ function createProfileCard(profile = {}) {
     availSpan.className = `availability-badge ${statusClass}`;
     availSpan.textContent = profile.availability || 'สอบถามคิว';
     badges.appendChild(availSpan);
-
     if (profile.isfeatured) {
         const feat = document.createElement('span');
         feat.className = 'featured-badge';
@@ -679,24 +673,22 @@ function createProfileCard(profile = {}) {
     overlay.className = 'card-overlay';
     const info = document.createElement('div');
     info.className = 'card-info';
-
     const h3 = document.createElement('h3');
     h3.className = 'text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow';
     h3.textContent = profile.name || 'ไม่ระบุชื่อ';
-
     const provinceName = provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
     const p = document.createElement('p');
     p.className = 'text-sm flex items-center gap-1.5 text-white/90';
     p.innerHTML = `<i class="fas fa-map-marker-alt opacity-80"></i> ${provinceName}`;
-
     info.appendChild(h3);
     info.appendChild(p);
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
 
-    // 🧠 Event
-    cardInner.addEventListener('click', () => {
-        window.location.href = `/profiles/${profile.id || ''}`;
+    // 🧠 Event - ✅ แก้ไขให้เรียก Lightbox แทนการ Redirect (ตาม Fix 1)
+    cardInner.addEventListener('click', (e) => {
+        // e.preventDefault(); // ไม่จำเป็นต้องใช้ถ้า cardInner เป็น div
+        openLightbox(profile.id || ''); 
     });
 
     card.appendChild(cardInner);
