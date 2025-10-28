@@ -1,13 +1,13 @@
 # =====================================
-# 🏗️  Netlify Build Configuration
+# 🏗️ Netlify Build Configuration
 # =====================================
 [build]
-  publish = "."          # Root folder
-  command = ""           # ไม่มี build command สำหรับเว็บ static
+  publish = "."             # Root folder
+  command = ""              # ไม่มี build command สำหรับเว็บ static
   environment = { NODE_VERSION = "18" }
 
 # =====================================
-# ⚙️  Global HTTP Security Headers
+# ⚙️ Global HTTP Security Headers
 # =====================================
 [[headers]]
   for = "/*"
@@ -21,7 +21,7 @@
     Vary = "Accept-Encoding"
 
 # =====================================
-# 🕸️  HTML Pages – Cache Short, Must Validate
+# 🕸️ HTML Pages – Cache Short, Must Validate
 # =====================================
 [[headers]]
   for = "*.html"
@@ -29,7 +29,7 @@
     Cache-Control = "public, max-age=600, must-revalidate"
 
 # =====================================
-# 🧠  Service Worker / Manifest / Sitemap / Robots
+# 🧠 Service Worker / Manifest / Sitemap / Robots
 # =====================================
 [[headers]]
   for = "/sw.js"
@@ -52,7 +52,7 @@
     Cache-Control = "public, max-age=86400, must-revalidate"
 
 # =====================================
-# 🖼️  Static Assets – Long-term Cache
+# 🖼️ Static Assets – Long-term Cache
 # =====================================
 [[headers]]
   for = "/images/*"
@@ -80,9 +80,30 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 # =====================================
-# 🔀  Redirect Rules
+# 🔀 Redirect Rules (ปรับปรุงให้ครอบคลุมทุกกรณี)
 # =====================================
-# Service Worker และ PWA files ไม่ถูก SPA redirect
+
+# 1. Redirection 301 (ถาวร) สำหรับลิงก์เก่าไปลิงก์ใหม่ที่ดีกว่า (SEO Friendly)
+# - ลิงก์เก่าแบบ /province/key ไปยัง /key
+[[redirects]]
+  from = "/province/:provincekey"
+  to = "/:provincekey"
+  status = 301
+
+# - ลิงก์เก่าแบบ Query Parameter (?province=key หรือ ?p=key) ไปยัง /key
+[[redirects]]
+  from = "/"
+  to = "/:provincekey"
+  status = 301
+  query = { province = ":provincekey" }
+
+[[redirects]]
+  from = "/profiles"
+  to = "/:provincekey"
+  status = 301
+  query = { p = ":provincekey" } 
+
+# 2. Service Worker และ PWA files ไม่ถูก SPA redirect
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
@@ -95,22 +116,15 @@
   status = 200
   force = true
 
-# SPA Fallback
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# ตัวอย่าง redirect เก่า → ใหม่
-[[redirects]]
-  from = "/old-path/*"
-  to = "/new-path/:splat"
-  status = 301
-  force = true
-
-# ซ่อน SEO profile path จากผู้ใช้ทั่วไป
+# 3. ซ่อน SEO profile path จากผู้ใช้ทั่วไป
 [[redirects]]
   from = "/seo-profiles/*"
   to = "/404"
   status = 302
 
+# 4. SPA Catch-all Fallback (สำคัญที่สุด)
+# URL ทุกตัวที่ไม่ใช่ไฟล์จริง (เช่น /chiangmai) จะถูกส่งไปที่ index.html เพื่อให้ JS จัดการ
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

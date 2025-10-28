@@ -538,10 +538,18 @@ function renderProfiles(filteredProfiles, isSearching) {
     dom.profilesDisplayArea.innerHTML = '';
     dom.noResultsMessage.classList.add('hidden');
 
-    // --- [MODIFIED] FEATURED SECTION (ซ่อนไว้ก่อน) ---
-    // ไม่ว่าหน้า Home จะแสดงผลอย่างไร ก็ซ่อน Featured Section เดิม (#featured-profiles) ไว้
+    // --- FEATURED SECTION (เฉพาะหน้า Home) ---
     if (dom.featuredSection) {
-        dom.featuredSection.classList.add('hidden');
+        const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
+        if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
+            dom.featuredContainer.innerHTML = '';
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 12);
+            dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
+            dom.featuredSection.classList.remove('hidden');
+            dom.featuredSection.setAttribute('data-animate-on-scroll', '');
+        } else {
+            dom.featuredSection.classList.add('hidden');
+        }
     }
 
     // --- ไม่มีผลลัพธ์ ---
@@ -553,7 +561,7 @@ function renderProfiles(filteredProfiles, isSearching) {
         return;
     }
 
-    // --- หน้า PROFILES (ใช้งานได้เหมือนเดิม) ---
+    // --- หน้า PROFILES ---
     if (currentPage === 'profiles') {
         if (isSearching) {
             const gridContainer = document.createElement('div');
@@ -588,48 +596,11 @@ function renderProfiles(filteredProfiles, isSearching) {
         }
     }
 
-    // --- หน้า HOME (NEW LOGIC: Featured Profiles Grouped by Province) ---
+    // --- หน้า HOME ---
     else if (currentPage === 'home') {
         if (isSearching) {
             const searchResultWrapper = createSearchResultSection(filteredProfiles);
             dom.profilesDisplayArea.appendChild(searchResultWrapper);
-        } else {
-            // 1. กรองเอาเฉพาะโปรไฟล์แนะนำ (isfeatured: true)
-            // (ในสถานะนี้ filteredProfiles คือ allProfiles ทั้งหมด)
-            const featuredProfiles = filteredProfiles.filter(p => p.isfeatured);
-
-            // 2. จัดกลุ่มโปรไฟล์แนะนำตามจังหวัด
-            const featuredByProvince = featuredProfiles.reduce((acc, profile) => {
-                const key = profile.provinceKey || 'unknown'; 
-                (acc[key] = acc[key] || []).push(profile);
-                return acc;
-            }, {});
-
-            // 3. สร้างรายการจังหวัด (เรียงตามชื่อจังหวัด ก-ฮ)
-            const provinceKeys = Object.keys(featuredByProvince).sort((a, b) => {
-                 const nameA = provincesMap.get(a) || a;
-                 const nameB = provincesMap.get(b) || b;
-                 return nameA.localeCompare(nameB, 'th'); // เรียงลำดับชื่อภาษาไทย
-            });
-            
-            if (provinceKeys.length === 0 || (provinceKeys.length === 1 && provinceKeys[0] === 'unknown')) {
-                // กรณีไม่มีโปรไฟล์แนะนำเลย
-                dom.noResultsMessage.classList.remove('hidden');
-            } else {
-                // 4. วนลูปสร้าง Section ของแต่ละจังหวัด
-                provinceKeys.forEach(provinceKey => {
-                    if (provinceKey === 'unknown') return; // ข้ามกลุ่ม 'unknown'
-                    
-                    const provinceProfiles = featuredByProvince[provinceKey] || [];
-                    if (provinceProfiles.length === 0) return; 
-                    
-                    const provinceName = provincesMap.get(provinceKey) || "ไม่ระบุ";
-                    
-                    // 5. ใช้ฟังก์ชัน `createProvinceSection` เพื่อสร้าง UI
-                    const provinceSectionEl = createProvinceSection(provinceKey, provinceName, provinceProfiles);
-                    dom.profilesDisplayArea.appendChild(provinceSectionEl);
-                });
-            }
         }
     }
 
@@ -733,17 +704,12 @@ function createProvinceSection(key, name, provinceProfiles) {
     sectionWrapper.className = 'section-content-wrapper';
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
 
-    const currentPage = dom.body.dataset.page;
-    const isSearching = dom.body.dataset.isSearching === 'true'; // เช็คสถานะค้นหา
-
-    // 🧩 Meta title + description (เฉพาะหน้า /profiles เท่านั้น เพื่อรักษา SEO หน้าแรก)
-    if (currentPage === 'profiles' && !isSearching) { 
-        document.title = `ไซด์ไลน์ ${name} - รวมสาวสวยพร้อมให้บริการในจังหวัด${name}`;
-        const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
-        metaDesc.name = 'description';
-        metaDesc.content = `รวมสาวไซด์ไลน์ ${name} ทั้งหมด ${totalCount} โปรไฟล์ พร้อมรายละเอียดและรูปภาพครบถ้วน`;
-        if (!metaDesc.parentNode) document.head.appendChild(metaDesc);
-    } 
+    // 🧩 Meta title + description
+    document.title = `ไซด์ไลน์ ${name} - รวมสาวสวยพร้อมให้บริการในจังหวัด${name}`;
+    const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
+    metaDesc.name = 'description';
+    metaDesc.content = `รวมสาวไซด์ไลน์ ${name} ทั้งหมด ${totalCount} โปรไฟล์ พร้อมรายละเอียดและรูปภาพครบถ้วน`;
+    if (!metaDesc.parentNode) document.head.appendChild(metaDesc);
 
     // 🏷️ Header Province
     sectionWrapper.innerHTML = `
@@ -775,31 +741,13 @@ function createProvinceSection(key, name, provinceProfiles) {
         </div>`;
 
     const grid = sectionWrapper.querySelector('.profile-grid');
-    let profilesToDisplay = provinceProfiles; // Default: แสดงทั้งหมด
-
-    // 🛑 [NEW LOGIC] ถ้าอยู่ในหน้า Home (ไม่ได้ค้นหา) ให้แสดง "ทั้งหมด"
-    if (currentPage === 'home' && !isSearching) {
-        profilesToDisplay = provinceProfiles; // แสดงโปรไฟล์แนะนำทั้งหมดของจังหวัดนี้
-        // ไม่ต้องมีปุ่ม "ดูทั้งหมด" เพราะแสดงทั้งหมดแล้ว
-    } 
-    // ถ้าอยู่ในหน้า Profiles (ไม่ได้ค้นหา) ให้แสดงตาม Limit
-    else if (currentPage === 'profiles' && !isSearching) {
-        // จำกัดการแสดงผลสำหรับหน้า /profiles ที่แสดงโดยรวม
-        profilesToDisplay = provinceProfiles.slice(0, PROFILES_PER_PROVINCE_ON_INDEX); 
-    }
-    // กรณีอื่นๆ (เช่น หน้าค้นหา) ให้แสดงผลลัพธ์ทั้งหมด
-    else {
-        profilesToDisplay = provinceProfiles;
-    }
-
+    const profilesToDisplay = provinceProfiles.slice(0, 8);
     grid.append(...profilesToDisplay.map(createProfileCard));
 
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
     const viewMoreBtn = sectionWrapper.querySelector('.view-more-btn');
 
-    // 🛑 [MODIFIED LOGIC] แสดงปุ่ม "ดูทั้งหมด" เฉพาะในหน้า /profiles เท่านั้น
-    // และเมื่อจำนวนโปรไฟล์ทั้งหมดมากกว่าจำนวนที่แสดง (8 คน)
-    if (viewMoreContainer && currentPage === 'profiles' && totalCount > PROFILES_PER_PROVINCE_ON_INDEX) {
+    if (viewMoreContainer && totalCount > 10) {
         viewMoreContainer.style.display = 'block';
         viewMoreBtn.addEventListener('click', () => {
             window.location.href = `/province/${key}`;
@@ -808,6 +756,7 @@ function createProvinceSection(key, name, provinceProfiles) {
 
     return sectionWrapper;
 }
+
 // ==========================================================
 // 🔍 Search Result Section
 // ==========================================================
