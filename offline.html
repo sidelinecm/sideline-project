@@ -1,34 +1,31 @@
 <!doctype html>
 <html lang="th" class="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>คุณกำลังออฟไลน์ - SidelineCM</title>
-  <meta name="robots" content="noindex, nofollow">
-  <link rel="manifest" href="manifest.webmanifest"> 
-  <meta name="theme-color" content="#FFFFFF">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827">
-  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/offline">
- <!-- 1. Preconnect -->
-<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="manifest" href="manifest.webmanifest" /> 
+  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827" />
+  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/offline" />
 
-<!-- 2. Preload web fonts -->
-<link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- 1. Preconnect -->
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 
-<!-- 3. Preload CSS non-blocking -->
-<link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/styles.css"></noscript>
+  <!-- 2. Preload web fonts -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin />
 
-<!-- 4. Preload Font Awesome non-blocking -->
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <!-- 3. Preload CSS non-blocking -->
+  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/styles.css" /></noscript>
 
-<!-- 5. Module preload JS -->
-
-  
+  <!-- 4. Preload Font Awesome -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
 
   <!-- Critical inline CSS -->
   <style>
@@ -62,7 +59,7 @@
 
       <h1>โอ๊ะ! คุณกำลังออฟไลน์</h1>
       <p>ดูเหมือนว่าการเชื่อมต่ออินเทอร์เน็ตของคุณมีปัญหาในขณะนี้ ไม่ต้องกังวล เนื้อหาที่คุณเคยเข้าชมอาจยังคงใช้งานได้</p>
-      <a href="javascript:window.location.reload()" class="retry-button">
+      <a href="javascript:window.location.reload()" class="retry-button" aria-label="ลองอีกครั้ง">
         <!-- Refresh icon -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" style="width:1em; height:1em;">
           <path d="M463.5 224H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"/>
@@ -89,7 +86,5 @@
     });
   }
 </script>
-
-
 </body>
 </html>
