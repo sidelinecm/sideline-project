@@ -864,30 +864,12 @@
 
 
 <script type="module" src="/main.js"></script>
-<!-- ✅ โหลด SW หลังโหลดเสร็จ -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.body.classList.add("loaded");
-});
 
-// ✅ ลงทะเบียน Service Worker แบบ idle time
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const registerSW = () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('✅ SW registered:', reg.scope))
-        .catch(err => console.error('❌ SW registration failed:', err));
-    };
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(registerSW);
-    } else {
-      setTimeout(registerSW, 1500);
-    }
-  });
-}
-</script>
-
+<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
 
 </body>
 </html>
+
+
+
 
