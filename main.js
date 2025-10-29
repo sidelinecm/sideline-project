@@ -477,57 +477,75 @@ function matchesProfile(profile, parsed) {
         }
     });
 
-    // --- APPLY FILTERS (uses smart parsing and matchesProfile) ---
-    function applyFilters(updateUrl = true) {
-        const searchTermRaw = dom.searchInput?.value?.trim() || '';
-        const searchTerm = searchTermRaw.toLowerCase();
-        const selectedProvince = dom.provinceSelect?.value || '';
-        const selectedAvailability = dom.availabilitySelect?.value || '';
-        const isFeaturedOnly = dom.featuredSelect?.value === 'true';
+// ==========================================================
+// 🔍 APPLY FILTERS (ใช้ smart parsing และ matchesProfile)
+// ==========================================================
+function applyFilters(updateUrl = true) {
+    const searchTermRaw = dom.searchInput?.value?.trim() || '';
+    const searchTerm = searchTermRaw.toLowerCase();
+    const selectedProvince = dom.provinceSelect?.value || '';
+    const selectedAvailability = dom.availabilitySelect?.value || '';
+    const isFeaturedOnly = dom.featuredSelect?.value === 'true';
 
-        // Save last selected province to localStorage
-        if (selectedProvince) {
-            localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
-        } else {
-            localStorage.removeItem(LAST_PROVINCE_KEY);
-        }
-
-        // Update URL
-        if (updateUrl) {
-            const urlParams = new URLSearchParams();
-            if (searchTermRaw) urlParams.set('q', searchTermRaw);
-            if (selectedProvince) urlParams.set('province', selectedProvince);
-            if (selectedAvailability) urlParams.set('availability', selectedAvailability);
-            if (isFeaturedOnly) urlParams.set('featured', 'true');
-            const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-            history.pushState({}, '', newUrl);
-        }
-
-        // If searchTerm contains explicit filters (key:value), we let smart parser handle them.
-        const parsed = parseSearchQuery(searchTermRaw);
-
-        // Use parsed clauses and also selected UI filters (province/selects)
-        const filtered = allProfiles.filter(p => {
-            try {
-                // First enforce selected UI filters
-                if (selectedProvince && p.provinceKey !== selectedProvince) return false;
-                if (selectedAvailability && p.availability !== selectedAvailability) return false;
-                if (isFeaturedOnly && !p.isfeatured) return false;
-
-                // Then smart match against parsed query (if any)
-                if (searchTermRaw) {
-                    return matchesProfile(p, parsed);
-                }
-                return true;
-            } catch (err) {
-                console.error('Search match error', err, p);
-                return false;
-            }
-        });
-
-        const isSearching = !!(searchTermRaw || selectedProvince || selectedAvailability || isFeaturedOnly);
-        renderProfiles(filtered, isSearching);
+    // ✅ Save last selected province to localStorage
+    if (selectedProvince) {
+        localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
+    } else {
+        localStorage.removeItem(LAST_PROVINCE_KEY);
     }
+
+    // ✅ Update URL ให้เป็นแบบ SEO-Friendly เช่น /chiangmai แทน ?province=chiangmai
+    if (updateUrl) {
+        let newUrl = window.location.origin;
+
+        // ✅ ถ้ามี province ให้ใช้เป็น /provinceKey เช่น /chiangmai
+        if (selectedProvince) {
+            newUrl += `/${selectedProvince}`;
+        } else {
+            // ถ้าไม่มี province ให้กลับไป root (เช่น / หรือ /profiles)
+            newUrl += window.location.pathname.replace(/\/[^/]*$/, '/');
+        }
+
+        // ✅ เพิ่มพารามิเตอร์อื่น ๆ เฉพาะที่จำเป็น
+        const urlParams = new URLSearchParams();
+        if (searchTermRaw) urlParams.set('q', searchTermRaw);
+        if (selectedAvailability) urlParams.set('availability', selectedAvailability);
+        if (isFeaturedOnly) urlParams.set('featured', 'true');
+
+        const queryStr = urlParams.toString();
+        if (queryStr) newUrl += `?${queryStr}`;
+
+        // ✅ อัปเดต URL โดยไม่ reload หน้า
+        history.pushState({}, '', newUrl);
+    }
+
+    // ✅ ใช้ smart parser เพื่อแยกเงื่อนไขใน search เช่น name:ฝน province:เชียงใหม่
+    const parsed = parseSearchQuery(searchTermRaw);
+
+    // ✅ กรองข้อมูลตามตัวกรองทั้งหมด (province, availability, featured, search)
+    const filtered = allProfiles.filter(p => {
+        try {
+            if (selectedProvince && p.provinceKey !== selectedProvince) return false;
+            if (selectedAvailability && p.availability !== selectedAvailability) return false;
+            if (isFeaturedOnly && !p.isfeatured) return false;
+
+            // ✅ ถ้ามี searchTermRaw ให้ใช้ matchesProfile
+            if (searchTermRaw) {
+                return matchesProfile(p, parsed);
+            }
+            return true;
+        } catch (err) {
+            console.error('Search match error', err, p);
+            return false;
+        }
+    });
+
+    // ✅ ตรวจสอบสถานะว่ากำลังค้นหาหรือไม่
+    const isSearching = !!(searchTermRaw || selectedProvince || selectedAvailability || isFeaturedOnly);
+
+    // ✅ Render โปรไฟล์ที่กรองแล้ว
+    renderProfiles(filtered, isSearching);
+}
 
 // ==========================================================
 // 🔄 Rendering Profiles (SEO + UX Enhanced)
@@ -570,30 +588,10 @@ function renderProfiles(filteredProfiles, isSearching) {
             gridContainer.append(...filteredProfiles.map(createProfileCard));
             dom.profilesDisplayArea.appendChild(gridContainer);
         } else {
-            const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
-                (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
-                return acc;
-            }, {});
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const priorityLocation = urlParams.get('location');
-
-            let dynamicProvinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
-            if (priorityLocation && dynamicProvinceOrder.includes(priorityLocation)) {
-                dynamicProvinceOrder = [
-                    priorityLocation,
-                    ...dynamicProvinceOrder.filter(p => p !== priorityLocation)
-                ];
-            }
-
-            dynamicProvinceOrder.forEach(provinceKey => {
-                if (!provinceKey) return;
-                const provinceProfiles = profilesByProvince[provinceKey] || [];
-                const provinceName = provincesMap.get(provinceKey) || "ไม่ระบุ";
-                const provinceSectionEl = createProvinceSection(provinceKey, provinceName, provinceProfiles);
-                dom.profilesDisplayArea.appendChild(provinceSectionEl);
-            });
+            renderProfilesByProvince(filteredProfiles, dom.profilesDisplayArea);
         }
+        document.title = 'รวมโปรไฟล์สาวไซด์ไลน์ทั่วประเทศ';
+        updateMetaDescription('รวมโปรไฟล์สาวไซด์ไลน์จากทุกจังหวัดทั่วประเทศไทย');
     }
 
     // --- หน้า HOME ---
@@ -601,6 +599,11 @@ function renderProfiles(filteredProfiles, isSearching) {
         if (isSearching) {
             const searchResultWrapper = createSearchResultSection(filteredProfiles);
             dom.profilesDisplayArea.appendChild(searchResultWrapper);
+        } else {
+            // ✅ แสดงแยกตามจังหวัดเช่นเดียวกับหน้า profiles
+            renderProfilesByProvince(filteredProfiles, dom.profilesDisplayArea);
+            document.title = 'ไซด์ไลน์ทั่วประเทศ - รวมสาวสวยทุกจังหวัด';
+            updateMetaDescription('รวมสาวไซด์ไลน์จากทุกจังหวัด ทั้งว่างและไม่ว่าง พร้อมรายละเอียดและภาพสวยคมชัด');
         }
     }
 
@@ -608,9 +611,40 @@ function renderProfiles(filteredProfiles, isSearching) {
 }
 
 // ==========================================================
-// 🧱 Profile Card (ไม่มี Schema)
+// 📦 Helper: แสดงโปรไฟล์ตามจังหวัด
 // ==========================================================
+function renderProfilesByProvince(filteredProfiles, container) {
+    const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
+        (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
+        return acc;
+    }, {});
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const priorityLocation = urlParams.get('location');
+
+    let dynamicProvinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
+    if (priorityLocation && dynamicProvinceOrder.includes(priorityLocation)) {
+        dynamicProvinceOrder = [
+            priorityLocation,
+            ...dynamicProvinceOrder.filter(p => p !== priorityLocation)
+        ];
+    }
+
+    // ✅ (Optional) จำกัดแค่ 6 จังหวัดแรกถ้าต้องการ
+    // dynamicProvinceOrder = dynamicProvinceOrder.slice(0, 6);
+
+    dynamicProvinceOrder.forEach(provinceKey => {
+        if (!provinceKey) return;
+        const provinceProfiles = profilesByProvince[provinceKey] || [];
+        const provinceName = provincesMap.get(provinceKey) || "ไม่ระบุ";
+        const provinceSectionEl = createProvinceSection(provinceKey, provinceName, provinceProfiles);
+        container.appendChild(provinceSectionEl);
+    });
+}
+
+// ==========================================================
+// 🧱 Profile Card
+// ==========================================================
 function createProfileCard(profile = {}) {
     const card = document.createElement('div');
     card.className = 'profile-card-new-container';
@@ -631,15 +665,13 @@ function createProfileCard(profile = {}) {
     };
     const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
 
-    // 🛑 โค้ด preload Link ถูกลบออกแล้วเพื่อเพิ่มประสิทธิภาพ (ตาม Fix 2)
-
     const img = document.createElement('img');
     img.className = 'card-image w-full h-auto object-cover aspect-[3/4]';
     img.src = `${baseUrl}?width=400&quality=80`;
-    img.srcset = ` 
-        ${baseUrl}?width=150&quality=70 150w, 
-        ${baseUrl}?width=250&quality=75 250w, 
-        ${baseUrl}?width=600&quality=80 600w 
+    img.srcset = `
+        ${baseUrl}?width=150&quality=70 150w,
+        ${baseUrl}?width=250&quality=75 250w,
+        ${baseUrl}?width=600&quality=80 600w
     `;
     img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
     img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
@@ -685,10 +717,8 @@ function createProfileCard(profile = {}) {
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
 
-    // 🧠 Event - ✅ แก้ไขให้เรียก Lightbox แทนการ Redirect (ตาม Fix 1)
-    cardInner.addEventListener('click', (e) => {
-        // e.preventDefault(); // ไม่จำเป็นต้องใช้ถ้า cardInner เป็น div
-        openLightbox(profile.id || ''); 
+    cardInner.addEventListener('click', () => {
+        openLightbox(profile.id || '');
     });
 
     card.appendChild(cardInner);
@@ -696,7 +726,7 @@ function createProfileCard(profile = {}) {
 }
 
 // ==========================================================
-// 📍 Province Section (SEO & UX)
+// 📍 Province Section (ไม่แตะ Title/Meta แล้ว)
 // ==========================================================
 function createProvinceSection(key, name, provinceProfiles) {
     const totalCount = provinceProfiles.length;
@@ -704,14 +734,6 @@ function createProvinceSection(key, name, provinceProfiles) {
     sectionWrapper.className = 'section-content-wrapper';
     sectionWrapper.setAttribute('data-animate-on-scroll', '');
 
-    // 🧩 Meta title + description
-    document.title = `ไซด์ไลน์ ${name} - รวมสาวสวยพร้อมให้บริการในจังหวัด${name}`;
-    const metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
-    metaDesc.name = 'description';
-    metaDesc.content = `รวมสาวไซด์ไลน์ ${name} ทั้งหมด ${totalCount} โปรไฟล์ พร้อมรายละเอียดและรูปภาพครบถ้วน`;
-    if (!metaDesc.parentNode) document.head.appendChild(metaDesc);
-
-    // 🏷️ Header Province
     sectionWrapper.innerHTML = `
         <div class="p-6 md:p-8">
             <h2 class="province-section-header flex items-center gap-2.5 text-lg font-semibold">
@@ -783,6 +805,19 @@ function createSearchResultSection(profiles = []) {
         grid.append(...profiles.map(createProfileCard));
     }
     return wrapper;
+}
+
+// ==========================================================
+// 🧠 Utilities
+// ==========================================================
+function updateMetaDescription(content) {
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.name = 'description';
+        document.head.appendChild(metaDesc);
+    }
+    metaDesc.content = content;
 }
 
     // --- OTHER INITIALIZERS & UTILITIES ---
