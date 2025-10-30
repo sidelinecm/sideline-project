@@ -142,6 +142,7 @@ async function main() {
 // --- DATA FETCHING ---
 async function fetchData() {
     try {
+        // 1. Fetch Data
         const [profilesRes, provincesRes] = await Promise.all([
             supabase
                 .from('profiles')
@@ -154,38 +155,55 @@ async function fetchData() {
                 .order('nameThai', { ascending: true })
         ]);
 
-        // ตรวจสอบ error จาก Supabase
+        // 2. ตรวจสอบ error จาก Supabase
         if (!profilesRes || profilesRes.error) throw profilesRes?.error || new Error('Unknown error fetching profiles');
         if (!provincesRes || provincesRes.error) throw provincesRes?.error || new Error('Unknown error fetching provinces');
 
-        // ตรวจสอบว่าข้อมูล provinces เป็น array
+        // 3. จัดการข้อมูลจังหวัด (Provinces Map)
+        // 🚨 แก้ไข: เปลี่ยนไปใช้ p.key (ตามโค้ดเดิม) หรือ p.id (ถ้ามี) ในการกำหนด Key 
+        // หากในตาราง profiles ใช้ provinceKey เป็น Key ในตาราง provinces 
         if (Array.isArray(provincesRes.data)) {
             provincesRes.data.forEach(p => {
-                if (p?.key && p?.nameThai) {
-                    provincesMap.set(p.key, p.nameThai);
+                // ⚠️ สมมติว่า 'key' ในตาราง provinces คือสิ่งที่ตรงกับ 'provinceKey' ในตาราง profiles
+                if (p?.key && p?.nameThai) { 
+                    provincesMap.set(p.key, p.nameThai); 
                 }
             });
         }
 
-        // ตรวจสอบว่าข้อมูล profiles เป็น array
+        // 4. จัดการข้อมูลโปรไฟล์ (Profiles Mapping with Cache Busting)
         if (Array.isArray(profilesRes.data)) {
             allProfiles = profilesRes.data.map(p => {
                 const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])]
                     .filter(Boolean);
 
+                // --- 🚀 การปรับปรุง: Cache Busting และ Smart URL Generation ---
                 const imageObjects = imagePaths.map(path => {
                     const publicUrlData = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-                    const originalUrl = publicUrlData?.data?.publicUrl || '/images/placeholder-profile-card.webp';
+                    let originalUrl = publicUrlData?.data?.publicUrl || '/images/placeholder-profile-card.webp';
 
+                    let urlSeparator = '?';
+                    
+                    // ⬇️ 🎯 การแก้ไขหลัก: Cache Busting (ใช้ lastUpdated เป็นเวอร์ชัน)
+                    if (p.lastUpdated) {
+                        const timestampInSeconds = Math.floor(new Date(p.lastUpdated).getTime() / 1000);
+                        originalUrl = `${originalUrl}${urlSeparator}v=${timestampInSeconds}`;
+                        urlSeparator = '&'; // เปลี่ยนตัวแยกเป็น & หลังจากใส่ตัวแรกแล้ว
+                    }
+                    // --------------------------------------------------------
+
+                    // สร้าง srcset โดยใช้ตัวแยก & สำหรับพารามิเตอร์ Image Transformation ต่อไป
                     const srcset = [300, 600, 900]
-                        .map(width => `${originalUrl}?width=${width}&quality=80 ${width}w`)
+                        .map(width => `${originalUrl}${urlSeparator}width=${width}&quality=80 ${width}w`)
                         .join(', ');
 
+                    // สร้าง src หลัก
                     return {
-                        src: `${originalUrl}?width=600&quality=80`,
+                        src: `${originalUrl}${urlSeparator}width=600&quality=80`,
                         srcset: srcset,
                     };
                 });
+                // --- สิ้นสุดการปรับปรุง ---
 
                 // fallback ถ้าไม่มีรูป
                 if (imageObjects.length === 0) {
@@ -202,12 +220,14 @@ async function fetchData() {
             allProfiles = [];
         }
 
-        // สร้าง dropdown จังหวัด
-        if (dom.provinceSelect && dom.provinceSelect.options.length <= 1 && Array.isArray(provincesRes.data)) {
+        // 5. สร้าง dropdown จังหวัด
+        // 💡 แก้ไข: ตรวจสอบและใช้ Key เดียวกันคือ prov.key
+        if (typeof dom !== 'undefined' && dom.provinceSelect && dom.provinceSelect.options.length <= 1 && Array.isArray(provincesRes.data)) {
             provincesRes.data.forEach(prov => {
                 if (prov?.key && prov?.nameThai) {
                     const option = document.createElement('option');
-                    option.value = prov.key;
+                    // 🚨 แก้ไข: ใช้ prov.key ที่ตรงกับ provincesMap และ p.provinceKey
+                    option.value = prov.key; 
                     option.textContent = prov.nameThai;
                     dom.provinceSelect.appendChild(option);
                 }
@@ -221,7 +241,6 @@ async function fetchData() {
         return false;
     }
 }
-
 // --- SEARCH & FILTERS ---
 function initSearchAndFilters() {
     if (!dom.searchForm) {
