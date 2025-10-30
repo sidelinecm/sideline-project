@@ -643,7 +643,7 @@ function renderProfilesByProvince(filteredProfiles, container) {
 }
 
 // ==========================================================
-// 🧱 Profile Card (ไม่มี Schema) - เวอร์ชันสมบูรณ์
+// 🧱 Profile Card
 // ==========================================================
 function createProfileCard(profile = {}) {
     const card = document.createElement('div');
@@ -677,27 +677,21 @@ function createProfileCard(profile = {}) {
     img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
     img.loading = 'lazy';
     img.decoding = 'async';
-    img.onerror = function () {
-        this.src = '/images/placeholder-profile.webp';
-        this.srcset = '';
-    };
+    img.onerror = function () { this.src = '/images/placeholder-profile.webp'; this.srcset = ''; };
     cardInner.appendChild(img);
 
     // 🎖️ Badge
     const badges = document.createElement('div');
     badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
-
     const availSpan = document.createElement('span');
     let statusClass = 'status-inquire';
-    if (profile.availability?.includes('ว่าง') || profile.availability?.includes('รับงาน')) {
-        statusClass = 'status-available';
-    } else if (profile.availability?.includes('ไม่ว่าง') || profile.availability?.includes('พัก')) {
-        statusClass = 'status-busy';
+    switch (profile.availability) {
+        case 'ว่าง': statusClass = 'status-available'; break;
+        case 'ไม่ว่าง': statusClass = 'status-busy'; break;
     }
     availSpan.className = `availability-badge ${statusClass}`;
     availSpan.textContent = profile.availability || 'สอบถามคิว';
     badges.appendChild(availSpan);
-
     if (profile.isfeatured) {
         const feat = document.createElement('span');
         feat.className = 'featured-badge';
@@ -711,34 +705,20 @@ function createProfileCard(profile = {}) {
     overlay.className = 'card-overlay';
     const info = document.createElement('div');
     info.className = 'card-info';
-
     const h3 = document.createElement('h3');
     h3.className = 'text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow';
     h3.textContent = profile.name || 'ไม่ระบุชื่อ';
-
     const provinceName = provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
     const p = document.createElement('p');
     p.className = 'text-sm flex items-center gap-1.5 text-white/90';
     p.innerHTML = `<i class="fas fa-map-marker-alt opacity-80"></i> ${provinceName}`;
-
     info.appendChild(h3);
     info.appendChild(p);
     overlay.appendChild(info);
     cardInner.appendChild(overlay);
 
-    // 🔹 คลิกเพื่อเปิด Lightbox
     cardInner.addEventListener('click', () => {
-        populateLightbox(profile); // ฟังก์ชัน ULTIMATE
-        gsap.to("#lightbox", { opacity: 1, duration: 0.3, pointerEvents: "auto" });
-        gsap.to("#lightbox-content-wrapper-el", { scale: 1, duration: 0.3 });
-    });
-
-    // 🔹 รองรับการเปิด Lightbox ด้วยคีย์ Enter (accessibility)
-    cardInner.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            cardInner.click();
-        }
+        openLightbox(profile.id || '');
     });
 
     card.appendChild(cardInner);
