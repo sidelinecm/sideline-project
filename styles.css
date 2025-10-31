@@ -25,56 +25,75 @@
   src: local("Prompt ExtraBold"),
        url(/fonts/prompt-v11-latin_thai-800.woff2) format("woff2");
 }
+
+/* ===============================
+   COLOR PALETTE (NEW DARK/PINK/PURPLE)
+================================== */
 :root {
-  --background: hsl(210, 15%, 98%); /* สีเทาอ่อนมาก สำหรับพื้นหลัง */
-  --foreground: hsl(210, 10%, 20%); /* สีข้อความเข้ม */
-  --card: hsl(0, 0%, 100%);        /* สีการ์ดสะอาด */
-  --primary: hsl(45, 100%, 55%);   /* ทองคำสด */
-  --primary-glow: hsl(45, 100%, 65%);
-  --secondary: hsl(330, 60%, 65%); /* โรสโกลด์ */
-  --secondary-glow: hsl(330, 60%, 75%);
-  --accent: hsl(20, 70%, 85%);     /* สีพีชอ่อน */
-  --muted: hsl(0, 0%, 95%);       /* สีเทาอ่อนมาก */
-  --border: hsl(0, 0%, 80%);      /* เทาอ่อนเข้ม */
-  --ring: hsl(210, 15%, 30%);
+  /* โทนสีหลักใหม่ (Dark/Pink/Purple) */
+  --background: hsl(0, 0%, 5%);     /* พื้นหลังใหม่: เกือบดำ (#0D0D0D) */
+  --foreground: hsl(0, 0%, 95%);    /* ข้อความ: ขาว/สว่าง */
+  --card: hsl(0, 0%, 10%);          /* สีการ์ด: ดำเข้ม (#1A1A1A) */
+  --primary: hsl(271, 76%, 53%);    /* ม่วงสว่าง (#8A2BE2) */
+  --primary-glow: hsl(280, 80%, 65%);
+  --secondary: hsl(330, 100%, 71%); /* ชมพู (#FF69B4) */
+  --secondary-glow: hsl(330, 100%, 80%);
+  --accent: hsl(278, 100%, 26%);    /* ม่วงเข้มสำหรับเน้น/พื้นหลังรอง (#4B0082) */
+  --muted: hsl(0, 0%, 15%);         /* สีเทาเข้มมาก */
+  --border: hsl(271, 20%, 30%);     /* ม่วงเข้มอ่อนๆ สำหรับเส้นขอบ */
+  --ring: hsl(330, 80%, 70%);       /* สีชมพูสำหรับ Ring */
   --destructive: hsl(0, 85%, 60%);
   --metallic-silver: hsl(0, 0%, 80%);
   --matte-black: hsl(0, 0%, 10%);
 }
+
 body {
-  background: linear-gradient(135deg, var(--background), var(--muted));
+  /* ปรับพื้นหลังเป็น Gradient ดำ-ม่วง (#0D0D0D -> #4B0082) */
+  background: linear-gradient(135deg, hsl(var(--background)), hsl(var(--accent)));
   color: hsl(var(--foreground));
-  font-family: var(--font-base);
+  font-family: 'Prompt', sans-serif;
   transition: background 0.8s, color 0.8s;
+  opacity: 0; /* Tailwind utility */
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;position:relative;overflow-x:hidden;
 }
+
 h1 {
+  /* ปรับสไตล์ H1 เดิม (ควรใช้ร่วมกับ shimmer-text class) */
   font-size: 3rem;
-  color: var(--primary);
-  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  font-weight: 800; /* เน้นความเข้มของฟอนต์ */
+  color: #fff;
+  text-shadow: 0 0 10px rgba(138, 43, 226, 0.4), 0 0 20px rgba(255, 105, 180, 0.4);
 }
+
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-glow));
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  /* ปุ่มหลักเปลี่ยนเป็น Gradient ชมพู-ม่วง */
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  box-shadow: 0 4px 15px hsl(var(--secondary)/0.5);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-glow), var(--primary));
-  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.7);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 8px 20px hsl(var(--secondary)/0.8);
 }
 .card {
-  background-color: #fff;
+  /* ปรับการ์ดทั่วไปให้เข้ากับโทนสีใหม่ */
+  background-color: hsl(var(--card));
   border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px hsl(var(--border)/0.3);
+  border: 1px solid hsl(var(--border));
 }
 .profile-card {
-  background-color: #fff;
+  /* ปรับการ์ดโปรไฟล์เดิมให้เข้ากับโทนสีใหม่ */
+  background-color: hsl(var(--card));
   border-radius: 1rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px hsl(var(--secondary)/0.3); /* เงาชมพูอ่อนๆ */
   transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid hsl(var(--border));
 }
 .profile-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transform: scale(1.03);
+  box-shadow: 0 12px 30px hsl(var(--secondary)/0.6);
 }
+
 /* ===============================
    TEXT & GLOW ANIMATIONS
 ================================== */
@@ -88,6 +107,128 @@ h1 {
     0 0 10px hsl(var(--accent)/0.8),
     0 0 20px hsl(var(--primary)/0.6);
   animation: flicker 3s infinite;
+}
+
+/* --- ADDED: Shimmer Animation for H1 (New Style) --- */
+@keyframes text-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-text {
+  /* คลาสนี้ใช้สำหรับข้อความที่ต้องการเอฟเฟกต์ระยิบระยับ */
+  background: linear-gradient(90deg, #FFFFFF, hsl(var(--secondary-glow)), hsl(var(--primary-glow)), #FFFFFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-shimmer 4s infinite linear;
+  background-size: 200% auto;
+  display: inline-block; /* สำคัญเพื่อให้ใช้ background-clip ได้ */
+}
+
+/* --- ADDED: Glitter Effect for Cards (New Style) --- */
+.glitter-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.glitter-effect::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /* ไล่สีชมพู/ม่วงอ่อนๆ */
+  background: linear-gradient(45deg, hsl(var(--secondary)/.7), hsl(var(--primary)/.7));
+  opacity: 0.1; 
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+/* ===============================
+   SCROLL ANIMATION
+================================== */
+[data-animate-on-scroll] {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+[data-animate-on-scroll].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===============================
+   HEADER + OVERLAY
+================================== */
+#page-header.scrolled {
+  background-color: hsl(var(--background)/0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid hsl(var(--border)/0.5);
+  box-shadow: 0 2px 10px -5px hsl(var(--foreground)/0.1);
+}
+
+/* Overlay Backdrop */
+.overlay-backdrop {
+  background-color: hsl(var(--background)/0.6);
+  backdrop-filter: blur(8px);
+}
+
+/* ===============================
+   CUSTOM STYLES (FROM ORIGINAL styles.css)
+================================== */
+@keyframes aurora-1{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(1turn)}}
+@keyframes aurora-2{0%{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(-1turn)}}
+
+body:after,body:before{content:"";position:fixed;top:50%;left:50%;width:150vmax;height:150vmax;border-radius:50%;z-index:-1;filter:blur(150px);opacity:.15}
+
+html:not(.dark) body:before{background:radial-gradient(circle,hsl(var(--primary)) 0,transparent 40%);animation:aurora-1 30s linear infinite}
+html:not(.dark) body:after{background:radial-gradient(circle,hsl(var(--secondary)) 0,transparent 40%);animation:aurora-2 40s linear infinite reverse}
+html.dark body:before{opacity:.2;background:radial-gradient(circle,hsl(var(--primary-glow)) 0,transparent 40%);animation:aurora-1 30s linear infinite}
+html.dark body:after{opacity:.15;background:radial-gradient(circle,hsl(var(--secondary-glow)) 0,transparent 40%);animation:aurora-2 40s linear infinite reverse}
+
+body.loaded{opacity:1}
+
+.theme-toggle-btn .moon-icon,.theme-toggle-btn .sun-icon{display:none}
+html.dark .theme-toggle-btn .moon-icon,html:not(.dark) .theme-toggle-btn .sun-icon{display:block}
+
+#page-header.scrolled{background-color:hsl(var(--background)/.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom-color:hsl(var(--border)/.5);box-shadow:0 2px 10px -5px hsl(var(--foreground)/.1)}
+.overlay-backdrop{background-color:hsl(var(--background)/.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-content{box-shadow:0 25px 50px -12px rgba(0,0,0,.4)}
+
+.text-primary,h1.text-primary{text-shadow:0 0 15px hsl(var(--primary-glow)/.6),0 0 3px hsl(var(--primary-glow)/.8)}
+.text-secondary,h1 .text-secondary{text-shadow:0 0 15px hsl(var(--secondary-glow)/.5),0 0 3px hsl(var(--secondary-glow)/.7)}
+
+.profile-card-new-container{perspective:1000px}
+
+.profile-card-new{
+  background-color:hsl(var(--muted));
+  border-radius:1rem;
+  overflow:hidden;
+  position:relative;
+  aspect-ratio:3/4;
+  transition:transform .5s cubic-bezier(.165,.84,.44,1),box-shadow .5s cubic-bezier(.165,.84,.44,1);
+  /* เงาใหม่ */
+  box-shadow:0 10px 30px -10px hsl(var(--secondary)/.2); 
+  transform-style:preserve-3d
+}
+
+.profile-card-new:hover{
+  /* เงา Pink/Purple Glow ที่เน้นขึ้น */
+  box-shadow:0 25px 50px -15px hsl(var(--secondary)/.5), 0 10px 30px -5px hsl(var(--primary)/.3)
+}
+
+.location-card-icon{
+    /* ไอคอนถูกเปลี่ยนเป็น Gradient ชมพู-ม่วง */
+    width:72px;
+    height:72px;
+    border-radius:50%;
+    margin:0 auto 1.5rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:2rem;
+    color:#fff;
+    background:linear-gradient(140deg,hsl(var(--secondary)),hsl(var(--primary)));
+    box-shadow:0 5px 20px -5px hsl(var(--secondary-glow)/.7),0 5px 15px -8px hsl(var(--primary-glow)/.6);
+    transition:transform .3s ease,box-shadow .3s ease
 }
 
 /* ===============================
