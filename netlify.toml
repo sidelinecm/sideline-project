@@ -7,7 +7,7 @@
   environment = { NODE_VERSION = "18" }
 
 # =====================================
-# ⚙️ Global HTTP Security Headers
+# ⚙️ Global HTTP Security Headers (ดีที่สุด)
 # =====================================
 [[headers]]
   for = "/*"
@@ -15,58 +15,42 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
+    # HSTS: บังคับใช้ HTTPS 2 ปี + Preload (ความปลอดภัยระดับสูง)
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Permissions-Policy: ปิดการเข้าถึง Hardware ที่ละเอียดอ่อนโดย Default
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Vary = "Accept-Encoding"
+    Vary = "Accept-Encoding" # สำหรับการบีบอัด GZIP/Brotli
 
 # =====================================
 # 🕸️ HTML Pages – Cache Short, Must Validate
 # =====================================
 [[headers]]
-  for = "*.html"
+  for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=600, must-revalidate"
+    Cache-Control = "public, max-age=600, must-revalidate" # Cache สั้น (10 นาที) แต่ต้อง Revalidate เสมอ
 
 # =====================================
-# 🧠 Service Worker / Manifest / Sitemap / Robots
+# 🧠 Service Worker / Manifest / Sitemap / Robots (PWA Robustness)
 # =====================================
 [[headers]]
   for = "/sw.js"
   [headers.values]
+    # ป้องกันการ Cache ของ Service Worker โดยเบราว์เซอร์ เพื่อให้มั่นใจว่าโหลดเวอร์ชันใหม่เสมอ
     Cache-Control = "no-store, no-cache, must-revalidate"
 
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
-    Cache-Control = "public, max-age=86400, must-revalidate"
-
-[[headers]]
-  for = "/sitemap.xml"
-  [headers.values]
-    Cache-Control = "public, max-age=86400, must-revalidate"
-
-[[headers]]
-  for = "/robots.txt"
-  [headers.values]
-    Cache-Control = "public, max-age=86400, must-revalidate"
+    Cache-Control = "public, max-age=86400" # Cache 1 วัน
 
 # =====================================
-# 🖼️ Static Assets – Long-term Cache
+# ⚡ Static Assets (CSS/JS/Fonts - Fast Cache)
 # =====================================
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/icons/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
 [[headers]]
   for = "/fonts/*"
   [headers.values]
+    # immutable: Cache 1 ปีสำหรับไฟล์ที่มี Hash ในชื่อ (เร็วที่สุด)
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
@@ -103,27 +87,19 @@
   status = 301
   query = { p = ":provincekey" } 
 
-# 2. Service Worker และ PWA files ไม่ถูก SPA redirect
+# 2. Service Worker และ PWA files ไม่ถูก SPA redirect (ป้องกันการวนซ้ำ)
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
   status = 200
-  force = true
 
-# 3. ซ่อน SEO profile path จากผู้ใช้ทั่วไป
-[[redirects]]
-  from = "/seo-profiles/*"
-  to = "/404"
-  status = 302
-
-# 4. SPA Catch-all Fallback (สำคัญที่สุด)
-# URL ทุกตัวที่ไม่ใช่ไฟล์จริง (เช่น /chiangmai) จะถูกส่งไปที่ index.html เพื่อให้ JS จัดการ
+# 3. SPA Fallback Rule (ต้องอยู่ล่างสุดเสมอ)
+# - ทุก Path ที่ไม่ตรงกับไฟล์จริง ให้ส่งไปที่ index.html (สำหรับ Single Page Application)
 [[redirects]]
   from = "/*"
   to = "/index.html"

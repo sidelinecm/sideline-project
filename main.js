@@ -497,170 +497,298 @@ function matchesProfile(profile, parsed) {
     });
 
 // ==========================================================
-// 🔍 APPLY FILTERS (ใช้ smart parsing และ matchesProfile)
+// 🔍 APPLY FILTERS (ใช้ smart parsing และ matchesProfile - **ADVANCED VERSION**)
+// 💡 ปรับปรุงการกรองด้วย Array.prototype.every และแยก Logic การอัปเดต URL
 // ==========================================================
+/**
+ * ประมวลผลและกรองโปรไฟล์ทั้งหมดตามตัวกรองที่เลือกและอัปเดต UI/URL
+ * @param {boolean} updateUrl - กำหนดว่าจะอัปเดต URL ด้วย history.pushState หรือไม่
+ */
 function applyFilters(updateUrl = true) {
+    // 1. **Securely Get Filter Values**
     const searchTermRaw = dom.searchInput?.value?.trim() || '';
-    const searchTerm = searchTermRaw.toLowerCase();
     const selectedProvince = dom.provinceSelect?.value || '';
     const selectedAvailability = dom.availabilitySelect?.value || '';
     const isFeaturedOnly = dom.featuredSelect?.value === 'true';
 
-    // ✅ Save last selected province to localStorage
+    // 2. **State Persistence (LocalStorage)**
     if (selectedProvince) {
         localStorage.setItem(LAST_PROVINCE_KEY, selectedProvince);
     } else {
         localStorage.removeItem(LAST_PROVINCE_KEY);
     }
 
-    // ✅ Update URL ให้เป็นแบบ SEO-Friendly เช่น /chiangmai แทน ?province=chiangmai
-    if (updateUrl) {
-        let newUrl = window.location.origin;
-
-        // ✅ ถ้ามี province ให้ใช้เป็น /provinceKey เช่น /chiangmai
-        if (selectedProvince) {
-            newUrl += `/${selectedProvince}`;
-        } else {
-            // ถ้าไม่มี province ให้กลับไป root (เช่น / หรือ /profiles)
-            newUrl += window.location.pathname.replace(/\/[^/]*$/, '/');
-        }
-
-        // ✅ เพิ่มพารามิเตอร์อื่น ๆ เฉพาะที่จำเป็น
-        const urlParams = new URLSearchParams();
-        if (searchTermRaw) urlParams.set('q', searchTermRaw);
-        if (selectedAvailability) urlParams.set('availability', selectedAvailability);
-        if (isFeaturedOnly) urlParams.set('featured', 'true');
-
-        const queryStr = urlParams.toString();
-        if (queryStr) newUrl += `?${queryStr}`;
-
-        // ✅ อัปเดต URL โดยไม่ reload หน้า
-        history.pushState({}, '', newUrl);
-    }
-
-    // ✅ ใช้ smart parser เพื่อแยกเงื่อนไขใน search เช่น name:ฝน province:เชียงใหม่
-    const parsed = parseSearchQuery(searchTermRaw);
-
-    // ✅ กรองข้อมูลตามตัวกรองทั้งหมด (province, availability, featured, search)
+    // 3. **Smart Parsing & Filtering**
+    const parsedSearch = parseSearchQuery(searchTermRaw);
+    
+    // **ประสิทธิภาพสูง (Optimized Filtering): ใช้ Array.prototype.every สำหรับเงื่อนไข AND**
     const filtered = allProfiles.filter(p => {
         try {
-            if (selectedProvince && p.provinceKey !== selectedProvince) return false;
-            if (selectedAvailability && p.availability !== selectedAvailability) return false;
-            if (isFeaturedOnly && !p.isfeatured) return false;
-
-            // ✅ ถ้ามี searchTermRaw ให้ใช้ matchesProfile
-            if (searchTermRaw) {
-                return matchesProfile(p, parsed);
-            }
-            return true;
+            return [
+                !selectedProvince || p.provinceKey === selectedProvince,
+                !selectedAvailability || p.availability === selectedAvailability,
+                !isFeaturedOnly || p.isfeatured,
+                !searchTermRaw || matchesProfile(p, parsedSearch)
+            ].every(condition => condition); // ทุกเงื่อนไขต้องเป็นจริง (AND Logic)
         } catch (err) {
-            console.error('Search match error', err, p);
+            console.error('Search match error for profile:', p, 'Error:', err);
             return false;
         }
     });
 
-    // ✅ ตรวจสอบสถานะว่ากำลังค้นหาหรือไม่
-    const isSearching = !!(searchTermRaw || selectedProvince || selectedAvailability || isFeaturedOnly);
+    // 4. **URL Management (SEO & User Experience)**
+    if (updateUrl) {
+        updateURLState({ searchTermRaw, selectedProvince, selectedAvailability, isFeaturedOnly });
+    }
 
-    // ✅ Render โปรไฟล์ที่กรองแล้ว
+    // 5. **Render**
+    const isSearching = !!(searchTermRaw || selectedProvince || selectedAvailability || isFeaturedOnly);
     renderProfiles(filtered, isSearching);
 }
 
 // ==========================================================
-// 🔄 Rendering Profiles (SEO + UX Enhanced)
+// 🧩 Helper: อัปเดต URL และ History State (แยก Logic จาก applyFilters)
+// 💡 จัดการ Path Parameter (Province) และ Query Parameters อย่างแม่นยำ
+// ==========================================================
+/**
+ * อัปเดต URL ให้เป็นแบบ SEO-Friendly เช่น /chiangmai แทน ?province=chiangmai
+ */
+function updateURLState({ searchTermRaw, selectedProvince, selectedAvailability, isFeaturedOnly }) {
+    let newPath = window.location.pathname;
+    
+    // 1. จัดการ Path: ใช้จังหวัดเป็น Path Parameter
+    if (selectedProvince) {
+        newPath = `/${selectedProvince}`;
+    } else {
+        // ถ้าไม่มีจังหวัด ให้กลับไป Root Path (/) หรือ Path หลักที่ตั้งไว้
+        // (ในกรณีนี้กำหนดให้กลับไปที่ / เสมอ หากไม่มีจังหวัดที่ถูกเลือก)
+        newPath = '/'; 
+    }
+
+    // 2. จัดการ Query Parameters
+    const urlParams = new URLSearchParams();
+    if (searchTermRaw) urlParams.set('q', searchTermRaw);
+    if (selectedAvailability) urlParams.set('availability', selectedAvailability);
+    if (isFeaturedOnly) urlParams.set('featured', 'true');
+
+    let newUrl = window.location.origin + newPath;
+    const queryStr = urlParams.toString();
+    if (queryStr) newUrl += `?${queryStr}`;
+    
+    // 3. อัปเดต URL โดยไม่ reload หน้า (history.pushState)
+    if (newUrl !== window.location.href) {
+        history.pushState(null, '', newUrl);
+    }
+}
+// ==========================================================
+// 🧩 Helper: Render Province Sections (ฟังก์ชันที่หายไป)
+// 💡 ทำหน้าที่จัดกลุ่มโปรไฟล์ตามจังหวัด แล้วเรียกใช้ createProvinceSection
+// ==========================================================
+/**
+ * จัดกลุ่มโปรไฟล์ตามจังหวัดและเรนเดอร์เป็นส่วนๆ
+ * @param {Array} filteredProfiles - รายชื่อโปรไฟล์ที่กรองแล้ว
+ * @param {HTMLElement} container - Element ที่จะใส่ Section ของจังหวัด (dom.profilesDisplayArea)
+ */
+function renderProfilesByProvince(filteredProfiles, container) {
+  
+  // 1. จัดกลุ่มโปรไฟล์ทั้งหมดตาม provinceKey
+  const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
+    // ใช้ 'unknown' หากโปรไฟล์ใดไม่มี provinceKey
+    const key = profile.provinceKey || 'unknown'; 
+    (acc[key] = acc[key] || []).push(profile);
+    return acc;
+  }, {});
+
+  // 2. วนลูปตาม Key ของจังหวัดที่จัดกลุ่มไว้
+  Object.keys(profilesByProvince).forEach(provinceKey => {
+    
+    // 3. ดึงชื่อจังหวัดจริงๆ จาก 'provincesMap' ที่เราโหลดมาตอนเริ่ม
+    const provinceName = provincesMap.get(provinceKey) || 'ไม่ระบุจังหวัด';
+    
+    // 4. ดึงรายชื่อโปรไฟล์ของจังหวัดนั้น
+    const profiles = profilesByProvince[provinceKey];
+
+    // 5. เรียกใช้ฟังก์ชัน 'createProvinceSection' ที่คุณมีอยู่แล้ว
+    // เพื่อสร้าง HTML ทั้ง Section ของจังหวัดนั้น
+    const provinceSectionElement = createProvinceSection(provinceKey, provinceName, profiles);
+    
+    // 6. เพิ่ม Section ที่สร้างเสร็จแล้วลงใน Container หลัก
+    container.appendChild(provinceSectionElement);
+  });
+}
+
+// ==========================================================
+// 🔍 RENDERING PROFILES (Dynamic Province + SEO Optimized)
+// 💡 ปรับปรุง Logic การสร้าง SEO Meta Tag และ Schema ให้แม่นยำยิ่งขึ้น
 // ==========================================================
 function renderProfiles(filteredProfiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
-    const currentPage = dom.body.dataset.page;
-    dom.profilesDisplayArea.innerHTML = '';
-    dom.noResultsMessage.classList.add('hidden');
 
-    // --- FEATURED SECTION (เฉพาะหน้า Home) ---
-    if (dom.featuredSection) {
-        const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
-        if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
-            dom.featuredContainer.innerHTML = '';
-            const topFeaturedProfiles = featuredProfilesList.slice(0, 12);
-            dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
-            dom.featuredSection.classList.remove('hidden');
-            dom.featuredSection.setAttribute('data-animate-on-scroll', '');
-        } else {
-            dom.featuredSection.classList.add('hidden');
-        }
-    }
-
-    // --- ไม่มีผลลัพธ์ ---
+    // 1. **Clear UI** (ใช้ replaceChildren เพื่อประสิทธิภาพที่สูงขึ้น)
+    dom.profilesDisplayArea.replaceChildren();
+    dom.noResultsMessage?.classList.add('hidden');
+    
+    // 2. **Featured Section Logic**
+    handleFeaturedSection(isSearching);
+    
+    // 3. **No Results Handling**
     if (filteredProfiles.length === 0) {
-        if (currentPage === 'home' || currentPage === 'profiles') {
-            dom.noResultsMessage.classList.remove('hidden');
-        }
+        dom.noResultsMessage?.classList.remove('hidden');
         initScrollAnimations();
         return;
     }
 
-    // --- หน้า PROFILES ---
-    if (currentPage === 'profiles') {
-        if (isSearching) {
-            const gridContainer = document.createElement('div');
-            gridContainer.className =
-                'profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4';
-            gridContainer.append(...filteredProfiles.map(createProfileCard));
-            dom.profilesDisplayArea.appendChild(gridContainer);
-        } else {
-            renderProfilesByProvince(filteredProfiles, dom.profilesDisplayArea);
-        }
-        document.title = 'รวมโปรไฟล์สาวไซด์ไลน์ทั่วประเทศ';
-        updateMetaDescription('รวมโปรไฟล์สาวไซด์ไลน์จากทุกจังหวัดทั่วประเทศไทย');
-    }
+    // 4. **Generate SEO & Page Data**
+    const pageData = generatePageData(filteredProfiles, isSearching);
 
-    // --- หน้า HOME ---
-    else if (currentPage === 'home') {
-        if (isSearching) {
-            const searchResultWrapper = createSearchResultSection(filteredProfiles);
-            dom.profilesDisplayArea.appendChild(searchResultWrapper);
-        } else {
-            // ✅ แสดงแยกตามจังหวัดเช่นเดียวกับหน้า profiles
-            renderProfilesByProvince(filteredProfiles, dom.profilesDisplayArea);
-            document.title = 'ไซด์ไลน์ทั่วประเทศ - รวมสาวสวยทุกจังหวัด';
-            updateMetaDescription('รวมสาวไซด์ไลน์จากทุกจังหวัด ทั้งว่างและไม่ว่าง พร้อมรายละเอียดและภาพสวยคมชัด');
-        }
+    // 5. **Update Meta Tags**
+    updateAdvancedMeta(pageData);
+
+    // 6. **Render UI**
+    if (isSearching) {
+        const searchResultWrapper = createSearchResultSection(filteredProfiles);
+        dom.profilesDisplayArea.appendChild(searchResultWrapper);
+    } else {
+        renderProfilesByProvince(filteredProfiles, dom.profilesDisplayArea);
     }
 
     initScrollAnimations();
 }
 
-// ==========================================================
-// 📦 Helper: แสดงโปรไฟล์ตามจังหวัด
-// ==========================================================
-function renderProfilesByProvince(filteredProfiles, container) {
-    const profilesByProvince = filteredProfiles.reduce((acc, profile) => {
-        (acc[profile.provinceKey] = acc[profile.provinceKey] || []).push(profile);
-        return acc;
-    }, {});
+// ----------------------------------------------------------------------------------
+// **Helper Functions ที่ได้รับการปรับปรุง Logic** (ต้องมีใน Global Scope)
+// ----------------------------------------------------------------------------------
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const priorityLocation = urlParams.get('location');
+// **Helper: Featured Section** (ใช้ dom object ที่กำหนดไว้)
+function handleFeaturedSection(isSearching) {
+    if (dom.featuredSection) {
+        const currentPage = dom.body.dataset.page || 'home';
+        const featuredProfilesList = allProfiles.filter(p => p.isfeatured);
 
-    let dynamicProvinceOrder = [...new Set(filteredProfiles.map(p => p.provinceKey))];
-    if (priorityLocation && dynamicProvinceOrder.includes(priorityLocation)) {
-        dynamicProvinceOrder = [
-            priorityLocation,
-            ...dynamicProvinceOrder.filter(p => p !== priorityLocation)
-        ];
+        if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
+            dom.featuredContainer.replaceChildren();
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 12);
+            dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
+            dom.featuredSection.classList.remove('hidden');
+        } else {
+            dom.featuredSection.classList.add('hidden');
+        }
     }
-
-    // ✅ (Optional) จำกัดแค่ 6 จังหวัดแรกถ้าต้องการ
-    // dynamicProvinceOrder = dynamicProvinceOrder.slice(0, 6);
-
-    dynamicProvinceOrder.forEach(provinceKey => {
-        if (!provinceKey) return;
-        const provinceProfiles = profilesByProvince[provinceKey] || [];
-        const provinceName = provincesMap.get(provinceKey) || "ไม่ระบุ";
-        const provinceSectionEl = createProvinceSection(provinceKey, provinceName, provinceProfiles);
-        container.appendChild(provinceSectionEl);
-    });
 }
 
+// **Advanced Helper: Generate SEO Data based on Context**
+function generatePageData(filteredProfiles, isSearching) {
+    const uniqueProvinces = [...new Set(filteredProfiles.map(p => p.province))];
+    const searchTerm = dom.searchInput?.value?.trim() || '';
+
+    let title = 'รวมโปรไฟล์สาวไซด์ไลน์ทั่วประเทศ | SidelineChiangmai';
+    let description = 'รวมสาวไซด์ไลน์จากทุกจังหวัดทั่วประเทศไทย อัปเดตล่าสุดทุกวัน พร้อมภาพสวยคมชัดและรายละเอียดครบถ้วน';
+    let ogImage = '/images/og-default.webp'; 
+
+    const currentUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+
+    if (uniqueProvinces.length === 1 && !isSearching) {
+        // 1. Dedicated Province Page (E.g., /chiangmai)
+        const provinceName = uniqueProvinces[0];
+        title = `ไซด์ไลน์${provinceName} - โปรไฟล์น้องๆ สาวสวยใน${provinceName} | SidelineChiangmai`;
+        description = `รวมโปรไฟล์น้องๆ ไซด์ไลน์ใน${provinceName} ทั้งว่างและไม่ว่าง อัปเดตล่าสุด พร้อมรายละเอียดและภาพสวยคมชัด`;
+    } else if (isSearching) {
+        // 2. Search Results Page
+        if (uniqueProvinces.length === 1) {
+            // Search within one province
+            const provinceName = uniqueProvinces[0];
+            title = `ไซด์ไลน์${searchTerm}ใน${provinceName} - โปรไฟล์สาวสวยที่คุณค้นหา | SidelineChiangmai`;
+            description = `ผลการค้นหาสำหรับสาวไซด์ไลน์ **${searchTerm}** ใน**${provinceName}** อัปเดตล่าสุด พร้อมภาพสวยและรายละเอียดครบถ้วนทุกวัน`;
+        } else {
+            // Cross-province search
+            title = `ไซด์ไลน์${searchTerm}ทั่วประเทศ - โปรไฟล์สาวสวยอัปเดตทุกวัน | SidelineChiangmai`;
+            description = `รวมโปรไฟล์น้องๆ ไซด์ไลน์**${searchTerm}** จากทั่วประเทศ อัปเดตล่าสุด พร้อมรูปภาพและข้อมูลติดต่อครบถ้วน`;
+        }
+    }
+
+    return {
+        title: title,
+        description: description,
+        canonicalUrl: currentUrl, // ใช้ Path และ Query Search เต็มรูปแบบ
+        image: ogImage,
+        profiles: filteredProfiles
+    };
+}
+
+// **Advanced Helper: อัปเดต Meta Tags และ Canonical**
+function updateAdvancedMeta({ title, description, canonicalUrl, image, profiles }) {
+    document.title = title;
+
+    const ensureMeta = (attr, value, isProperty = false) => {
+        const selector = isProperty ? `meta[property="${attr}"]` : `meta[name="${attr}"]`;
+        let tag = document.querySelector(selector);
+        
+        if (!tag) {
+            tag = document.createElement('meta');
+            tag.setAttribute(isProperty ? 'property' : 'name', attr);
+            document.head.appendChild(tag);
+        }
+        tag.setAttribute('content', value);
+    };
+
+    // SEO/Social Meta Tags
+    ensureMeta('description', description);
+    ensureMeta('og:title', title, true);
+    ensureMeta('og:description', description, true);
+    ensureMeta('og:image', image, true);
+    ensureMeta('og:url', canonicalUrl, true);
+    ensureMeta('twitter:title', title);
+    ensureMeta('twitter:description', description);
+    ensureMeta('twitter:image', image);
+    
+    // Canonical Link
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.appendChild(canonical);
+    }
+    canonical.href = canonicalUrl;
+    
+    // Structured Data (JSON-LD) - ใช้ข้อมูลโปรไฟล์ที่กรองแล้ว
+    updateSchemaJSONLD(title, description, canonicalUrl, image, profiles);
+}
+
+// **Helper: Update JSON-LD Schema (ใช้ ItemList และ ListItem)**
+function updateSchemaJSONLD(title, description, canonicalUrl, image, profiles) {
+    const existingSchema = document.getElementById('schema-list');
+    if (existingSchema) existingSchema.remove();
+
+    const itemListElements = profiles.slice(0, 10).map((p, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "url": `${window.location.origin}/${p.provinceKey || ''}#${p.id || i}`,
+        "item": {
+            "@type": "Person",
+            "name": p.name || "ไม่ระบุชื่อ",
+            "image": p.image || image,
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": p.province || ""
+            }
+        }
+    }));
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": title,
+        "description": description,
+        "url": canonicalUrl,
+        "itemListElement": itemListElements
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'schema-list';
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+}
 // ==========================================================
 // 🧱 Profile Card (ไม่มี Schema) - เวอร์ชันสมบูรณ์
 // ==========================================================
