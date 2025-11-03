@@ -3,6 +3,7 @@
 <head>
   
   
+  
   <meta charset=UTF-8>
   <meta http-equiv=X-UA-Compatible content="IE=edge">
   <meta name=viewport content="width=device-width,initial-scale=1">
@@ -12,12 +13,245 @@
   
   
   <meta name=description content="เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่และจังหวัดใกล้เคียงล่าสุด อัปเดตทุกวัน พร้อมรายละเอียด รูปภาพ และข้อมูลการติดต่อที่ครบถ้วน">
+    <style>
+  body {
+    margin: 0;
+    font-family: 'Prompt', sans-serif;
+    /* พื้นหลัง: ดำประกายม่วง */
+    background: linear-gradient(135deg, #0D0D0D, #4B0082); 
+    color: #fff;
+    min-height: 100vh;
+  }
+
+/* หัวข้อใหญ่ (h1) ขนาดเล็กลง พร้อม Shimmer Effect */
+h1 {
+    font-size: 2rem; 
+    font-weight: 700;
+    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
+    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 20px 0;
+    padding: 0 10px;
+    text-align: center;
+    background-size: 200% auto; /* สำคัญสำหรับ Shimmer */
+    animation: shimmer 3s infinite;
+}
+h2 {
+    font-size: 1.75rem;
+    margin-top: 20px;
+    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
+    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s infinite;
+    background-size: 200% auto;
+}
+
+/* เอฟเฟกต์ Shimmer (ใช้สำหรับ H1 และ H2) */
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+/* ส่วน Hero */
+section {
+    padding: 20px 20px;
+    text-align: center;
+}
+
+/* รูปภาพ hero */
+section img {
+    border-radius: 15px;
+    /* Shadow: ชมพูอ่อนๆ */
+    box-shadow: 0 4px 20px rgba(255,105,180,0.4); 
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.3s;
+}
+section img:hover {
+    transform: scale(1.02);
+}
+
+/* คำอธิบาย */
+p {
+    margin-top: 10px;
+    max-width: 800px;
+    margin-left:auto; margin-right:auto;
+    font-size: 1rem;
+    color: #eee;
+}
+
+/* ปุ่มและลิงก์ (Gradient Pink/Purple) */
+button, a.button {
+    /* Gradient: ม่วง -> ชมพู */
+    background: linear-gradient(135deg, #8A2BE2, #FF69B4); 
+    color: #fff;
+    padding: 12px 24px;
+    border: none; /* เพิ่ม border: none; */
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display:inline-block;
+    cursor: pointer;
+}
+button:hover, a.button:hover {
+    /* Hover Gradient: ชมพู -> ม่วง */
+    background: linear-gradient(135deg, #FF69B4, #8A2BE2);
+    /* Hover Shadow: ชมพูเข้ม */
+    box-shadow: 0 4px 15px rgba(255,105,180,0.8); 
+}
+
+/* Social media links */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap; /* ให้รองรับมือถือ */
+}
+.social-links a {
+    padding: 10px 20px;
+    border-radius: 50px;
+    background-color: #222;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.social-links a:hover {
+    background-color: #555;
+    color: #FF69B4; /* เปลี่ยนสีไอคอน/ข้อความเล็กน้อย */
+}
+
+/* โปรไฟล์แนะนำ Section */
+#featured {
+    /* Background: เทาเข้ม - เทาเข้มขึ้น */
+    background: linear-gradient(135deg, #222, #333); 
+    border-radius: 20px;
+    padding: 30px 20px;
+    margin-top: 40px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Grid สำหรับโปรไฟล์ */
+#featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* ปรับขนาดเล็กสุดให้รองรับมือถือ */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* รูปโปรไฟล์แบบใหม่: Card Glow */
+.profile-card {
+    /* Card Background: เทาเข้ม */
+    background: linear-gradient(135deg, #222, #444); 
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    /* Card Shadow: ชมพู */
+    box-shadow: 0 8px 20px rgba(255,105,180,0.4); 
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+.profile-card:hover {
+    transform: scale(1.05);
+    /* Hover Shadow: ชมพูเข้มขึ้น */
+    box-shadow: 0 12px 30px rgba(255,105,180,0.6); 
+}
+.profile-card img {
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    border-radius: 50%;
+    /* Border: ชมพู */
+    border: 4px solid #FF69B4; 
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    margin-bottom: 10px;
+    transition: transform 0.3s;
+}
+.profile-card:hover img {
+    transform: scale(1.05);
+}
+.profile-card h3 {
+    font-size: 1.2rem;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 700;
+}
+.profile-card .tagline {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-top: 4px;
+}
+
+/* เพิ่มความประกายกลิตเตอร์ (Overlay) */
+.profile-card::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* Overlay Gradient: ชมพู -> ม่วง */
+    background: linear-gradient(45deg, #ff69b0, #8a2be2, #ff69b0);
+    opacity: 0.2;
+    border-radius: 15px;
+    pointer-events: none;
+    animation: shimmer2 5s infinite alternate;
+}
+@keyframes shimmer2 {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 0; }
+}
+
+/* Form Section */
+.form-card {
+    max-width:600px; 
+    margin:auto; 
+    padding:20px; 
+    background:#222; /* พื้นหลังเข้ม */
+    border-radius:15px; 
+    /* Shadow: ชมพู */
+    box-shadow:0 4px 20px rgba(255,105,180,0.4);
+}
+.form-card input, .form-card select {
+    width:100%; 
+    padding:10px; 
+    border:none; 
+    border-radius:50px; 
+    margin-bottom:15px; 
+    outline:none;
+    color: #333; /* ข้อความใน input/select เป็นสีเข้ม */
+}
+
+/* Footer Style */
+footer {
+    background:#111; 
+    color:#ccc; 
+    padding:40px 20px 20px; 
+    border-top-left-radius:30px; 
+    border-top-right-radius:30px;
+}
+footer h4 {
+    color: #FF69B4; /* หัวข้อ footer เป็นสีชมพู */
+    margin-bottom: 10px;
+}
+footer p {
+    color: #999;
+    margin-top: 5px;
+}
+</style>
+  
+  
   
   
   <link rel=canonical href=https://sidelinechiangmai.netlify.app/profiles>
   
   
-  <meta name=robots content="index, follow, max-image-preview:large">
+  <meta name=robots content="index, follow">
   
   
   <meta name=google content=notranslate>
@@ -31,9 +265,10 @@
   
   
   
+  
   <meta property=og:title content="น้องๆ ไซด์ไลน์เชียงใหม่ทั้งหมด - โปรไฟล์ล่าสุด | SidelineChiangmai">
   <meta property=og:description content="เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่และจังหวัดใกล้เคียงล่าสุด พร้อมรายละเอียด รูปภาพ และข้อมูลการติดต่อ">
-  <meta property=og:url content=https://sidelinechiangmai.netlify.app/profiles>
+  <meta property=og:url content=https://sidelinechiangmai.netlify.app/profiles">
   <meta property=og:site_name content=SidelineChiangmai>
   <meta property=og:type content=website>
   <meta property=og:image content=https://sidelinechiangmai.netlify.app/images/og-image.jpg>
@@ -50,6 +285,9 @@
   
 
   
+  
+  
+ 
   <meta name=theme-color content=#ffffff media="(prefers-color-scheme: light)">
   <meta name=theme-color content=#111827 media="(prefers-color-scheme: dark)">
   <link rel=icon href=/images/favicon.ico sizes=any>
@@ -61,23 +299,27 @@
   <meta name=theme-color content=#db2777>
 
   
-  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
-
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel=preconnect href=https://hgzbgpbmymoiwjpaypvl.supabase.co crossorigin>
+  <link rel=preconnect href=https://cdnjs.cloudflare.com crossorigin>
+  <link rel=dns-prefetch href=//cdnjs.cloudflare.com>
+  <link rel=preconnect href=https://cdn.jsdelivr.net crossorigin>
 
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="all">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-  
-<link rel=modulepreload href=/main.js>
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-regular.woff2 as=font type=font/woff2 crossorigin>
+  <link rel=preload href=/fonts/prompt-v11-latin_thai-700.woff2 as=font type=font/woff2 crossorigin>
 
+  
+  <link rel=preload href=/styles.css as=style onload='this.onload=null,this.rel="stylesheet"'>
+  <noscript><link rel=stylesheet href=/styles.css></noscript>
+
+  
+  <link rel=preload href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'>
+  <noscript>
+    <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css>
+  </noscript>
+
+  
+  <link rel=modulepreload href=/main.js>
 
   <script type=application/ld+json>
   {
@@ -85,8 +327,7 @@
     "@type": "WebPage",
     "name": "น้องๆ ทั้งหมด - SidelineChiangmai",
     "description": "เลือกดูโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่ และจังหวัดใกล้เคียง พร้อมรายละเอียดและรูปภาพ",
-    // ✅ แก้ไข URL ใน Schema Markup เป็นแบบไม่มี .html
-    "url": "https://sidelinechiangmai.netlify.app/profiles",
+    "url": "https://sidelinechiangmai.netlify.app/profiles.html",
     "breadcrumb": {
       "@type": "BreadcrumbList",
       "itemListElement": [{
@@ -97,9 +338,7 @@
       },{
         "@type": "ListItem",
         "position": 2,
-        "name": "น้องๆ ทั้งหมด",
-        // ✅ แก้ไข URL ใน Breadcrumb เป็นแบบไม่มี .html
-        "item": "https://sidelinechiangmai.netlify.app/profiles" 
+        "name": "น้องๆ ทั้งหมด"
       }]
     }
   }
@@ -126,7 +365,7 @@
  <img src=/images/logo-sidelinechiangmai.webp alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงาน" class="h-[28px] w-auto" width=240 height=28 loading=eager fetchpriority=high>
 </a>
         <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label=เมนูหลัก>
-            <a href=/profiles class="px-4 py-2 rounded-full bg-accent text-primary font-semibold">น้องๆ ทั้งหมด</a>
+            <a href=/profiles.html class="px-4 py-2 rounded-full bg-accent text-primary font-semibold">น้องๆ ทั้งหมด</a>
             <a href=/locations.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
             <a href=/about.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
             <a href=/faq.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
@@ -156,7 +395,7 @@
 
     <nav aria-label=เมนูนำทางหลักในแถบด้านข้าง class="flex-grow overflow-y-auto p-4 space-y-4">
         <a href=/ class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-home w-5 text-center text-muted-foreground" aria-hidden=true></i><span>หน้าแรก</span></a>
-        <a href=/profiles class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-users w-5 text-center text-muted-foreground" aria-hidden=true></i><span>น้องๆ ทั้งหมด</span></a>
+        <a href=profiles.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-users w-5 text-center text-muted-foreground" aria-hidden=true></i><span>น้องๆ ทั้งหมด</span></a>
         <a href=locations.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-map-marker-alt w-5 text-center text-muted-foreground" aria-hidden=true></i><span>พิกัดบริการ</span></a>
         <a href=about.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-info-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>เกี่ยวกับเรา</span></a>
         <a href=faq.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-question-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>คำถามพบบ่อย</span></a>
@@ -171,12 +410,14 @@
 <main id="main-content" class="pt-20">
   <div class="container mx-auto px-4 py-12 md:py-16">
 
+    <!-- SEO H1 (Bot อ่านได้ แต่ผู้ใช้ไม่เห็น) -->
     <h1 class="sr-only">
       น้องๆ ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ตรงปกฟิวแฟน ทั้งหมด - โปรไฟล์ล่าสุด
     </h1>
 
     <section aria-labelledby="profiles-heading" class="space-y-12">
 
+      <!-- VISIBLE HEADING FOR USERS -->
       <div class="section-header-card text-center">
         <div class="card-content max-w-4xl mx-auto space-y-6">
           <div>
@@ -189,14 +430,17 @@
           </div>
 
 
+          <!-- SEARCH FORM -->
           <div id="hero-form">
-            <form id="search-form" action="/profiles" aria-labelledby="search-form-heading">
+            <form id="search-form" action="/profiles.html" aria-labelledby="search-form-heading">
               <h3 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h3>
 
               <div class="space-y-4">
 
+                <!-- INPUT GRID -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
+                  <!-- Keyword Search -->
                   <div class="relative sm:col-span-2 lg:col-span-1">
                     <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
                     <div class="relative">
@@ -207,6 +451,7 @@
                     </div>
                   </div>
 
+                  <!-- Province Filter -->
                   <div class="relative">
                     <label for="search-province" class="sr-only">เลือกจังหวัด</label>
                     <div class="relative">
@@ -222,6 +467,7 @@
                     </div>
                   </div>
 
+                  <!-- Availability Filter -->
                   <div class="relative">
                     <label for="search-availability" class="sr-only">เลือกสถานะ</label>
                     <div class="relative">
@@ -245,6 +491,7 @@
 
                 </div>
 
+                <!-- Featured Filter and Buttons -->
                 <div class="flex flex-wrap items-center justify-center sm:justify-between gap-3 pt-2">
                   <div class="relative">
                     <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
@@ -281,6 +528,9 @@
       </div>
 
       
+<!-- =============================== -->
+<!-- 🌟 Featured Profiles Section -->
+<!-- =============================== -->
 <section id="featured-profiles"
   class="featured-section py-12 md:py-16 bg-gradient-to-b from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-2xl mt-12"
   aria-labelledby="featured-heading"
@@ -289,14 +539,17 @@
   <div class="section-content-wrapper max-w-6xl mx-auto">
     <div class="p-6 md:p-10 text-center space-y-6">
       
+      <!-- Heading -->
       <h2 id="featured-heading" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
         โปรไฟล์แนะนำน้องๆรับงาน
       </h2>
 
+      <!-- Sub-heading -->
       <h3 class="featured-sub text-lg md:text-xl font-semibold text-pink-700 dark:text-pink-300">
         รวมสาวๆตัวท็อปยอดนิยม ที่ฮอตที่สุดสัปดาห์นี้
       </h3>
 
+      <!-- Description -->
       <p class="featured-desc max-w-2xl mx-auto text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
         คัดมาเฉพาะ <strong class="font-semibold text-pink-600">โปรไฟล์น้องๆยอดนิยม</strong> ที่ได้รับการจองมากที่สุด
         การันตี <strong class="font-semibold text-pink-600">ฟิวแฟนตรงปก 100%</strong>
@@ -304,19 +557,25 @@
       </p>
     </div>
     
+    <!-- Profiles Grid -->
     <div id="featured-profiles-container" 
       class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-6 md:px-10 pb-8 md:pb-12" 
       role="region"
       aria-live="polite" 
       aria-labelledby="featured-heading">
-      </div>
+      <!-- profile cards จะถูก inject ด้วย JS -->
+    </div>
   </div>
 </section>
 
+<!-- Divider -->
 <div class="container mx-auto px-4" data-animate-on-scroll>
   <hr class="border-pink-300/60 my-12 md:my-16">
 </div>
 
+<!-- =============================== -->
+<!-- 👩‍💻 All Profiles Section -->
+<!-- =============================== -->
 <section id="all-profiles-section" 
   aria-labelledby="all-profiles-heading" 
   class="pt-12 md:pt-16 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-4 md:px-10"
@@ -336,10 +595,13 @@
   </div>
 
   <div class="mt-12 md:mt-16" role="region" aria-live="polite">
+    <!-- Loading placeholder -->
     <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์..." class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div>
 
+    <!-- Profiles display -->
     <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
 
+    <!-- Load More Button -->
     <div id="load-more-container" class="hidden text-center mt-12">
       <button id="load-more-btn" 
         class="px-6 py-3 rounded-full font-semibold bg-pink-600 text-white hover:bg-pink-700 transition">
@@ -347,12 +609,14 @@
       </button>
     </div>
 
+    <!-- Error Message -->
     <div id="fetch-error-message" 
       class="hidden text-center py-12 px-6 bg-red-100/80 rounded-lg font-medium text-red-700 border border-red-300 max-w-2xl mx-auto" 
       role="alert">
       เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง
     </div>
 
+    <!-- No Results Message -->
     <div id="no-results-message" 
       class="hidden text-center py-12 px-6 text-pink-700 bg-pink-100/80 rounded-lg font-medium border border-pink-300 max-w-2xl mx-auto" 
       role="status">
@@ -371,7 +635,7 @@
         
         <div class=lg:col-span-1>
             <a href=/ aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
-                <img src=images/logo-sidelinechiangmai.webp alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width=245 height=30 loading=lazy decoding=async>
+                <img src=images/logo-sideline-chiangmai.webp alt="โลโก้ Sideline Chiang Mai" class="h-[30px] w-auto mx-auto md:mx-0" width=245 height=30 loading=lazy decoding=async>
             </a>
             <p class="leading-relaxed text-sm">
                 ศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง มุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย ไม่ต้องโอนมัดจำ
@@ -385,7 +649,7 @@
   <nav aria-label=ลิงก์ด่วนท้ายเว็บ>
     <ul class="space-y-3 text-sm">
       <li><a href=/ class="hover:text-secondary transition-colors">หน้าแรก</a></li>
-      <li><a href=/profiles class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li>
+      <li><a href=/profiles.html class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li>
       <li><a href=/locations.html class="hover:text-secondary transition-colors">พิกัดบริการ</a></li>
       <li><a href=/about.html class="hover:text-secondary transition-colors">เกี่ยวกับเรา</a></li>
       <li><a href=/faq.html class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li>
@@ -476,10 +740,11 @@
                         </div>
                         <div class="pt-5 border-t border-border">
                             
-                            <a id=lightboxLineLink href=https://line.me/ti/p/_faNcjQ3xx target=_blank rel="noopener noreferrer" style=display:inline-flex;align-items:center;gap:.25rem>
-                                <i class="fab fa-line" style=color:#00c300;font-size:24px></i>
-                                <span id=lightboxLineLinkText>ติดต่อ Line</span>
-                            </a>
+
+<a id=lightboxLineLink href=https://line.me/ti/p/xxxxxx target=_blank rel="noopener noreferrer" style=display:inline-flex;align-items:center;gap:.25rem>
+    <i class="fab fa-line" style=color:#00c300;font-size:24px></i>
+    <span id=lightboxLineLinkText>ติดต่อ Line</span>
+</a>
                         </div>
                     </div>
                 </div>
@@ -495,3 +760,9 @@
 
 </body>
 </html>
+
+
+
+
+
+
