@@ -111,7 +111,14 @@ section img:hover {
     transform: scale(1.02);
 }
 
-
+/* คำอธิบาย */
+p {
+    margin-top: 10px;
+    max-width: 800px;
+    margin-left:auto; margin-right:auto;
+    font-size: 1rem;
+    color: #eee;
+}
 
 /* ปุ่มและลิงก์ (Gradient Pink/Purple) */
 button, a.button {
@@ -270,7 +277,10 @@ footer h4 {
     color: #FF69B4; /* หัวข้อ footer เป็นสีชมพู */
     margin-bottom: 10px;
 }
-
+footer p {
+    color: #999;
+    margin-top: 5px;
+}
 </style>
   
 <link rel=modulepreload href=/main.js>
@@ -441,7 +451,13 @@ footer h4 {
 <main id=main-content class="min-h-screen pt-12">
   <div class="container mx-auto px-4 space-y-12 md:space-y-16">
 
+<section class="hero-h1-revised text-center space-y-4" aria-labelledby=hero-h1>
+  
+  <h1 id=hero-h1 class=sr-only>
+    Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ ฟิวแฟน ตรงปก100% ไม่มีมัดจำ เด็กn
+  </h1>
 
+<a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-full md:max-w-[1200px] animate-fadeIn" tabindex=0>
 <img
   src="images/hero-sidelinechiangmai-1200.webp"
   alt="ภาพสาวๆไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก 100%"
@@ -461,7 +477,9 @@ footer h4 {
       การันตีตรงปก ให้คุณได้ผ่อนคลายในบรรยากาศส่วนตัวและฟีลแฟนจริงๆ
     </p>
 </section>
+  
 
+    
     
   
  
@@ -540,6 +558,9 @@ footer h4 {
   aria-labelledby="featured-heading"
   data-animate-on-scroll>
   
+  <div class="section-content-wrapper max-w-6xl mx-auto">
+    <div class="p-6 md:p-10 text-center space-y-6">
+      
       <h2 id="featured-heading" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
         โปรไฟล์แนะนำน้องๆรับงาน
       </h2>
@@ -565,7 +586,7 @@ footer h4 {
 </section>
 
 <div class="container mx-auto px-4" data-animate-on-scroll>
-  
+  <hr class="border-pink-300/60 my-12 md:my-16">
 </div>
 
 <section id="all-profiles-section" 
@@ -573,8 +594,7 @@ footer h4 {
   class="pt-12 md:pt-16 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-4 md:px-10"
   data-animate-on-scroll>
   
-  
-
+  <div class="text-center space-y-6">
     <h2 id="all-profiles-heading" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
       ค้นหาน้องๆ รับงานทั้งหมด
     </h2>
@@ -721,7 +741,7 @@ footer h4 {
 </section>
 
 <section id="view-all-profiles" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8" aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
-  
+  <div class="text-center mt-10">
     <a href="/profiles.html"
        class="btn-view-all"
        aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
