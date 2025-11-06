@@ -51,7 +51,238 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="all">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <style>
+  body {
+    margin: 0;
+    font-family: 'Prompt', sans-serif;
+    /* พื้นหลัง: ดำประกายม่วง */
+    background: linear-gradient(135deg, #0D0D0D, #4B0082); 
+    color: #fff;
+    min-height: 100vh;
+  }
 
+/* หัวข้อใหญ่ (h1) ขนาดเล็กลง พร้อม Shimmer Effect */
+h1 {
+    font-size: 2rem; 
+    font-weight: 700;
+    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
+    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 20px 0;
+    padding: 0 10px;
+    text-align: center;
+    background-size: 200% auto; /* สำคัญสำหรับ Shimmer */
+    animation: shimmer 3s infinite;
+}
+h2 {
+    font-size: 1.75rem;
+    margin-top: 20px;
+    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
+    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s infinite;
+    background-size: 200% auto;
+}
+
+/* เอฟเฟกต์ Shimmer (ใช้สำหรับ H1 และ H2) */
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+/* ส่วน Hero */
+section {
+    padding: 20px 20px;
+    text-align: center;
+}
+
+/* รูปภาพ hero */
+section img {
+    border-radius: 15px;
+    /* Shadow: ชมพูอ่อนๆ */
+    box-shadow: 0 4px 20px rgba(255,105,180,0.4); 
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.3s;
+}
+section img:hover {
+    transform: scale(1.02);
+}
+
+/* คำอธิบาย */
+p {
+    margin-top: 10px;
+    max-width: 800px;
+    margin-left:auto; margin-right:auto;
+    font-size: 1rem;
+    color: #eee;
+}
+
+/* ปุ่มและลิงก์ (Gradient Pink/Purple) */
+button, a.button {
+    /* Gradient: ม่วง -> ชมพู */
+    background: linear-gradient(135deg, #8A2BE2, #FF69B4); 
+    color: #fff;
+    padding: 12px 24px;
+    border: none; /* เพิ่ม border: none; */
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display:inline-block;
+    cursor: pointer;
+}
+button:hover, a.button:hover {
+    /* Hover Gradient: ชมพู -> ม่วง */
+    background: linear-gradient(135deg, #FF69B4, #8A2BE2);
+    /* Hover Shadow: ชมพูเข้ม */
+    box-shadow: 0 4px 15px rgba(255,105,180,0.8); 
+}
+
+/* Social media links */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap; /* ให้รองรับมือถือ */
+}
+.social-links a {
+    padding: 10px 20px;
+    border-radius: 50px;
+    background-color: #222;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.social-links a:hover {
+    background-color: #555;
+    color: #FF69B4; /* เปลี่ยนสีไอคอน/ข้อความเล็กน้อย */
+}
+
+/* โปรไฟล์แนะนำ Section */
+#featured {
+    /* Background: เทาเข้ม - เทาเข้มขึ้น */
+    background: linear-gradient(135deg, #222, #333); 
+    border-radius: 20px;
+    padding: 30px 20px;
+    margin-top: 40px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Grid สำหรับโปรไฟล์ */
+#featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* ปรับขนาดเล็กสุดให้รองรับมือถือ */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* รูปโปรไฟล์แบบใหม่: Card Glow */
+.profile-card {
+    /* Card Background: เทาเข้ม */
+    background: linear-gradient(135deg, #222, #444); 
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    /* Card Shadow: ชมพู */
+    box-shadow: 0 8px 20px rgba(255,105,180,0.4); 
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+.profile-card:hover {
+    transform: scale(1.05);
+    /* Hover Shadow: ชมพูเข้มขึ้น */
+    box-shadow: 0 12px 30px rgba(255,105,180,0.6); 
+}
+.profile-card img {
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    border-radius: 50%;
+    /* Border: ชมพู */
+    border: 4px solid #FF69B4; 
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    margin-bottom: 10px;
+    transition: transform 0.3s;
+}
+.profile-card:hover img {
+    transform: scale(1.05);
+}
+.profile-card h3 {
+    font-size: 1.2rem;
+    color: #fff;
+    margin-top: 8px;
+    font-weight: 700;
+}
+.profile-card .tagline {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-top: 4px;
+}
+
+/* เพิ่มความประกายกลิตเตอร์ (Overlay) */
+.profile-card::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* Overlay Gradient: ชมพู -> ม่วง */
+    background: linear-gradient(45deg, #ff69b0, #8a2be2, #ff69b0);
+    opacity: 0.2;
+    border-radius: 15px;
+    pointer-events: none;
+    animation: shimmer2 5s infinite alternate;
+}
+@keyframes shimmer2 {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 0; }
+}
+
+/* Form Section */
+.form-card {
+    max-width:600px; 
+    margin:auto; 
+    padding:20px; 
+    background:#222; /* พื้นหลังเข้ม */
+    border-radius:15px; 
+    /* Shadow: ชมพู */
+    box-shadow:0 4px 20px rgba(255,105,180,0.4);
+}
+.form-card input, .form-card select {
+    width:100%; 
+    padding:10px; 
+    border:none; 
+    border-radius:50px; 
+    margin-bottom:15px; 
+    outline:none;
+    color: #333; /* ข้อความใน input/select เป็นสีเข้ม */
+}
+
+/* Footer Style */
+footer {
+    background:#111; 
+    color:#ccc; 
+    padding:40px 20px 20px; 
+    border-top-left-radius:30px; 
+    border-top-right-radius:30px;
+}
+footer h4 {
+    color: #FF69B4; /* หัวข้อ footer เป็นสีชมพู */
+    margin-bottom: 10px;
+}
+footer p {
+    color: #999;
+    margin-top: 5px;
+}
+</style>
+  
 <link rel=modulepreload href=/main.js>
 
   <script type="application/ld+json">
@@ -159,7 +390,7 @@
   <div class="container mx-auto px-6 h-14 flex items-center justify-between">
     
     <a href=/ aria-label="กลับไปหน้าแรก SidelineChiangmai">
-<img src=images/logo-sidelinechiangmai.webp srcset="images/logo-sidelinechiangmai@2x.webp 2x" alt="โลโก้ Sideline Chiang Mai" width=245 height=30 class="h-[30px] w-auto mx-auto md:mx-0" decoding=async>
+<img src=/images/logo-sidelinechiangmai.webp srcset="/images/logo-sidelinechiangmai@2x.webp 2x" alt="โลโก้ Sideline Chiang Mai" width=245 height=30 class="h-[30px] w-auto mx-auto md:mx-0" decoding=async>
     </a>
 
     
@@ -220,42 +451,37 @@
 <main id=main-content class="min-h-screen pt-12">
   <div class="container mx-auto px-4 space-y-12 md:space-y-16">
 
-<section class="hero-h1-revised text-center space-y-4" aria-labelledby=hero-h1>
+ <section class="hero-h1-revised text-center space-y-4" aria-labelledby=hero-h1>
   
   <h1 id=hero-h1 class=sr-only>
-    Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ ฟิวแฟน ตรงปก100% ไม่มีมัดจำ เด็กn
+    Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ สาวรับงาน ฟิวแฟน ตรงปก 100% ไม่มีมัดจำ
   </h1>
 
 <a href="/" aria-label="Sideline Chiangmai หน้าแรก" class="block mx-auto max-w-full md:max-w-[1200px] animate-fadeIn" tabindex=0>
-<img
-  src="images/hero-sidelinechiangmai-1200.webp"
-  alt="ภาพสาวๆไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก 100%"
-  class="hero-image-main"
-  style="width: 100%; aspect-ratio: 1200/962; border-radius: 0.5rem; object-fit: cover; max-width: 200px;"
-  width="1200"
-  height="962"
-  srcset="images/hero-sidelinechiangmai-600.webp 600w, images/hero-sidelinechiangmai-800.webp 800w, images/hero-sidelinechiangmai-1200.webp 1200w"
-  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 200px"
-/>
+
+
+  <img 
+      src="/images/hero-sidelinechiangmai-1200.webp"
+      srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 100vw"
+      alt="ภาพสาวๆรับงานไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก 100%"
+      width="1200"
+      height="962"
+      class="hero-image-main rounded-2xl object-cover w-full aspect-[1200/962]"
+      loading="eager"
+      decoding="async">
+
 </a>
-  <h2 class="sr-only">
-      สัมผัสประสบการณ์เหนือระดับ
-    </h2>
- <p class="sr-only">
-      บริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่ คัดสรรมาเพื่อคุณโดยเฉพาะ
-      การันตีตรงปก ให้คุณได้ผ่อนคลายในบรรยากาศส่วนตัวและฟีลแฟนจริงๆ
-    </p>
-</section>
+  </section>
   
 
-    
     
   
  
 
 <section class="social-media-section text-center py-8 md:py-10 bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-inner mt-8 md:mt-12">
 
-  <div class="social-section-header mb-2">
+   <div class="social-links">
     <h2 class="social-disclaimer text-sm md:text-base text-gray-900 dark:text-gray-100 max-w-xl mx-auto px-4 font-extrabold" style="text-shadow:0 0 4px rgba(255,255,255,.6)">
       ติดตามเราบน Social Media 
       <i class="fas fa-hand-point-down ml-1" aria-hidden="true"></i>
@@ -327,9 +553,8 @@
   aria-labelledby="featured-heading"
   data-animate-on-scroll>
   
-  <div class="section-content-wrapper max-w-6xl mx-auto">
-    <div class="p-6 md:p-10 text-center space-y-6">
-      
+ 
+ 
       <h2 id="featured-heading" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
         โปรไฟล์แนะนำน้องๆรับงาน
       </h2>
@@ -363,7 +588,7 @@
   class="pt-12 md:pt-16 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-4 md:px-10"
   data-animate-on-scroll>
   
-  <div class="text-center space-y-6">
+  
     <h2 id="all-profiles-heading" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
       ค้นหาน้องๆ รับงานทั้งหมด
     </h2>
@@ -476,7 +701,7 @@
     </div>
   </form>
 
-  <div class="mt-12 md:mt-16" role="region" aria-live="polite">
+ 
     <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์..." class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div>
 
     <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
@@ -510,7 +735,7 @@
 </section>
 
 <section id="view-all-profiles" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8" aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
-  <div class="text-center mt-10">
+  
     <a href="/profiles.html"
        class="btn-view-all"
        aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
@@ -522,6 +747,7 @@
 
     </div>
 </main>
+
 <section
   id="map-section"
   class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-12"
@@ -535,9 +761,9 @@
 
   <div class="p-6 text-gray-700 dark:text-gray-300 leading-relaxed text-center">
     <p class="max-w-2xl mx-auto">
-      📍 <strong>ที่ตั้ง:</strong> ไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
+      📍 <strong>ที่ตั้ง:</strong> ไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
       ☎️ <strong>โทร:</strong> <a href="tel:0994238888" class="text-pink-600 hover:underline">099-423-8888</a><br>
-      ⏰ <strong>เวลาเปิดทำการ:</strong> ทุกวัน 10:00 - 04:00 น.
+      ⏰ <strong>เวลาเปิดทำการ:</strong> ทุกวัน 10:00 - 02:00 น.
     </p>
   </div>
 
@@ -558,7 +784,7 @@
     <iframe
       id="google-map"
       data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1490.15809797274!2d98.971846!3d18.8140717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x86e6c4e0b0e515e!2zMTjCsDQ4JzUxLjAiTiA5OMKwNTgnMTkuNSJF!5e0!3m2!1sen!2sth!4v1678225091761!5m2!1sen!2sth"
-      title="แผนที่ตำแหน่งของ Sideline Chiangmai – สาวรับงานเชียงใหม่ ฟิวแแฟน เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
+      title="แผนที่ตำแหน่งของ Sideline Chiangmai – เจ็ดยอด ช้างเผือก เมืองเชียงใหม่"
       style="border:0; width:100%; height:100%; border-radius:1rem;"
       allowfullscreen
       loading="lazy"
@@ -591,7 +817,7 @@
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "Sideline Chiangmai",
-      "description": "บริการ ไซด์ไลน์เชียงใหม่ ฟิวแฟน สาวรับงานเชียงใหม่ ฟิวแฟน เจ็ดยอด พร้อมน้องๆคุณภาพระดับพรีเมียม",
+      "description": "บริการไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด พร้อมน้องๆคุณภาพระดับพรีเมียม",
       "image": "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
       "address": {
         "@type": "PostalAddress",
@@ -629,7 +855,6 @@
     observer.observe(iframe);
   });
 </script>
-
 
  <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
   <div class="container mx-auto">
@@ -697,12 +922,12 @@
 </footer>
 
  
- <div id="lightbox" 
+<div id="lightbox"
      class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
-  <div id="lightbox-content-wrapper-el" 
+  <div id="lightbox-content-wrapper-el"
        class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-full lg:max-w-[96vw] max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content overflow-hidden">
 
-    <button id="closeLightboxBtn" 
+    <button id="closeLightboxBtn"
             class="btn-close-premium absolute top-3 right-3 z-20 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full shadow-md hover:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
             aria-label="ปิดรายละเอียดโปรไฟล์">
       <svg xmlns="http://www.w3.org/2000/svg" width="1.25em" height="1.25em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -712,17 +937,17 @@
     </button>
 
     <div class="flex-grow overflow-y-auto">
-      <div class="lightbox-grid grid lg:grid-cols-2 gap-4 lg:gap-8">
+      <div class="lightbox-grid grid lg:grid-cols-[2fr_1fr] gap-4 lg:gap-8">
 
         <div class="lightbox-gallery bg-black lg:rounded-l-2xl">
-          <div class="sticky top-0 p-2 sm:p-4">
+          <div class="sticky top-0 p-2 sm:p-4 h-full"> 
 
-            <div class="hero-image-container mb-3 flex justify-center items-center max-h-[90vh] overflow-hidden">
+            <div class="hero-image-container mb-3 flex justify-center items-center h-full max-h-[90vh] overflow-hidden">
 
-              <img id="lightboxHeroImage" 
-                   src="/images/placeholder-profile.webp" 
+              <img id="lightboxHeroImage"
+                   src="/images/placeholder-profile.webp"
                    alt="โปรไฟล์หลักของน้อง (ชื่อ + จังหวัด)"
-                   class="hero-image-main w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-xl shadow-lg mx-auto" 
+                   class="hero-image-main w-full h-full object-cover rounded-xl shadow-lg mx-auto"
                    width="600" height="800" decoding="async" fetchpriority="high">
 
             </div>
@@ -736,7 +961,7 @@
 
             <header class="lightbox-header space-y-3">
               <h2 id="lightbox-header-title" class="sr-only">รายละเอียดโปรไฟล์น้องๆ</h2>
-              
+
               <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-3">
                 <h3 id="lightbox-profile-name-main"
                     class="text-3xl lg:text-4xl font-extrabold text-pink-600 dark:text-pink-400 text-center lg:text-left">
@@ -762,12 +987,12 @@
                 </svg>
                 <span>รายละเอียดเพิ่มเติม</span>
               </h4>
-              <div id="lightboxDescriptionVal" 
+              <div id="lightboxDescriptionVal"
                    class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3"></div>
             </div>
 
             <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
-              <a id="lightboxLineLink" href="https://line.me/ti/p/xxxxxx" 
+              <a id="lightboxLineLink" href="https://line.me/ti/p/xxxxxx"
                  target="_blank" rel="noopener noreferrer"
                  class="inline-flex items-center gap-2 text-green-600 font-bold hover:underline">
                 <i class="fab fa-line text-2xl"></i>
@@ -783,11 +1008,8 @@
   </div>
 </div>
 
-
-
 <script type="module" src="/main.js"></script>
 
 <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
-
 </body>
 </html>
