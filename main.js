@@ -511,8 +511,8 @@ function matchesProfile(profile, parsed) {
         container.innerHTML = ''; // Clear previous suggestions
         if (!items.length) { container.style.display='none'; return; } // Hide if no suggestions
 
-        // Render up to 12 suggestions
-        items.slice(0,12).forEach(it=>{
+        // Render up to 22 suggestions
+        items.slice(0,22).forEach(it=>{
             const el = document.createElement('div');
             el.className='item';
             el.tabIndex = 0;
@@ -653,7 +653,7 @@ function renderProfiles(filteredProfiles, isSearching) {
         // Show featured section only if not searching, there are featured profiles, and on home page
         if (!isSearching && featuredProfilesList.length > 0) {
             dom.featuredContainer.innerHTML = ''; // Clear previous featured items
-            const topFeaturedProfiles = featuredProfilesList.slice(0, 12); // Limit displayed featured profiles
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 22); // Limit displayed featured profiles
             dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard)); // Append cards
             dom.featuredSection.classList.remove('hidden'); // Show the section
             dom.featuredSection.setAttribute('data-animate-on-scroll', ''); // Ensure animation attribute is present
@@ -741,7 +741,7 @@ function renderProfilesByProvince(filteredProfiles, container) {
     }
 
     // Optional: Limit the number of provinces displayed for performance or UI reasons
-    // dynamicProvinceOrder = dynamicProvinceOrder.slice(0, 6);
+    // dynamicProvinceOrder = dynamicProvinceOrder.slice(0, 15);
 
     // Iterate through the determined province order and create sections
     dynamicProvinceOrder.forEach(provinceKey => {
