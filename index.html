@@ -458,7 +458,9 @@ footer p {
 
     <!-- Hero Section -->
     <section class="text-center space-y-4" aria-labelledby="hero-title">
-      <h1 id="hero-title" class="text-3xl md:text-4xl font-extrabold">sideline chiangmai รับงาน ไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก</h1>
+<h1 id="hero-h1" class="text-3xl md:text-4xl font-extrabold">
+  sideline chiangmai รับงาน ไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก
+</h1>
       <a href="/" aria-label="หน้าแรก" class="block mx-auto rounded-2xl overflow-hidden shadow-lg max-w-3xl">
         <img 
           src="/images/hero-sidelinechiangmai-1200.webp" 
@@ -595,132 +597,102 @@ footer p {
   </div>
 
 
-<section id="search-section"
-  class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp"
-  aria-labelledby="search-form-heading"
-  data-animate-on-scroll>
-  
-  <form id="search-form" action="/profiles.html" autocomplete="off">
+      <section id="search-section" aria-labelledby="search-form-heading" style="margin-top:20px;">
+        <form id="search-form" action="/profiles.html" autocomplete="off" aria-label="ฟอร์มค้นหาโปรไฟล์">
+          <h2 id="search-form-heading" class="sr-only" aria-label="ฟอร์มค้นหาและกรองโปรไฟล์">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
 
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+            <div>
+              <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
+              <div style="position:relative;">
+                <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                  <i class="fas fa-search"></i>
+                </span>
+                <input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..." aria-label="ค้นหาด้วยชื่อหรือสไตล์"
+                       style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+              </div>
+            </div>
 
-    <h2 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h2>
-    
-    <div class="space-y-5">
-      
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        
-        <div class="relative sm:col-span-2 lg:col-span-1">
-          <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
-          <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-search" aria-hidden="true"></i>
-            </span>
-            <input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..."
-              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400">
+            <div>
+              <label for="search-province" class="sr-only">เลือกจังหวัด</label>
+              <div style="position:relative;">
+                <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                  <i class="fas fa-map-marker-alt"></i>
+                </span>
+                <select id="search-province" name="province" aria-label="เลือกจังหวัด"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                  <option value="">ทุกจังหวัด</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="search-availability" class="sr-only">เลือกสถานะ</label>
+              <div style="position:relative;">
+                <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                  <i class="fas fa-clock"></i>
+                </span>
+                <select id="search-availability" name="availability" aria-label="เลือกสถานะ"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                  <option value="">สถานะ (ทั้งหมด)</option>
+                  <option value="ว่าง">ว่าง</option>
+                  <option value="รับงาน">รับงาน</option>
+                  <option value="รับงานบางวัน">รับงานบางวัน</option>
+                  <option value="สอบถามคิว">สอบถามคิว</option>
+                  <option value="ไม่ว่าง">ไม่ว่าง</option>
+                  <option value="พัก">พัก</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
+              <div style="position:relative;">
+                <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                  <i class="fas fa-star"></i>
+                </span>
+                <select id="search-featured" name="featured" aria-label="กรองโปรไฟล์แนะนำ"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                  <option value="">แนะนำ (ทั้งหมด)</option>
+                  <option value="true">แนะนำเท่านั้น</option>
+                </select>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="relative">
-          <label for="search-province" class="sr-only">เลือกจังหวัด</label>
-          <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-            </span>
-            <select id="search-province" name="province"
-              class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-              <option value="">ทุกจังหวัด</option>
-            </select>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </span>
+          <div style="margin-top:12px; display:flex; justify-content:center; gap:12px;">
+            <button type="reset" id="reset-search-btn" class="btn" style="background:#555; padding:10px 16px; border-radius:999px;">ล้างค่า</button>
+            <button type="submit" id="keyword-search-btn" class="btn" aria-label="ค้นหาโปรไฟล์" style="background: linear-gradient(135deg, #FF69B4, #8A2BE2);">
+              <i class="fas fa-search" aria-hidden="true" style="margin-right:6px;"></i>ค้นหา
+            </button>
           </div>
-        </div>
+        </form>
+      </section>
 
-        <div class="relative">
-          <label for="search-availability" class="sr-only">เลือกสถานะ</label>
-          <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-clock" aria-hidden="true"></i>
-            </span>
-            <select id="search-availability" name="availability"
-              class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-              <option value="">สถานะ (ทั้งหมด)</option>
-              <option value="ว่าง">ว่าง</option>
-              <option value="รับงาน">รับงาน</option>
-              <option value="รับงานบางวัน">รับงานบางวัน</option>
-              <option value="สอบถามคิว">สอบถามคิว</option>
-              <option value="ไม่ว่าง">ไม่ว่าง</option>
-              <option value="พัก">พัก</option>
-            </select>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </span>
-          </div>
-        </div>
+      <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์"
+           class="grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-top:12px;">
+        <!-- skeletons can be loaded here -->
       </div>
-      
-      <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 pt-2">
-        
-        <div class="relative">
-          <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
-          <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-star" aria-hidden="true"></i>
-            </span>
-            <select id="search-featured" name="featured"
-              class="w-full appearance-none pl-10 pr-10 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-xs shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-              <option value="">แนะนำ (ทั้งหมด)</option>
-              <option value="true">แนะนำเท่านั้น</option>
-            </select>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-              <i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </span>
-          </div>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <button type="reset" id="reset-search-btn"
-            class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-all duration-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">
-            <i class="fas fa-sync-alt" aria-hidden="true"></i>
-            <span>ล้างค่า</span>
-          </button>
-          
-          <button type="submit" id="keyword-search-btn"
-            class="flex items-center gap-2 px-6 py-2.5 bg-pink-500 text-white rounded-full transition-transform duration-300 text-sm font-semibold hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg hover:shadow-pink-500/20">
-            <i class="fas fa-search" aria-hidden="true"></i>
-            <span>ค้นหา</span>
-          </button>
-        </div>
+
+      <div id="profiles-display-area" class="space-y-12 md:space-y-16" aria-label="โปรไฟล์ที่ค้นพบ"></div>
+
+      <div id="load-more-container" class="hidden" aria-hidden="true" style="text-align:center; margin-top:20px;">
+        <button id="load-more-btn" class="btn" style="background: #e83e8c; padding:12px 24px;">
+          แสดงโปรไฟล์เพิ่มเติม
+        </button>
       </div>
-    </div>
-  </form>
 
- 
-    <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์..." class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div>
+      <div id="fetch-error-message" class="hidden" role="alert" aria-live="polite"
+           style="margin: 18px auto; padding: 16px; border:1px solid #f5c6cb; background:#f8d7da; color:#842029; max-width: 720px;">
+        เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง
+      </div>
 
-    <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
+      <div id="no-results-message" class="hidden" role="status" aria-live="polite"
+           style="margin: 18px auto; padding: 16px; border:1px solid #f5c6cb; background:#fff0f0; color:#a00; max-width: 720px;">
+        ไม่พบโปรไฟล์ที่ตรงกับการค้นหาของคุณ ลองใช้เกณฑ์อื่น
+      </div>
+    </section>
 
-    <div id="load-more-container" class="hidden text-center mt-12">
-      <button id="load-more-btn" 
-        class="px-6 py-3 rounded-full font-semibold bg-pink-600 text-white hover:bg-pink-700 transition">
-        แสดงโปรไฟล์เพิ่มเติม
-      </button>
-    </div>
-
-    <div id="fetch-error-message" 
-  class="hidden text-center py-12 px-6 bg-red-100/80 rounded-lg font-semibold text-red-800 border border-red-300 max-w-2xl mx-auto text-lg" 
-  role="alert">
-  เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง
-</div>
-
-<div id="no-results-message" 
-  class="hidden text-center py-12 px-6 bg-pink-100/80 rounded-lg font-semibold text-pink-800 border border-pink-300 max-w-2xl mx-auto text-lg" 
-  role="status">
-  ไม่พบโปรไฟล์ที่ตรงกับการค้นหาของคุณ ลองใช้เกณฑ์อื่น
-</div>
-
-  </div>
-</section>
 
 <div class="container mx-auto px-4" data-animate-on-scroll>
   <hr class="border-pink-300/60 my-12 md:my-16">
@@ -850,72 +822,57 @@ footer p {
   });
 </script>
 
- <footer class="bg-card text-muted-foreground pt-10 pb-6 px-6 border-t border-border mt-20 text-base leading-relaxed">
-  <div class="container mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center md:text-left mb-12">
-      
-      
-      <div class=lg:col-span-1>
-        <a href=/ aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4">
-       <img src=/images/logo-sidelinechiangmai.webp srcset="/images/logo-sidelinechiangmai@2x.webp 2x" alt="โลโก้ Sideline Chiang Mai" width=245 height=30 class="h-[30px] w-auto mx-auto md:mx-0" decoding=async>
-        </a>
-        <p class="text-sm text-muted-foreground m-0 leading-snug">
-          <strong>Sideline Chiangmai</strong> ศูนย์รวม <em>สาวไซด์ไลน์เชียงใหม่</em> และพื้นที่ใกล้เคียง  
-          ฟีลแฟนตรงปก 100% ปลอดภัย ไม่ต้องโอนก่อน  
-          มั่นใจทุกการนัด รับงานจริง ทุกคนผ่านการคัดสรรอย่างมืออาชีพ
+  <footer role="contentinfo" aria-label="ข้อมูลส่วนท้ายเว็บไซต์" style="margin-top:40px;">
+    <div class="container" style="text-align:left;">
+      <div class="grid" style="display:grid; grid-template-columns: 1fr; gap:20px;">
+        <div>
+          <a href="/" aria-label="หน้าแรก Sideline Chiang Mai">
+            <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ Sideline Chiang Mai" width="245" height="30" style="height:30px;">
+          </a>
+          <p style="color:#bbb; max-width:720px; line-height:1.6;">
+            Sideline Chiangmai ศูนย์รวมสาวไซด์ไลน์เชียงใหม่ ฟีลแฟนตรงปก 100% ปลอดภัย ไม่ต้องโอนก่อน มั่นใจทุกการนัด
+          </p>
+        </div>
+        <div>
+          <h4 style="margin-bottom:8px;">ลิงก์ด่วน</h4>
+          <nav aria-label="ลิงก์ด่วนท้ายเว็บ" style="color:#ddd;">
+            <ul style="list-style:none; padding:0; margin:0;">
+              <li><a href="/profiles.html" style="color:#ddd;">น้องๆ ทั้งหมด</a></li>
+              <li><a href="/about.html" style="color:#ddd;">เกี่ยวกับเรา</a></li>
+              <li><a href="/faq.html" style="color:#ddd;">คำถามที่พบบ่อย</a></li>
+              <li><a href="/blog.html" style="color:#ddd;">บทความ</a></li>
+              <li><a href="/privacy-policy.html" style="color:#ddd;">นโยบายความเป็นส่วนตัว</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div>
+          <h4 style="margin-bottom:8px;">พื้นที่ยอดนิยม</h4>
+          <ul style="color:#ddd;">
+            <li><a href="/profiles/chiangmai.html" style="color:#ddd;">ไซด์ไลน์เชียงใหม่</a></li>
+            <li><a href="/profiles/lamphun.html" style="color:#ddd;">ไซด์ไลน์ลำพูน</a></li>
+            <li><a href="/profiles/chiangrai.html" style="color:#ddd;">ไซด์ไลน์เชียงราย</a></li>
+            <li><a href="/profiles/bangkok.html" style="color:#ddd;">ไซด์ไลน์กรุงเทพ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="margin-bottom:8px;">ติดต่อสอบถาม</h4>
+          <p style="color:#bbb; margin:0;">
+            จองคิว / สอบถามรายละเอียดเพิ่มเติม:
+          </p>
+          <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn" style="margin-top:6px; background:#0a8f4b;">ติดต่อผ่าน LINE</a>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #333; padding-top:14px; margin-top:14px; text-align:center;">
+        <p style="font-size:14px; color:#aaa;">
+          © <span id="currentYear" aria-live="polite"></span> SidelineChiangmai. All Rights Reserved.
+        </p>
+        <p style="font-size:12px; color:#aaa;">
+          เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีขึ้นไป เนื้อหาคงเพื่อความบันเทิง และยืนยันตรงปก ปลอดภัย ไม่โอนก่อน
         </p>
       </div>
-
-      
-      <div>
-        <h3 class="font-semibold text-foreground mb-4 tracking-tight">ลิงก์ด่วน</h3>
-        <nav aria-label=ลิงก์ด่วนท้ายเว็บ>
-          <ul class="space-y-3 text-sm">
-            <li><a href=/profiles.html class="hover:text-secondary transition-colors">น้องๆ ทั้งหมด</a></li>
-            <li><a href=/about.html class="hover:text-secondary transition-colors">เกี่ยวกับเรา</a></li>
-            <li><a href=/faq.html class="hover:text-secondary transition-colors">คำถามที่พบบ่อย</a></li>
-            <li><a href=/blog.html class="hover:text-secondary transition-colors">บทความ</a></li>
-            <li><a href=/privacy-policy.html class="hover:text-secondary transition-colors">นโยบายความเป็นส่วนตัว</a></li>
-          </ul>
-        </nav>
-      </div>
-
-      
-      <div>
-        <h3 class="font-semibold text-foreground mb-4 tracking-tight">พื้นที่ยอดนิยม</h3>
-        <ul class="space-y-3 text-sm">
-          <li><a href=/profiles/chiangmai.html class="hover:text-secondary transition-colors">ไซด์ไลน์เชียงใหม่</a></li>
-          <li><a href=/profiles/lamphun.html class="hover:text-secondary transition-colors">ไซด์ไลน์ลำพูน</a></li>
-          <li><a href=/profiles/chiangrai.html class="hover:text-secondary transition-colors">ไซด์ไลน์เชียงราย</a></li>
-          <li><a href=/profiles/bangkok.html class="hover:text-secondary transition-colors">ไซด์ไลน์กรุงเทพ</a></li>
-        </ul>
-      </div>
-
-      
-      <div>
-        <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อสอบถาม (24 ชม.)</h3>
-        <address class="not-italic space-y-3 text-sm">
-          <p>จองคิว / สอบถามรายละเอียดเพิ่มเติม:</p>
-          <a href=https://line.me/ti/p/ksLUWB89Y_ target=_blank rel="noopener nofollow" class="inline-flex items-center gap-2 group font-semibold text-lg">
-             <i class="fab fa-line text-2xl text-green-500" aria-hidden=true></i>
-             <span class="group-hover:text-secondary transition-colors">ติดต่อผ่าน LINE</span>
-          </a>
-        </address>
-      </div>
     </div>
-
-    
-    <div class="mt-12 border-t border-border pt-8 text-center">
-      <p class=text-sm>Copyright © <span id=currentYearDynamic></span> SidelineChiangmai. All Rights Reserved.</p>
-      <p class="text-xs text-muted-foreground mt-1">
-        เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น  
-        เนื้อหาทั้งหมดเป็นเพียงการจำลองเพื่อความบันเทิง | การันตีตรงปก ปลอดภัย ไม่โอนก่อน
-      </p>
-    </div>
-  </div>
-</footer>
-
- 
+  </footer>
 <div id="lightbox"
      class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
   <div id="lightbox-content-wrapper-el"
