@@ -463,13 +463,16 @@ footer p {
   sideline chiangmai รับงาน ไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก
 </h1>
       <a href="/" aria-label="หน้าแรก" class="block mx-auto rounded-2xl overflow-hidden shadow-lg max-w-3xl">
-        <img 
-          src="/images/hero-sidelinechiangmai-1200.webp" 
-          srcset="/images/hero-sidelinechiangmai-600.webp 600w,/images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" 
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 100vw" 
-          alt="ภาพสาวๆรับงานไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก 100%" 
-          class="w-full rounded-2xl object-cover aspect-[1200/962]" 
-          loading="eager" />
+<img src="https://sidelinechiangmai.netlify.app/images/hero-sidelinechiangmai-800.webp"
+     srcset="/images/hero-sidelinechiangmai-600.webp 600w,
+             /images/hero-sidelinechiangmai-800.webp 800w,
+             /images/hero-sidelinechiangmai-1200.webp 1200w"
+     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 100vw"
+     alt="ภาพสาวๆรับงานไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก 100%"
+     width="1200" height="962"
+     class="w-full rounded-2xl object-cover"
+     loading="eager">
+
       </a>
       <h2 class="text-xl md:text-2xl font-semibold mt-4">สัมผัสประสบการณ์เหนือระดับ</h2>
       <p class="max-w-3xl mx-auto text-gray-300">บริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง คัดสรรคุณภาพ ส่งตรงถึงคุณ</p>
@@ -477,7 +480,8 @@ footer p {
 
 <section class="social-media-section text-center py-8 md:py-10 bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-inner mt-8 md:mt-12">
 
-   <div class="social-links">
+  <!-- Header -->
+  <div class="social-section-header mb-2">
     <h2 class="social-disclaimer text-sm md:text-base text-gray-900 dark:text-gray-100 max-w-xl mx-auto px-4 font-extrabold" style="text-shadow:0 0 4px rgba(255,255,255,.6)">
       ติดตามเราบน Social Media 
       <i class="fas fa-hand-point-down ml-1" aria-hidden="true"></i>
@@ -487,61 +491,70 @@ footer p {
     </p>
   </div>
 
+  <!-- Social Links Marquee -->
   <div class="social-marquee-wrap overflow-x-auto mt-4">
     <div class="social-marquee flex flex-nowrap justify-center gap-4 text-sm sm:text-base whitespace-nowrap py-2 px-4">
 
-      <a href="https://www.facebook.com/sidelinechiangmai" target="_blank" rel="nofollow noopener noreferrer"
+      <!-- Facebook -->
+      <a href="https://www.facebook.com/yourpage" target="_blank" rel="nofollow noopener noreferrer"
          class="social-item fb inline-flex items-center font-bold text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg px-3 py-1 transition-colors duration-200"
          title="ติดตามเราบน Facebook">
         <i class="fab fa-facebook-f mr-1" aria-hidden="true"></i>Facebook
       </a>
 
+      <!-- LINE -->
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item line inline-flex items-center font-bold text-white bg-green-900 hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-3 py-1 transition-colors duration-200"
+         class="social-item line inline-flex items-center font-bold text-white bg-green-900 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-400 rounded-lg px-3 py-1 transition-colors duration-200"
          aria-label="ติดต่อเราทาง LINE" title="ติดต่อเราทาง LINE">
-        <i class="fab fa-line mr-1" aria-hidden=true></i>LINE
+        <i class="fab fa-line mr-1" aria-hidden="true"></i>LINE
       </a>
 
+      <!-- TikTok -->
       <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item tiktok inline-flex items-center font-bold text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-lg px-3 py-1 transition-colors duration-200"
+         class="social-item tiktok inline-flex items-center font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-lg px-3 py-1 transition-colors duration-200"
          title="ดูวิดีโอของเราบน TikTok">
-        <i class="fab fa-tiktok mr-1" aria-hidden=true></i>TikTok
+        <i class="fab fa-tiktok mr-1" aria-hidden="true"></i>TikTok
       </a>
 
-      <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="nofollow noopener noreferrer"
-         class="social-item twitter inline-flex items-center font-bold text-white bg-sky-900 hover:bg-sky-900 focus:outline-none focus:ring-2 focus:ring-sky-400 rounded-lg px-3 py-1 transition-colors duration-200"
+      <!-- Twitter -->
+      <a href="https://twitter.com/yourtwitter" target="_blank" rel="nofollow noopener noreferrer"
+         class="social-item twitter inline-flex items-center font-bold text-white bg-sky-900 hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-400 rounded-lg px-3 py-1 transition-colors duration-200"
          title="ติดตามเราบน Twitter">
-        <i class="fab fa-twitter mr-1" aria-hidden=true></i>Twitter
+        <i class="fab fa-twitter mr-1" aria-hidden="true"></i>Twitter
       </a>
 
+      <!-- Bio.site -->
       <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="nofollow noopener noreferrer"
          title="เยี่ยมชม Bio.site Profile ของเรา"
          class="social-item bio-site inline-flex items-center justify-center gap-2 font-bold text-black bg-rose-500 hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-lg px-4 py-2 transition-colors duration-300 shadow-md">
-        <img src="/images/favicon-32x32.png" alt="โลโก้ Bio.site" width="16" height="16" class="w-4 h-4" loading="lazy" decoding="async">
+        <img src="/images/favicon-32x32.webp" alt="โลโก้ Bio.site" width="16" height="16" class="w-4 h-4" loading="lazy" decoding="async">
         Bio.site
       </a>
 
+      <!-- Linktree -->
       <a href="https://linktr.ee/kissmodel" target="_blank" rel="nofollow noopener noreferrer"
          class="social-item linktree inline-flex items-center font-bold text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg px-3 py-1 transition-colors duration-200"
          title="รวมลิงก์ทั้งหมดของเราใน Linktree">
-        <i class="fas fa-link mr-1" aria-hidden=true></i>Linktree
+        <i class="fas fa-link mr-1" aria-hidden="true"></i>Linktree
       </a>
 
-      <a href="https://bsky.app/profile/shebell-639.bsky.social" target="_blank" rel="nofollow noopener noreferrer"
+      <!-- Bluesky -->
+      
+<a href="https://bsky.app/profile/shebell-639.bsky.social" target="_blank" rel="nofollow noopener noreferrer"
    class="social-item bluesky inline-flex items-center font-bold text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-1 transition-colors duration-200"
    title="ติดตามเราบน Bluesky">
-  <i class="fas fa-cloud mr-1" aria-hidden=true></i>Bluesky
+  <i class="fas fa-cloud mr-1" aria-hidden="true"></i>Bluesky
 </a>
 
 
     </div>
   </div>
 
+  <!-- Age Disclaimer -->
   <p class="social-disclaimer text-xs md:text-sm text-center font-extrabold text-white bg-red-800 max-w-xl mx-auto px-4 py-2 mt-4 rounded-lg shadow-md leading-tight" role="alert">
     <strong>เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</strong>
   </p>
 </section>
-
 
 
 <section id="featured-profiles"
@@ -835,7 +848,7 @@ footer p {
           </p>
         </div>
         <div>
-          <h4 style="margin-bottom:8px;">ลิงก์ด่วน</h4>
+<h2 class="text-lg font-semibold mb-2">ลิงก์ด่วน</h2>
           <nav aria-label="ลิงก์ด่วนท้ายเว็บ" style="color:#ddd;">
             <ul style="list-style:none; padding:0; margin:0;">
               <li><a href="/profiles.html" style="color:#ddd;">น้องๆ ทั้งหมด</a></li>

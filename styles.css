@@ -26,233 +26,289 @@
        url(/fonts/prompt-v11-latin_thai-800.woff2) format("woff2");
 }
 :root {
-  --background: hsl(210, 15%, 98%); /* สีเทาอ่อนมาก สำหรับพื้นหลัง */
-  --foreground: hsl(210, 10%, 20%); /* สีข้อความเข้ม */
-  --card: hsl(0, 0%, 100%);        /* สีการ์ดสะอาด */
-  --primary: hsl(45, 100%, 55%);   /* ทองคำสด */
-  --primary-glow: hsl(45, 100%, 65%);
-  --secondary: hsl(330, 60%, 65%); /* โรสโกลด์ */
-  --secondary-glow: hsl(330, 60%, 75%);
-  --accent: hsl(20, 70%, 85%);     /* สีพีชอ่อน */
-  --muted: hsl(0, 0%, 95%);       /* สีเทาอ่อนมาก */
-  --border: hsl(0, 0%, 80%);      /* เทาอ่อนเข้ม */
-  --ring: hsl(210, 15%, 30%);
-  --destructive: hsl(0, 85%, 60%);
-  --metallic-silver: hsl(0, 0%, 80%);
-  --matte-black: hsl(0, 0%, 10%);
+  /* โทนสีหลักสำหรับความเรียบหรู */
+  --background: #F3F4F6; /* ขาวเทาอ่อน */
+  --foreground: #374151; /* เทาเข้มสำหรับข้อความ */
+  --card: #FFFFFF; /* การ์ดสะอาด */
+  --primary: #D4AF37; /* สีทองคำหรูหรา */
+  --primary-glow: #FFD700; /* เงาสีทอง */
+  --secondary: #EC4899; /* ชมพูเข้ม */
+  --secondary-glow: #F472B6; /* ชมพูอ่อน */
+  --accent: #3B82F6; /* น้ำเงินอ่อน */
+  --muted: #9CA3AF; /* เทาอ่อนมาก */
+  --border: #E5E7EB; /* เทาอ่อนเข้ม */
+  --ring: #6B7280; /* เทาเข้มสำหรับ ring */
+  --destructive: #EF4444; /* สีแดงสำหรับเตือน */
 }
-  
 
-/* หัวข้อใหญ่ (h1) ขนาดเล็กลง พร้อม Shimmer Effect */
+/* BODY */
+body {
+  margin: 0;
+  font-family: 'Prompt', 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.75;
+  transition: background-color 0.3s, color 0.3s;
+  font-size: 1rem;
+  overflow-x: hidden;
+}
+
+/* หัวข้อใหญ่ (h1) */
 h1 {
-    font-size: 2rem; 
-    font-weight: 700;
-    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
-    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 20px 0;
-    padding: 0 10px;
-    text-align: center;
-    background-size: 200% auto; /* สำคัญสำหรับ Shimmer */
-    animation: shimmer 3s infinite;
-}
-h2 {
-    font-size: 1.75rem;
-    margin-top: 20px;
-    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
-    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 3s infinite;
-    background-size: 200% auto;
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #FFD700, #FFC107); /* ทองคำ */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 20px 0;
+  text-align: center;
+  animation: shimmer 3s infinite;
 }
 
-/* เอฟเฟกต์ Shimmer (ใช้สำหรับ H1 และ H2) */
+/* หัวข้อรอง (h2) */
+h2 {
+  font-size: 1.75rem;
+  margin-top: 20px;
+  font-weight: 600;
+  color: var(--primary);
+  text-align: center;
+}
+
+/* เอฟเฟกต์ shimmer สำหรับหัวข้อ */
 @keyframes shimmer {
   0% { background-position: -100% 0; }
   100% { background-position: 100% 0; }
 }
 
-/* ส่วน Hero */
+/* ส่วน section */
 section {
-    padding: 20px 20px;
-    text-align: center;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
 }
 
+/* รูปภาพใน section */
+section img {
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  max-width: 100%;
+  height: auto;
+  transition: transform 0.3s;
+}
+section img:hover {
+  transform: scale(1.02);
+}
 
-/* คำอธิบาย */
+/* คำอธิบาย (p) */
 p {
-    margin-top: 10px;
-    max-width: 800px;
-    margin-left:auto; margin-right:auto;
-    font-size: 1rem;
-    color: #eee;
+  margin-top: 10px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1rem;
+  color: #555; /* สีเทาเข้ม */
+  line-height: 1.75;
 }
 
-/* ปุ่มและลิงก์ (Gradient Pink/Purple) */
+/* ปุ่มและลิงก์ */
 button, a.button {
-    /* Gradient: ม่วง -> ชมพู */
-    background: linear-gradient(135deg, #8A2BE2, #FF69B4); 
-    color: #fff;
-    padding: 12px 24px;
-    border: none; /* เพิ่ม border: none; */
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display:inline-block;
-    cursor: pointer;
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  margin-top: 10px;
 }
 button:hover, a.button:hover {
-    /* Hover Gradient: ชมพู -> ม่วง */
-    background: linear-gradient(135deg, #FF69B4, #8A2BE2);
-    /* Hover Shadow: ชมพูเข้ม */
-    box-shadow: 0 4px 15px rgba(255,105,180,0.8); 
+  background: linear-gradient(135deg, #60A5FA, #3B82F6);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
 /* Social media links */
 .social-links {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-    flex-wrap: wrap; /* ให้รองรับมือถือ */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
 }
 .social-links a {
-    padding: 10px 20px;
-    border-radius: 50px;
-    background-color: #222;
-    color: #fff;
-    font-weight: bold;
-    text-decoration: none;
-    display:flex;
-    align-items:center;
-    gap:8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  background-color: #222;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
 }
 .social-links a:hover {
-    background-color: #555;
-    color: #FF69B4; /* เปลี่ยนสีไอคอน/ข้อความเล็กน้อย */
+  background-color: #444;
+  transform: scale(1.05);
 }
 
-/* โปรไฟล์แนะนำ Section */
+/* โปรไฟล์ section */
 #featured {
-    /* Background: เทาเข้ม - เทาเข้มขึ้น */
-    background: linear-gradient(135deg, #222, #333); 
-    border-radius: 20px;
-    padding: 30px 20px;
-    margin-top: 40px;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 30px 20px;
+  margin-top: 40px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
 }
-
-/* Grid สำหรับโปรไฟล์ */
+#featured h2 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+#featured p {
+  text-align: center;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
 #featured-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* ปรับขนาดเล็กสุดให้รองรับมือถือ */
-    gap: 15px;
-    margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
 }
 
-/* รูปโปรไฟล์แบบใหม่: Card Glow */
-.profile-card {
-    /* Card Background: เทาเข้ม */
-    background: linear-gradient(135deg, #222, #444); 
-    border-radius: 15px;
-    padding: 15px;
-    text-align: center;
-    /* Card Shadow: ชมพู */
-    box-shadow: 0 8px 20px rgba(255,105,180,0.4); 
-    transition: transform 0.3s, box-shadow 0.3s;
-    position: relative;
-    overflow: hidden;
-}
-.profile-card:hover {
-    transform: scale(1.05);
-    /* Hover Shadow: ชมพูเข้มขึ้น */
-    box-shadow: 0 12px 30px rgba(255,105,180,0.6); 
-}
-.profile-card img {
-    width: 100%;
-    max-width: 180px;
-    height: auto;
-    border-radius: 50%;
-    /* Border: ชมพู */
-    border: 4px solid #FF69B4; 
-    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
-    margin-bottom: 10px;
-    transition: transform 0.3s;
-}
-.profile-card:hover img {
-    transform: scale(1.05);
-}
-.profile-card h3 {
-    font-size: 1.2rem;
-    color: #fff;
-    margin-top: 8px;
-    font-weight: 700;
-}
-.profile-card .tagline {
-    font-size: 0.9rem;
-    color: #ccc;
-    margin-top: 4px;
+/* ✅ ปรับการ์ดให้เต็มพื้นที่และภาพเด่น */
+.profile-card-new-container {
+  width: 100%;
+  height: 100%;
 }
 
-/* เพิ่มความประกายกลิตเตอร์ (Overlay) */
-.profile-card::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    /* Overlay Gradient: ชมพู -> ม่วง */
-    background: linear-gradient(45deg, #ff69b0, #8a2be2, #ff69b0);
-    opacity: 0.2;
-    border-radius: 15px;
-    pointer-events: none;
-    animation: shimmer2 5s infinite alternate;
-}
-@keyframes shimmer2 {
-    0% { background-position: 0 0; }
-    100% { background-position: 100px 0; }
+.profile-card-new {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Form Section */
-.form-card {
-    max-width:600px; 
-    margin:auto; 
-    padding:20px; 
-    background:#222; /* พื้นหลังเข้ม */
-    border-radius:15px; 
-    /* Shadow: ชมพู */
-    box-shadow:0 4px 20px rgba(255,105,180,0.4);
-}
-.form-card input, .form-card select {
-    width:100%; 
-    padding:10px; 
-    border:none; 
-    border-radius:50px; 
-    margin-bottom:15px; 
-    outline:none;
-    color: #333; /* ข้อความใน input/select เป็นสีเข้ม */
+.profile-card-new:hover {
+  transform: scale(1.02);
+  box-shadow: 0 15px 30px rgba(255, 105, 180, 0.25);
 }
 
-/* Footer Style */
-footer {
-    background:#111; 
-    color:#ccc; 
-    padding:40px 20px 20px; 
-    border-top-left-radius:30px; 
-    border-top-right-radius:30px;
-}
-footer h4 {
-    color: #FF69B4; /* หัวข้อ footer เป็นสีชมพู */
-    margin-bottom: 10px;
-}
-footer p {
-    color: #999;
-    margin-top: 5px;
+/* ✅ รูปภาพเต็มพื้นที่การ์ด */
+.profile-image-round-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
 }
 
+.profile-image-round-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
 
+.profile-card-new:hover img {
+  transform: scale(1.05);
+}
+
+/* ✅ กล่องข้อมูลซ้อนบนภาพ */
+.profile-card-new .p-3 {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.7));
+  color: #fff;
+}
+
+.profile-card-new h3 {
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.profile-card-new p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ✅ ปรับ grid layout สำหรับมือถือ */
+@media (max-width: 640px) {
+  #featured-profiles-container {
+    gap: 2px;
+  }
+  .profile-card-new .p-3 {
+    padding: 0.75rem;
+  }
+}
+
+/* ชื่อ */
+.profile-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 10px;
+  color: #222;
+  text-align: center;
+}
+.profile-name span {
+  display: block;
+}
+.profile-age {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 4px;
+  color: #f472b6; /* Pink หรูหรา */
+}
+/* Tagline */
+.tagline {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+  margin-top: 8px;
+  padding: 0 10px;
+  text-align: center;
+}
+
+/* ป้ายสถานะ */
+.status-badges {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.status-badge {
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+}
+.status-available {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+.status-busy {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+.status-offline {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
 body:after,body:before{content:"";position:fixed;top:50%;left:50%;width:150vmax;height:150vmax;border-radius:50%;z-index:-1;filter:blur(150px);opacity:.15}
 
 html:not(.dark) body:before{background:radial-gradient(circle,hsl(var(--primary)) 0,transparent 40%);animation:aurora-1 30s linear infinite}
@@ -3146,86 +3202,4 @@ p{margin:0 0 1em}
 /* ปรับให้เนื้อหาในการ์ดจัดกึ่งกลาง */
 .profile-card {
   text-align: center; 
-}
-/* 🎀 HERO SECTION STYLE */
-.hero-section {
-  margin-top: 1.5rem;
-  position: relative;
-  overflow: hidden;
-  border-radius: 1.25rem;
-  isolation: isolate;
-}
-
-.hero-image-main {
-  border-radius: 1.25rem;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  transition: transform 0.8s ease, box-shadow 0.6s ease;
-  box-shadow: 0 6px 30px rgba(255, 105, 180, 0.35);
-}
-
-.hero-image-wrapper:hover .hero-image-main {
-  transform: scale(1.03);
-  box-shadow: 0 10px 40px rgba(255, 105, 180, 0.55);
-}
-
-.hero-text {
-  position: absolute;
-  top: 55%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  width: 100%;
-  padding: 0 1rem;
-  max-width: 90%;
-}
-
-.hero-title {
-  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.75);
-}
-
-.hero-sub {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-  margin-bottom: 0.5rem;
-}
-
-.hero-btn {
-  letter-spacing: 0.3px;
-  transition: all 0.35s ease-in-out;
-}
-
-/* เอฟเฟกต์ fade-in สวยงาม */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -40%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
-}
-.animate-fadeInUp {
-  animation: fadeInUp 1.1s ease both;
-}
-.animate-fadeInUp.delay-100 {
-  animation-delay: 0.2s;
-}
-.animate-fadeInUp.delay-200 {
-  animation-delay: 0.4s;
-}
-
-/* ปรับขนาดอัตโนมัติบนจอเล็ก */
-@media (max-width: 640px) {
-  .hero-title {
-    font-size: 1.75rem;
-  }
-  .hero-sub {
-    font-size: 0.9rem;
-  }
-  .hero-btn {
-    padding: 0.6rem 1.5rem;
-    font-size: 0.9rem;
-  }
 }
