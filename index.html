@@ -366,42 +366,45 @@ footer p {
 
 <body class="antialiased" data-page="home">
 
-<header id=page-header class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
+<header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent bg-white dark:bg-dark">
   <div class="container mx-auto px-6 h-14 flex items-center justify-between">
-    
-    <a href=/ aria-label="กลับไปหน้าแรก SidelineChiangmai">
-<img src="/images/logo- sidelinechiangmai.webp"
-srcset="/images/logo- sidelinechiangmai.webp 1x,
-/images/logo-sidelinechiangmai@2x.webp 2x"
-alt="โลโก้ ไซด์ไลน์เชียงใหม่ Sideline Chiangmai"
-width="240"
-height="28"
-class="mx-auto rounded-md object-
-contain" style="height:auto;" loading="eager">
+
+    <!-- Logo -->
+    <a href="/" aria-label="กลับไปหน้าแรก Sideline Chiang Mai">
+      <img src="/images/logo-sidelinechiangmai.webp"
+           alt="โลโก้ ไซด์ไลน์เชียงใหม่ Sideline Chiang Mai"
+           width="240"
+           height="28"
+           class="mx-auto rounded-md object-contain"
+           style="height:auto;"
+           loading="eager"
+           decoding="async">
     </a>
 
-    
-    <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label=เมนูหลัก>
-      <a href=profiles.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
-      <a href=locations.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
-      <a href=about.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
-      <a href=faq.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
-      <a href=blog.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
+    <!-- Navigation -->
+    <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
+      <a href="profiles.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
+      <a href="locations.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
+      <a href="about.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
+      <a href="faq.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
+      <a href="blog.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
     </nav>
 
-    
+    <!-- Buttons -->
     <div class="flex items-center gap-2">
       
-      <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type=button aria-label=เปลี่ยนโหมดสี title=เปลี่ยนโหมดสี>
-        <i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden=true></i>
-        <span class=sr-only>เปลี่ยนโหมดสี</span>
+      <!-- Theme Toggle -->
+      <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปลี่ยนโหมดสี" title="เปลี่ยนโหมดสี">
+        <i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i>
+        <span class="sr-only">เปลี่ยนโหมดสี</span>
       </button>
 
-      
-      <button id=menu-toggle class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type=button aria-label=เปิดเมนูนำทาง aria-haspopup=true aria-controls=sidebar title=เปิดเมนูนำทาง>
-        <i class="fas fa-bars text-xl" aria-hidden=true></i>
-        <span class=sr-only>เปิดเมนูนำทาง</span>
+      <!-- Mobile Menu Toggle -->
+      <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปิดเมนูนำทาง" aria-haspopup="true" aria-controls="sidebar" title="เปิดเมนูนำทาง">
+        <i class="fas fa-bars text-xl" aria-hidden="true"></i>
+        <span class="sr-only">เปิดเมนูนำทาง</span>
       </button>
+
     </div>
   </div>
 </header>
@@ -804,63 +807,72 @@ contain" style="height:auto;" loading="eager">
   });
 </script>
 
-  <footer role="contentinfo" aria-label="ข้อมูลส่วนท้ายเว็บไซต์" style="margin-top:40px;">
-    <div class="container" style="text-align:left;">
-      <div class="grid" style="display:grid; grid-template-columns: 1fr; gap:20px;">
-        <div>
-<a href="/" aria-label="หน้าแรก Sideline Chiang Mai">
-              
-            <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ Sideline Chiang Mai" width="245" height="30" style="height:30px;">
-          </a>
-          <p style="color:#bbb; max-width:720px; line-height:1.6;">
-            Sideline Chiangmai ศูนย์รวมสาวไซด์ไลน์เชียงใหม่ ฟีลแฟนตรงปก 100% ปลอดภัย ไม่ต้องโอนก่อน มั่นใจทุกการนัด
-          </p>
-        </div>
-        <div>
-<h2 style="margin-bottom:8px;">ลิงก์ด่วน</h2>
-          <nav aria-label="ลิงก์ด่วนท้ายเว็บ" style="color:#ddd;">
-            <ul style="list-style:none; padding:0; margin:0;">
-              <li><a href="/profiles.html" style="color:#ddd;">น้องๆ ทั้งหมด</a></li>
-              <li><a href="/about.html" style="color:#ddd;">เกี่ยวกับเรา</a></li>
-              <li><a href="/faq.html" style="color:#ddd;">คำถามที่พบบ่อย</a></li>
-              <li><a href="/blog.html" style="color:#ddd;">บทความ</a></li>
-              <li><a href="/privacy-policy.html" style="color:#ddd;">นโยบายความเป็นส่วนตัว</a></li>
-            </ul>
-          </nav>
-        </div>
-        <div>
-          <h3 style="margin-bottom:8px;">พื้นที่ยอดนิยม</h3>
-          <ul style="color:#ddd;">
-            <li><a href="/profiles/chiangmai.html" style="color:#ddd;">ไซด์ไลน์เชียงใหม่</a></li>
-            <li><a href="/profiles/lamphun.html" style="color:#ddd;">ไซด์ไลน์ลำพูน</a></li>
-            <li><a href="/profiles/chiangrai.html" style="color:#ddd;">ไซด์ไลน์เชียงราย</a></li>
-            <li><a href="/profiles/bangkok.html" style="color:#ddd;">ไซด์ไลน์กรุงเทพ</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 style="margin-bottom:8px;">ติดต่อสอบถาม</h4>
-          <p style="color:#bbb; margin:0;">
-            จองคิว / สอบถามรายละเอียดเพิ่มเติม:
-          </p>
+<footer role="contentinfo" aria-label="ข้อมูลส่วนท้ายเว็บไซต์" class="bg-gray-900 dark:bg-gray-800 text-gray-300 dark:text-gray-400 mt-12">
+  <div class="container mx-auto px-6 py-10 grid gap-8 md:grid-cols-4">
 
-<a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn"
-style="margin-top:6px;
-background:#0a8f4b; color:#ffffff; font- weight:600;"
-onclick="saAutomatedLink(this, 'outbound');">
-ติดต่อผ่าน LINE </a>
-        </div>
-      </div>
-
-      <div style="border-top:1px solid #333; padding-top:14px; margin-top:14px; text-align:center;">
-        <p style="font-size:14px; color:#aaa;">
-          © <span id="currentYear" aria-live="polite"></span> SidelineChiangmai. All Rights Reserved.
-        </p>
-        <p style="font-size:12px; color:#aaa;">
-          เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีขึ้นไป เนื้อหาคงเพื่อความบันเทิง และยืนยันตรงปก ปลอดภัย ไม่โอนก่อน
-        </p>
-      </div>
+    <!-- โลโก้และคำอธิบาย -->
+    <div>
+      <a href="/" aria-label="หน้าแรก Sideline Chiang Mai">
+        <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ Sideline Chiang Mai" width="245" height="30" class="h-7">
+      </a>
+      <p class="mt-3 text-gray-400 leading-relaxed max-w-sm">
+        Sideline Chiangmai ศูนย์รวมสาวไซด์ไลน์เชียงใหม่ ฟีลแฟนตรงปก 100% ปลอดภัย ไม่ต้องโอนก่อน มั่นใจทุกการนัด
+      </p>
     </div>
-  </footer>
+
+    <!-- ลิงก์ด่วน -->
+    <div>
+      <h3 class="text-lg font-semibold mb-2">ลิงก์ด่วน</h3>
+      <nav aria-label="ลิงก์ด่วนท้ายเว็บ">
+        <ul class="space-y-1">
+          <li><a href="/profiles.html" class="hover:text-white transition-colors">น้องๆ ทั้งหมด</a></li>
+          <li><a href="/about.html" class="hover:text-white transition-colors">เกี่ยวกับเรา</a></li>
+          <li><a href="/faq.html" class="hover:text-white transition-colors">คำถามที่พบบ่อย</a></li>
+          <li><a href="/blog.html" class="hover:text-white transition-colors">บทความ</a></li>
+          <li><a href="/privacy-policy.html" class="hover:text-white transition-colors">นโยบายความเป็นส่วนตัว</a></li>
+        </ul>
+      </nav>
+    </div>
+
+<div>
+  <h3 class="text-lg font-semibold mb-2">พื้นที่ยอดนิยม</h3>
+<ul class="space-y-1">
+  <li><a href="/chiangmai" class="hover:text-white transition-colors">ไซด์ไลน์เชียงใหม่</a></li>
+  <li><a href="/lamphun" class="hover:text-white transition-colors">ไซด์ไลน์ลำพูน</a></li>
+  <li><a href="/chiangrai" class="hover:text-white transition-colors">ไซด์ไลน์เชียงราย</a></li>
+  <li><a href="/bangkok" class="hover:text-white transition-colors">ไซด์ไลน์กรุงเทพ</a></li>
+</ul>
+
+</div>
+
+
+    <!-- ติดต่อสอบถาม -->
+    <div>
+      <h3 class="text-lg font-semibold mb-2">ติดต่อสอบถาม</h3>
+      <p class="text-gray-400 mb-2">จองคิว / สอบถามรายละเอียดเพิ่มเติม:</p>
+      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow"
+         class="inline-block px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded transition-colors"
+         onclick="saAutomatedLink(this, 'outbound');">
+        ติดต่อผ่าน LINE
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ข้อมูลลิขสิทธิ์และคำเตือน -->
+  <div class="border-t border-gray-700 mt-8 pt-4 text-center space-y-1">
+    <p class="text-sm text-gray-500">
+      &copy; <span id="currentYear" aria-live="polite"></span> SidelineChiangmai. All Rights Reserved.
+    </p>
+    <p class="text-xs text-gray-500">
+      เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีขึ้นไป เนื้อหาคงเพื่อความบันเทิง และยืนยันตรงปก ปลอดภัย ไม่โอนก่อน
+    </p>
+  </div>
+</footer>
+
+
+
+  
 <div id="lightbox"
      class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
   <div id="lightbox-content-wrapper-el"
@@ -947,13 +959,39 @@ onclick="saAutomatedLink(this, 'outbound');">
   </div>
 </div>
 
+<!-- โหลด main.js -->
 <script type="module" src="/main.js"></script>
+
 <script>
+  // เติมปีปัจจุบันอัตโนมัติ
   document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("currentYear").textContent = new Date().getFullYear();
+    const yearEl = document.getElementById("currentYear");
+    if(yearEl) yearEl.textContent = new Date().getFullYear();
   });
 </script>
-<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
+
+<!-- เพิ่ม class 'loaded' และลงทะเบียน Service Worker -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("loaded");
+  });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      const registerSW = () => {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" })
+          .then(reg => console.log("✅ Service Worker registered:", reg))
+          .catch(err => console.error("❌ SW registration failed:", err));
+      };
+
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(registerSW);
+      } else {
+        setTimeout(registerSW, 1500);
+      }
+    });
+  }
+</script>
 </body>
 </html>
 
