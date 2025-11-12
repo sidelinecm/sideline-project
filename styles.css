@@ -2926,60 +2926,6 @@ p{margin:0 0 1em}
   object-fit: cover;
 }
 
-/* ===============================
-   PROFILE COUNT BADGE
-================================== */
-.profile-count-badge {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-  color: #fff;
-  font-weight: 600;
-  padding: 0.35rem 0.9rem;
-  border-radius: 9999px;
-  font-size: 0.85rem;
-  box-shadow: 0 3px 12px hsl(var(--primary-glow)/0.45);
-  margin-left: 0.5rem;
-  display: inline-block;
-}
-.profile-count-badge {
-  background: linear-gradient(135deg, #ff4d94, #ff80b5);
-  color: #fff !important;
-  font-weight: 600;
-  padding: 0.3rem 0.9rem;
-  border-radius: 9999px;
-  font-size: 0.85rem;
-  display: inline-block !important;
-  box-shadow: 0 3px 10px rgba(255, 77, 148, 0.4);
-}
-
-/* ===============================
-   PROFILE CARD
-================================== */
-.profile-card-new {
-  background-color: hsl(var(--card));
-  border-radius: 1rem;
-  overflow: hidden;
-  position: relative;
-  aspect-ratio: 3/4;
-  transition: transform .4s ease, box-shadow .4s ease;
-  box-shadow: 0 8px 24px -10px rgba(0,0,0,0.2);
-}
-.profile-card-new img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.profile-card-new:hover {
-  transform: scale(1.05);
-  box-shadow: 0 16px 40px -12px rgba(0,0,0,0.3);
-}
-.lightbox-backdrop img {
-  width: 100%;
-  max-width: 95vw;
-  max-height: 95vh;
-  object-fit: contain;
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
 
 /* ===============================
    LIGHTBOX
@@ -3228,4 +3174,64 @@ p{margin:0 0 1em}
     padding: 0.6rem 1.5rem;
     font-size: 0.9rem;
   }
+}
+.profile-count-badge {
+  background-color: #fff0f5; /* สีขาวอ่อน กระจ่าง */
+  color: #ff4d6d; /* สีชมพูแดงสวย */
+  font-size: 0.75rem; /* ขนาดตัวเลข */
+  font-weight: 600;
+  padding: 0.2rem 0.6rem; /* ระยะ padding */
+  border-radius: 0.25rem; /* มุมมน */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* เงาให้ดูมีมิติ */
+  display: inline-block; /* ให้เป็นกล่องแนวนอน */
+  border: 1px solid rgba(0,0,0,0.1); /* เส้นขอบบาง ๆ */
+}
+/* รูปแบบพื้นฐานของสถานะ */
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff; /* สีข้อความเป็นสีขาว */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+/* สถานะออนไลน์ */
+.status-online {
+  background-color: #4CAF50; /* เขียวสด */
+}
+.status-online::before {
+  content: "●";
+  color: #4CAF50;
+  margin-right: 0.5rem;
+}
+
+/* สถานะไม่ออนไลน์ */
+.status-offline {
+  background-color: #757575; /* เทาเข้ม */
+}
+.status-offline::before {
+  content: "●";
+  color: #757575;
+  margin-right: 0.5rem;
+}
+
+/* สถานะหยุดงาน busy */
+.status-busy {
+  background-color: #D32F2F; /* แดงเข้ม */
+}
+.status-busy::before {
+  content: "●";
+  color: #D32F2F;
+  margin-right: 0.5rem;
+}
+
+/* ตัวอย่างเพิ่มเติม ถ้าต้องการไอคอน */
+.status i {
+  margin-right: 0.5rem;
+  font-size: 1rem;
 }

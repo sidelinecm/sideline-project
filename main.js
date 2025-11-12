@@ -11,9 +11,9 @@ gsap.registerPlugin(ScrollTrigger);
     const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
     const STORAGE_BUCKET = 'profile-images';
-    const PROFILES_PER_PAGE = 12;
-    const PROFILES_PER_PROVINCE_ON_INDEX = 8;
-    const SKELETON_CARD_COUNT = 8;
+    const PROFILES_PER_PAGE = 20;
+    const PROFILES_PER_PROVINCE_ON_INDEX = 20;
+    const SKELETON_CARD_COUNT = 20;
     const LAST_PROVINCE_KEY = 'sidelinecm_last_province'; // Key for localStorage
 
     // --- STATE & CACHE ---
@@ -471,8 +471,8 @@ function matchesProfile(profile, parsed) {
         const items = [];
         if (!q) {
             // show top suggested provinces and tags
-            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,8);
-            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,8);
+            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,20);
+            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,20);
             provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
             tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:`tag`}));
             items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
@@ -493,7 +493,7 @@ function matchesProfile(profile, parsed) {
         const container = dom.searchSuggestions;
         container.innerHTML = '';
         if (!items.length) { container.style.display='none'; return; }
-        items.slice(0,12).forEach(it=>{
+        items.slice(0,20).forEach(it=>{
             const el = document.createElement('div');
             el.className='item';
             el.tabIndex = 0;
@@ -708,7 +708,7 @@ function handleFeaturedSection(isSearching) {
 
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
             dom.featuredContainer.replaceChildren();
-            const topFeaturedProfiles = featuredProfilesList.slice(0, 12);
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 20);
             dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
             dom.featuredSection.classList.remove('hidden');
         } else {
@@ -742,7 +742,7 @@ function generatePageData(filteredProfiles, isSearching) {
             title = `ไซด์ไลน์${searchTerm}ใน${provinceName} - โปรไฟล์สาวสวยใน${provinceName}`;
             description = `ผลการค้นหา "${searchTerm}" ใน${provinceName} อัปเดตล่าสุด พร้อมภาพและรายละเอียด`;
         } else {
-            title = `ไซด์ไลน์${searchTerm}ทั่วประเทศ - โปรไฟล์สาวสวยอัปเดตทุกวัน`;
+            title = `ไซด์ไลน์ รับงานฟิวแฟนตรงปก${searchTerm}ทั่วประเทศ - โปรไฟล์สาวสวยอัปเดตทุกวัน`;
             description = `รวมโปรไฟล์น้องๆ ไซด์ไลน์ "${searchTerm}" จากทั่วประเทศ อัปเดตล่าสุด พร้อมรูปภาพและข้อมูลติดต่อครบถ้วน`;
         }
         ogImage = defaultImage;
@@ -810,7 +810,7 @@ function updateSchemaJSONLD(title, description, canonicalUrl, image, profiles) {
     const existingSchema = document.getElementById('schema-list');
     if (existingSchema) existingSchema.remove();
 
-    const itemListElements = profiles.slice(0, 10).map((p, i) => ({
+    const itemListElements = profiles.slice(0, 20).map((p, i) => ({
         "@type": "ListItem",
         "position": i + 1,
         "url": `${window.location.origin}/${p.province || ''}#${p.id || i}`,
@@ -982,13 +982,13 @@ function createProvinceSection(key, name, provinceProfiles) {
         </div>`;
 
     const grid = sectionWrapper.querySelector('.profile-grid');
-    const profilesToDisplay = provinceProfiles.slice(0, 15);
+    const profilesToDisplay = provinceProfiles.slice(0, 20);
     grid.append(...profilesToDisplay.map(createProfileCard));
 
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
     const viewMoreBtn = sectionWrapper.querySelector('.view-more-btn');
 
-    if (viewMoreContainer && totalCount > 15) {
+    if (viewMoreContainer && totalCount > 20) {
         viewMoreContainer.style.display = 'block';
         viewMoreBtn.addEventListener('click', () => {
             window.location.href = `/province/${key}`;
