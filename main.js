@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
     const STORAGE_BUCKET = 'profile-images';
     const PROFILES_PER_PAGE = 30;
     const PROFILES_PER_PROVINCE_ON_INDEX = 20;
-    const SKELETON_CARD_COUNT = 30;
+    const SKELETON_CARD_COUNT = 20;
     const LAST_PROVINCE_KEY = 'sidelinecm_last_province'; // Key for localStorage
 
     // --- STATE & CACHE ---
@@ -504,8 +504,8 @@ function matchesProfile(profile, parsed) {
         const items = [];
         if (!q) {
             // show top suggested provinces and tags
-            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,30);
-            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,30);
+            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,20);
+            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,20);
             provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
             tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:`tag`}));
             items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
@@ -526,7 +526,7 @@ function matchesProfile(profile, parsed) {
         const container = dom.searchSuggestions;
         container.innerHTML = '';
         if (!items.length) { container.style.display='none'; return; }
-        items.slice(0,30).forEach(it=>{
+        items.slice(0,20).forEach(it=>{
             const el = document.createElement('div');
             el.className='item';
             el.tabIndex = 0;
@@ -738,7 +738,7 @@ function handleFeaturedSection(isSearching) {
 
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
             dom.featuredContainer.replaceChildren();
-            const topFeaturedProfiles = featuredProfilesList.slice(0, 20);
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 30);
             dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
             dom.featuredSection.classList.remove('hidden');
         } else {
@@ -1030,7 +1030,7 @@ function createProvinceSection(key, name, provinceProfiles) {
         </div>`;
 
     const grid = sectionWrapper.querySelector('.profile-grid');
-    const profilesToDisplay = provinceProfiles.slice(0, 30);
+    const profilesToDisplay = provinceProfiles.slice(0, 20);
     grid.append(...profilesToDisplay.map(createProfileCard));
 
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
