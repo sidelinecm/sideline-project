@@ -116,6 +116,39 @@ async function main() {
     }
 }
 
+function generateSitemap() {
+  const baseUrl = 'https://sidelinechiangmai.netlify.app/'; // แทน URL จริงของคุณ
+  const urls = [];
+
+  // ลิงก์หน้าโปรไฟล์ของแต่ละคน
+  allProfiles.forEach(profile => {
+    urls.push(`${baseUrl}/profile/${profile.id}`);
+  });
+
+  // ลิงก์หน้าแต่ละจังหวัด
+  provincesMap.forEach((name, key) => {
+    urls.push(`${baseUrl}/province/${key}`);
+  });
+
+  // สร้างไฟล์ sitemap.xml ในรูปแบบ XML
+  const sitemapXml = `
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    ${urls.map(url => `
+      <url>
+        <loc>${url}</loc>
+        <lastmod>${new Date().toISOString()}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+      </url>
+    `).join('')}
+  </urlset>
+  `;
+
+  // คุณสามารถส่งไฟล์นี้ไปเซิร์ฟเวอร์เพื่อเก็บเป็นไฟล์ sitemap.xml ได้โดยตรง
+  // หรือแสดงผลใน console แล้วคัดลอกไปวางใน root ของเว็บไซต์
+  console.log(sitemapXml);
+}
+
     // --- UI STATE FUNCTIONS ---
     function showLoadingState() {
         if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
@@ -696,9 +729,6 @@ function renderProfiles(filteredProfiles, isSearching) {
     initScrollAnimations();
 }
 
-// ----------------------------------------------------------------------------------
-// **Helper Functions ที่ได้รับการปรับปรุง Logic** (ต้องมีใน Global Scope)
-// ----------------------------------------------------------------------------------
 
 // **Helper: Featured Section** (ใช้ dom object ที่กำหนดไว้)
 function handleFeaturedSection(isSearching) {
@@ -717,48 +747,66 @@ function handleFeaturedSection(isSearching) {
     }
 }
 
-// **Helper: Generate SEO Data based on Context**
 function generatePageData(filteredProfiles, isSearching) {
     const uniqueProvinces = [...new Set(filteredProfiles.map(p => p.province))];
     const searchTerm = dom.searchInput?.value?.trim() || '';
     const currentUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
     const defaultImage = '/images/og-default.webp';
 
-    let title = 'รวมโปรไฟล์สาวไซด์ไลน์ทั่วประเทศ | SidelineChiangmai';
-    let description = 'รวมสาวไซด์ไลน์จากทุกจังหวัดทั่วประเทศไทย อัปเดตล่าสุดทุกวัน พร้อมภาพสวยคมชัดและรายละเอียดครบถ้วน';
+    // ตัวแปรสำหรับ SEO
+    let title = 'ไซด์ไลน์เชียงใหม่ | รับงาน sideline ฟิวแฟน ตรงปก 100% ไม่ต้องมัดจำ';
+    let description = 'รวมโปรไฟล์สาวไซด์ไลน์ เชียงใหม่ รับงานฟิวแฟน ตรงปก 100% สาวสวยปลอดภัย อัปเดตโปรไฟล์ใหม่ทุกอาทิตย์ พร้อมรายละเอียดโปรไฟล์ที่น่าสนใจและปลอดภัยที่สุดในประเทศไทย';
     let ogImage = defaultImage;
 
     if (filteredProfiles.length === 1 && !isSearching) {
         // หน้าโปรไฟล์เดียว
         const profile = filteredProfiles[0];
         const provinceName = provincesMap.get(profile.province) || '';
-        title = `${profile.name} - โปรไฟล์สาวใน${provinceName}`;
-        description = `ดูโปรไฟล์ของ ${profile.name} ใน${provinceName} อัปเดตล่าสุด พร้อมภาพและรายละเอียด`;
+        title = `${profile.name} - สาวไซด์ไลน์ รับงาน โปรไฟล์สาวใน${provinceName} | รับงานฟิวแฟน ตรงปก 100%`;
+        description = `ดูโปรไฟล์ของ ${profile.name} ใน${provinceName} อัปเดตล่าสุด พร้อมภาพและรายละเอียดที่น่าสนใจและปลอดภัยที่สุด`;
         ogImage = profile.image || defaultImage;
     } else if (isSearching) {
         // หน้าผลการค้นหา
         if (uniqueProvinces.length === 1) {
             const provinceName = provincesMap.get(uniqueProvinces[0]) || '';
-            title = `ไซด์ไลน์${searchTerm}ใน${provinceName} - โปรไฟล์สาวสวยใน${provinceName}`;
-            description = `ผลการค้นหา "${searchTerm}" ใน${provinceName} อัปเดตล่าสุด พร้อมภาพและรายละเอียด`;
+            title = `ค้นหาไซด์ไลน์ "${searchTerm}" ใน${provinceName} | โปรไฟล์สาวสวย อัปเดตล่าสุด`;
+            description = `ผลการค้นหา "${searchTerm}" ใน${provinceName} อัปเดตล่าสุด พร้อมรายละเอียดและภาพสาวสวยจาก${provinceName}`;
         } else {
-            title = `ไซด์ไลน์ รับงานฟิวแฟนตรงปก${searchTerm}ทั่วประเทศ - โปรไฟล์สาวสวยอัปเดตทุกวัน`;
-            description = `รวมโปรไฟล์น้องๆ ไซด์ไลน์ "${searchTerm}" จากทั่วประเทศ อัปเดตล่าสุด พร้อมรูปภาพและข้อมูลติดต่อครบถ้วน`;
+            title = `ไซด์ไลน์รับงาน "${searchTerm}" ทั่วประเทศ | โปรไฟล์สาวสวย อัปเดตล่าสุด`;
+            description = `รวมโปรไฟล์น้องๆ ไซด์ไลน์ "${searchTerm}" จากทั่วประเทศ อัปเดตล่าสุด พร้อมรายละเอียดและภาพสวยๆ`;
         }
         ogImage = defaultImage;
     } else if (filteredProfiles.length > 1 && uniqueProvinces.length === 1) {
         // หน้าแสดงกลุ่มในจังหวัดเดียว
         const provinceName = provincesMap.get(uniqueProvinces[0]) || '';
-        title = `โปรไฟล์สาวใน${provinceName} | SidelineChiangmai`;
-        description = `รวมโปรไฟล์สาวใน${provinceName} อัปเดตล่าสุด พร้อมภาพและรายละเอียด`;
+        title = `โปรไฟล์สาวใน${provinceName} | รับงานไซด์ไลน์ ฟิวแฟน ตรงปก`;
+        description = `รวมโปรไฟล์สาวใน${provinceName} อัปเดตล่าสุด พร้อมภาพและรายละเอียดที่น่าสนใจและปลอดภัยที่สุด`;
         ogImage = filteredProfiles[0].image || defaultImage;
+    } else {
+        // กรณีอื่นๆ เช่น หน้าแรกหรือกลุ่มหลายจังหวัด
+        title = 'ไซด์ไลน์เชียงใหม่ | รับงาน sideline ฟิวแฟน ตรงปก 100% ไม่ต้องมัดจำ';
+        description = 'รวมโปรไฟล์สาวไซด์ไลน์ เชียงใหม่และทั่วประเทศ รับงานฟิวแฟน ตรงปก 100% สาวสวยปลอดภัย อัปเดตโปรไฟล์ใหม่ทุกอาทิตย์ พร้อมรายละเอียดโปรไฟล์ที่น่าสนใจและปลอดภัยที่สุดในประเทศไทย';
+        ogImage = defaultImage;
     }
 
+    // สำหรับการจัดโครงสร้างข้อมูล SEO ที่สมบูรณ์แบบ
     return {
-        title,
-        description,
+        title: title,
+        description: description,
         canonicalUrl: currentUrl,
         image: ogImage,
+        // เพิ่มข้อมูล Open Graph meta tags เพื่อ SEO สูงสุด
+        metaTags: [
+            { name: 'title', content: title },
+            { name: 'description', content: description },
+            { property: 'og:title', content: title },
+            { property: 'og:description', content: description },
+            { property: 'og:image', content: ogImage },
+            { property: 'og:url', content: currentUrl },
+            { name: 'twitter:title', content: title },
+            { name: 'twitter:description', content: description },
+            { name: 'twitter:image', content: ogImage }
+        ],
         profiles: filteredProfiles
     };
 }
@@ -1609,4 +1657,4 @@ function generateFullSchema() {
         document.head.appendChild(schemaContainer);
     }
 
-})(); 
+})();
