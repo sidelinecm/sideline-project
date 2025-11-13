@@ -11,9 +11,9 @@ gsap.registerPlugin(ScrollTrigger);
     const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
     const STORAGE_BUCKET = 'profile-images';
-    const PROFILES_PER_PAGE = 20;
+    const PROFILES_PER_PAGE = 30;
     const PROFILES_PER_PROVINCE_ON_INDEX = 20;
-    const SKELETON_CARD_COUNT = 20;
+    const SKELETON_CARD_COUNT = 30;
     const LAST_PROVINCE_KEY = 'sidelinecm_last_province'; // Key for localStorage
 
     // --- STATE & CACHE ---
@@ -504,8 +504,8 @@ function matchesProfile(profile, parsed) {
         const items = [];
         if (!q) {
             // show top suggested provinces and tags
-            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,20);
-            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,20);
+            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,30);
+            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,30);
             provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
             tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:`tag`}));
             items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
@@ -526,7 +526,7 @@ function matchesProfile(profile, parsed) {
         const container = dom.searchSuggestions;
         container.innerHTML = '';
         if (!items.length) { container.style.display='none'; return; }
-        items.slice(0,20).forEach(it=>{
+        items.slice(0,30).forEach(it=>{
             const el = document.createElement('div');
             el.className='item';
             el.tabIndex = 0;
@@ -1030,7 +1030,7 @@ function createProvinceSection(key, name, provinceProfiles) {
         </div>`;
 
     const grid = sectionWrapper.querySelector('.profile-grid');
-    const profilesToDisplay = provinceProfiles.slice(0, 20);
+    const profilesToDisplay = provinceProfiles.slice(0, 30);
     grid.append(...profilesToDisplay.map(createProfileCard));
 
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
