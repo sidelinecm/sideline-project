@@ -1456,24 +1456,53 @@ header nav a[aria-current=page]{text-shadow:0 0 10px hsl(var(--primary-glow)/.2)
   background-color: hsl(var(--background) / 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  /* กำหนดความกว้างและสูงล่วงหน้าเพื่อป้องกัน CLS */
+  min-width: 300px; /* ปรับตามความเหมาะสม */
+  min-height: 300px;
+  /* หรือใช้ aspect-ratio ถ้าเหมาะสม */
 }
-.lightbox-grid { display: flex; flex-direction: column; }
+
+.lightbox-grid { 
+  display: flex; 
+  flex-direction: column; 
+  /* กำหนดความสูงและความกว้างล่วงหน้า */
+  min-height: 200px; /* ปรับตามเนื้อหา */
+}
+
 @media (min-width: 1024px) {
-  .lightbox-grid { display: grid; grid-template-columns: 40% 60%; }
+  .lightbox-grid { 
+    display: grid; 
+    grid-template-columns: 40% 60%; 
+  }
 }
-.lightbox-gallery { width: 100%; }
+
+.lightbox-gallery { 
+  width: 100%; 
+  /* กำหนดความสูงล่วงหน้าเพื่อป้องกันการเลื่อน */
+  min-height: 300px; 
+}
+
 @media (min-width: 1024px) {
-  .lightbox-gallery { border-right: 1px solid hsl(var(--border)); }
+  .lightbox-gallery { 
+    border-right: 1px solid hsl(var(--border)); 
+  }
 }
+
 .hero-image-container {
   aspect-ratio: 3 / 4;
   border-radius: var(--radius);
   overflow: hidden;
   background-color: hsl(var(--muted));
   box-shadow: 0 10px 30px -5px hsl(var(--foreground)/.1);
+  /* กำหนดความกว้างล่วงหน้าเพื่อไม่ให้ layout เปลี่ยนแปลง */
+  width: 100%; /* ความกว้างเต็มที่ของ container */
+  max-width: 400px; /* ปรับตามดีไซน์ */
 }
+
 .hero-image-main {
-  width: 100%; height: 100%; object-fit: cover;
+  width: 100%;
+  height: auto; /* เพื่อรักษา aspect ratio */
+  object-fit: cover;
   transition: transform var(--transition-slow) cubic-bezier(0.165,0.84,0.44,1),
               filter var(--transition-medium);
 }
