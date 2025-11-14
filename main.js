@@ -173,136 +173,155 @@ function generateSitemap() {
     }
 
 async function fetchData() {
-  try {
-    // --- 1. ตรวจสอบโหมดการดึงข้อมูล ---
-    const lastFetchTimeStr = localStorage.getItem('lastFetchTime');
-    const isFullSync = !lastFetchTimeStr;
-    const fetchTimeKey = lastFetchTimeStr || '1970-01-01T00:00:00.000Z';
+    try {
+        // --- 1. ตรวจสอบโหมดการดึงข้อมูล ---
+        const lastFetchTimeStr = localStorage.getItem('lastFetchTime');
+        const isFullSync = !lastFetchTimeStr;
+        const fetchTimeKey = lastFetchTimeStr || '1970-01-01T00:00:00.000Z';
 
-    // --- 2. ดึงข้อมูลจาก Supabase ---
-    const [profilesRes, provincesRes] = await Promise.all([
-      supabase.from('profiles').select('*').gt('lastUpdated', fetchTimeKey),
-      supabase.from('provinces').select('*').order('nameThai', { ascending: true })
-    ]);
-    if (profilesRes.error || !profilesRes.data) throw profilesRes.error;
-    if (provincesRes.error || !provincesRes.data) throw provincesRes.error;
+        // --- 2. ดึงข้อมูลจาก Supabase ---
+        const [profilesRes, provincesRes] = await Promise.all([
+            supabase.from('profiles').select('*').gt('lastUpdated', fetchTimeKey),
+            supabase.from('provinces').select('*').order('nameThai', { ascending: true })
+        ]);
+        if (profilesRes.error || !profilesRes.data) throw profilesRes.error;
+        if (provincesRes.error || !provincesRes.data) throw provincesRes.error;
 
-    const deltaProfiles = profilesRes.data;
+        const deltaProfiles = profilesRes.data;
 
-    // --- 3. จัดการข้อมูลจังหวัด ---
-    provincesMap.clear();
-    provincesRes.data.forEach(p => {
-      if (p?.key && p?.nameThai) {
-        provincesMap.set(p.key, p.nameThai);
-      }
-    });
+        // --- 3. จัดการข้อมูลจังหวัด ---
+        provincesMap.clear();
+        provincesRes.data.forEach(p => {
+            if (p?.key && p?.nameThai) {
+                provincesMap.set(p.key, p.nameThai);
+            }
+        });
 
-    // --- 4. รวมข้อมูลโปรไฟล์ (ทั้งเก่าและใหม่) ---
-    let currentProfiles = [];
-    if (isFullSync) {
-      currentProfiles = deltaProfiles;
-    } else {
-      const cachedProfilesJSON = localStorage.getItem('cachedProfiles');
-      if (cachedProfilesJSON) {
-        try {
-          const cachedProfiles = JSON.parse(cachedProfilesJSON);
-          const deltaIds = new Set(deltaProfiles.map(p => p.id));
-          // กรองข้อมูลเก่าไม่ซ้ำ
-          currentProfiles = cachedProfiles.filter(p => !deltaIds.has(p.id));
-          // รวมข้อมูลใหม่
-          currentProfiles.push(...deltaProfiles);
-        } catch (e) {
-          console.error("Cache เสียหาย ล้าง cache เพื่อ full sync ครั้งถัดไป");
-          localStorage.removeItem('lastFetchTime');
-          localStorage.removeItem('cachedProfiles');
-          currentProfiles = deltaProfiles;
+        // --- 4. รวมข้อมูลโปรไฟล์ (ทั้งเก่าและใหม่) ---
+        let currentProfiles = [];
+        if (isFullSync) {
+            currentProfiles = deltaProfiles;
+        } else {
+            const cachedProfilesJSON = localStorage.getItem('cachedProfiles');
+            if (cachedProfilesJSON) {
+                try {
+                    const cachedProfiles = JSON.parse(cachedProfilesJSON);
+                    const deltaIds = new Set(deltaProfiles.map(p => p.id));
+                    // กรองข้อมูลเก่าไม่ซ้ำ
+                    currentProfiles = cachedProfiles.filter(p => !deltaIds.has(p.id));
+                    // รวมข้อมูลใหม่
+                    currentProfiles.push(...deltaProfiles);
+                } catch (e) {
+                    console.error("Cache เสียหาย ล้าง cache เพื่อ full sync ครั้งถัดไป");
+                    localStorage.removeItem('lastFetchTime');
+                    localStorage.removeItem('cachedProfiles');
+                    currentProfiles = deltaProfiles;
+                }
+            } else {
+                currentProfiles = deltaProfiles;
+            }
         }
-      } else {
-        currentProfiles = deltaProfiles;
-      }
+
+        // --- 5. ประมวลผลข้อมูลโปรไฟล์ ---
+        allProfiles = currentProfiles.map(p => {
+            const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+
+            const imageObjects = imagePaths.map(path => {
+                const publicUrlData = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+                let originalUrl = publicUrlData?.data?.publicUrl || '/images/placeholder-profile-card.webp';
+
+                let urlSeparator = '?';
+                if (p.lastUpdated) {
+                    const timestampInSeconds = Math.floor(new Date(p.lastUpdated).getTime() / 1000);
+                    originalUrl = `${originalUrl}${urlSeparator}v=${timestampInSeconds}`;
+                    urlSeparator = '&';
+                }
+
+                const srcset = [300, 600, 900]
+                    .map(w => `${originalUrl}${urlSeparator}width=${w}&quality=80 ${w}w`)
+                    .join(', ');
+
+                return {
+                    src: `${originalUrl}${urlSeparator}width=600&quality=80`,
+                    srcset,
+                };
+            });
+            if (imageObjects.length === 0) {
+                imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
+            }
+
+            const provinceName = provincesMap.get(p.provinceKey) || '';
+            const altText = p.altText || `โปรไฟล์ไซด์ไลน์ ${p.name} จังหวัด ${provinceName}`;
+
+            return { ...p, images: imageObjects, altText };
+        });
+
+        // ✅ เพิ่ม: จัดเรียงโปรไฟล์ทั้งหมดตาม 'lastUpdated' ล่าสุด (มากไปน้อย/Descending)
+        // เพื่อให้โปรไฟล์ที่ถูกเพิ่ม/อัปเดตล่าสุด แสดงเป็นอันดับ 1 เสมอ
+        allProfiles.sort((a, b) => {
+            const dateA = new Date(a.lastUpdated).getTime();
+            const dateB = new Date(b.lastUpdated).getTime();
+            // dateB - dateA ทำให้วันที่ใหม่กว่า (ค่าตัวเลขมากกว่า) ขึ้นก่อน
+            return dateB - dateA;
+        });
+
+
+        // สร้าง Index จังหวัด
+        window.indexByProvince = new Map();
+        allProfiles.forEach(p => {
+            if (p.provinceKey) {
+                if (!window.indexByProvince.has(p.provinceKey)) {
+                    window.indexByProvince.set(p.provinceKey, []);
+                }
+                // ข้อมูลที่ถูก push เข้าไปใน indexByProvince จะเรียงตามลำดับที่ถูกจัดเรียงแล้วใน allProfiles
+                window.indexByProvince.get(p.provinceKey).push(p);
+            }
+        });
+
+        // --- 6. บันทึก cache และ lastFetchTime ---
+        if (allProfiles.length > 0) {
+            // ✅ เพิ่ม: จัดเรียง currentProfiles ด้วยก่อนนำไปเก็บใน cache เพื่อรักษาความใหม่
+            currentProfiles.sort((a, b) => {
+                const dateA = new Date(a.lastUpdated).getTime();
+                const dateB = new Date(b.lastUpdated).getTime();
+                return dateB - dateA;
+            });
+            localStorage.setItem('cachedProfiles', JSON.stringify(currentProfiles));
+
+            if (deltaProfiles.length > 0) {
+                const maxTime = Math.max(...deltaProfiles.map(p => new Date(p.lastUpdated).getTime()));
+                if (maxTime && !isNaN(maxTime)) {
+                    localStorage.setItem('lastFetchTime', new Date(maxTime).toISOString());
+                }
+            }
+        }
+
+        // --- 7. สร้าง dropdown จังหวัด ถ้ายังไม่มี ---
+        if (dom.provinceSelect && dom.provinceSelect.options.length <= 1) {
+            provincesRes.data.forEach(prov => {
+                if (prov?.key && prov?.nameThai) {
+                    const option = document.createElement('option');
+                    option.value = prov.key;
+                    option.textContent = prov.nameThai;
+                    dom.provinceSelect.appendChild(option);
+                }
+            });
+        }
+
+        // เรียกแสดงข้อมูลทั้งหมด
+        renderAllProfiles();
+
+        return true;
+    } catch (err) {
+        console.error('fetchData error:', err);
+        localStorage.removeItem('lastFetchTime');
+        localStorage.removeItem('cachedProfiles');
+        allProfiles = [];
+        window.indexByProvince = new Map();
+        return false;
     }
-
-    // --- 5. ประมวลผลข้อมูลโปรไฟล์ ---
-    allProfiles = currentProfiles.map(p => {
-      const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
-
-      const imageObjects = imagePaths.map(path => {
-        const publicUrlData = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-        let originalUrl = publicUrlData?.data?.publicUrl || '/images/placeholder-profile-card.webp';
-
-        let urlSeparator = '?';
-        if (p.lastUpdated) {
-          const timestampInSeconds = Math.floor(new Date(p.lastUpdated).getTime() / 1000);
-          originalUrl = `${originalUrl}${urlSeparator}v=${timestampInSeconds}`;
-          urlSeparator = '&';
-        }
-
-        const srcset = [300, 600, 900]
-          .map(w => `${originalUrl}${urlSeparator}width=${w}&quality=80 ${w}w`)
-          .join(', ');
-
-        return {
-          src: `${originalUrl}${urlSeparator}width=600&quality=80`,
-          srcset,
-        };
-      });
-      if (imageObjects.length === 0) {
-        imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
-      }
-
-      const provinceName = provincesMap.get(p.provinceKey) || '';
-      const altText = p.altText || `โปรไฟล์ไซด์ไลน์ ${p.name} จังหวัด ${provinceName}`;
-
-      return { ...p, images: imageObjects, altText };
-    });
-
-    // สร้าง Index จังหวัด
-    window.indexByProvince = new Map();
-    allProfiles.forEach(p => {
-      if (p.provinceKey) {
-        if (!window.indexByProvince.has(p.provinceKey)) {
-          window.indexByProvince.set(p.provinceKey, []);
-        }
-        window.indexByProvince.get(p.provinceKey).push(p);
-      }
-    });
-
-    // --- 6. บันทึก cache และ lastFetchTime ---
-    if (allProfiles.length > 0) {
-      localStorage.setItem('cachedProfiles', JSON.stringify(currentProfiles));
-      if (deltaProfiles.length > 0) {
-        const maxTime = Math.max(...deltaProfiles.map(p => new Date(p.lastUpdated).getTime()));
-        if (maxTime && !isNaN(maxTime)) {
-          localStorage.setItem('lastFetchTime', new Date(maxTime).toISOString());
-        }
-      }
-    }
-
-    // --- 7. สร้าง dropdown จังหวัด ถ้ายังไม่มี ---
-    if (dom.provinceSelect && dom.provinceSelect.options.length <= 1) {
-      provincesRes.data.forEach(prov => {
-        if (prov?.key && prov?.nameThai) {
-          const option = document.createElement('option');
-          option.value = prov.key;
-          option.textContent = prov.nameThai;
-          dom.provinceSelect.appendChild(option);
-        }
-      });
-    }
-
-    // เรียกแสดงข้อมูลทั้งหมด
-    renderAllProfiles();
-
-    return true;
-  } catch (err) {
-    console.error('fetchData error:', err);
-    localStorage.removeItem('lastFetchTime');
-    localStorage.removeItem('cachedProfiles');
-    allProfiles = [];
-    window.indexByProvince = new Map();
-    return false;
-  }
 }
+
 // --- SEARCH & FILTERS ---
 function initSearchAndFilters() {
     if (!dom.searchForm) {
