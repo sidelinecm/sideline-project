@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
     const STORAGE_BUCKET = 'profile-images';
     const PROFILES_PER_PAGE = 100;
     const PROFILES_PER_PROVINCE_ON_INDEX = 100;
-    const SKELETON_CARD_COUNT = 20;
+    const SKELETON_CARD_COUNT = 100;
     const LAST_PROVINCE_KEY = 'sidelinecm_last_province'; // Key for localStorage
 
     // --- STATE & CACHE ---
@@ -1063,14 +1063,14 @@ function createProvinceSection(key, name, provinceProfiles) {
         </div>`;
 
     const grid = sectionWrapper.querySelector('.profile-grid');
-    const profilesToDisplay = provinceProfiles.slice(0, 20);
+    const profilesToDisplay = provinceProfiles.slice(0, 100);
     // ✅ จุดสำคัญ: เรียกใช้ createProfileCard ที่ได้รับการแก้ไขแล้ว
     grid.append(...profilesToDisplay.map(createProfileCard)); 
 
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
     
     // แสดงปุ่มดูทั้งหมด หากมีโปรไฟล์มากกว่า 20 คน
-    if (viewMoreContainer && totalCount > 20) {
+    if (viewMoreContainer && totalCount > 100) {
         viewMoreContainer.style.display = 'block';
     }
 
