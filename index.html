@@ -366,49 +366,50 @@ footer p {
 
 <body class="antialiased" data-page="home">
 
-<header id=page-header class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
-  <div class="container mx-auto px-6 h-14 flex items-center justify-between">
-    
-    <!-- ✅ โลโก้ -->
-    <a href="/" aria-label="หน้าแรก" class="flex-shrink-0 block w-[250px] h-[85px]">
-      <img
-        src="/images/logo-sidelinechiangmai-250x85.webp"
-        srcset="/images/logo-sidelinechiangmai-150.webp 150w, 
-                /images/logo-sidelinechiangmai-250x85.webp 250w, 
-                /images/logo-sidelinechiangmai-500.webp 500w"
-        sizes="(max-width: 480px) 150px, (max-width: 1024px) 200px, 250px"
-        alt="โลโก้ Sideline Chiang Mai"
-        width="250" height="85"
-        class="mx-auto object-contain w-[250px] h-[85px] transition-transform duration-300 hover:scale-105"
-        loading="eager" decoding="async" fetchpriority="high" />
-    </a>
+<header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
+    <div class="container mx-auto px-6 h-14 flex items-center justify-between">
+        
+        <a href="/" aria-label="หน้าแรก" class="flex-shrink-0 block w-[250px] h-[85px]">
+            <img
+                src="/images/logo-sidelinechiangmai-250x85.webp"
+                srcset="/images/logo-sidelinechiangmai-150.webp 150w, 
+                        /images/logo-sidelinechiangmai-250x85.webp 250w, 
+                        /images/logo-sidelinechiangmai-500.webp 500w"
+                sizes="(max-width: 480px) 150px, (max-width: 1024px) 200px, 250px"
+                alt="โลโก้ Sideline Chiang Mai"
+                width="250" height="85"
+                class="mx-auto object-contain w-[250px] h-[85px] transition-transform duration-300 hover:scale-105"
+                loading="eager" decoding="async" fetchpriority="high" />
+        </a>
 
-    
-    <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label=เมนูหลัก>
-      <a href=profiles.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
-      <a href=locations.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
-      <a href=about.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
-      <a href=faq.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
-      <a href=blog.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
-    </nav>
+        <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 dark:text-gray-400 mt-2">
+            อัปเดต: <span id="last-updated-time" class="font-semibold text-red-600 dark:text-red-400">กำลังโหลด...</span>
+        </div>
+        
+        <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
+            <a href="profiles.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
+            <a href="locations.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
+            <a href="about.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
+            <a href="faq.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
+            <a href="blog.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
+        </nav>
 
-    
-    <div class="flex items-center gap-2">
-      
-      <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type=button aria-label=เปลี่ยนโหมดสี title=เปลี่ยนโหมดสี>
-        <i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden=true></i>
-        <span class=sr-only>เปลี่ยนโหมดสี</span>
-      </button>
+        
+        <div class="flex items-center gap-2">
+            
+            <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปลี่ยนโหมดสี" title="เปลี่ยนโหมดสี">
+                <i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i>
+                <span class="sr-only">เปลี่ยนโหมดสี</span>
+            </button>
 
-      
-      <button id=menu-toggle class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type=button aria-label=เปิดเมนูนำทาง aria-haspopup=true aria-controls=sidebar title=เปิดเมนูนำทาง>
-        <i class="fas fa-bars text-xl" aria-hidden=true></i>
-        <span class=sr-only>เปิดเมนูนำทาง</span>
-      </button>
+            
+            <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปิดเมนูนำทาง" aria-haspopup="true" aria-controls="sidebar" title="เปิดเมนูนำทาง">
+                <i class="fas fa-bars text-xl" aria-hidden="true"></i>
+                <span class="sr-only">เปิดเมนูนำทาง</span>
+            </button>
+        </div>
     </div>
-  </div>
 </header>
-
 <div id=menu-backdrop class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden=true></div>
 
 

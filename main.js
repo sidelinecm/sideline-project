@@ -11,8 +11,8 @@ gsap.registerPlugin(ScrollTrigger);
     const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
     const STORAGE_BUCKET = 'profile-images';
-    const PROFILES_PER_PAGE = 30;
-    const PROFILES_PER_PROVINCE_ON_INDEX = 20;
+    const PROFILES_PER_PAGE = 100;
+    const PROFILES_PER_PROVINCE_ON_INDEX = 100;
     const SKELETON_CARD_COUNT = 20;
     const LAST_PROVINCE_KEY = 'sidelinecm_last_province'; // Key for localStorage
 
@@ -523,8 +523,8 @@ function matchesProfile(profile, parsed) {
         const items = [];
         if (!q) {
             // show top suggested provinces and tags
-            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,20);
-            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,20);
+            const provinces = [...new Set(allProfiles.map(p=>p.provinceKey).filter(Boolean))].slice(0,100);
+            const tags = [...new Set(allProfiles.flatMap(p=>p.styleTags || []))].slice(0,100);
             provinces.forEach(p=>items.push({type:'province', text:`province:${p}`, hint:`จังหวัด ${provincesMap.get(p) || p}`}));
             tags.forEach(t=>items.push({type:'tag', text:`tag:${t}`, hint:`tag`}));
             items.unshift({type:'toggle', text:'featured:true', hint:'เฉพาะโปรไฟล์แนะนำ'});
@@ -638,37 +638,51 @@ allProfiles.forEach(profile => {
         dom.profilesDisplayArea.appendChild(card);
     });
 }
-
 // ==========================================================
-// 🧩 Helper: อัปเดต URL และ History State (แยก Logic จาก applyFilters)
-// 💡 จัดการ Path Parameter (Province) และ Query Parameters อย่างแม่นยำ
+// 🧠 Utility: Helper สำหรับการจัดการ URL รูปภาพตามขนาด
+// ==========================================================
+
+/**
+ * Helper: สร้าง URL รูปภาพใหม่ตามขนาดและความละเอียดที่ต้องการ
+ * ใช้เพื่อควบคุมขนาดภาพสำหรับการ์ด, Lightbox, และ Thumbnail
+ */
+function createSizedImageUrl(imageObject, width, quality) {
+    const originalSrc = imageObject?.src || '/images/placeholder-profile.webp';
+    // แยก Base URL ออกมาโดยตัด Query Parameters เดิมออก
+    const baseUrl = originalSrc.split('?')[0];
+    // คืนค่า URL พร้อม Query Parameters ใหม่ตามขนาดที่กำหนด
+    return `${baseUrl}?width=${width}&quality=${quality}`;
+}
+// ==========================================================
+// 🧩 Helper: อัปเดต URL และ History State (ฉบับที่ดีที่สุด)
 // ==========================================================
 /**
  * อัปเดต URL ให้เป็นแบบ SEO-Friendly เช่น /chiangmai แทน ?province=chiangmai
+ * Logic นี้รองรับการเป็นหน้าหลัก (/) และหน้าเฉพาะจังหวัด (/provinceKey) โดยไม่สร้าง History ซ้ำซ้อน
  */
 function updateURLState({ searchTermRaw, selectedProvince, selectedAvailability, isFeaturedOnly }) {
-    let newPath = window.location.pathname;
     
     // 1. จัดการ Path: ใช้จังหวัดเป็น Path Parameter
-    if (selectedProvince) {
-        newPath = `/${selectedProvince}`;
-    } else {
-        // ถ้าไม่มีจังหวัด ให้กลับไป Root Path (/) หรือ Path หลักที่ตั้งไว้
-        // (ในกรณีนี้กำหนดให้กลับไปที่ / เสมอ หากไม่มีจังหวัดที่ถูกเลือก)
-        newPath = '/'; 
-    }
+    // ✅ Logic ที่ดีที่สุด: ถ้ามีจังหวัดใช้ /provinceKey ถ้าไม่มีกลับไปที่ / (หน้าหลัก)
+    const newPath = selectedProvince ? `/${selectedProvince}` : '/';
 
-    // 2. จัดการ Query Parameters
+    // 2. จัดการ Query Parameters (สร้างใหม่เสมอ)
     const urlParams = new URLSearchParams();
+    
     if (searchTermRaw) urlParams.set('q', searchTermRaw);
     if (selectedAvailability) urlParams.set('availability', selectedAvailability);
     if (isFeaturedOnly) urlParams.set('featured', 'true');
 
-    let newUrl = window.location.origin + newPath;
+    // 3. รวม Path, Query และ Origin
     const queryStr = urlParams.toString();
-    if (queryStr) newUrl += `?${queryStr}`;
     
-    // 3. อัปเดต URL โดยไม่ reload หน้า (history.pushState)
+    let newUrl = window.location.origin + newPath;
+    
+    if (queryStr) {
+        newUrl += `?${queryStr}`;
+    }
+    
+    // 4. อัปเดต URL โดยไม่ reload หน้า (history.pushState)
     if (newUrl !== window.location.href) {
         history.pushState(null, '', newUrl);
     }
@@ -757,7 +771,7 @@ function handleFeaturedSection(isSearching) {
 
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
             dom.featuredContainer.replaceChildren();
-            const topFeaturedProfiles = featuredProfilesList.slice(0, 30);
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 100);
             dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
             dom.featuredSection.classList.remove('hidden');
         } else {
@@ -908,111 +922,112 @@ function updateSchemaJSONLD(title, description, canonicalUrl, image, profiles) {
     document.head.appendChild(script);
 }
 // ==========================================================
-// 🧱 Profile Card (ไม่มี Schema) - เวอร์ชันสมบูรณ์
+// 🧱 Profile Card (แก้ไขการกำหนดขนาดภาพเริ่มต้น)
 // ==========================================================
 function createProfileCard(profile = {}) {
-    const card = document.createElement('div');
-    card.className = 'profile-card-new-container';
+    const card = document.createElement('div');
+    card.className = 'profile-card-new-container';
 
-    const cardInner = document.createElement('div');
-    cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl shadow-lg bg-white dark:bg-gray-800 transition-transform duration-300 hover:scale-105 hover:shadow-xl';
-    cardInner.setAttribute('data-profile-id', profile.id || '');
-    cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
-    cardInner.setAttribute('role', 'button');
-    cardInner.setAttribute('tabindex', '0');
+    const cardInner = document.createElement('div');
+    cardInner.className = 'profile-card-new group cursor-pointer relative overflow-hidden rounded-2xl shadow-lg bg-white dark:bg-gray-800 transition-transform duration-300 hover:scale-105 hover:shadow-xl';
+    cardInner.setAttribute('data-profile-id', profile.id || '');
+    cardInner.setAttribute('aria-label', `ดูโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`);
+    cardInner.setAttribute('role', 'button');
+    cardInner.setAttribute('tabindex', '0');
 
-    // 🖼️ ภาพหลัก
-    const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
-        src: '/images/placeholder-profile.webp',
-        alt: profile.name || 'profile',
-        width: 600,
-        height: 800
-    };
-    const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
+    // 🖼️ ภาพหลัก
+    const mainImage = (profile.images && profile.images[0]) ? profile.images[0] : {
+        src: '/images/placeholder-profile.webp',
+        alt: profile.name || 'profile',
+        width: 600,
+        height: 800
+    };
+    const baseUrl = mainImage.src?.split('?')[0] || '/images/placeholder-profile.webp';
 
-    const img = document.createElement('img');
-    img.className = 'card-image w-full h-[75%] object-cover aspect-[3/4] transition-transform duration-300 ease-in-out';
-    img.src = `${baseUrl}?width=400&quality=80`;
-    img.srcset = `
-        ${baseUrl}?width=150&quality=70 150w,
-        ${baseUrl}?width=250&quality=75 250w,
-        ${baseUrl}?width=600&quality=80 600w
-    `;
-    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
-    img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.onerror = function () {
-        this.src = '/images/placeholder-profile.webp';
-        this.srcset = '';
-    };
-    cardInner.appendChild(img);
+    const img = document.createElement('img');
+    img.className = 'card-image w-full h-[75%] object-cover aspect-[3/4] transition-transform duration-300 ease-in-out';
+    // ✅ จุดที่แก้ไข: กำหนด src เป็น 600px เพื่อให้เป็น Fallback คุณภาพสูง
+    img.src = `${baseUrl}?width=600&quality=80`; 
+    img.srcset = `
+        ${baseUrl}?width=150&quality=70 150w,
+        ${baseUrl}?width=250&quality=75 250w,
+        ${baseUrl}?width=600&quality=80 600w
+    `;
+    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 600px';
+    img.alt = mainImage.alt || `รูปโปรไฟล์ของ ${profile.name || 'ไม่ระบุชื่อ'}`;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.onerror = function () {
+        this.src = '/images/placeholder-profile.webp';
+        this.srcset = '';
+    };
+    cardInner.appendChild(img);
 
-    // 🎖️ Badge (Availability)
-    const badges = document.createElement('div');
-    badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
+    // ... (ส่วนอื่นๆ ของ createProfileCard เหมือนเดิม) ...
+    // 🎖️ Badge (Availability)
+    const badges = document.createElement('div');
+    badges.className = 'absolute top-2 right-2 flex flex-col items-end gap-1.5 z-10';
 
-    const availSpan = document.createElement('span');
-    let statusClass = 'status-inquire';
-    if (profile.availability?.includes('ว่าง') || profile.availability?.includes('รับงาน')) {
-        statusClass = 'status-available';
-    } else if (profile.availability?.includes('ไม่ว่าง') || profile.availability?.includes('พัก')) {
-        statusClass = 'status-busy';
-    }
-    availSpan.className = `availability-badge ${statusClass}`;
-    availSpan.textContent = profile.availability || 'สอบถามคิว';
-    badges.appendChild(availSpan);
+    const availSpan = document.createElement('span');
+    let statusClass = 'status-inquire';
+    if (profile.availability?.includes('ว่าง') || profile.availability?.includes('รับงาน')) {
+        statusClass = 'status-available';
+    } else if (profile.availability?.includes('ไม่ว่าง') || profile.availability?.includes('พัก')) {
+        statusClass = 'status-busy';
+    }
+    availSpan.className = `availability-badge ${statusClass}`;
+    availSpan.textContent = profile.availability || 'สอบถามคิว';
+    badges.appendChild(availSpan);
 
-    // ถ้ามีความเป็น Featured
-    if (profile.isfeatured) {
-        const feat = document.createElement('span');
-        feat.className = 'featured-badge';
-        feat.innerHTML = `<i class="fas fa-star" style="font-size:0.7em;margin-right:4px;"></i> แนะนำ`;
-        badges.appendChild(feat);
-    }
-    cardInner.appendChild(badges);
+    // ถ้ามีความเป็น Featured
+    if (profile.isfeatured) {
+        const feat = document.createElement('span');
+        feat.className = 'featured-badge';
+        feat.innerHTML = `<i class="fas fa-star" style="font-size:0.7em;margin-right:4px;"></i> แนะนำ`;
+        badges.appendChild(feat);
+    }
+    cardInner.appendChild(badges);
 
-    // 🔤 Overlay ข้อมูล
-    const overlay = document.createElement('div');
-    overlay.className = 'card-overlay flex items-end p-4 bg-gradient-to-t from-black/70 via-transparent to-transparent absolute inset-0';
-    const info = document.createElement('div');
-    info.className = 'card-info';
+    // 🔤 Overlay ข้อมูล
+    const overlay = document.createElement('div');
+    overlay.className = 'card-overlay flex items-end p-4 bg-gradient-to-t from-black/70 via-transparent to-transparent absolute inset-0';
+    const info = document.createElement('div');
+    info.className = 'card-info';
 
-    const h3 = document.createElement('h3');
-    h3.className = 'text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow-md';
-    h3.textContent = profile.name || 'ไม่ระบุชื่อ';
+    const h3 = document.createElement('h3');
+    h3.className = 'text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow-md';
+    h3.textContent = profile.name || 'ไม่ระบุชื่อ';
 
-    const provinceName = provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
-    const p = document.createElement('p');
-    p.className = 'text-sm flex items-center gap-1.5 text-white/90 mt-2';
-    p.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${provinceName}`;
+    const provinceName = provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
+    const p = document.createElement('p');
+    p.className = 'text-sm flex items-center gap-1.5 text-white/90 mt-2';
+    p.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${provinceName}`;
 
-    info.appendChild(h3);
-    info.appendChild(p);
-    overlay.appendChild(info);
-    cardInner.appendChild(overlay);
+    info.appendChild(h3);
+    info.appendChild(p);
+    overlay.appendChild(info);
+    cardInner.appendChild(overlay);
 
-    // 🔹 คลิกเพื่อเปิด Lightbox
-    cardInner.addEventListener('click', () => {
-        populateLightbox(profile);
-        gsap.to("#lightbox", { opacity: 1, duration: 0.3, pointerEvents: "auto" });
-        gsap.to("#lightbox-content-wrapper-el", { scale: 1, duration: 0.3 });
-    });
+    // 🔹 คลิกเพื่อเปิด Lightbox
+    cardInner.addEventListener('click', () => {
+        populateLightbox(profile);
+        gsap.to("#lightbox", { opacity: 1, duration: 0.3, pointerEvents: "auto" });
+        gsap.to("#lightbox-content-wrapper-el", { scale: 1, duration: 0.3 });
+    });
 
-    // 🔹 รองรับการเปิด Lightbox ด้วยคีย์ Enter
-    cardInner.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            cardInner.click();
-        }
-    });
+    // 🔹 รองรับการเปิด Lightbox ด้วยคีย์ Enter
+    cardInner.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            cardInner.click();
+        }
+    });
 
-    card.appendChild(cardInner);
-    return card;
+    card.appendChild(cardInner);
+    return card;
 }
-
 // ==========================================================
-// 📍 Province Section (ไม่แตะ Title/Meta แล้ว)
+// 📍 Province Section (แก้ไขให้ใช้ <a> และ URL ถูกต้องสำหรับ SEO)
 // ==========================================================
 function createProvinceSection(key, name, provinceProfiles) {
     const totalCount = provinceProfiles.length;
@@ -1036,63 +1051,31 @@ function createProvinceSection(key, name, provinceProfiles) {
                     sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 
                     px-6 md:px-8 pb-6 md:pb-8"></div>
         <div class="view-more-container px-6 md:px-8 pb-6 md:pb-8 -mt-4 text-center" style="display:none;">
-            <button 
-                type="button"
-                class="view-more-btn inline-flex items-center gap-2 rounded-full 
-                bg-gradient-to-r from-pink-500 to-pink-700 px-6 py-2 
-                text-sm font-semibold text-white shadow-lg hover:from-pink-600 
-                hover:to-pink-800 focus:outline-none focus:ring-2 
+            <a href="/${key}/"
+                class="view-more-btn inline-flex items-center gap-2 rounded-full
+                bg-gradient-to-r from-pink-500 to-pink-700 px-6 py-2
+                text-sm font-semibold text-white shadow-lg hover:from-pink-600
+                hover:to-pink-800 focus:outline-none focus:ring-2
                 focus:ring-pink-500 focus:ring-offset-2 transition-transform"
                 aria-label="ดูน้องๆ ในจังหวัด ${name} ทั้งหมด">
                 ดูน้องๆ ใน ${name} ทั้งหมด →
-            </button>
+            </a>
         </div>`;
 
     const grid = sectionWrapper.querySelector('.profile-grid');
     const profilesToDisplay = provinceProfiles.slice(0, 20);
-    grid.append(...profilesToDisplay.map(createProfileCard));
+    // ✅ จุดสำคัญ: เรียกใช้ createProfileCard ที่ได้รับการแก้ไขแล้ว
+    grid.append(...profilesToDisplay.map(createProfileCard)); 
 
     const viewMoreContainer = sectionWrapper.querySelector('.view-more-container');
-    const viewMoreBtn = sectionWrapper.querySelector('.view-more-btn');
-
+    
+    // แสดงปุ่มดูทั้งหมด หากมีโปรไฟล์มากกว่า 20 คน
     if (viewMoreContainer && totalCount > 20) {
         viewMoreContainer.style.display = 'block';
-        viewMoreBtn.addEventListener('click', () => {
-            window.location.href = `/province/${key}`;
-        });
     }
 
     return sectionWrapper;
 }
-
-// ==========================================================
-// 🔍 Search Result Section
-// ==========================================================
-function createSearchResultSection(profiles = []) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'section-content-wrapper';
-    wrapper.setAttribute('data-animate-on-scroll', '');
-    const count = Array.isArray(profiles) ? profiles.length : 0;
-
-    wrapper.innerHTML = `
-      <div class="p-6 md:p-8">
-        <h3 class="search-results-header">ผลการค้นหา</h3>
-        <p class="mt-2 text-sm text-muted-foreground">
-          ${count > 0 ? `พบ <span class="search-count-highlight">${count}</span> โปรไฟล์ที่ตรงกับเงื่อนไข` : 'ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข'}
-        </p>
-      </div>
-      <div class="profile-grid grid grid-cols-2 gap-x-3.5 gap-y-5 
-                  sm:gap-x-4 sm:gap-y-6 md:grid-cols-3 lg:grid-cols-4 
-                  px-6 md:px-8 pb-6 md:pb-8"></div>
-    `;
-
-    const grid = wrapper.querySelector('.profile-grid');
-    if (count > 0) {
-        grid.append(...profiles.map(createProfileCard));
-    }
-    return wrapper;
-}
-
 // ==========================================================
 // 🧠 Utilities
 // ==========================================================
@@ -1337,113 +1320,124 @@ document.addEventListener("DOMContentLoaded", initAgeVerification);
         lightbox.addEventListener('click', e => { if (e.target === lightbox) closeAction(); });
     }
     
-    // ✅ [ULTIMATE VERSION] - แทนที่ฟังก์ชัน populateLightbox เดิมด้วยอันนี้
-    function populateLightbox(profileData) {
-        // Cache DOM elements
-        const getEl = (id) => document.getElementById(id);
-        const nameMainEl = getEl('lightbox-profile-name-main');
-        const heroImageEl = getEl('lightboxHeroImage');
-        const thumbnailStripEl = getEl('lightboxThumbnailStrip');
-        const quoteEl = getEl('lightboxQuote');
-        const tagsEl = getEl('lightboxTags');
-        const detailsEl = getEl('lightboxDetailsCompact');
-        const descriptionEl = getEl('lightboxDescriptionVal');
-        const lineLink = getEl('lightboxLineLink');
-        const lineLinkText = getEl('lightboxLineLinkText');
-        const availabilityWrapper = getEl('lightbox-availability-badge-wrapper');
+// ==========================================================
+// 🖼️ Lightbox: populateLightbox (แก้ไขการกำหนดขนาดภาพ High-Res)
+// ==========================================================
+function populateLightbox(profileData) {
+    // Cache DOM elements
+    const getEl = (id) => document.getElementById(id);
+    const nameMainEl = getEl('lightbox-profile-name-main');
+    const heroImageEl = getEl('lightboxHeroImage');
+    const thumbnailStripEl = getEl('lightboxThumbnailStrip');
+    const quoteEl = getEl('lightboxQuote');
+    const tagsEl = getEl('lightboxTags');
+    const detailsEl = getEl('lightboxDetailsCompact');
+    const descriptionEl = getEl('lightboxDescriptionVal');
+    const lineLink = getEl('lightboxLineLink');
+    const lineLinkText = getEl('lightboxLineLinkText');
+    const availabilityWrapper = getEl('lightbox-availability-badge-wrapper');
 
-        // --- Main Header ---
-        nameMainEl.textContent = profileData.name || 'N/A';
-        quoteEl.textContent = profileData.quote ? `"${profileData.quote}"` : '';
-        quoteEl.style.display = profileData.quote ? 'block' : 'none';
+    // --- Main Header ---
+    nameMainEl.textContent = profileData.name || 'N/A';
+    quoteEl.textContent = profileData.quote ? `"${profileData.quote}"` : '';
+    quoteEl.style.display = profileData.quote ? 'block' : 'none';
 
-        // --- Availability Badge (Upgraded) ---
-        availabilityWrapper.innerHTML = ''; // Clear previous
-        let availabilityText = profileData.availability || "สอบถามคิว";
-        let availabilityStatus = 'inquire'; // default
-        if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) {
-            availabilityStatus = 'available';
-        } else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) {
-            availabilityStatus = 'busy';
-        }
-        const availabilityBadge = document.createElement('div');
-        availabilityBadge.className = `availability-badge-upgraded status-${availabilityStatus}`;
-        availabilityBadge.textContent = availabilityText;
-        availabilityWrapper.appendChild(availabilityBadge);
-        
-        // --- Gallery ---
-        heroImageEl.src = profileData.images[0]?.src || '/images/placeholder-profile.webp';
-        heroImageEl.srcset = profileData.images[0]?.srcset || '';
-        heroImageEl.alt = profileData.altText;
-        
-        thumbnailStripEl.innerHTML = '';
-        if (profileData.images.length > 1) {
-            profileData.images.forEach((img, index) => {
-                const thumb = document.createElement('img');
-                thumb.src = img.src;
-                thumb.srcset = img.srcset;
-                thumb.alt = `รูปตัวอย่างที่ ${index + 1} ของ ${profileData.name}`;
-                thumb.className = 'thumbnail';
-                if (index === 0) thumb.classList.add('active');
-                
-                thumb.addEventListener('click', () => {
-                    heroImageEl.src = img.src;
-                    heroImageEl.srcset = img.srcset;
-                    thumbnailStripEl.querySelector('.thumbnail.active')?.classList.remove('active');
-                    thumb.classList.add('active');
-                });
-                thumbnailStripEl.appendChild(thumb);
-            });
-            thumbnailStripEl.style.display = 'grid';
-        } else {
-            thumbnailStripEl.style.display = 'none';
-        }
-
-        // --- Tags (Upgraded Class) ---
-        tagsEl.innerHTML = '';
-        if (profileData.styleTags?.length > 0) {
-            profileData.styleTags.forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'tag-badge'; // Use new class from upgraded css
-                tagEl.textContent = tag;
-                tagsEl.appendChild(tagEl);
-            });
-            tagsEl.style.display = 'flex';
-        } else {
-            tagsEl.style.display = 'none';
-        }
-
-        // --- Details Section (Complete Redesign) ---
-        const paletteIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 4zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zM5.932 7.033a.75.75 0 011.05-1.07l1.5 1.5a.75.75 0 01-1.05 1.07l-1.5-1.5zM12.95 14.05a.75.75 0 01-1.05 1.07l-1.5-1.5a.75.75 0 011.05-1.07l1.5 1.5zM4 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 014 10zM13.75 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM7.033 12.95a.75.75 0 011.07-1.05l1.5 1.5a.75.75 0 01-1.07 1.05l-1.5-1.5zM14.05 7.05a.75.75 0 01-1.07-1.05l1.5-1.5a.75.75 0 011.07 1.05l-1.5 1.5z"/></svg>`;
-        const mapIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
-        const moneyIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 10.837a1 1 0 00-1.5 0 1 1 0 000 1.413l.001.001 2.25 2.25a1 1 0 001.414 0l.001-.001 2.688-2.688a1 1 0 000-1.414 1 1 0 00-1.414 0l-1.937 1.937-1.5-1.5z" /><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1a.5.5 0 000 1h8a.5.5 0 000-1H5z" clip-rule="evenodd" /></svg>`;
-        
-        detailsEl.innerHTML = `
-            <div class="details-grid-upgraded">
-                <div class="detail-item-grid"><div class="label">อายุ</div><div class="value">${profileData.age || '-'} ปี</div></div>
-                <div class="detail-item-grid"><div class="label">สัดส่วน</div><div class="value">${profileData.stats || '-'}</div></div>
-                <div class="detail-item-grid"><div class="label">สูง/หนัก</div><div class="value">${profileData.height || '-'}/${profileData.weight || '-'}</div></div>
-            </div>
-            <div class="detail-list-upgraded">
-                <div class="detail-item-list"><div class="detail-item-list-icon">${paletteIcon}</div><div class="value">ผิว: <strong>${profileData.skinTone || '-'}</strong></div></div>
-                <div class="detail-item-list"><div class="detail-item-list-icon">${mapIcon}</div><div class="value">จังหวัด: <strong>${provincesMap.get(profileData.provinceKey) || ''}</strong> (${profileData.location || 'ไม่ระบุ'})</div></div>
-                <div class="detail-item-list"><div class="detail-item-list-icon">${moneyIcon}</div><div class="value">เรท: <strong>${profileData.rate || 'สอบถาม'}</strong></div></div>
-            </div>`;
-
-        // --- Description ---
-        descriptionEl.innerHTML = profileData.description ? profileData.description.replace(/\n/g, '<br>') : 'ไม่มีรายละเอียดเพิ่มเติม';
-
-        // --- Line Button (Upgraded) ---
-        lineLink.className = "btn-line-shared-upgraded"; 
-        
-        if (profileData.lineId) {
-            lineLink.href = profileData.lineId.startsWith('http') ? profileData.lineId : `https://line.me/ti/p/${profileData.lineId}`;
-            lineLink.style.display = 'inline-flex';
-            lineLinkText.textContent = `ติดต่อ LINE: ${profileData.name}`;
-        } else {
-            lineLink.style.display = 'none';
-        }
+    // --- Availability Badge (Upgraded) ---
+    availabilityWrapper.innerHTML = ''; // Clear previous
+    let availabilityText = profileData.availability || "สอบถามคิว";
+    let availabilityStatus = 'inquire'; // default
+    if (availabilityText.includes('ว่าง') || availabilityText.includes('รับงาน')) {
+        availabilityStatus = 'available';
+    } else if (availabilityText.includes('ไม่ว่าง') || availabilityText.includes('พัก')) {
+        availabilityStatus = 'busy';
     }
+    const availabilityBadge = document.createElement('div');
+    availabilityBadge.className = `availability-badge-upgraded status-${availabilityStatus}`;
+    availabilityBadge.textContent = availabilityText;
+    availabilityWrapper.appendChild(availabilityBadge);
+        
+    // --- Gallery (ส่วนที่ถูกแก้ไขเพื่อให้ภาพ Lightbox คมชัด) ---
+    const firstImage = profileData.images[0];
+    // 💡 กำหนดขนาด High-Res (1024px, Q90) สำหรับภาพหลัก
+    const highResUrl = createSizedImageUrl(firstImage, 1024, 90);
+
+    heroImageEl.src = highResUrl;
+    heroImageEl.srcset = ''; // ล้าง srcset
+    heroImageEl.alt = profileData.altText || `รูปโปรไฟล์ของ ${profileData.name}`;
+        
+    thumbnailStripEl.innerHTML = '';
+    if (profileData.images.length > 1) {
+        profileData.images.forEach((img, index) => {
+            const thumb = document.createElement('img');
+            
+            // 💡 กำหนดขนาด Thumbnail (150px, Q80)
+            const thumbUrl = createSizedImageUrl(img, 150, 80);
+            thumb.src = thumbUrl;
+            thumb.srcset = ''; // ล้าง srcset
+            thumb.alt = `รูปตัวอย่างที่ ${index + 1} ของ ${profileData.name}`;
+            thumb.className = 'thumbnail';
+            if (index === 0) thumb.classList.add('active');
+                
+            // 💡 เมื่อคลิก Thumbnail ต้องเปลี่ยน Hero Image เป็น High-Res
+            thumb.addEventListener('click', () => {
+                const fullResUrl = createSizedImageUrl(img, 1024, 90);
+                heroImageEl.src = fullResUrl;
+                heroImageEl.srcset = '';
+                thumbnailStripEl.querySelector('.thumbnail.active')?.classList.remove('active');
+                thumb.classList.add('active');
+            });
+            thumbnailStripEl.appendChild(thumb);
+        });
+        thumbnailStripEl.style.display = 'grid';
+    } else {
+        thumbnailStripEl.style.display = 'none';
+    }
+
+    // --- Tags (Upgraded Class) ---
+    tagsEl.innerHTML = '';
+    if (profileData.styleTags?.length > 0) {
+        profileData.styleTags.forEach(tag => {
+            const tagEl = document.createElement('span');
+            tagEl.className = 'tag-badge'; // Use new class from upgraded css
+            tagEl.textContent = tag;
+            tagsEl.appendChild(tagEl);
+        });
+        tagsEl.style.display = 'flex';
+    } else {
+        tagsEl.style.display = 'none';
+    }
+
+    // --- Details Section (Complete Redesign) ---
+    const paletteIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 4zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zM5.932 7.033a.75.75 0 011.05-1.07l1.5 1.5a.75.75 0 01-1.05 1.07l-1.5-1.5zM12.95 14.05a.75.75 0 01-1.05 1.07l-1.5-1.5a.75.75 0 011.05-1.07l1.5 1.5zM4 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 014 10zM13.75 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM7.033 12.95a.75.75 0 011.07-1.05l1.5 1.5a.75.75 0 01-1.07 1.05l-1.5-1.5zM14.05 7.05a.75.75 0 01-1.07-1.05l1.5-1.5a.75.75 0 011.07 1.05l-1.5 1.5z"/></svg>`;
+    const mapIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.223.654-.369.623-.359 1.445-.835 2.13-1.36.712-.549 1.282-1.148 1.655-1.743.372-.596.59-1.28.59-2.002v-1.996a4.504 4.504 0 00-1.272-3.116A4.47 4.47 0 0013.5 4.513V4.5C13.5 3.12 12.38 2 11 2H9c-1.38 0-2.5 1.12-2.5 2.5v.013a4.47 4.47 0 00-1.728 1.388A4.504 4.504 0 003 9.504v1.996c0 .722.218 1.406.59 2.002.373.595.943 1.194 1.655 1.743.685.525 1.507 1.001 2.13 1.36.254.147.468.27.654.369a5.745 5.745 0 00.28.14l.019.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>`;
+    const moneyIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 10.837a1 1 0 00-1.5 0 1 1 0 000 1.413l.001.001 2.25 2.25a1 1 0 001.414 0l.001-.001 2.688-2.688a1 1 0 000-1.414 1 1 0 00-1.414 0l-1.937 1.937-1.5-1.5z" /><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1a.5.5 0 000 1h8a.5.5 0 000-1H5z" clip-rule="evenodd" /></svg>`;
+            
+    detailsEl.innerHTML = `
+        <div class="details-grid-upgraded">
+            <div class="detail-item-grid"><div class="label">อายุ</div><div class="value">${profileData.age || '-'} ปี</div></div>
+            <div class="detail-item-grid"><div class="label">สัดส่วน</div><div class="value">${profileData.stats || '-'}</div></div>
+            <div class="detail-item-grid"><div class="label">สูง/หนัก</div><div class="value">${profileData.height || '-'}/${profileData.weight || '-'}</div></div>
+        </div>
+        <div class="detail-list-upgraded">
+            <div class="detail-item-list"><div class="detail-item-list-icon">${paletteIcon}</div><div class="value">ผิว: <strong>${profileData.skinTone || '-'}</strong></div></div>
+            <div class="detail-item-list"><div class="detail-item-list-icon">${mapIcon}</div><div class="value">จังหวัด: <strong>${provincesMap.get(profileData.provinceKey) || ''}</strong> (${profileData.location || 'ไม่ระบุ'})</div></div>
+            <div class="detail-item-list"><div class="detail-item-list-icon">${moneyIcon}</div><div class="value">เรท: <strong>${profileData.rate || 'สอบถาม'}</strong></div></div>
+        </div>`;
+
+    // --- Description ---
+    descriptionEl.innerHTML = profileData.description ? profileData.description.replace(/\n/g, '<br>') : 'ไม่มีรายละเอียดเพิ่มเติม';
+
+    // --- Line Button (Upgraded) ---
+    lineLink.className = "btn-line-shared-upgraded";    
+        
+    if (profileData.lineId) {
+        lineLink.href = profileData.lineId.startsWith('http') ? profileData.lineId : `https://line.me/ti/p/${profileData.lineId}`;
+        lineLink.style.display = 'inline-flex';
+        lineLinkText.textContent = `ติดต่อ LINE: ${profileData.name}`;
+    } else {
+        lineLink.style.display = 'none';
+    }
+}
 
     function initHeaderScrollEffect() {
         const header = document.getElementById('page-header');
