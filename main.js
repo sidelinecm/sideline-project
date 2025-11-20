@@ -381,6 +381,7 @@ async function fetchData() {
         return true;
     }
 }
+
 // --- SEARCH & FILTERS ---
 function initSearchAndFilters() {
     if (!dom.searchForm) {
@@ -604,7 +605,7 @@ function matchesProfile(profile, parsed) {
         const container = dom.searchSuggestions;
         container.innerHTML = '';
         if (!items.length) { container.style.display='none'; return; }
-        items.slice(0,20).forEach(it=>{
+        items.slice(0,40).forEach(it=>{
             const el = document.createElement('div');
             el.className='item';
             el.tabIndex = 0;
@@ -816,7 +817,7 @@ function handleFeaturedSection(isSearching) {
 
         if (currentPage === 'home' && !isSearching && featuredProfilesList.length > 0) {
             dom.featuredContainer.replaceChildren();
-            const topFeaturedProfiles = featuredProfilesList.slice(0, 30);
+            const topFeaturedProfiles = featuredProfilesList.slice(0, 40);
             dom.featuredContainer.append(...topFeaturedProfiles.map(createProfileCard));
             dom.featuredSection.classList.remove('hidden');
         } else {
