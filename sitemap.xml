@@ -1,1 +1,178 @@
-<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"><url><loc>https://sidelinechiangmai.netlify.app/404</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/about</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/blog</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/faq</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/locations</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/offline</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/privacy-policy</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/profiles</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/blog/nimman-feel-fan-guide</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/blog/safety-tips</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url><url><loc>https://sidelinechiangmai.netlify.app/blog/what-is-trong-pok</loc><lastmod>2025-10-29T02:24:26Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url></urlset>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <!-- Sitemap generated for www.sitemaps.org -->
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/profiles</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/locations</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/about</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/faq</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/blog</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/privacy-policy</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/chiangmai</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/lamphun</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/chiangrai</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/bangkok</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Additional locations -->
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/khon-kaen</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/nakhon-pathom</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/nakhon-si-thammarat</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/nakhon-sawan</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/phra-nakhon-si-ayutthaya</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/phitsanulok</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/phuket</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/rayong</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/lopburi</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/lampang</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/samut-sakhon</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/surat-thani</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/nong-khai</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/udonthani</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://sidelinechiangmai.netlify.app/upon-ratchathani</loc>
+    <lastmod>2025-11-20T12:38:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+</urlset>
