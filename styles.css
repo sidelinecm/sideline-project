@@ -2972,32 +2972,49 @@ p{margin:0 0 1em}
 }
 
 
-/* ==========================================================
-   [A2] LIGHTBOX UPGRADED DETAILS
-========================================================== */
+/* --- แก้ไขรูป Lightbox ให้ใหญ่และสวยงาม (เฉพาะรูปใหญ่) --- */
 
-/* 1. Availability Badge In Lightbox (ใช้ upgraded เพื่อแยกขนาด) */
-.availability-badge-upgraded {
-    display: inline-flex;
-    padding: 0.4rem 0.9rem;
-    border-radius: 9999px;
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 700;
-    color: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+.hero-image-container {
+    width: 100%;
+    position: relative;
+    background-color: #000; /* พื้นหลังดำ */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    /* 📱 มือถือ: บังคับความสูง 70% ของจอ (ใหญ่สะใจแน่นอน) */
+    height: 70vh !important; 
 }
 
-/* 2. Style for Tags (e.g., สไตล์, บริการ) */
-.tag-badge {
-    display: inline-block;
-    background-color: #fecaca; /* Red-100 */
-    color: #b91c1c; /* Red-700 */
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-    /* Dark Mode */
-    @apply dark:bg-gray-700 dark:text-gray-100;
+.hero-image-main {
+    width: 100%;
+    height: 100%;
+    
+    /* ✅ ใช้ contain เพื่อให้เห็นทั้งตัว หัวไม่ขาด เท้าไม่ขาด */
+    object-fit: contain !important; 
+    
+    display: block;
+    margin: 0 auto;
+}
+
+/* 💻 PC / Tablet (หน้าจอใหญ่) */
+@media (min-width: 1024px) {
+    .hero-image-container {
+        height: auto !important; /* ปล่อยความสูงอิสระตามสัดส่วน */
+        aspect-ratio: 3 / 4;     /* ล็อคสัดส่วนมาตรฐาน */
+        border-radius: 0 0 0 1rem; /* มนมุมนิดหน่อย */
+    }
+    
+    .hero-image-main {
+        object-fit: cover !important; /* บน PC ให้เต็มกรอบสวยๆ */
+    }
+}
+
+/* ปรับ Thumbnails ให้เลื่อนแนวนอนได้ลื่นๆ */
+.thumbnail-strip {
+    scrollbar-width: none; /* ซ่อน Scrollbar */
+}
+.thumbnail-strip::-webkit-scrollbar { 
+    display: none; 
 }
