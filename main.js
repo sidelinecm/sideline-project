@@ -174,55 +174,88 @@ function generateSitemap() {
 
 async function fetchData() {
     try {
-        // --- 1. ตรวจสอบโหมดการดึงข้อมูล ---
+        // --- CONFIGURATION: CACHE SETTINGS ---
+        const CACHE_TTL_HOURS = 24; // บังคับโหลดใหม่ทั้งหมดทุก 24 ชม. เพื่อเคลียร์ข้อมูลที่ถูกลบ
+        const NOW = new Date();
+        
+        // --- 1. ตรวจสอบสถานะ Cache และโหมดการดึงข้อมูล ---
         const lastFetchTimeStr = localStorage.getItem('lastFetchTime');
-        const isFullSync = !lastFetchTimeStr;
-        const fetchTimeKey = lastFetchTimeStr || '1970-01-01T00:00:00.000Z';
+        let isFullSync = !lastFetchTimeStr;
+        let fetchTimeKey = lastFetchTimeStr || '1970-01-01T00:00:00.000Z';
 
-        // --- 2. ดึงข้อมูลจาก Supabase ---
+        // ตรวจสอบว่า Cache เก่าเกินไปหรือไม่ (Expired Cache)
+        if (lastFetchTimeStr) {
+            const lastFetchDate = new Date(lastFetchTimeStr);
+            const hoursDiff = (NOW - lastFetchDate) / (1000 * 60 * 60);
+            if (hoursDiff > CACHE_TTL_HOURS) {
+                console.log('Cache expired (older than 24h). Forcing full sync...');
+                isFullSync = true;
+                fetchTimeKey = '1970-01-01T00:00:00.000Z'; // รีเซ็ตเวลาเพื่อดึงใหม่หมด
+            }
+        }
+
+        // --- 2. เตรียม Promise สำหรับดึงข้อมูล ---
+        // ถ้าเป็น Full Sync หรือไม่มี Cache ให้ดึงทั้งหมด, ถ้ามี Cache ให้ดึงเฉพาะส่วนต่าง (Delta)
+        const profilesQuery = supabase
+            .from('profiles')
+            .select('*');
+            
+        // ถ้าไม่ใช่ Full Sync ให้ดึงเฉพาะข้อมูลที่อัปเดตหลังจากการดึงครั้งล่าสุด
+        if (!isFullSync) {
+            profilesQuery.gt('lastUpdated', fetchTimeKey);
+        }
+
         const [profilesRes, provincesRes] = await Promise.all([
-            supabase.from('profiles').select('*').gt('lastUpdated', fetchTimeKey),
+            profilesQuery,
             supabase.from('provinces').select('*').order('nameThai', { ascending: true })
         ]);
-        if (profilesRes.error || !profilesRes.data) throw profilesRes.error;
-        if (provincesRes.error || !provincesRes.data) throw provincesRes.error;
 
-        const deltaProfiles = profilesRes.data;
+        if (profilesRes.error) throw profilesRes.error;
+        if (provincesRes.error) throw provincesRes.error;
+
+        const fetchedProfiles = profilesRes.data || [];
+        const fetchedProvinces = provincesRes.data || [];
 
         // --- 3. จัดการข้อมูลจังหวัด ---
         provincesMap.clear();
-        provincesRes.data.forEach(p => {
+        fetchedProvinces.forEach(p => {
             if (p?.key && p?.nameThai) {
                 provincesMap.set(p.key, p.nameThai);
             }
         });
 
-        // --- 4. รวมข้อมูลโปรไฟล์ (ทั้งเก่าและใหม่) ---
+        // --- 4. รวมข้อมูลโปรไฟล์ (Merge Strategy) ---
         let currentProfiles = [];
+
         if (isFullSync) {
-            currentProfiles = deltaProfiles;
+            // กรณีโหลดใหม่หมด ใช้ข้อมูลใหม่แทนที่เลย
+            currentProfiles = fetchedProfiles;
         } else {
+            // กรณี Delta Sync: เอาของเก่ามาผสมของใหม่
             const cachedProfilesJSON = localStorage.getItem('cachedProfiles');
             if (cachedProfilesJSON) {
                 try {
                     const cachedProfiles = JSON.parse(cachedProfilesJSON);
-                    const deltaIds = new Set(deltaProfiles.map(p => p.id));
-                    // กรองข้อมูลเก่าไม่ซ้ำ
-                    currentProfiles = cachedProfiles.filter(p => !deltaIds.has(p.id));
-                    // รวมข้อมูลใหม่
-                    currentProfiles.push(...deltaProfiles);
+                    // สร้าง Map ของ IDs เพื่อให้ค้นหาง่าย
+                    const profileMap = new Map(cachedProfiles.map(p => [p.id, p]));
+                    
+                    // อัปเดตหรือเพิ่มข้อมูลใหม่ลงใน Map
+                    fetchedProfiles.forEach(p => {
+                        profileMap.set(p.id, p);
+                    });
+
+                    // แปลงกลับเป็น Array
+                    currentProfiles = Array.from(profileMap.values());
                 } catch (e) {
-                    console.error("Cache เสียหาย ล้าง cache เพื่อ full sync ครั้งถัดไป");
-                    localStorage.removeItem('lastFetchTime');
-                    localStorage.removeItem('cachedProfiles');
-                    currentProfiles = deltaProfiles;
+                    console.warn("Cache corrupted. Fallback to fetched data.");
+                    currentProfiles = fetchedProfiles;
                 }
             } else {
-                currentProfiles = deltaProfiles;
+                currentProfiles = fetchedProfiles;
             }
         }
 
-        // --- 5. ประมวลผลข้อมูลโปรไฟล์ ---
+        // --- 5. ประมวลผล URLs รูปภาพและฟิลด์อื่นๆ ---
         allProfiles = currentProfiles.map(p => {
             const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
 
@@ -230,6 +263,7 @@ async function fetchData() {
                 const publicUrlData = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
                 let originalUrl = publicUrlData?.data?.publicUrl || '/images/placeholder-profile-card.webp';
 
+                // Cache busting สำหรับรูปภาพ
                 let urlSeparator = '?';
                 if (p.lastUpdated) {
                     const timestampInSeconds = Math.floor(new Date(p.lastUpdated).getTime() / 1000);
@@ -237,6 +271,7 @@ async function fetchData() {
                     urlSeparator = '&';
                 }
 
+                // สร้าง Srcset
                 const srcset = [300, 600, 900]
                     .map(w => `${originalUrl}${urlSeparator}width=${w}&quality=80 ${w}w`)
                     .join(', ');
@@ -246,6 +281,7 @@ async function fetchData() {
                     srcset,
                 };
             });
+
             if (imageObjects.length === 0) {
                 imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
             }
@@ -256,72 +292,95 @@ async function fetchData() {
             return { ...p, images: imageObjects, altText };
         });
 
-        // ✅ เพิ่ม: จัดเรียงโปรไฟล์ทั้งหมดตาม 'lastUpdated' ล่าสุด (มากไปน้อย/Descending)
-        // เพื่อให้โปรไฟล์ที่ถูกเพิ่ม/อัปเดตล่าสุด แสดงเป็นอันดับ 1 เสมอ
+        // --- 6. จัดเรียงข้อมูล (Sorting) ---
+        // เรียงตามวันที่อัปเดตล่าสุด (ใหม่สุดอยู่บน)
         allProfiles.sort((a, b) => {
-            const dateA = new Date(a.lastUpdated).getTime();
-            const dateB = new Date(b.lastUpdated).getTime();
-            // dateB - dateA ทำให้วันที่ใหม่กว่า (ค่าตัวเลขมากกว่า) ขึ้นก่อน
+            const dateA = new Date(a.lastUpdated || 0).getTime();
+            const dateB = new Date(b.lastUpdated || 0).getTime();
             return dateB - dateA;
         });
 
-
-        // สร้าง Index จังหวัด
+        // สร้าง Index จังหวัด (สำหรับการเข้าถึงเร็วๆ)
         window.indexByProvince = new Map();
         allProfiles.forEach(p => {
             if (p.provinceKey) {
                 if (!window.indexByProvince.has(p.provinceKey)) {
                     window.indexByProvince.set(p.provinceKey, []);
                 }
-                // ข้อมูลที่ถูก push เข้าไปใน indexByProvince จะเรียงตามลำดับที่ถูกจัดเรียงแล้วใน allProfiles
                 window.indexByProvince.get(p.provinceKey).push(p);
             }
         });
 
-        // --- 6. บันทึก cache และ lastFetchTime ---
+        // --- 7. บันทึก Cache (Safe Storage Saving) ---
         if (allProfiles.length > 0) {
-            // ✅ เพิ่ม: จัดเรียง currentProfiles ด้วยก่อนนำไปเก็บใน cache เพื่อรักษาความใหม่
-            currentProfiles.sort((a, b) => {
-                const dateA = new Date(a.lastUpdated).getTime();
-                const dateB = new Date(b.lastUpdated).getTime();
-                return dateB - dateA;
-            });
-            localStorage.setItem('cachedProfiles', JSON.stringify(currentProfiles));
-
-            if (deltaProfiles.length > 0) {
-                const maxTime = Math.max(...deltaProfiles.map(p => new Date(p.lastUpdated).getTime()));
-                if (maxTime && !isNaN(maxTime)) {
-                    localStorage.setItem('lastFetchTime', new Date(maxTime).toISOString());
+            try {
+                // เก็บข้อมูลดิบ (currentProfiles) ลง LocalStorage
+                // ต้องเรียงลำดับก่อนเก็บเพื่อให้ Cache รอบหน้าเป็นระเบียบ
+                currentProfiles.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+                
+                localStorage.setItem('cachedProfiles', JSON.stringify(currentProfiles));
+                
+                // อัปเดตเวลา Fetch ล่าสุด
+                // ถ้าเป็น Full Sync ให้ใช้เวลาปัจจุบัน
+                // ถ้าเป็น Delta ให้ใช้เวลาของ Item ที่ใหม่ที่สุดที่ดึงมาได้
+                let newLastFetchTime = NOW.toISOString();
+                if (!isFullSync && fetchedProfiles.length > 0) {
+                    const maxTime = Math.max(...fetchedProfiles.map(p => new Date(p.lastUpdated).getTime()));
+                    if (!isNaN(maxTime)) {
+                        newLastFetchTime = new Date(maxTime).toISOString();
+                    }
+                } else if (isFullSync) {
+                     // ถ้า Full Sync ให้ตั้งเวลาเป็นปัจจุบัน เพื่อเริ่มนับ TTL ใหม่
+                     newLastFetchTime = NOW.toISOString();
+                }
+                
+                localStorage.setItem('lastFetchTime', newLastFetchTime);
+                
+            } catch (storageErr) {
+                if (storageErr.name === 'QuotaExceededError') {
+                    console.warn('LocalStorage is full. Data loaded but not cached.');
+                    // Optional: Clear old cache to make space for next time
+                    localStorage.clear(); 
+                } else {
+                    console.error('Error saving to LocalStorage:', storageErr);
                 }
             }
         }
 
-        // --- 7. สร้าง dropdown จังหวัด ถ้ายังไม่มี ---
+        // --- 8. อัปเดต Dropdown จังหวัด ---
         if (dom.provinceSelect && dom.provinceSelect.options.length <= 1) {
-            provincesRes.data.forEach(prov => {
-                if (prov?.key && prov?.nameThai) {
-                    const option = document.createElement('option');
-                    option.value = prov.key;
-                    option.textContent = prov.nameThai;
-                    dom.provinceSelect.appendChild(option);
-                }
+            // เรียงจังหวัดตามตัวอักษร
+            const sortedProvinces = Array.from(provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], 'th'));
+            
+            sortedProvinces.forEach(([key, name]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = name;
+                dom.provinceSelect.appendChild(option);
             });
         }
 
-        // เรียกแสดงข้อมูลทั้งหมด
+        // เรียกแสดงผล
         renderAllProfiles();
 
         return true;
     } catch (err) {
-        console.error('fetchData error:', err);
-        localStorage.removeItem('lastFetchTime');
-        localStorage.removeItem('cachedProfiles');
-        allProfiles = [];
-        window.indexByProvince = new Map();
-        return false;
+        console.error('fetchData Critical Error:', err);
+        
+        // กรณี Error หนักๆ ให้ล้างค่าเพื่อลองใหม่รอบหน้า
+        // แต่อย่าล้าง cachedProfiles ทันที เพื่อให้ user ยังพอเห็นข้อมูลเก่าได้ถ้ามี
+        localStorage.removeItem('lastFetchTime'); 
+        
+        // ถ้าโหลดไม่ขึ้นเลย และไม่มีข้อมูลในตัวแปร ให้แสดง error state
+        if (allProfiles.length === 0) {
+            return false;
+        }
+        
+        // ถ้ามีข้อมูลเก่าค้างใน allProfiles (จากรอบก่อนๆ) ก็ให้แสดงไปก่อน (Graceful Degradation)
+        renderAllProfiles();
+        return true;
     }
 }
-
 // --- SEARCH & FILTERS ---
 function initSearchAndFilters() {
     if (!dom.searchForm) {
