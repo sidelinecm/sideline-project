@@ -1,9 +1,6 @@
 // netlify/edge-functions/render-bot.js
 //
 // Edge Function สำหรับ SSR โปรไฟล์ Supabase (SEO Bot SSR)
-// - Detect Bot/Crawler แล้วสร้าง HTML แบบ SEO-rich ด้วย meta/og/schema/FAQ/review/person/profile
-// - รองรับการแสดงผลโปรไฟล์แต่ละคนที่ /app/{slug}
-// - สามารถพัฒนา/ขยายเพิ่มเติม SEO schema หรือเนื้อหาได้ตามต้องการ
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -68,18 +65,14 @@ const generateProfileHTML = (profileData, profileSlug) => {
     }
     const pageTitle = `${name} - สาวไซด์ไลน์${province} รับงานฟิวแฟน ตรงปก | Sideline Chiang Mai`;
 
-    // FAQ Schema
+    // FAQ Schema (Simplified for best practice)
     const faqSchema = {
         "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "FAQPage",
-                "mainEntity": [
-                    { "@type": "Question", "name": "บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?", "acceptedAnswer": { "@type": "Answer", "text": "Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้า ข้อมูลจะถูกเก็บเป็นความลับ" } },
-                    { "@type": "Question", "name": "จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการหรือไม่?", "acceptedAnswer": { "@type": "Answer", "text": "ไม่จำเป็นต้องโอนเงินมัดจำ สามารถชำระค่าบริการเต็มจำนวนที่หน้างานได้เลย" } },
-                    { "@type": "Question", "name": "น้องๆ ตรงปกตามรูปโปรไฟล์จริงหรือ?", "acceptedAnswer": { "@type": "Answer", "text": "เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพอย่างละเอียด การันตีตรงปก 100%" } }
-                ]
-            }
+        "@type": "FAQPage",
+        "mainEntity": [
+            { "@type": "Question", "name": "บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?", "acceptedAnswer": { "@type": "Answer", "text": "Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้า ข้อมูลจะถูกเก็บเป็นความลับ" } },
+            { "@type": "Question", "name": "จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการหรือไม่?", "acceptedAnswer": { "@type": "Answer", "text": "ไม่จำเป็นต้องโอนเงินมัดจำ สามารถชำระค่าบริการเต็มจำนวนที่หน้างานได้เลย" } },
+            { "@type": "Question", "name": "น้องๆ ตรงปกตามรูปโปรไฟล์จริงหรือ?", "acceptedAnswer": { "@type": "Answer", "text": "เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพอย่างละเอียด การันตีตรงปก 100%" } }
         ]
     };
 
