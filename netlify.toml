@@ -2,8 +2,8 @@
 # 🏗️ Netlify Build Configuration
 # =====================================
 [build]
-  publish = "."             # Root folder
-  command = ""              # ไม่มี build command สำหรับเว็บ static
+  publish = "."
+  command = ""
   environment = { NODE_VERSION = "18" }
 
 # =====================================
@@ -47,7 +47,7 @@
     Cache-Control = "no-cache"
 
 # =====================================
-# ⚡ Static Assets (CSS/JS/Fonts - Fast Cache)
+# ⚡ Static Assets (CSS/JS/Fonts/Images - Fast Cache)
 # =====================================
 [[headers]]
   for = "/fonts/*"
@@ -64,11 +64,15 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # =====================================
 # 🔀 Redirect Rules
 # =====================================
 
-# 1. SEO-friendly old links -> new links
 [[redirects]]
   from = "/province/:provincekey"
   to = "/:provincekey"
@@ -86,7 +90,6 @@
   status = 301
   query = { p = ":provincekey" }
 
-# 2. PWA / Service Worker exceptions
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
@@ -97,14 +100,18 @@
   to = "/manifest.webmanifest"
   status = 200
 
-# 3. SPA Fallback Rule (ต้องอยู่ล่างสุด)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
 # =====================================
-# 💻 Netlify Edge Function Configuration (ต้องเพิ่มส่วนนี้)
+# 💻 Netlify Edge Function Configuration
 # =====================================
 [[edge_functions]]
-function = "render-bot" # ต้องตรงกับชื่อไฟล์ render-bot.js
-path = "/app/*"         # กำหนดให้ Edge Function ทำงานกับทุก URL ที่ขึ้นต้นด้วย /app/ (เช่น /app/ชื่อโปรไฟล์)
+function = "render-bot"
+path = "/app/*"
+
+[[edge_functions]]
+function = "ssr-province"
+path = "/province/:provinceKey"
