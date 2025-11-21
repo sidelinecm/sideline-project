@@ -53,7 +53,7 @@ async function main() {
         initAgeVerification();
         initHeaderScrollEffect();
         updateActiveNavLinks();
-        generateFullSchema();
+        
         
         // ❌ ปิดระบบหมุน 3D ของการ์ดโปรไฟล์ (ป้องกันภาพหมุน)
         // init3dCardHover();
@@ -971,40 +971,256 @@ function updateAdvancedMeta({ title, description, canonicalUrl, image, profiles 
     updateSchemaJSONLD(title, description, canonicalUrl, image, profiles);
 }
 
-// **Helper: สร้าง Schema JSON-LD สำหรับโปรไฟล์**
+// **Helper: อัปเดต Schema JSON-LD ฉบับสมบูรณ์**
 function updateSchemaJSONLD(title, description, canonicalUrl, image, profiles) {
-    const existingSchema = document.getElementById('schema-list');
-    if (existingSchema) existingSchema.remove();
+    const siteUrl = "https://sidelinechiangmai.netlify.app/";
+    const orgName = "Sideline Chiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
 
-    const itemListElements = profiles.slice(0, 20).map((p, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "url": `${window.location.origin}/${p.province || ''}#${p.id || i}`,
-        "item": {
-            "@type": "Person",
-            "name": p.name || "ไม่ระบุชื่อ",
-            "image": p.image || image,
+    // 1. องค์ประกอบพื้นฐานสำหรับ @graph
+    let graphElements = [
+        // Organization
+        {
+            "@type": "Organization",
+            "@id": `${siteUrl}#organization`,
+            "name": orgName,
+            "url": siteUrl,
+            "logo": {
+                "@type": "ImageObject",
+                "url": `${siteUrl}images/logo-sideline-chiangmai.webp`,
+                "width": 164,
+                "height": 40
+            },
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer support",
+                "url": "https://line.me/ti/p/_faNcjQ3xx"
+            }
+        },
+        // WebSite
+        {
+            "@type": "WebSite",
+            "@id": `${siteUrl}#website`,
+            "url": siteUrl,
+            "name": orgName,
+            "description": "รวมโปรไฟล์ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย คุณภาพ บริการฟีลแฟน การันตีตรงปก 100% ปลอดภัย ไม่ต้องมัดจำ",
+            "publisher": { "@id": `${siteUrl}#organization` },
+            "inLanguage": "th-TH"
+        },
+        // WebPage (สำหรับหน้านั้นๆ)
+        {
+            "@type": "WebPage",
+            "@id": `${canonicalUrl}#webpage`,
+            "url": canonicalUrl,
+            "name": title,
+            "description": description,
+            "isPartOf": { "@id": `${siteUrl}#website` },
+            "primaryImageOfPage": {
+                "@type": "ImageObject",
+                "url": image // ใช้รูปภาพที่ปรับเปลี่ยนตามหน้านั้นๆ
+            },
+            "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
+        },
+        // LocalBusiness
+        {
+            "@type": "LocalBusiness",
+            "@id": `${siteUrl}#localbusiness`,
+            "name": "SidelineChiangmai - ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก",
+            // ... (ข้อมูล LocalBusiness อื่นๆ เหมือนเดิม)
+            "image": `${siteUrl}images/sideline-chiangmai-social-preview.webp`,
+            "url": siteUrl,
+            "priceRange": "฿฿",
             "address": {
                 "@type": "PostalAddress",
-                "addressLocality": provincesMap.get(p.province) || ""
-            }
+                "streetAddress": "เจ็ดยอด",
+                "addressLocality": "ช้างเผือก",
+                "addressRegion": "เชียงใหม่",
+                "postalCode": "50300",
+                "addressCountry": "TH"
+            },
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": "18.814361",
+                "longitude": "98.972389"
+            },
+            "hasMap": "https://maps.app.goo.gl/3y8gyAtamm8YSagi9",
+            "openingHours": ["Mo-Su 00:00-24:00"],
+            "areaServed": [
+                { "@type": "City", "name": "Chiang Mai" },
+                { "@type": "City", "name": "Bangkok" },
+                { "@type": "City", "name": "Lampang" },
+                { "@type": "City", "name": "Chiang Rai" },
+                { "@type": "City", "name": "Pattaya" },
+                { "@type": "City", "name": "Phuket" }
+            ]
+        },
+        // FAQPage (คงไว้ถ้าเป็นหน้าแรกหรือหน้าหลัก)
+        {
+            "@type": "FAQPage",
+            "@id": `${siteUrl}#faq`,
+            "mainEntity": [
+                // ... (Question/Answer 3 ข้อเดิม)
+                {
+                    "@type": "Question",
+                    "name": "บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้าทุกท่าน ข้อมูลการติดต่อและการจองของท่านจะถูกเก็บรักษาเป็นความลับอย่างเข้มงวด"
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการไซด์ไลน์หรือไม่?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "เพื่อความสบายใจของลูกค้าทุกท่าน ท่านไม่จำเป็นต้องโอนเงินมัดจำใดๆ ทั้งสิ้น สามารถชำระค่าบริการเต็มจำนวนโดยตรงกับน้องๆ ที่หน้างานได้เลย"
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "น้องๆ ไซด์ไลน์เชียงใหม่ตรงปกตามรูปที่แสดงในโปรไฟล์จริงหรือ?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพของน้องๆ ทุกคนอย่างละเอียด Sideline Chiang Mai กล้าการันตีว่าน้องๆ ตรงปก 100% หากพบปัญหาใดๆ สามารถแจ้งทีมงานเพื่อดำเนินการแก้ไขได้ทันที"
+                    }
+                }
+            ]
         }
-    }));
+    ];
 
-    const schema = {
+    // 2. BreadcrumbList (กำหนดให้ Breadcrumb ใช้ได้กับทุกหน้า)
+    const currentPath = window.location.pathname.replace(/^\/|\/$/g, '');
+    let breadcrumbList = [
+        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": siteUrl }
+    ];
+    
+    // Logic: เพิ่ม Breadcrumb สำหรับหน้าจังหวัด
+    if (currentPath && currentPath !== 'index.html' && currentPath.split('/').length === 1 && profiles.length > 1) {
+        const provinceCode = currentPath;
+        const provinceName = provincesMap.get(provinceCode) || '';
+        if (provinceName) {
+            breadcrumbList.push({
+                "@type": "ListItem",
+                "position": 2,
+                "name": provinceName,
+                "item": canonicalUrl
+            });
+        }
+    }
+    
+    // Logic: เพิ่ม Breadcrumb สำหรับหน้าโปรไฟล์เดี่ยว
+    if (profiles.length === 1) {
+        const profile = profiles[0];
+        const provinceCode = profile.province;
+        const provinceName = provincesMap.get(provinceCode) || '';
+        const provinceUrl = `${window.location.origin}/${provinceCode}`;
+
+        if (provinceName) {
+            breadcrumbList.push({
+                "@type": "ListItem",
+                "position": 2,
+                "name": provinceName,
+                "item": provinceUrl
+            });
+        }
+        breadcrumbList.push({
+            "@type": "ListItem",
+            "position": breadcrumbList.length + 1,
+            "name": profile.name || title,
+            "item": canonicalUrl
+        });
+    }
+
+    graphElements.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        "itemListElement": breadcrumbList
+    });
+
+    // 3. ItemList (เพิ่มเฉพาะเมื่อมีรายการโปรไฟล์มากกว่า 1 รายการ)
+    if (profiles.length > 1) {
+        const itemListElements = profiles.slice(0, 20).map((p, i) => ({
+            "@type": "ListItem",
+            "position": i + 1,
+            "url": `${window.location.origin}/${p.province || ''}#${p.id || i}`,
+            "item": {
+                // เปลี่ยนเป็น type ที่เหมาะสมกว่า Person เช่น WebPage หรือ Offer ถ้าเน้นการบริการ
+                // แต่ถ้าเน้นโปรไฟล์สาวๆ ให้ใช้ Person ต่อไป (แต่จะไม่มีสิทธิ์ Rich Snippet)
+                "@type": "Person", 
+                "name": p.name || "ไม่ระบุชื่อ",
+                "image": p.image || image,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": provincesMap.get(p.province) || ""
+                }
+            }
+        }));
+
+        graphElements.push({
+            "@type": "ItemList",
+            "@id": `${canonicalUrl}#itemlist`,
+            "name": title,
+            "description": description,
+            "url": canonicalUrl,
+            "itemListElement": itemListElements
+        });
+    } 
+    
+    // 4. Schema สำหรับโปรไฟล์เดี่ยว (ถ้ามีโปรไฟล์เดียว)
+    if (profiles.length === 1) {
+         const profile = profiles[0];
+         // ใช้ ProfilePage แทน WebPage ใน WebPage element หรือเพิ่ม Person element
+         graphElements.push({
+             "@type": "Person", 
+             "@id": `${canonicalUrl}#person`,
+             "name": profile.name || title,
+             "url": canonicalUrl,
+             "image": profile.image || image,
+             "description": description,
+             "gender": "Female",
+             "address": {
+                 "@type": "PostalAddress",
+                 "addressLocality": provincesMap.get(profile.province) || ""
+             },
+             // อาจเพิ่ม property อื่นๆ ที่เหมาะสมกับ Person/Profile
+             "mainEntityOfPage": { "@id": `${canonicalUrl}#webpage` }
+         });
+         // หากเพิ่ม Person แล้ว ควรกำหนด @type ของ WebPage เป็น ProfilePage ด้วย
+         const webPageElement = graphElements.find(el => el["@type"] === "WebPage");
+         if (webPageElement) {
+             webPageElement["@type"] = "ProfilePage";
+         }
+    }
+
+
+    // 5. สร้าง JSON-LD Final
+    const finalSchema = {
         "@context": "https://schema.org",
-        "@type": "ItemList",
-        "name": title,
-        "description": description,
-        "url": canonicalUrl,
-        "itemListElement": itemListElements
+        "@graph": graphElements
     };
 
     const script = document.createElement('script');
     script.type = 'application/ld+json';
-    script.id = 'schema-list';
-    script.textContent = JSON.stringify(schema);
+    script.id = 'schema-full'; // เปลี่ยน ID เพื่อหลีกเลี่ยงความสับสน
+    script.textContent = JSON.stringify(finalSchema);
+
+    // ลบ script เก่าแล้วสร้างใหม่
+    const existingSchema = document.getElementById('schema-full');
+    if (existingSchema) existingSchema.remove();
+
+    // ลบ script เก่าของ ItemList ด้วย ถ้ามี (ID: schema-list)
+    const oldItemListSchema = document.getElementById('schema-list');
+    if (oldItemListSchema) oldItemListSchema.remove();
+
     document.head.appendChild(script);
+}
+
+// **ข้อสำคัญ: แก้ไขการเรียกใช้**
+// ในฟังก์ชัน updateAdvancedMeta() ให้เรียกใช้ฟังก์ชันที่ปรับปรุงแล้ว
+function updateAdvancedMeta({ title, description, canonicalUrl, image, profiles }) {
+    // ... โค้ดสำหรับ Meta Tags และ Canonical เดิม ...
+    
+    // เรียกใช้ฟังก์ชัน Schema ที่รวมทุกอย่างแล้ว
+    updateSchemaJSONLD(title, description, canonicalUrl, image, profiles);
 }
 // ==========================================================
 // 🧱 Profile Card (ไม่มี Schema) - เวอร์ชันสมบูรณ์
@@ -1648,131 +1864,7 @@ document.addEventListener("DOMContentLoaded", initAgeVerification);
         wrapper.addEventListener('touchend', () => { isDragging = false; speed = 0.5; });
     });
 
-function generateFullSchema() {
-    const pageTitle = document.title;
-    const canonicalUrl = document.querySelector("link[rel='canonical']")?.href || window.location.href;
-    const siteUrl = "https://sidelinechiangmai.netlify.app/";
-    const orgName = "Sideline Chiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
 
-    const mainSchema = {
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "Organization",
-                "@id": `${siteUrl}#organization`,
-                "name": orgName,
-                "url": siteUrl,
-                "logo": {
-                    "@type": "ImageObject",
-                    "url": `${siteUrl}images/logo-sideline-chiangmai.webp`,
-                    "width": 164,
-                    "height": 40
-                },
-                "contactPoint": {
-                    "@type": "ContactPoint",
-                    "contactType": "customer support",
-                    "url": "https://line.me/ti/p/_faNcjQ3xx"
-                }
-            },
-            {
-                "@type": "WebSite",
-                "@id": `${siteUrl}#website`,
-                "url": siteUrl,
-                "name": orgName,
-                "description": "รวมโปรไฟล์ไซด์ไลน์เชียงใหม่, ลำปาง, เชียงราย คุณภาพ บริการฟีลแฟน การันตีตรงปก 100% ปลอดภัย ไม่ต้องมัดจำ",
-                "publisher": { "@id": `${siteUrl}#organization` },
-                "inLanguage": "th-TH"
-            },
-            {
-                "@type": "WebPage",
-                "@id": `${canonicalUrl}#webpage`,
-                "url": canonicalUrl,
-                "name": pageTitle,
-                "isPartOf": { "@id": `${siteUrl}#website` },
-                "primaryImageOfPage": {
-                    "@type": "ImageObject",
-                    "url": `${siteUrl}images/sideline-chiangmai-social-preview.webp`
-                },
-                "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` }
-            },
-            {
-                "@type": "LocalBusiness",
-                "@id": `${siteUrl}#localbusiness`,
-                "name": "SidelineChiangmai - ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก",
-                "image": `${siteUrl}images/sideline-chiangmai-social-preview.webp`,
-                "url": siteUrl,
-                "priceRange": "฿฿",
-                "address": {
-                    "@type": "PostalAddress",
-                    "streetAddress": "เจ็ดยอด",
-                    "addressLocality": "ช้างเผือก",
-                    "addressRegion": "เชียงใหม่",
-                    "postalCode": "50300",
-                    "addressCountry": "TH"
-                },
-                "geo": {
-                    "@type": "GeoCoordinates",
-                    "latitude": "18.814361",
-                    "longitude": "98.972389"
-                },
-                "hasMap": "https://maps.app.goo.gl/3y8gyAtamm8YSagi9",
-                "openingHours": ["Mo-Su 00:00-24:00"],
-                "areaServed": [
-                    { "@type": "City", "name": "Chiang Mai" },
-                    { "@type": "City", "name": "Bangkok" },
-                    { "@type": "City", "name": "Lampang" },
-                    { "@type": "City", "name": "Chiang Rai" },
-                    { "@type": "City", "name": "Pattaya" },
-                    { "@type": "City", "name": "Phuket" }
-                ]
-            },
-            {
-                "@type": "BreadcrumbList",
-                "@id": `${canonicalUrl}#breadcrumb`,
-                "itemListElement": [
-                    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": siteUrl }
-                ]
-            },
-            {
-                "@type": "FAQPage",
-                "@id": `${siteUrl}#faq`,
-                "mainEntity": [
-                    {
-                        "@type": "Question",
-                        "name": "บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?",
-                        "acceptedAnswer": {
-                            "@type": "Answer",
-                            "text": "Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้าทุกท่าน ข้อมูลการติดต่อและการจองของท่านจะถูกเก็บรักษาเป็นความลับอย่างเข้มงวด"
-                        }
-                    },
-                    {
-                        "@type": "Question",
-                        "name": "จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการไซด์ไลน์หรือไม่?",
-                        "acceptedAnswer": {
-                            "@type": "Answer",
-                            "text": "เพื่อความสบายใจของลูกค้าทุกท่าน ท่านไม่จำเป็นต้องโอนเงินมัดจำใดๆ ทั้งสิ้น สามารถชำระค่าบริการเต็มจำนวนโดยตรงกับน้องๆ ที่หน้างานได้เลย"
-                        }
-                    },
-                    {
-                        "@type": "Question",
-                        "name": "น้องๆ ไซด์ไลน์เชียงใหม่ตรงปกตามรูปที่แสดงในโปรไฟล์จริงหรือ?",
-                        "acceptedAnswer": {
-                            "@type": "Answer",
-                            "text": "เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพของน้องๆ ทุกคนอย่างละเอียด Sideline Chiang Mai กล้าการันตีว่าน้องๆ ตรงปก 100% หากพบปัญหาใดๆ สามารถแจ้งทีมงานเพื่อดำเนินการแก้ไขได้ทันที"
-                        }
-                    }
-                ]
-            }
-        ]
-    };
 
-    // ลบ script เก่าแล้วสร้างใหม่
-        const schemaContainer = document.createElement('script');
-        schemaContainer.type = 'application/ld+json';
-        schemaContainer.textContent = JSON.stringify(mainSchema);
-        const oldSchema = document.querySelector('script[type="application/ld+json"]');
-        if (oldSchema) oldSchema.remove();
-        document.head.appendChild(schemaContainer);
-    }
 
 })();
