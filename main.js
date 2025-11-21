@@ -700,38 +700,23 @@ allProfiles.forEach(profile => {
 }
 
 // ==========================================================
-// 🧩 Helper: อัปเดต URL และ History State (แยก Logic จาก applyFilters)
-// 💡 จัดการ Path Parameter (Province) และ Query Parameters อย่างแม่นยำ
+// 🧩 Helper: อัปเดต URL และ History State (ปรับปรุง)
 // ==========================================================
-/**
- * อัปเดต URL ให้เป็นแบบ SEO-Friendly เช่น /chiangmai แทน ?province=chiangmai
- */
 function updateURLState({ searchTermRaw, selectedProvince, selectedAvailability, isFeaturedOnly }) {
-    let newPath = window.location.pathname;
-    
-    // 1. จัดการ Path: ใช้จังหวัดเป็น Path Parameter
-    if (selectedProvince) {
-        newPath = `/${selectedProvince}`;
-    } else {
-        // ถ้าไม่มีจังหวัด ให้กลับไป Root Path (/) หรือ Path หลักที่ตั้งไว้
-        // (ในกรณีนี้กำหนดให้กลับไปที่ / เสมอ หากไม่มีจังหวัดที่ถูกเลือก)
-        newPath = '/'; 
-    }
+    // 1. **จัดการ Path: ไม่เปลี่ยน Path Parameter** (ใช้ Path เดิม, เช่น / หรือ /profiles)
+    //    เพื่อให้ไม่เกิด Conflict กับ Edge Function SSR
+    const newPath = window.location.pathname; 
 
     // 2. จัดการ Query Parameters
     const urlParams = new URLSearchParams();
     if (searchTermRaw) urlParams.set('q', searchTermRaw);
+    if (selectedProvince) urlParams.set('province', selectedProvince); // ใช้ Query Param แทน Path
     if (selectedAvailability) urlParams.set('availability', selectedAvailability);
     if (isFeaturedOnly) urlParams.set('featured', 'true');
 
-    let newUrl = window.location.origin + newPath;
-    const queryStr = urlParams.toString();
-    if (queryStr) newUrl += `?${queryStr}`;
-    
-    // 3. อัปเดต URL โดยไม่ reload หน้า (history.pushState)
-    if (newUrl !== window.location.href) {
-        history.pushState(null, '', newUrl);
-    }
+    // 3. สร้าง URL และอัปเดต History
+    const newUrl = `${newPath}${urlParams.toString() ? `?${urlParams.toString()}` : ''}`;
+    window.history.pushState({}, '', newUrl);
 }
 // ==========================================================
 // 🧩 Helper: Render Province Sections (ฟังก์ชันที่หายไป)
