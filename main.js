@@ -910,95 +910,90 @@ function updateAdvancedMeta({ title, description, canonicalUrl, image, profiles 
     updateSchemaJSONLD(title, description, canonicalUrl, image, profiles);
 }
 
-// **Helper: อัปเดต Schema JSON-LD ฉบับสมบูรณ์ (แก้ไขแล้ว)**
+// **Helper: สร้าง Schema JSON-LD สำหรับโปรไฟล์**
 function updateSchemaJSONLD(title, description, canonicalUrl, image, profiles) {
-    const siteUrl = "https://sidelinechiangmai.netlify.app/";
-    const orgName = "Sideline Chiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก";
-
-    // 1. องค์ประกอบพื้นฐานสำหรับ @graph (WebSite, Organization, WebPage, LocalBusiness, FAQPage)
-    // ... (ส่วนนี้ใช้โค้ดเดิมทั้งหมด)
-    let graphElements = [ /* ... โค้ด Organization, WebSite, WebPage, LocalBusiness, FAQPage เดิม ... */ ];
-    
-    // 2. BreadcrumbList (โค้ดเดิม - สมบูรณ์แล้ว)
-    // ... (โค้ด BreadcrumbList เดิม - สมบูรณ์แล้ว)
-
-// **Helper: อัปเดต Schema JSON-LD ฉบับสมบูรณ์ (ส่วน ItemList ที่แก้ไข)**
-// ...
-// 3. ItemList (ส่วนที่แก้ไข GSC Error)
-if (profiles.length > 1) {
-    const itemListElements = profiles.slice(0, 20).map((p, i) => {
-        const listItemUrl = `${window.location.origin}/${p.province || ''}#${p.id || i}`;
-        
-        return {
-            "@type": "ListItem",
-            "position": i + 1,
-            "url": listItemUrl, // URL สำหรับ ListItem (ถูกต้องแล้ว)
-            "item": {
-                "@type": "Person", 
-                "name": p.name || "ไม่ระบุชื่อ",
-                "image": p.image || image,
-                
-                // 🔥 การแก้ไขที่สำคัญ: เพิ่ม url เข้าไปใน item (Person object)
-                "url": listItemUrl, 
-                
-                "address": {
-                    "@type": "PostalAddress",
-                    "addressLocality": provincesMap.get(p.province) || ""
-                }
-            }
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://sidelinechiangmai.netlify.app/#website",
+        "url": "https://sidelinechiangmai.netlify.app/",
+        "name": "Sideline Chiangmai - รับงาน ไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก",
+        "publisher": {
+          "@id": "https://sidelinechiangmai.netlify.app/#organization"
         }
-    });
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://sidelinechiangmai.netlify.app/#organization",
+        "name": "Sideline Chiangmai",
+        "url": "https://sidelinechiangmai.netlify.app/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://sidelinechiangmai.netlify.app/images/og-default.webp"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://sidelinechiangmai.netlify.app/chiangmai#webpage",
+        "url": "https://sidelinechiangmai.netlify.app/chiangmai",
+        "name": "รายการโปรไฟล์สาวไซด์ไลน์เชียงใหม่",
+        "isPartOf": {
+          "@id": "https://sidelinechiangmai.netlify.app/#website"
+        }
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://sidelinechiangmai.netlify.app/chiangmai#itemlist",
+        "name": "รายชื่อสาวไซด์ไลน์เชียงใหม่",
+        "description": "รายชื่อสาวไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก ปลอดภัย พร้อมรายละเอียดภาพและข้อมูล",
+        "url": "https://sidelinechiangmai.netlify.app/chiangmai",
+        "numberOfItems": profiles.length,
+        "itemListElement": profiles.map((profile, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "url": profile.url,
+          "item": {
+            "@type": "Person",
+            "name": profile.name,
+            "image": profile.image,
+            "url": profile.url,
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Age",
+                "value": profile.age
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Province",
+                "value": profile.province
+              }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": profile.province
+            }
+          }
+        }))
+      }
+    ]
+  };
 
-        graphElements.push({
-            "@type": "ItemList",
-            "@id": `${canonicalUrl}#itemlist`,
-            "name": title,
-            "description": description,
-            "url": canonicalUrl,
-            "itemListElement": itemListElements
-        });
-    }
-    
-    // 4. Schema สำหรับโปรไฟล์เดี่ยว (ถ้ามีโปรไฟล์เดียว)
-    if (profiles.length === 1) {
-        const profile = profiles[0];
-        // ... (โค้ด ProfilePage และ Person เดิม)
-        // ส่วนนี้ก็มีความสมบูรณ์อยู่แล้ว เพราะมีการกำหนด url ใน Person object อยู่แล้ว
-        
-        // ... (โค้ดเดิม)
-    }
+  // ลบ schema เก่าออก ถ้ามี
+  const oldScript = document.getElementById('schema-jsonld');
+  if (oldScript) oldScript.remove();
 
-    // 5. สร้าง JSON-LD Final
-    const finalSchema = {
-        "@context": "https://schema.org",
-        "@graph": graphElements
-    };
-    
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'schema-full'; // เปลี่ยน ID เพื่อหลีกเลี่ยงความสับสน
-    script.textContent = JSON.stringify(finalSchema);
-
-    // ลบ script เก่าแล้วสร้างใหม่
-    const existingSchema = document.getElementById('schema-full');
-    if (existingSchema) existingSchema.remove();
-
-    // ลบ script เก่าของ ItemList ด้วย ถ้ามี (ID: schema-list)
-    const oldItemListSchema = document.getElementById('schema-list');
-    if (oldItemListSchema) oldItemListSchema.remove();
-
-    document.head.appendChild(script);
+  // สร้าง script สำหรับ schema ใหม่
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = 'schema-jsonld';
+  script.textContent = JSON.stringify(schema, null, 2);
+  document.head.appendChild(script);
 }
 
-// **ข้อสำคัญ: แก้ไขการเรียกใช้**
-// ในฟังก์ชัน updateAdvancedMeta() ให้เรียกใช้ฟังก์ชันที่ปรับปรุงแล้ว
-function updateAdvancedMeta({ title, description, canonicalUrl, image, profiles }) {
-    // ... โค้ดสำหรับ Meta Tags และ Canonical เดิม ...
-    
-    // เรียกใช้ฟังก์ชัน Schema ที่รวมทุกอย่างแล้ว
-    updateSchemaJSONLD(title, description, canonicalUrl, image, profiles);
-}
+
 // ==========================================================
 // 🧱 Profile Card (ไม่มี Schema) - เวอร์ชันสมบูรณ์
 // ==========================================================
