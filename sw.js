@@ -4,7 +4,7 @@ if (workbox) {
   console.log(`[SW] Workbox loaded v7.1.0`);
 
   const CACHE_VERSION = 'v20251112_FINAL';
-  const OFFLINE_PAGE = '/offline.html';
+  const OFFLINE_PAGE = '/offline';
   const API_BLACKLIST = ['supabase.co', 'google.com'];
 
   self.addEventListener('install', () => self.skipWaiting());
