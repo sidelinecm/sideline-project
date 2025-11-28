@@ -42,7 +42,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
  <!-- Preload CSS สำคัญ -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="styles.css" as="/style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
 
   <!-- Preload Font -->
@@ -334,10 +334,9 @@ footer p {
 <header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
     <div class="container mx-auto px-6 h-14 flex items-center justify-between">
         
-        <a href=/ aria-label="กลับไปหน้าแรก SidelineChiangmai">
-<!-- ✅ โลโก้ตรงสัดส่วน -->
-<img src=/images/logo-sidelinechiangmai.webp srcset="/images/logo-sidelinechiangmai@2×.webp 2x" alt="โลโก้ Sideline Chiang Mai" width=245 height=30 class="h-[30px] w-auto mx-auto md:mx-0" decoding=async>
-    </a>
+       <a href="/" aria-label="กลับไปหน้าแรก" class="flex-shrink-0 flex items-center p-2 bg-gradient-to-tr from-pink-400 via-purple-500 to-indigo-600 rounded-lg shadow-lg hover:scale-105 hover:shadow-xl transition-transform transition-shadow duration-300">
+  <img src="/images/logo-sidelinechiangmai.webp" width="250" height="82" class="w-[250px] h-[82px] object-contain" />
+</a>
 
         <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 dark:text-gray-400 mt-2">
             อัปเดต: <span id="last-updated-time" class="font-semibold text-red-600 dark:text-red-400">กำลังโหลด...</span>
