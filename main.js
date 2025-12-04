@@ -11,9 +11,9 @@ gsap.registerPlugin(ScrollTrigger);
     const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
     const STORAGE_BUCKET = 'profile-images';
-    const PROFILES_PER_PAGE = 100;
-    const PROFILES_PER_PROVINCE_ON_INDEX = 100;
-    const SKELETON_CARD_COUNT = 100;
+    const PROFILES_PER_PAGE = 60;
+    const PROFILES_PER_PROVINCE_ON_INDEX = 60;
+    const SKELETON_CARD_COUNT = 30;
     const LAST_PROVINCE_KEY = 'sidelinecm_last_province'; // Key for localStorage
 
     // --- STATE & CACHE ---
