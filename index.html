@@ -1,3 +1,4 @@
+
 <!DOCTYPE html> 
 <html lang="th" class="scroll-smooth antialiased dark:bg-gray-900 dark:text-gray-100 dark">
 <head>
@@ -42,7 +43,8 @@
 <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 
 <!-- เปลี่ยนจาก cdn.jsdelivr.net เป็น esm.sh เพื่อเตรียมโหลด Supabase ตัวใหม่ -->
-<link rel="preconnect" href="https://esm.sh" crossorigin>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
 <!-- Preload CSS สำคัญ (คงเดิมไว้ได้เลย ดีแล้วครับ) -->
 <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -950,13 +952,6 @@ footer p {
 <!-- โหลด main.js -->
 <script type="module" src="/main.js"></script>
 
-<script>
-  // เติมปีปัจจุบันอัตโนมัติ
-  document.addEventListener("DOMContentLoaded", () => {
-    const yearEl = document.getElementById("currentYear");
-    if(yearEl) yearEl.textContent = new Date().getFullYear();
-  });
-</script>
 
 <!-- เพิ่ม class 'loaded' และลงทะเบียน Service Worker -->
 <script>
@@ -983,5 +978,4 @@ footer p {
 
 </body>
 </html>
-
 

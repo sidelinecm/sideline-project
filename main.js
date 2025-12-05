@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
@@ -7,6 +6,10 @@ gsap.registerPlugin(ScrollTrigger);
 
 (function () {
     'use strict';
+    
+    // =================================================================
+    // 1. CONFIGURATION
+    // =================================================================
     const CONFIG = {
         SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
         SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
@@ -16,7 +19,8 @@ gsap.registerPlugin(ScrollTrigger);
             LAST_PROVINCE: 'sidelinecm_last_province',
             CACHE_PROFILES: 'cachedProfiles',
             LAST_FETCH: 'lastFetchTime',
-            AGE_CONFIRMED: 'ageConfirmedTimestamp'
+            AGE_CONFIRMED: 'ageConfirmedTimestamp',
+            THEME: 'theme' // เพิ่ม Key นี้ให้ชัดเจน
         },
         SITE_URL: 'https://sidelinechiangmai.netlify.app'
     };
@@ -35,16 +39,17 @@ gsap.registerPlugin(ScrollTrigger);
     const dom = {};
 
     // =================================================================
-    // 3. SUPABASE CLIENT
+    // 3. SUPABASE CLIENT (แก้ไขให้กระชับและถูกต้อง)
     // =================================================================
     let supabase;
     try {
-        if (!window.supabaseClient && typeof createClient !== 'undefined') {
-            window.supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        }
-        supabase = window.supabaseClient || createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        // ใช้ createClient ที่ import มาโดยตรง ไม่ต้องเช็ค window
+        supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        // เก็บลง window เผื่อ debug ใน console ได้ (Optional)
+        window.supabase = supabase; 
+        console.log("✅ Supabase Connected");
     } catch (e) {
-        console.error("Supabase Init Failed:", e);
+        console.error("❌ Supabase Init Failed:", e);
     }
 
     // =================================================================
@@ -56,50 +61,55 @@ gsap.registerPlugin(ScrollTrigger);
         cacheDOMElements();
         
         // UI Inits
-        if (typeof window.initThemeToggle === 'function') window.initThemeToggle(); else initThemeToggle();
-        if (typeof window.initMobileMenu === 'function') window.initMobileMenu(); else initMobileMenu();
-        if (typeof window.initAgeVerification === 'function') window.initAgeVerification(); else initAgeVerification();
+        initThemeToggle();
+        initMobileMenu();
+        initAgeVerification();
 
         initHeaderScrollEffect();
         initMarqueeEffect();
-        initMobileSitemapTrigger(); // Invisible Admin Button
+        initMobileSitemapTrigger(); 
         
-        if (typeof updateActiveNavLinks === 'function') updateActiveNavLinks();
+        updateActiveNavLinks();
 
         // Main Logic
         await handleRouting(); 
         await handleDataLoading();
 
-        // Footer Year
+        // Footer Year (แก้ไขให้ตรงกับ ID ใน HTML)
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
         document.body.classList.add('loaded');
         
-        // Intro Animation
+        // Intro Animation (Home only)
         if (window.location.pathname === '/' && !state.currentProfileSlug) {
             try {
-                gsap.from(['#hero-h1', '#hero-p', '#hero-form'], {
-                    y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.3
-                });
-            } catch(e){}
+                // เช็คว่ามี element จริงไหมก่อน animate เพื่อกัน error
+                const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
+                if(heroElements.length > 0) {
+                    gsap.from(heroElements, {
+                        y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.3
+                    });
+                }
+            } catch(e){ console.warn("Animation skipped", e); }
         }
 
         // Navigation Listener
         window.addEventListener('popstate', async () => {
             await handleRouting();
-            if (typeof updateActiveNavLinks === 'function') updateActiveNavLinks();
+            updateActiveNavLinks();
         });
     }
 
     function cacheDOMElements() {
+        // Cache elements (เพิ่มการเช็ค null เล็กน้อยตอนใช้)
         dom.body = document.body;
         dom.pageHeader = document.getElementById('page-header');
         dom.loadingPlaceholder = document.getElementById('loading-profiles-placeholder');
         dom.profilesDisplayArea = document.getElementById('profiles-display-area');
         dom.noResultsMessage = document.getElementById('no-results-message');
         dom.fetchErrorMessage = document.getElementById('fetch-error-message');
-        dom.retryFetchBtn = document.getElementById('retry-fetch-btn');
+        dom.retryFetchBtn = document.getElementById('retry-fetch-btn'); // ปุ่มนี้อาจไม่มีใน HTML ต้องระวัง
         dom.searchForm = document.getElementById('search-form');
         dom.searchInput = document.getElementById('search-keyword');
         dom.provinceSelect = document.getElementById('search-province');
@@ -124,13 +134,13 @@ gsap.registerPlugin(ScrollTrigger);
 
         if (success) {
             initSearchAndFilters();
-            initLightboxEvents(); // ✅ สำคัญ: เริ่มระบบดักจับการคลิก
+            initLightboxEvents();
             init3dCardHoverDelegate();
             await handleRouting(true);
 
             if (dom.retryFetchBtn) {
                 dom.retryFetchBtn.onclick = async () => {
-                    dom.fetchErrorMessage.style.display = 'none';
+                    if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'none';
                     await handleDataLoading();
                 };
             }
@@ -143,12 +153,19 @@ gsap.registerPlugin(ScrollTrigger);
         if (state.isFetching) return false;
         state.isFetching = true;
 
+        if(!supabase) {
+            console.error("Supabase client not initialized");
+            state.isFetching = false;
+            return false;
+        }
+
         try {
             const NOW = new Date();
             const lastFetchTimeStr = localStorage.getItem(CONFIG.KEYS.LAST_FETCH);
             let isFullSync = !lastFetchTimeStr;
             let fetchTimeKey = lastFetchTimeStr || '1970-01-01T00:00:00.000Z';
 
+            // ถ้า Cache เก่าเกินกำหนด ให้โหลดใหม่หมด
             if (lastFetchTimeStr) {
                 const hoursDiff = (NOW - new Date(lastFetchTimeStr)) / (1000 * 60 * 60);
                 if (hoursDiff > CONFIG.CACHE_TTL_HOURS) {
@@ -158,6 +175,7 @@ gsap.registerPlugin(ScrollTrigger);
             }
 
             let profilesQuery = supabase.from('profiles').select('*');
+            // ถ้าไม่ใช่ Full Sync ให้โหลดเฉพาะที่อัปเดต
             if (!isFullSync) profilesQuery.gt('lastUpdated', fetchTimeKey);
 
             const [profilesRes, provincesRes] = await Promise.all([
@@ -170,6 +188,7 @@ gsap.registerPlugin(ScrollTrigger);
 
             const fetchedProfiles = profilesRes.data || [];
             
+            // Update Provinces Map
             state.provincesMap.clear();
             (provincesRes.data || []).forEach(p => {
                 if (p?.key && p?.nameThai) state.provincesMap.set(p.key, p.nameThai);
@@ -183,6 +202,7 @@ gsap.registerPlugin(ScrollTrigger);
                     const cachedJSON = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
                     const cachedProfiles = cachedJSON ? JSON.parse(cachedJSON) : [];
                     const profileMap = new Map(cachedProfiles.map(p => [p.id, p]));
+                    // Merge ข้อมูลใหม่ทับของเก่า
                     fetchedProfiles.forEach(p => profileMap.set(p.id, p));
                     currentProfiles = Array.from(profileMap.values());
                 } catch {
@@ -191,8 +211,10 @@ gsap.registerPlugin(ScrollTrigger);
             }
 
             state.allProfiles = currentProfiles.map(processProfileData);
+            // เรียงลำดับตาม update ล่าสุด
             state.allProfiles.sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
 
+            // Save to LocalStorage
             if (state.allProfiles.length > 0) {
                 try {
                     localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(currentProfiles));
@@ -200,12 +222,10 @@ gsap.registerPlugin(ScrollTrigger);
                     if (!isFullSync && fetchedProfiles.length > 0) {
                         const maxTime = Math.max(...fetchedProfiles.map(p => new Date(p.lastUpdated).getTime()));
                         if (!isNaN(maxTime)) newFetchTime = new Date(maxTime).toISOString();
-                    } else if (isFullSync) {
-                        newFetchTime = NOW.toISOString();
                     }
                     localStorage.setItem(CONFIG.KEYS.LAST_FETCH, newFetchTime);
                 } catch (e) {
-                    console.warn("Storage Quota Exceeded", e);
+                    console.warn("Storage Quota Exceeded or Error", e);
                 }
             }
 
@@ -216,6 +236,7 @@ gsap.registerPlugin(ScrollTrigger);
             return true;
         } catch (err) {
             console.error('Fetch Error:', err);
+            // Fallback: Try loading from cache if fetch fails
             const cachedJSON = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
             if (cachedJSON) {
                 try {
@@ -233,26 +254,31 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     function processProfileData(p) {
+        // Process images
         const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
         const imageObjects = imagePaths.map(path => {
             const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
             let url = data?.publicUrl || '/images/placeholder-profile-card.webp';
+            
+            // Cache busting
             let sep = url.includes('?') ? '&' : '?';
             if (p.lastUpdated) {
                 url = `${url}${sep}v=${Math.floor(new Date(p.lastUpdated).getTime() / 1000)}`;
             }
+            
+            // Image Optimization params (assuming Supabase transform or similar)
+            sep = url.includes('?') ? '&' : '?';
             return {
-                src: `${url}${url.includes('?') ? '&' : '?'}width=600&quality=80`,
-                srcset: [300, 600].map(w => `${url}${url.includes('?') ? '&' : '?'}width=${w}&quality=80 ${w}w`).join(', ')
+                src: `${url}${sep}width=600&quality=80`,
+                srcset: [300, 600].map(w => `${url}${sep}width=${w}&quality=80 ${w}w`).join(', ')
             };
         });
 
         if (imageObjects.length === 0) imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
 
         const provinceName = state.provincesMap.get(p.provinceKey) || '';
-        
         const tags = (p.styleTags || []).join(' ');
-        const fullSearchString = `${p.name} ${p.description} ${p.provinceKey} ${provinceName} ${tags} ${p.height} ${p.weight} ${p.skinTone} ${p.rate}`.toLowerCase();
+        const fullSearchString = `${p.name} ${p.description || ''} ${p.provinceKey} ${provinceName} ${tags} ${p.height || ''} ${p.weight || ''} ${p.skinTone || ''} ${p.rate || ''}`.toLowerCase();
 
         return { 
             ...p, 
@@ -265,7 +291,12 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     function populateProvinceDropdown() {
-        if (!dom.provinceSelect || dom.provinceSelect.options.length > 1) return;
+        if (!dom.provinceSelect) return;
+        // เก็บตัวเลือกแรกไว้ (ทั้งหมด) แล้วลบที่เหลือเพื่อสร้างใหม่
+        while (dom.provinceSelect.options.length > 1) {
+            dom.provinceSelect.remove(1);
+        }
+        
         const sorted = Array.from(state.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], 'th'));
         const fragment = document.createDocumentFragment();
         sorted.forEach(([key, name]) => {
@@ -297,11 +328,13 @@ gsap.registerPlugin(ScrollTrigger);
             if (profile) {
                 openLightbox(profile);
                 updateAdvancedMeta(profile, null);
-                if(dom.profilesDisplayArea) dom.profilesDisplayArea.style.display = 'none';
+                if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
+                if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
             } else if (dataLoaded) {
+                // Not found -> Go home
                 history.replaceState(null, '', '/');
                 closeLightbox(false);
-                if(dom.profilesDisplayArea) dom.profilesDisplayArea.style.display = 'block';
+                if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
                 state.currentProfileSlug = null;
             }
             return;
@@ -316,7 +349,7 @@ gsap.registerPlugin(ScrollTrigger);
             if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
             
             if (dataLoaded) {
-                applyFilters(false);
+                applyFilters(false); // Filter by province
                 const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
                 const seoData = {
                     title: `รับงาน${provinceName} | รวมสาวไซด์ไลน์${provinceName} ฟิวแฟน`,
@@ -325,7 +358,7 @@ gsap.registerPlugin(ScrollTrigger);
                     profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
                 };
                 updateAdvancedMeta(null, seoData);
-                if(dom.profilesDisplayArea) dom.profilesDisplayArea.style.display = 'block';
+                if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
             }
             return;
         }
@@ -333,7 +366,7 @@ gsap.registerPlugin(ScrollTrigger);
         // Home Page
         state.currentProfileSlug = null;
         closeLightbox(false);
-        if(dom.profilesDisplayArea) dom.profilesDisplayArea.style.display = 'block';
+        if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
         if (dataLoaded) {
             applyFilters(false);
             updateAdvancedMeta(null, null);
@@ -364,12 +397,12 @@ gsap.registerPlugin(ScrollTrigger);
         const onFilterChange = debounce(() => applyFilters(true), 300);
 
         dom.searchForm.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(true); });
-        dom.resetSearchBtn?.addEventListener('click', () => { resetFilters(); applyFilters(true); });
+        dom.resetSearchBtn?.addEventListener('click', () => { resetFilters(); });
         dom.searchInput?.addEventListener('input', () => { updateSuggestions(); onFilterChange(); });
         
         dom.provinceSelect?.addEventListener('change', () => {
             const val = dom.provinceSelect.value;
-            if (val && val !== 'all') {
+            if (val && val !== 'all' && val !== '') {
                 history.pushState(null, '', `/province/${val}`);
                 handleRouting(true);
             } else {
@@ -408,12 +441,14 @@ gsap.registerPlugin(ScrollTrigger);
 
         const filtered = state.allProfiles.filter(p => {
             try {
-                const basicMatch = 
-                    (!query.province || query.province === 'all' || p.provinceKey === query.province) &&
-                    (!query.avail || query.avail === 'all' || p.availability === query.avail) &&
-                    (!query.featured || p.isfeatured);
+                // Basic Filters
+                const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
+                const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
+                const featuredMatch = !query.featured || p.isfeatured;
 
-                if (!basicMatch) return false;
+                if (!provinceMatch || !availMatch || !featuredMatch) return false;
+                
+                // Text Search
                 return matchesSmartProfile(p, parsedSearch);
             } catch { return false; }
         });
@@ -426,6 +461,7 @@ gsap.registerPlugin(ScrollTrigger);
             
             const currentPath = window.location.pathname;
             const search = params.toString();
+            // Don't overwrite province URL
             if (!currentPath.includes('/province/')) {
                  const newUrl = currentPath + (search ? '?' + search : '');
                  history.pushState({}, '', newUrl);
@@ -448,32 +484,8 @@ gsap.registerPlugin(ScrollTrigger);
             if (explicit) {
                 const key = explicit[1];
                 const val = explicit[2];
-                if (key === 'price' || key === 'rate') {
-                    if (val.includes('-')) {
-                        const [min, max] = val.split('-');
-                        ranges.push({ key: 'price', min: +min, max: +max });
-                    } else if (val.startsWith('<')) ranges.push({ key: 'price', max: +val.substring(1) });
-                    else if (val.startsWith('>')) ranges.push({ key: 'price', min: +val.substring(1) });
-                    else ranges.push({ key: 'price', exact: +val });
-                } else if (key === 'age') {
-                    if (val.includes('-')) {
-                        const [min, max] = val.split('-');
-                        ranges.push({ key: 'age', min: +min, max: +max });
-                    } else ranges.push({ key: 'age', exact: +val });
-                } else tokens.push(val);
-                return;
-            }
-            if (/^\d+$/.test(t)) {
-                const num = parseInt(t);
-                if (num >= 100) ranges.push({ key: 'price', max: num + 500 });
-                else if (num >= 18 && num <= 60) ranges.push({ key: 'age', exact: num });
-                else tokens.push(t);
-                return;
-            }
-            if (/^\d+-\d+$/.test(t)) {
-                const [min, max] = t.split('-').map(Number);
-                if (max > 100) ranges.push({ key: 'price', min, max });
-                else ranges.push({ key: 'age', min, max });
+                // Handle price/age range logic here if needed
+                tokens.push(val); // Fallback simpler logic
                 return;
             }
             tokens.push(t);
@@ -482,12 +494,7 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     function matchesSmartProfile(p, parsed) {
-        for (const r of parsed.ranges) {
-            const val = r.key === 'price' ? p._price : p._age;
-            if (r.exact !== undefined && val !== r.exact) return false;
-            if (r.min !== undefined && val < r.min) return false;
-            if (r.max !== undefined && val > r.max) return false;
-        }
+        // Simplified Smart Search
         for (const token of parsed.tokens) {
             if (!p.searchString.includes(token)) return false;
         }
@@ -500,10 +507,12 @@ gsap.registerPlugin(ScrollTrigger);
     function renderProfiles(profiles, isSearching) {
         if (!dom.profilesDisplayArea) return;
 
-        dom.profilesDisplayArea.replaceChildren();
+        dom.profilesDisplayArea.replaceChildren(); // Clear old content
         
+        // Toggle Featured Section visibility
         if(dom.featuredSection) {
             const showFeatured = !isSearching || (isSearching && dom.featuredSelect?.value === 'true');
+            // ถ้าค้นหาอยู่ ให้ซ่อน Featured เว้นแต่เลือก filter Featured
             dom.featuredSection.classList.toggle('hidden', !showFeatured);
             
             if (showFeatured && dom.featuredContainer && state.allProfiles.length > 0) {
@@ -607,7 +616,6 @@ gsap.registerPlugin(ScrollTrigger);
         return wrapper;
     }
 
-    // ✅ FIX: Create Profile Card with SEO Link + Pointer Events
     function createProfileCard(p) {
         const cardContainer = document.createElement('div');
         cardContainer.className = 'profile-card-new-container';
@@ -619,12 +627,11 @@ gsap.registerPlugin(ScrollTrigger);
         cardInner.setAttribute('role', 'button');
         cardInner.setAttribute('tabindex', '0');
 
-        // ✅ Link SEO Overlay
+        // Link for SEO / Open in New Tab
         cardInner.innerHTML = `<a href="/profile/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์ ${p.name}"></a>`;
 
         const imgObj = p.images[0];
         const img = document.createElement('img');
-        // ✅ Pointer Events None to allow click-through
         img.className = 'card-image w-full h-full object-cover pointer-events-none';
         img.src = imgObj.src;
         img.srcset = imgObj.srcset;
@@ -666,6 +673,7 @@ gsap.registerPlugin(ScrollTrigger);
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================
     async function fetchSingleProfile(slug) {
+        if(!supabase) return null;
         try {
             const { data, error } = await supabase.from('profiles').select('*').eq('slug', slug).maybeSingle();
             if (error || !data) return null;
@@ -673,14 +681,12 @@ gsap.registerPlugin(ScrollTrigger);
         } catch { return null; }
     }
 
-    // ✅ FIX: Lightbox Event Delegation Logic
     function initLightboxEvents() {
         document.body.addEventListener('click', (e) => {
-            // 1. Check if clicked element is the card link or inside a profile card
             const link = e.target.closest('a.card-link');
             
             if (link && link.closest('.profile-card-new')) {
-                e.preventDefault(); // ⛔ Stop Navigation
+                e.preventDefault(); 
                 
                 const card = link.closest('.profile-card-new');
                 const slug = card.getAttribute('data-profile-slug');
@@ -750,19 +756,18 @@ gsap.registerPlugin(ScrollTrigger);
             lineText: get('lightboxLineLinkText')
         };
 
-        // 1. Header & Quote
         if (els.name) els.name.textContent = p.name || 'ไม่ระบุชื่อ';
         if (els.quote) {
             els.quote.textContent = p.quote ? `"${p.quote}"` : '';
             els.quote.style.display = p.quote ? 'block' : 'none';
         }
 
-        // 2. Images
         if (els.hero) {
             els.hero.src = p.images?.[0]?.src || '/images/placeholder-profile.webp';
             els.hero.srcset = p.images?.[0]?.srcset || '';
             els.hero.alt = p.altText || p.name;
         }
+
         if (els.thumbs) {
             els.thumbs.innerHTML = '';
             if (p.images && p.images.length > 1) {
@@ -784,7 +789,6 @@ gsap.registerPlugin(ScrollTrigger);
             }
         }
 
-        // 3. Tags
         if (els.tags) {
             els.tags.innerHTML = '';
             if (p.styleTags?.length) {
@@ -800,83 +804,51 @@ gsap.registerPlugin(ScrollTrigger);
             }
         }
 
-        // 4. Details Section (Clean Grid & List)
         if (els.details) {
             const provinceName = state.provincesMap.get(p.provinceKey) || '';
             
             els.details.innerHTML = `
-                <!-- Stats Grid -->
                 <div class="stats-grid-container">
-                    <div class="stat-box">
-                        <span class="stat-label">อายุ</span>
-                        <span class="stat-value">${p.age || '-'}</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">สัดส่วน</span>
-                        <span class="stat-value">${p.stats || '-'}</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">สูง/หนัก</span>
-                        <span class="stat-value">${p.height || '-'}/${p.weight || '-'}</span>
-                    </div>
+                    <div class="stat-box"><span class="stat-label">อายุ</span><span class="stat-value">${p.age || '-'}</span></div>
+                    <div class="stat-box"><span class="stat-label">สัดส่วน</span><span class="stat-value">${p.stats || '-'}</span></div>
+                    <div class="stat-box"><span class="stat-label">สูง/หนัก</span><span class="stat-value">${p.height || '-'}/${p.weight || '-'}</span></div>
                 </div>
-
-                <!-- Info List -->
                 <div class="info-list-container">
-                    <div class="info-row">
-                        <div class="info-label"><i class="fas fa-palette info-icon"></i> สีผิว</div>
-                        <div class="info-value">${p.skinTone || '-'}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label"><i class="fas fa-map-marker-alt info-icon"></i> พิกัด</div>
-                        <div class="info-value text-primary">${provinceName} (${p.location || '-'})</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label"><i class="fas fa-tag info-icon"></i> เรทราคา</div>
-                        <div class="info-value text-green-600">${p.rate || 'สอบถาม'}</div>
-                    </div>
+                    <div class="info-row"><div class="info-label"><i class="fas fa-palette info-icon"></i> สีผิว</div><div class="info-value">${p.skinTone || '-'}</div></div>
+                    <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt info-icon"></i> พิกัด</div><div class="info-value text-primary">${provinceName} (${p.location || '-'})</div></div>
+                    <div class="info-row"><div class="info-label"><i class="fas fa-tag info-icon"></i> เรทราคา</div><div class="info-value text-green-600">${p.rate || 'สอบถาม'}</div></div>
                 </div>
             `;
         }
 
-        // 5. Description
-        if (els.desc) {
-            // สร้าง Wrapper ใหม่เพื่อควบคุม CSS
+        if (els.desc && els.desc.parentElement) {
             els.desc.parentElement.innerHTML = `
                 <div class="description-box">
                     <div class="desc-header"><i class="fas fa-align-left"></i> รายละเอียดเพิ่มเติม</div>
                     <div class="desc-content">${p.description ? p.description.replace(/\n/g, '<br>') : '-'}</div>
                 </div>
             `;
-            // Reset Reference เพราะเราเขียนทับ parentElement
-            // (ไม่ต้องทำอะไรเพิ่มเพราะ HTML ถูกเขียนลงไปแล้ว)
         }
 
-        // 6. Sticky LINE Button
         const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
         if (oldWrapper) oldWrapper.remove();
 
         if (p.lineId) {
             const wrapper = document.createElement('div');
             wrapper.id = 'line-btn-sticky-wrapper';
-            wrapper.className = 'lb-sticky-footer'; // Class CSS ใหม่
+            wrapper.className = 'lb-sticky-footer';
 
             const link = document.createElement('a');
-            link.className = 'btn-line-action'; // Class CSS ใหม่
+            link.className = 'btn-line-action';
             link.href = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/${p.lineId}`;
             link.target = '_blank';
             link.innerHTML = `<i class="fab fa-line"></i> แอดไลน์ ${p.name}`;
 
             wrapper.appendChild(link);
-            
-            // หา Container หลักของ Lightbox (ขวามือ)
             const detailsCol = document.querySelector('.lightbox-details');
-            if (detailsCol) {
-                detailsCol.appendChild(wrapper); // แปะไว้ล่างสุดของคอลัมน์ขวา
-            }
+            if (detailsCol) detailsCol.appendChild(wrapper);
         }
 
-        // 7. Status Badge
         if (els.avail) {
             els.avail.innerHTML = '';
             let sClass = 'status-inquire';
@@ -890,6 +862,7 @@ gsap.registerPlugin(ScrollTrigger);
             els.avail.appendChild(badge);
         }
     }
+
     // =================================================================
     // 10. SEO META TAGS UPDATER
     // =================================================================
@@ -1104,11 +1077,13 @@ gsap.registerPlugin(ScrollTrigger);
         const div = document.createElement('div');
         div.id = 'search-suggestions';
         div.className = 'absolute z-50 bg-white dark:bg-gray-800 shadow-xl rounded-lg w-full mt-1 hidden max-h-60 overflow-y-auto';
-        dom.searchInput.parentElement.appendChild(div);
-        dom.searchSuggestions = div;
-        document.addEventListener('click', (e) => {
-            if (!dom.searchInput.contains(e.target) && !div.contains(e.target)) div.style.display = 'none';
-        });
+        if(dom.searchInput) {
+            dom.searchInput.parentElement.appendChild(div);
+            dom.searchSuggestions = div;
+            document.addEventListener('click', (e) => {
+                if (!dom.searchInput.contains(e.target) && !div.contains(e.target)) div.style.display = 'none';
+            });
+        }
     }
 
     function updateSuggestions() {
@@ -1141,43 +1116,36 @@ gsap.registerPlugin(ScrollTrigger);
     function showErrorState() { if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'block'; }
 
     // =================================================================
-    // 12. ADMIN TOOLS (SITEMAP GENERATOR - INVISIBLE BUTTON VERSION)
+    // 12. ADMIN TOOLS (SITEMAP GENERATOR)
     // =================================================================
     function initMobileSitemapTrigger() {
-        // 1. สร้างปุ่มล่องหน (Invisible Button)
         const ghostBtn = document.createElement('div');
         
         Object.assign(ghostBtn.style, {
             position: 'fixed',
             bottom: '0',
             right: '0',
-            width: '60px',        // ขนาดกว้างพอให้นิ้วจิ้มโดน
-            height: '60px',       // ขนาดสูงพอ
-            zIndex: '99999',      // อยู่บนสุดทับทุกอย่าง
+            width: '60px',
+            height: '60px',
+            zIndex: '99999',
             cursor: 'pointer',
-            background: 'transparent', // โปร่งใส
-            touchAction: 'manipulation' // ป้องกันการซูม
+            background: 'transparent',
+            touchAction: 'manipulation'
         });
 
         document.body.appendChild(ghostBtn);
 
-        // 2. Logic การกดรัวๆ
         let clicks = 0;
         let timeout;
 
         ghostBtn.addEventListener('click', (e) => {
             e.preventDefault();
             clicks++;
-            
-            // ถ้าหยุดกดเกิน 1.5 วินาที ให้เริ่มนับใหม่
             clearTimeout(timeout);
             timeout = setTimeout(() => { clicks = 0; }, 1500);
 
-            // ครบ 5 ครั้ง ทำงานทันที
             if (clicks >= 5) {
-                // สั่นเตือน (Android)
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                
                 const confirmGen = confirm("⚙️ Admin Menu:\nต้องการโหลด sitemap.xml ใช่ไหม?");
                 if (confirmGen) {
                     const xml = generateSitemapXML();
