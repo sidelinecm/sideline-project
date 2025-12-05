@@ -1,266 +1,636 @@
-/* ===============================
-   FONT
-================================== */
+/* ==========================================================================
+   1. CORE SETTINGS & THEME VARIABLES
+   ========================================================================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Color Palette (HSL for easy opacity manipulation) */
+  --primary: 330 81% 60%;       /* #db2777 (Pink) */
+  --primary-glow: 330 81% 75%;
+  --secondary: 270 50% 60%;     /* #9333ea (Purple) */
+  --background: 0 0% 100%;      /* White */
+  --foreground: 222 47% 11%;    /* Dark Blue/Black */
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  
+  --radius: 1rem;
+  --header-height: 4rem;
+}
+
+.dark {
+  --background: 222 47% 11%;    /* Slate-900 */
+  --foreground: 210 40% 98%;    /* Whiteish */
+  --card: 217 33% 17%;          /* Slate-800 */
+  --card-foreground: 210 40% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --muted: 217 33% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+}
+
+/* Base Reset & Fonts */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Prompt', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  overflow-x: hidden; /* 🛡️ ป้องกันหน้าจอล้นแนวนอน 100% */
+  width: 100%;
+  min-height: 100vh;
+  line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Fonts Loading */
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local("Prompt Regular"),
-       url(/fonts/prompt-v11-latin_thai-regular.woff2) format("woff2");
+  src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: local("Prompt Bold"),
-       url(/fonts/prompt-v11-latin_thai-700.woff2) format("woff2");
+  src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
-@font-face {
-  font-family: 'Prompt';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: local("Prompt ExtraBold"),
-       url(/fonts/prompt-v11-latin_thai-800.woff2) format("woff2");
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--primary)); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--secondary)); }
+
+/* ==========================================================================
+   2. TYPOGRAPHY & TEXT EFFECTS
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+  color: hsl(var(--foreground));
 }
-:root {
-  --background: hsl(210, 15%, 98%); /* สีเทาอ่อนมาก สำหรับพื้นหลัง */
-  --foreground: hsl(210, 10%, 20%); /* สีข้อความเข้ม */
-  --card: hsl(0, 0%, 100%);        /* สีการ์ดสะอาด */
-  --primary: hsl(45, 100%, 55%);   /* ทองคำสด */
-  --primary-glow: hsl(45, 100%, 65%);
-  --secondary: hsl(330, 60%, 65%); /* โรสโกลด์ */
-  --secondary-glow: hsl(330, 60%, 75%);
-  --accent: hsl(20, 70%, 85%);     /* สีพีชอ่อน */
-  --muted: hsl(0, 0%, 95%);       /* สีเทาอ่อนมาก */
-  --border: hsl(0, 0%, 80%);      /* เทาอ่อนเข้ม */
-  --ring: hsl(210, 15%, 30%);
-  --destructive: hsl(0, 85%, 60%);
-  --metallic-silver: hsl(0, 0%, 80%);
-  --matte-black: hsl(0, 0%, 10%);
+
+/* Text Shimmer (ตัวหนังสือวิบวับ) */
+.text-shimmer {
+  background: linear-gradient(90deg, #ec4899, #a855f7, #ec4899);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 3s linear infinite;
+  display: inline-block;
 }
+@keyframes textShimmer { to { background-position: 200% center; } }
+
+/* Fluid Typography (ปรับขนาดตามจอ) */
+h1 { font-size: clamp(1.875rem, 4vw, 3rem); line-height: 1.2; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.3; }
+
+/* ==========================================================================
+   3. PROFILE CARDS (Responsive & Proportional)
+   ========================================================================== */
+.profile-card-new-container {
+  perspective: 1000px;
+  width: 100%;
+}
+
+.profile-card-new {
+  position: relative;
+  background-color: hsl(var(--card));
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   
-
-/* หัวข้อใหญ่ (h1) ขนาดเล็กลง พร้อม Shimmer Effect */
-h1 {
-    font-size: 2rem; 
-    font-weight: 700;
-    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
-    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 20px 0;
-    padding: 0 10px;
-    text-align: center;
-    background-size: 200% auto; /* สำคัญสำหรับ Shimmer */
-    animation: shimmer 3s infinite;
-}
-h2 {
-    font-size: 1.75rem;
-    margin-top: 20px;
-    /* Shimmer Effect: ขาว -> ชมพู -> ม่วง */
-    background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 3s infinite;
-    background-size: 200% auto;
+  /* 📐 สัดส่วนทองคำ 3:4 (Portrait) คงที่เสมอ */
+  aspect-ratio: 3/4; 
+  width: 100%;
+  
+  /* Performance Optimization */
+  transform: translateZ(0); 
+  will-change: transform;
 }
 
-/* เอฟเฟกต์ Shimmer (ใช้สำหรับ H1 และ H2) */
-@keyframes shimmer {
-  0% { background-position: -100% 0; }
-  100% { background-position: 100% 0; }
+.profile-card-new:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
 }
 
-/* ส่วน Hero */
-section {
-    padding: 20px 20px;
-    text-align: center;
+.card-image-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
-/* styles.css: เพิ่ม/แก้ไขส่วนนี้ */
 
-/* Container หลักของรูปภาพใน Profile Card */
-.profile-card-image-container {
+/* รูปภาพในการ์ด */
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* เต็มกรอบไม่เบี้ยว */
+  object-position: center top; /* โฟกัสช่วงบน (หน้า) */
+  transition: transform 0.5s ease;
+}
+
+.profile-card-new:hover .card-image {
+  transform: scale(1.08);
+}
+
+/* Overlay ไล่เฉดสี */
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 30%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem;
+  pointer-events: none; /* คลิกทะลุได้ */
+  z-index: 10;
+}
+
+/* ข้อมูลในการ์ด */
+.card-info {
+  transform: translateY(5px);
+  transition: transform 0.3s ease;
+}
+.profile-card-new:hover .card-info {
+  transform: translateY(0);
+}
+
+
+
+/* ==========================================================================
+   6. SEARCH & UI COMPONENTS
+   ========================================================================== */
+#search-section {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.dark #search-section {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255,255,255,0.1);
+}
+
+#search-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Fields */
+input[type="search"], select {
+  height: 3rem; /* 48px มาตรฐาน Mobile Touch Target */
+  font-size: 0.95rem;
+}
+
+/* Social Marquee */
+.social-marquee-wrap {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Skeleton Loading */
+.skeleton-card {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--border)) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: var(--radius);
+  aspect-ratio: 3/4;
+}
+@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ==========================================================================
+   7. UTILITIES
+   ========================================================================== */
+/* Mobile Sidebar Overlay */
+#menu-backdrop {
+  background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Button Animations */
+.btn, button, a.button {
+  active: scale: 0.98;
+  transition: transform 0.1s;
+}
+
+/* Container Adjustments */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 640px) { .container { max-width: 640px; } }
+@media (min-width: 768px) { .container { max-width: 768px; } }
+@media (min-width: 1024px) { .container { max-width: 1024px; } }
+@media (min-width: 1280px) { .container { max-width: 1280px; } }
+
+
+/* ==========================================================================
+   🎨 LIGHTBOX DESIGN - MOBILE APP STYLE (FIXED)
+   ========================================================================== */
+
+/* 1. พื้นที่แสดงข้อมูล (ขวามือ/ล่าง) */
+.lightbox-details {
+    background-color: hsl(var(--card)); /* สีพื้นหลังทึบ */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     position: relative;
-    /* pt-[133.33%] ใช้เพื่อให้รูปภาพมีสัดส่วน 3:4 (400/300) */
-    padding-top: 133.33%; 
-    overflow: hidden;
-    /* สำคัญ: ให้องค์ประกอบที่อยู่ภายในแสดงผลได้ */
-    z-index: 1; 
 }
 
-/* ตรวจสอบให้แน่ใจว่ารูปภาพหลัก ไม่ได้ถูกซ่อนโดยไม่ตั้งใจ */
-.profile-card-image-container > img {
+/* 2. ส่วนหัวข้อ (Header Group) */
+.lightbox-header-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+#lightbox-profile-name-main {
+    font-size: 1.75rem; /* ใหญ่ชัดเจน */
+    font-weight: 800;
+    color: hsl(var(--foreground));
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+#lightboxQuote {
+    font-size: 0.95rem;
+    color: hsl(var(--primary)); /* สีชมพู */
+    font-style: italic;
+    font-weight: 500;
+}
+
+/* 3. ตารางสถิติ (Stats Grid) - ทำให้ดูพรีเมียม */
+.stats-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    background: linear-gradient(to bottom right, rgba(0,0,0,0.02), rgba(0,0,0,0.05));
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 1rem;
+    padding: 1rem 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.dark .stats-grid-container {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: hsl(var(--foreground));
+}
+
+/* 4. รายการข้อมูล (Info List) */
+.info-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background-color: hsl(var(--background));
+    border-radius: 1rem;
+    border: 1px solid hsl(var(--border));
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* ชิดซ้ายขวา */
+    padding: 1rem;
+    border-bottom: 1px solid hsl(var(--border));
+}
+.info-row:last-child { border-bottom: none; }
+
+.info-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+}
+
+.info-icon {
+    color: hsl(var(--primary));
+    width: 20px;
+    text-align: center;
+}
+
+.info-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    text-align: right;
+}
+
+/* 5. กล่องรายละเอียด (Description Box) */
+.description-box {
+    background-color: hsl(var(--muted) / 0.5);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 5rem; /* เว้นที่ให้ปุ่ม Line */
+}
+
+.desc-header {
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: hsl(var(--foreground));
+}
+
+.desc-content {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: hsl(var(--foreground) / 0.8);
+    white-space: pre-wrap;
+}
+/* สีเขียว LINE แบบ Gradient หรูหรา */
+background: linear-gradient(135deg, #06C755 0%, #00B900 100%);
+
+/* Typography */
+color: #ffffff !important;
+font-size: 1.25rem;
+font-weight: 800;
+letter-spacing: 0.03em;
+text-decoration: none;
+
+/* Shape */
+border-radius: 50px; /* ทรงแคปซูลโค้งมน */
+border: 2px solid rgba(255,255,255,0.2); /* ขอบขาวจางๆ เพิ่มมิติ */
+
+/* เงาฟุ้งสีเขียว (Glow) */
+box-shadow: 0 8px 25px -5px rgba(6, 199, 85, 0.5), 
+            0 4px 10px -3px rgba(6, 199, 85, 0.3);
+
+transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+overflow: hidden;
+/* ==========================================================================
+   🎨 MODERN STICKY LINE BUTTON (PREMIUM STYLE)
+   ========================================================================== */
+
+/* Wrapper ที่ลอยอยู่ด้านล่าง (Sticky) */
+.lb-sticky-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    
+    /* จัดระยะห่างให้สวยงาม */
+    margin: 0 -1.5rem -1.5rem -1.5rem; 
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+
+    /* พื้นหลังแบบ Glassmorphism (เบลอๆ ไล่เฟด) */
+    background: linear-gradient(to top, 
+        hsl(var(--card)) 85%, 
+        rgba(255,255,255,0.8) 95%, 
+        transparent 100%
+    );
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    
+    /* ใน Dark Mode ปรับสีพื้นหลังให้เข้ากัน */
+    .dark & {
+        background: linear-gradient(to top, 
+            hsl(var(--card)) 85%, 
+            rgba(30, 41, 59, 0.8) 95%, 
+            transparent 100%
+        );
+    }
+}
+
+/* ปุ่ม LINE ดีไซน์ใหม่ */
+.btn-line-action {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 3.8rem; /* สูงขึ้นนิดนึงให้กดง่าย */
+    
+    /* สีเขียว LINE แบบ Gradient หรูหรา */
+    background: linear-gradient(135deg, #06C755 0%, #00B900 100%);
+    
+    /* Typography */
+    color: #ffffff !important;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    
+    /* Shape */
+    border-radius: 50px; /* ทรงแคปซูลโค้งมน */
+    border: 2px solid rgba(255,255,255,0.2); /* ขอบขาวจางๆ เพิ่มมิติ */
+    
+    /* เงาฟุ้งสีเขียว (Glow) */
+    box-shadow: 0 8px 25px -5px rgba(6, 199, 85, 0.5), 
+                0 4px 10px -3px rgba(6, 199, 85, 0.3);
+    
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+}
+
+/* เอฟเฟกต์แสงพาดผ่าน (Shine Effect) */
+.btn-line-action::after {
+    content: "";
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: -100%;
+    width: 50%;
     height: 100%;
-    object-fit: cover;
-    z-index: 2; /* ให้อยู่เหนือ Skeleton (ถ้ามี) */
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-20deg);
+    transition: 0.5s;
 }
 
-/* ส่วนนี้คือ CSS สำหรับ Skeleton ที่เราเพิ่มเข้าไป */
-.skeleton-card {
-    /* ...โค้ด P3 เดิม... */
-    z-index: 5; /* ถ้า Skeleton มี Z-index สูงเกินไปอาจบังรูปภาพจริง */
+/* Interactive State */
+.btn-line-action:hover {
+    transform: translateY(-3px) scale(1.02); /* ลอยขึ้นเล็กน้อย */
+    box-shadow: 0 12px 30px -5px rgba(6, 199, 85, 0.7);
+    background: linear-gradient(135deg, #05d65a 0%, #00c900 100%);
 }
 
-/* เมื่อโหลดข้อมูลเสร็จแล้ว (ผ่าน JS) */
-body.loaded .skeleton-card {
-    display: none !important;
+.btn-line-action:hover::after {
+    left: 150%; /* แสงวิ่งผ่าน */
+    transition: 0.7s ease-in-out;
 }
 
-/* คำอธิบาย */
-p {
-    margin-top: 10px;
-    max-width: 800px;
-    margin-left:auto; margin-right:auto;
-    font-size: 1rem;
-    color: #eee;
+.btn-line-action:active {
+    transform: scale(0.96); /* กดยุบลง */
+    box-shadow: 0 4px 15px -5px rgba(6, 199, 85, 0.5);
 }
 
-/* ปุ่มและลิงก์ (Gradient Pink/Purple) */
-button, a.button {
-    /* Gradient: ม่วง -> ชมพู */
-    background: linear-gradient(135deg, #8A2BE2, #FF69B4); 
-    color: #fff;
-    padding: 12px 24px;
-    border: none; /* เพิ่ม border: none; */
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display:inline-block;
-    cursor: pointer;
-}
-button:hover, a.button:hover {
-    /* Hover Gradient: ชมพู -> ม่วง */
-    background: linear-gradient(135deg, #FF69B4, #8A2BE2);
-    /* Hover Shadow: ชมพูเข้ม */
-    box-shadow: 0 4px 15px rgba(255,105,180,0.8); 
+/* ไอคอนในปุ่ม */
+.btn-line-action i {
+    font-size: 2rem; /* ไอคอนใหญ่ */
+    margin-right: 0.75rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    transition: transform 0.3s;
 }
 
-/* Social media links */
-.social-links {
+.btn-line-action:hover i {
+    transform: rotate(-10deg) scale(1.1); /* ไอคอนขยับน่ารักๆ */
+}
+
+/* Animation เรียกร้องความสนใจ (Pulse) */
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(6, 199, 85, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0); }
+}
+
+.btn-line-action {
+    animation: pulse-green 2s infinite; /* ปุ่มจะเต้นตุบๆ เบาๆ */
+}
+/* ==========================================================================
+   📱 MOBILE SIDEBAR MENU (CLEAN & COMPACT)
+   ========================================================================== */
+
+/* ตัวกล่องเมนูหลัก */
+#sidebar {
+    background-color: hsl(var(--background)); /* สีพื้นหลังเดียวกับเว็บ */
+    border-left: 1px solid hsl(var(--border));
+    box-shadow: -10px 0 30px rgba(0,0,0,0.1); /* เงาฟุ้งๆ ด้านซ้าย */
+}
+
+.dark #sidebar {
+    background-color: hsl(var(--card)); /* โหมดมืดใช้สีการ์ดเข้มๆ */
+}
+
+/* หัวข้อเมนู (ด้านบนสุด) */
+#sidebar-nav-heading {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: hsl(var(--foreground));
+    letter-spacing: -0.01em;
+}
+
+/* ลิงก์เมนูแต่ละตัว */
+#sidebar nav a {
     display: flex;
+    align-items: center;
+    gap: 1rem; /* ระยะห่างไอคอนกับข้อความ */
+    
+    padding: 0.75rem 1rem; /* ขนาดพอดีนิ้ว (Compact) */
+    margin: 0.25rem 0.75rem; /* เว้นขอบซ้ายขวา */
+    
+    border-radius: 0.75rem; /* มุมมนสวยงาม */
+    
+    color: hsl(var(--foreground) / 0.8); /* สีข้อความเกือบดำ/เกือบขาว */
+    font-size: 0.95rem;
+    font-weight: 500;
+    
+    background-color: transparent; /* พื้นหลังใส ไม่ทึบตัน */
+    border: 1px solid transparent; /* ซ่อนเส้นขอบ */
+    
+    transition: all 0.2s ease;
+    
+    /* Reset ค่าเดิมที่อาจติดมา */
+    box-shadow: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* ไอคอนในเมนู */
+#sidebar nav a i {
+    width: 24px;
+    text-align: center;
+    color: hsl(var(--muted-foreground));
+    font-size: 1.1rem;
+    transition: color 0.2s;
+}
+
+/* ✨ สถานะ: Hover / Active (หน้าที่เปิดอยู่) */
+#sidebar nav a:hover,
+#sidebar nav a.active-nav-link {
+    background-color: hsl(var(--primary) / 0.08); /* พื้นหลังสีชมพูจางๆ */
+    color: hsl(var(--primary)); /* ข้อความสีชมพู */
+    font-weight: 700;
+}
+
+#sidebar nav a:hover i,
+#sidebar nav a.active-nav-link i {
+    color: hsl(var(--primary)); /* ไอคอนเปลี่ยนสีตาม */
+    transform: scale(1.1); /* ขยายไอคอนนิดนึง */
+}
+
+/* ในโหมดมืด ปรับสี Highlight ให้ชัดขึ้น */
+.dark #sidebar nav a:hover,
+.dark #sidebar nav a.active-nav-link {
+    background-color: hsl(var(--primary) / 0.15);
+}
+
+/* ปุ่มปิดเมนู (กากบาท) */
+#close-sidebar-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+    display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-    flex-wrap: wrap; /* ให้รองรับมือถือ */
-}
-.social-links a {
-    padding: 10px 20px;
-    border-radius: 50px;
-    background-color: #222;
-    color: #fff;
-    font-weight: bold;
-    text-decoration: none;
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-.social-links a:hover {
-    background-color: #555;
-    color: #FF69B4; /* เปลี่ยนสีไอคอน/ข้อความเล็กน้อย */
+    transition: all 0.2s;
+    border: none;
 }
 
-/* โปรไฟล์แนะนำ Section */
-#featured {
-    /* Background: เทาเข้ม - เทาเข้มขึ้น */
-    background: linear-gradient(135deg, #222, #333); 
-    border-radius: 20px;
-    padding: 30px 20px;
-    margin-top: 40px;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+#close-sidebar-btn:hover {
+    background-color: hsl(var(--destructive) / 0.1);
+    color: hsl(var(--destructive));
+    transform: rotate(90deg);
 }
 
-/* Grid สำหรับโปรไฟล์ */
-#featured-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* ปรับขนาดเล็กสุดให้รองรับมือถือ */
-    gap: 15px;
-    margin-top: 20px;
+/* ปุ่ม LINE ในเมนู (ด้านล่างสุด) */
+#sidebar .btn-line-shared {
+    margin-top: auto;
+    background: linear-gradient(135deg, #06C755, #00B900);
+    color: white !important;
+    border-radius: 0.75rem;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
+    font-weight: 700;
 }
-
-
-
-/* Form Section */
-.form-card {
-    max-width:600px; 
-    margin:auto; 
-    padding:20px; 
-    background:#222; /* พื้นหลังเข้ม */
-    border-radius:15px; 
-    /* Shadow: ชมพู */
-    box-shadow:0 4px 20px rgba(255,105,180,0.4);
-}
-.form-card input, .form-card select {
-    width:100%; 
-    padding:10px; 
-    border:none; 
-    border-radius:50px; 
-    margin-bottom:15px; 
-    outline:none;
-    color: #333; /* ข้อความใน input/select เป็นสีเข้ม */
-}
-
-/* Footer Style */
-footer {
-    background:#111; 
-    color:#ccc; 
-    padding:40px 20px 20px; 
-    border-top-left-radius:30px; 
-    border-top-right-radius:30px;
-}
-footer h4 {
-    color: #FF69B4; /* หัวข้อ footer เป็นสีชมพู */
-    margin-bottom: 10px;
-}
-footer p {
-    color: #999;
-    margin-top: 5px;
-}
-/* Skeleton สำหรับการโหลดโปรไฟล์ */
-.skeleton-card {
-  background: #eee;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.skeleton-image {
-  width: 100%;
-  height: 150px;
-  background: #ccc;
-  border-radius: 4px;
-}
-.skeleton-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.skeleton-text-line {
-  height: 12px;
-  background: #ddd;
-  border-radius: 4px;
-}
-.short { width: 50%; }
-.long { width: 80%; }
-.smallest { width: 30%; }
-.skeleton-button {
-  width: 100px;
-  height: 30px;
-  background: #bbb;
-  border-radius: 4px;
-  align-self: flex-start;
-}
-
 body:after,body:before{content:"";position:fixed;top:50%;left:50%;width:150vmax;height:150vmax;border-radius:50%;z-index:-1;filter:blur(150px);opacity:.15}
 
 html:not(.dark) body:before{background:radial-gradient(circle,hsl(var(--primary)) 0,transparent 40%);animation:aurora-1 30s linear infinite}
@@ -3017,4 +3387,18 @@ p{margin:0 0 1em}
 }
 .thumbnail-strip::-webkit-scrollbar { 
     display: none; 
+}
+/* แอดมินทริกเกอร์สำหรับมือถือ */
+#admin-trigger {
+    user-select: none;           /* ห้ามคลุมดำ */
+    -webkit-user-select: none;   /* iOS Safari ห้ามคลุมดำ */
+    touch-action: manipulation;  /* ป้องกันการซูม */
+    cursor: pointer;             /* เมาส์เป็นรูปมือ */
+    position: relative;
+    z-index: 50;                 /* ให้อยู่บนสุด กดติดแน่นอน */
+}
+
+#admin-trigger:active {
+    opacity: 0.5; /* เวลากดจะกระพริบ ให้รู้ว่ากดติด */
+    color: #ff0055; /* เปลี่ยนสีตอนกด */
 }
