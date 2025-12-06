@@ -64,24 +64,26 @@
   <meta name=theme-color content=#db2777>
 
   
-  <link rel=preconnect href=https://hgzbgpbmymoiwjpaypvl.supabase.co crossorigin>
-  <link rel=preconnect href=https://cdnjs.cloudflare.com crossorigin>
-  <link rel=dns-prefetch href=//cdnjs.cloudflare.com>
-  <link rel=preconnect href=https://cdn.jsdelivr.net crossorigin>
 
-  
-  <link rel=preload href=/fonts/prompt-v11-latin_thai-regular.woff2 as=font type=font/woff2 crossorigin>
-  <link rel=preload href=/fonts/prompt-v11-latin_thai-700.woff2 as=font type=font/woff2 crossorigin>
+  <!-- ✅ UPDATE: Preconnect ไปยัง esm.sh เพื่อความเร็วสูงสุด -->
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://esm.sh" crossorigin>
+  <link rel="dns-prefetch" href="https://esm.sh">
 
+  <!-- CSS -->
+  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="all">
   
-  <link rel=preload href=/styles.css as=style onload='this.onload=null,this.rel="stylesheet"'>
-  <noscript><link rel=stylesheet href=/styles.css></noscript>
+  <!-- Fonts -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 
+  <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
+
+  <!-- Module Preload -->
+  <link rel="modulepreload" href="/main.js">
   
-  <link rel=preload href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'>
-  <noscript>
-    <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css>
-  </noscript>
   <style>
   body {
     margin: 0;
@@ -362,7 +364,7 @@ footer p {
 </style>
   
   
-  <link rel=modulepreload href=/main.js>
+  
 
   <script type=application/ld+json>
   {

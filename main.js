@@ -1,4 +1,7 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// =================================================================
+// แก้ไขบรรทัดนี้: เปลี่ยนมาใช้ esm.sh และระบุเวอร์ชัน 2.39.8 เพื่อความเสถียรสูงสุด
+// =================================================================
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
 
@@ -20,7 +23,7 @@ gsap.registerPlugin(ScrollTrigger);
             CACHE_PROFILES: 'cachedProfiles',
             LAST_FETCH: 'lastFetchTime',
             AGE_CONFIRMED: 'ageConfirmedTimestamp',
-            THEME: 'theme' // เพิ่ม Key นี้ให้ชัดเจน
+            THEME: 'theme'
         },
         SITE_URL: 'https://sidelinechiangmai.netlify.app'
     };
@@ -39,13 +42,11 @@ gsap.registerPlugin(ScrollTrigger);
     const dom = {};
 
     // =================================================================
-    // 3. SUPABASE CLIENT (แก้ไขให้กระชับและถูกต้อง)
+    // 3. SUPABASE CLIENT
     // =================================================================
     let supabase;
     try {
-        // ใช้ createClient ที่ import มาโดยตรง ไม่ต้องเช็ค window
         supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        // เก็บลง window เผื่อ debug ใน console ได้ (Optional)
         window.supabase = supabase; 
         console.log("✅ Supabase Connected");
     } catch (e) {
@@ -75,7 +76,7 @@ gsap.registerPlugin(ScrollTrigger);
         await handleRouting(); 
         await handleDataLoading();
 
-        // Footer Year (แก้ไขให้ตรงกับ ID ใน HTML)
+        // Footer Year
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
@@ -84,7 +85,6 @@ gsap.registerPlugin(ScrollTrigger);
         // Intro Animation (Home only)
         if (window.location.pathname === '/' && !state.currentProfileSlug) {
             try {
-                // เช็คว่ามี element จริงไหมก่อน animate เพื่อกัน error
                 const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
                 if(heroElements.length > 0) {
                     gsap.from(heroElements, {
@@ -102,14 +102,13 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     function cacheDOMElements() {
-        // Cache elements (เพิ่มการเช็ค null เล็กน้อยตอนใช้)
         dom.body = document.body;
         dom.pageHeader = document.getElementById('page-header');
         dom.loadingPlaceholder = document.getElementById('loading-profiles-placeholder');
         dom.profilesDisplayArea = document.getElementById('profiles-display-area');
         dom.noResultsMessage = document.getElementById('no-results-message');
         dom.fetchErrorMessage = document.getElementById('fetch-error-message');
-        dom.retryFetchBtn = document.getElementById('retry-fetch-btn'); // ปุ่มนี้อาจไม่มีใน HTML ต้องระวัง
+        dom.retryFetchBtn = document.getElementById('retry-fetch-btn');
         dom.searchForm = document.getElementById('search-form');
         dom.searchInput = document.getElementById('search-keyword');
         dom.provinceSelect = document.getElementById('search-province');
@@ -165,7 +164,6 @@ gsap.registerPlugin(ScrollTrigger);
             let isFullSync = !lastFetchTimeStr;
             let fetchTimeKey = lastFetchTimeStr || '1970-01-01T00:00:00.000Z';
 
-            // ถ้า Cache เก่าเกินกำหนด ให้โหลดใหม่หมด
             if (lastFetchTimeStr) {
                 const hoursDiff = (NOW - new Date(lastFetchTimeStr)) / (1000 * 60 * 60);
                 if (hoursDiff > CONFIG.CACHE_TTL_HOURS) {
@@ -175,7 +173,6 @@ gsap.registerPlugin(ScrollTrigger);
             }
 
             let profilesQuery = supabase.from('profiles').select('*');
-            // ถ้าไม่ใช่ Full Sync ให้โหลดเฉพาะที่อัปเดต
             if (!isFullSync) profilesQuery.gt('lastUpdated', fetchTimeKey);
 
             const [profilesRes, provincesRes] = await Promise.all([
@@ -188,7 +185,6 @@ gsap.registerPlugin(ScrollTrigger);
 
             const fetchedProfiles = profilesRes.data || [];
             
-            // Update Provinces Map
             state.provincesMap.clear();
             (provincesRes.data || []).forEach(p => {
                 if (p?.key && p?.nameThai) state.provincesMap.set(p.key, p.nameThai);
@@ -202,7 +198,6 @@ gsap.registerPlugin(ScrollTrigger);
                     const cachedJSON = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
                     const cachedProfiles = cachedJSON ? JSON.parse(cachedJSON) : [];
                     const profileMap = new Map(cachedProfiles.map(p => [p.id, p]));
-                    // Merge ข้อมูลใหม่ทับของเก่า
                     fetchedProfiles.forEach(p => profileMap.set(p.id, p));
                     currentProfiles = Array.from(profileMap.values());
                 } catch {
@@ -211,10 +206,8 @@ gsap.registerPlugin(ScrollTrigger);
             }
 
             state.allProfiles = currentProfiles.map(processProfileData);
-            // เรียงลำดับตาม update ล่าสุด
             state.allProfiles.sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
 
-            // Save to LocalStorage
             if (state.allProfiles.length > 0) {
                 try {
                     localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(currentProfiles));
@@ -236,7 +229,6 @@ gsap.registerPlugin(ScrollTrigger);
             return true;
         } catch (err) {
             console.error('Fetch Error:', err);
-            // Fallback: Try loading from cache if fetch fails
             const cachedJSON = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
             if (cachedJSON) {
                 try {
@@ -254,19 +246,16 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     function processProfileData(p) {
-        // Process images
         const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
         const imageObjects = imagePaths.map(path => {
             const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
             let url = data?.publicUrl || '/images/placeholder-profile-card.webp';
             
-            // Cache busting
             let sep = url.includes('?') ? '&' : '?';
             if (p.lastUpdated) {
                 url = `${url}${sep}v=${Math.floor(new Date(p.lastUpdated).getTime() / 1000)}`;
             }
             
-            // Image Optimization params (assuming Supabase transform or similar)
             sep = url.includes('?') ? '&' : '?';
             return {
                 src: `${url}${sep}width=600&quality=80`,
@@ -292,7 +281,6 @@ gsap.registerPlugin(ScrollTrigger);
 
     function populateProvinceDropdown() {
         if (!dom.provinceSelect) return;
-        // เก็บตัวเลือกแรกไว้ (ทั้งหมด) แล้วลบที่เหลือเพื่อสร้างใหม่
         while (dom.provinceSelect.options.length > 1) {
             dom.provinceSelect.remove(1);
         }
@@ -331,7 +319,6 @@ gsap.registerPlugin(ScrollTrigger);
                 if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
                 if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
             } else if (dataLoaded) {
-                // Not found -> Go home
                 history.replaceState(null, '', '/');
                 closeLightbox(false);
                 if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
@@ -349,7 +336,7 @@ gsap.registerPlugin(ScrollTrigger);
             if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
             
             if (dataLoaded) {
-                applyFilters(false); // Filter by province
+                applyFilters(false);
                 const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
                 const seoData = {
                     title: `รับงาน${provinceName} | รวมสาวไซด์ไลน์${provinceName} ฟิวแฟน`,
@@ -441,14 +428,12 @@ gsap.registerPlugin(ScrollTrigger);
 
         const filtered = state.allProfiles.filter(p => {
             try {
-                // Basic Filters
                 const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
                 const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
                 const featuredMatch = !query.featured || p.isfeatured;
 
                 if (!provinceMatch || !availMatch || !featuredMatch) return false;
                 
-                // Text Search
                 return matchesSmartProfile(p, parsedSearch);
             } catch { return false; }
         });
@@ -461,7 +446,6 @@ gsap.registerPlugin(ScrollTrigger);
             
             const currentPath = window.location.pathname;
             const search = params.toString();
-            // Don't overwrite province URL
             if (!currentPath.includes('/province/')) {
                  const newUrl = currentPath + (search ? '?' + search : '');
                  history.pushState({}, '', newUrl);
@@ -484,8 +468,7 @@ gsap.registerPlugin(ScrollTrigger);
             if (explicit) {
                 const key = explicit[1];
                 const val = explicit[2];
-                // Handle price/age range logic here if needed
-                tokens.push(val); // Fallback simpler logic
+                tokens.push(val);
                 return;
             }
             tokens.push(t);
@@ -494,7 +477,6 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     function matchesSmartProfile(p, parsed) {
-        // Simplified Smart Search
         for (const token of parsed.tokens) {
             if (!p.searchString.includes(token)) return false;
         }
@@ -507,12 +489,10 @@ gsap.registerPlugin(ScrollTrigger);
     function renderProfiles(profiles, isSearching) {
         if (!dom.profilesDisplayArea) return;
 
-        dom.profilesDisplayArea.replaceChildren(); // Clear old content
+        dom.profilesDisplayArea.replaceChildren();
         
-        // Toggle Featured Section visibility
         if(dom.featuredSection) {
             const showFeatured = !isSearching || (isSearching && dom.featuredSelect?.value === 'true');
-            // ถ้าค้นหาอยู่ ให้ซ่อน Featured เว้นแต่เลือก filter Featured
             dom.featuredSection.classList.toggle('hidden', !showFeatured);
             
             if (showFeatured && dom.featuredContainer && state.allProfiles.length > 0) {
@@ -627,7 +607,6 @@ gsap.registerPlugin(ScrollTrigger);
         cardInner.setAttribute('role', 'button');
         cardInner.setAttribute('tabindex', '0');
 
-        // Link for SEO / Open in New Tab
         cardInner.innerHTML = `<a href="/profile/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์ ${p.name}"></a>`;
 
         const imgObj = p.images[0];

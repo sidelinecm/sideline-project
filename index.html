@@ -37,29 +37,23 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-<!-- ✅ แก้ไขส่วนหัวเป็นแบบนี้ครับ -->
-<link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+  <!-- ✅ UPDATE: Preconnect ไปยัง esm.sh เพื่อความเร็วสูงสุด -->
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://esm.sh" crossorigin>
+  <link rel="dns-prefetch" href="https://esm.sh">
 
-<!-- เปลี่ยนจาก cdn.jsdelivr.net เป็น esm.sh เพื่อเตรียมโหลด Supabase ตัวใหม่ -->
-
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
-<!-- Preload CSS สำคัญ (คงเดิมไว้ได้เลย ดีแล้วครับ) -->
-<link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/styles.css"></noscript>
-
-  <!-- Preload Font -->
+  <!-- CSS -->
+  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="all">
+  
+  <!-- Fonts -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 
+  <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
 
-<link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp"
-as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w"
-imagesizes="1200px" fetchpriority="high">
-
-
+  
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="all">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
   
@@ -950,32 +944,23 @@ footer p {
 </div>
 
 <!-- โหลด main.js -->
+
 <script type="module" src="/main.js"></script>
-
-
-<!-- เพิ่ม class 'loaded' และลงทะเบียน Service Worker -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.add("loaded");
+    // Lazy Load Map
+    const iframe = document.getElementById("google-map");
+    if(iframe) {
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(e => {
+                if(e.isIntersecting) { iframe.src = iframe.dataset.src; obs.disconnect(); }
+            });
+        });
+        observer.observe(iframe);
+    }
   });
-
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      const registerSW = () => {
-        navigator.serviceWorker.register("/sw.js", { scope: "/" })
-          .then(reg => console.log("✅ Service Worker registered:", reg))
-          .catch(err => console.error("❌ SW registration failed:", err));
-      };
-
-      if ("requestIdleCallback" in window) {
-        requestIdleCallback(registerSW);
-      } else {
-        setTimeout(registerSW, 1500);
-      }
-    });
-  }
 </script>
 
 </body>
 </html>
-
