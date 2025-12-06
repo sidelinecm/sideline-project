@@ -55,6 +55,10 @@ const generateProfileHTML = (profileData, profileSlug) => {
     const location = profileData.location || province;
     const availability = profileData.availability || 'สอบถามคิว';
 
+    // SEO Optimization for Image Alt Text
+    // ดึงค่าจาก DB ก่อน ถ้าไม่มีให้ Generate คำ Keyword แรงๆ
+    const finalAltText = profileData.altText || `น้อง ${name} ไซด์ไลน์${province} รับงานฟิวแฟน ตรงปก`;
+
     const rawDescription = profileData.description || '';
     const metaDescription = rawDescription.length > 150 ? rawDescription.substring(0, 150) + '...' : (rawDescription || `ดูโปรไฟล์น้อง ${name} ไซด์ไลน์${province} รับงานเอง ปลอดภัย ตรงปก`);
     let imageUrl = '';
@@ -105,8 +109,9 @@ const generateProfileHTML = (profileData, profileSlug) => {
                 </div>
             </header>
             <figure>
-                <img src="${imageUrl}" alt="รูปโปรไฟล์ของ ${name}" itemprop="image" style="max-width:100%; height:auto; border-radius:8px; margin:20px 0;">
-                <figcaption>${profileData.altText || `น้อง ${name} รับงาน${province}`}</figcaption>
+                <!-- ✅ UPDATE: ใช้ Alt Text แบบ Optimized เพื่อ SEO -->
+                <img src="${imageUrl}" alt="${finalAltText}" itemprop="image" style="max-width:100%; height:auto; border-radius:8px; margin:20px 0;">
+                <figcaption>${finalAltText}</figcaption>
             </figure>
             <section class="details">
                 <h2>รายละเอียดบริการ</h2>
