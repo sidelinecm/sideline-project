@@ -1,651 +1,511 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- หน้าหลัก -->
   <url>
-    <loc>https://sidelinechiangmai.netlify.app</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/</loc>
+    <lastmod>2025-12-07T00:00:00+07:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- หน้าหมวดหมู่จังหวัด (URL ใหม่: /location/) -->
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/แอมมี่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/location/chiangmai</loc>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/หลิงหลิง</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/กระต่าย</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/มินนี่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ไข่เจียว</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ริต้า</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/เดียร์</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/location/chiangrai</loc>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ริสา</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/แตงโม</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/นุช</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องกลอย</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/location/khon-kaen</loc>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องโอเปิ้ล</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/location/phuket</loc>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ข้าวปุ้น</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/location/udonthani</loc>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/พลอยสวย</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/location/lamphun</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/เมษา</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/location/bangkok</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- (ใส่จังหวัดอื่นๆ เพิ่มตามที่มีใน DB) -->
+
+  <!-- หน้าโปรไฟล์น้องๆ (URL ใหม่: /sideline/) -->
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ฟักแฟง</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/แอมมี่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องน้ำหวาน</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/หลิงหลิง</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/บีบี</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/กระต่าย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ไผ่หลิว</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/มินนี่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/เฟิร์ส</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ไข่เจียว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/นมสด</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ริต้า</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ลูกโซ่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/เดียร์</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/หมิว</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ริสา</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องผิง</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/แตงโม</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องมิกิ</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/นุช</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องใบส้ม</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องกลอย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ลูกน้ำ</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องโอเปิ้ล</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/อ๊ะอาย</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ข้าวปุ้น</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/เอิงเอย</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/พลอยสวย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/โมเน่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/เมษา</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ลูกแก้ว</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ฟักแฟง</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/บิวบิว</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องน้ำหวาน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องโอปอ</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/บีบี</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ปรายฟ้า</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ไผ่หลิว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ยิปซี</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/เฟิร์ส</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ปาย</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/นมสด</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ลูกแพร</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ลูกโซ่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/Jelly🚨</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/หมิว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/มัดหมี่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องผิง</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ถุงเงิน</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องมิกิ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/นัท</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องใบส้ม</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/Ammie</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ลูกน้ำ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/นับดาว</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/อ๊ะอาย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/จุ๊ปแจง</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/เอิงเอย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/มายด์</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/โมเน่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/มีตังค์</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ลูกแก้ว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ใบหยก</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/บิวบิว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/แตงกวา</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องโอปอ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/แคทตี้</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ปรายฟ้า</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ปุยฝ้าย</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ยิปซี</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/เบล</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ปาย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/นินิว</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ลูกแพร</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้ำริน</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/Jelly🚨</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้ำขิง</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/มัดหมี่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องแนน</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ถุงเงิน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/มะปราง</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/นัท</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/เบบี๋</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/Ammie</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/โบอาร์</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/นับดาว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ชะเอม</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/จุ๊ปแจง</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ใบเฟริน</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/มายด์</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องปันปัน"</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/มีตังค์</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้ำหวาน"</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ใบหยก</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/โบวี่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/แตงกวา</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องโมจิ</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/แคทตี้</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/เมจิ</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ปุยฝ้าย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ฮันนี่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/เบล</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ชมพู่</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/นินิว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/แอริน</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้ำริน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ปูเป้</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้ำขิง</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องมิ้น</loc>
-    <lastmod>2025-12-05T02:18:50.348Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องแนน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/บิวตี้</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/มะปราง</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ครีม</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/เบบี๋</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/มะนาว</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/โบอาร์</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องอาย</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ชะเอม</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/หลินหลิน😍</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ใบเฟริน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ขนม</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องปันปัน"</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้ำมนต์</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้ำหวาน"</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/Minnie</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/โบวี่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/จิ้บ</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องโมจิ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ข้าวฟ้าง</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/เมจิ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องปันปัน</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ฮันนี่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้องเนส</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ชมพู่</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/โมจิ</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/แอริน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้ำหวาน</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ปูเป้</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ปันปัน</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องมิ้น</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/ปุยนุ่น</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/บิวตี้</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/โอปอ</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ครีม</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/น้ำหนาว</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/มะนาว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/profile/NAMTAN</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องอาย</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/khon-kaen</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/หลินหลิน😍</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/chiangrai</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ขนม</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/chiangmai</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้ำมนต์</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/nakhon-pathom</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/Minnie</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/nakhon-si-thammarat</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/จิ้บ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/nakhon-sawan</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ข้าวฟ้าง</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/phra-nakhon-si-ayutthaya</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องปันปัน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/phitsanulok</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้องเนส</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/phuket</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/โมจิ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/rayong</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้ำหวาน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/lopburi</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ปันปัน</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/lampang</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/ปุยนุ่น</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/lamphun</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/โอปอ</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/samut-sakhon</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/น้ำหนาว</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/surat-thani</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
+    <loc>https://sidelinechiangmai.netlify.app/sideline/NAMTAN</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- หน้า Static อื่นๆ -->
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/nong-khai</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <loc>https://sidelinechiangmai.netlify.app/blog.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/udonthani</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <loc>https://sidelinechiangmai.netlify.app/about.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://sidelinechiangmai.netlify.app/province/upon-ratchathani</loc>
-    <lastmod>2025-12-05T02:18:50.349Z</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <loc>https://sidelinechiangmai.netlify.app/faq.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

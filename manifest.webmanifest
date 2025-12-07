@@ -1,7 +1,8 @@
 {
-  "name": "Sideline Chiangmai",
+  "name": "Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน",
   "short_name": "SidelineCM",
-  "start_url": "/",
+  "id": "/",
+  "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -9,6 +10,7 @@
   "theme_color": "#db2777",
   "description": "ศูนย์รวมโปรไฟล์น้องๆ SidelineCM รับงานฟีลแฟนในเชียงใหม่ การันตีตรงปก ไม่ต้องโอนมัดจำ",
   "lang": "th-TH",
+  "categories": ["social", "lifestyle", "entertainment"],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -25,6 +27,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ดูน้องๆ ทั้งหมด",
+      "short_name": "น้องๆ",
+      "url": "/profiles.html?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "พิกัดรับงาน",
+      "short_name": "พิกัด",
+      "url": "/locations.html?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
