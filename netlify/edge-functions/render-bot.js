@@ -1,20 +1,18 @@
 // netlify/edge-functions/render-bot.js
-//
-// Edge Function สำหรับ SSR โปรไฟล์ Supabase (SEO Bot SSR)
+// ฉบับ Ultimate: รองรับ URL /sideline/ และใช้ตารางเดิม
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ------------------------------------------
-// CONFIGURATION (แนะนำใช้ Environment Variables ใน Production)
+// --- CONFIGURATION ---
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
 const TABLE_NAME = 'profiles';
+const TABLE_PROVINCES = 'provinces';
 const STORAGE_BUCKET = 'profile-images';
 const SLUG_COLUMN = 'slug'; 
 const DOMAIN_URL = "https://sidelinechiangmai.netlify.app";
 
-// ------------------------------------------
-// Helpers: Generate Review/AggregateRating schema per profile
+// 1. Schema: Review (ดาวรีวิว)
 function genReviewSchema(profileData) {
   return {
     "@context": "https://schema.org",
@@ -26,108 +24,103 @@ function genReviewSchema(profileData) {
     },
     "author": {
       "@type": "Person",
-      "name": profileData.reviewAuthor || "รีวิวลูกค้าจริง"
+      "name": profileData.reviewAuthor || "รีวิวจากลูกค้าจริง"
     },
-    "reviewBody": profileData.reviewText || "บริการดี ตรงปกจริง!"
+    "reviewBody": profileData.reviewText || "น้องตัวจริงน่ารักมาก งานดี ไม่เร่ง ตรงปกครับ"
   };
 }
 
-// Helper: Generate Breadcrumb for SEO navigation
-function genBreadcrumb(profileData, profileSlug) {
+// 2. Schema: Breadcrumb (แก้ให้ลิงก์กลับไป /location/ แทน /province/)
+function genBreadcrumb(profileData, provinceName) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": DOMAIN_URL + "/" },
-      { "@type": "ListItem", "position": 2, "name": "โปรไฟล์ไซด์ไลน์", "item": DOMAIN_URL + "/profiles" },
-      { "@type": "ListItem", "position": 3, "name": profileData.name || profileSlug, "item": DOMAIN_URL + `/app/${profileSlug}` }
+      { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": DOMAIN_URL + `/location/${profileData.provinceKey}` },
+      { "@type": "ListItem", "position": 3, "name": profileData.name, "item": DOMAIN_URL + `/sideline/${profileData.slug}` }
     ]
   };
 }
 
-// Main SSR Profile HTML generator for Bots/Crawlers
-const generateProfileHTML = (profileData, profileSlug) => {
-    const name = profileData.name || `น้อง ${profileSlug}`;
-    const province = profileData.provinceKey || 'เชียงใหม่';
-    const age = profileData.age || 'ไม่ระบุ';
-    const stats = profileData.stats || 'ไม่ระบุ';
+// 3. Schema: Product (Google ชอบอันนี้สำหรับงานบริการ)
+function genProductSchema(profileData, provinceName, imageUrl) {
+    return {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": `บริการรับงานน้อง ${profileData.name}`,
+        "image": imageUrl,
+        "description": profileData.description || `น้อง ${profileData.name} รับงาน${provinceName}`,
+        "brand": {
+            "@type": "Brand",
+            "name": "SidelineChiangmai"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": `${DOMAIN_URL}/sideline/${profileData.slug}`,
+            "priceCurrency": "THB",
+            "price": parseInt(profileData.rate) || 1500,
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        }
+    };
+}
+
+const generateProfileHTML = (profileData, provinceData) => {
+    const name = profileData.name || 'ไม่ระบุชื่อ';
+    // ดึงชื่อจังหวัดไทยจากตาราง provinces ถ้าไม่มีใช้ค่า fallback
+    const provinceName = provinceData?.nameThai || profileData.provinceKey || 'เชียงใหม่';
+    const age = profileData.age || '20+';
+    const stats = profileData.stats || 'สัดส่วนมาตรฐาน';
     const rate = profileData.rate || 'สอบถาม';
-    const location = profileData.location || province;
-    const availability = profileData.availability || 'สอบถามคิว';
+    
+    // SEO Title: สูตร [ชื่อ] + [จังหวัด] + [จุดเด่น]
+    const pageTitle = `${name} ไซด์ไลน์${provinceName} รับงาน${profileData.location || ''} รูปจริง ตรงปก 100%`;
+    
+    // SEO Description
+    const metaDescription = `น้อง${name} อายุ ${age} สัดส่วน ${stats} พิกัด${provinceName} ${profileData.location || ''} ${profileData.description?.substring(0, 100) || ''} แอดไลน์จองคิวได้เลย`;
 
-    // SEO Optimization for Image Alt Text
-    // ดึงค่าจาก DB ก่อน ถ้าไม่มีให้ Generate คำ Keyword แรงๆ
-    const finalAltText = profileData.altText || `น้อง ${name} ไซด์ไลน์${province} รับงานฟิวแฟน ตรงปก`;
-
-    const rawDescription = profileData.description || '';
-    const metaDescription = rawDescription.length > 150 ? rawDescription.substring(0, 150) + '...' : (rawDescription || `ดูโปรไฟล์น้อง ${name} ไซด์ไลน์${province} รับงานเอง ปลอดภัย ตรงปก`);
-    let imageUrl = '';
+    let imageUrl = `${DOMAIN_URL}/images/og-default.webp`;
     if (profileData.imagePath) {
         imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${profileData.imagePath}`;
-    } else {
-        imageUrl = `${DOMAIN_URL}/images/og-default.webp`;
     }
-    const pageTitle = `${name} - สาวไซด์ไลน์${province} รับงานฟิวแฟน ตรงปก | Sideline Chiang Mai`;
 
-    // FAQ Schema (Simplified for best practice)
-    const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            { "@type": "Question", "name": "บริการไซด์ไลน์เชียงใหม่ ปลอดภัยและเป็นความลับหรือไม่?", "acceptedAnswer": { "@type": "Answer", "text": "Sideline Chiang Mai ให้ความสำคัญสูงสุดกับความปลอดภัยและความเป็นส่วนตัวของลูกค้า ข้อมูลจะถูกเก็บเป็นความลับ" } },
-            { "@type": "Question", "name": "จำเป็นต้องโอนเงินมัดจำก่อนใช้บริการหรือไม่?", "acceptedAnswer": { "@type": "Answer", "text": "ไม่จำเป็นต้องโอนเงินมัดจำ สามารถชำระค่าบริการเต็มจำนวนที่หน้างานได้เลย" } },
-            { "@type": "Question", "name": "น้องๆ ตรงปกตามรูปโปรไฟล์จริงหรือ?", "acceptedAnswer": { "@type": "Answer", "text": "เราคัดกรองและยืนยันตัวตนพร้อมรูปภาพอย่างละเอียด การันตีตรงปก 100%" } }
-        ]
-    };
+    // Alt Text: ดึงจาก DB หรือสร้างเอง
+    const finalAltText = profileData.altText || `${name} สาวไซด์ไลน์ ${provinceName} รับงาน${profileData.location || ''} ฟิวแฟน รูปตัวจริง`;
 
-    // Person/Profile Schema
-    const personSchema = {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": name,
-        "description": metaDescription,
-        "image": imageUrl,
-        "url": `${DOMAIN_URL}/app/${profileSlug}`,
-        "address": { "@type": "PostalAddress", "addressLocality": province, "addressCountry": "TH" }
-    };
-
-    // Review/AggregateRating schema
+    const breadcrumbSchema = genBreadcrumb(profileData, provinceName);
     const reviewSchema = genReviewSchema(profileData);
+    const productSchema = genProductSchema(profileData, provinceName, imageUrl);
 
-    // Breadcrumb schema
-    const breadcrumbSchema = genBreadcrumb(profileData, profileSlug);
-
-    // HTML Content
+    // HTML Content (ตัด CSS ออกมาใส่ใน <style> ด้านล่างเพื่อให้ Code สะอาด)
     const profileContentHTML = `
-        <article class="profile-container" itemscope itemtype="https://schema.org/Person">
+        <article class="profile-container">
             <header>
-                <h1 itemprop="name">${name} (${province})</h1>
-                <div class="meta-info">
-                    <span itemprop="age">อายุ: ${age} ปี</span> | 
-                    <span>สัดส่วน: ${stats}</span> | 
-                    <span itemprop="address">${province}</span>
+                <h1>${name} <span class="province-badge">(${provinceName})</span></h1>
+                <div class="meta-tags">
+                    <span>🔥 ตรงปก</span> <span>✅ ${provinceName}</span> <span>💖 ฟิวแฟน</span>
                 </div>
             </header>
             <figure>
-                <!-- ✅ UPDATE: ใช้ Alt Text แบบ Optimized เพื่อ SEO -->
-                <img src="${imageUrl}" alt="${finalAltText}" itemprop="image" style="max-width:100%; height:auto; border-radius:8px; margin:20px 0;">
-                <figcaption>${finalAltText}</figcaption>
+                <img src="${imageUrl}" alt="${finalAltText}">
+                <figcaption style="display:none;">${finalAltText}</figcaption>
             </figure>
-            <section class="details">
-                <h2>รายละเอียดบริการ</h2>
-                <div class="description-content" itemprop="description">
-                    ${profileData.description ? profileData.description.replace(/\n/g, '<br>') : 'ไม่มีรายละเอียดเพิ่มเติม'}
+            <div class="info-box">
+                <p><strong>💰 เรทราคา:</strong> ${rate}</p>
+                <p><strong>📍 พิกัด:</strong> ${profileData.location || provinceName}</p>
+                <p><strong>📏 สัดส่วน:</strong> ${stats} (อายุ ${age})</p>
+                <hr>
+                <div class="desc">
+                    ${profileData.description ? profileData.description.replace(/\n/g, '<br>') : 'สอบถามรายละเอียดเพิ่มเติมทางไลน์'}
                 </div>
-                <div class="additional-info">
-                    <p><strong>เรทราคา:</strong> <span itemprop="price">${rate}</span></p>
-                    <p><strong>สถานที่รับงาน:</strong> ${location}</p>
-                    <p><strong>สถานะ:</strong> ${availability}</p>
-                </div>
-            </section>
-            ${profileData.reviewText ? `<section class="review-section"><h3>รีวิวจริง</h3><blockquote>${profileData.reviewText} <footer>${profileData.reviewAuthor || ""}</footer></blockquote></section>` : ""}
-            <section class="cta">
-                <a href="https://line.me/ti/p/ksLUWB89Y_" class="btn-main">จองคิวผ่าน LINE</a>
-            </section>
+            </div>
+            <div class="cta-box">
+                <a href="https://line.me/ti/p/ksLUWB89Y_" class="line-btn">📲 จองคิวผ่าน LINE (คลิก)</a>
+            </div>
+            <div class="back-link">
+                <!-- ลิงก์ย้อนกลับไปหน้า location -->
+                <a href="/location/${profileData.provinceKey}">⬅️ ดูสาวๆ ${provinceName} คนอื่น</a>
+            </div>
         </article>
     `;
 
@@ -139,30 +132,32 @@ const generateProfileHTML = (profileData, profileSlug) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${pageTitle}</title>
     <meta name="description" content="${metaDescription}">
-    <link rel="canonical" href="${DOMAIN_URL}/app/${profileSlug}">
-    <meta property="og:type" content="profile">
+    <link rel="canonical" href="${DOMAIN_URL}/sideline/${profileData.slug}">
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDescription}">
     <meta property="og:image" content="${imageUrl}">
-    <meta property="og:url" content="${DOMAIN_URL}/app/${profileSlug}">
-    <meta property="og:site_name" content="Sideline Chiang Mai">
+    <meta property="og:type" content="profile">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${pageTitle}">
-    <meta name="twitter:description" content="${metaDescription}">
-    <meta name="twitter:image" content="${imageUrl}">
-    <script type="application/ld+json">${JSON.stringify(faqSchema)}</script>
-    <script type="application/ld+json">${JSON.stringify(personSchema)}</script>
-    <script type="application/ld+json">${JSON.stringify(reviewSchema)}</script>
     <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+    <script type="application/ld+json">${JSON.stringify(reviewSchema)}</script>
+    <script type="application/ld+json">${JSON.stringify(productSchema)}</script>
     <style>
-        body { font-family: 'Prompt', sans-serif; line-height:1.6; color:#333; max-width:860px; margin:0 auto; padding:20px; background:#fff;}
-        h1 { color:#d53f8c; }
-        .btn-main {display:inline-block; padding:10px 24px; background:#d53f8c; color:#fff; font-weight:600; border-radius:2em; box-shadow:0 4px 10px 0 rgba(213,63,140,0.10);}
-        .meta-info { font-weight: bold; color: #555; margin-bottom: 10px; }
-        .details { margin-top: 20px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
-        .review-section {margin:24px 0 0 0; padding:18px 20px; background:#faf3fa; border-radius:8px;}
-        .cta {margin:28px 0 4px 0;}
-        @media(max-width:700px){body{padding:10px;}}
+        body{font-family:'Prompt',sans-serif;background:#f9f9f9;color:#333;margin:0;padding:20px;line-height:1.6}
+        .profile-container{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:15px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+        h1{color:#d53f8c;margin-bottom:10px;text-align:center;font-size:1.8rem;}
+        .province-badge{font-size:0.6em;color:#666;vertical-align:middle;}
+        .meta-tags{text-align:center;margin-bottom:20px;}
+        .meta-tags span{background:#fce7f3;color:#be185d;padding:4px 10px;border-radius:20px;font-size:0.85em;margin:0 2px;}
+        figure{margin:0 0 20px 0;}
+        figure img{width:100%;height:auto;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);object-fit:cover;}
+        .info-box{background:#fdf2f8;padding:20px;border-radius:12px;margin-top:20px;}
+        .info-box p{margin:5px 0;}
+        .info-box hr{border:0;border-top:1px solid #f3dce9;margin:15px 0;}
+        .desc{font-size:0.95em;}
+        .line-btn{display:block;width:100%;padding:15px;background:#06c755;color:#fff;text-align:center;text-decoration:none;border-radius:50px;font-weight:bold;font-size:1.2em;margin-top:25px;box-shadow:0 4px 10px rgba(6,199,85,0.3);transition:transform 0.2s;}
+        .line-btn:active{transform:scale(0.98);}
+        .back-link{text-align:center;margin-top:25px;}
+        .back-link a{color:#888;text-decoration:none;font-size:0.9em;}
     </style>
 </head>
 <body>
@@ -176,28 +171,43 @@ const generateProfileHTML = (profileData, profileSlug) => {
 export default async (request, context) => {
     const userAgent = request.headers.get('User-Agent') || '';
     const isBot = /googlebot|bingbot|yandex|duckduckbot|slurp|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|baiduspider/i.test(userAgent);
-    if (!isBot) return context.next(); // Only bot gets SSR, users get SPA
+    if (!isBot) return context.next(); 
 
-    // parse /app/{slug}
     const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/').filter(s => s.length > 0);
-    const profileSlug = pathSegments[1]; // [0] = app, [1] = slug
+    // ตรวจสอบ path ว่าเป็นแบบไหน (รองรับทั้งแบบเก่าและแบบใหม่)
+    // แบบใหม่: /sideline/{slug}
+    // แบบเก่า: /profile/{slug} หรือ /app/{slug}
+    const pathSegments = url.pathname.split('/').filter(Boolean);
+    
+    // ถ้าไม่ใช่ path ที่เกี่ยวกับโปรไฟล์ ให้ผ่านไป
+    if (!['sideline', 'profile', 'app'].includes(pathSegments[0])) return context.next();
+    
+    const profileSlug = pathSegments[1];
     if (!profileSlug) return context.next();
 
     try {
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data, error } = await supabase
+        
+        // 1. ดึงข้อมูล Profile
+        const { data: profileData } = await supabase
             .from(TABLE_NAME)
             .select('*')
             .eq(SLUG_COLUMN, profileSlug)
             .maybeSingle();
 
-        if (error || !data) {
-            console.log(`Bot request for /app/${profileSlug} - not found`);
+        if (!profileData) {
+            console.log(`Bot request for ${profileSlug} - not found`);
             return context.next();
         }
 
-        const renderedHTML = generateProfileHTML(data, profileSlug);
+        // 2. ดึงข้อมูลชื่อจังหวัด (เพื่อเอาไปทำ Title/Breadcrumb สวยๆ)
+        const { data: provinceData } = await supabase
+            .from(TABLE_PROVINCES)
+            .select('nameThai')
+            .eq('key', profileData.provinceKey)
+            .maybeSingle();
+
+        const renderedHTML = generateProfileHTML(profileData, provinceData);
         return new Response(renderedHTML, {
             headers: { 
                 "content-type": "text/html; charset=utf-8",
