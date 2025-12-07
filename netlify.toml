@@ -112,3 +112,6 @@ path = "/location/*"
   from = "/*"
   to = "/index.html"
   status = 200
+
+# เพิ่มหลังจากบรรทัด 47 (ที่มี Permissions-Policy)
+Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' https:;"
