@@ -1,6 +1,4 @@
 // netlify/edge-functions/ssr-province.js
-// ฉบับ Ultimate (จูนเข้ากับตารางเดิมใน Supabase)
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
@@ -10,7 +8,6 @@ const TABLE_PROVINCES = 'provinces';
 const STORAGE_BUCKET = 'profile-images';
 const DOMAIN_URL = "https://sidelinechiangmai.netlify.app";
 
-// 1. Schema: AggregateRating (ดาวรวม)
 function genCollectionSchema(provinceName, count) {
     return {
         "@context": "https://schema.org",
@@ -27,35 +24,21 @@ function genCollectionSchema(provinceName, count) {
 }
 
 function renderProvinceHTML({provinceKey, provinceData, profiles=[], allProvinces=[]}) {
-  // ✅ ดึงข้อมูลจากตารางเดิมของคุณ
   const provinceName = provinceData.nameThai || provinceData.name || provinceKey;
-  
-  // ✅ Logic: ถ้าใน DB ช่อง description ว่าง ให้สร้างคำพูดเอง
   const dbDescription = provinceData.description; 
-  
-  // 1. สร้าง Title อัตโนมัติ (ไม่ต้องเพิ่มคอลัมน์)
   const pageTitle = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟน ตรงปก 100% | อัปเดตล่าสุด`;
-  
-  // 2. สร้าง Description (ถ้าใน DB มีก็ใช้ ถ้าไม่มีก็เจนเอง)
   const metaDescription = dbDescription || `รวมสาวไซด์ไลน์${provinceName} พิกัดยอดฮิต รับงานเอง ไม่ผ่านเอเย่นต์ รูปตัวจริง ${profiles.length} คน พร้อมให้บริการ ปลอดภัย เชื่อถือได้`;
-  
-  // 3. สร้าง H1
   const h1Text = `ไซด์ไลน์${provinceName} รับงานฟิวแฟน`;
 
-  // รูป OG Image (ถ้ามีน้องคนแรก ให้เอารูปน้องคนแรกมาโชว์ ถ้าไม่มีเอารูป default)
   const ogImage = profiles.length > 0 && profiles[0].imagePath 
     ? `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${profiles[0].imagePath}`
     : `${DOMAIN_URL}/images/og-${provinceKey}.jpg`;
 
   const collectionSchema = genCollectionSchema(provinceName, profiles.length);
   
-  // สร้าง Grid Cards
   const profileCards = profiles.slice(0, 20).map(p => {
       const img = p.imagePath ? `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${p.imagePath}` : '/images/placeholder.webp';
-      // ดึง Alt Text จาก DB หรือสร้างเอง
       const alt = p.altText || `น้อง${p.name} ไซด์ไลน์${provinceName}`;
-      
-      // ลิงก์ไปหน้า Profile (ใช้ /sideline/ ตามโครงสร้างใหม่)
       return `
         <div class="card">
             <a href="/sideline/${p.slug}">
@@ -70,7 +53,6 @@ function renderProvinceHTML({provinceKey, provinceData, profiles=[], allProvince
       `;
   }).join('');
 
-  // ลิงก์ไปจังหวัดอื่นๆ (ใช้ /location/ ตามโครงสร้างใหม่)
   const navLinks = allProvinces.map(p => `<a href="/location/${p.key}" class="${p.key===provinceKey?'active':''}">ไซด์ไลน์${p.nameThai}</a>`).join(' ');
 
   return `
@@ -112,16 +94,14 @@ function renderProvinceHTML({provinceKey, provinceData, profiles=[], allProvince
   <div class="container">
     <div class="nav-scroller">${navLinks}</div>
     <div class="grid">${profileCards}</div>
-    
     <div class="seo-text">
         <h2>บริการไซด์ไลน์${provinceName} ครบวงจร</h2>
         <p>${metaDescription}</p>
-        <p>หากคุณกำลังมองหา <strong>ไซด์ไลน์${provinceName}</strong> หรือเด็กเอ็น${provinceName} ที่นี่คือแหล่งรวมน้องๆ ที่เยอะที่สุด คัดกรองตัวจริง ตรงปก ไม่จกตา พร้อมให้บริการในทุกอำเภอของ${provinceName}</p>
+        <p>หากคุณกำลังมองหา <strong>ไซด์ไลน์${provinceName}</strong> ที่นี่คือแหล่งรวมที่เยอะที่สุด</p>
     </div>
   </div>
 </body>
-</html>
-  `;
+</html>`;
 }
 
 export default async (request, context) => {
@@ -129,19 +109,14 @@ export default async (request, context) => {
   const isBot = /googlebot|bingbot|yandex|duckduckbot|slurp|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|baiduspider/i.test(userAgent);
   if (!isBot) return context.next(); 
 
-  // ✅ เปลี่ยนการตัดคำให้รองรับ /location/
   const url = new URL(request.url);
   const pathSegments = url.pathname.split('/').filter(Boolean);
-  
-  // ถ้าไม่ใช่ location หรือ province ให้ผ่านไป
   if (pathSegments[0] !== "location" && pathSegments[0] !== "province") return context.next();
-  
   const provinceKey = pathSegments[1];
 
   try {
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       
-      // ดึงข้อมูลจังหวัด
       const { data: provinceData } = await supabase
         .from(TABLE_PROVINCES)
         .select('*')
@@ -150,10 +125,13 @@ export default async (request, context) => {
 
       if (!provinceData) return context.next();
 
-      // ดึงรายชื่อจังหวัดทั้งหมด (ทำเมนู) และ ดึงโปรไฟล์
+      // 🚀 OPTIMIZATION: ดึงเฉพาะคอลัมน์ที่จำเป็น
       const [allProvincesRes, profilesRes] = await Promise.all([
         supabase.from(TABLE_PROVINCES).select('key,name,nameThai'),
-        supabase.from(TABLE_PROFILES).select('*').eq('provinceKey', provinceKey).order('isfeatured', {ascending: false})
+        supabase.from(TABLE_PROFILES)
+          .select('name, slug, imagePath, altText, rate, provinceKey, isfeatured') // ลดขนาด Payload
+          .eq('provinceKey', provinceKey)
+          .order('isfeatured', {ascending: false})
       ]);
 
       const html = renderProvinceHTML({
@@ -164,7 +142,11 @@ export default async (request, context) => {
       });
 
       return new Response(html, {
-        headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "index, follow" },
+        headers: { 
+            "content-type": "text/html; charset=utf-8", 
+            "x-robots-tag": "index, follow",
+            "Cache-Control": "public, max-age=600, s-maxage=600"
+        },
         status: 200
       });
   } catch (e) {
