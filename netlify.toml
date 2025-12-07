@@ -3,35 +3,34 @@
 # =====================================
 [build]
   publish = "."
-  command = "" # ถ้าคุณไม่ได้ใช้ npm run build ให้ปล่อยว่างไว้
+  command = "" 
   environment = { NODE_VERSION = "18" }
 
 # =====================================
-# 💻 Netlify Edge Function Configuration (หัวใจสำคัญ SEO)
+# 💻 Netlify Edge Function Configuration
 # =====================================
-# แก้ไข: ดักจับทุก URL ที่เป็นไปได้ เพื่อให้บอททำงานเสมอ
 
-# 1. สำหรับหน้าโปรไฟล์ (รองรับทั้ง /profile, /sideline, /app)
+# 1. หน้าโปรไฟล์ (Profile Routing)
 [[edge_functions]]
-function = "render-bot"
-path = "/profile/*"
-
-[[edge_functions]]
-function = "render-bot"
-path = "/sideline/*"
+  function = "render-bot"
+  path = "/profile/*"
 
 [[edge_functions]]
-function = "render-bot"
-path = "/app/*"
-
-# 2. สำหรับหน้าจังหวัด (รองรับทั้ง /province, /location)
-[[edge_functions]]
-function = "ssr-province"
-path = "/province/*"
+  function = "render-bot"
+  path = "/sideline/*"
 
 [[edge_functions]]
-function = "ssr-province"
-path = "/location/*"
+  function = "render-bot"
+  path = "/app/*"
+
+# 2. หน้าจังหวัด (Location Routing)
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/province/*"
+
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/location/*"
 
 # =====================================
 # ⚙️ Global HTTP Security Headers
@@ -46,17 +45,28 @@ path = "/location/*"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Vary = "Accept-Encoding"
+    
+    # 🔥 CSP ที่ถูกต้องและรองรับ Supabase + FontAwesome 🔥
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+      img-src 'self' data: https: blob:;
+      font-src 'self' data: https://cdnjs.cloudflare.com;
+      connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co https://esm.sh;
+    """
 
 # =====================================
-# 🕸️ HTML Pages
+# 🕸️ HTML Pages Caching
 # =====================================
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=600, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate" 
+    # ปรับเป็น 0 เพื่อให้มั่นใจว่า User ได้หน้าเว็บเวอร์ชันล่าสุดเสมอ (สำคัญมากตอนแก้บั๊ก)
 
 # =====================================
-# 🧠 Service Worker / Manifest (สำคัญห้ามแก้)
+# 🧠 Service Worker / Manifest
 # =====================================
 [[headers]]
   for = "/sw.js"
@@ -67,11 +77,6 @@ path = "/location/*"
   for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "public, max-age=86400"
-
-[[headers]]
-  for = "/offline.html"
-  [headers.values]
-    Cache-Control = "no-cache"
 
 # =====================================
 # ⚡ Static Assets (Cache ยาวๆ 1 ปี)
@@ -100,18 +105,14 @@ path = "/location/*"
 # 🔀 Redirect Rules (SPA Routing)
 # =====================================
 
-# กฎที่ 1: บังคับ Service Worker ให้โหลดได้เสมอ (กันเหนียว)
+# กฎที่ 1: บังคับ Service Worker
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
 
-# กฎที่ 2: SPA Fallback (สำคัญที่สุด!)
-# ทุก URL ที่ไม่มีไฟล์จริง ให้ส่งไปที่ index.html เพื่อให้ JS ทำงาน
+# กฎที่ 2: SPA Catch-all (ส่งทุก URL ที่ไม่มีไฟล์จริงไป index.html)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# เพิ่มหลังจากบรรทัด 47 (ที่มี Permissions-Policy)
-Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' https:;"

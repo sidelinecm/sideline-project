@@ -213,41 +213,56 @@ gsap.registerPlugin(ScrollTrigger);
             return false;
         }
     }
+// ใน main.js ส่วนฟังก์ชัน processProfileData
+
 function processProfileData(p) {
-        // จัดการรูปภาพ (Safe Mode: รูปไม่แตกแน่นอน)
-        const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
-        const imageObjects = imagePaths.map(path => {
-            const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-            let url = data?.publicUrl || '/images/placeholder-profile-card.webp';
-            let sep = url.includes('?') ? '&' : '?';
-            if (p.lastUpdated) url = `${url}${sep}v=${Math.floor(new Date(p.lastUpdated).getTime() / 1000)}`;
-            sep = url.includes('?') ? '&' : '?';
-            
-            return {
-                src: `${url}${sep}width=600`, 
-                srcset: [300, 600].map(w => `${url}${sep}width=${w} ${w}w`).join(', ')
-            };
-        });
-
-        if (imageObjects.length === 0) imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
-
-        // ✅ ส่วนที่แก้: ดึงชื่อไทยจาก Map มาใช้
-        const provinceName = state.provincesMap.get(p.provinceKey) || '';
-        const tags = (p.styleTags || []).join(' ');
+    // 1. จัดการรูปภาพ (Safe Mode: ตัดพารามิเตอร์แต่งรูปออก กันรูปพัง)
+    const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+    
+    const imageObjects = imagePaths.map(path => {
+        // ดึง URL ตรงๆ จาก Storage
+        const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
+        let url = data?.publicUrl || '/images/placeholder-profile-card.webp';
         
-        // 🔴 ยัดชื่อจังหวัดภาษาไทยลงไปใน Text Search ด้วย! (สำคัญมาก)
-        const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''}`.toLowerCase();
-
-        return { 
-            ...p, 
-            images: imageObjects, 
-            altText: `น้อง${p.name} ${provinceName}`,
-            searchString: fullSearchString, // ใช้ค้นหา
-            provinceNameThai: provinceName, // ใช้แสดงผล
-            _price: Number(p.rate) || 0,
-            _age: Number(p.age) || 0
+        // 2. Cache Busting: อันนี้เก็บไว้ได้ (กัน Browser จำรูปเก่า)
+        // ใส่เฉพาะ v=timestamp เพื่อให้รูปอัปเดตถ้ามีการแก้
+        let sep = url.includes('?') ? '&' : '?';
+        if (p.lastUpdated) {
+            url = `${url}${sep}v=${Math.floor(new Date(p.lastUpdated).getTime() / 1000)}`;
+        }
+        
+        // 3. สร้าง src และ srcset แบบ Basic (ไม่ resize ผ่าน URL)
+        // ให้ Browser เลือกโหลดเอง แต่ลิงก์คือไฟล์เดิม
+        return {
+            src: url, 
+            srcset: `${url} 1x` // ส่งค่าเดิมไปเลย กันเหนียว
         };
+    });
+
+    // ถ้าไม่มีรูปเลย ให้ใช้ Placeholder
+    if (imageObjects.length === 0) {
+        imageObjects.push({ 
+            src: '/images/placeholder-profile.webp', 
+            srcset: '' 
+        });
     }
+
+    // ส่วนอื่นๆ เหมือนเดิม...
+    const provinceName = state.provincesMap.get(p.provinceKey) || '';
+    const tags = (p.styleTags || []).join(' ');
+    
+    const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''}`.toLowerCase();
+
+    return { 
+        ...p, 
+        images: imageObjects, 
+        altText: `น้อง${p.name} ${provinceName}`,
+        searchString: fullSearchString,
+        provinceNameThai: provinceName,
+        _price: Number(p.rate) || 0,
+        _age: Number(p.age) || 0
+    };
+}
     function populateProvinceDropdown() {
         if (!dom.provinceSelect) return;
         while (dom.provinceSelect.options.length > 1) {
