@@ -1,16 +1,15 @@
-# =====================================
-# 🏗️ Netlify Build Configuration
-# =====================================
+# ================================
+# Netlify build + routing + headers
+# ================================
 [build]
   publish = "."
   command = "" 
   environment = { NODE_VERSION = "18" }
 
-# =====================================
-# 💻 Netlify Edge Function Configuration
-# =====================================
-
-# 1. หน้าโปรไฟล์ (Profile Routing)
+# ================================
+# Edge Functions (declare first)
+# ================================
+# Edge functions should be declared high up so they are applied before catch-all redirects.
 [[edge_functions]]
   function = "render-bot"
   path = "/profile/*"
@@ -23,7 +22,6 @@
   function = "render-bot"
   path = "/app/*"
 
-# 2. หน้าจังหวัด (Location Routing)
 [[edge_functions]]
   function = "ssr-province"
   path = "/province/*"
@@ -32,9 +30,9 @@
   function = "ssr-province"
   path = "/location/*"
 
-# =====================================
-# ⚙️ Global HTTP Security Headers
-# =====================================
+# ================================
+# Global HTTP Security Headers
+# ================================
 [[headers]]
   for = "/*"
   [headers.values]
@@ -45,42 +43,65 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Vary = "Accept-Encoding"
-    
-    # 🔥 CSP ที่ถูกต้องและรองรับ Supabase + FontAwesome 🔥
+
+    # CSP: ปรับให้ครอบคลุม Supabase (API + Realtime/websocket) + CDN ที่ใช้บ่อย
+    # - อย่าใส่แหล่งที่ไม่จำเป็นเพื่อรักษาความปลอดภัย
     Content-Security-Policy = """
       default-src 'self';
       script-src 'self' 'unsafe-inline' https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
-      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-      img-src 'self' data: https: blob:;
-      font-src 'self' data: https://cdnjs.cloudflare.com;
-      connect-src 'self' https://hgzbgpbmymoiwjpaypvl.supabase.co https://esm.sh;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+      img-src 'self' data: blob: https:;
+      font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+      connect-src 'self' https://*.supabase.co https://hgzbgpbmymoiwjpaypvl.supabase.co wss://*.supabase.co https://esm.sh;
+      frame-ancestors 'self';
+      base-uri 'self';
+      form-action 'self';
     """
 
-# =====================================
-# 🕸️ HTML Pages Caching
-# =====================================
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate" 
-    # ปรับเป็น 0 เพื่อให้มั่นใจว่า User ได้หน้าเว็บเวอร์ชันล่าสุดเสมอ (สำคัญมากตอนแก้บั๊ก)
-
-# =====================================
-# 🧠 Service Worker / Manifest
-# =====================================
+# ================================
+# Specific asset + SPA exclusions (must come BEFORE catch-all)
+# Ensure sw.js and critical files are not swallowed by SPA redirect
+# ================================
 [[headers]]
   for = "/sw.js"
   [headers.values]
+    Content-Type = "application/javascript"
+    Cache-Control = "no-store, no-cache, must-revalidate"
+
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Content-Type = "application/javascript"
     Cache-Control = "no-store, no-cache, must-revalidate"
 
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
+    Content-Type = "application/manifest+json"
     Cache-Control = "public, max-age=86400"
 
-# =====================================
-# ⚡ Static Assets (Cache ยาวๆ 1 ปี)
-# =====================================
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# ================================
+# HTML Pages: always validate to fetch latest HTML (good for hotfixes)
+# ================================
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ================================
+# Long-term caching for immutable static assets
+# (Make sure filenames include content-hash in production builds)
+# ================================
 [[headers]]
   for = "/fonts/*"
   [headers.values]
@@ -97,22 +118,93 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Images served from the site root (if any)
+[[headers]]
   for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# =====================================
-# 🔀 Redirect Rules (SPA Routing)
-# =====================================
+# ================================
+# Important Redirects (order matters)
+# - Provide explicit passthrough rules for sw + manifest + robots + sitemap
+# - Then handle other static paths if you need SPA behavior on dynamic routes
+# - Finally catch-all SPA redirect (last)
+# ================================
 
-# กฎที่ 1: บังคับ Service Worker
+# Ensure sw.js is served as a static file (not proxied to index.html)
+# force = true makes Netlify prefer this rule before catch-all
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
+  force = true
 
-# กฎที่ 2: SPA Catch-all (ส่งทุก URL ที่ไม่มีไฟล์จริงไป index.html)
+[[redirects]]
+  from = "/service-worker.js"
+  to = "/service-worker.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+  force = true
+
+# If you serve any prerendered HTML for profiles or provinces, whitelist them here.
+# (Edge functions above will handle dynamic server-side rendering for these paths.)
+[[redirects]]
+  from = "/profile/*"
+  to = "/profile/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/province/*"
+  to = "/province/:splat"
+  status = 200
+  force = false
+
+# (Optional) If you want to ensure /images/* on your site root is served directly before SPA,
+# you can add:
+[[redirects]]
+  from = "/images/*"
+  to = "/images/:splat"
+  status = 200
+  force = true
+
+# Catch-all SPA redirect — MUST be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = { Country = [] }  # placeholder: no special conditions; keep last
+
+# ================================
+# Notes & Recommendations (not parsed by Netlify)
+# ================================
+# 1) Keep sw.js at repo root (publish = ".") so /sw.js is an actual file deployed to site root.
+# 2) Ensure service worker code does not import remote scripts that are blocked by CSP,
+#    or add required CDN origins into the CSP connect/script-src if you must import them.
+# 3) For Supabase images, change client URLs to use Supabase image renderer with width & quality parameters:
+#    https://<project>.supabase.co/storage/v1/render/image/public/profile-images/ID.webp?width=300&quality=65
+# 4) Use filename hashing (e.g., main.abc123.js) so long-term Cache-Control is safe.
+# 5) If using Realtime (websocket), confirm the connect-src includes wss://*.supabase.co (already included).
+# 6) Test in production preview; Netlify's preview URL may behave differently for service workers —
+#    always test the published production domain (or set a proper custom domain) when verifying SW registration.

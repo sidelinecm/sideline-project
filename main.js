@@ -853,7 +853,7 @@ function createSearchResultSection(profiles) {
         grid.appendChild(frag);
         return wrapper;
     }
-    function createProfileCard(p) {
+function createProfileCard(p) {
         const cardContainer = document.createElement('div');
         cardContainer.className = 'profile-card-new-container';
 
