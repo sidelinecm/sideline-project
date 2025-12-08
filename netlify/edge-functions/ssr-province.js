@@ -107,6 +107,8 @@ function renderProvinceHTML({provinceKey, provinceData, profiles=[], allProvince
 export default async (request, context) => {
   const userAgent = request.headers.get('User-Agent') || '';
   const isBot = /googlebot|bingbot|yandex|duckduckbot|slurp|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|baiduspider/i.test(userAgent);
+  
+  // ถ้าไม่ใช่บอท ให้ข้ามไปใช้กฎ Redirect/Rewrite ถัดไปใน netlify.toml 
   if (!isBot) return context.next(); 
 
   const url = new URL(request.url);
@@ -123,6 +125,7 @@ export default async (request, context) => {
         .eq('key', provinceKey)
         .maybeSingle();
 
+      // ถ้าไม่พบข้อมูลจังหวัด ให้ข้ามไปใช้กฎ Redirect/Rewrite ถัดไป
       if (!provinceData) return context.next();
 
       // 🚀 OPTIMIZATION: ดึงเฉพาะคอลัมน์ที่จำเป็น
@@ -150,6 +153,7 @@ export default async (request, context) => {
         status: 200
       });
   } catch (e) {
+      // 🛑 ถ้าเกิดข้อผิดพลาดในการ SSR (เช่น Supabase ล่ม) ให้ข้ามไปใช้กฎ Redirect/Rewrite ถัดไป (ซึ่งจะโหลด index.html)
       return context.next();
   }
 };
