@@ -45,7 +45,6 @@
     Vary = "Accept-Encoding"
 
     # CSP: ปรับให้ครอบคลุม Supabase (API + Realtime/websocket) + CDN ที่ใช้บ่อย
-    # - อย่าใส่แหล่งที่ไม่จำเป็นเพื่อรักษาความปลอดภัย
     Content-Security-Policy = """
       default-src 'self';
       script-src 'self' 'unsafe-inline' https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
@@ -60,7 +59,6 @@
 
 # ================================
 # Specific asset + SPA exclusions (must come BEFORE catch-all)
-# Ensure sw.js and critical files are not swallowed by SPA redirect
 # ================================
 [[headers]]
   for = "/sw.js"
@@ -100,7 +98,6 @@
 
 # ================================
 # Long-term caching for immutable static assets
-# (Make sure filenames include content-hash in production builds)
 # ================================
 [[headers]]
   for = "/fonts/*"
@@ -132,7 +129,6 @@
 # Important Redirects (order matters)
 # ================================
 
-# Ensure sw.js is served as a static file (not proxied to index.html)
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
@@ -163,7 +159,6 @@
   status = 200
   force = true
 
-# If you serve any prerendered HTML for profiles or provinces, whitelist them here.
 [[redirects]]
   from = "/profile/*"
   to = "/profile/:splat"
@@ -176,22 +171,20 @@
   status = 200
   force = false
 
-# ✅ กฎใหม่: Rewrite /sideline/* ไปยัง index.html สำหรับผู้ใช้ทั่วไป (ที่มาจาก Edge Function context.next())
+# ✅ กฎที่แก้ไข: Rewrite /sideline/* ไปยัง index.html (สำหรับผู้ใช้ทั่วไป)
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"
   status = 200
   force = true 
 
-# กฎที่แก้ไขไปแล้ว: Rewrite /location/* ไปยัง index.html สำหรับผู้ใช้ทั่วไป
+# ✅ กฎที่แก้ไข: Rewrite /location/* ไปยัง index.html (สำหรับผู้ใช้ทั่วไป)
 [[redirects]]
   from = "/location/*"
   to = "/index.html"
   status = 200
   force = true 
 
-# (Optional) If you want to ensure /images/* on your site root is served directly before SPA,
-# you can add:
 [[redirects]]
   from = "/images/*"
   to = "/images/:splat"
@@ -203,18 +196,4 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = { Country = [] }  # placeholder: no special conditions; keep last
-
-
-# ================================
-# Notes & Recommendations (not parsed by Netlify)
-# ================================
-# 1) Keep sw.js at repo root (publish = ".") so /sw.js is an actual file deployed to site root.
-# 2) Ensure service worker code does not import remote scripts that are blocked by CSP,
-#    or add required CDN origins into the CSP connect/script-src if you must import them.
-# 3) For Supabase images, change client URLs to use Supabase image renderer with width & quality parameters:
-#    https://<project>.supabase.co/storage/v1/render/image/public/profile-images/ID.webp?width=300&quality=65
-# 4) Use filename hashing (e.g., main.abc123.js) so long-term Cache-Control is safe.
-# 5) If using Realtime (websocket), confirm the connect-src includes wss://*.supabase.co (already included).
-# 6) Test in production preview; Netlify's preview URL may behave differently for service workers —
-#    always test the published production domain (or set a proper custom domain) when verifying SW registration.
+  conditions = { Country = [] }
