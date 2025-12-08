@@ -103,20 +103,7 @@
   }
   </script>
 
-  <!-- Inline Critical CSS -->
-  <style>
-    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
-    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
-    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
-    section { padding: 20px; text-align: center; }
-    .profile-image img { image-orientation: none; }
-    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
-    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
-    @media (max-width: 767px) {
-        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
-        .profile-card { padding: 10px; border-radius: 12px; }
-    }
-  </style>
+
 </head>
 
 
@@ -126,12 +113,15 @@
     <div class="container mx-auto px-6 h-14 flex items-center justify-between">
         
  <a href="/" aria-label="หน้าแรก Sideline Chiangmai" class="logo-link">
-  <picture>
-    <source srcset="/images/logo-sidelinechiangmai.webp" type="image/webp" />
-    <img src="/images/logo-sidelinechiangmai.png" alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่" width="250" height="85" loading="eager" fetchpriority="high" decoding="async" />
-  </picture>
+  <img 
+    src="/images/logo-sidelinechiangmai.svg" 
+    alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงานหิวแฟน ตรงปก100%" 
+    width="250" 
+    height="82" loading="eager" 
+    fetchpriority="high" 
+    decoding="async" 
+  />
 </a>
-
         <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 dark:text-gray-400 mt-2">
             อัปเดต: <span id="last-updated-time" class="font-semibold text-red-600 dark:text-red-400">กำลังโหลด...</span>
         </div>
@@ -715,11 +705,25 @@
     </div>
   </div>
 </div>
-
-<!-- โหลด main.js -->
-
 <script type="module" src="/main.js"></script>
 
-<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("loaded");
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // ใส่ .catch เพื่อดักจับ Error ที่มาจาก sw.js
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(error => {
+          console.error('ServiceWorker registration failed: ', error);
+        });
+    });
+  }
+</script>
 </body>
 </html>
