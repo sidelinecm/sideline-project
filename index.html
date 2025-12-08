@@ -867,25 +867,18 @@ footer p {
     </div>
   </div>
 </div>
+
 <script type="module" src="/main.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.body.classList.add("loaded");
-  });
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // ใส่ .catch เพื่อดักจับ Error ที่มาจาก sw.js
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
-          console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        })
-        .catch(error => {
-          console.error('ServiceWorker registration failed: ', error);
-        });
+  document.addEventListener("DOMContentLoaded", ()=>{ document.body.classList.add("loaded"); });
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", ()=>{
+      if ("requestIdleCallback" in window) requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js"));
+      else setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500);
     });
   }
 </script>
+
 </body>
 </html>
