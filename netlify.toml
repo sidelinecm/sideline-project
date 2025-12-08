@@ -130,13 +130,9 @@
 
 # ================================
 # Important Redirects (order matters)
-# - Provide explicit passthrough rules for sw + manifest + robots + sitemap
-# - Then handle other static paths if you need SPA behavior on dynamic routes
-# - Finally catch-all SPA redirect (last)
 # ================================
 
 # Ensure sw.js is served as a static file (not proxied to index.html)
-# force = true makes Netlify prefer this rule before catch-all
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
@@ -168,7 +164,6 @@
   force = true
 
 # If you serve any prerendered HTML for profiles or provinces, whitelist them here.
-# (Edge functions above will handle dynamic server-side rendering for these paths.)
 [[redirects]]
   from = "/profile/*"
   to = "/profile/:splat"
@@ -180,6 +175,20 @@
   to = "/province/:splat"
   status = 200
   force = false
+
+# ✅ กฎใหม่: Rewrite /sideline/* ไปยัง index.html สำหรับผู้ใช้ทั่วไป (ที่มาจาก Edge Function context.next())
+[[redirects]]
+  from = "/sideline/*"
+  to = "/index.html"
+  status = 200
+  force = true 
+
+# กฎที่แก้ไขไปแล้ว: Rewrite /location/* ไปยัง index.html สำหรับผู้ใช้ทั่วไป
+[[redirects]]
+  from = "/location/*"
+  to = "/index.html"
+  status = 200
+  force = true 
 
 # (Optional) If you want to ensure /images/* on your site root is served directly before SPA,
 # you can add:
@@ -195,6 +204,7 @@
   to = "/index.html"
   status = 200
   conditions = { Country = [] }  # placeholder: no special conditions; keep last
+
 
 # ================================
 # Notes & Recommendations (not parsed by Netlify)
