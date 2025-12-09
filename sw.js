@@ -1,5 +1,3 @@
-// --- START OF FILE sw.js ---
-
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox-sw.js');
 
 if (workbox) {
@@ -8,8 +6,9 @@ if (workbox) {
   // -----------------------------------------------------------
   // 1. CONFIGURATION
   // -----------------------------------------------------------
-  const CACHE_VERSION = 'v-2025-12-09-03'; // 🔄 อัปเดตเลขเวอร์ชันทุกครั้งที่แก้โค้ด
-  const OFFLINE_PAGE = '/offline.html'; // ⚠️ ต้องมีไฟล์นี้อยู่จริง ห้ามลืมสร้าง!
+  // ⚠️ เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการแก้โค้ด เพื่อให้ลูกค้าได้ไฟล์ใหม่
+  const CACHE_VERSION = 'v-2025-12-09-FINAL-01'; 
+  const OFFLINE_PAGE = '/offline.html'; // ⚠️ ต้องมีไฟล์นี้อยู่จริง
 
   workbox.core.setCacheNameDetails({
     prefix: 'sideline-cm',
@@ -21,10 +20,10 @@ if (workbox) {
   // -----------------------------------------------------------
   // 2. LIFECYCLE
   // -----------------------------------------------------------
-  self.addEventListener('install', (event) => {
-    self.skipWaiting();
-  });
+  // ติดตั้งและทำงานทันที ไม่ต้องรอปิดแท็บ
+  self.addEventListener('install', (event) => self.skipWaiting());
 
+  // ล้าง Cache เก่าทิ้งเมื่อมีการอัปเดตเวอร์ชัน
   self.addEventListener('activate', (event) => {
     event.waitUntil(
       caches.keys().then((keys) =>
@@ -40,16 +39,16 @@ if (workbox) {
   });
 
   // -----------------------------------------------------------
-  // 3. PRECACHE
+  // 3. PRECACHE (โหลดไฟล์สำคัญมารอไว้เลย)
   // -----------------------------------------------------------
   workbox.precaching.precacheAndRoute([
     { url: '/index.html', revision: CACHE_VERSION },
     { url: '/main.js', revision: CACHE_VERSION },
     { url: '/styles.css', revision: CACHE_VERSION },
-    { url: OFFLINE_PAGE, revision: CACHE_VERSION }, // ⚠️ ถ้าหาไฟล์ไม่เจอ SW จะ Error ทันที
+    { url: OFFLINE_PAGE, revision: CACHE_VERSION },
     { url: '/manifest.webmanifest', revision: CACHE_VERSION },
     { url: '/images/logo-sidelinechiangmai.webp', revision: CACHE_VERSION },
-    { url: '/images/og-default.webp', revision: CACHE_VERSION }, // รูปสำรองเวลารูปหลักโหลดไม่ได้
+    { url: '/images/favicon.ico', revision: CACHE_VERSION }
   ]);
 
   // -----------------------------------------------------------
@@ -57,22 +56,23 @@ if (workbox) {
   // -----------------------------------------------------------
 
   // A. หน้าเว็บ HTML (NetworkFirst + Timeout)
-  // เพิ่ม networkTimeoutSeconds: 3 คือถ้าเน็ตอืดเกิน 3 วิ ให้เอาของเก่ามาโชว์ก่อนเลย ลูกค้าจะได้ไม่รอนาน
+  // โหลดจากเน็ตก่อน ถ้าช้าเกิน 3 วินาที ให้เอา Cache มาโชว์
   workbox.routing.registerRoute(
     ({ request }) => request.mode === 'navigate',
     new workbox.strategies.NetworkFirst({
       cacheName: `pages-${CACHE_VERSION}`,
-      networkTimeoutSeconds: 3, 
+      networkTimeoutSeconds: 3,
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [200] }),
       ],
     })
   );
 
-  // B. Static Assets (JS/CSS/Fonts)
+  // B. Static Assets (CSS, JS, Fonts) - StaleWhileRevalidate
+  // เอาของเก่ามาโชว์ก่อนเลย (เร็วมาก) แล้วแอบโหลดตัวใหม่มาเก็บไว้รอบหน้า
   workbox.routing.registerRoute(
     ({ request }) => 
-      ['style', 'script', 'worker'].includes(request.destination),
+      ['style', 'script', 'worker', 'font'].includes(request.destination),
     new workbox.strategies.StaleWhileRevalidate({
       cacheName: `static-assets-${CACHE_VERSION}`,
       plugins: [
@@ -84,25 +84,11 @@ if (workbox) {
     })
   );
 
-  // C. Google Fonts (Cache ลึกๆ หน่อย)
-  workbox.routing.registerRoute(
-    ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
-    new workbox.strategies.CacheFirst({
-      cacheName: `google-fonts-${CACHE_VERSION}`,
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 30,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 ปี
-        }),
-      ],
-    })
-  );
-
-  // D. รูปภาพน้องๆ (Supabase + Local)
+  // C. รูปภาพ (CacheFirst) - เก็บยาวๆ ประหยัดเน็ต
   workbox.routing.registerRoute(
     ({ request, url }) => 
       request.destination === 'image' ||
-      url.href.includes('/storage/v1/object/public/'),
+      url.href.includes('/storage/v1/object/public/'), // Supabase Storage
     new workbox.strategies.CacheFirst({
       cacheName: `images-${CACHE_VERSION}`,
       plugins: [
@@ -110,19 +96,18 @@ if (workbox) {
           statuses: [0, 200],
         }),
         new workbox.expiration.ExpirationPlugin({
-          maxEntries: 150, // เก็บ 150 รูปพอ กันเครื่องลูกค้าเต็ม
-          maxAgeSeconds: 30 * 24 * 60 * 60, 
+          maxEntries: 150,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 วัน
           purgeOnQuotaError: true,
         }),
       ],
     })
   );
 
-  // E. Supabase API (NetworkOnly) - ห้าม Cache เด็ดขาด
+  // D. Supabase API (NetworkOnly) - ห้าม Cache เด็ดขาด!
+  // เพื่อให้ข้อมูลน้องๆ (ว่าง/ไม่ว่าง) เป็นปัจจุบันเสมอ
   workbox.routing.registerRoute(
-    ({ url }) => 
-      url.href.includes('rest/v1') || 
-      url.href.includes('google-analytics'), 
+    ({ url }) => url.href.includes('rest/v1'), 
     new workbox.strategies.NetworkOnly()
   );
 
@@ -130,11 +115,9 @@ if (workbox) {
   // 5. OFFLINE FALLBACK
   // -----------------------------------------------------------
   workbox.routing.setCatchHandler(async ({ event }) => {
+    // ถ้าเป็นหน้าเว็บแล้วไม่มีเน็ต -> ส่งหน้า offline.html ไปให้
     if (event.request.destination === 'document') {
       return caches.match(OFFLINE_PAGE);
-    }
-    if (event.request.destination === 'image') {
-      return caches.match('/images/og-default.webp');
     }
     return Response.error();
   });
