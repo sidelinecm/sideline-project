@@ -992,20 +992,24 @@ function createProfileCard(p) {
             lineText: get('lightboxLineLinkText')
         };
 
+        // 1. ชื่อและคำคม
         if (els.name) els.name.textContent = p.name || 'ไม่ระบุชื่อ';
         if (els.quote) {
             els.quote.textContent = p.quote ? `"${p.quote}"` : '';
             els.quote.style.display = p.quote ? 'block' : 'none';
         }
 
+        // 2. รูปภาพหลัก (Hero Image)
         if (els.hero) {
             els.hero.src = p.images?.[0]?.src || '/images/placeholder-profile.webp';
             els.hero.srcset = p.images?.[0]?.srcset || '';
             els.hero.alt = p.altText || p.name;
         }
 
+        // 3. รูปย่อย (Thumbnails) - ดึงจาก galleryPaths ใน JSON
         if (els.thumbs) {
             els.thumbs.innerHTML = '';
+            // ตรวจสอบว่ามีรูปมากกว่า 1 รูปหรือไม่
             if (p.images && p.images.length > 1) {
                 els.thumbs.style.display = 'grid';
                 p.images.forEach((img, i) => {
@@ -1013,9 +1017,11 @@ function createProfileCard(p) {
                     thumb.className = `thumbnail ${i === 0 ? 'active' : ''}`;
                     thumb.src = img.src;
                     thumb.onclick = () => {
+                        // เปลี่ยนรูปหลักเมื่อกด
                         els.hero.src = img.src;
                         els.hero.srcset = img.srcset;
-                        els.thumbs.querySelector('.active')?.classList.remove('active');
+                        // จัดการ class active
+                        els.thumbs.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
                         thumb.classList.add('active');
                     };
                     els.thumbs.appendChild(thumb);
@@ -1025,9 +1031,10 @@ function createProfileCard(p) {
             }
         }
 
+        // 4. Tags (styleTags)
         if (els.tags) {
             els.tags.innerHTML = '';
-            if (p.styleTags?.length) {
+            if (p.styleTags && p.styleTags.length > 0) {
                 els.tags.style.display = 'flex';
                 p.styleTags.forEach(t => {
                     const span = document.createElement('span');
@@ -1040,43 +1047,91 @@ function createProfileCard(p) {
             }
         }
 
+        // 5. ข้อมูลสถิติ (Stats Grid) - แก้ไข Logic ให้แสดงผลแม่นยำขึ้น
         if (els.details) {
-            const provinceName = state.provincesMap.get(p.provinceKey) || '';
+            const provinceName = state.provincesMap.get(p.provinceKey) || 'ไม่ระบุ';
             
+            // Logic จัดการ สูง/หนัก ไม่ให้แสดง "-/-" ถ้าขาดอย่างใดอย่างหนึ่ง
+            let hwDisplay = '-';
+            if (p.height && p.weight) {
+                hwDisplay = `${p.height}/${p.weight}`;
+            } else if (p.height) {
+                hwDisplay = `${p.height} ซม.`;
+            } else if (p.weight) {
+                hwDisplay = `${p.weight} กก.`;
+            }
+
+            // ตรวจสอบค่า NULL ของสัดส่วน
+            const statsDisplay = p.stats ? p.stats : '-';
+            const ageDisplay = p.age ? p.age : '-';
+            const skinDisplay = p.skinTone ? p.skinTone : '-';
+            const locationDisplay = p.location ? p.location : '-';
+            const rateDisplay = p.rate ? p.rate : 'สอบถาม';
+
+            // สร้าง HTML ใหม่
             els.details.innerHTML = `
                 <div class="stats-grid-container">
-                    <div class="stat-box"><span class="stat-label">อายุ</span><span class="stat-value">${p.age || '-'}</span></div>
-                    <div class="stat-box"><span class="stat-label">สัดส่วน</span><span class="stat-value">${p.stats || '-'}</span></div>
-                    <div class="stat-box"><span class="stat-label">สูง/หนัก</span><span class="stat-value">${p.height || '-'}/${p.weight || '-'}</span></div>
+                    <div class="stat-box">
+                        <span class="stat-label">อายุ</span>
+                        <span class="stat-value">${ageDisplay}</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">สัดส่วน</span>
+                        <span class="stat-value text-pink-600">${statsDisplay}</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">สูง/หนัก</span>
+                        <span class="stat-value">${hwDisplay}</span>
+                    </div>
                 </div>
+                
                 <div class="info-list-container">
-                    <div class="info-row"><div class="info-label"><i class="fas fa-palette info-icon"></i> สีผิว</div><div class="info-value">${p.skinTone || '-'}</div></div>
-                    <div class="info-row"><div class="info-label"><i class="fas fa-map-marker-alt info-icon"></i> พิกัด</div><div class="info-value text-primary">${provinceName} (${p.location || '-'})</div></div>
-                    <div class="info-row"><div class="info-label"><i class="fas fa-tag info-icon"></i> เรทราคา</div><div class="info-value text-green-600">${p.rate || 'สอบถาม'}</div></div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-palette info-icon"></i> สีผิว</div>
+                        <div class="info-value">${skinDisplay}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-map-marker-alt info-icon"></i> พิกัด</div>
+                        <div class="info-value text-primary">${provinceName} <span class="text-xs text-gray-500">(${locationDisplay})</span></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-tag info-icon"></i> เรทราคา</div>
+                        <div class="info-value text-green-600 font-extrabold">${rateDisplay}</div>
+                    </div>
                 </div>
             `;
         }
 
+        // 6. รายละเอียดเพิ่มเติม (Description)
         if (els.desc && els.desc.parentElement) {
+            // แปลง \n เป็น <br> เพื่อให้ขึ้นบรรทัดใหม่
+            const cleanDesc = p.description ? p.description.replace(/\n/g, '<br>') : 'ไม่มีรายละเอียดเพิ่มเติม';
+            
             els.desc.parentElement.innerHTML = `
                 <div class="description-box">
-                    <div class="desc-header"><i class="fas fa-align-left"></i> รายละเอียดเพิ่มเติม</div>
-                    <div class="desc-content">${p.description ? p.description.replace(/\n/g, '<br>') : '-'}</div>
+                    <div class="desc-header">
+                        <i class="fas fa-align-left text-pink-500"></i> รายละเอียดเพิ่มเติม
+                    </div>
+                    <div class="desc-content">${cleanDesc}</div>
                 </div>
             `;
         }
 
+        // 7. ปุ่ม LINE (Sticky Footer)
         const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
-        if (oldWrapper) oldWrapper.remove();
+        if (oldWrapper) oldWrapper.remove(); // ลบอันเก่าออกก่อนเสมอ
 
         if (p.lineId) {
             const wrapper = document.createElement('div');
             wrapper.id = 'line-btn-sticky-wrapper';
             wrapper.className = 'lb-sticky-footer';
 
+            // ตรวจสอบว่าเป็น Link เต็ม หรือ ID
+            const lineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/${p.lineId}`;
+
             const link = document.createElement('a');
             link.className = 'btn-line-action';
-            link.href = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/${p.lineId}`;
+            link.href = lineUrl;
             link.target = '_blank';
             link.innerHTML = `<i class="fab fa-line"></i> แอดไลน์ ${p.name}`;
 
@@ -1085,20 +1140,28 @@ function createProfileCard(p) {
             if (detailsCol) detailsCol.appendChild(wrapper);
         }
 
+        // 8. สถานะ (Availability)
         if (els.avail) {
             els.avail.innerHTML = '';
             let sClass = 'status-inquire';
             let icon = '<i class="fas fa-question-circle"></i>';
-            if (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) { sClass = 'status-available'; icon = '<i class="fas fa-check-circle"></i>'; }
-            else if (p.availability?.includes('ไม่ว่าง')) { sClass = 'status-busy'; icon = '<i class="fas fa-times-circle"></i>'; }
+            
+            // เช็คคำว่า "ว่าง" หรือ "รับงาน"
+            if (p.availability && (p.availability.includes('ว่าง') || p.availability.includes('รับงาน'))) { 
+                sClass = 'status-available'; 
+                icon = '<i class="fas fa-check-circle"></i>'; 
+            }
+            else if (p.availability && p.availability.includes('ไม่ว่าง')) { 
+                sClass = 'status-busy'; 
+                icon = '<i class="fas fa-times-circle"></i>'; 
+            }
             
             const badge = document.createElement('div');
-            badge.className = `lb-status-badge ${sClass}`;
+            badge.className = `lb-status-badge ${sClass} flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold shadow-sm`;
             badge.innerHTML = `${icon} ${p.availability || 'สอบถาม'}`;
             els.avail.appendChild(badge);
         }
     }
-
     // =================================================================
     // 10. SEO META TAGS UPDATER
     // =================================================================
