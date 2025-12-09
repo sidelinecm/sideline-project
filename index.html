@@ -936,24 +936,9 @@ footer p {
   </div>
 </div>
 
-<!-- โหลด main.js -->
 
-<script type="module" src="/main.js"></script>
-document.addEventListener("DOMContentLoaded", () => {
-    document.body.classList.add("loaded");
-    // Lazy Load Map
-    const iframe = document.getElementById("google-map");
-    if(iframe) {
-        const observer = new IntersectionObserver((entries, obs) => {
-            entries.forEach(e => {
-                if(e.isIntersecting) { iframe.src = iframe.dataset.src; obs.disconnect(); }
-            });
-        });
-        observer.observe(iframe);
-    }
-  });
-</script>
+<script type=module src=/main.js></script>
 
-  
+<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
 </body>
 </html>
