@@ -1,18 +1,16 @@
+// --- START OF FILE sw.js ---
+
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox-sw.js');
 
 if (workbox) {
   console.log(`[SW] Workbox loaded v7.1.0 - Ready to serve!`);
 
   // -----------------------------------------------------------
-  // 1. CONFIGURATION (ตั้งค่าเวอร์ชัน)
-  // ⚠️ สำคัญ: เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการแก้โค้ดเว็บ เพื่อให้ลูกค้าได้ไฟล์ใหม่ทันที
+  // 1. CONFIGURATION
   // -----------------------------------------------------------
-  // ✅ โค้ดที่แก้ไข: อัปเดตเวอร์ชันจาก 'v-2025-19-07-01' เป็น 'v-2025-12-09-02'
-  const CACHE_VERSION = 'v-2025-12-09-02'; 
-  const OFFLINE_PAGE = '/offline.html'; 
-  
+  const CACHE_VERSION = 'v-2025-12-09-03'; // 🔄 อัปเดตเลขเวอร์ชันทุกครั้งที่แก้โค้ด
+  const OFFLINE_PAGE = '/offline.html'; // ⚠️ ต้องมีไฟล์นี้อยู่จริง ห้ามลืมสร้าง!
 
-  // ตั้งค่า Config พื้นฐาน
   workbox.core.setCacheNameDetails({
     prefix: 'sideline-cm',
     suffix: CACHE_VERSION,
@@ -21,21 +19,18 @@ if (workbox) {
   });
 
   // -----------------------------------------------------------
-  // 2. LIFECYCLE (การติดตั้งและเปิดใช้งาน)
+  // 2. LIFECYCLE
   // -----------------------------------------------------------
   self.addEventListener('install', (event) => {
-    // บังคับให้ SW ตัวใหม่ทำงานทันที ไม่ต้องรอปิดแท็บ
     self.skipWaiting();
   });
 
   self.addEventListener('activate', (event) => {
-    // ล้าง Cache เก่าทิ้งทันทีที่เปลี่ยนเวอร์ชัน
     event.waitUntil(
       caches.keys().then((keys) =>
         Promise.all(
           keys.map((key) => {
             if (!key.includes(CACHE_VERSION)) {
-              console.log(`[SW] Cleaning old cache: ${key}`);
               return caches.delete(key);
             }
           })
@@ -45,41 +40,39 @@ if (workbox) {
   });
 
   // -----------------------------------------------------------
-  // 3. PRECACHE (โหลดไฟล์สำคัญมารอไว้เลย)
+  // 3. PRECACHE
   // -----------------------------------------------------------
   workbox.precaching.precacheAndRoute([
     { url: '/index.html', revision: CACHE_VERSION },
     { url: '/main.js', revision: CACHE_VERSION },
-    { url: '/styles.css', revision: CACHE_VERSION }, // ตรวจสอบชื่อไฟล์ css ของคุณให้ตรง
-    { url: OFFLINE_PAGE, revision: CACHE_VERSION },
+    { url: '/styles.css', revision: CACHE_VERSION },
+    { url: OFFLINE_PAGE, revision: CACHE_VERSION }, // ⚠️ ถ้าหาไฟล์ไม่เจอ SW จะ Error ทันที
     { url: '/manifest.webmanifest', revision: CACHE_VERSION },
     { url: '/images/logo-sidelinechiangmai.webp', revision: CACHE_VERSION },
-    { url: '/images/og-default.webp', revision: CACHE_VERSION },
+    { url: '/images/og-default.webp', revision: CACHE_VERSION }, // รูปสำรองเวลารูปหลักโหลดไม่ได้
   ]);
 
   // -----------------------------------------------------------
-  // 4. ROUTING STRATEGIES (สูตรการโหลดไฟล์แต่ละแบบ)
+  // 4. ROUTING STRATEGIES
   // -----------------------------------------------------------
 
-  // A. หน้าเว็บ HTML (NetworkFirst)
-  // พยายามโหลดหน้าล่าสุดจากเน็ตก่อน ถ้าไม่มีเน็ตค่อยเอาจาก Cache
+  // A. หน้าเว็บ HTML (NetworkFirst + Timeout)
+  // เพิ่ม networkTimeoutSeconds: 3 คือถ้าเน็ตอืดเกิน 3 วิ ให้เอาของเก่ามาโชว์ก่อนเลย ลูกค้าจะได้ไม่รอนาน
   workbox.routing.registerRoute(
     ({ request }) => request.mode === 'navigate',
     new workbox.strategies.NetworkFirst({
       cacheName: `pages-${CACHE_VERSION}`,
+      networkTimeoutSeconds: 3, 
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [200] }),
       ],
     })
   );
 
-  // B. ไฟล์ Static JS/CSS/Fonts (StaleWhileRevalidate)
-  // โหลดจาก Cache มาโชว์ก่อนเลย (เร็วมาก) แล้วแอบโหลดตัวใหม่มาเก็บไว้รอบหน้า
+  // B. Static Assets (JS/CSS/Fonts)
   workbox.routing.registerRoute(
     ({ request }) => 
-      request.destination === 'script' ||
-      request.destination === 'style' ||
-      request.destination === 'font',
+      ['style', 'script', 'worker'].includes(request.destination),
     new workbox.strategies.StaleWhileRevalidate({
       cacheName: `static-assets-${CACHE_VERSION}`,
       plugins: [
@@ -91,45 +84,55 @@ if (workbox) {
     })
   );
 
-  // C. รูปภาพจาก Supabase Storage และในเว็บ (CacheFirst)
-  // เก็บรูปไว้ยาวๆ เพราะรูปน้องๆ ไม่ค่อยเปลี่ยน (ประหยัดเน็ตลูกค้า)
+  // C. Google Fonts (Cache ลึกๆ หน่อย)
   workbox.routing.registerRoute(
-    ({ request, url }) => 
-      request.destination === 'image' ||
-      url.href.includes('/storage/v1/object/public/'), // Supabase Storage
+    ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
     new workbox.strategies.CacheFirst({
-      cacheName: `images-${CACHE_VERSION}`,
+      cacheName: `google-fonts-${CACHE_VERSION}`,
       plugins: [
-        new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [0, 200], // รองรับ CORS (0) และ OK (200)
-        }),
         new workbox.expiration.ExpirationPlugin({
-          maxEntries: 200, // เก็บรูปสูงสุด 200 รูป
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 วัน
-          purgeOnQuotaError: true, // ถ้าเมมเต็มให้ลบรูปทิ้งก่อน
+          maxEntries: 30,
+          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 ปี
         }),
       ],
     })
   );
 
-  // D. Supabase API & ข้อมูล Real-time (NetworkOnly)
-  // ⚠️ ห้าม Cache ข้อมูล JSON เด็ดขาด สถานะต้องล่าสุดเสมอ
+  // D. รูปภาพน้องๆ (Supabase + Local)
+  workbox.routing.registerRoute(
+    ({ request, url }) => 
+      request.destination === 'image' ||
+      url.href.includes('/storage/v1/object/public/'),
+    new workbox.strategies.CacheFirst({
+      cacheName: `images-${CACHE_VERSION}`,
+      plugins: [
+        new workbox.cacheableResponse.CacheableResponsePlugin({
+          statuses: [0, 200],
+        }),
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 150, // เก็บ 150 รูปพอ กันเครื่องลูกค้าเต็ม
+          maxAgeSeconds: 30 * 24 * 60 * 60, 
+          purgeOnQuotaError: true,
+        }),
+      ],
+    })
+  );
+
+  // E. Supabase API (NetworkOnly) - ห้าม Cache เด็ดขาด
   workbox.routing.registerRoute(
     ({ url }) => 
-      url.href.includes('rest/v1') || // Supabase DB endpoint
+      url.href.includes('rest/v1') || 
       url.href.includes('google-analytics'), 
     new workbox.strategies.NetworkOnly()
   );
 
   // -----------------------------------------------------------
-  // 5. OFFLINE FALLBACK (กันเหนียว)
+  // 5. OFFLINE FALLBACK
   // -----------------------------------------------------------
   workbox.routing.setCatchHandler(async ({ event }) => {
-    // ถ้าเป็นหน้าเว็บ (HTML) แล้วโหลดไม่ได้ ให้ส่งหน้า Offline ไปแทน
     if (event.request.destination === 'document') {
       return caches.match(OFFLINE_PAGE);
     }
-    // ถ้าเป็นรูป แล้วโหลดไม่ได้ ให้ส่งรูป Placeholder
     if (event.request.destination === 'image') {
       return caches.match('/images/og-default.webp');
     }
