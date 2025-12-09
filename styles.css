@@ -1,9 +1,30 @@
-/* ==========================================================================
-   1. CORE SETTINGS & THEME VARIABLES
-   ========================================================================== */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ===============================
+   FONT
+================================== */
+@font-face {
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local("Prompt Regular"),
+       url(/fonts/prompt-v11-latin_thai-regular.woff2) format("woff2");
+}
+@font-face {
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local("Prompt Bold"),
+       url(/fonts/prompt-v11-latin_thai-700.woff2) format("woff2");
+}
+@font-face {
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: local("Prompt ExtraBold"),
+       url(/fonts/prompt-v11-latin_thai-800.woff2) format("woff2");
+}
 
 :root {
   /* Color Palette (HSL for easy opacity manipulation) */
@@ -51,27 +72,31 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Custom Fonts Loading */
-@font-face {
-  font-family: 'Prompt';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Prompt';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
+/* การ์ดโปรไฟล์ (Optimized) */
+.profile-card-new {
+    position: relative;
+    background-color: #f3f4f6; /* สีเทารองพื้นระหว่างรอรูป */
+    border-radius: 12px;
+    overflow: hidden;
+    
+    /* ✅ KEY FIX: ล็อคสัดส่วน 3:4 ป้องกันหน้ากระโดด */
+    aspect-ratio: 3 / 4; 
+    width: 100%;
+    
+    /* Hardware Acceleration */
+    transform: translateZ(0); 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(var(--primary)); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--secondary)); }
+/* รูปภาพในการ์ด */
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* บังคับรูปเต็มกรอบ */
+    object-position: center top; /* โฟกัสช่วงบน */
+    display: block;
+}
 
 /* ==========================================================================
    2. TYPOGRAPHY & TEXT EFFECTS
