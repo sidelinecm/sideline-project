@@ -209,7 +209,7 @@ async function initApp() {
 }
 
 function processProfileData(p) {
-    // 1. ดึง URL รูปภาพให้ชัวร์ (ไม่เอา Cache เก่า) (โค้ดส่วนนี้เหมือนเดิม)
+    // 1. ดึง URL รูปภาพให้ชัวร์ (ไม่เอา Cache เก่า)
     let imagePaths = [];
     if (p.imagePath) imagePaths.push(p.imagePath);
     if (Array.isArray(p.galleryPaths) && p.galleryPaths.length > 0) {
@@ -219,7 +219,7 @@ function processProfileData(p) {
     // กรองเอาเฉพาะ path ที่ไม่ว่าง
     imagePaths = imagePaths.filter(path => path && path.trim() !== '');
 
-    // 2. สร้าง Object รูปภาพ (โค้ดส่วนนี้เหมือนเดิม)
+    // 2. สร้าง Object รูปภาพ
     const imageObjects = imagePaths.map(path => {
         // ใช้ getPublicUrl ของ Supabase
         const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
@@ -230,11 +230,11 @@ function processProfileData(p) {
 
         return {
             src: finalUrl,
-            srcset: `${finalUrl} 1x` 
+            srcset: `${finalUrl} 1x` // ใช้รูปเดิม ไม่ต้องย่อ (Server Supabase เร็วอยู่แล้ว)
         };
     });
 
-    // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder (โค้ดส่วนนี้เหมือนเดิม)
+    // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder
     if (imageObjects.length === 0) {
         imageObjects.push({ 
             src: '/images/placeholder-profile.webp', 
@@ -242,42 +242,17 @@ function processProfileData(p) {
         });
     }
 
+
     const provinceName = state.provincesMap.get(p.provinceKey) || '';
-    
-    // 🔥🔥🔥 เริ่มส่วนที่ถูกแก้ไข/เพิ่มเติม 🔥🔥🔥
-
-    // 1. ดึงสัดส่วน (Bust/Waist/Hip) จาก Field 'stats' (เช่น "35-25-38")
-    const sizes = (p.stats || '').split('-').map(s => s.trim()).filter(Boolean);
-    const bustSize = sizes[0] || '';
-    const waistSize = sizes[1] || '';
-    const hipSize = sizes[2] || '';
-    
-    // 2. แปลง StyleTags (ถ้ามี) เป็น String สำหรับค้นหา
-    const tagsString = (Array.isArray(p.styleTags) ? p.styleTags.join(' ') : p.styleTags || ''); 
-
-    // 3. สร้าง searchString ให้ครอบคลุมทุกข้อมูลที่คุณต้องการ
-    const fullSearchString = [
-        p.name,                                     // ชื่อ
-        provinceName, p.provinceKey,                // จังหวัด (ชื่อไทย, คีย์)
-        p.age, p.height, p.weight,                  // อายุ, ส่วนสูง, น้ำหนัก
-        p.rate,                                     // เรทราคา
-        p.location, p.availability, p.status,       // สถานะ/ตำแหน่ง
-        bustSize, waistSize, hipSize,               // สัดส่วน (แยกเป็น 3 ส่วน)
-        p.quote, p.description,                     // คำโปรย / รายละเอียด
-        tagsString                                  // แท็กสไตล์
-    ].filter(Boolean) // กรองค่าที่เป็น null, undefined, 0, หรือ '' ออก
-     .join(' ')
-     .toLowerCase();
+    const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${p.rate || ''}`.toLowerCase();
 
     return { 
         ...p, 
         images: imageObjects, 
         altText: `น้อง${p.name} ${provinceName}`,
-        searchString: fullSearchString // Search Engine จะใช้ Field นี้
+        searchString: fullSearchString
     };
 }
-
-
 
     function populateProvinceDropdown() {
         if (!dom.provinceSelect) return;
@@ -486,106 +461,98 @@ function initRealtimeProfiles() {
             if(suggestionsBox) suggestionsBox.classList.add('hidden');
         });
     }
-    
-// 🔥 แทนที่ applyUltimateFilters ตัวเดิมทั้งหมดด้วยโค้ดที่ถูกต้องนี้ 🔥
 function applyUltimateFilters(updateUrl = false) {
-    let query = {
-        text: dom.searchInput?.value?.trim() || '',
-        province: dom.provinceSelect?.value || '',
-        avail: dom.availabilitySelect?.value || '',
-        featured: dom.featuredSelect?.value === 'true'
-    };
+        let query = {
+            text: dom.searchInput?.value?.trim() || '',
+            province: dom.provinceSelect?.value || '',
+            avail: dom.availabilitySelect?.value || '',
+            featured: dom.featuredSelect?.value === 'true'
+        };
 
-    // 1. จัดการคำค้นหา (Keyword) และแยกจังหวัด (Intent Detection)
-    let remainingQueryText = (dom.searchInput?.value?.trim() || '').toLowerCase();
-    query.text = ''; // รีเซ็ตคำค้นหาเดิม (เราจะเติมคำที่เหลือเข้าไปใหม่)
-
-    // 🚨 วนลูปตรวจสอบและดึงชื่อจังหวัดออกจากคำค้นหา
-    if (remainingQueryText) {
-        for (const [key, name] of state.provincesMap.entries()) {
-            // ใช้ Regular Expression พร้อม Word Boundary (\b) เพื่อค้นหาชื่อจังหวัด/คีย์ ที่เป็นคำเดี่ยวๆ
-            const searchRegex = new RegExp(`\\b(${name}|${key})\\b`, 'i'); 
-
-            if (searchRegex.test(remainingQueryText)) {
-                query.province = key;
-                
-                // ✅ แก้ไข: ลบชื่อจังหวัด/คีย์ออกจากคำค้นหาที่เหลือ
-                remainingQueryText = remainingQueryText.replace(searchRegex, ' ').trim(); 
-                
-                // Update Dropdown ให้ตรงกันด้วย
-                if(dom.provinceSelect) dom.provinceSelect.value = key;
-                
-                break; 
+        // 🟢 จุดที่แก้: เพิ่ม Logic ตรวจสอบว่าคำที่พิมพ์ คือชื่อจังหวัดหรือไม่?
+        // ถ้าใช่ -> ให้ระบบเปลี่ยนไปใช้การกรอง "ทั้งจังหวัด" ทันที
+        if (query.text) {
+            for (let [key, name] of state.provincesMap.entries()) {
+                // เช็คว่าคำที่พิมพ์ มีชื่อจังหวัดปนอยู่มั้ย (เช่น "เชียงใหม่", "น้องเชียงใหม่")
+                if (name === query.text || name.includes(query.text) || query.text.includes(name)) {
+                    
+                    // สั่งระบบว่า: "ผู้ใช้ต้องการดูจังหวัดนี้นะ" (Set key จังหวัด)
+                    query.province = key; 
+                    
+                    // *เคล็ดลับ* ลบ text ทิ้ง เพื่อให้ระบบดึง "ทุกคน" ที่มี key นี้ออกมา
+                    // (ไม่ใช่แค่คนที่พิมพ์ชื่อจังหวัดไว้ใน Description)
+                    query.text = ''; 
+                    
+                    // Update Dropdown ให้ตรงกันด้วย (เพื่อความเนียน)
+                    if(dom.provinceSelect) dom.provinceSelect.value = key;
+                    
+                    break; // เจอแล้วหยุดหา
+                }
             }
         }
-    }
-    
-    // 2. เก็บ Keyword ที่เหลือไว้สำหรับ Fuse.js
-    query.text = remainingQueryText;
-    
-    // บันทึกจังหวัดล่าสุด
-    if (query.province && query.province !== 'all') localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
 
-    let filtered = state.allProfiles;
+        if (query.province && query.province !== 'all') localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
 
-    // 3. กรองด้วย Text (Omni-Search โดยใช้ Fuse.js)
-    if (query.text) {
-        if (fuseEngine) { 
-            const results = fuseEngine.search(query.text);
-            filtered = results.map(result => result.item);
-        } else {
-            const lower = query.text.toLowerCase();
-            filtered = filtered.filter(p => p.searchString.includes(lower));
+        let filtered = state.allProfiles;
+
+        // 1. กรองด้วย Text (จะทำงานเฉพาะถ้าเราไม่ได้ลบ text ทิ้งข้างบน หรือค้นหาชื่อเล่น)
+        if (query.text) {
+            if (fuseEngine) {
+                const results = fuseEngine.search(query.text);
+                filtered = results.map(result => result.item);
+            } else {
+                const lower = query.text.toLowerCase();
+                filtered = filtered.filter(p => p.searchString.includes(lower));
+            }
+        }
+
+        // 2. กรองด้วย Category/Province 
+        // (จุดนี้แหละที่น้องๆ อีก 89 คนจะโผล่ออกมา เพราะเรา set query.province ไว้แล้ว)
+        filtered = filtered.filter(p => {
+            const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
+            const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
+            const featuredMatch = !query.featured || p.isfeatured;
+            return provinceMatch && availMatch && featuredMatch;
+        });
+
+        // UI Updates
+        if (dom.resultCount) {
+             dom.resultCount.innerHTML = filtered.length > 0 ? `✅ พบ ${filtered.length} โปรไฟล์` : '❌ ไม่พบข้อมูล';
+             dom.resultCount.style.display = 'block';
+        }
+
+        // ส่ง Flag ไปบอกว่าตอนนี้กำลังค้นหา (เพื่อให้โชว์หัวข้อแบบ Search Result)
+        const isSearchMode = !!dom.searchInput?.value || !!query.province; 
+        renderProfiles(filtered, isSearchMode);
+
+        // Update URL
+        if (updateUrl) {
+            const params = new URLSearchParams();
+            if (query.text) params.set('q', query.text);
+            const path = (query.province && query.province !== 'all') ? `/location/${query.province}` : '/';
+            const qs = params.toString() ? '?' + params.toString() : '';
+            if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
         }
     }
-
-    // 4. กรองด้วย Category/Province (กรองซ้ำจากผลลัพธ์ของ Fuse.js/AllProfiles)
-    filtered = filtered.filter(p => {
-        const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
-        const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
-        const featuredMatch = !query.featured || p.isfeatured;
-        return provinceMatch && availMatch && featuredMatch;
-    });
-
-    // อัปเดตตัวเลขผลลัพธ์
-    if (dom.resultCount) {
-        dom.resultCount.innerHTML = filtered.length > 0 ? `✅ พบ ${filtered.length} โปรไฟล์` : '❌ ไม่พบข้อมูล';
-        dom.resultCount.style.display = 'block';
-    }
-
-    // สั่ง Render
-    const isSearchMode = !!dom.searchInput?.value || !!query.province;    
-    renderProfiles(filtered, isSearchMode);
-
-    // Update URL
-    if (updateUrl) {
-        const params = new URLSearchParams();
-        if (query.text) params.set('q', query.text); // ใส่ Keyword ที่เหลือกลับไปใน URL 
-        
-        const path = (query.province && query.province !== 'all') ? `/location/${query.province}` : '/';
-        const qs = params.toString() ? '?' + params.toString() : '';
-        if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
-    }
-}
-
-
-// ฟังก์ชันอื่น ๆ ที่ทำงานร่วมกัน (ไม่มีการแก้ไข Logic การค้นหา)
-
 function updateUltimateSuggestions(val) {
     const box = document.getElementById('search-suggestions');
     const input = document.getElementById('search-keyword');
     const clearBtn = document.getElementById('clear-search-btn');
 
+    // จัดการปุ่ม Clear (X)
     if(clearBtn) clearBtn.classList.toggle('hidden', !val);
+
     if (!box) return;
 
+    // ถ้าช่องว่าง -> แสดงประวัติการค้นหา
     if (!val) {
-        showRecentSearches();    
+        showRecentSearches(); 
         return;
     }
 
     if (!fuseEngine) return;
 
+    // ค้นหา (เอาแค่ 5 อันดับแรก)
     const results = fuseEngine.search(val).slice(0, 5);
 
     if (results.length === 0) {
@@ -593,26 +560,35 @@ function updateUltimateSuggestions(val) {
         return;
     }
 
+    // สร้าง HTML Dropdown
     let html = `<div class="search-dropdown-box">`;
+
+    // 1. Header
     html += `<div class="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">ผลลัพธ์ที่แนะนำ (${results.length})</span>
              </div>`;
+
+    // 2. List Items
     html += `<div class="flex flex-col">`;
     
     results.forEach(({ item }) => {
         const provinceName = state.provincesMap.get(item.provinceKey) || '';
         const isAvailable = item.availability?.includes('ว่าง') || item.availability?.includes('รับงาน');
+        
+        // รูป Avatar
         const imgSrc = item.images && item.images[0] ? item.images[0].src : '/images/placeholder.webp';
 
         html += `
             <div class="relative flex items-center gap-3 px-4 py-3 hover:bg-pink-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0 group"
                  onclick="window.selectSuggestion('${item.slug}', true)">
                 
+                <!-- Avatar + Status Dot -->
                 <div class="relative shrink-0">
                     <img src="${imgSrc}" class="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-600 shadow-sm">
                     <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-${isAvailable ? 'green' : 'gray'}-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
                 </div>
 
+                <!-- Text Info -->
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-center">
                         <h4 class="text-sm font-bold text-gray-800 dark:text-gray-100 truncate group-hover:text-pink-600">
@@ -627,12 +603,14 @@ function updateUltimateSuggestions(val) {
                     </div>
                 </div>
 
+                <!-- Chevron Icon -->
                 <i class="fas fa-chevron-right text-gray-300 text-xs group-hover:text-pink-400 transform group-hover:translate-x-1 transition-transform"></i>
             </div>
         `;
     });
     html += `</div>`; // End List
 
+    // 3. Footer (View All)
     html += `
         <div onclick="document.getElementById('search-form').dispatchEvent(new Event('submit'))"
              class="px-4 py-3 bg-pink-50/50 dark:bg-gray-800 text-center cursor-pointer hover:bg-pink-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-100 dark:border-gray-700">
@@ -645,62 +623,133 @@ function updateUltimateSuggestions(val) {
     box.innerHTML = html;
     box.classList.remove('hidden');
 }
-
-
-window.selectSuggestion = (value, isProfile = false) => {
-    const box = document.getElementById('search-suggestions');
-    const input = document.getElementById('search-keyword');
-    
-    if (isProfile) {
-        box?.classList.add('hidden');
-        if (input) {
-            input.value = ''; 
-            document.getElementById('clear-search-btn')?.classList.add('hidden');
-        }
+    // ✅ FIXED: 2. แก้ไขฟังก์ชันเมื่อกดเลือก (แยก Logic)
+    window.selectSuggestion = (value, isProfile = false) => {
+        const box = document.getElementById('search-suggestions');
+        const input = document.getElementById('search-keyword');
         
-        history.pushState(null, '', `/sideline/${value}`);
-        handleRouting();    
-    } else {
-        if(input) {
-            input.value = value;
-            saveRecentSearch(value);
-            applyUltimateFilters(true);
+        if (isProfile) {
+            // กรณีคลิกที่โปรไฟล์น้อง: ให้เปิดหน้าโปรไฟล์ทันที
             box?.classList.add('hidden');
+            if (input) {
+                input.value = ''; // ล้างคำค้นหา
+                document.getElementById('clear-search-btn')?.classList.add('hidden');
+            }
+            
+            history.pushState(null, '', `/sideline/${value}`);
+            handleRouting(); 
+        } else {
+            // กรณีคลิกที่ประวัติการค้นหา: ให้ทำการค้นหา
+            if(input) {
+                input.value = value;
+                saveRecentSearch(value);
+                applyUltimateFilters(true);
+                box?.classList.add('hidden');
+            }
+        }
+    };
+
+    // ✅ FIXED: 3. แก้ไขฟังก์ชันแสดงประวัติ (ใส่พื้นหลังทึบ)
+    function showRecentSearches() {
+        const box = document.getElementById('search-suggestions');
+        if (!box) return;
+        
+        const recents = JSON.parse(localStorage.getItem('recent_searches') || '[]');
+        if (recents.length === 0) {
+            box.classList.add('hidden');
+            return;
+        }
+
+        let html = `<div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">`;
+        html += `<div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase flex justify-between items-center bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700">
+                    <span>ค้นหาล่าสุด</span>
+                    <button onclick="window.clearRecentSearches()" class="text-red-400 hover:text-red-600 text-xs">ล้างประวัติ</button>
+                 </div>`;
+        
+        recents.forEach(term => {
+            html += `
+                <div class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-3 text-gray-600 dark:text-gray-300 border-b border-gray-50 dark:border-gray-700 last:border-0"
+                     onclick="window.selectSuggestion('${term}', false)">
+                    <i class="fas fa-history text-gray-400 min-w-[20px]"></i>
+                    <span class="font-medium">${term}</span>
+                </div>
+            `;
+        });
+        html += `</div>`;
+
+        box.innerHTML = html;
+        box.classList.remove('hidden');
+    }
+function applyUltimateFilters(updateUrl = false) {
+        let query = {
+            text: dom.searchInput?.value?.trim() || '',
+            province: dom.provinceSelect?.value || '',
+            avail: dom.availabilitySelect?.value || '',
+            featured: dom.featuredSelect?.value === 'true'
+        };
+
+        // 🔥 LOGIC แก้ไข: ดักจับชื่อจังหวัด (Intent Detection)
+        // ถ้าสิ่งที่พิมพ์ คือชื่อจังหวัดในระบบ -> ให้เปลี่ยนไปกรองด้วย ID จังหวัดทันที
+        if (query.text) {
+            for (let [key, name] of state.provincesMap.entries()) {
+                // เช็คว่า text ที่พิมพ์ มีชื่อจังหวัดปนอยู่มั้ย
+                if (name === query.text || name.includes(query.text) || query.text.includes(name)) {
+                    
+                    // สั่งระบบว่า: "ผู้ใช้ต้องการดูจังหวัดนี้นะ"
+                    query.province = key; 
+                    
+                    // *สำคัญ* ลบ text ทิ้ง เพื่อให้ระบบดึง "ทุกคน" ที่มี key นี้ออกมา
+                    // (ไม่ใช่แค่คนที่พิมพ์ชื่อจังหวัดไว้ใน Bio)
+                    query.text = ''; 
+                    break; 
+                }
+            }
+        }
+
+        // บันทึกจังหวัดล่าสุด
+        if (query.province && query.province !== 'all') localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
+
+        let filtered = state.allProfiles;
+
+        // 1. กรองด้วย Text (จะทำงานเฉพาะถ้าเราไม่ได้ลบ text ทิ้งข้างบน)
+        if (query.text) {
+            if (fuseEngine) {
+                const results = fuseEngine.search(query.text);
+                filtered = results.map(result => result.item);
+            } else {
+                const lower = query.text.toLowerCase();
+                filtered = filtered.filter(p => p.searchString.includes(lower));
+            }
+        }
+
+        // 2. กรองด้วย Category/Province (ตัวนี้จะทำงานดึงทั้งจังหวัดออกมา)
+        filtered = filtered.filter(p => {
+            const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
+            const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
+            const featuredMatch = !query.featured || p.isfeatured;
+            return provinceMatch && availMatch && featuredMatch;
+        });
+
+        // อัปเดตตัวเลขผลลัพธ์
+        if (dom.resultCount) {
+             dom.resultCount.innerHTML = filtered.length > 0 ? `✅ พบ ${filtered.length} โปรไฟล์` : '❌ ไม่พบข้อมูล';
+             dom.resultCount.style.display = 'block';
+        }
+
+        // สั่ง Render
+        // ส่ง flag ไปบอกว่า ถ้ามีค่าพวกนี้ ให้แสดงหัวข้อแบบ "ผลการค้นหา" หรือ "จังหวัด"
+        const isSearchMode = !!dom.searchInput?.value || !!query.province; 
+        renderProfiles(filtered, isSearchMode);
+
+        // Update URL
+        if (updateUrl) {
+            const params = new URLSearchParams();
+            if (query.text) params.set('q', query.text); // ใส่ text กลับไปถ้ามี
+            const path = (query.province && query.province !== 'all') ? `/location/${query.province}` : '/';
+            const qs = params.toString() ? '?' + params.toString() : '';
+            if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
         }
     }
-};
-
-
-function showRecentSearches() {
-    const box = document.getElementById('search-suggestions');
-    if (!box) return;
-    
-    const recents = JSON.parse(localStorage.getItem('recent_searches') || '[]');
-    if (recents.length === 0) {
-        box.classList.add('hidden');
-        return;
-    }
-
-    let html = `<div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">`;
-    html += `<div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase flex justify-between items-center bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700">
-                <span>ค้นหาล่าสุด</span>
-                <button onclick="window.clearRecentSearches()" class="text-red-400 hover:text-red-600 text-xs">ล้างประวัติ</button>
-             </div>`;
-    
-    recents.forEach(term => {
-        html += `
-            <div class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-3 text-gray-600 dark:text-gray-300 border-b border-gray-50 dark:border-gray-700 last:border-0"
-                  onclick="window.selectSuggestion('${term}', false)">
-                <i class="fas fa-history text-gray-400 min-w-[20px]"></i>
-                <span class="font-medium">${term}</span>
-            </div>
-        `;
-    });
-    html += `</div>`;
-
-    box.innerHTML = html;
-    box.classList.remove('hidden');
-}
 function renderByProvince(profiles) {
         // 1. Group ข้อมูล
         const groups = profiles.reduce((acc, p) => {

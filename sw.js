@@ -1,51 +1,43 @@
-const CACHE_NAME = 'sideline-cm-v3-stable';
-const ASSETS = [
+// sw.js
+
+const CACHE_NAME = 'sideline-cm-v1';
+const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/styles.css',
   '/main.js',
-  '/offline.html',
-  '/images/logo-sidelinechiangmai.webp',
-  '/images/favicon.ico'
+  '/images/favicon.ico',
+  '/images/placeholder-profile.webp'
 ];
 
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('Service Worker: Caching app shell');
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys.map((key) => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      })
-    ))
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(keyList.map((key) => {
+        if (key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+      }));
+    })
   );
   return self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-  // ข้าม request ที่ไม่ใช่ http (เช่น chrome-extension://)
-  if (!e.request.url.startsWith('http')) return;
-
-  // สำหรับรูปภาพ: Cache First (โหลดเร็วสุด)
-  if (e.request.destination === 'image') {
-    e.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(e.request).then((cachedResponse) => {
-          return cachedResponse || fetch(e.request).then((networkResponse) => {
-            cache.put(e.request, networkResponse.clone());
-            return networkResponse;
-          });
-        });
-      })
-    );
-    return;
-  }
-
-  // สำหรับหน้าเว็บและ API: Network First (เนื้อหาสดใหม่)
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+self.addEventListener('fetch', (event) => {
+  // ใช้ Network first strategy สำหรับทุก request
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      // ถ้า network ล้มเหลว, ลองหาจาก cache
+      return caches.match(event.request);
+    })
   );
 });
