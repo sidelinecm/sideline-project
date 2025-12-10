@@ -3522,3 +3522,67 @@ p{margin:0 0 1em}
     opacity: 0.5; /* เวลากดจะกระพริบ ให้รู้ว่ากดติด */
     color: #ff0055; /* เปลี่ยนสีตอนกด */
 }
+/* --- FAVORITES SYSTEM (V10.1 Add-on) --- */
+
+/* ปุ่มหัวใจบนการ์ด */
+.fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 30; /* อยู่เหนือลิงก์ */
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: none;
+}
+
+.fav-btn:hover {
+    transform: scale(1.15);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.fav-btn:active {
+    transform: scale(0.9);
+}
+
+.fav-btn i {
+    font-size: 1.1rem;
+    transition: color 0.2s;
+}
+
+/* สถานะ: กดแล้ว (Active) */
+.fav-btn.active {
+    background: white;
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.4);
+}
+
+.fav-btn.active i {
+    color: #ec4899; /* สีชมพู */
+    font-weight: 900; /* Solid icon */
+    animation: heartPop 0.3s;
+}
+
+/* สถานะ: ยังไม่กด (Inactive) */
+.fav-btn:not(.active) i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+@keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+/* ย้าย Status Badge ไปด้านซ้าย (เพื่อหลบปุ่มหัวใจ) */
+.status-badge {
+    left: 10px; 
+    right: auto !important; /* ยกเลิกค่าเดิม */
+}
