@@ -244,7 +244,7 @@ function renderFeaturedProfiles() {
     if(!dom.featuredSection || !dom.featuredContainer || state.allProfiles.length === 0) return;
     
     // กรองเอาเฉพาะ isfeatured = true และเอาแค่ 8 คนแรก
-    const featuredProfiles = state.allProfiles.filter(p => p.isfeatured).slice(0, 8);
+    const featuredProfiles = state.allProfiles.filter(p => p.isfeatured).slice(0, 70);
     
     if (featuredProfiles.length > 0) {
         const frag = document.createDocumentFragment();
@@ -417,7 +417,7 @@ function renderProfiles(profiles, isSearching) {
         // ✅ FIX: ใช้ ID ที่ถูกต้อง (dom.featuredProfiles, dom.featuredProfilesContainer)
         if(!dom.featuredProfiles || !dom.featuredProfilesContainer || state.allProfiles.length === 0) return;
         
-        const featuredProfiles = state.allProfiles.filter(p => p.isfeatured).slice(0, 8);
+        const featuredProfiles = state.allProfiles.filter(p => p.isfeatured).slice(0, 70);
         
         if (featuredProfiles.length > 0) {
             const frag = document.createDocumentFragment();
