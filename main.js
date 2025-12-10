@@ -215,31 +215,34 @@ gsap.registerPlugin(ScrollTrigger);
     }
 // ใน main.js ส่วนฟังก์ชัน processProfileData
 
+// ใน main.js
 function processProfileData(p) {
-    // 1. จัดการรูปภาพ (Safe Mode: ตัดพารามิเตอร์แต่งรูปออก กันรูปพัง)
-    const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+    // 1. ดึง URL รูปภาพให้ชัวร์ (ไม่เอา Cache เก่า)
+    let imagePaths = [];
+    if (p.imagePath) imagePaths.push(p.imagePath);
+    if (Array.isArray(p.galleryPaths) && p.galleryPaths.length > 0) {
+        imagePaths = [...imagePaths, ...p.galleryPaths];
+    }
     
+    // กรองเอาเฉพาะ path ที่ไม่ว่าง
+    imagePaths = imagePaths.filter(path => path && path.trim() !== '');
+
+    // 2. สร้าง Object รูปภาพ
     const imageObjects = imagePaths.map(path => {
-        // ดึง URL ตรงๆ จาก Storage
+        // ใช้ getPublicUrl ของ Supabase
         const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-        let url = data?.publicUrl || '/images/placeholder-profile-card.webp';
         
-        // 2. Cache Busting: อันนี้เก็บไว้ได้ (กัน Browser จำรูปเก่า)
-        // ใส่เฉพาะ v=timestamp เพื่อให้รูปอัปเดตถ้ามีการแก้
-        let sep = url.includes('?') ? '&' : '?';
-        if (p.lastUpdated) {
-            url = `${url}${sep}v=${Math.floor(new Date(p.lastUpdated).getTime() / 1000)}`;
-        }
-        
-        // 3. สร้าง src และ srcset แบบ Basic (ไม่ resize ผ่าน URL)
-        // ให้ Browser เลือกโหลดเอง แต่ลิงก์คือไฟล์เดิม
+        // 🛠️ แก้บั๊กรูปขาว: เพิ่ม timestamp กัน Browser จำผิด
+        const uniqueVer = p.lastUpdated ? new Date(p.lastUpdated).getTime() : Date.now();
+        const finalUrl = `${data.publicUrl}?v=${uniqueVer}`;
+
         return {
-            src: url, 
-            srcset: `${url} 1x` // ส่งค่าเดิมไปเลย กันเหนียว
+            src: finalUrl,
+            srcset: `${finalUrl} 1x` // ใช้รูปเดิม ไม่ต้องย่อ (Server Supabase เร็วอยู่แล้ว)
         };
     });
 
-    // ถ้าไม่มีรูปเลย ให้ใช้ Placeholder
+    // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder
     if (imageObjects.length === 0) {
         imageObjects.push({ 
             src: '/images/placeholder-profile.webp', 
@@ -247,22 +250,18 @@ function processProfileData(p) {
         });
     }
 
-    // ส่วนอื่นๆ เหมือนเดิม...
+    // ... (ส่วนอื่นๆ ของฟังก์ชันคงเดิม) ...
     const provinceName = state.provincesMap.get(p.provinceKey) || '';
-    const tags = (p.styleTags || []).join(' ');
-    
-    const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''}`.toLowerCase();
+    const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${p.rate || ''}`.toLowerCase();
 
     return { 
         ...p, 
         images: imageObjects, 
         altText: `น้อง${p.name} ${provinceName}`,
-        searchString: fullSearchString,
-        provinceNameThai: provinceName,
-        _price: Number(p.rate) || 0,
-        _age: Number(p.age) || 0
+        searchString: fullSearchString
     };
 }
+
     function populateProvinceDropdown() {
         if (!dom.provinceSelect) return;
         while (dom.provinceSelect.options.length > 1) {

@@ -63,15 +63,6 @@
 
  
 <style>
-:root {
-  --main-bg: linear-gradient(135deg,#0d0d0d 0%, #4b0082 100%);
-  --rad-grad: radial-gradient(800px 600px at 60% 10%, rgba(255, 182, 193, 0.18), transparent 70%);
-  --primary: #ff69b4;
-  --secondary: #8a2be2;
-  --card-bg: rgba(30, 17, 53, 0.98);
-  --card-radius: 22px;
-  --max-width: 1280px;
-}
 
 body {
     margin: 0;
@@ -111,7 +102,29 @@ header nav a:hover { background: var(--secondary); }
   header nav{ gap: 14px; }
   header{ padding-left: 0;}
 }
+section img:hover {
+    transform: scale(1.02);
+}
 
+/* ปุ่มและลิงก์ (Gradient Pink/Purple) */
+button, a.button {
+    /* Gradient: ม่วง -> ชมพู */
+    background: linear-gradient(135deg, #8A2BE2, #FF69B4); 
+    color: #fff;
+    padding: 12px 24px;
+    border: none; /* เพิ่ม border: none; */
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display:inline-block;
+    cursor: pointer;
+}
+button:hover, a.button:hover {
+    /* Hover Gradient: ชมพู -> ม่วง */
+    background: linear-gradient(135deg, #FF69B4, #8A2BE2);
+    /* Hover Shadow: ชมพูเข้ม */
+    box-shadow: 0 4px 15px rgba(255,105,180,0.8); 
+}
 /* MAIN HERO TITLE */
 h1 {
   font-size: clamp(1.5rem,5vw,2.7rem);
