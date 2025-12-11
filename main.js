@@ -631,7 +631,76 @@ function updateUltimateSuggestions(val) {
         box.innerHTML = html;
         box.classList.remove('hidden');
     }
+function applyUltimateFilters(updateUrl = false) {
+        let query = {
+            text: dom.searchInput?.value?.trim() || '',
+            province: dom.provinceSelect?.value || '',
+            avail: dom.availabilitySelect?.value || '',
+            featured: dom.featuredSelect?.value === 'true'
+        };
 
+        // 🔥 LOGIC แก้ไข: ดักจับชื่อจังหวัด (Intent Detection)
+        // ถ้าสิ่งที่พิมพ์ คือชื่อจังหวัดในระบบ -> ให้เปลี่ยนไปกรองด้วย ID จังหวัดทันที
+        if (query.text) {
+            for (let [key, name] of state.provincesMap.entries()) {
+                // เช็คว่า text ที่พิมพ์ มีชื่อจังหวัดปนอยู่มั้ย
+                if (name === query.text || name.includes(query.text) || query.text.includes(name)) {
+                    
+                    // สั่งระบบว่า: "ผู้ใช้ต้องการดูจังหวัดนี้นะ"
+                    query.province = key; 
+                    
+                    // *สำคัญ* ลบ text ทิ้ง เพื่อให้ระบบดึง "ทุกคน" ที่มี key นี้ออกมา
+                    // (ไม่ใช่แค่คนที่พิมพ์ชื่อจังหวัดไว้ใน Bio)
+                    query.text = ''; 
+                    break; 
+                }
+            }
+        }
+
+        // บันทึกจังหวัดล่าสุด
+        if (query.province && query.province !== 'all') localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
+
+        let filtered = state.allProfiles;
+
+        // 1. กรองด้วย Text (จะทำงานเฉพาะถ้าเราไม่ได้ลบ text ทิ้งข้างบน)
+        if (query.text) {
+            if (fuseEngine) {
+                const results = fuseEngine.search(query.text);
+                filtered = results.map(result => result.item);
+            } else {
+                const lower = query.text.toLowerCase();
+                filtered = filtered.filter(p => p.searchString.includes(lower));
+            }
+        }
+
+        // 2. กรองด้วย Category/Province (ตัวนี้จะทำงานดึงทั้งจังหวัดออกมา)
+        filtered = filtered.filter(p => {
+            const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
+            const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
+            const featuredMatch = !query.featured || p.isfeatured;
+            return provinceMatch && availMatch && featuredMatch;
+        });
+
+        // อัปเดตตัวเลขผลลัพธ์
+        if (dom.resultCount) {
+             dom.resultCount.innerHTML = filtered.length > 0 ? `✅ พบ ${filtered.length} โปรไฟล์` : '❌ ไม่พบข้อมูล';
+             dom.resultCount.style.display = 'block';
+        }
+
+        // สั่ง Render
+        // ส่ง flag ไปบอกว่า ถ้ามีค่าพวกนี้ ให้แสดงหัวข้อแบบ "ผลการค้นหา" หรือ "จังหวัด"
+        const isSearchMode = !!dom.searchInput?.value || !!query.province; 
+        renderProfiles(filtered, isSearchMode);
+
+        // Update URL
+        if (updateUrl) {
+            const params = new URLSearchParams();
+            if (query.text) params.set('q', query.text); // ใส่ text กลับไปถ้ามี
+            const path = (query.province && query.province !== 'all') ? `/location/${query.province}` : '/';
+            const qs = params.toString() ? '?' + params.toString() : '';
+            if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
+        }
+    }
 function renderByProvince(profiles) {
         // 1. Group ข้อมูล
         const groups = profiles.reduce((acc, p) => {
