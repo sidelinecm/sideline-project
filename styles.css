@@ -1,9 +1,34 @@
 /* ==========================================================================
-   1. CORE SETTINGS & THEME VARIABLES
-   ========================================================================== */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+/* ===============================
+   FONT
+================================== */
+@font-face {
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local("Prompt Regular"),
+       url(/fonts/prompt-v11-latin_thai-regular.woff2) format("woff2");
+}
+@font-face {
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local("Prompt Bold"),
+       url(/fonts/prompt-v11-latin_thai-700.woff2) format("woff2");
+}
+@font-face {
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: local("Prompt ExtraBold"),
+       url(/fonts/prompt-v11-latin_thai-800.woff2) format("woff2");
+}
+
+
 
 :root {
   /* Color Palette (HSL for easy opacity manipulation) */
