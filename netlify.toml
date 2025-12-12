@@ -3,15 +3,19 @@
 # =====================================
 [build]
   publish = "."
-  command = "" # ถ้าคุณไม่ได้ใช้ npm run build ให้ปล่อยว่างไว้
+  command = "" 
   environment = { NODE_VERSION = "18" }
 
 # =====================================
-# 💻 Netlify Edge Function Configuration (หัวใจสำคัญ SEO)
+# 💻 Edge Functions (SEO & Routing Engine)
 # =====================================
-# แก้ไข: ดักจับทุก URL ที่เป็นไปได้ เพื่อให้บอททำงานเสมอ
 
-# 1. สำหรับหน้าโปรไฟล์ (รองรับทั้ง /profile, /sideline, /app)
+# 1. Dynamic Sitemap (สำคัญมาก: สร้าง XML สดๆ จาก Database)
+[[edge_functions]]
+function = "sitemap"
+path = "/sitemap.xml"
+
+# 2. หน้าโปรไฟล์ (รองรับ SEO, Schema, Bot Rendering)
 [[edge_functions]]
 function = "render-bot"
 path = "/profile/*"
@@ -24,7 +28,7 @@ path = "/sideline/*"
 function = "render-bot"
 path = "/app/*"
 
-# 2. สำหรับหน้าจังหวัด (รองรับทั้ง /province, /location)
+# 3. หน้าจังหวัด/หมวดหมู่ (รองรับ SEO Listing)
 [[edge_functions]]
 function = "ssr-province"
 path = "/province/*"
@@ -45,37 +49,18 @@ path = "/location/*"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Vary = "Accept-Encoding"
 
 # =====================================
-# 🕸️ HTML Pages
+# ⚡ Cache Control Strategy
 # =====================================
+
+# HTML: ให้ Cache สั้นๆ เพื่อความสดใหม่
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=600, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# =====================================
-# 🧠 Service Worker / Manifest (สำคัญห้ามแก้)
-# =====================================
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate"
-
-[[headers]]
-  for = "/manifest.webmanifest"
-  [headers.values]
-    Cache-Control = "public, max-age=86400"
-
-[[headers]]
-  for = "/offline.html"
-  [headers.values]
-    Cache-Control = "no-cache"
-
-# =====================================
-# ⚡ Static Assets (Cache ยาวๆ 1 ปี)
-# =====================================
+# Assets: Cache ยาวๆ 1 ปี (Immutable) เพื่อความเร็วสูงสุด (Core Web Vitals)
 [[headers]]
   for = "/fonts/*"
   [headers.values]
@@ -96,18 +81,29 @@ path = "/location/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Service Worker & Manifest (ห้าม Cache)
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
 # =====================================
 # 🔀 Redirect Rules (SPA Routing)
 # =====================================
 
-# กฎที่ 1: บังคับ Service Worker ให้โหลดได้เสมอ (กันเหนียว)
-[[redirects]]
-  from = "/sw.js"
-  to = "/sw.js"
-  status = 200
+# กฎที่ 1: บังคับใช้ HTTPS และ non-www (หรือ www ตามต้องการ) เพื่อลด Duplicate Content
+# [[redirects]]
+#   from = "http://*"
+#   to = "https://sidelinechiangmai.netlify.app/:splat"
+#   status = 301
+#   force = true
 
-# กฎที่ 2: SPA Fallback (สำคัญที่สุด!)
-# ทุก URL ที่ไม่มีไฟล์จริง ให้ส่งไปที่ index.html เพื่อให้ JS ทำงาน
+# กฎที่ 2: SPA Fallback (ส่งทุก Request ที่ไม่มีไฟล์จริงไป index.html)
 [[redirects]]
   from = "/*"
   to = "/index.html"
