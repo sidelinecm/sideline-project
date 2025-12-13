@@ -1,19 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-// ✅ FIX: เปลี่ยนชื่อ Key ให้ตรงกับที่ตั้งใน Netlify แล้ว
-const SUPABASE_KEY_ENV_NAME = 'SUPABASE_ANON_KEY'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
 const DOMAIN = "https://sidelinechiangmai.netlify.app";
 
 export default async (request, context) => {
-  // ดึง Key จาก Environment Variable ที่ชื่อ SUPABASE_ANON_KEY
-  const SUPABASE_ANON_KEY = context.env[SUPABASE_KEY_ENV_NAME]; 
-  
-  if (!SUPABASE_ANON_KEY) {
-      console.error("CRITICAL: Supabase Key not found in Env Vars for SSR-Province.");
-      return context.next(); 
-  }
-
   const userAgent = request.headers.get('User-Agent') || '';
   if (!/bot|spider|crawl|facebook|twitter/i.test(userAgent)) return context.next(); 
 
@@ -26,7 +17,7 @@ export default async (request, context) => {
       
       if (!prov) return context.next();
 
-      // ดึง 30 คนล่าสุดเพื่อสร้างลิงก์ให้ Bot ไต่ (Internal Linking)
+      // ดึง 30 คนล่าสุดเพื่อสร้างลิงก์ให้ Bot ไต่
       const { data: profiles } = await supabase
         .from('profiles')
         .select('name, slug')
@@ -53,12 +44,8 @@ export default async (request, context) => {
       return new Response(html, {
         headers: { 
             "content-type": "text/html; charset=utf-8",
-            "Cache-Control": "public, max-age=600", 
             "Netlify-CDN-Cache-Control": "public, max-age=86400, durable"
         }
       });
-  } catch (e) { 
-      console.error("SSR Province Error:", e);
-      return context.next(); 
-  }
+  } catch (e) { return context.next(); }
 };
