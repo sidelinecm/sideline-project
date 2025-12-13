@@ -1,7 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
+// ✅ FIX: เปลี่ยนชื่อ Key ให้ตรงกับที่ตั้งใน Netlify แล้ว
+const SUPABASE_KEY_ENV_NAME = 'SUPABASE_ANON_KEY'; 
+
 const TABLE_NAME = 'profiles';
 const TABLE_PROVINCES = 'provinces';
 const STORAGE_BUCKET = 'profile-images';
@@ -18,54 +20,36 @@ function getRandomTemplate(name, province) {
     return intros[Math.floor(Math.random() * intros.length)];
 }
 
-function genReviewSchema(profileData) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Review",
-    "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
-    "author": { "@type": "Person", "name": "Verified Customer" },
-    "reviewBody": profileData.reviewText || "น้องตัวจริงน่ารักมาก งานดี ไม่เร่ง ตรงปกครับ ประทับใจมาก"
-  };
-}
-
+// Schema: Breadcrumb
 function genBreadcrumb(profileData, provinceName) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": DOMAIN_URL + "/" },
-      { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": DOMAIN_URL + `/location/${profileData.provinceKey}` },
-      { "@type": "ListItem", "position": 3, "name": profileData.name, "item": DOMAIN_URL + `/sideline/${profileData.slug}` }
-    ]
-  };
-}
-
-// เพิ่ม AggregateRating เพื่อให้โชว์ดาวบน Google
-function genProductSchema(profileData, provinceName, imageUrl) {
-    const randomRating = (4.5 + Math.random() * 0.5).toFixed(1); // สุ่ม 4.5 - 5.0
-    const randomReviewCount = Math.floor(Math.random() * 100) + 20;
-
     return {
         "@context": "https://schema.org",
-        "@type": "Product",
-        "name": `น้อง ${profileData.name} รับงาน${provinceName}`,
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": DOMAIN_URL + "/" },
+            { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": DOMAIN_URL + `/location/${profileData.provinceKey}` },
+            { "@type": "ListItem", "position": 3, "name": profileData.name, "item": DOMAIN_URL + `/sideline/${profileData.slug}` }
+        ]
+    };
+}
+
+// ✅ NEW & SAFE Schema: Person
+function genPersonSchema(profileData, provinceName, imageUrl) {
+    return {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": profileData.name || "ไม่ระบุชื่อ",
+        "url": `${DOMAIN_URL}/sideline/${profileData.slug}`,
         "image": imageUrl,
-        "description": profileData.description || `น้อง ${profileData.name} รับงาน${provinceName} บริการดี`,
-        "brand": { "@type": "Brand", "name": "SidelineChiangmai" },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": randomRating,
-            "reviewCount": randomReviewCount,
-            "bestRating": "5",
-            "worstRating": "1"
+        "description": profileData.description || `สาวสวยรับงานในจังหวัด ${provinceName}`,
+        "jobTitle": "Escort Model",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": provinceName,
+            "addressRegion": "Thailand"
         },
-        "offers": {
-            "@type": "Offer",
-            "url": `${DOMAIN_URL}/sideline/${profileData.slug}`,
-            "priceCurrency": "THB",
-            "price": parseInt(profileData.rate) || 1500,
-            "availability": "https://schema.org/InStock"
-        }
+        "alumniOf": "Thailand",
+        "gender": "Female"
     };
 }
 
@@ -76,7 +60,6 @@ const generateProfileHTML = (profileData, provinceData) => {
     const stats = profileData.stats || 'มาตรฐาน';
     const rate = profileData.rate || 'สอบถาม';
     
-    // SEO: Title & Meta Optimization
     const intro = getRandomTemplate(name, provinceName);
     const pageTitle = `${intro} | ${profileData.location || ''} รูปจริง 100%`;
     const metaDescription = `${intro} อายุ ${age} สัดส่วน ${stats} พิกัด${provinceName} ${profileData.location || ''} ${profileData.description?.substring(0, 100) || ''} ...คลิกดูรายละเอียด`;
@@ -87,8 +70,7 @@ const generateProfileHTML = (profileData, provinceData) => {
     }
 
     const breadcrumbSchema = genBreadcrumb(profileData, provinceName);
-    const reviewSchema = genReviewSchema(profileData);
-    const productSchema = genProductSchema(profileData, provinceName, imageUrl);
+    const personSchema = genPersonSchema(profileData, provinceName, imageUrl);
 
     return `
 <!DOCTYPE html>
@@ -105,8 +87,7 @@ const generateProfileHTML = (profileData, provinceData) => {
     <meta property="og:type" content="profile">
     <meta name="twitter:card" content="summary_large_image">
     <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
-    <script type="application/ld+json">${JSON.stringify(reviewSchema)}</script>
-    <script type="application/ld+json">${JSON.stringify(productSchema)}</script>
+    <script type="application/ld+json">${JSON.stringify(personSchema)}</script> 
     <style>
         body{font-family:'Prompt',sans-serif;background:#f9f9f9;color:#333;margin:0;padding:20px;line-height:1.6}
         .container{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:15px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
@@ -144,10 +125,17 @@ const generateProfileHTML = (profileData, provinceData) => {
 };
 
 export default async (request, context) => {
+    // ดึง Key จาก Environment Variable ที่ชื่อ SUPABASE_ANON_KEY
+    const SUPABASE_ANON_KEY = context.env[SUPABASE_KEY_ENV_NAME]; 
+    
+    if (!SUPABASE_ANON_KEY) {
+        console.error("CRITICAL: Supabase Key not found in Environment Variables.");
+        return context.next(); 
+    }
+    
     const userAgent = request.headers.get('User-Agent') || '';
     const isBot = /googlebot|bingbot|yandex|duckduckbot|slurp|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|baiduspider/i.test(userAgent);
     
-    // ถ้าไม่ใช่ Bot ให้ข้ามไปเลย (ให้ JS ฝั่ง Client ทำงานแทน)
     if (!isBot) return context.next(); 
 
     const url = new URL(request.url);
@@ -159,7 +147,6 @@ export default async (request, context) => {
     try {
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Optimize: ดึงเฉพาะที่จำเป็น
         const { data: profileData } = await supabase
             .from(TABLE_NAME)
             .select('name, slug, provinceKey, age, stats, rate, location, description, imagePath, altText')
@@ -176,17 +163,17 @@ export default async (request, context) => {
 
         const renderedHTML = generateProfileHTML(profileData, provinceData);
 
-        // 🔥 Cache Strategy: CDN เก็บไว้นาน (Durable) เพื่อความเร็วสูงสุดตอน Bot เข้ามาซ้ำ
         return new Response(renderedHTML, {
             headers: { 
                 "content-type": "text/html; charset=utf-8",
                 "x-robots-tag": "index, follow",
-                "Cache-Control": "public, max-age=600", // Browser/Bot Cache 10 นาที
-                "Netlify-CDN-Cache-Control": "public, max-age=86400, durable" // CDN Cache 1 วัน
+                "Cache-Control": "public, max-age=600",
+                "Netlify-CDN-Cache-Control": "public, max-age=86400, durable"
             },
             status: 200
         });
     } catch (e) {
+        console.error("SSR Profile Error:", e);
         return context.next();
     }
 };
