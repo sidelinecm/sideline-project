@@ -6,12 +6,6 @@
   command = "" 
   environment = { NODE_VERSION = "18" }
 
-# =========================================================
-# ⚙️ CONFIG FOR FUNCTIONS ENVIRONMENT VARIABLES (*** ส่วนที่แก้ไขแล้ว ***)
-# แก้ปัญหา context.env เป็น undefined โดยการบังคับให้โหลด Env Vars
-# =========================================================
-[functions]
-  environment = { SUPABASE_ANON_KEY = "${SUPABASE_ANON_KEY}", SUPABASE_URL = "${SUPABASE_URL}" }
 
 
 # =========================================================
