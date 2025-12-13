@@ -1,17 +1,23 @@
-# =====================================
-# 🏗️ Netlify Build Configuration
-# =====================================
+# =========================================================
+# 🏗️ NETLIFY ULTIMATE CONFIGURATION
+# =========================================================
 [build]
   publish = "."
-  command = "" # ถ้าคุณไม่ได้ใช้ npm run build ให้ปล่อยว่างไว้
+  command = "" 
   environment = { NODE_VERSION = "18" }
 
-# =====================================
-# 💻 Netlify Edge Function Configuration (หัวใจสำคัญ SEO)
-# =====================================
-# แก้ไข: ดักจับทุก URL ที่เป็นไปได้ เพื่อให้บอททำงานเสมอ
 
-# 1. สำหรับหน้าโปรไฟล์ (รองรับทั้ง /profile, /sideline, /app)
+
+# =========================================================
+# 🤖 EDGE FUNCTIONS (SEO & SITEMAP ENGINE)
+# =========================================================
+
+# 1. Sitemap อัตโนมัติ (Real-time)
+[[edge_functions]]
+function = "sitemap"
+path = "/sitemap.xml"
+
+# 2. หน้าโปรไฟล์ (สำหรับ Bot/Facebook/Line Preview)
 [[edge_functions]]
 function = "render-bot"
 path = "/profile/*"
@@ -20,64 +26,41 @@ path = "/profile/*"
 function = "render-bot"
 path = "/sideline/*"
 
-[[edge_functions]]
-function = "render-bot"
-path = "/app/*"
-
-# 2. สำหรับหน้าจังหวัด (รองรับทั้ง /province, /location)
-[[edge_functions]]
-function = "ssr-province"
-path = "/province/*"
-
+# 3. หน้าจังหวัด (สำหรับ Bot)
 [[edge_functions]]
 function = "ssr-province"
 path = "/location/*"
 
-# =====================================
-# ⚙️ Global HTTP Security Headers
-# =====================================
+[[edge_functions]]
+function = "ssr-province"
+path = "/province/*"
+
+# =========================================================
+# ⚡ SECURITY & CACHE HEADERS
+# =========================================================
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Vary = "Accept-Encoding"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
 
-# =====================================
-# 🕸️ HTML Pages
-# =====================================
+# HTML: ห้าม Cache (เพื่อให้ User เห็นข้อมูลล่าสุดเสมอ)
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=600, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# =====================================
-# 🧠 Service Worker / Manifest (สำคัญห้ามแก้)
-# =====================================
+# Assets (JS/CSS/Images): Cache 1 ปี (เพื่อความเร็วสูงสุด)
 [[headers]]
-  for = "/sw.js"
+  for = "/images/*"
   [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate"
-
+    Cache-Control = "public, max-age=31536000, immutable"
+    
 [[headers]]
-  for = "/manifest.webmanifest"
-  [headers.values]
-    Cache-Control = "public, max-age=86400"
-
-[[headers]]
-  for = "/offline.html"
-  [headers.values]
-    Cache-Control = "no-cache"
-
-# =====================================
-# ⚡ Static Assets (Cache ยาวๆ 1 ปี)
-# =====================================
-[[headers]]
-  for = "/fonts/*"
+  for = "/js/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
@@ -86,28 +69,10 @@ path = "/location/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# =====================================
-# 🔀 Redirect Rules (SPA Routing)
-# =====================================
-
-# กฎที่ 1: บังคับ Service Worker ให้โหลดได้เสมอ (กันเหนียว)
-[[redirects]]
-  from = "/sw.js"
-  to = "/sw.js"
-  status = 200
-
-# กฎที่ 2: SPA Fallback (สำคัญที่สุด!)
-# ทุก URL ที่ไม่มีไฟล์จริง ให้ส่งไปที่ index.html เพื่อให้ JS ทำงาน
+# =========================================================
+# 🔀 REDIRECT RULES (SPA FALLBACK)
+# =========================================================
+# กฎสำคัญ: ทุก URL ที่ไม่มีไฟล์จริง ให้ส่งไป index.html เพื่อให้ JS ทำงาน
 [[redirects]]
   from = "/*"
   to = "/index.html"
