@@ -55,7 +55,7 @@
 
   <!-- ✅ JS -->
   <link rel="modulepreload" href="/main.js">
-  <script defer src="/main.js" type="module"></script>
+  
 
   <!-- ✅ Open Graph -->
   <meta property="og:type" content="website">
@@ -212,148 +212,117 @@
     </section>
 
 
-        <section id="search-section" class="max-w-screen-xl mx-auto mt-10 md:mt-12 px-4 sm:px-6 lg:px-8 py-6 md:py-8 rounded-3xl shadow-2xl ring-1 ring-gray-100/10 dark:ring-white/10 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl animate-fadeInUp">
-            <form id="search-form" action="/profiles.html" autocomplete="off" aria-labelledby="search-form-heading">
-                <h4 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h4>
+        <!-- Search Section (Ultimate Google Style) -->
+    <section id="search-section" aria-labelledby="search-form-heading" style="margin-top:20px;">
+        <h3 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h3>
+        
+        <form id="search-form" autocomplete="off">
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
                 
-                <div class="space-y-5">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="relative sm:col-span-2 lg:col-span-1">
-                            <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-                                    <i class="fas fa-search" aria-hidden="true"></i>
-                                </span>
-                                <input id="search-keyword" name="q" type="search" placeholder="ค้นหาชื่อ, สไตล์..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600 placeholder:text-gray-500 dark:placeholder:text-gray-400">
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <label for="search-province" class="sr-only">เลือกจังหวัด</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-                                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                                </span>
-                                <select id="search-province" name="province" class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-                                    <option value="">ทุกจังหวัด</option>
-                                    </select>
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <label for="search-availability" class="sr-only">เลือกสถานะ</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-                                    <i class="fas fa-clock" aria-hidden="true"></i>
-                                </span>
-                                <select id="search-availability" name="availability" class="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-sm shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-                                    <option value="">สถานะ (ทั้งหมด)</option>
-                                    <option value="ว่าง">ว่าง</option>
-                                    <option value="รับงาน">รับงาน</option>
-                                    <option value="รับงานบางวัน">รับงานบางวัน</option>
-                                    <option value="สอบถามคิว">สอบถามคิว</option>
-                                    <option value="ไม่ว่าง">ไม่ว่าง</option>
-                                    <option value="พัก">พัก</option>
-                                </select>
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                        </div>
+                <!-- 1. ช่องค้นหา (Google Style Wrapper) -->
+                <div class="relative group z-50">
+                    <label for="search-keyword" class="sr-only">ค้นหา</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input id="search-keyword" name="q" type="search" autocomplete="off" 
+                               placeholder="🔍 พิมพ์ชื่อ, จังหวัด, หรือสไตล์..." 
+                               class="w-full py-3 pl-10 pr-4 rounded-full border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all shadow-sm">
+                        
+                        <!-- ปุ่มลบข้อความ (X) -->
+                        <button type="button" id="clear-search-btn" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 hidden cursor-pointer">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
                     </div>
                     
-                    <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 pt-2">
-                        <div class="relative">
-                            <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-                                    <i class="fas fa-star" aria-hidden="true"></i>
-                                </span>
-                                <select id="search-featured" name="featured" class="w-full appearance-none pl-10 pr-10 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300 text-xs shadow-sm bg-white/50 dark:bg-gray-800/50 dark:border-gray-600">
-                                    <option value="">แนะนำ (ทั้งหมด)</option>
-                                    <option value="true">แนะนำเท่านั้น</option>
-                                </select>
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
-                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center gap-3">
-                            <button type="reset" id="reset-search-btn" class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-all duration-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">
-                                <i class="fas fa-sync-alt" aria-hidden="true"></i><span>ล้างค่า</span>
-                            </button>
-                            
-                            <button type="submit" id="keyword-search-btn" class="flex items-center gap-2 px-6 py-2.5 bg-pink-500 text-white rounded-full transition-transform duration-300 text-sm font-semibold hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 shadow-lg hover:shadow-pink-500/20">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                                <span>ค้นหา</span>
-                            </button>
-                        </div>
+                    <!-- กล่อง Suggestions (เด้งออกมาตรงนี้) -->
+                    <div id="search-suggestions" class="absolute z-[60] left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hidden animate-fade-in-down">
+                        <!-- JS จะยัดข้อมูลใส่ตรงนี้ -->
                     </div>
                 </div>
-            </form>
-        </section>
 
-       
-<div class="container mx-auto px-4" data-animate-on-scroll>
-  <hr class="border-pink-300/60 my-12 md:my-16">
-</div>
+                <!-- 2. เลือกจังหวัด -->
+                <div>
+                    <select id="search-province" name="province" class="w-full p-3 rounded-full border border-gray-300 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none cursor-pointer">
+                         <option value="">🗺️ ทุกจังหวัด</option>
+                    </select>
+                </div>
 
-<!-- All Profiles Section -->
-<section id="all-profiles-section" 
-  aria-labelledby="all-profiles-heading" 
-  class="pt-12 md:pt-16 bg-white/60 dark:bg-gray-900/60 rounded-2xl shadow-lg px-4 md:px-10"
-  data-animate-on-scroll>
-  
-  <div class="text-center space-y-6">
-    <h2 id="all-profiles-heading" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-      ค้นหาน้องๆ รับงานทั้งหมด
-    </h2>
+                <!-- 3. เลือกสถานะ (ใส่กลับมาให้ครบ Grid) -->
+                <div>
+                    <select id="search-availability" name="availability" class="w-full p-3 rounded-full border border-gray-300 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none cursor-pointer">
+                        <option value="">✅ สถานะ (ทั้งหมด)</option>
+                        <option value="รับงาน">รับงาน</option>
+                        <option value="สอบถามคิว">สอบถามคิว</option>
+                        <option value="ไม่ว่าง">ไม่ว่าง/พัก</option>
+                    </select>
+                </div>
 
-    <p class="all-desc max-w-3xl mx-auto text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-      เลือกชม <strong class="font-semibold text-pink-600">โปรไฟล์ทั้งหมด</strong>
-      หรือใช้ <strong class="font-semibold text-pink-600">ตัวกรองขั้นสูง</strong>
-      เพื่อค้นหาน้องๆ ที่พร้อมรับงานใน 
-      <strong class="highlight text-pink-600">จังหวัดที่คุณต้องการ</strong>
-    </p>
-  </div>
+                <!-- 4. กรองแนะนำ -->
+                <div>
+                    <select id="search-featured" name="featured" class="w-full p-3 rounded-full border border-gray-300 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none cursor-pointer">
+                        <option value="">⭐ แนะนำ (ทั้งหมด)</option>
+                        <option value="true">แนะนำเท่านั้น</option>
+                    </select>
+                </div>
 
-  <div class="mt-12 md:mt-16" role="region" aria-live="polite">
-    <!-- Loading placeholder -->
-    <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์..." class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"></div>
-
-    <!-- Profiles display -->
-    <div id="profiles-display-area" class="space-y-12 md:space-y-16"></div>
-
-    <!-- Load More Button -->
-    <div id="load-more-container" class="hidden text-center mt-12">
-      <button id="load-more-btn" 
-        class="px-6 py-3 rounded-full font-semibold bg-pink-600 text-white hover:bg-pink-700 transition">
-        แสดงโปรไฟล์เพิ่มเติม
-      </button>
-    </div>
-  <div>
-    <!-- Error Message -->
-    <div id="fetch-error-message" 
-      class="hidden text-center py-12 px-6 bg-red-100/80 rounded-lg font-medium text-red-700 border border-red-300 max-w-2xl mx-auto" 
-      role="alert">
-      เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง
-    </div>
-
-    <!-- No Results Message -->
-    <div id="no-results-message" 
-      class="hidden text-center py-12 px-6 text-pink-700 bg-pink-100/80 rounded-lg font-medium border border-pink-300 max-w-2xl mx-auto" 
-      role="status">
-      ไม่พบโปรไฟล์ที่ตรงกับการค้นหาของคุณ ลองใช้เกณฑ์อื่น
-    </div>
-  </div>
-</section>
-
+            </div>
+            
+            <!-- ผลลัพธ์การค้นหา -->
+            <div id="result-count" class="mt-3 text-center font-bold text-green-500 hidden"></div>
+            
+            <!-- ปุ่มล้างค่า -->
+            <div class="mt-3 flex justify-center gap-3">
+                <button type="button" id="reset-search-btn" class="rounded-full border border-red-800 bg-red-100 px-4 py-2.5 text-red-800 hover:bg-red-200 transition-colors">
+                    🔄 ล้างค่า
+                </button>
+            </div>
+        </form>
+    </section>
+        <!-- ตัวแจ้งโหลดโปรไฟล์ -->
+        <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์"
+            class="grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-top:12px;">
         </div>
+
+<!-- ✅ แบบนี้ถูกต้องตามหลัก ARIA -->
+<div id="profiles-display-area" class="space-y-12 md:space-y-16" role="region" aria-label="โปรไฟล์ที่ค้นพบ">
+    <!-- เนื้อหาข้างใน -->
+</div>
+        <!-- ปุ่มแสดงโปรไฟล์เพิ่มเติม -->
+        <div id="load-more-container" class="hidden" aria-hidden="true" style="text-align:center; margin-top:20px;">
+            <button id="load-more-btn" class="btn" style="background: #e83e8c; padding:12px 24px;">แสดงโปรไฟล์เพิ่มเติม</button>
+        </div>
+
+        <!-- ข้อความแสดงข้อผิดพลาด -->
+        <div id="fetch-error-message" class="hidden" role="alert" aria-live="polite"
+            style="margin: 18px auto; padding: 16px; border:1px solid #f5c6cb; background:#f8d7da; color:#842029; max-width: 720px;">
+            เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง
+        </div>
+
+        <!-- ข้อความไม่พบผลลัพธ์ -->
+        <div id="no-results-message" class="hidden" role="status" aria-live="polite"
+            style="margin: 18px auto; padding: 16px; border:1px solid #f5c6cb; background:#fff0f0; color:#a00; max-width: 720px;">
+            ไม่พบโปรไฟล์ที่ตรงกับการค้นหาของคุณ ลองใช้เกณฑ์อื่น
+        </div>
+    
+
+    <!-- เส้นแบ่ง -->
+    <div class="container mx-auto px-4" data-animate-on-scroll>
+        <hr class="border-pink-300/60 my-12 md:my-16" />
+        </div>
+
+    <!-- ดูโปรไฟล์ทั้งหมด -->
+    <section id="view-all-profiles" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8" aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
+        <a href="/profiles.html" class="btn-view-all" aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
+            <i class="fas fa-users" aria-hidden="true"></i>
+            <span>ดูโปรไฟล์ทั้งหมด</span>
+        </a>
+    </section>
+    </div>
+    
 </main>
+
 
 
 <!-- Footer (Dynamic & SEO Optimized) -->
