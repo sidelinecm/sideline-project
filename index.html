@@ -39,11 +39,8 @@
   <link rel="dns-prefetch" href="https://esm.sh">
 
   <!-- Preload Assets -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-  
+<link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
   <!-- Fonts -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -127,7 +124,7 @@
         
     <!-- ✅ โลโก้ -->
      <a href="/" aria-label="SidelineChiangmai หน้าแรก">
-            <img src="/images/logo-sidelinechiangmai.webp" alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงาน" class="h-[28px] w-auto" width="20" height="85" loading="eager" fetchpriority="high" />
+            <img src="/images/logo-sidelinechiangmai.webp" alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงาน" class="h-[28px] w-auto" width="250" height="85" loading="eager" fetchpriority="high" />
         </a>
 
         <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 dark:text-gray-400 mt-2">
