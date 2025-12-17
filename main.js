@@ -442,21 +442,20 @@ function populateProvinceDropdown() {
     });
     dom.provinceSelect.appendChild(fragment);
 }
-    // =================================================================
-    // 6. ROUTING & SEO (UPDATED)
+// =================================================================
+    // 6. ROUTING & SEO (UPDATED - FRANCHISE STYLE)
     // =================================================================
     async function handleRouting(dataLoaded = false) {
         const path = window.location.pathname.toLowerCase();
         
+        // 1. หน้าโปรไฟล์
         const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
         if (profileMatch) {
             const slug = decodeURIComponent(profileMatch[1]);
             state.currentProfileSlug = slug;
             
             let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
-            if (!profile && !dataLoaded) {
-                profile = await fetchSingleProfile(slug);
-            }
+            if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
 
             if (profile) {
                 openLightbox(profile);
@@ -472,6 +471,7 @@ function populateProvinceDropdown() {
             return;
         } 
         
+        // 2. หน้าจังหวัด (Location Page) -> จุดที่แก้ให้สวยๆ
         const provinceMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
         if (provinceMatch) {
             const provinceKey = decodeURIComponent(provinceMatch[1]);
@@ -482,19 +482,23 @@ function populateProvinceDropdown() {
             if (dataLoaded) {
                 applyUltimateFilters(false);
                 const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
+                
+                // สร้างข้อมูล SEO (ส่งแค่หัวข้อหลัก เดี๋ยวไปเติมแบรนด์ทีหลัง)
                 const seoData = {
-                    title: `รับงาน${provinceName} | รวมสาวไซด์ไลน์${provinceName} ฟิวแฟน`,
-                    description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} รับงานเอง ไม่ผ่านเอเย่นต์ คัดคนสวย ตรงปก ปลอดภัย`,
+                    title: `รับงาน${provinceName} - ไซด์ไลน์${provinceName}`, 
+                    description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก ปลอดภัย 100% การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}`,
                     canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
+                    provinceName: provinceName, 
                     profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
                 };
+                
                 updateAdvancedMeta(null, seoData);
                 dom.profilesDisplayArea?.classList.remove('hidden');
             }
             return;
         }
 
-        // Home Page
+        // 3. หน้าแรก
         state.currentProfileSlug = null;
         closeLightbox(false);
         dom.profilesDisplayArea?.classList.remove('hidden');
@@ -1265,75 +1269,92 @@ function createSearchResultSection(profiles) {
 // 10. SEO META TAGS UPDATER (มาตรฐานสูงสุด - พร้อม Fallback, Locale & Rich Schemas)
 // =================================================================
 
-// ข้อมูล FAQ แบบ Static (เพื่อให้ง่ายต่อการจัดการ)
 const FAQ_DATA = [
-    { question: "บริการ Sideline Chiangmai คืออะไร?", answer: "เราคือศูนย์รวมรายชื่อน้องๆ ไซด์ไลน์ เด็กเอ็น ในเชียงใหม่ โดยเน้นความตรงปก ปลอดภัย และมีคุณภาพ สามารถเลือกน้องๆ ได้ตามความต้องการของคุณ" },
-    { question: "วิธีการติดต่อและนัดหมายน้องๆ ทำได้อย่างไร?", answer: "คุณสามารถเลือกดูโปรไฟล์น้องที่สนใจ แล้วติดต่อผ่านช่องทาง LINE ID หรือเบอร์โทรศัพท์ที่น้องระบุไว้ในรายละเอียดโปรไฟล์โดยตรง" },
-    { question: "เรทราคางานไซด์ไลน์เริ่มต้นที่เท่าไหร่?", answer: "เรทราคาเริ่มต้นจะขึ้นอยู่กับน้องแต่ละคน โปรดตรวจสอบในหน้าโปรไฟล์ของน้องโดยตรง หรือสอบถามผ่านช่องทางการติดต่อน้อง" }
+    { 
+        question: "บริการ Sideline Chiangmai คืออะไร?", 
+        answer: "เราคือศูนย์รวมรายชื่อน้องๆ ไซด์ไลน์ อันดับ 1 ที่มีสำนักงานหลักดูแลมาตรฐานความปลอดภัย และมีเครือข่ายน้องๆ รับงานทั่วประเทศ คัดคนสวย ตรงปก 100%" 
+    },
+    { 
+        question: "วิธีการติดต่อและนัดหมายน้องๆ ทำได้อย่างไร?", 
+        answer: "คุณสามารถเลือกดูโปรไฟล์น้องที่สนใจ (เลือกจังหวัดได้) แล้วติดต่อผ่านช่องทาง LINE ID หรือเบอร์โทรศัพท์ที่น้องระบุไว้ในรายละเอียดโปรไฟล์โดยตรง" 
+    },
+    { 
+        question: "เรทราคางานไซด์ไลน์เริ่มต้นที่เท่าไหร่?", 
+        answer: "เรทราคาเริ่มต้นจะขึ้นอยู่กับน้องแต่ละคนและพื้นที่ให้บริการ โปรดตรวจสอบในหน้าโปรไฟล์ของน้องโดยตรง หรือสอบถามผ่านช่องทางการติดต่อน้อง" 
+    }
 ];
 
+// =================================================================
+// แก้ไขส่วน: updateAdvancedMeta (Franchise Style)
+// =================================================================
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // ลบ Schema เก่าออกก่อนเสมอ
     const oldScript = document.getElementById('schema-jsonld');
     if (oldScript) oldScript.remove();
 
-    // ค่า Default สำหรับหน้า Home/Listing Fallback
-    const DEFAULT_TITLE = 'ไซด์ไลน์เชียงใหม่ | รับงาน Sideline ฟิวแฟน ตรงปก 100%';
-    const DEFAULT_DESCRIPTION = 'ศูนย์รวมน้องๆสาวๆ รับงานไซด์ไลน์ เด็กเอ็น ฟิวแฟน ตรงปก100% ที่เยอะที่สุดในเชียงใหม่';
+    // ชื่อแบรนด์หลัก
+    const BRAND_NAME = "Sideline Chiangmai";
+    const GLOBAL_TITLE = `${BRAND_NAME} | ศูนย์รวมไซด์ไลน์ อันดับ 1 ของภาคเหนือ`;
+    const GLOBAL_DESC = `ศูนย์รวมน้องๆ ${BRAND_NAME} และรับงานทั่วประเทศ คัดคนสวย ตรงปก ปลอดภัย 100%`;
     
     if (profile) {
-        // ✅ 1. Profile Page SEO
-        const provinceName = state.provincesMap.get(profile.provinceKey) || '';
-        const title = `${profile.name} - ${provinceName} | Sideline Chiangmai`;
-        // สร้าง Rich Description สำหรับ Meta Tag และ Schema
-        const richDescription = `📌 ดูโปรไฟล์น้อง ${profile.name} อายุ ${profile.age} จังหวัด${provinceName} ${profile.quote ? `"${profile.quote}"` : ''} ${profile.rate ? `เรท ${profile.rate}` : 'เรทสอบถาม'}`;
-        const canonicalUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug}`;
+        // --- กรณี: หน้าโปรไฟล์ ---
+        // ผลลัพธ์: น้องส้ม - ขอนแก่น | Sideline Chiangmai
+        const provinceName = state.provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
+        const title = `${profile.name} - ${provinceName} | ${BRAND_NAME}`; 
+        
+        const richDescription = `📌 ดูโปรไฟล์น้อง ${profile.name} อายุ ${profile.age} รับงาน${provinceName} ดูแลโดย ${BRAND_NAME} ${profile.quote ? `"${profile.quote}"` : ''}`;
         
         document.title = title;
         updateMeta('description', richDescription); 
         updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', canonicalUrl);
+        updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug}`);
         
-        // OpenGraph / Twitter (ใช้ Rich Description)
         updateOpenGraphMeta(profile, title, richDescription, 'profile');
-        
-        // Schema จัดเต็มสำหรับ Profile
-        injectSchema(generatePersonSchema(profile, richDescription)); // ส่ง Rich Description เข้าไป
+        injectSchema(generatePersonSchema(profile, richDescription));
         injectSchema(generateBreadcrumbSchema('profile', profile.name)); 
         
     } else if (pageData) {
-        // ✅ 2. Location/Listing Page SEO (ปรับปรุง: เพิ่ม Fallback)
-        const pageTitle = pageData.title || DEFAULT_TITLE;
-        const pageDescription = pageData.description || DEFAULT_DESCRIPTION;
-        const canonical = pageData.canonicalUrl || CONFIG.SITE_URL;
+        // --- กรณี: หน้าจังหวัด (ตามที่คุณชอบ) ---
+        
+        // ดึงหัวข้อมาจาก handleRouting ("รับงานขอนแก่น - ไซด์ไลน์ขอนแก่น")
+        // แล้วเติมแบรนด์ต่อท้าย -> "รับงานขอนแก่น - ไซด์ไลน์ขอนแก่น | Sideline Chiangmai"
+        const pageTitle = `${pageData.title} | ${BRAND_NAME}`;
+        const pageDescription = pageData.description || GLOBAL_DESC;
         
         document.title = pageTitle;
         updateMeta('description', pageDescription);
         updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', canonical);
+        updateLink('canonical', pageData.canonicalUrl);
         
-        updateOpenGraphMeta(null, pageTitle, pageDescription, 'article');
-        
-        // Schema สำหรับหน้า Location/Listing
+        updateOpenGraphMeta(null, pageTitle, pageDescription, 'website');
         injectSchema(generateListingSchema(pageData));
-        injectSchema(generateBreadcrumbSchema('location', pageTitle));
+        injectSchema(generateBreadcrumbSchema('location', pageData.provinceName));
+        
+        // Schema บอก Google ว่านี่คือแบรนด์ Sideline Chiangmai
+        injectSchema({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "url": pageData.canonicalUrl,
+            "name": `${BRAND_NAME} (${pageData.provinceName})`,
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": `${CONFIG.SITE_URL}/?q={search_term_string}`,
+                "query-input": "required name=search_term_string"
+            }
+        });
         
     } else {
-        // ✅ 3. Home Page SEO (ปรับปรุง: ใช้ค่า Default)
-        document.title = DEFAULT_TITLE;
-        updateMeta('description', DEFAULT_DESCRIPTION);
+        // --- กรณี: หน้าแรก ---
+        document.title = GLOBAL_TITLE;
+        updateMeta('description', GLOBAL_DESC);
         updateMeta('robots', 'index, follow'); 
         updateLink('canonical', CONFIG.SITE_URL);
         
-        updateOpenGraphMeta(null, DEFAULT_TITLE, DEFAULT_DESCRIPTION, 'website');
-        
-        // Schema จัดเต็มสำหรับหน้าแรก
+        updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
         injectSchema(generateWebsiteSchema()); 
         injectSchema(generateOrganizationSchema()); 
-        injectSchema(generateFAQPageSchema(FAQ_DATA)); // ส่ง FAQ Data เข้าไป
     }
 }
-
 // Helper: OpenGraph & Twitter Card Updates (ปรับปรุง: เพิ่ม locale และใช้ CONFIG.DEFAULT_OG_IMAGE)
 function updateOpenGraphMeta(profile, title, description, type) {
     updateMeta('og:title', title);
@@ -1412,13 +1433,12 @@ function generateBreadcrumbSchema(pageType, entityName = null) {
     };
 }
 
-// ✅ Schema: Website (คงเดิม)
 function generateWebsiteSchema() {
     return {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "url": CONFIG.SITE_URL,
-        "name": "Sideline Chiangmai",
+        "name": "Sideline Club Thailand", // ใช้ชื่อกลางๆ ที่ดูยิ่งใหญ่
         "potentialAction": {
             "@type": "SearchAction",
             "target": `${CONFIG.SITE_URL}/?q={search_term_string}`,
@@ -1427,17 +1447,15 @@ function generateWebsiteSchema() {
     };
 }
 
-// ✅ Schema: Organization (คงเดิม)
 function generateOrganizationSchema() {
     return {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "Sideline Chiangmai",
+        "name": "Sideline Club Thailand", // ใช้ชื่อกลางๆ
         "url": CONFIG.SITE_URL,
         "logo": `${CONFIG.SITE_URL}/images/logo.png`
     };
 }
-
 // ✅ Schema: FAQPage (ปรับปรุง: รับ data จากภายนอก)
 function generateFAQPageSchema(faqData) {
     if (!faqData || faqData.length === 0) return null; // ป้องกันถ้าไม่มีข้อมูล
@@ -1687,13 +1705,9 @@ function initAgeVerification() {
         });
     }
 
-// ==========================================
-// ✨ NEW FEATURE: PREMIUM LOADER (HARDCODED COLORS)
-// ==========================================
 function createGlobalLoader() {
     if (document.getElementById('global-loader-overlay')) return;
 
-    // เพิ่ม CSS Animation แบบฝังเอง เพื่อให้หัวใจเต้นได้โดยไม่ต้องไปแก้ไฟล์ CSS
     const style = document.createElement('style');
     style.innerHTML = `
         @keyframes bounce-gentle {
@@ -1707,19 +1721,16 @@ function createGlobalLoader() {
     const loaderHTML = `
         <div id="global-loader-overlay" style="position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #ffffff; transition: background-color 0.3s;" class="dark:bg-gray-900">
             <div style="position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
-                
-                <!-- วงกลมระลอกคลื่น (สีชมพู) -->
                 <div style="position: absolute; inset: 0; border-radius: 9999px; background-color: #ec4899; opacity: 0.2;" class="animate-ping"></div>
                 <div style="position: absolute; inset: 10px; border-radius: 9999px; background-color: #ec4899; opacity: 0.4;" class="animate-pulse"></div>
-                
-                <!-- ตัว Icon หัวใจ (ไล่สี Gradient สวยๆ) -->
                 <div style="position: relative; z-index: 10; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #ec4899 0%, #9333ea 100%); box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);">
                     <i class="fas fa-heart animate-bounce-gentle" style="font-size: 36px; color: #ffffff;"></i>
                 </div>
             </div>
             
             <div style="margin-top: 24px; text-align: center;">
-                <h3 style="font-size: 18px; font-weight: 800; color: #374151; letter-spacing: 0.1em; text-transform: uppercase;" class="dark:text-white">Sideline chiangmai</h3>
+                <!-- ✅ แก้ตรงนี้ให้เป็นตัวใหญ่ Sideline Chiangmai -->
+                <h3 style="font-size: 18px; font-weight: 800; color: #374151; letter-spacing: 0.1em; text-transform: uppercase;" class="dark:text-white">Sideline Chiangmai</h3>
                 <p style="font-size: 12px; color: #ec4899; margin-top: 4px; font-weight: 500;">กำลังคัดเลือกคนสวย...</p>
             </div>
         </div>
@@ -1802,21 +1813,61 @@ function hideLoadingState() {
         setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); alert("✅ ดาวน์โหลดเรียบร้อย!"); }, 100);
     }
     
-    // =================================================================
-    // 13. DYNAMIC FOOTER SYSTEM
+// =================================================================
+    // 13. DYNAMIC FOOTER SYSTEM (COMPLETE VERSION)
     // =================================================================
     async function initFooterLinks() {
         const footerContainer = document.getElementById('popular-locations-footer');
         if (!footerContainer) return;
+
         let provincesList = [];
-        if (state.provincesMap && state.provincesMap.size > 0) { state.provincesMap.forEach((name, key) => { provincesList.push({ key: key, name: name }); }); } 
-        else if (supabase) { try { const { data, error } = await supabase.from('provinces').select('key, nameThai').order('nameThai', { ascending: true }); if (!error && data) { provincesList = data.map(p => ({ key: p.key, name: p.nameThai })); } } catch (e) { console.warn("Footer load failed", e); } }
-        if (provincesList.length === 0) { footerContainer.innerHTML = `<li><a href="/location/chiangmai">ไซด์ไลน์เชียงใหม่</a></li>`; return; }
+
+        // 1. พยายามดึงจาก Memory ก่อน (เร็วที่สุด)
+        if (state.provincesMap && state.provincesMap.size > 0) {
+            state.provincesMap.forEach((name, key) => {
+                provincesList.push({ key: key, name: name });
+            });
+        } 
+        // 2. ถ้า Memory ว่าง (เช่น เข้าหน้านี้โดยตรง) ให้ดึงจาก Supabase
+        else if (window.supabase) {
+            try {
+                const { data, error } = await window.supabase
+                    .from('provinces')
+                    .select('*'); // ดึงมาทั้งหมดแล้วค่อยเลือกฟิลด์
+                
+                if (!error && data) {
+                    provincesList = data.map(p => ({
+                        key: p.key || p.slug || p.id,
+                        name: p.nameThai || p.name_thai || p.thai_name || p.name // รองรับทุกชื่อคอลัมน์
+                    })).filter(p => p.key && p.name);
+                }
+            } catch (e) {
+                console.warn("Footer fallback load failed", e);
+            }
+        }
+
+        // 3. กรณีเลวร้ายสุด: ไม่เจอข้อมูลเลย (ป้องกันหน้าขาว)
+        if (provincesList.length === 0) {
+            // ให้ลิงก์กลับหน้าแรกแทนการ Hardcode ไปจังหวัดใดจังหวัดหนึ่ง
+            footerContainer.innerHTML = `<li><a href="/" class="hover:text-pink-500 transition-colors">✨ ดูโปรไฟล์น้องๆ ทั้งหมด</a></li>`;
+            return;
+        }
+
+        // 4. เรียงลำดับ ก-ฮ
         provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
-        const displayLimit = 15; 
-        const html = provincesList.slice(0, displayLimit).map(p => `<li><a href="/location/${p.key}" title="รับงาน${p.name}">ไซด์ไลน์${p.name}</a></li>`).join('');
-        const viewAllLink = provincesList.length > displayLimit ? `<li><a href="/locations.html" class="text-pink-500 font-bold hover:underline mt-2 inline-block">ดูจังหวัดทั้งหมด (${provincesList.length})</a></li>` : '';
+
+        // 5. แสดงผล (จำกัด 15 จังหวัดยอดฮิต เพื่อไม่ให้ Footer ยาวเกิน)
+        const displayLimit = 15;
+        const html = provincesList.slice(0, displayLimit).map(p => 
+            `<li><a href="/location/${p.key}" title="รับงาน${p.name} | Sideline Chiangmai" class="hover:text-pink-500 transition-colors">ไซด์ไลน์${p.name}</a></li>`
+        ).join('');
+
+        // 6. ปุ่ม "ดูทั้งหมด" ถ้ามีมากกว่า 15 จังหวัด
+        let viewAllLink = '';
+        if (provincesList.length > displayLimit) {
+            viewAllLink = `<li><a href="/" class="text-pink-500 font-bold hover:underline mt-2 inline-block">🔥 ดูจังหวัดอื่นๆ เพิ่มเติม (${provincesList.length - displayLimit}+)</a></li>`;
+        }
+
         footerContainer.innerHTML = html + viewAllLink;
     }
-
 })();
