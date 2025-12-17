@@ -1785,23 +1785,74 @@ function hideLoadingState() {
         });
     }
 
-    function generateSitemapXML() {
-        const baseUrl = CONFIG.SITE_URL.replace(/\/$/, '');
-        const urls = [];
-        const processUrl = (path) => {
-            const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
-            const fullUrl = `${baseUrl}/${encodedPath}`;
-            return fullUrl.replace(/&/g, '&amp;').replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
-        };
-        urls.push({ loc: processUrl(''), priority: '1.0', freq: 'daily' });
-        state.allProfiles.forEach(p => { if (p.slug) { urls.push({ loc: processUrl(`sideline/${p.slug.trim()}`), priority: '0.9', freq: 'daily' }); } });
-        if (state.provincesMap && state.provincesMap.size > 0) { state.provincesMap.forEach((name, key) => { urls.push({ loc: processUrl(`location/${key}`), priority: '0.8', freq: 'daily' }); }); }
-        ['blog.html', 'about.html', 'faq.html', 'profiles.html', 'locations.html'].forEach(page => { urls.push({ loc: processUrl(page), priority: '0.7', freq: 'weekly' }); });
-        const xmlContent = urls.map(u => `<url><loc>${u.loc}</loc><lastmod>${new Date().toISOString()}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`).join('\n');
-        return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${xmlContent}</urlset>`;
+function generateSitemapXML() {
+    const baseUrl = CONFIG.SITE_URL.replace(/\/$/, '');
+    const urls = [];
+
+    const processUrl = (path) => {
+        const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
+        const fullUrl = `${baseUrl}/${encodedPath}`;
+        return fullUrl.replace(/&/g, '&amp;').replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
+    };
+
+    // 1. หน้าแรก
+    urls.push({ loc: processUrl(''), priority: '1.0', freq: 'daily' });
+
+    // 2. หน้า Profile น้องๆ (จุดสำคัญที่เพิ่มรูปภาพ)
+    state.allProfiles.forEach(p => { 
+        if (p.slug) { 
+            // ดึงข้อมูลรูปภาพจาก object ที่ process แล้ว
+            let imageTag = '';
+            if (p.images && p.images.length > 0 && p.images[0].src) {
+                // ต้อง Escape URL รูปภาพด้วยเพื่อให้ XML ถูกต้อง
+                const imgUrl = p.images[0].src.replace(/&/g, '&amp;');
+                imageTag = `
+        <image:image>
+            <image:loc>${imgUrl}</image:loc>
+            <image:title>${p.name || 'Profile Image'}</image:title>
+        </image:image>`;
+            }
+
+            urls.push({ 
+                loc: processUrl(`sideline/${p.slug.trim()}`), 
+                priority: '0.9', 
+                freq: 'daily',
+                // เพิ่มฟิลด์พิเศษสำหรับเก็บ html รูปภาพ
+                imageXml: imageTag 
+            }); 
+        } 
+    });
+
+    // 3. หน้า Location
+    if (state.provincesMap && state.provincesMap.size > 0) { 
+        state.provincesMap.forEach((name, key) => { 
+            urls.push({ loc: processUrl(`location/${key}`), priority: '0.8', freq: 'daily' }); 
+        }); 
     }
 
-    function downloadFile(filename, content) {
+    // 4. หน้า Static
+    ['blog.html', 'about.html', 'faq.html', 'profiles.html', 'locations.html'].forEach(page => { 
+        urls.push({ loc: processUrl(page), priority: '0.7', freq: 'weekly' }); 
+    });
+
+    // สร้างเนื้อหา XML
+    const xmlContent = urls.map(u => 
+        `<url>
+            <loc>${u.loc}</loc>
+            <lastmod>${new Date().toISOString()}</lastmod>
+            <changefreq>${u.freq}</changefreq>
+            <priority>${u.priority}</priority>${u.imageXml || ''}
+        </url>` // เพิ่ม u.imageXml ตรงนี้
+    ).join(''); // ลบ \n ออกเพื่อให้ไฟล์เล็กลง (Optional)
+
+    // คืนค่าพร้อม Header ที่ถูกต้อง (เพิ่ม xmlns:image)
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${xmlContent}
+</urlset>`;
+}
+function downloadFile(filename, content) {
         const blob = new Blob([content], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -1812,7 +1863,6 @@ function hideLoadingState() {
         link.click();
         setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); alert("✅ ดาวน์โหลดเรียบร้อย!"); }, 100);
     }
-    
 // =================================================================
     // 13. DYNAMIC FOOTER SYSTEM (COMPLETE VERSION)
     // =================================================================
