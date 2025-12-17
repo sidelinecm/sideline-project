@@ -1605,14 +1605,27 @@ function updateLink(rel, href) {
     }
 
 // ==========================================
-// ✨ NEW FEATURE: VIP AGE GATE (HARDCODED COLORS)
+// ✨ NEW FEATURE: VIP AGE GATE (SEO & BOT FRIENDLY)
 // ==========================================
 function initAgeVerification() {
+    // 1. 🛡️ ตรวจสอบ Bot ทันที (SEO Stealth Mode)
+    // เพิ่มการตรวจจับ Bot ทุกค่าย รวมถึงตัว Crawler ของโซเชียลมีเดีย
+    const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|ia_archiver|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|quora\ link\ preview|outbrain|pinterest\/0\.|vkShare|W3C_Validator/i.test(navigator.userAgent);
+
+    // 🔥 ถ้าเป็น Bot ให้ "Return" ออกไปทันที (ทะลุผ่าน) ไม่ต้องสร้างหน้ากั้นอายุ
+    if (isBot) {
+        console.log("SEO Mode: Search Engine detected. Bypassing age verification for full indexing.");
+        return; 
+    }
+
+    // 2. ตรวจสอบสถานะเดิมสำหรับ User ทั่วไป (คน)
     const ts = localStorage.getItem(CONFIG.KEYS.AGE_CONFIRMED);
     if (ts && (Date.now() - parseInt(ts)) < 3600000) return;
 
+    // 3. เริ่มสร้าง UI สำหรับคนปกติ (ถ้าไม่ใช่ Bot และยังไม่ได้กดยืนยัน)
     const div = document.createElement('div');
     div.id = 'age-verification-overlay';
+    
     // ใช้ Inline Style ผสม Tailwind เพื่อความชัวร์เรื่อง Layout
     div.style.cssText = "position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; overflow: hidden;";
     
@@ -1643,19 +1656,12 @@ function initAgeVerification() {
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <!-- ปุ่มยืนยัน (Gradient Pink-Purple) -->
                     <button id="age-confirm" style="width: 100%; padding: 14px; background: linear-gradient(90deg, #ec4899, #9333ea); color: white; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s;">
                         ยืนยัน (เข้าสู่เว็บไซต์)
                     </button>
-                    
-                    <!-- ปุ่มออก -->
                     <button id="age-reject" style="width: 100%; padding: 12px; background: transparent; color: #9ca3af; font-size: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
                         ออกจากเว็บไซต์
                     </button>
-                </div>
-
-                <div style="margin-top: 24px; font-size: 10px; color: #6b7280;">
-                    By entering, you agree to our Terms & Privacy Policy.
                 </div>
             </div>
         </div>
@@ -1665,33 +1671,34 @@ function initAgeVerification() {
     document.body.style.overflow = 'hidden';
 
     // Animation Effect (GSAP)
-    const card = div.querySelector('div[style*="background: rgba"]'); // เลือกตัวการ์ด
-    gsap.from(card, { 
-        y: 50, 
-        opacity: 0, 
-        duration: 0.8, 
-        ease: "back.out(1.2)",
-        delay: 0.2 
-    });
+    const card = div.querySelector('div[style*="background: rgba"]'); 
+    if (window.gsap) {
+        gsap.from(card, { 
+            y: 50, 
+            opacity: 0, 
+            duration: 0.8, 
+            ease: "back.out(1.2)",
+            delay: 0.2 
+        });
+    }
 
-    // Hover Effect แบบบ้านๆ ด้วย JS (เผื่อ CSS ไม่ทำงาน)
-    const btn = document.getElementById('age-confirm');
-    btn.onmouseover = () => btn.style.transform = "scale(1.03)";
-    btn.onmouseout = () => btn.style.transform = "scale(1)";
-
+    // Event Listeners
     document.getElementById('age-confirm').onclick = () => {
         localStorage.setItem(CONFIG.KEYS.AGE_CONFIRMED, Date.now());
-        
-        gsap.to(card, { scale: 0.9, opacity: 0, duration: 0.3 });
-        gsap.to(div, { 
-            opacity: 0, 
-            duration: 0.5, 
-            delay: 0.1,
-            onComplete: () => {
-                div.remove();
-                document.body.style.overflow = '';
-            }
-        });
+        if (window.gsap) {
+            gsap.to(card, { scale: 0.9, opacity: 0, duration: 0.3 });
+            gsap.to(div, { 
+                opacity: 0, 
+                duration: 0.5, 
+                onComplete: () => {
+                    div.remove();
+                    document.body.style.overflow = '';
+                }
+            });
+        } else {
+            div.remove();
+            document.body.style.overflow = '';
+        }
     };
 
     document.getElementById('age-reject').onclick = () => {
