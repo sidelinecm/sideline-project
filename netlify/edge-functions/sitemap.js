@@ -1,79 +1,49 @@
-(function() {
-    'use strict';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-    const CONFIG = {
-        AGE_KEY: 'ageConfirmedTimestamp',
-        AGE_TTL: 3600000, 
-        BOT_PATTERN: /googlebot|bingbot|yandex|duckduckbot|slurp|baiduspider|twitterbot|facebookexternalhit|discordbot|linkedinbot/i
-    };
+export default async (request, context) => {
+  const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
+  const DOMAIN = 'https://sidelinechiangmai.netlify.app';
 
-    // 1. ตรวจสอบ Age Gate: ถ้าเป็น Bot ให้ข้ามเลย
-    function handleAgeVerification() {
-        const isBot = CONFIG.BOT_PATTERN.test(navigator.userAgent);
-        if (isBot) return; 
+  const esc = (unsafe) => unsafe ? unsafe.replace(/[<>&"']/g, (m) => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":"&apos;"}[m])) : '';
 
-        const confirmedAt = localStorage.getItem(CONFIG.AGE_KEY);
-        const overlay = document.getElementById('age-verification-overlay');
-        
-        if (!confirmedAt || (Date.now() - parseInt(confirmedAt) > CONFIG.AGE_TTL)) {
-            if (overlay) {
-                overlay.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // ดึงข้อมูล
+    const { data: profiles } = await supabase.from('profiles').select('slug, name, imagePath').limit(1500);
+    const { data: provinces } = await supabase.from('provinces').select('key');
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <url><loc>${DOMAIN}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`;
+
+    // หน้าจังหวัด
+    provinces?.forEach(p => {
+        xml += `<url><loc>${DOMAIN}/location/${esc(p.key)}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
+    });
+
+    // หน้าโปรไฟล์ + รูปภาพ
+    profiles?.forEach(p => {
+        if (p.slug) {
+            xml += `<url>
+                <loc>${DOMAIN}/sideline/${esc(p.slug)}</loc>
+                <changefreq>weekly</changefreq>
+                <priority>0.9</priority>
+                <image:image>
+                    <image:loc>${SUPABASE_URL}/storage/v1/object/public/profile-images/${esc(p.imagePath)}</image:loc>
+                    <image:title>น้อง ${esc(p.name)} ไซด์ไลน์</image:title>
+                </image:image>
+            </url>`;
         }
-    }
+    });
 
-    // 2. จัดการ Event ปุ่มยืนยันอายุ
-    function setupAgeGateListeners() {
-        const confirmBtn = document.getElementById('age-confirm');
-        const rejectBtn = document.getElementById('age-reject');
-        const overlay = document.getElementById('age-verification-overlay');
+    xml += `</urlset>`;
 
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => {
-                localStorage.setItem(CONFIG.AGE_KEY, Date.now().toString());
-                if (overlay) overlay.style.display = 'none';
-                document.body.style.overflow = '';
-            });
-        }
-
-        if (rejectBtn) {
-            rejectBtn.addEventListener('click', () => {
-                window.location.href = 'https://www.google.com';
-            });
-        }
-    }
-
-    // 3. ฟังก์ชันอัปเดต SEO Meta (กรณีเปลี่ยนหน้าแบบ SPA)
-    window.updatePageMeta = function(title, desc) {
-        if (title) document.title = title;
-        const metaDesc = document.querySelector('meta[name="description"]');
-        if (metaDesc && desc) metaDesc.setAttribute('content', desc);
-        
-        let canonical = document.querySelector('link[rel="canonical"]');
-        if (canonical) canonical.setAttribute('href', window.location.href);
-    };
-
-    // เริ่มการทำงาน
-    function init() {
-        handleAgeVerification();
-        setupAgeGateListeners();
-        
-        // Loader Fade-out
-        const loader = document.getElementById('global-loader');
-        if (loader) {
-            window.addEventListener('load', () => {
-                setTimeout(() => {
-                    loader.style.opacity = '0';
-                    setTimeout(() => loader.style.display = 'none', 500);
-                }, 200);
-            });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-})();
+    return new Response(xml, {
+      headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=3600" }
+    });
+  } catch (error) {
+    return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${DOMAIN}/</loc></url></urlset>`, { headers: { "Content-Type": "application/xml" } });
+  }
+};
