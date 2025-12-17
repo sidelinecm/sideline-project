@@ -1,67 +1,59 @@
 <!DOCTYPE html> 
-<html lang="th" class="scroll-smooth antialiased dark">
+<html lang="th" class="scroll-smooth antialiased dark:bg-gray-900 dark:text-gray-100 dark">
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   
-  <!-- 1. SEO Meta Tags (Advanced Setup) -->
+  <!-- 1. SEO Meta Tags (Ultimate Setup) -->
   <title>ไซด์ไลน์เชียงใหม่ | รับงาน Sideline ฟิวแฟน ตรงปก 100% ไม่มีมัดจำ</title>
-  <meta name="description" content="Sideline Chiangmai ศูนย์รวมน้องๆ สาวสวยรับงานไซด์ไลน์เชียงใหม่ เด็กเอ็น ฟิวแฟน ตรงปก 100% พิกัดเจ็ดยอด นิมมาน และทั่วเชียงใหม่ ปลอดภัย ไม่ต้องโอนมัดจำ ชำระเงินหน้างาน">
+  <meta name="description" content="Sideline Chiangmai ศูนย์รวมน้องๆสาวๆ รับงานไซด์ไลน์ เด็กเอ็น ฟิวแฟน ตรงปก100% ที่เยอะที่สุด ปลอดภัย ไม่ต้องโอนก่อน อัปเดตโปรไฟล์ใหม่ทุกวัน">
   <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#db2777">
 
-  <!-- Social Media Tags (Open Graph) -->
+  <!-- Social Media Tags -->
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="Sideline Chiangmai">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ รับงาน เด็กเอ็น ฟิวแฟน ตรงปก">
-  <meta property="og:description" content="รวมน้องๆ ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก 100% พิกัดเจ็ดยอด นิมมาน ตัวเมืองเชียงใหม่ ไม่ต้องโอนมัดจำ ปลอดภัยแน่นอน">
+  <meta property="og:description" content="Sideline Chiangmai ศูนย์รวมน้องๆสาวๆ รับงานไซด์ไลน์ เด็กเอ็น ฟิวแฟน ตรงปก100% ที่เยอะที่สุด ปลอดภัย ไม่ต้องโอนก่อน อัปเดตโปรไฟล์ใหม่ทุกวัน">
   <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
   <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก">
   <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
 
   <!-- Icons -->
   <link rel="shortcut icon" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
   <!-- 2. Performance Optimization -->
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<!-- ✅ Preload Fonts -->
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://esm.sh" crossorigin>
+  <link rel="dns-prefetch" href="https://esm.sh">
 
+  <!-- Preload Assets -->
+  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
   
-  <!-- Critical CSS: ป้องกันเว็บดีด (CLS) และทำให้หน้าเว็บแสดงผลทันที -->
-  <style>
-    :root { --pink: #db2777; --bg-dark: #0D0D0D; }
-    body { margin: 0; font-family: 'Prompt', sans-serif; background: #fff; color: #111; min-height: 100vh; transition: background 0.3s; }
-    .dark body { background: var(--bg-dark); color: #f9f9f9; }
-    h1 { font-size: 2.25rem; font-weight: 800; background: linear-gradient(90deg, #db2777, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; line-height: 1.2; margin: 20px 0; }
-    
-    /* Skeleton Loader: โครงร่างจำลองตอนโหลดข้อมูล */
-    .skeleton-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
-    @media (min-width: 768px) { .skeleton-grid { grid-template-columns: repeat(4, 1fr); } }
-    .sk-card { height: 280px; background: #f3f4f6; border-radius: 1.5rem; position: relative; overflow: hidden; }
-    .dark .sk-card { background: #1f2937; }
-    .sk-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: sh 1.5s infinite; }
-    @keyframes sh { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-    
-    .btn-line-action { background: #00b900; color: #fff; padding: 12px 25px; border-radius: 50px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.2s; }
-    .btn-line-action:hover { transform: scale(1.05); }
-    details summary::-webkit-details-marker { display: none; }
-  </style>
+  <!-- Fonts -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- Load Non-Critical CSS -->
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <!-- LCP Image Optimization -->
+  <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
 
-  <!-- 3. Schema Markup (Ultimate Advanced Graph) -->
+  <link rel="modulepreload" href="/main.js">
+
+  <!-- 3. Schema Markup -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -69,23 +61,25 @@
       {
         "@type": "WebSite",
         "@id": "https://sidelinechiangmai.netlify.app/#website",
-        "url": "https://sidelinechiangmai.netlify.app/",
         "name": "Sideline Chiangmai",
-        "publisher": { "@id": "https://sidelinechiangmai.netlify.app/#localbusiness" },
-        "potentialAction": [{
+        "url": "https://sidelinechiangmai.netlify.app/",
+        "description": "แหล่งรวมน้องๆสาวๆ รับงาน ไซด์ไลน์เชียงใหม่ ตรงปก100% ฟีลแฟน ปลอดภัยไม่มีมัดจำ",
+        "inLanguage": "th-TH",
+        "potentialAction": {
           "@type": "SearchAction",
           "target": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}",
           "query-input": "required name=search_term_string"
-        }]
+        }
       },
       {
         "@type": "LocalBusiness",
         "@id": "https://sidelinechiangmai.netlify.app/#localbusiness",
         "name": "Sideline Chiangmai",
         "image": "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
+        "description": "บริการไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100% เด็กใหม่ โปรไฟล์จริง อัปเดตทุกวัน",
         "url": "https://sidelinechiangmai.netlify.app/",
-        
-        "priceRange": "฿800 - ฿5000",
+        "priceRange": "฿฿฿",
+        "telephone": "+66994238888",
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก",
@@ -94,14 +88,38 @@
           "postalCode": "50300",
           "addressCountry": "TH"
         },
-        "geo": { "@type": "GeoCoordinates", "latitude": 18.8140717, "longitude": 98.972096 },
-        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "128" },
-        "areaServed": ["Chiang Mai", "Chiang Rai", "Lamphun", "Khon Kaen"]
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 18.8140717,
+          "longitude": 98.972096
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "128"
+        }
       }
     ]
   }
   </script>
+
+  <!-- Inline Critical CSS -->
+  <style>
+    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
+    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
+    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
+    section { padding: 20px; text-align: center; }
+    .profile-image img { image-orientation: none; }
+    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
+    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
+    @media (max-width: 767px) {
+        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
+        .profile-card { padding: 10px; border-radius: 12px; }
+    }
+  </style>
 </head>
+
+
 
 <body class="antialiased" data-page="home">
 
