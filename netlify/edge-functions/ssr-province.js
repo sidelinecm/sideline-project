@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 export default async (request, context) => {
   const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';

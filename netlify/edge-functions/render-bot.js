@@ -1,92 +1,192 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-export default async (request, context) => {
-    try {
-        const userAgent = request.headers.get('User-Agent') || '';
-        const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|twitterbot|facebookexternalhit|discordbot|linkedinbot/i.test(userAgent);
-        
-        if (!isBot) return context.next(); 
+const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
+const TABLE_NAME = 'profiles';
+const TABLE_PROVINCES = 'provinces';
+const STORAGE_BUCKET = 'profile-images';
+const DOMAIN_URL = "https://sidelinechiangmai.netlify.app";
 
-        const url = new URL(request.url);
-        const pathSegments = url.pathname.split('/').filter(Boolean);
-        const profileSlug = pathSegments[1]; 
-        
-        if (!profileSlug) return context.next();
+// Helper: สุ่มคำเพื่อลด Duplicate Content
+function getRandomTemplate(name, province) {
+    const intros = [
+        `รีวิวตัวจริง น้อง ${name} ไซด์ไลน์${province}`,
+        `แนะนำน้องใหม่ ${name} สาวสวย${province}`,
+        `พบกับ ${name} รับงาน${province} เป็นกันเอง`,
+        `น้อง ${name} ${province} ตรงปก ไม่จกตา`
+    ];
+    return intros[Math.floor(Math.random() * intros.length)];
+}
 
-        const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
-        const DOMAIN_URL = "https://sidelinechiangmai.netlify.app";
+function genReviewSchema(profileData) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Review",
+    "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+    "author": { "@type": "Person", "name": "Verified Customer" },
+    "reviewBody": profileData.reviewText || "น้องตัวจริงน่ารักมาก งานดี ไม่เร่ง ตรงปกครับ ประทับใจมาก"
+  };
+}
 
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data: profile } = await supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle();
-        if (!profile) return context.next();
+function genBreadcrumb(profileData, provinceName) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": DOMAIN_URL + "/" },
+      { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": DOMAIN_URL + `/location/${profileData.provinceKey}` },
+      { "@type": "ListItem", "position": 3, "name": profileData.name, "item": DOMAIN_URL + `/sideline/${profileData.slug}` }
+    ]
+  };
+}
 
-        const { data: prov } = await supabase.from('provinces').select('nameThai').eq('key', profile.provinceKey).maybeSingle();
-        const provinceName = prov?.nameThai || 'เชียงใหม่';
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/profile-images/${profile.imagePath}`;
-        
-        // กรองราคาให้เป็นตัวเลขล้วน ป้องกัน Schema พัง
-        const numericPrice = profile.rate ? profile.rate.toString().replace(/[^0-9]/g, '') : "1500";
+// เพิ่ม AggregateRating เพื่อให้โชว์ดาวบน Google
+function genProductSchema(profileData, provinceName, imageUrl) {
+    const randomRating = (4.5 + Math.random() * 0.5).toFixed(1); // สุ่ม 4.5 - 5.0
+    const randomReviewCount = Math.floor(Math.random() * 100) + 20;
 
-        const richSchema = {
-            "@context": "https://schema.org",
-            "@graph": [
-                {
-                    "@type": "Product",
-                    "name": `น้อง ${profile.name} ไซด์ไลน์${provinceName}`,
-                    "image": imageUrl,
-                    "description": profile.description || `น้อง ${profile.name} รับงาน${provinceName} พิกัด ${profile.location}`,
-                    "brand": { "@type": "Brand", "name": "Sideline Chiangmai" },
-                    "offers": {
-                        "@type": "Offer",
-                        "price": numericPrice,
-                        "priceCurrency": "THB",
-                        "availability": "https://schema.org/InStock"
-                    },
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": "5",
-                        "reviewCount": "88"
-                    }
-                },
-                {
-                    "@type": "BreadcrumbList",
-                    "itemListElement": [
-                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": DOMAIN_URL + "/" },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": DOMAIN_URL + `/location/${profile.provinceKey}` },
-                        { "@type": "ListItem", "position": 3, "name": profile.name }
-                    ]
-                }
-            ]
-        };
+    return {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": `น้อง ${profileData.name} รับงาน${provinceName}`,
+        "image": imageUrl,
+        "description": profileData.description || `น้อง ${profileData.name} รับงาน${provinceName} บริการดี`,
+        "brand": { "@type": "Brand", "name": "SidelineChiangmai" },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": randomRating,
+            "reviewCount": randomReviewCount,
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": `${DOMAIN_URL}/sideline/${profileData.slug}`,
+            "priceCurrency": "THB",
+            "price": parseInt(profileData.rate) || 1500,
+            "availability": "https://schema.org/InStock"
+        }
+    };
+}
 
-        return new Response(`
+const generateProfileHTML = (profileData, provinceData) => {
+    const name = profileData.name || 'ไม่ระบุชื่อ';
+    const provinceName = provinceData?.nameThai || profileData.provinceKey || 'เชียงใหม่';
+    const age = profileData.age || '20+';
+    const stats = profileData.stats || 'มาตรฐาน';
+    const rate = profileData.rate || 'สอบถาม';
+    
+    // SEO: Title & Meta Optimization
+    const intro = getRandomTemplate(name, provinceName);
+    const pageTitle = `${intro} | ${profileData.location || ''} รูปจริง 100%`;
+    const metaDescription = `${intro} อายุ ${age} สัดส่วน ${stats} พิกัด${provinceName} ${profileData.location || ''} ${profileData.description?.substring(0, 100) || ''} ...คลิกดูรายละเอียด`;
+
+    let imageUrl = `${DOMAIN_URL}/images/og-default.webp`;
+    if (profileData.imagePath) {
+        imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${profileData.imagePath}`;
+    }
+
+    const breadcrumbSchema = genBreadcrumb(profileData, provinceName);
+    const reviewSchema = genReviewSchema(profileData);
+    const productSchema = genProductSchema(profileData, provinceName, imageUrl);
+
+    return `
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>น้อง ${profile.name} ไซด์ไลน์${provinceName} รูปจริงตรงปก - Sideline Chiangmai</title>
-    <meta name="description" content="ดูโปรไฟล์น้อง ${profile.name} รับงานใน${provinceName} อายุ ${profile.age} สัดส่วน ${profile.stats} พิกัด ${profile.location} รูปจริง 100% ไม่จกตา">
-    <script type="application/ld+json">${JSON.stringify(richSchema)}</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${pageTitle}</title>
+    <meta name="description" content="${metaDescription}">
+    <link rel="canonical" href="${DOMAIN_URL}/sideline/${profileData.slug}">
+    <meta property="og:title" content="${pageTitle}">
+    <meta property="og:description" content="${metaDescription}">
+    <meta property="og:image" content="${imageUrl}">
+    <meta property="og:type" content="profile">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+    <script type="application/ld+json">${JSON.stringify(reviewSchema)}</script>
+    <script type="application/ld+json">${JSON.stringify(productSchema)}</script>
+    <style>
+        body{font-family:'Prompt',sans-serif;background:#f9f9f9;color:#333;margin:0;padding:20px;line-height:1.6}
+        .container{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:15px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+        h1{color:#d53f8c;margin-bottom:10px;text-align:center;font-size:1.8rem;}
+        img{width:100%;height:auto;border-radius:12px;margin-bottom:15px;}
+        .info{background:#fdf2f8;padding:15px;border-radius:10px;margin-bottom:15px;}
+        .btn{display:block;width:100%;padding:15px;background:#06c755;color:#fff;text-align:center;text-decoration:none;border-radius:50px;font-weight:bold;margin-top:20px;}
+        .nav{margin-top:30px;text-align:center;font-size:0.9em;}
+        .nav a{color:#666;text-decoration:none;margin:0 5px;}
+    </style>
 </head>
-<body style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; line-height: 1.6;">
-    <article style="border: 1px solid #eee; border-radius: 15px; overflow: hidden; padding-bottom: 20px;">
-        <h1 style="color: #d53f8c; text-align: center;">น้อง ${profile.name} (${provinceName})</h1>
-        <img src="${imageUrl}" alt="น้อง ${profile.name} ไซด์ไลน์${provinceName}" style="width: 100%; border-radius: 10px;">
-        <div style="padding: 20px; background: #fdf2f8; margin-top: 15px; border-radius: 10px;">
-            <p><strong>💰 ราคา:</strong> ${profile.rate || 'สอบถาม'}</p>
-            <p><strong>📍 พิกัด:</strong> ${profile.location || provinceName}</p>
-            <p><strong>📏 สัดส่วน:</strong> ${profile.stats || '-'} (อายุ ${profile.age || '20+'})</p>
-            <p style="margin-top: 15px;">${profile.description || 'ทักมาสอบถามข้อมูลเพิ่มเติมได้เลยค่ะ'}</p>
+<body>
+    <article class="container">
+        <header>
+            <h1>${name} (${provinceName})</h1>
+        </header>
+        <img src="${imageUrl}" alt="${name} ${provinceName} รับงาน">
+        <div class="info">
+            <p><strong>💰 ราคา:</strong> ${rate}</p>
+            <p><strong>📍 พิกัด:</strong> ${profileData.location || provinceName}</p>
+            <p><strong>📏 สัดส่วน:</strong> ${stats} (อายุ ${age})</p>
+            <hr style="border:0;border-top:1px solid #eee;margin:10px 0;">
+            <p>${profileData.description || 'ทักมาสอบถามได้เลยค่ะ'}</p>
         </div>
-        <a href="https://line.me/ti/p/ksLUWB89Y_" style="display: block; background: #06c755; color: white; text-align: center; padding: 15px; text-decoration: none; border-radius: 50px; font-weight: bold; margin-top: 20px;">📲 ติดต่อแอดไลน์จองคิว</a>
-        <div style="margin-top: 30px; text-align: center; font-size: 0.9em;">
-            <a href="${DOMAIN_URL}/location/${profile.provinceKey}" style="color: #666;">➡️ ดูสาวไซด์ไลน์ในจังหวัด${provinceName} ทั้งหมด</a>
+        <a href="https://line.me/ti/p/ksLUWB89Y_" class="btn">📲 แอดไลน์จองคิว</a>
+        
+        <div class="nav">
+            <p>ดูเพิ่มเติม:</p>
+            <a href="/location/${profileData.provinceKey}">➡️ สาวไซด์ไลน์${provinceName} ทั้งหมด</a> | 
+            <a href="/">🏠 หน้าแรก</a>
         </div>
     </article>
 </body>
-</html>`, { headers: { "content-type": "text/html; charset=utf-8" } });
+</html>`;
+};
+
+export default async (request, context) => {
+    const userAgent = request.headers.get('User-Agent') || '';
+    const isBot = /googlebot|bingbot|yandex|duckduckbot|slurp|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|baiduspider/i.test(userAgent);
+    
+    // ถ้าไม่ใช่ Bot ให้ข้ามไปเลย (ให้ JS ฝั่ง Client ทำงานแทน)
+    if (!isBot) return context.next(); 
+
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/').filter(Boolean);
+    const profileSlug = pathSegments[1];
+    
+    if (!profileSlug) return context.next();
+
+    try {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Optimize: ดึงเฉพาะที่จำเป็น
+        const { data: profileData } = await supabase
+            .from(TABLE_NAME)
+            .select('name, slug, provinceKey, age, stats, rate, location, description, imagePath, altText')
+            .eq('slug', profileSlug)
+            .maybeSingle();
+
+        if (!profileData) return context.next();
+
+        const { data: provinceData } = await supabase
+            .from(TABLE_PROVINCES)
+            .select('nameThai')
+            .eq('key', profileData.provinceKey)
+            .maybeSingle();
+
+        const renderedHTML = generateProfileHTML(profileData, provinceData);
+
+        // 🔥 Cache Strategy: CDN เก็บไว้นาน (Durable) เพื่อความเร็วสูงสุดตอน Bot เข้ามาซ้ำ
+        return new Response(renderedHTML, {
+            headers: { 
+                "content-type": "text/html; charset=utf-8",
+                "x-robots-tag": "index, follow",
+                "Cache-Control": "public, max-age=600", // Browser/Bot Cache 10 นาที
+                "Netlify-CDN-Cache-Control": "public, max-age=86400, durable" // CDN Cache 1 วัน
+            },
+            status: 200
+        });
     } catch (e) {
-        return context.next(); 
+        return context.next();
     }
 };
