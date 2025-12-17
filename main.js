@@ -1586,26 +1586,100 @@ function updateLink(rel, href) {
         backdrop.onclick = () => toggle(false);
     }
 
-    function initAgeVerification() {
-        const ts = localStorage.getItem(CONFIG.KEYS.AGE_CONFIRMED);
-        if (ts && (Date.now() - parseInt(ts)) < 3600000) return;
-        const div = document.createElement('div');
-        div.id = 'age-verification-overlay';
-        div.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4';
-        div.innerHTML = `
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm text-center shadow-2xl animate-fade-in">
-                <h2 class="text-2xl font-bold text-red-600 mb-2">20+ Only</h2>
-                <p class="mb-6 text-gray-600 dark:text-gray-300">เว็บไซต์นี้มีเนื้อหาสำหรับผู้ใหญ่</p>
-                <div class="flex gap-4 justify-center">
-                    <button id="age-reject" class="px-4 py-2 bg-gray-200 rounded-lg">ออก</button>
-                    <button id="age-confirm" class="px-4 py-2 bg-pink-600 text-white rounded-lg">ยืนยัน (20+)</button>
-                </div>
-            </div>`;
-        document.body.appendChild(div);
-        document.getElementById('age-confirm').onclick = () => { localStorage.setItem(CONFIG.KEYS.AGE_CONFIRMED, Date.now()); div.remove(); };
-        document.getElementById('age-reject').onclick = () => window.location.href = 'https://google.com';
-    }
+// ==========================================
+// ✨ NEW FEATURE: VIP AGE GATE (HARDCODED COLORS)
+// ==========================================
+function initAgeVerification() {
+    const ts = localStorage.getItem(CONFIG.KEYS.AGE_CONFIRMED);
+    if (ts && (Date.now() - parseInt(ts)) < 3600000) return;
 
+    const div = document.createElement('div');
+    div.id = 'age-verification-overlay';
+    // ใช้ Inline Style ผสม Tailwind เพื่อความชัวร์เรื่อง Layout
+    div.style.cssText = "position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; overflow: hidden;";
+    
+    div.innerHTML = `
+        <!-- พื้นหลังรูปภาพ (เบลอ) -->
+        <div style="position: absolute; inset: 0; background-image: url('/images/placeholder-profile.webp'); background-size: cover; background-position: center; filter: blur(20px); opacity: 0.4; transform: scale(1.1);"></div>
+        <!-- พื้นหลังสีดำทับ -->
+        <div style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px);"></div>
+
+        <!-- การ์ด VIP (Glassmorphism) -->
+        <div style="position: relative; z-index: 10; width: 100%; max-width: 380px; margin: 16px;">
+            <div style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(16px); border-radius: 24px; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center; overflow: hidden;">
+                
+                <!-- แสงพาดด้านบน -->
+                <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 50%; height: 4px; background: linear-gradient(90deg, transparent, #ec4899, transparent); opacity: 0.8;"></div>
+                
+                <div style="margin-bottom: 24px;">
+                    <!-- วงกลม 20+ -->
+                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 70px; height: 70px; border-radius: 9999px; background-color: rgba(236, 72, 153, 0.15); margin-bottom: 16px; border: 1px solid rgba(236, 72, 153, 0.5); box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);">
+                        <span style="font-size: 24px; font-weight: 800; color: #ec4899;">20+</span>
+                    </div>
+                    
+                    <h2 style="font-size: 24px; font-weight: 700; color: #ffffff; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Restricted Area</h2>
+                    <p style="color: #d1d5db; font-size: 14px; line-height: 1.6;">
+                        เว็บไซต์นี้มีเนื้อหาสำหรับผู้ใหญ่<br>
+                        กรุณายืนยันว่าคุณมีอายุ 20 ปีบริบูรณ์
+                    </p>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- ปุ่มยืนยัน (Gradient Pink-Purple) -->
+                    <button id="age-confirm" style="width: 100%; padding: 14px; background: linear-gradient(90deg, #ec4899, #9333ea); color: white; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s;">
+                        ยืนยัน (เข้าสู่เว็บไซต์)
+                    </button>
+                    
+                    <!-- ปุ่มออก -->
+                    <button id="age-reject" style="width: 100%; padding: 12px; background: transparent; color: #9ca3af; font-size: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
+                        ออกจากเว็บไซต์
+                    </button>
+                </div>
+
+                <div style="margin-top: 24px; font-size: 10px; color: #6b7280;">
+                    By entering, you agree to our Terms & Privacy Policy.
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(div);
+    document.body.style.overflow = 'hidden';
+
+    // Animation Effect (GSAP)
+    const card = div.querySelector('div[style*="background: rgba"]'); // เลือกตัวการ์ด
+    gsap.from(card, { 
+        y: 50, 
+        opacity: 0, 
+        duration: 0.8, 
+        ease: "back.out(1.2)",
+        delay: 0.2 
+    });
+
+    // Hover Effect แบบบ้านๆ ด้วย JS (เผื่อ CSS ไม่ทำงาน)
+    const btn = document.getElementById('age-confirm');
+    btn.onmouseover = () => btn.style.transform = "scale(1.03)";
+    btn.onmouseout = () => btn.style.transform = "scale(1)";
+
+    document.getElementById('age-confirm').onclick = () => {
+        localStorage.setItem(CONFIG.KEYS.AGE_CONFIRMED, Date.now());
+        
+        gsap.to(card, { scale: 0.9, opacity: 0, duration: 0.3 });
+        gsap.to(div, { 
+            opacity: 0, 
+            duration: 0.5, 
+            delay: 0.1,
+            onComplete: () => {
+                div.remove();
+                document.body.style.overflow = '';
+            }
+        });
+    };
+
+    document.getElementById('age-reject').onclick = () => {
+        window.location.href = 'https://google.com';
+    };
+}
     function updateActiveNavLinks() {
         const path = window.location.pathname;
         document.querySelectorAll('nav a').forEach(l => {
@@ -1613,10 +1687,72 @@ function updateLink(rel, href) {
         });
     }
 
-    function showLoadingState() { if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'block'; }
-    function hideLoadingState() { if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none'; }
-    function showErrorState() { if(dom.fetchErrorMessage) dom.fetchErrorMessage.style.display = 'block'; }
+// ==========================================
+// ✨ NEW FEATURE: PREMIUM LOADER (HARDCODED COLORS)
+// ==========================================
+function createGlobalLoader() {
+    if (document.getElementById('global-loader-overlay')) return;
 
+    // เพิ่ม CSS Animation แบบฝังเอง เพื่อให้หัวใจเต้นได้โดยไม่ต้องไปแก้ไฟล์ CSS
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes bounce-gentle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .animate-bounce-gentle { animation: bounce-gentle 1.5s infinite ease-in-out; }
+    `;
+    document.head.appendChild(style);
+
+    const loaderHTML = `
+        <div id="global-loader-overlay" style="position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #ffffff; transition: background-color 0.3s;" class="dark:bg-gray-900">
+            <div style="position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
+                
+                <!-- วงกลมระลอกคลื่น (สีชมพู) -->
+                <div style="position: absolute; inset: 0; border-radius: 9999px; background-color: #ec4899; opacity: 0.2;" class="animate-ping"></div>
+                <div style="position: absolute; inset: 10px; border-radius: 9999px; background-color: #ec4899; opacity: 0.4;" class="animate-pulse"></div>
+                
+                <!-- ตัว Icon หัวใจ (ไล่สี Gradient สวยๆ) -->
+                <div style="position: relative; z-index: 10; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #ec4899 0%, #9333ea 100%); box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);">
+                    <i class="fas fa-heart animate-bounce-gentle" style="font-size: 36px; color: #ffffff;"></i>
+                </div>
+            </div>
+            
+            <div style="margin-top: 24px; text-align: center;">
+                <h3 style="font-size: 18px; font-weight: 800; color: #374151; letter-spacing: 0.1em; text-transform: uppercase;" class="dark:text-white">Sideline chiangmai</h3>
+                <p style="font-size: 12px; color: #ec4899; margin-top: 4px; font-weight: 500;">กำลังคัดเลือกคนสวย...</p>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loaderHTML);
+}
+function showLoadingState() {
+    let loader = document.getElementById('global-loader-overlay');
+    if (!loader) {
+        createGlobalLoader();
+        loader = document.getElementById('global-loader-overlay');
+    }
+    // ใช้ GSAP ดึงกลับมาถ้ามันซ่อนอยู่
+    gsap.set(loader, { display: 'flex', opacity: 1, pointerEvents: 'all' });
+}
+
+function hideLoadingState() {
+    const loader = document.getElementById('global-loader-overlay');
+    if (loader) {
+        // Animation ตอนโหลดเสร็จ: ขยายวงออกแล้วจางหาย
+        gsap.to(loader, {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: () => {
+                loader.style.display = 'none';
+                // Trigger ให้ ScrollTrigger ทำงานใหม่หลังจาก Loader หาย
+                ScrollTrigger.refresh();
+            }
+        });
+    }
+    if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
+}
     // =================================================================
     // 12. ADMIN TOOLS (SITEMAP GENERATOR)
     // =================================================================
