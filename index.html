@@ -1,56 +1,63 @@
 <!DOCTYPE html> 
-<html lang="th" class="scroll-smooth antialiased dark:bg-gray-900 dark:text-gray-100 dark">
+<html lang="th" class="scroll-smooth antialiased dark">
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   
-  <!-- 1. SEO Meta Tags (Ultimate Setup) -->
+  <!-- 1. SEO Meta Tags (Advanced Setup) -->
   <title>ไซด์ไลน์เชียงใหม่ | รับงาน Sideline ฟิวแฟน ตรงปก 100% ไม่มีมัดจำ</title>
-  <meta name="description" content="Sideline Chiangmai ศูนย์รวมน้องๆสาวๆ รับงานไซด์ไลน์ เด็กเอ็น ฟิวแฟน ตรงปก100% ที่เยอะที่สุด ปลอดภัย ไม่ต้องโอนก่อน อัปเดตโปรไฟล์ใหม่ทุกวัน">
+  <meta name="description" content="Sideline Chiangmai ศูนย์รวมน้องๆ สาวสวยรับงานไซด์ไลน์เชียงใหม่ เด็กเอ็น ฟิวแฟน ตรงปก 100% พิกัดเจ็ดยอด นิมมาน และทั่วเชียงใหม่ ปลอดภัย ไม่ต้องโอนมัดจำ ชำระเงินหน้างาน">
   <link rel="canonical" href="https://sidelinechiangmai.netlify.app/">
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#db2777">
 
-  <!-- Social Media Tags -->
+  <!-- Social Media Tags (Open Graph) -->
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="Sideline Chiangmai">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ รับงาน เด็กเอ็น ฟิวแฟน ตรงปก">
-  <meta property="og:description" content="Sideline Chiangmai ศูนย์รวมน้องๆสาวๆ รับงานไซด์ไลน์ เด็กเอ็น ฟิวแฟน ตรงปก100% ที่เยอะที่สุด ปลอดภัย ไม่ต้องโอนก่อน อัปเดตโปรไฟล์ใหม่ทุกวัน">
+  <meta property="og:description" content="รวมน้องๆ ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก 100% พิกัดเจ็ดยอด นิมมาน ตัวเมืองเชียงใหม่ ไม่ต้องโอนมัดจำ ปลอดภัยแน่นอน">
   <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
   <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปก">
   <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
 
   <!-- Icons -->
   <link rel="shortcut icon" href="/images/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
-  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
   <!-- 2. Performance Optimization -->
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://esm.sh" crossorigin>
-  <link rel="dns-prefetch" href="https://esm.sh">
-
-  <!-- Preload Assets -->
-<link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
-  <!-- Fonts -->
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
-
-  <!-- LCP Image Optimization -->
-  <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
-
-  <link rel="modulepreload" href="/main.js">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   
-  <!-- 3. Schema Markup -->
+  <!-- Critical CSS: ป้องกันเว็บดีด (CLS) และทำให้หน้าเว็บแสดงผลทันที -->
+  <style>
+    :root { --pink: #db2777; --bg-dark: #0D0D0D; }
+    body { margin: 0; font-family: 'Prompt', sans-serif; background: #fff; color: #111; min-height: 100vh; transition: background 0.3s; }
+    .dark body { background: var(--bg-dark); color: #f9f9f9; }
+    h1 { font-size: 2.25rem; font-weight: 800; background: linear-gradient(90deg, #db2777, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; line-height: 1.2; margin: 20px 0; }
+    
+    /* Skeleton Loader: โครงร่างจำลองตอนโหลดข้อมูล */
+    .skeleton-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+    @media (min-width: 768px) { .skeleton-grid { grid-template-columns: repeat(4, 1fr); } }
+    .sk-card { height: 280px; background: #f3f4f6; border-radius: 1.5rem; position: relative; overflow: hidden; }
+    .dark .sk-card { background: #1f2937; }
+    .sk-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: sh 1.5s infinite; }
+    @keyframes sh { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    
+    .btn-line-action { background: #00b900; color: #fff; padding: 12px 25px; border-radius: 50px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.2s; }
+    .btn-line-action:hover { transform: scale(1.05); }
+    details summary::-webkit-details-marker { display: none; }
+  </style>
+
+  <!-- Load Non-Critical CSS -->
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+
+  <!-- 3. Schema Markup (Ultimate Advanced Graph) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -58,25 +65,23 @@
       {
         "@type": "WebSite",
         "@id": "https://sidelinechiangmai.netlify.app/#website",
-        "name": "Sideline Chiangmai",
         "url": "https://sidelinechiangmai.netlify.app/",
-        "description": "แหล่งรวมน้องๆสาวๆ รับงาน ไซด์ไลน์เชียงใหม่ ตรงปก100% ฟีลแฟน ปลอดภัยไม่มีมัดจำ",
-        "inLanguage": "th-TH",
-        "potentialAction": {
+        "name": "Sideline Chiangmai",
+        "publisher": { "@id": "https://sidelinechiangmai.netlify.app/#localbusiness" },
+        "potentialAction": [{
           "@type": "SearchAction",
           "target": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}",
           "query-input": "required name=search_term_string"
-        }
+        }]
       },
       {
         "@type": "LocalBusiness",
         "@id": "https://sidelinechiangmai.netlify.app/#localbusiness",
         "name": "Sideline Chiangmai",
         "image": "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
-        "description": "บริการไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100% เด็กใหม่ โปรไฟล์จริง อัปเดตทุกวัน",
         "url": "https://sidelinechiangmai.netlify.app/",
-        "priceRange": "฿฿฿",
-        "telephone": "+66994238888",
+        
+        "priceRange": "฿800 - ฿5000",
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก",
@@ -85,37 +90,14 @@
           "postalCode": "50300",
           "addressCountry": "TH"
         },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": 18.8140717,
-          "longitude": 98.972096
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "reviewCount": "128"
-        }
+        "geo": { "@type": "GeoCoordinates", "latitude": 18.8140717, "longitude": 98.972096 },
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "128" },
+        "areaServed": ["Chiang Mai", "Chiang Rai", "Lamphun", "Khon Kaen"]
       }
     ]
   }
   </script>
-
-  <!-- Inline Critical CSS -->
-  <style>
-    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
-    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
-    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
-    section { padding: 20px; text-align: center; }
-    .profile-image img { image-orientation: none; }
-    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
-    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
-    @media (max-width: 767px) {
-        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
-        .profile-card { padding: 10px; border-radius: 12px; }
-    }
-  </style>
 </head>
-
 
 <body class="antialiased" data-page="home">
 
@@ -124,7 +106,7 @@
         
     <!-- ✅ โลโก้ -->
      <a href="/" aria-label="SidelineChiangmai หน้าแรก">
-            <img src="/images/logo-sidelinechiangmai.webp" alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงาน" class="h-[28px] w-auto" width="250" height="85" loading="eager" fetchpriority="high" />
+            <img src="images/logo-sidelinechiangmai.webp" alt="Sideline Chiangmai - ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก100%" class="h-[28px] w-auto" width="250" height="85" loading="eager" fetchpriority="high" />
         </a>
 
         <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 dark:text-gray-400 mt-2">
@@ -185,9 +167,22 @@
         สัมผัสประสบการณ์เหนือระดับ
       </h2>
 
-      <p class="max-w-3xl mx-auto text-gray-600 dark:text-gray-300 leading-relaxed">
-        บริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง คัดสรรคุณภาพ ส่งตรงถึงคุณ
-      </p>
+     <!-- แถบยืนยันความโปร่งใส 100% -->
+<div class="container mx-auto px-4 mt-8">
+    <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 p-4 rounded-2xl text-center shadow-sm">
+        <h4 class="text-green-600 dark:text-green-400 font-extrabold text-lg md:text-xl flex items-center justify-center gap-2">
+            <i class="fas fa-shield-alt"></i> การันตีความโปร่งใส 100%
+        </h4>
+        <p class="text-gray-700 dark:text-gray-300 text-sm md:text-base mt-1">
+            <span class="font-bold text-red-500">❌ ไม่ต้องโอนมัดจำ</span> | 
+            <span class="font-bold text-red-500">❌ ไม่ต้องจ่ายค่าสมาชิก</span> | 
+            <span class="font-bold text-green-600">✅ จ่ายเงินหน้างานเท่านั้น</span>
+        </p>
+        <p class="text-[10px] md:text-xs text-gray-500 mt-2 uppercase tracking-widest">
+            ติดต่อเราได้เฉพาะทาง LINE ที่ปรากฏบนหน้าเว็บไซต์นี้เท่านั้น
+        </p>
+    </div>
+</div>
     </section>
 
 <section class="social-media-section text-center py-8 md:py-10 bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-inner mt-8 md:mt-12">
@@ -291,74 +286,83 @@
 <div class="container mx-auto px-4" data-animate-on-scroll>
   <hr class="border-pink-300/60 my-12 md:my-16">
 </div>
-<!-- Search Section (Ultimate Google Style) -->
-    <section id="search-section" aria-labelledby="search-form-heading" style="margin-top:20px;">
-        <h3 id="search-form-heading" class="sr-only">ฟอร์มค้นหาและกรองโปรไฟล์</h3>
-        
-        <form id="search-form" autocomplete="off">
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
-                
-                <!-- 1. ช่องค้นหา (Google Style Wrapper) -->
-                <div class="relative group z-50">
-                    <label for="search-keyword" class="sr-only">ค้นหา</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input id="search-keyword" name="q" type="search" autocomplete="off" 
-                               placeholder="🔍 พิมพ์ชื่อ, จังหวัด, หรือสไตล์..." 
-                               class="w-full py-3 pl-10 pr-4 rounded-full border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all shadow-sm">
-                        
-                        <!-- ปุ่มลบข้อความ (X) -->
-                        <button type="button" id="clear-search-btn" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 hidden cursor-pointer">
-                            <i class="fas fa-times-circle"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- กล่อง Suggestions (เด้งออกมาตรงนี้) -->
-                    <div id="search-suggestions" class="absolute z-[60] left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hidden animate-fade-in-down">
-                        <!-- JS จะยัดข้อมูลใส่ตรงนี้ -->
-                    </div>
-                </div>
 
-                <!-- 2. เลือกจังหวัด -->
-                <div>
-                    <select id="search-province" name="province" class="w-full p-3 rounded-full border border-gray-300 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none cursor-pointer">
-                         <option value="">🗺️ ทุกจังหวัด</option>
-                    </select>
+<section id="search-section" aria-labelledby="search-form-heading" style="margin-top:20px;">
+    <h3 id="search-form-heading" class="sr-only" aria-label="ฟอร์มค้นหาและกรองโปรไฟล์">ฟอร์มค้นหาและกรองโปรไฟล์</h3>
+    
+    <form id="search-form" autocomplete="off" aria-label="ฟอร์มค้นหาโปรไฟล์">
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+            
+            <div>
+                <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input id="search-keyword" name="q" type="search" placeholder="🔍 ค้นหาชื่อ, สไตล์..." aria-label="ค้นหาด้วยชื่อหรือสไตล์"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
                 </div>
-
-                <!-- 3. เลือกสถานะ (ใส่กลับมาให้ครบ Grid) -->
-                <div>
-                    <select id="search-availability" name="availability" class="w-full p-3 rounded-full border border-gray-300 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none cursor-pointer">
+            </div>
+            
+            <div>
+                <label for="search-province" class="sr-only">เลือกจังหวัด</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </span>
+                    <select id="search-province" name="province" aria-label="เลือกจังหวัด"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                        <option value="">🗺️ ทุกจังหวัด</option>
+                        </select>
+                </div>
+            </div>
+            
+            <div>
+                <label for="search-availability" class="sr-only">เลือกสถานะ</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-clock"></i>
+                    </span>
+                    <select id="search-availability" name="availability" aria-label="เลือกสถานะ"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
                         <option value="">✅ สถานะ (ทั้งหมด)</option>
                         <option value="รับงาน">รับงาน</option>
                         <option value="สอบถามคิว">สอบถามคิว</option>
-                        <option value="ไม่ว่าง">ไม่ว่าง/พัก</option>
-                    </select>
+                        <option value="ไม่ว่าง/พัก">ไม่ว่าง/พัก</option>
+                        </select>
                 </div>
-
-                <!-- 4. กรองแนะนำ -->
-                <div>
-                    <select id="search-featured" name="featured" class="w-full p-3 rounded-full border border-gray-300 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none cursor-pointer">
+            </div>
+            
+            <div>
+                <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-star"></i>
+                    </span>
+                    <select id="search-featured" name="featured" aria-label="กรองโปรไฟล์แนะนำ"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
                         <option value="">⭐ แนะนำ (ทั้งหมด)</option>
                         <option value="true">แนะนำเท่านั้น</option>
                     </select>
                 </div>
+            </div>
+            
+        </div>
+        
+        <div id="result-count" style="margin-top:12px; font-weight:bold; color:#10B981; text-align:center;">
+            
+        </div>
+        
+<div class="mt-3 flex justify-center gap-3">
+    <button type="button" id="reset-search-btn" 
+            class="btn rounded-full border border-red-800 bg-red-100 px-4 py-2.5 text-red-800" 
+            aria-label="รีเซ็ตตัวกรองทั้งหมด">
+        🔄 ล้างค่า
+    </button>
+</div>
 
-            </div>
-            
-            <!-- ผลลัพธ์การค้นหา -->
-            <div id="result-count" class="mt-3 text-center font-bold text-green-500 hidden"></div>
-            
-            <!-- ปุ่มล้างค่า -->
-            <div class="mt-3 flex justify-center gap-3">
-                <button type="button" id="reset-search-btn" class="rounded-full border border-red-800 bg-red-100 px-4 py-2.5 text-red-800 hover:bg-red-200 transition-colors">
-                    🔄 ล้างค่า
-                </button>
-            </div>
-        </form>
-    </section>
+    </form>
+</section>
         <!-- ตัวแจ้งโหลดโปรไฟล์ -->
         <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์"
             class="grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-top:12px;">
@@ -391,13 +395,7 @@
         <hr class="border-pink-300/60 my-12 md:my-16" />
         </div>
 
-    <!-- ดูโปรไฟล์ทั้งหมด -->
-    <section id="view-all-profiles" class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8" aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
-        <a href="/profiles.html" class="btn-view-all" aria-label="ดูโปรไฟล์น้องๆ รับงานทั้งหมด">
-            <i class="fas fa-users" aria-hidden="true"></i>
-            <span>ดูโปรไฟล์ทั้งหมด</span>
-        </a>
-    </section>
+   
     </div>
     
 </main>
@@ -433,14 +431,19 @@
   <section class="section" aria-labelledby="faq-h">
     <h2 id="faq-h">คำถามพบบ่อย (FAQ)</h2>
     <div class="article" id="faq-list">
-      <details>
-        <summary><strong>ไซด์ไลน์เชียงใหม่ราคากี่บาท?</strong></summary>
-        <p>ราคายืดหยุ่น ขึ้นกับโปรไฟล์และบริการ เริ่มต้นประมาณ 800–2500 บาท โปรดอ่านรายละเอียดในโปรไฟล์แต่ละคน</p>
-      </details>
-      <details>
-        <summary><strong>ต้องโอนเงินก่อนหรือไม่?</strong></summary>
-        <p>ไม่ต้องโอนก่อน ชำระหน้างานเป็นหลัก เพื่อความโปร่งใส</p>
-      </details>
+     <details class="bg-white/5 rounded-xl border border-pink-500/20 mb-3">
+  <summary class="cursor-pointer font-bold text-pink-400 p-4 hover:bg-pink-500/10 transition-all">
+    <strong>⚠️ ต้องโอนเงินมัดจำ หรือค่าจองคิวก่อนไหม?</strong>
+  </summary>
+  <div class="p-4 text-gray-300 text-sm border-t border-white/10">
+    <p class="text-green-400 font-bold text-lg mb-2">❌ ไม่ต้องโอนก่อน 100% ทุกกรณี!</p>
+    <p class="leading-relaxed">
+      เว็บไซต์เราไม่มีนโยบายเก็บเงินมัดจำ ค่าสมาชิก หรือค่าดำเนินการใดๆ ทั้งสิ้น <br>
+      <span class="text-white font-bold underline">"ลูกค้าชำระเงินหน้างานเมื่อเจอตัวน้องเท่านั้น"</span> <br><br>
+      หากแอดมินหรือใครก็ตามที่อ้างว่าเป็นเราขอให้พี่โอนเงินก่อนแม้แต่บาทเดียว ให้สันนิษฐานว่าเป็นมิจฉาชีพทันที และห้ามโอนเด็ดขาดครับ!
+    </p>
+  </div>
+</details>
       <details>
         <summary><strong>เว็บไซต์นี้ปลอดภัยไหม?</strong></summary>
         <p>เว็บไซต์เป็นแหล่งรวมโปรไฟล์ ผู้ใช้ควรสอบถามรายละเอียดเพิ่มเติมก่อนนัดหมาย ทีมงานแนะนำให้จัดนัดหมายในที่สาธารณะก่อนและให้ข้อมูลส่วนบุคคลเท่าที่จำเป็น</p>
@@ -475,12 +478,14 @@
   </h2>
 
   <div class="p-6 text-gray-700 dark:text-gray-300 leading-relaxed text-center">
-    <p class="max-w-2xl mx-auto">
-      📍 <strong>ที่ตั้ง:</strong> ไซด์ไลน์เชียงใหม่ ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก อำเภอเมือง จังหวัดเชียงใหม่ 50300<br>
-      ☎️ <strong>โทร:</strong> <a href="tel:0994238888" class="text-pink-600 hover:underline">099-423-8888</a><br>
-      ⏰ <strong>เวลาเปิดทำการ:</strong> ทุกวัน 10:00 - 02:00 น.
-    </p>
-  </div>
+  <p class="max-w-2xl mx-auto">
+    📍 <strong>พิกัดบริการ:</strong> โซนเจ็ดยอด-ช้างเผือก และทั่วเมืองเชียงใหม่<br>
+    ✅ <strong>จองคิวผ่าน LINE:</strong> <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" class="text-green-500 font-bold hover:scale-105 inline-block transition-transform">@sidelinecm (คลิกเพื่อแอดไลน์)</a><br>
+    <span class="inline-block mt-2 px-3 py-1 bg-red-500/10 text-red-500 text-xs font-bold rounded-full border border-red-500/20">
+      🚫 ไม่มีนโยบายรับจองทางโทรศัพท์ เพื่อความปลอดภัยของข้อมูลลูกค้า
+    </span>
+  </p>
+</div>
 
   <figure
     id="map-container"
@@ -546,7 +551,6 @@
         "latitude": 18.8140716,
         "longitude": 98.9720960
       },
-      "telephone": "+66994238888",
       "url": "https://sidelinechiangmai.netlify.app",
       "openingHours": "Mo-Su 10:00-02:00"
     }
@@ -571,6 +575,7 @@
   });
 </script>
 
+
 <!-- Footer (Dynamic & SEO Optimized) -->
 <footer class="bg-gray-900 text-gray-400 pt-16 pb-8 px-4 border-t border-gray-800 mt-16 font-sans">
     <div class="container mx-auto">
@@ -578,7 +583,11 @@
             <!-- Brand -->
             <div>
                 <a href="/" aria-label="หน้าแรก" class="inline-block mb-4">
-                    <img src="/images/logo-sideline-chiangmai.webp" alt="Logo" class="h-8 w-auto mx-auto md:mx-0">
+                   <img src="/images/logo-sideline-chiangmai.webp" 
+     alt="Logo" 
+     class="h-8 w-auto mx-auto md:mx-0"
+     width="98" 
+     height="32">
                 </a>
                 <p class="text-sm">SidelineChiangmai แพลตฟอร์มอันดับ 1 รวมน้องๆ ไซด์ไลน์ รับงานเชียงใหม่ การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ</p>
             </div>
@@ -710,9 +719,6 @@
     </div>
   </div>
 </div>
-
-<!-- โหลด main.js -->
-
 <script type="module" src="/main.js"></script>
 
 <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
