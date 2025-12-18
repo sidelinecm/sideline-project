@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 export default async (request, context) => {
   const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
@@ -9,7 +9,6 @@ export default async (request, context) => {
     const userAgent = request.headers.get('User-Agent') || '';
     const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|twitterbot|facebookexternalhit|discordbot|linkedinbot/i.test(userAgent);
     
-    // ถ้าไม่ใช่ Bot ให้ข้ามไป
     if (!isBot) return context.next(); 
 
     const url = new URL(request.url);
@@ -17,59 +16,43 @@ export default async (request, context) => {
     if (!key) return context.next();
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // ดึงข้อมูลจังหวัด
     const { data: prov } = await supabase.from('provinces').select('*').eq('key', key).maybeSingle();
     if (!prov) return context.next();
 
-    // ดึง 100 คนล่าสุด (เพิ่มจากเดิม 30 เพื่อให้ Bot เก็บข้อมูลได้เยอะขึ้นในครั้งเดียว)
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('name, slug, location, rate')
-      .eq('provinceKey', key)
-      .order('created_at', { ascending: false })
-      .limit(100);
+    const { data: profiles } = await supabase.from('profiles').select('name, slug, location, rate').eq('provinceKey', key).order('created_at', { ascending: false }).limit(100);
 
-    const profileListHtml = profiles?.map(p => `
-      <li style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; list-style: none;">
-          <a href="${DOMAIN}/sideline/${p.slug}" style="font-size: 1.25rem; font-weight: bold; color: #d53f8c; text-decoration: none;">
-              น้อง ${p.name} - ไซด์ไลน์${prov.nameThai} พิกัด ${p.location || prov.nameThai}
-          </a>
-          <p style="color: #666; margin: 5px 0;">เรทราคาเริ่มต้น: ${p.rate || 'สอบถาม'} | การันตีรูปจริงตรงปก</p>
-      </li>`).join('') || '<li>ขณะนี้ยังไม่มีข้อมูลโปรไฟล์ในพื้นที่นี้</li>';
+    const listHtml = profiles?.map(p => `
+      <li style="margin-bottom: 25px; list-style: none; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px;">
+          <h2 style="margin: 0; font-size: 1.3rem;">
+            <a href="${DOMAIN}/sideline/${p.slug}" style="color: #d53f8c; text-decoration: none;">น้อง ${p.name} ไซด์ไลน์${prov.nameThai} พิกัด ${p.location || prov.nameThai}</a>
+          </h2>
+          <p style="color: #555; margin: 8px 0;">เรทราคาเริ่มต้น: ${p.rate || 'สอบถาม'} บาท | การันตีรูปจริง 100% ดูโปรไฟล์คลิกเลย</p>
+      </li>`).join('') || '<li>ขออภัย ขณะนี้ยังไม่มีข้อมูลในพื้นที่นี้</li>';
 
     const html = `
     <!DOCTYPE html>
     <html lang="th">
     <head>
       <meta charset="UTF-8">
-      <title>รวมสาวไซด์ไลน์${prov.nameThai} รับงาน${prov.nameThai} ตัวจริงตรงปก - Sideline Chiangmai</title>
-      <meta name="description" content="ศูนย์รวมน้องๆ ไซด์ไลน์${prov.nameThai} คัดคนสวย รับงานเอง ไม่ผ่านเอเย่นต์ พิกัด${prov.nameThai} อัปเดตใหม่ล่าสุด">
+      <title>รวมสาวไซด์ไลน์${prov.nameThai} งานดี ตัวจริงตรงปก - Sideline Chiangmai</title>
+      <meta name="description" content="ศูนย์รวมน้องๆ ไซด์ไลน์${prov.nameThai} รับงาน${prov.nameThai} พิกัด ${prov.nameThai} คัดสรรเฉพาะคนสวย งานดี ไม่ผ่านเอเย่นต์ อัปเดตล่าสุด">
       <link rel="canonical" href="${DOMAIN}/location/${key}">
       <meta name="robots" content="index, follow">
     </head>
-    <body style="font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; color: #333;">
-      <header>
+    <body style="font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; color: #333; background: #fff;">
+      <header style="border-bottom: 3px solid #fdf2f8; padding-bottom: 10px;">
           <h1 style="color: #d53f8c;">ไซด์ไลน์${prov.nameThai} (Sideline ${prov.nameThai})</h1>
-          <p>พบกับรายการน้องๆ รับงานในพื้นที่ <strong>${prov.nameThai}</strong> ที่ดีที่สุด คัดสรรคุณภาพเพื่อคุณ</p>
+          <p>พบกับน้องๆ รับงานใน <strong>${prov.nameThai}</strong> ที่ดีที่สุด การันตีคุณภาพและความพึงพอใจ</p>
       </header>
-      <hr style="border: 0; border-top: 2px solid #fdf2f8; margin: 20px 0;">
-      <main>
-          <ul style="padding: 0;">${profileListHtml}</ul>
+      <main style="margin-top: 30px;">
+          <ul style="padding: 0;">${listHtml}</ul>
       </main>
-      <footer style="margin-top: 40px; text-align: center; color: #888;">
-          <p>© ${new Date().getFullYear()} Sideline Chiangmai - <a href="${DOMAIN}/">กลับหน้าแรก</a></p>
+      <footer style="margin-top: 50px; text-align: center; border-top: 1px solid #eee; padding-top: 20px; color: #999;">
+          <p>© ${new Date().getFullYear()} <a href="${DOMAIN}/" style="color: #999;">Sideline Chiangmai</a> - แหล่งรวมสาวไซด์ไลน์คุณภาพ</p>
       </footer>
     </body>
     </html>`;
 
-    return new Response(html, {
-      headers: { 
-          "content-type": "text/html; charset=utf-8",
-          "Netlify-CDN-Cache-Control": "public, max-age=3600, durable"
-      }
-    });
-  } catch (error) {
-    return context.next(); 
-  }
+    return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
+  } catch (e) { return context.next(); }
 };
