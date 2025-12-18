@@ -387,44 +387,53 @@ gsap.registerPlugin(ScrollTrigger);
         }
     }
 
-// ✅ PROCESS PROFILE DATA (FIXED: เพิ่ม p.stats ลงใน Search String)
 function processProfileData(p) {
-    // จัดการรูปภาพ (Safe Mode: รูปไม่แตกแน่นอน)
+    // 1. ดึง Path รูปภาพทั้งหมด
     const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+    
+    // 💡 เช็คก่อนว่าเราเปิดในเครื่องตัวเอง (Localhost) หรือบนเว็บจริง
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
     const imageObjects = imagePaths.map(path => {
+        // 2. รับ URL ต้นฉบับจาก Supabase
         const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-        let url = data?.publicUrl || '/images/placeholder-profile-card.webp';
-        let sep = url.includes('?') ? '&' : '?';
-        // 💡 ใช้ created_at เป็น fallback สำหรับ versioning ของรูปภาพ
-        if (p.lastUpdated || p.created_at) url = `${url}${sep}v=${Math.floor(new Date(p.lastUpdated || p.created_at).getTime() / 1000)}`;
-        sep = url.includes('?') ? '&' : '?';
-        
+        let originalUrl = data?.publicUrl || '/images/placeholder-profile-card.webp';
+
+        // 3. ฟังก์ชันสร้าง URL ตามสภาพแวดล้อม
+        const makeCdnUrl = (width) => {
+            if (isLocal) {
+                // ✅ แสดงผลในเครื่อง: ใช้ลิงก์ตรง (เพราะ /.netlify/... จะหาไม่เจอในเครื่องเรา)
+                return originalUrl;
+            }
+            // ✅ แสดงผลบนเว็บจริง: ใช้พลังของ Netlify CDN ย่อรูปให้เล็กลงและเร็วขึ้น
+            return `/.netlify/images?url=${encodeURIComponent(originalUrl)}&w=${width}&fit=cover&q=80`;
+        };
+
         return {
-            src: `${url}${sep}width=600`, 
-            srcset: [300, 600].map(w => `${url}${sep}width=${w} ${w}w`).join(', ')
+            src: makeCdnUrl(600), // ขนาดมาตรฐาน
+            srcset: isLocal ? '' : [300, 600].map(w => `${makeCdnUrl(w)} ${w}w`).join(', ') // Responsive บนเว็บจริง
         };
     });
 
-    if (imageObjects.length === 0) imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
+    if (imageObjects.length === 0) {
+        imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
+    }
 
-    // ✅ ส่วนที่แก้: ดึงชื่อไทยจาก Map มาใช้
+    // --- ส่วนที่เหลือคงเดิมเพื่อให้ Logic อื่นๆ ไม่พัง ---
     const provinceName = state.provincesMap.get(p.provinceKey) || '';
     const tags = (p.styleTags || []).join(' ');
-    
-    // 🔴 FIX: เพิ่ม p.stats ลงใน fullSearchString เพื่อให้ค้นหาด้วยคำเช่น "สัดส่วน" หรือ "36-24-36" ได้
     const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''} ${p.stats || ''}`.toLowerCase();
 
     return { 
         ...p, 
         images: imageObjects, 
         altText: `น้อง${p.name} ${provinceName}`,
-        searchString: fullSearchString, // ใช้ค้นหา
-        provinceNameThai: provinceName, // ใช้แสดงผล
+        searchString: fullSearchString,
+        provinceNameThai: provinceName,
         _price: Number(p.rate) || 0,
         _age: Number(p.age) || 0
     };
 }
-
 // ✅ POPULATE PROVINCE DROPDOWN (Unchanged, but included for completeness)
 function populateProvinceDropdown() {
     if (!dom.provinceSelect) return;
@@ -579,6 +588,43 @@ function populateProvinceDropdown() {
             if(suggestionsBox) suggestionsBox.classList.add('hidden');
         });
     }
+    
+    // ✅ ฟังก์ชันช่วยบันทึกข้อมูลแบบปลอดภัย
+function saveCache(key, data) {
+    try {
+        const cacheObj = {
+            value: data,
+            timestamp: Date.now() // เก็บเวลาที่บันทึก
+        };
+        localStorage.setItem(key, JSON.stringify(cacheObj));
+    } catch (e) {
+        // ถ้าพื้นที่เต็ม ให้ล้างทิ้งทั้งหมดเพื่อป้องกันเว็บค้าง
+        console.error("Cache Full:", e);
+        localStorage.clear();
+    }
+}
+
+// ✅ ฟังก์ชันช่วยโหลดข้อมูลแบบเช็ควันหมดอายุ
+function loadCache(key, expiryHours = 24) {
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+
+    try {
+        const cacheObj = JSON.parse(cached);
+        const now = Date.now();
+        const expiryTime = expiryHours * 60 * 60 * 1000;
+
+        // ถ้าเก่าเกิน 24 ชม. ให้คืนค่า null เพื่อโหลดใหม่จาก Supabase
+        if (now - cacheObj.timestamp > expiryTime) {
+            localStorage.removeItem(key);
+            return null;
+        }
+        return cacheObj.value;
+    } catch (e) {
+        return null;
+    }
+}
+
 function applyUltimateFilters(updateUrl = false) {
         let query = {
             text: dom.searchInput?.value?.trim() || '',
@@ -1871,60 +1917,62 @@ function downloadFile(filename, content) {
         setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); alert("✅ ดาวน์โหลดเรียบร้อย!"); }, 100);
     }
 // =================================================================
-    // 13. DYNAMIC FOOTER SYSTEM (COMPLETE VERSION)
-    // =================================================================
-    async function initFooterLinks() {
-        const footerContainer = document.getElementById('popular-locations-footer');
-        if (!footerContainer) return;
+// 13. DYNAMIC FOOTER SYSTEM (SMART APPEND VERSION)
+// =================================================================
+async function initFooterLinks() {
+    const footerContainer = document.getElementById('popular-locations-footer');
+    if (!footerContainer) return;
 
-        let provincesList = [];
+    let provincesList = [];
 
-        // 1. พยายามดึงจาก Memory ก่อน (เร็วที่สุด)
-        if (state.provincesMap && state.provincesMap.size > 0) {
-            state.provincesMap.forEach((name, key) => {
-                provincesList.push({ key: key, name: name });
-            });
-        } 
-        // 2. ถ้า Memory ว่าง (เช่น เข้าหน้านี้โดยตรง) ให้ดึงจาก Supabase
-        else if (window.supabase) {
-            try {
-                const { data, error } = await window.supabase
-                    .from('provinces')
-                    .select('*'); // ดึงมาทั้งหมดแล้วค่อยเลือกฟิลด์
-                
-                if (!error && data) {
-                    provincesList = data.map(p => ({
-                        key: p.key || p.slug || p.id,
-                        name: p.nameThai || p.name_thai || p.thai_name || p.name // รองรับทุกชื่อคอลัมน์
-                    })).filter(p => p.key && p.name);
-                }
-            } catch (e) {
-                console.warn("Footer fallback load failed", e);
+    // 1. ดึงข้อมูลจังหวัด (จาก Memory หรือ Supabase)
+    if (state.provincesMap && state.provincesMap.size > 0) {
+        state.provincesMap.forEach((name, key) => {
+            provincesList.push({ key: key, name: name });
+        });
+    } else if (window.supabase) {
+        try {
+            const { data } = await window.supabase.from('provinces').select('*');
+            if (data) {
+                provincesList = data.map(p => ({
+                    key: p.key || p.slug || p.id,
+                    name: p.nameThai || p.name_thai || p.name
+                })).filter(p => p.key && p.name);
             }
-        }
-
-        // 3. กรณีเลวร้ายสุด: ไม่เจอข้อมูลเลย (ป้องกันหน้าขาว)
-        if (provincesList.length === 0) {
-            // ให้ลิงก์กลับหน้าแรกแทนการ Hardcode ไปจังหวัดใดจังหวัดหนึ่ง
-            footerContainer.innerHTML = `<li><a href="/" class="hover:text-pink-500 transition-colors">✨ ดูโปรไฟล์น้องๆ ทั้งหมด</a></li>`;
-            return;
-        }
-
-        // 4. เรียงลำดับ ก-ฮ
-        provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
-
-        // 5. แสดงผล (จำกัด 15 จังหวัดยอดฮิต เพื่อไม่ให้ Footer ยาวเกิน)
-        const displayLimit = 15;
-        const html = provincesList.slice(0, displayLimit).map(p => 
-            `<li><a href="/location/${p.key}" title="รับงาน${p.name} | Sideline Chiangmai" class="hover:text-pink-500 transition-colors">ไซด์ไลน์${p.name}</a></li>`
-        ).join('');
-
-        // 6. ปุ่ม "ดูทั้งหมด" ถ้ามีมากกว่า 15 จังหวัด
-        let viewAllLink = '';
-        if (provincesList.length > displayLimit) {
-            viewAllLink = `<li><a href="/" class="text-pink-500 font-bold hover:underline mt-2 inline-block">🔥 ดูจังหวัดอื่นๆ เพิ่มเติม (${provincesList.length - displayLimit}+)</a></li>`;
-        }
-
-        footerContainer.innerHTML = html + viewAllLink;
+        } catch (e) { console.warn("Footer load failed", e); }
     }
+
+    // 2. เรียงลำดับ ก-ฮ
+    provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+    // 3. 🟢 ลบตัว Loading ออก (ถ้ามี)
+    const loadingPulse = footerContainer.querySelector('.animate-pulse');
+    if (loadingPulse) {
+        loadingPulse.parentElement.remove();
+    }
+
+    // 4. 🟢 วนลูปเช็คและเติมจังหวัดที่ "ยังไม่มี" ใน HTML
+    const displayLimit = 20; // จำกัดจำนวนลิงก์รวมทั้งหมดไม่ให้ยาวเกินไป
+    let addedCount = footerContainer.querySelectorAll('li').length;
+
+    provincesList.forEach(p => {
+        // ตรวจสอบว่ามีลิงก์จังหวัดนี้อยู่แล้วหรือยัง (เช็คจาก URL)
+        const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
+        
+        if (!exists && addedCount < displayLimit) {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="/location/${p.key}" title="รับงาน${p.name} | Sideline Chiangmai" class="hover:text-pink-500 transition-colors">ไซด์ไลน์${p.name}</a>`;
+            footerContainer.appendChild(li);
+            addedCount++;
+        }
+    });
+
+    // 5. กรณีมีจังหวัดเยอะมาก ให้เติมปุ่ม "ดูทั้งหมด"
+    if (provincesList.length > addedCount && !footerContainer.querySelector('.view-all-link')) {
+        const viewAll = document.createElement('li');
+        viewAll.className = 'view-all-link';
+        viewAll.innerHTML = `<a href="/profiles.html" class="text-pink-500 font-bold hover:underline mt-2 inline-block">ดูจังหวัดอื่นๆ ทั้งหมด (${provincesList.length})</a>`;
+        footerContainer.appendChild(viewAll);
+    }
+}
 })();
