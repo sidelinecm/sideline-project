@@ -388,30 +388,19 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
 function processProfileData(p) {
-    // 1. ดึง Path รูปภาพทั้งหมด
+    if (!p) return null;
+
+    // 1. ดึง URL ตรงจาก Supabase (เพื่อตัดปัญหา Error 400 จาก Netlify)
     const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
     
-    // 💡 เช็คก่อนว่าเราเปิดในเครื่องตัวเอง (Localhost) หรือบนเว็บจริง
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
     const imageObjects = imagePaths.map(path => {
-        // 2. รับ URL ต้นฉบับจาก Supabase
         const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-        let originalUrl = data?.publicUrl || '/images/placeholder-profile-card.webp';
-
-        // 3. ฟังก์ชันสร้าง URL ตามสภาพแวดล้อม
-        const makeCdnUrl = (width) => {
-            if (isLocal) {
-                // ✅ แสดงผลในเครื่อง: ใช้ลิงก์ตรง (เพราะ /.netlify/... จะหาไม่เจอในเครื่องเรา)
-                return originalUrl;
-            }
-            // ✅ แสดงผลบนเว็บจริง: ใช้พลังของ Netlify CDN ย่อรูปให้เล็กลงและเร็วขึ้น
-            return `/.netlify/images?url=${encodeURIComponent(originalUrl)}&w=${width}&fit=cover&q=80`;
-        };
+        // ใช้ลิงก์ตรงๆ เลย ไม่ต้องผ่าน /.netlify/images
+        const finalUrl = data?.publicUrl || '/images/placeholder-profile-card.webp';
 
         return {
-            src: makeCdnUrl(600), // ขนาดมาตรฐาน
-            srcset: isLocal ? '' : [300, 600].map(w => `${makeCdnUrl(w)} ${w}w`).join(', ') // Responsive บนเว็บจริง
+            src: finalUrl,
+            srcset: '' 
         };
     });
 
@@ -419,7 +408,7 @@ function processProfileData(p) {
         imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
     }
 
-    // --- ส่วนที่เหลือคงเดิมเพื่อให้ Logic อื่นๆ ไม่พัง ---
+    // 2. จัดการข้อมูลส่วนอื่นคงเดิม
     const provinceName = state.provincesMap.get(p.provinceKey) || '';
     const tags = (p.styleTags || []).join(' ');
     const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''} ${p.stats || ''}`.toLowerCase();
