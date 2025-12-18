@@ -7,7 +7,7 @@ export default async (request, context) => {
 
   try {
     const userAgent = request.headers.get('User-Agent') || '';
-    const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|twitterbot|facebookexternalhit|discordbot|linkedinbot/i.test(userAgent);
+    const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|twitterbot|facebookexternalhit|discordbot|linkedinbot|whatsapp|line/i.test(userAgent);
     
     if (!isBot) return context.next(); 
 
@@ -22,12 +22,13 @@ export default async (request, context) => {
     const { data: profiles } = await supabase.from('profiles').select('name, slug, location, rate').eq('provinceKey', key).order('created_at', { ascending: false }).limit(100);
 
     const listHtml = profiles?.map(p => `
-      <li style="margin-bottom: 25px; list-style: none; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px;">
-          <h2 style="margin: 0; font-size: 1.3rem;">
-            <a href="${DOMAIN}/sideline/${p.slug}" style="color: #d53f8c; text-decoration: none;">น้อง ${p.name} ไซด์ไลน์${prov.nameThai} พิกัด ${p.location || prov.nameThai}</a>
-          </h2>
-          <p style="color: #555; margin: 8px 0;">เรทราคาเริ่มต้น: ${p.rate || 'สอบถาม'} บาท | การันตีรูปจริง 100% ดูโปรไฟล์คลิกเลย</p>
-      </li>`).join('') || '<li>ขออภัย ขณะนี้ยังไม่มีข้อมูลในพื้นที่นี้</li>';
+      <li>
+          <h2><a href="${DOMAIN}/sideline/${p.slug}">น้อง ${p.name} ไซด์ไลน์${prov.nameThai}</a></h2>
+          <p>พิกัด ${p.location || prov.nameThai} | เรท ${p.rate}</p>
+      </li>`).join('') || '<li>ยังไม่มีข้อมูล</li>';
+
+    // เพิ่มรูป Default สำหรับแชร์หน้าจังหวัด
+    const ogImage = `${DOMAIN}/images/default_og_image.jpg`;
 
     const html = `
     <!DOCTYPE html>
@@ -35,21 +36,19 @@ export default async (request, context) => {
     <head>
       <meta charset="UTF-8">
       <title>รวมสาวไซด์ไลน์${prov.nameThai} งานดี ตัวจริงตรงปก - Sideline Chiangmai</title>
-      <meta name="description" content="ศูนย์รวมน้องๆ ไซด์ไลน์${prov.nameThai} รับงาน${prov.nameThai} พิกัด ${prov.nameThai} คัดสรรเฉพาะคนสวย งานดี ไม่ผ่านเอเย่นต์ อัปเดตล่าสุด">
+      <meta name="description" content="ศูนย์รวมน้องๆ ไซด์ไลน์${prov.nameThai} รับงาน${prov.nameThai} พิกัด ${prov.nameThai} คัดสรรเฉพาะคนสวย งานดี ไม่ผ่านเอเย่นต์">
       <link rel="canonical" href="${DOMAIN}/location/${key}">
-      <meta name="robots" content="index, follow">
+      
+      <meta property="og:title" content="ไซด์ไลน์${prov.nameThai} - Sideline Chiangmai">
+      <meta property="og:description" content="รวมน้องๆ รับงาน${prov.nameThai} คัดเกรดพรีเมียม">
+      <meta property="og:image" content="${ogImage}">
+      <meta property="og:type" content="website">
+
+      <style>body{font-family:sans-serif;padding:20px;max-width:800px;margin:0 auto}a{color:#d53f8c;text-decoration:none}li{margin-bottom:15px;border-bottom:1px solid #eee;padding-bottom:10px}</style>
     </head>
-    <body style="font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; color: #333; background: #fff;">
-      <header style="border-bottom: 3px solid #fdf2f8; padding-bottom: 10px;">
-          <h1 style="color: #d53f8c;">ไซด์ไลน์${prov.nameThai} (Sideline ${prov.nameThai})</h1>
-          <p>พบกับน้องๆ รับงานใน <strong>${prov.nameThai}</strong> ที่ดีที่สุด การันตีคุณภาพและความพึงพอใจ</p>
-      </header>
-      <main style="margin-top: 30px;">
-          <ul style="padding: 0;">${listHtml}</ul>
-      </main>
-      <footer style="margin-top: 50px; text-align: center; border-top: 1px solid #eee; padding-top: 20px; color: #999;">
-          <p>© ${new Date().getFullYear()} <a href="${DOMAIN}/" style="color: #999;">Sideline Chiangmai</a> - แหล่งรวมสาวไซด์ไลน์คุณภาพ</p>
-      </footer>
+    <body>
+      <h1>ไซด์ไลน์${prov.nameThai}</h1>
+      <ul>${listHtml}</ul>
     </body>
     </html>`;
 
