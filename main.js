@@ -965,72 +965,69 @@ function renderByProvince(profiles) {
         return wrapper;
     }
 
+// 1. ฟังก์ชัน Render หลัก
 function renderProfiles(profiles, isSearching) {
-        if (!dom.profilesDisplayArea) return;
-        dom.profilesDisplayArea.innerHTML = ''; 
+    if (!dom.profilesDisplayArea) return;
+    dom.profilesDisplayArea.innerHTML = '';
 
-        // --- ส่วน Featured (คงเดิม) ---
-        if(dom.featuredSection) {
-            // แสดง Featured เฉพาะเมื่ออยู่หน้าแรกจริงๆ (ไม่มีการกรองจังหวัด)
-            const isHome = !isSearching && !window.location.pathname.includes('/location/');
-            dom.featuredSection.classList.toggle('hidden', !isHome);
-            
-            if (isHome && dom.featuredContainer && state.allProfiles.length > 0) {
-                if (dom.featuredContainer.children.length === 0) {
-                     const featured = state.allProfiles.filter(p => p.isfeatured);
-                     const frag = document.createDocumentFragment();
-                     featured.forEach(p => frag.appendChild(createProfileCard(p)));
-                     dom.featuredContainer.appendChild(frag);
-                }
+    // --- ส่วน Featured (แสดงเฉพาะหน้าแรก) ---
+    if (dom.featuredSection) {
+        const isHome = !isSearching && !window.location.pathname.includes('/location/');
+        dom.featuredSection.classList.toggle('hidden', !isHome);
+
+        if (isHome && dom.featuredContainer && state.allProfiles.length > 0) {
+            if (dom.featuredContainer.children.length === 0) {
+                const featured = state.allProfiles.filter(p => p.isfeatured);
+                const frag = document.createDocumentFragment();
+                // ✅ ส่ง index (i) ไปด้วย
+                featured.forEach((p, i) => frag.appendChild(createProfileCard(p, i)));
+                dom.featuredContainer.appendChild(frag);
             }
         }
-
-        // ถ้าไม่มีข้อมูล
-        if (profiles.length === 0) {
-            dom.noResultsMessage?.classList.remove('hidden');
-            return;
-        }
-        dom.noResultsMessage?.classList.add('hidden');
-
-        // --- ตัดสินใจการแสดงผล ---
-        // เช็คอีกทีว่า URL เป็น location หรือไม่ (เพื่อบังคับโชว์หัวข้อจังหวัด)
-        const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
-        
-        if (isSearching || isLocationPage) {
-            // โหมด 1: ผลลัพธ์การค้นหา / หน้าดูจังหวัดเดี่ยว (แสดงหัวข้อจังหวัด)
-            dom.profilesDisplayArea.appendChild(createSearchResultSection(profiles));
-        } else {
-            // โหมด 2: หน้าแรกดูรวม (แยกเป็น Section ก-ฮ)
-            renderByProvince(profiles);
-        }
-
-        if(window.ScrollTrigger) ScrollTrigger.refresh();
-        initScrollAnimations();
     }
 
-function createSearchResultSection(profiles) {
-        let headerText = "ผลการค้นหา";
-        
-        // ดึงค่าจังหวัดปัจจุบัน จาก Dropdown หรือจากค่าที่เรา Auto Set เมื่อกี้
-        const currentProvKey = dom.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE); 
-        const urlProvMatch = window.location.pathname.match(/\/(?:location|province)\/([^/]+)/);
-        
-        // ลำดับความสำคัญ: เอาจาก URL ก่อน -> ถ้าไม่มีเอาจาก Dropdown
-        let activeKey = urlProvMatch ? urlProvMatch[1] : currentProvKey;
-        
-        // 🟢 จุดที่แก้: แสดงชื่อจังหวัดสวยๆ แทนคำว่า "ผลการค้นหา"
-        if (activeKey && state.provincesMap.has(activeKey) && activeKey !== 'all') {
-            const name = state.provincesMap.get(activeKey);
-            headerText = `📍 น้องๆ ในจังหวัด <span class="text-pink-600">${name}</span>`;
-        } else if (dom.searchInput?.value) {
-            headerText = `🔍 ผลการค้นหา "${dom.searchInput.value}"`;
-        } else {
-            headerText = `✨ โปรไฟล์ทั้งหมด`;
-        }
+    // ถ้าไม่มีข้อมูล
+    if (profiles.length === 0) {
+        dom.noResultsMessage?.classList.remove('hidden');
+        return;
+    }
+    dom.noResultsMessage?.classList.add('hidden');
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'section-content-wrapper animate-fade-in-up';
-        wrapper.innerHTML = `
+    // --- ตัดสินใจการแสดงผล ---
+    const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
+
+    if (isSearching || isLocationPage) {
+        // โหมด 1: ผลลัพธ์การค้นหา หรือ หน้าจังหวัดเดี่ยว
+        dom.profilesDisplayArea.appendChild(createSearchResultSection(profiles));
+    } else {
+        // โหมด 2: หน้าแรกดูรวม (แยกหมวด)
+        renderByProvince(profiles);
+    }
+
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+    initScrollAnimations();
+} // ✅ ปิด renderProfiles
+
+// 2. ฟังก์ชันสร้างส่วนแสดงผลการค้นหา
+function createSearchResultSection(profiles) {
+    let headerText = "ผลการค้นหา";
+
+    const currentProvKey = dom.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE);
+    const urlProvMatch = window.location.pathname.match(/\/(?:location|province)\/([^/]+)/);
+    let activeKey = urlProvMatch ? urlProvMatch[1] : currentProvKey;
+
+    if (activeKey && state.provincesMap.has(activeKey) && activeKey !== 'all') {
+        const name = state.provincesMap.get(activeKey);
+        headerText = `📍 น้องๆ ในจังหวัด <span class="text-pink-600">${name}</span>`;
+    } else if (dom.searchInput?.value) {
+        headerText = `🔍 ผลการค้นหา "${dom.searchInput.value}"`;
+    } else {
+        headerText = `✨ โปรไฟล์ทั้งหมด`;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'section-content-wrapper animate-fade-in-up';
+    wrapper.innerHTML = `
           <div class="px-4 sm:px-6 pt-8 pb-4">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 dark:border-gray-700 pb-4">
                 <div>
@@ -1048,64 +1045,86 @@ function createSearchResultSection(profiles) {
           <div class="profile-grid grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-4 sm:px-6 pb-12"></div>
         `;
 
-        const grid = wrapper.querySelector('.profile-grid');
-        const frag = document.createDocumentFragment();
-        profiles.forEach(p => frag.appendChild(createProfileCard(p)));
-        grid.appendChild(frag);
-        return wrapper;
-    }
-    function createProfileCard(p) {
-        const cardContainer = document.createElement('div');
-        cardContainer.className = 'profile-card-new-container';
+    const grid = wrapper.querySelector('.profile-grid');
+    const frag = document.createDocumentFragment();
 
-        const cardInner = document.createElement('div');
-        cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-white dark:bg-gray-800 cursor-pointer transform transition-all duration-300';
-        cardInner.setAttribute('data-profile-id', p.id);
-        cardInner.setAttribute('data-profile-slug', p.slug);
-        cardInner.setAttribute('role', 'button');
-        cardInner.setAttribute('tabindex', '0');
+    // ✅ forEach ส่งค่า i ถูกต้องแล้ว
+    profiles.forEach((p, i) => frag.appendChild(createProfileCard(p, i)));
 
-        cardInner.innerHTML = `<a href="/profile/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์ ${p.name}"></a>`;
+    grid.appendChild(frag);
+    return wrapper;
+} // ✅ ปิด createSearchResultSection
 
-        const imgObj = p.images[0];
-        const img = document.createElement('img');
-        img.className = 'card-image w-full h-full object-cover pointer-events-none';
-        img.src = imgObj.src;
-        img.srcset = imgObj.srcset;
-        img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 400px';
-        img.alt = p.altText;
-        img.loading = 'lazy';
-        img.decoding = 'async';
+// 3. ฟังก์ชันสร้างการ์ด (Advanced LCP & CLS)
+function createProfileCard(p, index = 10) {
+    const cardContainer = document.createElement('div');
+    cardContainer.className = 'profile-card-new-container';
 
-        const badges = document.createElement('div');
-        badges.className = 'absolute top-2 right-2 flex flex-col gap-1 items-end z-10 pointer-events-none';
-        
-        let statusClass = 'status-inquire';
-        if (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) statusClass = 'status-available';
-        else if (p.availability?.includes('ไม่ว่าง')) statusClass = 'status-busy';
-        
-        badges.innerHTML = `
-            <span class="availability-badge ${statusClass}">${p.availability || 'สอบถาม'}</span>
-            ${p.isfeatured ? '<span class="featured-badge"><i class="fas fa-star text-[0.7em] mr-1"></i>แนะนำ</span>' : ''}
-        `;
+    // Skeleton BG
+    const cardInner = document.createElement('div');
+    cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-700 cursor-pointer transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1';
+    cardInner.setAttribute('data-profile-id', p.id);
+    cardInner.setAttribute('data-profile-slug', p.slug);
+    cardInner.setAttribute('role', 'button');
+    cardInner.setAttribute('tabindex', '0');
 
-        const overlay = document.createElement('div');
-        overlay.className = 'card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none';
-        overlay.innerHTML = `
-            <div class="card-info transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                <h3 class="text-xl font-bold text-white shadow-sm">${p.name}</h3>
-                <p class="text-sm text-gray-200 mt-1 flex items-center">
-                    <i class="fas fa-map-marker-alt mr-1.5"></i> 
-                    ${state.provincesMap.get(p.provinceKey) || 'ไม่ระบุ'}
-                </p>
-            </div>
-        `;
+    cardInner.innerHTML = `<a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์ ${p.name}"></a>`;
 
-        cardInner.append(img, badges, overlay);
-        cardContainer.appendChild(cardInner);
-        return cardContainer;
-    }
+    const imgObj = p.images[0];
+    const img = document.createElement('img');
 
+    // Fade-in Animation
+    img.className = 'card-image w-full h-full object-cover pointer-events-none transition-opacity duration-500 opacity-0';
+    img.onload = () => img.classList.remove('opacity-0');
+    img.onerror = () => {
+        img.src = '/images/placeholder-profile.webp';
+        img.classList.remove('opacity-0');
+    };
+
+    img.src = imgObj.src;
+    img.srcset = imgObj.srcset || '';
+    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 400px';
+    img.alt = p.altText || `น้อง ${p.name}`;
+
+    // ✅ LCP Optimization: รูปบนๆ โหลดเลย (Eager)
+    img.loading = index < 4 ? 'eager' : 'lazy';
+    img.decoding = 'async';
+
+    // ✅ CLS Optimization: จองพื้นที่
+    img.width = 300;
+    img.height = 400;
+
+    const badges = document.createElement('div');
+    badges.className = 'absolute top-2 right-2 flex flex-col gap-1 items-end z-10 pointer-events-none';
+
+    let statusClass = 'status-inquire';
+    if (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) statusClass = 'status-available';
+    else if (p.availability?.includes('ไม่ว่าง')) statusClass = 'status-busy';
+
+    badges.innerHTML = `
+        <span class="availability-badge ${statusClass} shadow-sm backdrop-blur-sm">${p.availability || 'สอบถาม'}</span>
+        ${p.isfeatured ? '<span class="featured-badge shadow-sm"><i class="fas fa-star text-[0.7em] mr-1"></i>แนะนำ</span>' : ''}
+    `;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none';
+
+    const provName = state.provincesMap.get(p.provinceKey) || p.provinceNameThai || 'เชียงใหม่';
+
+    overlay.innerHTML = `
+        <div class="card-info transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+            <h3 class="text-xl font-bold text-white shadow-black drop-shadow-md leading-tight">${p.name}</h3>
+            <p class="text-sm text-gray-200 mt-1 flex items-center font-medium">
+                <i class="fas fa-map-marker-alt mr-1.5 text-pink-500"></i> 
+                ${provName}
+            </p>
+        </div>
+    `;
+
+    cardInner.append(img, badges, overlay);
+    cardContainer.appendChild(cardInner);
+    return cardContainer;
+} // ✅ ปิด createProfileCard
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================
