@@ -3,18 +3,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 export default async (request, context) => {
     try {
         const userAgent = request.headers.get('User-Agent') || '';
-        // ตรวจจับ Bot (Google, Social, Line)
         const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|twitterbot|facebookexternalhit|discordbot|linkedinbot|whatsapp|line/i.test(userAgent);
         
         if (!isBot) return context.next(); 
 
         const url = new URL(request.url);
         const pathSegments = url.pathname.split('/').filter(Boolean);
-        // pathSegments[0] = 'sideline' หรือ 'profile'
-        // pathSegments[1] = ชื่อคน (Slug)
-
-        // ✅ FIX 1: แก้ปัญหาชื่อไทย (Decode URL)
-        // ถ้า URL มาเป็น %E0%B8%... จะถูกแปลงกลับเป็น "กระต่าย" ให้ Database เข้าใจ
         const rawSlug = pathSegments[1];
         if (!rawSlug) return context.next();
         
@@ -26,27 +20,13 @@ export default async (request, context) => {
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // ✅ FIX 2: ดึงข้อมูลแบบระบุ Column เพื่อความเร็ว (ลดโอกาส 504 Timeout)
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('*') // เลือกทั้งหมดเพราะต้องใช้หลายค่า
-            .eq('slug', profileSlug)
-            .maybeSingle();
+        const { data: profile } = await supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle();
 
-        // ถ้าหาไม่เจอ ให้ส่งกลับไปให้หน้าเว็บปกติจัดการ (404 ของ React)
-        if (!profile) {
-            console.log(`❌ Profile not found: ${profileSlug}`);
-            return context.next();
-        }
+        if (!profile) return context.next();
 
-        // ดึงจังหวัด (ถ้าไม่มีให้ Default เป็นเชียงใหม่)
         let provinceName = 'เชียงใหม่';
         if (profile.provinceKey) {
-             const { data: prov } = await supabase
-                .from('provinces')
-                .select('nameThai')
-                .eq('key', profile.provinceKey)
-                .maybeSingle();
+             const { data: prov } = await supabase.from('provinces').select('nameThai').eq('key', profile.provinceKey).maybeSingle();
              if (prov) provinceName = prov.nameThai;
         }
 
@@ -55,12 +35,15 @@ export default async (request, context) => {
             : `${DOMAIN_URL}/images/default_og_image.jpg`;
         
         const numericPrice = profile.rate ? profile.rate.toString().replace(/[^0-9]/g, '') : "1500";
-        const pageUrl = `${DOMAIN_URL}/sideline/${encodeURIComponent(profile.slug)}`; // Encode กลับตอนสร้าง Link
+        const pageUrl = `${DOMAIN_URL}/sideline/${encodeURIComponent(profile.slug)}`;
 
-        // สูตรคำนวณดาวคงที่
+        // คะแนนดาวคงที่
         const nameScore = profile.slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const reviewCount = (nameScore % 40) + 80; 
         const ratingValue = (4.5 + (nameScore % 5) / 10).toFixed(1);
+
+        // ✅ สร้าง Alt Text ขั้นเทพ (Keywords แน่นๆ)
+        const seoAltText = `น้อง ${profile.name} ไซด์ไลน์${provinceName} ตัวจริงตรงปก พิกัด${profile.location}`;
 
         const richSchema = {
             "@context": "https://schema.org",
@@ -100,7 +83,7 @@ export default async (request, context) => {
     <meta property="og:title" content="น้อง ${profile.name} ไซด์ไลน์${provinceName} - Sideline Chiangmai">
     <meta property="og:description" content="พิกัด ${profile.location} เรทราคา ${profile.rate} บาท การันตีงานดี ตรงปก">
     <meta property="og:image" content="${imageUrl}">
-    <meta property="og:image:alt" content="น้อง ${profile.name} ไซด์ไลน์${provinceName}">
+    <meta property="og:image:alt" content="${seoAltText}">
     <meta property="og:type" content="profile">
     <meta property="og:locale" content="th_TH">
     
@@ -110,7 +93,10 @@ export default async (request, context) => {
 <body>
     <article>
         <h1>น้อง ${profile.name} (${provinceName})</h1>
-        <img src="${imageUrl}" alt="น้อง ${profile.name}">
+        
+        <!-- ✅ ใช้ Alt Text แบบเต็มยศตรงนี้ -->
+        <img src="${imageUrl}" alt="${seoAltText}">
+        
         <p><strong>💰 ราคา:</strong> ${profile.rate}</p>
         <p><strong>📍 พิกัด:</strong> ${profile.location}</p>
         <p>${profile.description}</p>
@@ -122,7 +108,6 @@ export default async (request, context) => {
         return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
 
     } catch (e) {
-        console.error("❌ Render Bot Error:", e);
         return context.next(); 
     }
 };
