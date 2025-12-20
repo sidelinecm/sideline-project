@@ -1,3 +1,41 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8'; export default async (request, context) => { const DOMAIN = 'https://sidelinechiangmai.netlify.app'; const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co'; const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; const headers = { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=3600", "X-Robots-Tag": "index, follow" }; try { const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); // ดึงข้อมูลพร้อมกันเพื่อความเร็ว (Parallel Fetch) const [profilesRes, provincesRes] = await Promise.all([ supabase.from('profiles').select('slug, name, imagePath, lastUpdated, created_at').limit(3000), supabase.from('provinces').select('key') ]); if (profilesRes.error) throw profilesRes.error; const esc = (unsafe) => unsafe ? unsafe.replace(/[<>&"']/g, (m) => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":"&apos;"}[m])) : ''; // ฟังก์ชันสำหรับจัดการ URL ภาษาไทย (สำคัญมากสำหรับ Google Search Console) const encodeThaiUrl = (path, slug) => { const parts = slug.split('/').map(p => encodeURIComponent(p)).join('/'); return `${DOMAIN}/${path}/${parts}`; }; let xml = `<?xml version="1.0" encoding="UTF-8"?> <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"> <url> <loc>${DOMAIN}/</loc> <changefreq>daily</changefreq> <priority>1.0</priority> </url>`; // 1. เพิ่มหน้าจังหวัด (Locations) if (provincesRes.data) { for (const p of provincesRes.data) { if (!p.key) continue; xml += ` <url> <loc>${encodeThaiUrl('location', p.key)}</loc> <changefreq>weekly</changefreq> <priority>0.8</priority> </url>`; } } // 2. เพิ่มหน้าโปรไฟล์น้องๆ (Profiles) พร้อมรูปภาพเพื่อ SEO if (profilesRes.data) { for (const p of profilesRes.data) { if (!p.slug) continue; const pageUrl = encodeThaiUrl('sideline', p.slug); const lastMod = p.lastUpdated || p.created_at || new Date().toISOString(); const safeName = esc(p.name); // จัดการ URL รูปภาพให้รองรับภาษาไทย const imgUrl = p.imagePath ? `${SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath.split('/').map(s => encodeURIComponent(s)).join('/')}` : `${DOMAIN}/images/default_og_image.jpg`; xml += ` <url> <loc>${pageUrl}</loc> <lastmod>${lastMod.split('T')[0]}</lastmod> <changefreq>daily</changefreq> <priority>0.9</priority> <image:image> <image:loc>${esc(imgUrl)}</image:loc> <image:title>น้อง ${safeName} ไซด์ไลน์</image:title> <image:caption>ดูโปรไฟล์น้อง ${safeName} อัปเดตล่าสุด</image:caption> </image:image> </url>`; } } xml += `\n</urlset>`; return new Response(xml, { headers }); } catch (error) { console.error("Sitemap Error:", error); return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${DOMAIN}/</loc></url></urlset>`, { headers }); } };
+export default async (request, context) => {
+  const DOMAIN = 'https://sidelinechiangmai.netlify.app';
+  const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
 
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const [profilesRes, provincesRes] = await Promise.all([
+      supabase.from('profiles').select('slug, name, imagePath, lastUpdated').order('created_at', { ascending: false }).limit(5000),
+      supabase.from('provinces').select('key')
+    ]);
+
+    const esc = (unsafe) => unsafe ? unsafe.replace(/[<>&"']/g, (m) => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":"&apos;"}[m])) : '';
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+      <url><loc>${DOMAIN}/</loc><priority>1.0</priority></url>`;
+
+    provincesRes.data?.forEach(p => {
+      xml += `<url><loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc><priority>0.8</priority></url>`;
+    });
+
+    profilesRes.data?.forEach(p => {
+      const imgUrl = p.imagePath ? `${SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}` : `${DOMAIN}/images/default_og_image.jpg`;
+      xml += `
+      <url>
+        <loc>${DOMAIN}/sideline/${encodeURIComponent(p.slug)}</loc>
+        <lastmod>${(p.lastUpdated || new Date().toISOString()).split('T')[0]}</lastmod>
+        <priority>0.9</priority>
+        <image:image><image:loc>${esc(imgUrl)}</image:loc></image:image>
+      </url>`;
+    });
+
+    xml += `</urlset>`;
+    return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=3600" } });
+  } catch (e) {
+    return new Response("<urlset></urlset>", { status: 500 });
+  }
+};
