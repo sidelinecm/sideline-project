@@ -1,25 +1,31 @@
+# ===================================================
+# Netlify Configuration for SEO Pre-rendering
+# ===================================================
+
 [build]
-  publish = "."
+  command = "npm run build" # ใส่คำสั่ง build ของคุณ ถ้ามี
+  publish = "/" # โฟลเดอร์ที่ build เสร็จแล้ว
 
+# --- การตั้งค่า Edge Functions ---
 [[edge_functions]]
-  function = "sitemap"
-  path = "/sitemap.xml"
-
-[[edge_functions]]
-  function = "render-bot"
+  # ฟังก์ชันนี้จะทำงานเมื่อ Bot เข้ามาดู "หน้าโปรไฟล์"
+  # มันจะไปเรียกไฟล์ render-bot.js
   path = "/sideline/*"
+  function = "render-bot"
 
 [[edge_functions]]
-  function = "ssr-province"
+  # ฟังก์ชันนี้จะทำงานเมื่อ Bot เข้ามาดู "หน้าจังหวัด"
+  # มันจะไปเรียกไฟล์ที่ render หน้าจังหวัด (ตั้งชื่อให้ตรง)
   path = "/location/*"
+  function = "location-render" # **สำคัญ:** "location-render" คือชื่อไฟล์ JS ของคุณ (ไม่รวม .js)
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "SAMEORIGIN"
-    Cache-Control = "public, max-age=0, must-revalidate"
+[[edge_functions]]
+  # ฟังก์ชันนี้จะทำงานเมื่อมีการเรียก "sitemap.xml"
+  # มันจะไปเรียกไฟล์ sitemap.js
+  path = "/sitemap.xml"
+  function = "sitemap-generator" # **สำคัญ:** "sitemap-generator" คือชื่อไฟล์ sitemap.js ของคุณ
 
+# --- การตั้งค่า Redirects ---
 [[redirects]]
   from = "/*"
   to = "/index.html"
