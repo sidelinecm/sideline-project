@@ -30,13 +30,15 @@ gsap.registerPlugin(ScrollTrigger);
         DEFAULT_OG_IMAGE: '/images/default_og_image.jpg' // ✅ CORRECT SYNTAX
     };
 
-    // =================================================================
-    // 1.1 GLOBAL STATE AND VARIABLES
-    // =================================================================
-    let state = {
+let state = {
         allProfiles: [],
         provincesMap: new Map(),
         currentProfileSlug: null,
+        // 👇👇 เพิ่ม 2 ตัวนี้เข้าไปครับ 👇👇
+        displayLimit: 12,     // โชว์ทีละ 12 คน (สำหรับหน้าค้นหา)
+        featuredLimit: 8,     // โชว์ 8 คน (สำหรับหน้าแรก)
+        // 👆👆 ----------------------- 👆👆
+        
         lastFocusedElement: null,
         isFetching: false,
         lastFetchedAt: '1970-01-01T00:00:00Z',
@@ -903,68 +905,81 @@ function applyUltimateFilters(updateUrl = false) {
             if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
         }
     }
+// ✅ แบบใหม่: renderByProvince (แก้ไขแล้ว)
 function renderByProvince(profiles) {
-        // 1. Group ข้อมูล
-        const groups = profiles.reduce((acc, p) => {
-            const key = p.provinceKey || 'no_province';
-            if (!acc[key]) acc[key] = [];
-            acc[key].push(p);
-            return acc;
-        }, {});
+    // 1. Group ข้อมูล (เหมือนเดิม)
+    const groups = profiles.reduce((acc, p) => {
+        const key = p.provinceKey || 'no_province';
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(p);
+        return acc;
+    }, {});
 
-        // 2. Sort ก-ฮ ตามชื่อไทย
-        const keys = Object.keys(groups).sort((a, b) => {
-            const nA = state.provincesMap.get(a) || a;
-            const nB = state.provincesMap.get(b) || b;
-            return nA.localeCompare(nB, 'th');
+    // 2. Sort ก-ฮ (เหมือนเดิม)
+    const keys = Object.keys(groups).sort((a, b) => {
+        const nA = state.provincesMap.get(a) || a;
+        const nB = state.provincesMap.get(b) || b;
+        return nA.localeCompare(nB, 'th');
+    });
+
+    // 3. Render
+    const mainFragment = document.createDocumentFragment();
+    
+    if (keys.length === 0) {
+        dom.noResultsMessage?.classList.remove('hidden');
+    } else {
+        keys.forEach(key => {
+            const name = state.provincesMap.get(key) || (key === 'no_province' ? 'ไม่ระบุจังหวัด' : key);
+            
+            // 👇👇👇 จุดเปลี่ยนสำคัญอยู่ตรงนี้ครับ 👇👇👇
+            // ของเดิม: createProvinceSection(key, name, groups[key])
+            // ของใหม่: เพิ่มเลข 4 เข้าไป เพื่อจำกัดจำนวนการ์ด
+            mainFragment.appendChild(createProvinceSection(key, name, groups[key], 4)); 
+            // 👆👆👆 ----------------------------- 👆👆👆
         });
-
-        // 3. Render
-        const mainFragment = document.createDocumentFragment();
-        
-        if (keys.length === 0) {
-            // ถ้าไม่มีหมวดหมู่เลย ให้แสดงข้อความเตือน
-            dom.noResultsMessage?.classList.remove('hidden');
-        } else {
-            keys.forEach(key => {
-                // ดึงชื่อไทย (สำคัญ: ถ้า state.provincesMap ว่าง ชื่อจะหาย)
-                // ดังนั้นการแก้ที่ fetchData ข้อ 1. สำคัญมาก
-                const name = state.provincesMap.get(key) || (key === 'no_province' ? 'ไม่ระบุจังหวัด' : key);
-                
-                // ใช้ createProvinceSection ตัวเดิมที่มีอยู่แล้ว
-                mainFragment.appendChild(createProvinceSection(key, name, groups[key]));
-            });
-        }
-        
-        dom.profilesDisplayArea.appendChild(mainFragment);
     }
-    function createProvinceSection(key, name, profiles) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'section-content-wrapper province-section mt-12';
-        wrapper.id = `province-${key}`;
-        wrapper.setAttribute('data-animate-on-scroll', '');
+    
+    dom.profilesDisplayArea.appendChild(mainFragment);
+}
+// ✅ ต้องแก้ฟังก์ชันนี้ด้วย เพื่อให้รับ limit (เลข 4) มาใช้ตัดข้อมูล
+function createProvinceSection(key, name, profiles, limit = 1000) { // <--- รับค่า limit
+    const wrapper = document.createElement('div');
+    wrapper.className = 'section-content-wrapper province-section mt-12';
+    wrapper.style.contentVisibility = 'auto'; // ช่วยให้ลื่นขึ้น
+    wrapper.id = `province-${key}`;
 
-        wrapper.innerHTML = `
-            <div class="p-6 md:p-8">
-                <a href="/location/${key}" class="group block">
-                    <h2 class="province-section-header flex items-center gap-2.5 text-2xl font-bold text-gray-800 dark:text-gray-200 group-hover:text-pink-600 transition-colors">
-                        📍 จังหวัด ${name}
-                        <span class="ml-2 bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded-full">${profiles.length}</span>
-                        <i class="fas fa-chevron-right text-sm opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0"></i>
-                    </h2>
+    // 👇 ตัดข้อมูลเอาแค่จำนวน limit (4 คน)
+    const visibleProfiles = profiles.slice(0, limit); 
+    const hasMore = profiles.length > limit; // เช็คว่ามีคนเหลือไหม
+
+    wrapper.innerHTML = `
+        <div class="p-6 md:p-8 flex justify-between items-end">
+            <a href="/location/${key}" class="group block">
+                <h2 class="province-section-header flex items-center gap-2.5 text-2xl font-bold text-gray-800 dark:text-gray-200 group-hover:text-pink-600 transition-colors">
+                    📍 จังหวัด ${name}
+                    <span class="ml-2 bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded-full">${profiles.length}</span>
+                </h2>
+            </a>
+            ${hasMore ? `
+                <!-- ถ้ามีคนเหลือ ให้โชว์ปุ่มดูทั้งหมด -->
+                <a href="/location/${key}" class="text-sm font-bold text-pink-600 hover:underline">
+                    ดูทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
                 </a>
-            </div>
-            <div class="profile-grid grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-6 md:px-8 pb-8"></div>
-        `;
+            ` : ''}
+        </div>
+        <div class="profile-grid grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-6 md:px-8 pb-8"></div>
+    `;
 
-        const grid = wrapper.querySelector('.profile-grid');
-        const frag = document.createDocumentFragment();
-        profiles.forEach(p => frag.appendChild(createProfileCard(p)));
-        grid.appendChild(frag);
+    const grid = wrapper.querySelector('.profile-grid');
+    const frag = document.createDocumentFragment();
+    
+    // 👇 วนลูปสร้างการ์ดเฉพาะคนที่ตัดมาแล้ว (visibleProfiles)
+    visibleProfiles.forEach(p => frag.appendChild(createProfileCard(p)));
+    
+    grid.appendChild(frag);
 
-        return wrapper;
-    }
-
+    return wrapper;
+}
 // 1. ฟังก์ชัน Render หลัก
 function renderProfiles(profiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
