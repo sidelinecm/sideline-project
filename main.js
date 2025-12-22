@@ -934,16 +934,18 @@ function renderByProvince(profiles) {
     
     dom.profilesDisplayArea.appendChild(mainFragment);
 }
-// ✅ ต้องแก้ฟังก์ชันนี้ด้วย เพื่อให้รับ limit (เลข 4) มาใช้ตัดข้อมูล
-function createProvinceSection(key, name, profiles, limit = 1000) { // <--- รับค่า limit
+// ค้นหา function createProvinceSection แล้วแก้ข้างในเป็นแบบนี้ครับ
+function createProvinceSection(key, name, profiles, limit = 9999) { // 1. เปลี่ยนตัวเลข Default เป็นค่าเยอะๆ
     const wrapper = document.createElement('div');
     wrapper.className = 'section-content-wrapper province-section mt-12';
-    wrapper.style.contentVisibility = 'auto'; // ช่วยให้ลื่นขึ้น
+    wrapper.style.contentVisibility = 'auto';
     wrapper.id = `province-${key}`;
 
-    // 👇 ตัดข้อมูลเอาแค่จำนวน limit (4 คน)
-    const visibleProfiles = profiles.slice(0, limit); 
-    const hasMore = profiles.length > limit; // เช็คว่ามีคนเหลือไหม
+    // 2. 🟢 แก้ตรงนี้: ให้ตัวแปร visibleProfiles เท่ากับ profiles ทั้งหมดเลย (ไม่ต้องใช้ .slice)
+    const visibleProfiles = profiles; 
+    
+    // 3. 🟢 แก้ตรงนี้: สั่งปิดปุ่ม "ดูทั้งหมด" ไปเลย เพราะเราโชว์หมดแล้ว
+    const hasMore = false; 
 
     wrapper.innerHTML = `
         <div class="p-6 md:p-8 flex justify-between items-end">
@@ -953,20 +955,14 @@ function createProvinceSection(key, name, profiles, limit = 1000) { // <--- ร�
                     <span class="ml-2 bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded-full">${profiles.length}</span>
                 </h2>
             </a>
-            ${hasMore ? `
-                <!-- ถ้ามีคนเหลือ ให้โชว์ปุ่มดูทั้งหมด -->
-                <a href="/location/${key}" class="text-sm font-bold text-pink-600 hover:underline">
-                    ดูทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
-                </a>
-            ` : ''}
-        </div>
+            </div>
         <div class="profile-grid grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-6 md:px-8 pb-8"></div>
     `;
 
     const grid = wrapper.querySelector('.profile-grid');
     const frag = document.createDocumentFragment();
     
-    // 👇 วนลูปสร้างการ์ดเฉพาะคนที่ตัดมาแล้ว (visibleProfiles)
+    // วนลูปสร้างการ์ดจากข้อมูลทั้งหมด
     visibleProfiles.forEach(p => frag.appendChild(createProfileCard(p)));
     
     grid.appendChild(frag);
