@@ -35,8 +35,8 @@ let state = {
         provincesMap: new Map(),
         currentProfileSlug: null,
         // 👇👇 เพิ่ม 2 ตัวนี้เข้าไปครับ 👇👇
-        displayLimit: 12,     // โชว์ทีละ 12 คน (สำหรับหน้าค้นหา)
-        featuredLimit: 8,     // โชว์ 8 คน (สำหรับหน้าแรก)
+        displayLimit: 100,     // โชว์ทีละ 12 คน (สำหรับหน้าค้นหา)
+        featuredLimit: 1000,     // โชว์ 8 คน (สำหรับหน้าแรก)
         // 👆👆 ----------------------- 👆👆
         
         lastFocusedElement: null,
@@ -707,14 +707,7 @@ function updateUltimateSuggestions(val) {
 
     if (!fuseEngine) return;
 
-    // ค้นหา (เอาแค่ 5 อันดับแรก)
-    const results = fuseEngine.search(val).slice(0, 5);
-
-    if (results.length === 0) {
-        box.classList.add('hidden');
-        return;
-    }
-
+const results = fuseEngine.search(val);
     // สร้าง HTML Dropdown
     let html = `<div class="search-dropdown-box">`;
 
