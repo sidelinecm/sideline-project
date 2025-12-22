@@ -934,7 +934,7 @@ function renderByProvince(profiles) {
             // 👇👇👇 จุดเปลี่ยนสำคัญอยู่ตรงนี้ครับ 👇👇👇
             // ของเดิม: createProvinceSection(key, name, groups[key])
             // ของใหม่: เพิ่มเลข 4 เข้าไป เพื่อจำกัดจำนวนการ์ด
-            mainFragment.appendChild(createProvinceSection(key, name, groups[key], 4)); 
+            mainFragment.appendChild(createProvinceSection(key, name, groups[key], 100)); 
             // 👆👆👆 ----------------------------- 👆👆👆
         });
     }
@@ -1102,7 +1102,7 @@ function createProfileCard(p, index = 10) {
     img.alt = p.altText || `น้อง ${p.name}`;
 
     // ✅ LCP Optimization: รูปบนๆ โหลดเลย (Eager)
-    img.loading = index < 4 ? 'eager' : 'lazy';
+    img.loading = index < 100 ? 'eager' : 'lazy';
     img.decoding = 'async';
 
     // ✅ CLS Optimization: จองพื้นที่
