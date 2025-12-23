@@ -44,7 +44,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- ✅ Styles -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
 
   <!-- ✅ FontAwesome (CDN) -->
@@ -121,14 +121,14 @@
 
 <body class=antialiased data-page=profiles>
 
+<!-- Page Loader -->
+<div id="page-loader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gray-900/90 backdrop-blur-sm transition-opacity duration-500">
+    <div class="relative flex items-center justify-center w-32 h-32">
+        <div class="loader-spinner absolute w-full h-full rounded-full"></div>
+        <span class="loader-text text-white font-bold text-sm">Sideline CM</span>
+    </div>
+</div>
   
-  <div class=aurora-container>
-      <div class="aurora-blob aurora-blob-1"></div>
-      <div class="aurora-blob aurora-blob-2"></div>
-  </div>
-  <div id=custom-cursor-dot class=custom-cursor></div>
-  <div id=custom-cursor-circle class=custom-cursor></div>
-
 
 <header id=page-header class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
     <div class="container mx-auto px-4 h-18 flex items-center justify-between">
@@ -431,7 +431,7 @@
 </div>
 
 
-<script type="module" src="/main.js"></script>
+<script type="module" src="main.js"></script>
 
 <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
 
