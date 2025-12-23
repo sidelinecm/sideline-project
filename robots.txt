@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+# แจ้ง Google ว่า Sitemap อยู่ที่ไหน (สำคัญมาก)
 Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml
