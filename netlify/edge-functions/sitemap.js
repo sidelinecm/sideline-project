@@ -12,30 +12,43 @@ export default async (request, context) => {
       supabase.from('provinces').select('key')
     ]);
 
-    const esc = (unsafe) => unsafe ? unsafe.replace(/[<>&"']/g, (m) => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":"&apos;"}[m])) : '';
-
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
       <url><loc>${DOMAIN}/</loc><priority>1.0</priority></url>`;
 
+    // ส่วนจังหวัด
     provincesRes.data?.forEach(p => {
-      xml += `<url><loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc><priority>0.8</priority></url>`;
+      xml += `<url>
+        <loc>${DOMAIN}/location/${p.key}</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+      </url>`;
     });
 
+    // ส่วนโปรไฟล์รายคน
     profilesRes.data?.forEach(p => {
       const imgUrl = p.imagePath ? `${SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}` : `${DOMAIN}/images/default_og_image.jpg`;
       xml += `
       <url>
-        <loc>${DOMAIN}/sideline/${encodeURIComponent(p.slug)}</loc>
+        <loc>${DOMAIN}/sideline/${p.slug}</loc>
         <lastmod>${(p.lastUpdated || new Date().toISOString()).split('T')[0]}</lastmod>
         <priority>0.9</priority>
-        <image:image><image:loc>${esc(imgUrl)}</image:loc></image:image>
+        <image:image>
+          <image:loc>${imgUrl}</image:loc>
+          <image:title>${p.name}</image:title>
+        </image:image>
       </url>`;
     });
 
     xml += `</urlset>`;
-    return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=3600" } });
-  } catch (e) {
-    return new Response("<urlset></urlset>", { status: 500 });
+
+    return new Response(xml, {
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'X-Content-Type-Options': 'nosniff'
+      }
+    });
+  } catch (err) {
+    return new Response(`Error generating sitemap`, { status: 500 });
   }
 };
