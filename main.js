@@ -1091,7 +1091,7 @@ function createProfileCard(p, index = 10) {
     img.alt = p.altText || `น้อง ${p.name}`;
 
     // ✅ LCP Optimization: รูปบนๆ โหลดเลย (Eager)
-    img.loading = index < 100 ? 'eager' : 'lazy';
+    img.loading = index < 10 ? 'eager' : 'lazy';
     img.decoding = 'async';
 
     // ✅ CLS Optimization: จองพื้นที่
@@ -1829,162 +1829,218 @@ function hideLoadingState() {
     }
     if(dom.loadingPlaceholder) dom.loadingPlaceholder.style.display = 'none';
 }
-    // =================================================================
-    // 12. ADMIN TOOLS (SITEMAP GENERATOR)
+// =================================================================
+    // 12. ADMIN TOOLS (SITEMAP GENERATOR) - สำหรับจัดการด้วยมือถือ
     // =================================================================
     function initMobileSitemapTrigger() {
+        // สร้างปุ่มล่องหนที่มุมขวาล่าง (กด 5 ครั้งเพื่อเปิดเมนูแอดมิน)
         const ghostBtn = document.createElement('div');
-        Object.assign(ghostBtn.style, { position: 'fixed', bottom: '0', right: '0', width: '60px', height: '60px', zIndex: '99999', cursor: 'pointer', background: 'transparent', touchAction: 'manipulation' });
+        Object.assign(ghostBtn.style, { 
+            position: 'fixed', bottom: '0', right: '0', 
+            width: '60px', height: '60px', zIndex: '99999', 
+            cursor: 'pointer', background: 'transparent', 
+            touchAction: 'manipulation' 
+        });
         document.body.appendChild(ghostBtn);
-        let clicks = 0; let timeout;
+
+        let clicks = 0; 
+        let timeout;
+
         ghostBtn.addEventListener('click', (e) => {
-            e.preventDefault(); clicks++; clearTimeout(timeout);
+            e.preventDefault(); 
+            clicks++; 
+            clearTimeout(timeout);
             timeout = setTimeout(() => { clicks = 0; }, 1500);
+
             if (clicks >= 5) {
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                if (state.allProfiles.length === 0) { alert("⚠️ ข้อมูลยังโหลดไม่เสร็จ"); clicks = 0; return; }
-                const confirmGen = confirm(`⚙️ Admin Menu:\nพบข้อมูล ${state.allProfiles.length} รายการ\nต้องการโหลด sitemap.xml ใช่ไหม?`);
-                if (confirmGen) { try { const xml = generateSitemapXML(); downloadFile('sitemap.xml', xml); } catch (err) { alert("❌ เกิดข้อผิดพลาด: " + err.message); console.error(err); } }
+                
+                if (state.allProfiles.length === 0) { 
+                    alert("⚠️ ข้อมูลยังโหลดไม่เสร็จ กรุณารอสักครู่"); 
+                    clicks = 0; return; 
+                }
+
+                const confirmGen = confirm(`⚙️ Admin Menu:\nพบข้อมูล ${state.allProfiles.length} รายการ\nต้องการดาวน์โหลด sitemap.xml ใช่ไหม?`);
+                if (confirmGen) { 
+                    try { 
+                        const xml = generateSitemapXML(); 
+                        downloadFile('sitemap.xml', xml); 
+                    } catch (err) { 
+                        alert("❌ เกิดข้อผิดพลาด: " + err.message); 
+                    } 
+                }
                 clicks = 0;
             }
         });
     }
 
-function generateSitemapXML() {
-    const baseUrl = CONFIG.SITE_URL.replace(/\/$/, '');
-    const urls = [];
+    function generateSitemapXML() {
+        const baseUrl = CONFIG.SITE_URL.replace(/\/$/, '');
+        const urls = [];
 
-    const processUrl = (path) => {
-        const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
-        const fullUrl = `${baseUrl}/${encodedPath}`;
-        return fullUrl.replace(/&/g, '&amp;').replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
-    };
+        const escapeXml = (str) => {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/'/g, '&apos;')
+                      .replace(/"/g, '&quot;').replace(/>/g, '&gt;')
+                      .replace(/</g, '&lt;');
+        };
 
-    // 1. หน้าแรก
-    urls.push({ loc: processUrl(''), priority: '1.0', freq: 'daily' });
+        const processUrl = (path) => {
+            const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
+            return escapeXml(`${baseUrl}/${encodedPath}`);
+        };
 
-    // 2. หน้า Profile น้องๆ (จุดสำคัญที่เพิ่มรูปภาพ)
-    state.allProfiles.forEach(p => { 
-        if (p.slug) { 
-            // ดึงข้อมูลรูปภาพจาก object ที่ process แล้ว
-            let imageTag = '';
-            if (p.images && p.images.length > 0 && p.images[0].src) {
-                // ต้อง Escape URL รูปภาพด้วยเพื่อให้ XML ถูกต้อง
-                const imgUrl = p.images[0].src.replace(/&/g, '&amp;');
-                imageTag = `
+        // 1. หน้าแรก
+        urls.push({ loc: processUrl(''), priority: '1.0', freq: 'daily' });
+
+        // 2. หน้า Profile น้องๆ + รูปภาพ (SEO หัวใจสำคัญ)
+        state.allProfiles.forEach(p => { 
+            if (p.slug) { 
+                let imageTag = '';
+                if (p.images && p.images.length > 0 && p.images[0].src) {
+                    const imgUrl = escapeXml(p.images[0].src);
+                    imageTag = `
         <image:image>
             <image:loc>${imgUrl}</image:loc>
-            <image:title>${p.name || 'Profile Image'}</image:title>
+            <image:title>${escapeXml(p.name || 'Profile Image')}</image:title>
         </image:image>`;
-            }
+                }
 
-            urls.push({ 
-                loc: processUrl(`sideline/${p.slug.trim()}`), 
-                priority: '0.9', 
-                freq: 'daily',
-                // เพิ่มฟิลด์พิเศษสำหรับเก็บ html รูปภาพ
-                imageXml: imageTag 
+                urls.push({ 
+                    loc: processUrl(`sideline/${p.slug.trim()}`), 
+                    priority: '0.9', 
+                    freq: 'daily',
+                    imageXml: imageTag 
+                }); 
+            } 
+        });
+
+        // 3. หน้า Location (จังหวัด)
+        if (state.provincesMap && state.provincesMap.size > 0) { 
+            state.provincesMap.forEach((name, key) => { 
+                urls.push({ loc: processUrl(`location/${key}`), priority: '0.8', freq: 'daily' }); 
             }); 
-        } 
-    });
+        }
 
-    // 3. หน้า Location
-    if (state.provincesMap && state.provincesMap.size > 0) { 
-        state.provincesMap.forEach((name, key) => { 
-            urls.push({ loc: processUrl(`location/${key}`), priority: '0.8', freq: 'daily' }); 
-        }); 
-    }
+        // 4. หน้า Static อื่นๆ
+        ['blog.html', 'about.html', 'faq.html', 'profiles.html', 'locations.html'].forEach(page => { 
+            urls.push({ loc: processUrl(page), priority: '0.7', freq: 'weekly' }); 
+        });
 
-    // 4. หน้า Static
-    ['blog.html', 'about.html', 'faq.html', 'profiles.html', 'locations.html'].forEach(page => { 
-        urls.push({ loc: processUrl(page), priority: '0.7', freq: 'weekly' }); 
-    });
-
-    // สร้างเนื้อหา XML
-    const xmlContent = urls.map(u => 
-        `<url>
+        const xmlContent = urls.map(u => 
+            `<url>
             <loc>${u.loc}</loc>
             <lastmod>${new Date().toISOString()}</lastmod>
             <changefreq>${u.freq}</changefreq>
             <priority>${u.priority}</priority>${u.imageXml || ''}
-        </url>` // เพิ่ม u.imageXml ตรงนี้
-    ).join(''); // ลบ \n ออกเพื่อให้ไฟล์เล็กลง (Optional)
+        </url>`
+        ).join('');
 
-    // คืนค่าพร้อม Header ที่ถูกต้อง (เพิ่ม xmlns:image)
-    return `<?xml version="1.0" encoding="UTF-8"?>
+        return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${xmlContent}
 </urlset>`;
-}
-function downloadFile(filename, content) {
+    }
+
+    function downloadFile(filename, content) {
         const blob = new Blob([content], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = filename;
-        link.style.display = 'none';
-        document.body.appendChild(link);
         link.click();
-        setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); alert("✅ ดาวน์โหลดเรียบร้อย!"); }, 100);
-    }
-// =================================================================
-// 13. DYNAMIC FOOTER SYSTEM (SMART APPEND VERSION)
-// =================================================================
-async function initFooterLinks() {
-    const footerContainer = document.getElementById('popular-locations-footer');
-    if (!footerContainer) return;
-
-    let provincesList = [];
-
-    // 1. ดึงข้อมูลจังหวัด (จาก Memory หรือ Supabase)
-    if (state.provincesMap && state.provincesMap.size > 0) {
-        state.provincesMap.forEach((name, key) => {
-            provincesList.push({ key: key, name: name });
-        });
-    } else if (window.supabase) {
-        try {
-            const { data } = await window.supabase.from('provinces').select('*');
-            if (data) {
-                provincesList = data.map(p => ({
-                    key: p.key || p.slug || p.id,
-                    name: p.nameThai || p.name_thai || p.name
-                })).filter(p => p.key && p.name);
-            }
-        } catch (e) { console.warn("Footer load failed", e); }
+        setTimeout(() => { URL.revokeObjectURL(url); alert("✅ ดาวน์โหลด Sitemap สำเร็จ! นำไฟล์นี้ไปวางที่ root ของเว็บไซต์"); }, 100);
     }
 
-    // 2. เรียงลำดับ ก-ฮ
-    provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
-
-    // 3. 🟢 ลบตัว Loading ออก (ถ้ามี)
-    const loadingPulse = footerContainer.querySelector('.animate-pulse');
-    if (loadingPulse) {
-        loadingPulse.parentElement.remove();
-    }
-
-    // 4. 🟢 วนลูปเช็คและเติมจังหวัดที่ "ยังไม่มี" ใน HTML
-    const displayLimit = 20; // จำกัดจำนวนลิงก์รวมทั้งหมดไม่ให้ยาวเกินไป
-    let addedCount = footerContainer.querySelectorAll('li').length;
-
-    provincesList.forEach(p => {
-        // ตรวจสอบว่ามีลิงก์จังหวัดนี้อยู่แล้วหรือยัง (เช็คจาก URL)
-        const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
+    // =================================================================
+    // 13. SEO & CANONICAL SYSTEM (ปลดล็อก Google ให้เจอทุกหน้า)
+    // =================================================================
+    function updateSEO(title, description, imagePath, path = window.location.pathname) {
+        const DOMAIN = 'https://sidelinechiangmai.netlify.app';
+        const fullUrl = `${DOMAIN}${path}`;
         
-        if (!exists && addedCount < displayLimit) {
-            const li = document.createElement('li');
-            li.innerHTML = `<a href="/location/${p.key}" title="รับงาน${p.name} | Sideline Chiangmai" class="hover:text-pink-500 transition-colors">ไซด์ไลน์${p.name}</a>`;
-            footerContainer.appendChild(li);
-            addedCount++;
+        // จัดการเรื่องรูปภาพ OG Image
+        let fullImageUrl = `${DOMAIN}/images/default_og_image.jpg`;
+        if (imagePath) {
+            fullImageUrl = imagePath.startsWith('http') ? imagePath : `https://hgzbgpbmymoiwjpaypvl.supabase.co/storage/v1/object/public/profile-images/${imagePath}`;
         }
-    });
 
-    // 5. กรณีมีจังหวัดเยอะมาก ให้เติมปุ่ม "ดูทั้งหมด"
-    if (provincesList.length > addedCount && !footerContainer.querySelector('.view-all-link')) {
-        const viewAll = document.createElement('li');
-        viewAll.className = 'view-all-link';
-        viewAll.innerHTML = `<a href="/profiles.html" class="text-pink-500 font-bold hover:underline mt-2 inline-block">ดูจังหวัดอื่นๆ ทั้งหมด (${provincesList.length})</a>`;
-        footerContainer.appendChild(viewAll);
+        // 1. เปลี่ยน Title
+        document.title = title;
+
+        // 2. อัปเดต Meta Description
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.setAttribute('content', description);
+
+        // 3. อัปเดต Canonical Link (ID ต้องตรงกับใน index.html)
+        let canonical = document.getElementById('canonical-link');
+        if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.id = 'canonical-link';
+            canonical.rel = 'canonical';
+            document.head.appendChild(canonical);
+        }
+        canonical.setAttribute('href', fullUrl);
+
+        // 4. อัปเดต Social Media Tags (OG)
+        const updateMeta = (prop, val) => {
+            const el = document.querySelector(`meta[property="${prop}"]`);
+            if (el) el.setAttribute('content', val);
+        };
+        updateMeta('og:title', title);
+        updateMeta('og:url', fullUrl);
+        updateMeta('og:image', fullImageUrl);
+        updateMeta('og:description', description);
     }
-}
-})();
+
+    // =================================================================
+    // 14. DYNAMIC FOOTER SYSTEM
+    // =================================================================
+    async function initFooterLinks() {
+        const footerContainer = document.getElementById('popular-locations-footer');
+        if (!footerContainer) return;
+
+        let provincesList = [];
+
+        if (state.provincesMap && state.provincesMap.size > 0) {
+            state.provincesMap.forEach((name, key) => {
+                provincesList.push({ key: key, name: name });
+            });
+        }
+
+        provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+        const loadingPulse = footerContainer.querySelector('.animate-pulse');
+        if (loadingPulse) {
+            loadingPulse.parentElement.remove();
+        }
+
+        const displayLimit = 20; 
+        let addedCount = footerContainer.querySelectorAll('li').length;
+
+        provincesList.forEach(p => {
+            const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
+            if (!exists && addedCount < displayLimit) {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="/location/${p.key}" title="รับงาน${p.name} | Sideline Chiangmai" class="hover:text-pink-500 transition-colors">ไซด์ไลน์${p.name}</a>`;
+                footerContainer.appendChild(li);
+                addedCount++;
+            }
+        });
+
+        if (provincesList.length > addedCount && !footerContainer.querySelector('.view-all-link')) {
+            const viewAll = document.createElement('li');
+            viewAll.className = 'view-all-link';
+            viewAll.innerHTML = `<a href="/profiles.html" class="text-pink-500 font-bold hover:underline mt-2 inline-block">ดูจังหวัดทั้งหมด (${provincesList.length})</a>`;
+            footerContainer.appendChild(viewAll);
+        }
+    }
+
+    // =================================================================
+    // START APPLICATION
+    // =================================================================
+    initMobileSitemapTrigger();
+    initFooterLinks();
+
+})(); // ปิดฟังก์ชันหลัก
