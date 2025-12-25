@@ -9,14 +9,14 @@ export default async (request, context) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const [profilesRes, provincesRes] = await Promise.all([
       supabase.from('profiles').select('slug, name, imagePath, lastUpdated').order('created_at', { ascending: false }).limit(5000),
-      supabase.from('provinces').select('key, nameThai')
+      supabase.from('provinces').select('key')
     ]);
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-      <url><loc>${DOMAIN}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`;
+      <url><loc>${DOMAIN}/</loc><priority>1.0</priority></url>`;
 
-    // ส่วนจังหวัด (เพิ่มลำดับความสำคัญ)
+    // ส่วนจังหวัด
     provincesRes.data?.forEach(p => {
       xml += `<url>
         <loc>${DOMAIN}/location/${p.key}</loc>
@@ -25,14 +25,13 @@ export default async (request, context) => {
       </url>`;
     });
 
-    // ส่วนโปรไฟล์รายคน (เพิ่มรูปภาพและ Lastmod)
+    // ส่วนโปรไฟล์รายคน
     profilesRes.data?.forEach(p => {
       const imgUrl = p.imagePath ? `${SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}` : `${DOMAIN}/images/default_og_image.jpg`;
       xml += `
       <url>
-        <loc>${DOMAIN}/sideline/${encodeURIComponent(p.slug)}</loc>
+        <loc>${DOMAIN}/sideline/${p.slug}</loc>
         <lastmod>${(p.lastUpdated || new Date().toISOString()).split('T')[0]}</lastmod>
-        <changefreq>weekly</changefreq>
         <priority>0.9</priority>
         <image:image>
           <image:loc>${imgUrl}</image:loc>
@@ -41,7 +40,7 @@ export default async (request, context) => {
       </url>`;
     });
 
-    xml += `\n</urlset>`;
+    xml += `</urlset>`;
 
     return new Response(xml, {
       headers: {
