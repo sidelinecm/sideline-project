@@ -2016,7 +2016,7 @@ ${xmlContent}
             loadingPulse.parentElement.remove();
         }
 
-        const displayLimit = 20; 
+        const displayLimit = 9999; 
         let addedCount = footerContainer.querySelectorAll('li').length;
 
         provincesList.forEach(p => {
