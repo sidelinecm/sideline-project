@@ -1,76 +1,60 @@
-# =========================================================
-# 🏗️ NETLIFY ULTIMATE CONFIGURATION
-# =========================================================
+# =====================================
+# 🏗️ Netlify Build Configuration
+# =====================================
 [build]
   publish = "."
-  command = "" 
-  environment = { NODE_VERSION = "18" }
+  command = ""
 
-# =========================================================
-# 🤖 EDGE FUNCTIONS (SEO & SITEMAP ENGINE)
-# =========================================================
-
-# 1. Sitemap อัตโนมัติ (Real-time)
-[[edge_functions]]
-function = "sitemap"
-path = "/sitemap.xml"
-
-# 2. หน้าโปรไฟล์ (สำหรับ Bot/Facebook/Line Preview)
-[[edge_functions]]
-function = "render-bot"
-path = "/profile/*"
-
-[[edge_functions]]
-function = "render-bot"
-path = "/sideline/*"
-
-# 3. หน้าจังหวัด (สำหรับ Bot)
-[[edge_functions]]
-function = "ssr-province"
-path = "/location/*"
-
-[[edge_functions]]
-function = "ssr-province"
-path = "/province/*"
-
-# =========================================================
-# ⚡ SECURITY & CACHE HEADERS
-# =========================================================
+# =====================================
+# ⚙️ Global HTTP Security Headers
+# =====================================
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
 
-# HTML: ห้าม Cache (เพื่อให้ User เห็นข้อมูลล่าสุดเสมอ)
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+# =====================================
+# 🧠 Edge Functions Mapping
+# =====================================
 
-# Assets (JS/CSS/Images): Cache 1 ปี (เพื่อความเร็วสูงสุด)
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# จัดการไฟล์ sitemap.xml แบบ Real-time
+[[edge_functions]]
+function = "sitemap"
+path = "/sitemap.xml"
 
-[[headers]]
-  for = "/css/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# จัดการหน้าโปรไฟล์น้องๆ สำหรับ Bot (SEO)
+[[edge_functions]]
+function = "render-bot"
+path = "/sideline/*"
 
-# =========================================================
-# 🔀 REDIRECT RULES (SPA FALLBACK)
-# =========================================================
-# กฎสำคัญ: ทุก URL ที่ไม่มีไฟล์จริง ให้ส่งไป index.html เพื่อให้ JS ทำงาน
+# จัดการหน้าจังหวัดสำหรับ Bot (SEO)
+[[edge_functions]]
+function = "ssr-province"
+path = "/location/*"
+
+# =====================================
+# 🔀 Redirect Rules (SPA Fallback)
+# =====================================
+
+# 1. ปล่อยให้ Service Worker โหลดได้ปกติ
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  force = true
+
+# 2. ปล่อยให้ Manifest โหลดได้ปกติ
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+  force = true
+
+# 3. ให้ทุก Path อื่นๆ วิ่งไปหา index.html (ยกเว้นที่มีไฟล์จริง)
 [[redirects]]
   from = "/*"
   to = "/index.html"
