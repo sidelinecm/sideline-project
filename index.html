@@ -54,7 +54,7 @@
   <link rel="dns-prefetch" href="https://esm.sh">
 
   <!-- Preload Assets -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
@@ -328,23 +328,32 @@
 <div class="container mx-auto px-4" data-animate-on-scroll>
   <hr class="border-pink-300/60 my-12 md:my-16">
 </div>
-
 <section id="search-section" aria-labelledby="search-form-heading" style="margin-top:20px;">
     <h3 id="search-form-heading" class="sr-only" aria-label="ฟอร์มค้นหาและกรองโปรไฟล์">ฟอร์มค้นหาและกรองโปรไฟล์</h3>
     
     <form id="search-form" autocomplete="off" aria-label="ฟอร์มค้นหาโปรไฟล์">
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
             
+            <!-- === บล็อกสำหรับช่องค้นหา (แก้ไขแล้ว) === -->
             <div>
                 <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
                 <div style="position:relative;">
-                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                    <span aria-hidden="true" style="position:absolute; left:15px; top:50%; transform: translateY(-50%); color:#9ca3af; z-index:10;">
                         <i class="fas fa-search"></i>
                     </span>
-                    <input id="search-keyword" name="q" type="search" placeholder="🔍 ค้นหาชื่อ, สไตล์..." aria-label="ค้นหาด้วยชื่อหรือสไตล์"
-                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                    <input id="search-keyword" name="q" type="search" 
+                           placeholder="🔍 ค้นหาชื่อ, จังหวัด, สไตล์..." 
+                           aria-label="ค้นหาด้วยชื่อ จังหวัด หรือสไตล์"
+                           style="width:100%; padding:12px 45px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                    
+                    <button type="button" id="clear-search-btn" class="hidden absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-500 hover:text-gray-800" aria-label="ล้างคำค้นหา">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+
+                    <div id="search-suggestions" class="hidden absolute top-full left-0 right-0 mt-2 z-50"></div>
                 </div>
             </div>
+            <!-- === จบส่วนบล็อกค้นหา === -->
             
             <div>
                 <label for="search-province" class="sr-only">เลือกจังหวัด</label>
@@ -391,18 +400,15 @@
             
         </div>
         
-        <div id="result-count" style="margin-top:12px; font-weight:bold; color:#10B981; text-align:center;">
-            
-        </div>
+        <div id="result-count" style="margin-top:12px; font-weight:bold; color:#10B981; text-align:center;"></div>
         
-<div class="mt-3 flex justify-center gap-3">
-    <button type="button" id="reset-search-btn" 
-            class="btn rounded-full border border-red-800 bg-red-100 px-4 py-2.5 text-red-800" 
-            aria-label="รีเซ็ตตัวกรองทั้งหมด">
-        🔄 ล้างค่า
-    </button>
-</div>
-
+        <div class="mt-3 flex justify-center gap-3">
+            <button type="button" id="reset-search-btn" 
+                    class="btn rounded-full border border-red-800 bg-red-100 px-4 py-2.5 text-red-800" 
+                    aria-label="รีเซ็ตตัวกรองทั้งหมด">
+                🔄 ล้างค่า
+            </button>
+        </div>
     </form>
 </section>
         <!-- ตัวแจ้งโหลดโปรไฟล์ -->
@@ -470,44 +476,7 @@
         <a href=https://line.me/ti/p/ksLUWB89Y_ target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-line text-lg" aria-hidden=true></i><span>ติดต่อผ่าน LINE</span></a>
     </div>
 </div>
-  <section class="section" aria-labelledby="faq-h">
-    <h2 id="faq-h">คำถามพบบ่อย (FAQ)</h2>
-    <div class="article" id="faq-list">
-     <details class="bg-white/5 rounded-xl border border-pink-500/20 mb-3">
-  <summary class="cursor-pointer font-bold text-pink-400 p-4 hover:bg-pink-500/10 transition-all">
-    <strong>⚠️ ต้องโอนเงินมัดจำ หรือค่าจองคิวก่อนไหม?</strong>
-  </summary>
-  <div class="p-4 text-gray-300 text-sm border-t border-white/10">
-    <p class="text-green-400 font-bold text-lg mb-2">❌ ไม่ต้องโอนก่อน 100% ทุกกรณี!</p>
-    <p class="leading-relaxed">
-      เว็บไซต์เราไม่มีนโยบายเก็บเงินมัดจำ ค่าสมาชิก หรือค่าดำเนินการใดๆ ทั้งสิ้น <br>
-      <span class="text-white font-bold underline">"ลูกค้าชำระเงินหน้างานเมื่อเจอตัวน้องเท่านั้น"</span> <br><br>
-      หากแอดมินหรือใครก็ตามที่อ้างว่าเป็นเราขอให้พี่โอนเงินก่อนแม้แต่บาทเดียว ให้สันนิษฐานว่าเป็นมิจฉาชีพทันที และห้ามโอนเด็ดขาดครับ!
-    </p>
-  </div>
-</details>
-      <details>
-        <summary><strong>เว็บไซต์นี้ปลอดภัยไหม?</strong></summary>
-        <p>เว็บไซต์เป็นแหล่งรวมโปรไฟล์ ผู้ใช้ควรสอบถามรายละเอียดเพิ่มเติมก่อนนัดหมาย ทีมงานแนะนำให้จัดนัดหมายในที่สาธารณะก่อนและให้ข้อมูลส่วนบุคคลเท่าที่จำเป็น</p>
-      </details>
-    </div>
-  </section>
 
-  <section class="section" aria-labelledby="articles-h">
-    <h2 id="articles-h">บทความแนะนำ — เรียนรู้เพิ่มเติม</h2>
-    <div class="grid">
-      <article class="card" aria-labelledby="art1">
-        <h3 id="art1">วิธีเลือกไซด์ไลน์อย่างปลอดภัย</h3>
-        <p class="muted">คำแนะนำจากผู้มีประสบการณ์สำหรับการนัดหมายอย่างปลอดภัย</p>
-        <a class="btn" href="/blog/safe-choices.html">อ่านเพิ่มเติม</a>
-      </article>
-      <article class="card" aria-labelledby="art2">
-        <h3 id="art2">ฟิวแฟนคืออะไร ทำไมคนชอบ</h3>
-        <p class="muted">เข้าใจคอนเซ็ปต์ฟิวแฟนและข้อควรรู้</p>
-        <a class="btn" href="/blog/what-is-few-fan.html">อ่านเพิ่มเติม</a>
-      </article>
-    </div>
-  </section>
 <section
   id="map-section"
   class="relative overflow-hidden rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 my-12"
@@ -616,66 +585,72 @@
     observer.observe(iframe);
   });
 </script>
-
-
-<!-- Footer (Dynamic & SEO Optimized) -->
 <footer class="bg-gray-900 text-gray-400 pt-16 pb-8 px-4 border-t border-gray-800 mt-16 font-sans">
     <div class="container mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 text-center md:text-left">
-            <!-- Brand -->
+            
             <div>
                 <a href="/" aria-label="หน้าแรก" class="inline-block mb-4">
-                   <img src="/images/logo-sideline-chiangmai.webp" 
-     alt="Logo" 
-     class="h-8 w-auto mx-auto md:mx-0"
-     width="98" 
-     height="32">
+                    <img src="/images/logo-sideline-chiangmai.webp" 
+                         alt="ไซด์ไลน์เชียงใหม่ อันดับ 1" 
+                         class="h-10 w-auto mx-auto md:mx-0"
+                         width="120" height="40">
                 </a>
-                <p class="text-sm">SidelineChiangmai แพลตฟอร์มอันดับ 1 รวมน้องๆ ไซด์ไลน์ รับงานเชียงใหม่ การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ</p>
+                <p class="text-sm leading-relaxed">
+                    <strong>SidelineChiangmai</strong> แพลตฟอร์มอันดับ 1 รวมสาวสวยไซด์ไลน์ รับงานเชียงใหม่ และทั่วประเทศ การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ จ่ายเงินหน้างาน
+                </p>
             </div>
-            <!-- Menu -->
+
             <div>
-                <h3 class="font-bold text-white mb-4">เมนูหลัก</h3>
+                <h3 class="font-bold text-white mb-4 border-l-4 border-pink-500 pl-3">เมนูหลัก</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="/" class="hover:text-pink-500">หน้าแรก</a></li>
-                    <li><a href="/profiles.html" class="hover:text-pink-500">น้องๆ ทั้งหมด</a></li>
-                    <li><a href="/blog.html" class="hover:text-pink-500">บทความ</a></li>
-                    <li><a href="/faq.html" class="hover:text-pink-500">FAQ</a></li>
+                    <li><a href="/" class="hover:text-pink-500 transition">หน้าแรก</a></li>
+                    <li><a href="/profiles.html" class="hover:text-pink-500 transition">น้องๆ ทั้งหมด</a></li>
+                    <li><a href="/blog.html" class="hover:text-pink-500 transition">บทความ / สาระน่ารู้</a></li>
+                    <li><a href="/faq.html" class="hover:text-pink-500 transition">คำถามที่พบบ่อย (FAQ)</a></li>
+                    <li><a href="/sitemap.xml" class="hover:text-pink-500 transition text-gray-600">แผนผังเว็บไซต์ (Sitemap)</a></li>
                 </ul>
             </div>
-            <!-- Dynamic Locations (JS will populate this) -->
+
             <div>
-                <h3 class="font-bold text-white mb-4">พื้นที่ให้บริการยอดฮิต</h3>
-                <ul id="popular-locations-footer" class="space-y-2 text-sm">
-                    <li><span class="animate-pulse">กำลังโหลดรายชื่อจังหวัด...</span></li>
-                </ul>
+                <h3 class="font-bold text-white mb-4 border-l-4 border-pink-500 pl-3">พื้นที่ยอดนิยม</h3>
+                <ul id="popular-locations-footer" class="grid grid-cols-2 gap-2 text-sm">
+                    <li><a href="/location/chiangmai" class="hover:text-pink-500 transition">เชียงใหม่</a></li>
+                    <li><a href="/location/bangkok" class="hover:text-pink-500 transition">กรุงเทพ</a></li>
+                    <li><a href="/location/pattaya" class="hover:text-pink-500 transition">พัทยา</a></li>
+                    <li><a href="/location/chonburi" class="hover:text-pink-500 transition">ชลบุรี</a></li>
+                    <li><a href="/location/khonkaen" class="hover:text-pink-500 transition">ขอนแก่น</a></li>
+                    <li><a href="/location/phuket" class="hover:text-pink-500 transition">ภูเก็ต</a></li>
+                    </ul>
             </div>
-            <!-- Contact -->
+
             <div>
-                <h3 class="font-bold text-white mb-4">ติดต่อสอบถาม</h3>
-                <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-green-700 transition">
-                    <i class="fab fa-line text-xl"></i> แอดไลน์จองคิว
+                <h3 class="font-bold text-white mb-4 border-l-4 border-pink-500 pl-3">ติดต่อสอบถาม</h3>
+                <p class="text-xs mb-4">สนใจจองคิวน้องๆ หรือสอบถามรายละเอียดเพิ่มเติมได้ตลอด 24 ชม.</p>
+                <a href="https://line.me/ti/p/ksLUWB89Y_" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-green-700 hover:scale-105 transition-all shadow-lg">
+                    <i class="fab fa-line text-2xl"></i> แอดไลน์จองคิวเลย
                 </a>
             </div>
         </div>
         
-        <!-- SEO Text Zone -->
-        <div class="border-t border-gray-800 pt-8 pb-8 text-xs text-gray-500 text-center md:text-left">
-            <h3 class="font-bold text-gray-300 mb-2">ทำไมต้อง SidelineChiangmai?</h3>
-            <p>เราคือศูนย์รวม <strong>ไซด์ไลน์เชียงใหม่</strong> และจังหวัดท่องเที่ยวชั้นนำ ให้บริการครอบคลุมพื้นที่ <em>เชียงใหม่, เชียงราย, ลำพูน, ขอนแก่น, ภูเก็ต</em> มั่นใจในความปลอดภัยด้วยระบบ <strong>ไม่ต้องโอนมัดจำ</strong> จ่ายเงินหน้างาน 100%</p>
+        <div class="border-t border-gray-800 pt-8 pb-8 text-xs leading-loose text-gray-500">
+            <h4 class="font-bold text-gray-300 mb-2">ทำไมต้องเลือกใช้บริการกับเรา?</h4>
+            <p>หากคุณกำลังมองหา <strong>ไซด์ไลน์เชียงใหม่</strong> หรือ <strong>เด็กเอ็นฟิวแฟน</strong> เราคือตัวจริงในวงการ เว็บไซต์ของเราคัดสรรโปรไฟล์คุณภาพเพื่อตอบโจทย์ทุกความต้องการ ไม่ว่าจะเป็นการหาเพื่อนเที่ยว เพื่อนทานข้าว หรือไซด์ไลน์รับงานในพื้นที่ <em>เชียงใหม่, เชียงราย, ลำพูน, ลำปาง, และกรุงเทพฯ</em> เราเน้นความซื่อสัตย์ ข้อมูลตรงปก และระบบการจองที่ปลอดภัยที่สุด <strong>"ไม่โอนก่อน ไม่มัดจำ"</strong> เพื่อป้องกันมิจฉาชีพ 100%</p>
         </div>
 
-        <!-- Copyright -->
-        <div class="border-t border-gray-800 pt-6 text-center text-xs">
-            <p>Copyright © <span id="currentYearDynamic">2025</span> SidelineChiangmai. All Rights Reserved.</p>
-            <div class="flex justify-center gap-4 mt-2">
-                <a href="/privacy-policy.html" class="hover:text-white">นโยบายความเป็นส่วนตัว</a>
-                <a href="/terms-of-service.html" class="hover:text-white">ข้อตกลงการใช้งาน</a>
+        <div class="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-widest text-gray-600">
+            <p>© 2025 SidelineChiangmai - All Rights Reserved.</p>
+            <div class="flex gap-6">
+                <a href="/privacy-policy.html" class="hover:text-white transition">Privacy Policy</a>
+                <a href="/terms-of-service.html" class="hover:text-white transition">Terms & Conditions</a>
             </div>
         </div>
     </div>
 </footer>
-
+<!-- === โค้ด LIGHTBOX ฉบับแก้ไขสมบูรณ์ === -->
 <div id="lightbox"
      class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
   <div id="lightbox-content-wrapper-el"
@@ -695,17 +670,13 @@
 
         <div class="lightbox-gallery bg-black lg:rounded-l-2xl">
           <div class="sticky top-0 p-2 sm:p-4 h-full"> 
-
             <div class="hero-image-container mb-3 flex justify-center items-center h-full max-h-[90vh] overflow-hidden">
-
               <img id="lightboxHeroImage"
                    src="/images/placeholder-profile.webp"
                    alt="โปรไฟล์หลักของน้อง (ชื่อ + จังหวัด)"
                    class="hero-image-main w-full h-full object-cover rounded-xl shadow-lg mx-auto"
                    width="600" height="800" decoding="async" fetchpriority="high">
-
             </div>
-
             <div id="lightboxThumbnailStrip" class="thumbnail-strip flex gap-2 overflow-x-auto"></div>
           </div>
         </div>
@@ -715,7 +686,6 @@
 
             <header class="lightbox-header space-y-3">
               <h2 id="lightbox-header-title" class="sr-only">รายละเอียดโปรไฟล์น้องๆ</h2>
-
               <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-3">
                 <h3 id="lightbox-profile-name-main"
                     class="text-3xl lg:text-4xl font-extrabold text-pink-600 dark:text-pink-400 text-center lg:text-left">
@@ -723,7 +693,6 @@
                 </h3>
                 <div id="lightbox-availability-badge-wrapper" class="flex-shrink-0"></div>
               </div>
-
               <p id="lightboxQuote" class="text-base text-gray-600 dark:text-gray-300 italic text-center lg:text-left"></p>
             </header>
 
@@ -733,7 +702,8 @@
               <div id="lightboxDetailsCompact" class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"></div>
             </div>
 
-            <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
+            <!-- ✅✅✅ นี่คือจุดที่แก้ไข ✅✅✅ -->
+            <div id="lightbox-description-container" class="pt-5 border-t border-gray-200 dark:border-gray-700">
               <h4 class="detail-section-title text-gray-900 dark:text-gray-100 flex items-center gap-2 font-bold">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path d="M10.75 2.75a.75.75 0 00-1.5 0V4h-3a.75.75 0 000 1.5h3v1.25a.75.75 0 001.5 0V5.5h3a.75.75 0 000-1.5h-3V2.75z"/>
@@ -741,9 +711,12 @@
                 </svg>
                 <span>รายละเอียดเพิ่มเติม</span>
               </h4>
-              <div id="lightboxDescriptionVal"
-                   class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3"></div>
+              <!-- เราลบ id="lightboxDescriptionVal" ออกจาก div นี้ -->
+              <div class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3">
+                <!-- เนื้อหา description จะถูกใส่ในนี้โดย JS -->
+              </div>
             </div>
+            <!-- ✅✅✅ จบจุดที่แก้ไข ✅✅✅ -->
 
             <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
               <a id="lightboxLineLink" href="https://line.me/ti/p/xxxxxx"
@@ -761,6 +734,7 @@
     </div>
   </div>
 </div>
+<!-- === จบส่วนโค้ด LIGHTBOX === -->
 <script type="module" src="/main.js"></script>
 
 <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
