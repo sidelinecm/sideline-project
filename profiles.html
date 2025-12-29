@@ -44,7 +44,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- ✅ Styles -->
-  <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
 
   <!-- ✅ FontAwesome (CDN) -->
@@ -397,17 +397,15 @@
 
 
  
-  
-<!-- === โค้ด LIGHTBOX ฉบับแก้ไขสมบูรณ์ === -->
-<div id="lightbox"
+ <div id="lightbox" 
      class="hidden opacity-0 fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-opacity duration-300 overlay-backdrop">
-  <div id="lightbox-content-wrapper-el"
+  <div id="lightbox-content-wrapper-el" 
        class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-full lg:max-w-[96vw] max-h-[95vh] flex flex-col relative transform scale-95 transition-all duration-300 modal-content overflow-hidden">
 
-    <button id="closeLightboxBtn"
-            class="btn-close-premium absolute top-3 right-3 z-20 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full shadow-md hover:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+    <button id="closeLightboxBtn" 
+            class="btn-close-premium absolute top-3 right-3 z-20 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full shadow-md hover:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500" 
             aria-label="ปิดรายละเอียดโปรไฟล์">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1.25em" height="1.25em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.25em" height="1.25em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
@@ -417,15 +415,14 @@
       <div class="lightbox-grid grid lg:grid-cols-[2fr_1fr] gap-4 lg:gap-8">
 
         <div class="lightbox-gallery bg-black lg:rounded-l-2xl">
-          <div class="sticky top-0 p-2 sm:p-4 h-full"> 
-            <div class="hero-image-container mb-3 flex justify-center items-center h-full max-h-[90vh] overflow-hidden">
-              <img id="lightboxHeroImage"
-                   src="/images/placeholder-profile.webp"
-                   alt="โปรไฟล์หลักของน้อง (ชื่อ + จังหวัด)"
-                   class="hero-image-main w-full h-full object-cover rounded-xl shadow-lg mx-auto"
-                   width="600" height="800" decoding="async" fetchpriority="high">
+          <div class="sticky top-0 p-2 sm:p-4 h-full flex flex-col justify-center"> 
+            <div class="hero-image-container mb-3 flex justify-center items-center h-full max-h-[80vh] overflow-hidden">
+              <img id="lightboxHeroImage" 
+                   src="" 
+                   alt="โปรไฟล์น้อง" 
+                   class="hero-image-main w-full h-full object-contain rounded-xl shadow-lg mx-auto">
             </div>
-            <div id="lightboxThumbnailStrip" class="thumbnail-strip flex gap-2 overflow-x-auto"></div>
+            <div id="lightboxThumbnailStrip" class="thumbnail-strip flex gap-2 overflow-x-auto pb-2 px-2 justify-center"></div>
           </div>
         </div>
 
@@ -433,9 +430,8 @@
           <div class="p-5 sm:p-7 lg:p-8 space-y-6">
 
             <header class="lightbox-header space-y-3">
-              <h2 id="lightbox-header-title" class="sr-only">รายละเอียดโปรไฟล์น้องๆ</h2>
               <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-3">
-                <h3 id="lightbox-profile-name-main"
+                <h3 id="lightbox-profile-name-main" 
                     class="text-3xl lg:text-4xl font-extrabold text-pink-600 dark:text-pink-400 text-center lg:text-left">
                   ชื่อโปรไฟล์
                 </h3>
@@ -447,31 +443,27 @@
             <div id="lightboxTags" class="flex flex-wrap gap-2 justify-center lg:justify-start"></div>
 
             <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
-              <div id="lightboxDetailsCompact" class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"></div>
+              <div id="lightboxDetailsCompact" class="grid grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
+                </div>
             </div>
 
-            <!-- ✅✅✅ นี่คือจุดที่แก้ไข ✅✅✅ -->
             <div id="lightbox-description-container" class="pt-5 border-t border-gray-200 dark:border-gray-700">
-              <h4 class="detail-section-title text-gray-900 dark:text-gray-100 flex items-center gap-2 font-bold">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path d="M10.75 2.75a.75.75 0 00-1.5 0V4h-3a.75.75 0 000 1.5h3v1.25a.75.75 0 001.5 0V5.5h3a.75.75 0 000-1.5h-3V2.75z"/>
-                  <path fill-rule="evenodd" d="M4 8a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2H4zm2.25 1.25a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5z" clip-rule="evenodd" />
+              <h4 class="text-gray-900 dark:text-gray-100 flex items-center gap-2 font-bold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
                 </svg>
                 <span>รายละเอียดเพิ่มเติม</span>
               </h4>
-              <!-- เราลบ id="lightboxDescriptionVal" ออกจาก div นี้ -->
-              <div class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3">
-                <!-- เนื้อหา description จะถูกใส่ในนี้โดย JS -->
-              </div>
+              <div id="lightboxDescriptionVal" class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3 text-gray-600 dark:text-gray-300">
+                </div>
             </div>
-            <!-- ✅✅✅ จบจุดที่แก้ไข ✅✅✅ -->
 
             <div class="pt-5 border-t border-gray-200 dark:border-gray-700">
-              <a id="lightboxLineLink" href="https://line.me/ti/p/xxxxxx"
-                 target="_blank" rel="noopener noreferrer"
-                 class="inline-flex items-center gap-2 text-green-600 font-bold hover:underline">
+              <a id="lightboxLineLink" href="#" 
+                 target="_blank" rel="noopener noreferrer" 
+                 class="w-full flex justify-center items-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition-all shadow-lg">
                 <i class="fab fa-line text-2xl"></i>
-                <span id="lightboxLineLinkText">ติดต่อ Line</span>
+                <span id="lightboxLineLinkText">จองคิว / สอบถามผ่าน Line</span>
               </a>
             </div>
 
@@ -482,7 +474,6 @@
     </div>
   </div>
 </div>
-
 <script type="module" src="/main.js"></script>
 
 <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
