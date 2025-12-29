@@ -749,26 +749,37 @@ function renderProfiles(profiles, isSearching) {
         cardContainer.className = 'profile-card-new-container';
 
         const cardInner = document.createElement('div');
-        cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-700 cursor-pointer transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1';
+        // เพิ่ม 'aspect-[3/4]' เพื่อจองพื้นที่รูปทรงแนวตั้ง และ 'bg-gray-800' เป็นพื้นหลังระหว่างรอ
+        cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 aspect-[3/4] w-full';
         cardInner.setAttribute('data-profile-id', p.id);
         cardInner.setAttribute('data-profile-slug', p.slug);
         cardInner.setAttribute('role', 'button');
         cardInner.setAttribute('tabindex', '0');
 
+        // Link ครอบตัวการ์ด
         cardInner.innerHTML = `<a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์ ${p.name}"></a>`;
 
-        const imgObj = p.images[0];
+        const imgObj = p.images && p.images.length > 0 ? p.images[0] : { src: '' };
         const img = document.createElement('img');
-        img.className = 'card-image w-full h-full object-cover pointer-events-none transition-opacity duration-500 opacity-0';
+        
+        // ใช้ 'absolute inset-0' เพื่อให้รูปแนบสนิทกับกรอบที่จองไว้ ไม่ดันข้อความ
+        img.className = 'card-image absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-500 opacity-0';
+        
         img.onload = () => img.classList.remove('opacity-0');
-        img.onerror = () => { img.src = '/images/placeholder-profile.webp'; img.classList.remove('opacity-0'); };
-        img.src = imgObj.src;
+        img.onerror = () => { 
+            // ถ้ารูปจากฐานข้อมูลพัง ให้ดึงรูปสำรองที่มีขนาดเท่ากันมาแสดงแทน หน้าเว็บจะไม่เบี้ยว
+            img.src = 'https://placehold.co/400x600/2a2a2a/white?text=No+Image'; 
+            img.classList.remove('opacity-0'); 
+        };
+        
+        img.src = imgObj.src || 'https://placehold.co/400x600/2a2a2a/white?text=No+Image';
         img.alt = p.altText || `น้อง ${p.name}`;
         img.loading = index < 8 ? 'eager' : 'lazy';
         img.decoding = 'async';
         img.width = 300;
         img.height = 400;
 
+        // ส่วนแสดงสถานะ (Badges)
         const badges = document.createElement('div');
         badges.className = 'absolute top-2 right-2 flex flex-col gap-1 items-end z-10 pointer-events-none';
         let statusClass = p.availability?.includes('รับงาน') ? 'status-available' : 'status-inquire';
@@ -777,8 +788,9 @@ function renderProfiles(profiles, isSearching) {
             ${p.isfeatured ? '<span class="featured-badge shadow-sm"><i class="fas fa-star text-[0.7em] mr-1"></i>แนะนำ</span>' : ''}
         `;
 
+        // ส่วนแสดงชื่อและจังหวัด (Overlay) - บังคับให้อยู่ด้านล่างสุดเสมอ
         const overlay = document.createElement('div');
-        overlay.className = 'card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none';
+        overlay.className = 'card-overlay absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-4 pointer-events-none min-h-[50%]';
         overlay.innerHTML = `
             <div class="card-info transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                 <h3 class="text-xl font-bold text-white shadow-black drop-shadow-md leading-tight">${p.name}</h3>
@@ -792,7 +804,6 @@ function renderProfiles(profiles, isSearching) {
         cardContainer.appendChild(cardInner);
         return cardContainer;
     }
-
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================

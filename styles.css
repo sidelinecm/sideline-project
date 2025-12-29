@@ -747,6 +747,7 @@ overflow: hidden;
     box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
     font-weight: 700;
 }
+
 body:after,body:before{content:"";position:fixed;top:50%;left:50%;width:150vmax;height:150vmax;border-radius:50%;z-index:-1;filter:blur(150px);opacity:.15}
 
 html:not(.dark) body:before{background:radial-gradient(circle,hsl(var(--primary)) 0,transparent 40%);animation:aurora-1 30s linear infinite}
@@ -3517,4 +3518,248 @@ p{margin:0 0 1em}
 #admin-trigger:active {
     opacity: 0.5; /* เวลากดจะกระพริบ ให้รู้ว่ากดติด */
     color: #ff0055; /* เปลี่ยนสีตอนกด */
+}
+/* --- Page Loader Styles --- */
+
+/* ==========================================================================
+   PAGE LOADER ANIMATION
+   ========================================================================== */
+
+#page-loader {
+    pointer-events: none; /* ทำให้คลิกทะลุได้ */
+    transition: opacity 0.5s ease-out; /* ทำให้จางหายอย่างนุ่มนวล */
+}
+
+/* ✅ Class นี้สำคัญมาก! เป็นตัวสั่งให้มันหายไป */
+.loader-hidden {
+    opacity: 0;
+}
+
+.loader-spinner {
+    border: 4px solid transparent;
+    /* สร้างวงแหวน Gradient ที่เข้ากับธีมเว็บ */
+    border-image: linear-gradient(45deg, hsl(var(--primary-glow)), hsl(var(--secondary-glow))) 1;
+    animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-top-color: transparent !important; /* Hack ให้มันหมุนเป็นเส้นสวยๆ */
+}
+
+.loader-text {
+    /* ทำให้ตัวหนังสือเรืองแสง */
+    text-shadow: 0 0 5px #fff, 0 0 10px hsl(var(--primary-glow)), 0 0 15px hsl(var(--secondary-glow));
+    animation: pulse-text 2s infinite alternate;
+}
+
+/* Animation Keyframes */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-text {
+    from { opacity: 0.7; }
+    to { opacity: 1; }
+}
+/* --- Upgraded Loader: Pulsating Crystal --- */
+.loader-crystal {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: crystal-breath 3s ease-in-out infinite;
+    overflow: hidden;
+}
+
+.aurora-ring {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(244, 63, 94, 0.5);
+    border-radius: 50%;
+    animation: aurora-pulse 3s ease-out infinite;
+    opacity: 0;
+}
+
+.shine-effect {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(to right, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+    transform: rotate(-45deg);
+    animation: shine-sweep 3s ease-in-out infinite;
+    animation-delay: 0.5s;
+}
+
+.loader-text-upgraded {
+    animation: pulse-text 3s ease-in-out infinite;
+}
+
+/* Keyframes for the magic */
+@keyframes crystal-breath {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes aurora-pulse {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: scale(1.2); opacity: 0; }
+}
+
+@keyframes shine-sweep {
+    0% { transform: translateX(-100%) rotate(-45deg); }
+    50% { transform: translateX(100%) rotate(-45deg); }
+    100% { transform: translateX(100%) rotate(-45deg); } /* Stay off-screen */
+}
+
+@keyframes pulse-text {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+/* เพิ่มใน CSS ของคุณเพื่อความเนียน */
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+  50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+}
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s infinite;
+}
+/* --- CSS for Advanced Search Suggestions --- */
+#search-suggestions {
+    text-align: left;
+}
+.search-dropdown-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+    color: #333;
+}
+.dark .search-dropdown-box {
+    background: #2d3748; /* gray-800 */
+    border-color: #4a5568; /* gray-600 */
+    color: #f7fafc; /* gray-100 */
+}
+.search-dropdown-header {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #718096; /* gray-500 */
+    background: #f7fafc; /* gray-100 */
+    border-bottom: 1px solid #edf2f7; /* gray-200 */
+}
+.dark .search-dropdown-header {
+    color: #a0aec0; /* gray-400 */
+    background: #1a202c; /* gray-900 */
+    border-color: #4a5568; /* gray-600 */
+}
+.search-dropdown-header.recent { display: flex; justify-content: space-between; align-items: center; }
+.clear-history-btn { background: none; border: none; color: #e53e3e; /* red-600 */ font-size: 0.75rem; cursor: pointer; }
+.dark .clear-history-btn { color: #fc8181; /* red-400 */ }
+
+.search-dropdown-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.search-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #edf2f7; /* gray-200 */
+}
+.search-dropdown-item:last-child { border-bottom: none; }
+.search-dropdown-item:hover { background-color: #f7fafc; /* gray-100 */ }
+.dark .search-dropdown-item { border-color: #4a5568; }
+.dark .search-dropdown-item:hover { background-color: #4a5568; }
+.search-dropdown-item-empty {
+    padding: 1rem;
+    text-align: center;
+    color: #a0aec0; /* gray-400 */
+}
+
+.search-item-avatar { position: relative; flex-shrink: 0; }
+.search-item-img { width: 40px; height: 40px; border-radius: 9999px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.dark .search-item-img { border-color: #2d3748; }
+
+.search-item-status {
+    position: absolute; bottom: 0; right: 0;
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid #fff;
+}
+.dark .search-item-status { border-color: #2d3748; }
+.search-item-status.available { background-color: #48bb78; /* green-500 */ }
+.search-item-status.inquire { background-color: #a0aec0; /* gray-400 */ }
+
+.search-item-info { flex-grow: 1; min-width: 0; }
+.search-item-name { font-weight: 700; color: #2d3748; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.dark .search-item-name { color: #f7fafc; }
+.group:hover .search-item-name { color: #dd6b20; /* pink-600 in your theme */ }
+
+.search-item-location { font-size: 0.875rem; color: #718096; }
+.dark .search-item-location { color: #a0aec0; }
+
+.search-item-chevron { color: #cbd5e0; transition: transform 0.2s; margin-left: auto; }
+.dark .search-item-chevron { color: #718096; }
+.group:hover .search-item-chevron { transform: translateX(4px); color: #dd6b20; }
+
+.search-dropdown-footer {
+    padding: 0.75rem 1rem; text-align: center; font-weight: 700;
+    color: #c5306c; /* pink-700 */
+    background: #fff5f7; /* pink-50 */
+    cursor: pointer; transition: background-color 0.2s;
+}
+.search-dropdown-footer:hover { background-color: #fed7e2; /* pink-200 */ }
+.dark .search-dropdown-footer { background-color: rgba(221, 107, 32, 0.2); color: #fabd22; }
+.dark .search-dropdown-footer:hover { background-color: rgba(221, 107, 32, 0.4); }
+
+.search-dropdown-item.history { gap: 1rem; }
+.history-icon { color: #a0aec0; }
+.history-term { font-weight: 500; }
+
+/* --- ส่วนที่ต้องเพิ่มเพื่อแก้ปัญหา Layout Shift --- */
+
+/* 1. ล็อคสัดส่วนการ์ดให้เป็นแนวตั้ง 3:4 เสมอ */
+.profile-card-new {
+    aspect-ratio: 3 / 4 !important;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: #1a1a1a; /* สีพื้นหลังเข้มระหว่างรอรูป */
+}
+
+/* 2. บังคับให้รูปภาพแนบไปกับกรอบที่จองไว้ */
+.card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ป้องกันรูปยืดหรือพัง */
+    display: block;
+}
+
+/* 3. จัดการแถบชื่อ (Overlay) ให้คงที่ที่ด้านล่าง */
+.card-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    z-index: 10;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 40%, transparent 100%);
+}
+
+/* 4. รองรับ Browser เก่าที่ยังไม่รู้จัก aspect-ratio (Fallback) */
+@supports not (aspect-ratio: 3 / 4) {
+    .profile-card-new {
+        padding-top: 133.33%; /* สูตรคือ (4/3)*100 */
+    }
 }
