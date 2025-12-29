@@ -1,3 +1,7 @@
+// =================================================================
+// FILE: ssr-province.js (ฉบับสมบูรณ์ - FINAL VERSION)
+// สร้างหน้าจังหวัดสำหรับ Bot โดยใช้ Title & Description ที่ดีที่สุดสำหรับ SEO
+// =================================================================
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
@@ -18,7 +22,7 @@ export default async (request, context) => {
     // ดึงข้อมูลจังหวัด
     const { data: provinceData } = await supabase
       .from('provinces')
-      .select('*')
+      .select('nameThai')
       .eq('key', provinceKey)
       .maybeSingle();
 
@@ -31,6 +35,18 @@ export default async (request, context) => {
       .eq('provinceKey', provinceKey)
       .limit(100);
 
+    // ✅ ================== START: SEO LOGIC REVISION ==================
+    const BRAND_NAME = "Sideline Chiangmai";
+    const provinceName = provinceData.nameThai;
+    const profileCount = profiles ? profiles.length : 0;
+
+    // TITLE ใหม่ (เหมือนใน main.js)
+    const title = `ไซด์ไลน์${provinceName} (${profileCount} คน) คัดสวย ตรงปก | ${BRAND_NAME}`;
+
+    // DESCRIPTION ใหม่ (เหมือนใน main.js)
+    const description = `รวมน้องๆ ไซด์ไลน์${provinceName}เกรดพรีเมียมกว่า ${profileCount} คน อัปเดตล่าสุด. ค้นหาน้องๆ ที่รับงานในพื้นที่${provinceName}ได้ทันที พร้อมรีวิวและข้อมูลติดต่อ`;
+    // ✅ =================== END: SEO LOGIC REVISION ===================
+
     const listHtml = profiles?.map(p => {
       const safeSlug = encodeURIComponent(p.slug);
       return `<li><a href="/sideline/${safeSlug}">${p.name}</a></li>`;
@@ -40,11 +56,13 @@ export default async (request, context) => {
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>รวมสาวไซด์ไลน์${provinceData.nameThai} รับงาน${provinceData.nameThai} ตัวจริง</title>
-  <meta name="description" content="ศูนย์รวมน้องๆ ไซด์ไลน์จังหวัด${provinceData.nameThai} คัดเกรดพรีเมียม รูปจริง ตรงปก ทุกคน">
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
 </head>
 <body>
-  <h1>รายชื่อไซด์ไลน์ ${provinceData.nameThai}</h1>
+  <h1>รายชื่อไซด์ไลน์ ${provinceName} (${profileCount} คน)</h1>
   <ul>
     ${listHtml}
   </ul>
@@ -58,6 +76,7 @@ export default async (request, context) => {
     });
 
   } catch (error) {
+    console.error("SSR Province Error:", error);
     return context.next();
   }
 };
