@@ -1,43 +1,8 @@
-// = a================================================================
-// FILE: ssr-province.js (ฉบับสมบูรณ์แบบขั้นสูงสุด - The Ultimate Edition)
-// =================================================================
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
-const BRAND_NAME = "Sideline Chiangmai";
-const BRAND_URL = "https://sidelinechiangmai.netlify.app/"; // ใส่ URL เว็บไซต์หลักของคุณ
-const DEFAULT_OG_IMAGE = "hero-sidelinechiangmai-1200.webp"; // ใส่ URL รูปภาพหลักสำหรับหน้ารวม
-
-// ✅ [ULTIMATE] ฟังก์ชันสร้าง JSON-LD สำหรับหน้ารายการ (CollectionPage)
-const createProvinceJsonLd = (provinceName, profiles, pageUrl) => {
-  const itemListElements = profiles.map((profile, index) => {
-    return {
-      "@type": "ListItem",
-      "position": index + 1, // ตำแหน่งเริ่มต้นที่ 1
-      "item": {
-        "@type": "Person",
-        "name": `น้อง${profile.name}`,
-        "url": `${BRAND_URL}/sideline/${encodeURIComponent(profile.slug)}` // URL เต็มของโปรไฟล์
-      }
-    };
-  });
-
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage", // ระบุว่านี่คือ "หน้าคอลเลกชัน"
-    "name": `ไซด์ไลน์${provinceName} (${profiles.length} คน) | ${BRAND_NAME}`,
-    "url": pageUrl.href,
-    "description": `รวมน้องๆ ไซด์ไลน์${provinceName}เกรดพรีเมียมกว่า ${profiles.length} คน อัปเดตล่าสุด. ค้นหาและดูโปรไฟล์ได้ทันที`,
-    "mainEntity": {
-      "@type": "ItemList", // สิ่งสำคัญในหน้านี้คือ "รายการ"
-      "numberOfItems": profiles.length,
-      "itemListElement": itemListElements
-    }
-  };
-  
-  return `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;
-};
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
+const STORAGE_BUCKET = 'profile-images'; // เพิ่ม Bucket name สำหรับดึงรูปภาพ
 
 export default async (request, context) => {
   const userAgent = request.headers.get('User-Agent') || '';
@@ -48,84 +13,105 @@ export default async (request, context) => {
   try {
     const url = new URL(request.url);
     const provinceKey = decodeURIComponent(url.pathname.split('/').pop()); 
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     const { data: provinceData } = await supabase
-      .from('provinces').select('nameThai').eq('key', provinceKey).maybeSingle();
+      .from('provinces')
+      .select('nameThai')
+      .eq('key', provinceKey)
+      .maybeSingle();
 
     if (!provinceData) return context.next();
 
+    // ดึงข้อมูลโปรไฟล์พร้อมรูปภาพ (imagePath) เพื่อใช้กับ Open Graph
     const { data: profiles } = await supabase
-      .from('profiles').select('name, slug').eq('provinceKey', provinceKey).limit(100);
+      .from('profiles')
+      .select('name, slug, imagePath')
+      .eq('provinceKey', provinceKey)
+      .limit(100);
 
+    // --- ส่วนปรับปรุงเพื่อ SEO ที่ดีที่สุด ---
     const provinceName = provinceData.nameThai;
-    const profileCount = profiles ? profiles.length : 0;
-
-    // 1. สร้าง Title & Description ที่ดีที่สุด
-    const title = `ไซด์ไลน์${provinceName} (${profileCount} คน) อัปเดตล่าสุด | ${BRAND_NAME}`;
-    const description = `รวมน้องๆ ไซด์ไลน์${provinceName}เกรดพรีเมียมกว่า ${profileCount} คน. ค้นหาน้องๆ ที่รับงานในพื้นที่${provinceName}ได้ทันที พร้อมรีวิวและข้อมูลติดต่อ`;
+    const profileCount = profiles?.length || 0;
+    const firstFewNames = profiles?.slice(0, 3).map(p => p.name).join(', ') || '';
     
-    // 2. สร้าง JSON-LD ขั้นสูงสุด
-    const jsonLd = createProvinceJsonLd(provinceName, profiles || [], url);
+    const siteUrl = url.origin; // ex: https://sidelinechiangmai.netlify.app
+    const pageUrl = url.href;   // URL เต็มของหน้านี้
 
-    // 3. สร้าง HTML รายการสำหรับแสดงผล
+    // สร้าง Title
+    const title = `ไซด์ไลน์${provinceName} - น้องๆ ${profileCount} คน รับงาน${provinceName} อัปเดตล่าสุด`;
+
+    // สร้าง Meta Description
+    const description = `รวมน้องๆ ไซด์ไลน์${provinceName} คัดพิเศษ รูปจริง ตรงปก 100% พบกับ ${firstFewNames} และอีกมากมาย บริการดี เป็นกันเอง จองคิวง่าย ไม่ต้องโอนมัดจำ`;
+
+    // หารูปภาพสำหรับ Open Graph (ใช้รูปของคนแรก หรือรูปสำรอง)
+    const ogImageUrl = profiles?.[0]?.imagePath 
+      ? `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${profiles[0].imagePath}`
+      : `${siteUrl}/default-og-image.jpg`; // -- ควรสร้างรูป Default ไว้ --
+
+    // สร้าง Structured Data (ItemList)
+    const itemListElements = profiles?.map((p, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Person",
+        "name": p.name,
+        "url": `${siteUrl}/sideline/${encodeURIComponent(p.slug)}`
+      }
+    })) || [];
+
     const listHtml = profiles?.map(p => {
       const safeSlug = encodeURIComponent(p.slug);
-      return `<li><a href="/sideline/${safeSlug}">น้อง${p.name}</a></li>`;
-    }).join('') || '<li>ไม่มีข้อมูลในขณะนี้</li>';
+      return `<li><a href="/sideline/${safeSlug}">${p.name}</a></li>`;
+    }).join('') || '<li>ไม่มีข้อมูล</li>';
 
     const html = `<!DOCTYPE html>
-<html lang="th" prefix="og: https://ogp.me/ns#">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <title>${title}</title>
   <meta name="description" content="${description}">
-  
-  <!-- Technical SEO -->
-  <link rel="canonical" href="${url.href}" />
+  <link rel="canonical" href="${pageUrl}">
 
-  <!-- Social Media SEO: Open Graph -->
+  <!-- Open Graph / Facebook / LINE -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="${pageUrl}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
-  <meta property="og:image" content="${DEFAULT_OG_IMAGE}">
-  <meta property="og:url" content="${url.href}">
-  <meta property="og:site_name" content="${BRAND_NAME}">
-  <meta property="og:type" content="website">
+  <meta property="og:image" content="${ogImageUrl}">
 
-  <!-- Social Media SEO: Twitter Cards -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
-  <meta name="twitter:description" content="${description}">
-  <meta name="twitter:image" content="${DEFAULT_OG_IMAGE}">
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="${pageUrl}">
+  <meta property="twitter:title" content="${title}">
+  <meta property="twitter:description" content="${description}">
+  <meta property="twitter:image" content="${ogImageUrl}">
 
-  <!-- พิมพ์เขียวสำหรับ GOOGLE (JSON-LD) -->
-  ${jsonLd}
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "${title}",
+    "description": "${description}",
+    "url": "${pageUrl}",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": ${JSON.stringify(itemListElements)}
+    }
+  }
+  </script>
 
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: auto; padding: 20px; color: #333; }
-    h1 { color: #111; }
-    ul { list-style-type: none; padding: 0; }
-    li a { display: block; padding: 12px 15px; margin-bottom: 8px; background-color: #f9f9f9; border-radius: 8px; text-decoration: none; color: #007bff; }
-    li a:hover { background-color: #eef; }
-  </style>
 </head>
 <body>
-  <header>
-    <h1>${title}</h1>
-  </header>
-  
-  <main>
-    <p>${description}</p>
-    <h2>รายชื่อน้องๆ ใน${provinceName}</h2>
-    <ul>
-      ${listHtml}
-    </ul>
-  </main>
-  
-  <footer>
-    <hr>
-    <a href="/">🏠 กลับหน้าหลัก ${BRAND_NAME}</a>
-  </footer>
+  <h1>รายชื่อไซด์ไลน์ ${provinceName} (${profileCount} คน)</h1>
+  <p>พบกับน้องๆ ไซด์ไลน์ที่คัดสรรมาอย่างดีในจังหวัด${provinceName} ทุกคนรูปจริง ตรงปก พร้อมให้บริการที่เป็นกันเอง</p>
+  <ul>
+    ${listHtml}
+  </ul>
+  <hr>
+  <a href="/">🏠 กลับหน้าหลัก</a>
 </body>
 </html>`;
 
@@ -134,7 +120,7 @@ export default async (request, context) => {
     });
 
   } catch (error) {
-    console.error("SSR Province Ultimate Error:", error);
+    console.error("SSR Province Error:", error);
     return context.next();
   }
 };
