@@ -30,15 +30,15 @@ gsap.registerPlugin(ScrollTrigger);
         DEFAULT_OG_IMAGE: '/images/default_og_image.jpg' // ✅ CORRECT SYNTAX
     };
 
-// =================================================================
-    // 1. STATE MANAGEMENT
-    // =================================================================
-    let state = {
+let state = {
         allProfiles: [],
         provincesMap: new Map(),
         currentProfileSlug: null,
-        displayLimit: 100,      // จำนวนโปรไฟล์สูงสุดที่แสดงในหน้าค้นหา
-        featuredLimit: 20,      // จำนวนโปรไฟล์แนะนำสูงสุด
+        // 👇👇 เพิ่ม 2 ตัวนี้เข้าไปครับ 👇👇
+        displayLimit: 100,     // โชว์ทีละ 12 คน (สำหรับหน้าค้นหา)
+        featuredLimit: 1000,     // โชว์ 8 คน (สำหรับหน้าแรก)
+        // 👆👆 ----------------------- 👆👆
+        
         lastFocusedElement: null,
         isFetching: false,
         lastFetchedAt: '1970-01-01T00:00:00Z',
@@ -52,63 +52,59 @@ gsap.registerPlugin(ScrollTrigger);
     const dom = {};
 
     // =================================================================
-    // 3. SUPABASE CLIENT INITIALIZATION
+    // 3. SUPABASE CLIENT
     // =================================================================
     let supabase;
     try {
+        // Note: The createClient function is imported from Supabase ESM
         supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        window.supabase = supabase; // Export for debugging if needed
-        console.log("✅ Supabase System Ready");
+        window.supabase = supabase;
+        console.log("✅ Supabase Connected");
     } catch (e) {
         console.error("❌ Supabase Init Failed:", e);
     }
     
     // =================================================================
-    // 3.1 GLOBAL ERROR HANDLER
+    // 3.1 GLOBAL ERROR HANDLER (Ultimate Robustness)
     // =================================================================
     window.onerror = function (message, source, lineno, colno, error) {
+        // ดักจับ JavaScript Error ที่ไม่ได้ถูกจัดการ (unhandled) ทั่วทั้งแอปพลิเคชัน
         console.error('🛑 Global Runtime Error:', message, error);
+        
+        // คืนค่า true เพื่อป้องกันไม่ให้เบราว์เซอร์แสดง Error message มาตรฐาน (Clean User Experience)
         return true; 
     };
 
     // =================================================================
-    // 4. MAIN ENTRY POINT (ปรับปรุงลำดับการทำงานแบบสมบูรณ์)
+    // 4. MAIN ENTRY POINT 
     // =================================================================
     document.addEventListener('DOMContentLoaded', initApp);
     
     async function initApp() {
-        // 1. เก็บตัวแปร DOM ทั้งหมด
         cacheDOMElements();
 
-        // 2. เริ่มต้น UI ที่ไม่ต้องใช้ข้อมูลจาก Database (เพื่อให้เว็บดูโหลดเร็ว)
+        // UI Inits
         initThemeToggle();
         initMobileMenu();
         initAgeVerification();
         initHeaderScrollEffect();
         initMarqueeEffect();
         initMobileSitemapTrigger();
-        
-        // 3. ✅ [สำคัญมาก] โหลดข้อมูลจาก Supabase ให้เสร็จก่อนเพื่อน
-        // ขั้นตอนนี้จะเติม state.allProfiles และ state.provincesMap ให้เต็ม
-        await handleDataLoading(); 
+        initFooterLinks();
 
-        // 4. ✅ พอข้อมูลมาครบแล้ว ค่อยสร้าง Link จังหวัดที่ Footer
-        // (ขั้นตอนนี้จะดึงชื่อจังหวัดจาก Database มาวาดจริง)
-        await initFooterLinks();
-
-        // 5. ✅ ตรวจสอบ URL (Routing) 
-        // เช่น ถ้าเปิดมาที่หน้า /location/chiangmai ระบบจะรู้ทันทีเพราะข้อมูลโหลดมาแล้ว
-        await handleRouting(true); 
-
-        // 6. อัปเดต UI ทั่วไป
         updateActiveNavLinks();
+
+        // Main Logic
+        await handleRouting();
+        await handleDataLoading();
+
+        // Footer Year
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
-        // ปิด Loader
         document.body.classList.add('loaded');
 
-        // Intro Animation (แสดงเฉพาะหน้าแรกเมื่อไม่มีการเปิดโปรไฟล์)
+        // Intro Animation (Home only)
         if (window.location.pathname === '/' && !state.currentProfileSlug) {
             try {
                 const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
@@ -120,14 +116,12 @@ gsap.registerPlugin(ScrollTrigger);
             } catch (e) { console.warn("Animation skipped", e); }
         }
 
-        // Navigation Listener: เมื่อกด Back/Forward ใน Browser
+        // Navigation Listener
         window.addEventListener('popstate', async () => {
-            // เมื่อ URL เปลี่ยน ต้องตรวจสอบ Routing ใหม่เสมอ
-            await handleRouting(true);
+            await handleRouting();
             updateActiveNavLinks();
         });
     }
-
 
     function cacheDOMElements() {
         dom.body = document.body;
@@ -448,61 +442,72 @@ function populateProvinceDropdown() {
     });
     dom.provinceSelect.appendChild(fragment);
 }
-async function handleRouting(dataLoaded = false) {
-    const path = window.location.pathname.toLowerCase();
-    
-    // 🚩 กรณี: ดูโปรไฟล์น้อง (/sideline/slug)
-    const profileMatch = path.match(/^\/sideline\/([^/]+)/);
-    if (profileMatch) {
-        const slug = decodeURIComponent(profileMatch[1]);
-        state.currentProfileSlug = slug;
+// =================================================================
+    // 6. ROUTING & SEO (UPDATED - FRANCHISE STYLE)
+    // =================================================================
+    async function handleRouting(dataLoaded = false) {
+        const path = window.location.pathname.toLowerCase();
         
-        let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
+        // 1. หน้าโปรไฟล์
+        const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+        if (profileMatch) {
+            const slug = decodeURIComponent(profileMatch[1]);
+            state.currentProfileSlug = slug;
+            
+            let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
+            if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
+
+            if (profile) {
+                openLightbox(profile);
+                updateAdvancedMeta(profile, null);
+                dom.profilesDisplayArea?.classList.add('hidden');
+                dom.featuredSection?.classList.add('hidden');
+            } else if (dataLoaded) {
+                history.replaceState(null, '', '/');
+                closeLightbox(false);
+                dom.profilesDisplayArea?.classList.remove('hidden');
+                state.currentProfileSlug = null;
+            }
+            return;
+        } 
         
-        if (profile) {
-            openLightbox(profile);
-            updateAdvancedMeta(profile, null);
-        } else if (dataLoaded) {
-            // ถ้าหาไม่เจอ ให้กลับหน้าแรก
-            window.history.replaceState(null, '', '/');
+        // 2. หน้าจังหวัด (Location Page) -> จุดที่แก้ให้สวยๆ
+        const provinceMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+        if (provinceMatch) {
+            const provinceKey = decodeURIComponent(provinceMatch[1]);
+            state.currentProfileSlug = null;
             closeLightbox(false);
+            if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
+            
+            if (dataLoaded) {
+                applyUltimateFilters(false);
+                const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
+                
+                // สร้างข้อมูล SEO (ส่งแค่หัวข้อหลัก เดี๋ยวไปเติมแบรนด์ทีหลัง)
+                const seoData = {
+                    title: `รับงาน${provinceName} - ไซด์ไลน์${provinceName}`, 
+                    description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก ปลอดภัย 100% การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}`,
+                    canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
+                    provinceName: provinceName, 
+                    profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
+                };
+                
+                updateAdvancedMeta(null, seoData);
+                dom.profilesDisplayArea?.classList.remove('hidden');
+            }
+            return;
         }
-        return;
-    } 
-    
-    // 🚩 กรณี: ดูหน้าจังหวัด (/location/key)
-    const locationMatch = path.match(/^\/location\/([^/]+)/);
-    if (locationMatch) {
-        const provinceKey = decodeURIComponent(locationMatch[1]);
+
+        // 3. หน้าแรก
         state.currentProfileSlug = null;
         closeLightbox(false);
-
-        // อัปเดต Dropdown ให้ตรงกับ URL
-        if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
-        
-        // สั่ง Filter ข้อมูลตามจังหวัดใน URL
-        applyUltimateFilters(false); 
-        
-        // อัปเดต SEO
-        const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
-        const seoData = {
-            title: `รับงาน${provinceName} - ไซด์ไลน์${provinceName} ฟิวแฟน ตรงปก`,
-            description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ปลอดภัย การันตีโดย Sideline Chiangmai`,
-            canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
-            provinceName: provinceName,
-            profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
-        };
-        updateAdvancedMeta(null, seoData);
-        return;
+        dom.profilesDisplayArea?.classList.remove('hidden');
+        if (dataLoaded) {
+            applyUltimateFilters(false);
+            updateAdvancedMeta(null, null);
+        }
     }
 
-    // 🚩 กรณี: หน้าแรก
-    state.currentProfileSlug = null;
-    closeLightbox(false);
-    if (dom.provinceSelect) dom.provinceSelect.value = '';
-    applyUltimateFilters(false);
-    updateAdvancedMeta(null, null);
-}
     // =================================================================
     // 7. ULTIMATE SEARCH ENGINE (Google Style + Fuse.js)
     // =================================================================
@@ -611,7 +616,79 @@ function loadCache(key, expiryHours = 24) {
     }
 }
 
+function applyUltimateFilters(updateUrl = false) {
+        let query = {
+            text: dom.searchInput?.value?.trim() || '',
+            province: dom.provinceSelect?.value || '',
+            avail: dom.availabilitySelect?.value || '',
+            featured: dom.featuredSelect?.value === 'true'
+        };
 
+        // 🟢 จุดที่แก้: เพิ่ม Logic ตรวจสอบว่าคำที่พิมพ์ คือชื่อจังหวัดหรือไม่?
+        // ถ้าใช่ -> ให้ระบบเปลี่ยนไปใช้การกรอง "ทั้งจังหวัด" ทันที
+        if (query.text) {
+            for (let [key, name] of state.provincesMap.entries()) {
+                // เช็คว่าคำที่พิมพ์ มีชื่อจังหวัดปนอยู่มั้ย (เช่น "เชียงใหม่", "น้องเชียงใหม่")
+                if (name === query.text || name.includes(query.text) || query.text.includes(name)) {
+                    
+                    // สั่งระบบว่า: "ผู้ใช้ต้องการดูจังหวัดนี้นะ" (Set key จังหวัด)
+                    query.province = key; 
+                    
+                    // *เคล็ดลับ* ลบ text ทิ้ง เพื่อให้ระบบดึง "ทุกคน" ที่มี key นี้ออกมา
+                    // (ไม่ใช่แค่คนที่พิมพ์ชื่อจังหวัดไว้ใน Description)
+                    query.text = ''; 
+                    
+                    // Update Dropdown ให้ตรงกันด้วย (เพื่อความเนียน)
+                    if(dom.provinceSelect) dom.provinceSelect.value = key;
+                    
+                    break; // เจอแล้วหยุดหา
+                }
+            }
+        }
+
+        if (query.province && query.province !== 'all') localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
+
+        let filtered = state.allProfiles;
+
+        // 1. กรองด้วย Text (จะทำงานเฉพาะถ้าเราไม่ได้ลบ text ทิ้งข้างบน หรือค้นหาชื่อเล่น)
+        if (query.text) {
+            if (fuseEngine) {
+                const results = fuseEngine.search(query.text);
+                filtered = results.map(result => result.item);
+            } else {
+                const lower = query.text.toLowerCase();
+                filtered = filtered.filter(p => p.searchString.includes(lower));
+            }
+        }
+
+        // 2. กรองด้วย Category/Province 
+        // (จุดนี้แหละที่น้องๆ อีก 89 คนจะโผล่ออกมา เพราะเรา set query.province ไว้แล้ว)
+        filtered = filtered.filter(p => {
+            const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
+            const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
+            const featuredMatch = !query.featured || p.isfeatured;
+            return provinceMatch && availMatch && featuredMatch;
+        });
+
+        // UI Updates
+        if (dom.resultCount) {
+             dom.resultCount.innerHTML = filtered.length > 0 ? `✅ พบ ${filtered.length} โปรไฟล์` : '❌ ไม่พบข้อมูล';
+             dom.resultCount.style.display = 'block';
+        }
+
+        // ส่ง Flag ไปบอกว่าตอนนี้กำลังค้นหา (เพื่อให้โชว์หัวข้อแบบ Search Result)
+        const isSearchMode = !!dom.searchInput?.value || !!query.province; 
+        renderProfiles(filtered, isSearchMode);
+
+        // Update URL
+        if (updateUrl) {
+            const params = new URLSearchParams();
+            if (query.text) params.set('q', query.text);
+            const path = (query.province && query.province !== 'all') ? `/location/${query.province}` : '/';
+            const qs = params.toString() ? '?' + params.toString() : '';
+            if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
+        }
+    }
 function updateUltimateSuggestions(val) {
     const box = document.getElementById('search-suggestions');
     const input = document.getElementById('search-keyword');
@@ -857,6 +934,7 @@ function renderByProvince(profiles) {
     
     dom.profilesDisplayArea.appendChild(mainFragment);
 }
+
 // ค้นหา function createProvinceSection แล้วแก้ข้างในเป็นแบบนี้ครับ
 function createProvinceSection(key, name, profiles, limit = 9999) { // 1. เปลี่ยนตัวเลข Default เป็นค่าเยอะๆ
     const wrapper = document.createElement('div');
@@ -1052,7 +1130,6 @@ function createProfileCard(p, index = 10) {
     cardContainer.appendChild(cardInner);
     return cardContainer;
 }
-
     // =================================================================
     // 9. LIGHTBOX (FIXED DESCRIPTION & DETAILS)
     // =================================================================
@@ -1228,6 +1305,7 @@ function createProfileCard(p, index = 10) {
             els.avail.innerHTML = `<div class="lb-status-badge ${sClass}">${icon} ${p.availability || 'สอบถาม'}</div>`;
         }
     }
+
 
 // =================================================================
 // 10. SEO META TAGS UPDATER (มาตรฐานสูงสุด - พร้อม Fallback, Locale & Rich Schemas)
@@ -1900,49 +1978,56 @@ ${xmlContent}
         updateMeta('og:description', description);
     }
 
-    // =================================================================
-    // 14. DYNAMIC FOOTER SYSTEM
-    // =================================================================
+// ✅ ฟังก์ชันดึงจังหวัดมาแสดง "ทั้งหมด" ที่มีข้อมูลจริงในระบบ
 async function initFooterLinks() {
     const footerContainer = document.getElementById('popular-locations-footer');
     if (!footerContainer) return;
 
-    // เคลียร์ Loader หรือข้อมูลเก่าออกก่อน
-    footerContainer.innerHTML = '';
-
-    // สร้างรายการจังหวัดจากข้อมูลจริงที่โหลดมา
+    // 1. ดึงข้อมูลจากฐานข้อมูล (state.provincesMap)
     let provincesList = [];
     state.provincesMap.forEach((name, key) => {
         provincesList.push({ key, name });
     });
 
-    // เรียง ก-ฮ
+    // 2. เรียงลำดับ ก-ฮ
     provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
-    if (provincesList.length === 0) {
-        footerContainer.innerHTML = '<li>ไม่มีข้อมูลจังหวัด</li>';
-        return;
-    }
-
-    const fragment = document.createDocumentFragment();
+    // 3. วนลูปเช็คกับ HTML เดิมของพี่
     provincesList.forEach(p => {
-        const li = document.createElement('li');
-        li.className = 'mb-1';
-        // สร้าง Link ที่กดแล้วจะทำงานผ่าน handleRouting
-        li.innerHTML = `
-            <a href="/location/${p.key}" 
-               class="hover:text-pink-500 transition-colors duration-200 text-sm flex items-center gap-1"
-               onclick="event.preventDefault(); window.history.pushState(null, '', '/location/${p.key}'); handleRouting(true);">
-               <i class="fas fa-chevron-right text-[8px] opacity-50"></i> ไซด์ไลน์${p.name}
-            </a>`;
-        fragment.appendChild(li);
+        // ค้นหาว่าใน HTML มีจังหวัดนี้อยู่หรือยัง (เช็คจาก href)
+        const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
+        
+        if (!exists) {
+            // 🆕 ถ้ายังไม่มีใน HTML (เช่น จังหวัดใหม่ๆ) ให้ "สร้างเพิ่ม" ต่อท้ายไปเลย
+            const li = document.createElement('li');
+            li.className = 'mb-1';
+            li.innerHTML = `
+                <a href="/location/${p.key}" 
+                   class="hover:text-pink-500 transition-colors duration-200 text-sm flex items-center gap-1"
+                   onclick="event.preventDefault(); window.history.pushState(null, '', '/location/${p.key}'); handleRouting(true);">
+                   <i class="fas fa-chevron-right text-[8px] opacity-50"></i> ไซด์ไลน์${p.name}
+                </a>`;
+            footerContainer.appendChild(li);
+        } else {
+            // ⚡ ถ้ามีใน HTML เดิมอยู่แล้ว (เช่น เชียงใหม่, กรุงเทพ) ให้ "อัปเกรด" ให้กดแล้วลื่น (SPA)
+            exists.classList.add('flex', 'items-center', 'gap-1');
+            // ใส่ไอคอนลูกศรให้เหมือนกันถ้ายังไม่มี
+            if (!exists.querySelector('.fas')) {
+                exists.insertAdjacentHTML('afterbegin', '<i class="fas fa-chevron-right text-[8px] opacity-50"></i> ');
+            }
+            exists.onclick = (e) => {
+                e.preventDefault();
+                window.history.pushState(null, '', `/location/${p.key}`);
+                handleRouting(true);
+            };
+        }
     });
-
-    footerContainer.appendChild(fragment);
 }
 
-        
+// =================================================================
+// START APPLICATION
+// =================================================================
+initMobileSitemapTrigger();
+initFooterLinks();
 
-
-
-})(); 
+})(); // ปิดไฟล์
