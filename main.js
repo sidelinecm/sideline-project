@@ -128,55 +128,7 @@ gsap.registerPlugin(ScrollTrigger);
         });
     }
 
-    // -----------------------------------------------------------------
-    // เพิ่มเติม: ปรับปรุงฟังก์ชัน initFooterLinks ให้ทำงานได้จริงและลิ้งก์ถูกต้อง
-    // -----------------------------------------------------------------
-    async function initFooterLinks() {
-        const footerContainer = document.getElementById('popular-locations-footer');
-        if (!footerContainer) return;
 
-        // เคลียร์ Loader หรือข้อมูลเก่าที่มีอยู่ใน HTML ออกก่อน
-        footerContainer.innerHTML = '';
-
-        if (state.provincesMap.size === 0) {
-            console.warn("⚠️ No provinces found in state to populate footer.");
-            return;
-        }
-
-        // แปลง Map เป็น Array และเรียงลำดับตามตัวอักษรไทย
-        const sortedProvinces = Array.from(state.provincesMap.entries())
-            .map(([key, name]) => ({ key, name }))
-            .sort((a, b) => a.name.localeCompare(b.name, 'th'));
-
-        const fragment = document.createDocumentFragment();
-        
-        sortedProvinces.forEach(p => {
-            const li = document.createElement('li');
-            li.className = 'mb-1';
-            
-            // สร้างลิงก์ที่กดแล้วไม่โหลดหน้าใหม่ แต่ใช้ History API และ Routing ของเรา
-            const a = document.createElement('a');
-            a.href = `/location/${p.key}`;
-            a.title = `รับงาน${p.name} | Sideline Chiangmai`;
-            a.className = 'hover:text-pink-500 transition-colors duration-200 text-sm';
-            a.textContent = `ไซด์ไลน์${p.name}`;
-            
-            // ทำให้กดแล้วทำงานทันทีโดยไม่ต้อง Refresh หน้า
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.history.pushState(null, '', `/location/${p.key}`);
-                handleRouting(true);
-                // เลื่อนหน้าจอกลับไปด้านบนเพื่อให้เห็นผลการค้นหา
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-
-            li.appendChild(a);
-            fragment.appendChild(li);
-        });
-
-        footerContainer.appendChild(fragment);
-    }
-    
     function cacheDOMElements() {
         dom.body = document.body;
         dom.pageHeader = document.getElementById('page-header');
@@ -659,79 +611,7 @@ function loadCache(key, expiryHours = 24) {
     }
 }
 
-function applyUltimateFilters(updateUrl = false) {
-        let query = {
-            text: dom.searchInput?.value?.trim() || '',
-            province: dom.provinceSelect?.value || '',
-            avail: dom.availabilitySelect?.value || '',
-            featured: dom.featuredSelect?.value === 'true'
-        };
 
-        // 🟢 จุดที่แก้: เพิ่ม Logic ตรวจสอบว่าคำที่พิมพ์ คือชื่อจังหวัดหรือไม่?
-        // ถ้าใช่ -> ให้ระบบเปลี่ยนไปใช้การกรอง "ทั้งจังหวัด" ทันที
-        if (query.text) {
-            for (let [key, name] of state.provincesMap.entries()) {
-                // เช็คว่าคำที่พิมพ์ มีชื่อจังหวัดปนอยู่มั้ย (เช่น "เชียงใหม่", "น้องเชียงใหม่")
-                if (name === query.text || name.includes(query.text) || query.text.includes(name)) {
-                    
-                    // สั่งระบบว่า: "ผู้ใช้ต้องการดูจังหวัดนี้นะ" (Set key จังหวัด)
-                    query.province = key; 
-                    
-                    // *เคล็ดลับ* ลบ text ทิ้ง เพื่อให้ระบบดึง "ทุกคน" ที่มี key นี้ออกมา
-                    // (ไม่ใช่แค่คนที่พิมพ์ชื่อจังหวัดไว้ใน Description)
-                    query.text = ''; 
-                    
-                    // Update Dropdown ให้ตรงกันด้วย (เพื่อความเนียน)
-                    if(dom.provinceSelect) dom.provinceSelect.value = key;
-                    
-                    break; // เจอแล้วหยุดหา
-                }
-            }
-        }
-
-        if (query.province && query.province !== 'all') localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
-
-        let filtered = state.allProfiles;
-
-        // 1. กรองด้วย Text (จะทำงานเฉพาะถ้าเราไม่ได้ลบ text ทิ้งข้างบน หรือค้นหาชื่อเล่น)
-        if (query.text) {
-            if (fuseEngine) {
-                const results = fuseEngine.search(query.text);
-                filtered = results.map(result => result.item);
-            } else {
-                const lower = query.text.toLowerCase();
-                filtered = filtered.filter(p => p.searchString.includes(lower));
-            }
-        }
-
-        // 2. กรองด้วย Category/Province 
-        // (จุดนี้แหละที่น้องๆ อีก 89 คนจะโผล่ออกมา เพราะเรา set query.province ไว้แล้ว)
-        filtered = filtered.filter(p => {
-            const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
-            const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
-            const featuredMatch = !query.featured || p.isfeatured;
-            return provinceMatch && availMatch && featuredMatch;
-        });
-
-        // UI Updates
-        if (dom.resultCount) {
-             dom.resultCount.innerHTML = filtered.length > 0 ? `✅ พบ ${filtered.length} โปรไฟล์` : '❌ ไม่พบข้อมูล';
-             dom.resultCount.style.display = 'block';
-        }
-
-        // ส่ง Flag ไปบอกว่าตอนนี้กำลังค้นหา (เพื่อให้โชว์หัวข้อแบบ Search Result)
-        const isSearchMode = !!dom.searchInput?.value || !!query.province; 
-        renderProfiles(filtered, isSearchMode);
-
-        // Update URL
-        if (updateUrl) {
-            const params = new URLSearchParams();
-            if (query.text) params.set('q', query.text);
-            const path = (query.province && query.province !== 'all') ? `/location/${query.province}` : '/';
-            const qs = params.toString() ? '?' + params.toString() : '';
-            if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
-        }
-    }
 function updateUltimateSuggestions(val) {
     const box = document.getElementById('search-suggestions');
     const input = document.getElementById('search-keyword');
@@ -1171,31 +1051,18 @@ function createProfileCard(p, index = 10) {
     cardInner.append(img, badges, overlay);
     cardContainer.appendChild(cardInner);
     return cardContainer;
-} // ✅ ปิด createProfileCard
-    // =================================================================
-    // 9. LIGHTBOX & HELPER FUNCTIONS
-    // =================================================================
-    async function fetchSingleProfile(slug) {
-        if(!supabase) return null;
-        try {
-            const { data, error } = await supabase.from('profiles').select('*').eq('slug', slug).maybeSingle();
-            if (error || !data) return null;
-            return processProfileData(data);
-        } catch { return null; }
-    }
+}
 
+    // =================================================================
+    // 9. LIGHTBOX (FIXED DESCRIPTION & DETAILS)
+    // =================================================================
     function initLightboxEvents() {
         document.body.addEventListener('click', (e) => {
             const link = e.target.closest('a.card-link');
-            
             if (link && link.closest('.profile-card-new')) {
                 e.preventDefault(); 
-                
-                const card = link.closest('.profile-card-new');
-                const slug = card.getAttribute('data-profile-slug');
-                
+                const slug = link.closest('.profile-card-new').getAttribute('data-profile-slug');
                 if (slug) {
-                    state.lastFocusedElement = card;
                     history.pushState(null, '', `/sideline/${slug}`);
                     handleRouting();
                 }
@@ -1226,24 +1093,19 @@ function createProfileCard(p, index = 10) {
 
     function closeLightbox(animate = true) {
         if (!dom.lightbox || dom.lightbox.classList.contains('hidden')) return;
-
         if (animate) {
             gsap.to(dom.lightbox, { opacity: 0, pointerEvents: 'none', duration: 0.2 });
             gsap.to(dom.lightboxWrapper, { 
                 scale: 0.95, opacity: 0, duration: 0.2, 
-                onComplete: () => {
-                    dom.lightbox.classList.add('hidden');
-                    document.body.style.overflow = '';
-                    state.lastFocusedElement?.focus();
-                }
+                onComplete: () => { dom.lightbox.classList.add('hidden'); document.body.style.overflow = ''; }
             });
         } else {
             dom.lightbox.classList.add('hidden');
-            dom.lightbox.style.opacity = '0';
             document.body.style.overflow = '';
         }
     }
 
+    // 🔥🔥 FIXED FUNCTION: แก้ไขจุดที่ทำให้ Description หาย 🔥🔥
     function populateLightboxData(p) {
         const get = (id) => document.getElementById(id);
         const els = {
@@ -1252,11 +1114,9 @@ function createProfileCard(p, index = 10) {
             thumbs: get('lightboxThumbnailStrip'),
             quote: get('lightboxQuote'),
             tags: get('lightboxTags'),
-            desc: get('lightboxDescriptionVal'),
+            desc: get('lightboxDescriptionVal'), // ID ที่เป็นปัญหา
             avail: get('lightbox-availability-badge-wrapper'),
             details: get('lightboxDetailsCompact'),
-            line: get('lightboxLineLink'),
-            lineText: get('lightboxLineLinkText')
         };
 
         if (els.name) els.name.textContent = p.name || 'ไม่ระบุชื่อ';
@@ -1271,6 +1131,7 @@ function createProfileCard(p, index = 10) {
             els.hero.alt = p.altText || p.name;
         }
 
+        // Gallery
         if (els.thumbs) {
             els.thumbs.innerHTML = '';
             if (p.images && p.images.length > 1) {
@@ -1281,7 +1142,6 @@ function createProfileCard(p, index = 10) {
                     thumb.src = img.src;
                     thumb.onclick = () => {
                         els.hero.src = img.src;
-                        els.hero.srcset = img.srcset;
                         els.thumbs.querySelector('.active')?.classList.remove('active');
                         thumb.classList.add('active');
                     };
@@ -1307,9 +1167,9 @@ function createProfileCard(p, index = 10) {
             }
         }
 
+        // ข้อมูลสัดส่วน
         if (els.details) {
             const provinceName = state.provincesMap.get(p.provinceKey) || '';
-            
             els.details.innerHTML = `
                 <div class="stats-grid-container">
                     <div class="stat-box"><span class="stat-label">อายุ</span><span class="stat-value">${p.age || '-'}</span></div>
@@ -1324,45 +1184,48 @@ function createProfileCard(p, index = 10) {
             `;
         }
 
-        if (els.desc && els.desc.parentElement) {
-            els.desc.parentElement.innerHTML = `
+        // ✅✅ แก้ไข Description Logic ✅✅
+        // เปลี่ยนจาก els.desc.parentElement.innerHTML = ... เป็นการใส่ข้อมูลในตัวมันเอง หรือสร้าง div ใหม่ถ้าจำเป็น
+        if (els.desc) {
+            // สร้าง HTML ภายใน element ที่มี ID เดิม เพื่อไม่ให้ ID หายไป
+            els.desc.innerHTML = `
                 <div class="description-box">
                     <div class="desc-header"><i class="fas fa-align-left"></i> รายละเอียดเพิ่มเติม</div>
                     <div class="desc-content">${p.description ? p.description.replace(/\n/g, '<br>') : '-'}</div>
                 </div>
             `;
+        } 
+        // Fallback กรณีหา ID ไม่เจอ (เช่น ถ้าเคยถูกลบไปแล้ว) ให้ลองหา Parent แล้วใส่กลับ
+        else {
+             const fallbackContainer = document.querySelector('.lightbox-description-container'); // ต้องแน่ใจว่าใน HTML มี class นี้ที่ parent
+             if(fallbackContainer) {
+                 fallbackContainer.innerHTML = `
+                    <div id="lightboxDescriptionVal">
+                         <div class="description-box">
+                            <div class="desc-header"><i class="fas fa-align-left"></i> รายละเอียดเพิ่มเติม</div>
+                            <div class="desc-content">${p.description ? p.description.replace(/\n/g, '<br>') : '-'}</div>
+                        </div>
+                    </div>
+                 `;
+             }
         }
 
+        // Line Button
         const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
         if (oldWrapper) oldWrapper.remove();
-
         if (p.lineId) {
             const wrapper = document.createElement('div');
             wrapper.id = 'line-btn-sticky-wrapper';
             wrapper.className = 'lb-sticky-footer';
-
-            const link = document.createElement('a');
-            link.className = 'btn-line-action';
-            link.href = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/${p.lineId}`;
-            link.target = '_blank';
-            link.innerHTML = `<i class="fab fa-line"></i> แอดไลน์ ${p.name}`;
-
-            wrapper.appendChild(link);
-            const detailsCol = document.querySelector('.lightbox-details');
-            if (detailsCol) detailsCol.appendChild(wrapper);
+            wrapper.innerHTML = `<a class="btn-line-action" href="${p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/${p.lineId}`}" target="_blank"><i class="fab fa-line"></i> แอดไลน์ ${p.name}</a>`;
+            document.querySelector('.lightbox-details')?.appendChild(wrapper);
         }
 
         if (els.avail) {
             els.avail.innerHTML = '';
-            let sClass = 'status-inquire';
-            let icon = '<i class="fas fa-question-circle"></i>';
-            if (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) { sClass = 'status-available'; icon = '<i class="fas fa-check-circle"></i>'; }
-            else if (p.availability?.includes('ไม่ว่าง')) { sClass = 'status-busy'; icon = '<i class="fas fa-times-circle"></i>'; }
-            
-            const badge = document.createElement('div');
-            badge.className = `lb-status-badge ${sClass}`;
-            badge.innerHTML = `${icon} ${p.availability || 'สอบถาม'}`;
-            els.avail.appendChild(badge);
+            let sClass = (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) ? 'status-available' : 'status-inquire';
+            let icon = sClass === 'status-available' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-question-circle"></i>';
+            els.avail.innerHTML = `<div class="lb-status-badge ${sClass}">${icon} ${p.availability || 'สอบถาม'}</div>`;
         }
     }
 
@@ -2080,10 +1943,6 @@ async function initFooterLinks() {
 
         
 
-    // =================================================================
-    // START APPLICATION
-    // =================================================================
-    initMobileSitemapTrigger();
-    initFooterLinks();
 
-})(); // ปิดฟังก์ชันหลัก
+
+})(); 
