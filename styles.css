@@ -1,37 +1,37 @@
 /* ==========================================================================
+   1. FONT & ROOT VARIABLES (FIXED VERSION)
+   ========================================================================== */
 
-/* ===============================
-   FONT
-================================== */
+/* ประกาศ Font-face แบบโหลดจากเครื่อง (ลบ / ข้างหน้าเพื่อให้ Path ถูกต้อง) */
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local("Prompt Regular"),
-       url(/fonts/prompt-v11-latin_thai-regular.woff2) format("woff2");
+  src: url('fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
+
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: local("Prompt Bold"),
-       url(/fonts/prompt-v11-latin_thai-700.woff2) format("woff2");
+  src: url('fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
+
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: local("Prompt ExtraBold"),
-       url(/fonts/prompt-v11-latin_thai-800.woff2) format("woff2");
+  src: url('fonts/prompt-v11-latin_thai-800.woff2') format('woff2');
 }
 
-
-
 :root {
-  /* Color Palette (HSL for easy opacity manipulation) */
+  /* Font Family */
+  --font-primary: 'Prompt', ui-sans-serif, system-ui, sans-serif;
+
+  /* Color Palette (HSL) */
   --primary: 330 81% 60%;       /* #db2777 (Pink) */
   --primary-glow: 330 81% 75%;
   --secondary: 270 50% 60%;     /* #9333ea (Purple) */
@@ -59,37 +59,24 @@
   --muted-foreground: 215 20.2% 65.1%;
 }
 
-/* Base Reset & Fonts */
+/* ==========================================================================
+   2. BASE RESET & TYPOGRAPHY
+   ========================================================================== */
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
-  font-family: 'Prompt', ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-primary);
 }
 
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  overflow-x: hidden; /* 🛡️ ป้องกันหน้าจอล้นแนวนอน 100% */
+  font-family: var(--font-primary);
+  overflow-x: hidden;
   width: 100%;
   min-height: 100vh;
   line-height: 1.5;
   transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Custom Fonts Loading */
-@font-face {
-  font-family: 'Prompt';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Prompt';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
 
 /* Custom Scrollbar */
@@ -98,9 +85,6 @@ body {
 ::-webkit-scrollbar-thumb { background: hsl(var(--primary)); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--secondary)); }
 
-/* ==========================================================================
-   2. TYPOGRAPHY & TEXT EFFECTS
-   ========================================================================== */
 h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.025em;
   color: hsl(var(--foreground));
@@ -122,13 +106,12 @@ h1 { font-size: clamp(1.875rem, 4vw, 3rem); line-height: 1.2; }
 h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.3; }
 
 /* ==========================================================================
-   3. PROFILE CARDS (Responsive & Proportional)
+   3. PROFILE CARDS
    ========================================================================== */
 .profile-card-new-container {
   perspective: 1000px;
   width: 100%;
 }
-
 .profile-card-new {
   position: relative;
   background-color: hsl(var(--card));
