@@ -934,7 +934,6 @@ function renderByProvince(profiles) {
     
     dom.profilesDisplayArea.appendChild(mainFragment);
 }
-
 // ค้นหา function createProvinceSection แล้วแก้ข้างในเป็นแบบนี้ครับ
 function createProvinceSection(key, name, profiles, limit = 9999) { // 1. เปลี่ยนตัวเลข Default เป็นค่าเยอะๆ
     const wrapper = document.createElement('div');
@@ -1129,7 +1128,8 @@ function createProfileCard(p, index = 10) {
     cardInner.append(img, badges, overlay);
     cardContainer.appendChild(cardInner);
     return cardContainer;
-}
+} 
+
     // =================================================================
     // 9. LIGHTBOX (FIXED DESCRIPTION & DETAILS)
     // =================================================================
@@ -1978,56 +1978,53 @@ ${xmlContent}
         updateMeta('og:description', description);
     }
 
-// ✅ ฟังก์ชันดึงจังหวัดมาแสดง "ทั้งหมด" ที่มีข้อมูลจริงในระบบ
-async function initFooterLinks() {
-    const footerContainer = document.getElementById('popular-locations-footer');
-    if (!footerContainer) return;
+    // =================================================================
+    // 14. DYNAMIC FOOTER SYSTEM
+    // =================================================================
+    async function initFooterLinks() {
+        const footerContainer = document.getElementById('popular-locations-footer');
+        if (!footerContainer) return;
 
-    // 1. ดึงข้อมูลจากฐานข้อมูล (state.provincesMap)
-    let provincesList = [];
-    state.provincesMap.forEach((name, key) => {
-        provincesList.push({ key, name });
-    });
+        let provincesList = [];
 
-    // 2. เรียงลำดับ ก-ฮ
-    provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
-
-    // 3. วนลูปเช็คกับ HTML เดิมของพี่
-    provincesList.forEach(p => {
-        // ค้นหาว่าใน HTML มีจังหวัดนี้อยู่หรือยัง (เช็คจาก href)
-        const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
-        
-        if (!exists) {
-            // 🆕 ถ้ายังไม่มีใน HTML (เช่น จังหวัดใหม่ๆ) ให้ "สร้างเพิ่ม" ต่อท้ายไปเลย
-            const li = document.createElement('li');
-            li.className = 'mb-1';
-            li.innerHTML = `
-                <a href="/location/${p.key}" 
-                   class="hover:text-pink-500 transition-colors duration-200 text-sm flex items-center gap-1"
-                   onclick="event.preventDefault(); window.history.pushState(null, '', '/location/${p.key}'); handleRouting(true);">
-                   <i class="fas fa-chevron-right text-[8px] opacity-50"></i> ไซด์ไลน์${p.name}
-                </a>`;
-            footerContainer.appendChild(li);
-        } else {
-            // ⚡ ถ้ามีใน HTML เดิมอยู่แล้ว (เช่น เชียงใหม่, กรุงเทพ) ให้ "อัปเกรด" ให้กดแล้วลื่น (SPA)
-            exists.classList.add('flex', 'items-center', 'gap-1');
-            // ใส่ไอคอนลูกศรให้เหมือนกันถ้ายังไม่มี
-            if (!exists.querySelector('.fas')) {
-                exists.insertAdjacentHTML('afterbegin', '<i class="fas fa-chevron-right text-[8px] opacity-50"></i> ');
-            }
-            exists.onclick = (e) => {
-                e.preventDefault();
-                window.history.pushState(null, '', `/location/${p.key}`);
-                handleRouting(true);
-            };
+        if (state.provincesMap && state.provincesMap.size > 0) {
+            state.provincesMap.forEach((name, key) => {
+                provincesList.push({ key: key, name: name });
+            });
         }
-    });
-}
 
-// =================================================================
-// START APPLICATION
-// =================================================================
-initMobileSitemapTrigger();
-initFooterLinks();
+        provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
-})(); // ปิดไฟล์
+        const loadingPulse = footerContainer.querySelector('.animate-pulse');
+        if (loadingPulse) {
+            loadingPulse.parentElement.remove();
+        }
+
+        const displayLimit = 9999; 
+        let addedCount = footerContainer.querySelectorAll('li').length;
+
+        provincesList.forEach(p => {
+            const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
+            if (!exists && addedCount < displayLimit) {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="/location/${p.key}" title="รับงาน${p.name} | Sideline Chiangmai" class="hover:text-pink-500 transition-colors">ไซด์ไลน์${p.name}</a>`;
+                footerContainer.appendChild(li);
+                addedCount++;
+            }
+        });
+
+        if (provincesList.length > addedCount && !footerContainer.querySelector('.view-all-link')) {
+            const viewAll = document.createElement('li');
+            viewAll.className = 'view-all-link';
+            viewAll.innerHTML = `<a href="/profiles.html" class="text-pink-500 font-bold hover:underline mt-2 inline-block">ดูจังหวัดทั้งหมด (${provincesList.length})</a>`;
+            footerContainer.appendChild(viewAll);
+        }
+    }
+
+    // =================================================================
+    // START APPLICATION
+    // =================================================================
+    initMobileSitemapTrigger();
+    initFooterLinks();
+
+})(); // ปิดฟังก์ชันหลัก
