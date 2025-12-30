@@ -30,15 +30,15 @@ gsap.registerPlugin(ScrollTrigger);
         DEFAULT_OG_IMAGE: '/images/default_og_image.jpg' // ✅ CORRECT SYNTAX
     };
 
-let state = {
+// =================================================================
+    // 1. STATE MANAGEMENT
+    // =================================================================
+    let state = {
         allProfiles: [],
         provincesMap: new Map(),
         currentProfileSlug: null,
-        // 👇👇 เพิ่ม 2 ตัวนี้เข้าไปครับ 👇👇
-        displayLimit: 100,     // โชว์ทีละ 12 คน (สำหรับหน้าค้นหา)
-        featuredLimit: 1000,     // โชว์ 8 คน (สำหรับหน้าแรก)
-        // 👆👆 ----------------------- 👆👆
-        
+        displayLimit: 100,      // จำนวนโปรไฟล์สูงสุดที่แสดงในหน้าค้นหา
+        featuredLimit: 20,      // จำนวนโปรไฟล์แนะนำสูงสุด
         lastFocusedElement: null,
         isFetching: false,
         lastFetchedAt: '1970-01-01T00:00:00Z',
@@ -52,59 +52,63 @@ let state = {
     const dom = {};
 
     // =================================================================
-    // 3. SUPABASE CLIENT
+    // 3. SUPABASE CLIENT INITIALIZATION
     // =================================================================
     let supabase;
     try {
-        // Note: The createClient function is imported from Supabase ESM
         supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        window.supabase = supabase;
-        console.log("✅ Supabase Connected");
+        window.supabase = supabase; // Export for debugging if needed
+        console.log("✅ Supabase System Ready");
     } catch (e) {
         console.error("❌ Supabase Init Failed:", e);
     }
     
     // =================================================================
-    // 3.1 GLOBAL ERROR HANDLER (Ultimate Robustness)
+    // 3.1 GLOBAL ERROR HANDLER
     // =================================================================
     window.onerror = function (message, source, lineno, colno, error) {
-        // ดักจับ JavaScript Error ที่ไม่ได้ถูกจัดการ (unhandled) ทั่วทั้งแอปพลิเคชัน
         console.error('🛑 Global Runtime Error:', message, error);
-        
-        // คืนค่า true เพื่อป้องกันไม่ให้เบราว์เซอร์แสดง Error message มาตรฐาน (Clean User Experience)
         return true; 
     };
 
     // =================================================================
-    // 4. MAIN ENTRY POINT 
+    // 4. MAIN ENTRY POINT (ปรับปรุงลำดับการทำงานแบบสมบูรณ์)
     // =================================================================
     document.addEventListener('DOMContentLoaded', initApp);
     
     async function initApp() {
+        // 1. เก็บตัวแปร DOM ทั้งหมด
         cacheDOMElements();
 
-        // UI Inits
+        // 2. เริ่มต้น UI ที่ไม่ต้องใช้ข้อมูลจาก Database (เพื่อให้เว็บดูโหลดเร็ว)
         initThemeToggle();
         initMobileMenu();
         initAgeVerification();
         initHeaderScrollEffect();
         initMarqueeEffect();
         initMobileSitemapTrigger();
-        initFooterLinks();
+        
+        // 3. ✅ [สำคัญมาก] โหลดข้อมูลจาก Supabase ให้เสร็จก่อนเพื่อน
+        // ขั้นตอนนี้จะเติม state.allProfiles และ state.provincesMap ให้เต็ม
+        await handleDataLoading(); 
 
+        // 4. ✅ พอข้อมูลมาครบแล้ว ค่อยสร้าง Link จังหวัดที่ Footer
+        // (ขั้นตอนนี้จะดึงชื่อจังหวัดจาก Database มาวาดจริง)
+        await initFooterLinks();
+
+        // 5. ✅ ตรวจสอบ URL (Routing) 
+        // เช่น ถ้าเปิดมาที่หน้า /location/chiangmai ระบบจะรู้ทันทีเพราะข้อมูลโหลดมาแล้ว
+        await handleRouting(true); 
+
+        // 6. อัปเดต UI ทั่วไป
         updateActiveNavLinks();
-
-        // Main Logic
-        await handleRouting();
-        await handleDataLoading();
-
-        // Footer Year
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
+        // ปิด Loader
         document.body.classList.add('loaded');
 
-        // Intro Animation (Home only)
+        // Intro Animation (แสดงเฉพาะหน้าแรกเมื่อไม่มีการเปิดโปรไฟล์)
         if (window.location.pathname === '/' && !state.currentProfileSlug) {
             try {
                 const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
@@ -116,13 +120,63 @@ let state = {
             } catch (e) { console.warn("Animation skipped", e); }
         }
 
-        // Navigation Listener
+        // Navigation Listener: เมื่อกด Back/Forward ใน Browser
         window.addEventListener('popstate', async () => {
-            await handleRouting();
+            // เมื่อ URL เปลี่ยน ต้องตรวจสอบ Routing ใหม่เสมอ
+            await handleRouting(true);
             updateActiveNavLinks();
         });
     }
 
+    // -----------------------------------------------------------------
+    // เพิ่มเติม: ปรับปรุงฟังก์ชัน initFooterLinks ให้ทำงานได้จริงและลิ้งก์ถูกต้อง
+    // -----------------------------------------------------------------
+    async function initFooterLinks() {
+        const footerContainer = document.getElementById('popular-locations-footer');
+        if (!footerContainer) return;
+
+        // เคลียร์ Loader หรือข้อมูลเก่าที่มีอยู่ใน HTML ออกก่อน
+        footerContainer.innerHTML = '';
+
+        if (state.provincesMap.size === 0) {
+            console.warn("⚠️ No provinces found in state to populate footer.");
+            return;
+        }
+
+        // แปลง Map เป็น Array และเรียงลำดับตามตัวอักษรไทย
+        const sortedProvinces = Array.from(state.provincesMap.entries())
+            .map(([key, name]) => ({ key, name }))
+            .sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+        const fragment = document.createDocumentFragment();
+        
+        sortedProvinces.forEach(p => {
+            const li = document.createElement('li');
+            li.className = 'mb-1';
+            
+            // สร้างลิงก์ที่กดแล้วไม่โหลดหน้าใหม่ แต่ใช้ History API และ Routing ของเรา
+            const a = document.createElement('a');
+            a.href = `/location/${p.key}`;
+            a.title = `รับงาน${p.name} | Sideline Chiangmai`;
+            a.className = 'hover:text-pink-500 transition-colors duration-200 text-sm';
+            a.textContent = `ไซด์ไลน์${p.name}`;
+            
+            // ทำให้กดแล้วทำงานทันทีโดยไม่ต้อง Refresh หน้า
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.history.pushState(null, '', `/location/${p.key}`);
+                handleRouting(true);
+                // เลื่อนหน้าจอกลับไปด้านบนเพื่อให้เห็นผลการค้นหา
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            li.appendChild(a);
+            fragment.appendChild(li);
+        });
+
+        footerContainer.appendChild(fragment);
+    }
+    
     function cacheDOMElements() {
         dom.body = document.body;
         dom.pageHeader = document.getElementById('page-header');
@@ -442,72 +496,61 @@ function populateProvinceDropdown() {
     });
     dom.provinceSelect.appendChild(fragment);
 }
-// =================================================================
-    // 6. ROUTING & SEO (UPDATED - FRANCHISE STYLE)
-    // =================================================================
-    async function handleRouting(dataLoaded = false) {
-        const path = window.location.pathname.toLowerCase();
+async function handleRouting(dataLoaded = false) {
+    const path = window.location.pathname.toLowerCase();
+    
+    // 🚩 กรณี: ดูโปรไฟล์น้อง (/sideline/slug)
+    const profileMatch = path.match(/^\/sideline\/([^/]+)/);
+    if (profileMatch) {
+        const slug = decodeURIComponent(profileMatch[1]);
+        state.currentProfileSlug = slug;
         
-        // 1. หน้าโปรไฟล์
-        const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-        if (profileMatch) {
-            const slug = decodeURIComponent(profileMatch[1]);
-            state.currentProfileSlug = slug;
-            
-            let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
-            if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
-
-            if (profile) {
-                openLightbox(profile);
-                updateAdvancedMeta(profile, null);
-                dom.profilesDisplayArea?.classList.add('hidden');
-                dom.featuredSection?.classList.add('hidden');
-            } else if (dataLoaded) {
-                history.replaceState(null, '', '/');
-                closeLightbox(false);
-                dom.profilesDisplayArea?.classList.remove('hidden');
-                state.currentProfileSlug = null;
-            }
-            return;
-        } 
+        let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
         
-        // 2. หน้าจังหวัด (Location Page) -> จุดที่แก้ให้สวยๆ
-        const provinceMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
-        if (provinceMatch) {
-            const provinceKey = decodeURIComponent(provinceMatch[1]);
-            state.currentProfileSlug = null;
+        if (profile) {
+            openLightbox(profile);
+            updateAdvancedMeta(profile, null);
+        } else if (dataLoaded) {
+            // ถ้าหาไม่เจอ ให้กลับหน้าแรก
+            window.history.replaceState(null, '', '/');
             closeLightbox(false);
-            if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
-            
-            if (dataLoaded) {
-                applyUltimateFilters(false);
-                const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
-                
-                // สร้างข้อมูล SEO (ส่งแค่หัวข้อหลัก เดี๋ยวไปเติมแบรนด์ทีหลัง)
-                const seoData = {
-                    title: `รับงาน${provinceName} - ไซด์ไลน์${provinceName}`, 
-                    description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก ปลอดภัย 100% การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}`,
-                    canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
-                    provinceName: provinceName, 
-                    profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
-                };
-                
-                updateAdvancedMeta(null, seoData);
-                dom.profilesDisplayArea?.classList.remove('hidden');
-            }
-            return;
         }
-
-        // 3. หน้าแรก
+        return;
+    } 
+    
+    // 🚩 กรณี: ดูหน้าจังหวัด (/location/key)
+    const locationMatch = path.match(/^\/location\/([^/]+)/);
+    if (locationMatch) {
+        const provinceKey = decodeURIComponent(locationMatch[1]);
         state.currentProfileSlug = null;
         closeLightbox(false);
-        dom.profilesDisplayArea?.classList.remove('hidden');
-        if (dataLoaded) {
-            applyUltimateFilters(false);
-            updateAdvancedMeta(null, null);
-        }
+
+        // อัปเดต Dropdown ให้ตรงกับ URL
+        if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
+        
+        // สั่ง Filter ข้อมูลตามจังหวัดใน URL
+        applyUltimateFilters(false); 
+        
+        // อัปเดต SEO
+        const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
+        const seoData = {
+            title: `รับงาน${provinceName} - ไซด์ไลน์${provinceName} ฟิวแฟน ตรงปก`,
+            description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ปลอดภัย การันตีโดย Sideline Chiangmai`,
+            canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
+            provinceName: provinceName,
+            profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
+        };
+        updateAdvancedMeta(null, seoData);
+        return;
     }
 
+    // 🚩 กรณี: หน้าแรก
+    state.currentProfileSlug = null;
+    closeLightbox(false);
+    if (dom.provinceSelect) dom.provinceSelect.value = '';
+    applyUltimateFilters(false);
+    updateAdvancedMeta(null, null);
+}
     // =================================================================
     // 7. ULTIMATE SEARCH ENGINE (Google Style + Fuse.js)
     // =================================================================
@@ -1997,45 +2040,45 @@ ${xmlContent}
     // =================================================================
     // 14. DYNAMIC FOOTER SYSTEM
     // =================================================================
-    async function initFooterLinks() {
-        const footerContainer = document.getElementById('popular-locations-footer');
-        if (!footerContainer) return;
+async function initFooterLinks() {
+    const footerContainer = document.getElementById('popular-locations-footer');
+    if (!footerContainer) return;
 
-        let provincesList = [];
+    // เคลียร์ Loader หรือข้อมูลเก่าออกก่อน
+    footerContainer.innerHTML = '';
 
-        if (state.provincesMap && state.provincesMap.size > 0) {
-            state.provincesMap.forEach((name, key) => {
-                provincesList.push({ key: key, name: name });
-            });
-        }
+    // สร้างรายการจังหวัดจากข้อมูลจริงที่โหลดมา
+    let provincesList = [];
+    state.provincesMap.forEach((name, key) => {
+        provincesList.push({ key, name });
+    });
 
-        provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    // เรียง ก-ฮ
+    provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
-        const loadingPulse = footerContainer.querySelector('.animate-pulse');
-        if (loadingPulse) {
-            loadingPulse.parentElement.remove();
-        }
-
-        const displayLimit = 9999; 
-        let addedCount = footerContainer.querySelectorAll('li').length;
-
-        provincesList.forEach(p => {
-            const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
-            if (!exists && addedCount < displayLimit) {
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="/location/${p.key}" title="รับงาน${p.name} | Sideline Chiangmai" class="hover:text-pink-500 transition-colors">ไซด์ไลน์${p.name}</a>`;
-                footerContainer.appendChild(li);
-                addedCount++;
-            }
-        });
-
-        if (provincesList.length > addedCount && !footerContainer.querySelector('.view-all-link')) {
-            const viewAll = document.createElement('li');
-            viewAll.className = 'view-all-link';
-            viewAll.innerHTML = `<a href="/profiles.html" class="text-pink-500 font-bold hover:underline mt-2 inline-block">ดูจังหวัดทั้งหมด (${provincesList.length})</a>`;
-            footerContainer.appendChild(viewAll);
-        }
+    if (provincesList.length === 0) {
+        footerContainer.innerHTML = '<li>ไม่มีข้อมูลจังหวัด</li>';
+        return;
     }
+
+    const fragment = document.createDocumentFragment();
+    provincesList.forEach(p => {
+        const li = document.createElement('li');
+        li.className = 'mb-1';
+        // สร้าง Link ที่กดแล้วจะทำงานผ่าน handleRouting
+        li.innerHTML = `
+            <a href="/location/${p.key}" 
+               class="hover:text-pink-500 transition-colors duration-200 text-sm flex items-center gap-1"
+               onclick="event.preventDefault(); window.history.pushState(null, '', '/location/${p.key}'); handleRouting(true);">
+               <i class="fas fa-chevron-right text-[8px] opacity-50"></i> ไซด์ไลน์${p.name}
+            </a>`;
+        fragment.appendChild(li);
+    });
+
+    footerContainer.appendChild(fragment);
+}
+
+        
 
     // =================================================================
     // START APPLICATION
