@@ -16,45 +16,50 @@
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # เพิ่ม Cache-Control สำหรับไฟล์ Static เพื่อให้เว็บโหลดเร็วขึ้น (คะแนน Core Web Vitals ดีขึ้น)
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 # =====================================
 # 🧠 Edge Functions Mapping
 # =====================================
-
-# จัดการไฟล์ sitemap.xml แบบ Real-time
 [[edge_functions]]
 function = "sitemap"
 path = "/sitemap.xml"
 
-# จัดการหน้าโปรไฟล์น้องๆ สำหรับ Bot (SEO)
 [[edge_functions]]
 function = "render-bot"
 path = "/sideline/*"
 
-# จัดการหน้าจังหวัดสำหรับ Bot (SEO)
 [[edge_functions]]
 function = "ssr-province"
 path = "/location/*"
 
 # =====================================
-# 🔀 Redirect Rules (SPA Fallback)
+# 🔀 Redirect Rules (SEO Best Practices)
 # =====================================
 
-# 1. ปล่อยให้ Service Worker โหลดได้ปกติ
+# 1. บังคับให้เป็น HTTPS และตัด WWW ออก (หรือเลือกใช้อย่างใดอย่างหนึ่ง) 
+# เพื่อให้ Google Index หน้าเดียว ไม่สับสน
+[[redirects]]
+  from = "http://sidelinechiangmai.netlify.app/*"
+  to = "https://sidelinechiangmai.netlify.app/:splat"
+  status = 301
+  force = true
+
+# 2. จัดการไฟล์สำคัญให้เข้าถึงได้โดยตรง (200 OK)
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
   force = true
 
-# 2. ปล่อยให้ Manifest โหลดได้ปกติ
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
   status = 200
   force = true
 
-# 3. ให้ทุก Path อื่นๆ วิ่งไปหา index.html (ยกเว้นที่มีไฟล์จริง)
+# 3. SPA Fallback (รักษา URL เดิมไว้เพื่อให้ React/Vue จัดการต่อ)
 [[redirects]]
   from = "/*"
   to = "/index.html"
