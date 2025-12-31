@@ -1128,7 +1128,7 @@ function createProfileCard(p, index = 10) {
     cardInner.append(img, badges, overlay);
     cardContainer.appendChild(cardInner);
     return cardContainer;
-} 
+}
 
     // =================================================================
     // 9. LIGHTBOX (FIXED DESCRIPTION & DETAILS)
@@ -1305,7 +1305,6 @@ function createProfileCard(p, index = 10) {
             els.avail.innerHTML = `<div class="lb-status-badge ${sClass}">${icon} ${p.availability || 'สอบถาม'}</div>`;
         }
     }
-
 
 // =================================================================
 // 10. SEO META TAGS UPDATER (มาตรฐานสูงสุด - พร้อม Fallback, Locale & Rich Schemas)
