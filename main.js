@@ -462,70 +462,75 @@ function populateProvinceDropdown() {
     dom.provinceSelect.appendChild(fragment);
 }
 // =================================================================
-    // 6. ROUTING & SEO (UPDATED - FRANCHISE STYLE)
-    // =================================================================
-    async function handleRouting(dataLoaded = false) {
-        const path = window.location.pathname.toLowerCase();
+// [ฉบับแก้ไขสมบูรณ์ 1/2] - handleRouting
+// =================================================================
+async function handleRouting(dataLoaded = false) {
+    const path = window.location.pathname.toLowerCase();
+    
+    // 1. หน้าโปรไฟล์
+    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+    if (profileMatch) {
+        const slug = decodeURIComponent(profileMatch[1]);
+        state.currentProfileSlug = slug;
         
-        // 1. หน้าโปรไฟล์
-        const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-        if (profileMatch) {
-            const slug = decodeURIComponent(profileMatch[1]);
-            state.currentProfileSlug = slug;
-            
-            let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
-            if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
+        let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
+        if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
 
-            if (profile) {
-                openLightbox(profile);
-                updateAdvancedMeta(profile, null);
-                dom.profilesDisplayArea?.classList.add('hidden');
-                dom.featuredSection?.classList.add('hidden');
-            } else if (dataLoaded) {
-                history.replaceState(null, '', '/');
-                closeLightbox(false);
-                dom.profilesDisplayArea?.classList.remove('hidden');
-                state.currentProfileSlug = null;
-            }
-            return;
-        } 
-        
-        // 2. หน้าจังหวัด (Location Page) -> จุดที่แก้ให้สวยๆ
-        const provinceMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
-        if (provinceMatch) {
-            const provinceKey = decodeURIComponent(provinceMatch[1]);
-            state.currentProfileSlug = null;
+        if (profile) {
+            openLightbox(profile);
+            updateAdvancedMeta(profile, null);
+            dom.profilesDisplayArea?.classList.add('hidden');
+            dom.featuredSection?.classList.add('hidden');
+        } else if (dataLoaded) {
+            history.replaceState(null, '', '/');
             closeLightbox(false);
-            if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
-            
-            if (dataLoaded) {
-                applyUltimateFilters(false);
-                const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
-                
-                // สร้างข้อมูล SEO (ส่งแค่หัวข้อหลัก เดี๋ยวไปเติมแบรนด์ทีหลัง)
-                const seoData = {
-                    title: `รับงาน${provinceName} - ไซด์ไลน์${provinceName}`, 
-                    description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก ปลอดภัย 100% การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}`,
-                    canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
-                    provinceName: provinceName, 
-                    profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
-                };
-                
-                updateAdvancedMeta(null, seoData);
-                dom.profilesDisplayArea?.classList.remove('hidden');
-            }
-            return;
+            dom.profilesDisplayArea?.classList.remove('hidden');
+            state.currentProfileSlug = null;
         }
-
-        // 3. หน้าแรก
+        return;
+    } 
+    
+    // 2. หน้าจังหวัด (Location Page)
+    const provinceMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+    if (provinceMatch) {
+        const provinceKey = decodeURIComponent(provinceMatch[1]);
         state.currentProfileSlug = null;
         closeLightbox(false);
-        dom.profilesDisplayArea?.classList.remove('hidden');
+        if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
+        
         if (dataLoaded) {
             applyUltimateFilters(false);
-            updateAdvancedMeta(null, null);
+            const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
+            
+            // --- ✅ START OF CHANGES ---
+            // สร้าง Title และ Description ที่สมบูรณ์แบบที่นี่
+            const completeTitle = `ไซด์ไลน์${provinceName} - รับงาน${provinceName} (ทีมงาน Sideline Chiangmai)`;
+            const completeDescription = `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก 100% ปลอดภัย การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}.`;
+
+            const seoData = {
+                title: completeTitle, 
+                description: completeDescription,
+                canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
+                provinceName: provinceName, 
+                profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
+            };
+            // --- ✅ END OF CHANGES ---
+            
+            updateAdvancedMeta(null, seoData);
+            dom.profilesDisplayArea?.classList.remove('hidden');
         }
+        return;
     }
+
+    // 3. หน้าแรก
+    state.currentProfileSlug = null;
+    closeLightbox(false);
+    dom.profilesDisplayArea?.classList.remove('hidden');
+    if (dataLoaded) {
+        applyUltimateFilters(false);
+        updateAdvancedMeta(null, null);
+    }
+}
 
     // =================================================================
     // 7. ULTIMATE SEARCH ENGINE (Google Style + Fuse.js)
@@ -1434,23 +1439,20 @@ const FAQ_DATA = [
 ];
 
 // =================================================================
-// ส่วนที่แก้ไข: updateAdvancedMeta (ฉบับสมบูรณ์)
+// === ฟังก์ชัน updateAdvancedMeta (ฉบับสมบูรณ์) ===
 // =================================================================
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // 1. ล้าง Schema เดิมออกก่อนเพื่อป้องกันข้อมูลซ้ำซ้อน (แก้ไขให้รองรับหลาย ID)
+    // 1. ล้าง Schema เดิมออกก่อนเพื่อป้องกันข้อมูลซ้ำซ้อน
     const oldScripts = document.querySelectorAll('script[id^="schema-jsonld"]');
     oldScripts.forEach(s => s.remove());
 
     const BRAND_NAME = "Sideline Chiangmai";
-    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html' || window.location.pathname === '';
-
-    // คีย์เวิร์ดที่ทรงพลังที่สุด
     const TRUST_KEYWORDS = "📌 ไม่มัดจำ ชำระเงินหน้างาน | ตรงปก 100% | มีแอดมินดูแลฟรี";
     const GLOBAL_TITLE = `ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ไม่มัดจำ | ${BRAND_NAME}`;
     const GLOBAL_DESC = `ศูนย์รวมน้องๆ ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ทั่วประเทศ ${TRUST_KEYWORDS} ปลอดภัย ไม่ต้องโอนก่อน อัปเดตใหม่ทุกวัน`;
 
     if (profile) {
-        // --- กรณี: หน้าโปรไฟล์รายบุคคล ---
+        // --- กรณี: หน้าโปรไฟล์รายบุคคล (ส่วนนี้ถูกต้องอยู่แล้ว) ---
         const provinceName = state.provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
         const title = `${profile.name} - ไซด์ไลน์${provinceName} ฟิวแฟนตรงปก ไม่มัดจำ | ${BRAND_NAME}`; 
         const richDescription = `📌 โปรไฟล์น้อง ${profile.name} อายุ ${profile.age} รับงาน${provinceName} ชำระหน้างานเท่านั้น! ไม่ต้องมัดจำ ตรงปก 100% มีแอดมินดูแลฟรี ${profile.quote ? `"${profile.quote}"` : ''}`;
@@ -1465,9 +1467,13 @@ function updateAdvancedMeta(profile = null, pageData = null) {
         injectSchema(generateBreadcrumbSchema('profile', profile.name), 'schema-jsonld-bc');
         
     } else if (pageData) {
-        // --- กรณี: หน้าจังหวัด ---
-        const pageTitle = `${pageData.title} | ${BRAND_NAME}`;
-        const pageDescription = `${pageData.description || GLOBAL_DESC} ${TRUST_KEYWORDS}`;
+        // --- กรณี: หน้าจังหวัด (ฉบับแก้ไขสมบูรณ์) ---
+        
+        // ✅ แก้ไขแล้ว: ใช้ Title ที่สมบูรณ์ที่ส่งมาจาก handleRouting โดยตรง ไม่ต้องเติมอะไรเพิ่ม
+        const pageTitle = pageData.title;
+        
+        // ✅ แก้ไขแล้ว: ใช้ Description ที่สร้างมาสำหรับหน้านั้นๆ โดยเฉพาะ แล้วเติมแค่คีย์เวิร์ดสำคัญ
+        const pageDescription = `${pageData.description} ${TRUST_KEYWORDS}`;
         
         document.title = pageTitle;
         updateMeta('description', pageDescription);
@@ -1479,7 +1485,7 @@ function updateAdvancedMeta(profile = null, pageData = null) {
         injectSchema(generateBreadcrumbSchema('location', pageData.provinceName), 'schema-jsonld-bc');
         
     } else {
-        // --- กรณี: หน้าแรก ---
+        // --- กรณี: หน้าแรก (ส่วนนี้ถูกต้องอยู่แล้ว) ---
         document.title = GLOBAL_TITLE;
         updateMeta('description', GLOBAL_DESC);
         updateMeta('robots', 'index, follow'); 
@@ -1488,7 +1494,7 @@ function updateAdvancedMeta(profile = null, pageData = null) {
         updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
         injectSchema(generateWebsiteSchema(), 'schema-jsonld-web'); 
         injectSchema(generateOrganizationSchema(), 'schema-jsonld-org'); 
-        injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq'); // ดึง FAQ จากด้านบนมาโชว์ที่ Google
+        injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
     }
 }
 
