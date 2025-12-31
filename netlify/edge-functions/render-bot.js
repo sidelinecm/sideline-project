@@ -1,203 +1,165 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // --- CONFIGURATION ---
-// ตรวจสอบ Key ให้ถูกต้อง (ใช้ Key ที่คุณส่งมาให้ก่อนหน้านี้)
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
 const STORAGE_BUCKET = 'profile-images';
 const SITE_DOMAIN = 'https://sidelinechiangmai.netlify.app';
 
+// ฟังก์ชันสุ่มตัวเลขแบบคงที่ (Stable Random)
+function getStableRandom(seedString) {
+  let hash = 0;
+  for (let i = 0; i < seedString.length; i++) {
+    hash = ((hash << 5) - hash) + seedString.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 export default async (request, context) => {
-  // 1. 🛡️ Bot Detection (ตรวจสอบว่าเป็น Bot หรือไม่)
+  // 1. 🛡️ Bot Detection
   const userAgent = request.headers.get('User-Agent') || '';
   const isBot = /googlebot|bingbot|yandex|duckduckbot|slurp|baiduspider|facebookexternalhit|twitterbot|discordbot|whatsapp|linkedinbot|embedly|quora\ link\ preview|outbrain|pinterest|skypeuripreview/i.test(userAgent);
 
-  // ถ้าไม่ใช่ Bot -> ปล่อยให้ไปโหลดหน้าเว็บปกติ (Client-Side Rendering)
   if (!isBot) return context.next();
 
   try {
-    // 2. 🔗 URL Parsing
+    // 2. 🔗 URL Parsing & Data Fetching
     const url = new URL(request.url);
-    const slug = decodeURIComponent(url.pathname.split('/').pop()); // ถอดรหัสภาษาไทยจาก URL
-
-    // เชื่อมต่อ Supabase
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const slug = decodeURIComponent(url.pathname.split('/').pop() || '');
     
-    // ดึงข้อมูล Profile และชื่อจังหวัด
+    if (!slug) return context.next();
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*, provinces(nameThai)')
       .eq('slug', slug)
       .maybeSingle();
 
-    // ถ้าหาไม่เจอ หรือ Database มีปัญหา -> ปล่อยให้ Client จัดการ (ไม่ให้เว็บล่ม)
     if (error || !profile) return context.next();
 
-    // 3. 🛡️ Bulletproof Data Extraction (กันข้อมูลแหว่ง/Error)
+    // 3. 🛡️ Data Prep (Handle Null & Undefined)
     const pName = profile.name || 'สาวสวย';
-    
-    // ตรวจสอบจังหวัด (กันตาย กรณี Supabase ส่งมาเป็น Array หรือ Object)
     let pProv = 'เชียงใหม่';
     if (profile.provinces) {
-      if (Array.isArray(profile.provinces)) {
-         pProv = profile.provinces[0]?.nameThai || 'เชียงใหม่';
-      } else {
-         pProv = profile.provinces?.nameThai || 'เชียงใหม่';
-      }
+      pProv = Array.isArray(profile.provinces) ? (profile.provinces[0]?.nameThai || 'เชียงใหม่') : (profile.provinces?.nameThai || 'เชียงใหม่');
     }
-    
-    const pLoc = profile.location || pProv; 
-    const pAge = profile.age ? `${profile.age} ปี` : 'วัยรุ่น';
-    const pPrice = profile.rate ? `${profile.rate}` : 'สอบถาม'; // แปลงเป็น String เสมอ
+    const pLoc = profile.location || pProv;
+    const pAge = profile.age ? `${profile.age} ปี` : '20+ ปี';
+    const rawPrice = profile.rate ? profile.rate.toString().replace(/[^0-9]/g, '') : '1500';
+    const displayPrice = profile.rate || '1,500';
 
-    // 4. 🧠 Dynamic SEO Content (สุ่มคำเพื่อไม่ให้ซ้ำ)
-    const jobTypes = ['ไซด์ไลน์', 'รับงาน N', 'งาน En', 'SL', 'เด็กเอน', 'เพื่อนเที่ยว', 'น้องรับงาน', 'Part-time'];
-    const adjectives = ['ตรงปก100%', 'ตัวจริงสวยมาก', 'งานดีไม่เร่ง', 'ฟีลแฟน', 'ขี้อ้อน', 'รับงานเอง', 'ไม่ผ่านเอเจนซี่', 'คัดเกรด A'];
-    const actions = ['นัดเจอ', 'หาคนดูแล', 'รับงาน', 'พิกัด', 'จ้างเที่ยว', 'หาเพื่อนทานข้าว'];
-    
-    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    
-    // สร้าง Title (หัวข้อ)
-    const title = `น้อง${pName} ${rand(jobTypes)} ${pProv} (${pLoc}) - ${rand(adjectives)} เริ่ม ${pPrice} | Sideline Chiangmai`;
+    // 4. 🎲 Smart Random Logic (Stable for SEO)
+    const seed = getStableRandom(slug);
+    const reviewCount = (seed % 205) + 45;
+    const ratingBase = 4.7;
+    const ratingDecimal = (seed % 4) / 10;
+    let ratingValue = (ratingBase + ratingDecimal).toFixed(1);
+    if (parseFloat(ratingValue) > 5.0) ratingValue = "5.0";
 
-    // สร้าง Description (คำบรรยาย)
-    const description = `
-      ${rand(actions)}${pProv} โซน${pLoc} น้อง${pName} อายุ ${pAge}. 
-      ${profile.stats ? `สัดส่วน ${profile.stats}.` : ''} 
-      ${profile.description ? profile.description.substring(0, 100).replace(/["\n]/g, '') : 'นิสัยน่ารัก คุยเก่ง งานดี'}. 
-      ${rand(adjectives)}. รับงานเอง ปลอดภัย. 
-      ${rand(jobTypes)} ${pProv} หาพี่ดูแล ทักไลน์จองคิวได้เลย
-    `.replace(/\s+/g, ' ').trim();
+    const jobTypes = ['ไซด์ไลน์', 'รับงาน N', 'งาน En', 'น้องรับงาน', 'เพื่อนเที่ยว', 'นวดผ่อนคลาย'];
+    const adjectives = ['ตรงปก 100%', 'ตัวจริงสวยมาก', 'งานดีไม่เร่ง', 'ฟีลแฟน', 'ขี้อ้อน', 'บริการดีเยี่ยม'];
+    const jobType = jobTypes[seed % jobTypes.length];
+    const adj = adjectives[(seed + 5) % adjectives.length];
 
-    // สร้าง URL รูปภาพ
-    const imageUrl = profile.imagePath.startsWith('http') 
-      ? profile.imagePath 
-      : `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${profile.imagePath}`;
-    
+    const title = `น้อง${pName} ${jobType} ${pProv} (${pLoc}) - ${adj} เริ่ม ${displayPrice} | Sideline Chiangmai`;
+    const description = `บริการ${jobType}${pProv} น้อง${pName} โซน${pLoc} อายุ ${pAge}. ${profile.stats ? `สัดส่วน ${profile.stats}.` : ''} ${profile.description ? profile.description.substring(0, 150).replace(/["\n\\]/g, ' ') : 'นิสัยน่ารัก คุยเก่ง งานดี ไม่เร่งรีบ'}. รับงานเอง ปลอดภัย จ่ายหน้างาน 100%. รีวิวแน่น ${reviewCount} คน`.replace(/\s+/g, ' ').trim();
+
+    // Handle Image URL Safely
+    const imagePath = profile.imagePath || '';
+    const imageUrl = imagePath.startsWith('http') 
+      ? imagePath 
+      : (imagePath ? `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${imagePath}` : 'https://sidelinechiangmai.netlify.app/default-og.jpg');
+
     const pageUrl = `${SITE_DOMAIN}/sideline/${slug}`;
 
-    // 5. ⭐ JSON-LD Schema (หัวใจสำคัญของดาว)
-    // ใช้ type "Product" เพื่อกระตุ้นให้ Google แสดงดาว
-    const priceValue = profile.rate ? profile.rate.toString().replace(/[^0-9]/g, '') : '1500';
-    
+    // 5. ⭐ JSON-LD Schema (Safe Stringify)
     const schemaData = {
       "@context": "https://schema.org/",
       "@type": "Product",
-      "name": `บริการน้อง ${pName} ${pProv}`,
+      "name": `น้อง ${pName} (${pProv})`,
       "image": imageUrl,
       "description": description,
-      "brand": {
-        "@type": "Brand",
-        "name": "Sideline Chiangmai"
-      },
+      "brand": { "@type": "Brand", "name": "Sideline Chiangmai" },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "4.9",
+        "ratingValue": ratingValue,
         "bestRating": "5",
         "worstRating": "1",
-        "reviewCount": "128" 
+        "reviewCount": reviewCount.toString()
       },
       "offers": {
         "@type": "Offer",
         "url": pageUrl,
         "priceCurrency": "THB",
-        "price": priceValue || "1500",
-        "availability": "https://schema.org/InStock",
-        "itemCondition": "https://schema.org/NewCondition"
+        "price": rawPrice,
+        "availability": "https://schema.org/InStock"
       }
     };
 
-    // 6. 🚀 สร้าง HTML Response
+    // 6. 🚀 Generate HTML
     const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
-  <meta name="description" content="${description}">
-  <link rel="canonical" href="${pageUrl}">
-  <meta name="robots" content="index, follow, max-image-preview:large">
-
-  <!-- Open Graph (Facebook/Line/Twitter) -->
-  <meta property="og:site_name" content="Sideline Chiangmai">
-  <meta property="og:title" content="${title}">
-  <meta property="og:description" content="${description}">
-  <meta property="og:image" content="${imageUrl}">
-  <meta property="og:image:width" content="800">
-  <meta property="og:image:height" content="800">
-  <meta property="og:url" content="${pageUrl}">
-  <meta property="og:type" content="profile">
-  <meta property="og:locale" content="th_TH">
-
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
-  <meta name="twitter:description" content="${description}">
-  <meta name="twitter:image" content="${imageUrl}">
-
-  <!-- ✅ SCHEMA INJECTION ✅ -->
-  <script type="application/ld+json">
-    ${JSON.stringify(schemaData)}
-  </script>
-
-  <style>
-    /* CSS สำหรับ Bot และหน้า Preview */
-    :root { --primary: #ec4899; --text: #1f2937; --bg: #fdf2f8; }
-    body { font-family: 'Prompt', -apple-system, sans-serif; margin: 0; line-height: 1.6; background: var(--bg); color: var(--text); }
-    .container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
-    .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
-    .content { padding: 24px; }
-    h1 { color: var(--primary); margin: 0 0 10px 0; font-size: 22px; line-height: 1.3; }
-    .rating-badge { display: inline-flex; align-items: center; background: #fffbeb; color: #b45309; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; margin-bottom: 16px; border: 1px solid #fcd34d; }
-    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-    .meta-item { background: #f3f4f6; padding: 10px; border-radius: 8px; font-size: 14px; }
-    .meta-label { color: #6b7280; font-size: 12px; display: block; }
-    .meta-val { font-weight: 600; color: #111; }
-    .desc-box { background: #fdf2f8; padding: 16px; border-radius: 12px; color: #4b5563; font-size: 15px; margin-bottom: 24px; border: 1px dashed #fbcfe8; }
-    .cta-btn { display: block; background: #06c755; color: #fff; text-align: center; padding: 16px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3); transition: transform 0.2s; }
-    .footer-link { text-align: center; margin-top: 30px; padding-bottom: 30px; font-size: 14px; }
-    .footer-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <meta name="description" content="${description}">
+    <link rel="canonical" href="${pageUrl}">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
+    <meta property="og:image" content="${imageUrl}">
+    <meta property="og:url" content="${pageUrl}">
+    <meta property="og:type" content="profile">
+    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; margin: 0; background: #fdf2f8; color: #1f2937; line-height: 1.6; }
+        .container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; }
+        .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+        .content { padding: 20px; }
+        h1 { color: #ec4899; font-size: 22px; margin-bottom: 10px; }
+        .rating-badge { background: #fffbeb; color: #b45309; padding: 6px 12px; border-radius: 8px; font-weight: bold; display: inline-block; border: 1px solid #fcd34d; margin-bottom: 15px; }
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+        .meta-item { background: #f3f4f6; padding: 12px; border-radius: 10px; }
+        .meta-label { font-size: 12px; color: #6b7280; display: block; }
+        .meta-val { font-size: 15px; font-weight: 600; }
+        .cta-btn { display: block; background: #06c755; color: white; text-align: center; padding: 16px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 18px; margin-top: 25px; box-shadow: 0 4px 12px rgba(6,199,85,0.3); }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <img src="${imageUrl}" alt="${title}" class="hero-img">
-    <div class="content">
-      <h1>${title}</h1>
-      
-      <!-- ⭐ Visual Rating (แสดงให้ตรงกับ Schema ป้องกันโดนแบน) -->
-      <div class="rating-badge">
-        <span>⭐⭐⭐⭐⭐ 4.9 (128 รีวิว)</span>
-      </div>
-
-      <div class="meta-grid">
-        <div class="meta-item"><span class="meta-label">💰 ราคาเริ่มต้น</span><span class="meta-val">${pPrice}</span></div>
-        <div class="meta-item"><span class="meta-label">📍 พิกัด</span><span class="meta-val">${pLoc}</span></div>
-        <div class="meta-item"><span class="meta-label">📏 สัดส่วน</span><span class="meta-val">${profile.stats || '-'}</span></div>
-        <div class="meta-item"><span class="meta-label">🎂 อายุ</span><span class="meta-val">${pAge}</span></div>
-      </div>
-
-      <div class="desc-box">"${profile.description || 'ทักมาคุยรายละเอียดกันก่อนได้นะคะ'}"</div>
-
-      <a href="https://line.me/ti/p/${profile.lineId || ''}" class="cta-btn">📲 แอดไลน์จองคิว</a>
-
-      <div class="footer-link"><a href="/">🏠 กลับสู่หน้าหลัก Sideline Chiangmai</a></div>
+    <div class="container">
+        <img src="${imageUrl}" alt="${pName}" class="hero-img">
+        <div class="content">
+            <div class="rating-badge">⭐ ${ratingValue} (${reviewCount} รีวิว)</div>
+            <h1>${title}</h1>
+            <div class="meta-grid">
+                <div class="meta-item"><span class="meta-label">ราคาเริ่มต้น</span><span class="meta-val">${displayPrice}</span></div>
+                <div class="meta-item"><span class="meta-label">พื้นที่</span><span class="meta-val">${pLoc}</span></div>
+                <div class="meta-item"><span class="meta-label">สัดส่วน</span><span class="meta-val">${profile.stats || '-'}</span></div>
+                <div class="meta-item"><span class="meta-label">อายุ</span><span class="meta-val">${pAge}</span></div>
+            </div>
+            <p>${profile.description || 'สนใจสอบถามข้อมูลเพิ่มเติม แอดไลน์คุยกับน้องได้โดยตรงเลยค่ะ'}</p>
+            <a href="https://line.me/ti/p/${profile.lineId || ''}" class="cta-btn">📲 แอดไลน์จองคิว</a>
+            <div style="text-align:center; margin-top:40px; font-size:14px;">
+                <a href="/" style="color:#ec4899; text-decoration:none;">🏠 กลับหน้าหลัก</a>
+            </div>
+        </div>
     </div>
-  </div>
 </body>
 </html>`;
 
-    // 7. ส่ง Response กลับไปให้ Bot (พร้อม Cache)
     return new Response(html, {
-      headers: { 
+      headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Netlify-CDN-Cache-Control": "public, s-maxage=86400", // Cache ที่ CDN 24 ชม. (เร็วมาก)
-        "Cache-Control": "public, max-age=3600" // Cache ที่ Google 1 ชม.
+        "Netlify-CDN-Cache-Control": "public, s-maxage=3600",
+        "Cache-Control": "public, max-age=600"
       }
     });
 
-  } catch (error) {
-    // 🚨 Fail-Safe: ถ้ามี Error ใดๆ ก็ตาม ให้ข้ามไปโหลดหน้าเว็บปกติทันที
-    console.error('Edge Function Error:', error);
+  } catch (err) {
+    console.error("SSR Error:", err);
     return context.next();
   }
 };
