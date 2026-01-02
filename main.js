@@ -1494,6 +1494,96 @@ function generatePersonSchema(p, descriptionOverride) {
 
     return schema;
 }
+// --- START OF COMPLETE FUNCTIONS ---
+
+/**
+ * [COMPLETE FUNCTION 1/3]
+ * สร้าง Schema สำหรับหน้าคำถามที่พบบ่อย (FAQPage)
+ * @param {Array} faqData - อาร์เรย์ของ { question, answer }
+ * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
+ */
+function generateFAQPageSchema(faqData) {
+    if (!faqData || faqData.length === 0) return null;
+    return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqData.map(item => ({
+            "@type": "Question",
+            "name": item.question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": item.answer
+            }
+        }))
+    };
+}
+
+/**
+ * [COMPLETE FUNCTION 2/3]
+ * สร้าง Schema สำหรับ Breadcrumb (เส้นทางนำทาง)
+ * @param {string} type - 'profile' หรือ 'location'
+ * @param {string} name - ชื่อโปรไฟล์ หรือ ชื่อจังหวัด
+ * @returns {Object} - JSON-LD object สำหรับ BreadcrumbList
+ */
+function generateBreadcrumbSchema(type, name) {
+    const home = {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "หน้าแรก",
+        "item": CONFIG.SITE_URL
+    };
+
+    let secondItem;
+    if (type === 'profile') {
+        secondItem = {
+            "@type": "ListItem",
+            "position": 2,
+            "name": name
+        };
+    } else if (type === 'location') {
+        secondItem = {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `จังหวัด ${name}`
+        };
+    }
+
+    const list = secondItem ? [home, secondItem] : [home];
+    return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": list
+    };
+}
+
+/**
+ * [COMPLETE FUNCTION 3/3]
+ * สร้าง Schema สำหรับหน้ารายการ (ItemList) เช่น หน้าจังหวัด
+ * @param {Object} pageData - ข้อมูลของหน้าเว็บ รวมถึง profiles array
+ * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
+ */
+function generateListingSchema(pageData) {
+    if (!pageData || !pageData.profiles || pageData.profiles.length === 0) return null;
+    return {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": `รายชื่อไซด์ไลน์ในจังหวัด ${pageData.provinceName}`,
+        "description": pageData.description,
+        "numberOfItems": pageData.profiles.length,
+        "itemListElement": pageData.profiles.map((p, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Person",
+                "name": p.name,
+                "url": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
+                "image": (p.images && p.images.length > 0) ? p.images[0].src : CONFIG.DEFAULT_OG_IMAGE
+            }
+        }))
+    };
+}
+
+// --- END OF COMPLETE FUNCTIONS ---
 // ✅ อัปเกรด Website/Org: ระบุชื่อแบรนด์ให้ตรงกับ URL
 function generateWebsiteSchema() {
     return {
@@ -1969,5 +2059,30 @@ async function initFooterLinks() {
         viewAll.innerHTML = `<a href="/profiles.html" class="text-pink-500 font-bold hover:underline mt-2 inline-block">ดูจังหวัดอื่นๆ ทั้งหมด (${provincesList.length})</a>`;
         footerContainer.appendChild(viewAll);
     }
+}
+// ✅ เพิ่มฟังก์ชันนี้ลงไปในไฟล์ main.js เพื่อกันแอปเด้ง
+function showErrorState(error) {
+    console.error("❌ เกิดข้อผิดพลาดร้ายแรง:", error);
+    
+    // 1. ซ่อนตัวโหลดหมุนๆ
+    hideLoadingState();
+
+    // 2. แสดงข้อความแจ้งเตือนบนหน้าจอ (ดีกว่าปล่อยจอขาว)
+    const displayArea = document.getElementById('profiles-display-area');
+    if (displayArea) {
+        displayArea.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #ef4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h3 style="font-size: 20px; font-weight: bold;">โหลดข้อมูลไม่สำเร็จ</h3>
+                <p style="margin-top: 8px; color: #374151;">ระบบไม่สามารถดึงข้อมูลได้ในขณะนี้<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือลองใหม่อีกครั้ง</p>
+                <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 24px; background-color: #ec4899; color: white; border-radius: 99px; border: none; cursor: pointer; font-weight: bold;">
+                    <i class="fas fa-sync-alt mr-2"></i> ลองใหม่
+                </button>
+            </div>
+        `;
+    }
+    
+    // 3. แจ้งเตือนแบบ Popup (เผื่อไม่เห็น)
+    // alert("ขออภัย ระบบไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
 }
 })();
