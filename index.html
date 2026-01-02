@@ -171,44 +171,37 @@
 
 
 <body class="antialiased" data-page="home">
-
-<header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
-    <div class="container mx-auto px-6 h-14 flex items-center justify-between">
+<header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
+    <div class="container mx-auto px-4 h-14 flex items-center justify-between">
         
-    <!-- ✅ โลโก้ -->
-     <a href="/" aria-label="sidelinechiangmai หน้าแรก">
-      <img src="/images/logo-sidelinechiangmai.webp" 
-     alt="sideline chiangmai - ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก100% ไม่ต้องมัดจำ" 
-     class="h-[28px] w-auto" 
-     width="82" height="28" 
-     loading="eager" 
-     fetchpriority="high" />
-</a>
-
-        <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 dark:text-gray-400 mt-2">
-            อัปเดต: <span id="last-updated-time" class="font-semibold text-red-600 dark:text-red-400">กำลังโหลด...</span>
+        <div class="flex items-center">
+            <a href="/" aria-label="sidelinechiangmai หน้าแรก" class="flex items-center">
+                <img src="/images/logo-sidelinechiangmai.webp" 
+                     alt="sideline chiangmai" 
+                     class="h-[28px] w-auto" 
+                     width="82" height="28" 
+                     loading="eager" fetchpriority="high" />
+            </a>
         </div>
-        
-        <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
-            <a href="profiles.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
-            <a href="locations.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
-            <a href="about.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
-            <a href="faq.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
-            <a href="blog.html" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
-        </nav>
 
-        
-        <div class="flex items-center gap-2">
-            
-            <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปลี่ยนโหมดสี" title="เปลี่ยนโหมดสี">
-                <i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i>
-                <span class="sr-only">เปลี่ยนโหมดสี</span>
+        <div class="flex items-center justify-center flex-1">
+            <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 ...">
+    อัปเดต: <span id="last-updated-time">...</span>
+</div>
+        </div>
+
+        <div class="flex items-center gap-1 md:gap-3">
+            <nav class="hidden lg:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
+                <a href="profiles.html" class="px-3 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ</a>
+                <a href="locations.html" class="px-3 py-2 rounded-full hover:bg-accent transition-colors">พิกัด</a>
+            </nav>
+
+            <button class="theme-toggle-btn w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปลี่ยนโหมดสี">
+                <i class="fas fa-sun theme-toggle-icon text-base"></i>
             </button>
 
-            
-            <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปิดเมนูนำทาง" aria-haspopup="true" aria-controls="sidebar" title="เปิดเมนูนำทาง">
-                <i class="fas fa-bars text-xl" aria-hidden="true"></i>
-                <span class="sr-only">เปิดเมนูนำทาง</span>
+            <button id="menu-toggle" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-accent" type="button" aria-label="เปิดเมนู">
+                <i class="fas fa-bars text-lg"></i>
             </button>
         </div>
     </div>
@@ -787,10 +780,10 @@
   </div>
 </div>
 
-<!-- === จบส่วนโค้ด LIGHTBOX === -->
 <script type="module" src="/main.js"></script>
 
 <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
+
 
 
 </body>

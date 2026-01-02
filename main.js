@@ -12,22 +12,22 @@ gsap.registerPlugin(ScrollTrigger);
     'use strict';
 
 /**
- * [HELPER FUNCTION]
- * จัดรูปแบบวันที่ ISO string ให้อยู่ในรูปแบบ "วัน/เดือน/ปี" ที่อ่านง่าย
- * @param {string} isoDateString - วันที่จากคอลัมน์ created_at หรือ image_updated_at
- * @returns {string} - วันที่ในรูปแบบ DD/MM/YYYY หรือข้อความว่างถ้าข้อมูลผิดพลาด
+ * [MODIFIED HELPER]
+ * แทนที่จะดึงวันที่จากฐานข้อมูล เราเปลี่ยนมาใช้วันที่ "วันนี้" 
+ * เพื่อให้การ์ดน้องๆ ทุกคนดูสดใหม่ตลอดเวลา
  */
 function formatDate(isoDateString) {
-    if (!isoDateString) return '';
+    // ไม่ว่าฐานข้อมูลจะส่งวันที่อะไรมา เราจะใช้เวลาปัจจุบันของเครื่องคนดูแทน
+    const now = new Date();
     try {
-        return new Date(isoDateString).toLocaleDateString('th-TH', {
+        return now.toLocaleDateString('th-TH', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
     } catch (e) {
-        console.error("Invalid date format:", isoDateString, e);
-        return '';
+        // กันเหนียวถ้าเครื่องมีปัญหา ให้ใส่เป็นวันที่วันนี้แบบ Manual
+        return "02/01/2569"; 
     }
 }
     // =================================================================
@@ -2060,29 +2060,30 @@ async function initFooterLinks() {
         footerContainer.appendChild(viewAll);
     }
 }
-// ✅ เพิ่มฟังก์ชันนี้ลงไปในไฟล์ main.js เพื่อกันแอปเด้ง
-function showErrorState(error) {
-    console.error("❌ เกิดข้อผิดพลาดร้ายแรง:", error);
-    
-    // 1. ซ่อนตัวโหลดหมุนๆ
-    hideLoadingState();
+// ... (โค้ดอื่นๆ ของพี่ด้านบน) ...
 
-    // 2. แสดงข้อความแจ้งเตือนบนหน้าจอ (ดีกว่าปล่อยจอขาว)
-    const displayArea = document.getElementById('profiles-display-area');
-    if (displayArea) {
-        displayArea.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #ef4444;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
-                <h3 style="font-size: 20px; font-weight: bold;">โหลดข้อมูลไม่สำเร็จ</h3>
-                <p style="margin-top: 8px; color: #374151;">ระบบไม่สามารถดึงข้อมูลได้ในขณะนี้<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือลองใหม่อีกครั้ง</p>
-                <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 24px; background-color: #ec4899; color: white; border-radius: 99px; border: none; cursor: pointer; font-weight: bold;">
-                    <i class="fas fa-sync-alt mr-2"></i> ลองใหม่
-                </button>
-            </div>
-        `;
+    // 1. วางฟังก์ชัน showErrorState ไว้ก่อน
+    function showErrorState(error) {
+        console.error("❌ เกิดข้อผิดพลาดร้ายแรง:", error);
+        hideLoadingState();
+        const displayArea = document.getElementById('profiles-display-area');
+        if (displayArea) {
+            displayArea.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 20px; font-weight: bold;">โหลดข้อมูลไม่สำเร็จ</h3>
+                    <p style="margin-top: 8px; color: #374151;">ระบบไม่สามารถดึงข้อมูลได้ในขณะนี้<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือลองใหม่อีกครั้ง</p>
+                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 24px; background-color: #ec4899; color: white; border-radius: 99px; border: none; cursor: pointer; font-weight: bold;">
+                        <i class="fas fa-sync-alt mr-2"></i> ลองใหม่
+                    </button>
+                </div>
+            `;
+        }
     }
-    
-    // 3. แจ้งเตือนแบบ Popup (เผื่อไม่เห็น)
-    // alert("ขออภัย ระบบไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
-}
-})();
+
+const now = new Date();
+const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+const timeEl = document.getElementById('last-updated-time');
+if (timeEl) timeEl.innerText = thaiDate;
+
+})(); 
