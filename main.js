@@ -532,78 +532,81 @@ async function handleRouting(dataLoaded = false) {
     }
 }
 
-    // =================================================================
-    // 7. ULTIMATE SEARCH ENGINE (Google Style + Fuse.js)
-    // =================================================================
+// =================================================================
+// 7. ULTIMATE SEARCH ENGINE (เวอร์ชันอัปเกรด)
+// =================================================================
+let fuseEngine; 
+function initSearchAndFilters() {
+    if (!dom.searchForm) return;
+
+    // ตั้งค่า Search Engine (อัปเกรด Keys ในการค้นหา)
+    const fuseOptions = {
+        includeScore: true,
+        threshold: 0.35, // เพิ่มค่าเล็กน้อยเพื่อให้ค้นหาเจอได้ง่ายขึ้น
+        ignoreLocation: true,
+        keys: [
+            // --- Keys ที่มีอยู่เดิม (ปรับ Weight เล็กน้อย) ---
+            { name: 'name', weight: 1.0 },
+            { name: 'provinceNameThai', weight: 0.9 },
+            { name: 'provinceKey', weight: 0.8 },
+            { name: 'styleTags', weight: 0.5 },
+            { name: 'description', weight: 0.1 },
+            
+            // --- ✅ Keys ที่เพิ่มใหม่เพื่อการค้นหาที่สมบูรณ์แบบ ---
+            { name: 'location', weight: 0.7 },      // ค้นหาพิกัดย่อย เช่น "นิมมาน", "เจ็ดยอด"
+            { name: 'skinTone', weight: 0.6 },      // ค้นหาสีผิว เช่น "ขาวอมชมพู"
+            { name: 'stats', weight: 0.5 },         // ค้นหาสัดส่วน เช่น "36-25-35"
+            { name: 'rate', weight: 0.4 },          // ค้นหาเรทราคา เช่น "1500"
+            { name: 'availability', weight: 0.4 }   // ค้นหาสถานะ เช่น "รับงาน"
+        ]
+    };
     
-    let fuseEngine; 
-    function initSearchAndFilters() {
-        if (!dom.searchForm) return;
-
-        // ตั้งค่า Search Engine
-        const fuseOptions = {
-            includeScore: true,
-            threshold: 0.3,
-            ignoreLocation: true,
-            keys: [
-                { name: 'name', weight: 1.0 },
-                { name: 'provinceNameThai', weight: 1.0 }, // เพิ่มน้ำหนักชื่อจังหวัดไทยให้สูงสุด
-                { name: 'provinceKey', weight: 0.8 },
-                { name: 'styleTags', weight: 0.5 },
-                { name: 'description', weight: 0.2 }
-            ]
-        };
-        
-        if (state.allProfiles.length > 0) {
-            fuseEngine = new Fuse(state.allProfiles, fuseOptions);
-        }
-
-        // Listener สำหรับ Input
-        const clearBtn = document.getElementById('clear-search-btn');
-        const suggestionsBox = document.getElementById('search-suggestions');
-        
-        dom.searchInput?.addEventListener('input', (e) => {
-            const val = e.target.value;
-            if(clearBtn) clearBtn.classList.toggle('hidden', !val);
-            // applyUltimateFilters() จะถูกเรียกที่นี่
-            applyUltimateFilters(); 
-        });
-
-        // ปุ่ม Clear
-        clearBtn?.addEventListener('click', () => {
-            dom.searchInput.value = '';
-            clearBtn.classList.add('hidden');
-            dom.searchInput.focus();
-            applyUltimateFilters();
-        });
-
-        // เปลี่ยนจังหวัดใน Dropdown
-        dom.provinceSelect?.addEventListener('change', () => {
-            if (dom.searchInput) dom.searchInput.value = ''; // เคลียร์ช่องพิมพ์
-            history.pushState(null, '', dom.provinceSelect.value ? `/location/${dom.provinceSelect.value}` : '/');
-            applyUltimateFilters(true);
-        });
-
-        dom.availabilitySelect?.addEventListener('change', () => applyUltimateFilters(true));
-        dom.featuredSelect?.addEventListener('change', () => applyUltimateFilters(true));
-        
-        // ปุ่ม Reset
-        dom.resetSearchBtn?.addEventListener('click', () => {
-            dom.searchInput.value = '';
-            dom.provinceSelect.value = '';
-            dom.availabilitySelect.value = '';
-            dom.featuredSelect.value = '';
-            history.pushState(null, '', '/');
-            applyUltimateFilters(true);
-        });
-
-        dom.searchForm.addEventListener('submit', (e) => { 
-            e.preventDefault(); 
-            applyUltimateFilters(true); 
-            if(suggestionsBox) suggestionsBox.classList.add('hidden');
-        });
+    if (state.allProfiles.length > 0) {
+        fuseEngine = new Fuse(state.allProfiles, fuseOptions);
     }
+
+    // --- ส่วน Listener ไม่มีการเปลี่ยนแปลง ---
+    const clearBtn = document.getElementById('clear-search-btn');
+    const suggestionsBox = document.getElementById('search-suggestions');
     
+    dom.searchInput?.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if(clearBtn) clearBtn.classList.toggle('hidden', !val);
+        applyUltimateFilters(); 
+    });
+
+    clearBtn?.addEventListener('click', () => {
+        dom.searchInput.value = '';
+        clearBtn.classList.add('hidden');
+        dom.searchInput.focus();
+        applyUltimateFilters();
+    });
+
+    dom.provinceSelect?.addEventListener('change', () => {
+        if (dom.searchInput) dom.searchInput.value = '';
+        history.pushState(null, '', dom.provinceSelect.value ? `/location/${dom.provinceSelect.value}` : '/');
+        applyUltimateFilters(true);
+    });
+
+    dom.availabilitySelect?.addEventListener('change', () => applyUltimateFilters(true));
+    dom.featuredSelect?.addEventListener('change', () => applyUltimateFilters(true));
+    
+    dom.resetSearchBtn?.addEventListener('click', () => {
+        dom.searchInput.value = '';
+        dom.provinceSelect.value = '';
+        dom.availabilitySelect.value = '';
+        dom.featuredSelect.value = '';
+        history.pushState(null, '', '/');
+        applyUltimateFilters(true);
+    });
+
+    dom.searchForm.addEventListener('submit', (e) => { 
+        e.preventDefault(); 
+        applyUltimateFilters(true); 
+        if(suggestionsBox) suggestionsBox.classList.add('hidden');
+    });
+}
+
     // ✅ ฟังก์ชันช่วยบันทึกข้อมูลแบบปลอดภัย
 function saveCache(key, data) {
     try {
@@ -640,79 +643,7 @@ function loadCache(key, expiryHours = 24) {
     }
 }
 
-function applyUltimateFilters(updateUrl = false) {
-        let query = {
-            text: dom.searchInput?.value?.trim() || '',
-            province: dom.provinceSelect?.value || '',
-            avail: dom.availabilitySelect?.value || '',
-            featured: dom.featuredSelect?.value === 'true'
-        };
 
-        // 🟢 จุดที่แก้: เพิ่ม Logic ตรวจสอบว่าคำที่พิมพ์ คือชื่อจังหวัดหรือไม่?
-        // ถ้าใช่ -> ให้ระบบเปลี่ยนไปใช้การกรอง "ทั้งจังหวัด" ทันที
-        if (query.text) {
-            for (let [key, name] of state.provincesMap.entries()) {
-                // เช็คว่าคำที่พิมพ์ มีชื่อจังหวัดปนอยู่มั้ย (เช่น "เชียงใหม่", "น้องเชียงใหม่")
-                if (name === query.text || name.includes(query.text) || query.text.includes(name)) {
-                    
-                    // สั่งระบบว่า: "ผู้ใช้ต้องการดูจังหวัดนี้นะ" (Set key จังหวัด)
-                    query.province = key; 
-                    
-                    // *เคล็ดลับ* ลบ text ทิ้ง เพื่อให้ระบบดึง "ทุกคน" ที่มี key นี้ออกมา
-                    // (ไม่ใช่แค่คนที่พิมพ์ชื่อจังหวัดไว้ใน Description)
-                    query.text = ''; 
-                    
-                    // Update Dropdown ให้ตรงกันด้วย (เพื่อความเนียน)
-                    if(dom.provinceSelect) dom.provinceSelect.value = key;
-                    
-                    break; // เจอแล้วหยุดหา
-                }
-            }
-        }
-
-        if (query.province && query.province !== 'all') localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
-
-        let filtered = state.allProfiles;
-
-        // 1. กรองด้วย Text (จะทำงานเฉพาะถ้าเราไม่ได้ลบ text ทิ้งข้างบน หรือค้นหาชื่อเล่น)
-        if (query.text) {
-            if (fuseEngine) {
-                const results = fuseEngine.search(query.text);
-                filtered = results.map(result => result.item);
-            } else {
-                const lower = query.text.toLowerCase();
-                filtered = filtered.filter(p => p.searchString.includes(lower));
-            }
-        }
-
-        // 2. กรองด้วย Category/Province 
-        // (จุดนี้แหละที่น้องๆ อีก 89 คนจะโผล่ออกมา เพราะเรา set query.province ไว้แล้ว)
-        filtered = filtered.filter(p => {
-            const provinceMatch = !query.province || query.province === 'all' || p.provinceKey === query.province;
-            const availMatch = !query.avail || query.avail === 'all' || query.avail === '' || p.availability === query.avail;
-            const featuredMatch = !query.featured || p.isfeatured;
-            return provinceMatch && availMatch && featuredMatch;
-        });
-
-        // UI Updates
-        if (dom.resultCount) {
-             dom.resultCount.innerHTML = filtered.length > 0 ? `✅ พบ ${filtered.length} โปรไฟล์` : '❌ ไม่พบข้อมูล';
-             dom.resultCount.style.display = 'block';
-        }
-
-        // ส่ง Flag ไปบอกว่าตอนนี้กำลังค้นหา (เพื่อให้โชว์หัวข้อแบบ Search Result)
-        const isSearchMode = !!dom.searchInput?.value || !!query.province; 
-        renderProfiles(filtered, isSearchMode);
-
-        // Update URL
-        if (updateUrl) {
-            const params = new URLSearchParams();
-            if (query.text) params.set('q', query.text);
-            const path = (query.province && query.province !== 'all') ? `/location/${query.province}` : '/';
-            const qs = params.toString() ? '?' + params.toString() : '';
-            if (!window.location.pathname.includes('/sideline/')) history.pushState({}, '', path + qs);
-        }
-    }
 function updateUltimateSuggestions(val) {
     const box = document.getElementById('search-suggestions');
     const input = document.getElementById('search-keyword');
@@ -1264,8 +1195,8 @@ async function fetchSingleProfile(slug) {
     }
 
 /**
- * [COMPLETE FUNCTION 2/3]
- * อัปเดตข้อมูลใน Lightbox ทั้งหมด รวมถึง "วันที่อัปเดตรูปภาพล่าสุด"
+ * [ULTIMATE COMPLETE VERSION]
+ * อัปเดตข้อมูลใน Lightbox ทั้งหมดให้ครบถ้วนตามตารางข้อมูล
  */
 function populateLightboxData(p) {
     if (!p) {
@@ -1274,6 +1205,7 @@ function populateLightboxData(p) {
         return;
     }
 
+    // --- Cache DOM elements ---
     const els = {
         name: document.getElementById('lightbox-profile-name-main'),
         hero: document.getElementById('lightboxHeroImage'),
@@ -1284,22 +1216,37 @@ function populateLightboxData(p) {
         detailsContainer: document.getElementById('lightboxDetailsCompact'),
         descContainer: document.getElementById('lightboxDescriptionContainer'),
         descContent: document.getElementById('lightboxDescriptionContent'),
-        lineBtnContainer: document.querySelector('.lightbox-details'),
-        dateAddedContainer: document.getElementById('lightboxDateAdded')
+        lineBtnContainer: document.querySelector('.lightbox-details')
+        // ไม่ต้องใช้ dateAddedContainer แล้ว เพราะจะรวมเข้าไปใน detailsContainer
     };
 
+    // --- 1. Header & Quote ---
     if (els.name) els.name.textContent = p.name || 'ไม่ระบุชื่อ';
     if (els.quote) {
         const hasQuote = p.quote && p.quote.trim() !== '';
         els.quote.textContent = hasQuote ? `"${p.quote}"` : '';
         els.quote.style.display = hasQuote ? 'block' : 'none';
     }
+    
+    // --- 2. Availability Badge ---
+    if (els.avail) {
+        let statusClass = 'status-inquire';
+        let icon = '<i class="fas fa-question-circle"></i>';
+        if (p.availability?.toLowerCase().includes('ว่าง') || p.availability?.toLowerCase().includes('รับงาน')) {
+            statusClass = 'status-available';
+            icon = '<i class="fas fa-check-circle"></i>';
+        } else if (p.availability?.toLowerCase().includes('ไม่ว่าง')) {
+            statusClass = 'status-busy';
+            icon = '<i class="fas fa-times-circle"></i>';
+        }
+        els.avail.innerHTML = `<div class="lb-status-badge ${statusClass}">${icon} ${p.availability || 'สอบถาม'}</div>`;
+    }
 
+    // --- 3. Image Gallery ---
     if (els.hero) {
         els.hero.src = p.images?.[0]?.src || '/images/placeholder-profile.webp';
-        els.hero.alt = p.altText || p.name;
+        els.hero.alt = p.altText || `รูปโปรไฟล์ ${p.name}`;
     }
-    
     if (els.thumbs) {
         els.thumbs.innerHTML = '';
         const hasGallery = p.images && p.images.length > 1;
@@ -1325,15 +1272,18 @@ function populateLightboxData(p) {
         }
     }
 
+    // --- 4. Style Tags ---
     if (els.tags) {
         els.tags.innerHTML = '';
-        const hasTags = p.styleTags && p.styleTags.length > 0;
+        const hasTags = Array.isArray(p.styleTags) && p.styleTags.length > 0 && p.styleTags[0] !== '';
         if (hasTags) {
             p.styleTags.forEach(t => {
-                const span = document.createElement('span');
-                span.className = 'tag-badge';
-                span.textContent = t;
-                els.tags.appendChild(span);
+                if (t && t.trim() !== '') {
+                    const span = document.createElement('span');
+                    span.className = 'tag-badge';
+                    span.textContent = t.trim();
+                    els.tags.appendChild(span);
+                }
             });
             els.tags.style.display = 'flex';
         } else {
@@ -1341,49 +1291,49 @@ function populateLightboxData(p) {
         }
     }
 
+    // --- 5. ✅ สร้าง HTML แสดงรายละเอียดทั้งหมดแบบสมบูรณ์ ---
     if (els.detailsContainer) {
         const provinceName = state.provincesMap.get(p.provinceKey) || '';
-        const fullLocation = [provinceName, p.location ? `(${p.location})` : ''].filter(Boolean).join(' ');
-        const detailsData = {
-            'อายุ': p.age,
-            'สัดส่วน': p.stats,
-            'สูง/หนัก': (p.height != null || p.weight != null) ? `${p.height ?? '-'}/${p.weight ?? '-'}` : null,
-            'สีผิว': p.skinTone,
-            'พิกัด': fullLocation,
-            'เรทราคา': p.rate
-        };
-        const icons = { 'สีผิว': 'fa-palette', 'พิกัด': 'fa-map-marker-alt', 'เรทราคา': 'fa-tag' };
-        let detailsHTML = '<div class="stats-grid-container">';
-        ['อายุ', 'สัดส่วน', 'สูง/หนัก'].forEach(label => {
-            const value = detailsData[label];
-            if (value != null) {
-                detailsHTML += `<div class="stat-box"><span class="stat-label">${label}</span><span class="stat-value">${value || '-'}</span></div>`;
+        const fullLocation = [provinceName, p.location ? `(${p.location})` : ''].filter(Boolean).join(' ').trim();
+        const dateToShow = p.lastUpdated || p.created_at;
+        const formattedDate = formatDate(dateToShow);
+
+        let detailsHTML = '';
+
+        // --- ส่วนที่ 1: ข้อมูลทางกายภาพ ---
+        detailsHTML += `
+            <div class="stats-grid-container">
+                ${p.age ? `<div class="stat-box"><span class="stat-label">อายุ</span><span class="stat-value">${p.age} ปี</span></div>` : ''}
+                ${p.stats ? `<div class="stat-box"><span class="stat-label">สัดส่วน</span><span class="stat-value">${p.stats}</span></div>` : ''}
+                ${(p.height || p.weight) ? `<div class="stat-box"><span class="stat-label">สูง/หนัก</span><span class="stat-value">${p.height || '-'}/${p.weight || '-'}</span></div>` : ''}
+            </div>`;
+
+        // --- ส่วนที่ 2: ข้อมูลบริการและอื่นๆ ---
+        detailsHTML += '<div class="info-list-container mt-5 pt-5 border-t border-gray-200 dark:border-gray-700">';
+        
+        const infoRows = [
+            { label: 'สีผิว', value: p.skinTone, icon: 'fa-palette' },
+            { label: 'พิกัด', value: fullLocation, icon: 'fa-map-marker-alt', class: 'text-primary' },
+            { label: 'เรทราคา', value: p.rate, icon: 'fa-tag', class: 'text-green-600 dark:text-green-400' },
+            { label: 'อัปเดตล่าสุด', value: formattedDate, icon: 'fa-camera' }
+        ];
+
+        infoRows.forEach(row => {
+            if (row.value) {
+                detailsHTML += `
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas ${row.icon} info-icon"></i> ${row.label}</div>
+                        <div class="info-value ${row.class || ''}">${row.value}</div>
+                    </div>`;
             }
         });
-        detailsHTML += '</div><div class="info-list-container">';
-        ['สีผิว', 'พิกัด', 'เรทราคา'].forEach(label => {
-            const value = detailsData[label];
-            if (value != null && value !== '') {
-                const valueClass = label === 'พิกัด' ? 'text-primary' : (label === 'เรทราคา' ? 'text-green-600' : '');
-                detailsHTML += `<div class="info-row"><div class="info-label"><i class="fas ${icons[label]} info-icon"></i> ${label}</div><div class="info-value ${valueClass}">${value || '-'}</div></div>`;
-            }
-        });
+        
         detailsHTML += '</div>';
+        
         els.detailsContainer.innerHTML = detailsHTML;
     }
 
-    // --- ✅ LOGIC FOR DATE IN LIGHTBOX ---
-    if (els.dateAddedContainer) {
-        const dateToShow = p.image_updated_at || p.created_at;
-        const dateAdded = formatDate(dateToShow);
-        if (dateAdded) {
-            els.dateAddedContainer.innerHTML = `<i class="fa-solid fa-camera info-icon"></i> <strong>อัปเดตรูปภาพล่าสุด:</strong> ${dateAdded}`;
-            els.dateAddedContainer.style.display = 'block';
-        } else {
-            els.dateAddedContainer.style.display = 'none';
-        }
-    }
-
+    // --- 6. Description ---
     if (els.descContainer && els.descContent) {
         const hasDescription = p.description && p.description.trim() !== '';
         if (hasDescription) {
@@ -1394,6 +1344,7 @@ function populateLightboxData(p) {
         }
     }
 
+    // --- 7. LINE Button (Sticky Footer) ---
     const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
     if (oldWrapper) oldWrapper.remove();
     if (p.lineId && els.lineBtnContainer) {
@@ -1409,14 +1360,6 @@ function populateLightboxData(p) {
         wrapper.appendChild(link);
         els.lineBtnContainer.appendChild(wrapper);
     }
-    
-    if (els.avail) {
-        let statusClass = 'status-inquire';
-        let icon = '<i class="fas fa-question-circle"></i>';
-        if (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) { statusClass = 'status-available'; icon = '<i class="fas fa-check-circle"></i>'; }
-        else if (p.availability?.includes('ไม่ว่าง')) { statusClass = 'status-busy'; icon = '<i class="fas fa-times-circle"></i>'; }
-        els.avail.innerHTML = `<div class="lb-status-badge ${statusClass}">${icon} ${p.availability || 'สอบถาม'}</div>`;
-    }
 }
 
 // =================================================================
@@ -1430,7 +1373,7 @@ const FAQ_DATA = [
     },
     { 
         question: "ถ้าน้องตอบช้าหรือมีปัญหาทำอย่างไร?", 
-        answer: "เรามีแอดมินดูแลฟรีตลอดเวลาทำการ สามารถติดต่อประสานงานผ่าน LINE ได้ทันทีครับ" 
+        answer: "เรามีแอดมินดูแลฟรีตลอดเวลาทำการ สามารถติดต่อประสานงานผ่าน LINE ไดเลยค่ะ" 
     },
     { 
         question: "น้องๆ ในเว็บตรงปกไหม?", 
