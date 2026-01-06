@@ -146,7 +146,7 @@
       "sameAs": [
         "https://www.facebook.com/sidelinechiangmai",
         "https://tiktok.com/@sidelinecm",
-        "https://bsky.app/profile/s-idelinechiangmai.bsky.social"
+        "https://bsky.app/profile/sidelinechiangmai.bsky.social"
       ]
     }
   ]
@@ -165,6 +165,44 @@
         #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
         .profile-card { padding: 10px; border-radius: 12px; }
     }
+
+        /* --- CSS สำหรับปุ่มไลค์ (ปลอดภัย ไม่กระทบส่วนอื่น) --- */
+
+        /* สไตล์เริ่มต้นของหัวใจ */
+        .like-button-wrapper .fa-heart {
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            color: rgba(255, 255, 255, 0.8); /* สีขาวโปร่งแสง */
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* สไตล์เมื่อเอาเมาส์ไปชี้ */
+        .like-button-wrapper:hover .fa-heart {
+            transform: scale(1.15);
+            color: rgba(255, 255, 255, 1);
+        }
+
+        /* สไตล์เมื่อถูกไลค์แล้ว (.liked) */
+        .like-button-wrapper.liked .fa-heart {
+            color: #ec4899; /* สีชมพูสด */
+        }
+        
+        /* เมื่อไลค์แล้ว เอาเมาส์ไปชี้ จะเป็นสีชมพูที่สว่างขึ้น */
+        .like-button-wrapper.liked:hover .fa-heart {
+            color: #f472b6;
+        }
+
+        /* Animation หัวใจเต้นตอนกด */
+        @keyframes heart-beat-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* เรียกใช้ Animation เมื่อมีคลาส .liked */
+        .like-button-wrapper.liked .fa-heart {
+            animation: heart-beat-animation 0.3s ease-in-out;
+        }
+    
   </style>
 </head>
 
@@ -310,7 +348,7 @@
         <i class="fas fa-link mr-1" aria-hidden=true></i>Linktree
       </a>
 
-      <a href="https://bsky.app/profile/s-idelinechiangmai.bsky.social" 
+      <a href="https://bsky.app/profile/sidelinechiangmai.bsky.social" 
    target="_blank" 
    rel="nofollow noopener noreferrer"
    class="social-item bluesky inline-flex items-center font-bold text-white bg-indigo-700 hover:bg-indigo-800 rounded-lg px-3 py-1 transition-colors"
