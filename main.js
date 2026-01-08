@@ -1482,130 +1482,105 @@ const FAQ_DATA = [
 ];
 
 // =================================================================
-// 10. SEO META TAGS UPDATER (ULTIMATE & CLEANEST VERSION)
+// 10. SEO META TAGS UPDATER (ADVANCED REAL-DATA & SAFE VERSION)
 // =================================================================
 
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // 1. ล้าง Schema เดิมออกก่อนเพื่อป้องกันข้อมูลซ้ำซ้อน
+    /** 
+     * 🚩 [จุดสำคัญที่สุด] 
+     * ถ้าไม่ใช่หน้าโปรไฟล์น้องๆ และไม่ใช่หน้าจังหวัด (ไม่มีข้อมูล Dynamic)
+     * ให้หยุดทำงานทันที เพื่อรักษาค่าดั้งเดิมใน index.html หรือไฟล์หลักอื่นๆ ไว้
+     */
+    if (!profile && !pageData) {
+        console.log("SEO: หน้าหลัก/ไฟล์หลัก -> ใช้ค่าดั้งเดิมจาก HTML");
+        return; 
+    }
+
+    // 1. ล้าง Schema เดิมออกก่อน (เฉพาะหน้าที่เป็น Dynamic)
     const oldScripts = document.querySelectorAll('script[id^="schema-jsonld"]');
     oldScripts.forEach(s => s.remove());
 
-    // --- KEYWORDS STRATEGY (กลยุทธ์คำค้นหา) ---
     const BRAND_NAME = "Sideline Chiangmai";
-    // คำหลักที่คนค้นหาบ่อยที่สุด (High Volume Keywords)
-    const MAIN_KEYWORDS = "ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ เด็กเอ็น"; 
-    // จุดขายที่ทำให้คนตัดสินใจคลิก (Conversion Keywords)
-    const SELLING_POINTS = "ฟิวแฟน ตรงปก 100% ไม่มีมัดจำ"; 
-    // ปัจจัยความน่าเชื่อถือ (Trust Factors)
-    const TRUST_FACTORS = "ปลอดภัย จ่ายหน้างาน มีแอดมินดูแล 24ชม.";
-
     let title, description, canonicalUrl, ogType, ogImage, keywords;
 
-    // --- LOGIC: กำหนดค่าตามประเภทหน้า ---
+    // --- LOGIC: สร้างข้อมูลตามจริงจากฐานข้อมูล ---
+    
     if (profile) {
-        // [CASE 1: หน้าโปรไฟล์รายบุคคล]
-        const provinceName = state.provincesMap.get(profile.provinceKey) || 'เชียงใหม่';
-        const location = profile.location ? `โซน${profile.location}` : '';
-        const ageTxt = profile.age ? `อายุ ${profile.age}` : '';
-        const statsTxt = profile.stats ? `สัดส่วน ${profile.stats}` : '';
+        // [CASE 1: หน้าโปรไฟล์รายบุคคล - ดึงข้อมูลจริงทั้งหมด]
+        const province = state.provincesMap.get(profile.provinceKey) || 'เชียงใหม่';
+        const area = profile.location ? `โซน${profile.location}` : '';
+        const age = profile.age ? `อายุ ${profile.age} ปี` : '';
+        const stats = profile.stats ? `สัดส่วน ${profile.stats}` : '';
+        const rate = profile.rate ? `เรท ${profile.rate}` : '';
+
+        // Title: รับงาน[จังหวัด] + ไซด์ไลน์ ฟิวแฟนตรงปก ไม่มีมัดจำ
+        title = `น้อง${profile.name} รับงาน${province} ${area} ไซด์ไลน์ ฟิวแฟนตรงปก 100% ไม่มีมัดจำ | ${BRAND_NAME}`;
         
-        // Title: เน้นชื่อ + คีย์เวิร์ดหลัก + พิกัด
-        title = `น้อง${profile.name} ${MAIN_KEYWORDS} ${location} | ${SELLING_POINTS}`;
-        
-        // Description: ใส่รายละเอียดเจาะจง เพื่อดักจับ Long-tail Keywords (เช่น ค้นหาด้วยสัดส่วน/อายุ)
-        description = `น้อง${profile.name} ${ageTxt} ${statsTxt} ${location} ไซด์ไลน์${provinceName} รับงานเอง ${SELLING_POINTS} ${TRUST_FACTORS} ตัวจริงน่ารัก งานดี ไม่เร่งรีบ สนใจคลิกดูรูปและรีวิวเพิ่มเติม`;
+        // Description: รวมรายละเอียดจริง (อายุ/สัดส่วน/พิกัด/ราคา) และคำหลักขั้นสูง
+        description = `น้อง${profile.name} ${age} ${stats} ${area} ไซด์ไลน์${province} รับงานฟิวแฟน ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำ ${rate} งานดีไม่เร่งรีบ ดูรูปจริงและจองคิวแอดไลน์ได้เลย`;
         
         canonicalUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug}`;
         ogType = 'profile';
-        // เช็คว่ามีรูปหรือไม่ ถ้าไม่มีให้ใช้ Default
-        ogImage = (profile.images && profile.images.length > 0 && profile.images[0].src) 
-                  ? profile.images[0].src 
-                  : CONFIG.DEFAULT_OG_IMAGE;
-        
-        keywords = `${profile.name}, ไซด์ไลน์${provinceName}, รับงาน${provinceName}, ${location}, ${MAIN_KEYWORDS}, ${SELLING_POINTS}`;
+        ogImage = (profile.images && profile.images.length > 0) ? profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
+        keywords = `${profile.name}, รับงาน${province}, ไซด์ไลน์${province}, ฟิวแฟนตรงปก, ไม่มัดจำ, ${profile.location}`;
 
-        // Inject Schema
+        // ฉีด Schema น้องๆ (Person)
         injectSchema(generatePersonSchema(profile, description), 'schema-jsonld-person');
         injectSchema(generateBreadcrumbSchema('profile', profile.name), 'schema-jsonld-bc');
 
     } else if (pageData) {
-        // [CASE 2: หน้าแยกจังหวัด]
-        const provinceName = pageData.provinceName;
+        // [CASE 2: หน้าแยกจังหวัด - ดึงชื่อจังหวัดจริง]
+        const prov = pageData.provinceName;
         
-        title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ${SELLING_POINTS} | ${BRAND_NAME}`;
+        // Title: ไซด์ไลน์[จังหวัด] + รับงาน[จังหวัด] + ฟิวแฟนตรงปก ไม่มีมัดจำ
+        title = `ไซด์ไลน์${prov} รับงาน${prov} ฟิวแฟนตรงปก ไม่มีมัดจำ รวมน้องๆ งานดี | ${BRAND_NAME}`;
         
-        description = `รวมสาวสวย ไซด์ไลน์${provinceName} รับงาน${provinceName} ${MAIN_KEYWORDS} คัดเกรดพรีเมียม ${TRUST_FACTORS} อัปเดตน้องใหม่ล่าสุดวันนี้`;
+        // Description: เน้นคำค้นหาในพื้นที่และจุดขายหลัก
+        description = `รวมสาวสวย ไซด์ไลน์${prov} และ รับงาน${prov} ฟิวแฟน พิกัดทั่วเมือง ตรงปก 100% ไม่ต้องโอนมัดจำ จ่ายเงินหน้างานเท่านั้น ปลอดภัย มั่นใจได้ อัปเดตโปรไฟล์ใหม่ล่าสุดทุกวัน`;
         
         canonicalUrl = pageData.canonicalUrl;
         ogType = 'website';
         ogImage = CONFIG.DEFAULT_OG_IMAGE;
-        keywords = `ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ${MAIN_KEYWORDS}`;
+        keywords = `ไซด์ไลน์${prov}, รับงาน${prov}, เด็กเอ็น${prov}, ฟิวแฟน${prov}, ตรงปก, ไม่มีมัดจำ`;
 
-        // Inject Schema
+        // ฉีด Schema หน้าจังหวัด (ItemList)
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
-        injectSchema(generateBreadcrumbSchema('location', provinceName), 'schema-jsonld-bc');
-
-    } else {
-        // [CASE 3: หน้าแรก]
-        title = `${MAIN_KEYWORDS} ${SELLING_POINTS} | ${BRAND_NAME}`;
-        
-        description = `ศูนย์รวม ${MAIN_KEYWORDS} อันดับ 1 คัดน้องๆ ${SELLING_POINTS} ${TRUST_FACTORS} ครบทุกโซน รูปตัวจริง รีวิวแน่น ปลอดภัยที่สุดในไทย`;
-        
-        canonicalUrl = CONFIG.SITE_URL;
-        ogType = 'website';
-        ogImage = CONFIG.DEFAULT_OG_IMAGE;
-        keywords = `${MAIN_KEYWORDS}, ${SELLING_POINTS}, หาเพื่อนเที่ยว, จ้างเที่ยว`;
-
-        // Inject Schema
-        injectSchema(generateWebsiteSchema(), 'schema-jsonld-web'); 
-        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org'); 
-        injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
+        injectSchema(generateBreadcrumbSchema('location', prov), 'schema-jsonld-bc');
     }
 
     // --- DOM UPDATER HELPER (ฟังก์ชันช่วยอัปเดต Tag) ---
-    // ฟังก์ชันนี้จะจัดการทั้ง name="..." และ property="..." ให้เอง
     const setMeta = (names, content) => {
         const nameArray = Array.isArray(names) ? names : [names];
         nameArray.forEach(name => {
             let el = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
             if (!el) {
                 el = document.createElement('meta');
-                // ถ้าขึ้นต้นด้วย og: หรือ twitter: ให้ใช้ property, ถ้าไม่ใช่ให้ใช้ name
-                if (name.startsWith('og:') || name.startsWith('twitter:')) {
-                    el.setAttribute('property', name);
-                } else {
-                    el.setAttribute('name', name);
-                }
+                if (name.startsWith('og:') || name.startsWith('twitter:')) el.setAttribute('property', name);
+                else el.setAttribute('name', name);
                 document.head.appendChild(el);
             }
             el.setAttribute('content', content);
         });
     };
 
-    // --- APPLY VALUES TO DOM ---
+    // --- สั่งอัปเดตลงบนหน้าเว็บจริง ---
     document.title = title;
     
-    // Standard Meta
     setMeta('description', description);
     setMeta('keywords', keywords);
     setMeta('robots', 'index, follow, max-image-preview:large');
 
-    // Open Graph (Facebook/Line)
+    // Social Media Tags
     setMeta('og:title', title);
     setMeta('og:description', description);
     setMeta('og:url', canonicalUrl);
     setMeta('og:type', ogType);
     setMeta('og:image', ogImage);
-    setMeta('og:site_name', BRAND_NAME);
-    setMeta('og:locale', 'th_TH');
-
-    // Twitter Card
-    setMeta('twitter:card', 'summary_large_image');
-    setMeta('twitter:title', title);
+    setMeta(['twitter:title', 'twitter:card'], [title, 'summary_large_image']);
     setMeta('twitter:description', description);
     setMeta('twitter:image', ogImage);
 
-    // Canonical Link Update
+    // Canonical Link
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) {
         linkEl = document.createElement('link');
