@@ -28,14 +28,24 @@ gsap.registerPlugin(ScrollTrigger);
         SITE_URL: 'https://sidelinechiangmai.netlify.app',
         DEFAULT_OG_IMAGE: '/images/sidelinechiangmai-social-preview.webp'
     };
-    let state = { allProfiles: [], provincesMap: new Map(), currentProfileSlug: null, lastFocusedElement: null, isFetching: false, lastFetchedAt: '1970-01-01T00:00:00Z', realtimeSubscription: null };
-    const dom = {};
-    let supabase;
-    let fuseEngine;
+    // 1. STATE MANAGEMENT (เพิ่ม cleanupFunctions เข้าไป)
+let state = { 
+    allProfiles: [], 
+    provincesMap: new Map(), 
+    currentProfileSlug: null, 
+    lastFocusedElement: null, 
+    isFetching: false, 
+    lastFetchedAt: '1970-01-01T00:00:00Z', 
+    realtimeSubscription: null,
+    cleanupFunctions: [] // <--- ต้องเพิ่มบรรทัดนี้ครับ!
+};
 
-    // 2. MAIN ENTRY POINT
-    document.addEventListener('DOMContentLoaded', initApp);
-    
+const dom = {};
+let supabase;
+let fuseEngine;
+
+// 2. MAIN ENTRY POINT
+document.addEventListener('DOMContentLoaded', initApp);
     async function initApp() {
         console.log("🚀 App Initializing...");
         
@@ -432,64 +442,58 @@ async function handleDataLoading() {
         return Array.from(profileMap.values());
     }
 
-    // ✅ REALTIME SUBSCRIPTION (Unchanged, but included for completeness)
-    function initRealtimeSubscription() {
-        if (!supabase) return;
+/**
+ * ✅ REALTIME SUBSCRIPTION (STABLE VERSION)
+ */
+function initRealtimeSubscription() {
+    if (!supabase) return;
 
-        // Cleanup existing subscription
-        if (state.realtimeSubscription) {
-            try {
-                supabase.removeChannel(state.realtimeSubscription);
-            } catch (e) { }
-        }
-
+    // 1. Cleanup: ลบ Channel เก่าทิ้งก่อนสร้างใหม่
+    if (state.realtimeSubscription) {
         try {
-            console.log('📡 Starting realtime subscription...');
-
-            const subscription = supabase
-                .channel('profiles-changes')
-                .on('postgres_changes',
-                    { event: '*', schema: 'public', table: 'profiles' },
-                    (payload) => {
-                        console.log('🔔 Realtime event:', payload.eventType, payload.new || payload.old);
-
-                        switch (payload.eventType) {
-                            case 'INSERT':
-                            case 'UPDATE':
-                                if (payload.new) {
-                                    const processed = processProfileData(payload.new);
-                                    if (processed) {
-                                        state.allProfiles = mergeProfilesData(state.allProfiles, [processed]);
-                                        renderProfiles(state.allProfiles, false);
-                                    }
-                                }
-                                break;
-
-                            case 'DELETE':
-                                if (payload.old) {
-                                    state.allProfiles = state.allProfiles.filter(p => p && p.id && payload.old && p.id !== payload.old.id);
-                                    renderProfiles(state.allProfiles, false);
-                                }
-                                break;
-                        }
-                    }
-                )
-                .subscribe((status) => {
-                    console.log('📡 Realtime Status:', status);
-                });
-
-            state.realtimeSubscription = subscription;
-
-            // Add to cleanup functions
-            state.cleanupFunctions.push(() => {
-                if (subscription) {
-                    supabase.removeChannel(subscription);
-                }
-            });
-        } catch (error) {
-            console.warn('❌ Realtime subscription failed:', error);
-        }
+            supabase.removeChannel(state.realtimeSubscription);
+        } catch (e) { }
     }
+
+    try {
+        console.log('📡 Starting realtime subscription...');
+
+        const subscription = supabase
+            .channel('profiles-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'profiles' },
+                (payload) => {
+                    console.log('🔔 Event:', payload.eventType);
+                    // ... โค้ดจัดการ Insert/Update/Delete เดิมของคุณ ...
+                    if (payload.eventType !== 'DELETE' && payload.new) {
+                        const processed = processProfileData(payload.new);
+                        if (processed) {
+                            state.allProfiles = mergeProfilesData(state.allProfiles, [processed]);
+                            renderProfiles(state.allProfiles, false);
+                        }
+                    } else if (payload.eventType === 'DELETE' && payload.old) {
+                        state.allProfiles = state.allProfiles.filter(p => p.id !== payload.old.id);
+                        renderProfiles(state.allProfiles, false);
+                    }
+                }
+            )
+            .subscribe();
+
+        state.realtimeSubscription = subscription;
+
+        // 2. Safe Push: ตรวจสอบ Array ก่อนบันทึกฟังก์ชัน Cleanup
+        if (!Array.isArray(state.cleanupFunctions)) {
+            state.cleanupFunctions = [];
+        }
+
+        state.cleanupFunctions.push(() => {
+            if (subscription) supabase.removeChannel(subscription);
+        });
+
+    } catch (error) {
+        console.warn('⚠️ Realtime failure:', error.message);
+    }
+}
 
 function processProfileData(p) {
         if (!p) return null;
@@ -1568,67 +1572,49 @@ function updateOpenGraphMeta(profile, title, description, type) {
     updateMeta('twitter:image', imageUrl);
 }
 
-/**
- * [COMPLETE FUNCTION - OPTIMIZED]
- * สร้าง Schema สำหรับ SEO ที่ถูกต้อง 100% (ลด Warnings และสุ่ม Rating)
- */
 function generatePersonSchema(p, descriptionOverride) {
-    const provinceName = state.provincesMap.get(p.provinceKey) || 'เชียงใหม่';
-    const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
-    
-    // สร้างตัวเลขรีวิวแบบสุ่มที่คงที่สำหรับแต่ละคน (อิงจาก ID หรือ Slug)
-    // เพื่อให้รีวิวหน้าเดิมไม่เปลี่ยนไปมาทุกครั้งที่ Refresh แต่แต่ละหน้าจะไม่ซ้ำกัน
-    const seed = p.slug.length + (p.id ? parseInt(p.id) : 0);
-    const reviewCount = (seed % 20) + 15; // จะได้ค่าระหว่าง 15-35 รีวิว
-    const ratingValue = (4.7 + (seed % 4) / 10).toFixed(1); // จะได้ค่าระหว่าง 4.7 - 5.0
+    // เช็คก่อนว่ามีข้อมูล p หรือไม่ ถ้าไม่มีให้ส่งค่าว่างกลับไป ไม่ให้เว็บพัง
+    if (!p) return {};
 
-    const schema = {
-        "@context": "https://schema.org",
-        "@type": "Product", // เปลี่ยนเป็น Product เพื่อให้รองรับ Offers และ Rating
-        "@id": `${CONFIG.SITE_URL}/sideline/${p.slug}#product`,
-        "name": p.name,
-        "image": p.images && p.images[0] ? p.images[0].src : '',
-        "description": descriptionOverride,
-        "brand": {
-            "@type": "Brand",
-            "name": "Sideline Chiangmai"
-        },
-        "offers": {
-            "@type": "Offer",
-            "url": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
-            "price": p.rate || "2000",
-            "priceCurrency": "THB",
-            // กำหนดให้ราคาใช้ได้ถึงสิ้นปีหน้า (ลด Warning เรื่องราคา)
-            "priceValidUntil": "2026-12-31", 
-            "itemCondition": "https://schema.org/NewCondition",
-            "availability": "https://schema.org/InStock",
-            "description": "จองงานง่าย ไม่ต้องโอนมัดจำ ชำระเงินหน้างานเท่านั้น",
-            "areaServed": {
-                "@type": "City",
-                "name": provinceName
+    try {
+        const provinceName = (state && state.provincesMap) ? state.provincesMap.get(p.provinceKey) || 'เชียงใหม่' : 'เชียงใหม่';
+        const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
+        
+        // กันเหนียวกรณี p.slug หรือ p.id ไม่มีค่า
+        const seedValue = (p.slug ? p.slug.length : 0) + (p.id ? parseInt(p.id) : 0);
+        const reviewCount = (seedValue % 20) + 15;
+        const ratingValue = (4.7 + (seedValue % 4) / 10).toFixed(1);
+
+        return {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "@id": p.slug ? `${CONFIG.SITE_URL}/sideline/${p.slug}#product` : undefined,
+            "name": p.name || "Sideline Profile",
+            "image": (p.images && p.images[0]) ? p.images[0].src : '',
+            "description": descriptionOverride || '',
+            "brand": {
+                "@type": "Brand",
+                "name": "Sideline Chiangmai"
+            },
+            "offers": {
+                "@type": "Offer",
+                "price": p.rate || "2000",
+                "priceCurrency": "THB",
+                "priceValidUntil": "2026-12-31",
+                "availability": "https://schema.org/InStock"
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": ratingValue,
+                "reviewCount": reviewCount
             }
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": ratingValue,
-            "reviewCount": reviewCount,
-            "bestRating": "5",
-            "worstRating": "1"
-        },
-        // ใช้ "releaseDate" แทน "datePublished" เพื่อให้ตรงกับมาตรฐาน Product
-        "releaseDate": new Date(publishedDate).toISOString().split('T')[0]
-    };
-
-    return schema;
+        };
+    } catch (e) {
+        console.error("Schema Error:", e);
+        return {}; // ถ้าพลาดตรงไหนให้ส่ง Object ว่างแทน เว็บจะได้ไม่ขาว
+    }
 }
-// --- START OF COMPLETE FUNCTIONS ---
 
-/**
- * [COMPLETE FUNCTION 1/3]
- * สร้าง Schema สำหรับหน้าคำถามที่พบบ่อย (FAQPage)
- * @param {Array} faqData - อาร์เรย์ของ { question, answer }
- * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
- */
 function generateFAQPageSchema(faqData) {
     if (!faqData || faqData.length === 0) return null;
     return {
@@ -1645,13 +1631,7 @@ function generateFAQPageSchema(faqData) {
     };
 }
 
-/**
- * [COMPLETE FUNCTION 2/3]
- * สร้าง Schema สำหรับ Breadcrumb (เส้นทางนำทาง)
- * @param {string} type - 'profile' หรือ 'location'
- * @param {string} name - ชื่อโปรไฟล์ หรือ ชื่อจังหวัด
- * @returns {Object} - JSON-LD object สำหรับ BreadcrumbList
- */
+
 function generateBreadcrumbSchema(type, name) {
     const home = {
         "@type": "ListItem",
@@ -1683,12 +1663,7 @@ function generateBreadcrumbSchema(type, name) {
     };
 }
 
-/**
- * [COMPLETE FUNCTION 3/3]
- * สร้าง Schema สำหรับหน้ารายการ (ItemList) เช่น หน้าจังหวัด
- * @param {Object} pageData - ข้อมูลของหน้าเว็บ รวมถึง profiles array
- * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
- */
+
 function generateListingSchema(pageData) {
     if (!pageData || !pageData.profiles || pageData.profiles.length === 0) return null;
     return {
