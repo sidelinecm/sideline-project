@@ -219,7 +219,7 @@ h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.3; }
 /* 2. สไตล์ใหม่ของ "ตราประทับวันที่" */
 .date-stamp {
     /* ขนาดและฟอนต์ */
-    font-size: 10px; /* ขนาดเล็กกำลังดี */
+    font-size: 14px; /* ขนาดเล็กกำลังดี */
     font-weight: 500; /* Medium weight */
     color: rgba(255, 255, 255, 0.7); /* สีขาวโปร่งแสง 70% */
     
