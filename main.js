@@ -547,6 +547,16 @@ function populateProvinceDropdown() {
 // =================================================================
 async function handleRouting(dataLoaded = false) {
     const path = window.location.pathname.toLowerCase();
+
+    // ✅ --- START: เพิ่มส่วนป้องกันการเขียนทับ Meta Tags ---
+    // เช็คว่าถ้าเป็นหน้าไฟล์ .html อื่นๆ ที่ไม่ใช่หน้าหลัก ให้หยุดการทำงานทันที
+    if (path.endsWith('.html') || path.endsWith('.htm')) {
+        console.warn(`Static HTML page (${path}) detected. Skipping dynamic meta tag update.`);
+        closeLightbox(false); // ปิด Lightbox เผื่อเปิดค้างไว้
+        dom.profilesDisplayArea?.classList.add('hidden'); // ซ่อนพื้นที่แสดงโปรไฟล์
+        return; // 🛑 ออกจากฟังก์ชันทันที ไม่ต้องทำอะไรต่อ
+    }
+    // ✅ --- END: เพิ่มส่วนป้องกัน ---
     
     // 1. หน้าโปรไฟล์
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
@@ -583,8 +593,6 @@ async function handleRouting(dataLoaded = false) {
             applyUltimateFilters(false);
             const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
             
-            // --- ✅ START OF CHANGES ---
-            // สร้าง Title และ Description ที่สมบูรณ์แบบที่นี่
             const completeTitle = `ไซด์ไลน์${provinceName} - รับงาน${provinceName} (ทีมงาน Sideline Chiangmai)`;
             const completeDescription = `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก 100% ปลอดภัย การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}.`;
 
@@ -595,7 +603,6 @@ async function handleRouting(dataLoaded = false) {
                 provinceName: provinceName, 
                 profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
             };
-            // --- ✅ END OF CHANGES ---
             
             updateAdvancedMeta(null, seoData);
             dom.profilesDisplayArea?.classList.remove('hidden');
@@ -612,7 +619,6 @@ async function handleRouting(dataLoaded = false) {
         updateAdvancedMeta(null, null);
     }
 }
-
 // =================================================================
 // 7. ULTIMATE SEARCH ENGINE (เวอร์ชันอัปเกรด)
 // =================================================================
