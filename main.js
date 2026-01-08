@@ -1591,36 +1591,92 @@ function updateAdvancedMeta(profile = null, pageData = null) {
 }
 
 function generatePersonSchema(p, descriptionOverride) {
-    const provinceName = state.provincesMap.get(p.provinceKey) || '';
+    const provinceName = state.provincesMap.get(p.provinceKey) || 'เชียงใหม่';
     const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
+    const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
     
+    // 1. ล้างราคาให้เป็นตัวเลขล้วน (Numeric Only) - ป้องกัน Error ร้ายแรง
+    let cleanPrice = p.rate ? String(p.rate).replace(/[^0-9.]/g, '') : "1500";
+    const numericPrice = parseFloat(cleanPrice) || 1500;
+
+    // 2. Pro-tip: ตั้งวันหมดอายุราคาแบบ Dynamic (บวกไปอีก 1 ปีจากวันนี้) 
+    // เพื่อให้ Google ไม่มองว่าราคา "บูด" เมื่อเวลาผ่านไป
+    const validUntil = new Date();
+    validUntil.setFullYear(validUntil.getFullYear() + 1);
+    const validUntilStr = validUntil.toISOString().split('T')[0];
+
     const schema = {
         "@context": "https://schema.org",
         "@type": "Person",
-        "@id": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
+        "@id": `${profileUrl}#person`, // สร้าง ID เฉพาะของตัวบุคคล
+        "mainEntityOfPage": profileUrl,
         "name": p.name,
-        "url": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
-        "image": p.images[0].src,
+        "url": profileUrl,
+        "image": p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE,
         "description": descriptionOverride,
-        "jobTitle": "Independent Model",
+        "jobTitle": "Independent Service Provider",
         "address": {
             "@type": "PostalAddress",
             "addressLocality": provinceName,
-            "addressRegion": "Thailand"
+            "addressRegion": "Thailand",
+            "addressCountry": "TH"
         },
         "offers": {
             "@type": "Offer",
-            "price": p.rate,
+            "@id": `${profileUrl}#offer`,
+            "price": numericPrice,
             "priceCurrency": "THB",
-            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำทุกกรณี",
-            "availability": "https://schema.org/InStock"
+            "priceValidUntil": validUntilStr, // ใช้วันที่แบบ Dynamic
+            "url": profileUrl,
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "description": "บริการตรงปก ฟิวแฟน ไม่ต้องโอนมัดจำ จ่ายเงินหน้างานเท่านั้น",
+            "seller": {
+                "@type": "Person",
+                "name": p.name
+            },
+            // ✅ แก้รูปที่ 1: Merchant Return Policy (นโยบายการคืนเงิน)
+            "hasMerchantReturnPolicy": {
+                "@type": "MerchantReturnPolicy",
+                "applicableCountry": "TH",
+                "returnPolicyCategory": "https://schema.org/NoReturns",
+                "merchantReturnLink": `${CONFIG.SITE_URL}/terms-of-service.html`
+            },
+            // ✅ แก้รูปที่ 1: Shipping Details (รายละเอียดการรับบริการ)
+            // สำหรับงานบริการ เราจะบอกว่า "ค่าจัดส่งเป็น 0" และ "จัดส่งทันที"
+            "shippingDetails": {
+                "@type": "OfferShippingDetails",
+                "shippingDestination": { 
+                    "@type": "DefinedRegion", 
+                    "addressCountry": "TH" 
+                },
+                "shippingRate": {
+                    "@type": "MonetaryAmount",
+                    "value": 0,
+                    "currency": "THB"
+                },
+                "deliveryTime": {
+                    "@type": "ShippingDeliveryTime",
+                    "handlingTime": { 
+                        "@type": "QuantitativeValue", 
+                        "minValue": 0, 
+                        "maxValue": 0, 
+                        "unitCode": "DAY" 
+                    },
+                    "transitTime": { 
+                        "@type": "ShippingDeliveryTime", 
+                        "minValue": 0, 
+                        "maxValue": 0, 
+                        "unitCode": "DAY" 
+                    }
+                }
+            }
         },
         "datePublished": new Date(publishedDate).toISOString()
     };
 
     return schema;
 }
-// --- START OF COMPLETE FUNCTIONS ---
 
 /**
  * [COMPLETE FUNCTION 1/3]
