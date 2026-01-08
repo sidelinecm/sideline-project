@@ -1591,59 +1591,61 @@ function updateAdvancedMeta(profile = null, pageData = null) {
 }
 
 function generatePersonSchema(p, descriptionOverride) {
+    // ระบบจะดึงข้อมูลตามโปรไฟล์ที่เปิดอยู่ (Dynamic)
     const provinceName = state.provincesMap.get(p.provinceKey) || 'เชียงใหม่';
     const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
     const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
     
-    // 1. ล้างราคาให้เป็นตัวเลขล้วน (Numeric Only) - ป้องกัน Error ร้ายแรง
+    // แปลงราคาเป็นตัวเลข (ป้องกัน Error รูปแบบราคา)
     let cleanPrice = p.rate ? String(p.rate).replace(/[^0-9.]/g, '') : "1500";
     const numericPrice = parseFloat(cleanPrice) || 1500;
 
-    // 2. Pro-tip: ตั้งวันหมดอายุราคาแบบ Dynamic (บวกไปอีก 1 ปีจากวันนี้) 
-    // เพื่อให้ Google ไม่มองว่าราคา "บูด" เมื่อเวลาผ่านไป
+    // ตั้งวันหมดอายุราคา (บวก 1 ปีจากวันที่เปิดดู)
     const validUntil = new Date();
     validUntil.setFullYear(validUntil.getFullYear() + 1);
     const validUntilStr = validUntil.toISOString().split('T')[0];
 
+    // โครงสร้างมาตรฐาน Product (Service) เพื่อให้ Error เป็น 0 สำหรับทุกคน
     const schema = {
         "@context": "https://schema.org",
-        "@type": "Person",
-        "@id": `${profileUrl}#person`, // สร้าง ID เฉพาะของตัวบุคคล
-        "mainEntityOfPage": profileUrl,
-        "name": p.name,
-        "url": profileUrl,
+        "@type": "Product", 
+        "@id": `${profileUrl}#product`,
+        "name": p.name, // ดึงชื่อตามคนที่เราเปิดดู
         "image": p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE,
         "description": descriptionOverride,
-        "jobTitle": "Independent Service Provider",
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": provinceName,
-            "addressRegion": "Thailand",
-            "addressCountry": "TH"
+        "brand": {
+            "@type": "Brand",
+            "name": "Sideline Chiangmai"
         },
         "offers": {
             "@type": "Offer",
             "@id": `${profileUrl}#offer`,
             "price": numericPrice,
             "priceCurrency": "THB",
-            "priceValidUntil": validUntilStr, // ใช้วันที่แบบ Dynamic
+            "priceValidUntil": validUntilStr,
             "url": profileUrl,
             "availability": "https://schema.org/InStock",
             "itemCondition": "https://schema.org/NewCondition",
-            "description": "บริการตรงปก ฟิวแฟน ไม่ต้องโอนมัดจำ จ่ายเงินหน้างานเท่านั้น",
             "seller": {
                 "@type": "Person",
-                "name": p.name
+                "@id": `${profileUrl}#person`,
+                "name": p.name,
+                "jobTitle": "Independent Service Provider",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": provinceName,
+                    "addressRegion": "Thailand",
+                    "addressCountry": "TH"
+                }
             },
-            // ✅ แก้รูปที่ 1: Merchant Return Policy (นโยบายการคืนเงิน)
+            // แก้ไข Error Merchant Return Policy ให้ผ่านมาตรฐาน Google
             "hasMerchantReturnPolicy": {
                 "@type": "MerchantReturnPolicy",
                 "applicableCountry": "TH",
-                "returnPolicyCategory": "https://schema.org/NoReturns",
-                "merchantReturnLink": `${CONFIG.SITE_URL}/terms-of-service.html`
+                "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+                "merchantReturnLink": `${CONFIG.SITE_URL}/faq.html`
             },
-            // ✅ แก้รูปที่ 1: Shipping Details (รายละเอียดการรับบริการ)
-            // สำหรับงานบริการ เราจะบอกว่า "ค่าจัดส่งเป็น 0" และ "จัดส่งทันที"
+            // แก้ไข Error Shipping Details สำหรับงานบริการ
             "shippingDetails": {
                 "@type": "OfferShippingDetails",
                 "shippingDestination": { 
@@ -1657,27 +1659,23 @@ function generatePersonSchema(p, descriptionOverride) {
                 },
                 "deliveryTime": {
                     "@type": "ShippingDeliveryTime",
-                    "handlingTime": { 
-                        "@type": "QuantitativeValue", 
-                        "minValue": 0, 
-                        "maxValue": 0, 
-                        "unitCode": "DAY" 
+                    "handlingTime": {
+                        "@type": "QuantitativeValue",
+                        "value": 0,
+                        "unitCode": "DAY"
                     },
-                    "transitTime": { 
-                        "@type": "ShippingDeliveryTime", 
-                        "minValue": 0, 
-                        "maxValue": 0, 
-                        "unitCode": "DAY" 
+                    "transitTime": {
+                        "@type": "QuantitativeValue",
+                        "value": 0,
+                        "unitCode": "DAY"
                     }
                 }
             }
-        },
-        "datePublished": new Date(publishedDate).toISOString()
+        }
     };
 
     return schema;
 }
-
 /**
  * [COMPLETE FUNCTION 1/3]
  * สร้าง Schema สำหรับหน้าคำถามที่พบบ่อย (FAQPage)
