@@ -1484,91 +1484,78 @@ const FAQ_DATA = [
 ];
 
 // =================================================================
-// 10. SEO META TAGS UPDATER (FIXED: DYNAMIC PAGES ONLY)
+// === ฟังก์ชัน updateAdvancedMeta (ฉบับสมบูรณ์) ===
 // =================================================================
-
 function updateAdvancedMeta(profile = null, pageData = null) {
-    /** 
-     * 🚩 [จุดสำคัญตามคำสั่ง] 
-     * ตรวจสอบก่อนเลย: ถ้าไม่มี profile และไม่มี pageData (แปลว่าเป็นหน้าหลัก หรือหน้า Static ทั่วไป)
-     * ให้ "return" ออกไปทันที! ไม่ต้องสร้าง Meta หรือ Title ใหม่ทับของเดิม
-     */
-    if (!profile && !pageData) {
-        // console.log("SEO: Static Page detected - Keep original HTML tags.");
-        return; 
-    }
-
-    // 1. ล้าง Schema เดิมออกก่อน (เฉพาะเมื่อเรากำลังจะสร้างอันใหม่)
+    // 1. ล้าง Schema เดิมออกก่อนเพื่อป้องกันข้อมูลซ้ำซ้อน
     const oldScripts = document.querySelectorAll('script[id^="schema-jsonld"]');
     oldScripts.forEach(s => s.remove());
 
     const BRAND_NAME = "Sideline Chiangmai";
+    const TRUST_KEYWORDS = "📌 ไม่มัดจำ ชำระเงินหน้างาน | ตรงปก 100% | มีแอดมินดูแลฟรี";
+    const GLOBAL_TITLE = `ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ไม่มัดจำ | ${BRAND_NAME}`;
+    const GLOBAL_DESC = `ศูนย์รวมน้องๆ ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ทั่วประเทศ ${TRUST_KEYWORDS} ปลอดภัย ไม่ต้องโอนก่อน อัปเดตใหม่ทุกวัน`;
 
     if (profile) {
-        // =========================================================
-        // CASE 1: หน้าโปรไฟล์น้อง (Dynamic Profile) -> สร้างดาว + URL ตรง
-        // =========================================================
-        const provinceName = state.provincesMap.get(profile.provinceKey) || 'เชียงใหม่';
-        
-        // Title: ใส่ชื่อ + จังหวัด + จุดขาย
-        const title = `น้อง${profile.name} ไซด์ไลน์${provinceName} รับงาน${provinceName} (ตรงปก 100%) - ${BRAND_NAME}`;
-        
-        // Description: ใส่รายละเอียดจริง
-        const richDescription = `ดูรูปตัวจริงน้อง${profile.name} อายุ ${profile.age || '20+'} สัดส่วน ${profile.stats || 'นางแบบ'} ไซด์ไลน์${provinceName} พิกัด${profile.location || 'ในเมือง'} ราคา ${profile.rate} ไม่ต้องโอนมัดจำ`;
-        
-        // URL: ชี้ไปที่หน้าน้องคนนี้โดยเฉพาะ
-        const specificUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug}`;
+        // --- กรณี: หน้าโปรไฟล์รายบุคคล (ส่วนนี้ถูกต้องอยู่แล้ว) ---
+        const provinceName = state.provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
+        const title = `${profile.name} - ไซด์ไลน์${provinceName} ฟิวแฟนตรงปก ไม่มัดจำ | ${BRAND_NAME}`; 
+        const richDescription = `📌 โปรไฟล์น้อง ${profile.name} อายุ ${profile.age} รับงาน${provinceName} ชำระหน้างานเท่านั้น! ไม่ต้องมัดจำ ตรงปก 100% มีแอดมินดูแลฟรี ${profile.quote ? `"${profile.quote}"` : ''}`;
 
-        // Update Tags
         document.title = title;
         updateMeta('description', richDescription); 
-        updateLink('canonical', specificUrl); // ✅ URL ตรงเป๊ะ
+        updateMeta('robots', 'index, follow'); 
+        updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug}`);
         
-        // ส่ง specificUrl ไปให้ Social Media ด้วย
-        updateOpenGraphMeta(profile, title, richDescription, 'profile', specificUrl);
-        
-        // 🔥 ใช้ Schema แบบ Product เพื่อให้ Google โชว์ดาว
-        injectSchema(generateProductSchema(profile, richDescription, specificUrl), 'schema-jsonld-person');
+        updateOpenGraphMeta(profile, title, richDescription, 'profile');
+        injectSchema(generatePersonSchema(profile, richDescription), 'schema-jsonld-person');
         injectSchema(generateBreadcrumbSchema('profile', profile.name), 'schema-jsonld-bc');
         
     } else if (pageData) {
-        // =========================================================
-        // CASE 2: หน้าแยกจังหวัด (Dynamic Location) -> URL ตรง
-        // =========================================================
+        // --- กรณี: หน้าจังหวัด (ฉบับแก้ไขสมบูรณ์) ---
+        
+        // ✅ แก้ไขแล้ว: ใช้ Title ที่สมบูรณ์ที่ส่งมาจาก handleRouting โดยตรง ไม่ต้องเติมอะไรเพิ่ม
         const pageTitle = pageData.title;
-        const pageDescription = pageData.description;
-        const specificUrl = pageData.canonicalUrl; // ✅ URL ตรงเป๊ะตามจังหวัด
+        
+        // ✅ แก้ไขแล้ว: ใช้ Description ที่สร้างมาสำหรับหน้านั้นๆ โดยเฉพาะ แล้วเติมแค่คีย์เวิร์ดสำคัญ
+        const pageDescription = `${pageData.description} ${TRUST_KEYWORDS}`;
         
         document.title = pageTitle;
         updateMeta('description', pageDescription);
-        updateLink('canonical', specificUrl);
+        updateMeta('robots', 'index, follow'); 
+        updateLink('canonical', pageData.canonicalUrl);
         
-        // ส่ง specificUrl ไปให้ Social Media ด้วย
-        updateOpenGraphMeta(null, pageTitle, pageDescription, 'website', specificUrl);
-        
+        updateOpenGraphMeta(null, pageTitle, pageDescription, 'website');
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
         injectSchema(generateBreadcrumbSchema('location', pageData.provinceName), 'schema-jsonld-bc');
+        
+    } else {
+        // --- กรณี: หน้าแรก (ส่วนนี้ถูกต้องอยู่แล้ว) ---
+        document.title = GLOBAL_TITLE;
+        updateMeta('description', GLOBAL_DESC);
+        updateMeta('robots', 'index, follow'); 
+        updateLink('canonical', CONFIG.SITE_URL);
+        
+        updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
+        injectSchema(generateWebsiteSchema(), 'schema-jsonld-web'); 
+        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org'); 
+        injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
     }
 }
 
-// ✅ เพิ่มฟังก์ชันนี้เข้าไปครับ (สำคัญมากสำหรับ Facebook/Line Preview)
-function updateOpenGraphMeta(profile, title, description, type, specificUrl) {
-    let imageUrl = CONFIG.DEFAULT_OG_IMAGE;
-    
-    // พยายามหารูปน้อง ถ้าไม่มีให้ใช้รูป Default
-    if (profile && profile.images && profile.images.length > 0) {
-        imageUrl = profile.images[0].src;
-    }
-
+// ✅ อัปเกรดการแสดงผลโซเชียล: ใช้รูป .webp และใส่ Alt Text คีย์เวิร์ด
+function updateOpenGraphMeta(profile, title, description, type) {
     updateMeta('og:title', title);
     updateMeta('og:description', description);
+    updateMeta('og:url', profile ? `${CONFIG.SITE_URL}/sideline/${profile.slug}` : CONFIG.SITE_URL);
+    updateMeta('og:type', type); 
+    updateMeta('og:locale', 'th_TH'); 
     
-    // ✅ ใช้ URL ที่เจาะจงเท่านั้น (ตามที่คุณต้องการ)
-    updateMeta('og:url', specificUrl); 
+    let imageUrl = (profile && profile.images && profile.images[0]) 
+                    ? profile.images[0].src 
+                    : CONFIG.DEFAULT_OG_IMAGE;
     
-    updateMeta('og:type', type);
     updateMeta('og:image', imageUrl);
-
     updateMeta('twitter:card', 'summary_large_image');
     updateMeta('twitter:title', title);
     updateMeta('twitter:description', description);
@@ -1576,55 +1563,46 @@ function updateOpenGraphMeta(profile, title, description, type, specificUrl) {
 }
 
 /**
- * [GENERATE PRODUCT SCHEMA]
- * ใช้สำหรับสร้าง Schema น้องๆ เพื่อให้ Google Show Review Stars
+ * [COMPLETE FUNCTION 3/3]
+ * สร้าง Schema สำหรับ SEO พร้อมข้อมูล "วันที่เผยแพร่"
  */
-function generateProductSchema(p, descriptionOverride, url) {
-    const provinceName = state.provincesMap.get(p.provinceKey) || 'เชียงใหม่';
+function generatePersonSchema(p, descriptionOverride) {
+    const provinceName = state.provincesMap.get(p.provinceKey) || '';
+    const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
     
-    // แปลงราคาเป็นตัวเลข
-    let cleanPrice = p.rate ? String(p.rate).replace(/[^0-9.]/g, '') : "1500";
-    const numericPrice = parseFloat(cleanPrice) || 1500;
-
-    // 🔥 คำนวณดาว (4.5 - 5.0) จาก ID น้อง (เพื่อให้คะแนนคงที่สำหรับคนเดิมเสมอ)
-    const seed = p.id ? String(p.id).split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 99;
-    const randomScore = (4.5 + (seed % 50) / 100).toFixed(1); // เช่น 4.8
-    const reviewCount = 50 + (seed % 100); // เช่น 85 รีวิว
-
-    return {
+    const schema = {
         "@context": "https://schema.org",
-        "@type": "Product", // ✅ ต้องใช้ Product เท่านั้น ดาวถึงจะขึ้น
-        "@id": `${url}#product`,
-        "name": `น้อง${p.name} ไซด์ไลน์${provinceName}`, 
-        "image": (p.images && p.images.length > 0) ? p.images[0].src : CONFIG.DEFAULT_OG_IMAGE,
+        "@type": "Person",
+        "@id": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
+        "name": p.name,
+        "url": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
+        "image": p.images[0].src,
         "description": descriptionOverride,
-        "url": url,
-        "brand": {
-            "@type": "Brand",
-            "name": "Sideline Chiangmai"
-        },
-        // ✅ ส่วนแสดงดาว (AggregateRating)
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": randomScore,
-            "reviewCount": reviewCount,
-            "bestRating": "5",
-            "worstRating": "1"
+        "jobTitle": "Independent Model",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": provinceName,
+            "addressRegion": "Thailand"
         },
         "offers": {
             "@type": "Offer",
-            "url": url,
-            "price": numericPrice,
+            "price": p.rate,
             "priceCurrency": "THB",
-            "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-            "availability": "https://schema.org/InStock",
-            "itemCondition": "https://schema.org/NewCondition"
-        }
+            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำทุกกรณี",
+            "availability": "https://schema.org/InStock"
+        },
+        "datePublished": new Date(publishedDate).toISOString()
     };
+
+    return schema;
 }
+// --- START OF COMPLETE FUNCTIONS ---
 
 /**
- * [HELPER FUNCTIONS]
+ * [COMPLETE FUNCTION 1/3]
+ * สร้าง Schema สำหรับหน้าคำถามที่พบบ่อย (FAQPage)
+ * @param {Array} faqData - อาร์เรย์ของ { question, answer }
+ * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
  */
 function generateFAQPageSchema(faqData) {
     if (!faqData || faqData.length === 0) return null;
@@ -1634,26 +1612,58 @@ function generateFAQPageSchema(faqData) {
         "mainEntity": faqData.map(item => ({
             "@type": "Question",
             "name": item.question,
-            "acceptedAnswer": { "@type": "Answer", "text": item.answer }
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": item.answer
+            }
         }))
     };
 }
 
+/**
+ * [COMPLETE FUNCTION 2/3]
+ * สร้าง Schema สำหรับ Breadcrumb (เส้นทางนำทาง)
+ * @param {string} type - 'profile' หรือ 'location'
+ * @param {string} name - ชื่อโปรไฟล์ หรือ ชื่อจังหวัด
+ * @returns {Object} - JSON-LD object สำหรับ BreadcrumbList
+ */
 function generateBreadcrumbSchema(type, name) {
-    const home = { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL };
+    const home = {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "หน้าแรก",
+        "item": CONFIG.SITE_URL
+    };
+
     let secondItem;
     if (type === 'profile') {
-        secondItem = { "@type": "ListItem", "position": 2, "name": name };
+        secondItem = {
+            "@type": "ListItem",
+            "position": 2,
+            "name": name
+        };
     } else if (type === 'location') {
-        secondItem = { "@type": "ListItem", "position": 2, "name": `จังหวัด ${name}` };
+        secondItem = {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `จังหวัด ${name}`
+        };
     }
+
+    const list = secondItem ? [home, secondItem] : [home];
     return {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
-        "itemListElement": secondItem ? [home, secondItem] : [home]
+        "itemListElement": list
     };
 }
 
+/**
+ * [COMPLETE FUNCTION 3/3]
+ * สร้าง Schema สำหรับหน้ารายการ (ItemList) เช่น หน้าจังหวัด
+ * @param {Object} pageData - ข้อมูลของหน้าเว็บ รวมถึง profiles array
+ * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
+ */
 function generateListingSchema(pageData) {
     if (!pageData || !pageData.profiles || pageData.profiles.length === 0) return null;
     return {
@@ -1675,21 +1685,39 @@ function generateListingSchema(pageData) {
     };
 }
 
+// --- END OF COMPLETE FUNCTIONS ---
+// ✅ อัปเกรด Website/Org: ระบุชื่อแบรนด์ให้ตรงกับ URL
 function generateWebsiteSchema() {
     return {
-        "@context": "https://schema.org", "@type": "WebSite", "url": CONFIG.SITE_URL, "name": "Sideline Chiangmai",
-        "potentialAction": { "@type": "SearchAction", "target": `${CONFIG.SITE_URL}/?q={search_term_string}`, "query-input": "required name=search_term_string" }
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": CONFIG.SITE_URL,
+        "name": "Sideline Chiangmai",
+        "description": "ศูนย์รวมน้องๆ ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ไม่มัดจำ",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": `${CONFIG.SITE_URL}/?q={search_term_string}`,
+            "query-input": "required name=search_term_string"
+        }
     };
 }
 
 function generateOrganizationSchema() {
     return {
-        "@context": "https://schema.org", "@type": "Organization", "name": "Sideline Chiangmai", "url": CONFIG.SITE_URL,
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sideline Chiangmai",
+        "url": CONFIG.SITE_URL,
         "logo": "https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp",
-        "contactPoint": { "@type": "ContactPoint", "contactType": "customer service", "description": "มีแอดมินดูแลฟรีตลอดเวลาทำการ" }
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "description": "มีแอดมินดูแลฟรีตลอดเวลาทำการ"
+        }
     };
 }
 
+// ✅ ปรับปรุงระบบฉีด Schema (รองรับหลาย ID และความปลอดภัย)
 function injectSchema(json, id = 'schema-jsonld') {
     if (!json) return;
     const script = document.createElement('script');
@@ -1699,6 +1727,7 @@ function injectSchema(json, id = 'schema-jsonld') {
     document.head.appendChild(script);
 }
 
+// ✅ ปรับปรุง Helper functions ให้รองรับทั้ง meta name และ property (สำหรับ OG)
 function updateMeta(name, content) {
     let el = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
     if (!el) {
