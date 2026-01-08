@@ -91,21 +91,25 @@ gsap.registerPlugin(ScrollTrigger);
         catch (e) { return "08/01/2569"; }
     }
 
-    function showErrorState(error) {
-        console.error("❌ เกิดข้อผิดพลาดร้ายแรง:", error);
-        hideLoadingState();
-        if (dom.profilesDisplayArea) {
-            dom.profilesDisplayArea.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #ef4444;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
-                    <h3 style="font-size: 20px; font-weight: bold;">โหลดข้อมูลไม่สำเร็จ</h3>
-                    <p style="margin-top: 8px; color: #374151;">ระบบไม่สามารถดึงข้อมูลได้ในขณะนี้<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือลองใหม่อีกครั้ง</p>
-                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 24px; background-color: #ec4899; color: white; border-radius: 99px; border: none; cursor: pointer; font-weight: bold;">
-                        <i class="fas fa-sync-alt mr-2"></i> ลองใหม่
-                    </button>
-                </div>`;
-        }
+    // ค้นหาฟังก์ชัน showErrorState ใน main.js แล้วเปลี่ยนเป็น code นี้
+function showErrorState(error) {
+    console.error("❌ Error:", error);
+    hideLoadingState();
+    
+    // 1. ซ่อนพื้นที่แสดงผลปกติ
+    if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
+    if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
+
+    // 2. แสดงข้อความ Error ที่เตรียมไว้ใน HTML
+    if(dom.fetchErrorMessage) {
+        dom.fetchErrorMessage.classList.remove('hidden');
+        dom.fetchErrorMessage.style.display = 'block'; // บังคับแสดง
     }
+    
+    // 3. ซ่อนปุ่ม Load More
+    const loadMore = document.getElementById('load-more-container');
+    if(loadMore) loadMore.classList.add('hidden');
+}
 
 // =================================================================
     // 4. EVENT HANDLING (COMPLETE & FIXED)
@@ -239,28 +243,31 @@ gsap.registerPlugin(ScrollTrigger);
         dom.lightboxWrapper = document.getElementById('lightbox-content-wrapper-el');
     }
 
-    async function handleDataLoading() {
-        if (state.isFetching) return;
+    // แก้ไขฟังก์ชัน handleDataLoading
+async function handleDataLoading() {
+    if (state.isFetching) return;
 
-        showLoadingState();
-        try {
-            const success = await fetchDataDelta();
-            if (success) {
-                initSearchAndFilters();
-                
-                
-                await handleRouting(true);
-                initRealtimeSubscription();
-            } else {
-                showErrorState();
-            }
-        } catch (error) {
-            console.error('Data loading failed:', error);
-            showErrorState();
-        } finally {
-            hideLoadingState();
+    showLoadingState(); // เริ่มหมุนติ้วๆ
+    try {
+        const success = await fetchDataDelta();
+        if (success) {
+            initSearchAndFilters();
+            await handleRouting(true);
+            initRealtimeSubscription();
+            
+            // ✅ ซ่อน Error message หากโหลดสำเร็จ
+            if(dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
+            if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
+        } else {
+            showErrorState("Data fetch returned false");
         }
+    } catch (error) {
+        showErrorState(error);
+    } finally {
+        // ✅ สำคัญ: บรรทัดนี้จะทำงานเสมอ ไม่ว่าจะ error หรือไม่
+        hideLoadingState(); 
     }
+}
 
 // ✅ DELTA FETCH (FIXED: ใช้ created_at แทน updated_at)
     async function fetchDataDelta() {
@@ -1086,78 +1093,108 @@ function createSearchResultSection(profiles) {
     return wrapper;
 } 
 
-// ✅ [เวอร์ชันแก้ไขสมบูรณ์: เรียงลำดับชั้นใหม่ให้ถูกต้อง]
+// ✅ [เวอร์ชันแก้ไขสมบูรณ์ที่สุด: เพิ่ม Skeleton Loader + เรียง Layer ถูกต้อง]
 function createProfileCard(p, index = 20) {
+    // 1. สร้าง Container หลัก
     const cardContainer = document.createElement('div');
     cardContainer.className = 'profile-card-new-container';
 
+    // 2. สร้าง Card Inner (กรอบการ์ด)
     const cardInner = document.createElement('div');
-    cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-700 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2';
+    cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1';
+    
+    // ใส่ Attribute สำคัญสำหรับการ Routing
     cardInner.setAttribute('data-profile-id', p.id); 
     cardInner.setAttribute('data-profile-slug', p.slug);
     
-    cardInner.innerHTML = `
-        <!-- 1. รูปภาพ (อยู่ล่างสุด z-0) -->
-        <img src="${p.images[0].src}" 
-             alt="น้อง ${p.name} ไซด์ไลน์ ${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน"
-             class="card-image w-full h-full object-cover transition-opacity duration-500 opacity-0 absolute inset-0 z-0"
-             loading="${index < 4 ? 'eager' : 'lazy'}"
-             onload="this.classList.remove('opacity-0')"
-             onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0');">
+    // --- ตรวจสอบรูปภาพให้ปลอดภัย (กัน Error กรณีไม่มีรูป) ---
+    const imgSrc = (p.images && p.images.length > 0) ? p.images[0].src : '/images/placeholder-profile.webp';
 
-        <!-- 2. ลิงก์คลุมการ์ด (อยู่ตรงกลาง z-10) เพื่อให้รับคลิกได้ -->
+    // --- HTML หลักของการ์ด ---
+    cardInner.innerHTML = `
+        <!-- LAYER 0: Skeleton Loader (ตัวโหลดวิบวับ รอรูปมา) -->
+        <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0"></div>
+
+        <!-- LAYER 1: รูปภาพ (อยู่ล่างสุด) -->
+        <img src="${imgSrc}" 
+             alt="น้อง ${p.name} ไซด์ไลน์ ${p.provinceNameThai || 'เชียงใหม่'}"
+             class="card-image w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
+             loading="${index < 4 ? 'eager' : 'lazy'}"
+             style="object-position: center top;"
+             onload="this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();"
+             onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();">
+
+        <!-- LAYER 2: ลิงก์คลุมการ์ด (Z-10) -> เพื่อให้คลิกตรงไหนก็เปิดโปรไฟล์ -->
         <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์ ${p.name}"></a>
     `;
 
-    let statusClass = 'status-inquire';
-    if (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) statusClass = 'status-available';
-    else if (p.availability?.includes('ไม่ว่าง')) statusClass = 'status-busy';
+    // --- Logic คำนวณสถานะ (ว่าง/ไม่ว่าง) ---
+    let statusClass = 'status-inquire'; // ค่าเริ่มต้น: สีเทา (สอบถาม)
+    const availability = (p.availability || '').toLowerCase();
     
-    // Badges (อยู่บนลิงก์ z-20 แต่ให้คลิกทะลุได้)
+    if (availability.includes('ว่าง') || availability.includes('รับงาน')) {
+        statusClass = 'status-available'; // สีเขียว
+    } else if (availability.includes('ไม่ว่าง') || availability.includes('พัก')) {
+        statusClass = 'status-busy'; // สีแดง
+    }
+    
+    // --- HTML ส่วน Badges (มุมขวาบน) ---
+    // ใส่ pointer-events-none เพื่อให้คลิกทะลุไปโดน Link (Layer 2) ได้
     const badgesHTML = `
         <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
-            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-sm text-[10px] font-bold px-2 py-1 rounded-full text-white">
+            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-md bg-white/10 border border-white/20 text-[10px] font-bold px-2 py-1 rounded-full text-white">
                 ${p.availability || 'สอบถาม'}
             </span>
             ${p.isfeatured ? '<span class="featured-badge bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
         </div>
     `;
 
+    // --- Logic ปุ่ม Like ---
     const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
     const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
     const likeCount = p.likes || 0;
 
-    // 3. Overlay (อยู่บนลิงก์ z-20 แต่สั่ง pointer-events: none เพื่อให้คลิกทะลุไปโดนลิงก์)
+    // --- HTML ส่วน Overlay (ไล่เฉดสี + ชื่อ + ปุ่มไลค์) ---
+    // pointer-events-none ที่ตัวแม่ เพื่อให้คลิกพื้นที่ว่างแล้วไปโดน Link
+    // pointer-events-auto ที่ปุ่มหัวใจ เพื่อให้กดหัวใจได้
     const overlayHTML = `
-        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 flex flex-col justify-between" 
+        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-3 flex flex-col justify-between" 
              style="z-index: 20; pointer-events: none;">
             
-            <div class="card-header">
-                <h3 class="text-lg font-bold text-white drop-shadow-lg leading-tight">${p.name}</h3>
-                <p class="text-xs text-gray-200 flex items-center mt-0.5">
-                    <i class="fas fa-map-marker-alt mr-1.5 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
-                </p>
+            <div class="card-header mt-8">
+                <!-- พื้นที่ว่างด้านบน ปล่อยให้คลิกทะลุ -->
             </div>
             
-            <div class="card-footer-minimal flex justify-between items-center">
-                <div class="date-stamp">${formatDate(p.created_at)}</div>
-                
-                <!-- 4. ปุ่มหัวใจ (อยู่บนสุด z-30 และสั่งให้รับคลิกได้ pointer-events: auto) -->
-                <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass}"
-                     style="pointer-events: auto !important; z-index: 30 !important; position: relative;"
-                     data-action="like" 
-                     data-id="${p.id}"
-                     aria-label="กดไลค์โปรไฟล์นี้">
-                    <i class="fas fa-heart text-lg transition-all duration-200"></i>
-                    <span class="like-count text-sm font-bold">${likeCount}</span>
+            <div class="card-footer-content">
+                <h3 class="text-lg font-bold text-white drop-shadow-md leading-tight truncate pr-2">${p.name}</h3>
+                <p class="text-xs text-gray-300 flex items-center mt-0.5 mb-2">
+                    <i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
+                </p>
+
+                <div class="flex justify-between items-end border-t border-white/10 pt-2">
+                    <div class="date-stamp text-[10px] text-gray-400">
+                        อัปเดต: ${formatDate(p.created_at)}
+                    </div>
+                    
+                    <!-- ปุ่มหัวใจ (Z-30) ต้องกดได้ -->
+                    <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors"
+                         style="pointer-events: auto !important; z-index: 30 !important;"
+                         data-action="like" 
+                         data-id="${p.id}"
+                         aria-label="ถูกใจ">
+                        <i class="fas fa-heart text-lg transition-transform duration-200 group-hover/like:scale-110"></i>
+                        <span class="like-count text-sm font-bold">${likeCount}</span>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 
+    // ประกอบร่าง
     cardInner.insertAdjacentHTML('beforeend', badgesHTML);
     cardInner.insertAdjacentHTML('beforeend', overlayHTML);
     cardContainer.appendChild(cardInner);
+
     return cardContainer;
 }
     // =================================================================
@@ -2200,4 +2237,4 @@ const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short
 const timeEl = document.getElementById('last-updated-time');
 if (timeEl) timeEl.innerText = thaiDate;
 
-})(); 
+})();
