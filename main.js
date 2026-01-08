@@ -1572,49 +1572,48 @@ function updateOpenGraphMeta(profile, title, description, type) {
     updateMeta('twitter:image', imageUrl);
 }
 
+/**
+ * [COMPLETE FUNCTION 3/3]
+ * สร้าง Schema สำหรับ SEO พร้อมข้อมูล "วันที่เผยแพร่"
+ */
 function generatePersonSchema(p, descriptionOverride) {
-    // เช็คก่อนว่ามีข้อมูล p หรือไม่ ถ้าไม่มีให้ส่งค่าว่างกลับไป ไม่ให้เว็บพัง
-    if (!p) return {};
+    const provinceName = state.provincesMap.get(p.provinceKey) || '';
+    const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
+    
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "@id": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
+        "name": p.name,
+        "url": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
+        "image": p.images[0].src,
+        "description": descriptionOverride,
+        "jobTitle": "Independent Model",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": provinceName,
+            "addressRegion": "Thailand"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": p.rate,
+            "priceCurrency": "THB",
+            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำทุกกรณี",
+            "availability": "https://schema.org/InStock"
+        },
+        "datePublished": new Date(publishedDate).toISOString()
+    };
 
-    try {
-        const provinceName = (state && state.provincesMap) ? state.provincesMap.get(p.provinceKey) || 'เชียงใหม่' : 'เชียงใหม่';
-        const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
-        
-        // กันเหนียวกรณี p.slug หรือ p.id ไม่มีค่า
-        const seedValue = (p.slug ? p.slug.length : 0) + (p.id ? parseInt(p.id) : 0);
-        const reviewCount = (seedValue % 20) + 15;
-        const ratingValue = (4.7 + (seedValue % 4) / 10).toFixed(1);
-
-        return {
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "@id": p.slug ? `${CONFIG.SITE_URL}/sideline/${p.slug}#product` : undefined,
-            "name": p.name || "Sideline Profile",
-            "image": (p.images && p.images[0]) ? p.images[0].src : '',
-            "description": descriptionOverride || '',
-            "brand": {
-                "@type": "Brand",
-                "name": "Sideline Chiangmai"
-            },
-            "offers": {
-                "@type": "Offer",
-                "price": p.rate || "2000",
-                "priceCurrency": "THB",
-                "priceValidUntil": "2026-12-31",
-                "availability": "https://schema.org/InStock"
-            },
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": ratingValue,
-                "reviewCount": reviewCount
-            }
-        };
-    } catch (e) {
-        console.error("Schema Error:", e);
-        return {}; // ถ้าพลาดตรงไหนให้ส่ง Object ว่างแทน เว็บจะได้ไม่ขาว
-    }
+    return schema;
 }
+// --- START OF COMPLETE FUNCTIONS ---
 
+/**
+ * [COMPLETE FUNCTION 1/3]
+ * สร้าง Schema สำหรับหน้าคำถามที่พบบ่อย (FAQPage)
+ * @param {Array} faqData - อาร์เรย์ของ { question, answer }
+ * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
+ */
 function generateFAQPageSchema(faqData) {
     if (!faqData || faqData.length === 0) return null;
     return {
@@ -1631,7 +1630,13 @@ function generateFAQPageSchema(faqData) {
     };
 }
 
-
+/**
+ * [COMPLETE FUNCTION 2/3]
+ * สร้าง Schema สำหรับ Breadcrumb (เส้นทางนำทาง)
+ * @param {string} type - 'profile' หรือ 'location'
+ * @param {string} name - ชื่อโปรไฟล์ หรือ ชื่อจังหวัด
+ * @returns {Object} - JSON-LD object สำหรับ BreadcrumbList
+ */
 function generateBreadcrumbSchema(type, name) {
     const home = {
         "@type": "ListItem",
@@ -1663,7 +1668,12 @@ function generateBreadcrumbSchema(type, name) {
     };
 }
 
-
+/**
+ * [COMPLETE FUNCTION 3/3]
+ * สร้าง Schema สำหรับหน้ารายการ (ItemList) เช่น หน้าจังหวัด
+ * @param {Object} pageData - ข้อมูลของหน้าเว็บ รวมถึง profiles array
+ * @returns {Object|null} - JSON-LD object หรือ null ถ้าไม่มีข้อมูล
+ */
 function generateListingSchema(pageData) {
     if (!pageData || !pageData.profiles || pageData.profiles.length === 0) return null;
     return {
@@ -1744,6 +1754,7 @@ function updateLink(rel, href) {
     if (!el) { el = document.createElement('link'); el.rel = rel; document.head.appendChild(el); }
     el.href = href;
 }
+
 // ฟังก์ชัน generateBreadcrumbSchema, generateFAQPageSchema, generateListingSchema 
 // ให้ใช้ตามโครงสร้างเดิมที่คุณส่งมา แต่ตรวจสอบให้แน่ใจว่าได้เรียกใช้ใน updateAdvancedMeta แล้ว
     // =================================================================
