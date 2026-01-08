@@ -3777,3 +3777,25 @@ p{margin:0 0 1em}
         padding-top: 133.33%; /* สูตรคือ (4/3)*100 */
     }
 }
+/* ✅ เพิ่มโค้ดนี้ลงไปใน <style> ... </style> หรือไฟล์ CSS ของคุณ */
+
+/* 1. บังคับให้ปุ่มหัวใจ "รับการคลิก" ได้ (สำคัญที่สุด) */
+.like-button-wrapper {
+    pointer-events: auto !important; /* กุญแจสำคัญ: สั่งให้รับคลิก */
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 50 !important; /* ดันให้ลอยเหนือทุกอย่าง */
+}
+
+/* 2. ป้องกันไอคอนข้างในไปขวางการกด */
+.like-button-wrapper i,
+.like-button-wrapper span {
+    pointer-events: none !important; /* ให้คลิกทะลุไอคอนไปโดนตัวปุ่มแม่ */
+}
+
+/* 3. ย้ำให้แน่ใจว่า Overlay แม่ของมันไม่บัง */
+.card-footer-minimal {
+    pointer-events: auto !important; /* พื้นที่ Footer ต้องกดได้ */
+    z-index: 20 !important;
+    position: relative !important;
+}

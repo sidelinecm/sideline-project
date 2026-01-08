@@ -1,5 +1,5 @@
 // =================================================================
-// MAIN.JS (ULTIMATE FIXED VERSION with Enhanced Robustness and SEO)
+// MAIN.JS (THE FINAL, BULLETPROOF & COMPLETE VERSION)
 // =================================================================
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
@@ -11,96 +11,37 @@ gsap.registerPlugin(ScrollTrigger);
 (function () {
     'use strict';
 
-/**
- * [MODIFIED HELPER]
- * แทนที่จะดึงวันที่จากฐานข้อมูล เราเปลี่ยนมาใช้วันที่ "วันนี้" 
- * เพื่อให้การ์ดน้องๆ ทุกคนดูสดใหม่ตลอดเวลา
- */
-function formatDate(isoDateString) {
-    // ไม่ว่าฐานข้อมูลจะส่งวันที่อะไรมา เราจะใช้เวลาปัจจุบันของเครื่องคนดูแทน
-    const now = new Date();
-    try {
-        return now.toLocaleDateString('th-TH', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    } catch (e) {
-        // กันเหนียวถ้าเครื่องมีปัญหา ให้ใส่เป็นวันที่วันนี้แบบ Manual
-        return "02/01/2569"; 
-    }
-}
-    // =================================================================
-    // 1. CONFIGURATION (FIXED: Added DEFAULT_OG_IMAGE Correctly)
-    // =================================================================
+// 1. CONFIGURATION & STATE
     const CONFIG = {
         SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
+        // ✅ บรรทัดนี้คือรหัสที่ถูกต้องครับ (คัดลอกไปวางทับอันเดิมได้เลย)
         SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
         STORAGE_BUCKET: 'profile-images',
-        CACHE_TTL_HOURS: 24,
         KEYS: {
             LAST_PROVINCE: 'sidelinecm_last_province',
             CACHE_PROFILES: 'cachedProfiles',
             LAST_FETCH: 'lastFetchTime',
             AGE_CONFIRMED: 'ageConfirmedTimestamp',
-            THEME: 'theme'
+            THEME: 'theme',
+            LIKED_PROFILES: 'liked_profiles'
         },
         SITE_URL: 'https://sidelinechiangmai.netlify.app',
-        DEFAULT_OG_IMAGE: '/images/sidelinechiangmai-social-preview.webp' // ✅ CORRECT SYNTAX
+        DEFAULT_OG_IMAGE: '/images/sidelinechiangmai-social-preview.webp'
     };
-
-    // =================================================================
-    // 1.1 GLOBAL STATE AND VARIABLES
-    // =================================================================
-    let state = {
-        allProfiles: [],
-        provincesMap: new Map(),
-        currentProfileSlug: null,
-        lastFocusedElement: null,
-        isFetching: false,
-        lastFetchedAt: '1970-01-01T00:00:00Z',
-        realtimeSubscription: null,
-        cleanupFunctions: []
-    };
-
-    // =================================================================
-    // 2. DOM ELEMENTS CACHE
-    // =================================================================
+    let state = { allProfiles: [], provincesMap: new Map(), currentProfileSlug: null, lastFocusedElement: null, isFetching: false, lastFetchedAt: '1970-01-01T00:00:00Z', realtimeSubscription: null };
     const dom = {};
-
-    // =================================================================
-    // 3. SUPABASE CLIENT
-    // =================================================================
     let supabase;
-    try {
-        // Note: The createClient function is imported from Supabase ESM
-        supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        window.supabase = supabase;
-        console.log("✅ Supabase Connected");
-    } catch (e) {
-        console.error("❌ Supabase Init Failed:", e);
-    }
-    
-    // =================================================================
-    // 3.1 GLOBAL ERROR HANDLER (Ultimate Robustness)
-    // =================================================================
-    window.onerror = function (message, source, lineno, colno, error) {
-        // ดักจับ JavaScript Error ที่ไม่ได้ถูกจัดการ (unhandled) ทั่วทั้งแอปพลิเคชัน
-        console.error('🛑 Global Runtime Error:', message, error);
-        
-        // คืนค่า true เพื่อป้องกันไม่ให้เบราว์เซอร์แสดง Error message มาตรฐาน (Clean User Experience)
-        return true; 
-    };
+    let fuseEngine;
 
-    // =================================================================
-    // 4. MAIN ENTRY POINT 
-    // =================================================================
+    // 2. MAIN ENTRY POINT
     document.addEventListener('DOMContentLoaded', initApp);
     
     async function initApp() {
+        console.log("🚀 App Initializing...");
+        
+        initializeSupabase();
         cacheDOMElements();
 
-        // UI Inits
         initThemeToggle();
         initMobileMenu();
         initAgeVerification();
@@ -108,39 +49,174 @@ function formatDate(isoDateString) {
         initMarqueeEffect();
         initMobileSitemapTrigger();
         initFooterLinks();
-         // ✅ ย้าย initLightboxEvents() มาไว้ที่นี่
-    initLightboxEvents();
+        initGlobalClickListener();
         updateActiveNavLinks();
 
-        // Main Logic
         await handleRouting();
         await handleDataLoading();
 
-        // Footer Year
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-
         document.body.classList.add('loaded');
+        console.log("✅ App Initialized Successfully!");
 
-        // Intro Animation (Home only)
         if (window.location.pathname === '/' && !state.currentProfileSlug) {
             try {
                 const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
                 if (heroElements.length > 0) {
-                    gsap.from(heroElements, {
-                        y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.3
-                    });
+                    gsap.from(heroElements, { y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.3 });
                 }
             } catch (e) { console.warn("Animation skipped", e); }
         }
 
-        // Navigation Listener
         window.addEventListener('popstate', async () => {
             await handleRouting();
             updateActiveNavLinks();
         });
     }
 
+    // 3. CORE INITIALIZATION & HELPER FUNCTIONS
+    function initializeSupabase() {
+        try {
+            supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+            window.supabase = supabase;
+            console.log("✅ Supabase Connected");
+        } catch (e) {
+            console.error("❌ Supabase Init Failed:", e);
+        }
+    }
+
+    function formatDate() {
+        try { return new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }); } 
+        catch (e) { return "08/01/2569"; }
+    }
+
+    function showErrorState(error) {
+        console.error("❌ เกิดข้อผิดพลาดร้ายแรง:", error);
+        hideLoadingState();
+        if (dom.profilesDisplayArea) {
+            dom.profilesDisplayArea.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 20px; font-weight: bold;">โหลดข้อมูลไม่สำเร็จ</h3>
+                    <p style="margin-top: 8px; color: #374151;">ระบบไม่สามารถดึงข้อมูลได้ในขณะนี้<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือลองใหม่อีกครั้ง</p>
+                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 24px; background-color: #ec4899; color: white; border-radius: 99px; border: none; cursor: pointer; font-weight: bold;">
+                        <i class="fas fa-sync-alt mr-2"></i> ลองใหม่
+                    </button>
+                </div>`;
+        }
+    }
+
+// =================================================================
+    // 4. EVENT HANDLING (COMPLETE & FIXED)
+    // =================================================================
+    function initGlobalClickListener() {
+        console.log("👂 Global Click Listener is now active.");
+        
+        document.body.addEventListener('click', (event) => {
+            const target = event.target;
+
+            // --- Priority 1: ตรวจสอบการคลิกที่ "ปุ่มหัวใจ" ก่อนเสมอ ---
+            const likeButton = target.closest('[data-action="like"]');
+            if (likeButton) {
+                // หยุดทุกอย่างไม่ให้ทะลุไปโดนการ์ด
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const profileId = likeButton.dataset.id;
+                
+                // ตรวจสอบว่ามี ID และมีฟังก์ชันให้เรียกใช้
+                if (profileId && typeof window.handleLikeClick === 'function') {
+                    window.handleLikeClick(likeButton, profileId);
+                }
+                return; // จบการทำงานทันที
+            }
+
+            // --- Priority 2: ถ้าไม่ใช่หัวใจ ค่อยเช็ค "การ์ด" เพื่อเปิด Lightbox ---
+            const cardLink = target.closest('a.card-link');
+            if (cardLink) {
+                event.preventDefault(); // หยุดการเปลี่ยนหน้าปกติ
+                
+                const card = cardLink.closest('.profile-card-new');
+                const slug = card ? card.getAttribute('data-profile-slug') : null;
+                
+                if (slug) {
+                    state.lastFocusedElement = card;
+                    history.pushState(null, '', `/sideline/${slug}`);
+                    handleRouting(); // เปิด Lightbox
+                }
+                return;
+            }
+            
+            // --- Priority 3: ปุ่มปิด Lightbox ---
+            const closeButton = target.closest('#closeLightboxBtn');
+            const lightboxBackdrop = target.closest('#lightbox');
+            if (closeButton || (lightboxBackdrop && event.target === lightboxBackdrop)) {
+                 history.pushState(null, '', '/');
+                 handleRouting(); // ปิด Lightbox
+            }
+        });
+
+        // ปุ่ม ESC ปิด Lightbox
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && state.currentProfileSlug) {
+                history.pushState(null, '', '/');
+                handleRouting();
+            }
+        });
+    }
+
+    // ✅ [ฟังก์ชันกดไลค์ที่สมบูรณ์: UI + LocalStorage + Database]
+    window.handleLikeClick = async function(likeButton, profileId) {
+        console.log(`👍 Processing like for profile ID: ${profileId}`);
+
+        // 1. UI UPDATE (อัปเดตหน้าจอทันทีเพื่อให้ลื่นไหล)
+        const isLiked = likeButton.classList.toggle('liked');
+        const countSpan = likeButton.querySelector('.like-count');
+        
+        if (countSpan) {
+            // แปลงตัวเลข (กันเหนียวเผื่อมี comma)
+            let currentLikes = parseInt(countSpan.textContent.replace(/,/g, '') || '0');
+            // บวกหรือลบตามสถานะ
+            countSpan.textContent = isLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+        }
+
+        // 2. LOCAL STORAGE (บันทึกลงเครื่องผู้ใช้)
+        try {
+            const likedProfiles = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || '{}');
+            if (isLiked) {
+                likedProfiles[profileId] = true;
+            } else {
+                delete likedProfiles[profileId];
+            }
+            localStorage.setItem(CONFIG.KEYS.LIKED_PROFILES, JSON.stringify(likedProfiles));
+        } catch (e) {
+            console.error("Local storage error:", e);
+        }
+
+        // 3. DATABASE UPDATE (ส่งไป Supabase - ส่วนที่ขาดไป)
+        if (window.supabase) {
+            try {
+                // เลือกชื่อฟังก์ชัน SQL
+                const rpcName = isLiked ? 'increment_likes' : 'decrement_likes';
+                
+                // 🔥 ส่งคำสั่งไปฐานข้อมูล (ใช้ชื่อตัวแปร profile_id_to_update ตาม SQL ของคุณ)
+                const { error } = await window.supabase.rpc(rpcName, { 
+                    profile_id_to_update: profileId 
+                });
+
+                if (error) {
+                    console.error('❌ Supabase update failed:', error);
+                    // กรณี Error จริงจัง อาจจะเขียนโค้ด Rollback UI ตรงนี้ได้ (แต่ปกติไม่ต้องก็ได้)
+                } else {
+                    console.log(`✅ DB Updated: ${rpcName}`);
+                }
+            } catch (err) {
+                console.error("Connection error:", err);
+            }
+        }
+    };
+    
     function cacheDOMElements() {
         dom.body = document.body;
         dom.pageHeader = document.getElementById('page-header');
@@ -409,41 +485,39 @@ function formatDate(isoDateString) {
     }
 
 function processProfileData(p) {
-    if (!p) return null;
+        if (!p) return null;
 
-    // 1. ดึง URL ตรงจาก Supabase (เพื่อตัดปัญหา Error 400 จาก Netlify)
-    const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
-    
-    const imageObjects = imagePaths.map(path => {
-        const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-        // ใช้ลิงก์ตรงๆ เลย ไม่ต้องผ่าน /.netlify/images
-        const finalUrl = data?.publicUrl || '/images/placeholder-profile-card.webp';
+        // จัดการรูปภาพ: ใช้ Path จาก DB หรือใช้รูป Default
+        const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+        
+        let imageObjects = imagePaths.map(path => {
+            // ใช้ getPublicUrl เพื่อให้ได้ลิงก์ที่ถูกต้องเสมอ
+            const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
+            return { src: data?.publicUrl || CONFIG.DEFAULT_OG_IMAGE };
+        });
 
-        return {
-            src: finalUrl,
-            srcset: '' 
+        // ถ้าไม่มีรูปเลย ให้ใส่รูป Default กันไว้
+        if (imageObjects.length === 0) {
+            imageObjects.push({ src: CONFIG.DEFAULT_OG_IMAGE });
+        }
+
+        const provinceName = state.provincesMap.get(p.provinceKey) || '';
+        const tags = (p.styleTags || []).join(' ');
+        
+        // รวมคำค้นหาทั้งหมดไว้ใน string เดียว (ตัวเล็กหมดเพื่อให้ค้นง่าย)
+        const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''} ${p.stats || ''} ${p.location || ''}`.toLowerCase();
+
+        return { 
+            ...p, 
+            images: imageObjects, 
+            altText: `น้อง${p.name} ไซด์ไลน์${provinceName} รับงาน${provinceName}`,
+            searchString: fullSearchString,
+            provinceNameThai: provinceName,
+            // แปลงค่าตัวเลขเผื่อไว้ใช้คำนวณ
+            _price: Number(String(p.rate).replace(/\D/g, '')) || 0, 
+            _age: Number(p.age) || 0
         };
-    });
-
-    if (imageObjects.length === 0) {
-        imageObjects.push({ src: '/images/placeholder-profile.webp', srcset: '' });
     }
-
-    // 2. จัดการข้อมูลส่วนอื่นคงเดิม
-    const provinceName = state.provincesMap.get(p.provinceKey) || '';
-    const tags = (p.styleTags || []).join(' ');
-    const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''} ${p.stats || ''}`.toLowerCase();
-
-    return { 
-        ...p, 
-        images: imageObjects, 
-        altText: `น้อง${p.name} ${provinceName}`,
-        searchString: fullSearchString,
-        provinceNameThai: provinceName,
-        _price: Number(p.rate) || 0,
-        _age: Number(p.age) || 0
-    };
-}
 // ✅ POPULATE PROVINCE DROPDOWN (Unchanged, but included for completeness)
 function populateProvinceDropdown() {
     if (!dom.provinceSelect) return;
@@ -535,7 +609,7 @@ async function handleRouting(dataLoaded = false) {
 // =================================================================
 // 7. ULTIMATE SEARCH ENGINE (เวอร์ชันอัปเกรด)
 // =================================================================
-let fuseEngine; 
+
 function initSearchAndFilters() {
     if (!dom.searchForm) return;
 
@@ -1012,91 +1086,80 @@ function createSearchResultSection(profiles) {
     return wrapper;
 } 
 
-// ✅ ปิด createSearchResultSection
-
-/**
- * [ULTIMATE MINIMALIST VERSION]
- * สร้างการ์ดโปรไฟล์พร้อม "วันที่" เล็กๆ ที่มุมซ้ายล่าง
- */
-function createProfileCard(p, index = 10) {
+// ✅ [เวอร์ชันแก้ไขสมบูรณ์: เรียงลำดับชั้นใหม่ให้ถูกต้อง]
+function createProfileCard(p, index = 20) {
     const cardContainer = document.createElement('div');
     cardContainer.className = 'profile-card-new-container';
 
     const cardInner = document.createElement('div');
     cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-700 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2';
-    cardInner.setAttribute('data-profile-id', p.id);
+    cardInner.setAttribute('data-profile-id', p.id); 
     cardInner.setAttribute('data-profile-slug', p.slug);
-    cardInner.setAttribute('role', 'button');
-    cardInner.setAttribute('tabindex', '0');
+    
+    cardInner.innerHTML = `
+        <!-- 1. รูปภาพ (อยู่ล่างสุด z-0) -->
+        <img src="${p.images[0].src}" 
+             alt="น้อง ${p.name} ไซด์ไลน์ ${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน"
+             class="card-image w-full h-full object-cover transition-opacity duration-500 opacity-0 absolute inset-0 z-0"
+             loading="${index < 4 ? 'eager' : 'lazy'}"
+             onload="this.classList.remove('opacity-0')"
+             onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0');">
 
-    cardInner.innerHTML = `<a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์ ${p.name} ไซด์ไลน์ไม่มัดจำ"></a>`;
+        <!-- 2. ลิงก์คลุมการ์ด (อยู่ตรงกลาง z-10) เพื่อให้รับคลิกได้ -->
+        <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์ ${p.name}"></a>
+    `;
 
-    const imgObj = p.images[0];
-    const img = document.createElement('img');
-    const provName = state.provincesMap.get(p.provinceKey) || p.provinceNameThai || 'เชียงใหม่';
-    img.alt = `น้อง ${p.name} ไซด์ไลน์ ${provName} ฟิวแฟน ตรงปก ไม่มัดจำ ชำระเงินหน้างาน`;
-    img.className = 'card-image w-full h-full object-cover pointer-events-none transition-opacity duration-500 opacity-0';
-    img.onload = () => img.classList.remove('opacity-0');
-    img.onerror = () => {
-        img.src = '/images/placeholder-profile.webp';
-        img.classList.remove('opacity-0');
-    };
-    img.src = imgObj.src;
-    img.srcset = imgObj.srcset || '';
-    img.sizes = '(max-width: 640px) 150px, (max-width: 1024px) 250px, 400px';
-    img.loading = index < 4 ? 'eager' : 'lazy';
-    img.decoding = 'async';
-    img.width = 300;
-    img.height = 400;
-
-    const badges = document.createElement('div');
-    badges.className = 'absolute top-2 right-2 flex flex-col gap-1 items-end z-10 pointer-events-none';
     let statusClass = 'status-inquire';
     if (p.availability?.includes('ว่าง') || p.availability?.includes('รับงาน')) statusClass = 'status-available';
     else if (p.availability?.includes('ไม่ว่าง')) statusClass = 'status-busy';
-    badges.innerHTML = `
-        <span class="availability-badge ${statusClass} shadow-md backdrop-blur-sm text-[10px] font-bold px-2 py-1 rounded-full text-white">
-            ${p.availability || 'สอบถาม'}
-        </span>
-        ${p.isfeatured ? '<span class="featured-badge bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
-    `;
-
-    const overlay = document.createElement('div');
-    // ✅ เปลี่ยน justify-end เป็น justify-between เพื่อดันข้อมูลหลักและวันที่ออกจากกัน
-    overlay.className = 'card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 flex flex-col justify-between';
-
-    // --- ✅ START OF MINIMALIST LAYOUT ---
-    const dateToShow = p.image_updated_at || p.created_at;
-    const dateAdded = formatDate(dateToShow);
-    let dateStampHTML = '';
-
-    if (dateAdded) {
-        // ✅ แสดงแค่วันที่ล้วนๆ และใช้ class ใหม่
-        dateStampHTML = `<div class="date-stamp">${dateAdded}</div>`;
-    }
-
-    // โครงสร้างใหม่ที่สะอาดและเรียบง่าย
-    overlay.innerHTML = `
-        <!-- ส่วนบน: ชื่อและพิกัด -->
-        <div class="card-header">
-            <h3 class="text-lg font-bold text-white drop-shadow-lg leading-tight">${p.name}</h3>
-            <p class="text-xs text-gray-200 flex items-center mt-0.5">
-                <i class="fas fa-map-marker-alt mr-1.5 text-pink-500"></i> ${provName}
-            </p>
-        </div>
-
-        <!-- ส่วนล่าง: วันที่ -->
-        <div class="card-footer-minimal">
-            ${dateStampHTML}
+    
+    // Badges (อยู่บนลิงก์ z-20 แต่ให้คลิกทะลุได้)
+    const badgesHTML = `
+        <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
+            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-sm text-[10px] font-bold px-2 py-1 rounded-full text-white">
+                ${p.availability || 'สอบถาม'}
+            </span>
+            ${p.isfeatured ? '<span class="featured-badge bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
         </div>
     `;
-    // --- ✅ END OF MINIMALIST LAYOUT ---
 
-    cardInner.append(img, badges, overlay);
+    const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
+    const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
+    const likeCount = p.likes || 0;
+
+    // 3. Overlay (อยู่บนลิงก์ z-20 แต่สั่ง pointer-events: none เพื่อให้คลิกทะลุไปโดนลิงก์)
+    const overlayHTML = `
+        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 flex flex-col justify-between" 
+             style="z-index: 20; pointer-events: none;">
+            
+            <div class="card-header">
+                <h3 class="text-lg font-bold text-white drop-shadow-lg leading-tight">${p.name}</h3>
+                <p class="text-xs text-gray-200 flex items-center mt-0.5">
+                    <i class="fas fa-map-marker-alt mr-1.5 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
+                </p>
+            </div>
+            
+            <div class="card-footer-minimal flex justify-between items-center">
+                <div class="date-stamp">${formatDate(p.created_at)}</div>
+                
+                <!-- 4. ปุ่มหัวใจ (อยู่บนสุด z-30 และสั่งให้รับคลิกได้ pointer-events: auto) -->
+                <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass}"
+                     style="pointer-events: auto !important; z-index: 30 !important; position: relative;"
+                     data-action="like" 
+                     data-id="${p.id}"
+                     aria-label="กดไลค์โปรไฟล์นี้">
+                    <i class="fas fa-heart text-lg transition-all duration-200"></i>
+                    <span class="like-count text-sm font-bold">${likeCount}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    cardInner.insertAdjacentHTML('beforeend', badgesHTML);
+    cardInner.insertAdjacentHTML('beforeend', overlayHTML);
     cardContainer.appendChild(cardInner);
     return cardContainer;
 }
-
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================
@@ -1382,88 +1445,139 @@ const FAQ_DATA = [
 ];
 
 // =================================================================
-// === ฟังก์ชัน updateAdvancedMeta (ฉบับสมบูรณ์) ===
+// 10. SEO META TAGS UPDATER (ULTIMATE & CLEANEST VERSION)
 // =================================================================
+
 function updateAdvancedMeta(profile = null, pageData = null) {
     // 1. ล้าง Schema เดิมออกก่อนเพื่อป้องกันข้อมูลซ้ำซ้อน
     const oldScripts = document.querySelectorAll('script[id^="schema-jsonld"]');
     oldScripts.forEach(s => s.remove());
 
+    // --- KEYWORDS STRATEGY (กลยุทธ์คำค้นหา) ---
     const BRAND_NAME = "Sideline Chiangmai";
-    const TRUST_KEYWORDS = "📌 ไม่มัดจำ ชำระเงินหน้างาน | ตรงปก 100% | มีแอดมินดูแลฟรี";
-    const GLOBAL_TITLE = `ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ไม่มัดจำ | ${BRAND_NAME}`;
-    const GLOBAL_DESC = `ศูนย์รวมน้องๆ ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ทั่วประเทศ ${TRUST_KEYWORDS} ปลอดภัย ไม่ต้องโอนก่อน อัปเดตใหม่ทุกวัน`;
+    // คำหลักที่คนค้นหาบ่อยที่สุด (High Volume Keywords)
+    const MAIN_KEYWORDS = "ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ เด็กเอ็น"; 
+    // จุดขายที่ทำให้คนตัดสินใจคลิก (Conversion Keywords)
+    const SELLING_POINTS = "ฟิวแฟน ตรงปก 100% ไม่มีมัดจำ"; 
+    // ปัจจัยความน่าเชื่อถือ (Trust Factors)
+    const TRUST_FACTORS = "ปลอดภัย จ่ายหน้างาน มีแอดมินดูแล 24ชม.";
 
+    let title, description, canonicalUrl, ogType, ogImage, keywords;
+
+    // --- LOGIC: กำหนดค่าตามประเภทหน้า ---
     if (profile) {
-        // --- กรณี: หน้าโปรไฟล์รายบุคคล (ส่วนนี้ถูกต้องอยู่แล้ว) ---
-        const provinceName = state.provincesMap.get(profile.provinceKey) || 'ไม่ระบุ';
-        const title = `${profile.name} - ไซด์ไลน์${provinceName} ฟิวแฟนตรงปก ไม่มัดจำ | ${BRAND_NAME}`; 
-        const richDescription = `📌 โปรไฟล์น้อง ${profile.name} อายุ ${profile.age} รับงาน${provinceName} ชำระหน้างานเท่านั้น! ไม่ต้องมัดจำ ตรงปก 100% มีแอดมินดูแลฟรี ${profile.quote ? `"${profile.quote}"` : ''}`;
+        // [CASE 1: หน้าโปรไฟล์รายบุคคล]
+        const provinceName = state.provincesMap.get(profile.provinceKey) || 'เชียงใหม่';
+        const location = profile.location ? `โซน${profile.location}` : '';
+        const ageTxt = profile.age ? `อายุ ${profile.age}` : '';
+        const statsTxt = profile.stats ? `สัดส่วน ${profile.stats}` : '';
+        
+        // Title: เน้นชื่อ + คีย์เวิร์ดหลัก + พิกัด
+        title = `น้อง${profile.name} ${MAIN_KEYWORDS} ${location} | ${SELLING_POINTS}`;
+        
+        // Description: ใส่รายละเอียดเจาะจง เพื่อดักจับ Long-tail Keywords (เช่น ค้นหาด้วยสัดส่วน/อายุ)
+        description = `น้อง${profile.name} ${ageTxt} ${statsTxt} ${location} ไซด์ไลน์${provinceName} รับงานเอง ${SELLING_POINTS} ${TRUST_FACTORS} ตัวจริงน่ารัก งานดี ไม่เร่งรีบ สนใจคลิกดูรูปและรีวิวเพิ่มเติม`;
+        
+        canonicalUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug}`;
+        ogType = 'profile';
+        // เช็คว่ามีรูปหรือไม่ ถ้าไม่มีให้ใช้ Default
+        ogImage = (profile.images && profile.images.length > 0 && profile.images[0].src) 
+                  ? profile.images[0].src 
+                  : CONFIG.DEFAULT_OG_IMAGE;
+        
+        keywords = `${profile.name}, ไซด์ไลน์${provinceName}, รับงาน${provinceName}, ${location}, ${MAIN_KEYWORDS}, ${SELLING_POINTS}`;
 
-        document.title = title;
-        updateMeta('description', richDescription); 
-        updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug}`);
-        
-        updateOpenGraphMeta(profile, title, richDescription, 'profile');
-        injectSchema(generatePersonSchema(profile, richDescription), 'schema-jsonld-person');
+        // Inject Schema
+        injectSchema(generatePersonSchema(profile, description), 'schema-jsonld-person');
         injectSchema(generateBreadcrumbSchema('profile', profile.name), 'schema-jsonld-bc');
-        
+
     } else if (pageData) {
-        // --- กรณี: หน้าจังหวัด (ฉบับแก้ไขสมบูรณ์) ---
+        // [CASE 2: หน้าแยกจังหวัด]
+        const provinceName = pageData.provinceName;
         
-        // ✅ แก้ไขแล้ว: ใช้ Title ที่สมบูรณ์ที่ส่งมาจาก handleRouting โดยตรง ไม่ต้องเติมอะไรเพิ่ม
-        const pageTitle = pageData.title;
+        title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ${SELLING_POINTS} | ${BRAND_NAME}`;
         
-        // ✅ แก้ไขแล้ว: ใช้ Description ที่สร้างมาสำหรับหน้านั้นๆ โดยเฉพาะ แล้วเติมแค่คีย์เวิร์ดสำคัญ
-        const pageDescription = `${pageData.description} ${TRUST_KEYWORDS}`;
+        description = `รวมสาวสวย ไซด์ไลน์${provinceName} รับงาน${provinceName} ${MAIN_KEYWORDS} คัดเกรดพรีเมียม ${TRUST_FACTORS} อัปเดตน้องใหม่ล่าสุดวันนี้`;
         
-        document.title = pageTitle;
-        updateMeta('description', pageDescription);
-        updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', pageData.canonicalUrl);
-        
-        updateOpenGraphMeta(null, pageTitle, pageDescription, 'website');
+        canonicalUrl = pageData.canonicalUrl;
+        ogType = 'website';
+        ogImage = CONFIG.DEFAULT_OG_IMAGE;
+        keywords = `ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ${MAIN_KEYWORDS}`;
+
+        // Inject Schema
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
-        injectSchema(generateBreadcrumbSchema('location', pageData.provinceName), 'schema-jsonld-bc');
-        
+        injectSchema(generateBreadcrumbSchema('location', provinceName), 'schema-jsonld-bc');
+
     } else {
-        // --- กรณี: หน้าแรก (ส่วนนี้ถูกต้องอยู่แล้ว) ---
-        document.title = GLOBAL_TITLE;
-        updateMeta('description', GLOBAL_DESC);
-        updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', CONFIG.SITE_URL);
+        // [CASE 3: หน้าแรก]
+        title = `${MAIN_KEYWORDS} ${SELLING_POINTS} | ${BRAND_NAME}`;
         
-        updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
+        description = `ศูนย์รวม ${MAIN_KEYWORDS} อันดับ 1 คัดน้องๆ ${SELLING_POINTS} ${TRUST_FACTORS} ครบทุกโซน รูปตัวจริง รีวิวแน่น ปลอดภัยที่สุดในไทย`;
+        
+        canonicalUrl = CONFIG.SITE_URL;
+        ogType = 'website';
+        ogImage = CONFIG.DEFAULT_OG_IMAGE;
+        keywords = `${MAIN_KEYWORDS}, ${SELLING_POINTS}, หาเพื่อนเที่ยว, จ้างเที่ยว`;
+
+        // Inject Schema
         injectSchema(generateWebsiteSchema(), 'schema-jsonld-web'); 
         injectSchema(generateOrganizationSchema(), 'schema-jsonld-org'); 
         injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
     }
+
+    // --- DOM UPDATER HELPER (ฟังก์ชันช่วยอัปเดต Tag) ---
+    // ฟังก์ชันนี้จะจัดการทั้ง name="..." และ property="..." ให้เอง
+    const setMeta = (names, content) => {
+        const nameArray = Array.isArray(names) ? names : [names];
+        nameArray.forEach(name => {
+            let el = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+            if (!el) {
+                el = document.createElement('meta');
+                // ถ้าขึ้นต้นด้วย og: หรือ twitter: ให้ใช้ property, ถ้าไม่ใช่ให้ใช้ name
+                if (name.startsWith('og:') || name.startsWith('twitter:')) {
+                    el.setAttribute('property', name);
+                } else {
+                    el.setAttribute('name', name);
+                }
+                document.head.appendChild(el);
+            }
+            el.setAttribute('content', content);
+        });
+    };
+
+    // --- APPLY VALUES TO DOM ---
+    document.title = title;
+    
+    // Standard Meta
+    setMeta('description', description);
+    setMeta('keywords', keywords);
+    setMeta('robots', 'index, follow, max-image-preview:large');
+
+    // Open Graph (Facebook/Line)
+    setMeta('og:title', title);
+    setMeta('og:description', description);
+    setMeta('og:url', canonicalUrl);
+    setMeta('og:type', ogType);
+    setMeta('og:image', ogImage);
+    setMeta('og:site_name', BRAND_NAME);
+    setMeta('og:locale', 'th_TH');
+
+    // Twitter Card
+    setMeta('twitter:card', 'summary_large_image');
+    setMeta('twitter:title', title);
+    setMeta('twitter:description', description);
+    setMeta('twitter:image', ogImage);
+
+    // Canonical Link Update
+    let linkEl = document.querySelector('link[rel="canonical"]');
+    if (!linkEl) {
+        linkEl = document.createElement('link');
+        linkEl.setAttribute('rel', 'canonical');
+        document.head.appendChild(linkEl);
+    }
+    linkEl.setAttribute('href', canonicalUrl);
 }
 
-// ✅ อัปเกรดการแสดงผลโซเชียล: ใช้รูป .webp และใส่ Alt Text คีย์เวิร์ด
-function updateOpenGraphMeta(profile, title, description, type) {
-    updateMeta('og:title', title);
-    updateMeta('og:description', description);
-    updateMeta('og:url', profile ? `${CONFIG.SITE_URL}/sideline/${profile.slug}` : CONFIG.SITE_URL);
-    updateMeta('og:type', type); 
-    updateMeta('og:locale', 'th_TH'); 
-    
-    let imageUrl = (profile && profile.images && profile.images[0]) 
-                    ? profile.images[0].src 
-                    : CONFIG.DEFAULT_OG_IMAGE;
-    
-    updateMeta('og:image', imageUrl);
-    updateMeta('twitter:card', 'summary_large_image');
-    updateMeta('twitter:title', title);
-    updateMeta('twitter:description', description);
-    updateMeta('twitter:image', imageUrl);
-}
-
-/**
- * [COMPLETE FUNCTION 3/3]
- * สร้าง Schema สำหรับ SEO พร้อมข้อมูล "วันที่เผยแพร่"
- */
 function generatePersonSchema(p, descriptionOverride) {
     const provinceName = state.provincesMap.get(p.provinceKey) || '';
     const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();

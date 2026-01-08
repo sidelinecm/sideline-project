@@ -1,46 +1,60 @@
 <!DOCTYPE html> 
 <html lang="th" class="scroll-smooth antialiased dark:bg-gray-900 dark:text-gray-100 dark">
 <head>
+  <!-- 1. Essential Meta Tags (ต้องมาก่อนเสมอ) -->
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  
-  <!-- 1. SEO Meta Tags (Ultimate Setup) -->
-  <title>ไซด์ไลน์เชียงใหม่ | รับงาน sideline ฟิวแฟน ตรงปก100% ไม่มีมัดจำ</title>
-  <meta name="description" content="sidelinechiangmai แหล่งรวมน้องๆสาวๆ รับงานอิสระ ฟิวแฟน สาวไซด์ไลน์ fiwfans เด็กเอ็น ตรงปก100% ที่เยอะที่สุด ปลอดภัย ไม่ต้องโอนก่อน อัปเดตโปรไฟล์ใหม่">
- <link rel="canonical" id="canonical-link" href="https://sidelinechiangmai.netlify.app/">
-
-<script>
-  // โค้ดสำหรับอัปเดต Canonical ให้ตรงตาม URL ที่คนหรือบอทกำลังดูอยู่จริง
-  (function() {
-    try {
-      const currentUrl = window.location.origin + window.location.pathname;
-      const canonicalElement = document.getElementById('canonical-link');
-      if (canonicalElement) {
-        canonicalElement.setAttribute('href', currentUrl);
-      }
-    } catch (e) {
-      console.error('Canonical update failed', e);
-    }
-  })();
-</script>
-  <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
-  <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#db2777">
 
-  <!-- Social Media Tags -->
-  <meta property="og:locale" content="th_TH">
-  <meta property="og:site_name" content="sideline chiangmai">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="sideline chiangmai | ไซด์ไลน์เชียงใหม่ fiwfans รับงานเชียงใหม่ เด็กเอ็น ฟิวแฟน ตรงปกไม่มีมัดจำ">
-  <meta property="og:description" content="sideline chiangmai ศูนย์รวมน้องๆสาวๆ รับงานไซด์ไลน์ fiwfans เด็กเอ็น ฟิวแฟน ตรงปก100% ที่เยอะที่สุด ปลอดภัย ไม่ต้องโอนก่อน อัปเดตโปรไฟล์ใหม่ทุกวัน">
+  <!-- 2. Primary SEO Tags (หัวใจหลักสำหรับการค้นหา) -->
+  <!-- Title: เน้นคีย์เวิร์ดหลัก "ไซด์ไลน์เชียงใหม่", "รับงาน", "ฟิวแฟน" ให้อยู่หน้าสุด -->
+  <title>ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ตรงปก 100% ไม่มีมัดจำ</title>
   
-  <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="sideline chiangmai | ไซด์ไลน์เชียงใหม่ ฟิวแฟน ตรงปกไม่ต้องมัดจำ">
-  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
-<meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
+  <!-- Description: เขียนขายของให้จบใน 160 ตัวอักษร ใส่คีย์เวิร์ดรองครบถ้วน -->
+  <meta name="description" content="ศูนย์รวมน้องๆ ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน สาวสวย นักศึกษา น่ารัก เป็นกันเอง การันตีรูปตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำ อัปเดตใหม่ทุกวัน">
+  
+  <!-- Keywords: สำหรับ Search Engine ทางเลือก -->
+  <meta name="keywords" content="ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, รับงาน N เชียงใหม่, เด็กเอ็นเชียงใหม่, ฟิวแฟน, ไซด์ไลน์, ตรงปก, ไม่โอนมัดจำ, หาเพื่อนเที่ยวเชียงใหม่">
 
+  <!-- 3. Robots & Verification -->
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
+
+  <!-- 4. Canonical URL Handling -->
+  <link rel="canonical" id="canonical-link" href="https://sidelinechiangmai.netlify.app/">
+  <script>
+    // สคริปต์ปรับ Canonical URL อัตโนมัติ (ช่วยเรื่อง Duplicate Content)
+    (function() {
+      try {
+        const currentUrl = window.location.origin + window.location.pathname;
+        const canonicalElement = document.getElementById('canonical-link');
+        if (canonicalElement) {
+          canonicalElement.setAttribute('href', currentUrl);
+        }
+      } catch (e) {
+        console.error('Canonical update failed', e);
+      }
+    })();
+  </script>
+
+  <!-- 5. Social Media / Open Graph (สำหรับ Facebook & LINE) -->
+  <!-- รวม Tag ที่ซ้ำซ้อนให้เหลือชุดเดียวที่สมบูรณ์ที่สุด -->
+  <meta property="og:locale" content="th_TH">
+  <meta property="og:site_name" content="Sideline Chiangmai">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ตรงปก 100% ไม่มีมัดจำ">
+  <meta property="og:description" content="แหล่งรวมสาวสวยไซด์ไลน์เชียงใหม่ คัดเกรดพรีเมียม ฟิวแฟน ตรงปก จ่ายหน้างาน ปลอดภัย 100%">
+  <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
+  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
+
+  <!-- 6. Twitter Card (สำหรับ Twitter/X) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ตรงปก 100%">
+  <meta name="twitter:description" content="รับงานฟิวแฟน เชียงใหม่ สาวสวย ตรงปก ไม่ต้องโอนก่อน จ่ายหน้างาน">
+  <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
+
+  
   <!-- Icons -->
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -64,7 +78,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- ✅ Styles -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="styles.css" as="/style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
 
   <!-- ✅ FontAwesome (CDN) -->
@@ -824,8 +838,25 @@
 
 <script type="module" src="/main.js"></script>
 
-<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
+  <!-- ✅ ใช้โค้ดชุดนี้แทนครับ -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. สั่งให้เว็บแสดงผล (แก้จอขาว)
+    document.body.classList.add("loaded");
+  });
 
+  // 2. ถ้ามีไฟล์ sw.js (PWA) ค่อยทำงาน ถ้าไม่มีก็ไม่ error
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      // ตรวจสอบว่าไฟล์มีอยู่จริงไหมก่อนลงทะเบียน (ป้องกัน Error 404)
+      fetch('/sw.js', { method: 'HEAD' })
+        .then(res => {
+           if (res.ok) navigator.serviceWorker.register("/sw.js");
+        })
+        .catch(() => console.log('No Service Worker found, skipping.'));
+    });
+  }
+</script>
 
 
 </body>
