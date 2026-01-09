@@ -1,269 +1,139 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // --- 1. CONFIGURATION ---
-const CONFIG = {
-    SUPABASE_URL: Deno.env.get('SUPABASE_URL') || 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
-    SUPABASE_KEY: Deno.env.get('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
-    BUCKET: 'profile-images',
-    DOMAIN: 'https://sidelinechiangmai.netlify.app'
-};
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
+const STORAGE_BUCKET = 'profile-images';
+const SITE_DOMAIN = 'https://sidelinechiangmai.netlify.app';
 
-// --- 2. BOT DETECTOR (ระบบกรองบอท) ---
+// --- 2. BOT DETECTOR ---
 class BotDetector {
+    static patterns = [
+        'googlebot', 'bingbot', 'yandex', 'duckduckbot', 'slurp', 'baiduspider',
+        'facebookexternalhit', 'twitterbot', 'discordbot', 'whatsapp', 'linkedinbot',
+        'telegrambot', 'line', 'lighthouse', 'google-inspectiontool', 'gptbot'
+    ];
+    static regex = new RegExp(this.patterns.join('|'), 'i');
     static isBot(request) {
-        try {
-            const ua = (request.headers.get('User-Agent') || '').toLowerCase();
-            const accept = request.headers.get('Accept') || '';
-            
-            // รายชื่อบอทที่พบบ่อย (ครอบคลุม Social Media & Search Engine)
-            const botPatterns = [
-                'googlebot', 'bingbot', 'yandex', 'duckduckbot', 'baiduspider', 'slurp',
-                'facebookexternalhit', 'twitterbot', 'linkedinbot', 'discordbot', 'whatsapp', 
-                'telegrambot', 'line-poker', 'slackbot', 'pinterest', 'applebot', 
-                'ahrefsbot', 'semrushbot', 'mj12bot', 'dotbot', 'petalbot'
-            ];
-
-            if (botPatterns.some(bot => ua.includes(bot))) return true;
-            
-            // กรณีไม่มี User-Agent หรือขอแต่ HTML (พฤติกรรมบอทบางประเภท)
-            if (accept.includes('text/html') && !accept.includes('application/json') && ua === '') return true;
-            
-            return false;
-        } catch { return false; }
+        const userAgent = request.headers.get('User-Agent') || '';
+        return this.regex.test(userAgent.toLowerCase());
     }
 }
 
-// --- 3. UTILITY FUNCTIONS ---
-const Utils = {
-    // สุ่มเลขคงที่จากข้อความ (เพื่อให้คะแนนรีวิวเท่าเดิมทุกครั้งที่บอทเข้า)
-    getStableRandom: (str) => {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = ((hash << 5) - hash) + str.charCodeAt(i);
-            hash |= 0;
-        }
-        return Math.abs(hash);
-    },
-
-    // จัดรูปแบบเงิน (เช่น 1500 -> 1,500)
-    formatPrice: (price) => {
-        if (!price) return '1,500'; // ค่าเริ่มต้น
-        return parseInt(price.toString().replace(/\D/g,'')).toLocaleString('th-TH');
-    },
-
-    // จัดรูปแบบวันที่ไทย
-    getThaiDate: () => {
-        return new Date().toLocaleDateString('th-TH', { 
-            day: 'numeric', month: 'short', year: 'numeric' 
-        });
+function getStableRandom(seedString) {
+    let hash = 0;
+    for (let i = 0; i < seedString.length; i++) {
+        hash = ((hash << 5) - hash) + seedString.charCodeAt(i);
+        hash |= 0;
     }
-};
+    return Math.abs(hash);
+}
 
-// --- 4. MAIN HANDLER ---
+// --- 3. MAIN HANDLER ---
 export default async (request, context) => {
-    // 1. ถ้าไม่ใช่บอท ให้ส่งไปหน้าเว็บปกติ (Client-Side)
     if (!BotDetector.isBot(request)) return context.next();
 
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(p => p);
-
-        // ตรวจสอบ URL ต้องเป็น /sideline/slug เท่านั้น
         if (pathParts.length < 2 || pathParts[0] !== 'sideline') return context.next();
 
         const slug = decodeURIComponent(pathParts[1]);
+        const thaiDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 
-        // 2. ดึงข้อมูลจาก Supabase
-        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // ดึงข้อมูลโดยเชื่อมตาราง provinces ผ่านคอลัมน์ provinceKey (ตาม JSON จริง)
         const { data: profile, error } = await supabase
             .from('profiles')
-            .select('*, provinces(nameThai)')
+            .select('*, provinces:provinceKey(nameThai)')
             .eq('slug', slug)
             .maybeSingle();
 
-        if (error || !profile) {
-            console.log(`Profile not found for slug: ${slug}`);
-            return context.next(); // ถ้าหาไม่เจอ ให้หน้าเว็บปกติจัดการ 404
-        }
+        if (error || !profile) return context.next();
 
-        // 3. เตรียมข้อมูล (Data Preparation) - ฉบับแก้ไขสมบูรณ์ 100%
-        const name = (profile.name || 'สาวสวย').trim();
-        const province = profile.provinces?.nameThai || 'เชียงใหม่';
-        const location = (profile.location || province).trim();
-        const price = Utils.formatPrice(profile.rate);
-        const date = Utils.getThaiDate();
-
-        // --- 🛠️ ส่วนแก้ไข Logic ขั้นสูง (Data Validation) ---
+        // จัดการข้อมูลให้ตรงตามโครงสร้าง JSON
+        const pName = (profile.name || 'สาวสวย').trim();
+        const pProv = profile.provinces?.nameThai || 'เชียงใหม่';
+        const pLoc = (profile.location || pProv).trim();
         
-        // 1. จัดการอายุ (แก้ปัญหา 'อายุ null' และ 'null ปี')
-        // แปลงค่าเป็น String ก่อน -> เช็คว่าไม่ใช่ค่าว่าง และไม่ใช่คำว่า "null"
-        const rawAge = String(profile.age || '').trim();
-        const ageText = (rawAge && rawAge !== '' && rawAge.toLowerCase() !== 'null') 
-            ? `${rawAge} ปี` 
-            : '20+ ปี'; // ค่า Default ถ้าไม่มีข้อมูล
-        
-        // 2. จัดการสัดส่วน (แก้ปัญหา 'สัดส่วน-' และ 'สัดส่วน null')
-        const rawStats = String(profile.stats || '').trim();
-        const hasStats = (rawStats && rawStats !== '-' && rawStats.toLowerCase() !== 'null');
-        
-        // 2.1 สร้าง HTML สำหรับแสดงในตาราง (ถ้าไม่มีข้อมูล ให้เป็นค่าว่าง)
-        const statsHtml = hasStats
-            ? `<div class="meta-item"><span class="meta-label">สัดส่วน</span><span class="meta-val">${rawStats}</span></div>`
-            : '';
-            
-        // 2.2 สร้างข้อความสำหรับ SEO Description (ถ้ามีสัดส่วน ให้โชว์ด้วย)
-        const statsDesc = hasStats ? `สัดส่วน ${rawStats}` : '';
+        // ล้างค่าราคา (เช่น "1500.-" ให้เหลือ "1,500")
+        const displayPrice = profile.rate 
+            ? profile.rate.toString().replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ",") 
+            : '1,500';
 
-        // 3. จัดการรูปภาพ (บังคับเป็น Absolute URL เสมอ)
-        // ตัด ../ ออก และเติม Domain ให้ครบ ป้องกันรูปไม่ขึ้นใน Google
-        const imageUrl = profile.imagePath?.startsWith('http') 
-            ? profile.imagePath 
-            : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.BUCKET}/${profile.imagePath?.replace(/^\.\.\//, '')}`;
+        const seed = getStableRandom(slug);
+        const reviewCount = (seed % 205) + 45;
+        const ratingValue = ((seed % 4) / 10 + 4.6).toFixed(1);
 
-        // 4. SEO & Review Logic (ส่วนสำคัญที่ดึงดูดคนคลิก)
-        const seed = Utils.getStableRandom(slug);
-        const reviewCount = (seed % 150) + 50; // รีวิวระหว่าง 50-200 คน
-        const rating = ((seed % 5) / 10 + 4.5).toFixed(1); // ดาวระหว่าง 4.5-4.9
+        const title = `น้อง${pName} ไซด์ไลน์${pProv} (${pLoc}) งานดีตรงปก เริ่ม ${displayPrice} | sideline chiangmai`;
+        const description = `อัปเดตล่าสุด ${thaiDate}: ไซด์ไลน์${pProv} น้อง${pName} โซน${pLoc} งานดีไม่เร่ง ฟีลแฟน ไม่มีมัดจำ ปลอดภัย จ่ายหน้างาน 100% รีวิวแน่น ${reviewCount} คน ⭐ ${ratingValue}`;
 
-        // สร้าง Title (หัวข้อผลการค้นหา)
-        const pageTitle = `น้อง${name} ไซด์ไลน์${province} (${location}) งานดีตรงปก เริ่ม ${price} | Sideline Chiangmai`;
+        // ใช้ imagePath ตาม JSON จริง
+        const imageFileName = profile.imagePath || '';
+        const imageUrl = imageFileName.startsWith('http') 
+            ? imageFileName 
+            : `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${imageFileName.replace(/\.\.\//g, '')}`;
 
-        // สร้าง Description (คำบรรยายใต้หัวข้อ) 
-        // 🚨 สังเกต: ตรงนี้ใช้ตัวแปร ageText ที่แก้แล้ว (จะไม่ขึ้น null แน่นอน)
-        const metaDesc = `📌 โปรไฟล์น้อง ${name} ไซด์ไลน์${province} โซน${location} อายุ ${ageText} ${statsDesc} รับงานเอง ตรงปก 100% ไม่ต้องโอนมัดจำ ชำระหน้างาน ปลอดภัย รีวิวแน่น ${rating}⭐`;
-        
-        const pageUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(slug)}`;
+        const pageUrl = `${SITE_DOMAIN}/sideline/${encodeURIComponent(slug)}`;
 
-        // 5. สร้าง Structured Data (JSON-LD) **ทีเด็ดให้ติดดาว** ⭐
-        const schemaData = {
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": `น้อง${name} ไซด์ไลน์${province}`,
-            "image": imageUrl,
-            "description": metaDesc,
-            "brand": {
-                "@type": "Brand",
-                "name": "Sideline Chiangmai"
-            },
-            "offers": {
-                "@type": "Offer",
-                "url": pageUrl,
-                "priceCurrency": "THB",
-                "price": profile.rate || 1500,
-                "availability": "https://schema.org/InStock"
-            },
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": rating,
-                "reviewCount": reviewCount,
-                "bestRating": "5",
-                "worstRating": "1"
-            }
-        };
-
-        // 6. Render HTML
         const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle}</title>
-    <meta name="description" content="${metaDesc}">
-    <link rel="canonical" href="${pageUrl}">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="profile">
-    <meta property="og:url" content="${pageUrl}">
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
+    <title>${title}</title>
+    <meta name="description" content="${description}">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
     <meta property="og:image" content="${imageUrl}">
-    <meta property="og:image:width" content="800">
-    <meta property="og:image:height" content="800">
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${pageTitle}">
-    <meta name="twitter:description" content="${metaDesc}">
-    <meta name="twitter:image" content="${imageUrl}">
-
-    <!-- Schema Markup (Rich Snippets) -->
-    <script type="application/ld+json">
-        ${JSON.stringify(schemaData)}
-    </script>
-
+    <meta property="og:url" content="${pageUrl}">
+    <meta property="og:type" content="profile">
+    <link rel="canonical" href="${pageUrl}">
     <style>
-        body { font-family: 'Prompt', -apple-system, sans-serif; margin: 0; background: #f3f4f6; color: #1f2937; line-height: 1.5; }
-        .container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .hero { position: relative; }
-        .hero-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
-        .badge-verified { position: absolute; bottom: 10px; right: 10px; background: #06c755; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .content { padding: 20px; }
-        .rating-bar { display: flex; align-items: center; gap: 6px; color: #b45309; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
-        .last-update { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
-        h1 { color: #db2777; font-size: 22px; margin: 0 0 16px 0; line-height: 1.4; }
-        
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
-        .meta-item { background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; }
-        .meta-label { display: block; font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-        .meta-val { display: block; font-weight: 700; color: #111827; font-size: 14px; }
-        
-        .description { background: #fff1f2; padding: 16px; border-radius: 12px; border: 1px dashed #fbcfe8; font-size: 14px; color: #881337; margin-bottom: 24px; white-space: pre-wrap; }
-        
-        .btn-line { display: flex; justify-content: center; align-items: center; background: #06c755; color: white; text-decoration: none; padding: 14px; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(6,199,85,0.25); transition: transform 0.2s; }
-        .btn-home { text-align: center; display: block; margin-top: 24px; color: #db2777; font-size: 14px; font-weight: 500; text-decoration: none; }
+        body { font-family: 'Prompt', sans-serif; margin: 0; background: #fdf2f8; color: #1f2937; line-height: 1.6; }
+        .container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+        .content { padding: 24px; }
+        .rating { color: #b45309; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        h1 { color: #ec4899; font-size: 22px; margin: 0 0 16px 0; line-height: 1.3; }
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .meta-item { background: #f9fafb; padding: 12px; border-radius: 12px; border: 1px solid #f3f4f6; }
+        .meta-label { display: block; font-size: 11px; color: #6b7280; }
+        .meta-val { display: block; font-weight: bold; color: #111827; }
+        .desc { font-size: 15px; color: #4b5563; margin-bottom: 24px; white-space: pre-wrap; }
+        .cta-btn { display: block; background: #06c755; color: #fff; text-align: center; padding: 16px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 18px; }
+        .back-home { display: block; text-align: center; margin-top: 30px; color: #ec4899; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="hero">
-            <img src="${imageUrl}" alt="${name} ไซด์ไลน์${province}" class="hero-img" loading="eager">
-            <div class="badge-verified">✓ ยืนยันตัวตนแล้ว</div>
-        </div>
+        <img src="${imageUrl}" alt="${pName}" class="hero-img">
         <div class="content">
-            <div class="rating-bar">
-                <span>⭐ ${rating}</span>
-                <span style="color:#9ca3af">•</span>
-                <span>${reviewCount} รีวิว</span>
+            <div class="rating">⭐ ${ratingValue} (${reviewCount} รีวิว)</div>
+            <h1>${title}</h1>
+            <div class="meta-grid">
+                <div class="meta-item"><span class="meta-label">ราคา</span><span class="meta-val">${displayPrice} บาท</span></div>
+                <div class="meta-item"><span class="meta-label">พื้นที่</span><span class="meta-val">${pLoc}</span></div>
+                <div class="meta-item"><span class="meta-label">สัดส่วน</span><span class="meta-val">${profile.stats || '34-25-36'}</span></div>
+                <div class="meta-item"><span class="meta-label">อายุ</span><span class="meta-val">${profile.age || '22'} ปี</span></div>
             </div>
-            <div class="last-update">อัปเดตข้อมูล: ${date}</div>
-            
-            <h1>${pageTitle}</h1>
-
-            <div class="info-grid">
-                <div class="meta-item"><span class="meta-label">ราคาเริ่มต้น</span><span class="meta-val">${price} ฿</span></div>
-                <div class="meta-item"><span class="meta-label">พิกัด</span><span class="meta-val">${location}</span></div>
-                <div class="meta-item"><span class="meta-label">อายุ</span><span class="meta-val">${ageText}</span></div>
-                ${statsHtml} <!-- ตรงนี้จะไม่โชว์ถ้าไม่มีข้อมูล -->
-            </div>
-
-            <div class="description">${profile.description || 'น้องนิสัยดี เป็นกันเอง ฟีลแฟน งานดีตรงปก ไม่เร่งรีบ รับรองความประทับใจค่ะ'}</div>
-
-            <a href="https://line.me/ti/p/${profile.lineId || ''}" class="btn-line">
-                📲 แอดไลน์จองคิว
-            </a>
-
-            <a href="/" class="btn-home">
-                🏠 ดูน้องคนอื่นๆ เพิ่มเติม
-            </a>
+            <div class="desc">${profile.description || profile.quote || 'งานดี ตรงปก ฟีลแฟน ปลอดภัย 100%'}</div>
+            <a href="${profile.lineId || '#'}" class="cta-btn">📲 แอดไลน์จองคิว</a>
+            <a href="/" class="back-home">🏠 กลับหน้าหลัก</a>
         </div>
     </div>
 </body>
 </html>`;
 
         return new Response(html, {
-            headers: {
+            headers: { 
                 "Content-Type": "text/html; charset=utf-8",
-                "Netlify-CDN-Cache-Control": "public, s-maxage=3600", // Cache 1 ชั่วโมง
-                "X-Robots-Tag": "index, follow"
+                "Cache-Control": "public, s-maxage=3600" 
             }
         });
 
-    } catch (err) {
-        console.error("SSR Error:", err);
-        // ถ้า error จริงๆ ให้ส่ง html เปล่าๆ ไปก่อน บอทจะได้ไม่เจอ 500
-        return new Response("<!DOCTYPE html><html><body>System Loading...</body></html>", { 
-            status: 200, 
-            headers: { "Content-Type": "text/html" } 
-        });
+    } catch (e) {
+        return context.next();
     }
 };
