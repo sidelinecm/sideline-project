@@ -59,7 +59,7 @@ const Utils = {
     }
 };
 
-// --- 4. MAIN HANDLER ---
+// --- 4. MAIN HANDLER (ฉบับแก้ไขสมบูรณ์ 100%) ---
 export default async (request, context) => {
     // 1. ถ้าไม่ใช่บอท ให้ส่งไปหน้าเว็บปกติ (Client-Side)
     if (!BotDetector.isBot(request)) return context.next();
@@ -77,64 +77,54 @@ export default async (request, context) => {
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const { data: profile, error } = await supabase
             .from('profiles')
-.select('*, provinces:provinceKey(nameThai)')
+            .select('*, provinces:provinceKey(nameThai)')
             .eq('slug', slug)
             .maybeSingle();
 
         if (error || !profile) {
             console.log(`Profile not found for slug: ${slug}`);
-            return context.next(); // ถ้าหาไม่เจอ ให้หน้าเว็บปกติจัดการ 404
+            return context.next(); 
         }
 
-        // 3. เตรียมข้อมูล (Data Preparation) - ฉบับแก้ไขสมบูรณ์ 100%
+        // 3. เตรียมข้อมูล (Data Preparation)
         const name = (profile.name || 'สาวสวย').trim();
         const province = profile.provinces?.nameThai || 'เชียงใหม่';
         const location = (profile.location || province).trim();
         const price = Utils.formatPrice(profile.rate);
         const date = Utils.getThaiDate();
 
-        // --- 🛠️ ส่วนแก้ไข Logic ขั้นสูง (Data Validation) ---
-        
-        // 1. จัดการอายุ (แก้ปัญหา 'อายุ null' และ 'null ปี')
-        // แปลงค่าเป็น String ก่อน -> เช็คว่าไม่ใช่ค่าว่าง และไม่ใช่คำว่า "null"
+        // --- 🛠️ Logic ขั้นสูง: แก้ปัญหาอายุ/สัดส่วน null ---
         const rawAge = String(profile.age || '').trim();
         const ageText = (rawAge && rawAge !== '' && rawAge.toLowerCase() !== 'null') 
             ? `${rawAge} ปี` 
-            : '20+ ปี'; // ค่า Default ถ้าไม่มีข้อมูล
+            : '20+ ปี';
         
-        // 2. จัดการสัดส่วน (แก้ปัญหา 'สัดส่วน-' และ 'สัดส่วน null')
         const rawStats = String(profile.stats || '').trim();
         const hasStats = (rawStats && rawStats !== '-' && rawStats.toLowerCase() !== 'null');
-        
-        // 2.1 สร้าง HTML สำหรับแสดงในตาราง (ถ้าไม่มีข้อมูล ให้เป็นค่าว่าง)
         const statsHtml = hasStats
             ? `<div class="meta-item"><span class="meta-label">สัดส่วน</span><span class="meta-val">${rawStats}</span></div>`
             : '';
-            
-        // 2.2 สร้างข้อความสำหรับ SEO Description (ถ้ามีสัดส่วน ให้โชว์ด้วย)
         const statsDesc = hasStats ? `สัดส่วน ${rawStats}` : '';
 
-        // 3. จัดการรูปภาพ (บังคับเป็น Absolute URL เสมอ)
-        // ตัด ../ ออก และเติม Domain ให้ครบ ป้องกันรูปไม่ขึ้นใน Google
-        const imageUrl = profile.imagePath?.startsWith('http') 
-            ? profile.imagePath 
-            : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.BUCKET}/${profile.imagePath?.replace(/^\.\.\//, '')}`;
-
-        // 4. SEO & Review Logic (ส่วนสำคัญที่ดึงดูดคนคลิก)
-        const seed = Utils.getStableRandom(slug);
-        const reviewCount = (seed % 150) + 50; // รีวิวระหว่าง 50-200 คน
-        const rating = ((seed % 5) / 10 + 4.5).toFixed(1); // ดาวระหว่าง 4.5-4.9
-
-        // สร้าง Title (หัวข้อผลการค้นหา)
-        const pageTitle = `น้อง${name} ไซด์ไลน์${province} (${location}) งานดีตรงปก เริ่ม ${price} | Sideline Chiangmai`;
-
-        // สร้าง Description (คำบรรยายใต้หัวข้อ) 
-        // 🚨 สังเกต: ตรงนี้ใช้ตัวแปร ageText ที่แก้แล้ว (จะไม่ขึ้น null แน่นอน)
-        const metaDesc = `📌 โปรไฟล์น้อง ${name} ไซด์ไลน์${province} โซน${location} อายุ ${ageText} ${statsDesc} รับงานเอง ตรงปก 100% ไม่ต้องโอนมัดจำ ชำระหน้างาน ปลอดภัย รีวิวแน่น ${rating}⭐`;
+        // --- 🖼️ Logic แก้ไขปัญหา "รูปจอดำ" & รูปสำรอง ---
+        const rawImg = profile.imagePath || profile.image_path || '';
+        // ล้าง Path ให้สะอาดที่สุด ตัด ../ และชื่อ bucket ที่อาจซ้ำซ้อนออก
+        const cleanPath = rawImg.replace(/^\.\.\//g, '').replace('profile-images/', '').trim();
         
+        const imageUrl = cleanPath 
+            ? `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.BUCKET}/${cleanPath}`
+            : 'https://sidelinechiangmai.netlify.app/sidelinechiangmai-social-preview.webp';
+
+        // 4. SEO & Review Logic
+        const seed = Utils.getStableRandom(slug);
+        const reviewCount = (seed % 150) + 50;
+        const rating = ((seed % 5) / 10 + 4.5).toFixed(1);
+
+        const pageTitle = `น้อง${name} ไซด์ไลน์${province} (${location}) งานดีตรงปก เริ่ม ${price} | Sideline Chiangmai`;
+        const metaDesc = `📌 โปรไฟล์น้อง ${name} ไซด์ไลน์${province} โซน${location} อายุ ${ageText} ${statsDesc} รับงานเอง ตรงปก 100% ไม่ต้องโอนมัดจำ ชำระหน้างาน ปลอดภัย รีวิวแน่น ${rating}⭐`;
         const pageUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(slug)}`;
 
-        // 5. สร้าง Structured Data (JSON-LD) **ทีเด็ดให้ติดดาว** ⭐
+        // 5. Structured Data (JSON-LD)
         const schemaData = {
             "@context": "https://schema.org",
             "@type": "Product",
@@ -171,7 +161,6 @@ export default async (request, context) => {
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${pageUrl}">
 
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="profile">
     <meta property="og:url" content="${pageUrl}">
     <meta property="og:title" content="${pageTitle}">
@@ -180,13 +169,11 @@ export default async (request, context) => {
     <meta property="og:image:width" content="800">
     <meta property="og:image:height" content="800">
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${pageTitle}">
     <meta name="twitter:description" content="${metaDesc}">
     <meta name="twitter:image" content="${imageUrl}">
 
-    <!-- Schema Markup (Rich Snippets) -->
     <script type="application/ld+json">
         ${JSON.stringify(schemaData)}
     </script>
@@ -195,20 +182,17 @@ export default async (request, context) => {
         body { font-family: 'Prompt', -apple-system, sans-serif; margin: 0; background: #f3f4f6; color: #1f2937; line-height: 1.5; }
         .container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .hero { position: relative; }
-        .hero-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+        .hero-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #e5e7eb; }
         .badge-verified { position: absolute; bottom: 10px; right: 10px; background: #06c755; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .content { padding: 20px; }
         .rating-bar { display: flex; align-items: center; gap: 6px; color: #b45309; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
         .last-update { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
         h1 { color: #db2777; font-size: 22px; margin: 0 0 16px 0; line-height: 1.4; }
-        
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
         .meta-item { background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; }
         .meta-label { display: block; font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .meta-val { display: block; font-weight: 700; color: #111827; font-size: 14px; }
-        
         .description { background: #fff1f2; padding: 16px; border-radius: 12px; border: 1px dashed #fbcfe8; font-size: 14px; color: #881337; margin-bottom: 24px; white-space: pre-wrap; }
-        
         .btn-line { display: flex; justify-content: center; align-items: center; background: #06c755; color: white; text-decoration: none; padding: 14px; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(6,199,85,0.25); transition: transform 0.2s; }
         .btn-home { text-align: center; display: block; margin-top: 24px; color: #db2777; font-size: 14px; font-weight: 500; text-decoration: none; }
     </style>
@@ -216,7 +200,7 @@ export default async (request, context) => {
 <body>
     <div class="container">
         <div class="hero">
-            <img src="${imageUrl}" alt="${name} ไซด์ไลน์${province}" class="hero-img" loading="eager">
+            <img src="${imageUrl}" alt="${name} ไซด์ไลน์${province}" class="hero-img" loading="eager" onerror="this.src='https://sidelinechiangmai.netlify.app/sidelinechiangmai-social-preview.webp'">
             <div class="badge-verified">✓ ยืนยันตัวตนแล้ว</div>
         </div>
         <div class="content">
@@ -233,7 +217,7 @@ export default async (request, context) => {
                 <div class="meta-item"><span class="meta-label">ราคาเริ่มต้น</span><span class="meta-val">${price} ฿</span></div>
                 <div class="meta-item"><span class="meta-label">พิกัด</span><span class="meta-val">${location}</span></div>
                 <div class="meta-item"><span class="meta-label">อายุ</span><span class="meta-val">${ageText}</span></div>
-                ${statsHtml} <!-- ตรงนี้จะไม่โชว์ถ้าไม่มีข้อมูล -->
+                ${statsHtml}
             </div>
 
             <div class="description">${profile.description || 'น้องนิสัยดี เป็นกันเอง ฟีลแฟน งานดีตรงปก ไม่เร่งรีบ รับรองความประทับใจค่ะ'}</div>
@@ -253,14 +237,13 @@ export default async (request, context) => {
         return new Response(html, {
             headers: {
                 "Content-Type": "text/html; charset=utf-8",
-                "Netlify-CDN-Cache-Control": "public, s-maxage=3600", // Cache 1 ชั่วโมง
+                "Netlify-CDN-Cache-Control": "public, s-maxage=3600",
                 "X-Robots-Tag": "index, follow"
             }
         });
 
     } catch (err) {
         console.error("SSR Error:", err);
-        // ถ้า error จริงๆ ให้ส่ง html เปล่าๆ ไปก่อน บอทจะได้ไม่เจอ 500
         return new Response("<!DOCTYPE html><html><body>System Loading...</body></html>", { 
             status: 200, 
             headers: { "Content-Type": "text/html" } 
