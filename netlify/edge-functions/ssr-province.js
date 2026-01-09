@@ -124,12 +124,12 @@ async function fetchProfiles(supabase, provinceKey) {
 // HTML Generation Functions
 function generateMetaTags(provinceData, thaiDate, profilesCount) {
   const title = `รวมสาวไซด์ไลน์${provinceData.nameThai} [อัปเดตล่าสุด ${thaiDate}] รับงานตรงปก`;
-  const description = `อัปเดตล่าสุด ${thaiDate}: ศูนย์รวมน้องๆ ไซด์ไลน์จังหวัด${provinceData.nameThai} ${profilesCount}+ คน คัดเกรดพรีเมียม รูปจริง ตรงปก ทุกคน ปลอดภัย 100%`;
+  const description = `อัปเดตล่าสุด ${thaiDate}: ศูนย์รวมน้องๆ ไซด์ไลน์จังหวัด${provinceData.nameThai} ${profilesCount}+ คน คัดเกรดพรีเมียม รูปจริง ตรงปก ทุกคน ปลอดภัย100% ไม่มีมัดจำ`;
   
   return `
     <title>${sanitizeHTML(title)}</title>
     <meta name="description" content="${sanitizeHTML(description)}">
-    <meta name="keywords" content="ไซด์ไลน์, ${provinceData.nameThai}, รับงาน, พาร์ทไทม์, นักศึกษา, งานพิเศษ">
+    <meta name="keywords" content="ไซด์ไลน์, ${provinceData.nameThai}, รับงาน, พาร์ทไทม์, นักศึกษา, งานพิเศษ, ฟิวแฟน, ตรงปก, ไม่มีมัดจำ">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta property="og:title" content="${sanitizeHTML(title)}">
     <meta property="og:description" content="${sanitizeHTML(description)}">
