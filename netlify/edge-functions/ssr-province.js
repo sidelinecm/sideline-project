@@ -1,519 +1,149 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// Configuration - ควรใช้ Environment Variables ใน production
-const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
-
-// Cache สำหรับ reuse connection และข้อมูล
-const cache = {
-  supabaseClient: null,
-  provinces: new Map(),
-  profilesCache: new Map(),
-  lastFetchTime: new Map()
+// Configuration
+const CONFIG = {
+    SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
+    DOMAIN: 'https://sidelinechiangmai.netlify.app'
 };
 
-// Constants
-const CACHE_DURATION = 30 * 60 * 1000; // 30 นาที
-const MAX_PROFILES = 100;
-const BOT_PATTERNS = /bot|spider|crawl|facebook|twitter|whatsapp|telegram|slack|discord|skype|zoom|line/i;
+const cache = { data: new Map(), lastFetch: new Map() };
+const CACHE_TTL = 15 * 60 * 1000;
 
-// Helper Functions
-const getSupabaseClient = () => {
-  if (!cache.supabaseClient) {
-    cache.supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-      global: { headers: { 'x-application-name': 'province-bot-renderer' } }
-    });
-  }
-  return cache.supabaseClient;
+const sanitizeHTML = (str) => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]);
+
+const getImageUrl = (path) => {
+    if (!path) return `${CONFIG.DOMAIN}/sidelinechiangmai-social-preview.webp`;
+    const cleanPath = path.replace(/^(\.\.?\/)+/, '');
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${cleanPath}`;
 };
 
-const isCacheValid = (cacheKey) => {
-  const lastFetch = cache.lastFetchTime.get(cacheKey);
-  if (!lastFetch) return false;
-  return (Date.now() - lastFetch) < CACHE_DURATION;
-};
-
-const sanitizeHTML = (str) => {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-};
-
-const formatThaiDate = () => {
-  const now = new Date();
-  const options = { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric',
-    timeZone: 'Asia/Bangkok'
-  };
-  return now.toLocaleDateString('th-TH', options);
-};
-
-const validateProvinceKey = (key) => {
-  if (!key || typeof key !== 'string') return false;
-  if (key.length > 100) return false;
-  if (!/^[a-zA-Z0-9ก-๙\-_]+$/.test(key)) return false;
-  return true;
-};
-
-// Data Fetching Functions
-async function fetchProvinceData(supabase, provinceKey) {
-  const cacheKey = `province_${provinceKey}`;
-  
-  // Check cache first
-  if (cache.provinces.has(cacheKey) && isCacheValid(cacheKey)) {
-    return cache.provinces.get(cacheKey);
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from('provinces')
-      .select('id, nameThai, nameEng, key, region, population, area')
-      .eq('key', provinceKey)
-      .maybeSingle();
-
-    if (error) throw error;
+export default async (request, context) => {
+    const ua = (request.headers.get('User-Agent') || '').toLowerCase();
+    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord/i.test(ua);
     
-    if (data) {
-      cache.provinces.set(cacheKey, data);
-      cache.lastFetchTime.set(cacheKey, Date.now());
-    }
-    
-    return data;
-  } catch (error) {
-    console.error(`Error fetching province ${provinceKey}:`, error);
-    return null;
-  }
-}
+    if (!isBot) return context.next();
 
-async function fetchProfiles(supabase, provinceKey) {
-  const cacheKey = `profiles_${provinceKey}`;
-  if (cache.profilesCache.has(cacheKey) && isCacheValid(cacheKey)) {
-    return cache.profilesCache.get(cacheKey);
-  }
+    try {
+        const url = new URL(request.url);
+        const provinceKey = decodeURIComponent(url.pathname.split('/').pop());
 
-  try {
-    const { data, error, count } = await supabase
-      .from('profiles')
-      .select('name, slug, age, rating, verified, created_at, imagePath, rate, stats', { // เพิ่มฟิลด์ที่ขาด
-        count: 'exact',
-        head: false 
-      })
-      .eq('provinceKey', provinceKey) // ตรงนี้ชื่อคอลัมน์ใน DB ต้องสะกด provinceKey นะครับ
-      .eq('active', true)
-      .order('created_at', { ascending: false })
-      .limit(MAX_PROFILES);
+        if (!/^[a-zA-Z0-9ก-๙\-_]+$/.test(provinceKey)) return context.next();
 
-    if (error) throw error;
-    const result = { profiles: data || [], totalCount: count || 0 };
-    cache.profilesCache.set(cacheKey, result);
-    cache.lastFetchTime.set(cacheKey, Date.now());
-    return result;
-  } catch (error) {
-    console.error(`Error fetching profiles for ${provinceKey}:`, error);
-    return { profiles: [], totalCount: 0 };
-  }
-}
+        const cacheKey = `prov_${provinceKey}`;
+        if (cache.data.has(cacheKey) && (Date.now() - cache.lastFetch.get(cacheKey) < CACHE_TTL)) {
+            return new Response(cache.data.get(cacheKey), { headers: { "content-type": "text/html; charset=utf-8", "x-cache": "HIT" } });
+        }
 
-// HTML Generation Functions
-function generateMetaTags(provinceData, thaiDate, profilesCount) {
-  const title = `รวมสาวไซด์ไลน์${provinceData.nameThai} [อัปเดตล่าสุด ${thaiDate}] รับงานตรงปก`;
-  const description = `อัปเดตล่าสุด ${thaiDate}: ศูนย์รวมน้องๆ ไซด์ไลน์จังหวัด${provinceData.nameThai} ${profilesCount}+ คน คัดเกรดพรีเมียม รูปจริง ตรงปก ทุกคน ปลอดภัย100% ไม่มีมัดจำ`;
-  
-  return `
-    <title>${sanitizeHTML(title)}</title>
-    <meta name="description" content="${sanitizeHTML(description)}">
-    <meta name="keywords" content="ไซด์ไลน์, ${provinceData.nameThai}, รับงาน, พาร์ทไทม์, นักศึกษา, งานพิเศษ, ฟิวแฟน, ตรงปก, ไม่มีมัดจำ">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <meta property="og:title" content="${sanitizeHTML(title)}">
-    <meta property="og:description" content="${sanitizeHTML(description)}">
+        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        const [provinceRes, profilesRes] = await Promise.all([
+            supabase.from('provinces').select('nameThai, key').eq('key', provinceKey).maybeSingle(),
+            supabase.from('profiles')
+                .select('name, slug, age, rate, stats, imagePath, verified, location, created_at')
+                .eq('provinceKey', provinceKey)
+                .eq('active', true)
+                .order('verified', { ascending: false })
+                .order('created_at', { ascending: false })
+                .limit(60)
+        ]);
+
+        const province = provinceRes.data;
+        const profiles = profilesRes.data || [];
+
+        if (!province) return context.next();
+
+        const thaiDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        // 🔥 SEO UPDATE: ปรับ Title/Desc ให้ตรงกับกลยุทธ์ GSC
+        const title = `ไซด์ไลน์${province.nameThai} รับงาน${province.nameThai} ฟิวแฟน ไม่มัดจำ [อัปเดต ${thaiDate}]`;
+        const description = `รวมรูปสาวไซด์ไลน์ ${province.nameThai} รับงานเอง ${province.nameThai} คัดคนสวย ตรงปก 100% ปลอดภัย ไม่ผ่านเอเย่นต์ ไม่ต้องโอนจอง จ่ายเงินหน้างานเท่านั้น อัปเดตใหม่ล่าสุด`;
+        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/province/${provinceKey}`;
+
+        const profilesHtml = profiles.map(p => {
+            const imgUrl = getImageUrl(p.imagePath);
+            const price = p.rate ? parseInt(p.rate.toString().replace(/[^0-9]/g, '')).toLocaleString() : 'สอบถาม';
+            return `
+            <a href="/sideline/${p.slug}" class="profile-card">
+                <div class="img-wrapper">
+                    <img src="${imgUrl}" alt="น้อง${p.name} ${province.nameThai}" loading="lazy">
+                    ${p.verified ? '<span class="badge-ver">✓ ยืนยัน</span>' : ''}
+                </div>
+                <div class="info">
+                    <div class="name">น้อง${sanitizeHTML(p.name)} <span class="age">${p.age ? p.age+'ปี' : ''}</span></div>
+                    <div class="meta">${p.location || province.nameThai}</div>
+                    <div class="price">${price} ฿</div>
+                </div>
+            </a>`;
+        }).join('');
+
+        const html = `<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <meta name="description" content="${description}">
+    <link rel="canonical" href="${canonicalUrl}">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
+    <meta property="og:image" content="${profiles[0] ? getImageUrl(profiles[0].imagePath) : ''}">
     <meta property="og:type" content="website">
-    <meta property="og:locale" content="th_TH">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${sanitizeHTML(title)}">
-    <meta name="twitter:description" content="${sanitizeHTML(description)}">
-    <link rel="canonical" href="https://sidelinechiangmai.netlify.app/sideline/province/${provinceData.key}">
-  `;
-}
-
-function generateStructuredData(provinceData, profiles, thaiDate) {
-  const profileList = profiles.map(profile => ({
-    "@type": "Person",
-    "name": profile.name,
-    "url": `https://sidelinechiangmai.netlify.app/sideline/${encodeURIComponent(profile.slug)}`
-  }));
-
-  return `
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      "name": "รายชื่อไซด์ไลน์จังหวัด${provinceData.nameThai}",
-      "description": "รายชื่อน้องๆ ไซด์ไลน์ในจังหวัด${provinceData.nameThai}",
-      "dateModified": "${new Date().toISOString()}",
-      "datePublished": "${thaiDate}",
+      "name": "${title}",
+      "description": "${description}",
+      "url": "${canonicalUrl}",
       "mainEntity": {
         "@type": "ItemList",
-        "numberOfItems": ${profiles.length},
-        "itemListElement": ${JSON.stringify(profileList.map((item, index) => ({
-          "@type": "ListItem",
-          "position": index + 1,
-          "item": item
-        })))}
+        "itemListElement": [
+          ${profiles.map((p, index) => `{ "@type": "ListItem", "position": ${index + 1}, "url": "${CONFIG.DOMAIN}/sideline/${p.slug}" }`).join(',')}
+        ]
       }
     }
     </script>
-  `;
-}
-
-function generateProfilesList(profiles) {
-  if (!profiles || profiles.length === 0) {
-    return '<li class="no-data">กำลังอัปเดตข้อมูลน้องๆ ในพื้นที่นี้...</li>';
-  }
-
-  return profiles.map(profile => {
-    const safeSlug = encodeURIComponent(profile.slug);
-    
-    // จัดการราคาให้สวยงาม
-    const cleanPrice = profile.rate ? profile.rate.toString().replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '1,500';
-    
-    // จัดการ URL รูปภาพให้บอทอ่านออก (ทำเป็น Absolute URL)
-    const imageUrl = profile.imagePath 
-      ? `https://hgzbgpbmymoiwjpaypvl.supabase.co/storage/v1/object/public/profile-images/${profile.imagePath.replace(/^\.\.\//, '')}`
-      : 'https://via.placeholder.com/300x400';
-
-    return `
-      <li class="profile-item">
-        <a href="/sideline/${safeSlug}" class="profile-link">
-          <img src="${imageUrl}" alt="น้อง${profile.name} ไซด์ไลน์" style="width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:8px; margin-bottom:10px;">
-          <span class="profile-name" style="font-size:1.2em;">น้อง${sanitizeHTML(profile.name)} ${profile.age ? `(${profile.age} ปี)` : ''}</span>
-          <div style="margin:5px 0;">
-             ${profile.stats ? `<small>สัดส่วน: ${profile.stats}</small>` : ''}
-             ${profile.verified ? ' <span class="verified">✓ ตัวจริง</span>' : ''}
-          </div>
-          <div style="color:#db2777; font-weight:bold; font-size:1.1em;">ค่าขนม: ${cleanPrice}.-</div>
-          ${profile.rating ? `<span class="rating">⭐ ${profile.rating.toFixed(1)}</span>` : ''}
-        </a>
-      </li>
-    `;
-  }).join('');
-}
-
-function generateHTML(provinceData, profilesData, thaiDate) {
-  const profiles = profilesData.profiles;
-  const totalCount = profilesData.totalCount;
-  
-  const html = `<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  ${generateMetaTags(provinceData, thaiDate, totalCount)}
-  ${generateStructuredData(provinceData, profiles, thaiDate)}
-  <style>
-    :root {
-      --primary-color: #4a6fa5;
-      --secondary-color: #ff6b6b;
-      --text-color: #333;
-      --bg-color: #f8f9fa;
-      --card-bg: #ffffff;
-      --border-color: #e0e0e0;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Sarabun', 'Kanit', sans-serif;
-      line-height: 1.6;
-      color: var(--text-color);
-      background-color: var(--bg-color);
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      color: white;
-      padding: 2rem;
-      border-radius: 10px;
-      margin-bottom: 2rem;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .stat-item {
-      background: rgba(255,255,255,0.2);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-weight: bold;
-    }
-    
-    .profiles-list {
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 2rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .profiles-list h2 {
-      color: var(--primary-color);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--border-color);
-    }
-    
-    .profile-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1rem;
-      list-style: none;
-    }
-    
-    .profile-item {
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .profile-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    
-    .profile-link {
-      text-decoration: none;
-      color: var(--text-color);
-      display: block;
-    }
-    
-    .profile-name {
-      font-weight: bold;
-      color: var(--primary-color);
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-    
-    .verified {
-      color: #4CAF50;
-      font-weight: bold;
-    }
-    
-    .age {
-      color: #666;
-      font-size: 0.9em;
-    }
-    
-    .rating {
-      color: #FFC107;
-      font-size: 0.9em;
-      margin-left: 0.5rem;
-    }
-    
-    .no-data {
-      text-align: center;
-      color: #666;
-      font-style: italic;
-      padding: 2rem;
-      grid-column: 1 / -1;
-    }
-    
-    .footer {
-      text-align: center;
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--border-color);
-      color: #666;
-    }
-    
-    .back-link {
-      display: inline-block;
-      background: var(--primary-color);
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 5px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    
-    .back-link:hover {
-      background: #3a5a8c;
-    }
-    
-    @media (max-width: 768px) {
-      .header h1 {
-        font-size: 1.8rem;
-      }
-      
-      .profile-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .stats {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-      }
-    }
-  </style>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Kanit:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; margin: 0; background: #f3f4f6; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
+        header { text-align: center; margin-bottom: 25px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        h1 { color: #db2777; margin: 0 0 5px 0; font-size: 22px; }
+        .subtitle { color: #666; font-size: 14px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        @media (min-width: 600px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 900px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+        .profile-card { background: white; border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: block; }
+        .img-wrapper { position: relative; aspect-ratio: 3/4; background: #eee; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .badge-ver { position: absolute; bottom: 5px; right: 5px; background: #06c755; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .info { padding: 10px; }
+        .name { font-weight: bold; font-size: 14px; color: #1f2937; }
+        .age { color: #6b7280; font-weight: normal; }
+        .meta { font-size: 11px; color: #9ca3af; margin-bottom: 5px; }
+        .price { color: #db2777; font-weight: bold; font-size: 15px; }
+        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #999; font-size: 12px; }
+        .btn-home { display: inline-block; background: #db2777; color: white; padding: 8px 20px; border-radius: 20px; text-decoration: none; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
-  <header class="header">
-    <h1>รายชื่อไซด์ไลน์จังหวัด${sanitizeHTML(provinceData.nameThai)}</h1>
-    <p>อัปเดตล่าสุด: ${thaiDate}</p>
-    <div class="stats">
-      <div class="stat-item">ทั้งหมด ${totalCount} คน</div>
-      <div class="stat-item">แสดงล่าสุด ${Math.min(MAX_PROFILES, totalCount)} คน</div>
-      ${provinceData.region ? `<div class="stat-item">ภูมิภาค: ${provinceData.region}</div>` : ''}
+    <div class="container">
+        <header>
+            <h1>ไซด์ไลน์${province.nameThai} รับงานเอง ไม่มัดจำ</h1>
+            <div class="subtitle">อัปเดตล่าสุด: ${thaiDate} • ทั้งหมด ${profiles.length} คน</div>
+        </header>
+        <div class="grid">${profilesHtml}</div>
+        <div class="footer">
+            <a href="/" class="btn-home">🏠 กลับหน้าหลัก</a>
+            <div>© 2026 Sideline Chiangmai - ข้อมูลตรงปก 100%</div>
+        </div>
     </div>
-  </header>
-  
-  <main class="profiles-list">
-    <h2>📋 รายชื่อน้องๆ ล่าสุด</h2>
-    <ul class="profile-grid">
-      ${generateProfilesList(profiles)}
-    </ul>
-  </main>
-  
-  <footer class="footer">
-    <p>ข้อมูลถูกอัปเดตอัตโนมัติทุกวัน • ปลอดภัย 100% • ตรวจสอบแล้ว</p>
-    <a href="/" class="back-link">🏠 กลับหน้าหลัก</a>
-    <p style="margin-top: 1rem; font-size: 0.9em; color: #999;">
-      © ${new Date().getFullYear()} All rights reserved.
-    </p>
-  </footer>
-  
-  <script>
-    // Performance monitoring
-    window.addEventListener('load', function() {
-      const timing = performance.timing;
-      const loadTime = timing.loadEventEnd - timing.navigationStart;
-      console.log('Page loaded in', loadTime, 'ms');
-      
-      // Track user engagement
-      document.querySelectorAll('.profile-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-          console.log('Profile clicked:', this.href);
-        });
-      });
-    });
-  </script>
 </body>
 </html>`;
 
-  return html;
-}
+        cache.data.set(cacheKey, html);
+        cache.lastFetch.set(cacheKey, Date.now());
 
-// Main Handler
-export default async (request, context) => {
-  const startTime = Date.now();
-  
-  try {
-    // Bot Detection
-    const userAgent = request.headers.get('User-Agent') || '';
-    const isBot = BOT_PATTERNS.test(userAgent.toLowerCase());
-    
-    if (!isBot) {
-      console.log(`Non-bot request from: ${userAgent}`);
-      return context.next();
-    }
+        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "x-cache": "MISS" } });
 
-    // Parse URL and validate
-    const url = new URL(request.url);
-    const provinceKey = decodeURIComponent(url.pathname.split('/').pop());
-    
-    if (!validateProvinceKey(provinceKey)) {
-      console.warn(`Invalid province key: ${provinceKey}`);
-      return context.next();
-    }
-
-    // Get Supabase client
-    const supabase = getSupabaseClient();
-    
-    // Fetch data in parallel for better performance
-    const [provinceData, profilesData] = await Promise.all([
-      fetchProvinceData(supabase, provinceKey),
-      fetchProfiles(supabase, provinceKey)
-    ]);
-
-    // Validate data
-    if (!provinceData) {
-      console.log(`Province not found: ${provinceKey}`);
-      return context.next();
-    }
-
-    // Generate response
-    const thaiDate = formatThaiDate();
-    const html = generateHTML(provinceData, profilesData, thaiDate);
-    
-    const processingTime = Date.now() - startTime;
-    console.log(`Generated page for ${provinceKey} in ${processingTime}ms`);
-    
-    // Return response with caching headers
-    return new Response(html, {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=1800, s-maxage=3600", // Cache 30-60 minutes
-        "Vary": "User-Agent",
-        "X-Processing-Time": `${processingTime}ms`,
-        "X-Province": provinceData.nameThai,
-        "X-Total-Profiles": profilesData.totalCount.toString()
-      }
-    });
-
-  } catch (error) {
-    // Enhanced error handling
-    console.error('Error in province page handler:', {
-      url: request.url,
-      error: error.message,
-      stack: error.stack,
-      timestamp: new Date().toISOString()
-    });
-    
-    // Return error page for bots, fallback for users
-    if (BOT_PATTERNS.test(request.headers.get('User-Agent') || '')) {
-      const errorHtml = `<!DOCTYPE html>
-<html>
-<head><title>เกิดข้อผิดพลาด</title></head>
-<body>
-  <h1>ขออภัย กำลังปรับปรุงระบบ</h1>
-  <p>กรุณาลองใหม่อีกครั้งในภายหลัง</p>
-</body>
-</html>`;
-      
-      return new Response(errorHtml, {
-        status: 500,
-        headers: { "Content-Type": "text/html; charset=utf-8" }
-      });
-    }
-    
-    return context.next();
-  }
+    } catch (e) { return context.next(); }
 };
