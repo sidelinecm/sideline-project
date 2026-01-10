@@ -1,13 +1,8 @@
-# =====================================
-# 🏗️ Netlify Build Configuration
-# =====================================
 [build]
   publish = "."
   command = ""
+  functions = "netlify/functions"
 
-# =====================================
-# ⚙️ Global HTTP Security Headers
-# =====================================
 [[headers]]
   for = "/*"
   [headers.values]
@@ -18,30 +13,53 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# =====================================
-# 🧠 Edge Functions Mapping
-# (ปล่อยไว้เหมือนเดิม Google อาจจะยังพยายามเข้ามาได้)
-# =====================================
 [[edge_functions]]
-function = "sitemap"
-path = "/sitemap.xml"
+  function = "sitemap"
+  path = "/sitemap.xml"
 
 [[edge_functions]]
-function = "render-bot"
-path = "/sideline/*"
+  function = "render-bot"
+  path = "/sideline/*"
 
 [[edge_functions]]
-function = "ssr-province"
-path = "/location/*"
+  function = "ssr-province"
+  path = "/location/*"
 
-# =====================================
-# 🔀 Redirect Rules (Maintenance Mode)
-# =====================================
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/province/*"
 
-# 🔥 แก้ไขตรงนี้: ลบ Redirects เดิมทั้งหมด แล้วใส่แค่บล็อกนี้เข้าไป
-# นี่คือ Redirect ที่จะส่งทุกคน ทุก URL ไปที่หน้าปิดปรับปรุง
-# พร้อมกับบอก Google ว่า "เว็บแค่ปิดชั่วคราวนะ" (503)
+[[redirects]]
+  from = "http://sidelinechiangmai.netlify.app/*"
+  to = "https://sidelinechiangmai.netlify.app/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
-  to = "/maintenance.html"
-  status = 503
+  to = "/index.html"
+  status = 200
