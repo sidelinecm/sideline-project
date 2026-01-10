@@ -16,11 +16,11 @@
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # เพิ่ม Cache-Control สำหรับไฟล์ Static เพื่อให้เว็บโหลดเร็วขึ้น (คะแนน Core Web Vitals ดีขึ้น)
     Cache-Control = "public, max-age=0, must-revalidate"
 
 # =====================================
 # 🧠 Edge Functions Mapping
+# (ปล่อยไว้เหมือนเดิม Google อาจจะยังพยายามเข้ามาได้)
 # =====================================
 [[edge_functions]]
 function = "sitemap"
@@ -35,32 +35,13 @@ function = "ssr-province"
 path = "/location/*"
 
 # =====================================
-# 🔀 Redirect Rules (SEO Best Practices)
+# 🔀 Redirect Rules (Maintenance Mode)
 # =====================================
 
-# 1. บังคับให้เป็น HTTPS และตัด WWW ออก (หรือเลือกใช้อย่างใดอย่างหนึ่ง) 
-# เพื่อให้ Google Index หน้าเดียว ไม่สับสน
-[[redirects]]
-  from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
-  status = 301
-  force = true
-
-# 2. จัดการไฟล์สำคัญให้เข้าถึงได้โดยตรง (200 OK)
-[[redirects]]
-  from = "/sw.js"
-  to = "/sw.js"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/manifest.webmanifest"
-  to = "/manifest.webmanifest"
-  status = 200
-  force = true
-
-# 3. SPA Fallback (รักษา URL เดิมไว้เพื่อให้ React/Vue จัดการต่อ)
+# 🔥 แก้ไขตรงนี้: ลบ Redirects เดิมทั้งหมด แล้วใส่แค่บล็อกนี้เข้าไป
+# นี่คือ Redirect ที่จะส่งทุกคน ทุก URL ไปที่หน้าปิดปรับปรุง
+# พร้อมกับบอก Google ว่า "เว็บแค่ปิดชั่วคราวนะ" (503)
 [[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
+  to = "/maintenance.html"
+  status = 503
