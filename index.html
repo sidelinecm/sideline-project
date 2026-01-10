@@ -7,15 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#db2777">
 
-  <!-- 2. Primary SEO Tags (หัวใจหลักสำหรับการค้นหา) -->
-  <!-- Title: เน้นคีย์เวิร์ดหลัก "ไซด์ไลน์เชียงใหม่", "รับงาน", "ฟิวแฟน" ให้อยู่หน้าสุด -->
-  <title>ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ตรงปก 100% ไม่มีมัดจำ</title>
+  <!-- 2. Primary SEO Tags (ปรับปรุงใหม่ แข็งแกร่งกว่าเดิม) -->
+  <title>ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ไม่มัดจำ จ่ายหน้างาน</title>
   
-  <!-- Description: เขียนขายของให้จบใน 160 ตัวอักษร ใส่คีย์เวิร์ดรองครบถ้วน -->
-  <meta name="description" content="ศูนย์รวมน้องๆ ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน สาวสวย นักศึกษา น่ารัก เป็นกันเอง การันตีรูปตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำ อัปเดตใหม่ทุกวัน">
+  <meta name="description" content="ศูนย์รวมไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน การันตีตรงปก 100% ไม่ต้องโอนมัดจำ จ่ายเงินหน้างานเท่านั้น ปลอดภัย มีแอดมินดูแล อัปเดตล่าสุด">
   
-  <!-- Keywords: สำหรับ Search Engine ทางเลือก -->
-  <meta name="keywords" content="ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, รับงาน N เชียงใหม่, เด็กเอ็นเชียงใหม่, ฟิวแฟน, ไซด์ไลน์, ตรงปก, ไม่โอนมัดจำ, หาเพื่อนเที่ยวเชียงใหม่">
+  <meta name="keywords" content="ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, รับงาน N เชียงใหม่, เด็กเอ็นเชียงใหม่, ฟิวแฟน, ไซด์ไลน์, ตรงปก, ไม่โอนมัดจำ, จ่ายหน้างาน, หาเพื่อนเที่ยวเชียงใหม่">
 
   <!-- 3. Robots & Verification -->
   <meta name="robots" content="index, follow, max-image-preview:large">
@@ -50,7 +47,7 @@
 
   <!-- 6. Twitter Card (สำหรับ Twitter/X) -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ตรงปก 100%">
+  <meta name="twitter:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ไม่มัดจำ จ่ายหน้างาน">
   <meta name="twitter:description" content="รับงานฟิวแฟน เชียงใหม่ สาวสวย ตรงปก ไม่ต้องโอนก่อน จ่ายหน้างาน">
   <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
 
@@ -267,8 +264,9 @@
   <div class="container mx-auto px-4 space-y-16">
 
 <section class="text-center space-y-4" aria-labelledby="hero-h1">
+  <!-- H1 ใหม่: เอาไทยขึ้นก่อน ใส่คีย์เวิร์ดครบ -->
   <h1 id="hero-h1" class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight">
-    sideline chiangmai รับงานฟิวแฟน สาวไซด์ไลน์เชียงใหม่  ตรงปก100% ไม่มีมัดจำ
+    ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน ตรงปก 100% ไม่มีมัดจำ
   </h1>
 
 
@@ -839,8 +837,34 @@
 
 <script type="module" src="/main.js"></script>
 
- <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("loaded")
+});
 
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        const registerSW = () => {
+            // ใช้ try-catch ดักจับ Error จาก Antivirus
+            try {
+                navigator.serviceWorker.register("/sw.js")
+                    .catch(err => {
+                        // ถ้าลงทะเบียนไม่ผ่าน (เช่นโดน Kaspersky บล็อค) ให้เงียบไว้ ไม่ต้องแดง
+                        console.debug("SW registration suppressed:", err);
+                    });
+            } catch (e) {
+                console.debug("SW sync error suppressed");
+            }
+        };
+
+        if ("requestIdleCallback" in window) {
+            requestIdleCallback(registerSW);
+        } else {
+            setTimeout(registerSW, 1500);
+        }
+    });
+}
+</script>
 
 </body>
 
