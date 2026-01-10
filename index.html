@@ -1,14 +1,222 @@
-<!DOCTYPE html>
-<html lang="th">
+<!DOCTYPE html> 
+<html lang="th" class="scroll-smooth antialiased dark:bg-gray-900 dark:text-gray-100 dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ยุติการให้บริการ | Sideline Chiangmai</title>
+  <!-- 1. Essential Meta Tags (ต้องมาก่อนเสมอ) -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#db2777">
+
+ 
+  <title>ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน |ตรงปก ไม่มัดจำ🚨 ชำระเงินหน้างาน✅ </title>
+  <meta name="description" content="✅ (ยืนยันตัวตน) ศูนย์รวมไซด์ไลน์เชียงใหม่ ⭐ 5.0 เต็ม! รับงานฟิวแฟน ตรงปก 100% ไม่ต้องโอนมัดจำ จ่ายเงินหน้างานเท่านั้น ปลอดภัย...">
+  
+  
+  <meta name="keywords" content="ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, รับงาน N เชียงใหม่, เด็กเอ็นเชียงใหม่, ฟิวแฟน, ไซด์ไลน์, ตรงปก, ไม่โอนมัดจำ, จ่ายหน้างาน, หาเพื่อนเที่ยวเชียงใหม่">
+
+  <!-- 3. Robots & Verification -->
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
+
+  <!-- 4. Canonical URL Handling -->
+  <link rel="canonical" id="canonical-link" href="https://sidelinechiangmai.netlify.app/">
+  <script>
+    // สคริปต์ปรับ Canonical URL อัตโนมัติ (ช่วยเรื่อง Duplicate Content)
+    (function() {
+      try {
+        const currentUrl = window.location.origin + window.location.pathname;
+        const canonicalElement = document.getElementById('canonical-link');
+        if (canonicalElement) {
+          canonicalElement.setAttribute('href', currentUrl);
+        }
+      } catch (e) {
+        console.error('Canonical update failed', e);
+      }
+    })();
+  </script>
+
+  <!-- 5. Social Media / Open Graph (สำหรับ Facebook & LINE) -->
+  <!-- รวม Tag ที่ซ้ำซ้อนให้เหลือชุดเดียวที่สมบูรณ์ที่สุด -->
+  <meta property="og:locale" content="th_TH">
+  <meta property="og:site_name" content="Sideline Chiangmai">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ตรงปก 100% ไม่มีมัดจำ">
+  <meta property="og:description" content="แหล่งรวมสาวสวยไซด์ไลน์เชียงใหม่ คัดเกรดพรีเมียม ฟิวแฟน ตรงปก จ่ายหน้างาน ปลอดภัย 100%">
+  <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
+  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
+
+  <!-- 6. Twitter Card (สำหรับ Twitter/X) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ไม่มัดจำ จ่ายหน้างาน">
+  <meta name="twitter:description" content="รับงานฟิวแฟน เชียงใหม่ สาวสวย ตรงปก ไม่ต้องโอนก่อน จ่ายหน้างาน">
+  <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
+
+  
+  <!-- Icons -->
+  <link rel="shortcut icon" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <!-- 2. Performance Optimization -->
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://esm.sh" crossorigin>
+  <link rel="dns-prefetch" href="https://esm.sh">
+
+  
+  <!-- ✅ Preconnect for Faster Loading -->
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+  <!-- ✅ Preload Fonts -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+
+  
+  <!-- แก้เป็นแบบนี้ครับ -->
+<link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
+
+  <!-- ✅ FontAwesome (CDN) -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </noscript>
+
+
+  <!-- LCP Image Optimization -->
+  <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
+  <link rel="modulepreload" href="/main.js">
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://sidelinechiangmai.netlify.app/#website",
+      "url": "https://sidelinechiangmai.netlify.app/",
+      "name": "sideline chiangmai",
+      "description": "แหล่งรวมน้องๆสาวๆ รับงาน ไซด์ไลน์เชียงใหม่ ตรงปก 100% ฟีลแฟน ปลอดภัยไม่มีมัดจำ",
+      "publisher": {
+        "@id": "https://sidelinechiangmai.netlify.app/#localbusiness"
+      },
+      "inLanguage": "th-TH",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://sidelinechiangmai.netlify.app/profiles.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://sidelinechiangmai.netlify.app/#localbusiness",
+      "name": "sideline chiangmai (ไซด์ไลน์เชียงใหม่)",
+      "image": [
+        "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp"
+      ],
+      "description": "บริการไซด์ไลน์เชียงใหม่ ฟีลแฟน ตรงปก 100% เด็กใหม่ โปรไฟล์จริง อัปเดตทุกวัน ไม่ต้องโอนมัดจำ",
+      "url": "https://sidelinechiangmai.netlify.app/",
+      "telephone": "+66994238888",
+      "priceRange": "฿฿฿",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ฟิวแฟน เจ็ดยอด, ตำบลช้างเผือก",
+        "addressLocality": "เมืองเชียงใหม่",
+        "addressRegion": "เชียงใหม่",
+        "postalCode": "50300",
+        "addressCountry": "TH"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 18.8140717,
+        "longitude": 98.972096
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "00:00",
+        "closes": "23:59"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "128",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "sameAs": [
+        "https://www.facebook.com/sidelinechiangmai",
+        "https://tiktok.com/@sidelinecm",
+        "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+      ]
+    }
+  ]
+}
+</script>
+  <!-- Inline Critical CSS -->
+  <style>
+    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
+    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
+    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
+    section { padding: 20px; text-align: center; }
+    .profile-image img { image-orientation: none; }
+    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
+    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
+    @media (max-width: 767px) {
+        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
+        .profile-card { padding: 10px; border-radius: 12px; }
+    }
+
+        /* --- CSS สำหรับปุ่มไลค์ (ปลอดภัย ไม่กระทบส่วนอื่น) --- */
+
+        /* สไตล์เริ่มต้นของหัวใจ */
+        .like-button-wrapper .fa-heart {
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            color: rgba(255, 255, 255, 0.8); /* สีขาวโปร่งแสง */
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* สไตล์เมื่อเอาเมาส์ไปชี้ */
+        .like-button-wrapper:hover .fa-heart {
+            transform: scale(1.15);
+            color: rgba(255, 255, 255, 1);
+        }
+
+        /* สไตล์เมื่อถูกไลค์แล้ว (.liked) */
+        .like-button-wrapper.liked .fa-heart {
+            color: #ec4899; /* สีชมพูสด */
+        }
+        
+        /* เมื่อไลค์แล้ว เอาเมาส์ไปชี้ จะเป็นสีชมพูที่สว่างขึ้น */
+        .like-button-wrapper.liked:hover .fa-heart {
+            color: #f472b6;
+        }
+
+        /* Animation หัวใจเต้นตอนกด */
+        @keyframes heart-beat-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* เรียกใช้ Animation เมื่อมีคลาส .liked */
+        .like-button-wrapper.liked .fa-heart {
+            animation: heart-beat-animation 0.3s ease-in-out;
+        }
     
-    <!-- Google Fonts: Prompt -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+  </style>
+
 
     <style>
         /* CSS Keyframes สำหรับสร้างแอนิเมชัน */
