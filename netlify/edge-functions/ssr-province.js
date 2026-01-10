@@ -20,15 +20,28 @@ const getImageUrl = (path) => {
 
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
+    
+    // Bot Detection (รวม Google Inspection Tool)
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord/i.test(ua);
     
     if (!isBot) return context.next();
 
     try {
         const url = new URL(request.url);
-        const provinceKey = decodeURIComponent(url.pathname.split('/').pop());
+        
+        // 🔥 แก้ไข Logic การดึง Key ให้แม่นยำขึ้น (รองรับ Slash ท้าย)
+        // กรองเอาเฉพาะส่วนที่มีตัวอักษรจริงๆ ไม่เอาค่าว่าง
+        const pathParts = url.pathname.split('/').filter(part => part && part.trim() !== '');
+        
+        // สมมติ URL /location/chiangmai -> pathParts = ['location', 'chiangmai']
+        // ตัวสุดท้ายคือ provinceKey
+        const provinceKey = decodeURIComponent(pathParts[pathParts.length - 1]);
 
-        if (!/^[a-zA-Z0-9ก-๙\-_]+$/.test(provinceKey)) return context.next();
+        // ตรวจสอบความถูกต้องของ Key
+        if (!provinceKey || !/^[a-zA-Z0-9ก-๙\-_]+$/.test(provinceKey)) {
+             console.log(`Invalid Province Key: ${provinceKey}`);
+             return context.next();
+        }
 
         const cacheKey = `prov_${provinceKey}`;
         if (cache.data.has(cacheKey) && (Date.now() - cache.lastFetch.get(cacheKey) < CACHE_TTL)) {
@@ -50,14 +63,17 @@ export default async (request, context) => {
         const province = provinceRes.data;
         const profiles = profilesRes.data || [];
 
-        if (!province) return context.next();
+        if (!province) {
+            console.log(`Province Not Found in DB: ${provinceKey}`);
+            return context.next();
+        }
 
         const thaiDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
         
-        // 🔥 SEO UPDATE: ปรับ Title/Desc ให้ตรงกับกลยุทธ์ GSC
+        // SEO Content
         const title = `ไซด์ไลน์${province.nameThai} รับงาน${province.nameThai} ฟิวแฟน ไม่มัดจำ [อัปเดต ${thaiDate}]`;
         const description = `รวมรูปสาวไซด์ไลน์ ${province.nameThai} รับงานเอง ${province.nameThai} คัดคนสวย ตรงปก 100% ปลอดภัย ไม่ผ่านเอเย่นต์ ไม่ต้องโอนจอง จ่ายเงินหน้างานเท่านั้น อัปเดตใหม่ล่าสุด`;
-        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/province/${provinceKey}`;
+        const canonicalUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`; // ใช้ /location/ เสมอเพื่อความเป็นระเบียบ
 
         const profilesHtml = profiles.map(p => {
             const imgUrl = getImageUrl(p.imagePath);
