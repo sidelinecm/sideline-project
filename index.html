@@ -75,8 +75,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
 
   
-  <!-- แก้เป็นแบบนี้ครับ -->
-<link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
 
   <!-- ✅ FontAwesome (CDN) -->
@@ -164,58 +163,7 @@
   ]
 }
 </script>
-  <!-- Inline Critical CSS -->
-  <style>
-    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
-    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
-    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
-    section { padding: 20px; text-align: center; }
-    .profile-image img { image-orientation: none; }
-    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
-    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
-    @media (max-width: 767px) {
-        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
-        .profile-card { padding: 10px; border-radius: 12px; }
-    }
-
-        /* --- CSS สำหรับปุ่มไลค์ (ปลอดภัย ไม่กระทบส่วนอื่น) --- */
-
-        /* สไตล์เริ่มต้นของหัวใจ */
-        .like-button-wrapper .fa-heart {
-            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-            color: rgba(255, 255, 255, 0.8); /* สีขาวโปร่งแสง */
-            transition: all 0.2s ease-in-out;
-        }
-        
-        /* สไตล์เมื่อเอาเมาส์ไปชี้ */
-        .like-button-wrapper:hover .fa-heart {
-            transform: scale(1.15);
-            color: rgba(255, 255, 255, 1);
-        }
-
-        /* สไตล์เมื่อถูกไลค์แล้ว (.liked) */
-        .like-button-wrapper.liked .fa-heart {
-            color: #ec4899; /* สีชมพูสด */
-        }
-        
-        /* เมื่อไลค์แล้ว เอาเมาส์ไปชี้ จะเป็นสีชมพูที่สว่างขึ้น */
-        .like-button-wrapper.liked:hover .fa-heart {
-            color: #f472b6;
-        }
-
-        /* Animation หัวใจเต้นตอนกด */
-        @keyframes heart-beat-animation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
-
-        /* เรียกใช้ Animation เมื่อมีคลาส .liked */
-        .like-button-wrapper.liked .fa-heart {
-            animation: heart-beat-animation 0.3s ease-in-out;
-        }
-    
-  </style>
+ 
 
 
     <style>
