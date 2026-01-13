@@ -38,7 +38,20 @@
   <meta name="twitter:description" content="รับงานฟิวแฟน เชียงใหม่ สาวสวย ตรงปก ไม่ต้องโอนก่อน จ่ายหน้างาน">
   <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
 
-  
+    <script>
+    // สคริปต์ปรับ Canonical URL อัตโนมัติ (ช่วยเรื่อง Duplicate Content)
+    (function() {
+      try {
+        const currentUrl = window.location.origin + window.location.pathname;
+        const canonicalElement = document.getElementById('canonical-link');
+        if (canonicalElement) {
+          canonicalElement.setAttribute('href', currentUrl);
+        }
+      } catch (e) {
+        console.error('Canonical update failed', e);
+      }
+    })();
+  </script>
   <!-- Icons -->
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
