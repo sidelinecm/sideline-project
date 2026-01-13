@@ -13,50 +13,27 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# 1. จัดการ Sitemap
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
+# 2. ใช้ไฟล์เดียวคุมทุกหน้า (หน้าแรก, จังหวัด, โปรไฟล์)
+# วิธีนี้จะทำให้ URL กลับมาแสดงผลถูกต้องเพราะไม่มีการแย่งกันตอบ
 [[edge_functions]]
   function = "render-bot"
-  path = "/sideline/*"
-
+  path = "/"           # คุมหน้าแรก
 [[edge_functions]]
-  function = "ssr-province"
-  path = "/location/*"
-
+  function = "render-bot"
+  path = "/sideline/*" # คุมหน้าโปรไฟล์
 [[edge_functions]]
-  function = "ssr-province"
-  path = "/province/*"
+  function = "render-bot"
+  path = "/location/*" # คุมหน้าจังหวัด
 
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
-  force = true
-
-[[redirects]]
-  from = "/sw.js"
-  to = "/sw.js"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/manifest.webmanifest"
-  to = "/manifest.webmanifest"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/sitemap.xml"
-  to = "/sitemap.xml"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/robots.txt"
-  to = "/robots.txt"
-  status = 200
   force = true
 
 [[redirects]]
