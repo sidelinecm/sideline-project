@@ -1046,9 +1046,11 @@ function renderByProvince(profiles) {
         return wrapper;
     }
 
-// 1. ฟังก์ชัน Render หลัก
+// 1. ฟังก์ชัน Render หลัก (เวอร์ชันอัปเกรด อนิเมชั่นครบถ้วน)
 function renderProfiles(profiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
+    
+    // ล้างหน้าจอเตรียมแสดงผลใหม่
     dom.profilesDisplayArea.innerHTML = '';
 
     // --- ส่วน Featured (แสดงเฉพาะหน้าแรก) ---
@@ -1057,38 +1059,73 @@ function renderProfiles(profiles, isSearching) {
         dom.featuredSection.classList.toggle('hidden', !isHome);
 
         if (isHome && dom.featuredContainer && state.allProfiles.length > 0) {
-            if (dom.featuredContainer.children.length === 0) {
-                const featured = state.allProfiles.filter(p => p.isfeatured);
-                const frag = document.createDocumentFragment();
-                // ✅ ส่ง index (i) ไปด้วย
-                featured.forEach((p, i) => frag.appendChild(createProfileCard(p, i)));
-                dom.featuredContainer.appendChild(frag);
-            }
+            // ล้างข้อมูลเก่าใน Featured ก่อนถ้ามีการเปลี่ยนแปลง
+            dom.featuredContainer.innerHTML = ''; 
+            const featured = state.allProfiles.filter(p => p.isfeatured);
+            const frag = document.createDocumentFragment();
+            // ส่ง index (i) ไปเพื่อให้สร้างอนิเมชั่นดีเลย์ได้
+            featured.forEach((p, i) => frag.appendChild(createProfileCard(p, i)));
+            dom.featuredContainer.appendChild(frag);
         }
     }
 
-    // ถ้าไม่มีข้อมูล
+    // กรณีไม่มีข้อมูลที่ตรงตามเงื่อนไข
     if (profiles.length === 0) {
         dom.noResultsMessage?.classList.remove('hidden');
         return;
     }
     dom.noResultsMessage?.classList.add('hidden');
 
-    // --- ตัดสินใจการแสดงผล ---
+    // --- การตัดสินใจแสดงผลตามหน้า ---
     const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
 
     if (isSearching || isLocationPage) {
-        // โหมด 1: ผลลัพธ์การค้นหา หรือ หน้าจังหวัดเดี่ยว
+        // โหมด 1: แสดงเป็นรายการผลการค้นหา หรือหน้าเฉพาะจังหวัด
         dom.profilesDisplayArea.appendChild(createSearchResultSection(profiles));
     } else {
-        // โหมด 2: หน้าแรกดูรวม (แยกหมวด)
+        // โหมด 2: แสดงแยกตามหมวดหมู่จังหวัด (หน้าแรก)
         renderByProvince(profiles);
     }
 
-    if (window.ScrollTrigger) ScrollTrigger.refresh();
-    initScrollAnimations();
-} // ✅ ปิด renderProfiles
+    // ==========================================
+    // ✨ ส่วนที่เพิ่ม: อนิเมชั่นทางเข้า (Entrance Animation)
+    // ==========================================
+    if (window.gsap) {
+        // ใช้ requestAnimationFrame เพื่อให้มั่นใจว่า DOM ถูกวาดเสร็จก่อนรันอนิเมชั่น
+        requestAnimationFrame(() => {
+            // เลือกการ์ดทั้งหมดที่มีคลาส profile-card-new (หรือชื่อคลาสที่คุณใช้)
+            const cards = document.querySelectorAll('.profile-card-new');
+            
+            if (cards.length > 0) {
+                gsap.from(cards, {
+                    duration: 0.8,
+                    y: 60,                // ดีดขึ้นจากด้านล่าง 60px
+                    opacity: 0,           // เริ่มจากจาง
+                    scale: 0.9,           // ขยายขึ้นมาเล็กน้อย
+                    stagger: {
+                        amount: 0.6,      // เฉลี่ยเวลาให้ทยอยโผล่จนครบใน 0.6 วินาที
+                        grid: "auto",     // คำนวณลำดับการเด้งตามแถว/คอลัมน์อัตโนมัติ
+                        from: "start"     // เริ่มเด้งจากตัวแรกไปตัวสุดท้าย
+                    },
+                    ease: "back.out(1.4)", // มีจังหวะเด้งเกินนิดๆ ให้ดูมีพลัง (Bouncy)
+                    clearProps: "all",     // เมื่อจบให้ลบสไตล์ของ GSAP ออก เพื่อให้ CSS Hover ทำงานได้ปกติ
+                    onComplete: () => {
+                        // เมื่ออนิเมชั่นจบ สั่งให้ ScrollTrigger ตรวจสอบตำแหน่งใหม่
+                        if (window.ScrollTrigger) ScrollTrigger.refresh();
+                    }
+                });
+            }
+        });
+    }
 
+    // รีเฟรชระบบตรวจจับการเลื่อน
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+    
+    // เรียกใช้ฟังก์ชันอนิเมชั่นเสริมอื่นๆ (ถ้ามี)
+    if (typeof initScrollAnimations === 'function') {
+        initScrollAnimations();
+    }
+} // ✅ ปิด renderProfiles สมบูรณ์แบบ
 // 2. ฟังก์ชันสร้างส่วนแสดงผลการค้นหา
 function createSearchResultSection(profiles) {
     let headerText = "ผลการค้นหา";
@@ -1136,109 +1173,100 @@ function createSearchResultSection(profiles) {
     return wrapper;
 } 
 
-// ✅ [เวอร์ชันแก้ไขสมบูรณ์ที่สุด: เพิ่ม Skeleton Loader + เรียง Layer ถูกต้อง]
+// ✅ 1. ฟังก์ชันสร้างการ์ดฉบับ Ultimate (เร็วสุด + สวยสุด)
 function createProfileCard(p, index = 20) {
-    // 1. สร้าง Container หลัก
-    const cardContainer = document.createElement('div');
-    cardContainer.className = 'profile-card-new-container';
+    // สร้าง Wrapper หลัก
+    const cardWrapper = document.createElement('div');
+    // ใช้ class 'profile-card-new' เชื่อมกับ CSS
+    // เพิ่ม 'group' เพื่อควบคุม Effect ตอน Hover
+    cardWrapper.className = 'profile-card-new group relative w-full bg-gray-900 rounded-2xl overflow-hidden shadow-lg';
+    
+    // Set ID สำหรับระบบ
+    cardWrapper.setAttribute('data-profile-id', p.id);
+    cardWrapper.setAttribute('data-profile-slug', p.slug);
 
-    // 2. สร้าง Card Inner (กรอบการ์ด)
-    const cardInner = document.createElement('div');
-    cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1';
-    
-    // ใส่ Attribute สำคัญสำหรับการ Routing
-    cardInner.setAttribute('data-profile-id', p.id); 
-    cardInner.setAttribute('data-profile-slug', p.slug);
-    
-    // --- ตรวจสอบรูปภาพให้ปลอดภัย (กัน Error กรณีไม่มีรูป) ---
+    // --- Logic: จัดการรูปภาพ ---
+    // ถ้าไม่มีรูป ให้ใช้รูป Placeholder
     const imgSrc = (p.images && p.images.length > 0) ? p.images[0].src : '/images/placeholder-profile.webp';
-
-    // --- HTML หลักของการ์ด ---
-    cardInner.innerHTML = `
-        <!-- LAYER 0: Skeleton Loader (ตัวโหลดวิบวับ รอรูปมา) -->
-        <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0"></div>
-
-        <!-- LAYER 1: รูปภาพ (อยู่ล่างสุด) -->
-        <img src="${imgSrc}" 
-             alt="น้อง ${p.name} ไซด์ไลน์ ${p.provinceNameThai || 'เชียงใหม่'}"
-             class="card-image w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
-             loading="${index < 4 ? 'eager' : 'lazy'}"
-             style="object-position: center top;"
-             onload="this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();"
-             onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();">
-
-        <!-- LAYER 2: ลิงก์คลุมการ์ด (Z-10) -> เพื่อให้คลิกตรงไหนก็เปิดโปรไฟล์ -->
-        <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์ ${p.name}"></a>
-    `;
-
-    // --- Logic คำนวณสถานะ (ว่าง/ไม่ว่าง) ---
-    let statusClass = 'status-inquire'; // ค่าเริ่มต้น: สีเทา (สอบถาม)
-    const availability = (p.availability || '').toLowerCase();
     
-    if (availability.includes('ว่าง') || availability.includes('รับงาน')) {
-        statusClass = 'status-available'; // สีเขียว
-    } else if (availability.includes('ไม่ว่าง') || availability.includes('พัก')) {
-        statusClass = 'status-busy'; // สีแดง
+    // --- Logic: ประมวลผลสถานะ (Available/Busy) ---
+    let statusConfig = { color: '#9ca3af', text: 'สอบถาม', bg: 'bg-gray-500/20', border: 'border-gray-500/50' };
+    const availText = (p.availability || 'สอบถาม');
+    const availCheck = availText.toLowerCase();
+
+    if (availCheck.includes('ว่าง') || availCheck.includes('รับงาน')) {
+        statusConfig = { color: '#22c55e', text: availText, bg: 'bg-green-500/20', border: 'border-green-500/50' }; // เขียว
+    } else if (availCheck.includes('ไม่ว่าง') || availCheck.includes('พัก') || availCheck.includes('จอง')) {
+        statusConfig = { color: '#ef4444', text: availText, bg: 'bg-red-500/20', border: 'border-red-500/50' }; // แดง
     }
-    
-    // --- HTML ส่วน Badges (มุมขวาบน) ---
-    // ใส่ pointer-events-none เพื่อให้คลิกทะลุไปโดน Link (Layer 2) ได้
-    const badgesHTML = `
-        <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
-            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-md bg-white/10 border border-white/20 text-[10px] font-bold px-2 py-1 rounded-full text-white">
-                ${p.availability || 'สอบถาม'}
-            </span>
-            ${p.isfeatured ? '<span class="featured-badge bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
+
+    // --- Logic: เช็คไลค์ ---
+    const isLiked = checkIfLiked(p.id); // ฟังก์ชันเช็คไลค์ (ต้องมีอยู่แล้วข้างล่าง)
+
+    // --- HTML Structure (ใช้ Template Literal เพื่อความเร็วในการ Render) ---
+    cardWrapper.innerHTML = `
+        <div class="relative w-full h-full">
+            <img src="${imgSrc}" 
+                 alt="น้อง ${p.name}" 
+                 class="card-image w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                 loading="${index < 4 ? 'eager' : 'lazy'}" 
+                 decoding="async"
+                 onerror="this.src='/images/placeholder-profile.webp'">
+                 
+            <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10"></div>
         </div>
-    `;
 
-    // --- Logic ปุ่ม Like ---
-    const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
-    const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
-    const likeCount = p.likes || 0;
+        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none z-10"></div>
 
-    // --- HTML ส่วน Overlay (ไล่เฉดสี + ชื่อ + ปุ่มไลค์) ---
-    // pointer-events-none ที่ตัวแม่ เพื่อให้คลิกพื้นที่ว่างแล้วไปโดน Link
-    // pointer-events-auto ที่ปุ่มหัวใจ เพื่อให้กดหัวใจได้
-    const overlayHTML = `
-        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-3 flex flex-col justify-between" 
-             style="z-index: 20; pointer-events: none;">
-            
-            <div class="card-header mt-8">
-                <!-- พื้นที่ว่างด้านบน ปล่อยให้คลิกทะลุ -->
+        <div class="absolute top-3 right-3 z-20 flex flex-col items-end gap-1 pointer-events-none">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-md border ${statusConfig.border} ${statusConfig.bg} shadow-sm">
+                <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: ${statusConfig.color}; box-shadow: 0 0 8px ${statusConfig.color};"></span>
+                <span class="text-[10px] font-bold text-white tracking-wide shadow-black drop-shadow-md">${availText}</span>
             </div>
-            
-            <div class="card-footer-content">
-                <h3 class="text-lg font-bold text-white drop-shadow-md leading-tight truncate pr-2">${p.name}</h3>
-                <p class="text-xs text-gray-300 flex items-center mt-0.5 mb-2">
-                    <i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
-                </p>
+            ${p.isfeatured ? `<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-500/20 border border-yellow-500/50 backdrop-blur text-[10px] font-bold text-yellow-300 shadow-sm"><i class="fas fa-crown text-[9px]"></i> แนะนำ</div>` : ''}
+        </div>
 
-                <div class="flex justify-between items-end border-t border-white/10 pt-2">
-                    <div class="date-stamp text-[10px] text-gray-400">
-                        อัปเดต: ${formatDate(p.created_at)}
-                    </div>
+        <div class="absolute bottom-0 left-0 w-full p-4 z-20 flex flex-col justify-end">
+            <div class="transform transition-transform duration-300 translate-y-2 group-hover:translate-y-0">
+                
+                <div class="flex items-end justify-between mb-1">
+                    <h3 class="text-lg font-bold text-white leading-none drop-shadow-lg truncate pr-2">${p.name}</h3>
+                    ${p.age ? `<span class="text-[11px] font-medium text-gray-200 bg-white/10 px-1.5 py-0.5 rounded border border-white/5 backdrop-blur-sm">${p.age} ปี</span>` : ''}
+                </div>
+                
+                <div class="flex items-center text-xs text-gray-300 mb-3 font-medium">
+                    <i class="fas fa-map-marker-alt text-pink-500 mr-1.5"></i>
+                    <span class="truncate">${p.provinceNameThai || 'เชียงใหม่'}</span>
+                </div>
+
+                <div class="w-full h-px bg-gradient-to-r from-white/20 to-transparent mb-2"></div>
+
+                <div class="flex justify-between items-center h-8">
+                     <span class="text-[10px] text-gray-400 font-light flex items-center gap-1">
+                        <i class="far fa-clock"></i> ${formatDate ? formatDate(p.created_at) : ''}
+                    </span>
                     
-                    <!-- ปุ่มหัวใจ (Z-30) ต้องกดได้ -->
-                    <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors"
-                         style="pointer-events: auto !important; z-index: 30 !important;"
-                         data-action="like" 
-                         data-id="${p.id}"
-                         aria-label="ถูกใจ">
-                        <i class="fas fa-heart text-lg transition-transform duration-200 group-hover/like:scale-110"></i>
-                        <span class="like-count text-sm font-bold">${likeCount}</span>
-                    </div>
+                    <button class="like-btn relative z-30 group/like flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-pink-600 backdrop-blur-md transition-all duration-300 border border-white/10 hover:border-pink-500 pointer-events-auto"
+                            data-id="${p.id}"
+                            onclick="event.preventDefault(); event.stopPropagation(); toggleLike('${p.id}', this)">
+                        <i class="fas fa-heart text-xs transition-transform duration-300 group-hover/like:scale-125 ${isLiked ? 'text-white' : 'text-gray-300 group-hover/like:text-white'}"></i>
+                    </button>
                 </div>
             </div>
         </div>
+
+        <a href="/sideline/${p.slug}" class="absolute inset-0 z-0" aria-label="ดูโปรไฟล์ ${p.name}"></a>
     `;
 
-    // ประกอบร่าง
-    cardInner.insertAdjacentHTML('beforeend', badgesHTML);
-    cardInner.insertAdjacentHTML('beforeend', overlayHTML);
-    cardContainer.appendChild(cardInner);
+    return cardWrapper;
+}
 
-    return cardContainer;
+// ฟังก์ชันเสริม (ถ้ายังไม่มี ให้เพิ่มต่อท้ายไปเลยครับ)
+function checkIfLiked(id) {
+    try {
+        const liked = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
+        return !!liked[id];
+    } catch(e) { return false; }
 }
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
