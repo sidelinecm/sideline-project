@@ -13,13 +13,13 @@ export default async (request, context) => {
     const path = url.pathname;
     const pathParts = path.split('/').filter(Boolean);
 
-    // [Optimization] รองรับทั้งหน้าหลักและหน้าสถานที่
-    if (!path.startsWith('/sideline/') && !path.startsWith('/location/')) return context.next();
+    // [Optimization] ปล่อยผ่านเฉพาะไฟล์รูปภาพ หรือ API เพื่อความเร็ว
+    if (path.includes('.') || path.startsWith('/api/')) return context.next();
 
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     const clientIP = request.headers.get('x-nf-client-connection-ip') || '';
 
-    // ระบบดักจับ Bot และสายสืบ (Data Center)
+    // ระบบดักจับ Bot และ Data Center (สายสืบ)
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|skype|curl|wget|inspectiontool|lighthouse/i.test(ua);
     let isDataCenter = false;
     if (isBot && clientIP && clientIP !== '127.0.0.1') {
@@ -30,41 +30,55 @@ export default async (request, context) => {
         } catch (e) { isDataCenter = false; }
     }
 
+    // ถ้าไม่ใช่ Bot หรือ Googlebot ให้เข้าหน้าเว็บปกติ (index.html)
     if (!isBot && !isDataCenter) return context.next();
 
     try {
-        const type = pathParts[0]; 
-        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        if (['province', 'category', 'search', 'app'].includes(slug) || pathParts.length < 2) return context.next();
+        let type = pathParts.length === 0 ? "home" : pathParts[0];
+        let slug = pathParts.length === 0 ? "index" : decodeURIComponent(pathParts[pathParts.length - 1]);
 
-        // ดึงข้อมูลเฉพาะคอลัมน์ที่จำเป็น
-        const { data: p } = await supabase
-            .from('profiles')
-            .select('id, name, rate, stats, age, imagePath, location, created_at, lineId, provinces(nameThai, key)')
-            .eq('slug', slug)
-            .maybeSingle();
+        // ข้ามหน้า Filter ที่ไม่ใช่โปรไฟล์หรือสถานที่
+        if (['province', 'category', 'search', 'app', 'profiles.html', 'locations.html'].includes(slug)) return context.next();
 
-        if (!p) return context.next();
+        // ดึงข้อมูลจาก Supabase
+        let query = supabase.from('profiles').select('id, name, rate, stats, age, imagePath, location, lineId, provinces(nameThai, key)');
+        
+        if (type === "home") {
+            query = query.limit(1).order('created_at', { ascending: false });
+        } else if (type === "location") {
+            query = query.eq('location', slug).limit(1);
+        } else {
+            query = query.eq('slug', slug);
+        }
 
-        // --- ระบบคำโปรย SEO อัตโนมัติ (SCO Optimization) ---
+        const { data: result } = await query.maybeSingle();
+        const p = result || { name: 'น้องๆ สาวสวย', location: 'เชียงใหม่' };
+
+        // จัดการข้อมูล SEO ให้ตรงกับ index.html ของบอส
         const provName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         let pageTitle = "";
         let pageDesc = "";
-        const canonical = `${CONFIG.DOMAIN}/${type}/${slug}`;
+        let canonical = CONFIG.DOMAIN;
 
-        if (type === 'location') {
-            pageTitle = `ไซด์ไลน์${slug} - รวมสาวสวยงานฟิวแฟน พิกัด${slug} รับงานเอง ตรงปก`;
-            pageDesc = `รวมน้องๆ ไซด์ไลน์${slug} สาวสวยงานฟิวแฟน รับงานเองในพื้นที่${slug} รูปตรงปก 100% ไม่โอนมัดจำ ปลอดภัย จองคิวได้ที่นี่`;
+        if (type === "home") {
+            pageTitle = "ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน |ตรงปก ไม่มัดจำ🚨 ชำระเงินหน้างาน✅";
+            pageDesc = "✅ (ยืนยันตัวตน) ศูนย์รวมไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก100% ไม่ต้องโอนมัดจำ✅ จ่ายเงินหน้างานเท่านั้น✅ ปลอดภัย... ⭐⭐⭐⭐⭐⭐ 5.0";
+            canonical = CONFIG.DOMAIN;
+        } else if (type === "location") {
+            pageTitle = `ไซด์ไลน์${slug} - สาวสวยงานฟิวแฟน พิกัด${slug} รับงานเอง ไม่มัดจำ`;
+            pageDesc = `รวมน้องๆ ไซด์ไลน์${slug} สาวสวยงานฟิวแฟน รับงานเองในพื้นที่${slug} รูปตรงปก 100% ปลอดภัย ไม่โอนมัดจำ จองคิวสะดวกผ่านไลน์`;
+            canonical = `${CONFIG.DOMAIN}/location/${slug}`;
         } else {
             pageTitle = `น้อง${p.name} - ไซด์ไลน์${provName} รับงานเอง ฟิวแฟน ตรงปก 100%`;
-            pageDesc = `น้อง${p.name} ไซด์ไลน์${provName} อายุ ${p.age || '20+'}ปี สัดส่วน ${p.stats || 'งานฟิวแฟน'} พิกัด${p.location || provName} ไม่โอนมัดจำ รูปตรงปก จองคิวคลิกเลย!`;
+            pageDesc = `น้อง${p.name} ไซด์ไลน์${provName} อายุ ${p.age || '20+'}ปี พิกัด${p.location || provName} งานฟิวแฟน รูปตรงปก ไม่มัดจำ จองคิวคลิกเลย!`;
+            canonical = `${CONFIG.DOMAIN}/sideline/${slug}`;
         }
 
         const rawRate = p.rate ? parseInt(p.rate.toString().replace(/[^0-9]/g, '')) : 0;
         const displayPrice = rawRate > 0 ? `${rawRate.toLocaleString()}.-` : 'สอบถาม';
         const imageUrl = p.imagePath ? `${CONFIG.URL}/storage/v1/object/public/profile-images/${p.imagePath}` : `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
         
-        // Rating แบบ Dynamic อ้างอิงจาก Slug
+        // สร้าง Rating แบบ Dynamic
         const hash = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const rating = (4.7 + (hash % 4) / 10).toFixed(1);
         const reviews = 120 + (hash % 80);
@@ -74,7 +88,7 @@ export default async (request, context) => {
             "@graph": [
                 {
                     "@type": "Product",
-                    "name": type === 'location' ? `บริการไซด์ไลน์ ${slug}` : `น้อง${p.name} ไซด์ไลน์${provName}`,
+                    "name": pageTitle,
                     "image": imageUrl,
                     "description": pageDesc,
                     "brand": { "@type": "Brand", "name": "Sideline Chiangmai" },
@@ -94,12 +108,11 @@ export default async (request, context) => {
         <style>body{font-family:sans-serif;line-height:1.6;color:#333;margin:0;background:#f9f9f9}.v-card{max-width:500px;margin:auto;background:#fff;min-height:100vh}
         .hero{width:100%;aspect-ratio:1;object-fit:cover}.p-5{padding:20px}h1{color:#db2777;margin-top:0;font-size:24px}.tag{display:inline-block;background:#fdf2f8;color:#be185d;padding:4px 12px;border-radius:20px;font-size:14px;margin-bottom:10px}
         .btn{display:block;background:#06c755;color:#fff;text-align:center;padding:16px;text-decoration:none;border-radius:50px;font-weight:bold;margin-top:30px;box-shadow:0 4px 12px rgba(6,199,85,0.3)}</style>
-        </head><body><div class="v-card"><img src="${imageUrl}" class="hero" alt="${p.name}">
+        </head><body><div class="v-card"><img src="${imageUrl}" class="hero">
         <div class="p-5"><div class="tag">⭐ ${rating} (${reviews} reviews)</div>
-        <h1>${type === 'location' ? `ไซด์ไลน์${slug} งานฟิวแฟน` : `น้อง${p.name} ไซด์ไลน์${provName}`}</h1>
+        <h1>${type === "home" ? "ไซด์ไลน์เชียงใหม่ ฟิวแฟน" : (type === "location" ? `ไซด์ไลน์${slug} งานดีตรงปก` : `น้อง${p.name} ไซด์ไลน์${provName}`)}</h1>
         <p><b>พิกัด:</b> ${p.location || provName}</p>
         <p><b>ราคา:</b> <span style="color:#db2777;font-size:20px;font-weight:bold">${displayPrice}</span></p>
-        <div style="border-left:4px solid #db2777;padding-left:15px;margin:20px 0;font-style:italic">ยินดีต้อนรับสู่ ${provName} ครับ น้องๆ งานดีตรงปก ไม่มัดจำ ปลอดภัยแน่นอน</div>
         <a href="https://line.me/ti/p/${p.lineId || ''}" class="btn">📲 ติดต่อสอบถาม / จองคิวคลิก</a>
         </div></div></body></html>`;
 
