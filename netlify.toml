@@ -1,8 +1,16 @@
+# =======================================================
+# === netlify.toml ฉบับปรับปรุงขั้นสูงสุด (Final Version) ===
+# =======================================================
+
 [build]
+  # การตั้งค่า build เดิมของคุณ ถูกต้องแล้ว
   publish = "."
   command = ""
-  functions = "netlify/functions"
+  # ตรวจสอบให้แน่ใจว่าโฟลเดอร์นี้ถูกต้องสำหรับ Edge Functions ของคุณ
+  # โดยปกติจะเป็น "netlify/edge-functions"
+  functions = "netlify/edge-functions"
 
+# --- HEADERS (ไม่ต้องแก้ไข ดีอยู่แล้ว) ---
 [[headers]]
   for = "/*"
   [headers.values]
@@ -13,21 +21,32 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# --- EDGE FUNCTIONS (ส่วนที่แก้ไข) ---
+
+# (ถ้าคุณมีฟังก์ชัน sitemap.xml แยก ก็คงไว้อย่างเดิม)
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
+# ✅ [การเปลี่ยนแปลงสำคัญ]
+# เราจะลบ `render-bot` และ `ssr-province` ออก
+# แล้วชี้ทุก path ที่เกี่ยวข้องมาที่ฟังก์ชันใหม่ `ssr` ตัวเดียว
+
 [[edge_functions]]
-  function = "render-bot"
+  # ตรวจสอบให้แน่ใจว่าชื่อ "ssr" ตรงกับชื่อไฟล์ใหม่ของคุณ (เช่น ssr.js)
+  function = "ssr"
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "ssr-province"
+  function = "ssr" # <-- ใช้ฟังก์ชันเดียวกัน
   path = "/location/*"
 
 [[edge_functions]]
-  function = "ssr-province"
+  function = "ssr" # <-- ใช้ฟังก์ชันเดียวกัน
   path = "/province/*"
+
+# --- REDIRECTS (ไม่ต้องแก้ไข ดีอยู่แล้ว) ---
+# ส่วนนี้สำคัญมากสำหรับ Single Page Application (SPA) ของคุณ
 
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
@@ -35,30 +54,28 @@
   status = 301
   force = true
 
+# Redirects พวกนี้เพื่อให้ไฟล์สำคัญทำงานได้ถูกต้องในโหมด SPA
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
-  force = true
-
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
   status = 200
-  force = true
-
 [[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
   status = 200
-  force = true
-
 [[redirects]]
   from = "/robots.txt"
   to = "/robots.txt"
   status = 200
-  force = true
 
+# ✅ [สำคัญมาก] Redirect สุดท้ายนี้คือหัวใจของเว็บคุณ
+# มันจะบอกว่า "ถ้าหาหน้าไหนไม่เจอ ให้ส่ง /index.html กลับไปเสมอ"
+# เพื่อให้ JavaScript (main.js) ทำงานจัดการหน้านั้นๆ ต่อไปสำหรับ "ผู้ใช้จริง"
+# ห้ามลบ Redirect นี้เด็ดขาด
 [[redirects]]
   from = "/*"
   to = "/index.html"
