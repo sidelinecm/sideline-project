@@ -1,13 +1,8 @@
-# =====================================
-# 🏗️ Netlify Build Configuration
-# =====================================
 [build]
   publish = "."
   command = ""
+  functions = "netlify/functions"
 
-# =====================================
-# ⚙️ Global HTTP Security Headers
-# =====================================
 [[headers]]
   for = "/*"
   [headers.values]
@@ -16,37 +11,30 @@
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # เพิ่ม Cache-Control สำหรับไฟล์ Static เพื่อให้เว็บโหลดเร็วขึ้น (คะแนน Core Web Vitals ดีขึ้น)
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# =====================================
-# 🧠 Edge Functions Mapping
-# =====================================
 [[edge_functions]]
-function = "sitemap"
-path = "/sitemap.xml"
+  function = "sitemap"
+  path = "/sitemap.xml"
 
 [[edge_functions]]
-function = "render-bot"
-path = "/sideline/*"
+  function = "render-bot"
+  path = "/sideline/*"
 
 [[edge_functions]]
-function = "ssr-province"
-path = "/location/*"
+  function = "ssr-province"
+  path = "/location/*"
 
-# =====================================
-# 🔀 Redirect Rules (SEO Best Practices)
-# =====================================
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/province/*"
 
-# 1. บังคับให้เป็น HTTPS และตัด WWW ออก (หรือเลือกใช้อย่างใดอย่างหนึ่ง) 
-# เพื่อให้ Google Index หน้าเดียว ไม่สับสน
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
 
-# 2. จัดการไฟล์สำคัญให้เข้าถึงได้โดยตรง (200 OK)
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
@@ -59,7 +47,18 @@ path = "/location/*"
   status = 200
   force = true
 
-# 3. SPA Fallback (รักษา URL เดิมไว้เพื่อให้ React/Vue จัดการต่อ)
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
