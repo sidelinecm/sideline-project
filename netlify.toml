@@ -1,79 +1,39 @@
-# =======================================================
-# 🏆 NETLIFY CONFIG (MERGED SSR + SMART CACHE)
-# =======================================================
-
 [build]
   publish = "."
   command = ""
 
-# --- 1. EDGE FUNCTIONS (รวมร่าง SSR) ---
-# ⚠️ เตือน: คุณต้องมีไฟล์ "netlify/edge-functions/ssr.js" อยู่จริงเท่านั้น!
-
+# --- 1. EDGE FUNCTIONS ---
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "ssr"  # ใช้ฟังก์ชันเดียวคุมทุกอย่าง
-  path = "/sideline/*"
-
+  function = "ssr"
+  path = "/"           # คุมหน้าแรก
 [[edge_functions]]
   function = "ssr"
-  path = "/profile/*"
-
+  path = "/sideline/*" # คุมหน้าน้องๆ
 [[edge_functions]]
   function = "ssr"
-  path = "/location/*"
-
+  path = "/province/*" # คุมหน้าจังหวัด
 [[edge_functions]]
   function = "ssr"
-  path = "/province/*"
+  path = "/location/*" # เผื่อบางหน้าใช้ path location
 
-# --- 2. HEADERS (แก้ให้เว็บเร็วขึ้น 300%) ---
-
-# ความปลอดภัยพื้นฐาน
+# --- 2. SECURITY & CACHE ---
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
-    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
 
-# ✅ HTML: ห้าม Cache (เพื่อข้อมูลล่าสุด)
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-# ✅ รูปภาพ/JS/CSS: Cache 1 ปี (เพื่อให้โหลดเร็วปรื๊ด)
 [[headers]]
   for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-    
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
 
-[[headers]]
-  for = "/css/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- 3. REDIRECTS (Routing) ---
-
-# Force HTTPS
-[[redirects]]
-  from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
-  status = 301
-  force = true
-
-# SPA Fallback (สำคัญที่สุด ห้ามลบ)
+# --- 3. SPA ROUTING ---
 [[redirects]]
   from = "/*"
   to = "/index.html"
