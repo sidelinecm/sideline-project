@@ -10,8 +10,10 @@ export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     const clientIP = request.headers.get('x-nf-client-connection-ip') || ''; 
     
+    // 1. ดักจับ Bot ครอบคลุมทุกค่าย รวมถึง Google Inspection Tool
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|skype|curl|wget|inspectiontool|lighthouse/i.test(ua);
     
+    // 2. ดักจับคนตรวจสอบที่ปลอมตัวมาผ่าน IP Data Center
     let isDataCenter = false;
     if (clientIP && clientIP !== '127.0.0.1') {
         try {
@@ -21,12 +23,13 @@ export default async (request, context) => {
         } catch (e) { isDataCenter = false; }
     }
 
+    // ถ้าไม่ใช่ Bot ให้รันหน้าเว็บปกติ (Client-side)
     if (!isBot && !isDataCenter) return context.next();
 
     try {
-        const url = new URL(request.url);
+        const url = new URL(request.url); 
         const pathParts = url.pathname.split('/').filter(Boolean);
-        const currentFullUrl = url.origin + url.pathname;
+        const currentFullUrl = url.origin + url.pathname; // ดึง URL จริงปัจจุบัน
         
         let pageTitle = '';
         let metaDesc = '';
@@ -34,7 +37,7 @@ export default async (request, context) => {
         let pageContent = '';
         let jsonLd = {};
 
-        // --- CASE: หน้าแรก (Homepage) ---
+        // --- CASE: หน้าแรก (Homepage) แก้ปัญหาจอดำหน้าแรก ---
         if (pathParts.length === 0) {
             pageTitle = 'ไซด์ไลน์เชียงใหม่ - รวมน้องๆ ไซด์ไลน์ รับงานเอง ฟิวแฟน ตรงปก 100%';
             metaDesc = 'ศูนย์รวมสาวสวยไซด์ไลน์เชียงใหม่ รับงานเอง ไม่ผ่านเอเย่นต์ พิกัดตัวเมืองเชียงใหม่และใกล้เคียง คัดน้องๆ งานดี ฟิวแฟน ปลอดภัย ไม่ต้องมัดจำ';
@@ -74,7 +77,7 @@ export default async (request, context) => {
             metaDesc = `น้อง${p.name} สาวสวยไซด์ไลน์${provinceName} อายุ ${p.age || '20+'} ปี รับงานฟิวแฟน พิกัด${p.location || provinceName} ไม่ต้องโอนมัดจำ ปลอดภัยแน่นอน`;
             imageUrl = p.imagePath ? `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}` : `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
 
-            // ข้อมูลดาวและรีวิวแบบสุ่มตามชื่อ (เพื่อให้ Google แสดงดาวในหน้าค้นหา)
+            // ข้อมูลดาวและรีวิวแบบสุ่มเพื่อให้ Google แสดงผลพิเศษ
             const seed = slug.length;
             const ratingValue = (4.5 + (seed % 5) / 10).toFixed(1);
             const reviewCount = 100 + (seed * 3);
@@ -118,6 +121,7 @@ export default async (request, context) => {
         } 
         else { return context.next(); }
 
+        // --- ส่วน HTML ที่แก้ปัญหาจอดำด้วย CSS !important ---
         const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -137,7 +141,8 @@ export default async (request, context) => {
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 
     <style>
-        html, body { background-color: #ffffff !important; color: #1a1a1a; margin: 0; font-family: 'Sarabun', sans-serif; -webkit-font-smoothing: antialiased; }
+        /* บังคับพื้นหลังขาวและตัวอักษรเข้มเพื่อแก้ปัญหาจอดำใน Screenshot */
+        html, body { background-color: #ffffff !important; color: #1a1a1a !important; margin: 0; font-family: 'Sarabun', sans-serif; -webkit-font-smoothing: antialiased; }
         .container { max-width: 500px; margin: 0 auto; background: #ffffff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
         .hero-img { width: 100%; height: auto; display: block; background: #f0f0f0; }
         .content-wrapper { padding: 24px; text-align: center; }
@@ -145,7 +150,7 @@ export default async (request, context) => {
         .rating { color: #f59e0b; font-weight: bold; margin-bottom: 10px; }
         .info-box { background: #fff5f8; padding: 16px; border-radius: 12px; margin: 20px 0; text-align: left; border: 1px solid #ffe4ee; }
         .info-box p { margin: 8px 0; font-size: 16px; }
-        .btn { display: inline-block; width: 100%; padding: 14px 0; background: #db2777; color: #fff; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 18px; transition: 0.3s; }
+        .btn { display: inline-block; width: 100%; padding: 14px 0; background: #db2777; color: #fff !important; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 18px; }
         .line-btn { background: #06c755; margin-top: 10px; }
     </style>
 </head>
