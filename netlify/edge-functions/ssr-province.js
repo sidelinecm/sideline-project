@@ -132,12 +132,12 @@ async function fetchProfiles(supabase, provinceKey) {
 // HTML Generation Functions
 function generateMetaTags(provinceData, thaiDate, profilesCount) {
   const title = `รวมสาวไซด์ไลน์${provinceData.nameThai} [อัปเดตล่าสุด ${thaiDate}] รับงานตรงปก`;
-  const description = `อัปเดตล่าสุด ${thaiDate}: ศูนย์รวมน้องๆ ไซด์ไลน์จังหวัด${provinceData.nameThai} ${profilesCount}+ คน คัดเกรดพรีเมียม รูปจริง ตรงปก ทุกคน ปลอดภัย 100% ไม่มีมัดจำ`;
+  const description = `อัปเดตล่าสุด ${thaiDate}: ศูนย์รวมน้องๆ ไซด์ไลน์จังหวัด${provinceData.nameThai} ${profilesCount}+ คน คัดเกรดพรีเมียม รูปจริง ตรงปก ทุกคน ปลอดภัย 100%`;
   
   return `
     <title>${sanitizeHTML(title)}</title>
     <meta name="description" content="${sanitizeHTML(description)}">
-    <meta name="keywords" content="ไซด์ไลน์, ${provinceData.nameThai}, รับงาน, พาร์ทไทม์, ฟิวแฟน, นักศึกษา, งานพิเศษ, ตรงปก, ไม่มีมัดจำ">
+    <meta name="keywords" content="ไซด์ไลน์, ${provinceData.nameThai}, รับงาน, พาร์ทไทม์, นักศึกษา, งานพิเศษ">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta property="og:title" content="${sanitizeHTML(title)}">
     <meta property="og:description" content="${sanitizeHTML(description)}">
@@ -163,7 +163,7 @@ function generateStructuredData(provinceData, profiles, thaiDate) {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       "name": "รายชื่อไซด์ไลน์จังหวัด${provinceData.nameThai}",
-      "description": "รายชื่อน้องๆรับงาน ไซด์ไลน์ในจังหวัด${provinceData.nameThai}",
+      "description": "รายชื่อน้องๆ ไซด์ไลน์ในจังหวัด${provinceData.nameThai}",
       "dateModified": "${new Date().toISOString()}",
       "datePublished": "${thaiDate}",
       "mainEntity": {
@@ -384,7 +384,7 @@ function generateHTML(provinceData, profilesData, thaiDate) {
 </head>
 <body>
   <header class="header">
-    <h1>รายชื่อน้องๆรับงานไซด์ไลน์จังหวัด${sanitizeHTML(provinceData.nameThai)}</h1>
+    <h1>รายชื่อไซด์ไลน์จังหวัด${sanitizeHTML(provinceData.nameThai)}</h1>
     <p>อัปเดตล่าสุด: ${thaiDate}</p>
     <div class="stats">
       <div class="stat-item">ทั้งหมด ${totalCount} คน</div>
@@ -394,14 +394,14 @@ function generateHTML(provinceData, profilesData, thaiDate) {
   </header>
   
   <main class="profiles-list">
-    <h2>📋 รายชื่อน้องๆรับงาน ล่าสุด</h2>
+    <h2>📋 รายชื่อน้องๆ ล่าสุด</h2>
     <ul class="profile-grid">
       ${generateProfilesList(profiles)}
     </ul>
   </main>
   
   <footer class="footer">
-    <p>ข้อมูลถูกอัปเดตอัตโนมัติทุกวัน • ปลอดภัย 100% • ไม่ต้องมัดจำ ชำระเงินหน้างานเท่านั้นตรวจสอบแล้ว</p>
+    <p>ข้อมูลถูกอัปเดตอัตโนมัติทุกวัน • ปลอดภัย 100% • ตรวจสอบแล้ว</p>
     <a href="/" class="back-link">🏠 กลับหน้าหลัก</a>
     <p style="margin-top: 1rem; font-size: 0.9em; color: #999;">
       © ${new Date().getFullYear()} All rights reserved.
