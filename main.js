@@ -1487,26 +1487,97 @@ function populateLightboxData(p) {
         }
     }
 
-    // --- 7. LINE Button (Sticky Footer) ---
+// --- 7. LINE Button (Popup Guide Version - แบบมีหน้าต่างแจ้งเตือนลูกค้า) ---
     const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
     if (oldWrapper) oldWrapper.remove();
+    
     if (p.lineId && els.lineBtnContainer) {
         const wrapper = document.createElement('div');
         wrapper.id = 'line-btn-sticky-wrapper';
         wrapper.className = 'lb-sticky-footer';
+
+        // 1. เตรียมข้อมูลสำหรับ Copy
+        const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
+        const autoMessage = `สวัสดีครับ สนใจน้อง ${p.name} เห็นจากเว็บ Sideline Chiangmai ครับ\n${profileUrl}`;
+        
+        // 2. เตรียมลิงก์ LINE (รองรับทั้ง ID ธรรมดา และ Link เต็ม)
+        let finalLineUrl = p.lineId;
+        if (!p.lineId.startsWith('http')) {
+            // ใช้ ti/p/~ เพื่อไปหน้าเพิ่มเพื่อน
+            finalLineUrl = `https://line.me/ti/p/~${p.lineId}`;
+        }
+
         const link = document.createElement('a');
         link.className = 'btn-line-action';
-        link.href = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/${p.lineId}`;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.innerHTML = `<i class="fab fa-line"></i> แอดไลน์ ${p.name || ''}`;
+        link.href = '#'; // ใส่ # ไว้ก่อนเพื่อดัก event
+        link.innerHTML = `<i class="fab fa-line text-xl"></i> แอดไลน์ ${p.name || ''}`;
+
+        // 🔥 Event: กดปุ่มแล้วเด้ง Popup แจ้งเตือน
+        link.onclick = (e) => {
+            e.preventDefault();
+
+            // A. สั่ง Copy ข้อความทันที
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(autoMessage).catch(console.error);
+            }
+
+            // B. สร้าง Popup (Modal) ขึ้นมาบังหน้าจอ
+            const modal = document.createElement('div');
+            // ใส่ Style แบบ Inline เพื่อให้มั่นใจว่าแสดงผลถูกต้องแน่นอน
+            modal.style.cssText = "position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease-out;";
+            
+            modal.innerHTML = `
+                <div style="background: white; width: 100%; max-width: 340px; border-radius: 24px; padding: 30px 24px; text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                    
+                    <!-- ไอคอนเช็คถูก -->
+                    <div style="width: 70px; height: 70px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 0 8px rgba(209, 250, 229, 0.3);">
+                        <i class="fas fa-check" style="font-size: 32px; color: #059669;"></i>
+                    </div>
+
+                    <h3 style="font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 10px; line-height: 1.3;">คัดลอกข้อมูลแล้ว!</h3>
+                    
+                    <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+                        ระบบบันทึกชื่อน้องให้แล้วครับ<br>
+                        เมื่อแอป LINE เปิดขึ้นมา<br>
+                        <span style="background: #fdf2f8; padding: 4px 12px; border-radius: 6px; font-weight: bold; color: #db2777; display: inline-block; margin-top: 4px; border: 1px solid #fbcfe8;">กรุณากด "วาง" (Paste) ในแชท</span>
+                    </p>
+
+                    <!-- ปุ่มไป LINE -->
+                    <a href="${finalLineUrl}" id="go-to-line-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px; background: #06c755; color: white; font-weight: bold; border-radius: 14px; text-decoration: none; font-size: 16px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4); transition: transform 0.1s;">
+                        <i class="fab fa-line" style="font-size: 24px;"></i> เปิด LINE ทันที
+                    </a>
+
+                    <!-- ปุ่มปิด -->
+                    <button id="close-modal-btn" style="margin-top: 16px; background: transparent; border: none; color: #9ca3af; font-size: 14px; cursor: pointer; padding: 8px;">
+                        ยกเลิก
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // C. จัดการปุ่มใน Popup
+            const closeBtn = modal.querySelector('#close-modal-btn');
+            const goBtn = modal.querySelector('#go-to-line-btn');
+
+            const closeModal = () => {
+                modal.style.opacity = '0';
+                setTimeout(() => modal.remove(), 200);
+            };
+
+            closeBtn.onclick = closeModal;
+            modal.onclick = (ev) => { if(ev.target === modal) closeModal(); }; // กดพื้นหลังปิด
+            
+            // พอกดปุ่มเขียว ให้ปิด Modal แล้วไป LINE
+            goBtn.onclick = () => {
+                setTimeout(closeModal, 500);
+            };
+        };
+        
         wrapper.appendChild(link);
         els.lineBtnContainer.appendChild(wrapper);
     }
 }
-
-
-
 // =================================================================
 // 10. SEO META TAGS UPDATER (อัปเกรดขั้นสูง - สูตรลับดันอันดับ GSC)
 // =================================================================
