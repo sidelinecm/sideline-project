@@ -1,39 +1,76 @@
+# =========================================================
+# 🏗️ NETLIFY ULTIMATE CONFIGURATION
+# =========================================================
 [build]
   publish = "."
-  command = ""
+  command = "" 
+  environment = { NODE_VERSION = "18" }
 
-# --- 1. EDGE FUNCTIONS ---
+# =========================================================
+# 🤖 EDGE FUNCTIONS (SEO & SITEMAP ENGINE)
+# =========================================================
+
+# 1. Sitemap อัตโนมัติ (Real-time)
 [[edge_functions]]
-  function = "sitemap"
-  path = "/sitemap.xml"
+function = "sitemap"
+path = "/sitemap.xml"
+
+# 2. หน้าโปรไฟล์ (สำหรับ Bot/Facebook/Line Preview)
+[[edge_functions]]
+function = "render-bot"
+path = "/profile/*"
 
 [[edge_functions]]
-  function = "ssr"
-  path = "/"           # คุมหน้าแรก
-[[edge_functions]]
-  function = "ssr"
-  path = "/sideline/*" # คุมหน้าน้องๆ
-[[edge_functions]]
-  function = "ssr"
-  path = "/province/*" # คุมหน้าจังหวัด
-[[edge_functions]]
-  function = "ssr"
-  path = "/location/*" # เผื่อบางหน้าใช้ path location
+function = "render-bot"
+path = "/sideline/*"
 
-# --- 2. SECURITY & CACHE ---
+# 3. หน้าจังหวัด (สำหรับ Bot)
+[[edge_functions]]
+function = "ssr-province"
+path = "/location/*"
+
+[[edge_functions]]
+function = "ssr-province"
+path = "/province/*"
+
+# =========================================================
+# ⚡ SECURITY & CACHE HEADERS
+# =========================================================
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
 
+# HTML: ห้าม Cache (เพื่อให้ User เห็นข้อมูลล่าสุดเสมอ)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Assets (JS/CSS/Images): Cache 1 ปี (เพื่อความเร็วสูงสุด)
 [[headers]]
   for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-# --- 3. SPA ROUTING ---
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# =========================================================
+# 🔀 REDIRECT RULES (SPA FALLBACK)
+# =========================================================
+# กฎสำคัญ: ทุก URL ที่ไม่มีไฟล์จริง ให้ส่งไป index.html เพื่อให้ JS ทำงาน
 [[redirects]]
   from = "/*"
   to = "/index.html"
