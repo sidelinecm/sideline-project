@@ -1969,50 +1969,49 @@ function updateLink(rel, href) {
     }
 
 // ==========================================
-// ✨ NEW FEATURE: VIP AGE GATE (SEO & BOT FRIENDLY)
+// ✨ NEW FEATURE: VIP AGE GATE (JS ONLY VERSION)
 // ==========================================
 function initAgeVerification() {
-    // 1. 🛡️ ตรวจสอบ Bot ทันที (SEO Stealth Mode)
-    // เพิ่มการตรวจจับ Bot ทุกค่าย รวมถึงตัว Crawler ของโซเชียลมีเดีย
+    // 1. 🛡️ เช็คก่อนเลยว่าเป็น Bot หรือเปล่า
+    // ถ้าเป็น Googlebot หรือ Bot อื่นๆ ให้ "จบการทำงานทันที (return)"
+    // ผลลัพธ์: โค้ดบรรทัดล่างๆ จะไม่ทำงาน = ไม่มีการสร้างกล่องดำ = Google ไม่เห็นจอดำ
     const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|ia_archiver|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|quora\ link\ preview|outbrain|pinterest\/0\.|vkShare|W3C_Validator/i.test(navigator.userAgent);
 
-    // 🔥 ถ้าเป็น Bot ให้ "Return" ออกไปทันที (ทะลุผ่าน) ไม่ต้องสร้างหน้ากั้นอายุ
     if (isBot) {
-        console.log("SEO Mode: Search Engine detected. Bypassing age verification for full indexing.");
+        console.log("SEO Mode: Search Engine detected. No overlay created.");
         return; 
     }
 
-    // 2. ตรวจสอบสถานะเดิมสำหรับ User ทั่วไป (คน)
+    // 2. เช็คว่าคนนี้เคยยืนยันหรือยัง (ถ้าเคยแล้ว ก็ไม่ต้องสร้าง)
     const ts = localStorage.getItem(CONFIG.KEYS.AGE_CONFIRMED);
     if (ts && (Date.now() - parseInt(ts)) < 3600000) return;
 
-    // 3. เริ่มสร้าง UI สำหรับคนปกติ (ถ้าไม่ใช่ Bot และยังไม่ได้กดยืนยัน)
+    // -----------------------------------------------------
+    // 3. ถ้าเป็น "คน" และ "ยังไม่ยืนยัน" -> ค่อยเริ่มสร้าง Element (Create Element)
+    // -----------------------------------------------------
     const div = document.createElement('div');
     div.id = 'age-verification-overlay';
     
-    // ใช้ Inline Style ผสม Tailwind เพื่อความชัวร์เรื่อง Layout
+    // ตั้งค่า CSS ให้แสดงผลเต็มจอ
     div.style.cssText = "position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; overflow: hidden;";
     
+    // ใส่ HTML ข้างในเหมือนเดิม
     div.innerHTML = `
         <!-- พื้นหลังรูปภาพ (เบลอ) -->
         <div style="position: absolute; inset: 0; background-image: url('/images/placeholder-profile.webp'); background-size: cover; background-position: center; filter: blur(20px); opacity: 0.4; transform: scale(1.1);"></div>
         <!-- พื้นหลังสีดำทับ -->
         <div style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px);"></div>
 
-        <!-- การ์ด VIP (Glassmorphism) -->
+        <!-- การ์ด VIP -->
         <div style="position: relative; z-index: 10; width: 100%; max-width: 380px; margin: 16px;">
             <div style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(16px); border-radius: 24px; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center; overflow: hidden;">
-                
-                <!-- แสงพาดด้านบน -->
                 <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 50%; height: 4px; background: linear-gradient(90deg, transparent, #ec4899, transparent); opacity: 0.8;"></div>
                 
                 <div style="margin-bottom: 24px;">
-                    <!-- วงกลม 20+ -->
                     <div style="display: inline-flex; align-items: center; justify-content: center; width: 70px; height: 70px; border-radius: 9999px; background-color: rgba(236, 72, 153, 0.15); margin-bottom: 16px; border: 1px solid rgba(236, 72, 153, 0.5); box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);">
                         <span style="font-size: 24px; font-weight: 800; color: #ec4899;">20+</span>
                     </div>
-                    
-                    <h2 style="font-size: 24px; font-weight: 700; color: #ffffff; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Restricted Area</h2>
+                    <h2 style="font-size: 24px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">Restricted Area</h2>
                     <p style="color: #d1d5db; font-size: 14px; line-height: 1.6;">
                         เว็บไซต์นี้มีเนื้อหาสำหรับผู้ใหญ่<br>
                         กรุณายืนยันว่าคุณมีอายุ 20 ปีบริบูรณ์
@@ -2020,30 +2019,21 @@ function initAgeVerification() {
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button id="age-confirm" style="width: 100%; padding: 14px; background: linear-gradient(90deg, #ec4899, #9333ea); color: white; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s;">
-                        ยืนยัน (เข้าสู่เว็บไซต์)
-                    </button>
-                    <button id="age-reject" style="width: 100%; padding: 12px; background: transparent; color: #9ca3af; font-size: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
-                        ออกจากเว็บไซต์
-                    </button>
+                    <button id="age-confirm" style="width: 100%; padding: 14px; background: linear-gradient(90deg, #ec4899, #9333ea); color: white; font-weight: 700; border-radius: 12px; border: none; cursor: pointer;">ยืนยัน (เข้าสู่เว็บไซต์)</button>
+                    <button id="age-reject" style="width: 100%; padding: 12px; background: transparent; color: #9ca3af; font-size: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">ออกจากเว็บไซต์</button>
                 </div>
             </div>
         </div>
     `;
 
+    // ยัดใส่หน้าเว็บ
     document.body.appendChild(div);
     document.body.style.overflow = 'hidden';
 
     // Animation Effect (GSAP)
     const card = div.querySelector('div[style*="background: rgba"]'); 
     if (window.gsap) {
-        gsap.from(card, { 
-            y: 50, 
-            opacity: 0, 
-            duration: 0.8, 
-            ease: "back.out(1.2)",
-            delay: 0.2 
-        });
+        gsap.from(card, { y: 50, opacity: 0, duration: 0.8, ease: "back.out(1.2)", delay: 0.2 });
     }
 
     // Event Listeners
