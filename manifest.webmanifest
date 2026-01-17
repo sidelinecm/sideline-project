@@ -35,12 +35,6 @@
       "short_name": "น้องๆ",
       "url": "/profiles.html?utm_source=pwa_shortcut",
       "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "พิกัดรับงาน",
-      "short_name": "พิกัด",
-      "url": "/locations.html?utm_source=pwa_shortcut",
-      "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
