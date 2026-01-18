@@ -4,11 +4,17 @@ const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
 const DOMAIN = 'https://sidelinechiangmai.netlify.app';
 
+// Helper Function: ทำความสะอาด Slug
+function cleanSlug(text) {
+    if (!text) return '';
+    return text.trim().replace(/\s+/g, '-').replace(/[^\u0E00-\u0E7F\w-]/g, '');
+}
+
 export default async () => {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 1. ดึงข้อมูลจากตาราง Profiles และ Provinces พร้อมกัน
+    // 1. ดึงข้อมูลจากตาราง Profiles และ Provinces
     const [{ data: profiles }, { data: provinces }] = await Promise.all([
       supabase.from('profiles').select('slug, lastUpdated').limit(1000),
       supabase.from('provinces').select('key')
@@ -28,20 +34,24 @@ export default async () => {
     // เพิ่มหน้าจังหวัด (Provinces)
     if (provinces) {
       provinces.forEach(p => {
-        xml += `\n  <url>`;
-        xml += `\n    <loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc>`;
-        xml += `\n    <changefreq>daily</changefreq>`;
-        xml += `\n    <priority>0.9</priority>`;
-        xml += `\n  </url>`;
+        if (p.key) {
+            xml += `\n  <url>`;
+            xml += `\n    <loc>${DOMAIN}/sideline/province/${encodeURIComponent(p.key)}</loc>`;
+            xml += `\n    <changefreq>daily</changefreq>`;
+            xml += `\n    <priority>0.9</priority>`;
+            xml += `\n  </url>`;
+        }
       });
     }
 
-    // เพิ่มหน้าโปรไฟล์ (Profiles) - จัดการภาษาไทยด้วย encodeURIComponent
+    // เพิ่มหน้าโปรไฟล์ (Profiles)
     if (profiles) {
       profiles.forEach(p => {
         if (p.slug) {
-          const safeSlug = encodeURIComponent(p.slug);
+          const safeSlug = encodeURIComponent(cleanSlug(p.slug));
+          // ถ้าไม่มี lastUpdated ให้ใช้วันปัจจุบัน
           const lastMod = p.lastUpdated ? new Date(p.lastUpdated).toISOString() : new Date().toISOString();
+          
           xml += `\n  <url>`;
           xml += `\n    <loc>${DOMAIN}/sideline/${safeSlug}</loc>`;
           xml += `\n    <lastmod>${lastMod}</lastmod>`;
