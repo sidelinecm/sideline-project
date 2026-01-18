@@ -5,7 +5,7 @@ if (workbox) {
   // 1. CONFIGURATION
   // ⚠️ เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการอัปเดตไฟล์ CSS/JS หลัก
   // -----------------------------------------------------------
-  const CACHE_VERSION = 'v-2026-01-18-01'; 
+  const CACHE_VERSION = 'v-2026-01-18-02'; 
   const OFFLINE_PAGE = '/offline.html';
 
   workbox.core.setCacheNameDetails({

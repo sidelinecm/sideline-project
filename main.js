@@ -496,39 +496,46 @@ function initRealtimeSubscription() {
 }
 
 function processProfileData(p) {
-        if (!p) return null;
+    if (!p) return null;
 
-        // จัดการรูปภาพ: ใช้ Path จาก DB หรือใช้รูป Default
-        const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
-        
-        let imageObjects = imagePaths.map(path => {
-            // ใช้ getPublicUrl เพื่อให้ได้ลิงก์ที่ถูกต้องเสมอ
-            const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-            return { src: data?.publicUrl || CONFIG.DEFAULT_OG_IMAGE };
+    // 1. จัดการรูปภาพ: รวม Path หลักและ Gallery เข้าด้วยกัน
+    const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+    
+    // 2. แปลง Path เป็น URL ที่บีบอัดแล้ว (แก้ไขจุดที่พี่เขียนผิด)
+    let imageObjects = imagePaths.map(path => {
+        const { data } = supabase.storage.from('profiles').getPublicUrl(path, {
+            transform: {
+                width: 450,       // ย่อขนาดให้โหลดไว
+                quality: 80,      // บีบอัดไฟล์
+                format: 'webp'    // ใช้ WebP ตามมาตรฐาน Google
+            }
         });
+        return { src: data.publicUrl }; // คืนค่ากลับเป็น Object ที่มี URL พร้อมใช้
+    });
 
-        // ถ้าไม่มีรูปเลย ให้ใส่รูป Default กันไว้
-        if (imageObjects.length === 0) {
-            imageObjects.push({ src: CONFIG.DEFAULT_OG_IMAGE });
-        }
-
-        const provinceName = state.provincesMap.get(p.provinceKey) || '';
-        const tags = (p.styleTags || []).join(' ');
-        
-        // รวมคำค้นหาทั้งหมดไว้ใน string เดียว (ตัวเล็กหมดเพื่อให้ค้นง่าย)
-        const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''} ${p.stats || ''} ${p.location || ''}`.toLowerCase();
-
-        return { 
-            ...p, 
-            images: imageObjects, 
-            altText: `น้อง${p.name} ไซด์ไลน์${provinceName} รับงาน${provinceName}`,
-            searchString: fullSearchString,
-            provinceNameThai: provinceName,
-            // แปลงค่าตัวเลขเผื่อไว้ใช้คำนวณ
-            _price: Number(String(p.rate).replace(/\D/g, '')) || 0, 
-            _age: Number(p.age) || 0
-        };
+    // 3. ถ้าไม่มีรูปเลย ให้ใส่รูป Default (ป้องกันหน้าเว็บขาว)
+    if (imageObjects.length === 0) {
+        imageObjects.push({ src: CONFIG.DEFAULT_OG_IMAGE || '/assets/default-profile.jpg' });
     }
+
+    // 4. ดึงชื่อจังหวัดและสร้าง Search String สำหรับระบบค้นหา (SEO & Filter)
+    const provinceName = state.provincesMap.get(p.provinceKey) || '';
+    const tags = Array.isArray(p.styleTags) ? p.styleTags.join(' ') : '';
+    
+    const fullSearchString = `${p.name} ${provinceName} ${p.provinceKey} ${tags} ${p.description || ''} ${p.rate || ''} ${p.stats || ''} ${p.location || ''}`.toLowerCase();
+
+    // 5. คืนค่าข้อมูลที่พร้อมแสดงผลที่สุด
+    return { 
+        ...p, 
+        images: imageObjects, 
+        altText: `น้อง${p.name} ไซด์ไลน์${provinceName} รับงาน${provinceName}`,
+        searchString: fullSearchString,
+        provinceNameThai: provinceName,
+        // แปลงราคาเป็นตัวเลขไว้สำหรับฟีเจอร์ "เรียงตามราคา"
+        _price: Number(String(p.rate).replace(/\D/g, '')) || 0, 
+        _age: Number(p.age) || 0
+    };
+}
 // ✅ POPULATE PROVINCE DROPDOWN (Unchanged, but included for completeness)
 function populateProvinceDropdown() {
     if (!dom.provinceSelect) return;
@@ -1598,80 +1605,81 @@ const FAQ_DATA = [
 ];
 
 // =================================================================
-// === ฟังก์ชัน updateAdvancedMeta (ฉบับสมบูรณ์ & ปรับแต่ง SEO) ===
+// === ฟังก์ชัน updateAdvancedMeta (เวอร์ชันสมบูรณ์แบบที่สุด) ===
 // =================================================================
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // 1. ล้าง Schema เดิมออกก่อน
-    const oldScripts = document.querySelectorAll('script[id^="schema-jsonld"]');
+    // 1. ล้าง Schema เดิมออกให้เกลี้ยง (ใช้ Class ช่วยเพื่อให้ลบแม่นยำ 100%)
+    const oldScripts = document.querySelectorAll('.dynamic-schema, script[id^="schema-jsonld"]');
     oldScripts.forEach(s => s.remove());
 
     const BRAND_NAME = "Sideline Chiangmai";
+    const SITE_URL = CONFIG.SITE_URL.replace(/\/$/, ''); // ตัด / ท้าย URL ออกป้องกัน URL ซ้ำซ้อน
     
-    // 🔥 ปรับ KEYWORDS ตาม GSC: เอา "เชียงใหม่" ขึ้นก่อน, ใส่ "รับงาน", ย้ำ "จ่ายหน้างาน"
+    // 2. ตั้งค่า Default (Global)
     const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก ไม่มัดจำ จ่ายหน้างาน | ${BRAND_NAME}`;
-    
     const GLOBAL_DESC = `ศูนย์รวมสาวไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน การันตีรูปตรงปก 100% ปลอดภัยสูง ไม่ต้องโอนมัดจำ ชำระเงินหน้างานเท่านั้น อัปเดตน้องใหม่ทุกวัน มีแอดมินดูแลฟรี`;
 
     if (profile) {
         // --- กรณี: หน้าโปรไฟล์รายบุคคล ---
-        
-        // 1. ถ้าไม่ระบุจังหวัด ให้ Default เป็น "เชียงใหม่" (ดีกว่าคำว่า ไม่ระบุ)
         const provinceName = state.provincesMap.get(profile.provinceKey) || 'เชียงใหม่';
-        
-        // 2. ดึงราคามาใส่ Title (ถ้ามี) คนชอบคลิกที่มีราคาบอกชัดเจน
         const priceText = profile.rate ? ` ราคา ${profile.rate}` : '';
+        const currentUrl = `${SITE_URL}/sideline/${profile.slug}`;
         
-        // Title สูตร: [ชื่อ] [จังหวัด] [รับงานเอง] [ราคา] [แบรนด์]
         const title = `น้อง${profile.name} ไซด์ไลน์${provinceName} รับงานเอง${priceText} จ่ายหน้างาน | ${BRAND_NAME}`; 
-        
-        // Description สูตร: อัดแน่นด้วยรายละเอียด + Trust words
         const richDescription = `น้อง${profile.name} สาวไซด์ไลน์${provinceName} อายุ ${profile.age || '20+'} รับงานฟิวแฟน พิกัด${profile.location || provinceName} รูปตรงปก 100% ไม่ต้องโอนมัดจำ ชำระเงินหน้างาน ${profile.quote ? `"${profile.quote}"` : ''}`;
 
         document.title = title;
         updateMeta('description', richDescription); 
-        updateMeta('keywords', `ไซด์ไลน์${provinceName}, รับงาน${provinceName}, น้อง${profile.name}, สาวไซด์ไลน์, ไม่มัดจำ`); // ✅ เพิ่ม Keywords
+        updateMeta('keywords', `ไซด์ไลน์${provinceName}, รับงาน${provinceName}, น้อง${profile.name}, สาวไซด์ไลน์, ไม่มัดจำ`);
         updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug}`);
+        updateLink('canonical', currentUrl);
         
         updateOpenGraphMeta(profile, title, richDescription, 'profile');
+        
+        // ฉีด Schema แยก ID เพื่อความเป็นระเบียบ
         injectSchema(generatePersonSchema(profile, richDescription), 'schema-jsonld-person');
         injectSchema(generateBreadcrumbSchema('profile', profile.name), 'schema-jsonld-bc');
         
-    } else if (pageData) {
+    } else if (pageData && pageData.provinceName) {
         // --- กรณี: หน้าจังหวัด (Location) ---
-        
-        // ใช้ Title จาก handleRouting หรือสร้างใหม่แบบ Strong
         const pageTitle = pageData.title || `ไซด์ไลน์${pageData.provinceName} รับงาน${pageData.provinceName} ฟิวแฟน ไม่มัดจำ | ${BRAND_NAME}`;
-        
-        // Description เน้นจังหวัดนั้นๆ
         const pageDescription = `รวมรูปสาวไซด์ไลน์ ${pageData.provinceName} รับงานเอง ${pageData.provinceName} คัดคนสวย ตรงปก 100% ปลอดภัย ไม่ผ่านเอเย่นต์ ไม่ต้องโอนจอง จ่ายเงินหน้างานเท่านั้น`;
-        
+        const currentUrl = pageData.canonicalUrl || `${SITE_URL}/location/${pageData.provinceKey || ''}`;
+
         document.title = pageTitle;
         updateMeta('description', pageDescription);
-        updateMeta('keywords', `ไซด์ไลน์${pageData.provinceName}, รับงาน${pageData.provinceName}, สาวไซด์ไลน์${pageData.provinceName}, ไม่มัดจำ`); // ✅ เพิ่ม Keywords
+        updateMeta('keywords', `ไซด์ไลน์${pageData.provinceName}, รับงาน${pageData.provinceName}, สาวไซด์ไลน์${pageData.provinceName}, ไม่มัดจำ`);
         updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', pageData.canonicalUrl);
+        updateLink('canonical', currentUrl);
         
         updateOpenGraphMeta(null, pageTitle, pageDescription, 'website');
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
         injectSchema(generateBreadcrumbSchema('location', pageData.provinceName), 'schema-jsonld-bc');
         
     } else {
-        // --- กรณี: หน้าแรก (Home) ---
-        
-        // เช็คก่อนว่า Title ว่างอยู่หรือเปล่า (กันพลาด)
-        if (!document.title || document.title === BRAND_NAME) document.title = GLOBAL_TITLE; 
-        
+        // --- กรณี: หน้าแรก (Home) หรือ หน้าอื่นๆ ---
+        document.title = GLOBAL_TITLE;
         updateMeta('description', GLOBAL_DESC);
-        updateMeta('keywords', 'ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, ไซด์ไลน์, ฟิวแฟน, ไม่มัดจำ, จ่ายหน้างาน, สาวไซด์ไลน์, เชียงใหม่'); // ✅ เพิ่ม Keywords
+        updateMeta('keywords', 'ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, ไซด์ไลน์, ฟิวแฟน, ไม่มัดจำ, จ่ายหน้างาน, สาวไซด์ไลน์, เชียงใหม่');
         updateMeta('robots', 'index, follow'); 
-        updateLink('canonical', CONFIG.SITE_URL);
+        updateLink('canonical', SITE_URL);
         
         updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
         injectSchema(generateWebsiteSchema(), 'schema-jsonld-web'); 
         injectSchema(generateOrganizationSchema(), 'schema-jsonld-org'); 
         injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
     }
+}
+
+// ✅ ปรับปรุงฟังก์ชันฉีด Schema ให้ปลอดภัยและตรวจสอบได้ง่าย
+function injectSchema(json, id) {
+    if (!json) return;
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = id;
+    script.className = 'dynamic-schema'; // ใส่ class ไว้เพื่อการล้างข้อมูลในอนาคต
+    script.textContent = JSON.stringify(json);
+    document.head.appendChild(script);
 }
 
 // ✅ อัปเกรดการแสดงผลโซเชียล: ใช้รูป .webp และใส่ Alt Text คีย์เวิร์ด
@@ -2150,69 +2158,97 @@ function generateSitemapXML() {
     const baseUrl = CONFIG.SITE_URL.replace(/\/$/, '');
     const urls = [];
 
+    // ฟังก์ชันช่วยจัดการตัวอักษรพิเศษใน XML ให้ปลอดภัย 100%
+    const escapeXml = (unsafe) => {
+        if (!unsafe) return '';
+        return unsafe.replace(/[<>&"']/g, (m) => {
+            switch (m) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '"': return '&quot;';
+                case "'": return '&apos;';
+                default: return m;
+            }
+        });
+    };
+
     const processUrl = (path) => {
-        const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
-        const fullUrl = `${baseUrl}/${encodedPath}`;
-        return fullUrl.replace(/&/g, '&amp;').replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        // จัดการเรื่องเว้นวรรคและการเข้ารหัส Path
+        const encodedPath = path.split('/').map(segment => encodeURIComponent(segment)).join('/');
+        const fullUrl = `${baseUrl}/${encodedPath}`.replace(/\/$/, '');
+        return escapeXml(fullUrl);
     };
 
     // 1. หน้าแรก
     urls.push({ loc: processUrl(''), priority: '1.0', freq: 'daily' });
 
-    // 2. หน้า Profile น้องๆ (จุดสำคัญที่เพิ่มรูปภาพ)
-    state.allProfiles.forEach(p => { 
-        if (p.slug) { 
-            // ดึงข้อมูลรูปภาพจาก object ที่ process แล้ว
+    // 2. หน้า Profile (พร้อมระบบ Image Sitemap ขั้นสูง)
+    state.allProfiles.forEach(p => {
+        if (p.slug) {
             let imageTag = '';
             if (p.images && p.images.length > 0 && p.images[0].src) {
-                // ต้อง Escape URL รูปภาพด้วยเพื่อให้ XML ถูกต้อง
-                const imgUrl = p.images[0].src.replace(/&/g, '&amp;');
+                const imgUrl = escapeXml(p.images[0].src);
+                const imgTitle = escapeXml(`น้อง${p.name} ไซด์ไลน์${state.provincesMap.get(p.provinceKey) || ''}`);
+                
                 imageTag = `
         <image:image>
             <image:loc>${imgUrl}</image:loc>
-            <image:title>${p.name || 'Profile Image'}</image:title>
+            <image:title>${imgTitle}</image:title>
+            <image:caption>${imgTitle} ตรงปก ไม่มัดจำ</image:caption>
         </image:image>`;
             }
 
-            urls.push({ 
-                loc: processUrl(`sideline/${p.slug.trim()}`), 
-                priority: '0.9', 
+            const lastMod = p.image_updated_at || p.created_at || new Date().toISOString();
+
+            urls.push({
+                loc: processUrl(`sideline/${p.slug.trim()}`),
+                priority: '0.9',
                 freq: 'daily',
-                // เพิ่มฟิลด์พิเศษสำหรับเก็บ html รูปภาพ
-                imageXml: imageTag 
-            }); 
-        } 
+                lastmod: new Date(lastMod).toISOString(),
+                imageXml: imageTag
+            });
+        }
     });
 
     // 3. หน้า Location
-    if (state.provincesMap && state.provincesMap.size > 0) { 
-        state.provincesMap.forEach((name, key) => { 
-            urls.push({ loc: processUrl(`location/${key}`), priority: '0.8', freq: 'daily' }); 
-        }); 
+    if (state.provincesMap) {
+        state.provincesMap.forEach((name, key) => {
+            urls.push({ 
+                loc: processUrl(`location/${key}`), 
+                priority: '0.8', 
+                freq: 'daily',
+                lastmod: new Date().toISOString()
+            });
+        });
     }
 
-    // 4. หน้า Static
-    ['blog.html', 'about.html', 'faq.html', 'profiles.html', 'locations.html'].forEach(page => { 
-        urls.push({ loc: processUrl(page), priority: '0.7', freq: 'weekly' }); 
+    // 4. หน้า Static อื่นๆ
+    ['about.html', 'faq.html', 'profiles.html'].forEach(page => {
+        urls.push({ 
+            loc: processUrl(page), 
+            priority: '0.6', 
+            freq: 'weekly',
+            lastmod: new Date().toISOString()
+        });
     });
 
-    // สร้างเนื้อหา XML
-    const xmlContent = urls.map(u => 
-        `<url>
-            <loc>${u.loc}</loc>
-            <lastmod>${new Date().toISOString()}</lastmod>
-            <changefreq>${u.freq}</changefreq>
-            <priority>${u.priority}</priority>${u.imageXml || ''}
-        </url>` // เพิ่ม u.imageXml ตรงนี้
-    ).join(''); // ลบ \n ออกเพื่อให้ไฟล์เล็กลง (Optional)
+    // สร้าง XML Content
+    const xmlContent = urls.map(u => `
+    <url>
+        <loc>${u.loc}</loc>
+        <lastmod>${u.lastmod}</lastmod>
+        <changefreq>${u.freq}</changefreq>
+        <priority>${u.priority}</priority>${u.imageXml || ''}
+    </url>`).join('');
 
-    // คืนค่าพร้อม Header ที่ถูกต้อง (เพิ่ม xmlns:image)
     return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${xmlContent}
 </urlset>`;
 }
+
 function downloadFile(filename, content) {
         const blob = new Blob([content], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
@@ -2260,7 +2296,7 @@ async function initFooterLinks() {
     }
 
     // 4. 🟢 วนลูปเช็คและเติมจังหวัดที่ "ยังไม่มี" ใน HTML
-    const displayLimit = 20; // จำกัดจำนวนลิงก์รวมทั้งหมดไม่ให้ยาวเกินไป
+    const displayLimit = 50; // จำกัดจำนวนลิงก์รวมทั้งหมดไม่ให้ยาวเกินไป
     let addedCount = footerContainer.querySelectorAll('li').length;
 
     provincesList.forEach(p => {
@@ -2283,9 +2319,7 @@ async function initFooterLinks() {
         footerContainer.appendChild(viewAll);
     }
 }
-// ... (โค้ดอื่นๆ ของพี่ด้านบน) ...
 
-    // 1. วางฟังก์ชัน showErrorState ไว้ก่อน
     function showErrorState(error) {
         console.error("❌ เกิดข้อผิดพลาดร้ายแรง:", error);
         hideLoadingState();

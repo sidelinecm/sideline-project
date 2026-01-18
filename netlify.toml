@@ -1,8 +1,10 @@
 [build]
-  publish = "."
-  command = ""
+  # ถ้าใช้ Vite/React ปกติจะเป็น "dist" แต่ถ้าไฟล์ index.html อยู่หน้าแรกสุดใช้ "." ได้เลย
+  publish = "." 
+  command = "" 
   functions = "netlify/functions"
 
+# 1. ระบบความปลอดภัย (Security Headers)
 [[headers]]
   for = "/*"
   [headers.values]
@@ -11,8 +13,21 @@
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # หน้าหลักและ HTML ให้ตรวจสอบ Cache เสมอ (ป้องกันลูกค้าเห็นเว็บเก่า)
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# 2. ระบบ Cache (Long-term Caching)
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 3. Edge Functions (ทำงานก่อน Redirects เสมอ)
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
@@ -27,38 +42,28 @@
 
 [[edge_functions]]
   function = "ssr-province"
-  path = "/province/*"
+  path = "/province/*" # รองรับทั้ง /location และ /province
 
-[[redirects]]
-  from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
-  status = 301
-  force = true
+# 4. Redirects (จัดลำดับจาก เฉพาะเจาะจง -> ทั่วไป)
 
+# อนุญาตให้เข้าถึงไฟล์จริงเหล่านี้ได้เลย (ไม่ผ่าน SPA)
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
   status = 200
-  force = true
-
-[[redirects]]
-  from = "/sitemap.xml"
-  to = "/sitemap.xml"
-  status = 200
-  force = true
 
 [[redirects]]
   from = "/robots.txt"
   to = "/robots.txt"
   status = 200
-  force = true
 
+# กฎ SPA (Single Page Application) - ต้องอยู่อันสุดท้ายเสมอ!
+# ส่งทุกอย่างที่ไม่ตรงเงื่อนไขด้านบน ไปที่ index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
