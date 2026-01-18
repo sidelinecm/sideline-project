@@ -50,23 +50,22 @@ const SitemapHelpers = {
     }
   },
 
-  
   calculateChangeFreq(profile) {
-    // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
     return profile.isfeatured ? 'daily' : 'weekly';
   },
 
   calculatePriority(profile) {
-    // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
     if (profile.isfeatured) return '0.8';
     if (profile.imagePath) return '0.7';
     return '0.6';
   },
 
-
-  // ย้ายฟังก์ชันเหล่านี้เข้ามาข้างใน SitemapHelpers ให้ถูกต้องตามโครงสร้าง
   async compress(data) {
     try {
+      if (typeof CompressionStream === 'undefined') {
+        // Not available in this runtime
+        return null;
+      }
       const encoder = new TextEncoder();
       const encoded = encoder.encode(data);
       const cs = new CompressionStream('gzip');
@@ -76,7 +75,7 @@ const SitemapHelpers = {
       const compressed = await new Response(cs.readable).arrayBuffer();
       return new Uint8Array(compressed);
     } catch (error) {
-      console.warn('[Sitemap] Compression failed:', error.message);
+      console.warn('[Sitemap] Compression failed:', error && error.message ? error.message : error);
       return null;
     }
   },
@@ -95,12 +94,10 @@ const fetchData = async (supabase) => {
   );
 
   try {
-    const [{ data: profiles, error: profilesError }, 
-           { data: provinces, error: provincesError }] = await Promise.race([
+    const results = await Promise.race([
       Promise.all([
         supabase
           .from('profiles')
-          // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
           .select('slug, lastUpdated, created_at, active, isfeatured, imagePath')
           .eq('active', true)
           .order('lastUpdated', { ascending: false })
@@ -113,17 +110,16 @@ const fetchData = async (supabase) => {
       timeoutPromise
     ]);
 
-    if (profilesError || provincesError) {
-      console.error('[Sitemap] Database error:', profilesError || provincesError);
-      throw new Error('Failed to fetch data');
-    }
+    const [profilesResult, provincesResult] = results;
+    const profiles = profilesResult?.data || [];
+    const provinces = provincesResult?.data || [];
 
     return {
-      profiles: profiles || [],
-      provinces: provinces || [],
+      profiles,
+      provinces,
       stats: {
-        profiles: profiles?.length || 0,
-        provinces: provinces?.length || 0
+        profiles: profiles.length,
+        provinces: provinces.length
       }
     };
   } catch (error) {
@@ -153,7 +149,7 @@ const generateSitemap = (data) => {
 
   staticPages.forEach(page => {
     xml += '  <url>\n';
-    xml += `    <loc>${DOMAIN}${page.loc}</loc>\n`;
+    xml += `    <loc>${SitemapHelpers.escapeXml(DOMAIN + page.loc)}</loc>\n`;
     xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
     xml += `    <priority>${page.priority}</priority>\n`;
     xml += '  </url>\n';
@@ -163,12 +159,11 @@ const generateSitemap = (data) => {
   if (data.provinces?.length > 0) {
     console.log(`[Sitemap] Adding ${data.provinces.length} provinces`);
     data.provinces.forEach(province => {
-      // ✅ แก้ไข: ใช้ province.key เท่านั้น เพราะ slug ไม่มีในฐานข้อมูล
       const pIdentifier = province.key;
       if (!pIdentifier) return;
       
       xml += '  <url>\n';
-      xml += `    <loc>${DOMAIN}/location/${pIdentifier}</loc>\n`;
+      xml += `    <loc>${SitemapHelpers.escapeXml(DOMAIN + '/location/' + SitemapHelpers.cleanSlug(pIdentifier))}</loc>\n`;
       const lastMod = province.created_at || new Date().toISOString();
       xml += `    <lastmod>${SitemapHelpers.formatDate(lastMod)}</lastmod>\n`;
       xml += '    <changefreq>weekly</changefreq>\n';
@@ -183,10 +178,9 @@ const generateSitemap = (data) => {
     data.profiles.forEach(profile => {
       if (!profile.slug) return;
       
-      const profileSlug = profile.slug;
-      
+      const profileSlug = SitemapHelpers.cleanSlug(profile.slug);
       xml += '  <url>\n';
-      xml += `    <loc>${DOMAIN}/sideline/${profileSlug}</loc>\n`;
+      xml += `    <loc>${SitemapHelpers.escapeXml(DOMAIN + '/sideline/' + profileSlug)}</loc>\n`;
       const lastModDate = profile.lastUpdated || profile.created_at || new Date().toISOString();
       xml += `    <lastmod>${SitemapHelpers.formatDate(lastModDate)}</lastmod>\n`;
       xml += `    <changefreq>${SitemapHelpers.calculateChangeFreq(profile)}</changefreq>\n`;
@@ -310,7 +304,7 @@ export default async (request, context) => {
         'X-Cache': 'HIT-ERROR-FALLBACK',
         'X-Generated-At': new Date(CACHE.lastGenerated).toISOString(),
         'X-Total-URLs': CACHE.totalUrls.toString(),
-        'X-Error': error.message.substring(0, 100)
+        'X-Error': String(error && error.message ? error.message : error).substring(0, 100)
       };
       
       return new Response(CACHE.sitemap, { headers });
