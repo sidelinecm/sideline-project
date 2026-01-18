@@ -51,11 +51,13 @@ const SitemapHelpers = {
   },
 
   calculateChangeFreq(profile) {
-    return profile.verified ? 'daily' : 'weekly';
+    // เปลี่ยนจาก .verified เป็น .isFeatured
+    return profile.isFeatured ? 'daily' : 'weekly';
   },
 
   calculatePriority(profile) {
-    if (profile.verified) return '0.8';
+    // เปลี่ยนจาก .verified เป็น .isFeatured
+    if (profile.isFeatured) return '0.8';
     if (profile.imagePath) return '0.7';
     return '0.6';
   },
@@ -96,14 +98,16 @@ const fetchData = async (supabase) => {
       Promise.all([
         supabase
           .from('profiles')
-          .select('slug, updated_at, created_at, active, approved') // ตรวจสอบชื่อ column ให้ตรง
+          // ✅ แก้ไข: เลือกเฉพาะคอลัมน์ที่มีอยู่จริง และใช้ isFeatured แทน verified
+          .select('slug, lastUpdated, created_at, active, isFeatured, imagePath')
           .eq('active', true)
-          .eq('approved', true)
-          .order('updated_at', { ascending: false })
+          // ✅ ลบ .eq('approved', true) ที่ไม่มีอยู่จริงออก
+          .order('lastUpdated', { ascending: false })
           .limit(10000),
         supabase
           .from('provinces')
-          .select('key, nameThai, updated_at, slug') // เพิ่ม slug เข้าไปที่นี่ด้วย
+          // ✅ แก้ไข: ลบคอลัมน์ slug ที่ไม่มีอยู่จริงออก
+          .select('key, nameThai, created_at')
           .order('nameThai', { ascending: true })
       ]),
       timeoutPromise
@@ -128,11 +132,9 @@ const fetchData = async (supabase) => {
   }
 };
 
-// Generate Sitemap XML - ปรับปรุงเพื่อรองรับภาษาไทยและ SEO สมบูรณ์แบบ
 const generateSitemap = (data) => {
   const startTime = Date.now();
   
-  // 1. XML Header และ Schema (Standard)
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n';
   xml += '        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n';
@@ -141,7 +143,6 @@ const generateSitemap = (data) => {
 
   let totalUrls = 0;
 
-  // 2. Static Pages
   const staticPages = [
     { loc: '/', priority: '1.0', changefreq: 'daily' },
     { loc: '/sideline', priority: '0.9', changefreq: 'weekly' },
@@ -152,7 +153,6 @@ const generateSitemap = (data) => {
 
   staticPages.forEach(page => {
     xml += '  <url>\n';
-    // ใช้ escapeXml เฉพาะส่วนของ DOMAIN และ path อังกฤษพื้นฐาน
     xml += `    <loc>${DOMAIN}${page.loc}</loc>\n`;
     xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
     xml += `    <priority>${page.priority}</priority>\n`;
@@ -160,20 +160,16 @@ const generateSitemap = (data) => {
     totalUrls++;
   });
 
-  // 3. Provinces (หน้าจังหวัด)
   if (data.provinces?.length > 0) {
     console.log(`[Sitemap] Adding ${data.provinces.length} provinces`);
-    
     data.provinces.forEach(province => {
-      // ใช้ slug ถ้ามี ถ้าไม่มีให้ใช้ key
-      const pIdentifier = province.slug || province.key;
+      // ✅ แก้ไข: ใช้ province.key เท่านั้น เพราะ slug ไม่มีในฐานข้อมูล
+      const pIdentifier = province.key;
       if (!pIdentifier) return;
       
       xml += '  <url>\n';
-      // ไม่ต้องใช้ escapeXml ครอบ pIdentifier ถ้าเป็นภาษาไทย เพื่อให้เป็น UTF-8 ตรงๆ
       xml += `    <loc>${DOMAIN}/location/${pIdentifier}</loc>\n`;
-      
-      const lastMod = province.updated_at || new Date().toISOString();
+      const lastMod = province.created_at || new Date().toISOString();
       xml += `    <lastmod>${SitemapHelpers.formatDate(lastMod)}</lastmod>\n`;
       xml += '    <changefreq>weekly</changefreq>\n';
       xml += '    <priority>0.8</priority>\n';
@@ -182,25 +178,17 @@ const generateSitemap = (data) => {
     });
   }
 
-  // 4. Profiles (หน้าน้องๆ - จุดสำคัญของภาษาไทย)
   if (data.profiles?.length > 0) {
     console.log(`[Sitemap] Adding ${data.profiles.length} profiles`);
-    
     data.profiles.forEach(profile => {
       if (!profile.slug) return;
       
-      // ดึงค่า slug ออกมาตรงๆ (ค่านี้จะเป็นภาษาไทย เช่น 'มายด์')
       const profileSlug = profile.slug;
       
       xml += '  <url>\n';
-      // แก้ไข: ต่อ String ตรงๆ ไม่ต้องครอบ encodeURIComponent หรือ escapeXml 
-      // เพื่อให้ Google เห็นเป็นภาษาไทยใน XML (UTF-8)
       xml += `    <loc>${DOMAIN}/sideline/${profileSlug}</loc>\n`;
-      
-      const lastModDate = profile.updated_at || profile.created_at || new Date().toISOString();
+      const lastModDate = profile.lastUpdated || profile.created_at || new Date().toISOString();
       xml += `    <lastmod>${SitemapHelpers.formatDate(lastModDate)}</lastmod>\n`;
-      
-      // ใช้ Helper เดิมของคุณในการคำนวณ Priority
       xml += `    <changefreq>${SitemapHelpers.calculateChangeFreq(profile)}</changefreq>\n`;
       xml += `    <priority>${SitemapHelpers.calculatePriority(profile)}</priority>\n`;
       xml += '  </url>\n';
@@ -209,7 +197,6 @@ const generateSitemap = (data) => {
   }
 
   xml += '</urlset>';
-
   const generationTime = Date.now() - startTime;
   
   return {
@@ -219,7 +206,6 @@ const generateSitemap = (data) => {
     stats: data.stats
   };
 };
-
 // Main Handler สำหรับ Edge Function
 export default async (request, context) => {
   const startTime = Date.now();

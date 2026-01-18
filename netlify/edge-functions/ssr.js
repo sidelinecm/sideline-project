@@ -211,10 +211,11 @@ async function fetchProvinceData(provinceKey) {
   
   const supabase = cache.getSupabaseClient();
   
+ 
   try {
     const { data, error } = await supabase
       .from('provinces')
-      .select('id, nameThai, nameEng, key, region, description, slug')
+      .select('id, nameThai, key, description') // <--- แก้ไขเป็นแบบนี้
       .eq('key', provinceKey)
       .maybeSingle();
 
@@ -241,21 +242,14 @@ async function fetchProvinceData(provinceKey) {
 
 async function fetchProfiles(provinceData) {
   const provinceKey = provinceData.key;
-  const provinceId = provinceData.id;
+  const provinceId = provinceData.id; // แม้ province_id ไม่มี แต่เผื่อไว้
   const cacheKey = `profiles_${provinceKey}`;
   
   const cached = cache.get(cacheKey, 'profiles');
   if (cached) return cached;
   
-  // ถ้าเป็น fallback province
   if (provinceId === 0) {
-    const result = { 
-      profiles: [], 
-      totalCount: 0,
-      fetchedAt: new Date().toISOString(),
-      isFallback: true
-    };
-    
+    const result = { profiles: [], totalCount: 0, fetchedAt: new Date().toISOString(), isFallback: true };
     cache.set(cacheKey, result, 'profiles');
     return result;
   }
@@ -264,16 +258,16 @@ async function fetchProfiles(provinceData) {
   let profiles = [];
   let totalCount = 0;
   
-  const selectColumns = 'id, name, slug, age, rate, imagePath, verified, created_at, description';
+  const selectColumns = 'id, name, slug, age, rate, imagePath, isFeatured, created_at, description';
   
   try {
-    // Strategy 1: province_id
+    // ✅ แก้ไข: เปลี่ยนเงื่อนไขการค้นหาหลักมาเป็น provinceKey เนื่องจาก province_id ไม่มี
     const { data, error, count } = await supabase
       .from('profiles')
       .select(selectColumns, { count: 'exact' })
-      .eq('province_id', provinceId)
+      .eq('provinceKey', provinceKey) // ใช้ provinceKey เป็นหลัก
       .eq('active', true)
-      .eq('approved', true)
+      // ✅ ลบ .eq('approved', true) ที่ไม่มีอยู่จริงออก
       .order('created_at', { ascending: false })
       .limit(CONFIG.MAX_PROFILES);
 
@@ -281,34 +275,19 @@ async function fetchProfiles(provinceData) {
       profiles = data;
       totalCount = count || 0;
     } else {
-      // Strategy 2: provinceKey column
-      const { data: data2, error: error2, count: count2 } = await supabase
+      // Strategy 2: location fuzzy match (เป็น Fallback)
+      const { data: data2 } = await supabase
         .from('profiles')
-        .select(selectColumns, { count: 'exact' })
-        .eq('provinceKey', provinceKey)
+        .select(selectColumns)
+        .ilike('location', `%${provinceData.nameThai}%`)
         .eq('active', true)
-        .eq('approved', true)
+        // ✅ ลบ .eq('approved', true) ที่ไม่มีอยู่จริงออก
         .order('created_at', { ascending: false })
         .limit(CONFIG.MAX_PROFILES);
 
-      if (!error2 && data2) {
+      if (data2) {
         profiles = data2;
-        totalCount = count2 || 0;
-      } else {
-        // Strategy 3: location fuzzy match
-        const { data: data3 } = await supabase
-          .from('profiles')
-          .select(selectColumns, { count: 'exact' })
-          .ilike('location', `%${provinceData.nameThai}%`)
-          .eq('active', true)
-          .eq('approved', true)
-          .order('created_at', { ascending: false })
-          .limit(CONFIG.MAX_PROFILES);
-
-        if (data3) {
-          profiles = data3;
-          totalCount = data3.length;
-        }
+        totalCount = data2.length;
       }
     }
   } catch (error) {
@@ -318,6 +297,7 @@ async function fetchProfiles(provinceData) {
   // Process profiles
   const processedProfiles = profiles.map(profile => ({
     ...profile,
+    isFeatured: profile.isFeatured, // ส่งค่า isFeatured ไปให้ generateProvinceHTML
     displayName: profile.name ? 
       (profile.name.startsWith('น้อง') ? profile.name : `น้อง${profile.name}`) : 
       'น้องไซด์ไลน์',
@@ -359,7 +339,7 @@ async function fetchProfileData(slug) {
       .select('*, provinces(nameThai, key)')
       .eq('slug', slug)
       .eq('active', true)
-      .eq('approved', true)
+      // ✅ ลบ .eq('approved', true) ที่ไม่มีอยู่จริงออก
       .maybeSingle();
 
     if (error || !profile) {
@@ -633,7 +613,7 @@ function generateProvinceHTML(provinceData, profilesData, thaiDate) {
                loading="lazy" 
                itemprop="image"
                onerror="this.src='${CONFIG.DOMAIN}/images/default-avatar.webp'">
-          ${profile.verified ? '<span class="verified-badge" title="ตรวจสอบแล้ว">✓</span>' : ''}
+          ${profile.isFeatured ? '<span class="verified-badge" title="ตรวจสอบแล้ว">✓</span>' : ''} // <--- แก้ไขเงื่อนไขตรงนี้
         </div>
         <div class="profile-info">
           <h3 class="profile-name" itemprop="name">
