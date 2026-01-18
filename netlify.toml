@@ -1,13 +1,9 @@
-# =====================================
-# 🏗️ Netlify Build Configuration
-# =====================================
+# netlify.toml (ปรับปรุง)
 [build]
   publish = "."
   command = ""
 
-# =====================================
-# ⚙️ Global HTTP Security Headers
-# =====================================
+# Global security headers (no cache override here)
 [[headers]]
   for = "/*"
   [headers.values]
@@ -16,61 +12,85 @@
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # เพิ่ม Cache-Control สำหรับไฟล์ Static เพื่อให้เว็บโหลดเร็วขึ้น (คะแนน Core Web Vitals ดีขึ้น)
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Permissions-Policy = "camera=(), microphone=()"
 
-# =====================================
-# 🧠 Edge Functions Mapping
-# =====================================
-# Sitemap Edge Function
+# Long cache for static assets (images / js / css)
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Short cache for HTML / dynamic content (Edge functions set their own headers)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate, s-maxage=600"
+
+# Edge Functions mapping
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
-# Robots.txt Edge Function (ใช้ function เดียวกัน)
 [[edge_functions]]
   function = "sitemap"
   path = "/robots.txt"
 
-# SSR Edge Function - ต้องใช้ชื่อเดียวกับไฟล์
 [[edge_functions]]
-  function = "ssr"  # ⚠️ เปลี่ยนเป็นชื่อไฟล์  SSR จริง
-  path = "/sideline/*"
-
-[[edge_functions]]
-  function = "ssr"  # ⚠️ ใช้ function เดียวกัน
+  function = "ssr"
   path = "/location/*"
 
 [[edge_functions]]
-  function = "ssr"  # ⚠️ ใช้ function เดียวกัน
-  path = "/province/*"
+  function = "ssr"
+  path = "/locations/*"
 
-# =====================================
-# 🔀 Redirect Rules (SEO Best Practices)
-# =====================================
+[[edge_functions]]
+  function = "ssr"
+  path = "/location"
 
-# 1. บังคับให้เป็น HTTPS และตัด WWW ออก (หรือเลือกใช้อย่างใดอย่างหนึ่ง) 
-# เพื่อให้ Google Index หน้าเดียว ไม่สับสน
+[[edge_functions]]
+  function = "ssr"
+  path = "/sideline/*"
+
+[[edge_functions]]
+  function = "ssr"
+  path = "/sideline"
+
+[[edge_functions]]
+  function = "ssr"
+  path = "/profiles/*"
+
+# Redirects
+# Enforce HTTPS for all requests (generic)
 [[redirects]]
-  from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
+  from = "http://*"
+  to = "https://:splat"
   status = 301
   force = true
 
-# 2. จัดการไฟล์สำคัญให้เข้าถึงได้โดยตรง (200 OK)
+# Serve service worker and manifest directly if present
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
-  force = true
+  force = false
 
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
   status = 200
-  force = true
+  force = false
 
-# 3. SPA Fallback (รักษา URL เดิมไว้เพื่อให้ React/Vue จัดการต่อ)
+# SPA fallback - keep last so specific rules above apply first
 [[redirects]]
   from = "/*"
   to = "/index.html"
