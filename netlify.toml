@@ -1,35 +1,77 @@
+# =====================================
+# 🏗️ Netlify Build Configuration
+# =====================================
 [build]
   publish = "."
   command = ""
 
-# --- 1. EDGE FUNCTIONS ---
+# =====================================
+# ⚙️ Global HTTP Security Headers
+# =====================================
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # เพิ่ม Cache-Control สำหรับไฟล์ Static เพื่อให้เว็บโหลดเร็วขึ้น (คะแนน Core Web Vitals ดีขึ้น)
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# =====================================
+# 🧠 Edge Functions Mapping
+# =====================================
+# Sitemap Edge Function
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
+# Robots.txt Edge Function (ใช้ function เดียวกัน)
 [[edge_functions]]
-  function = "ssr"
-  path = "/"
+  function = "sitemap"
+  path = "/robots.txt"
+
+# SSR Edge Function - ต้องใช้ชื่อเดียวกับไฟล์
 [[edge_functions]]
-  function = "ssr"
+  function = "ssr"  # ⚠️ เปลี่ยนเป็นชื่อไฟล์  SSR จริง
   path = "/sideline/*"
+
 [[edge_functions]]
-  function = "ssr"
-  path = "/province/*"
-[[edge_functions]]
-  function = "ssr"
+  function = "ssr"  # ⚠️ ใช้ function เดียวกัน
   path = "/location/*"
 
-# --- 2. SECURITY & CACHE ---
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+[[edge_functions]]
+  function = "ssr"  # ⚠️ ใช้ function เดียวกัน
+  path = "/province/*"
 
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# =====================================
+# 🔀 Redirect Rules (SEO Best Practices)
+# =====================================
 
+# 1. บังคับให้เป็น HTTPS และตัด WWW ออก (หรือเลือกใช้อย่างใดอย่างหนึ่ง) 
+# เพื่อให้ Google Index หน้าเดียว ไม่สับสน
+[[redirects]]
+  from = "http://sidelinechiangmai.netlify.app/*"
+  to = "https://sidelinechiangmai.netlify.app/:splat"
+  status = 301
+  force = true
+
+# 2. จัดการไฟล์สำคัญให้เข้าถึงได้โดยตรง (200 OK)
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+  force = true
+
+# 3. SPA Fallback (รักษา URL เดิมไว้เพื่อให้ React/Vue จัดการต่อ)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
