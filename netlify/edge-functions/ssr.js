@@ -242,7 +242,7 @@ async function fetchProvinceData(provinceKey) {
 
 async function fetchProfiles(provinceData) {
   const provinceKey = provinceData.key;
-  const provinceId = provinceData.id; // แม้ province_id ไม่มี แต่เผื่อไว้
+  const provinceId = provinceData.id; 
   const cacheKey = `profiles_${provinceKey}`;
   
   const cached = cache.get(cacheKey, 'profiles');
@@ -258,16 +258,15 @@ async function fetchProfiles(provinceData) {
   let profiles = [];
   let totalCount = 0;
   
-  const selectColumns = 'id, name, slug, age, rate, imagePath, isFeatured, created_at, description';
+  // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
+  const selectColumns = 'id, name, slug, age, rate, imagePath, isfeatured, created_at, description';
   
   try {
-    // ✅ แก้ไข: เปลี่ยนเงื่อนไขการค้นหาหลักมาเป็น provinceKey เนื่องจาก province_id ไม่มี
     const { data, error, count } = await supabase
       .from('profiles')
       .select(selectColumns, { count: 'exact' })
-      .eq('provinceKey', provinceKey) // ใช้ provinceKey เป็นหลัก
+      .eq('provinceKey', provinceKey)
       .eq('active', true)
-      // ✅ ลบ .eq('approved', true) ที่ไม่มีอยู่จริงออก
       .order('created_at', { ascending: false })
       .limit(CONFIG.MAX_PROFILES);
 
@@ -275,13 +274,11 @@ async function fetchProfiles(provinceData) {
       profiles = data;
       totalCount = count || 0;
     } else {
-      // Strategy 2: location fuzzy match (เป็น Fallback)
       const { data: data2 } = await supabase
         .from('profiles')
         .select(selectColumns)
         .ilike('location', `%${provinceData.nameThai}%`)
         .eq('active', true)
-        // ✅ ลบ .eq('approved', true) ที่ไม่มีอยู่จริงออก
         .order('created_at', { ascending: false })
         .limit(CONFIG.MAX_PROFILES);
 
@@ -297,7 +294,8 @@ async function fetchProfiles(provinceData) {
   // Process profiles
   const processedProfiles = profiles.map(profile => ({
     ...profile,
-    isFeatured: profile.isFeatured, // ส่งค่า isFeatured ไปให้ generateProvinceHTML
+    // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
+    isfeatured: profile.isfeatured, 
     displayName: profile.name ? 
       (profile.name.startsWith('น้อง') ? profile.name : `น้อง${profile.name}`) : 
       'น้องไซด์ไลน์',
@@ -613,7 +611,8 @@ function generateProvinceHTML(provinceData, profilesData, thaiDate) {
                loading="lazy" 
                itemprop="image"
                onerror="this.src='${CONFIG.DOMAIN}/images/default-avatar.webp'">
-          ${profile.isFeatured ? '<span class="verified-badge" title="ตรวจสอบแล้ว">✓</span>' : ''} // <--- แก้ไขเงื่อนไขตรงนี้
+          ${/* ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก) */''}
+          ${profile.isfeatured ? '<span class="verified-badge" title="ตรวจสอบแล้ว">✓</span>' : ''}
         </div>
         <div class="profile-info">
           <h3 class="profile-name" itemprop="name">

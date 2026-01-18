@@ -50,17 +50,19 @@ const SitemapHelpers = {
     }
   },
 
+  
   calculateChangeFreq(profile) {
-    // เปลี่ยนจาก .verified เป็น .isFeatured
-    return profile.isFeatured ? 'daily' : 'weekly';
+    // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
+    return profile.isfeatured ? 'daily' : 'weekly';
   },
 
   calculatePriority(profile) {
-    // เปลี่ยนจาก .verified เป็น .isFeatured
-    if (profile.isFeatured) return '0.8';
+    // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
+    if (profile.isfeatured) return '0.8';
     if (profile.imagePath) return '0.7';
     return '0.6';
   },
+
 
   // ย้ายฟังก์ชันเหล่านี้เข้ามาข้างใน SitemapHelpers ให้ถูกต้องตามโครงสร้าง
   async compress(data) {
@@ -98,15 +100,13 @@ const fetchData = async (supabase) => {
       Promise.all([
         supabase
           .from('profiles')
-          // ✅ แก้ไข: เลือกเฉพาะคอลัมน์ที่มีอยู่จริง และใช้ isFeatured แทน verified
-          .select('slug, lastUpdated, created_at, active, isFeatured, imagePath')
+          // ✅ แก้ไข: เปลี่ยน isFeatured เป็น isfeatured (ตัวพิมพ์เล็ก)
+          .select('slug, lastUpdated, created_at, active, isfeatured, imagePath')
           .eq('active', true)
-          // ✅ ลบ .eq('approved', true) ที่ไม่มีอยู่จริงออก
           .order('lastUpdated', { ascending: false })
           .limit(10000),
         supabase
           .from('provinces')
-          // ✅ แก้ไข: ลบคอลัมน์ slug ที่ไม่มีอยู่จริงออก
           .select('key, nameThai, created_at')
           .order('nameThai', { ascending: true })
       ]),
