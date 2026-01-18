@@ -180,10 +180,13 @@ export default async (request, context) => {
 </body>
 </html>`;
         
+// 4. ส่ง Response กลับไปให้ Bot
         return new Response(html, { 
             headers: { 
                 "content-type": "text/html; charset=utf-8", 
-                "x-robots-tag": "index, follow" 
+                "x-robots-tag": "index, follow",
+                // วางบรรทัดนี้เพิ่มเข้าไปครับ
+                "cache-control": "public, s-maxage=3600, stale-while-revalidate=86400"
             } 
         });
 
