@@ -1,69 +1,39 @@
 [build]
-  # ถ้าใช้ Vite/React ปกติจะเป็น "dist" แต่ถ้าไฟล์ index.html อยู่หน้าแรกสุดใช้ "." ได้เลย
-  publish = "." 
-  command = "" 
-  functions = "netlify/functions"
+  publish = "."
+  command = ""
 
-# 1. ระบบความปลอดภัย (Security Headers)
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "SAMEORIGIN"
-    X-XSS-Protection = "1; mode=block"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    # หน้าหลักและ HTML ให้ตรวจสอบ Cache เสมอ (ป้องกันลูกค้าเห็นเว็บเก่า)
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-# 2. ระบบ Cache (Long-term Caching)
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# 3. Edge Functions (ทำงานก่อน Redirects เสมอ)
+# --- 1. EDGE FUNCTIONS ---
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "render-bot"
-  path = "/sideline/*"
-
+  function = "ssr"
+  path = "/"           # คุมหน้าแรก
 [[edge_functions]]
-  function = "ssr-province"
-  path = "/location/*"
-
+  function = "ssr"
+  path = "/sideline/*" # คุมหน้าน้องๆ
 [[edge_functions]]
-  function = "ssr-province"
-  path = "/province/*" # รองรับทั้ง /location และ /province
+  function = "ssr"
+  path = "/province/*" # คุมหน้าจังหวัด
+[[edge_functions]]
+  function = "ssr"
+  path = "/location/*" # เผื่อบางหน้าใช้ path location
 
-# 4. Redirects (จัดลำดับจาก เฉพาะเจาะจง -> ทั่วไป)
+# --- 2. SECURITY & CACHE ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
 
-# อนุญาตให้เข้าถึงไฟล์จริงเหล่านี้ได้เลย (ไม่ผ่าน SPA)
-[[redirects]]
-  from = "/sw.js"
-  to = "/sw.js"
-  status = 200
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-[[redirects]]
-  from = "/manifest.webmanifest"
-  to = "/manifest.webmanifest"
-  status = 200
-
-[[redirects]]
-  from = "/robots.txt"
-  to = "/robots.txt"
-  status = 200
-
-# กฎ SPA (Single Page Application) - ต้องอยู่อันสุดท้ายเสมอ!
-# ส่งทุกอย่างที่ไม่ตรงเงื่อนไขด้านบน ไปที่ index.html
+# --- 3. SPA ROUTING ---
 [[redirects]]
   from = "/*"
   to = "/index.html"

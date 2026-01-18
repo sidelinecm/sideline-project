@@ -1243,7 +1243,7 @@ function createProfileCard(p, index = 20) {
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================
-// ในไฟล์ main.js.html
+
 
 async function fetchSingleProfile(slug) {
     if (!supabase) return null;
