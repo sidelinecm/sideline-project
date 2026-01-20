@@ -1,357 +1,123 @@
-// netlify/edge-functions/sitemap.js
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// Configuration
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8';
-const DOMAIN = Deno.env.get('DOMAIN') || 'https://sidelinechiangmai.netlify.app';
+const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
+const DOMAIN = 'https://sidelinechiangmai.netlify.app';
+const STORAGE_URL = `${SUPABASE_URL}/storage/v1/object/public/profile-images`;
 
-// Cache Configuration
-const CACHE = {
-  sitemap: null,
-  compressed: null,
-  lastGenerated: 0,
-  totalUrls: 0,
-  generationTime: 0,
-  CACHE_DURATION: 30 * 60 * 1000 // 30 นาที
+// ฟังก์ชันช่วยแปลงตัวอักษรพิเศษให้เป็น XML ที่ปลอดภัย (ป้องกัน Error)
+const escapeXml = (unsafe) => {
+  if (!unsafe) return '';
+  return unsafe.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+    }
+  });
 };
 
-// ============================================
-// Helper Functions - Optimized for Thai SEO
-// ============================================
-const SitemapHelpers = {
-  cleanSlug(text) {
-    if (!text || typeof text !== 'string') return '';
-    return text
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-') 
-      .replace(/[^a-z0-9\u0E00-\u0E7F\-]/g, '') 
-      .replace(/-+/g, '-') 
-      .replace(/^-|-$/g, '');
-  },
-
-  escapeXml(unsafe) {
-    if (!unsafe) return '';
-    return String(unsafe)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-  },
-
-  formatDate(date) {
-    try {
-      const d = new Date(date);
-      return d.toISOString().split('T')[0];
-    } catch (e) {
-      return new Date().toISOString().split('T')[0];
-    }
-  },
-
-  calculateChangeFreq(profile) {
-    return profile.isfeatured ? 'daily' : 'weekly';
-  },
-
-  calculatePriority(profile) {
-    if (profile.isfeatured) return '0.8';
-    if (profile.imagePath) return '0.7';
-    return '0.6';
-  },
-
-  async compress(data) {
-    try {
-      if (typeof CompressionStream === 'undefined') {
-        // Not available in this runtime
-        return null;
-      }
-      const encoder = new TextEncoder();
-      const encoded = encoder.encode(data);
-      const cs = new CompressionStream('gzip');
-      const writer = cs.writable.getWriter();
-      writer.write(encoded);
-      writer.close();
-      const compressed = await new Response(cs.readable).arrayBuffer();
-      return new Uint8Array(compressed);
-    } catch (error) {
-      console.warn('[Sitemap] Compression failed:', error && error.message ? error.message : error);
-      return null;
-    }
-  },
-
-  isValidCache() {
-    return CACHE.sitemap && (Date.now() - CACHE.lastGenerated) < CACHE.CACHE_DURATION;
-  }
-};
-
-// Data Fetcher
-const fetchData = async (supabase) => {
-  console.log('[Sitemap] Fetching data from Supabase...');
-  
-  const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('Database timeout')), 10000)
-  );
-
+export default async () => {
   try {
-    const results = await Promise.race([
-      Promise.all([
-        supabase
-          .from('profiles')
-          .select('slug, lastUpdated, created_at, active, isfeatured, imagePath')
-          .eq('active', true)
-          .order('lastUpdated', { ascending: false })
-          .limit(10000),
-        supabase
-          .from('provinces')
-          .select('key, nameThai, created_at')
-          .order('nameThai', { ascending: true })
-      ]),
-      timeoutPromise
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 1. ดึงข้อมูล (เพิ่ม imagePath, name, created_at เข้ามา)
+    const [{ data: profiles }, { data: provinces }] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('slug, lastUpdated, created_at, imagePath, name')
+        .eq('active', true) // เอาเฉพาะคนที่สถานะ Active
+        .limit(2000), // เพิ่ม Limit เผื่ออนาคต
+      supabase
+        .from('provinces')
+        .select('key')
     ]);
 
-    const [profilesResult, provincesResult] = results;
-    const profiles = profilesResult?.data || [];
-    const provinces = provincesResult?.data || [];
+    // 2. เริ่มสร้าง XML (ต้องมี xmlns:image เพื่อรองรับรูปภาพ)
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
+    xml += `\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
-    return {
-      profiles,
-      provinces,
-      stats: {
-        profiles: profiles.length,
-        provinces: provinces.length
-      }
-    };
-  } catch (error) {
-    console.error('[Sitemap] Fetch error:', error);
-    throw error;
-  }
-};
+    // --- A. หน้าแรก (Home) ---
+    xml += `
+  <url>
+    <loc>${DOMAIN}/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>`;
 
-const generateSitemap = (data) => {
-  const startTime = Date.now();
-  
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n';
-  xml += '        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n';
-  xml += '        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9\n';
-  xml += '        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n';
-
-  let totalUrls = 0;
-
-  const staticPages = [
-    { loc: '/', priority: '1.0', changefreq: 'daily' },
-    { loc: '/sideline', priority: '0.9', changefreq: 'weekly' },
-    { loc: '/location', priority: '0.9', changefreq: 'weekly' },
-    { loc: '/about', priority: '0.8', changefreq: 'monthly' },
-    { loc: '/contact', priority: '0.8', changefreq: 'monthly' }
-  ];
-
-  staticPages.forEach(page => {
-    xml += '  <url>\n';
-    xml += `    <loc>${SitemapHelpers.escapeXml(DOMAIN + page.loc)}</loc>\n`;
-    xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
-    xml += `    <priority>${page.priority}</priority>\n`;
-    xml += '  </url>\n';
-    totalUrls++;
-  });
-
-  if (data.provinces?.length > 0) {
-    console.log(`[Sitemap] Adding ${data.provinces.length} provinces`);
-    data.provinces.forEach(province => {
-      const pIdentifier = province.key;
-      if (!pIdentifier) return;
-      
-      xml += '  <url>\n';
-      xml += `    <loc>${SitemapHelpers.escapeXml(DOMAIN + '/location/' + SitemapHelpers.cleanSlug(pIdentifier))}</loc>\n`;
-      const lastMod = province.created_at || new Date().toISOString();
-      xml += `    <lastmod>${SitemapHelpers.formatDate(lastMod)}</lastmod>\n`;
-      xml += '    <changefreq>weekly</changefreq>\n';
-      xml += '    <priority>0.8</priority>\n';
-      xml += '  </url>\n';
-      totalUrls++;
+    // --- B. หน้า Static (หน้าทั่วไป) ---
+    const staticPages = ['blog', 'about', 'faq', 'profiles', 'locations', 'contact'];
+    staticPages.forEach(page => {
+      xml += `
+  <url>
+    <loc>${DOMAIN}/${page}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
     });
-  }
 
-  if (data.profiles?.length > 0) {
-    console.log(`[Sitemap] Adding ${data.profiles.length} profiles`);
-    data.profiles.forEach(profile => {
-      if (!profile.slug) return;
-      
-      const profileSlug = SitemapHelpers.cleanSlug(profile.slug);
-      xml += '  <url>\n';
-      xml += `    <loc>${SitemapHelpers.escapeXml(DOMAIN + '/sideline/' + profileSlug)}</loc>\n`;
-      const lastModDate = profile.lastUpdated || profile.created_at || new Date().toISOString();
-      xml += `    <lastmod>${SitemapHelpers.formatDate(lastModDate)}</lastmod>\n`;
-      xml += `    <changefreq>${SitemapHelpers.calculateChangeFreq(profile)}</changefreq>\n`;
-      xml += `    <priority>${SitemapHelpers.calculatePriority(profile)}</priority>\n`;
-      xml += '  </url>\n';
-      totalUrls++;
-    });
-  }
-
-  xml += '</urlset>';
-  const generationTime = Date.now() - startTime;
-  
-  return {
-    xml,
-    totalUrls,
-    generationTime,
-    stats: data.stats
-  };
-};
-// Main Handler สำหรับ Edge Function
-export default async (request, context) => {
-  const startTime = Date.now();
-  
-  try {
-    const acceptEncoding = request.headers.get('Accept-Encoding') || '';
-    const supportsGzip = acceptEncoding.includes('gzip');
-    
-    if (SitemapHelpers.isValidCache()) {
-      console.log('[Sitemap] Serving from cache', {
-        age: Date.now() - CACHE.lastGenerated,
-        urls: CACHE.totalUrls
+    // --- C. หน้าจังหวัด (Provinces) ---
+    if (provinces) {
+      provinces.forEach(p => {
+        xml += `
+  <url>
+    <loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>`;
       });
-      
-      const headers = {
-        'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
-        'Last-Modified': new Date(CACHE.lastGenerated).toUTCString(),
-        'X-Cache': 'HIT',
-        'X-Generated-At': new Date(CACHE.lastGenerated).toISOString(),
-        'X-Total-URLs': CACHE.totalUrls.toString(),
-        'X-Generation-Time': `${CACHE.generationTime}ms`
-      };
-      
-      if (context?.geo?.country) {
-        headers['X-Geo-Country'] = context.geo.country;
-      }
-      
-      if (supportsGzip && CACHE.compressed) {
-        headers['Content-Encoding'] = 'gzip';
-        return new Response(CACHE.compressed, { headers });
-      }
-      
-      return new Response(CACHE.sitemap, { headers });
     }
-    
-    console.log('[Sitemap] Generating fresh sitemap...');
-    
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-      global: { 
-        headers: { 
-          'X-Client': 'sitemap-edge-function',
-          'X-Edge-Region': context?.geo?.city || 'unknown'
-        } 
-      }
-    });
-    
-    const data = await fetchData(supabase);
-    const result = generateSitemap(data);
-    
-    let compressed = null;
-    if (supportsGzip) {
-      compressed = await SitemapHelpers.compress(result.xml);
+
+    // --- D. หน้าโปรไฟล์ (Profiles) + รูปภาพ ---
+    if (profiles) {
+      profiles.forEach(p => {
+        if (p.slug) {
+          const safeSlug = encodeURIComponent(p.slug.trim());
+          // ใช้วันที่อัปเดต ถ้าไม่มีใช้วันที่สร้าง ถ้าไม่มีอีกใช้วันปัจจุบัน
+          const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
+          const lastMod = new Date(dateStr).toISOString();
+
+          // สร้าง Tag รูปภาพ (ถ้ามีรูป)
+          let imageXml = '';
+          if (p.imagePath) {
+            // สร้าง URL รูปเต็ม และ Escape ตัวอักษร
+            const imgUrl = `${STORAGE_URL}/${p.imagePath}`.replace(/&/g, '&amp;');
+            const imgTitle = escapeXml(p.name || 'Sideline Profile');
+            
+            imageXml = `
+    <image:image>
+      <image:loc>${imgUrl}</image:loc>
+      <image:title>${imgTitle}</image:title>
+    </image:image>`;
+          }
+
+          xml += `
+  <url>
+    <loc>${DOMAIN}/sideline/${safeSlug}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>${imageXml}
+  </url>`;
+        }
+      });
     }
-    
-    CACHE.sitemap = result.xml;
-    CACHE.compressed = compressed;
-    CACHE.lastGenerated = Date.now();
-    CACHE.totalUrls = result.totalUrls;
-    CACHE.generationTime = result.generationTime;
-    
-    console.log(`[Sitemap] Generated in ${result.generationTime}ms`, {
-      totalUrls: result.totalUrls,
-      profiles: data.stats.profiles,
-      provinces: data.stats.provinces,
-      edgeRegion: context?.geo?.city
-    });
-    
-    const headers = {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
-      'Last-Modified': new Date().toUTCString(),
-      'X-Cache': 'MISS',
-      'X-Generated-At': new Date().toISOString(),
-      'X-Total-URLs': result.totalUrls.toString(),
-      'X-Generation-Time': `${result.generationTime}ms`,
-      'X-Processing-Time': `${Date.now() - startTime}ms`
-    };
-    
-    if (context?.geo) {
-      headers['X-Geo-Country'] = context.geo.country;
-      headers['X-Geo-City'] = context.geo.city || 'unknown';
-    }
-    
-    if (supportsGzip && compressed) {
-      headers['Content-Encoding'] = 'gzip';
-      return new Response(compressed, { headers });
-    }
-    
-    return new Response(result.xml, { headers });
-    
-  } catch (error) {
-    console.error('[Sitemap] Error:', error);
-    
-    if (CACHE.sitemap) {
-      console.log('[Sitemap] Using cached fallback');
-      
-      const headers = {
-        'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
-        'X-Cache': 'HIT-ERROR-FALLBACK',
-        'X-Generated-At': new Date(CACHE.lastGenerated).toISOString(),
-        'X-Total-URLs': CACHE.totalUrls.toString(),
-        'X-Error': String(error && error.message ? error.message : error).substring(0, 100)
-      };
-      
-      return new Response(CACHE.sitemap, { headers });
-    }
-    
-    const errorXml = `<?xml version="1.0" encoding="UTF-8"?>
-<error>
-  <message>Sitemap temporarily unavailable</message>
-  <timestamp>${new Date().toISOString()}</timestamp>
-  <processingTime>${Date.now() - startTime}ms</processingTime>
-</error>`;
-    
-    return new Response(errorXml, {
-      status: 503,
+
+    xml += `\n</urlset>`;
+
+    // 3. ส่ง Response กลับไป
+    return new Response(xml, {
       headers: {
-        'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Retry-After': '60'
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600", // Cache 1 ชั่วโมง
+        "Netlify-CDN-Cache-Control": "public, max-age=86400, durable" // CDN Cache 1 วัน
       }
     });
+
+  } catch (error) {
+    console.error("Sitemap Generation Error:", error);
+    return new Response("Internal Server Error: " + error.message, { status: 500 });
   }
 };
-
-// Robots.txt handler
-export const config = {
-  path: '/robots.txt'
-};
-
-export async function onRequest() {
-  const robotsTxt = `# Robots.txt for ${DOMAIN}
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-
-# Sitemap
-Sitemap: ${DOMAIN}/sitemap.xml
-
-# Crawl delay
-Crawl-delay: 1
-
-# Generated: ${new Date().toISOString()}`;
-
-  return new Response(robotsTxt, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400'
-    }
-  });
-}
