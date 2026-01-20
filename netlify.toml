@@ -1,9 +1,8 @@
-# netlify.toml (ปรับปรุง)
 [build]
   publish = "."
   command = ""
+  functions = "netlify/functions"
 
-# Global security headers (no cache override here)
 [[headers]]
   for = "/*"
   [headers.values]
@@ -12,81 +11,54 @@
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=()"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# Long cache for static assets (images / js / css)
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Short cache for HTML / dynamic content (Edge functions set their own headers)
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate, s-maxage=600"
-
-# Edge Functions mapping - ให้ฟังก์ชัน sitemap ให้บริการที่ /sitemap.xml เท่านั้น
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "ssr"
-  path = "/location/*"
-
-[[edge_functions]]
-  function = "ssr"
-  path = "/locations/*"
-
-[[edge_functions]]
-  function = "ssr"
-  path = "/location"
-
-[[edge_functions]]
-  function = "ssr"
+  function = "render-bot"
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "ssr"
-  path = "/sideline"
+  function = "ssr-province"
+  path = "/location/*"
 
 [[edge_functions]]
-  function = "ssr"
-  path = "/profiles/*"
+  function = "ssr-province"
+  path = "/province/*"
 
-# Redirects
-# Enforce HTTPS for all requests (generic)
 [[redirects]]
-  from = "http://*"
-  to = "https://:splat"
+  from = "http://sidelinechiangmai.netlify.app/*"
+  to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
 
-# Serve service worker and manifest directly if present
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
-  force = false
+  force = true
 
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
   status = 200
-  force = false
+  force = true
 
-# SPA fallback - keep last so specific rules above apply first
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
