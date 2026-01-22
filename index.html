@@ -192,92 +192,113 @@
       
      
     
-    <!-- วางสคริปต์นักสืบตรงนี้ (ก่อนปิด body) -->
-    <script>
-    // =================================================================
-    // 🕵️‍♂️ ULTIMATE SCANNER v2 (แยกไฟล์มาเพื่อให้ทำงานชัวร์ 100%)
-    // =================================================================
-    (function() {
-        // รอให้หน้าเว็บโหลดเสร็จก่อนค่อยสร้างปุ่ม
-        window.addEventListener('load', () => {
-            // สร้างปุ่ม UI
-            const btn = document.createElement('button');
-            btn.innerHTML = "🔍 สแกนทั้งระบบ";
-            btn.style.cssText = "position: fixed; bottom: 20px; left: 20px; z-index: 99999; background: #2563eb; color: white; padding: 12px 24px; border-radius: 50px; border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.4); font-weight: bold; font-size: 14px; transition: all 0.3s; cursor: pointer;";
-            
-            btn.onmousedown = () => btn.style.transform = "scale(0.95)";
-            btn.onmouseup = () => btn.style.transform = "scale(1)";
+<script>
+// =================================================================
+// 🕵️‍♂️ ULTIMATE SCANNER v3 (ตรวจครบ: รูป, ลิงก์, DB, ฟอนต์, JS Errors)
+// =================================================================
+(function() {
+    // ---- PART 0: ติดตั้งเครื่องดักฟัง JS Error ----
+    const jsErrors = [];
+    window.addEventListener('error', (event) => {
+        // กรองเอาเฉพาะ Error จากไฟล์ของเรา ไม่เอาของ browser extension
+        if (event.filename && event.filename.includes(window.location.hostname)) {
+            const fileName = event.filename.split('/').pop();
+            jsErrors.push(`📜 JS Error: "${event.message}" ในไฟล์ ${fileName} บรรทัดที่ ${event.lineno}`);
+        }
+    });
 
-            btn.onclick = async () => {
-                btn.innerHTML = "⏳ กำลังตรวจสอบ...";
-                btn.style.background = "#fbbf24";
-                btn.style.color = "black";
-                btn.disabled = true;
+    // รอให้หน้าเว็บโหลดเสร็จก่อนค่อยสร้างปุ่ม
+    window.addEventListener('load', () => {
+        // สร้างปุ่ม UI
+        const btn = document.createElement('button');
+        btn.innerHTML = "🔍 สแกนทั้งระบบ";
+        btn.style.cssText = "position: fixed; bottom: 20px; left: 20px; z-index: 99999; background: #2563eb; color: white; padding: 12px 24px; border-radius: 50px; border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.4); font-weight: bold; font-size: 14px; transition: all 0.3s; cursor: pointer;";
+        
+        btn.onmousedown = () => btn.style.transform = "scale(0.95)";
+        btn.onmouseup = () => btn.style.transform = "scale(1)";
 
-                let report = [];
+        btn.onclick = async () => {
+            btn.innerHTML = "⏳ กำลังตรวจสอบ...";
+            btn.style.background = "#fbbf24";
+            btn.style.color = "black";
+            btn.disabled = true;
 
-                try {
-                    // PART 1: Frontend Check
-                    document.querySelectorAll('img').forEach(img => {
-                        if ((!img.complete || img.naturalWidth === 0) && !img.src.includes('placeholder')) {
-                            report.push(`🖼️ รูปแตกบนจอ: ${img.alt || 'ไม่มีชื่อ'}`);
-                            img.style.border = "5px solid red";
-                        }
-                    });
+            let report = [];
 
-                    document.querySelectorAll('a').forEach(link => {
-                        const href = link.getAttribute('href');
-                        if (!href || href === "#") {
-                           if (!link.onclick && link.innerText.trim()) { // เช็คว่าไม่ใช่ปุ่ม action และมีข้อความ
-                                report.push(`🔗 ลิงก์ว่าง: "${link.innerText.trim()}"`);
-                                link.style.backgroundColor = "yellow";
-                           }
-                        }
-                    });
-
-                    // PART 2: Backend Check (ต้องเช็คว่า Supabase พร้อมใช้งาน)
-                    if (window.supabase) {
-                        const { data: profiles, error: dbErr } = await window.supabase.from('profiles').select('id, name, imagePath');
-                        const { data: files, error: storageErr } = await window.supabase.storage.from('profile-images').list('', { limit: 1000 });
-
-                        if (dbErr || storageErr) {
-                            report.push("❌ เชื่อมต่อ Supabase DB หรือ Storage ไม่ได้");
-                        } else {
-                            const existingFiles = new Set(files.map(f => f.name));
-                            profiles.forEach(p => {
-                                if (p.imagePath && !existingFiles.has(p.imagePath.split('/').pop())) {
-                                    report.push(`🗄️ DB ไม่ตรง: น้อง${p.name} (รูปหาย)`);
-                                }
-                            });
-                        }
-                    } else {
-                        report.push("⚠️ ไม่พบ Supabase (window.supabase) จึงไม่ได้ตรวจสอบ DB");
+            try {
+                // ---- PART 1: Frontend Check (รูป & ลิงก์) ----
+                document.querySelectorAll('img').forEach(img => {
+                    if (img.getAttribute('src') && (!img.complete || img.naturalWidth === 0) && !img.src.includes('placeholder')) {
+                        report.push(`🖼️ รูปแตกบนจอ: ${img.alt || 'ไม่มีชื่อ'}`);
+                        img.style.border = "5px solid red";
                     }
-
-                    // สรุปผล
-                    let message = "";
-                    if (report.length === 0) {
-                        message = "✅ สุดยอด! ไม่พบปัญหาใดๆ";
-                        btn.style.background = "#10b981";
-                    } else {
-                        message = `⚠️ พบ ${report.length} ปัญหา:\n\n` + report.slice(0, 10).join("\n");
-                        if (report.length > 10) message += `\n...และอีก ${report.length - 10} รายการ`;
-                        btn.style.background = "#ef4444";
+                });
+                document.querySelectorAll('a').forEach(link => {
+                    if ((!link.getAttribute('href') || link.getAttribute('href') === "#") && !link.onclick && link.innerText.trim()) {
+                        report.push(`🔗 ลิงก์ว่าง: "${link.innerText.trim()}"`);
+                        link.style.backgroundColor = "yellow";
                     }
-                    alert(message);
+                });
 
-                } catch (e) {
-                    alert("❌ เกิด Error: " + e.message);
-                    btn.style.background = "gray";
-                } finally {
-                    btn.innerHTML = "🔍 สแกนอีกครั้ง";
-                    btn.disabled = false;
+                // ---- PART 2: ตรวจสอบฟอนต์ (Font Check) ----
+                const fontChecks = Array.from(document.querySelectorAll('link[rel="preload"][as="font"]'))
+                    .map(link => 
+                        fetch(link.href)
+                            .then(res => {
+                                if (!res.ok) report.push(`🖋️ ฟอนต์หาย (404): ${link.href.split('/').pop()}`);
+                            })
+                            .catch(() => report.push(`🖋️ ฟอนต์เชื่อมต่อไม่ได้: ${link.href.split('/').pop()}`))
+                    );
+                await Promise.all(fontChecks); // รอเช็คฟอนต์ให้เสร็จ
+
+                // ---- PART 3: Backend Check (Supabase) ----
+                if (window.supabase) {
+                    const { data: profiles, error: dbErr } = await window.supabase.from('profiles').select('id, name, imagePath');
+                    const { data: files, error: storageErr } = await window.supabase.storage.from('profile-images').list('', { limit: 1000 });
+
+                    if (dbErr || storageErr) {
+                        report.push("❌ เชื่อมต่อ Supabase ไม่ได้");
+                    } else {
+                        const existingFiles = new Set(files.map(f => f.name));
+                        profiles.forEach(p => {
+                            if (p.imagePath && !existingFiles.has(p.imagePath.split('/').pop())) {
+                                report.push(`🗄️ DB ไม่ตรง: น้อง${p.name} (รูปหาย)`);
+                            }
+                        });
+                    }
+                } else {
+                    report.push("⚠️ ไม่พบ Supabase (ไม่ได้ตรวจสอบ DB)");
                 }
-            };
-            document.body.appendChild(btn);
-        });
-    })();
-    </script>
-    
+
+                // ---- PART 4: รวมผลลัพธ์จากเครื่องดักฟัง JS Error ----
+                if(jsErrors.length > 0) {
+                    report.push(...jsErrors);
+                }
+
+                // ---- สรุปผล ----
+                let message = "";
+                if (report.length === 0) {
+                    message = "✅ สุดยอด! ไม่พบปัญหาใดๆ ในระบบ";
+                    btn.style.background = "#10b981";
+                } else {
+                    message = `⚠️ พบ ${report.length} ปัญหา:\n\n` + report.slice(0, 10).join("\n");
+                    if (report.length > 10) message += `\n...และอีก ${report.length - 10} รายการ`;
+                    btn.style.background = "#ef4444";
+                }
+                alert(message);
+
+            } catch (e) {
+                alert("❌ เกิด Error ขณะสแกน: " + e.message);
+                btn.style.background = "gray";
+            } finally {
+                btn.innerHTML = "🔍 สแกนอีกครั้ง";
+                btn.disabled = false;
+            }
+        };
+        document.body.appendChild(btn);
+    });
+})();
+</script>
 </body>
-</html>
+    </html>
+</body>
