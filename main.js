@@ -442,9 +442,7 @@ async function handleDataLoading() {
         return Array.from(profileMap.values());
     }
 
-/**
- * ✅ REALTIME SUBSCRIPTION (STABLE VERSION)
- */
+
 function initRealtimeSubscription() {
     if (!supabase) return;
 
@@ -1159,13 +1157,14 @@ function createProfileCard(p, index = 20) {
         <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0"></div>
 
         <!-- LAYER 1: รูปภาพ (อยู่ล่างสุด) -->
-        <img src="${imgSrc}" 
-             alt="น้อง ${p.name} ไซด์ไลน์ ${p.provinceNameThai || 'เชียงใหม่'}"
+<img src="${imgSrc}" 
+             alt="น้อง${p.name} - ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} รับงานเอง ฟิวแฟน ตรงปก 100%"
              class="card-image w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
              loading="${index < 4 ? 'eager' : 'lazy'}"
              style="object-position: center top;"
              onload="this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();"
              onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();">
+             
 
         <!-- LAYER 2: ลิงก์คลุมการ์ด (Z-10) -> เพื่อให้คลิกตรงไหนก็เปิดโปรไฟล์ -->
         <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์ ${p.name}"></a>
@@ -1240,10 +1239,11 @@ function createProfileCard(p, index = 20) {
 
     return cardContainer;
 }
+
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================
-// ในไฟล์ main.js.html
+
 
 async function fetchSingleProfile(slug) {
     if (!supabase) return null;
