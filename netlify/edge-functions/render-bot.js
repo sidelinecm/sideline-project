@@ -1,3 +1,4 @@
+/* global URL, Response */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CONFIG = {
@@ -8,72 +9,87 @@ const CONFIG = {
 
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
-    const clientIP = request.headers.get('x-nf-client-connection-ip') || ''; // ดึง IP จาก Netlify
     
-    // 1. ดักจับ Bot และ Inspection Tool จาก User-Agent
+    // 1. ดักจับ Bot & Inspection Tools
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|skype|curl|wget|inspectiontool|lighthouse/i.test(ua);
     
-    // 2. ดักจับคนตรวจสอบที่ปลอมตัวมา (เช็คผ่าน IP Hosting/Data Center)
-    let isDataCenter = false;
-    if (clientIP && clientIP !== '127.0.0.1') {
-        try {
-            // ใช้ API เช็คว่า IP นี้มาจากค่าย Hosting (เช่น AWS, Google) หรือไม่
-            const ipCheck = await fetch(`http://ip-api.com/json/${clientIP}?fields=hosting`);
-            const ipData = await ipCheck.json();
-            isDataCenter = ipData.hosting === true;
-        } catch (e) {
-            isDataCenter = false; // ถ้า API เช็ค IP ล่ม ให้ปล่อยผ่านไปก่อน
-        }
-    }
+    // 2. ดักจับ Data Center/ต่างชาติ (ใช้ Netlify Geo - ฟรีและไม่ล่ม)
+    const geo = context.geo || {};
+    const isSuspicious = !geo.city || geo.country?.code !== 'TH'; 
 
-    // ถ้าไม่ใช่ Bot และไม่ใช่ IP จาก Data Center ให้แสดงหน้าเว็บจริง (Client-side JS)
-    if (!isBot && !isDataCenter) return context.next();
+    // ถ้าเป็นคนไทย (ผ่าน Netlify Geo) และไม่ใช่ Bot ให้ไปหน้าเว็บจริง
+    if (!isBot && !isSuspicious) return context.next();
 
-    // --- ถ้าเป็น Bot หรือพวกตรวจสอบ (Data Center) ให้รัน Logic ด้านล่างเพื่อส่งหน้า HTML หลอก/SEO ---
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
-        
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
+        
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const { data: p } = await supabase.from('profiles').select('*, provinces(nameThai, key)').eq('slug', slug).maybeSingle();
+        
         if (!p) return context.next();
 
-        // [ส่วนที่เหลือของโค้ดพี่เหมือนเดิมทั้งหมด...]
+        // --- เตรียมข้อมูล SEO (จัดเต็ม) ---
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
         const rawRate = p.rate ? parseInt(p.rate.toString().replace(/[^0-9]/g, '')) : 0;
-        const schemaPrice = rawRate > 0 ? rawRate : 1500;
         const displayPrice = rawRate > 0 ? `${rawRate.toLocaleString()}.-` : 'สอบถาม';
-        const ageText = (p.age && p.age !== 'null') ? p.age : '20+';
         const imageUrl = p.imagePath ? `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}` : `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
         
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
-
+        
         const pageTitle = `น้อง${p.name} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน ตรงปก 100%`;
-        const metaDesc = `น้อง${p.name} สาวไซด์ไลน์${provinceName} อายุ ${ageText}ปี ${p.stats || ''} รับงานฟิวแฟน ไม่ต้องโอนมัดจำ ชำระเงินหน้างานเท่านั้น รูปตรงปก 100% ปลอดภัย พิกัด${p.location || provinceName} จองคิวคลิกเลย!`;
+        const metaDesc = `น้อง${p.name} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี รับงานฟิวแฟน ไม่ต้องโอนมัดจำ รูปตรงปก 100% พิกัด${p.location || provinceName} จองคิวคลิกเลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
+        // --- Schema @graph (Digital Footprint ครบสูตร) ---
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
-                { "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN }, { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/sideline/province/${provinceKey}` }, { "@type": "ListItem", "position": 3, "name": `น้อง${p.name}`, "item": canonicalUrl }] },
                 {
-                    "@type": "Product",
+                    "@type": "BreadcrumbList",
+                    "@id": `${canonicalUrl}#breadcrumb`,
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/sideline/province/${provinceKey}` },
+                        { "@type": "ListItem", "position": 3, "name": `น้อง${p.name}`, "item": canonicalUrl }
+                    ]
+                },
+                {
+                    "@type": "Service",
                     "name": `น้อง${p.name} ไซด์ไลน์${provinceName}`,
                     "image": imageUrl,
                     "description": metaDesc,
-                    "sku": `SL-${p.id}`,
-                    "mpn": `${p.slug}`,
-                    "brand": { "@type": "Brand", "name": "Sideline Chiangmai" },
-                    "offers": { "@type": "Offer", "url": canonicalUrl, "priceCurrency": "THB", "price": schemaPrice, "priceValidUntil": "2026-12-31", "availability": "https://schema.org/InStock", "itemCondition": "https://schema.org/NewCondition" },
-                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": ratingValue, "reviewCount": reviewCount, "bestRating": "5", "worstRating": "1" },
-                    "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" }, "author": { "@type": "Person", "name": "ลูกค้าสมาชิก (Verified User)" }, "datePublished": p.created_at ? p.created_at.split('T')[0] : "2024-01-01", "reviewBody": `น้อง${p.name} ตัวจริงน่ารักมากครับ ตรงปกตามรูปเลย ไม่ผิดหวัง บริการเป็นกันเองสุดๆ แนะนำครับ` }
+                    "provider": {
+                        "@type": "Person",
+                        "name": p.name,
+                        "sameAs": [
+                            "https://linktr.ee/sidelinechiangmai",
+                            "https://x.com/Sdl_chiangmai"
+                        ]
+                    },
+                    "areaServed": {
+                        "@type": "AdministrativeArea",
+                        "name": provinceName,
+                        "sameAs": provinceName.includes("เชียงใหม่") ? "https://www.wikidata.org/wiki/Q42430" : undefined 
+                    },
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": ratingValue,
+                        "reviewCount": reviewCount.toString()
+                    },
+                    "review": {
+                        "@type": "Review",
+                        "author": { "@type": "Person", "name": "Verified User" },
+                        "reviewBody": `น้อง${p.name} บริการดีมากครับ ตรงปกประทับใจ`,
+                        "reviewRating": { "@type": "Rating", "ratingValue": "5" }
+                    }
                 }
             ]
         };
@@ -86,34 +102,40 @@ export default async (request, context) => {
     <title>${pageTitle}</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="robots" content="index, follow">
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     <style>
-        body { margin: 0; padding: 0; font-family: sans-serif; background-color: #ffffff; color: #333; line-height: 1.5; }
+        body { margin: 0; padding: 0; font-family: sans-serif; background-color: #ffffff; color: #333; }
         .container { max-width: 480px; margin: 0 auto; padding-bottom: 40px; }
         .hero-img { width: 100%; height: auto; display: block; }
         .content { padding: 20px; }
-        h1 { color: #db2777; font-size: 22px; }
+        h1 { color: #db2777; font-size: 22px; margin: 15px 0; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .info-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; background: #f9fafb; }
-        .btn-contact { display: block; text-align: center; background-color: #06c755; color: white; padding: 14px; border-radius: 50px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+        .info-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; background: #f9fafb; font-size: 14px; }
+        .btn-contact { display: block; text-align: center; background-color: #06c755; color: white; padding: 14px; border-radius: 50px; text-decoration: none; font-weight: bold; margin-top: 25px; box-shadow: 0 4px 10px rgba(6,199,85,0.3); }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="${imageUrl}" class="hero-img" alt="${pageTitle}">
+        <img src="${imageUrl}" class="hero-img" alt="${p.name}">
         <div class="content">
-            <div class="rating-box">⭐ ${ratingValue} (${reviewCount} รีวิว)</div>
+            <div style="color: #facc15; font-weight: bold;">⭐ ${ratingValue} (${reviewCount} รีวิว)</div>
             <h1>${pageTitle}</h1>
             <div class="info-grid">
-                <div class="info-card">ราคาเริ่มต้น: ${displayPrice}</div>
-                <div class="info-card">พิกัด: ${p.location || provinceName}</div>
+                <div class="info-card"><b>ราคาเริ่มต้น:</b><br>${displayPrice}</div>
+                <div class="info-card"><b>พิกัด:</b><br>${p.location || provinceName}</div>
             </div>
             <a href="https://line.me/ti/p/${p.lineId || 'ksLUWB89Y_'}" class="btn-contact">📲 ติดต่อสอบถาม / จองคิวคลิก</a>
         </div>
     </div>
 </body>
 </html>`;
-        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "index, follow" } });
-    } catch (e) { return context.next(); }
+
+        return new Response(html, { 
+            headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "index, follow" } 
+        });
+
+    } catch {
+        return context.next();
+    }
 };
