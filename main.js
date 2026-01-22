@@ -1598,82 +1598,68 @@ const FAQ_DATA = [
 ];
 
 // =================================================================
-// === ฟังก์ชัน updateAdvancedMeta (ฉบับสมบูรณ์ & ปรับแต่ง SEO) ===
+// === updateAdvancedMeta (เวอร์ชัน SEO ขั้นสูงสุด) ===
 // =================================================================
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // 1. ล้าง Schema เดิมออกก่อน
+    // ... (ส่วนล้าง Schema เหมือนเดิม) ...
     const oldScripts = document.querySelectorAll('script[id^="schema-jsonld"]');
     oldScripts.forEach(s => s.remove());
 
     const BRAND_NAME = "Sideline Chiangmai";
-    
-    // 🔥 ปรับ KEYWORDS ตาม GSC: เอา "เชียงใหม่" ขึ้นก่อน, ใส่ "รับงาน", ย้ำ "จ่ายหน้างาน"
-    const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก ไม่มัดจำ จ่ายหน้างาน | ${BRAND_NAME}`;
-    
-    const GLOBAL_DESC = `ศูนย์รวมสาวไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน การันตีรูปตรงปก 100% ปลอดภัยสูง ไม่ต้องโอนมัดจำ ชำระเงินหน้างานเท่านั้น อัปเดตน้องใหม่ทุกวัน มีแอดมินดูแลฟรี`;
+    // ✅ GLOBAL TITLE: ใส่ User Intent เข้าไป "จ่ายหน้างาน", "ไม่มัดจำ"
+    const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน | ตรงปก จ่ายหน้างาน ไม่มัดจำ 100%`;
+    const GLOBAL_DESC = `รวมโปรไฟล์น้องๆ ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน เด็กเอ็นฯ การันตีตรงปก ไม่ต้องโอนมัดจำ ชำระเงินหน้างานเท่านั้น มีแอดมินดูแล ปลอดภัย 100%`;
 
     if (profile) {
-        // --- กรณี: หน้าโปรไฟล์รายบุคคล ---
-        
-        // 1. ถ้าไม่ระบุจังหวัด ให้ Default เป็น "เชียงใหม่" (ดีกว่าคำว่า ไม่ระบุ)
-        const provinceName = state.provincesMap.get(profile.provinceKey) || 'เชียงใหม่';
-        
-        // 2. ดึงราคามาใส่ Title (ถ้ามี) คนชอบคลิกที่มีราคาบอกชัดเจน
+        // --- หน้าโปรไฟล์ ---
+        const provinceName = profile.provinceNameThai || 'เชียงใหม่';
         const priceText = profile.rate ? ` ราคา ${profile.rate}` : '';
+        // ✅ NEW: สร้างคีย์เวิร์ดเสริมจาก Tags
+        const styleTags = (profile.styleTags || []).join(', '); // เช่น "ฟิวแฟน, เอาใจเก่ง"
+
+        // 🔥 TITLE สูตรใหม่: [ชื่อ] ไซด์ไลน์[จังหวัด] [สไตล์เด่น] | จ่ายหน้างาน
+        const title = `น้อง${profile.name} ไซด์ไลน์${provinceName} ${styleTags ? styleTags : 'รับงานฟิวแฟน'} | จ่ายหน้างาน`;
         
-        // Title สูตร: [ชื่อ] [จังหวัด] [รับงานเอง] [ราคา] [แบรนด์]
-        const title = `น้อง${profile.name} ไซด์ไลน์${provinceName} รับงานเอง${priceText} จ่ายหน้างาน | ${BRAND_NAME}`; 
-        
-        // Description สูตร: อัดแน่นด้วยรายละเอียด + Trust words
-        const richDescription = `น้อง${profile.name} สาวไซด์ไลน์${provinceName} อายุ ${profile.age || '20+'} รับงานฟิวแฟน พิกัด${profile.location || provinceName} รูปตรงปก 100% ไม่ต้องโอนมัดจำ ชำระเงินหน้างาน ${profile.quote ? `"${profile.quote}"` : ''}`;
+        // 🔥 DESC สูตรใหม่: อัดรายละเอียด + คำค้นหาใกล้เคียง + Trust Signals
+        const richDescription = `โปรไฟล์น้อง${profile.name} (${profile.age} ปี) ไซด์ไลน์${provinceName} รับงานเอง ไม่ผ่านเอเย่นต์. พิกัด: ${profile.location || provinceName}. ${styleTags}. การันตีตรงปก 100% ไม่ต้องโอนมัดจำ ชำระเงินหน้างานเท่านั้น.`;
 
         document.title = title;
-        updateMeta('description', richDescription); 
-        updateMeta('keywords', `ไซด์ไลน์${provinceName}, รับงาน${provinceName}, น้อง${profile.name}, สาวไซด์ไลน์, ไม่มัดจำ`); // ✅ เพิ่ม Keywords
-        updateMeta('robots', 'index, follow'); 
+        updateMeta('description', richDescription);
+        // ✅ KEYWORDS: ใส่คำค้นหาที่เกี่ยวข้อง
+        updateMeta('keywords', `ไซด์ไลน์${provinceName}, รับงาน${provinceName}, น้อง${profile.name}, ${styleTags}, เด็กเอ็น${provinceName}, ไม่มัดจำ`);
         updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug}`);
         
         updateOpenGraphMeta(profile, title, richDescription, 'profile');
         injectSchema(generatePersonSchema(profile, richDescription), 'schema-jsonld-person');
-        injectSchema(generateBreadcrumbSchema('profile', profile.name), 'schema-jsonld-bc');
-        
+
     } else if (pageData) {
-        // --- กรณี: หน้าจังหวัด (Location) ---
-        
-        // ใช้ Title จาก handleRouting หรือสร้างใหม่แบบ Strong
-        const pageTitle = pageData.title || `ไซด์ไลน์${pageData.provinceName} รับงาน${pageData.provinceName} ฟิวแฟน ไม่มัดจำ | ${BRAND_NAME}`;
-        
-        // Description เน้นจังหวัดนั้นๆ
-        const pageDescription = `รวมรูปสาวไซด์ไลน์ ${pageData.provinceName} รับงานเอง ${pageData.provinceName} คัดคนสวย ตรงปก 100% ปลอดภัย ไม่ผ่านเอเย่นต์ ไม่ต้องโอนจอง จ่ายเงินหน้างานเท่านั้น`;
+        // --- หน้าจังหวัด ---
+        const provinceName = pageData.provinceName;
+        // 🔥 TITLE สูตรใหม่: ไซด์ไลน์[จังหวัด] | รับงานเอง ตรงปก จ่ายหน้างาน
+        const pageTitle = `ไซด์ไลน์${provinceName} | รับงานเอง ตรงปก จ่ายหน้างาน (${new Date().getFullYear()})`;
+        const pageDescription = `รวมน้องๆ ไซด์ไลน์${provinceName} และเด็กเอ็นฯ รับงานเอง ไม่ผ่านเอเย่นต์. คัดเฉพาะโปรไฟล์คุณภาพ ตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ ชำระเงินกับน้องโดยตรง.`;
         
         document.title = pageTitle;
         updateMeta('description', pageDescription);
-        updateMeta('keywords', `ไซด์ไลน์${pageData.provinceName}, รับงาน${pageData.provinceName}, สาวไซด์ไลน์${pageData.provinceName}, ไม่มัดจำ`); // ✅ เพิ่ม Keywords
-        updateMeta('robots', 'index, follow'); 
+        updateMeta('keywords', `ไซด์ไลน์${provinceName}, เด็กเอ็น${provinceName}, รับงาน${provinceName}, หาเพื่อนเที่ยว${provinceName}, ไม่มัดจำ`);
         updateLink('canonical', pageData.canonicalUrl);
         
         updateOpenGraphMeta(null, pageTitle, pageDescription, 'website');
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
-        injectSchema(generateBreadcrumbSchema('location', pageData.provinceName), 'schema-jsonld-bc');
-        
+
     } else {
-        // --- กรณี: หน้าแรก (Home) ---
-        
-        // เช็คก่อนว่า Title ว่างอยู่หรือเปล่า (กันพลาด)
-        if (!document.title || document.title === BRAND_NAME) document.title = GLOBAL_TITLE; 
-        
+        // --- หน้าแรก ---
+        document.title = GLOBAL_TITLE;
         updateMeta('description', GLOBAL_DESC);
-        updateMeta('keywords', 'ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, ไซด์ไลน์, ฟิวแฟน, ไม่มัดจำ, จ่ายหน้างาน, สาวไซด์ไลน์, เชียงใหม่'); // ✅ เพิ่ม Keywords
-        updateMeta('robots', 'index, follow'); 
+        updateMeta('keywords', 'ไซด์ไลน์เชียงใหม่, เด็กเอ็นเชียงใหม่, รับงานฟิวแฟน, ไม่มัดจำ, จ่ายหน้างาน, ตรงปก');
         updateLink('canonical', CONFIG.SITE_URL);
         
         updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
-        injectSchema(generateWebsiteSchema(), 'schema-jsonld-web'); 
-        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org'); 
+        injectSchema(generateWebsiteSchema(), 'schema-jsonld-web');
+        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org');
         injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
     }
 }
-
 // ✅ อัปเกรดการแสดงผลโซเชียล: ใช้รูป .webp และใส่ Alt Text คีย์เวิร์ด
 function updateOpenGraphMeta(profile, title, description, type) {
     updateMeta('og:title', title);
@@ -1693,12 +1679,13 @@ function updateOpenGraphMeta(profile, title, description, type) {
     updateMeta('twitter:image', imageUrl);
 }
 
-/**
- * [COMPLETE FUNCTION 3/3]
- * สร้าง Schema สำหรับ SEO พร้อมข้อมูล "วันที่เผยแพร่"
- */
+
+// =================================================================
+// === generatePersonSchema (ฉบับแก้ไขบั๊กจังหวัด) ===
+// =================================================================
 function generatePersonSchema(p, descriptionOverride) {
-    const provinceName = state.provincesMap.get(p.provinceKey) || '';
+    // ✅ FIX: ใช้ p.provinceNameThai ที่ถูกเตรียมไว้แล้วโดยตรง
+    const provinceName = p.provinceNameThai || ''; // ถ้าไม่มีจริงๆ ให้เป็นค่าว่าง ดีกว่าใส่ค่า Default ผิดๆ
     const publishedDate = p.image_updated_at || p.created_at || new Date().toISOString();
     
     const schema = {
@@ -1707,23 +1694,30 @@ function generatePersonSchema(p, descriptionOverride) {
         "@id": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
         "name": p.name,
         "url": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
-        "image": p.images[0].src,
+        // ใช้รูปแรกเป็นรูปหลักใน Schema
+        "image": (p.images && p.images[0]) ? p.images[0].src : CONFIG.DEFAULT_OG_IMAGE,
         "description": descriptionOverride,
-        "jobTitle": "Independent Model",
+        "jobTitle": "Independent Model", // หรือ "Entertainer", "Companion"
         "address": {
             "@type": "PostalAddress",
-            "addressLocality": provinceName,
+            "addressLocality": provinceName, // ✅ ตอนนี้จะใส่ชื่อจังหวัดที่ถูกต้องแล้ว
             "addressRegion": "Thailand"
         },
         "offers": {
             "@type": "Offer",
-            "price": p.rate,
+            // แปลงราคาเป็นตัวเลขล้วนๆ เพื่อให้ Schema ถูกต้อง
+            "price": (p.rate || "0").replace(/\D/g, ''), 
             "priceCurrency": "THB",
             "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำทุกกรณี",
-            "availability": "https://schema.org/InStock"
+            "availability": "https://schema.org/InStock" // บ่งบอกว่ายังรับงานอยู่
         },
         "datePublished": new Date(publishedDate).toISOString()
     };
+
+    // กันพลาด: ถ้าไม่มีราคา ไม่ต้องใส่ field offers
+    if (!schema.offers.price || schema.offers.price === "0") {
+        delete schema.offers;
+    }
 
     return schema;
 }
