@@ -1434,14 +1434,19 @@ function populateLightboxData(p) {
         }
     }
 
+// ในฟังก์ชัน populateLightboxData(p)
+
     // --- 5. ✅ สร้าง HTML แสดงรายละเอียดทั้งหมดแบบสมบูรณ์ ---
     if (els.detailsContainer) {
-        const provinceName = state.provincesMap.get(p.provinceKey) || '';
+        // ✅ FIX: ใช้ p.provinceNameThai ที่ถูกเตรียมไว้แล้วจาก processProfileData โดยตรง!
+        const provinceName = p.provinceNameThai || ''; 
+        
         const fullLocation = [provinceName, p.location ? `(${p.location})` : ''].filter(Boolean).join(' ').trim();
         const dateToShow = p.lastUpdated || p.created_at;
         const formattedDate = formatDate(dateToShow);
 
         let detailsHTML = '';
+
 
         // --- ส่วนที่ 1: ข้อมูลทางกายภาพ ---
         detailsHTML += `
