@@ -2307,56 +2307,5 @@ const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short
 const timeEl = document.getElementById('last-updated-time');
 if (timeEl) timeEl.innerText = thaiDate;
 
-// ==========================================
-// 🛠️ เครื่องมือตรวจสอบรูปภาพ (สำหรับมือถือ)
-// ให้ลบโค้ดส่วนนี้ออกเมื่อใช้งานเสร็จแล้ว
-// ==========================================
-(function() {
-    // 1. สร้างปุ่มลอยขึ้นมาบนหน้าจอ
-    const btn = document.createElement('button');
-    btn.innerHTML = "🔍 ตรวจสอบรูปภาพ";
-    btn.style.cssText = "position: fixed; bottom: 20px; left: 20px; z-index: 99999; background: #ec4899; color: white; padding: 12px 20px; border-radius: 30px; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold; font-size: 14px;";
-    
-    // 2. เมื่อกดปุ่ม ให้เริ่มทำงาน
-    btn.onclick = async () => {
-        btn.innerHTML = "⏳ กำลังสแกน...";
-        btn.disabled = true;
 
-        try {
-            // ดึงข้อมูลจาก DB
-            const { data: profiles } = await window.supabase.from('profiles').select('id, name, imagePath');
-            // ดึงรายชื่อไฟล์ในถังเก็บรูป
-            const { data: files } = await window.supabase.storage.from('profile-images').list('', { limit: 1000 });
-            
-            const existingFiles = new Set(files ? files.map(f => f.name) : []);
-            let report = "";
-            let count = 0;
-
-            // เทียบข้อมูล
-            profiles.forEach(p => {
-                if (p.imagePath) {
-                    const fileName = p.imagePath.split('/').pop();
-                    if (!existingFiles.has(fileName)) {
-                        report += `❌ ${p.name} (รูปหาย)\n`;
-                        count++;
-                    }
-                }
-            });
-
-            // 3. แสดงผลลัพธ์ผ่านหน้าจอแจ้งเตือน
-            if (count === 0) {
-                alert("✅ เยี่ยมมาก! รูปภาพครบสมบูรณ์ทุกคน");
-            } else {
-                alert(`⚠️ พบปัญหา ${count} คน:\n\n${report}\n\n👉 ให้เข้าไปลบชื่อรูปของคนเหล่านี้ใน Supabase DB`);
-            }
-
-        } catch (e) {
-            alert("เกิดข้อผิดพลาด: " + e.message);
-        } finally {
-            btn.innerHTML = "🔍 ตรวจสอบรูปภาพ";
-            btn.disabled = false;
-        }
-    };
-
-    document.body.appendChild(btn);
 })();
