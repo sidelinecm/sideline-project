@@ -18,6 +18,9 @@ const CONFIG = {
     ]
 };
 
+// ฟังก์ชันสุ่มคำ (Spintax) เพื่อไม่ให้ Description ซ้ำกัน
+const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     const clientIP = request.headers.get('x-nf-client-connection-ip') || '';
@@ -27,7 +30,6 @@ export default async (request, context) => {
     // ==========================================
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|skype|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
     const geo = context.geo || {};
-    // ปรับเพื่อความปลอดภัยสูงสุด ไม่ให้ Bot หลุด
     const isSuspicious = !geo.city || geo.country?.code !== 'TH';
 
     let isDataCenter = false;
@@ -57,25 +59,52 @@ export default async (request, context) => {
         const { data: p } = await supabase.from('profiles').select('*, provinces(*)').eq('slug', slug).maybeSingle();
         if (!p) return context.next();
 
-        // --- จุดแก้ไข Price Format เพื่อแก้ Error ใน Screenshot ---
-        // ดึงเฉพาะตัวเลขออกมาเพื่อส่งให้ Google Schema (แก้ Error สีแดง)
+        // --- 🛠️ SMART FIX: จัดการข้อมูลให้ฉลาด ---
+        
+        // 1. ชื่อ (Name): ป้องกัน "น้องน้อง..."
+        const rawName = p.name || 'สาวสวย';
+        const displayName = rawName.startsWith('น้อง') ? rawName : `น้อง${rawName}`;
+
+        // 2. ราคา (Price): ดึงเฉพาะตัวเลขให้ Google Schema
         const rawPriceValue = (p.rate || "1500").toString().replace(/[^0-9]/g, '');
-        // ใช้ตัวแปรเดิมที่คุณต้องการแสดงผลบนหน้าเว็บ (1,500.-)
         const displayPrice = parseInt(rawPriceValue).toLocaleString() + ".-";
         
-        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const imageUrl = p.imagePath ? `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}` : `${CONFIG.DOMAIN}/images/default.webp`;
+        // 3. รูปภาพ (Image Optimization): ย่อรูปให้โหลดเร็ว + รองรับ Link เต็ม
+        let imageUrl = `${CONFIG.DOMAIN}/images/default.webp`;
+        if (p.imagePath) {
+            if (p.imagePath.startsWith('http')) {
+                imageUrl = p.imagePath;
+            } else {
+                // 🔥 SEO BOOST: เพิ่ม Query Param สั่งย่อรูป (width=800, quality=80)
+                imageUrl = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}?width=800&quality=80&format=webp`;
+            }
+        }
         
+        // 4. LINE Link: รองรับทั้ง ID และ Link เต็ม
+        let finalLineUrl = p.lineId || 'ksLUMz3p_o';
+        if (!finalLineUrl.startsWith('http')) {
+            finalLineUrl = `https://line.me/ti/p/${finalLineUrl}`;
+        }
+
+        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
+        
+        // คำนวณ Rating ให้คงที่ตาม Slug
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
 
-        const pageTitle = `น้อง${p.name} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน รูปตรงปก 100%`;
-        const metaDesc = `น้อง${p.name} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี บริการฟิวแฟน รับงานเองไม่ผ่านเอเย่นต์ ไม่ต้องโอนมัดจำ ชำระเงินหน้างานเท่านั้น รูปตรงปก 100% ปลอดภัย พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
+        // --- 🔥 SEO SPINTAX: สุ่มคำบรรยายไม่ให้ซ้ำ (Duplicate Content Killer) ---
+        const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
+        const descIntro = spin(["โปรไฟล์", "รายละเอียด", "ข้อมูล"]);
+        const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง"]);
+        const payWord = spin(["ไม่รับมัดจำ", "จ่ายหน้างานเท่านั้น", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
+        
+        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน รูปตรงปก 100%`;
+        const metaDesc = `${descIntro}${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
         // ==========================================
-        // 4. ADVANCED STRUCTURED DATA (JSON-LD) - เพิ่มความสมบูรณ์ 100%
+        // 4. ADVANCED STRUCTURED DATA (JSON-LD)
         // ==========================================
         const schemaData = {
             "@context": "https://schema.org/",
@@ -93,7 +122,7 @@ export default async (request, context) => {
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                         { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/sideline/province/${p.provinces?.key || 'chiangmai'}` },
-                        { "@type": "ListItem", "position": 3, "name": `น้อง${p.name}`, "item": canonicalUrl }
+                        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
                     ]
                 },
                 {
@@ -105,12 +134,11 @@ export default async (request, context) => {
                     "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
                     "offers": {
                         "@type": "Offer",
-                        "price": rawPriceValue, // ส่งเฉพาะเลขล้วน แก้ Error สีแดง
+                        "price": rawPriceValue,
                         "priceCurrency": "THB",
                         "availability": "https://schema.org/InStock",
                         "url": canonicalUrl,
-                        "priceValidUntil": "2026-12-31",
-                        // เพิ่มเพื่อแก้ Warning สีเหลืองใน Screenshot
+                        "priceValidUntil": "2026-12-31", // ✅ แก้ Error วันหมดอายุ
                         "shippingDetails": { 
                             "@type": "OfferShippingDetails", 
                             "shippingRate": { "@type": "MonetaryAmount", "value": 0, "currency": "THB" } 
@@ -130,7 +158,7 @@ export default async (request, context) => {
                     "review": {
                         "@type": "Review",
                         "author": { "@type": "Person", "name": "Verified User" },
-                        "reviewBody": `น้อง${p.name} งานดีมากครับ พิกัด${p.location} ตรงปกไม่จกตา บริการเป็นกันเองสุดๆ`,
+                        "reviewBody": `${displayName} งานดีมากครับ พิกัด${p.location} ตรงปกไม่จกตา บริการเป็นกันเองสุดๆ`,
                         "reviewRating": { "@type": "Rating", "ratingValue": "5" }
                     },
                     "areaServed": {
@@ -144,13 +172,13 @@ export default async (request, context) => {
                     "mainEntity": [
                         {
                             "@type": "Question",
-                            "name": `จองน้อง${p.name} ต้องโอนมัดจำไหม?`,
+                            "name": `จอง${displayName} ต้องโอนมัดจำไหม?`,
                             "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำครับ เว็บไซต์เราเน้นความปลอดภัย ชำระเงินหน้างานเมื่อเจอน้องเท่านั้น" }
                         },
                         {
                             "@type": "Question",
-                            "name": `รูปน้อง${p.name} ตรงปกไหม?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": `รูปน้อง${p.name} ตรงปก 100% ตรวจสอบโดยทีมงาน Sideline Chiang Mai เรียบร้อยแล้วครับ` }
+                            "name": `รูป${displayName} ตรงปกไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": `รูป${displayName} ตรงปก 100% ตรวจสอบโดยทีมงาน Sideline Chiang Mai เรียบร้อยแล้วครับ` }
                         }
                     ]
                 }
@@ -158,7 +186,7 @@ export default async (request, context) => {
         };
 
         // ==========================================
-        // 5. FULL OPTIMIZED HTML (CSS เดิมทั้งหมด)
+        // 5. FULL OPTIMIZED HTML
         // ==========================================
         const html = `<!DOCTYPE html>
 <html lang="th" prefix="og: https://ogp.me/ns#">
@@ -175,7 +203,7 @@ export default async (request, context) => {
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:image" content="${imageUrl}">
-    <meta property="og:image:alt" content="น้อง${p.name} ไซด์ไลน์${provinceName}">
+    <meta property="og:image:alt" content="${displayName} ไซด์ไลน์${provinceName}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
@@ -191,7 +219,7 @@ export default async (request, context) => {
 </head>
 <body>
     <div class="c">
-        <img src="${imageUrl}" class="h" alt="น้อง${p.name} สาวไซด์ไลน์ ${provinceName}" loading="lazy" decoding="async">
+        <img src="${imageUrl}" class="h" alt="${displayName} สาวไซด์ไลน์ ${provinceName}" loading="lazy" decoding="async">
         <div class="d">
             <div class="r">⭐ ${ratingValue} <span>(${reviewCount} รีวิว)</span></div>
             <h1>${pageTitle}</h1>
@@ -202,16 +230,13 @@ export default async (request, context) => {
             <div class="tx">
                 ${metaDesc}
             </div>
-            <a href="https://line.me/ti/p/${p.lineId || 'ksLUMz3p_o'}" class="btn">📲 ทักไลน์จองคิว น้อง${p.name}</a>
+            <a href="${finalLineUrl}" class="btn">📲 ทักไลน์จองคิว ${displayName}</a>
         </div>
         <div class="ft">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - มั่นใจ ปลอดภัย ไม่มัดจำ</div>
     </div>
 </body>
 </html>`;
 
-        // ==========================================
-        // 6. FINAL HEADERS & ROBOTS CONTROL
-        // ==========================================
         return new Response(html, { 
             headers: { 
                 "content-type": "text/html; charset=utf-8",

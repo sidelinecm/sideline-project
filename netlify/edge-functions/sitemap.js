@@ -1,11 +1,14 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// --- 1. CONFIGURATION ---
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
 const DOMAIN = 'https://sidelinechiangmai.netlify.app';
+// URL ของถังเก็บรูปภาพ (Bucket)
 const STORAGE_URL = `${SUPABASE_URL}/storage/v1/object/public/profile-images`;
 
-// ฟังก์ชันช่วยแปลงตัวอักษรพิเศษให้เป็น XML ที่ปลอดภัย (ป้องกัน Error)
+// --- 2. HELPER FUNCTION ---
+// ฟังก์ชันป้องกัน XML พัง (แปลงตัวอักษรพิเศษ)
 const escapeXml = (unsafe) => {
   if (!unsafe) return '';
   return unsafe.replace(/[<>&'"]/g, (c) => {
@@ -19,27 +22,30 @@ const escapeXml = (unsafe) => {
   });
 };
 
+// --- 3. MAIN FUNCTION ---
 export default async () => {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 1. ดึงข้อมูล (เพิ่ม imagePath, name, created_at เข้ามา)
+    // ดึงข้อมูลโปรไฟล์และจังหวัดพร้อมกัน (Active Only)
     const [{ data: profiles }, { data: provinces }] = await Promise.all([
       supabase
         .from('profiles')
         .select('slug, lastUpdated, created_at, imagePath, name')
-        .eq('active', true) // เอาเฉพาะคนที่สถานะ Active
-        .limit(2000), // เพิ่ม Limit เผื่ออนาคต
+        .eq('active', true)
+        .limit(2000), // รองรับได้ถึง 2000 คน
       supabase
         .from('provinces')
         .select('key')
     ]);
 
-    // 2. เริ่มสร้าง XML (ต้องมี xmlns:image เพื่อรองรับรูปภาพ)
+    // เริ่มเขียน XML Header
     let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
     xml += `\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
-    // --- A. หน้าแรก (Home) ---
+    // -------------------------------------------------------
+    // A. หน้าแรก (Home)
+    // -------------------------------------------------------
     xml += `
   <url>
     <loc>${DOMAIN}/</loc>
@@ -48,7 +54,9 @@ export default async () => {
     <priority>1.0</priority>
   </url>`;
 
-    // --- B. หน้า Static (หน้าทั่วไป) ---
+    // -------------------------------------------------------
+    // B. หน้าทั่วไป (Static Pages)
+    // -------------------------------------------------------
     const staticPages = ['blog', 'about', 'faq', 'profiles', 'locations', 'contact'];
     staticPages.forEach(page => {
       xml += `
@@ -59,32 +67,49 @@ export default async () => {
   </url>`;
     });
 
-    // --- C. หน้าจังหวัด (Provinces) ---
+    // -------------------------------------------------------
+    // C. หน้าจังหวัด (Provinces)
+    // -------------------------------------------------------
     if (provinces) {
       provinces.forEach(p => {
-        xml += `
+        if (p.key) {
+           xml += `
   <url>
     <loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>`;
+        }
       });
     }
 
-    // --- D. หน้าโปรไฟล์ (Profiles) + รูปภาพ ---
+    // -------------------------------------------------------
+    // D. หน้าโปรไฟล์น้องๆ (Profiles) - ส่วนสำคัญ
+    // -------------------------------------------------------
     if (profiles) {
       profiles.forEach(p => {
         if (p.slug) {
           const safeSlug = encodeURIComponent(p.slug.trim());
-          // ใช้วันที่อัปเดต ถ้าไม่มีใช้วันที่สร้าง ถ้าไม่มีอีกใช้วันปัจจุบัน
+          // วันที่อัปเดตล่าสุด
           const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
           const lastMod = new Date(dateStr).toISOString();
 
-          // สร้าง Tag รูปภาพ (ถ้ามีรูป)
+          // สร้าง Tag รูปภาพ (สำหรับ Google Images)
           let imageXml = '';
           if (p.imagePath) {
-            // สร้าง URL รูปเต็ม และ Escape ตัวอักษร
-            const imgUrl = `${STORAGE_URL}/${p.imagePath}`.replace(/&/g, '&amp;');
+            let imgUrl = '';
+            
+            // Logic: ตรวจสอบว่าเป็น Link เต็มหรือชื่อไฟล์
+            if (p.imagePath.startsWith('http')) {
+                // เผื่อไว้กรณีอนาคตมีการเปลี่ยนแปลง
+                imgUrl = p.imagePath;
+            } else {
+                // ✅ กรณีปกติ: แอดมินอัปโหลดรูป -> เอาชื่อไฟล์มาต่อท้าย URL หลัก
+                imgUrl = `${STORAGE_URL}/${p.imagePath}`;
+            }
+            
+            // แปลง & เป็น &amp; เพื่อไม่ให้ XML พัง
+            imgUrl = imgUrl.replace(/&/g, '&amp;');
             const imgTitle = escapeXml(p.name || 'Sideline Profile');
             
             imageXml = `
@@ -107,17 +132,20 @@ export default async () => {
 
     xml += `\n</urlset>`;
 
-    // 3. ส่ง Response กลับไป
+    // ส่งข้อมูลกลับ (Response)
     return new Response(xml, {
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600", // Cache 1 ชั่วโมง
-        "Netlify-CDN-Cache-Control": "public, max-age=86400, durable" // CDN Cache 1 วัน
+        // Cache ที่ Browser 1 ชั่วโมง
+        "Cache-Control": "public, max-age=3600",
+        // Cache ที่ Netlify Edge Server 1 วัน (โหลดเร็วมาก)
+        "Netlify-CDN-Cache-Control": "public, max-age=86400, durable"
       }
     });
 
   } catch (error) {
-    console.error("Sitemap Generation Error:", error);
-    return new Response("Internal Server Error: " + error.message, { status: 500 });
+    console.error("Sitemap Error:", error);
+    // ถ้าพังจริงๆ ให้ส่ง Error 500 กลับไป
+    return new Response("Internal Server Error", { status: 500 });
   }
 };
