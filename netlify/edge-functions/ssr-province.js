@@ -17,6 +17,9 @@ const CACHE_DURATION = 30 * 60 * 1000; // 30 นาที
 const MAX_PROFILES = 100;
 const BOT_PATTERNS = /bot|spider|crawl|facebook|twitter|whatsapp|telegram|slack|discord|skype|zoom|line/i;
 
+// ✅ 1. เพิ่มตัวแปร DOMAIN ที่นี่
+const DOMAIN = 'https://sidelinechiangmai.netlify.app';
+
 // Helper Functions
 const getSupabaseClient = () => {
   if (!cache.supabaseClient) {
@@ -66,7 +69,6 @@ const validateProvinceKey = (key) => {
 async function fetchProvinceData(supabase, provinceKey) {
   const cacheKey = `province_${provinceKey}`;
   
-  // Check cache first
   if (cache.provinces.has(cacheKey) && isCacheValid(cacheKey)) {
     return cache.provinces.get(cacheKey);
   }
@@ -95,7 +97,6 @@ async function fetchProvinceData(supabase, provinceKey) {
 async function fetchProfiles(supabase, provinceKey) {
   const cacheKey = `profiles_${provinceKey}`;
   
-  // Check cache first
   if (cache.profilesCache.has(cacheKey) && isCacheValid(cacheKey)) {
     return cache.profilesCache.get(cacheKey);
   }
@@ -146,7 +147,8 @@ function generateMetaTags(provinceData, thaiDate, profilesCount) {
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${sanitizeHTML(title)}">
     <meta name="twitter:description" content="${sanitizeHTML(description)}">
-    <link rel="canonical" href="https://yourdomain.com/sideline/province/${provinceData.key}">
+    {/* ✅ 2. แก้ไข Canonical URL ให้ถูกต้อง (สอดคล้องกับ main.js) */}
+    <link rel="canonical" href="${DOMAIN}/location/${provinceData.key}">
   `;
 }
 
@@ -154,7 +156,8 @@ function generateStructuredData(provinceData, profiles, thaiDate) {
   const profileList = profiles.map(profile => ({
     "@type": "Person",
     "name": profile.name,
-    "url": `https://yourdomain.com/sideline/${encodeURIComponent(profile.slug)}`
+    // ✅ 3. แก้ไข URL ของโปรไฟล์แต่ละคนให้ถูกต้อง
+    "url": `${DOMAIN}/sideline/${encodeURIComponent(profile.slug)}`
   }));
 
   return `
@@ -192,6 +195,7 @@ function generateProfilesList(profiles) {
     
     return `
       <li class="profile-item">
+        {/* ลิงก์แบบ Relative Path ถูกต้องแล้ว ไม่ต้องแก้ไข */}
         <a href="/sideline/${safeSlug}" class="profile-link">
           <span class="profile-name">${sanitizeHTML(profile.name)}</span>
           ${ageInfo}
@@ -202,6 +206,9 @@ function generateProfilesList(profiles) {
     `;
   }).join('');
 }
+
+// ... ส่วนที่เหลือของโค้ด (generateHTML, Main Handler) ไม่ต้องแก้ไข ...
+// ... (คัดลอกส่วนที่เหลือจากไฟล์เดิมมาต่อได้เลย) ...
 
 function generateHTML(provinceData, profilesData, thaiDate) {
   const profiles = profilesData.profiles;
