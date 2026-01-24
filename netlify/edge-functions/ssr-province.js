@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // Configuration - ควรใช้ Environment Variables ใน production
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';

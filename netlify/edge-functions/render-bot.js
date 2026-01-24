@@ -1,5 +1,4 @@
-/* global URL, Response, fetch */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // ==========================================
 // 1. CONFIGURATION & FULL DIGITAL FOOTPRINT
