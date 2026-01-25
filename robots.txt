@@ -4,31 +4,29 @@
 # ========================================================
 
 User-agent: *
-# อนุญาตให้เข้าถึงหน้าหลักและโครงสร้างสำคัญ
+# อนุญาตให้เข้าถึงหน้าหลักและโครงสร้างสำคัญทั้งหมด
 Allow: /
 Allow: /location/
 Allow: /sideline/
 Allow: /blog/
 Allow: /assets/
 
-# ปิดกั้นหน้าที่ไม่ส่งผลดีต่อ SEO หรือหน้าส่วนตัว
+# ปิดกั้นเฉพาะหน้าที่เป็นระบบหลังบ้านหรือหน้าส่วนตัวจริงๆ
 Disallow: /admin/
-Disallow: /api/
 Disallow: /login/
 Disallow: /register/
 Disallow: /search?*
 Disallow: /me/
 Disallow: /settings/
 
-# ปรับปรุงปัญหา "Duplicate Content" (Google เลือก URL บัญญัติผิด)
-# บล็อก URL ที่มีพารามิเตอร์ขยะ เช่น fbclid หรือ utm
+# ป้องกันปัญหา Duplicate Content จากพารามิเตอร์โฆษณา
 Disallow: /*?utm_source=*
 Disallow: /*?fbclid=*
 Disallow: /*?gclid=*
 Disallow: /*?_kx=*
 
 # ========================================================
-# BLOCK MALICIOUS & SPY BOTS (ป้องกันคู่แข่งส่อง Keyword/Backlink)
+# BLOCK MALICIOUS & SPY BOTS (ป้องกันคู่แข่งส่องข้อมูล)
 # ========================================================
 User-agent: AhrefsBot
 Disallow: /
@@ -45,11 +43,7 @@ Disallow: /
 User-agent: BLEXBot
 Disallow: /
 
-# ========================================================
-# CRAWL-DELAY (ป้องกัน Server ทำงานหนักเกินไป)
-# ========================================================
-User-agent: *
-Crawl-delay: 1
+# หมายเหตุ: ลบ Crawl-delay ออกเพื่อให้ Googlebot ทำงานได้เต็มประสิทธิภาพ
 
 # ========================================================
 # SITEMAP LOCATION
