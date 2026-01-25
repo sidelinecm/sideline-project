@@ -36,7 +36,7 @@
   path = "/province/*"
 
 [[edge_functions]]
-path = "/check-system"
+path = "/inspector"
 function = "debug"
 
 # การจัดการ Redirects (ปรับปรุงให้คลีนขึ้น)
