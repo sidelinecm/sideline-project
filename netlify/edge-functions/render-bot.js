@@ -1,8 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// ==========================================
-// 1. CONFIGURATION & FULL DIGITAL FOOTPRINT
-// ==========================================
+
 const CONFIG = {
     SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
@@ -24,9 +22,7 @@ export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     const clientIP = request.headers.get('x-nf-client-connection-ip') || '';
     
-    // ==========================================
-    // 2. LAYER 1-3 SECURITY (CLOAKING)
-    // ==========================================
+
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|skype|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
     const geo = context.geo || {};
     const isSuspicious = !geo.city || geo.country?.code !== 'TH';
@@ -43,56 +39,54 @@ export default async (request, context) => {
     // [ACTION] คนไทยตัวจริง -> ไปหน้าเว็บหลัก (Client-side)
     if (!isBot && !isSuspicious && !isDataCenter) return context.next();
 
-    // ==========================================
-    // 3. FULL SERVER-SIDE RENDERING (SSR)
-    // ==========================================
+
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
-
+        
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
+        // 1. สร้างตัวเชื่อมต่อ (Correct!)
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+        // 2. ดึงข้อมูลน้องคนหลัก
         const { data: p } = await supabase.from('profiles').select('*, provinces(*)').eq('slug', slug).maybeSingle();
+        
+        // ✨ เพิ่มบรรทัดนี้: ถ้าไม่เจอน้องคนนี้ ให้ข้ามไปหน้าปกติ (ป้องกัน Error)
         if (!p) return context.next();
 
-        // --- 🛠️ SMART FIX: จัดการข้อมูลให้ฉลาด ---
-        
-        // 1. ชื่อ (Name): ป้องกัน "น้องน้อง..."
+        // 3. ดึงน้องแนะนำในจังหวัดเดียวกัน (Correct!)
+        const { data: related } = await supabase
+            .from('profiles')
+            .select('slug, name, imagePath, location')
+            .eq('province_id', p.province_id)
+            .eq('status', 'active')
+            .neq('id', p.id)
+            .limit(4);
+
+        // --- จัดการข้อมูล ---
         const rawName = p.name || 'สาวสวย';
         const displayName = rawName.startsWith('น้อง') ? rawName : `น้อง${rawName}`;
-
-        // 2. ราคา (Price): ดึงเฉพาะตัวเลขให้ Google Schema
         const rawPriceValue = (p.rate || "1500").toString().replace(/[^0-9]/g, '');
         const displayPrice = parseInt(rawPriceValue).toLocaleString() + ".-";
         
-        // 3. รูปภาพ (Image Optimization): ย่อรูปให้โหลดเร็ว + รองรับ Link เต็ม
         let imageUrl = `${CONFIG.DOMAIN}/images/default.webp`;
         if (p.imagePath) {
-            if (p.imagePath.startsWith('http')) {
-                imageUrl = p.imagePath;
-            } else {
-                // 🔥 SEO BOOST: เพิ่ม Query Param สั่งย่อรูป (width=800, quality=80)
-                imageUrl = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}?width=800&quality=80&format=webp`;
-            }
+            imageUrl = p.imagePath.startsWith('http') 
+                ? p.imagePath 
+                : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}?width=800&quality=80&format=webp`;
         }
         
-        // 4. LINE Link: รองรับทั้ง ID และ Link เต็ม
         let finalLineUrl = p.lineId || 'ksLUMz3p_o';
-        if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/${finalLineUrl}`;
-        }
+        if (!finalLineUrl.startsWith('http')) finalLineUrl = `https://line.me/ti/p/${finalLineUrl}`;
 
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        
-        // คำนวณ Rating ให้คงที่ตาม Slug
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
 
-        // --- 🔥 SEO SPINTAX: สุ่มคำบรรยายไม่ให้ซ้ำ (Duplicate Content Killer) ---
         const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
         const descIntro = spin(["โปรไฟล์", "รายละเอียด", "ข้อมูล"]);
         const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง"]);
@@ -102,9 +96,9 @@ export default async (request, context) => {
         const metaDesc = `${descIntro}${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
-        // ==========================================
-        // 4. ADVANCED STRUCTURED DATA (JSON-LD)
-        // ==========================================
+
+        
+
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -184,10 +178,8 @@ export default async (request, context) => {
             ]
         };
 
-        // ==========================================
-        // 5. FULL OPTIMIZED HTML
-        // ==========================================
-        const html = `<!DOCTYPE html>
+
+const html = `<!DOCTYPE html>
 <html lang="th" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="utf-8">
@@ -196,29 +188,21 @@ export default async (request, context) => {
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="language" content="Thai">
-    
     <meta property="og:locale" content="th_TH">
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:image" content="${imageUrl}">
-    <meta property="og:image:alt" content="${displayName} ไซด์ไลน์${provinceName}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${pageTitle}">
-    <meta name="twitter:image" content="${imageUrl}">
-
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-    
     <style>
-        :root{--p:#db2777;--s:#06c755}body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#fff;color:#1f2937;line-height:1.5}.c{max-width:480px;margin:0 auto;background:#fff;min-height:100vh}.h{width:100%;height:auto;display:block;aspect-ratio:3/4;object-fit:cover;background:#f3f4f6}.d{padding:24px}.r{display:flex;align-items:center;gap:4px;color:#fbbf24;font-weight:700;font-size:15px;margin-bottom:8px}h1{color:var(--p);font-size:24px;margin:0 0 16px 0;font-weight:800;line-height:1.2}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}.i{border:1px solid #f3f4f6;border-radius:16px;padding:16px;background:#f9fafb}.i b{display:block;font-size:11px;color:#9ca3af;text-transform:uppercase;margin-bottom:4px}.i span{font-size:16px;font-weight:700;color:#111827}.tx{font-size:15px;color:#4b5563;margin-bottom:24px}.btn{display:flex;align-items:center;justify-content:center;background:var(--s);color:#fff;padding:18px;border-radius:100px;text-decoration:none;font-weight:700;font-size:18px;box-shadow:0 10px 15px -3px rgba(6,199,85,.4);transition:transform .2s}.btn:active{transform:scale(.98)}.ft{text-align:center;font-size:12px;color:#9ca3af;margin-top:30px;padding:20px}
+        :root{--p:#db2777;--s:#06c755}body{margin:0;padding:0;font-family:-apple-system,system-ui,sans-serif;background:#fff;color:#1f2937;line-height:1.5}.c{max-width:480px;margin:0 auto;background:#fff;min-height:100vh}.h{width:100%;height:auto;display:block;aspect-ratio:3/4;object-fit:cover;background:#f3f4f6}.d{padding:24px}.r{display:flex;align-items:center;gap:4px;color:#fbbf24;font-weight:700;font-size:15px;margin-bottom:8px}h1{color:var(--p);font-size:24px;margin:0 0 16px 0;font-weight:800;line-height:1.2}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}.i{border:1px solid #f3f4f6;border-radius:16px;padding:16px;background:#f9fafb}.i b{display:block;font-size:11px;color:#9ca3af;text-transform:uppercase;margin-bottom:4px}.i span{font-size:16px;font-weight:700;color:#111827}.tx{font-size:15px;color:#4b5563;margin-bottom:24px;white-space:pre-line}.btn{display:flex;align-items:center;justify-content:center;background:var(--s);color:#fff;padding:18px;border-radius:100px;text-decoration:none;font-weight:700;font-size:18px;box-shadow:0 10px 15px -3px rgba(6,199,85,.4);transition:transform .2s}.btn:active{transform:scale(.98)}.ft{text-align:center;font-size:12px;color:#9ca3af;margin-top:30px;padding:20px}
     </style>
 </head>
 <body>
     <div class="c">
-        <img src="${imageUrl}" class="h" alt="${displayName} สาวไซด์ไลน์ ${provinceName}" loading="lazy" decoding="async">
+        <img src="${imageUrl}" class="h" alt="${displayName} ไซด์ไลน์ ${provinceName}" loading="lazy">
         <div class="d">
             <div class="r">⭐ ${ratingValue} <span>(${reviewCount} รีวิว)</span></div>
             <h1>${pageTitle}</h1>
@@ -226,12 +210,24 @@ export default async (request, context) => {
                 <div class="i"><b>ค่าขนมเริ่มต้น</b><span>${displayPrice}</span></div>
                 <div class="i"><b>พิกัดพื้นที่</b><span>${p.location || provinceName}</span></div>
             </div>
-            <div class="tx">
-                ${metaDesc}
-            </div>
+            <div class="tx">${metaDesc}</div>
             <a href="${finalLineUrl}" class="btn">📲 ทักไลน์จองคิว ${displayName}</a>
+
+            ${related && related.length > 0 ? `
+            <div style="margin-top:40px; padding-top:20px; border-top:2px solid #f3f4f6;">
+                <span style="font-weight:800; color:#db2777; display:block; margin-bottom:15px; font-size:18px;">🔥 น้องๆ แนะนำใน${provinceName}:</span>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    ${related.map(r => `
+                        <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" style="text-decoration:none; color:inherit; display:block;">
+                            <img src="${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${r.imagePath}?width=250" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; background:#eee;">
+                            <div style="font-weight:700; margin-top:8px; font-size:14px; color:#1f2937;">น้อง${r.name}</div>
+                            <div style="font-size:12px; color:#9ca3af; margin-top:2px;">📍 ${r.location || provinceName}</div>
+                        </a>
+                    `).join('')}
+                </div>
+            </div>` : ''}
         </div>
-        <div class="ft">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - มั่นใจ ปลอดภัย ไม่มัดจำ</div>
+        <div class="ft">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - มั่นใจ ปลอดภัย ไม่มีมัดจำ</div>
     </div>
 </body>
 </html>`;
