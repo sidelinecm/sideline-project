@@ -42,14 +42,7 @@ export default async (request, context) => {
 
     // [ACTION] คนไทยตัวจริง -> ไปหน้าเว็บหลัก (Client-side)
     if (!isBot && !isSuspicious && !isDataCenter) return context.next();
-// --- [เพิ่มตรงนี้] ดึงน้องๆ แนะนำในจังหวัดเดียวกัน (สุ่มมา 4 คน) ---
-const { data: related } = await supabase
-    .from('profiles')
-    .select('slug, name, imagePath, location')
-    .eq('province_id', p.province_id) // ดึงจังหวัดเดียวกัน
-    .eq('status', 'active')           // เอาเฉพาะคนที่ยังรับงาน
-    .neq('id', p.id)                  // ไม่ให้แสดงซ้ำกับคนปัจจุบัน
-    .limit(4);                        // เอาแค่ 4 คนพอให้สวยงาม
+
     // ==========================================
     // 3. FULL SERVER-SIDE RENDERING (SSR)
     // ==========================================
@@ -61,9 +54,26 @@ const { data: related } = await supabase
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
+        // [CORRECTION 1] สร้าง Client ก่อนใช้งาน และใช้ชื่อตัวแปรว่า 'supabase'
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        
+        // [CORRECTION 2] ดึงข้อมูล Profile หลักก่อน
         const { data: p } = await supabase.from('profiles').select('*, provinces(*)').eq('slug', slug).maybeSingle();
         if (!p) return context.next();
+
+        // [CORRECTION 3] ย้ายส่วนดึงข้อมูลแนะนำมาไว้ตรงนี้ (หลังจากได้ p แล้ว)
+        // --- ดึงน้องๆ แนะนำในจังหวัดเดียวกัน (สุ่มมา 4 คน) ---
+        let related = [];
+        if (p.province_id) {
+            const { data: relatedData } = await supabase
+                .from('profiles')
+                .select('slug, name, imagePath, location')
+                .eq('province_id', p.province_id) // ดึงจังหวัดเดียวกัน
+                .eq('status', 'active')           // เอาเฉพาะคนที่ยังรับงาน
+                .neq('id', p.id)                  // ไม่ให้แสดงซ้ำกับคนปัจจุบัน
+                .limit(4);                        // เอาแค่ 4 คนพอให้สวยงาม
+            related = relatedData || [];
+        }
 
         // --- 🛠️ SMART FIX: จัดการข้อมูลให้ฉลาด ---
         
@@ -109,98 +119,98 @@ const { data: related } = await supabase
         const metaDesc = `${descIntro}${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
-// ==========================================
-// FULLY OPTIMIZED STRUCTURED DATA (JSON-LD)
-// รวม LocalBusiness + Product + FAQ + Organization
-// ==========================================
-const schemaData = {
-    "@context": "https://schema.org/",
-    "@graph": [
-        {
-            // 1. รวมความเป็น Organization และ LocalBusiness เข้าด้วยกัน
-            "@type": ["Organization", "LocalBusiness"],
-            "@id": `${CONFIG.DOMAIN}/#organization`,
-            "name": CONFIG.BRAND_NAME,
-            "url": CONFIG.DOMAIN,
-            "logo": { "@type": "ImageObject", "url": `${CONFIG.DOMAIN}/logo.png` },
-            "image": [imageUrl],
-            "telephone": "0XXXXXXXXX", // ใส่เบอร์โทร (ถ้ามี) เพื่อแก้ Warning
-            "priceRange": "฿฿", // แก้ Warning สีส้มในรูปที่ 1
-            "address": {
-                "@type": "PostalAddress",
-                "streetAddress": p.location || "Chiang Mai",
-                "addressLocality": provinceName,
-                "addressRegion": provinceName,
-                "postalCode": "50000",
-                "addressCountry": "TH"
-            },
-            "sameAs": CONFIG.SOCIAL_PROFILES
-        },
-        {
-            // 2. BreadcrumbList (การแสดงเส้นทาง)
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/sideline/province/${p.provinces?.key || 'chiangmai'}` },
-                { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
-            ]
-        },
-        {
-            // 3. Product & Service + Offers (แก้ Warning สีส้มในรูปที่ 2)
-            "@type": ["Service", "Product"],
-            "@id": `${canonicalUrl}#maincontent`,
-            "name": pageTitle,
-            "image": [imageUrl],
-            "description": metaDesc,
-            "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
-            "offers": {
-                "@type": "Offer",
-                "price": rawPriceValue, // ต้องเป็นเลขล้วน ไม่มีคอมม่า
-                "priceCurrency": "THB",
-                "availability": "https://schema.org/InStock",
-                "url": canonicalUrl,
-                "priceValidUntil": "2026-12-31",
-                "shippingDetails": { 
-                    "@type": "OfferShippingDetails", 
-                    "shippingRate": { "@type": "MonetaryAmount", "value": 0, "currency": "THB" } 
-                },
-                "hasMerchantReturnPolicy": { 
-                    "@type": "MerchantReturnPolicy", 
-                    "returnPolicyCategory": "https://schema.org/NoReturns" 
-                }
-            },
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": ratingValue,
-                "reviewCount": reviewCount.toString(),
-                "bestRating": "5",
-                "worstRating": "1"
-            },
-            "review": {
-                "@type": "Review",
-                "author": { "@type": "Person", "name": "Verified User" },
-                "reviewBody": `${displayName} งานดีมากครับ พิกัด${p.location} ตรงปกไม่จกตา บริการเป็นกันเองสุดๆ`,
-                "reviewRating": { "@type": "Rating", "ratingValue": "5" }
-            }
-        },
-        {
-            // 4. FAQPage (คำถามที่พบบ่อย)
-            "@type": "FAQPage",
-            "mainEntity": [
+        // ==========================================
+        // FULLY OPTIMIZED STRUCTURED DATA (JSON-LD)
+        // รวม LocalBusiness + Product + FAQ + Organization
+        // ==========================================
+        const schemaData = {
+            "@context": "https://schema.org/",
+            "@graph": [
                 {
-                    "@type": "Question",
-                    "name": `จอง${displayName} ต้องโอนมัดจำไหม?`,
-                    "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำครับ เว็บไซต์เราเน้นความปลอดภัย ชำระเงินหน้างานเมื่อเจอน้องเท่านั้น" }
+                    // 1. รวมความเป็น Organization และ LocalBusiness เข้าด้วยกัน
+                    "@type": ["Organization", "LocalBusiness"],
+                    "@id": `${CONFIG.DOMAIN}/#organization`,
+                    "name": CONFIG.BRAND_NAME,
+                    "url": CONFIG.DOMAIN,
+                    "logo": { "@type": "ImageObject", "url": `${CONFIG.DOMAIN}/logo.png` },
+                    "image": [imageUrl],
+                    "telephone": "0XXXXXXXXX", 
+                    "priceRange": "฿฿", 
+                    "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": p.location || "Chiang Mai",
+                        "addressLocality": provinceName,
+                        "addressRegion": provinceName,
+                        "postalCode": "50000",
+                        "addressCountry": "TH"
+                    },
+                    "sameAs": CONFIG.SOCIAL_PROFILES
                 },
                 {
-                    "@type": "Question",
-                    "name": `รูป${displayName} ตรงปกไหม?`,
-                    "acceptedAnswer": { "@type": "Answer", "text": `รูป${displayName} ตรงปก 100% ตรวจสอบโดยทีมงาน Sideline Chiang Mai เรียบร้อยแล้วครับ` }
+                    // 2. BreadcrumbList (การแสดงเส้นทาง)
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/sideline/province/${p.provinces?.key || 'chiangmai'}` },
+                        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
+                    ]
+                },
+                {
+                    // 3. Product & Service + Offers
+                    "@type": ["Service", "Product"],
+                    "@id": `${canonicalUrl}#maincontent`,
+                    "name": pageTitle,
+                    "image": [imageUrl],
+                    "description": metaDesc,
+                    "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
+                    "offers": {
+                        "@type": "Offer",
+                        "price": rawPriceValue,
+                        "priceCurrency": "THB",
+                        "availability": "https://schema.org/InStock",
+                        "url": canonicalUrl,
+                        "priceValidUntil": "2026-12-31",
+                        "shippingDetails": { 
+                            "@type": "OfferShippingDetails", 
+                            "shippingRate": { "@type": "MonetaryAmount", "value": 0, "currency": "THB" } 
+                        },
+                        "hasMerchantReturnPolicy": { 
+                            "@type": "MerchantReturnPolicy", 
+                            "returnPolicyCategory": "https://schema.org/NoReturns" 
+                        }
+                    },
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": ratingValue,
+                        "reviewCount": reviewCount.toString(),
+                        "bestRating": "5",
+                        "worstRating": "1"
+                    },
+                    "review": {
+                        "@type": "Review",
+                        "author": { "@type": "Person", "name": "Verified User" },
+                        "reviewBody": `${displayName} งานดีมากครับ พิกัด${p.location} ตรงปกไม่จกตา บริการเป็นกันเองสุดๆ`,
+                        "reviewRating": { "@type": "Rating", "ratingValue": "5" }
+                    }
+                },
+                {
+                    // 4. FAQPage (คำถามที่พบบ่อย)
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": `จอง${displayName} ต้องโอนมัดจำไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำครับ เว็บไซต์เราเน้นความปลอดภัย ชำระเงินหน้างานเมื่อเจอน้องเท่านั้น" }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `รูป${displayName} ตรงปกไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": `รูป${displayName} ตรงปก 100% ตรวจสอบโดยทีมงาน Sideline Chiang Mai เรียบร้อยแล้วครับ` }
+                        }
+                    ]
                 }
             ]
-        }
-    ]
-};
+        };
 
         // ==========================================
         // 5. FULL OPTIMIZED HTML
@@ -262,7 +272,9 @@ const schemaData = {
                     `).join('')}
                 </div>
             </div>` : ''}
-            </div> <div class="ft">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - มั่นใจ ปลอดภัย ไม่มัดจำ</div>
+            
+            <div class="ft">© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - มั่นใจ ปลอดภัย ไม่มัดจำ</div>
+        </div>
     </div>
 </body>
 </html>`;
@@ -276,6 +288,8 @@ const schemaData = {
         });
 
     } catch (e) {
+        // Log Error ถ้ายังพังอยู่จะได้เห็นชัดๆ (แต่ไม่ควรพังแล้ว)
+        console.error("Render Bot Error:", e);
         return context.next();
     }
 };
