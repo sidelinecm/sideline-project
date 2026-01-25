@@ -32,13 +32,7 @@ export default async (request, context) => {
     const isSuspicious = !geo.city || geo.country?.code !== 'TH';
 
     let isDataCenter = false;
-    if (clientIP && clientIP !== '127.0.0.1' && (isBot || isSuspicious)) {
-        try {
-            const ipCheck = await fetch(`http://ip-api.com/json/${clientIP}?fields=hosting`);
-            const ipData = await ipCheck.json();
-            isDataCenter = ipData.hosting === true;
-        } catch (e) { isDataCenter = false; }
-    }
+    
 
     // [ACTION] คนไทยตัวจริง -> ไปหน้าเว็บหลัก (Client-side)
     if (!isBot && !isSuspicious && !isDataCenter) return context.next();
