@@ -2,26 +2,40 @@
   publish = "."
   functions = "netlify/functions"
 
-# แก้ปัญหา URL มี .html และจัดระเบียบโครงสร้าง Link ทั้งเว็บ
 [build.processing]
   skip_processing = false
 [build.processing.html]
   pretty_urls = true
 
+# -----------------------------------------------------------
+# SECURITY & PERFORMANCE HEADERS (ปลดบล็อกบอท)
+# -----------------------------------------------------------
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+    # ปรับ Referrer เพื่อให้ดึงรูปจาก Supabase และ Font จาก Cloudflare ได้ง่ายขึ้น
+    Referrer-Policy = "no-referrer-when-downgrade"
+    # ยอมให้ Googlebot แสดงผลเว็บในเครื่องมือทดสอบได้
+    X-Frame-Options = "ALLOWALL" 
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# Cache ไฟล์ Static (รูปภาพ/Font) นาน 1 ปี เพื่อความเร็วสูงสุด (LCP)
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-# Edge Functions สำหรับทุกหน้า (ใช้ไฟล์เดียวจัดการทั้งหมด)
-
+# -----------------------------------------------------------
+# REDIRECTS & EDGE FUNCTIONS
+# -----------------------------------------------------------
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
@@ -34,33 +48,8 @@
   function = "render-bot"
   path = "/location/*"
 
-[[edge_functions]]
-  function = "render-bot"
-  path = "/province/*"
-
-
-# การจัดการ Redirects (ปรับปรุงให้คลีนขึ้น)
-
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
-
-[[redirects]]
-  from = "/sw.js"
-  to = "/sw.js"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/manifest.webmanifest"
-  to = "/manifest.webmanifest"
-  status = 200
-  force = true
-
-# SPA fallback สำหรับหน้าอื่นๆ ที่ไม่ใช่ Bot
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
