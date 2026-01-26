@@ -7,22 +7,20 @@
 [build.processing.html]
   pretty_urls = true
 
-# -----------------------------------------------------------
-# 1. SECURITY & PERFORMANCE (ส่วนที่ผมแก้ให้บอทเลิกบล็อก)
-# -----------------------------------------------------------
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    # ปลดบล็อก Referrer เพื่อให้โหลดรูป/Font ข้ามโดเมนผ่าน
-    Referrer-Policy = "no-referrer-when-downgrade"
-    # ยอมให้บอท Google จำลองหน้าเว็บได้ (แก้ SAMEORIGIN)
+    
+    # แก้ไข 2 บรรทัดนี้เพื่อปลดบล็อกบอทและเครื่องมือตรวจสอบ
     X-Frame-Options = "ALLOWALL" 
+    Referrer-Policy = "no-referrer-when-downgrade"
+    
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# Cache ไฟล์ Static ให้เว็บแรง (LCP ดีขึ้น)
+# เพิ่มการ Cache ไฟล์รูปภาพและ Font ให้แรงขึ้น
 [[headers]]
   for = "/images/*"
   [headers.values]
@@ -33,9 +31,11 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# -----------------------------------------------------------
-# 2. EDGE FUNCTIONS (ส่วนของคุณที่คุณถามถึง - ผมรวมให้แล้ว)
-# -----------------------------------------------------------
+# Edge Functions (คงไว้ตามเดิมที่คุณตั้งค่าไว้)
+[[edge_functions]]
+  function = "sitemap"
+  path = "/sitemap.xml"
+
 [[edge_functions]]
   function = "renderbot"
   path = "/sideline/*"
@@ -48,22 +48,23 @@
   function = "renderbot"
   path = "/province/*"
 
-[[edge_functions]]
-  function = "sitemap"
-  path = "/sitemap.xml"
-
-# -----------------------------------------------------------
-# 3. REDIRECTS (การจัดการลิงก์)
-# -----------------------------------------------------------
+# การจัดการ Redirects พื้นฐาน
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
 
-# บังคับให้ Service Worker อัปเดตเสมอ
+# บังคับให้ Service Worker ไม่ถูก Cache เพื่อให้อัปเดตข้อมูลใหม่เสมอ
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
+  force = true
   headers = { "Cache-Control" = "no-cache" }
+
+# SPA fallback (กฎสำรองสุดท้าย)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,3 +1,8 @@
+ /location/* /index.html    200
+/province/* /index.html    200
+/terms-of-service.html    /terms-of-service    301
+/contact.html             /contact             301
+
 /sideline/ปูเป้    /sideline/puep-87-87    301
 /sideline/ชมพู่    /sideline/chmphu-89-89    301
 /sideline/Minnie    /sideline/minnie-66-66    301
