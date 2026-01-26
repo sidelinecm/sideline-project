@@ -19,21 +19,22 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 # Edge Functions สำหรับ Bot และ Sitemap (คงไว้ตามเดิม)
-[[edge_functions]]
-  function = "sitemap"
-  path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "render-bot"
+  function = "combined-function"
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "ssr-province"
+  function = "combined-function"
   path = "/location/*"
 
 [[edge_functions]]
-  function = "ssr-province"
+  function = "combined-function"
   path = "/province/*"
+
+[[edge_functions]]
+  function = "sitemap"
+  path = "/sitemap.xml"
 
 [[edge_functions]]
 path = "/inspector"
