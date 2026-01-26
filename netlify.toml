@@ -35,9 +35,6 @@
   function = "ssr-province"
   path = "/province/*"
 
-[[edge_functions]]
-path = "/inspector"
-function = "debug"
 
 # การจัดการ Redirects (ปรับปรุงให้คลีนขึ้น)
 [[redirects]]
