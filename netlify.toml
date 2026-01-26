@@ -18,7 +18,10 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# Edge Functions สำหรับ Bot และ Sitemap (คงไว้ตามเดิม)
+
+
+# Edge Functions สำหรับทุกหน้า (ใช้ไฟล์เดียวจัดการทั้งหมด)
+
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
@@ -28,15 +31,16 @@
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "ssr-province"
+  function = "render-bot"
   path = "/location/*"
 
 [[edge_functions]]
-  function = "ssr-province"
+  function = "render-bot"
   path = "/province/*"
 
 
 # การจัดการ Redirects (ปรับปรุงให้คลีนขึ้น)
+
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
