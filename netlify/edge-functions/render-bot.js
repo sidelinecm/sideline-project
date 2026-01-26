@@ -1,7 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// --- 1. CONFIGURATION (ตั้งค่าระบบ) ---
+// --- 1. CONFIGURATION ---
 const CONFIG = {
+    // แนะนำ: ใน Production ควรย้าย Key เหล่านี้ไปที่ Netlify Environment Variables
     SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
@@ -14,94 +15,96 @@ const CONFIG = {
 };
 
 // --- 2. HELPER FUNCTIONS ---
-const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const formatDate = () => new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
 
-// --- 3. MAIN FUNCTION ---
+// สร้างวันที่ในอนาคต 1 ปี สำหรับ Schema priceValidUntil
+const getFutureDate = () => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
+    return d.toISOString().split('T')[0];
+};
+
+// แปลง Path รูปภาพให้เป็น URL เต็ม และปรับขนาด
+const optimizeImg = (path) => {
+    if (!path) return `${CONFIG.DOMAIN}/default-profile.webp`; // Fallback image
+    if (path.startsWith('http')) return path;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}?width=800&quality=85&format=webp`;
+};
+
+// --- 3. MAIN LOGIC ---
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // A. ตรวจสอบ Bot (Cloaking Logic)
-    // อนุญาต: Google, Bing, Facebook, Twitter, Line, Discord, Telegram, SEO Tools
+    // A. Bot Detection (ดักจับ Bot เพื่อทำ SEO SSR)
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|skype|curl|wget|inspectiontool|lighthouse/i.test(ua);
-    const geo = context.geo || {};
-    
-    // ความปลอดภัย: ถ้าไม่ใช่ Bot และ IP น่าสงสัย (ไม่อยู่ไทย) อาจจะให้ผ่านไปหน้า App ปกติ
-    // แต่ถ้าเป็น Bot ให้หยุดที่นี่เพื่อส่ง HTML (SSR)
-    // ถ้าเป็นคนไทยปกติ -> context.next() เพื่อไปโหลด React/Vue Client-side
-    const isSuspicious = !geo.city || geo.country?.code !== 'TH';
-    if (!isBot && !isSuspicious) return context.next();
+    const isDebug = request.url.includes('?debug=true');
+
+    // ถ้าไม่ใช่ Bot และไม่ได้ Debug ให้ผ่านไปโหลดหน้า App ปกติ (Client-side Rendering)
+    if (!isBot && !isDebug) {
+        return context.next();
+    }
 
     try {
         const url = new URL(request.url);
         const slug = url.pathname.split('/').pop(); // ดึง Slug จาก URL
 
-        // B. เชื่อมต่อฐานข้อมูล
+        // B. Query Data from Supabase
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // C. ดึงข้อมูลโปรไฟล์ + จังหวัด
-        const { data: p } = await supabase.from('profiles')
-            .select('id, name, slug, imagePath, rate, location, age, height, weight, proportions, lineId, verified, status, province_id, provinces(nameThai, slug)')
+        const { data: p, error } = await supabase.from('profiles')
+            .select('id, name, slug, imagePath, galleryPaths, styleTags, rate, location, age, height, weight, proportions, lineId, verified, status, created_at, province_id, provinces(nameThai, slug)')
             .eq('slug', slug)
             .maybeSingle();
 
-        // ถ้าหาไม่เจอ ให้ Client-side จัดการ (404)
-        if (!p) return context.next();
+        // กรณีไม่เจอน้อง หรือ Database Error ให้ Client จัดการ (404 Page)
+        if (error || !p) {
+            console.error("Profile not found or DB Error:", error);
+            return context.next();
+        }
 
-        // D. ดึงข้อมูลที่เกี่ยวข้อง (Related Profiles) เพื่อทำ Internal Link
+        // C. Related Profiles (หาเพื่อนในจังหวัดเดียวกัน)
         let related = [];
         if (p.province_id) {
-            const { data: relatedData } = await supabase
-                .from('profiles')
+            const { data: rel } = await supabase.from('profiles')
                 .select('slug, name, imagePath, location')
                 .eq('province_id', p.province_id)
                 .eq('status', 'active')
-                .neq('id', p.id) // ไม่เอาตัวเอง
-                .limit(4); // เอามา 4 คน
-            related = relatedData || [];
+                .neq('id', p.id)
+                .limit(4);
+            related = rel || [];
         }
 
-        // --- 4. DATA PREPARATION (เตรียมข้อมูล) ---
+        // D. Data Preparation (เตรียมข้อมูลสำหรับแสดงผล)
         const rawName = p.name || 'สาวสวย';
         const displayName = rawName.startsWith('น้อง') ? rawName : `น้อง${rawName}`;
-        const cleanPrice = (p.rate || "1500").toString().replace(/\D/g, ''); // เฉพาะตัวเลข
-        const displayPrice = parseInt(cleanPrice).toLocaleString();
         
-        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
+        // จัดการเรื่องราคา
+        const priceVal = (p.rate || "1500").toString().replace(/\D/g, ''); // เอาเฉพาะตัวเลข "1500"
+        const displayPrice = parseInt(priceVal).toLocaleString(); // "1,500"
+        
+        const provinceName = p.provinces?.nameThai || 'เชียงใหม่';
         const provinceSlug = p.provinces?.slug || 'chiangmai';
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceSlug}`;
-        
-        // จัดการรูปภาพ (รองรับทั้ง URL เต็มและ Path)
-        let imageUrl = `${CONFIG.DOMAIN}/images/default.webp`;
-        if (p.imagePath) {
-            imageUrl = p.imagePath.startsWith('http') 
-                ? p.imagePath 
-                : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}?width=800&quality=85&format=webp`;
-        }
-        
-        // Link Line
-        let lineUrl = p.lineId || '#';
-        if (!lineUrl.startsWith('http')) lineUrl = `https://line.me/ti/p/${lineUrl}`;
-
-        // สร้างวันที่ปัจจุบัน (เพื่อให้ Google เห็นว่าเนื้อหาสดใหม่)
-        const dateNow = new Date();
-        const dateString = dateNow.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-        const validUntil = new Date(dateNow.setFullYear(dateNow.getFullYear() + 1)).toISOString().split('T')[0];
-
-        // Spintax (สุ่มคำเพื่อไม่ให้ซ้ำ)
-        const titleIntro = spin(["แนะนำ", "รีวิว", "ห้ามพลาด", "มาแรง", "จัดอันดับ"]);
-        const descIntro = spin(["พบกับ", "ดูโปรไฟล์", "รายละเอียด"]);
-        const adj = spin(["ขี้อ้อน", "เอาใจเก่ง", "ฟิวแฟน", "งานดี", "ตรงปก"]);
-
-        // Meta Tags
-        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ราคา ${displayPrice}.-`;
-        const metaDesc = `${descIntro}${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'} ปี ${adj} รับงานเองไม่ผ่านเอเย่นต์ พิกัด${p.location || provinceName} ปลอดภัย ไม่โอนมัดจำ`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
-        // Rating Algorithm (Deterministic based on ID)
-        const ratingValue = (4.7 + (p.id % 3) / 10).toFixed(1); // 4.7, 4.8, 4.9
-        const reviewCount = (p.id * 7) % 300 + 50; // สุ่มจำนวนรีวิว 50-350
+        // จัดการรูปภาพ
+        const mainImage = optimizeImg(p.imagePath);
+        const galleryImages = (p.galleryPaths || []).map(path => optimizeImg(path));
+        
+        // Tags และ Styles
+        const styles = p.styleTags && p.styleTags.length > 0 ? p.styleTags.join(', ') : 'น่ารัก, เป็นกันเอง, ฟิวแฟน';
 
-        // --- 5. SCHEMA.ORG (JSON-LD) ---
+        // --- SEO: Title & Description ---
+        const title = `${displayName} รับงานไซด์ไลน์${provinceName} | ตรงปก 100% เริ่มต้น ${displayPrice}.-`;
+        const desc = `จองคิว ${displayName} ไซด์ไลน์${provinceName} โซน${p.location || provinceName} อายุ ${p.age || '20+'} สัดส่วน ${p.proportions || '-'} นิสัย ${styles} รูปตัวจริง ไม่ต้องโอนมัดจำ (อัปเดต ${formatDate()})`;
+
+        // --- SEO: Fake Ratings (Deterministic based on ID for consistency) ---
+        // ใช้ ID คำนวณเพื่อให้คะแนนคงที่สำหรับคนเดิมเสมอ (Google ไม่ชอบคะแนนที่เปลี่ยนไปมาทุกครั้งที่ Crawl)
+        const ratingValue = (4.5 + (p.id % 5) / 10).toFixed(1); // 4.5 - 4.9
+        const reviewCount = (p.id * 13) % 400 + 50; // 50 - 450 reviews
+
+        // --- E. SCHEMA.ORG (JSON-LD) ---
+        // ส่วนสำคัญ: ต้องใช้ตัวแปรที่ประกาศไว้ข้างบน (title, desc, priceVal)
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -122,22 +125,26 @@ export default async (request, context) => {
                     ]
                 },
                 {
-                    "@type": ["Product", "LocalBusiness"], // Hybrid Schema
+                    "@type": ["Product", "LocalBusiness"],
                     "@id": `${canonicalUrl}#product`,
-                    "name": pageTitle,
-                    "description": metaDesc,
-                    "image": [imageUrl],
+                    "name": title,
+                    "description": desc,
+                    "image": [mainImage, ...galleryImages.slice(0, 5)],
                     "sku": `SDL-${p.id}`,
                     "mpn": `SDL-${p.id}`,
                     "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
-                    "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
+                    "address": { 
+                        "@type": "PostalAddress", 
+                        "addressLocality": provinceName, 
+                        "addressCountry": "TH" 
+                    },
                     "priceRange": "฿฿",
                     "offers": {
                         "@type": "Offer",
                         "url": canonicalUrl,
                         "priceCurrency": "THB",
-                        "price": cleanPrice,
-                        "priceValidUntil": validUntil, // ราคาใช้ได้ถึงปีหน้า
+                        "price": priceVal,
+                        "priceValidUntil": getFutureDate(),
                         "availability": "https://schema.org/InStock",
                         "seller": { "@type": "Organization", "name": displayName }
                     },
@@ -150,189 +157,223 @@ export default async (request, context) => {
                     },
                     "review": {
                         "@type": "Review",
-                        "author": { "@type": "Person", "name": "Verified User" },
-                        "datePublished": new Date().toISOString().split('T')[0],
-                        "reviewBody": `${displayName} ตัวจริงน่ารักมากครับ ตรงปก งานดี บริการประทับใจ`,
+                        "author": { "@type": "Person", "name": "Verified Member" },
+                        "datePublished": p.created_at ? p.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+                        "reviewBody": `${displayName} ตัวจริงน่ารักมากครับ ตรงปก งานดี บริการประทับใจ ไม่ผิดหวังเลยครับ`,
                         "reviewRating": { "@type": "Rating", "ratingValue": "5" }
                     }
                 },
                 {
                     "@type": "FAQPage",
                     "mainEntity": [
-                        { "@type": "Question", "name": `จองคิว${displayName} ต้องทำยังไง?`, "acceptedAnswer": { "@type": "Answer", "text": `สามารถแอดไลน์ ${p.lineId || 'น้อง'} เพื่อสอบถามคิวและนัดสถานที่ได้เลยครับ` } },
-                        { "@type": "Question", "name": `ต้องโอนมัดจำไหม?`, "acceptedAnswer": { "@type": "Answer", "text": `เว็บไซต์เราไม่มีนโยบายเก็บมัดจำครับ จ่ายเงินหน้างานกับน้องโดยตรงเท่านั้น ปลอดภัย 100%` } }
+                        { 
+                            "@type": "Question", 
+                            "name": `${displayName} รับงานโซนไหน?`, 
+                            "acceptedAnswer": { "@type": "Answer", "text": `น้อง${displayName} สะดวกรับงานในพื้นที่ ${p.location || provinceName} และระแวกใกล้เคียงครับ` } 
+                        },
+                        { 
+                            "@type": "Question", 
+                            "name": `ราคาเริ่มต้นเท่าไหร่?`, 
+                            "acceptedAnswer": { "@type": "Answer", "text": `เรทค่าขนมเริ่มต้นที่ ${displayPrice} บาทครับ (ขึ้นอยู่กับรายละเอียดงาน)` } 
+                        },
+                        { 
+                            "@type": "Question", 
+                            "name": `ต้องโอนมัดจำก่อนไหม?`, 
+                            "acceptedAnswer": { "@type": "Answer", "text": `ปลอดภัย 100% ครับ เว็บเราไม่มีนโยบายโอนมัดจำ จ่ายหน้างานกับน้องได้เลย` } 
+                        }
                     ]
                 }
             ]
         };
 
-        // --- 6. HTML GENERATION ---
+        // --- F. HTML GENERATION (SSR) ---
         const html = `<!DOCTYPE html>
 <html lang="th" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle}</title>
-    <meta name="description" content="${metaDesc}">
+    <title>${title}</title>
+    <meta name="description" content="${desc}">
     <link rel="canonical" href="${canonicalUrl}">
     
-    <!-- Meta Tags for Social -->
-    <meta property="og:locale" content="th_TH">
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
-    <meta property="og:image" content="${imageUrl}">
-    <meta property="og:url" content="${canonicalUrl}">
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="profile">
+    <meta property="og:url" content="${canonicalUrl}">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${desc}">
+    <meta property="og:image" content="${mainImage}">
+    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
+    <meta property="og:locale" content="th_TH">
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${pageTitle}">
-    <meta name="twitter:image" content="${imageUrl}">
+    <meta name="twitter:title" content="${title}">
+    <meta name="twitter:description" content="${desc}">
+    <meta name="twitter:image" content="${mainImage}">
 
     <!-- Schema.org -->
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-    
-    <!-- Inline CSS (Fast Loading) -->
+
     <style>
-        :root{--primary:#ec4899;--bg:#f8fafc;--text:#1e293b;--white:#ffffff}
-        body{margin:0;font-family:-apple-system,'Prompt',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+        :root{--primary:#ec4899;--bg:#f8fafc;--text:#334155;--white:#fff;--success:#10b981}
+        body{margin:0;font-family:-apple-system,'Prompt',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding-bottom:80px}
         a{text-decoration:none;color:inherit}
-        .container{max-width:480px;margin:0 auto;background:var(--white);min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.05)}
+        .container{max-width:480px;margin:0 auto;background:var(--white);min-height:100vh;box-shadow:0 0 15px rgba(0,0,0,0.05)}
         
-        /* Navigation Breadcrumb */
-        .nav{padding:12px 16px;font-size:12px;color:#64748b;border-bottom:1px solid #e2e8f0}
-        .nav a:hover{color:var(--primary);text-decoration:underline}
-        
-        /* Hero Image */
-        .hero{position:relative;width:100%;padding-top:125%;background:#e2e8f0}
+        /* Hero Section */
+        .hero{position:relative;width:100%;padding-top:125%;background:#e2e8f0;overflow:hidden}
         .hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
-        .verified-badge{position:absolute;top:10px;right:10px;background:#10b981;color:#fff;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+        .status-badge{position:absolute;top:10px;right:10px;background:var(--success);color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,0.2)}
         
         /* Content */
         .content{padding:20px}
-        .meta-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-        .rating{color:#fbbf24;font-size:14px;font-weight:bold}
-        .date{font-size:11px;color:#94a3b8}
+        h1{font-size:20px;color:var(--primary);margin:0 0 5px 0;font-weight:700;line-height:1.4}
+        .update-time{font-size:11px;color:#94a3b8;margin-bottom:15px;display:block}
         
-        h1{margin:0 0 5px 0;font-size:24px;color:var(--primary);line-height:1.3}
-        .location{font-size:14px;color:#64748b;display:flex;align-items:center;gap:5px;margin-bottom:20px}
+        /* Spec Grid */
+        .spec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+        .spec-item{background:#f1f5f9;padding:12px;border-radius:8px;text-align:center}
+        .spec-lbl{font-size:11px;color:#64748b;display:block}
+        .spec-val{font-size:15px;font-weight:bold;color:#1e293b}
+        .price-val{color:var(--primary);font-size:18px}
+
+        /* Sections */
+        .section{margin-bottom:25px;border-bottom:1px solid #f1f5f9;padding-bottom:20px}
+        .h3-title{font-size:16px;margin:0 0 15px 0;display:flex;align-items:center;gap:8px;font-weight:700}
+        .h3-title::before{content:'';display:block;width:4px;height:20px;background:var(--primary);border-radius:2px}
         
-        /* Info Grid */
-        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:25px}
-        .info-item{background:#f1f5f9;padding:12px;border-radius:10px;text-align:center}
-        .info-label{display:block;font-size:11px;color:#64748b;margin-bottom:2px}
-        .info-val{font-size:16px;font-weight:bold;color:#334155}
-        .price{color:var(--primary)}
+        /* Gallery */
+        .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .gallery img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:6px;background:#f1f5f9}
         
-        .desc{font-size:15px;color:#334155;margin-bottom:25px;padding:15px;background:#fff1f2;border-radius:10px;border-left:4px solid var(--primary)}
-        
-        /* CTA Button */
-        .btn-line{display:flex;align-items:center;justify-content:center;background:#06c755;color:#fff;font-size:18px;font-weight:bold;padding:16px;border-radius:50px;box-shadow:0 4px 15px rgba(6,199,85,0.3);transition:transform .2s}
-        .btn-line:active{transform:scale(0.98)}
-        .safety-text{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+        /* FAQ */
+        .faq-item{margin-bottom:12px;background:#f8fafc;padding:12px;border-radius:8px}
+        .faq-q{font-weight:600;font-size:13px;color:#334155;margin-bottom:4px}
+        .faq-a{font-size:13px;color:#64748b}
+
+        /* Action Bar */
+        .action-bar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;padding:10px 20px;box-shadow:0 -2px 10px rgba(0,0,0,0.05);display:flex;gap:10px;z-index:99}
+        .btn{flex:1;padding:12px;border-radius:50px;text-align:center;font-weight:bold;font-size:16px;border:none;cursor:pointer}
+        .btn-line{background:#06c755;color:#fff;box-shadow:0 4px 12px rgba(6,199,85,0.3)}
         
         /* Related */
-        .related{margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0}
-        .rel-title{font-size:16px;font-weight:bold;margin-bottom:15px;display:block}
-        .rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .rel-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
-        .rel-name{font-size:13px;font-weight:bold;margin-top:5px;display:block}
-        .rel-loc{font-size:11px;color:#64748b}
+        .rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+        .rel-item img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
+        .rel-name{font-size:13px;font-weight:600;margin-top:5px;display:block}
         
-        /* Footer */
-        .footer{text-align:center;font-size:11px;color:#cbd5e1;padding:30px 20px;background:#1e293b;margin-top:40px}
+        /* Breadcrumb */
+        .bread{font-size:11px;color:#94a3b8;margin-bottom:10px;display:flex;gap:5px;overflow-x:auto;white-space:nowrap}
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Breadcrumb -->
-        <div class="nav">
-            <a href="${CONFIG.DOMAIN}">🏠 หน้าแรก</a> &rsaquo; 
-            <a href="${provinceUrl}">ไซด์ไลน์${provinceName}</a> &rsaquo; 
-            <span>${displayName}</span>
+        <div style="padding:10px 20px 0;">
+            <div class="bread">
+                <a href="${CONFIG.DOMAIN}">หน้าแรก</a> <span>/</span>
+                <a href="${provinceUrl}">ไซด์ไลน์${provinceName}</a> <span>/</span>
+                <span>${displayName}</span>
+            </div>
         </div>
 
-        <!-- Main Image -->
+        <!-- Hero Image -->
         <div class="hero">
-            <img src="${imageUrl}" alt="${displayName}" loading="eager">
-            ${p.verified ? '<div class="verified-badge">✓ ยืนยันตัวตน</div>' : ''}
+            <img src="${mainImage}" alt="${title}">
+            ${p.verified ? '<div class="status-badge">✓ Verified ตรวจสอบแล้ว</div>' : ''}
         </div>
 
         <div class="content">
-            <!-- Meta Header -->
-            <div class="meta-row">
-                <div class="rating">⭐ ${ratingValue} <span style="font-weight:normal;color:#94a3b8">(${reviewCount} รีวิว)</span></div>
-                <div class="date">อัปเดต: ${dateString}</div>
+            <h1>${title}</h1>
+            <span class="update-time">📅 อัปเดตข้อมูลเมื่อ: ${formatDate()}</span>
+
+            <!-- Specs -->
+            <div class="spec-grid">
+                <div class="spec-item"><span class="spec-lbl">เรทราคา</span><span class="spec-val price-val">฿${displayPrice}</span></div>
+                <div class="spec-item"><span class="spec-lbl">อายุ</span><span class="spec-val">${p.age || '20+'} ปี</span></div>
+                <div class="spec-item"><span class="spec-lbl">สัดส่วน</span><span class="spec-val">${p.proportions || '-'}</span></div>
+                <div class="spec-item"><span class="spec-lbl">พิกัด</span><span class="spec-val">${p.location || provinceName}</span></div>
             </div>
 
-            <h1>${pageTitle}</h1>
-            <div class="location">📍 พิกัด: ${p.location || provinceName}</div>
-
-            <!-- Stats Grid -->
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">ค่าขนมเริ่มต้น</span>
-                    <span class="info-val price">฿${displayPrice}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">อายุ</span>
-                    <span class="info-val">${p.age || '20+'} ปี</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">สัดส่วน</span>
-                    <span class="info-val">${p.proportions || '34-24-35'}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">ส่วนสูง/น้ำหนัก</span>
-                    <span class="info-val">${p.height || '-'} / ${p.weight || '-'}</span>
+            <!-- About -->
+            <div class="section">
+                <h3 class="h3-title">ข้อมูลน้อง${displayName}</h3>
+                <p style="font-size:14px;color:#475569;">
+                    ${displayName} สาวสวยประจำโซน <strong>${p.location || provinceName}</strong> 
+                    สไตล์การดูแลแบบ <strong>${styles}</strong> รับประกันงานดี ตรงปก 
+                    พี่ๆ ที่กำลังมองหาคนดูแลฟิวแฟน เป็นกันเอง ห้ามพลาดครับ
+                </p>
+                <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+                    ${(p.styleTags || []).map(t => `<span style="background:#fce7f3;color:#be185d;padding:4px 10px;border-radius:15px;font-size:12px">${t}</span>`).join('')}
                 </div>
             </div>
 
-            <!-- Description -->
-            <div class="desc">
-                ${metaDesc}
-                <br><br>
-                <strong>จุดเด่น:</strong> ${spin(['เอาใจเก่ง', 'เป็นกันเอง', 'คุยสนุก', 'ไม่เร่งงาน', 'ตรงปก 100%'])}
+            <!-- FAQ -->
+            <div class="section">
+                <h3 class="h3-title">คำถามที่พบบ่อย (FAQ)</h3>
+                <div class="faq-item">
+                    <div class="faq-q">Q: ${displayName} รับงานโซนไหนบ้าง?</div>
+                    <div class="faq-a">A: สะดวกรับงานย่าน ${p.location || provinceName} ค่ะ</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Q: ต้องโอนมัดจำก่อนไหม?</div>
+                    <div class="faq-a">A: ไม่ต้องโอนมัดจำค่ะ จ่ายหน้างานได้เลย ปลอดภัย 100%</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Q: ติดต่อน้องทางไหนไวสุด?</div>
+                    <div class="faq-a">A: แอดไลน์ด้านล่างทักมาจองคิวได้เลยค่ะ (ตอบไวมาก)</div>
+                </div>
             </div>
 
-            <!-- Call to Action -->
-            <a href="${lineUrl}" class="btn-line">📲 ทักไลน์จองคิว ${displayName}</a>
-            <div class="safety-text">🛡️ ปลอดภัย • ไม่โอนมัดจำ • จ่ายหน้างาน</div>
+            <!-- Gallery -->
+            ${galleryImages.length > 0 ? `
+            <div class="section">
+                <h3 class="h3-title">รูปภาพเพิ่มเติม</h3>
+                <div class="gallery">
+                    ${galleryImages.slice(0, 6).map(img => `<img src="${img}" alt="${displayName} ${provinceName}" loading="lazy">`).join('')}
+                </div>
+            </div>` : ''}
 
-            <!-- Related Profiles -->
+            <!-- Related -->
             ${related.length > 0 ? `
-            <div class="related">
-                <span class="rel-title">🔥 น้องๆ แนะนำใน${provinceName}</span>
+            <div class="section" style="border:none">
+                <h3 class="h3-title">แนะนำสาวสวยใกล้เคียง</h3>
                 <div class="rel-grid">
                     ${related.map(r => `
-                        <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="rel-card">
-                            <img src="${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${r.imagePath}?width=250" alt="น้อง${r.name}">
+                        <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="rel-item">
+                            <img src="${optimizeImg(r.imagePath)}" alt="${r.name}">
                             <span class="rel-name">น้อง${r.name}</span>
-                            <span class="rel-loc">📍 ${r.location || provinceName}</span>
+                            <span style="font-size:11px;color:#64748b">📍 ${r.location || provinceName}</span>
                         </a>
                     `).join('')}
                 </div>
             </div>` : ''}
         </div>
+        
+        <br><br>
 
-        <div class="footer">
-            &copy; ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - แหล่งรวมไซด์ไลน์อันดับ 1<br>
-            ให้บริการในพื้นที่ ${provinceName} และทั่วประเทศ
+        <!-- Fixed Bottom Bar -->
+        <div class="action-bar">
+            <a href="${p.lineId && !p.lineId.startsWith('http') ? 'https://line.me/ti/p/~' + p.lineId : (p.lineId || '#')}" class="btn btn-line">
+                💚 แอดไลน์จองคิว
+            </a>
         </div>
+
     </div>
 </body>
 </html>`;
 
-        // 7. RETURN RESPONSE
+        // G. Return Response
         return new Response(html, {
-            headers: {
-                "content-type": "text/html; charset=utf-8",
-                "cache-control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=600",
-                "x-robots-tag": "index, follow, max-image-preview:large"
+            headers: { 
+                "content-type": "text/html; charset=utf-8", 
+                "cache-control": "public, max-age=3600", // Cache 1 ชั่วโมง
+                "x-robots-tag": "index, follow" // สั่งให้ Bot เก็บข้อมูลแน่นอน
             }
         });
 
     } catch (e) {
+        // Critical Error Handling: ถ้ามีอะไรพัง ให้ Log และส่งต่อไปหน้าปกติ
         console.error("Render Bot Error:", e);
-        // กรณี Error ให้ส่งต่อไป Client-side ยังดีกว่าหน้าขาว
         return context.next();
     }
 };
