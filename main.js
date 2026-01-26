@@ -82,9 +82,10 @@ document.addEventListener('DOMContentLoaded', initApp);
         initGlobalClickListener();
         updateActiveNavLinks();
 
-        await handleRouting();
-        await handleDataLoading();
-
+        // ✅ แก้ไขเป็น (สลับบรรทัดกัน):
+    await handleDataLoading(); // 1. โหลดข้อมูลทั้งหมดให้เสร็จก่อน
+    await handleRouting();     // 2. ค่อยนำข้อมูลไปแสดงผลตาม URL
+    
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
         document.body.classList.add('loaded');
@@ -789,112 +790,159 @@ function populateProvinceDropdown() {
     dom.provinceSelect.appendChild(fragment);
 }
 // =================================================================
-// [ฉบับแก้ไขสมบูรณ์ 100% - รองรับ Pretty URLs] - handleRouting
+// 🚀 HANDLE ROUTING (UNIVERSAL EDITION - FINAL & SAFE)
+// รองรับทุกภาษา และ ป้องกันการทับหน้า Static 100%
 // =================================================================
 async function handleRouting(dataLoaded = false) {
-    // แปลง path ให้เป็นตัวเล็ก เพื่อให้ตรวจสอบง่าย (เช่น /Blog -> /blog)
-    // และลบเครื่องหมาย / ท้ายสุดออก (เช่น /blog/ -> /blog) เพื่อความแม่นยำ
-    let path = window.location.pathname.toLowerCase();
-    if (path.length > 1 && path.endsWith('/')) {
-        path = path.slice(0, -1);
-    }
+    try {
+        // 1. ถอดรหัส URL และจัดรูปแบบ (รองรับไทย, จีน, อีโมจิ)
+        const rawPath = window.location.pathname;
+        let path = decodeURIComponent(rawPath).trim().toLowerCase(); 
 
-    // ✅ --- START: ส่วนป้องกันหน้า Static (ฉบับอัปเกรด) ---
-    // 1. ระบุรายชื่อหน้า Static ทั้งหมดที่มีในเว็บ (หน้าที่มีไฟล์ HTML จริงๆ)
-    // ใส่เพิ่มได้เลยตามที่คุณมี เช่น '/contact', '/rules', '/register'
-    const staticPages = ['/blog', '/about', '/faq', '/profiles', '/locations', '/contact', '/policy'];
-
-    // 2. ตรวจสอบเงื่อนไข 3 อย่าง:
-    // A: มีนามสกุล .html (แบบเดิม)
-    // B: เป็นหน้า Static ที่ระบุไว้ในรายการข้างบน
-    // C: หรือเป็นหน้าย่อยของ Static นั้นๆ (เช่น /blog/post-1)
-    const isStaticPage = path.endsWith('.html') || 
-                         path.endsWith('.htm') || 
-                         staticPages.some(p => path === p || path.startsWith(p + '/'));
-
-    if (isStaticPage) {
-        console.log(`🛑 Static page detected (${path}). Skipping dynamic logic.`);
-        
-        // ปิด Lightbox และซ่อนส่วนแสดงผลของแอป เพื่อไม่ให้ทับเนื้อหาจริง
-        closeLightbox(false); 
-        if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
-        if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
-        
-        return; // 🛑 จบการทำงานทันที (Meta Tags ของหน้านั้นจะปลอดภัย)
-    }
-    // ✅ --- END: ส่วนป้องกัน ---
-    
-    // -------------------------------------------------------
-    // ส่วน Logic เดิม (ถูกต้องแล้ว)
-    // -------------------------------------------------------
-
-    // 1. หน้าโปรไฟล์ (Profile Page)
-    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-    if (profileMatch) {
-        const slug = decodeURIComponent(profileMatch[1]);
-        state.currentProfileSlug = slug;
-        
-        // ลองหาใน Memory ก่อน ถ้าไม่มีค่อย Fetch ใหม่
-        let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
-        if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
-
-        if (profile) {
-            openLightbox(profile);
-            updateAdvancedMeta(profile, null); // อัปเดต Meta เฉพาะคน
-            // ซ่อนหน้า List เพื่อ focus ที่ Lightbox
-            dom.profilesDisplayArea?.classList.add('hidden');
-            dom.featuredSection?.classList.add('hidden');
-        } else if (dataLoaded) {
-            // ถ้าโหลดเสร็จแล้วแต่ไม่เจอ profile -> ดีดกลับหน้าแรก
-            history.replaceState(null, '', '/');
-            closeLightbox(false);
-            dom.profilesDisplayArea?.classList.remove('hidden');
-            state.currentProfileSlug = null;
+        // ลบ Slash ท้ายสุดออก (Normalize Path)
+        if (path.length > 1 && path.endsWith('/')) {
+            path = path.slice(0, -1);
         }
-        return;
-    } 
-    
-    // 2. หน้าจังหวัด (Location/Province Page)
-    const provinceMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
-    if (provinceMatch) {
-        const provinceKey = decodeURIComponent(provinceMatch[1]);
+
+        // ✅ --- ส่วนป้องกันหน้า Static (SAFETY GUARD) ---
+        // รายชื่อหน้าที่ห้าม JS เข้าไปยุ่ง (รวม index.html แบบระบุชื่อไฟล์)
+        const staticPages = [
+            '/blog', '/about', '/faq', '/profiles', '/locations', '/contact', '/policy', 
+            '/rules', '/register', '/index.html', '/home.html'
+        ];
+        
+        // เช็ค 3 ระดับ: 
+        // 1. นามสกุลไฟล์ (.html, .htm)
+        // 2. ตรงกับ List เป๊ะๆ
+        // 3. เป็นหน้าย่อยของ Static (เช่น /blog/post-1)
+        const isStaticPage = path.endsWith('.html') || 
+                             path.endsWith('.htm') || 
+                             staticPages.some(p => path === p || path.startsWith(p + '/'));
+
+        if (isStaticPage) {
+            console.log(`🛑 Static page detected (${path}). Stopping SEO & Routing logic.`);
+            // ปิดทุกอย่างที่เป็น Dynamic
+            closeLightbox(false); 
+            if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
+            if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
+            return; // ⛔ จบการทำงานทันที ไม่มีการไปแตะต้อง Meta Tags
+        }
+
+        // -------------------------------------------------------
+        // A. หน้าโปรไฟล์ (Profile Page)
+        // -------------------------------------------------------
+        const profileMatch = path.match(/^\/(?:sideline|profile|app|model|สาว)\/([^/]+)/);
+        
+        if (profileMatch) {
+            const slug = profileMatch[1];
+            state.currentProfileSlug = slug;
+            
+            // ค้นหา (รองรับทั้ง Slug และ ID)
+            let profile = state.allProfiles.find(p => 
+                (p.slug || '').toLowerCase() === slug || 
+                (p.id || '').toString().toLowerCase() === slug
+            );
+            
+            if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
+
+            if (profile) {
+                openLightbox(profile);
+                updateAdvancedMeta(profile, null); // ✅ อนุญาตให้อัปเดตเฉพาะหน้านี้
+                dom.profilesDisplayArea?.classList.add('hidden');
+                dom.featuredSection?.classList.add('hidden');
+            } else if (dataLoaded) {
+                console.warn(`❌ Profile not found: ${slug}`);
+                history.replaceState(null, '', '/');
+                closeLightbox(false);
+                dom.profilesDisplayArea?.classList.remove('hidden');
+                state.currentProfileSlug = null;
+            }
+            return;
+        } 
+        
+        // -------------------------------------------------------
+        // B. หน้าจังหวัด (Location Page)
+        // -------------------------------------------------------
+        const locationMatch = path.match(/^\/(?:location|province|zone|tag|หมวด|โซน|จังหวัด|โลเคชั่น)\/([^/]+)/);
+        
+        if (locationMatch) {
+            const param = locationMatch[1].trim();
+            state.currentProfileSlug = null;
+            closeLightbox(false);
+            
+            let foundKey = null;
+            
+            // 🔍 Smart Lookup: หา Key จากชื่อไทย/อังกฤษ
+            if (state.provincesMap.size > 0) {
+                if (state.provincesMap.has(param)) {
+                    foundKey = param;
+                } else {
+                    for (let [key, name] of state.provincesMap.entries()) {
+                        if (name.toLowerCase().trim() === param) {
+                            foundKey = key;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (foundKey) {
+                // Sync Dropdown
+                if (dom.provinceSelect) {
+                    const optionExists = Array.from(dom.provinceSelect.options).some(o => o.value === foundKey);
+                    if (optionExists) dom.provinceSelect.value = foundKey;
+                }
+                
+                if (dataLoaded) {
+                    applyUltimateFilters(false);
+                    
+                    const provinceName = state.provincesMap.get(foundKey) || foundKey;
+                    
+                    // เตรียมข้อมูล SEO
+                    const seoData = {
+                        title: `ไซด์ไลน์${provinceName} - รับงาน${provinceName}`,
+                        description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย...`,
+                        canonicalUrl: `${CONFIG.SITE_URL}/location/${foundKey}`,
+                        provinceName: provinceName, 
+                        profiles: state.allProfiles.filter(p => p.provinceKey === foundKey)
+                    };
+                    
+                    updateAdvancedMeta(null, seoData); // ✅ อนุญาตให้อัปเดตหน้านี้
+                    dom.profilesDisplayArea?.classList.remove('hidden');
+                }
+            } else if (dataLoaded) {
+                console.warn(`⚠️ Location not found: ${param}`);
+                history.replaceState(null, '', '/');
+                applyUltimateFilters(false);
+            }
+            return;
+        }
+
+        // -------------------------------------------------------
+        // C. หน้าแรก (Root Path Only)
+        // -------------------------------------------------------
         state.currentProfileSlug = null;
         closeLightbox(false);
-        
-        // ตั้งค่า Dropdown ให้ตรงกับ URL
-        if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
+        dom.profilesDisplayArea?.classList.remove('hidden');
         
         if (dataLoaded) {
-            applyUltimateFilters(false); // กรองข้อมูล
-            const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
+            if (dom.provinceSelect) dom.provinceSelect.value = '';
+            if (dom.searchInput) dom.searchInput.value = '';
             
-            // สร้าง SEO Data สำหรับหน้าจังหวัด
-            const completeTitle = `ไซด์ไลน์${provinceName} - รับงาน${provinceName} (ทีมงาน Sideline Chiangmai)`;
-            const completeDescription = `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก 100% ปลอดภัย การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}.`;
+            applyUltimateFilters(false);
 
-            const seoData = {
-                title: completeTitle, 
-                description: completeDescription,
-                canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
-                provinceName: provinceName, 
-                profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
-            };
-            
-            updateAdvancedMeta(null, seoData); // อัปเดต Meta จังหวัด
-            dom.profilesDisplayArea?.classList.remove('hidden');
+            // 🔥 ความปลอดภัยสูงสุด: อัปเดต Meta หน้าแรกเฉพาะตอนอยู่ที่ Root จริงๆ เท่านั้น
+            // เพื่อไม่ให้ไปทับ index.html หรือหน้าอื่นๆ โดยไม่ตั้งใจ
+            if (path === '' || path === '/') {
+                updateAdvancedMeta(null, null); 
+            }
         }
-        return;
-    }
 
-    // 3. หน้าแรก (Home Page - Default)
-    // ถ้าไม่เข้าเงื่อนไขข้างบนเลย จะตกมาที่นี่
-    state.currentProfileSlug = null;
-    closeLightbox(false);
-    dom.profilesDisplayArea?.classList.remove('hidden');
-    
-    if (dataLoaded) {
-        applyUltimateFilters(false);
-        updateAdvancedMeta(null, null); // อัปเดต Meta หน้าแรก
+    } catch (error) {
+        console.error("Critical Routing Error:", error);
+        history.replaceState(null, '', '/');
+        if (dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
+        closeLightbox(false);
     }
 }
 
@@ -1839,33 +1887,21 @@ function populateLightboxData(p) {
 
 
 // ==========================================
-// 💎 SEO STRATEGIC POOL (ฉบับจัดเต็ม)
+// 💎 SEO STRATEGIC POOL (คลังคำศัพท์ LSI)
 // ==========================================
 const SEO_POOL = {
     styles: [
-        "ฟิวแฟนแท้ๆ", 
-        "งานเนี๊ยบดูแลดี", 
-        "สายหวานคุยสนุก", 
-        "เป็นกันเองสุดๆ", 
-        "งานละเมียดใส่ใจ", 
-        "สายอ้อนน่ารัก", 
-        "งานคุณภาพตรงปก"
+        "ฟิวแฟนแท้ๆ", "งานเนี๊ยบดูแลดี", "สายหวานคุยสนุก", 
+        "เอาใจเก่งสุดๆ", "สไตล์นางแบบ", "น่ารักขี้อ้อน", 
+        "งานเอนเตอร์เทน", "คุยเก่งไม่เดดแอร์"
     ],
     trust: [
-        "ไม่มีมัดจำ", 
-        "นัดเจอจ่ายหน้างาน", 
-        "ไม่ต้องโอนก่อน", 
-        "จ่ายเงินตอนเจอตัว", 
-        "ปลอดภัยไม่โดนโกง", 
-        "เช็คของก่อนจ่าย"
+        "ไม่ต้องโอนก่อน", "ไม่มีมัดจำล่วงหน้า", "ไม่โอนจอง", 
+        "จ่ายหน้างาน 100%", "นัดเจอจ่ายสด", "ปลอดภัยไร้กังวล"
     ],
     guarantee: [
-        "ตัวจริงตรงรูป 100%", 
-        "รูปปัจจุบันแน่นอน", 
-        "ไม่จกตา", 
-        "การันตีความสวย", 
-        "คัดคนงานดี", 
-        "ตรงปกไม่ผิดหวัง"
+        "ตัวจริงตรงรูป 100%", "รูปปัจจุบันไม่จกตา", "การันตีความสวย", 
+        "ตรงปกไม่ผิดหวัง", "คัดงานคุณภาพ", "รับประกันความตรงปก"
     ],
     pick: function(group) {
         return this[group][Math.floor(Math.random() * this[group].length)];
@@ -1873,85 +1909,93 @@ const SEO_POOL = {
 };
 
 // =================================================================
-// 10. SEO META TAGS UPDATER (THE BEST VERSION - PRICE INCLUDED)
+// 10. SEO META TAGS UPDATER (THE ULTIMATE VERSION)
 // =================================================================
-
-/**
- * 🔥 SUPREME DYNAMIC SEO ENGINE - FULL VERSION
- * จัดการ Title, Meta, และ JSON-LD Schema แบบละเอียดที่สุด
- */
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // --- 1. การจัดการความสะอาดของระบบ ---
-    // ล้าง Schema เดิมทั้งหมดเพื่อป้องกันข้อมูลขยะขัดขวางการจัดอันดับของ Google
-    const oldScripts = document.querySelectorAll('script[id^="schema-jsonld"]');
-    oldScripts.forEach(s => s.remove());
+    // 🛡️ SAFETY CHECK 1: ถ้าไม่ใช่หน้า Profile และไม่ใช่หน้า Location และไม่ใช่หน้าแรก
+    // (เช่น เป็นหน้า static อื่นๆ ที่หลุดรอดมา) ห้ามรันเด็ดขาด!
+    const currentPath = window.location.pathname.toLowerCase();
+    const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html'; // อนุญาตให้จัดการหน้าแรก
+    const isDynamic = profile || pageData;
 
-    // --- 2. การตั้งค่าตัวแปรเวลา (Freshness Factor) ---
-    // Google ให้คะแนนหน้าที่ระบุวันเวลาปัจจุบันสูงกว่า
-    const YEAR_TH = new Date().getFullYear() + 543; // ปี พ.ศ.
+    if (!isDynamic && !isRoot) {
+        return; // ออกทันที ไม่ทำอะไรกับ Meta Tags
+    }
+
+    // --- เริ่มกระบวนการ SEO ---
+    document.querySelectorAll('script[id^="schema-jsonld"]').forEach(s => s.remove());
+
+    const YEAR_TH = new Date().getFullYear() + 543;
     const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const d = new Date();
     const CURRENT_DATE = `${d.getDate()} ${thaiMonths[d.getMonth()]} ${YEAR_TH}`;
 
-    // --- 3. ฟังก์ชันภายใน: ล้างชื่อให้สมบูรณ์ (จุดที่ 1 ที่ต้องแก้) ---
     const getCleanName = (rawName) => {
         if (!rawName) return "";
-        let name = rawName.trim().replace(/^(น้อง\s?)/, ''); // ตัด "น้อง" ที่อาจซ้ำซ้อน
-        name = name.toLowerCase(); // ปรับมาตรฐานตัวพิมพ์เล็กก่อน
-        // ปรับตัวแรกเป็นตัวใหญ่ (Proper Noun) เพื่อให้ Google มองว่าเป็นชื่อเฉพาะที่มีคุณภาพ
+        let name = rawName.trim().replace(/^(น้อง\s?)/, '');
+        name = name.toLowerCase();
         return `น้อง${name.charAt(0).toUpperCase() + name.slice(1)}`;
     };
 
     // ==========================================
-    // CASE A: หน้าโปรไฟล์รายบุคคล (เน้นปิดการขาย)
+    // CASE A: หน้าโปรไฟล์ (สูตรที่คุณต้องการ)
     // ==========================================
     if (profile) {
         const displayName = getCleanName(profile.name);
-        const cleanNameOnly = displayName.replace('น้อง', '');
         const province = profile.provinceNameThai || 'เชียงใหม่';
         
-        // รวบรวมข้อมูลดิบ
-        const priceTag = profile.rate ? `ราคา ${profile.rate}` : 'รับงานเอง'; 
-        const stats = profile.stats ? `สัดส่วน ${profile.stats}` : '';
-        const age = profile.age ? `อายุ ${profile.age}` : '';
-        const location = profile.location ? `พิกัด ${profile.location}` : province;
+        // ข้อมูล
+        const priceInfo = profile.rate ? `ราคา ${profile.rate}` : 'สอบถามราคา';
+        const workArea = profile.location ? `${profile.location}, ${province}` : province;
+        
+        let statsParts = [];
+        if (profile.stats) statsParts.push(`สัดส่วน ${profile.stats}`);
+        if (profile.age) statsParts.push(`อายุ ${profile.age}`);
+        const detailsSnippet = statsParts.join('. '); 
 
-        // ดึงพลังจากการสุ่มคำ (จุดที่ 2 เพื่อความไม่ตายตัว)
-        const v = SEO_POOL.pick('styles');
         const t = SEO_POOL.pick('trust');
         const g = SEO_POOL.pick('guarantee');
 
-        // 🔥 STRATEGIC TITLE: [ชื่อ] [จังหวัด] [ราคา] | [จุดเด่น] [ความปลอดภัย] [การันตี]
-        // โครงสร้างนี้ถูกวิเคราะห์มาแล้วว่าครอบคลุมการค้นหา (Search Intent) มากที่สุด
-        const finalTitle = `${displayName} ไซด์ไลน์${province} ${priceTag} | ${v} ${t} ${g} (${YEAR_TH})`;
+        // 🏆 TITLE: [ชื่อ] รับงานไซด์ไลน์[จังหวัด] | [การันตี] [ความน่าเชื่อถือ] (ปี)
+        // (ไม่มีราคาในชื่อ ตามที่ขอ)
+        const finalTitle = `${displayName} รับงานไซด์ไลน์${province} | ${g} ${t} (${YEAR_TH})`;
 
-        // 🔥 STRATEGIC DESCRIPTION: เน้น Keyword หนาแน่นแต่เป็นธรรมชาติ
-        const finalDesc = `ดูโปรไฟล์ ${displayName} ไซด์ไลน์${province} ${priceTag}. ${stats} ${age} พิกัด: ${location}. บริการสไตล์${v} ${g}. มั่นใจปลอดภัยสูงสุดด้วยระบบ${t} จ่ายหน้างาน 100% ไม่มีการโอนก่อน อัปเดตข้อมูลล่าสุด ${CURRENT_DATE}.`;
+        // 🚀 DESCRIPTION: เรียงตามสูตรเป๊ะ
+        // โปรไฟล์... พื้นที่... ราคา... สัดส่วน... การันตี... Call to Action...
+        const finalDesc = `โปรไฟล์ ${displayName} สำหรับรับงานไซด์ไลน์ในพื้นที่ ${workArea}. ${priceInfo}. ${detailsSnippet}. ${g} และ ${t} 100%. ปลอดภัย จ่ายเงินหน้างาน. คลิกเพื่อดูรูปภาพเพิ่มเติม, อ่านรีวิว และแอดไลน์เพื่อนัดหมายได้ทันที. (อัปเดต ${CURRENT_DATE})`;
 
-        // 🎯 อัปเดตลง DOM จริง
+        const keywords = [
+            displayName,
+            `รับงานไซด์ไลน์${province}`,
+            `ไซด์ไลน์${province}`,
+            `รับงาน${province}`,
+            profile.location,
+            priceInfo,
+            t, g
+        ].filter(Boolean).join(', ');
+
+        // Update
         document.title = finalTitle;
         updateMeta('description', finalDesc);
-        updateMeta('keywords', `${displayName}, ไซด์ไลน์${province}, รับงาน${province}, ${cleanNameOnly} ${t}, ${v}, ${g}`);
+        updateMeta('keywords', keywords);
         updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`);
         
-        // 🎯 ส่งข้อมูลไปที่ Social Media Meta
         updateOpenGraphMeta(profile, finalTitle, finalDesc, 'profile');
-
-        // 🎯 ฝังโครงสร้างข้อมูลเชิงลึก (JSON-LD)
         injectSchema(generatePersonSchema(profile, finalDesc, province), 'schema-jsonld-person');
         injectSchema(generateBreadcrumbSchema('profile', displayName, province), 'schema-jsonld-breadcrumb');
+    }
 
-    } 
     // ==========================================
-    // CASE B: หน้าจังหวัด / หน้าหมวดหมู่ (Listing)
+    // CASE B: หน้าจังหวัด
     // ==========================================
     else if (pageData) {
         const province = pageData.provinceName || 'เชียงใหม่';
         const count = pageData.profiles ? pageData.profiles.length : 'หลาย';
         const t = SEO_POOL.pick('trust');
+        const g = SEO_POOL.pick('guarantee');
 
-        const pageTitle = `ไซด์ไลน์${province} ${t} ราคาดีที่สุด | รวมรูปน้องๆ ${province} ตรงปก (${YEAR_TH})`;
-        const pageDesc = `รวมรายชื่อน้องๆ ไซด์ไลน์${province} และเด็กเอ็นฯ คุณภาพ พิกัด${province} กว่า ${count} คน. ข้อมูลชัดเจน รูปตรงปก ${t} นัดเจอจ่ายเงินหน้างานเท่านั้น อัปเดตล่าสุด ${CURRENT_DATE}.`;
+        const pageTitle = `ไซด์ไลน์${province} รับงานเอง ${t} | รวมรูปน้องๆ ${province} ตรงปก (${YEAR_TH})`;
+        const pageDesc = `รวมรายชื่อน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province} กว่า ${count} คน. ข้อมูลชัดเจน รูปตรงปก ${g}. ${t} นัดเจอจ่ายเงินหน้างานเท่านั้น. อัปเดตล่าสุด ${CURRENT_DATE}.`;
 
         document.title = pageTitle;
         updateMeta('description', pageDesc);
@@ -1962,39 +2006,33 @@ function updateAdvancedMeta(profile = null, pageData = null) {
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
         injectSchema(generateBreadcrumbSchema('location', province), 'schema-jsonld-breadcrumb');
     } 
+    
     // ==========================================
-    // CASE C: หน้าแรก (Home) - พลังของ FAQ & Trust
+    // CASE C: หน้าแรก (Home Page - Authority)
     // ==========================================
     else {
-        // ป้องกันการทับซ้อนหน้า Static อื่นๆ
-        const currentPath = window.location.pathname;
-        if (currentPath !== '/' && currentPath !== '/index.html' && currentPath !== '') {
-            return; 
-        }
+        // 🛡️ DOUBLE CHECK: ถ้าไม่ใช่ Root Path จริงๆ ห้ามทำ
+        if (currentPath !== '/' && currentPath !== '' && currentPath !== '/index.html') return;
 
-        const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานเอง ไม่มัดจำ ตรงปก 100% | Sideline Chiangmai (${YEAR_TH})`;
-        const GLOBAL_DESC = `ศูนย์รวมไซด์ไลน์เชียงใหม่ และทั่วประเทศไทย แสดงราคาชัดเจน คัดน้องๆ งานฟิวแฟน รับงานเอง ไม่มีการโอนมัดจำล่วงหน้า ปลอดภัย 100% นัดเจอเช็คความตรงปกแล้วจ่ายหน้างาน (${CURRENT_DATE})`;
+        const GLOBAL_TITLE = `Sideline Chiangmai - ศูนย์รวมไซด์ไลน์เชียงใหม่และทั่วไทย รับงานเอง ไม่ผ่านเอเย่นต์ (${YEAR_TH})`;
+        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. คัดเน้นๆ สวยตรงปก 100%. ระบบปลอดภัย ไม่ต้องโอนมัดจำ (No Deposit). เช็คเรทราคา รูปภาพ และรีวิวตัวจริงได้ที่นี่ อัปเดตใหม่ทุกวัน`;
 
         document.title = GLOBAL_TITLE;
         updateMeta('description', GLOBAL_DESC);
-        updateMeta('keywords', 'ไซด์ไลน์เชียงใหม่, ราคาไซด์ไลน์, รับงานฟิวแฟน, ไซด์ไลน์ไม่มัดจำ, ตรงปก');
+        updateMeta('keywords', 'ไซด์ไลน์เชียงใหม่, รับงานไซด์ไลน์, ไซด์ไลน์ไม่มัดจำ, ตรงปก');
         updateLink('canonical', CONFIG.SITE_URL);
         
         updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
-        
-        // Schemas ชุดใหญ่สำหรับหน้าแรก
         injectSchema(generateWebsiteSchema(), 'schema-jsonld-web');
         injectSchema(generateOrganizationSchema(), 'schema-jsonld-org');
         
         const FAQ_DATA = [
-            { question: "ต้องโอนมัดจำก่อนไหม? มีความเสี่ยงโดนโกงหรือเปล่า?", answer: "สบายใจได้เลยค่ะ ที่นี่มีกฎเหล็ก 'ไม่รับโอนมัดจำทุกกรณี' (No Deposit) พี่ๆ สามารถเดินทางไปเจอตัวน้อง เช็คความตรงปกที่หน้างาน แล้วค่อยชำระเงินสดกับน้องโดยตรงค่ะ ปลอดภัย 100% ไม่เสี่ยงโดนโกงแน่นอนค่ะ" },
-            { question: "การันตีความตรงปกไหม? ถ้าไม่เหมือนในรูปทำอย่างไร?", answer: "ทางเราคัดกรองน้องๆ จากรูปตัวจริงปัจจุบันเท่านั้นค่ะ การันตีความสวยตรงปกแน่นอน หากพี่ๆ ไปถึงหน้างานแล้วพบว่า 'ตัวจริงไม่เหมือนรูป' สามารถปฏิเสธงานได้ทันทีโดยไม่มีค่าปรับใดๆ ค่ะ" },
-            { question: "ขั้นตอนการจองและติดต่อ ยากไหม?", answer: "ง่ายและเป็นส่วนตัวมากค่ะ 1. เลือกน้องที่ถูกใจ 2. กดแอดไลน์เพื่อคุยกับน้องโดยตรง 3. เดินทางไปตามพิกัด 4. จ่ายเงินหน้างาน จบ ครบ ง่าย ไม่ต้องสมัครสมาชิกค่ะ" }
+            { question: "ต้องโอนมัดจำก่อนไหม?", answer: "ไม่ต้องค่ะ! เราเน้นความปลอดภัยสูงสุด สมาชิกสามารถนัดเจอและจ่ายเงินหน้างานกับน้องๆ ได้โดยตรง 100% ไม่มีการเรียกเก็บเงินก่อนค่ะ" },
+            { question: "การันตีความตรงปกไหม?", answer: "ทางเราคัดกรองรูปภาพให้เป็นปัจจุบันที่สุด พร้อมการันตีความตรงปก หากไม่เหมือนในรูป สามารถปฏิเสธหน้างานได้ทันทีค่ะ" }
         ];
         injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
     }
 }
-        
 
 
 // =================================================================
