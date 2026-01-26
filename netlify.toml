@@ -8,7 +8,7 @@
   pretty_urls = true
 
 # -----------------------------------------------------------
-# SECURITY & PERFORMANCE HEADERS (ปลดบล็อกบอท)
+# 1. SECURITY & PERFORMANCE (ส่วนที่ผมแก้ให้บอทเลิกบล็อก)
 # -----------------------------------------------------------
 [[headers]]
   for = "/*"
@@ -16,13 +16,13 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    # ปรับ Referrer เพื่อให้ดึงรูปจาก Supabase และ Font จาก Cloudflare ได้ง่ายขึ้น
+    # ปลดบล็อก Referrer เพื่อให้โหลดรูป/Font ข้ามโดเมนผ่าน
     Referrer-Policy = "no-referrer-when-downgrade"
-    # ยอมให้ Googlebot แสดงผลเว็บในเครื่องมือทดสอบได้
+    # ยอมให้บอท Google จำลองหน้าเว็บได้ (แก้ SAMEORIGIN)
     X-Frame-Options = "ALLOWALL" 
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# Cache ไฟล์ Static (รูปภาพ/Font) นาน 1 ปี เพื่อความเร็วสูงสุด (LCP)
+# Cache ไฟล์ Static ให้เว็บแรง (LCP ดีขึ้น)
 [[headers]]
   for = "/images/*"
   [headers.values]
@@ -34,22 +34,36 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 # -----------------------------------------------------------
-# REDIRECTS & EDGE FUNCTIONS
+# 2. EDGE FUNCTIONS (ส่วนของคุณที่คุณถามถึง - ผมรวมให้แล้ว)
 # -----------------------------------------------------------
+[[edge_functions]]
+  function = "renderbot"
+  path = "/sideline/*"
+
+[[edge_functions]]
+  function = "renderbot"
+  path = "/location/*"
+
+[[edge_functions]]
+  function = "renderbot"
+  path = "/province/*"
+
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
-[[edge_functions]]
-  function = "render-bot"
-  path = "/sideline/*"
-
-[[edge_functions]]
-  function = "render-bot"
-  path = "/location/*"
-
+# -----------------------------------------------------------
+# 3. REDIRECTS (การจัดการลิงก์)
+# -----------------------------------------------------------
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
+
+# บังคับให้ Service Worker อัปเดตเสมอ
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  headers = { "Cache-Control" = "no-cache" }
