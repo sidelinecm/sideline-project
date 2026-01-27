@@ -29,7 +29,6 @@ gsap.registerPlugin(ScrollTrigger);
         DEFAULT_OG_IMAGE: '/images/sidelinechiangmai-social-preview.webp'
     };
     
-
 function getCleanName(rawName) {
     if (!rawName || typeof rawName !== 'string') return "";
     // ตัดคำว่า "น้อง" ออกก่อน และล้างช่องว่าง
@@ -49,6 +48,8 @@ const SEO_WORDS = {
     }
 };
 
+
+    // 1. STATE MANAGEMENT (เพิ่ม cleanupFunctions เข้าไป)
 let state = { 
     allProfiles: [], 
     provincesMap: new Map(), 
@@ -57,14 +58,14 @@ let state = {
     isFetching: false, 
     lastFetchedAt: '1970-01-01T00:00:00Z', 
     realtimeSubscription: null,
-    cleanupFunctions: [] 
+    cleanupFunctions: [] // <--- ต้องเพิ่มบรรทัดนี้ครับ!
 };
 
 const dom = {};
 let supabase;
 let fuseEngine;
 
-
+// 2. MAIN ENTRY POINT
 document.addEventListener('DOMContentLoaded', initApp);
     async function initApp() {
         console.log("🚀 App Initializing...");
@@ -82,10 +83,9 @@ document.addEventListener('DOMContentLoaded', initApp);
         initGlobalClickListener();
         updateActiveNavLinks();
 
-        // ✅ แก้ไขเป็น (สลับบรรทัดกัน):
-    await handleDataLoading(); // 1. โหลดข้อมูลทั้งหมดให้เสร็จก่อน
-    await handleRouting();     // 2. ค่อยนำข้อมูลไปแสดงผลตาม URL
-    
+        await handleRouting();
+        await handleDataLoading();
+
         const yearSpan = document.getElementById('currentYearDynamic');
         if (yearSpan) yearSpan.textContent = new Date().getFullYear();
         document.body.classList.add('loaded');
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', initApp);
         });
     }
 
-
+    // 3. CORE INITIALIZATION & HELPER FUNCTIONS
     function initializeSupabase() {
         try {
             supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -300,122 +300,143 @@ async function handleDataLoading() {
     }
 }
 
-// ✅ SUPREME FETCH DELTA (FIXED & SEO INTEGRATED)
-// ใช้ created_at เป็นหลักและเชื่อมโยงระบบ SEO ให้สมบูรณ์
-async function fetchDataDelta() {
-    if (state.isFetching) return false;
-    state.isFetching = true;
+// ✅ DELTA FETCH (FIXED: ใช้ created_at แทน updated_at)
+    async function fetchDataDelta() {
+        if (state.isFetching) return false;
+        state.isFetching = true;
 
-    if (!supabase) {
-        state.isFetching = false;
-        console.error("❌ Supabase client not initialized");
-        return false;
-    }
-
-    try {
-        console.log('🔄 Starting supreme delta fetch...');
-
-        // 1. ดึงข้อมูลจังหวัดและโปรไฟล์พร้อมกัน (Optimized Performance)
-        const [provincesRes, profilesRes] = await Promise.all([
-            supabase.from('provinces').select('*'),
-            supabase.from('profiles')
-                .select('*')
-                .gt('created_at', state.lastFetchedAt || '1970-01-01T00:00:00Z') 
-                .order('created_at', { ascending: false })
-        ]);
-
-        if (provincesRes.error) throw provincesRes.error;
-        if (profilesRes.error) throw profilesRes.error;
-
-        // 2. จัดการ Mapping จังหวัด (เพื่อให้ชื่อจังหวัดใน SEO ถูกต้อง)
-        state.provincesMap.clear();
-        (provincesRes.data || []).forEach(p => {
-            const thName = p.nameThai || p.name_thai || p.thai_name || p.name || p.provinceName;
-            const key = p.key || p.slug || p.id;
-            if (key && thName) {
-                state.provincesMap.set(key.toString(), thName.trim());
-            }
-        });
-
-        const fetchedProfiles = profilesRes.data || [];
-        console.log(`📊 Fetched ${fetchedProfiles.length} new profiles`);
-
-        // 3. Process ข้อมูลใหม่พร้อมฉีดระบบ SEO
-        if (fetchedProfiles.length > 0) {
-            const newProcessedProfiles = fetchedProfiles
-                .map(p => processProfileData(p)) // ฟังก์ชันนี้จะทำ getCleanName และสร้าง Alt Text
-                .filter(Boolean);
-
-            if (newProcessedProfiles.length > 0) {
-                // Merge ข้อมูลใหม่เข้ากับข้อมูลเดิม (ไม่ให้ข้อมูลซ้ำ)
-                state.allProfiles = mergeProfilesData(state.allProfiles, newProcessedProfiles);
-
-                // อัปเดตตัวแปรเวลาล่าสุดเพื่อใช้ในการโหลดครั้งต่อไป
-                const newestDate = fetchedProfiles
-                    .map(p => p.created_at)
-                    .filter(Boolean)
-                    .sort()
-                    .pop();
-
-                if (newestDate) state.lastFetchedAt = newestDate;
-            }
+        if (!supabase) {
+            state.isFetching = false;
+            return false;
         }
 
-        // 4. กรณีไม่มีข้อมูลใน State เลย (เช่น เปิดเว็บครั้งแรก) ให้ดึงทั้งหมด
-        if (state.allProfiles.length === 0) {
-            console.log('🔄 Initial load: Fetching all records...');
-            const allRes = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (allRes.error) throw allRes.error;
-
-            state.allProfiles = (allRes.data || [])
-                .map(p => processProfileData(p))
-                .filter(Boolean);
-
-            const newest = allRes.data?.map(p => p.created_at).filter(Boolean).sort().pop();
-            if (newest) state.lastFetchedAt = newest;
-        }
-
-        // 5. จัดเรียงข้อมูล (อัปเดตล่าสุดขึ้นก่อน) และแสดงผล
-        state.allProfiles.sort((a, b) => {
-            const dateA = new Date(a.created_at || 0);
-            const dateB = new Date(b.created_at || 0);
-            return dateB - dateA;
-        });
-
-        // 6. อัปเดต UI และ Cache
-        populateProvinceDropdown();
-        renderProfiles(state.allProfiles, false); 
-
-        // เก็บลง LocalStorage เพื่อความเร็วในการเข้าครั้งถัดไป
         try {
-            localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(state.allProfiles));
-            localStorage.setItem(CONFIG.KEYS.LAST_FETCH, Date.now().toString());
-            localStorage.setItem('lastFetchedAt', state.lastFetchedAt); // เก็บเวลาล่าสุดไว้ด้วย
-        } catch (e) {
-            console.warn('⚠️ LocalStorage limit reached, cache not saved');
-        }
+            console.log('🔄 Starting delta fetch...');
 
-        state.isFetching = false;
-        return true;
+            // ✅ ดึงข้อมูลจังหวัดและโปรไฟล์พร้อมกัน
+            const [provincesRes, profilesRes] = await Promise.all([
+                supabase.from('provinces').select('*'),
+                supabase.from('profiles')
+                    .select('*')
+                    .gt('created_at', state.lastFetchedAt) // ✅ FIX: แก้ไข column name
+                    .order('created_at', { ascending: false }) // ✅ FIX: แก้ไข column name
+            ]);
 
-    } catch (err) {
-        console.error('❌ Fetch Delta Critical Error:', err);
-        
-        // Fallback: ใช้ข้อมูลเก่าจาก Cache ถ้า API พัง
-        const cachedJSON = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
-        if (cachedJSON) {
-            state.allProfiles = JSON.parse(cachedJSON).map(p => processProfileData(p)).filter(Boolean);
-            renderProfiles(state.allProfiles, false);
+            // ✅ ตรวจสอบ errors
+            if (provincesRes.error) throw provincesRes.error;
+            if (profilesRes.error) throw profilesRes.error; // ข้อผิดพลาด 42703 ถูกแก้ไขที่บรรทัดนี้แล้ว
+
+            // ✅ จัดการจังหวัด
+            state.provincesMap.clear();
+            (provincesRes.data || []).forEach(p => {
+                const thName = p.nameThai || p.name_thai || p.thai_name || p.name || p.provinceName;
+                const key = p.key || p.slug || p.id;
+
+                if (key && thName) {
+                    state.provincesMap.set(key.toString(), thName);
+                }
+            });
+
+            const fetchedProfiles = profilesRes.data || [];
+            console.log(`📊 Fetched ${fetchedProfiles.length} new profiles`);
+
+            // ✅ Process และ Merge ข้อมูล
+            if (fetchedProfiles.length > 0) {
+                const newProcessedProfiles = fetchedProfiles
+                    .map(processProfileData)
+                    .filter(Boolean);
+
+                if (newProcessedProfiles.length > 0) {
+                    state.allProfiles = mergeProfilesData(state.allProfiles, newProcessedProfiles);
+
+                    // ✅ อัพเดต lastFetchedAt จากข้อมูลใหม่
+                    const newestDate = fetchedProfiles
+                        .map(p => p.created_at) // ✅ FIX: แก้ไข column name
+                        .filter(Boolean)
+                        .sort()
+                        .pop();
+
+                    if (newestDate) {
+                        state.lastFetchedAt = newestDate;
+                    }
+                }
+            }
+
+            // ✅ ถ้าเป็นครั้งแรกที่โหลดหรือไม่มีข้อมูล
+            if (state.allProfiles.length === 0) {
+                console.log('🔄 No existing data, fetching all profiles...');
+
+                const allProfilesRes = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false }); // ✅ FIX: แก้ไข column name
+
+                if (allProfilesRes.error) throw allProfilesRes.error;
+
+                if (allProfilesRes.data && allProfilesRes.data.length > 0) {
+                    state.allProfiles = allProfilesRes.data
+                        .map(processProfileData)
+                        .filter(Boolean);
+
+                    const newestDate = allProfilesRes.data
+                        .map(p => p.created_at) // ✅ FIX: แก้ไข column name
+                        .filter(Boolean)
+                        .sort()
+                        .pop();
+
+                    if (newestDate) {
+                        state.lastFetchedAt = newestDate;
+                    }
+                }
+            }
+
+            // ✅ เรียงลำดับข้อมูลโดยอัพเดตล่าสุดก่อน
+            state.allProfiles.sort((a, b) => {
+                const dateA = new Date(a.lastUpdated || a.created_at || 0); // ✅ FIX: ใช้ created_at
+                const dateB = new Date(b.lastUpdated || b.created_at || 0); // ✅ FIX: ใช้ created_at
+                return dateB - dateA;
+            });
+
+            populateProvinceDropdown();
+            // 💡 BUG FIX: การโหลดข้อมูลสำเร็จ จะแก้ปัญหาเรื่องรูปภาพและฟิลเตอร์ที่ใช้งานไม่ได้
+            renderProfiles(state.allProfiles, false); 
+
+            // ✅ Cache ข้อมูล
+            try {
+                localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(state.allProfiles));
+                localStorage.setItem(CONFIG.KEYS.LAST_FETCH, Date.now().toString());
+            } catch (e) {
+                console.warn('Cache save failed:', e);
+            }
+
+            state.isFetching = false;
+            return true;
+
+        } catch (err) {
+            console.error('❌ Fetch Delta Error:', err);
+
+            // ✅ Fallback Cache
+            try {
+                const cachedJSON = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
+                if (cachedJSON) {
+                    const cached = JSON.parse(cachedJSON);
+                    state.allProfiles = cached
+                        .map(processProfileData)
+                        .filter(Boolean);
+
+                    populateProvinceDropdown();
+                    renderProfiles(state.allProfiles, false);
+                    state.isFetching = false;
+                    return true;
+                }
+            } catch (cacheErr) {
+                console.error('❌ Cache fallback failed:', cacheErr);
+            }
+
+            state.isFetching = false;
+            return false;
         }
-        
-        state.isFetching = false;
-        return false;
     }
-}
 
     // ✅ MERGE PROFILES DATA (Unchanged, but included for completeness)
     function mergeProfilesData(existingProfiles, newProfiles) {
@@ -442,7 +463,9 @@ async function fetchDataDelta() {
         return Array.from(profileMap.values());
     }
 
-
+/**
+ * ✅ REALTIME SUBSCRIPTION (STABLE VERSION)
+ */
 function initRealtimeSubscription() {
     if (!supabase) return;
 
@@ -493,7 +516,6 @@ function initRealtimeSubscription() {
     }
 }
 
-
 // ✅ 2. ฟังก์ชันประมวลผลข้อมูล (วางทับของเดิม)
 function processProfileData(p) {
     if (!p) return null;
@@ -533,244 +555,6 @@ function processProfileData(p) {
         _age: Number(p.age) || 0
     };
 }
-// =================================================================
-// 3. POPULATE LIGHTBOX DATA (ฉบับเต็ม: รายละเอียดครบ + Line Button)
-// =================================================================
-function populateLightboxData(p) {
-    if (!p) {
-        closeLightbox();
-        return;
-    }
-
-    const els = {
-        name: document.getElementById('lightbox-profile-name-main'),
-        hero: document.getElementById('lightboxHeroImage'),
-        thumbs: document.getElementById('lightboxThumbnailStrip'),
-        quote: document.getElementById('lightboxQuote'),
-        tags: document.getElementById('lightboxTags'),
-        avail: document.getElementById('lightbox-availability-badge-wrapper'),
-        detailsContainer: document.getElementById('lightboxDetailsCompact'),
-        descContainer: document.getElementById('lightboxDescriptionContainer'),
-        descContent: document.getElementById('lightboxDescriptionContent'),
-        lineBtnContainer: document.querySelector('.lightbox-details')
-    };
-
-    // 1. Header Name
-    if (els.name) els.name.textContent = p.name || 'ไม่ระบุชื่อ';
-
-    // 2. Quote
-    if (els.quote) {
-        const hasQuote = p.quote && p.quote.trim() !== '';
-        els.quote.textContent = hasQuote ? `"${p.quote}"` : '';
-        els.quote.style.display = hasQuote ? 'block' : 'none';
-    }
-    
-    // 3. Availability Badge
-    if (els.avail) {
-        let statusClass = 'status-inquire';
-        let icon = '<i class="fas fa-question-circle"></i>';
-        if (p.availability?.toLowerCase().includes('ว่าง') || p.availability?.toLowerCase().includes('รับงาน')) {
-            statusClass = 'status-available';
-            icon = '<i class="fas fa-check-circle"></i>';
-        } else if (p.availability?.toLowerCase().includes('ไม่ว่าง')) {
-            statusClass = 'status-busy';
-            icon = '<i class="fas fa-times-circle"></i>';
-        }
-        els.avail.innerHTML = `<div class="lb-status-badge ${statusClass}">${icon} ${p.availability || 'สอบถาม'}</div>`;
-    }
-
-    // 4. Hero Image (รูปใหญ่)
-    if (els.hero) {
-        els.hero.src = p.images?.[0]?.src || '/images/placeholder-profile.webp';
-        els.hero.alt = p.altText;
-        els.hero.title = p.imgTitle;
-    }
-
-    // 5. Thumbnails (อัลบั้มรูป)
-    if (els.thumbs) {
-        els.thumbs.innerHTML = '';
-        const hasGallery = p.images && p.images.length > 1;
-        if (hasGallery) {
-            const fragment = document.createDocumentFragment();
-            p.images.forEach((img, i) => {
-                const thumb = document.createElement('img');
-                thumb.className = `thumbnail ${i === 0 ? 'active' : ''}`;
-                thumb.src = img.src;
-                
-                // สร้าง Alt Text แยกย่อยแต่ละรูป
-                let thumbAlt = '';
-                if (i === 0) thumbAlt = `รูปโปรไฟล์ ${p.name} ${p.provinceNameThai} หน้าตาดี`;
-                else if (i === 1) thumbAlt = `รูปเต็มตัว น้อง${p.name} สัดส่วน ${p.stats || 'ดี'}`;
-                else thumbAlt = `อัลบั้มรูปภาพ ${p.name} รูปที่ ${i+1} บรรยากาศจริง`;
-                
-                thumb.alt = thumbAlt;
-                thumb.title = `คลิกเพื่อดูรูปขนาดใหญ่ (รูปที่ ${i+1})`;
-                thumb.loading = 'lazy';
-                
-                thumb.onclick = () => {
-                    if (els.hero) {
-                        els.hero.src = img.src;
-                        els.hero.alt = thumbAlt; 
-                        els.hero.classList.remove('fade-in'); 
-                        void els.hero.offsetWidth; 
-                        els.hero.classList.add('fade-in');
-                    }
-                    els.thumbs.querySelector('.active')?.classList.remove('active');
-                    thumb.classList.add('active');
-                };
-                fragment.appendChild(thumb);
-            });
-            els.thumbs.appendChild(fragment);
-            els.thumbs.style.display = 'grid';
-        } else {
-            els.thumbs.style.display = 'none';
-        }
-    }
-
-    // 6. Tags
-    if (els.tags) {
-        els.tags.innerHTML = '';
-        const hasTags = Array.isArray(p.styleTags) && p.styleTags.length > 0 && p.styleTags[0] !== '';
-        if (hasTags) {
-            p.styleTags.forEach(t => {
-                if (t && t.trim() !== '') {
-                    const span = document.createElement('span');
-                    span.className = 'tag-badge';
-                    span.textContent = t.trim();
-                    els.tags.appendChild(span);
-                }
-            });
-            els.tags.style.display = 'flex';
-        } else {
-            els.tags.style.display = 'none';
-        }
-    }
-
-    // 7. Details (ข้อมูลรายละเอียด)
-    if (els.detailsContainer) {
-        const provinceName = p.provinceNameThai || ''; 
-        const fullLocation = [provinceName, p.location ? `(${p.location})` : ''].filter(Boolean).join(' ').trim();
-        const dateToShow = p.lastUpdated || p.created_at;
-        const formattedDate = formatDate(dateToShow);
-
-        let detailsHTML = '';
-
-        // ข้อมูลกายภาพ
-        detailsHTML += `
-            <div class="stats-grid-container">
-                ${p.age ? `<div class="stat-box"><span class="stat-label">อายุ</span><span class="stat-value">${p.age} ปี</span></div>` : ''}
-                ${p.stats ? `<div class="stat-box"><span class="stat-label">สัดส่วน</span><span class="stat-value">${p.stats}</span></div>` : ''}
-                ${(p.height || p.weight) ? `<div class="stat-box"><span class="stat-label">สูง/หนัก</span><span class="stat-value">${p.height || '-'}/${p.weight || '-'}</span></div>` : ''}
-            </div>`;
-
-        // ข้อมูลบริการ
-        detailsHTML += '<div class="info-list-container mt-5 pt-5 border-t border-gray-200 dark:border-gray-700">';
-        const infoRows = [
-            { label: 'สีผิว', value: p.skinTone, icon: 'fa-palette' },
-            { label: 'พิกัด', value: fullLocation, icon: 'fa-map-marker-alt', class: 'text-primary' },
-            { label: 'เรทราคา', value: p.rate, icon: 'fa-tag', class: 'text-green-600 dark:text-green-400' },
-            { label: 'อัปเดตล่าสุด', value: formattedDate, icon: 'fa-camera' }
-        ];
-
-        infoRows.forEach(row => {
-            if (row.value) {
-                detailsHTML += `
-                    <div class="info-row">
-                        <div class="info-label"><i class="fas ${row.icon} info-icon"></i> ${row.label}</div>
-                        <div class="info-value ${row.class || ''}">${row.value}</div>
-                    </div>`;
-            }
-        });
-        detailsHTML += '</div>';
-        
-        els.detailsContainer.innerHTML = detailsHTML;
-    }
-
-    // 8. Description
-    if (els.descContainer && els.descContent) {
-        const hasDescription = p.description && p.description.trim() !== '';
-        if (hasDescription) {
-            els.descContent.innerHTML = p.description.replace(/\n/g, '<br>');
-            els.descContainer.style.display = 'block';
-        } else {
-            els.descContainer.style.display = 'none';
-        }
-    }
-
-    // 9. LINE Button (Sticky + Popup Modal)
-    const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
-    if (oldWrapper) oldWrapper.remove();
-    
-    if (p.lineId && els.lineBtnContainer) {
-        const wrapper = document.createElement('div');
-        wrapper.id = 'line-btn-sticky-wrapper';
-        wrapper.className = 'lb-sticky-footer';
-
-        const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
-        const autoMessage = `สวัสดีครับ สนใจน้อง ${p.name} เห็นจากเว็บ Sideline Chiangmai ครับ\n${profileUrl}`;
-        
-        let finalLineUrl = p.lineId;
-        if (!p.lineId.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/~${p.lineId}`;
-        }
-
-        const link = document.createElement('a');
-        link.className = 'btn-line-action';
-        link.href = '#'; 
-        link.innerHTML = `<i class="fab fa-line text-xl"></i> แอดไลน์ ${p.name || ''}`;
-
-        link.onclick = (e) => {
-            e.preventDefault();
-
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(autoMessage).catch(console.error);
-            }
-
-            const modal = document.createElement('div');
-            modal.style.cssText = "position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease-out;";
-            
-            modal.innerHTML = `
-                <div style="background: white; width: 100%; max-width: 340px; border-radius: 24px; padding: 30px 24px; text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-                    <div style="width: 70px; height: 70px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 0 8px rgba(209, 250, 229, 0.3);">
-                        <i class="fas fa-check" style="font-size: 32px; color: #059669;"></i>
-                    </div>
-                    <h3 style="font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 10px; line-height: 1.3;">คัดลอกข้อมูลแล้ว!</h3>
-                    <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
-                        ระบบบันทึกชื่อน้องให้แล้วครับ<br>
-                        เมื่อแอป LINE เปิดขึ้นมา<br>
-                        <span style="background: #fdf2f8; padding: 4px 12px; border-radius: 6px; font-weight: bold; color: #db2777; display: inline-block; margin-top: 4px; border: 1px solid #fbcfe8;">กรุณากด "วาง" (Paste) ในแชท</span>
-                    </p>
-                    <a href="${finalLineUrl}" id="go-to-line-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px; background: #06c755; color: white; font-weight: bold; border-radius: 14px; text-decoration: none; font-size: 16px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4); transition: transform 0.1s;">
-                        <i class="fab fa-line" style="font-size: 24px;"></i> เปิด LINE ทันที
-                    </a>
-                    <button id="close-modal-btn" style="margin-top: 16px; background: transparent; border: none; color: #9ca3af; font-size: 14px; cursor: pointer; padding: 8px;">
-                        ยกเลิก
-                    </button>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            const closeBtn = modal.querySelector('#close-modal-btn');
-            const goBtn = modal.querySelector('#go-to-line-btn');
-
-            const closeModal = () => {
-                modal.style.opacity = '0';
-                setTimeout(() => modal.remove(), 200);
-            };
-
-            closeBtn.onclick = closeModal;
-            modal.onclick = (ev) => { if(ev.target === modal) closeModal(); }; 
-            
-            goBtn.onclick = () => {
-                setTimeout(closeModal, 500);
-            };
-        };
-        
-        wrapper.appendChild(link);
-        els.lineBtnContainer.appendChild(wrapper);
-    }
-}
 
 // ✅ POPULATE PROVINCE DROPDOWN (Unchanged, but included for completeness)
 function populateProvinceDropdown() {
@@ -790,159 +574,112 @@ function populateProvinceDropdown() {
     dom.provinceSelect.appendChild(fragment);
 }
 // =================================================================
-// 🚀 HANDLE ROUTING (UNIVERSAL EDITION - FINAL & SAFE)
-// รองรับทุกภาษา และ ป้องกันการทับหน้า Static 100%
+// [ฉบับแก้ไขสมบูรณ์ 100% - รองรับ Pretty URLs] - handleRouting
 // =================================================================
 async function handleRouting(dataLoaded = false) {
-    try {
-        // 1. ถอดรหัส URL และจัดรูปแบบ (รองรับไทย, จีน, อีโมจิ)
-        const rawPath = window.location.pathname;
-        let path = decodeURIComponent(rawPath).trim().toLowerCase(); 
+    // แปลง path ให้เป็นตัวเล็ก เพื่อให้ตรวจสอบง่าย (เช่น /Blog -> /blog)
+    // และลบเครื่องหมาย / ท้ายสุดออก (เช่น /blog/ -> /blog) เพื่อความแม่นยำ
+    let path = window.location.pathname.toLowerCase();
+    if (path.length > 1 && path.endsWith('/')) {
+        path = path.slice(0, -1);
+    }
 
-        // ลบ Slash ท้ายสุดออก (Normalize Path)
-        if (path.length > 1 && path.endsWith('/')) {
-            path = path.slice(0, -1);
-        }
+    // ✅ --- START: ส่วนป้องกันหน้า Static (ฉบับอัปเกรด) ---
+    // 1. ระบุรายชื่อหน้า Static ทั้งหมดที่มีในเว็บ (หน้าที่มีไฟล์ HTML จริงๆ)
+    // ใส่เพิ่มได้เลยตามที่คุณมี เช่น '/contact', '/rules', '/register'
+    const staticPages = ['/blog', '/about', '/faq', '/profiles', '/locations', '/contact', '/policy'];
 
-        // ✅ --- ส่วนป้องกันหน้า Static (SAFETY GUARD) ---
-        // รายชื่อหน้าที่ห้าม JS เข้าไปยุ่ง (รวม index.html แบบระบุชื่อไฟล์)
-        const staticPages = [
-            '/blog', '/about', '/faq', '/profiles', '/locations', '/contact', '/policy', 
-            '/rules', '/register', '/index.html', '/home.html'
-        ];
+    // 2. ตรวจสอบเงื่อนไข 3 อย่าง:
+    // A: มีนามสกุล .html (แบบเดิม)
+    // B: เป็นหน้า Static ที่ระบุไว้ในรายการข้างบน
+    // C: หรือเป็นหน้าย่อยของ Static นั้นๆ (เช่น /blog/post-1)
+    const isStaticPage = path.endsWith('.html') || 
+                         path.endsWith('.htm') || 
+                         staticPages.some(p => path === p || path.startsWith(p + '/'));
+
+    if (isStaticPage) {
+        console.log(`🛑 Static page detected (${path}). Skipping dynamic logic.`);
         
-        // เช็ค 3 ระดับ: 
-        // 1. นามสกุลไฟล์ (.html, .htm)
-        // 2. ตรงกับ List เป๊ะๆ
-        // 3. เป็นหน้าย่อยของ Static (เช่น /blog/post-1)
-        const isStaticPage = path.endsWith('.html') || 
-                             path.endsWith('.htm') || 
-                             staticPages.some(p => path === p || path.startsWith(p + '/'));
-
-        if (isStaticPage) {
-            console.log(`🛑 Static page detected (${path}). Stopping SEO & Routing logic.`);
-            // ปิดทุกอย่างที่เป็น Dynamic
-            closeLightbox(false); 
-            if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
-            if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
-            return; // ⛔ จบการทำงานทันที ไม่มีการไปแตะต้อง Meta Tags
-        }
-
-        // -------------------------------------------------------
-        // A. หน้าโปรไฟล์ (Profile Page)
-        // -------------------------------------------------------
-        const profileMatch = path.match(/^\/(?:sideline|profile|app|model|สาว)\/([^/]+)/);
+        // ปิด Lightbox และซ่อนส่วนแสดงผลของแอป เพื่อไม่ให้ทับเนื้อหาจริง
+        closeLightbox(false); 
+        if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
+        if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
         
-        if (profileMatch) {
-            const slug = profileMatch[1];
-            state.currentProfileSlug = slug;
-            
-            // ค้นหา (รองรับทั้ง Slug และ ID)
-            let profile = state.allProfiles.find(p => 
-                (p.slug || '').toLowerCase() === slug || 
-                (p.id || '').toString().toLowerCase() === slug
-            );
-            
-            if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
+        return; // 🛑 จบการทำงานทันที (Meta Tags ของหน้านั้นจะปลอดภัย)
+    }
 
-            if (profile) {
-                openLightbox(profile);
-                updateAdvancedMeta(profile, null); // ✅ อนุญาตให้อัปเดตเฉพาะหน้านี้
-                dom.profilesDisplayArea?.classList.add('hidden');
-                dom.featuredSection?.classList.add('hidden');
-            } else if (dataLoaded) {
-                console.warn(`❌ Profile not found: ${slug}`);
-                history.replaceState(null, '', '/');
-                closeLightbox(false);
-                dom.profilesDisplayArea?.classList.remove('hidden');
-                state.currentProfileSlug = null;
-            }
-            return;
-        } 
+    
+    // -------------------------------------------------------
+    // ส่วน Logic เดิม (ถูกต้องแล้ว)
+    // -------------------------------------------------------
+
+    // 1. หน้าโปรไฟล์ (Profile Page)
+    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+    if (profileMatch) {
+        const slug = decodeURIComponent(profileMatch[1]);
+        state.currentProfileSlug = slug;
         
-        // -------------------------------------------------------
-        // B. หน้าจังหวัด (Location Page)
-        // -------------------------------------------------------
-        const locationMatch = path.match(/^\/(?:location|province|zone|tag|หมวด|โซน|จังหวัด|โลเคชั่น)\/([^/]+)/);
-        
-        if (locationMatch) {
-            const param = locationMatch[1].trim();
-            state.currentProfileSlug = null;
+        // ลองหาใน Memory ก่อน ถ้าไม่มีค่อย Fetch ใหม่
+        let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
+        if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
+
+        if (profile) {
+            openLightbox(profile);
+            updateAdvancedMeta(profile, null); // อัปเดต Meta เฉพาะคน
+            // ซ่อนหน้า List เพื่อ focus ที่ Lightbox
+            dom.profilesDisplayArea?.classList.add('hidden');
+            dom.featuredSection?.classList.add('hidden');
+        } else if (dataLoaded) {
+            // ถ้าโหลดเสร็จแล้วแต่ไม่เจอ profile -> ดีดกลับหน้าแรก
+            history.replaceState(null, '', '/');
             closeLightbox(false);
-            
-            let foundKey = null;
-            
-            // 🔍 Smart Lookup: หา Key จากชื่อไทย/อังกฤษ
-            if (state.provincesMap.size > 0) {
-                if (state.provincesMap.has(param)) {
-                    foundKey = param;
-                } else {
-                    for (let [key, name] of state.provincesMap.entries()) {
-                        if (name.toLowerCase().trim() === param) {
-                            foundKey = key;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (foundKey) {
-                // Sync Dropdown
-                if (dom.provinceSelect) {
-                    const optionExists = Array.from(dom.provinceSelect.options).some(o => o.value === foundKey);
-                    if (optionExists) dom.provinceSelect.value = foundKey;
-                }
-                
-                if (dataLoaded) {
-                    applyUltimateFilters(false);
-                    
-                    const provinceName = state.provincesMap.get(foundKey) || foundKey;
-                    
-                    // เตรียมข้อมูล SEO
-                    const seoData = {
-                        title: `ไซด์ไลน์${provinceName} - รับงาน${provinceName}`,
-                        description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย...`,
-                        canonicalUrl: `${CONFIG.SITE_URL}/location/${foundKey}`,
-                        provinceName: provinceName, 
-                        profiles: state.allProfiles.filter(p => p.provinceKey === foundKey)
-                    };
-                    
-                    updateAdvancedMeta(null, seoData); // ✅ อนุญาตให้อัปเดตหน้านี้
-                    dom.profilesDisplayArea?.classList.remove('hidden');
-                }
-            } else if (dataLoaded) {
-                console.warn(`⚠️ Location not found: ${param}`);
-                history.replaceState(null, '', '/');
-                applyUltimateFilters(false);
-            }
-            return;
+            dom.profilesDisplayArea?.classList.remove('hidden');
+            state.currentProfileSlug = null;
         }
-
-        // -------------------------------------------------------
-        // C. หน้าแรก (Root Path Only)
-        // -------------------------------------------------------
+        return;
+    } 
+    
+    // 2. หน้าจังหวัด (Location/Province Page)
+    const provinceMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+    if (provinceMatch) {
+        const provinceKey = decodeURIComponent(provinceMatch[1]);
         state.currentProfileSlug = null;
         closeLightbox(false);
-        dom.profilesDisplayArea?.classList.remove('hidden');
+        
+        // ตั้งค่า Dropdown ให้ตรงกับ URL
+        if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
         
         if (dataLoaded) {
-            if (dom.provinceSelect) dom.provinceSelect.value = '';
-            if (dom.searchInput) dom.searchInput.value = '';
+            applyUltimateFilters(false); // กรองข้อมูล
+            const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
             
-            applyUltimateFilters(false);
+            // สร้าง SEO Data สำหรับหน้าจังหวัด
+            const completeTitle = `ไซด์ไลน์${provinceName} - รับงาน${provinceName} (ทีมงาน Sideline Chiangmai)`;
+            const completeDescription = `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก 100% ปลอดภัย การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}.`;
 
-            // 🔥 ความปลอดภัยสูงสุด: อัปเดต Meta หน้าแรกเฉพาะตอนอยู่ที่ Root จริงๆ เท่านั้น
-            // เพื่อไม่ให้ไปทับ index.html หรือหน้าอื่นๆ โดยไม่ตั้งใจ
-            if (path === '' || path === '/') {
-                updateAdvancedMeta(null, null); 
-            }
+            const seoData = {
+                title: completeTitle, 
+                description: completeDescription,
+                canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
+                provinceName: provinceName, 
+                profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
+            };
+            
+            updateAdvancedMeta(null, seoData); // อัปเดต Meta จังหวัด
+            dom.profilesDisplayArea?.classList.remove('hidden');
         }
+        return;
+    }
 
-    } catch (error) {
-        console.error("Critical Routing Error:", error);
-        history.replaceState(null, '', '/');
-        if (dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
-        closeLightbox(false);
+    // 3. หน้าแรก (Home Page - Default)
+    // ถ้าไม่เข้าเงื่อนไขข้างบนเลย จะตกมาที่นี่
+    state.currentProfileSlug = null;
+    closeLightbox(false);
+    dom.profilesDisplayArea?.classList.remove('hidden');
+    
+    if (dataLoaded) {
+        applyUltimateFilters(false);
+        updateAdvancedMeta(null, null); // อัปเดต Meta หน้าแรก
     }
 }
 
@@ -1309,6 +1046,7 @@ function renderByProvince(profiles) {
         
         dom.profilesDisplayArea.appendChild(mainFragment);
     }
+    
     function createProvinceSection(key, name, profiles) {
         const wrapper = document.createElement('div');
         wrapper.className = 'section-content-wrapper province-section mt-12';
@@ -1426,114 +1164,105 @@ function createSearchResultSection(profiles) {
     return wrapper;
 } 
 
-// =================================================================
-// 2. CREATE PROFILE CARD (ฉบับสมบูรณ์ที่สุด: SEO Image + Lazy Load + Interaction)
-// =================================================================
+// ✅ [เวอร์ชันแก้ไขสมบูรณ์ที่สุด: เพิ่ม Skeleton Loader + เรียง Layer ถูกต้อง]
 function createProfileCard(p, index = 20) {
-    if (!p) return document.createElement('div');
-
+    // 1. สร้าง Container หลัก
     const cardContainer = document.createElement('div');
     cardContainer.className = 'profile-card-new-container';
 
+    // 2. สร้าง Card Inner (กรอบการ์ด)
     const cardInner = document.createElement('div');
-    // เพิ่มการจัดการ Dark/Light mode และ Transition ที่ลื่นไหล
-    cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2';
+    cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1';
     
+    // ใส่ Attribute สำคัญสำหรับการ Routing
     cardInner.setAttribute('data-profile-id', p.id); 
-    cardInner.setAttribute('data-profile-slug', p.slug || p.id);
+    cardInner.setAttribute('data-profile-slug', p.slug);
     
-    // ดึงรูปภาพแรก (ใช้ค่าเริ่มต้นหากไม่มีรูป)
-    const imgSrc = (p.images && p.images.length > 0) ? p.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
+    // --- ตรวจสอบรูปภาพให้ปลอดภัย (กัน Error กรณีไม่มีรูป) ---
+    const imgSrc = (p.images && p.images.length > 0) ? p.images[0].src : '/images/placeholder-profile.webp';
 
-    /**
-     * 🔥 SEO & Performance Strategy:
-     * 1. index < 4 ให้โหลดทันที (eager) เพื่อคะแนน LCP (Largest Contentful Paint)
-     * 2. index >= 4 ให้โหลดเมื่อเลื่อนถึง (lazy) เพื่อประหยัดเน็ตและเปิดเว็บไว
-     * 3. ใส่ alt และ title ที่ถูกประมวลผลมาจาก processProfileData (สุ่มคีย์เวิร์ด)
-     */
-    const loadingAttr = index < 4 ? 'eager' : 'lazy';
-
+    // --- HTML หลักของการ์ด ---
     cardInner.innerHTML = `
+        <!-- LAYER 0: Skeleton Loader (ตัวโหลดวิบวับ รอรูปมา) -->
         <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0"></div>
 
-        <img src="${imgSrc}" 
-             alt="${p.altText || `น้อง${p.name} ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'}`}" 
-             title="${p.imgTitle || `คลิกดูโปรไฟล์ น้อง${p.name}`}"
+        <!-- LAYER 1: รูปภาพ (อยู่ล่างสุด) -->
+<img src="${imgSrc}" 
+             alt="น้อง${p.name} - ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} รับงานเอง ฟิวแฟน ตรงปก 100%"
              class="card-image w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
-             loading="${loadingAttr}"
-             width="300" height="400" 
+             loading="${index < 4 ? 'eager' : 'lazy'}"
              style="object-position: center top;"
              onload="this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();"
-             onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'; this.classList.remove('opacity-0');">
+             onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();">
              
-        <a href="/sideline/${p.slug || p.id}" 
-           class="card-link absolute inset-0 z-10" 
-           aria-label="ดูรายละเอียดน้อง${p.displayName} ${p.provinceNameThai}"></a>
+
+        <!-- LAYER 2: ลิงก์คลุมการ์ด (Z-10) -> เพื่อให้คลิกตรงไหนก็เปิดโปรไฟล์ -->
+        <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์ ${p.name}"></a>
     `;
 
-    // --- ส่วนที่ 1: Badges (สถานะ & แนะนำ) ---
-    let statusClass = 'status-inquire';
+    // --- Logic คำนวณสถานะ (ว่าง/ไม่ว่าง) ---
+    let statusClass = 'status-inquire'; // ค่าเริ่มต้น: สีเทา (สอบถาม)
     const availability = (p.availability || '').toLowerCase();
+    
     if (availability.includes('ว่าง') || availability.includes('รับงาน')) {
-        statusClass = 'status-available';
+        statusClass = 'status-available'; // สีเขียว
     } else if (availability.includes('ไม่ว่าง') || availability.includes('พัก')) {
-        statusClass = 'status-busy';
+        statusClass = 'status-busy'; // สีแดง
     }
     
+    // --- HTML ส่วน Badges (มุมขวาบน) ---
+    // ใส่ pointer-events-none เพื่อให้คลิกทะลุไปโดน Link (Layer 2) ได้
     const badgesHTML = `
-        <div class="absolute top-3 right-3 flex flex-col gap-1.5 items-end z-20 pointer-events-none">
-            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-md bg-black/30 border border-white/20 text-[10px] font-bold px-2.5 py-1 rounded-full text-white uppercase tracking-wider">
+        <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
+            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-md bg-white/10 border border-white/20 text-[10px] font-bold px-2 py-1 rounded-full text-white">
                 ${p.availability || 'สอบถาม'}
             </span>
-            ${p.isfeatured ? `
-                <span class="featured-badge bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg flex items-center">
-                    <i class="fas fa-star mr-1 animate-pulse"></i>แนะนำ
-                </span>
-            ` : ''}
+            ${p.isfeatured ? '<span class="featured-badge bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
         </div>
     `;
 
-    // --- ส่วนที่ 2: Overlay ข้อมูลด้านล่าง ---
+    // --- Logic ปุ่ม Like ---
     const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
-    const isLikedClass = likedProfiles[p.id] ? 'liked text-pink-500' : 'text-white';
+    const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
     const likeCount = p.likes || 0;
 
+    // --- HTML ส่วน Overlay (ไล่เฉดสี + ชื่อ + ปุ่มไลค์) ---
+    // pointer-events-none ที่ตัวแม่ เพื่อให้คลิกพื้นที่ว่างแล้วไปโดน Link
+    // pointer-events-auto ที่ปุ่มหัวใจ เพื่อให้กดหัวใจได้
     const overlayHTML = `
-        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent p-4 flex flex-col justify-end" 
+        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-3 flex flex-col justify-between" 
              style="z-index: 20; pointer-events: none;">
             
-            <div class="card-info">
-                <h3 class="text-xl font-bold text-white drop-shadow-lg leading-tight truncate mb-1">
-                    ${p.displayName || p.name}
-                </h3>
-                
-                <div class="flex items-center justify-between mb-3">
-                    <p class="text-sm text-gray-200 flex items-center">
-                        <i class="fas fa-map-marker-alt mr-1.5 text-pink-500"></i>
-                        ${p.provinceNameThai || 'เชียงใหม่'}
-                    </p>
-                    ${p.rate ? `<span class="text-pink-400 font-bold text-sm">฿${p.rate}</span>` : ''}
-                </div>
+            <div class="card-header mt-8">
+                <!-- พื้นที่ว่างด้านบน ปล่อยให้คลิกทะลุ -->
+            </div>
+            
+            <div class="card-footer-content">
+                <h3 class="text-lg font-bold text-white drop-shadow-md leading-tight truncate pr-2">${p.name}</h3>
+                <p class="text-xs text-gray-300 flex items-center mt-0.5 mb-2">
+                    <i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
+                </p>
 
-                <div class="flex justify-between items-center border-t border-white/20 pt-3">
-                    <div class="date-stamp text-[10px] text-gray-400 font-medium">
-                        <i class="far fa-clock mr-1"></i> ${formatDate(p.created_at)}
+                <div class="flex justify-between items-end border-t border-white/10 pt-2">
+                    <div class="date-stamp text-[10px] text-gray-400">
+                        อัปเดต: ${formatDate(p.created_at)}
                     </div>
                     
-                    <div class="like-button-wrapper relative flex items-center gap-2 cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-all duration-300"
+                    <!-- ปุ่มหัวใจ (Z-30) ต้องกดได้ -->
+                    <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors"
                          style="pointer-events: auto !important; z-index: 30 !important;"
                          data-action="like" 
                          data-id="${p.id}"
-                         role="button"
-                         aria-label="กดถูกใจ">
-                        <i class="fas fa-heart text-xl transition-transform duration-300 group-hover/like:scale-125"></i>
-                        <span class="like-count text-sm font-black">${likeCount}</span>
+                         aria-label="ถูกใจ">
+                        <i class="fas fa-heart text-lg transition-transform duration-200 group-hover/like:scale-110"></i>
+                        <span class="like-count text-sm font-bold">${likeCount}</span>
                     </div>
                 </div>
             </div>
         </div>
     `;
 
+    // ประกอบร่าง
     cardInner.insertAdjacentHTML('beforeend', badgesHTML);
     cardInner.insertAdjacentHTML('beforeend', overlayHTML);
     cardContainer.appendChild(cardInner);
@@ -1544,7 +1273,6 @@ function createProfileCard(p, index = 20) {
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================
-
 
 async function fetchSingleProfile(slug) {
     if (!supabase) return null;
@@ -1735,18 +1463,14 @@ function populateLightboxData(p) {
         }
     }
 
-
     // --- 5. ✅ สร้าง HTML แสดงรายละเอียดทั้งหมดแบบสมบูรณ์ ---
     if (els.detailsContainer) {
-        // ✅ FIX: ใช้ p.provinceNameThai ที่ถูกเตรียมไว้แล้วจาก processProfileData โดยตรง!
-        const provinceName = p.provinceNameThai || ''; 
-        
+        const provinceName = state.provincesMap.get(p.provinceKey) || '';
         const fullLocation = [provinceName, p.location ? `(${p.location})` : ''].filter(Boolean).join(' ').trim();
         const dateToShow = p.lastUpdated || p.created_at;
         const formattedDate = formatDate(dateToShow);
 
         let detailsHTML = '';
-
 
         // --- ส่วนที่ 1: ข้อมูลทางกายภาพ ---
         detailsHTML += `
@@ -1883,9 +1607,6 @@ function populateLightboxData(p) {
         els.lineBtnContainer.appendChild(wrapper);
     }
 }
-
-
-
 // ==========================================
 // 💎 SEO STRATEGIC POOL (คลังคำศัพท์ LSI)
 // ==========================================
@@ -2465,25 +2186,30 @@ function showLoadingState() {
 function hideLoadingState() {
     const loader = document.getElementById('global-loader-overlay');
     if (loader) {
-        // Animation ตอนจบ: หดตัวและจางหาย (Expo style)
-        gsap.to(loader, {
-            opacity: 0,
-            scale: 1.05,
-            duration: 0.6,
-            ease: "expo.inOut",
-            onComplete: () => {
-                loader.style.display = 'none';
-                gsap.set(loader, { scale: 1 }); // reset scale สำหรับรอบหน้า
-                // อัปเดต ScrollTrigger ของ GSAP เพื่อให้การเลื่อนหน้าเว็บไม่สะดุด
-                if (window.ScrollTrigger) ScrollTrigger.refresh();
-            }
-        });
+        try {
+            // ลองสั่งงานแอนิเมชัน
+            gsap.to(loader, {
+                opacity: 0,
+                scale: 1.05,
+                duration: 0.6,
+                ease: "expo.inOut",
+                onComplete: () => {
+                    loader.style.display = 'none';
+                    gsap.set(loader, { scale: 1 });
+                    if (window.ScrollTrigger) ScrollTrigger.refresh();
+                }
+            });
+        } catch (e) {
+            // หากเกิด error (เช่น gsap โหลดไม่ขึ้น) ให้ซ่อนหน้าต่างโหลดไปเลยทันที
+            console.error("GSAP failed, hiding loader manually.", e);
+            loader.style.display = 'none';
+        }
     }
-    // ซ่อนตัว Placeholder เก่า (ถ้ามี)
     if (typeof dom !== 'undefined' && dom.loadingPlaceholder) {
         dom.loadingPlaceholder.style.display = 'none';
     }
 }
+
     // =================================================================
     // 12. ADMIN TOOLS (SITEMAP GENERATOR)
     // =================================================================
