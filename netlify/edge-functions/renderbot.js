@@ -192,7 +192,9 @@ async function handleProfilePage(supabase, slug) {
                 <div style="font-size:11px;color:#94a3b8">— Verified Member (สมาชิกตรวจสอบแล้ว)</div>
             </div>
 
-            ${related?.length > 0 ? `<h3 style="margin-top:35px">🔥 แนะนำสาวสวยใน${provinceName}</h3><div class="rel-grid">${related.map(r => `<a href="/sideline/${r.slug}" style="text-decoration:none"><img src="${optimizeImg(r.imagePath, 300)}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover"><div style="font-weight:bold;font-size:13px;margin-top:5px;color:#1e293b">น้อง${r.name}</div></a>`).join('')}</div>` : ''}
+            ${related?.length > 0 ? `<h3 style="margin-top:35px">🔥 แนะนำสาวสวยใน${provinceName}</h3><div class="rel-grid">${related.map(r => `<a href="/sideline/${r.slug}" style="text-decoration:none">
+<img src="${optimizeImg(r.imagePath, 300)}" alt="น้อง${r.name} ไซด์ไลน์${provinceName}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover">
+            <div style="font-weight:bold;font-size:13px;margin-top:5px;color:#1e293b">น้อง${r.name}</div></a>`).join('')}</div>` : ''}
         </div>
         <a href="${lineLink}" class="btn-line" target="_blank">📲 แอดไลน์จองคิว น้อง${p.name}</a>
     </div>
@@ -293,7 +295,8 @@ async function handleLocationPage(supabase, slug) {
                     <div style="color:var(--p);font-weight:bold;margin-top:5px">฿${parseInt(p.rate || 1500).toLocaleString()}</div>
                 </div>
             </a>`).join('')
-        : `<div class="box" style="text-align:center;width:100%;grid-column: 1 / -1;"><h2>กำลังอัปเดตข้อมูลน้องๆ ในพื้นที่ ${provinceName}</2></div>`;
+        : `<div class="box" style="text-align:center;width:100%;grid-column: 1 / -1;">
+        <h2>กำลังอัปเดตข้อมูลน้องๆ ในพื้นที่ ${provinceName}</h2></div>`;
 
     return new Response(`<!DOCTYPE html>
 <html lang="th">
