@@ -1,22 +1,21 @@
+// sw.js
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox-sw.js');
 
 if (workbox) {
-  const CACHE_VERSION = 'v-2026-premium'; 
+  // 0. ให้ SW Activate ทันที
+  workbox.core.skipWaiting();
+  workbox.core.clientsClaim();
 
-  workbox.core.setCacheNameDetails({
-    prefix: 'sideline-cm',
-    suffix: CACHE_VERSION
-  });
+  // 1. ล้าง cache เก่าอัตโนมัติ
+  workbox.precaching.cleanupOutdatedCaches();
 
-  // 1. Precache หน้า Offline
-  self.addEventListener('install', (event) => {
-    event.waitUntil(
-      caches.open(`precache-${CACHE_VERSION}`).then(c => c.add('/offline.html'))
-    );
-  });
+  // 2. Precache แบบ ง่ายๆ (เก็บเฉพาะไฟล์ offline.html)
+  //    ไม่ต้องระบุ revision, ใช้ URL เป็น key
+  workbox.precaching.precacheAndRoute([
+    { url: '/offline.html', revision: null }
+  ]);
 
-  // 2. กลยุทธ์สำหรับรูปภาพน้องๆ (เปลี่ยนเป็น StaleWhileRevalidate)
-  // เพื่อให้รูปโชว์ทันทีจาก Cache แต่แอบโหลดใหม่เพื่อเช็คความสดใหม่/แก้ไขถ้าไฟล์พัง
+  // 3. Runtime cache – รูปภาพ แบบ Stale-While-Revalidate
   workbox.routing.registerRoute(
     ({ request }) => request.destination === 'image',
     new workbox.strategies.StaleWhileRevalidate({
@@ -24,29 +23,55 @@ if (workbox) {
       plugins: [
         new workbox.expiration.ExpirationPlugin({
           maxEntries: 150,
-          maxAgeSeconds: 14 * 24 * 60 * 60 // 14 วัน
-        })
-      ]
+          maxAgeSeconds: 14 * 24 * 60 * 60,
+        }),
+      ],
     })
   );
 
-  // 3. ข้อมูล API (สถานะน้องๆ)
-  // ใช้ NetworkFirst เพื่อให้ความสำคัญกับข้อมูลสดใหม่จาก Supabase ก่อนเสมอ
-  // ถ้าโควตา Supabase เต็ม/เน็ตหลุด ถึงจะเอาข้อมูลเก่าจาก Cache มาช่วย
+  // 4. Runtime cache – API แบบ NetworkFirst
   workbox.routing.registerRoute(
     ({ url }) => url.href.includes('rest/v1'),
     new workbox.strategies.NetworkFirst({
       cacheName: 'api-cache',
-      networkTimeoutSeconds: 3, // ถ้า 3 วิโหลดไม่เสร็จ ให้เอาจาก Cache ทันที
+      networkTimeoutSeconds: 3,
       plugins: [
         new workbox.expiration.ExpirationPlugin({ maxEntries: 100 })
+      ],
+    })
+  );
+
+  // 5. Runtime cache – CSS/JS แบบ Stale-While-Revalidate
+  workbox.routing.registerRoute(
+    ({ request }) =>
+      request.destination === 'script' ||
+      request.destination === 'style',
+    new workbox.strategies.StaleWhileRevalidate({
+      cacheName: 'static-resources',
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({ maxEntries: 50 })
       ]
     })
   );
 
-  // 4. ไฟล์ CSS / JS หลัก
+  // 6. SPA Navigation – NetworkFirst + เก็บใน cache กรณี offline
   workbox.routing.registerRoute(
-    ({ request }) => request.destination === 'script' || request.destination === 'style',
-    new workbox.strategies.StaleWhileRevalidate()
+    ({ request }) => request.mode === 'navigate',
+    new workbox.strategies.NetworkFirst({
+      cacheName: 'pages-cache',
+      networkTimeoutSeconds: 3,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({ maxEntries: 50 })
+      ]
+    })
   );
+
+  // 7. Offline fallback
+  workbox.routing.setCatchHandler(({ event }) => {
+    if (event.request.mode === 'navigate') {
+      // คืน offline.html จาก cache ที่เรา precache ไว้
+      return caches.match('/offline.html');
+    }
+    return Response.error();
+  });
 }
