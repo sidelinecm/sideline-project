@@ -172,7 +172,7 @@ async function handleProfilePage(supabase, slug) {
             </div>
             <div style="padding:15px;background:#fff1f2;border-radius:10px;border-left:4px solid var(--p);margin-bottom:25px;font-size:15px"><strong>รีวิวโดยย่อ:</strong> ${metaDesc}</div>
             
-            ${galleryImages.length > 0 ? `<h3>📷 รูปภาพเพิ่มเติมของน้อง${p.name}</h3><div class="gallery">${galleryImages.map((img, i) => `<img src="${img}" alt="${displayName} ไซด์ไลน์${provinceName} รูปที่ ${i+1}" width="140" height="140" loading="lazy">`).join('')}</div>` : ''}
+            ${galleryImages.length > 0 ? `<h2>📷 รูปภาพเพิ่มเติมของน้อง${p.name}</h2><div class="gallery">${galleryImages.map((img, i) => `<img src="${img}" alt="${displayName} ไซด์ไลน์${provinceName} รูปที่ ${i+1}" width="140" height="140" loading="lazy">`).join('')}</div>` : ''}
 
             <div class="box">
                 <h3 style="margin-top:0">คำถามที่พบบ่อย (FAQ)</h3>
@@ -192,9 +192,7 @@ async function handleProfilePage(supabase, slug) {
                 <div style="font-size:11px;color:#94a3b8">— Verified Member (สมาชิกตรวจสอบแล้ว)</div>
             </div>
 
-            ${related?.length > 0 ? `<h3 style="margin-top:35px">🔥 แนะนำสาวสวยใน${provinceName}</h3><div class="rel-grid">${related.map(r => `<a href="/sideline/${r.slug}" style="text-decoration:none">
-<img src="${optimizeImg(r.imagePath, 300)}" alt="น้อง${r.name} ไซด์ไลน์${provinceName}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover">
-            <div style="font-weight:bold;font-size:13px;margin-top:5px;color:#1e293b">น้อง${r.name}</div></a>`).join('')}</div>` : ''}
+            ${related?.length > 0 ? `<h3 style="margin-top:35px">🔥 แนะนำสาวสวยใน${provinceName}</h3><div class="rel-grid">${related.map(r => `<a href="/sideline/${r.slug}" style="text-decoration:none"><img src="${optimizeImg(r.imagePath, 300)}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover"><div style="font-weight:bold;font-size:13px;margin-top:5px;color:#1e293b">น้อง${r.name}</div></a>`).join('')}</div>` : ''}
         </div>
         <a href="${lineLink}" class="btn-line" target="_blank">📲 แอดไลน์จองคิว น้อง${p.name}</a>
     </div>
@@ -213,7 +211,7 @@ async function handleLocationPage(supabase, slug) {
     const provinceName = province.nameThai;
     const localZones = getLocalZones(slug);
     const title = `ไซด์ไลน์${provinceName} เพื่อนเที่ยว งานเอนเตอร์เทน ตัวจริงตรงปก - ${CONFIG.BRAND_NAME}`;
-    const desc = `รวมน้องๆ ไซด์ไลน์${provinceName} รับงานเอง ครอบคลุมพื้นที่ ${localZones.slice(0, 4).join(', ')} พบกับน้องๆ ${profiles?.length || 0} คน ตรวจสอบแล้ว รูปตรงปก ปลอดภัย ไม่โอนมัดจำ จ่ายเงินหน้างาน (อัปเดตล่าสุด ${formatDate()})`;
+    const desc = `รวมน้องๆ ไซด์ไลน์${provinceName} รับงานเอง ครอบคลุมพื้นที่ ${localZones.slice(0, 4).join(', ')} พบกับน้องๆ ${profiles?.length || 0} คน ตรวจสอบแล้ว รูปตรงปก ปลอดภัย ไม่มีโอนมัดจำ จ่ายเงินหน้างาน (อัปเดตล่าสุด ${formatDate()})`;
     const canonicalUrl = `${CONFIG.DOMAIN}/location/${slug}`;
     const otherLocs = [{n:'กรุงเทพ',s:'bangkok'}, {n:'ชลบุรี',s:'chonburi'}, {n:'เชียงใหม่',s:'chiang-mai'}, {n:'ขอนแก่น',s:'khon-kaen'}].filter(i=>i.s!==slug);
     
@@ -295,8 +293,7 @@ async function handleLocationPage(supabase, slug) {
                     <div style="color:var(--p);font-weight:bold;margin-top:5px">฿${parseInt(p.rate || 1500).toLocaleString()}</div>
                 </div>
             </a>`).join('')
-        : `<div class="box" style="text-align:center;width:100%;grid-column: 1 / -1;">
-        <h2>กำลังอัปเดตข้อมูลน้องๆ ในพื้นที่ ${provinceName}</h2></div>`;
+        : `<div class="box" style="text-align:center;width:100%;grid-column: 1 / -1;"><h2>กำลังอัปเดตข้อมูลน้องๆ ในพื้นที่ ${provinceName}</2></div>`;
 
     return new Response(`<!DOCTYPE html>
 <html lang="th">
@@ -353,7 +350,7 @@ async function handleLocationPage(supabase, slug) {
         </div>
 
         <div class="box" style="line-height:1.8;text-align:justify;background:linear-gradient(to bottom right, #1e293b, #0f172a)">
-            <h2 style="color:#fff">ทำไมต้องเลือกหาเพื่อนเที่ยว${provinceName}กับเรา?</h2>
+            <h3 style="color:#fff">ทำไมต้องเลือกหาเพื่อนเที่ยว${provinceName}กับเรา?</h3>
             เราคืออันดับ 1 ในด้านการรวบรวมโปรไฟล์ <strong>ไซด์ไลน์${provinceName} ไม่ผ่านเอเย่นต์</strong> โดยเน้นความจริงใจเป็นหลัก พี่ๆ ที่มองหาเพื่อนเที่ยวในย่าน ${localZones.slice(0, 3).join(', ')} สามารถเลือกน้องที่ถูกใจและนัดหมายพิกัดได้ทันที ไม่ต้องกลัวโดนโกง เพราะเราไม่มีการเรียกเก็บมัดจำใดๆ ทั้งสิ้น เจอน้องก่อนค่อยจ่ายเงินค่ะ
         </div>
 
