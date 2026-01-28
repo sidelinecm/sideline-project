@@ -130,7 +130,27 @@
         transition: none !important;
       }
     }
+        .tag-pill {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: #6b7280;
+      background-color: #f3f4f6;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .dark .tag-pill {
+      background-color: #1f2937;
+      color: #9ca3af;
+    }
+    .tag-pill:hover {
+      background-color: #db2777;
+      color: white;
+      transform: translateY(-1px);
+    }
   </style>
+
 
   <!-- 11. Load Full CSS Non-Blocking -->
   <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -222,7 +242,7 @@
         <div class="flex items-center">
             <a href="/" aria-label="sidelinechiangmai หน้าแรก" class="flex items-center">
                <img src="/images/logo-sidelinechiangmai.webp" 
-     alt="sideline chiangmai" 
+     alt="ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน ตรงปก100% ไม่ต้องโอนมัดจำ" 
      class="h-[28px] w-auto" 
      width="240" 
      height="28" 
@@ -232,7 +252,7 @@
         </div>
 
         <div class="flex items-center justify-center flex-1">
-            <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 ...">
+<div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2">
     อัปเดต: <span id="last-updated-time">...</span>
 </div>
         </div>
@@ -280,16 +300,17 @@
           loading="eager" decoding="async" fetchpriority="high" />
       </a>
 
-      <h2 class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200">
-        สัมผัสประบริการเหนือระดับ sideline chiangmai ยินดีให้บริการค่ะ
-      </h2>
+<!-- แก้ไขคำผิด "ประบริการ" -> "ประสบการณ์" และปรับคำท้ายให้ดูดึงดูด -->
+<h2 class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 mt-4 mb-2">
+  สัมผัสประสบการณ์เหนือระดับ <span class="text-pink-600 dark:text-pink-400">Sideline Chiangmai</span> บริการเกรดพรีเมียม
+</h2>
 
      <!-- แถบยืนยันความโปร่งใส 100% -->
 <div class="container mx-auto px-4 mt-8">
     <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 p-4 rounded-2xl text-center shadow-sm">
-        <h3 class="text-green-600 dark:text-green-400 font-extrabold text-lg md:text-xl flex items-center justify-center gap-2">
+        <h2 class="text-green-600 dark:text-green-400 font-extrabold text-lg md:text-xl flex items-center justify-center gap-2">
             <i class="fas fa-shield-alt"></i> การันตีความโปร่งใส100%✅
-        </h3>
+        </h2>
         <p class="text-gray-700 dark:text-gray-300 text-sm md:text-base mt-1">
             <span class="font-bold text-red-500">✅ ไม่ต้องโอนมัดจำ</span> | 
             <span class="font-bold text-red-500">✅ ไม่ต้องจ่ายค่าสมาชิก</span> | 
@@ -565,9 +586,9 @@
   role="region"
   data-animate-on-scroll
 >
-  <h2 id="map-title" class="text-center text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white pt-6">
+  <h3 id="map-title" class="text-center text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white pt-6">
     แผนที่และข้อมูลการติดต่อ Sideline Chiangmai
-  </h2>
+  </h3>
 
   <div class="p-6 text-gray-700 dark:text-gray-300 leading-relaxed text-center">
   <p class="max-w-2xl mx-auto">
@@ -623,71 +644,174 @@
       เปิดใน Google Maps
     </a>
   </div>
+<!-- === ส่วนเนื้อหา SEO & ข้อมูลบริการ (Advanced SEO Compact Layout) === -->
+<section class="container mx-auto px-4 py-10 space-y-12 border-t border-gray-100 dark:border-gray-800">
 
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Sideline Chiangmai",
-      "description": "บริการไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน เจ็ดยอด พร้อมน้องๆคุณภาพระดับพรีเมียม ไม่ต้องมัดจำ",
-      "image": "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "ตำบลช้างเผือก อำเภอเมือง",
-        "addressLocality": "เชียงใหม่",
-        "postalCode": "50300",
-        "addressCountry": "TH"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 18.8140716,
-        "longitude": 98.9720960
-      },
-      "url": "https://sidelinechiangmai.netlify.app",
-      "openingHours": "Mo-Su 10:00-02:00"
-    }
-  </script>
+  <!-- 1. SEO Intro: H2 ที่ทรงพลัง + คีย์เวิร์ดหลัก -->
+  <article class="max-w-4xl mx-auto text-center">
+    <h2 class="text-xl md:text-3xl font-extrabold text-gray-900 dark:text-white mb-4 leading-snug">
+      ศูนย์รวม <span class="text-pink-600 dark:text-pink-400">ไซด์ไลน์เชียงใหม่</span> อันดับ 1 <br class="hidden md:block">
+      น้องๆ รับงานเอง ไม่ผ่านเอเย่นต์ คัดเกรดพรีเมียม
+    </h2>
+    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+      <strong>Sideline Chiangmai</strong> แหล่งรวมโปรไฟล์สาวสวย นักศึกษา วัยทำงาน และพริตตี้เชียงใหม่ 
+      พิกัดยอดฮิต <em>นิมมาน, สันติธรรม, เจ็ดยอด, ท่าแพ และหลัง มช.</em> 
+      เราการันตี <strong class="text-gray-900 dark:text-white">คนจริง ตรงปก 100%</strong> 
+      พร้อมให้บริการครบวงจรทั้ง <strong>ฟิวแฟน (GFE)</strong>, <strong>เพื่อนทานข้าว</strong>, และ <strong>งานเอนเตอร์เทน (En)</strong>
+    </p>
+    <div class="mt-4 flex flex-wrap justify-center gap-2">
+      <span class="inline-flex items-center bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-200 dark:border-green-800">
+        <i class="fas fa-check-circle mr-1"></i> ปลอดภัย ไม่ต้องโอนมัดจำ
+      </span>
+      <span class="inline-flex items-center bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 px-3 py-1 rounded-full text-xs font-bold border border-pink-200 dark:border-pink-800">
+        <i class="fas fa-heart mr-1"></i> จ่ายหน้างาน 100%
+      </span>
+    </div>
+  </article>
+
+  <!-- 2. How to Use: ขั้นตอนการจอง (UX Friendly & Mobile Swipe) -->
+  <div>
+    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2 border-l-4 border-pink-500 pl-3">
+      ขั้นตอนการจอง (ง่ายๆ ใน 3 ขั้นตอน)
+    </h3>
+    
+    <!-- Horizontal Scroll Container -->
+    <div class="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:grid md:grid-cols-3 md:pb-0 no-scrollbar" style="-webkit-overflow-scrolling: touch;">
+      
+      <!-- Step 1 -->
+      <div class="snap-center shrink-0 w-[85%] md:w-auto bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-4 hover:shadow-lg transition-all duration-300">
+        <div class="w-12 h-12 rounded-full bg-pink-50 dark:bg-pink-900/20 text-pink-600 flex items-center justify-center font-black text-xl shrink-0 ring-4 ring-pink-50 dark:ring-pink-900/10">1</div>
+        <div>
+          <h4 class="font-bold text-gray-900 dark:text-gray-100 text-lg">เลือกน้องที่ถูกใจ</h4>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">ค้นหาจากโซน หรือสไตล์ที่ชอบ ดูรูปโปรไฟล์จริงและเรทราคาได้ทันที</p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="snap-center shrink-0 w-[85%] md:w-auto bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-4 hover:shadow-lg transition-all duration-300">
+        <div class="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center font-black text-xl shrink-0 ring-4 ring-green-50 dark:ring-green-900/10">2</div>
+        <div>
+          <h4 class="font-bold text-gray-900 dark:text-gray-100 text-lg">แอดไลน์เช็คคิว</h4>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">กดปุ่ม "แอดไลน์" เพื่อคุยรายละเอียดและจองคิว (สะดวกรวดเร็ว)</p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="snap-center shrink-0 w-[85%] md:w-auto bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-start gap-4 hover:shadow-lg transition-all duration-300">
+        <div class="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center font-black text-xl shrink-0 ring-4 ring-purple-50 dark:ring-purple-900/10">3</div>
+        <div>
+          <h4 class="font-bold text-gray-900 dark:text-gray-100 text-lg">นัดพบ & จ่ายหน้างาน</h4>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">เจอกันตามพิกัดนัดหมาย เช็คตัวจริงให้ชัวร์ แล้วค่อยชำระเงิน</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. Services & Location Grid (Bento Grid Style) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
+    
+    <!-- Service Keywords Box -->
+    <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-pink-200 dark:hover:border-pink-900/50 transition-colors">
+      <h3 class="font-bold text-gray-900 dark:text-white mb-4 text-base uppercase tracking-wider flex items-center gap-2">
+        <i class="fas fa-gem text-pink-500"></i> ขอบเขตงานให้บริการ
+      </h3>
+      <ul class="grid grid-cols-1 gap-3 text-sm md:text-base text-gray-700 dark:text-gray-300">
+        <li class="flex items-center gap-3 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+          <i class="fas fa-check-circle text-green-500"></i> 
+          <span><strong>ฟิวแฟน (GFE):</strong> เอาใจเก่ง ขี้อ้อน เหมือนแฟนจริง</span>
+        </li>
+        <li class="flex items-center gap-3 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+          <i class="fas fa-glass-cheers text-purple-500"></i> 
+          <span><strong>งานเอนเตอร์เทน (En):</strong> ชงเหล้า ปาร์ตี้ สนุกสนาน</span>
+        </li>
+        <li class="flex items-center gap-3 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+          <i class="fas fa-utensils text-orange-500"></i> 
+          <span><strong>เพื่อนเที่ยว/ทานข้าว:</strong> เดินห้าง คาเฟ่ ดูหนัง</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Time & Location Box -->
+    <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-900/50 transition-colors">
+      <h3 class="font-bold text-gray-900 dark:text-white mb-4 text-base uppercase tracking-wider flex items-center gap-2">
+        <i class="fas fa-map-marked-alt text-blue-500"></i> พื้นที่และเวลาทำการ
+      </h3>
+      <div class="space-y-4 text-sm md:text-base text-gray-700 dark:text-gray-300">
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
+          <span class="flex items-center gap-2"><i class="fas fa-calendar-check text-gray-400"></i> เปิดบริการ</span>
+          <span class="font-bold text-green-600 dark:text-green-400">ทุกวัน 24 ชม. (ตามคิว)</span>
+        </div>
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
+          <span class="flex items-center gap-2"><i class="fas fa-clock text-gray-400"></i> ช่วงเวลาฮิต</span>
+          <span class="font-medium">12:00 - 02:00 น.</span>
+        </div>
+        <div class="pt-2">
+          <div class="flex gap-2 items-start">
+            <i class="fas fa-map-pin text-red-500 mt-1"></i>
+            <div>
+              <strong class="block text-gray-900 dark:text-white mb-1">โซนรับงานยอดนิยม:</strong>
+              <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                อ.เมืองเชียงใหม่, นิมมานเหมินท์, สันติธรรม, เจ็ดยอด, ช้างเผือก, ท่าแพ, ไนท์บาซาร์ และ โรงแรม/คอนโด ทั่วตัวเมือง
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </section>
 
-<script>
-  // Lazy-load map iframe (เพื่อ performance & SEO)
-  document.addEventListener("DOMContentLoaded", () => {
-    const iframe = document.getElementById("google-map");
-    const placeholder = document.getElementById("map-placeholder");
-    const observer = new IntersectionObserver((entries, obs) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          iframe.src = iframe.dataset.src;
-          placeholder && placeholder.remove(); // ตรวจสอบว่ามี placeholder ก่อน remove
-          obs.disconnect();
-        }
-      });
-    }, { threshold: 0.1 });
-    observer.observe(iframe);
-  });
-</script>
-<section class="max-w-4xl mx-auto px-4 py-12 border-t border-gray-100 dark:border-gray-800">
-    <h2 class="text-2xl font-bold text-center mb-8">คำถามที่พบบ่อย (FAQ)</h2>
+<!-- === ส่วน FAQ (Rich Snippets Support) === -->
+<section class="max-w-4xl mx-auto px-4 py-8 border-t border-gray-100 dark:border-gray-800">
+    <h3 class="text-2xl font-bold text-center mb-8 text-gray-900 dark:text-white">
+      คำถามที่พบบ่อย (FAQ)
+    </h3>
     <div class="space-y-4">
-        <details class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl cursor-pointer group">
-            <summary class="font-bold list-none flex justify-between items-center text-gray-900 dark:text-white">
-                จองน้องต้องมัดจำไหม?
-                <i class="fas fa-chevron-down group-open:rotate-180 transition-transform text-pink-500"></i>
+        <details class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm cursor-pointer group transition-all duration-300 open:shadow-md">
+            <summary class="font-bold list-none flex justify-between items-center text-gray-900 dark:text-white select-none">
+                <span class="flex items-center gap-2"><i class="fas fa-question-circle text-pink-500"></i> จองน้องต้องโอนมัดจำก่อนไหม?</span>
+                <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform duration-300"></i>
             </summary>
-            <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                ไม่ต้องมัดจำทุกกรณีครับ ลูกค้าสามารถชำระเงินโดยตรงกับน้องที่หน้างานเท่านั้น เพื่อความปลอดภัยสูงสุดของท่าน
-            </p>
+            <div class="mt-3 text-sm md:text-base text-gray-600 dark:text-gray-300 pl-6 border-l-2 border-pink-200 dark:border-pink-900">
+                <p><strong>ไม่ต้องโอนมัดจำ 100% ครับ</strong> ทาง Sideline Chiangmai เน้นความปลอดภัยสูงสุด ลูกค้าสามารถนัดพบน้องๆ เช็คตัวจริงให้ตรงปกก่อน แล้วจึงชำระเงินค่าบริการที่หน้างานได้เลย</p>
+            </div>
         </details>
-        <details class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl cursor-pointer group">
-            <summary class="font-bold list-none flex justify-between items-center text-gray-900 dark:text-white">
-                มีแอดมินดูแลไหม?
-                <i class="fas fa-chevron-down group-open:rotate-180 transition-transform text-pink-500"></i>
+        
+        <details class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm cursor-pointer group transition-all duration-300 open:shadow-md">
+            <summary class="font-bold list-none flex justify-between items-center text-gray-900 dark:text-white select-none">
+                <span class="flex items-center gap-2"><i class="fas fa-user-shield text-green-500"></i> น้องๆ รับงานเอง หรือผ่านเอเย่นต์?</span>
+                <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform duration-300"></i>
             </summary>
-            <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                เรามีแอดมินคอยให้คำปรึกษาและประสานงานฟรี หากน้องตอบช้าหรือมีข้อสงสัย สามารถติดต่อเราได้ทาง LINE ตลอดเวลาทำการครับ
-            </p>
+            <div class="mt-3 text-sm md:text-base text-gray-600 dark:text-gray-300 pl-6 border-l-2 border-green-200 dark:border-green-900">
+                <p>ส่วนใหญ่เป็นน้องๆ <strong>รับงานเอง อิสระ</strong> ครับ โดยทางเราเป็นสื่อกลางช่วยคัดกรองโปรไฟล์ให้มีความน่าเชื่อถือ เพื่อให้ลูกค้าได้เจอน้องที่ตรงสเปคและคุยง่าย เป็นกันเองครับ</p>
+            </div>
         </details>
     </div>
+</section>
+
+<!-- === ส่วน Keyword Tags (SEO Booster - วางล่างสุดเนียนๆ) === -->
+<section class="container mx-auto px-4 pb-12 pt-4 opacity-70 hover:opacity-100 transition-opacity">
+  <div class="text-center">
+    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">คำค้นหายอดนิยม</h4>
+    <div class="flex flex-wrap justify-center gap-2">
+      <a href="#" class="tag-pill">#ไซด์ไลน์เชียงใหม่</a>
+      <a href="#" class="tag-pill">#รับงานเชียงใหม่</a>
+      <a href="#" class="tag-pill">#สาวเชียงใหม่</a>
+      <a href="#" class="tag-pill">#เด็กเอ็นเชียงใหม่</a>
+      <a href="#" class="tag-pill">#รับงานนิมมาน</a>
+      <a href="#" class="tag-pill">#ไซด์ไลน์สันติธรรม</a>
+      <a href="#" class="tag-pill">#หาเพื่อนเที่ยวเชียงใหม่</a>
+      <a href="#" class="tag-pill">#รับงานเจ็ดยอด</a>
+      <a href="#" class="tag-pill">#นวดน้ำมันเชียงใหม่</a>
+      <a href="#" class="tag-pill">#SidelineChiangmai</a>
+      <a href="#" class="tag-pill">#ไม่โอนมัดจำ</a>
+    </div>
+  </div>
+  
+
 </section>
 <footer class="bg-gray-900 text-gray-400 pt-16 pb-8 px-4 border-t border-gray-800 mt-16 font-sans">
     <div class="container mx-auto">
@@ -805,12 +929,12 @@
             </div>
 
             <div id="lightboxDescriptionContainer" class="pt-5 border-t border-gray-200 dark:border-gray-700" style="display: none;">
-              <h4 class="text-gray-900 dark:text-gray-100 flex items-center gap-2 font-bold">
+              <h3 class="text-gray-900 dark:text-gray-100 flex items-center gap-2 font-bold">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
                 </svg>
                 <span>รายละเอียดเพิ่มเติม</span>
-              </h4>
+              </h3>
               <div id="lightboxDescriptionContent" class="prose dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap mt-3 text-gray-600 dark:text-gray-300">
                 <!-- Content is generated by JS -->
               </div>
