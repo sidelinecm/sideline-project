@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // --- 1. CONFIGURATION ---
@@ -6,7 +5,7 @@ const CONFIG = {
     SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Thailand',
+    BRAND_NAME: 'sideline chiangmai',
     LOGO_URL: '/images/logo-sidelinechiangmai.webp',
     OG_PREVIEW: 'https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp',
     SOCIAL_PROFILES: [
@@ -15,7 +14,6 @@ const CONFIG = {
         "https://line.me/ti/p/ksLUMz3p_o"
     ]
 };
-
 // --- 2. ADVANCED HELPERS ---
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const formatDate = () => new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -274,19 +272,67 @@ async function handleLocationPage(request, context, supabase, slug) {
         const provinceRating = (4.7 + (province.id % 3) / 10).toFixed(1);
         const provinceReviews = (province.id * 23) % 150 + 120;
 
-        const schemaData = {
-            "@context": "https://schema.org/",
-            "@graph": [
-                { "@type": "Organization", "@id": `${CONFIG.DOMAIN}/#organization`, "name": CONFIG.BRAND_NAME, "url": CONFIG.DOMAIN, "logo": { "@type": "ImageObject", "url": `${CONFIG.DOMAIN}${CONFIG.LOGO_URL}` } },
-                { "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN }, { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": canonicalUrl }] },
-                { 
-                    "@type": "Product", "name": `บริการเพื่อนเที่ยว ไซด์ไลน์${provinceName}`, "description": desc, "url": canonicalUrl, "image": CONFIG.OG_PREVIEW,
-                    "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME }, "sku": `LOC-${cleanSlug}`,
-                    "offers": { "@type": "AggregateOffer", "priceCurrency": "THB", "lowPrice": "1500", "highPrice": "5000", "offerCount": (actualCount || 15).toString(), "availability": "https://schema.org/InStock" },
-                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": provinceRating, "reviewCount": provinceReviews.toString() } 
-                }
-            ]
-        };
+            // 1. ADVANCED SCHEMA DATA (ฟินครบทุก Rich Snippets)
+    const schemaData = {
+        "@context": "https://schema.org/",
+        "@graph": [
+            { 
+                "@type": "Organization", 
+                "@id": `${CONFIG.DOMAIN}/#organization`, 
+                "name": CONFIG.BRAND_NAME, 
+                "url": CONFIG.DOMAIN, 
+                "logo": { "@type": "ImageObject", "url": `${CONFIG.DOMAIN}${CONFIG.LOGO_URL}` },
+                "sameAs": CONFIG.SOCIAL_PROFILES 
+            },
+            { 
+                "@type": "BreadcrumbList", 
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN }, 
+                    { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": canonicalUrl }
+                ] 
+            },
+            { 
+                "@type": "Product", 
+                "name": `บริการเพื่อนเที่ยว ไซด์ไลน์${provinceName}`, 
+                "description": desc, 
+                "url": canonicalUrl,
+                "image": CONFIG.OG_PREVIEW,
+                "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
+                "sku": `LOC-${slug}`,
+                "offers": { 
+                    "@type": "AggregateOffer", 
+                    "priceCurrency": "THB", 
+                    "lowPrice": "1500", 
+                    "highPrice": "5000",
+                    "offerCount": (profiles?.length || 15).toString(),
+                    "availability": "https://schema.org/InStock",
+                    "seller": { "@type": "Organization", "name": CONFIG.BRAND_NAME }
+                },
+                "aggregateRating": { 
+                    "@type": "AggregateRating", 
+                    "ratingValue": provinceRating, 
+                    "reviewCount": provinceReviews.toString(),
+                    "bestRating": "5",
+                    "worstRating": "1"
+                } 
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    { 
+                        "@type": "Question", 
+                        "name": `จองคิวไซด์ไลน์${provinceName} ต้องมัดจำไหม?`, 
+                        "acceptedAnswer": { "@type": "Answer", "text": "ไม่มีระบบโอนมัดจำค่ะ เว็บไซต์เราปลอดภัย 100% จ่ายเงินค่าขนมน้องได้โดยตรงหลังจากเจอน้องแล้วเท่านั้น" } 
+                    },
+                    { 
+                        "@type": "Question", 
+                        "name": `ไซด์ไลน์${provinceName} ครอบคลุมย่านไหนบ้าง?`, 
+                        "acceptedAnswer": { "@type": "Answer", "text": `น้องๆ รับงานครอบคลุมพื้นที่ ${localZones.slice(0, 4).join(', ')} และย่านใกล้เคียงค่ะ` } 
+                    }
+                ]
+            }
+        ]
+    };
 
         const profileGridHTML = actualCount > 0 
             ? profiles.map(p => {
