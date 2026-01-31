@@ -1102,30 +1102,35 @@ function yieldToMain() {
     });
 }
 
-/**
- * [หัวใจของการแก้ไข] ฟังก์ชันสำหรับทยอยสร้างและแสดงผลการ์ดทีละชุด (Incremental Rendering)
- * @param {HTMLElement} container - Element ปลายทางที่จะให้ใส่การ์ดเข้าไป
- * @param {Array<Object>} profiles - ข้อมูลโปรไฟล์ทั้งหมดที่ต้องการแสดงผล
- */
 async function renderCardsIncrementally(container, profiles) {
-    if (!container) {
-        console.error("Render container not found for profiles:", profiles);
-        return;
-    }
+    if (!container || !profiles) return;
+    
+    // ล้างเนื้อหาเดิมในกรณีที่เป็น Grid เปล่า
+    container.innerHTML = '';
     
     const fragment = document.createDocumentFragment();
-    const BATCH_SIZE = 8; // สร้างทีละ 8 ใบแล้วพัก (เหมาะสำหรับมือถือ)
+    // ถ้าโปรไฟล์เยอะ (เชียงใหม่) ให้วาดทีละ 4 ใบ เพื่อให้ UI ไม่ค้าง
+    const BATCH_SIZE = profiles.length > 20 ? 4 : 8; 
 
     for (let i = 0; i < profiles.length; i++) {
-        fragment.appendChild(createProfileCard(profiles[i], i));
+        const card = createProfileCard(profiles[i], i);
+        fragment.appendChild(card);
 
+        // เมื่อครบชุด (Batch) หรือใบสุดท้าย ให้เอาลงหน้าจอ
         if ((i + 1) % BATCH_SIZE === 0 || i === profiles.length - 1) {
-            container.appendChild(fragment); // fragment จะถูกล้างค่าอัตโนมัติ
-            await yieldToMain(); // <<-- จุดสำคัญ! พักเพื่อให้ UI ตอบสนอง
+            container.appendChild(fragment);
+            
+            // 🟢 จุดสำคัญ: คืน Main Thread ให้ Browser ไปวาดรูปและรับคำสั่งจากผู้ใช้
+            // ใช้ requestAnimationFrame เพื่อความนุ่มนวลสูงสุด
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
+            // ถ้าข้อมูลเยอะมาก ให้หยุดพักเพิ่มอีกนิด (แก้ปัญหาเครื่องร้อน/ค้าง)
+            if (profiles.length > 40) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
         }
     }
 }
-
 
 
 /**
@@ -1250,55 +1255,54 @@ async function renderByProvince(profiles) {
 }
 
 function renderProfiles(profiles, isSearching) {
-    // 1. ความปลอดภัย: ถ้าหาพื้นที่แสดงผลไม่เจอ ให้หยุด
     if (!dom.profilesDisplayArea) return;
     
-    // 2. ล้างหน้าจอเก่าเตรียมแสดงผลใหม่
-    dom.profilesDisplayArea.innerHTML = '';
+    // 1. ซ่อน Error และ No Results ก่อนเริ่มงาน
+    dom.noResultsMessage?.classList.add('hidden');
+    if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
 
-    // 3. จัดการส่วน Featured (โปรไฟล์แนะนำ)
+    // 2. จัดการส่วน Featured (แนะนำ)
     if (dom.featuredSection) {
-        // ซ่อน Featured ถ้ากำลังค้นหา หรืออยู่ในหน้าจังหวัด
         const isHome = !isSearching && !window.location.pathname.includes('/location/');
         dom.featuredSection.classList.toggle('hidden', !isHome);
 
-        // ถ้าอยู่หน้าแรก และยังไม่มีการ์ดแนะนำ ให้สร้างขึ้นมา
-        if (isHome && dom.featuredContainer && state.allProfiles.length > 0) {
-            if (dom.featuredContainer.children.length === 0) {
-                const featured = state.allProfiles.filter(p => p.isfeatured);
-                // ส่งงานให้ผู้ช่วยสร้างการ์ด (ไม่บล็อก UI)
-                renderCardsIncrementally(dom.featuredContainer, featured);
-            }
+        if (isHome && dom.featuredContainer && dom.featuredContainer.children.length === 0) {
+            const featured = state.allProfiles.filter(p => p.isfeatured);
+            renderCardsIncrementally(dom.featuredContainer, featured);
         }
     }
 
-    // 4. กรณีไม่พบข้อมูลเลย
+    // 3. กรณีไม่มีข้อมูล
     if (!profiles || profiles.length === 0) {
+        dom.profilesDisplayArea.innerHTML = '';
         dom.noResultsMessage?.classList.remove('hidden');
         if (dom.resultCount) dom.resultCount.style.display = 'none';
         return;
     }
-    
-    // ซ่อนข้อความแจ้งเตือนเมื่อมีข้อมูล
-    dom.noResultsMessage?.classList.add('hidden');
-    if (dom.resultCount) dom.resultCount.style.display = 'block';
 
-    // 5. ตัดสินใจเลือกโหมดการแสดงผล
+    // 4. ตัดสินใจโหมดการวาด (ค้นหา/จังหวัด หรือ หน้าแรกแยกตามจังหวัด)
     const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
     
+    // ล้างพื้นที่แสดงผลหลัก "ครั้งเดียว" ก่อนเริ่มวาดใหม่
+    dom.profilesDisplayArea.innerHTML = '';
+
     if (isSearching || isLocationPage) {
-        // [โหมด A] : แสดงผลแบบรายการเดียว (ผลการค้นหา / หรือดูจังหวัดเดียว)
-        // สร้าง Header สวยๆ พร้อมจำนวนรายการ
+        // [โหมด A] หน้าค้นหา หรือ หน้าจังหวัด (เช่น เชียงใหม่)
         const searchSection = createSearchResultSection(profiles);
         dom.profilesDisplayArea.appendChild(searchSection);
+        
+        // สั่งวาดการ์ดใน Grid ของ Search Section
+        const grid = searchSection.querySelector('.profile-grid');
+        renderCardsIncrementally(grid, profiles);
     } else {
-        // [โหมด B] : แสดงผลหน้าแรก (แยกหมวดหมู่ตามจังหวัด)
-        // เรียกใช้ฟังก์ชัน High Performance ที่เราเขียนไว้ข้างบน
+        // [โหมด B] หน้าแรกแบบแยกจังหวัด (ทยอยวาดทีละจังหวัด)
         renderByProvince(profiles);
     }
 
-    // 6. กระตุ้นระบบ Animation (ScrollTrigger) ถ้ามี
-    if (window.ScrollTrigger) ScrollTrigger.refresh();
+    // 5. อัปเดต ScrollTrigger เพื่อให้ Animation ทำงานถูกต้อง
+    if (window.ScrollTrigger) {
+        setTimeout(() => ScrollTrigger.refresh(), 500);
+    }
 }
 
 // ✅ [เวอร์ชันแก้ไขสมบูรณ์ที่สุด: เพิ่ม Skeleton Loader + เรียง Layer ถูกต้อง]
@@ -1406,7 +1410,6 @@ function createProfileCard(p, index = 20) {
 
     return cardContainer;
 }
-
     // =================================================================
     // 9. LIGHTBOX & HELPER FUNCTIONS
     // =================================================================
