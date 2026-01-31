@@ -500,7 +500,7 @@ function initRealtimeSubscription() {
     }
 }
 
-// ✅ 2. ฟังก์ชันประมวลผลข้อมูล (วางทับของเดิม)
+// ✅ 2. ฟังก์ชันประมวลผลข้อมูล (เวอร์ชัน Genius Search)
 function processProfileData(p) {
     if (!p) return null;
 
@@ -523,18 +523,44 @@ function processProfileData(p) {
     const statsText = p.stats ? `สัดส่วน ${p.stats}` : '';
     const locationText = p.location ? `พิกัด ${p.location}` : '';
 
-    // สร้าง Alt Text สำหรับ Google Image Search
+    // 🔥 GENIUS LOGIC: แกะชื่ออังกฤษจาก Slug (เช่น puep-87 -> puep)
+    // เพื่อให้ค้นหาคำว่า "Puep" หรือ "Pupe" แล้วเจอ
+    let englishName = '';
+    if (p.slug) {
+        // ตัดตัวเลขออก เอาแค่ตัวหนังสือภาษาอังกฤษ
+        englishName = p.slug.split('-').filter(part => isNaN(part)).join(' ');
+    }
+
+    // 🔥 GENIUS LOGIC: รวมทุกอย่างเป็น "ก้อนข้อความเดียว" สำหรับค้นหา
+    // รวม: ชื่อไทย, ชื่ออังกฤษ(จาก slug), ไอดี, จังหวัด, แท็ก, รายละเอียด, สัดส่วน
+    const universalSearchString = `
+        ${displayName} 
+        ${englishName} 
+        ${p.id} 
+        ${provinceName} 
+        ${p.provinceKey} 
+        ${p.styleTags ? p.styleTags.join(' ') : ''} 
+        ${p.description || ''} 
+        ${p.location || ''} 
+        ${p.stats || ''}
+    `.toLowerCase().replace(/\s+/g, ' ').trim();
+
+    // สร้าง Alt Text
     const richAltText = `รูปตัวจริง${displayName} ไซด์ไลน์${provinceName} ${v} ${g} ${t} ${statsText} รับงานเอง ตรงปก`;
     const imgTitleText = `${displayName} (${provinceName}) - ${v} ${g} [คลิกดูรูปเพิ่ม]`;
 
     return { 
         ...p, 
         displayName,
+        englishName, // เก็บไว้ใช้แสดงผลถ้าต้องการ
         images: imageObjects, 
         altText: richAltText,
         imgTitle: imgTitleText,
         provinceNameThai: provinceName,
-        searchString: `${displayName} ${provinceName} ${p.provinceKey} ${p.description || ''} ${p.rate || ''} ${p.stats || ''} ${locationText} ${v} ${t}`.toLowerCase(),
+        
+        // ✅ ตัวแปรเทพสำหรับค้นหา (ใช้ตัวนี้ตัวเดียว ครอบจักรวาล)
+        searchString: universalSearchString,
+        
         _price: Number(String(p.rate).replace(/\D/g, '')) || 0, 
         _age: Number(p.age) || 0
     };
@@ -682,31 +708,37 @@ function debounce(func, delay = 350) {
     };
 }
 
+// =================================================================
+// [ฉบับสมบูรณ์] - initSearchAndFilters (Genius Search Engine)
+// =================================================================
 function initSearchAndFilters() {
     if (!dom.searchForm) return;
 
     // 1. ตั้งค่า Search Engine (Fuse.js) ---
     const fuseOptions = {
         includeScore: true,
-        threshold: 0.35,
+        threshold: 0.3, // ค่า 0.3 ยืดหยุ่นกำลังดี (พิมพ์ผิดนิดหน่อยก็เจอ เช่น Pupe -> Puep)
         ignoreLocation: true,
+        useExtendedSearch: true, // เปิดโหมดค้นหาขั้นสูง
         keys: [
-            { name: 'name', weight: 1.0 },
-            { name: 'provinceNameThai', weight: 0.9 },
-            { name: 'provinceKey', weight: 0.8 },
-            { name: 'styleTags', weight: 0.5 },
-            { name: 'description', weight: 0.1 },
-            { name: 'location', weight: 0.7 },
-            { name: 'skinTone', weight: 0.6 },
-            { name: 'name', weight: 0.2 } // ✅ ถูกต้อง
-        ],
-        //... อื่นๆ...
+            // 🔥 พระเอกของเรา: ให้ความสำคัญสูงสุดกับ searchString (ที่รวมทุกอย่างไว้แล้ว)
+            { name: 'searchString', weight: 1.0 },
+            
+            // 🌟 ตัวช่วยดันคะแนน: ถ้าชื่อตรงเป๊ะๆ ให้คะแนนพิเศษ
+            { name: 'name', weight: 0.8 },         // ชื่อไทย
+            { name: 'englishName', weight: 0.8 },  // ชื่ออังกฤษ (ที่แกะจาก URL)
+            { name: 'id', weight: 0.9 },           // เผื่อค้นหาด้วย ID ตรงๆ
+            
+            // 🌍 ตัวช่วยรอง: จังหวัดและแท็ก
+            { name: 'provinceNameThai', weight: 0.5 },
+            { name: 'styleTags', weight: 0.4 }
+        ]
     };
     
-    // หน่วงเวลาการสร้าง Index เพื่อให้หน้าเว็บโหลดเร็วขึ้น
+    // หน่วงเวลาการสร้าง Index เพื่อให้หน้าเว็บโหลด UI หลักเสร็จก่อน (Performance)
     setTimeout(() => {
         if (state.allProfiles.length > 0) {
-            console.log("🚀 Building search index in the background...");
+            console.log("🚀 Building GENIUS search index...");
             fuseEngine = new Fuse(state.allProfiles, fuseOptions);
             console.log("✅ Search index is ready.");
         }
@@ -716,47 +748,83 @@ function initSearchAndFilters() {
     const clearBtn = document.getElementById('clear-search-btn');
     const suggestionsBox = document.getElementById('search-suggestions');
     
-    // ✅ [แก้ไข] ใช้ Debounce กับช่องค้นหา เพื่อประสิทธิภาพสูงสุด
+    // ✅ Input Listener: ใช้ Debounce หน่วงเวลาไม่ให้ค้นหาถี่เกินไป
     dom.searchInput?.addEventListener('input', debounce((e) => {
         const val = e.target.value;
+        
+        // แสดง/ซ่อน ปุ่มกากบาท (X)
         if(clearBtn) clearBtn.classList.toggle('hidden', !val);
+        
+        // เรียกฟังก์ชันค้นหาหลัก
         applyUltimateFilters(); 
+        
+        // (Optional) ถ้าคุณมีระบบ Auto-suggest ให้เรียกใช้ตรงนี้
+        if (typeof updateUltimateSuggestions === 'function') {
+            updateUltimateSuggestions(val);
+        }
     }, 350));
 
-    // Listener สำหรับปุ่มล้างคำค้นหา (X)
+    // ✅ Clear Button Listener: ปุ่มล้างคำค้นหา (X)
     clearBtn?.addEventListener('click', () => {
-        dom.searchInput.value = '';
+        if (dom.searchInput) {
+            dom.searchInput.value = '';
+            dom.searchInput.focus(); // โฟกัสกลับไปที่ช่องพิมพ์
+        }
         clearBtn.classList.add('hidden');
-        dom.searchInput.focus();
-        applyUltimateFilters();
+        if (suggestionsBox) suggestionsBox.classList.add('hidden');
+        
+        applyUltimateFilters(); // รีเซ็ตผลการค้นหา
     });
 
-    // Listener สำหรับ Dropdown จังหวัด
+    // ✅ Province Dropdown: เปลี่ยนจังหวัดแล้วค้นหาทันที
     dom.provinceSelect?.addEventListener('change', () => {
-        if (dom.searchInput) dom.searchInput.value = '';
-        history.pushState(null, '', dom.provinceSelect.value ? `/location/${dom.provinceSelect.value}` : '/');
+        // เมื่อเลือกจังหวัด ให้ล้างช่องค้นหา text เพื่อไม่ให้ตีกัน
+        if (dom.searchInput) {
+            dom.searchInput.value = '';
+            if(clearBtn) clearBtn.classList.add('hidden');
+        }
+        
+        // เปลี่ยน URL ตามจังหวัดที่เลือก (SEO Friendly)
+        const newPath = dom.provinceSelect.value ? `/location/${dom.provinceSelect.value}` : '/';
+        history.pushState(null, '', newPath);
+        
         applyUltimateFilters(true);
     });
 
-    // Listener สำหรับ Dropdown อื่นๆ
+    // ✅ Filter Dropdowns อื่นๆ (Availability, Featured, Sort)
     dom.availabilitySelect?.addEventListener('change', () => applyUltimateFilters(true));
     dom.featuredSelect?.addEventListener('change', () => applyUltimateFilters(true));
+    dom.sortSelect?.addEventListener('change', () => applyUltimateFilters(true)); // เพิ่มตัวเรียงลำดับด้วย
     
-    // Listener สำหรับปุ่ม Reset ตัวกรองทั้งหมด
+    // ✅ Reset Button: ปุ่มรีเซ็ตค่าทุกอย่าง
     dom.resetSearchBtn?.addEventListener('click', () => {
-        dom.searchInput.value = '';
-        dom.provinceSelect.value = '';
-        dom.availabilitySelect.value = '';
-        dom.featuredSelect.value = '';
+        // 1. เคลียร์ค่าใน Input และ Select ทั้งหมด
+        if (dom.searchInput) dom.searchInput.value = '';
+        if (dom.provinceSelect) dom.provinceSelect.value = '';
+        if (dom.availabilitySelect) dom.availabilitySelect.value = '';
+        if (dom.featuredSelect) dom.featuredSelect.value = '';
+        if (dom.sortSelect) dom.sortSelect.value = 'featured';
+
+        // 2. ซ่อนปุ่ม Clear
+        if (clearBtn) clearBtn.classList.add('hidden');
+
+        // 3. รีเซ็ต URL กลับหน้าแรก
         history.pushState(null, '', '/');
+
+        // 4. เรียกฟังก์ชันกรองใหม่
         applyUltimateFilters(true);
     });
 
-    // Listener สำหรับการ Submit ฟอร์ม (กด Enter)
+    // ✅ Form Submit: ป้องกันการ Refresh หน้าเมื่อกด Enter
     dom.searchForm.addEventListener('submit', (e) => { 
         e.preventDefault(); 
         applyUltimateFilters(true); 
+        
+        // ซ่อนกล่อง Suggestion เมื่อกด Enter
         if(suggestionsBox) suggestionsBox.classList.add('hidden');
+        
+        // ปิด Keyboard ในมือถือ
+        if (dom.searchInput) dom.searchInput.blur();
     });
 }
 
@@ -893,7 +961,7 @@ function showRecentSearches() {
 }
     
 // =================================================================
-// [ฉบับสมบูรณ์ 100%] - applyUltimateFilters
+// [ฉบับสมบูรณ์ 100%] - applyUltimateFilters (Genius Search Edition)
 // =================================================================
 function applyUltimateFilters(updateUrl = true) {
     try {
@@ -940,18 +1008,40 @@ function applyUltimateFilters(updateUrl = true) {
         // 4. กรองข้อมูลตามเงื่อนไข
         let filtered = [...state.allProfiles]; // สร้างสำเนาเพื่อป้องกันการเปลี่ยนแปลงต้นฉบับ
 
-        // 4.1 กรองด้วยคำค้นหา (ถ้ามี)
+        // 4.1 🔥 กรองด้วยคำค้นหา (GENIUS LOGIC)
         if (query.text) {
-            if (fuseEngine) {
-                const results = fuseEngine.search(query.text, { limit: 500 });
-                filtered = results.map(result => result.item);
-            } else {
-                const lowerText = query.text.toLowerCase();
-                filtered = filtered.filter(p => 
-                    p.searchString?.includes(lowerText) || 
-                    p.name?.toLowerCase().includes(lowerText) ||
-                    p.bio?.toLowerCase().includes(lowerText)
+            const searchText = query.text.toLowerCase().trim();
+            let searchHandled = false;
+
+            // [A] ค้นหาด้วย ID (High Priority): ถ้าพิมพ์ตัวเลขล้วนๆ ให้หา ID ก่อน
+            if (/^\d+$/.test(searchText)) {
+                // ค้นหาทั้ง ID ตรงๆ และ เลขที่ห้อยท้าย Slug
+                const idMatches = filtered.filter(p => 
+                    String(p.id) === searchText || 
+                    (p.slug && p.slug.endsWith(`-${searchText}`))
                 );
+
+                if (idMatches.length > 0) {
+                    filtered = idMatches;
+                    searchHandled = true;
+                    console.log(`⚡ ID Match Found: ${searchText}`);
+                }
+            }
+
+            // [B] ค้นหาด้วย Fuse.js หรือ Text (ถ้ายังไม่เจอ ID)
+            if (!searchHandled) {
+                if (fuseEngine) {
+                    // ใช้ Fuse.js ที่ตั้งค่าไว้ (ค้นหา searchString, ชื่ออังกฤษ, ชื่อไทย)
+                    const results = fuseEngine.search(query.text, { limit: 500 });
+                    filtered = results.map(result => result.item);
+                } else {
+                    // Fallback: ถ้า Fuse ยังไม่พร้อม ให้หาจาก searchString ตรงๆ
+                    filtered = filtered.filter(p => 
+                        p.searchString?.includes(searchText) || 
+                        p.name?.toLowerCase().includes(searchText) ||
+                        p.englishName?.includes(searchText)
+                    );
+                }
             }
         }
 
@@ -1410,34 +1500,54 @@ function createProfileCard(p, index = 20) {
 
     return cardContainer;
 }
-    // =================================================================
-    // 9. LIGHTBOX & HELPER FUNCTIONS
-    // =================================================================
 
 async function fetchSingleProfile(slug) {
     if (!supabase) return null;
     try {
-        // ✅ แก้ไข: JOIN ตาราง provinces เพื่อดึงชื่อจังหวัดมาพร้อมกัน
-        const { data, error } = await supabase
+        // 1. ลองค้นหาแบบ "ตรงตัวเป๊ะๆ" ก่อน (Search by Slug)
+        let query = supabase
             .from('profiles')
-            .select('*, provinces(key, nameThai)') // ดึง key และ nameThai จาก provinces
+            .select('*, provinces(key, nameThai)')
             .eq('slug', slug)
             .maybeSingle();
 
+        let { data, error } = await query;
+
+        // 2. [ส่วนที่เพิ่มความฉลาด] ถ้าหาไม่เจอ ให้ลองแกะ "ID" จาก URL ไปค้นหาแทน
+        if (!data) {
+            // สมมติ URL มาเป็น "puep-87" หรือ "puep-87-87"
+            // โค้ดนี้จะดึงเลขตัวสุดท้ายออกมา (คือ 87)
+            const extractedId = slug.split('-').pop(); 
+            
+            // เช็คว่าเป็นตัวเลขจริงๆ ไหม
+            if (extractedId && !isNaN(extractedId)) {
+                console.log(`⚠️ ไม่เจอ Slug เป๊ะๆ กำลังลองค้นหาด้วย ID: ${extractedId}`);
+                
+                const byId = await supabase
+                    .from('profiles')
+                    .select('*, provinces(key, nameThai)')
+                    .eq('id', extractedId) // ค้นหาจาก ID แทน
+                    .maybeSingle();
+                
+                if (byId.data) {
+                    data = byId.data; // เจอแล้ว! เอาข้อมูลมาใช้เลย
+                    error = null;
+                }
+            }
+        }
+
         if (error || !data) {
-            console.error("Error fetching single profile:", error);
+            console.error("❌ หาไม่เจอจริงๆ ยอมแพ้:", slug);
             return null;
         }
 
-        // ✅ เพิ่ม: นำข้อมูลจังหวัดที่ได้มาใหม่ ใส่ลงใน state.provincesMap ทันที
-        // เพื่อให้ฟังก์ชัน processProfileData และ updateAdvancedMeta นำไปใช้ได้
+        // อัปเดต Map จังหวัด (โค้ดเดิม)
         if (data.provinces && data.provinces.key && data.provinces.nameThai) {
             if (!state.provincesMap.has(data.provinces.key)) {
                 state.provincesMap.set(data.provinces.key.toString(), data.provinces.nameThai);
             }
         }
         
-        // ตอนนี้ processProfileData จะหาชื่อจังหวัดเจอแน่นอน
         return processProfileData(data);
 
     } catch (err) {
