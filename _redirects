@@ -183,6 +183,4 @@
 /sideline/lukaekw-129-129      /sideline/lukaekw-129         301
 /sideline/ediyr-139-139        /sideline/ediyr-139           301
 
-# --- ส่วนที่ 4: Wildcard อื่นๆ (คงเดิมไว้) ---
-/location/*                    /index.html                   200
-/province/*                    /index.html                   200
+/* /index.html 200
