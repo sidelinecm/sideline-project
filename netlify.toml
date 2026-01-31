@@ -5,7 +5,7 @@
 [build.processing]
   skip_processing = false
 [build.processing.html]
-  pretty_urls = true
+  pretty_urls = true  # ทำให้ /page.html เข้าผ่าน /page ได้
 
 [[headers]]
   for = "/*"
@@ -13,14 +13,12 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    
-    # แก้ไข 2 บรรทัดนี้เพื่อปลดบล็อกบอทและเครื่องมือตรวจสอบ
     X-Frame-Options = "ALLOWALL" 
     Referrer-Policy = "no-referrer-when-downgrade"
-    
     Cache-Control = "public, max-age=0, must-revalidate"
+    # เพิ่ม X-Robots-Tag เพื่อยืนยันกับ Google ว่าเว็บนี้ให้เก็บข้อมูลได้เต็มที่
+    X-Robots-Tag = "index, follow"
 
-# เพิ่มการ Cache ไฟล์รูปภาพและ Font ให้แรงขึ้น
 [[headers]]
   for = "/images/*"
   [headers.values]
@@ -31,7 +29,7 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Edge Functions (คงไว้ตามเดิมที่คุณตั้งค่าไว้)
+# --- Edge Functions (คงไว้ตามเดิมที่คุณใช้งาน) ---
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
@@ -48,14 +46,24 @@
   function = "renderbot"
   path = "/province/*"
 
-# การจัดการ Redirects พื้นฐาน
+# --- การจัดการ Redirects (ปรับลำดับให้ถูกต้องเพื่อ SEO) ---
+
+# 1. บังคับ HTTP เป็น HTTPS (ต้องทำเป็นอันดับแรก)
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
 
-# บังคับให้ Service Worker ไม่ถูก Cache เพื่อให้อัปเดตข้อมูลใหม่เสมอ
+# 2. แก้ปัญหา Duplicate Content: บังคับให้ลบ .html ออกจาก URL (สำคัญมาก!)
+# ถ้า Google เจอหน้าที่มี .html มันจะส่งคนมาหน้าปกติ เพื่อให้อันดับไม่ร่วง
+[[redirects]]
+  from = "/*.html"
+  to = "/:splat"
+  status = 301
+  force = true
+
+# 3. จัดการ Service Worker
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
@@ -63,7 +71,7 @@
   force = true
   headers = { "Cache-Control" = "no-cache" }
 
-# SPA fallback (กฎสำรองสุดท้าย)
+# 4. SPA fallback (กฎสำรองสุดท้าย - แก้ปัญหาหน้าขาวเวลา Refresh)
 [[redirects]]
   from = "/*"
   to = "/index.html"
