@@ -92,6 +92,5 @@
 /sideline/ลูกแก้ว              /sideline/lukaekw-129-129     301
 /sideline/เดียร์                /sideline/ediyr-139-139       301
 
-/location/*                    /index.html                   200
-/province/*                    /index.html                   200
+/* /index.html 200
 
