@@ -500,9 +500,21 @@ function initRealtimeSubscription() {
     }
 }
 
-// ✅ 2. ฟังก์ชันประมวลผลข้อมูล (เวอร์ชัน Genius Search)
+// ✅ 2. ฟังก์ชันประมวลผลข้อมูล (เวอร์ชัน Genius Search + Clean URL)
 function processProfileData(p) {
     if (!p) return null;
+
+    // 🔥 1. จุดที่เพิ่มเข้าไป: แก้ไข Slug ให้สั้นลง (Clean URL)
+    // จาก "hlinghling-90-90-90" ให้เหลือแค่ "hlinghling-90"
+    if (p.slug) {
+        const parts = p.slug.split('-');
+        const namePart = parts.filter(part => isNaN(part)).join('-'); // ดึงส่วนที่เป็นตัวอักษรทั้งหมด
+        const idPart = parts.filter(part => !isNaN(part)).pop(); // ดึงตัวเลขชุดสุดท้ายออกมา
+        
+        if (namePart && idPart) {
+            p.slug = `${namePart}-${idPart}`; // เขียนทับให้เป็นแบบสั้น
+        }
+    }
 
     const displayName = getCleanName(p.name); 
 
@@ -523,16 +535,13 @@ function processProfileData(p) {
     const statsText = p.stats ? `สัดส่วน ${p.stats}` : '';
     const locationText = p.location ? `พิกัด ${p.location}` : '';
 
-    // 🔥 GENIUS LOGIC: แกะชื่ออังกฤษจาก Slug (เช่น puep-87 -> puep)
-    // เพื่อให้ค้นหาคำว่า "Puep" หรือ "Pupe" แล้วเจอ
+    // 🔥 GENIUS LOGIC: แกะชื่ออังกฤษจาก Slug 
     let englishName = '';
     if (p.slug) {
-        // ตัดตัวเลขออก เอาแค่ตัวหนังสือภาษาอังกฤษ
         englishName = p.slug.split('-').filter(part => isNaN(part)).join(' ');
     }
 
     // 🔥 GENIUS LOGIC: รวมทุกอย่างเป็น "ก้อนข้อความเดียว" สำหรับค้นหา
-    // รวม: ชื่อไทย, ชื่ออังกฤษ(จาก slug), ไอดี, จังหวัด, แท็ก, รายละเอียด, สัดส่วน
     const universalSearchString = `
         ${displayName} 
         ${englishName} 
@@ -552,15 +561,12 @@ function processProfileData(p) {
     return { 
         ...p, 
         displayName,
-        englishName, // เก็บไว้ใช้แสดงผลถ้าต้องการ
+        englishName, 
         images: imageObjects, 
-        altText: richAltText,
+        altText: richAltText, 
         imgTitle: imgTitleText,
         provinceNameThai: provinceName,
-        
-        // ✅ ตัวแปรเทพสำหรับค้นหา (ใช้ตัวนี้ตัวเดียว ครอบจักรวาล)
         searchString: universalSearchString,
-        
         _price: Number(String(p.rate).replace(/\D/g, '')) || 0, 
         _age: Number(p.age) || 0
     };
