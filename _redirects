@@ -1,7 +1,4 @@
-# [ส่วนที่ 1] คำสั่งบังคับลบ .html ออกจากทุกหน้า (แก้ปัญหา Duplicate & SEO)
-/*.html  /:splat  301
 
-# [ส่วนที่ 2] การ Redirect รายบุคคล (ที่คุณมีอยู่เดิม - ตรวจสอบความถูกต้องแล้ว)
 /terms-of-service.html         /terms-of-service             301
 /contact.html                  /contact                      301
 /sideline/ปูเป้                /sideline/puep-87-87          301
@@ -93,7 +90,6 @@
 /sideline/ลูกแก้ว              /sideline/lukaekw-129-129     301
 /sideline/เดียร์                /sideline/ediyr-139-139       301
 
-# [ส่วนที่ 3] จัดการเส้นทางที่เปลี่ยนโครงสร้าง (แก้ปัญหาหน้า 404)
 /location/* /index.html                   200
 /province/* /index.html                   200
 /profiles/* /index.html                   200

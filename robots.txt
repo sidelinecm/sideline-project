@@ -1,10 +1,51 @@
+# ========================================================
+# ROBOTS.TXT FOR SIDELINE THAILAND - SEO OPTIMIZED
+# Updated: 2026
+# ========================================================
+
 User-agent: *
+# อนุญาตให้เข้าถึงหน้าหลักและโครงสร้างสำคัญทั้งหมด
 Allow: /
+Allow: /location/
+Allow: /sideline/
+Allow: /blog/
+Allow: /assets/
 
-User-agent: Googlebot
-Allow: /
+# ปิดกั้นเฉพาะหน้าที่เป็นระบบหลังบ้านหรือหน้าส่วนตัวจริงๆ
+Disallow: /admin/
+Disallow: /login/
+Disallow: /register/
+Disallow: /search?*
+Disallow: /me/
+Disallow: /settings/
 
-User-agent: Googlebot-Image
-Allow: /
+# ป้องกันปัญหา Duplicate Content จากพารามิเตอร์โฆษณา
+Disallow: /*?utm_source=*
+Disallow: /*?fbclid=*
+Disallow: /*?gclid=*
+Disallow: /*?_kx=*
 
+# ========================================================
+# BLOCK MALICIOUS & SPY BOTS (ป้องกันคู่แข่งส่องข้อมูล)
+# ========================================================
+User-agent: AhrefsBot
+Disallow: /
+User-agent: SemrushBot
+Disallow: /
+User-agent: DotBot
+Disallow: /
+User-agent: Rogerbot
+Disallow: /
+User-agent: MJ12bot
+Disallow: /
+User-agent: MegaIndex.ru
+Disallow: /
+User-agent: BLEXBot
+Disallow: /
+
+# หมายเหตุ: ลบ Crawl-delay ออกเพื่อให้ Googlebot ทำงานได้เต็มประสิทธิภาพ
+
+# ========================================================
+# SITEMAP LOCATION
+# ========================================================
 Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml
