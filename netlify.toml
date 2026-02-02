@@ -1,99 +1,81 @@
 # =========================================================================
-# ส่วนที่ 1: การตั้งค่า Build (Build Settings)
+# ส่วนที่ 1: การตั้งค่า Build
 # =========================================================================
 [build]
-  publish = "."               # Netlify จะเสิร์ฟไฟล์จาก Root directory ของ Repository
-  functions = "netlify/functions" # โฟลเดอร์สำหรับ Netlify Functions (ถ้ามี)
+  publish = "." [cite: 1]
+  functions = "netlify/functions" [cite: 2]
 
-# แก้ปัญหา URL มี .html และจัดระเบียบโครงสร้าง Link ทั้งเว็บ
 [build.processing]
-  skip_processing = false     # ไม่ข้ามกระบวนการ Build ของ Netlify
+  skip_processing = false [cite: 2]
 [build.processing.html]
-  pretty_urls = true          # ทำให้ URL ไม่มี .html เช่น about.html -> /about
+  pretty_urls = true [cite: 2]
 
 # =========================================================================
-# ส่วนที่ 2: การตั้งค่า Headers (HTTP Headers)
+# ส่วนที่ 2: HTTP Headers (Security & Cache)
 # =========================================================================
 [[headers]]
-  for = "/*"                  # ใช้กับทุก Path
+  for = "/*" [cite: 3]
   [headers.values]
-    X-Content-Type-Options = "nosniff"          # ป้องกัน MIME-sniffing
-    X-Frame-Options = "SAMEORIGIN"              # ป้องกัน Clickjacking
-    X-XSS-Protection = "1; mode=block"          # ป้องกัน XSS
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload" # บังคับใช้ HTTPS (HSTS)
-    Referrer-Policy = "strict-origin-when-cross-origin" # ควบคุมข้อมูล Referrer
-    Cache-Control = "public, max-age=0, must-revalidate" # ตั้งค่า Cache สำหรับไฟล์ (public, ไม่แคชในเบราว์เซอร์, ต้องตรวจสอบซ้ำ)
+    X-Content-Type-Options = "nosniff" [cite: 3]
+    X-Frame-Options = "SAMEORIGIN" [cite: 3]
+    X-XSS-Protection = "1; mode=block" [cite: 3]
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload" [cite: 3]
+    Referrer-Policy = "strict-origin-when-cross-origin" [cite: 3]
+    Cache-Control = "public, max-age=0, must-revalidate" [cite: 3]
 
 # =========================================================================
-# ส่วนที่ 3: Netlify Edge Functions (สำหรับ Netlify Edge Functions ของคุณ)
+# ส่วนที่ 3: Netlify Edge Functions
+# (ลำดับสำคัญมาก: Edge Functions จะทำงานก่อน Redirects เสมอ)
 # =========================================================================
 [[edge_functions]]
-  function = "sitemap"        # Edge Function สำหรับ sitemap
-  path = "/sitemap.xml"
+  function = "sitemap"
+  path = "/sitemap.xml" [cite: 4]
 
 [[edge_functions]]
-  function = "render-bot"     # Edge Function สำหรับการ Render Bot
-  path = "/sideline/*"
+  function = "render-bot"
+  path = "/sideline/*" [cite: 4]
 
 [[edge_functions]]
-  function = "ssr-province"   # Edge Function สำหรับ SSR จังหวัด
-  path = "/location/*"
+  function = "ssr-province"
+  path = "/location/*" [cite: 4]
 
 [[edge_functions]]
-  function = "ssr-province"   # Edge Function สำหรับ SSR จังหวัด
-  path = "/province/*"
+  function = "ssr-province"
+  path = "/province/*" [cite: 4]
+
+# เพิ่ม Edge Function สำหรับ Profiles (ถ้าคุณมี function สำหรับจัดการหน้านี้)
+# [[edge_functions]]
+#   function = "ssr-profile" 
+#   path = "/profiles/*"
 
 # =========================================================================
-# ส่วนที่ 4: การจัดการ Redirects และ Rewrites ของ Netlify
-#          (จัดลำดับความสำคัญจาก Specific ไป General)
+# ส่วนที่ 4: Redirects & Rewrites (SPA Fallback)
 # =========================================================================
 
-# 1. บังคับใช้ HTTPS (HTTP -> HTTPS 301 Redirect)
+# 1. บังคับ HTTPS
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
+  to = "https://sidelinechiangmai.netlify.app/:splat" [cite: 5]
   status = 301
-  force = true
+  force = true [cite: 5]
 
-# 2. เสิร์ฟไฟล์ Service Worker และ Web Manifest โดยตรง (200 OK)
-#    - ไม่จำเป็นต้องมี force = true หากเป็นไฟล์จริงที่อยู่ใน publish directory
+# 2. ปล่อยให้ไฟล์จริง (Static Files) ทำงาน โดยไม่ต้อง Rewrite
+# เอา force = true ออกเพื่อให้เบราว์เซอร์หาไฟล์ sw.js หรือ assets เจอจริงๆ
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
-  status = 200
-  # force = true # สามารถเอาออกได้ถ้ามั่นใจว่าไฟล์นี้มีอยู่จริงและไม่ต้องการ rewrite ทับ
+  status = 200 [cite: 6]
 
 [[redirects]]
   from = "/manifest.webmanifest"
   to = "/manifest.webmanifest"
-  status = 200
-  # force = true # สามารถเอาออกได้ถ้ามั่นใจว่าไฟล์นี้มีอยู่จริงและไม่ต้องการ rewrite ทับ
+  status = 200 [cite: 6]
 
-# 3. SPA Fallback สำหรับ Path เฉพาะ (200 OK Rewrites)
-#    - สำหรับ URL ที่เกี่ยวข้องกับ location, province, profiles
-#    - ให้ชี้ไปที่ index.html เพื่อให้ JavaScript ของ SPA จัดการ routing
-[[redirects]]
-  from = "/location/*"
-  to = "/index.html"
-  status = 200
-  force = true # 'force = true' สำคัญสำหรับ SPA
-
-[[redirects]]
-  from = "/province/*"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/profiles/*"
-  to = "/index.html"
-  status = 200
-  force = true
-
-# 4. SPA Fallback ทั่วไป (200 OK Rewrite)
-#    - นี่คือกฎ "catch-all" ที่จะทำงานเมื่อไม่มีกฎ Redirect/Rewrite อื่นๆ ทำงาน
-#    - ส่งทุก Request ที่เหลือไปยัง index.html เพื่อให้ SPA จัดการ
+# 3. SPA Catch-all (หัวใจสำคัญ)
+# ใช้กฎเดียวครอบคลุมทุก Path ที่ไม่ใช่ไฟล์จริง
+# การเอา force = true ออกในส่วนนี้ จะช่วยให้หากมีไฟล์ชื่อนั้นจริงๆ Netlify จะเปิดไฟล์นั้น 
+# แต่ถ้าไม่มี (เช่น URL ของ Router) มันจะส่งไปที่ index.html ให้เองโดยอัตโนมัติ
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
+  status = 200 [cite: 7]
