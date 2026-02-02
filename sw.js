@@ -3,9 +3,9 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox
 if (workbox) {
   // -----------------------------------------------------------
   // 1. CONFIGURATION
-  // ⚠️ เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการอัปเดตไฟล์ CSS/JS หลัก
+  // ⚠️ เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการอัปเดตไฟล์ เพื่อให้เครื่องลูกค้าโหลดใหม่
   // -----------------------------------------------------------
-  const CACHE_VERSION = 'v-2026-01-18-03'; 
+  const CACHE_VERSION = 'v-2026-02-02-01'; 
   const OFFLINE_PAGE = '/offline.html';
 
   workbox.core.setCacheNameDetails({
@@ -16,12 +16,13 @@ if (workbox) {
   });
 
   // -----------------------------------------------------------
-  // 2. INSTALLATION (สำคัญ: บันทึกหน้า Offline ลงเครื่องทันที)
+  // 2. INSTALLATION (บันทึกหน้า Offline)
   // -----------------------------------------------------------
   self.addEventListener('install', (event) => {
     event.waitUntil(
       caches.open(`sideline-cm-precache-${CACHE_VERSION}`).then((cache) => {
-        return cache.add(OFFLINE_PAGE);
+        // พยายาม Cache หน้า Offline ถ้ามี ถ้าไม่มีให้ข้ามไป
+        return cache.add(OFFLINE_PAGE).catch(err => console.log('Offline page not found, skipping.'));
       })
     );
     self.skipWaiting();
@@ -47,10 +48,26 @@ if (workbox) {
   // 3. CACHING STRATEGIES
   // -----------------------------------------------------------
 
-  // A. ไฟล์หลัก (HTML, CSS, JS) - เน้นความเร็วแต่ต้องอัปเดต (StaleWhileRevalidate)
+  // ✅ A.1 HTML Pages (หน้าเว็บ) - ใช้ NetworkFirst 
+  // แก้ปัญหา: กดเปลี่ยนหน้าแล้วไม่ไป หรือข้อมูลไม่อัปเดต
+  // หลักการ: โหลดจาก Server ก่อน ถ้าเน็ตหลุดค่อยเอา Cache มาโชว์
+  workbox.routing.registerRoute(
+    ({ request }) => request.destination === 'document',
+    new workbox.strategies.NetworkFirst({
+      cacheName: `pages-cache-${CACHE_VERSION}`,
+      networkTimeoutSeconds: 3, // รอโหลด 3 วินาที ถ้าช้ากว่านี้ให้ใช้ Cache
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 50, // เก็บประวัติหน้าเว็บแค่ 50 หน้าล่าสุด
+        }),
+      ],
+    })
+  );
+
+  // ✅ A.2 ไฟล์ Static (CSS, JS, Worker) - ใช้ StaleWhileRevalidate
+  // หลักการ: เอาของเก่ามาโชว์ก่อนให้เว็บเร็ว แล้วแอบโหลดของใหม่มาเก็บไว้ใช้ครั้งหน้า
   workbox.routing.registerRoute(
     ({ request }) => 
-      request.destination === 'document' || 
       request.destination === 'style' || 
       request.destination === 'script' || 
       request.destination === 'worker',
@@ -86,7 +103,7 @@ if (workbox) {
     })
   );
 
-  // D. ข้อมูล Real-time (API) - ห้าม Cache เพื่อให้สถานะ "ว่าง/ไม่ว่าง" เป็นปัจจุบันเสมอ
+  // D. ข้อมูล Real-time (API) - ห้าม Cache เด็ดขาด
   workbox.routing.registerRoute(
     ({ url }) => url.href.includes('rest/v1'),
     new workbox.strategies.NetworkOnly()
