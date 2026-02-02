@@ -1,77 +1,106 @@
-// sw.js
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox-sw.js');
 
 if (workbox) {
-  // 0. ให้ SW Activate ทันที
-  workbox.core.skipWaiting();
-  workbox.core.clientsClaim();
+  // -----------------------------------------------------------
+  // 1. CONFIGURATION
+  // ⚠️ เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการอัปเดตไฟล์ CSS/JS หลัก
+  // -----------------------------------------------------------
+  const CACHE_VERSION = 'v-2026-01-18-03'; 
+  const OFFLINE_PAGE = '/offline.html';
 
-  // 1. ล้าง cache เก่าอัตโนมัติ
-  workbox.precaching.cleanupOutdatedCaches();
+  workbox.core.setCacheNameDetails({
+    prefix: 'sideline-cm',
+    suffix: CACHE_VERSION,
+    precache: 'precache',
+    runtime: 'runtime'
+  });
 
-  // 2. Precache แบบ ง่ายๆ (เก็บเฉพาะไฟล์ offline.html)
-  //    ไม่ต้องระบุ revision, ใช้ URL เป็น key
-  workbox.precaching.precacheAndRoute([
-    { url: '/offline.html', revision: null }
-  ]);
+  // -----------------------------------------------------------
+  // 2. INSTALLATION (สำคัญ: บันทึกหน้า Offline ลงเครื่องทันที)
+  // -----------------------------------------------------------
+  self.addEventListener('install', (event) => {
+    event.waitUntil(
+      caches.open(`sideline-cm-precache-${CACHE_VERSION}`).then((cache) => {
+        return cache.add(OFFLINE_PAGE);
+      })
+    );
+    self.skipWaiting();
+  });
 
-  // 3. Runtime cache – รูปภาพ แบบ Stale-While-Revalidate
+  self.addEventListener('activate', (event) => {
+    // ล้าง Cache เก่าทิ้งเมื่อมีการเปลี่ยนเวอร์ชัน
+    event.waitUntil(
+      caches.keys().then((keys) =>
+        Promise.all(
+          keys.map((key) => {
+            if (!key.includes(CACHE_VERSION)) {
+              return caches.delete(key);
+            }
+          })
+        )
+      )
+    );
+    self.clients.claim();
+  });
+
+  // -----------------------------------------------------------
+  // 3. CACHING STRATEGIES
+  // -----------------------------------------------------------
+
+  // A. ไฟล์หลัก (HTML, CSS, JS) - เน้นความเร็วแต่ต้องอัปเดต (StaleWhileRevalidate)
   workbox.routing.registerRoute(
-    ({ request }) => request.destination === 'image',
+    ({ request }) => 
+      request.destination === 'document' || 
+      request.destination === 'style' || 
+      request.destination === 'script' || 
+      request.destination === 'worker',
     new workbox.strategies.StaleWhileRevalidate({
-      cacheName: 'images-cache',
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 150,
-          maxAgeSeconds: 14 * 24 * 60 * 60,
-        }),
-      ],
+      cacheName: `static-resources-${CACHE_VERSION}`
     })
   );
 
-  // 4. Runtime cache – API แบบ NetworkFirst
+  // B. รูปภาพภายในเว็บและไอคอน (CacheFirst)
+  workbox.routing.registerRoute(
+    ({ request }) => request.destination === 'image' && !request.url.includes('supabase.co'),
+    new workbox.strategies.CacheFirst({
+      cacheName: `web-assets-${CACHE_VERSION}`,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 })
+      ]
+    })
+  );
+
+  // C. รูปภาพโปรไฟล์น้องๆ จาก Supabase (CacheFirst)
+  workbox.routing.registerRoute(
+    ({ url }) => url.href.includes('supabase.co/storage/v1/object/public/'),
+    new workbox.strategies.CacheFirst({
+      cacheName: `profile-images-${CACHE_VERSION}`,
+      plugins: [
+        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 200,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+          purgeOnQuotaError: true
+        })
+      ]
+    })
+  );
+
+  // D. ข้อมูล Real-time (API) - ห้าม Cache เพื่อให้สถานะ "ว่าง/ไม่ว่าง" เป็นปัจจุบันเสมอ
   workbox.routing.registerRoute(
     ({ url }) => url.href.includes('rest/v1'),
-    new workbox.strategies.NetworkFirst({
-      cacheName: 'api-cache',
-      networkTimeoutSeconds: 3,
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({ maxEntries: 100 })
-      ],
-    })
+    new workbox.strategies.NetworkOnly()
   );
 
-  // 5. Runtime cache – CSS/JS แบบ Stale-While-Revalidate
-  workbox.routing.registerRoute(
-    ({ request }) =>
-      request.destination === 'script' ||
-      request.destination === 'style',
-    new workbox.strategies.StaleWhileRevalidate({
-      cacheName: 'static-resources',
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({ maxEntries: 50 })
-      ]
-    })
-  );
-
-  // 6. SPA Navigation – NetworkFirst + เก็บใน cache กรณี offline
-  workbox.routing.registerRoute(
-    ({ request }) => request.mode === 'navigate',
-    new workbox.strategies.NetworkFirst({
-      cacheName: 'pages-cache',
-      networkTimeoutSeconds: 3,
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({ maxEntries: 50 })
-      ]
-    })
-  );
-
-  // 7. Offline fallback
-  workbox.routing.setCatchHandler(({ event }) => {
-    if (event.request.mode === 'navigate') {
-      // คืน offline.html จาก cache ที่เรา precache ไว้
-      return caches.match('/offline.html');
+  // -----------------------------------------------------------
+  // 4. OFFLINE FALLBACK
+  // -----------------------------------------------------------
+  workbox.routing.setCatchHandler(async ({ event }) => {
+    if (event.request.destination === 'document') {
+      return caches.match(OFFLINE_PAGE);
     }
     return Response.error();
   });
+
+  console.log(`[SW] Sideline Chiangmai Service Worker ${CACHE_VERSION} is active!`);
 }

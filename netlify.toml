@@ -2,76 +2,59 @@
   publish = "."
   functions = "netlify/functions"
 
+# แก้ปัญหา URL มี .html และจัดระเบียบโครงสร้าง Link ทั้งเว็บ
 [build.processing]
   skip_processing = false
 [build.processing.html]
-  pretty_urls = true  # ทำให้ /page.html เข้าผ่าน /page ได้
+  pretty_urls = true
 
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    X-Frame-Options = "ALLOWALL" 
-    Referrer-Policy = "no-referrer-when-downgrade"
+    Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=0, must-revalidate"
-    # เพิ่ม X-Robots-Tag เพื่อยืนยันกับ Google ว่าเว็บนี้ให้เก็บข้อมูลได้เต็มที่
-    X-Robots-Tag = "index, follow"
 
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/fonts/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Edge Functions (คงไว้ตามเดิมที่คุณใช้งาน) ---
+# Edge Functions สำหรับ Bot และ Sitemap (คงไว้ตามเดิม)
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "renderbot"
+  function = "render-bot"
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "renderbot"
+  function = "ssr-province"
   path = "/location/*"
 
 [[edge_functions]]
-  function = "renderbot"
+  function = "ssr-province"
   path = "/province/*"
 
-# --- การจัดการ Redirects (ปรับลำดับให้ถูกต้องเพื่อ SEO) ---
-
-# 1. บังคับ HTTP เป็น HTTPS (ต้องทำเป็นอันดับแรก)
+# การจัดการ Redirects (ปรับปรุงให้คลีนขึ้น)
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
 
-# 2. แก้ปัญหา Duplicate Content: บังคับให้ลบ .html ออกจาก URL (สำคัญมาก!)
-# ถ้า Google เจอหน้าที่มี .html มันจะส่งคนมาหน้าปกติ เพื่อให้อันดับไม่ร่วง
-[[redirects]]
-  from = "/*.html"
-  to = "/:splat"
-  status = 301
-  force = true
-
-# 3. จัดการ Service Worker
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
   force = true
-  headers = { "Cache-Control" = "no-cache" }
 
-# 4. SPA fallback (กฎสำรองสุดท้าย - แก้ปัญหาหน้าขาวเวลา Refresh)
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+  force = true
+
+# SPA fallback สำหรับหน้าอื่นๆ ที่ไม่ใช่ Bot
 [[redirects]]
   from = "/*"
   to = "/index.html"
