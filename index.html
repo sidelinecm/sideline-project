@@ -41,14 +41,19 @@
 <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="/main.js">
 
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+<!-- แก้เป็นแบบนี้ครับ -->
+<link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/styles.css"></noscript>
 
-<link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" 
-      imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w" 
-      imagesizes="(max-width: 640px) 100vw, 1200px" 
-      fetchpriority="high">
+  <!-- ✅ FontAwesome (CDN) -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </noscript>
 
+
+  <!-- LCP Image Optimization -->
+  <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
 
   <script type="application/ld+json">
 {
@@ -720,29 +725,7 @@
     </a>
   </div>
 
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Sideline Chiangmai",
-      "description": "บริการไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน เจ็ดยอด พร้อมน้องๆคุณภาพระดับพรีเมียม ไม่ต้องมัดจำ",
-      "image": "https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "ตำบลช้างเผือก อำเภอเมือง",
-        "addressLocality": "เชียงใหม่",
-        "postalCode": "50300",
-        "addressCountry": "TH"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 18.8140716,
-        "longitude": 98.9720960
-      },
-      "url": "https://sidelinechiangmai.netlify.app",
-      "openingHours": "Mo-Su 10:00-02:00"
-    }
-  </script>
+
 </section>
 
 <script>
