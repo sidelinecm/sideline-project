@@ -82,7 +82,7 @@ async function initApp() {
     initGlobalClickListener();
     updateActiveNavLinks();
     
-    // ✅ เพิ่มบรรทัดนี้
+
     initLightboxEvents();
 
     await handleRouting();
@@ -175,7 +175,8 @@ function saveRecentSearch(term) {
 
     // ค้นหาฟังก์ชัน showErrorState ใน main.js แล้วเปลี่ยนเป็น code นี้
 function showErrorState(error) {
-    
+    console.error("❌ Error:", error);
+    hideLoadingState();
     
     // 1. ซ่อนพื้นที่แสดงผลปกติ
     if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
@@ -196,7 +197,7 @@ function showErrorState(error) {
     // 4. EVENT HANDLING (COMPLETE & FIXED)
     // =================================================================
     function initGlobalClickListener() {
-        
+        console.log("👂 Global Click Listener is now active.");
         
         document.body.addEventListener('click', (event) => {
             const target = event.target;
@@ -251,44 +252,56 @@ function showErrorState(error) {
         });
     }
 
-window.handleLikeClick = async function(likeButton, profileId) {
-    // 1. UI UPDATE
-    const isLiked = likeButton.classList.toggle('liked');
-    const countSpan = likeButton.querySelector('.like-count');
-    
-    if (countSpan) {
-        let currentLikes = parseInt(countSpan.textContent.replace(/,/g, '') || '0');
-        countSpan.textContent = isLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
-    }
+    // ✅ [ฟังก์ชันกดไลค์ที่สมบูรณ์: UI + LocalStorage + Database]
+    window.handleLikeClick = async function(likeButton, profileId) {
+        console.log(`👍 Processing like for profile ID: ${profileId}`);
 
-    // 2. LOCAL STORAGE
-    try {
-        const likedProfiles = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || '{}');
-        if (isLiked) {
-            likedProfiles[profileId] = true;
-        } else {
-            delete likedProfiles[profileId];
+        // 1. UI UPDATE (อัปเดตหน้าจอทันทีเพื่อให้ลื่นไหล)
+        const isLiked = likeButton.classList.toggle('liked');
+        const countSpan = likeButton.querySelector('.like-count');
+        
+        if (countSpan) {
+            // แปลงตัวเลข (กันเหนียวเผื่อมี comma)
+            let currentLikes = parseInt(countSpan.textContent.replace(/,/g, '') || '0');
+            // บวกหรือลบตามสถานะ
+            countSpan.textContent = isLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
         }
-        localStorage.setItem(CONFIG.KEYS.LIKED_PROFILES, JSON.stringify(likedProfiles));
-    } catch (e) {
-        // เงียบไว้ ไม่พ่น error ออกจอ
-    }
 
-    // 3. DATABASE UPDATE
-    if (window.supabase) {
+        // 2. LOCAL STORAGE (บันทึกลงเครื่องผู้ใช้)
         try {
-            const rpcName = isLiked ? 'increment_likes' : 'decrement_likes';
-            
-            // ส่งคำสั่งไป Supabase
-            await window.supabase.rpc(rpcName, { 
-                profile_id_to_update: profileId 
-            });
-            // ลบ if(error) และ console.log ออกเพื่อให้ระบบปลอดภัยและคลีน
-        } catch (err) {
-            // ไม่แสดงข้อผิดพลาดทางการเชื่อมต่อให้บุคคลภายนอกเห็น
+            const likedProfiles = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || '{}');
+            if (isLiked) {
+                likedProfiles[profileId] = true;
+            } else {
+                delete likedProfiles[profileId];
+            }
+            localStorage.setItem(CONFIG.KEYS.LIKED_PROFILES, JSON.stringify(likedProfiles));
+        } catch (e) {
+            console.error("Local storage error:", e);
         }
-    }
-};
+
+        // 3. DATABASE UPDATE (ส่งไป Supabase - ส่วนที่ขาดไป)
+        if (window.supabase) {
+            try {
+                // เลือกชื่อฟังก์ชัน SQL
+                const rpcName = isLiked ? 'increment_likes' : 'decrement_likes';
+                
+                // 🔥 ส่งคำสั่งไปฐานข้อมูล (ใช้ชื่อตัวแปร profile_id_to_update ตาม SQL ของคุณ)
+                const { error } = await window.supabase.rpc(rpcName, { 
+                    profile_id_to_update: profileId 
+                });
+
+                if (error) {
+                    console.error('❌ Supabase update failed:', error);
+                    // กรณี Error จริงจัง อาจจะเขียนโค้ด Rollback UI ตรงนี้ได้ (แต่ปกติไม่ต้องก็ได้)
+                } else {
+                    console.log(`✅ DB Updated: ${rpcName}`);
+                }
+            } catch (err) {
+                console.error("Connection error:", err);
+            }
+        }
+    };
     
 function cacheDOMElements() {
     dom.body = document.body;
@@ -348,7 +361,8 @@ async function handleDataLoading() {
     hideLoadingState();
 }
 
-// ✅ ฟังก์ชันดึงข้อมูลฉบับแก้ไข (มองเห็นครบทุกจังหวัด)
+
+
 async function fetchDataDelta() {
     if (state.isFetching) return false;
     state.isFetching = true;
@@ -359,14 +373,13 @@ async function fetchDataDelta() {
     }
 
     try {
+        console.log('🔄 Loading all data fresh...');
 
-
-        // 1. ดึงข้อมูล (แก้ไข: เอา .gt ออก เพื่อดึงทั้งหมด)
+        // Parallel data fetching
         const [provincesRes, profilesRes] = await Promise.all([
             supabase.from('provinces').select('*'),
             supabase.from('profiles')
                 .select('*')
-                // .gt('created_at', state.lastFetchedAt) <-- ลบบรรทัดนี้ออกไปแล้ว
                 .order('created_at', { ascending: false })
         ]);
 
@@ -448,7 +461,7 @@ function initRealtimeSubscription() {
     }
 
     try {
-
+        console.log('📡 Starting realtime subscription...');
 
         const subscription = supabase
             .channel('profiles-changes')
@@ -574,22 +587,15 @@ function populateProvinceDropdown() {
 // [ฉบับแก้ไขสมบูรณ์ 100% - รองรับ Pretty URLs] - handleRouting
 // =================================================================
 async function handleRouting(dataLoaded = false) {
-    // แปลง path ให้เป็นตัวเล็ก เพื่อให้ตรวจสอบง่าย (เช่น /Blog -> /blog)
-    // และลบเครื่องหมาย / ท้ายสุดออก (เช่น /blog/ -> /blog) เพื่อความแม่นยำ
     let path = window.location.pathname.toLowerCase();
     if (path.length > 1 && path.endsWith('/')) {
         path = path.slice(0, -1);
     }
 
-    // ✅ --- START: ส่วนป้องกันหน้า Static (ฉบับอัปเกรด) ---
-    // 1. ระบุรายชื่อหน้า Static ทั้งหมดที่มีในเว็บ (หน้าที่มีไฟล์ HTML จริงๆ)
-    // ใส่เพิ่มได้เลยตามที่คุณมี เช่น '/contact', '/rules', '/register'
+    // Static pages list - add more as needed
     const staticPages = ['/blog', '/about', '/faq', '/profiles', '/locations', '/contact', '/policy'];
 
-    // 2. ตรวจสอบเงื่อนไข 3 อย่าง:
-    // A: มีนามสกุล .html (แบบเดิม)
-    // B: เป็นหน้า Static ที่ระบุไว้ในรายการข้างบน
-    // C: หรือเป็นหน้าย่อยของ Static นั้นๆ (เช่น /blog/post-1)
+    // Detect static pages (with .html, .htm, or in staticPages list)
     const isStaticPage = path.endsWith('.html') || 
                          path.endsWith('.htm') || 
                          staticPages.some(p => path === p || path.startsWith(p + '/'));
@@ -597,7 +603,7 @@ async function handleRouting(dataLoaded = false) {
     if (isStaticPage) {
         console.log(`🛑 Static page detected (${path}). Skipping dynamic logic.`);
         
-        // ปิด Lightbox และซ่อนส่วนแสดงผลของแอป เพื่อไม่ให้ทับเนื้อหาจริง
+        // Hide dynamic components
         closeLightbox(false); 
         if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
         if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
@@ -1169,15 +1175,7 @@ function updateUrlFromFilters(query) {
     }
 }
 
-/**
- * ฟังก์ชันพักการทำงานชั่วครู่ เพื่อคืน Main Thread ให้เบราว์เซอร์ได้ตอบสนอง (Yielding)
- * @returns {Promise<void>}
- */
-function yieldToMain() {
-    return new Promise(resolve => {
-        setTimeout(resolve, 0);
-    });
-}
+
 
 async function renderCardsIncrementally(container, profiles) {
     if (!container || !profiles) return;
@@ -1209,6 +1207,12 @@ async function renderCardsIncrementally(container, profiles) {
     }
 }
 
+// Yielding function for main thread responsiveness
+function yieldToMain() {
+    return new Promise(resolve => {
+        setTimeout(resolve, 0);
+    });
+}
 
 /**
  * สร้าง Section สำหรับแสดงผลการค้นหา หรือหน้าจังหวัด (ฉบับแก้ไข)
@@ -1382,7 +1386,7 @@ function renderProfiles(profiles, isSearching) {
     }
 }
 
-// ✅ [เวอร์ชันแก้ไขสมบูรณ์ที่สุด: เพิ่ม Skeleton Loader + เรียง Layer ถูกต้อง]
+/// ✅ [เวอร์ชันแก้ไขสมบูรณ์ที่สุด: เพิ่ม Skeleton Loader + เรียง Layer ถูกต้อง + Accessibility (a11y)]
 function createProfileCard(p, index = 20) {
     // 1. สร้าง Container หลัก
     const cardContainer = document.createElement('div');
@@ -1392,20 +1396,14 @@ function createProfileCard(p, index = 20) {
     const cardInner = document.createElement('div');
     cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1';
     
-    // ใส่ Attribute สำคัญสำหรับการ Routing
     cardInner.setAttribute('data-profile-id', p.id); 
     cardInner.setAttribute('data-profile-slug', p.slug);
     
-    // --- ตรวจสอบรูปภาพให้ปลอดภัย (กัน Error กรณีไม่มีรูป) ---
     const imgSrc = (p.images && p.images.length > 0) ? p.images[0].src : '/images/placeholder-profile.webp';
 
-    // --- HTML หลักของการ์ด ---
     cardInner.innerHTML = `
-        <!-- LAYER 0: Skeleton Loader (ตัวโหลดวิบวับ รอรูปมา) -->
         <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0"></div>
-
-        <!-- LAYER 1: รูปภาพ (อยู่ล่างสุด) -->
-<img src="${imgSrc}" 
+        <img src="${imgSrc}" 
              alt="น้อง${p.name} - ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} รับงานเอง ฟิวแฟน ตรงปก 100%"
              class="card-image w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
              loading="${index < 4 ? 'eager' : 'lazy'}"
@@ -1413,23 +1411,19 @@ function createProfileCard(p, index = 20) {
              onload="this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();"
              onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();">
              
-
-        <!-- LAYER 2: ลิงก์คลุมการ์ด (Z-10) -> เพื่อให้คลิกตรงไหนก็เปิดโปรไฟล์ -->
-        <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์ ${p.name}"></a>
+        <!-- LAYER 2: ลิงก์คลุมการ์ด (Z-10) -> เพิ่ม aria-labelledby แล้ว -->
+        <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-labelledby="profile-name-${p.id}"></a>
     `;
 
-    // --- Logic คำนวณสถานะ (ว่าง/ไม่ว่าง) ---
-    let statusClass = 'status-inquire'; // ค่าเริ่มต้น: สีเทา (สอบถาม)
+    let statusClass = 'status-inquire';
     const availability = (p.availability || '').toLowerCase();
     
     if (availability.includes('ว่าง') || availability.includes('รับงาน')) {
-        statusClass = 'status-available'; // สีเขียว
+        statusClass = 'status-available';
     } else if (availability.includes('ไม่ว่าง') || availability.includes('พัก')) {
-        statusClass = 'status-busy'; // สีแดง
+        statusClass = 'status-busy';
     }
     
-    // --- HTML ส่วน Badges (มุมขวาบน) ---
-    // ใส่ pointer-events-none เพื่อให้คลิกทะลุไปโดน Link (Layer 2) ได้
     const badgesHTML = `
         <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
             <span class="availability-badge ${statusClass} shadow-md backdrop-blur-md bg-white/10 border border-white/20 text-[10px] font-bold px-2 py-1 rounded-full text-white">
@@ -1439,24 +1433,19 @@ function createProfileCard(p, index = 20) {
         </div>
     `;
 
-    // --- Logic ปุ่ม Like ---
     const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
     const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
     const likeCount = p.likes || 0;
 
-    // --- HTML ส่วน Overlay (ไล่เฉดสี + ชื่อ + ปุ่มไลค์) ---
-    // pointer-events-none ที่ตัวแม่ เพื่อให้คลิกพื้นที่ว่างแล้วไปโดน Link
-    // pointer-events-auto ที่ปุ่มหัวใจ เพื่อให้กดหัวใจได้
     const overlayHTML = `
         <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-3 flex flex-col justify-between" 
              style="z-index: 20; pointer-events: none;">
             
-            <div class="card-header mt-8">
-                <!-- พื้นที่ว่างด้านบน ปล่อยให้คลิกทะลุ -->
-            </div>
+            <div class="card-header mt-8"></div>
             
             <div class="card-footer-content">
-                <h3 class="text-lg font-bold text-white drop-shadow-md leading-tight truncate pr-2">${p.name}</h3>
+                <!-- เพิ่ม id ให้ h3 -->
+                <h3 id="profile-name-${p.id}" class="text-lg font-bold text-white drop-shadow-md leading-tight truncate pr-2">${p.name}</h3>
                 <p class="text-xs text-gray-300 flex items-center mt-0.5 mb-2">
                     <i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
                 </p>
@@ -1466,12 +1455,15 @@ function createProfileCard(p, index = 20) {
                         อัปเดต: ${formatDate(p.created_at)}
                     </div>
                     
-                    <!-- ปุ่มหัวใจ (Z-30) ต้องกดได้ -->
+                    <!-- ปุ่มหัวใจ (Z-30) -> เพิ่ม a11y attributes ครบถ้วนแล้ว -->
                     <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors"
                          style="pointer-events: auto !important; z-index: 30 !important;"
                          data-action="like" 
                          data-id="${p.id}"
-                         aria-label="ถูกใจ">
+                         role="button" 
+                         tabindex="0"
+                         aria-pressed="${isLikedClass ? 'true' : 'false'}"
+                         aria-label="ถูกใจโปรไฟล์ ${p.name}">
                         <i class="fas fa-heart text-lg transition-transform duration-200 group-hover/like:scale-110"></i>
                         <span class="like-count text-sm font-bold">${likeCount}</span>
                     </div>
@@ -1480,7 +1472,6 @@ function createProfileCard(p, index = 20) {
         </div>
     `;
 
-    // ประกอบร่าง
     cardInner.insertAdjacentHTML('beforeend', badgesHTML);
     cardInner.insertAdjacentHTML('beforeend', overlayHTML);
     cardContainer.appendChild(cardInner);
@@ -1488,54 +1479,71 @@ function createProfileCard(p, index = 20) {
     return cardContainer;
 }
 
+// =================================================================
+// ✅ [ฉบับแก้ไขสมบูรณ์] - fetchSingleProfile (ไร้ alert() + Debug Friendly)
+// =================================================================
 async function fetchSingleProfile(slug) {
     if (!supabase) {
-        alert("❌ Supabase Error: ติดต่อฐานข้อมูลไม่ได้");
+        console.error("❌ Supabase Error: ไม่สามารถติดต่อฐานข้อมูลได้");
         return null;
     }
     
-    // แจ้งเตือนเพื่อให้รู้ว่าฟังก์ชันทำงานแล้ว
-    alert("🔍 ระบบกำลังหาข้อมูลให้จาก: " + slug); 
+    // ไม่มีการใช้ alert() เพื่อไม่ให้กวนใจผู้ใช้
+    // console.log("🔍 ระบบกำลังหาข้อมูลโปรไฟล์สำหรับ slug: " + slug);
 
     try {
-        // 1. ลองหาแบบชื่อตรงตัว (Slug)
+        // 1. ลองหาโปรไฟล์ด้วย Slug ตรงตัวก่อน
         let { data, error } = await supabase
             .from('profiles')
-            .select('*, provinces(key, nameThai)')
+            .select('*, provinces(key, nameThai)') // ดึงข้อมูลจังหวัดมาด้วย
             .eq('slug', slug)
-            .maybeSingle();
+            .maybeSingle(); // คาดหวังผลลัพธ์เดียว
 
+        if (error && error.code !== 'PGRST116') { // PGRST116 = ไม่พบข้อมูล
+            console.error('❌ Supabase Fetch by Slug Failed:', error.message);
+            // ถ้าเป็น error จริงจัง ให้แสดง error ใน console
+        }
+        
         if (data) {
-            alert("✅ เจอแล้ว! กำลังเปิดโปรไฟล์: " + data.name);
+            // console.log("✅ พบโปรไฟล์ด้วย Slug:", data.name);
             return processProfileData(data);
         }
 
-        // 2. ถ้าไม่เจอ ให้ลองแกะ ID จากท้าย URL (ส่วนที่ทำให้ฉลาดขึ้น)
+        // 2. ถ้าไม่พบด้วย Slug ตรงตัว ให้ลองแกะ ID จากท้าย URL
         const parts = slug.split('-');
-        const extractedId = parts[parts.length - 1]; 
+        const potentialId = parts[parts.length - 1]; // ค่าสุดท้ายของ slug (อาจเป็น ID)
         
-        alert("⚠️ ไม่เจอชื่อตรงๆ ระบบจะลองหาจาก ID: " + extractedId);
+        // console.log("⚠️ ไม่พบโปรไฟล์ด้วย Slug ตรงตัว ลองแกะ ID จาก: " + potentialId);
 
-        if (extractedId && !isNaN(extractedId)) {
-            const byId = await supabase
+        // ตรวจสอบว่าเป็นตัวเลขหรือไม่ และไม่ให้เป็นค่าว่าง
+        if (potentialId && !isNaN(potentialId) && potentialId.trim() !== '') {
+            const profileId = parseInt(potentialId);
+
+            const { data: byIdData, error: byIdError } = await supabase
                 .from('profiles')
                 .select('*, provinces(key, nameThai)')
-                .eq('id', parseInt(extractedId))
-                .maybeSingle();
-            
-            if (byId.data) {
-                alert("✅ เจอด้วย ID แล้ว! กำลังเปิดโปรไฟล์: " + byId.data.name);
-                return processProfileData(byId.data);
+                .eq('id', profileId)
+                .maybeSingle(); // คาดหวังผลลัพธ์เดียว
+
+            if (byIdError && byIdError.code !== 'PGRST116') {
+                console.error('❌ Supabase Fetch by ID Failed:', byIdError.message);
+            }
+
+            if (byIdData) {
+                // console.log("✅ พบโปรไฟล์ด้วย ID:", byIdData.name);
+                return processProfileData(byIdData);
             } else {
-                alert("❌ ในฐานข้อมูลไม่มี ID: " + extractedId + " ลองเช็คใน Supabase อีกทีครับ");
+                console.warn("❌ ไม่พบโปรไฟล์ในฐานข้อมูลด้วย ID:", profileId);
             }
         } else {
-            alert("❌ รูปแบบ URL ไม่ถูกต้อง หรือหาตัวเลข ID ไม่เจอ");
+            console.warn("❌ รูปแบบ URL slug ไม่ถูกต้อง หรือไม่สามารถหา ID ที่ถูกต้องได้");
         }
         
+        // ถ้าไม่พบโปรไฟล์ไม่ว่าจะด้วยวิธีใด ให้คืนค่า null
         return null;
+
     } catch (err) {
-        alert("❌ ระบบพังเพราะ: " + err.message);
+        console.error("❌ เกิดข้อผิดพลาดร้ายแรงขณะดึงโปรไฟล์:", err.message, err);
         return null;
     }
 }
@@ -1868,17 +1876,16 @@ const SEO_POOL = {
 // 10. SEO META TAGS UPDATER (THE ULTIMATE VERSION)
 // =================================================================
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // 🛡️ SAFETY CHECK 1: ถ้าไม่ใช่หน้า Profile และไม่ใช่หน้า Location และไม่ใช่หน้าแรก
-    // (เช่น เป็นหน้า static อื่นๆ ที่หลุดรอดมา) ห้ามรันเด็ดขาด!
+    // Safety check: only run for dynamic pages or root
     const currentPath = window.location.pathname.toLowerCase();
-    const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html'; // อนุญาตให้จัดการหน้าแรก
+    const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html';
     const isDynamic = profile || pageData;
 
     if (!isDynamic && !isRoot) {
-        return; // ออกทันที ไม่ทำอะไรกับ Meta Tags
+        return; // 🛑 Prevent meta updates on static pages
     }
 
-    // --- เริ่มกระบวนการ SEO ---
+    // Clear existing JSON-LD scripts
     document.querySelectorAll('script[id^="schema-jsonld"]').forEach(s => s.remove());
 
     const YEAR_TH = new Date().getFullYear() + 543;
@@ -2284,13 +2291,13 @@ function initAgeVerification() {
                 
                 <div style="margin-bottom: 32px;">
                     <p style="font-size: 12px; color: #ec4899; text-transform: uppercase; letter-spacing: 4px; font-weight: 800; margin-bottom: 8px;">Welcome To</p>
-                    <h1 style="font-size: 32px; font-weight: 900; color: #ffffff; margin-bottom: 20px; letter-spacing: -1px;">Sideline Chiangmai</h1>
+                    <h2 style="font-size: 32px; font-weight: 900; color: #ffffff; margin-bottom: 20px; letter-spacing: -1px;">Sideline Chiangmai</h2>
                     
                     <div style="display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; border-radius: 9999px; background-color: rgba(236, 72, 153, 0.1); margin-bottom: 20px; border: 1px solid rgba(236, 72, 153, 0.4); box-shadow: 0 0 25px rgba(236, 72, 153, 0.2);">
                         <span style="font-size: 22px; font-weight: 900; color: #ec4899;">20+</span>
                     </div>
                     
-                    <h2 style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 12px;">พื้นที่ส่วนบุคคล (VIP ONLY)</h2>
+                    <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 12px;">พื้นที่ส่วนบุคคล (VIP ONLY)</h3>
                     <p style="color: #9ca3af; font-size: 14px; line-height: 1.7;">
                         เว็บไซต์นี้จัดหาเนื้อหาสำหรับผู้ใหญ่<br>
                         <span style="color: #d1d5db;">กรุณายืนยันว่าคุณมีอายุ 20 ปีบริบูรณ์เพื่อเข้าชม</span>
