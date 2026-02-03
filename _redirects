@@ -1,9 +1,16 @@
-
+# [1] หน้าหลักและหน้าบริการ
 /terms-of-service.html         /terms-of-service             301!
 /contact.html                  /contact                      301!
 /profiles.html                 /profiles                     301!
 /locations.html                /locations                    301!
+/profiles.html?province=:province  /location/:province       301!
 
+# [2] บังคับหน้าที่มีเลขซ้ำ (จาก Sitemap เดิม) ให้ชี้ไปที่เลขชุดเดียว
+/sideline/obwi-96-96-96        /sideline/obwi-96             301!
+/sideline/pay-136-136          /sideline/pay-136             301!
+/sideline/hmiw-148-148-148     /sideline/hmiw-148            301!
+
+# [3] บังคับชื่อภาษาไทยไปหน้าใหม่ (เลขชุดเดียวทั้งหมด)
 /sideline/ปูเป้                /sideline/puep-87             301!
 /sideline/Minnie               /sideline/minnie-66           301!
 /sideline/หลิงหลิง             /sideline/hlinghling-90       301!
@@ -24,10 +31,8 @@
 /sideline/มีตังค์               /sideline/mitangkh-120        301!
 /sideline/บิวบิว               /sideline/biwbiw-138          301!
 /sideline/ลูกแพร               /sideline/lukaephr-135        301!
-/sideline/ปาย                  /sideline/pay-136             301!
 /sideline/เฟิร์ส               /sideline/efirs-79            301!
 /sideline/ใบหยก               /sideline/aibhyk-119          301!
-/sideline/น้องโอปอ             /sideline/nongopo-65          301! # แก้ไขจาก oopoo และรวม redirect
 /sideline/น้ำหวาน              /sideline/namhwan-51          301!
 /sideline/น้ำริน               /sideline/namrin-109          301!
 /sideline/ลูกน้ำ               /sideline/luknam-142          301!
@@ -37,11 +42,11 @@
 /sideline/พลอยสวย             /sideline/phloyswy-124        301!
 /sideline/มะปราง               /sideline/maprang-106         301!
 /sideline/ลูกโซ่               /sideline/lukos-112           301!
-/sideline/หมิว                 /sideline/hmiw-148            301!
 /sideline/น้องมิกิ             /sideline/nongmiki-145        301!
 /sideline/ยิปซี               /sideline/yipsi-137           301!
 /sideline/ปุยนุ่น              /sideline/puynun-58           301!
 /sideline/โอปอ                 /sideline/oopo-59             301!
+/sideline/น้องโอปอ             /sideline/oopoo-65            301!
 /sideline/น้ำหนาว              /sideline/namhnaw-61          301!
 /sideline/น้องแนน              /sideline/nongaenn-107        301!
 /sideline/อ๊ะอาย               /sideline/oaoay-83            301!
@@ -52,34 +57,30 @@
 /sideline/ปุยฝ้าย              /sideline/puyfay-114          301!
 /sideline/ถุงเงิน               /sideline/thungengin-132      301!
 /sideline/นัท                  /sideline/nath-131            301!
-
-
 /sideline/ข้าวปุ้น              /sideline/khawpun-126         301!
 /sideline/จิ้บ                 /sideline/jib-67              301!
 /sideline/ชมพู่                /sideline/chmphu-89           301!
 /sideline/ชะเอม                /sideline/chaeom-103          301!
 /sideline/นับดาว               /sideline/nabdaw-123          301!
 /sideline/นินิว                /sideline/niniw-111           301!
-/sideline/นุช                  /sideline/nuch-117            301!
-/sideline/น้องกลอย            /sideline/nongkloy-60         301!
-/sideline/น้องปันปัน          /sideline/nongpanpan-70       301!
-/sideline/น้องปันปันนน         /sideline/nongpanpannn-101    301!
-/sideline/น้องมิ้น             /sideline/nongmin-86          301!
+/sideline/นุช                 /sideline/nuch-117            301!
+/sideline/น้องกลอย             /sideline/nongkloy-60         301!
+/sideline/น้องปันปัน            /sideline/nongpanpan-70       301!
+/sideline/น้องปันปันนน          /sideline/nongpanpannn-101    301!
+/sideline/น้องมิ้น              /sideline/nongmin-86          301!
 /sideline/น้องอาย              /sideline/nongoay-81          301!
-/sideline/น้องโอเปิ้ล           /sideline/nongooepil-77       301!
+/sideline/น้องโอเปิ้ล            /sideline/nongooepil-77       301!
 /sideline/น้องใบส้ม            /sideline/nongaibsm-143       301!
-/sideline/น้ำหวานนน             /sideline/namhwann-97         301! # แก้ไขจาก namhwannn
+/sideline/น้ำหวานนน            /sideline/namhwann-97         301!
 /sideline/บิวตี้               /sideline/biwti-84            301!
 /sideline/บีบี                 /sideline/bibi-57             301!
 /sideline/ฟักแฟง               /sideline/fakaefng-80         301!
 /sideline/มัดหมี่               /sideline/madhmi-133          301!
-/sideline/มายด์                /sideline/mayd-121            301!
+/sideline/มายด์               /sideline/mayd-121            301!
 /sideline/ริต้า                /sideline/rita-128            301!
-/sideline/ริสา                 /sideline/risa-118            301!
+/sideline/ริสา                /sideline/risa-118            301!
 /sideline/ฮันนี่               /sideline/hanni-92            301!
-/sideline/เดียร์                /sideline/ediyr-139           301!
-/sideline/เบบี๋               /sideline/ebbi-105            301!
-/sideline/เบล                  /sideline/ebl-113             301!
+/sideline/เกี๊ยว                /sideline/kiy-139             301!
 /sideline/เมจิ                 /sideline/emji-93             301!
 /sideline/เมษา                 /sideline/emsa-125            301!
 /sideline/เอิงเอย               /sideline/eoingeoy-141        301!
@@ -87,23 +88,14 @@
 /sideline/แตงกวา              /sideline/aetngkwa-116        301!
 /sideline/แอมมี่               /sideline/aeommi-91           301!
 /sideline/แอริน                /sideline/aeorin-88           301!
-/sideline/โบวี่                /sideline/obwi-96             301!
 /sideline/โบอาร์               /sideline/oboar-104           301!
 /sideline/โมจิ                 /sideline/omji-73             301!
 /sideline/ไข่เจียว             /sideline/aikhejiyw-134       301!
 /sideline/Jelly                /sideline/jelly-76            301!
 
+# [4] กฎล้างเลขซ้ำแบบครอบจักรวาล
+/sideline/:slug-:num-:num    /sideline/:slug-:num          301
+/sideline/:slug-:num-:num-:num /sideline/:slug-:num        301
 
-/profiles.html?province=:province  /location/:province           301!
-/sideline/:slug-:num-:num    /sideline/:slug-:num          301!
-/sideline/:slug-:num-:num-:num /sideline/:slug-:num          301!
-/sideline/hmiw-148-148-148    /sideline/hmiw-148            301!
-/sideline/minni-147-147-147-147 /sideline/minni-147           301!
-/sideline/oopoo-65-65-65-65-65-65 /sideline/oopoo-65        301!
-/sideline/namhnaw-61-61-61-61-61 /sideline/namhnaw-61       301!
-
-/location/*                  /index.html                   200
-/province/*                  /index.html                   200
-/profiles/*                  /index.html                   200
-/sideline/*                  /index.html                   200
-
+# [5] SPA Fallback
+/* /index.html   200
