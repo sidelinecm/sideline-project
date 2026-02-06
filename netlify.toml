@@ -62,6 +62,12 @@
   to = "/sideline/puep-87"
   status = 301
 
+  [[redirects]]
+  from = "/profiles/*.html"
+  to = "/profiles/:splat"
+  status = 301
+  force = true
+
 # --- [4] SPA Fallback (กฎสุดท้าย ห้ามย้ายขึ้นข้างบน) ---
 # ตัวนี้จะทำให้กด Refresh หน้าโปรไฟล์แล้วไม่ขาว และไม่เกิด Loop
 [[redirects]]
