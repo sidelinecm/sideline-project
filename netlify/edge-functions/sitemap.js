@@ -2,13 +2,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // --- 1. CONFIGURATION ---
 const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
 const DOMAIN = 'https://sidelinechiangmai.netlify.app';
-// URL ของถังเก็บรูปภาพ (Bucket)
 const STORAGE_URL = `${SUPABASE_URL}/storage/v1/object/public/profile-images`;
 
-// --- 2. HELPER FUNCTION ---
-// ฟังก์ชันป้องกัน XML พัง (แปลงตัวอักษรพิเศษ)
+// --- 2. HELPER FUNCTION: ป้องกัน XML พัง ---
 const escapeXml = (unsafe) => {
   if (!unsafe) return '';
   return unsafe.replace(/[<>&'"]/g, (c) => {
@@ -25,104 +23,83 @@ const escapeXml = (unsafe) => {
 // --- 3. MAIN FUNCTION ---
 export default async () => {
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ดึงข้อมูลโปรไฟล์และจังหวัดพร้อมกัน (Active Only)
+    // ดึงข้อมูล 2 อย่างพร้อมกัน: โปรไฟล์ (Active) และ จังหวัด
     const [{ data: profiles }, { data: provinces }] = await Promise.all([
       supabase
         .from('profiles')
         .select('slug, lastUpdated, created_at, imagePath, name')
         .eq('active', true)
-        .limit(2000), // รองรับได้ถึง 2000 คน
+        .order('created_at', { ascending: false })
+        .limit(2000), 
       supabase
         .from('provinces')
         .select('key')
     ]);
 
-    // เริ่มเขียน XML Header
+    // เริ่มเขียน XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
     xml += `\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
-    // -------------------------------------------------------
-    // A. หน้าแรก (Home)
-    // -------------------------------------------------------
-    xml += `
-  <url>
-    <loc>${DOMAIN}/</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>`;
+    // A. หน้าแรก
+    xml += `\n<url><loc>${DOMAIN}/</loc><lastmod>${new Date().toISOString()}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`;
 
-    // -------------------------------------------------------
-    // B. หน้าทั่วไป (Static Pages)
-    // -------------------------------------------------------
-    const staticPages = ['blog', 'about', 'faq', 'profiles', 'locations', 'contact'];
-    staticPages.forEach(page => {
-      xml += `
-  <url>
-    <loc>${DOMAIN}/${page}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
+    // B. หน้า Static Pages
+    ['blog', 'about', 'faq', 'profiles', 'locations', 'contact'].forEach(p => {
+      xml += `\n<url><loc>${DOMAIN}/${p}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
     });
 
-    // -------------------------------------------------------
-    // C. หน้าจังหวัด (Provinces)
-    // -------------------------------------------------------
+    // C. หน้าจังหวัด (Locations)
     if (provinces) {
       provinces.forEach(p => {
         if (p.key) {
-           xml += `
-  <url>
-    <loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>`;
+           xml += `\n<url><loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`;
         }
       });
     }
 
-    // -------------------------------------------------------
-    // D. หน้าโปรไฟล์น้องๆ (Profiles) - ส่วนสำคัญ
-    // -------------------------------------------------------
+    // D. หน้าโปรไฟล์ (Profiles) - 🔥 จุดแก้สำคัญ 🔥
     if (profiles) {
       profiles.forEach(p => {
         if (p.slug) {
-          const safeSlug = encodeURIComponent(p.slug.trim());
-          // วันที่อัปเดตล่าสุด
-          const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
-          const lastMod = new Date(dateStr).toISOString();
+          // 1. ดึง Slug ดิบมา
+          let rawSlug = p.slug.trim();
 
-          // สร้าง Tag รูปภาพ (สำหรับ Google Images)
+          // 🔴 CLEANING LOGIC: ตัดเลข ID ที่ซ้ำซ้อนออก
+          // เปลี่ยน "name-99-99-99" -> "name-99"
+          rawSlug = rawSlug.replace(/(-\d+)(?:-\d+)+$/, '$1');
+
+          // 2. Encode URL (เผื่อมีภาษาไทยหลุดมา)
+          const safeSlug = encodeURIComponent(rawSlug);
+          
+          // 3. จัดการวันที่
+          const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
+          
+          // 4. จัดการรูปภาพ (Image Object)
           let imageXml = '';
           if (p.imagePath) {
             let imgUrl = '';
-            
-            // Logic: ตรวจสอบว่าเป็น Link เต็มหรือชื่อไฟล์
             if (p.imagePath.startsWith('http')) {
-                // เผื่อไว้กรณีอนาคตมีการเปลี่ยนแปลง
                 imgUrl = p.imagePath;
             } else {
-                // ✅ กรณีปกติ: แอดมินอัปโหลดรูป -> เอาชื่อไฟล์มาต่อท้าย URL หลัก
                 imgUrl = `${STORAGE_URL}/${p.imagePath}`;
             }
-            
-            // แปลง & เป็น &amp; เพื่อไม่ให้ XML พัง
+            // Escape ตัว & ใน URL ของรูปภาพ
             imgUrl = imgUrl.replace(/&/g, '&amp;');
-            const imgTitle = escapeXml(p.name || 'Sideline Profile');
             
             imageXml = `
-    <image:image>
-      <image:loc>${imgUrl}</image:loc>
-      <image:title>${imgTitle}</image:title>
-    </image:image>`;
+      <image:image>
+        <image:loc>${imgUrl}</image:loc>
+        <image:title>${escapeXml(p.name || 'Sideline Profile')}</image:title>
+      </image:image>`;
           }
 
+          // 5. เขียนลง XML
           xml += `
   <url>
     <loc>${DOMAIN}/sideline/${safeSlug}</loc>
-    <lastmod>${lastMod}</lastmod>
+    <lastmod>${new Date(dateStr).toISOString()}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>${imageXml}
   </url>`;
@@ -132,20 +109,19 @@ export default async () => {
 
     xml += `\n</urlset>`;
 
-    // ส่งข้อมูลกลับ (Response)
+    // ส่ง Response กลับไป
     return new Response(xml, {
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        // Cache ที่ Browser 1 ชั่วโมง
+        // Browser Cache 1 ชม.
         "Cache-Control": "public, max-age=3600",
-        // Cache ที่ Netlify Edge Server 1 วัน (โหลดเร็วมาก)
+        // Netlify CDN Cache 1 วัน (โหลดเร็วมาก)
         "Netlify-CDN-Cache-Control": "public, max-age=86400, durable"
       }
     });
 
   } catch (error) {
     console.error("Sitemap Error:", error);
-    // ถ้าพังจริงๆ ให้ส่ง Error 500 กลับไป
     return new Response("Internal Server Error", { status: 500 });
   }
 };
