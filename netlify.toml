@@ -5,21 +5,17 @@
 [build.processing]
   skip_processing = false
 [build.processing.html]
-  pretty_urls = true  # ตัวนี้จัดการเรื่องลบ .html ให้เองแบบฉลาด ไม่ต้องใส่กฎ Manual
+  pretty_urls = true 
 
-# --- Security Headers ---
+# --- [1] Headers (ดีต่อ SEO) ---
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    X-Frame-Options = "ALLOWALL" 
-    Referrer-Policy = "no-referrer-when-downgrade"
-    Cache-Control = "public, max-age=0, must-revalidate"
     X-Robots-Tag = "index, follow"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
 
-# --- [1] Edge Functions (รันก่อนเพื่อน) ---
+# --- [2] Edge Functions (รันอันดับ 1 เพื่อให้บอทเห็นข้อมูล) ---
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
@@ -32,30 +28,42 @@
   function = "ssr-province"
   path = "/location/*"
 
-# --- [2] Specific Redirects (ดัก Link เก่า/เลขซ้ำ) ---
+# --- [3] Redirects (ย้ายมาจาก _redirects เพื่อโอนคะแนน SEO) ---
+
 # บังคับ HTTPS
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
 
-# ตัวอย่างการแก้เลขซ้ำ (ใส่เฉพาะตัวที่จำเป็นจริงๆ)
-[[redirects]]
-  from = "/sideline/obwi-96-96-96"
-  to = "/sideline/obwi-96"
-  status = 301
-
+# ตัวอย่างการดักเลขซ้ำ (โอนคะแนนจากลิงก์เก่ามาลิงก์ใหม่ที่สะอาด)
+# ผมรวมตัวที่สำคัญๆ มาให้ครับ
 [[redirects]]
   from = "/sideline/nongmaprang-154-154-154"
   to = "/sideline/nongmaprang-154"
   status = 301
+  force = true
 
-# --- [3] SPA Fallback (กฎสุดท้าย) ---
 [[redirects]]
-  from = "/sw.js"
-  to = "/sw.js"
-  status = 200
+  from = "/sideline/obwi-96-96-96"
+  to = "/sideline/obwi-96"
+  status = 301
+  force = true
 
+[[redirects]]
+  from = "/sideline/pay-136-136-136"
+  to = "/sideline/pay-136"
+  status = 301
+  force = true
+
+# ดักจับลิงก์ภาษาไทย (URL Encode)
+[[redirects]]
+  from = "/sideline/%E0%B8%9B%E0%B8%B9%E0%B9%80%E0%B8%9B%E0%B9%82"
+  to = "/sideline/puep-87"
+  status = 301
+
+# --- [4] SPA Fallback (กฎสุดท้าย ห้ามย้ายขึ้นข้างบน) ---
+# ตัวนี้จะทำให้กด Refresh หน้าโปรไฟล์แล้วไม่ขาว และไม่เกิด Loop
 [[redirects]]
   from = "/*"
   to = "/index.html"
