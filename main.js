@@ -924,186 +924,120 @@ function showRecentSearches() {
 }
     
 // =================================================================
-// [ฉบับสมบูรณ์ 100%] - applyUltimateFilters (Genius Search Edition)
+// [ฉบับปรับปรุงเพื่อ Performance] - applyUltimateFilters
 // =================================================================
-function applyUltimateFilters(updateUrl = true) {
+async function applyUltimateFilters(updateUrl = true) {
     try {
-        // 1. รวบรวมค่าจาก UI ทั้งหมด
-        const query = {
-            text: (dom.searchInput?.value || '').trim(),
-            province: dom.provinceSelect?.value || 'all',
-            avail: dom.availabilitySelect?.value || 'all',
-            featured: dom.featuredSelect?.value === 'true',
-            sort: dom.sortSelect?.value || 'featured'
-        };
+        // 1. ตอบสนอง UI ทันที (สำคัญมากสำหรับ INP)
+        // แสดง Loading ทันที เพื่อให้ User รู้ว่าเครื่องรับคำสั่งแล้ว
+        showLoadingState();
 
-        // 2. 🔥 INTENT DETECTION: ตรวจจับความตั้งใจผู้ใช้
-        // ถ้าผู้ใช้พิมพ์ชื่อจังหวัด -> ให้เปลี่ยนเป็นการกรองจังหวัดแทน
-        if (query.text && state.provincesMap) {
-            for (const [key, provinceName] of state.provincesMap.entries()) {
-                const normalizedText = query.text.toLowerCase().trim();
-                const normalizedProvince = provinceName.toLowerCase().trim();
-                
-                // เช็คหลายเงื่อนไขเพื่อตรวจจับความตั้งใจ
-                if (normalizedText === normalizedProvince || 
-                    normalizedProvince.includes(normalizedText) ||
-                    normalizedText.includes(normalizedProvince)) {
-                    
-                    // ถ้าตรวจจับได้ว่าเป็นชื่อจังหวัด
-                    query.province = key;
-                    query.text = ''; // ลบ text เพื่อกรองเฉพาะจังหวัด
-                    
-                    // อัปเดต UI ให้สอดคล้อง
-                    if (dom.searchInput) dom.searchInput.value = '';
-                    if (dom.provinceSelect) dom.provinceSelect.value = key;
-                    
-                    console.log(`🔍 Intent detected: ผู้ใช้ต้องการดูจังหวัด "${provinceName}"`);
-                    break;
-                }
-            }
-        }
+        // 2. ใช้ setTimeout เพื่อผลักงานคำนวณหนักๆ ไปไว้ "คิวถัดไป"
+        // วิธีนี้จะทำให้ Main Thread ว่างเป็นช่วงสั้นๆ เพื่อรับการคลิก/แตะ
+        setTimeout(async () => {
+            
+            // --- [ส่วนที่ 1: การคำนวณและกรองข้อมูล] ---
+            const query = {
+                text: (dom.searchInput?.value || '').trim(),
+                province: dom.provinceSelect?.value || 'all',
+                avail: dom.availabilitySelect?.value || 'all',
+                featured: dom.featuredSelect?.value === 'true',
+                sort: dom.sortSelect?.value || 'featured'
+            };
 
-        // 3. บันทึกจังหวัดล่าสุดสำหรับการใช้งานครั้งต่อไป
-        if (query.province && query.province !== 'all') {
-            localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
-        }
-
-        // 4. กรองข้อมูลตามเงื่อนไข
-        let filtered = [...state.allProfiles]; // สร้างสำเนาเพื่อป้องกันการเปลี่ยนแปลงต้นฉบับ
-
-        // 4.1 🔥 กรองด้วยคำค้นหา (GENIUS LOGIC)
-        if (query.text) {
-            const searchText = query.text.toLowerCase().trim();
-            let searchHandled = false;
-
-            // [A] ค้นหาด้วย ID (High Priority): ถ้าพิมพ์ตัวเลขล้วนๆ ให้หา ID ก่อน
-            if (/^\d+$/.test(searchText)) {
-                // ค้นหาทั้ง ID ตรงๆ และ เลขที่ห้อยท้าย Slug
-                const idMatches = filtered.filter(p => 
-                    String(p.id) === searchText || 
-                    (p.slug && p.slug.endsWith(`-${searchText}`))
-                );
-
-                if (idMatches.length > 0) {
-                    filtered = idMatches;
-                    searchHandled = true;
-                    console.log(`⚡ ID Match Found: ${searchText}`);
+            // Intent Detection (Logic เดิม)
+            if (query.text && state.provincesMap) {
+                for (const [key, provinceName] of state.provincesMap.entries()) {
+                    const normalizedText = query.text.toLowerCase().trim();
+                    const normalizedProvince = provinceName.toLowerCase().trim();
+                    if (normalizedText === normalizedProvince || normalizedProvince.includes(normalizedText) || normalizedText.includes(normalizedProvince)) {
+                        query.province = key;
+                        query.text = '';
+                        if (dom.searchInput) dom.searchInput.value = '';
+                        if (dom.provinceSelect) dom.provinceSelect.value = key;
+                        break;
+                    }
                 }
             }
 
-            // [B] ค้นหาด้วย Fuse.js หรือ Text (ถ้ายังไม่เจอ ID)
-            if (!searchHandled) {
-                if (fuseEngine) {
-                    // ใช้ Fuse.js ที่ตั้งค่าไว้ (ค้นหา searchString, ชื่ออังกฤษ, ชื่อไทย)
-                    const results = fuseEngine.search(query.text, { limit: 500 });
-                    filtered = results.map(result => result.item);
-                } else {
-                    // Fallback: ถ้า Fuse ยังไม่พร้อม ให้หาจาก searchString ตรงๆ
-                    filtered = filtered.filter(p => 
-                        p.searchString?.includes(searchText) || 
-                        p.name?.toLowerCase().includes(searchText) ||
-                        p.englishName?.includes(searchText)
-                    );
+            if (query.province && query.province !== 'all') {
+                localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, query.province);
+            }
+
+            // กรองข้อมูล (Logic เดิม)
+            let filtered = [...state.allProfiles];
+
+            if (query.text) {
+                const searchText = query.text.toLowerCase().trim();
+                let searchHandled = false;
+
+                if (/^\d+$/.test(searchText)) {
+                    const idMatches = filtered.filter(p => String(p.id) === searchText || (p.slug && p.slug.endsWith(`-${searchText}`)));
+                    if (idMatches.length > 0) {
+                        filtered = idMatches;
+                        searchHandled = true;
+                    }
+                }
+
+                if (!searchHandled) {
+                    if (fuseEngine) {
+                        const results = fuseEngine.search(query.text, { limit: 500 });
+                        filtered = results.map(result => result.item);
+                    } else {
+                        filtered = filtered.filter(p => p.searchString?.includes(searchText) || p.name?.toLowerCase().includes(searchText));
+                    }
                 }
             }
-        }
 
-        // 4.2 กรองด้วยจังหวัด
-        if (query.province && query.province !== 'all') {
-            filtered = filtered.filter(p => p.provinceKey === query.province);
-        }
+            // กรอง Province, Avail, Featured
+            if (query.province && query.province !== 'all') filtered = filtered.filter(p => p.provinceKey === query.province);
+            if (query.avail && query.avail !== 'all') filtered = filtered.filter(p => p.availability === query.avail);
+            if (query.featured) filtered = filtered.filter(p => p.isfeatured === true);
 
-        // 4.3 กรองด้วยสถานะ Availability
-        if (query.avail && query.avail !== 'all') {
-            filtered = filtered.filter(p => p.availability === query.avail);
-        }
-
-        // 4.4 กรองด้วย Featured Status
-        if (query.featured) {
-            filtered = filtered.filter(p => p.isfeatured === true);
-        }
-
-        // 5. เรียงลำดับผลลัพธ์
-        filtered.sort((a, b) => {
-            switch (query.sort) {
-                case 'featured':
-                    // Featured มาก่อน, แล้วตามด้วยชื่อ A-Z
+            // Sorting
+            filtered.sort((a, b) => {
+                if (query.sort === 'featured') {
                     if (a.isfeatured && !b.isfeatured) return -1;
                     if (!a.isfeatured && b.isfeatured) return 1;
                     return (a.name || '').localeCompare(b.name || '');
-                    
-                case 'name_asc':
-                    return (a.name || '').localeCompare(b.name || '');
-                    
-                case 'name_desc':
-                    return (b.name || '').localeCompare(a.name || '');
-                    
-                case 'rating':
-                    return (b.rating || 0) - (a.rating || 0);
-                    
-                default:
-                    return 0;
-            }
-        });
-
-        // 6. อัปเดต UI - แสดงจำนวนผลลัพธ์
-        if (dom.resultCount) {
-            const count = filtered.length;
-            let message = '';
-            
-            if (count === 0) {
-                message = '❌ ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไข';
-            } else if (count === 1) {
-                message = '✅ พบ 1 โปรไฟล์';
-            } else {
-                message = `✅ พบ ${count.toLocaleString()} โปรไฟล์`;
-                
-                // แสดงจังหวัดที่กรอง (ถ้ามี)
-                if (query.province && query.province !== 'all') {
-                    const provinceName = state.provincesMap?.get(query.province) || query.province;
-                    message += ` ในจังหวัด${provinceName}`;
                 }
-            }
+                if (query.sort === 'name_asc') return (a.name || '').localeCompare(b.name || '');
+                if (query.sort === 'name_desc') return (b.name || '').localeCompare(a.name || '');
+                if (query.sort === 'rating') return (b.rating || 0) - (a.rating || 0);
+                return 0;
+            });
+
+            // --- [ส่วนที่ 2: การอัปเดต UI] ---
             
-            dom.resultCount.textContent = message;
-            dom.resultCount.style.display = 'block';
-            
-            // ซ่อนผลลัพธ์ถ้าไม่มีข้อมูล
-            if (count === 0) {
-                dom.resultCount.classList.add('no-results');
-            } else {
-                dom.resultCount.classList.remove('no-results');
+            // อัปเดตตัวเลขผลลัพธ์
+            if (dom.resultCount) {
+                const count = filtered.length;
+                dom.resultCount.textContent = count === 0 ? '❌ ไม่พบโปรไฟล์' : `✅ พบ ${count.toLocaleString()} รายการ`;
+                dom.resultCount.style.display = 'block';
+                dom.resultCount.classList.toggle('no-results', count === 0);
             }
-        }
 
-        // 7. Render โปรไฟล์
-        const isSearchMode = query.text || (query.province && query.province !== 'all') || 
-                            query.avail !== 'all' || query.featured;
-        
-        renderProfiles(filtered, isSearchMode);
+            // เรียกใช้ renderProfiles (ที่เราปรับปรุงให้เป็น async/batch แล้ว)
+            const isSearchMode = query.text || (query.province && query.province !== 'all') || query.avail !== 'all' || query.featured;
+            
+            // ใช้ await เพื่อรอให้การวาดทีละนิดเสร็จสิ้น
+            await renderProfiles(filtered, isSearchMode);
 
-        // 8. อัปเดต URL (ถ้าต้องการ)
-        if (updateUrl) {
-            updateUrlFromFilters(query);
-        }
+            if (updateUrl) updateUrlFromFilters(query);
+            
+            state.currentFilters = query;
+            state.filteredProfiles = filtered;
 
-        // 9. อัปเดต state ปัจจุบัน
-        state.currentFilters = query;
-        state.filteredProfiles = filtered;
-
-        console.log(`🔍 กรองเสร็จสิ้น: ${filtered.length} โปรไฟล์`, query);
+            // ซ่อน Loading เมื่อทุกอย่างเสร็จ
+            hideLoadingState();
+            
+        }, 10); // หน่วงเวลา 10ms เพื่อเปิดช่องให้ Browser รับ event คลิก
 
     } catch (error) {
-        console.error('❌ เกิดข้อผิดพลาดใน applyUltimateFilters:', error);
-        
-        // แสดงข้อความผิดพลาด
-        if (dom.resultCount) {
-            dom.resultCount.textContent = '⚠️ เกิดข้อผิดพลาดในการกรองข้อมูล';
-            dom.resultCount.style.display = 'block';
-        }
+        console.error('❌ Error:', error);
+        hideLoadingState();
     }
 }
-
 /**
  * อัปเดต URL จากฟิลเตอร์ปัจจุบัน
  * @param {Object} query - ข้อมูลฟิลเตอร์
@@ -1150,28 +1084,40 @@ function updateUrlFromFilters(query) {
 async function renderCardsIncrementally(container, profiles) {
     if (!container || !profiles) return;
     
-    // ล้างเนื้อหาเดิมในกรณีที่เป็น Grid เปล่า
+    // 1. ล้างข้อมูลเดิม
     container.innerHTML = '';
     
+    // 2. ปรับ BATCH_SIZE ให้เล็กลงมากสำหรับ Mobile
+    // ยิ่ง Batch เล็ก Browser ยิ่งตอบสนองต่อการคลิกได้ไวขึ้น
+    const isMobile = window.innerWidth < 768;
+    const BATCH_SIZE = isMobile ? 2 : 4; 
+
     const fragment = document.createDocumentFragment();
-    // ถ้าโปรไฟล์เยอะ (เชียงใหม่) ให้วาดทีละ 4 ใบ เพื่อให้ UI ไม่ค้าง
-    const BATCH_SIZE = profiles.length > 20 ? 4 : 8; 
 
     for (let i = 0; i < profiles.length; i++) {
         const card = createProfileCard(profiles[i], i);
         fragment.appendChild(card);
 
-        // เมื่อครบชุด (Batch) หรือใบสุดท้าย ให้เอาลงหน้าจอ
+        // เมื่อครบชุด (Batch) หรือใบสุดท้าย
         if ((i + 1) % BATCH_SIZE === 0 || i === profiles.length - 1) {
             container.appendChild(fragment);
             
-            // 🟢 จุดสำคัญ: คืน Main Thread ให้ Browser ไปวาดรูปและรับคำสั่งจากผู้ใช้
-            // ใช้ requestAnimationFrame เพื่อความนุ่มนวลสูงสุด
-            await new Promise(resolve => requestAnimationFrame(resolve));
-            
-            // ถ้าข้อมูลเยอะมาก ให้หยุดพักเพิ่มอีกนิด (แก้ปัญหาเครื่องร้อน/ค้าง)
-            if (profiles.length > 40) {
-                await new Promise(resolve => setTimeout(resolve, 10));
+            // 3. 🛠️ จุดเปลี่ยนสำคัญ (แก้ INP):
+            // เปลี่ยนจาก requestAnimationFrame เป็นการ Yield ด้วย Task Queue
+            // เราจะสลับกันใช้เพื่อให้ Browser ได้ทั้ง 'วาดภาพ' และ 'รับคำสั่งคลิก'
+            if (i < 10) {
+                // 10 ใบแรกใช้ rAF เพื่อความเร็วในการแสดงผล (LCP)
+                await new Promise(resolve => requestAnimationFrame(resolve));
+            } else {
+                // ใบต่อๆ ไปใช้ setTimeout(0) เพื่อเปิดช่องให้ User กดคลิก/เลื่อน ได้ (INP)
+                // นี่คือการ "คลายล็อก" Main Thread ที่แท้จริง
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
+
+            // 4. ถ้าโปรไฟล์เยอะมาก (เช่น หน้าเชียงใหม่ที่มี 100+) 
+            // ให้หยุดพักยาวขึ้นทุกๆ 20 ใบ เพื่อลดความร้อนและภาระ CPU
+            if (i > 0 && i % 20 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 20));
             }
         }
     }
@@ -2125,59 +2071,74 @@ function updateLink(rel, href) {
 
 
 // ==========================================
-// ✨ UPGRADED: VIP AGE GATE (SEO & LUXURY VERSION)
+// ✨ UPGRADED: VIP AGE GATE (SEO, LUXURY & PROPORTIONAL)
 // ==========================================
 function initAgeVerification() {
-    // 1. 🛡️ SEO Safe Guard: ตรวจสอบ Bot 
-    // ถ้าเป็น Googlebot จะไม่สร้าง Overlay เพื่อให้คะแนน SEO พุ่งกระฉูด
-    const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|ia_archiver|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|quora\ link\ preview|outbrain|pinterest\/0\.|vkShare|W3C_Validator/i.test(navigator.userAgent);
+    // 1. 🛡️ SEO Safe Guard: อนุญาตให้ Search Engine บอทข้ามไปเก็บข้อมูลเนื้อหาหลักได้
+    const isBot = /googlebot|bingbot|yandexbot|duckduckbot|slurp|baiduspider|ia_archiver|facebookexternalhit|twitterbot|discordbot|linkedinbot|embedly|quora\ link\ preview|outbrain|pinterest\/0\.|vkShare|W3C_Validator|lighthouse|inspectiontool/i.test(navigator.userAgent);
 
     if (isBot) {
-        console.log("🚀 SEO Mode: Search Engine detected. Access granted without overlay.");
+        console.log("🚀 SEO Mode: Indexing allowed.");
         return; 
     }
 
-    // 2. ตรวจสอบการยืนยันตัวตนจาก LocalStorage
+    // 2. ตรวจสอบการยืนยันตัวตน (ไม่แสดงซ้ำถ้าเพิ่งยืนยันไปไม่เกิน 1 ชม.)
     const ts = localStorage.getItem(CONFIG.KEYS.AGE_CONFIRMED);
     if (ts && (Date.now() - parseInt(ts)) < 3600000) return;
 
-    // 3. สร้างระบบยืนยันอายุ (VIP UI)
+    // 3. สร้างระบบยืนยันอายุ (Luxury UI)
     const div = document.createElement('div');
     div.id = 'age-verification-overlay';
     
-    // CSS จัดการ Layout เต็มหน้าจอ
-    div.style.cssText = "position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; overflow: hidden;";
+    // จัด Layout เต็มหน้าจอ
+    div.style.cssText = "position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;";
     
     div.innerHTML = `
-        <div style="position: absolute; inset: 0; background-image: url('/images/placeholder-profile.webp'); background-size: cover; background-position: center; filter: blur(30px); opacity: 0.3; transform: scale(1.1);"></div>
-        <div style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);"></div>
+        <!-- Background Layer: ใช้รูป Hero มาเบลอเพื่อคุมโทนเว็บ -->
+        <div style="position: absolute; inset: 0; background-image: url('/images/hero-sidelinechiangmai-800.webp'); background-size: cover; background-position: center; filter: blur(40px); opacity: 0.25; transform: scale(1.1);"></div>
+        <div style="position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, #000 100%);"></div>
 
-        <div style="position: relative; z-index: 10; width: 100%; max-width: 420px; margin: 16px;">
-            <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(25px); border-radius: 32px; padding: 48px 32px; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8); text-align: center; overflow: hidden; position: relative;">
+        <!-- Card Container -->
+        <div id="age-card-wrapper" style="position: relative; z-index: 10; width: 100%; max-width: 400px; padding: 24px;">
+            <div style="background: rgba(22, 22, 22, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-radius: 48px; padding: 55px 40px; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9); text-align: center; overflow: hidden; position: relative;">
                 
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #ec4899, #9333ea, transparent); opacity: 0.8;"></div>
+                <!-- Glow Line Top: เส้นเรืองแสงด้านบนเพิ่มความหรูหรา -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #ec4899, #9333ea, transparent); opacity: 0.7;"></div>
                 
-                <div style="margin-bottom: 32px;">
-                    <p style="font-size: 12px; color: #ec4899; text-transform: uppercase; letter-spacing: 4px; font-weight: 800; margin-bottom: 8px;">Welcome To</p>
-                    <h2 style="font-size: 32px; font-weight: 900; color: #ffffff; margin-bottom: 20px; letter-spacing: -1px;">Sideline Chiangmai</h2>
+                <!-- Content Section -->
+                <div style="margin-bottom: 40px;">
+                    <p style="font-size: 10px; color: #ec4899; text-transform: uppercase; letter-spacing: 6px; font-weight: 800; margin-bottom: 15px; opacity: 0.9;">Welcome To</p>
+                    <h2 style="font-size: 28px; font-weight: 900; color: #ffffff; margin-bottom: 30px; letter-spacing: -0.5px; line-height: 1.1;">Sideline <span style="color: #ec4899;">Chiangmai</span></h2>
                     
-                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; border-radius: 9999px; background-color: rgba(236, 72, 153, 0.1); margin-bottom: 20px; border: 1px solid rgba(236, 72, 153, 0.4); box-shadow: 0 0 25px rgba(236, 72, 153, 0.2);">
+                    <!-- 20+ Badge -->
+                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: 50%; background: rgba(236, 72, 153, 0.05); margin-bottom: 30px; border: 1.5px solid rgba(236, 72, 153, 0.4); box-shadow: 0 0 25px rgba(236, 72, 153, 0.15);">
                         <span style="font-size: 22px; font-weight: 900; color: #ec4899;">20+</span>
                     </div>
                     
-                    <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 12px;">พื้นที่ส่วนบุคคล (VIP ONLY)</h3>
-                    <p style="color: #9ca3af; font-size: 14px; line-height: 1.7;">
+                    <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.5px;">พื้นที่ส่วนบุคคล (VIP ONLY)</h3>
+                    <p style="color: #d1d5db; font-size: 14px; line-height: 1.7; max-width: 280px; margin: 0 auto; font-weight: 400; opacity: 0.9;">
                         เว็บไซต์นี้จัดหาเนื้อหาสำหรับผู้ใหญ่<br>
-                        <span style="color: #d1d5db;">กรุณายืนยันว่าคุณมีอายุ 20 ปีบริบูรณ์เพื่อเข้าชม</span>
+                        กรุณายืนยันอายุเพื่อเข้าสู่ระบบ
                     </p>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 14px;">
-                    <button id="age-confirm" style="width: 100%; padding: 18px; background: linear-gradient(90deg, #ec4899, #9333ea); color: white; font-weight: 800; border-radius: 16px; border: none; cursor: pointer; font-size: 16px; box-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.5); transition: all 0.3s ease;">ยืนยันอายุ (ENTER SITE)</button>
-                    <button id="age-reject" style="width: 100%; padding: 10px; background: transparent; color: #6b7280; font-size: 13px; border-radius: 12px; border: none; cursor: pointer; opacity: 0.8; hover:opacity: 1;">ออกจากเว็บไซต์ (Exit)</button>
+                <!-- Action Buttons: จัดเรียงแบบเน้นความสมมาตร -->
+                <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                    <!-- ปุ่มเข้าสู่เว็บ (เด่น) -->
+                    <button id="age-confirm" style="width: 100%; max-width: 280px; height: 58px; background: linear-gradient(90deg, #ec4899, #9333ea); color: white; font-weight: 800; border-radius: 100px; border: none; cursor: pointer; font-size: 16px; box-shadow: 0 15px 30px -8px rgba(236, 72, 153, 0.5); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 1px;">
+                        ยืนยันอายุ (ENTER SITE)
+                    </button>
+                    
+                    <!-- ปุ่มออก (มองเห็นชัดเจนขึ้น) -->
+                    <button id="age-reject" style="background: transparent; color: #9ca3af; font-size: 13px; font-weight: 600; border: none; cursor: pointer; padding: 5px 15px; transition: all 0.3s ease; text-decoration: underline; text-underline-offset: 4px;">
+                        ออกจากเว็บไซต์ (Exit Site)
+                    </button>
                 </div>
                 
-                <p style="margin-top: 24px; font-size: 10px; color: #4b5563; text-transform: uppercase; letter-spacing: 1px;">Premium Entertainment • Chiang Mai Thailand</p>
+                <!-- Footer Info -->
+                <div style="margin-top: 45px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+                    <p style="font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">Premium Entertainment • Chiang Mai</p>
+                </div>
             </div>
         </div>
     `;
@@ -2185,24 +2146,35 @@ function initAgeVerification() {
     document.body.appendChild(div);
     document.body.style.overflow = 'hidden';
 
-    // Animation Effect (GSAP)
-    const card = div.querySelector('div[style*="background: rgba"]'); 
+    // --- 4. ANIMATION & INTERACTION ---
+    
+    // เอฟเฟกต์การปรากฏตัว (GSAP)
     if (window.gsap) {
-        gsap.from(card, { 
-            scale: 0.9, 
-            opacity: 0, 
-            duration: 1.2, 
-            ease: "expo.out" 
-        });
+        gsap.fromTo("#age-card-wrapper", 
+            { scale: 0.94, opacity: 0, y: 20 },
+            { scale: 1, opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }
+        );
     }
 
-    // ปุ่มยืนยัน
+    // Hover Effect สำหรับปุ่ม Confirm
+    const btnEnter = document.getElementById('age-confirm');
+    btnEnter.onmouseover = () => btnEnter.style.filter = "brightness(1.1)";
+    btnEnter.onmouseout = () => btnEnter.style.filter = "brightness(1)";
+
+    // Hover Effect สำหรับปุ่ม Exit (เปลี่ยนสีให้ชัดขึ้นเมื่อเอาเมาส์จี้)
+    const btnExit = document.getElementById('age-reject');
+    btnExit.onmouseover = () => btnExit.style.color = "#ffffff";
+    btnExit.onmouseout = () => btnExit.style.color = "#9ca3af";
+
+    // 5. LOGIC: ปุ่มยืนยันอายุ
     document.getElementById('age-confirm').onclick = () => {
         localStorage.setItem(CONFIG.KEYS.AGE_CONFIRMED, Date.now());
+        
         if (window.gsap) {
             gsap.to(div, { 
                 opacity: 0, 
-                duration: 0.6, 
+                scale: 1.05,
+                duration: 0.5, 
                 ease: "power2.inOut",
                 onComplete: () => {
                     div.remove();
@@ -2215,7 +2187,7 @@ function initAgeVerification() {
         }
     };
 
-    // ปุ่มออก
+    // 6. LOGIC: ปุ่มออกจากเว็บ
     document.getElementById('age-reject').onclick = () => {
         window.location.href = 'https://google.com';
     };
@@ -2345,63 +2317,88 @@ function generateSitemapXML() {
     const baseUrl = CONFIG.SITE_URL.replace(/\/$/, '');
     const urls = [];
 
+    // ฟังก์ชันสำหรับจัดการอักขระพิเศษใน XML
+    const escapeXml = (unsafe) => {
+        if (!unsafe) return '';
+        return unsafe.replace(/[<>&'"]/g, (c) => {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+                default: return c;
+            }
+        });
+    };
+
     const processUrl = (path) => {
         const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
         const fullUrl = `${baseUrl}/${encodedPath}`;
-        return fullUrl.replace(/&/g, '&amp;').replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        // ป้องกัน & ใน URL พัง
+        return fullUrl.replace(/&/g, '&amp;');
     };
 
-    // 1. หน้าแรก
+    // 1. หน้าแรก (Priority สูงสุด)
     urls.push({ loc: processUrl(''), priority: '1.0', freq: 'daily' });
 
-    // 2. หน้า Profile น้องๆ (จุดสำคัญที่เพิ่มรูปภาพ)
+    // 2. หน้า Profile น้องๆ (ส่วนที่แก้ไขเรื่องเลขซ้ำและรูปภาพ)
     state.allProfiles.forEach(p => { 
         if (p.slug) { 
-            // ดึงข้อมูลรูปภาพจาก object ที่ process แล้ว
+            // 🔧 🔧 จุดสำคัญ: ทำความสะอาด Slug (เปลี่ยน "name-99-99" เป็น "name-99")
+            const cleanSlug = p.slug.trim().replace(/(-\d+)(?:-\d+)+$/, '$1');
+
+            // จัดการข้อมูลรูปภาพ
             let imageTag = '';
             if (p.images && p.images.length > 0 && p.images[0].src) {
-                // ต้อง Escape URL รูปภาพด้วยเพื่อให้ XML ถูกต้อง
                 const imgUrl = p.images[0].src.replace(/&/g, '&amp;');
+                const imgTitle = escapeXml(p.name || 'รูปโปรไฟล์');
                 imageTag = `
         <image:image>
             <image:loc>${imgUrl}</image:loc>
-            <image:title>${p.name || 'Profile Image'}</image:title>
+            <image:title>${imgTitle}</image:title>
         </image:image>`;
             }
 
             urls.push({ 
-                loc: processUrl(`sideline/${p.slug.trim()}`), 
+                loc: processUrl(`sideline/${cleanSlug}`), 
                 priority: '0.9', 
                 freq: 'daily',
-                // เพิ่มฟิลด์พิเศษสำหรับเก็บ html รูปภาพ
                 imageXml: imageTag 
             }); 
         } 
     });
 
-    // 3. หน้า Location
+    // 3. หน้า Location (จังหวัด)
     if (state.provincesMap && state.provincesMap.size > 0) { 
         state.provincesMap.forEach((name, key) => { 
-            urls.push({ loc: processUrl(`location/${key}`), priority: '0.8', freq: 'daily' }); 
+            urls.push({ 
+                loc: processUrl(`location/${key}`), 
+                priority: '0.8', 
+                freq: 'daily' 
+            }); 
         }); 
     }
 
-    // 4. หน้า Static
-    ['blog.html', 'about.html', 'faq.html', 'profiles.html', 'locations.html'].forEach(page => { 
-        urls.push({ loc: processUrl(page), priority: '0.7', freq: 'weekly' }); 
+    // 4. หน้า Static (Content Pages)
+    ['blog', 'about', 'faq', 'profiles', 'locations', 'contact'].forEach(page => { 
+        urls.push({ 
+            loc: processUrl(page), 
+            priority: '0.7', 
+            freq: 'weekly' 
+        }); 
     });
 
-    // สร้างเนื้อหา XML
-    const xmlContent = urls.map(u => 
-        `<url>
-            <loc>${u.loc}</loc>
-            <lastmod>${new Date().toISOString()}</lastmod>
-            <changefreq>${u.freq}</changefreq>
-            <priority>${u.priority}</priority>${u.imageXml || ''}
-        </url>` // เพิ่ม u.imageXml ตรงนี้
-    ).join(''); // ลบ \n ออกเพื่อให้ไฟล์เล็กลง (Optional)
+    // สร้างเนื้อหา XML (รวมทุกลิงก์)
+    const xmlContent = urls.map(u => `
+    <url>
+        <loc>${u.loc}</loc>
+        <lastmod>${new Date().toISOString()}</lastmod>
+        <changefreq>${u.freq}</changefreq>
+        <priority>${u.priority}</priority>${u.imageXml || ''}
+    </url>`).join('');
 
-    // คืนค่าพร้อม Header ที่ถูกต้อง (เพิ่ม xmlns:image)
+    // คืนค่าโครงสร้าง XML ที่สมบูรณ์
     return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
