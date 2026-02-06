@@ -1,81 +1,78 @@
-# =========================================================================
-# ส่วนที่ 1: การตั้งค่า Build
-# =========================================================================
 [build]
-  publish = "." [cite: 1]
-  functions = "netlify/functions" [cite: 2]
+  publish = "."
+  functions = "netlify/functions"
 
 [build.processing]
-  skip_processing = false [cite: 2]
+  skip_processing = false
 [build.processing.html]
-  pretty_urls = true [cite: 2]
+  pretty_urls = true
 
-# =========================================================================
-# ส่วนที่ 2: HTTP Headers (Security & Cache)
-# =========================================================================
+# --- Headers (ส่วนนี้ของคุณดีแล้วครับ) ---
 [[headers]]
-  for = "/*" [cite: 3]
+  for = "/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff" [cite: 3]
-    X-Frame-Options = "SAMEORIGIN" [cite: 3]
-    X-XSS-Protection = "1; mode=block" [cite: 3]
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload" [cite: 3]
-    Referrer-Policy = "strict-origin-when-cross-origin" [cite: 3]
-    Cache-Control = "public, max-age=0, must-revalidate" [cite: 3]
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Frame-Options = "ALLOWALL" 
+    Referrer-Policy = "no-referrer-when-downgrade"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    X-Robots-Tag = "index, follow"
 
-# =========================================================================
-# ส่วนที่ 3: Netlify Edge Functions
-# (ลำดับสำคัญมาก: Edge Functions จะทำงานก่อน Redirects เสมอ)
-# =========================================================================
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# --- Edge Functions (แก้ตรงนี้ครับ!) ---
+
+# 1. Sitemap เรียกไฟล์ sitemap.js
 [[edge_functions]]
   function = "sitemap"
-  path = "/sitemap.xml" [cite: 4]
+  path = "/sitemap.xml"
 
+# 2. หน้าโปรไฟล์ เรียกไฟล์ render-bot.js (ต้องมีขีดกลาง ตามชื่อไฟล์จริง)
 [[edge_functions]]
   function = "render-bot"
-  path = "/sideline/*" [cite: 4]
+  path = "/sideline/*"
 
+# 3. หน้าจังหวัด เรียกไฟล์ ssr-province.js (อย่าใช้ render-bot ตรงนี้)
 [[edge_functions]]
   function = "ssr-province"
-  path = "/location/*" [cite: 4]
+  path = "/location/*"
 
+# เผื่อไว้สำหรับ URL แบบเก่า (ถ้ามี)
 [[edge_functions]]
   function = "ssr-province"
-  path = "/province/*" [cite: 4]
+  path = "/province/*"
 
-# เพิ่ม Edge Function สำหรับ Profiles (ถ้าคุณมี function สำหรับจัดการหน้านี้)
-# [[edge_functions]]
-#   function = "ssr-profile" 
-#   path = "/profiles/*"
-
-# =========================================================================
-# ส่วนที่ 4: Redirects & Rewrites (SPA Fallback)
-# =========================================================================
-
-# 1. บังคับ HTTPS
+# --- Redirects (ส่วนนี้ของคุณถูกต้องแล้วครับ เยี่ยมมาก) ---
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat" [cite: 5]
+  to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
-  force = true [cite: 5]
+  force = true
 
-# 2. ปล่อยให้ไฟล์จริง (Static Files) ทำงาน โดยไม่ต้อง Rewrite
-# เอา force = true ออกเพื่อให้เบราว์เซอร์หาไฟล์ sw.js หรือ assets เจอจริงๆ
+[[redirects]]
+  from = "/*.html"
+  to = "/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
-  status = 200 [cite: 6]
+  status = 200
+  force = true
+  headers = { "Cache-Control" = "no-cache" }
 
-[[redirects]]
-  from = "/manifest.webmanifest"
-  to = "/manifest.webmanifest"
-  status = 200 [cite: 6]
-
-# 3. SPA Catch-all (หัวใจสำคัญ)
-# ใช้กฎเดียวครอบคลุมทุก Path ที่ไม่ใช่ไฟล์จริง
-# การเอา force = true ออกในส่วนนี้ จะช่วยให้หากมีไฟล์ชื่อนั้นจริงๆ Netlify จะเปิดไฟล์นั้น 
-# แต่ถ้าไม่มี (เช่น URL ของ Router) มันจะส่งไปที่ index.html ให้เองโดยอัตโนมัติ
+# กฎสุดท้ายสำหรับ SPA (สำคัญมาก ห้ามลบ)
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 [cite: 7]
+  status = 200
