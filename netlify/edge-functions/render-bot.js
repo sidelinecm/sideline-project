@@ -37,82 +37,84 @@ export default async (request, context) => {
     // [ACTION] คนไทยตัวจริง -> ไปหน้าเว็บหลัก (Client-side)
     if (!isBot && !isSuspicious && !isDataCenter) return context.next();
 
-    // ==========================================
-    // 3. FULL SERVER-SIDE RENDERING (SSR)
+// ==========================================
+    // 3. FULL SERVER-SIDE RENDERING (SSR) - [MASTER EDITION]
     // ==========================================
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
+        
+        // ตรวจสอบว่าเป็น Path ของโปรไฟล์น้องๆ หรือไม่
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
 
-        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
+        // 1. ดึง Slug และทำความสะอาดทันที (🔧 จุดตายสำคัญ)
+        let slug = decodeURIComponent(pathParts[pathParts.length - 1]);
+        const cleanSlug = slug.replace(/(-\d+)(?:-\d+)+$/, '$1'); // "nong-145-145" -> "nong-145"
+
+        // ข้ามคำที่ไม่ใช่ชื่อน้อง
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
-        // [CORRECTION 1] สร้าง Client ก่อนใช้งาน และใช้ชื่อตัวแปรว่า 'supabase'
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // [CORRECTION 2] ดึงข้อมูล Profile หลักก่อน
-        const { data: p } = await supabase.from('profiles').select('*, provinces(*)').eq('slug', slug).maybeSingle();
+        // 2. 🔍 ฉลาดกว่าเดิม: ค้นหาทั้งจาก Slug ดิบ และ Slug ที่ล้างแล้ว
+        // วิธีนี้จะทำให้บอทเจอตัวน้องเสมอ ไม่ว่าลิงก์ในหน้าเว็บจะเป็นแบบไหน
+        const { data: p } = await supabase
+            .from('profiles')
+            .select('*, provinces(*)')
+            .or(`slug.eq."${slug}",slug.eq."${cleanSlug}"`) 
+            .maybeSingle();
+
         if (!p) return context.next();
 
-        // [CORRECTION 3] ย้ายส่วนดึงข้อมูลแนะนำมาไว้ตรงนี้ (หลังจากได้ p แล้ว)
-        // --- ดึงน้องๆ แนะนำในจังหวัดเดียวกัน (สุ่มมา 4 คน) ---
+        // 3. ดึงน้องๆ แนะนำในจังหวัดเดียวกัน (สุ่ม 4 คน)
         let related = [];
         if (p.province_id) {
             const { data: relatedData } = await supabase
                 .from('profiles')
                 .select('slug, name, imagePath, location')
-                .eq('province_id', p.province_id) // ดึงจังหวัดเดียวกัน
-                .eq('status', 'active')           // เอาเฉพาะคนที่ยังรับงาน
-                .neq('id', p.id)                  // ไม่ให้แสดงซ้ำกับคนปัจจุบัน
-                .limit(4);                        // เอาแค่ 4 คนพอให้สวยงาม
+                .eq('province_id', p.province_id)
+                .eq('status', 'active')
+                .neq('id', p.id)
+                .limit(4);
             related = relatedData || [];
         }
 
-        // --- 🛠️ SMART FIX: จัดการข้อมูลให้ฉลาด ---
+        // --- 🛠️ SMART DATA CLEANUP ---
         
-        // 1. ชื่อ (Name): ป้องกัน "น้องน้อง..."
         const rawName = p.name || 'สาวสวย';
         const displayName = rawName.startsWith('น้อง') ? rawName : `น้อง${rawName}`;
 
-        // 2. ราคา (Price): ดึงเฉพาะตัวเลขให้ Google Schema
         const rawPriceValue = (p.rate || "1500").toString().replace(/[^0-9]/g, '');
-        const displayPrice = parseInt(rawPriceValue).toLocaleString() + ".-";
+        const displayPrice = parseInt(rawPriceValue || "1500").toLocaleString() + ".-";
         
-        // 3. รูปภาพ (Image Optimization): ย่อรูปให้โหลดเร็ว + รองรับ Link เต็ม
-        let imageUrl = `${CONFIG.DOMAIN}/images/default.webp`;
+        let imageUrl = `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
         if (p.imagePath) {
-            if (p.imagePath.startsWith('http')) {
-                imageUrl = p.imagePath;
-            } else {
-                // 🔥 SEO BOOST: เพิ่ม Query Param สั่งย่อรูป (width=800, quality=80)
-                imageUrl = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}?width=800&quality=80&format=webp`;
-            }
+            imageUrl = p.imagePath.startsWith('http') 
+                ? p.imagePath 
+                : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}?width=800&quality=80&format=webp`;
         }
         
-        // 4. LINE Link: รองรับทั้ง ID และ Link เต็ม
         let finalLineUrl = p.lineId || 'ksLUMz3p_o';
         if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/${finalLineUrl}`;
+            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         
-        // คำนวณ Rating ให้คงที่ตาม Slug
-        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
-        const reviewCount = 150 + (charCodeSum % 100);
+        // คำนวณ Rating ให้คงที่ (ใช้ cleanSlug เพื่อให้ค่าเหมือนเดิมเสมอ)
+        const charCodeSum = cleanSlug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const ratingValue = (4.7 + (charCodeSum % 3) / 10).toFixed(1);
+        const reviewCount = 120 + (charCodeSum % 80);
 
-        // --- 🔥 SEO SPINTAX: สุ่มคำบรรยายไม่ให้ซ้ำ (Duplicate Content Killer) ---
-        const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
-        const descIntro = spin(["โปรไฟล์", "รายละเอียด", "ข้อมูล"]);
-        const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง"]);
-        const payWord = spin(["ไม่รับมัดจำ", "จ่ายหน้างานเท่านั้น", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
+        // --- 🔥 SEO SPINTAX (สุ่มคำไม่ให้ Description ซ้ำกัน) ---
+        const titleIntro = spin(["แนะนำ", "โปรไฟล์", "รีวิว", "น้อง", "มาแรง"]);
+        const serviceWord = spin(["บริการฟิวแฟน", "งานเอนเตอร์เทน", "ดูแลดี", "คุยสนุก"]);
+        const payWord = spin(["ไม่ต้องโอนมัดจำ", "จ่ายหน้างานเท่านั้น", "นัดเจอจ่ายสด", "ปลอดภัย 100%"]);
         
-        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน รูปตรงปก 100%`;
-        const metaDesc = `${descIntro}${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
-        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
-
+        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ${serviceWord} ตรงปก`;
+        const metaDesc = `${displayName} สาวสวยรับงานไซด์ไลน์ ${provinceName} อายุ ${p.age || '20+'} ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} พิกัด${p.location || provinceName} ดูรูปตัวจริงและจองคิวทักไลน์ได้เลย`;
+        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${cleanSlug}`;
+        
         // ==========================================
         // FULLY OPTIMIZED STRUCTURED DATA (JSON-LD)
         // รวม LocalBusiness + Product + FAQ + Organization
