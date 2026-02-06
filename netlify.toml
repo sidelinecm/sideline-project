@@ -5,9 +5,9 @@
 [build.processing]
   skip_processing = false
 [build.processing.html]
-  pretty_urls = true
+  pretty_urls = true  # ตัวนี้จัดการเรื่องลบ .html ให้เองแบบฉลาด ไม่ต้องใส่กฎ Manual
 
-# --- Headers (ส่วนนี้ของคุณดีแล้วครับ) ---
+# --- Security Headers ---
 [[headers]]
   for = "/*"
   [headers.values]
@@ -19,59 +19,43 @@
     Cache-Control = "public, max-age=0, must-revalidate"
     X-Robots-Tag = "index, follow"
 
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/fonts/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Edge Functions (แก้ตรงนี้ครับ!) ---
-
-# 1. Sitemap เรียกไฟล์ sitemap.js
+# --- [1] Edge Functions (รันก่อนเพื่อน) ---
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
-# 2. หน้าโปรไฟล์ เรียกไฟล์ render-bot.js (ต้องมีขีดกลาง ตามชื่อไฟล์จริง)
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
-# 3. หน้าจังหวัด เรียกไฟล์ ssr-province.js (อย่าใช้ render-bot ตรงนี้)
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
 
-# เผื่อไว้สำหรับ URL แบบเก่า (ถ้ามี)
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/province/*"
-
-# --- Redirects (ส่วนนี้ของคุณถูกต้องแล้วครับ เยี่ยมมาก) ---
+# --- [2] Specific Redirects (ดัก Link เก่า/เลขซ้ำ) ---
+# บังคับ HTTPS
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
-  force = true
+
+# ตัวอย่างการแก้เลขซ้ำ (ใส่เฉพาะตัวที่จำเป็นจริงๆ)
+[[redirects]]
+  from = "/sideline/obwi-96-96-96"
+  to = "/sideline/obwi-96"
+  status = 301
 
 [[redirects]]
-  from = "/*.html"
-  to = "/:splat"
+  from = "/sideline/nongmaprang-154-154-154"
+  to = "/sideline/nongmaprang-154"
   status = 301
-  force = true
 
+# --- [3] SPA Fallback (กฎสุดท้าย) ---
 [[redirects]]
   from = "/sw.js"
   to = "/sw.js"
   status = 200
-  force = true
-  headers = { "Cache-Control" = "no-cache" }
 
-# กฎสุดท้ายสำหรับ SPA (สำคัญมาก ห้ามลบ)
 [[redirects]]
   from = "/*"
   to = "/index.html"

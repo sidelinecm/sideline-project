@@ -1,11 +1,10 @@
-# [1] Clean URLs & Service Pages
+# [1] Clean URLs (Standard Redirects)
 /terms-of-service.html   /terms-of-service   301!
 /contact.html            /contact            301!
 /profiles.html           /profiles           301!
 /locations.html          /locations          301!
-/profiles.html?province=:province  /location/:province  301!
 
-# [2] แก้ไขกลุ่ม "เลขซ้ำ" ที่ปรากฏใน Sitemap (ต้องชี้ไปที่เลขชุดเดียว)
+# [2] แก้ไขกลุ่ม "เลขซ้ำ" (Specific Fixes - อันนี้ใช้ได้และควรเก็บไว้ดัก Link เก่า)
 /sideline/obwi-96-96-96           /sideline/obwi-96       301!
 /sideline/pay-136-136             /sideline/pay-136       301!
 /sideline/hmiw-148-148-148        /sideline/hmiw-148      301!
@@ -26,8 +25,15 @@
 /sideline/nabdaw-123-123          /sideline/nabdaw-123    301!
 /sideline/mitangkh-120-120        /sideline/mitangkh-120  301!
 /sideline/ediyr-139-139-139-139-139  /sideline/ediyr-139  301!
+/sideline/hlinhlin-78-78          /sideline/hlinhlin-78   301!
+/sideline/biwbiw-138-138          /sideline/biwbiw-138    301!
+/sideline/nongmaprang-154-154-154 /sideline/nongmaprang-154 301!
+/sideline/nongomji-95-95-95-95    /sideline/nongomji-95   301!
+/sideline/namrin-109-109-109      /sideline/namrin-109    301!
+/sideline/aikhejiyw-134-134-134   /sideline/aikhejiyw-134 301!
+/sideline/ediyr-139-139-139       /sideline/ediyr-139     301!
 
-# [3] บังคับชื่อภาษาไทย (URL Encode) ไปหน้าใหม่ตามที่ Sitemap ระบุ
+# [3] บังคับชื่อภาษาไทย (URL Encode) ไปหน้าใหม่ (ถูกต้องและดีมากครับ)
 /sideline/%E0%B8%9B%E0%B8%B9%E0%B9%80%E0%B8%9B%E0%B9%82    /sideline/puep-87    301!
 /sideline/%E0%B8%AB%E0%B8%A5%E0%B8%B4%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%B4%E0%B8%87    /sideline/hlinghling-90    301!
 /sideline/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%AB%E0%B8%A7%E0%B8%B2%E0%B8%99%F0%9F%9A%A8    /sideline/namhwan-56    301!
@@ -97,10 +103,6 @@
 /sideline/%E0%B9%82%E0%B8%9A%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B9%8C    /sideline/oboar-104    301!
 /sideline/%E0%B9%82%E0%B8%A1%E0%B8%88%E0%B8%B4    /sideline/omji-73    301!
 /sideline/%E0%B9%84%E0%B8%82%E0%B9%88%E0%B9%80%E0%B8%88%E0%B8%B5%E0%B8%A2%E0%B8%A7    /sideline/aikhejiyw-134    301!
-
-# [4] กฎล้างเลขซ้ำแบบครอบจักรวาล (ดักจับตัวที่อาจจะหลุดมา)
-/sideline/:slug-:num-:num    /sideline/:slug-:num    301
-/sideline/:slug-:num-:num-:num /sideline/:slug-:num    301
 
 # [5] SPA Fallback
 /* /index.html    200
