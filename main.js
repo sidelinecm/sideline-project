@@ -1184,49 +1184,60 @@ async function renderByProvince(profiles) {
 function renderProfiles(profiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     
-    // 1. ซ่อน Error และ No Results ก่อนเริ่มงาน
+    // --- [ ขั้นตอนพิเศษ: กรองรายชื่อซ้ำก่อนเริ่มวาดรูป ] ---
+    const seenNames = new Set();
+    const uniqueProfiles = profiles.filter(p => {
+        if (!p.name) return false;
+        const cleanName = p.name.trim().toLowerCase(); // ทำความสะอาดชื่อก่อนเช็ก
+        if (seenNames.has(cleanName)) {
+            return false; // ถ้าชื่อนี้มีแล้ว ข้ามแถวนี้ไปเลย
+        }
+        seenNames.add(cleanName); // ถ้ายังไม่มี ให้บันทึกไว้
+        return true; // ยอมให้แสดงผล
+    });
+    // ------------------------------------------------
+
+    // 1. จัดการ UI พื้นฐาน
     dom.noResultsMessage?.classList.add('hidden');
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
 
-    // 2. จัดการส่วน Featured (แนะนำ)
+    // 2. จัดการส่วน Featured (แนะนำ) - ใช้ข้อมูลที่กรองแล้ว
     if (dom.featuredSection) {
         const isHome = !isSearching && !window.location.pathname.includes('/location/');
         dom.featuredSection.classList.toggle('hidden', !isHome);
 
         if (isHome && dom.featuredContainer && dom.featuredContainer.children.length === 0) {
-            const featured = state.allProfiles.filter(p => p.isfeatured);
+            const featured = uniqueProfiles.filter(p => p.isfeatured);
             renderCardsIncrementally(dom.featuredContainer, featured);
         }
     }
 
-    // 3. กรณีไม่มีข้อมูล
-    if (!profiles || profiles.length === 0) {
+    // 3. ตรวจสอบว่ามีข้อมูลเหลือไหมหลังจากการกรอง
+    if (!uniqueProfiles || uniqueProfiles.length === 0) {
         dom.profilesDisplayArea.innerHTML = '';
         dom.noResultsMessage?.classList.remove('hidden');
         if (dom.resultCount) dom.resultCount.style.display = 'none';
         return;
     }
 
-    // 4. ตัดสินใจโหมดการวาด (ค้นหา/จังหวัด หรือ หน้าแรกแยกตามจังหวัด)
+    // 4. เตรียมพื้นที่วาดรูป
     const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
-    
-    // ล้างพื้นที่แสดงผลหลัก "ครั้งเดียว" ก่อนเริ่มวาดใหม่
     dom.profilesDisplayArea.innerHTML = '';
 
+    // 5. เลือกโหมดการแสดงผล (ใช้ uniqueProfiles ทั้งหมด)
     if (isSearching || isLocationPage) {
-        // [โหมด A] หน้าค้นหา หรือ หน้าจังหวัด (เช่น เชียงใหม่)
-        const searchSection = createSearchResultSection(profiles);
+        // หน้าค้นหา หรือ หน้าจังหวัด
+        const searchSection = createSearchResultSection(uniqueProfiles);
         dom.profilesDisplayArea.appendChild(searchSection);
         
-        // สั่งวาดการ์ดใน Grid ของ Search Section
         const grid = searchSection.querySelector('.profile-grid');
-        renderCardsIncrementally(grid, profiles);
+        renderCardsIncrementally(grid, uniqueProfiles);
     } else {
-        // [โหมด B] หน้าแรกแบบแยกจังหวัด (ทยอยวาดทีละจังหวัด)
-        renderByProvince(profiles);
+        // หน้าแรกแบบแยกจังหวัด
+        renderByProvince(uniqueProfiles);
     }
 
-    // 5. อัปเดต ScrollTrigger เพื่อให้ Animation ทำงานถูกต้อง
+    // 6. อัปเดต ScrollTrigger
     if (window.ScrollTrigger) {
         setTimeout(() => ScrollTrigger.refresh(), 500);
     }
