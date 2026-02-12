@@ -1,28 +1,32 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// --- 1. CONFIGURATION ---
-const SUPABASE_URL = 'https://hgzbgpbmymoiwjpaypvl.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8'; 
-const DOMAIN = 'https://sidelinechiangmai.netlify.app';
-const STORAGE_URL = `${SUPABASE_URL}/storage/v1/object/public/profile-images`;
+const CONFIG = {
+    SUPABASE_URL: 'https://tskkgyikkeiucndtneoe.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2tneWlra2VpdWNuZHRuZW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzIyOTMsImV4cCI6MjA4NjEwODI5M30.-x6TN3XQS43QTKv4LpZv9AM4_Tm2q3R4Nd-KGo-KU1E',
+    DOMAIN: 'https://sidelinechiangmai.netlify.app',
+    STORAGE_URL: 'https://tskkgyikkeiucndtneoe.supabase.co/storage/v1/object/public/profile-images',
+    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)'
+};
 
 // Helper สำหรับ escape XML
 const escapeXml = (unsafe) => {
-  if (!unsafe) return '';
+  if (!unsafe || typeof unsafe !== 'string') return '';
   return unsafe.replace(/[<>&'"]/g, (c) => {
     switch (c) {
       case '<': return '&lt;';
       case '>': return '&gt;';
       case '&': return '&amp;';
       case '\'': return '&apos;';
-      case '"': return '&quot;';
+      case '\"': return '&quot;';
+      default: return c;
     }
   });
 };
 
 export default async () => {
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    // แก้ไขจุดนี้: ต้องใช้ CONFIG. นำหน้า
+    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
     const [{ data: profiles }, { data: provinces }] = await Promise.all([
       supabase
@@ -39,10 +43,10 @@ export default async () => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
-    // หน้าแรก
+    // หน้าแรก - แก้ไขจุดนี้: ต้องใช้ CONFIG.DOMAIN
     xml += `
 <url>
-  <loc>${DOMAIN}/</loc>
+  <loc>${CONFIG.DOMAIN}/</loc>
   <lastmod>${new Date().toISOString()}</lastmod>
   <changefreq>daily</changefreq>
   <priority>1.0</priority>
@@ -52,7 +56,7 @@ export default async () => {
     ['blog', 'about', 'faq', 'profiles', 'locations', 'contact'].forEach(page => {
       xml += `
 <url>
-  <loc>${DOMAIN}/${page}</loc>
+  <loc>${CONFIG.DOMAIN}/${page}</loc>
   <changefreq>weekly</changefreq>
   <priority>0.7</priority>
 </url>`;
@@ -64,7 +68,7 @@ export default async () => {
         if (p.key) {
           xml += `
 <url>
-  <loc>${DOMAIN}/location/${encodeURIComponent(p.key)}</loc>
+  <loc>${CONFIG.DOMAIN}/location/${encodeURIComponent(p.key)}</loc>
   <changefreq>daily</changefreq>
   <priority>0.9</priority>
 </url>`;
@@ -72,24 +76,23 @@ export default async () => {
       });
     }
 
-    // Profiles
     if (profiles) {
       profiles.forEach(p => {
         if (p.slug) {
-          // ตัดเลข ID ต่อท้ายออก
-          let rawSlug = p.slug.trim().replace(/(-\d+)(?:-\d+)+$/, '$1');
-
-          // encode slug เพื่อรองรับภาษาไทย
-          const safeSlug = encodeURIComponent(rawSlug);
-
+          // ✅ FIX: ใช้ Slug ตรงๆ จาก DB เลย เพื่อให้ตรงกับ main.js 100% ป้องกัน Link เสีย
+          const safeSlug = encodeURIComponent(p.slug.trim());
           const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
 
-          // จัดการรูปภาพ
+          // จัดการรูปภาพ (ใช้ Logic เดียวกับ main.js คือถ้าไม่มี path ให้ข้าม หรือใช้ placeholder)
           let imageXml = '';
           if (p.imagePath) {
-            let imgUrl = p.imagePath.startsWith('http') ? p.imagePath : `${STORAGE_URL}/${p.imagePath}`;
-            // escape & ใน URL
-            imgUrl = imgUrl.replace(/&/g, '&amp;');
+            // ✅ FIX: เช็คว่า path เป็น http อยู่แล้วหรือไม่
+            let imgUrl = p.imagePath.startsWith('http') 
+                ? p.imagePath 
+                : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${p.imagePath}`;
+            
+            // ใช้ escapeXml เพื่อความปลอดภัย
+            imgUrl = escapeXml(imgUrl);
 
             imageXml = `
   <image:image>
@@ -98,10 +101,9 @@ export default async () => {
   </image:image>`;
           }
 
-          // เขียน URL profile
           xml += `
 <url>
-  <loc>${DOMAIN}/sideline/${safeSlug}</loc>
+  <loc>${CONFIG.DOMAIN}/sideline/${safeSlug}</loc>
   <lastmod>${new Date(dateStr).toISOString()}</lastmod>
   <changefreq>daily</changefreq>
   <priority>0.8</priority>${imageXml}
@@ -115,8 +117,8 @@ export default async () => {
     return new Response(xml, {
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600", // 1 ชม. สำหรับเบราว์เซอร์
-        "Netlify-CDN-Cache-Control": "public, max-age=86400, durable" // 1 วัน สำหรับ CDN
+        "Cache-Control": "public, max-age=3600",
+        "Netlify-CDN-Cache-Control": "public, max-age=86400, durable"
       }
     });
 

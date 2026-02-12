@@ -1,107 +1,106 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// ==========================================
-// 1. CONFIGURATION & FULL DIGITAL FOOTPRINT
-// ==========================================
 const CONFIG = {
-    SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
+    SUPABASE_URL: 'https://tskkgyikkeiucndtneoe.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2tneWlra2VpdWNuZHRuZW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzIyOTMsImV4cCI6MjA4NjEwODI5M30.-x6TN3XQS43QTKv4LpZv9AM4_Tm2q3R4Nd-KGo-KU1E',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
-    SOCIAL_PROFILES: [
-        "https://linktr.ee/sidelinechiangmai", 
-        "https://x.com/Sdl_chiangmai",
-        "https://bsky.app/profile/sidelinechiangmai.bsky.social",
-        "https://www.linkedin.com/in/cuteti-sexythailand-398567280", 
-        "https://line.me/ti/p/ksLUMz3p_o"
-    ]
+    STORAGE_URL: 'https://tskkgyikkeiucndtneoe.supabase.co/storage/v1/object/public/profile-images',
+    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)'
 };
 
-// ==========================================
-// 2. ADVANCED HELPERS (SEO & IMAGE)
-// ==========================================
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-const optimizeImg = (path, width = 350) => {
-    if (!path) return `${CONFIG.DOMAIN}/logo.png`;
+const optimizeImg = (path, width = 400) => {
+    if (!path) return `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
     if (path.startsWith('http')) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}?width=${width}&quality=75&format=webp`;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}?width=${width}&quality=80&format=webp`;
 };
 
+// 📌 หมายเหตุ: คุณสามารถปรับแก้ข้อมูลโซนต่างๆ ในแต่ละจังหวัดให้ตรงกับความเป็นจริงได้ที่นี่
 const getLocalZones = (provinceKey) => {
     const zones = {
-        'chiangmai': ['นิมมานเหมินท์', 'สันติธรรม', 'ช้างเผือก', 'แม่โจ้', 'หางดง', 'มช.', 'สันกำแพง', 'แม่ริม'],
-        'bangkok': ['สุขุมวิท', 'รัชดา', 'ลาดพร้าว', 'ห้วยขวาง', 'เลียบด่วน', 'ฝั่งธน', 'บางนา', 'สีลม'],
-        'chonburi': ['พัทยาเหนือ', 'พัทยากลาง', 'จอมเทียน', 'ศรีราชา', 'อมตะนคร', 'บางแสน'],
-        'phuket': ['ป่าตอง', 'กะตะ', 'กะรน', 'ตัวเมืองภูเก็ต', 'ราไวย์']
+        'chiang-mai': ['เมืองเชียงใหม่', 'นิมมาน', 'สันกำแพง', 'หางดง', 'แม่ริม'],
+        'bangkok': ['สุขุมวิท', 'ทองหล่อ', 'สีลม', 'รัชดา', 'ลาดพร้าว'],
+        'chonburi': ['พัทยา', 'บางแสน', 'ศรีราชา', 'เมืองชลบุรี'],
+        'phuket': ['ป่าตอง', 'เมืองภูเก็ต', 'กะรน', 'ถลาง'],
+        // เพิ่มจังหวัดอื่นๆ ตามต้องการ
     };
-    return zones[provinceKey.toLowerCase()] || ['ตัวเมือง', 'ย่านใจกลางเมือง', 'พื้นที่ใกล้เคียง', 'พิกัดลับ'];
+    return zones[provinceKey] || ['ในเมือง', 'รอบนอก', 'ใกล้ฉัน'];
 };
 
 // ==========================================
-// 3. MAIN SSR FUNCTION
+// 3. MAIN SSR FUNCTION - [PROVINCE MASTER]
 // ==========================================
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // LAYER 1: BOT DETECTION (SSR เฉพาะบอท เพื่อความเร็วและประหยัด Resource)
+    // LAYER 1: BOT DETECTION
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|lighthouse/i.test(ua);
     
-    // ถ้าไม่ใช่ Bot ให้ Netlify ส่งหน้าเว็บปกติ (Client-side) ไปเลย
-    if (!isBot) return context.next();
+    // LAYER 2: SECURITY & CLOAKING (ป้องกันการดูดข้อมูลจากต่างประเทศที่ไม่ใช่บอท)
+    const geo = context.geo || {};
+    const isSuspicious = !geo.city || (geo.country?.code !== 'TH' && geo.country?.code !== 'US');
+
+    // ถ้าไม่ใช่ Bot และไม่ใช่พฤติกรรมน่าสงสัย ให้ไป Client Render ปกติ
+    if (!isBot && !isSuspicious) return context.next();
 
     const url = new URL(request.url);
     const pathParts = url.pathname.split('/').filter(Boolean);
+    
+    // ตรวจสอบว่าเป็นหน้าจังหวัดหรือไม่ (เช่น /location/chiangmai)
+    if (pathParts[0] !== 'location' || pathParts.length < 2) return context.next();
     const provinceKey = pathParts[pathParts.length - 1];
 
     try {
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
         // 1. ดึงข้อมูลจังหวัด
+        // ✅แก้ไข: ใช้คอลัมน์ key หรือ slug ตามที่มีในตาราง provinces
         const { data: provinceData } = await supabase
             .from('provinces')
-            .select('id, nameThai, slug')
-            .eq('slug', provinceKey)
-            .single();
+            .select('*')
+            .or(`key.eq."${provinceKey}",slug.eq."${provinceKey}"`)
+            .maybeSingle();
 
         if (!provinceData) return context.next();
 
-        // 2. ดึงโปรไฟล์น้องๆ ในจังหวัดนั้น (Limit 30 คน เพื่อให้บอทเก็บข้อมูลได้เยอะ)
+        // 2. ดึงโปรไฟล์น้องๆ ในจังหวัดนั้น (Limit 30 คน)
+        // ✅แก้ไข: ใช้ provinceKey และ active ตาม Schema จริงของคุณ
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, verified, location, rate')
-            .eq('province_id', provinceData.id)
-            .eq('status', 'active')
+            .select('id, slug, name, imagePath, location, rate, active, provinceKey')
+            .eq('provinceKey', provinceData.key || provinceData.slug) 
+            .eq('active', true) 
+            .order('isfeatured', { ascending: false })
             .order('created_at', { ascending: false })
             .limit(30);
 
-        // กรณีไม่มีน้องๆ ในจังหวัดนี้
+        const provinceName = provinceData.nameThai;
+
+        // กรณีไม่มีน้องๆ ในจังหวัดนี้ ให้ส่งหน้าพื้นฐานไป
         if (!profiles || profiles.length === 0) {
-            return new Response(`<!DOCTYPE html><html lang="th"><head><title>ไซด์ไลน์${provinceData.nameThai} - รับงานเอง</title></head><body><h1>กำลังอัปเดตโปรไฟล์น้องๆ ใน${provinceData.nameThai}</h1></body></html>`, { headers: { "content-type": "text/html; charset=utf-8" } });
+            return new Response(`<!DOCTYPE html><html lang="th"><head><title>ไซด์ไลน์${provinceName} - รับงานเองไม่มัดจำ</title></head><body style="background:#000;color:#fff;text-align:center;padding:50px;"><h1>กำลังอัปเดตข้อมูลน้องๆ ใน${provinceName}</h1><p>กรุณากลับมาตรวจสอบอีกครั้งเร็วๆ นี้</p></body></html>`, { headers: { "content-type": "text/html; charset=utf-8" } });
         }
 
-        const provinceName = provinceData.nameThai;
         const localZones = getLocalZones(provinceKey);
         const randomZone = spin(localZones);
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
 
         // --- SEO DATA ---
-        const pageTitle = `รวมน้องๆ ไซด์ไลน์${provinceName} รับงานเอง โซน${randomZone} ตรงปก ไม่มัดจำ`;
-        const metaDesc = `ศูนย์รวมสาวไซด์ไลน์${provinceName} ยอดนิยมในโซน ${localZones.slice(0, 4).join(', ')} และพื้นที่ใกล้เคียง พบกับโปรไฟล์น้องๆ รับงานเอง ฟิวแฟน ไม่ผ่านเอเย่นต์ ปลอดภัย จ่ายหน้างาน 100% ในจังหวัด${provinceName}`;
+        const pageTitle = `รวมน้องๆ ไซด์ไลน์${provinceName} รับงานเอง โซน${randomZone} ตรงปก ไม่มัดจำ (${new Date().getFullYear() + 543})`;
+        const metaDesc = `ศูนย์รวมสาวไซด์ไลน์${provinceName} ยอดนิยมในโซน ${localZones.slice(0, 4).join(', ')} พบกับโปรไฟล์น้องๆ รับงานเอง ฟิวแฟน ไม่ผ่านเอเย่นต์ ปลอดภัย จ่ายหน้างาน 100% ในจังหวัด${provinceName}`;
 
         // ==========================================
-        // 4. STRUCTURED DATA (JSON-LD) - MASTER LIST
+        // 4. STRUCTURED DATA (JSON-LD)
         // ==========================================
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
                 {
                     "@type": "Organization",
-                    "@id": `${CONFIG.DOMAIN}/#organization`,
                     "name": CONFIG.BRAND_NAME,
                     "url": CONFIG.DOMAIN,
-                    "logo": { "@type": "ImageObject", "url": `${CONFIG.DOMAIN}/logo.png` },
-                    "sameAs": CONFIG.SOCIAL_PROFILES
+                    "logo": `${CONFIG.DOMAIN}/logo.png`
                 },
                 {
                     "@type": "BreadcrumbList",
@@ -111,39 +110,28 @@ export default async (request, context) => {
                     ]
                 },
                 {
-                    "@type": "CollectionPage",
-                    "@id": `${provinceUrl}#maincontent`,
-                    "name": pageTitle,
-                    "description": metaDesc,
-                    "url": provinceUrl,
-                    "mainEntity": {
-                        "@type": "ItemList",
-                        "name": `รายชื่อน้องๆ ไซด์ไลน์${provinceName}`,
-                        "itemListElement": profiles.map((p, index) => ({
-                            "@type": "ListItem",
-                            "position": index + 1,
-                            "item": {
-                                "@type": "Person",
-                                "name": p.name.startsWith('น้อง') ? p.name : `น้อง${p.name}`,
-                                "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`,
-                                "image": optimizeImg(p.imagePath, 400),
-                                "description": `ไซด์ไลน์${provinceName} พิกัด ${p.location || randomZone}`
-                            }
-                        }))
-                    }
+                    "@type": "ItemList",
+                    "name": `รายชื่อน้องๆ ไซด์ไลน์${provinceName}`,
+                    "numberOfItems": profiles.length,
+                    "itemListElement": profiles.map((p, index) => ({
+                        "@type": "ListItem",
+                        "position": index + 1,
+                        "item": {
+                            "@type": "Person",
+                            "name": p.name.startsWith('น้อง') ? p.name : `น้อง${p.name}`,
+                            "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`,
+                            "image": optimizeImg(p.imagePath, 400),
+                            "description": `สาวสวยรับงานไซด์ไลน์${provinceName} พิกัด ${p.location || randomZone}`
+                        }
+                    }))
                 },
                 {
                     "@type": "FAQPage",
                     "mainEntity": [
                         {
                             "@type": "Question",
-                            "name": `หาไซด์ไลน์ใน${provinceName} โซนไหนเดินทางสะดวกที่สุด?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": `โซนยอดนิยมใน${provinceName} ได้แก่ ${localZones.join(', ')} ซึ่งมีน้องๆ รับงานเองอยู่จำนวนมากครับ` }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `จองน้องๆ ผ่านเว็บ ${CONFIG.BRAND_NAME} ปลอดภัยไหม?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": `ปลอดภัย 100% ครับ เพราะเราเน้นให้นัดเจอน้องและจ่ายเงินหน้างานเท่านั้น ห้ามโอนมัดจำทุกกรณี` }
+                            "name": `หาไซด์ไลน์ใน${provinceName} ต้องมัดจำไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": `ไม่ต้องมัดจำครับ เว็บไซต์เราเน้นนัดเจอน้องในจังหวัด${provinceName}แล้วค่อยชำระเงินหน้างานเท่านั้น` }
                         }
                     ]
                 }
@@ -151,7 +139,7 @@ export default async (request, context) => {
         };
 
         // ==========================================
-        // 5. HTML TEMPLATE (FULLY OPTIMIZED)
+        // 5. HTML TEMPLATE (SEO OPTIMIZED)
         // ==========================================
         const html = `<!DOCTYPE html>
 <html lang="th">
@@ -161,63 +149,39 @@ export default async (request, context) => {
     <title>${pageTitle}</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${provinceUrl}">
-    <meta name="robots" content="index, follow, max-image-preview:large">
-    
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
-    <meta property="og:image" content="${optimizeImg(profiles[0].imagePath, 600)}">
-    <meta property="og:url" content="${provinceUrl}">
-    <meta property="og:type" content="website">
-
+    <meta property="og:image" content="${optimizeImg(profiles[0].imagePath, 800)}">
+    <meta name="twitter:card" content="summary_large_image">
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-    
     <style>
-        :root{--p:#db2777;--bg:#0f172a;--card:#1e293b}
-        body{font-family:-apple-system,system-ui,sans-serif;background:var(--bg);color:#fff;margin:0;padding:20px;line-height:1.6}
-        .container{max-width:900px;margin:auto}
-        .h1-seo{color:var(--p);font-size:26px;text-align:center;font-weight:800;margin-bottom:10px}
-        .zone-info{background:var(--card);padding:20px;border-radius:12px;font-size:15px;margin:20px 0;border-left:5px solid var(--p);color:#cbd5e1}
-        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:20px;margin-top:30px}
-        .card{background:var(--card);border-radius:15px;overflow:hidden;text-decoration:none;color:inherit;transition:0.3s;border:1px solid #334155;display:block}
-        .img-w{position:relative;padding-top:130%;background:#000}
-        .img-w img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
-        .card-d{padding:12px}.name{font-weight:700;font-size:16px;color:#f1f5f9;display:block}
-        .loc{font-size:13px;color:#94a3b8;margin-top:4px}
-        .price{color:var(--p);font-weight:800;font-size:14px;margin-top:5px;display:block}
-        .v-badge{position:absolute;top:10px;right:10px;background:#10b981;color:#fff;font-size:11px;padding:3px 8px;border-radius:20px;font-weight:700;box-shadow:0 2px 5px rgba(0,0,0,0.3)}
-        .footer{text-align:center;padding:40px 0;color:#64748b;font-size:13px}
+        body{font-family:sans-serif;background:#0f172a;color:#fff;margin:0;padding:20px}
+        .container{max-width:800px;margin:auto}
+        h1{color:#db2777;text-align:center}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;margin-top:20px}
+        .card{background:#1e293b;border-radius:10px;overflow:hidden;text-decoration:none;color:inherit;border:1px solid #334155}
+        .card img{width:100%;aspect-ratio:1/1;object-fit:cover}
+        .card-d{padding:10px}.name{font-weight:700;display:block}.price{color:#db2777;font-size:14px}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="h1-seo">พิกัดน้องๆ ไซด์ไลน์${provinceName} รับงานเอง</h1>
-        
-        <div class="zone-info">
-            <strong>📍 พื้นที่บริการยอดนิยม:</strong> ${localZones.join(' • ')}<br>
-            พบกับน้องๆ งานดี เดินทางสะดวก ไม่ว่าคุณจะอยู่ในโซน ${randomZone} หรือพื้นที่ใกล้เคียง นัดง่าย จ่ายหน้างาน ไม่ต้องโอนมัดจำ
-        </div>
-
+        <h1>📍 ไซด์ไลน์${provinceName} รับงานเอง</h1>
+        <p style="text-align:center;color:#94a3b8">${metaDesc}</p>
         <div class="grid">
-            ${profiles.map(p => {
-                const pName = p.name.startsWith('น้อง') ? p.name : `น้อง${p.name}`;
-                return `
+            ${profiles.map(p => `
                 <a href="/sideline/${p.slug}" class="card">
-                    <div class="img-w">
-                        <img src="${optimizeImg(p.imagePath, 400)}" alt="${pName} ไซด์ไลน์${provinceName}" loading="lazy" decoding="async">
-                        ${p.verified ? '<span class="v-badge">✓ Verified</span>' : ''}
-                    </div>
+                    <img src="${optimizeImg(p.imagePath, 300)}" alt="น้อง${p.name} ไซด์ไลน์${provinceName}" loading="lazy">
                     <div class="card-d">
-                        <span class="name">${pName}</span>
-                        <div class="loc">📍 ${p.location || randomZone}</div>
-                        <span class="price">ค่าขนม: ${parseInt(p.rate || 1500).toLocaleString()}.-</span>
-                        <div style="color:#fbbf24;font-size:12px;margin-top:5px">⭐ ${(4.7 + (p.id % 3) / 10).toFixed(1)}</div>
+                        <span class="name">น้อง${p.name}</span>
+                        <span class="price">${parseInt(p.rate || 1500).toLocaleString()}.-</span>
+                        <div style="font-size:11px;color:#94a3b8">📍 ${p.location || randomZone}</div>
                     </div>
-                </a>`;
-            }).join('')}
+                </a>
+            `).join('')}
         </div>
-
-        <footer class="footer">
-            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - ศูนย์รวมไซด์ไลน์${provinceName} อันดับ 1
+        <footer style="text-align:center;margin-top:50px;font-size:12px;color:#475569">
+            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME}
         </footer>
     </div>
 </body>
@@ -226,7 +190,6 @@ export default async (request, context) => {
         return new Response(html, { 
             headers: { 
                 "content-type": "text/html; charset=utf-8",
-                "x-robots-tag": "index, follow",
                 "cache-control": "public, max-age=3600, s-maxage=86400" 
             } 
         });
