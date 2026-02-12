@@ -364,39 +364,37 @@ async function fetchDataDelta() {
     state.isFetching = true;
 
     try {
-        console.log("🔄 Checking for updates...");
+        console.log("🔄 Checking for updates via Timestamp...");
 
-        // 1. ถาม Server: "แก้ไขล่าสุดเมื่อไหร่?" (ดึงแค่ 1 บรรทัด = ประหยัดมาก)
-        // ใช้ updated_at หรือ created_at ล่าสุดมาเป็นตัวเช็ค
+        // 1. ดึงแค่เวลาอัปเดตล่าสุดบรรทัดเดียว (ประหยัด Data สุดๆ)
         const { data: latestEntry, error: checkError } = await supabase
             .from('profiles')
-            .select('updated_at, created_at')
-            .order('updated_at', { ascending: false }) // หรือ created_at ถ้า updated_at เป็น null
+            .select('updated_at')
+            .order('updated_at', { ascending: false, nullsFirst: false })
             .limit(1)
             .maybeSingle();
 
-        // เวลาจาก Server (ถ้าไม่มีข้อมูลเลย ให้เป็น '0')
-        const serverTimestamp = latestEntry 
-            ? (latestEntry.updated_at || latestEntry.created_at) 
+        if (checkError) throw checkError;
+
+        // แปลงเวลาเป็น String เพื่อใช้เทียบ
+        const serverTimestamp = latestEntry?.updated_at 
+            ? new Date(latestEntry.updated_at).getTime().toString() 
             : '0';
 
-        // เวลาที่มีในเครื่องลูกค้า
         const localTimestamp = localStorage.getItem(CONFIG.KEYS.LAST_SYNC);
         const hasCachedProfiles = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
         const hasCachedProvinces = localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES);
 
-        // 2. ตัดสินใจ: ถ้าเวลาตรงกัน และ มีข้อมูลในเครื่อง = ใช้ของเดิม (ไม่โหลดเพิ่ม)
+        // 🚀 เงื่อนไขสำคัญ: ถ้าเวลาตรงกัน และมี Cache = ใช้ของเดิม 100% ไม่ต้องโหลดใหม่
         if (localTimestamp === serverTimestamp && hasCachedProfiles && hasCachedProvinces) {
-            console.log("✅ Data is up-to-date. Loading from Cache.");
+            console.log("✅ ข้อมูลตรงกันเป๊ะ! ใช้ Cache เดิม (Data Usage: 0)");
             
-            // โหลดเข้า State
             state.allProfiles = JSON.parse(hasCachedProfiles);
             const cachedProv = JSON.parse(hasCachedProvinces);
             
             state.provincesMap.clear();
-            cachedProv.forEach(p => state.provincesMap.set(p.key, p.name));
+            cachedProv.forEach(p => state.provincesMap.set(p.key.toString(), p.name));
             
-            // วาดหน้าจอทันที
             populateProvinceDropdown();
             renderProfiles(state.allProfiles, false);
             
@@ -404,7 +402,7 @@ async function fetchDataDelta() {
             return true;
         }
 
-        // 3. ถ้าเวลาไม่ตรง (แอดมินแก้ไข) หรือไม่มีของเก่า = โหลดใหม่ทั้งหมด
+        // 2. ถ้าเวลาไม่ตรง (คุณมีการแก้หลังบ้าน) = โหลดใหม่
         console.log("🚀 Found updates! Fetching fresh data...");
 
         const [provincesRes, profilesRes] = await Promise.all([
@@ -418,7 +416,7 @@ async function fetchDataDelta() {
         if (provincesRes.error) throw provincesRes.error;
         if (profilesRes.error) throw profilesRes.error;
 
-        // เตรียมข้อมูลจังหวัด
+        // จัดการข้อมูลจังหวัด
         state.provincesMap.clear();
         const provincesForCache = [];
         (provincesRes.data || []).forEach(p => {
@@ -430,31 +428,29 @@ async function fetchDataDelta() {
             }
         });
 
-        // เตรียมข้อมูลโปรไฟล์
+        // 3. ใช้ฟังก์ชัน Genius Search ของคุณประมวลผล (เก็บข้อมูลครบเหมือนเดิม)
         const fetchedProfiles = profilesRes.data || [];
         state.allProfiles = fetchedProfiles.map(processProfileData).filter(Boolean);
 
-        // 4. บันทึกลงเครื่อง (Cache)
+        // 4. บันทึก Cache ลงเครื่องลูกค้า
         try {
             localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(state.allProfiles));
             localStorage.setItem(CONFIG.KEYS.CACHE_PROVINCES, JSON.stringify(provincesForCache));
-            localStorage.setItem(CONFIG.KEYS.LAST_SYNC, serverTimestamp); // อัปเดตเวลาให้ตรงกัน
-            console.log("💾 Data cached successfully.");
+            localStorage.setItem(CONFIG.KEYS.LAST_SYNC, serverTimestamp);
+            console.log("💾 Cache updated.");
         } catch (e) {
-            console.warn("⚠️ Cache failed (Storage full?):", e);
+            console.warn("⚠️ LocalStorage full:", e);
         }
 
-        // วาดหน้าจอ
         populateProvinceDropdown();
         renderProfiles(state.allProfiles, false);
         return true;
 
     } catch (err) {
         console.error('❌ Data load error:', err);
-        // Fallback: ถ้า Error ลองใช้ของเก่าแก้ขัด
+        // Fallback: ถ้าเน็ตเน่า ให้ใช้ของเก่าที่มี
         const staleData = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
         if (staleData) {
-            console.log("⚠️ Serving stale cache due to error.");
             state.allProfiles = JSON.parse(staleData);
             renderProfiles(state.allProfiles, false);
         } else {
