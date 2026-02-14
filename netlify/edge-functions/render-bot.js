@@ -20,7 +20,9 @@ const escapeHtml = (str) => {
         .replace(/'/g, '&#039;');
 };
 
+// Helper สุ่มคำเพื่อลดโอกาสเกิด Duplicate Content
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
 const optimizeImg = (path, width = 800) => {
     if (!path) return `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
     if (path.startsWith('http')) return path;
@@ -36,9 +38,9 @@ export default async (request, context) => {
         return context.next();
     }
 
-    // ตรวจสอบ User-Agent
+    // ตรวจสอบ User-Agent (รวม Bot สำคัญๆ)
     const ua = (request.headers.get('user-agent') || '').toLowerCase();
-    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|lighthouse|headless/i.test(ua);
+    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|applebot|telegram|discord|lighthouse|headless|bing|yahoo/i.test(ua);
     
     // Security/Geo Cloaking
     const geo = context.geo || {};
@@ -55,7 +57,7 @@ export default async (request, context) => {
         const cleanSlug = slug.includes('-') ? slug.split('-').slice(0, -1).join('-') : slug;
         
         // ตรวจสอบว่าไม่ใช่หน้า system
-        if (['province', 'search', 'location', 'admin', 'login'].includes(slug)) {
+        if (['province', 'search', 'location', 'admin', 'login', 'register'].includes(slug)) {
             return context.next();
         }
 
@@ -69,9 +71,10 @@ export default async (request, context) => {
             .eq('active', true) 
             .maybeSingle();
 
+        // 404 Handling: ถ้าหาไม่เจอ ให้ Client จัดการ (ซึ่งจะไปหน้า 404 เอง)
         if (!profile) return context.next();
 
-        // ดึงข้อมูลโปรไฟล์ที่เกี่ยวข้อง
+        // ดึงข้อมูลโปรไฟล์ที่เกี่ยวข้อง (ลดจำนวน field เพื่อความเร็ว)
         let related = [];
         if (profile.provinceKey) {
             const { data: relatedData } = await supabase
@@ -100,17 +103,29 @@ export default async (request, context) => {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        // Escape HTML สำหรับข้อมูลที่มาจากผู้ใช้
+        // Escape HTML
         const safeDisplayName = escapeHtml(displayName);
         const safeProvinceName = escapeHtml(provinceName);
         const safeLocation = escapeHtml(profile.location || provinceName);
         const safeDescription = escapeHtml(profile.description || '');
 
-        // SEO Metadata
-        const pageTitle = `${spin(["โปรไฟล์", "รีวิว", "แนะนำ"])} ${safeDisplayName} - ไซด์ไลน์${safeProvinceName} รับงานเอง ตรงปก`;
-        const metaDesc = `${safeDisplayName} รับงานไซด์ไลน์ ${safeProvinceName} อายุ ${profile.age || '20+'} ปี ฟิวแฟน รับงานเองไม่ผ่านเอเย่นต์ จ่ายหน้างานเท่านั้น พิกัด ${safeLocation}`;
+        // --- SEO: CONTENT SPINNING (แก้ปัญหา Duplicate Content) ---
+        const titleVariations = [
+            `${safeDisplayName} ไซด์ไลน์${safeProvinceName} รับงานเอง ตรงปก ไม่ผ่านเอเย่นต์`,
+            `รีวิว ${safeDisplayName} สาวสวย${safeProvinceName} ฟิวแฟน นิสัยดี`,
+            `นัดเจอ ${safeDisplayName} พิกัด${safeLocation} จ่ายหน้างาน 100%`,
+            `${safeDisplayName} รับงาน${safeProvinceName} รูปจริง ตัวจริง ตรงปก`
+        ];
+        const pageTitle = `${spin(titleVariations)} - ${CONFIG.BRAND_NAME}`;
 
-        // Schema.org Structured Data
+        const descVariations = [
+            `น้อง${safeDisplayName} อายุ ${profile.age || '20+'} ปี รับงานไซด์ไลน์${safeProvinceName} พิกัด${safeLocation} เป็นกันเอง`,
+            `หาคนดูแลชั่วคราว? แนะนำ ${safeDisplayName} สาว${safeProvinceName} หน้าตาดี หุ่นดี ฟิวแฟนสุดๆ`,
+            `ต้องการคนรู้ใจใน${safeProvinceName}? ทักหา ${safeDisplayName} ได้เลย รับงานเอง ไม่มัดจำ ปลอดภัย`
+        ];
+        const metaDesc = `${spin(descVariations)} ค่าขนม ${displayPrice} ทักไลน์จองคิวได้เลย`;
+
+        // Schema.org
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -124,24 +139,9 @@ export default async (request, context) => {
                 {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
-                        {
-                            "@type": "ListItem",
-                            "position": 1,
-                            "name": "หน้าแรก",
-                            "item": CONFIG.DOMAIN
-                        },
-                        {
-                            "@type": "ListItem",
-                            "position": 2,
-                            "name": `ไซด์ไลน์${safeProvinceName}`,
-                            "item": `${CONFIG.DOMAIN}/location/${profile.provinceKey || 'chiang-mai'}`
-                        },
-                        {
-                            "@type": "ListItem",
-                            "position": 3,
-                            "name": safeDisplayName,
-                            "item": canonicalUrl
-                        }
+                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${safeProvinceName}`, "item": `${CONFIG.DOMAIN}/location/${profile.provinceKey || 'chiang-mai'}` },
+                        { "@type": "ListItem", "position": 3, "name": safeDisplayName, "item": canonicalUrl }
                     ]
                 },
                 {
@@ -150,17 +150,8 @@ export default async (request, context) => {
                     "image": imageUrl,
                     "description": metaDesc,
                     "url": canonicalUrl,
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressLocality": safeProvinceName,
-                        "addressRegion": "ประเทศไทย"
-                    },
-                    "offers": {
-                        "@type": "Offer",
-                        "price": rawPrice,
-                        "priceCurrency": "THB",
-                        "availability": "https://schema.org/InStock"
-                    }
+                    "address": { "@type": "PostalAddress", "addressLocality": safeProvinceName, "addressRegion": "ประเทศไทย" },
+                    "offers": { "@type": "Offer", "price": rawPrice, "priceCurrency": "THB", "availability": "https://schema.org/InStock" }
                 },
                 {
                     "@type": "AggregateRating",
@@ -169,27 +160,6 @@ export default async (request, context) => {
                     "bestRating": "5",
                     "worstRating": "1",
                     "url": canonicalUrl
-                },
-                {
-                    "@type": "FAQPage",
-                    "mainEntity": [
-                        {
-                            "@type": "Question",
-                            "name": `จอง${safeDisplayName} ต้องมัดจำไหม?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": "ไม่ต้องมัดจำครับ จ่ายเงินหน้างานเท่านั้น ปลอดภัย 100%"
-                            }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `พิกัดของ ${safeDisplayName} อยู่แถวไหน?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": `น้องอยู่ที่ ${safeLocation} ครับ สามารถนัดเจอได้ในพื้นที่${safeProvinceName}และใกล้เคียง`
-                            }
-                        }
-                    ]
                 }
             ]
         };
@@ -201,356 +171,101 @@ export default async (request, context) => {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${pageTitle}</title>
-    <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     
     <!-- Open Graph -->
     <meta property="og:locale" content="th_TH">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="profile">
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:image" content="${imageUrl}">
     <meta property="og:image:width" content="800">
     <meta property="og:image:height" content="1067">
-    <meta property="og:image:alt" content="${safeDisplayName} ไซด์ไลน์${safeProvinceName}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     
-    <!-- Twitter Card -->
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${pageTitle}">
     <meta name="twitter:description" content="${metaDesc}">
     <meta name="twitter:image" content="${imageUrl}">
-    <meta name="twitter:image:alt" content="${safeDisplayName} ไซด์ไลน์${safeProvinceName}">
     
-    <!-- Additional Meta Tags -->
-    <meta name="keywords" content="ไซด์ไลน์, ${safeProvinceName}, ${safeDisplayName}, รับงานเอง, ไม่มัดจำ">
-    <meta name="author" content="${CONFIG.BRAND_NAME}">
-    <meta name="language" content="thai">
-    <meta name="geo.region" content="TH">
-    <meta name="geo.placename" content="${safeProvinceName}">
-    
-    <!-- Structured Data -->
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-        :root {
-            --primary: #db2777;
-            --secondary: #06c755;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --gray: #9ca3af;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #fff;
-            color: var(--dark);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background: #fff;
-        }
-        
-        .header-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            aspect-ratio: 3/4;
-            object-fit: cover;
-            background: #f3f4f6;
-        }
-        
-        .content {
-            padding: 24px;
-        }
-        
-        .rating {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #fbbf24;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        
-        .rating span {
-            color: var(--gray);
-            font-size: 14px;
-        }
-        
-        h1 {
-            color: var(--primary);
-            font-size: 24px;
-            margin: 0 0 16px 0;
-            font-weight: 800;
-            line-height: 1.3;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        
-        .info-item {
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 16px;
-            background: var(--light);
-        }
-        
-        .info-item b {
-            display: block;
-            font-size: 11px;
-            color: var(--gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        
-        .info-item span {
-            font-size: 16px;
-            font-weight: 700;
-            color: #111827;
-        }
-        
-        .description {
-            margin-bottom: 24px;
-            color: #4b5563;
-            font-size: 15px;
-            line-height: 1.7;
-        }
-        
-        .cta-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--secondary);
-            color: #fff;
-            padding: 18px;
-            border-radius: 100px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 18px;
-            box-shadow: 0 10px 15px -3px rgba(6, 199, 85, 0.4);
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(6, 199, 85, 0.4);
-        }
-        
-        .cta-button:active {
-            transform: translateY(0);
-        }
-        
-        .related-section {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #f3f4f6;
-        }
-        
-        .related-title {
-            font-weight: 800;
-            color: var(--primary);
-            display: block;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        
-        .related-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .related-card {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        
-        .related-image {
-            width: 100%;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            border-radius: 12px;
-            background: #eee;
-        }
-        
-        .related-name {
-            font-weight: 700;
-            margin-top: 8px;
-            font-size: 14px;
-            color: var(--dark);
-        }
-        
-        .related-location {
-            font-size: 12px;
-            color: var(--gray);
-            margin-top: 2px;
-        }
-        
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            color: var(--gray);
-            margin-top: 30px;
-            padding: 20px 0;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        @media (max-width: 360px) {
-            .content {
-                padding: 16px;
-            }
-            
-            h1 {
-                font-size: 20px;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .related-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        :root { --primary: #db2777; --secondary: #06c755; --dark: #1f2937; --light: #f9fafb; --gray: #9ca3af; }
+        body { font-family: -apple-system, sans-serif; background: #fff; color: var(--dark); line-height: 1.6; margin: 0; }
+        .container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff; }
+        .header-image { width: 100%; height: auto; display: block; aspect-ratio: 3/4; object-fit: cover; background: #f3f4f6; }
+        .content { padding: 24px; }
+        .rating { color: #fbbf24; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        h1 { color: var(--primary); font-size: 22px; margin: 0 0 16px 0; font-weight: 800; line-height: 1.3; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .info-item { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; background: var(--light); }
+        .info-item b { display: block; font-size: 11px; color: var(--gray); text-transform: uppercase; }
+        .info-item span { font-size: 16px; font-weight: 700; color: #111827; }
+        .cta-button { display: flex; align-items: center; justify-content: center; background: var(--secondary); color: #fff; padding: 16px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 18px; box-shadow: 0 4px 10px rgba(6, 199, 85, 0.3); margin: 20px 0; }
+        .related-title { font-weight: 800; color: var(--primary); margin: 30px 0 15px; display: block; }
+        .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .related-card { text-decoration: none; color: inherit; }
+        .related-image { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; }
+        .related-name { font-weight: 700; margin-top: 5px; font-size: 14px; }
+        .footer { text-align: center; font-size: 12px; color: var(--gray); margin-top: 40px; padding: 20px; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
     <div class="container">
-        <img 
-            src="${imageUrl}" 
-            class="header-image" 
-            alt="${safeDisplayName} ไซด์ไลน์${safeProvinceName}" 
-            fetchpriority="high" 
-            decoding="async"
-            loading="eager"
-            onerror="this.src='${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp'"
-        >
-        
+        <img src="${imageUrl}" class="header-image" alt="${safeDisplayName}" width="480" height="640">
         <div class="content">
-            <div class="rating">
-                ⭐ ${ratingValue} <span>(${reviewCount} รีวิว)</span>
-            </div>
-            
+            <div class="rating">⭐ ${ratingValue} <span style="color:#999;font-weight:400;font-size:13px">(${reviewCount} รีวิว)</span></div>
             <h1>${pageTitle}</h1>
             
             <div class="info-grid">
-                <div class="info-item">
-                    <b>ค่าขนมเริ่มต้น</b>
-                    <span>${displayPrice}</span>
-                </div>
-                <div class="info-item">
-                    <b>พิกัดพื้นที่</b>
-                    <span>${safeLocation}</span>
-                </div>
+                <div class="info-item"><b>ค่าขนมเริ่มต้น</b><span>${displayPrice}</span></div>
+                <div class="info-item"><b>พิกัด</b><span>${safeLocation}</span></div>
             </div>
             
-            <div class="description">
-                ${metaDesc}
-                ${safeDescription ? `<br><br>${safeDescription}` : ''}
-            </div>
+            <div style="color:#444;margin-bottom:20px;">${metaDesc}</div>
+            <div style="font-size:14px;color:#666;">${safeDescription}</div>
             
-            <a href="${finalLineUrl}" class="cta-button" aria-label="ทักไลน์จองคิวกับ ${safeDisplayName}">
-                📲 ทักไลน์จองคิว ${safeDisplayName}
-            </a>
+            <a href="${finalLineUrl}" class="cta-button">📲 ทักไลน์จองคิว</a>
             
-            ${related && related.length > 0 ? `
+            ${related.length > 0 ? `
             <div class="related-section">
-                <span class="related-title">🔥 น้องๆ แนะนำใน${safeProvinceName}:</span>
+                <span class="related-title">🔥 น้องๆ ใน${safeProvinceName} ที่แนะนำ:</span>
                 <div class="related-grid">
-                    ${related.map(r => {
-                        const safeName = escapeHtml(r.name);
-                        const safeRelatedLocation = escapeHtml(r.location || safeProvinceName);
-                        return `
-                        <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card" aria-label="ดูโปรไฟล์ ${safeName}">
-                            <img 
-                                src="${optimizeImg(r.imagePath, 350)}" 
-                                class="related-image" 
-                                alt="โปรไฟล์แนะนำ น้อง${safeName} ไซด์ไลน์${safeProvinceName}"
-                                loading="lazy"
-                                onerror="this.src='${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp'"
-                            >
-                            <div class="related-name">น้อง${safeName}</div>
-                            <div class="related-location">📍 ${safeRelatedLocation}</div>
-                        </a>
-                        `;
-                    }).join('')}
+                    ${related.map(r => `
+                    <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
+                        <img src="${optimizeImg(r.imagePath, 300)}" class="related-image" alt="${escapeHtml(r.name)}" loading="lazy">
+                        <div class="related-name">น้อง${escapeHtml(r.name)}</div>
+                        <div style="font-size:11px;color:#888;">📍 ${escapeHtml(r.location || safeProvinceName)}</div>
+                    </a>
+                    `).join('')}
                 </div>
             </div>` : ''}
             
             <div class="footer">
-                © ${new Date().getFullYear() + 543} ${CONFIG.BRAND_NAME} - มั่นใจ ปลอดภัย ไม่มัดจำ<br>
-                <small style="opacity: 0.7; margin-top: 5px; display: block;">
-                    อัปเดตล่าสุด: ${new Date().toLocaleDateString('th-TH', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                </small>
+                <p>© ${new Date().getFullYear()} ${CONFIG.BRAND_NAME}</p>
+                <p>แหล่งรวมไซด์ไลน์${safeProvinceName} อันดับ 1</p>
             </div>
         </div>
     </div>
-    
-    <script>
-        // Client-side hydration (ถ้ามี)
-        if (typeof window !== 'undefined') {
-            // เพิ่มการติดตาม Analytics หรือ Interactivity
-            document.addEventListener('DOMContentLoaded', function() {
-                // ตัวอย่าง: Log เมื่อผู้ใช้คลิกปุ่ม LINE
-                const lineButton = document.querySelector('.cta-button');
-                if (lineButton) {
-                    lineButton.addEventListener('click', function() {
-                        if (typeof gtag !== 'undefined') {
-                            gtag('event', 'line_click', {
-                                'event_category': 'engagement',
-                                'event_label': '${safeDisplayName}'
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    </script>
 </body>
 </html>`;
 
         return new Response(html, { 
             headers: { 
                 "content-type": "text/html; charset=utf-8",
-                "cache-control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
-                "vary": "User-Agent, Accept-Encoding"
+                // Cache 2 ชั่วโมงสำหรับ Bot เพื่อให้เห็นความเปลี่ยนแปลงบ้าง
+                "cache-control": "public, max-age=7200, s-maxage=86400",
+                "vary": "User-Agent"
             } 
         });
 
     } catch (error) {
         console.error("SSR Profile Error:", error);
-        // ในกรณีเกิดข้อผิดพลาด ให้ส่งไปยัง Client-side Rendering แทน
         return context.next();
     }
 };
