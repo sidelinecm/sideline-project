@@ -1,21 +1,26 @@
 [build]
-  publish = "."
+  # ตรวจสอบว่าไฟล์ index.html ของคุณอยู่ที่ root (.) หรือใน folder ชื่อ public/dist
+  # ถ้าไฟล์อยู่ที่ root ให้ใช้ "." ถ้าอยู่ใน public ให้แก้เป็น "public"
+  publish = "." 
   functions = "netlify/functions"
 
 [build.processing]
   skip_processing = false
-[build.processing.html]
-  pretty_urls = true 
 
-# --- [1] Headers (ดีต่อ SEO) ---
+# --- [1] Headers (Global) ---
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Robots-Tag = "index, follow"
+    # ❌ ลบ X-Robots-Tag ออก ให้ไปคุมในไฟล์ JS หรือ Meta tag แทน
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "no-referrer-when-downgrade"
+    # เพิ่ม Cache-Control เบื้องต้น (Edge Function จะ override เองถ้าจำเป็น)
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# --- [2] Edge Functions (รันอันดับ 1 เพื่อให้บอทเห็นข้อมูล) ---
+# --- [2] Edge Functions ---
+# Netlify จะรัน Edge Functions ก่อน Redirects เสมอ
+# ตรวจสอบให้แน่ใจว่าไฟล์ชื่อ sitemap.js, render-bot.js, ssr-province.js อยู่ใน folder netlify/edge-functions
+
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
@@ -28,16 +33,16 @@
   function = "ssr-province"
   path = "/location/*"
 
-# --- [3] Redirects (ย้ายมาจาก _redirects เพื่อโอนคะแนน SEO) ---
+# --- [3] Redirects ---
 
-# บังคับ HTTPS
+# 3.1 บังคับ HTTPS (SEO Standard)
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
+  force = true
 
-# ตัวอย่างการดักเลขซ้ำ (โอนคะแนนจากลิงก์เก่ามาลิงก์ใหม่ที่สะอาด)
-# ผมรวมตัวที่สำคัญๆ มาให้ครับ
+# 3.2 จัดการ Link เก่าที่เสีย (สำคัญมากสำหรับคะแนน SEO เดิม)
 [[redirects]]
   from = "/sideline/nongmaprang-154-154-154"
   to = "/sideline/nongmaprang-154"
@@ -56,20 +61,22 @@
   status = 301
   force = true
 
-# ดักจับลิงก์ภาษาไทย (URL Encode)
+# ดักจับลิงก์ภาษาไทย
 [[redirects]]
   from = "/sideline/%E0%B8%9B%E0%B8%B9%E0%B9%80%E0%B8%9B%E0%B9%82"
   to = "/sideline/puep-87"
   status = 301
 
-  [[redirects]]
+# จัดการนามสกุลไฟล์เก่า .html
+[[redirects]]
   from = "/profiles/*.html"
   to = "/profiles/:splat"
   status = 301
   force = true
 
-# --- [4] SPA Fallback (กฎสุดท้าย ห้ามย้ายขึ้นข้างบน) ---
-# ตัวนี้จะทำให้กด Refresh หน้าโปรไฟล์แล้วไม่ขาว และไม่เกิด Loop
+# --- [4] SPA Fallback (กฎสุดท้าย) ---
+# สำคัญ: ถ้า Edge Function (render-bot) สั่ง context.next() 
+# มันจะหลุดมาที่กฎนี้ เพื่อให้ Client-Side Rendering ทำงานต่อ (ไม่เกิดหน้าขาว)
 [[redirects]]
   from = "/*"
   to = "/index.html"
