@@ -1927,18 +1927,30 @@ const SEO_POOL = {
 };
 
 // =================================================================
-// 10. SEO META TAGS UPDATER (THE ULTIMATE VERSION)
+// 10. SEO META TAGS UPDATER (SMART & SAFE VERSION)
 // =================================================================
 function updateAdvancedMeta(profile = null, pageData = null) {
-    // Safety check: only run for dynamic pages or root
+    // 1. ตรวจสอบว่ามีข้อมูล SEO ในไฟล์ HTML อยู่แล้วหรือไม่ (ป้องกันการเขียนทับหน้าแรก)
+    const hasExistingTitle = document.title && document.title !== "" && document.title !== "Document";
+    const hasExistingDesc = document.querySelector('meta[name="description"]')?.getAttribute('content');
+
+    // 2. ถ้าไม่ใช่หน้าโปรไฟล์ หรือ หน้าจังหวัด (เป็นหน้าที่มีไฟล์ HTML จริงๆ เช่น index.html)
+    // และมีการตั้งค่า Title/Desc ไว้แล้ว ให้หยุดทำงานทันที ไม่ต้องทับ
+    if (!profile && !pageData && hasExistingTitle && hasExistingDesc) {
+        console.log("SEO: พบข้อมูลเดิมในไฟล์ HTML แล้ว ข้ามการอัปเดตเพื่อป้องกันการเขียนทับ");
+        return; 
+    }
+
     const currentPath = window.location.pathname.toLowerCase();
     const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html';
     const isDynamic = profile || pageData;
 
+    // ถ้าไม่ใช่หน้าแรก และ ไม่มีข้อมูล dynamic ก็ไม่ต้องทำอะไร
     if (!isDynamic && !isRoot) {
         return; 
     }
 
+    // เตรียมตัวแปรพื้นฐาน (เฉพาะกรณีที่จำเป็นต้องใช้)
     const YEAR_TH = new Date().getFullYear() + 543;
     const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const d = new Date();
@@ -1952,12 +1964,11 @@ function updateAdvancedMeta(profile = null, pageData = null) {
     };
 
     // ==========================================
-    // CASE A: หน้าโปรไฟล์
+    // CASE A: หน้าโปรไฟล์ (ส่วนนี้ต้องทำเพราะไม่มีไฟล์ HTML แยก)
     // ==========================================
     if (profile) {
         const displayName = getCleanName(profile.name);
         const province = profile.provinceNameThai || 'เชียงใหม่';
-        
         const priceInfo = profile.rate ? `ราคา ${profile.rate}` : 'สอบถามราคา';
         const workArea = profile.location ? `${profile.location}, ${province}` : province;
         
@@ -1970,73 +1981,48 @@ function updateAdvancedMeta(profile = null, pageData = null) {
         const g = SEO_POOL.pick('guarantee');
 
         const finalTitle = `${displayName} รับงานไซด์ไลน์${province} | ${g} ${t} (${YEAR_TH})`;
-        const finalDesc = `โปรไฟล์ ${displayName} สำหรับรับงานไซด์ไลน์ในพื้นที่ ${workArea}. ${priceInfo}. ${detailsSnippet}. ${g} และ ${t} 100%. ปลอดภัย จ่ายเงินหน้างาน. คลิกเพื่อดูรูปภาพเพิ่มเติม, อ่านรีวิว และแอดไลน์เพื่อนัดหมายได้ทันที. (อัปเดต ${CURRENT_DATE})`;
-
-        const keywords = [
-            displayName,
-            `รับงานไซด์ไลน์${province}`,
-            `ไซด์ไลน์${province}`,
-            `รับงาน${province}`,
-            profile.location,
-            priceInfo,
-            t, g
-        ].filter(Boolean).join(', ');
+        const finalDesc = `โปรไฟล์ ${displayName} สำหรับรับงานไซด์ไลน์ในพื้นที่ ${workArea}. ${priceInfo}. ${detailsSnippet}. ${g} และ ${t} 100%. ปลอดภัย จ่ายเงินหน้างาน. (อัปเดต ${CURRENT_DATE})`;
 
         document.title = finalTitle;
         updateMeta('description', finalDesc);
-        updateMeta('keywords', keywords);
+        updateMeta('keywords', `${displayName}, ไซด์ไลน์${province}, รับงาน${province}`);
         updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`);
         
         updateOpenGraphMeta(profile, finalTitle, finalDesc, 'profile');
         injectSchema(generatePersonSchema(profile, finalDesc, province), 'schema-jsonld-person');
-        injectSchema(generateBreadcrumbSchema('profile', displayName, province), 'schema-jsonld-breadcrumb');
     }
 
     // ==========================================
     // CASE B: หน้าจังหวัด
     // ==========================================
     else if (pageData) {
+        // ทำงานเฉพาะเมื่อไม่มีข้อมูลในไฟล์ HTML มาก่อน
         const province = pageData.provinceName || 'เชียงใหม่';
-        const count = pageData.profiles ? pageData.profiles.length : 'หลาย';
-        const t = SEO_POOL.pick('trust');
-        const g = SEO_POOL.pick('guarantee');
-
-        const pageTitle = `ไซด์ไลน์${province} รับงานเอง ${t} | รวมรูปน้องๆ ${province} ตรงปก (${YEAR_TH})`;
-        const pageDesc = `รวมรายชื่อน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province} กว่า ${count} คน. ข้อมูลชัดเจน รูปตรงปก ${g}. ${t} นัดเจอจ่ายเงินหน้างานเท่านั้น. อัปเดตล่าสุด ${CURRENT_DATE}.`;
+        const pageTitle = `ไซด์ไลน์${province} รับงานเอง ตรงปก (${YEAR_TH})`;
+        const pageDesc = `รวมน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province}. อัปเดตล่าสุด ${CURRENT_DATE}.`;
 
         document.title = pageTitle;
         updateMeta('description', pageDesc);
-        updateMeta('keywords', `ไซด์ไลน์${province}, รับงาน${province}, เด็กเอ็น${province}, ${province} ไม่มัดจำ`);
         updateLink('canonical', pageData.canonicalUrl || window.location.href);
-        
-        updateOpenGraphMeta(null, pageTitle, pageDesc, 'website');
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
-        injectSchema(generateBreadcrumbSchema('location', province), 'schema-jsonld-breadcrumb');
     } 
     
     // ==========================================
-    // CASE C: หน้าแรก
+    // CASE C: หน้าแรก (Fallback)
+    // จะรันถึงตรงนี้ได้ แปลว่าหน้าแรกของคุณ "ไม่มี" Title/Desc ในไฟล์ index.html
     // ==========================================
-    else {
-        if (currentPath !== '/' && currentPath !== '' && currentPath !== '/index.html') return;
-
-        const GLOBAL_TITLE = `Sideline Chiangmai - ศูนย์รวมไซด์ไลน์เชียงใหม่และทั่วไทย รับงานเอง ไม่ผ่านเอเย่นต์ (${YEAR_TH})`;
-        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. คัดเน้นๆ สวยตรงปก 100%. ระบบปลอดภัย ไม่ต้องโอนมัดจำ (No Deposit). เช็คเรทราคา รูปภาพ และรีวิวตัวจริงได้ที่นี่ อัปเดตใหม่ทุกวัน`;
+    else if (isRoot) {
+        const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานไม่มัดจำ (${YEAR_TH})`;
+        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. ไม่ต้องโอนมัดจำ ปลอดภัย 100%`;
 
         document.title = GLOBAL_TITLE;
         updateMeta('description', GLOBAL_DESC);
-        updateMeta('keywords', 'ไซด์ไลน์เชียงใหม่, รับงานไซด์ไลน์, ไซด์ไลน์ไม่มัดจำ, ตรงปก');
         updateLink('canonical', CONFIG.SITE_URL);
         
-        updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
-        injectSchema(generateWebsiteSchema(), 'schema-jsonld-web');
-        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org');
-        
-        const FAQ_DATA = [
-            { question: "ต้องโอนมัดจำก่อนไหม?", answer: "ไม่ต้องค่ะ! เราเน้นความปลอดภัยสูงสุด สมาชิกสามารถนัดเจอและจ่ายเงินหน้างานกับน้องๆ ได้โดยตรง 100% ไม่มีการเรียกเก็บเงินก่อนค่ะ" },
-            { question: "การันตีความตรงปกไหม?", answer: "ทางเราคัดกรองรูปภาพให้เป็นปัจจุบันที่สุด พร้อมการันตีความตรงปก หากไม่เหมือนในรูป สามารถปฏิเสธหน้างานได้ทันทีค่ะ" }
-        ];
-        injectSchema(generateFAQPageSchema(FAQ_DATA), 'schema-jsonld-faq');
+        // ใส่เฉพาะ Schema ที่จำเป็นเพื่อช่วย SEO
+        injectSchema(generateFAQPageSchema([
+            { question: "ต้องโอนมัดจำไหม?", answer: "ไม่ต้องค่ะ จ่ายเงินหน้างาน 100%" }
+        ]), 'schema-jsonld-faq');
     }
 }
 
