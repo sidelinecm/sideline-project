@@ -4,9 +4,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 // 1. CONFIGURATION
 // ==========================================
 const CONFIG = {
-    SUPABASE_URL: 'https://tskkgyikkeiucndtneoe.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2tneWlra2VpdWNuZHRuZW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzIyOTMsImV4cCI6MjA4NjEwODI5M30.-x6TN3XQS43QTKv4LpZv9AM4_Tm2q3R4Nd-KGo-KU1E',
-    DOMAIN: 'https://sidelinechiangmai.netlify.app',
+    SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
+    DOMAIN: 'https://sidelinechiangmai.netlify.app'
     BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
     SOCIAL_PROFILES: [
         "https://linktr.ee/sidelinechiangmai",
@@ -18,12 +18,12 @@ const CONFIG = {
 // ฟังก์ชันสุ่มคำ (Spintax)
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// ฟังก์ชันย่อรูป (Image Optimization)
-const optimizeImg = (path, width = 800) => {
+
+const getImageUrl = (path) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.startsWith('http')) return path;
-    // สั่ง Supabase ย่อรูป + แปลงเป็น WebP
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}?width=${width}&quality=80&format=webp`;
+    // ดึงตรงๆ จาก Bucket ชื่อ profile-images
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
 export default async (request, context) => {
@@ -77,7 +77,7 @@ export default async (request, context) => {
 
         // --- เตรียมข้อมูลสำหรับแสดงผล ---
         const rawName = p.name || 'สาวสวย';
-        const displayName = rawName.startsWith('น้อง') ? rawName : `น้อง${rawName}`;
+        const displayName = rawName;
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
 
@@ -210,7 +210,7 @@ export default async (request, context) => {
             </div>
             <div class="tx">
                 ${metaDesc} <br><br>
-                น้อง${displayName} เป็นกันเอง เอาใจเก่ง รูปตรงปก 100% สนใจจองคิวทักไลน์ได้เลยค่ะ
+                ${displayName} เป็นกันเอง เอาใจเก่ง รูปตรงปก 100% สนใจจองคิวทักไลน์ได้เลยค่ะ
             </div>
             <a href="${finalLineUrl}" class="btn">📲 ทักไลน์จองคิว ${displayName}</a>
 
@@ -221,7 +221,7 @@ export default async (request, context) => {
                     ${related.map(r => `
                         <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" style="text-decoration:none; color:inherit; display:block;">
                             <img src="${optimizeImg(r.imagePath, 300)}" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; background:#eee;">
-                            <div style="font-weight:700; margin-top:8px; font-size:14px; color:#1f2937;">น้อง${r.name}</div>
+                            <div style="font-weight:700; margin-top:8px; font-size:14px; color:#1f2937;">${r.name}</div>
                             <div style="font-size:12px; color:#9ca3af; margin-top:2px;">📍 ${r.location || provinceName}</div>
                         </a>
                     `).join('')}
