@@ -431,88 +431,112 @@
   <hr class="border-pink-300/60 my-12 md:my-16">
 </div>
 
-    <!-- SEARCH SECTION -->
-    <section id="search-section" aria-labelledby="search-form-heading" style="margin-top:20px;">
-        <h3 id="search-form-heading" class="sr-only" aria-label="ฟอร์มค้นหาและกรองโปรไฟล์">ฟอร์มค้นหาและกรองโปรไฟล์</h3>
-        
-        <form id="search-form" autocomplete="off" aria-label="ฟอร์มค้นหาโปรไฟล์">
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
-                
-                <div>
-                    <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
-                    <div style="position:relative;">
-                        <span aria-hidden="true" style="position:absolute; left:15px; top:50%; transform: translateY(-50%); color:#9ca3af; z-index:10;">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input id="search-keyword" name="q" type="search" 
-                               placeholder="🔍 ค้นหาชื่อ, จังหวัด, สไตล์..." 
-                               aria-label="ค้นหาด้วยชื่อ จังหวัด หรือสไตล์"
-                               style="width:100%; padding:12px 45px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
-                        
-                        <button type="button" id="clear-search-btn" class="hidden absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-500 hover:text-gray-800" aria-label="ล้างคำค้นหา">
-                            <i class="fas fa-times-circle"></i>
-                        </button>
+<!-- SEARCH SECTION (ฉบับแก้ไขสมบูรณ์) -->
+<section id="search-section" aria-labelledby="search-form-heading" style="margin-top:20px;">
+    <h3 id="search-form-heading" class="sr-only" aria-label="ฟอร์มค้นหาและกรองโปรไฟล์">ฟอร์มค้นหาและกรองโปรไฟล์</h3>
+    
+    <form id="search-form" autocomplete="off" aria-label="ฟอร์มค้นหาโปรไฟล์">
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+            
+            <!-- ค้นหาด้วยคีย์เวิร์ด (เหมือนเดิม) -->
+            <div>
+                <label for="search-keyword" class="sr-only">ค้นหาด้วยคีย์เวิร์ด</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:15px; top:50%; transform: translateY(-50%); color:#9ca3af; z-index:10;">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input id="search-keyword" name="q" type="search" 
+                           placeholder="🔍 ค้นหาชื่อ, จังหวัด, สไตล์..." 
+                           aria-label="ค้นหาด้วยชื่อ จังหวัด หรือสไตล์"
+                           style="width:100%; padding:12px 45px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                    
+                    <button type="button" id="clear-search-btn" class="hidden absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-500 hover:text-gray-800" aria-label="ล้างคำค้นหา">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
 
-                        <div id="search-suggestions" class="hidden absolute top-full left-0 right-0 mt-2 z-50"></div>
-                    </div>
+                    <div id="search-suggestions" class="hidden absolute top-full left-0 right-0 mt-2 z-50"></div>
                 </div>
-                
-                <div>
-                    <label for="search-province" class="sr-only">เลือกจังหวัด</label>
-                    <div style="position:relative;">
-                        <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </span>
-                        <select id="search-province" name="province" aria-label="เลือกจังหวัด"
-                            style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
-                            <option value="">🗺️ ทุกจังหวัด</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <label for="search-availability" class="sr-only">เลือกสถานะ</label>
-                    <div style="position:relative;">
-                        <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
-                            <i class="fas fa-clock"></i>
-                        </span>
-                        <select id="search-availability" name="availability" aria-label="เลือกสถานะ"
-                            style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
-                            <option value="">✅ สถานะ (ทั้งหมด)</option>
-                            <option value="รับงาน">รับงาน</option>
-                            <option value="สอบถามคิว">สอบถามคิว</option>
-                            <option value="ไม่ว่าง/พัก">ไม่ว่าง/พัก</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
-                    <div style="position:relative;">
-                        <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
-                            <i class="fas fa-star"></i>
-                        </span>
-                        <select id="search-featured" name="featured" aria-label="กรองโปรไฟล์แนะนำ"
-                            style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
-                            <option value="">⭐ แนะนำ (ทั้งหมด)</option>
-                            <option value="true">แนะนำเท่านั้น</option>
-                        </select>
-                    </div>
-                </div>
-                
             </div>
             
-            <div id="result-count" style="margin-top:12px; font-weight:bold; color:#10B981; text-align:center;"></div>
-            
-            <div class="mt-3 flex justify-center gap-3">
-                <button type="button" id="reset-search-btn" 
-                        class="btn rounded-full border border-red-800 bg-red-100 px-4 py-2.5 text-red-800" 
-                        aria-label="รีเซ็ตตัวกรองทั้งหมด">
-                    🔄 ล้างค่า
-                </button>
+            <!-- เลือกจังหวัด (เหมือนเดิม) -->
+            <div>
+                <label for="search-province" class="sr-only">เลือกจังหวัด</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </span>
+                    <select id="search-province" name="province" aria-label="เลือกจังหวัด"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                        <option value="">🗺️ ทุกจังหวัด</option>
+                    </select>
+                </div>
             </div>
-        </form>
-    </section>
+            
+            <!-- เลือกสถานะ (เหมือนเดิม) -->
+            <div>
+                <label for="search-availability" class="sr-only">เลือกสถานะ</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-clock"></i>
+                    </span>
+                    <select id="search-availability" name="availability" aria-label="เลือกสถานะ"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                        <option value="">✅ สถานะ (ทั้งหมด)</option>
+                        <option value="รับงาน">รับงาน</option>
+                        <option value="สอบถามคิว">สอบถามคิว</option>
+                        <option value="ไม่ว่าง/พัก">ไม่ว่าง/พัก</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- กรองโปรไฟล์แนะนำ (เหมือนเดิม) -->
+            <div>
+                <label for="search-featured" class="sr-only">กรองโปรไฟล์แนะนำ</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-star"></i>
+                    </span>
+                    <select id="search-featured" name="featured" aria-label="กรองโปรไฟล์แนะนำ"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                        <option value="">⭐ แนะนำ (ทั้งหมด)</option>
+                        <option value="true">แนะนำเท่านั้น</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ============================================= -->
+            <!-- ✅ ส่วนที่เพิ่มเข้ามา: ตัวเลือกการจัดเรียง -->
+            <!-- ============================================= -->
+            <div>
+                <label for="sort-select" class="sr-only">จัดเรียงโปรไฟล์</label>
+                <div style="position:relative;">
+                    <span aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color:#555;">
+                        <i class="fas fa-sort-amount-down"></i>
+                    </span>
+                    <select id="sort-select" name="sort" aria-label="จัดเรียงโปรไฟล์"
+                        style="width:100%; padding:12px 40px; border-radius:999px; border:1px solid #ccc; background: rgba(255,255,255,.8); color:#333;">
+                        <option value="featured">จัดเรียง: แนะนำ</option>
+                        <option value="name_asc">จัดเรียง: ชื่อ ก-ฮ</option>
+                        <option value="name_desc">จัดเรียง: ชื่อ ฮ-ก</option>
+                        <option value="rating">จัดเรียง: ยอดนิยม</option>
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- ส่วนแสดงผลลัพธ์และปุ่ม (เหมือนเดิม) -->
+        <div id="result-count" style="margin-top:12px; font-weight:bold; color:#10B981; text-align:center;"></div>
+        
+        <div class="mt-3 flex justify-center gap-3">
+            <button type="button" id="reset-search-btn" 
+                    class="btn rounded-full border border-red-800 bg-red-100 px-4 py-2.5 text-red-800" 
+                    aria-label="รีเซ็ตตัวกรองทั้งหมด">
+                🔄 ล้างค่า
+            </button>
+        </div>
+    </form>
+</section>
 
     <!-- LOADING & RESULTS AREA -->
     <div id="loading-profiles-placeholder" role="status" aria-label="กำลังโหลดโปรไฟล์"
