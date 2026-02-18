@@ -1,13 +1,10 @@
 // --- START OF FILE sitemap.js ---
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-const CONFIG = {
-    SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
-    DOMAIN: 'https://sidelinechiangmai.netlify.app'
-    
-}; 
-const STORAGE_URL = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images`;
+const SUPABASE_URL = 'https://tskkgyikkeiucndtneoe.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2tneWlra2VpdWNuZHRuZW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzIyOTMsImV4cCI6MjA4NjEwODI5M30.-x6TN3XQS43QTKv4LpZv9AM4_Tm2q3R4Nd-KGo-KU1E'; 
+const DOMAIN = 'https://sidelinechiangmai.netlify.app';
+const STORAGE_URL = `${SUPABASE_URL}/storage/v1/object/public/profile-images`;
 
 // ตัวช่วยแปลงอักษรพิเศษ XML
 const escapeXml = (unsafe) => {
@@ -19,7 +16,6 @@ const escapeXml = (unsafe) => {
       case '&': return '&amp;';
       case '\'': return '&apos;';
       case '"': return '&quot;';
-      default: return c;
     }
   });
 };

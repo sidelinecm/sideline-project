@@ -4,15 +4,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 // 1. CONFIGURATION
 // ==========================================
 const CONFIG = {
-    SUPABASE_URL: 'https://hgzbgpbmymoiwjpaypvl.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnemJncGJteW1vaXdqcGF5cHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDUyMDYsImV4cCI6MjA2MjY4MTIwNn0.dIzyENU-kpVD97WyhJVZF9owDVotbl1wcYgPTt9JL_8',
-    DOMAIN: 'https://sidelinechiangmai.netlify.app', // <--- เติมคอมม่าตรงนี้
-    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
-    SOCIAL_PROFILES: [
-        "https://linktr.ee/sidelinechiangmai",
-        "https://x.com/Sdl_chiangmai",
-        "https://line.me/ti/p/ksLUWB89Y_"
-    ]
+    SUPABASE_URL: 'https://tskkgyikkeiucndtneoe.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2tneWlra2VpdWNuZHRuZW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzIyOTMsImV4cCI6MjA4NjEwODI5M30.-x6TN3XQS43QTKv4LpZv9AM4_Tm2q3R4Nd-KGo-KU1E',
+    DOMAIN: 'https://sidelinechiangmai.netlify.app',
+    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)'
 };
 
 // ฟังก์ชันสุ่มคำ (Spintax) สำหรับสร้างความหลากหลายให้ SEO
