@@ -9,8 +9,8 @@ gsap.registerPlugin(ScrollTrigger);
     'use strict';
 
     const CONFIG = {
-        SUPABASE_URL: 'https://tskkgyikkeiucndtneoe.supabase.co',
-        SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2tneWlra2VpdWNuZHRuZW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzIyOTMsImV4cCI6MjA4NjEwODI5M30.-x6TN3XQS43QTKv4LpZv9AM4_Tm2q3R4Nd-KGo-KU1E',
+        SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
+        SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
         STORAGE_BUCKET: 'profile-images',
         KEYS: {
             LAST_PROVINCE: 'sidelinecm_last_province',
@@ -364,30 +364,33 @@ async function fetchDataDelta() {
     state.isFetching = true;
 
     try {
-        console.log("🔄 Checking for updates via Timestamp...");
+        console.log("🔄 Checking for updates via 'lastUpdated'...");
 
-        // 1. ดึงแค่เวลาอัปเดตล่าสุดบรรทัดเดียว (ประหยัด Data สุดๆ)
+        // 1. ดึงเวลาอัปเดตล่าสุด (ใช้ lastUpdated ตามโครงสร้างฐานข้อมูลจริงของคุณ)
         const { data: latestEntry, error: checkError } = await supabase
             .from('profiles')
-            .select('updated_at')
-            .order('updated_at', { ascending: false, nullsFirst: false })
+            .select('lastUpdated')
+            .order('lastUpdated', { ascending: false, nullsFirst: false })
             .limit(1)
             .maybeSingle();
 
-        if (checkError) throw checkError;
+        if (checkError) {
+            console.error("Supabase Check Error:", checkError);
+            throw checkError;
+        }
 
-        // แปลงเวลาเป็น String เพื่อใช้เทียบ
-        const serverTimestamp = latestEntry?.updated_at 
-            ? new Date(latestEntry.updated_at).getTime().toString() 
+        // แปลงเวลาเป็น String เพื่อใช้เทียบ (ถ้าไม่มีข้อมูลให้ใช้ '0')
+        const serverTimestamp = latestEntry?.lastUpdated 
+            ? new Date(latestEntry.lastUpdated).getTime().toString() 
             : '0';
 
         const localTimestamp = localStorage.getItem(CONFIG.KEYS.LAST_SYNC);
         const hasCachedProfiles = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
         const hasCachedProvinces = localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES);
 
-        // 🚀 เงื่อนไขสำคัญ: ถ้าเวลาตรงกัน และมี Cache = ใช้ของเดิม 100% ไม่ต้องโหลดใหม่
+        // 🚀 SMART CACHE: ถ้าเวลาตรงกัน ไม่ต้องโหลดใหม่
         if (localTimestamp === serverTimestamp && hasCachedProfiles && hasCachedProvinces) {
-            console.log("✅ ข้อมูลตรงกันเป๊ะ! ใช้ Cache เดิม (Data Usage: 0)");
+            console.log("✅ ข้อมูลเป็นปัจจุบัน (Data Usage: 0)");
             
             state.allProfiles = JSON.parse(hasCachedProfiles);
             const cachedProv = JSON.parse(hasCachedProvinces);
@@ -402,13 +405,14 @@ async function fetchDataDelta() {
             return true;
         }
 
-        // 2. ถ้าเวลาไม่ตรง (คุณมีการแก้หลังบ้าน) = โหลดใหม่
+        // 2. ถ้าข้อมูลไม่อัพเดท ให้โหลดใหม่ทั้งหมด
         console.log("🚀 Found updates! Fetching fresh data...");
 
         const [provincesRes, profilesRes] = await Promise.all([
             supabase.from('provinces').select('*'),
             supabase.from('profiles')
                 .select('*')
+                .eq('active', true) // โหลดเฉพาะคนที่ Active
                 .order('isfeatured', { ascending: false })
                 .order('created_at', { ascending: false })
         ]);
@@ -416,11 +420,11 @@ async function fetchDataDelta() {
         if (provincesRes.error) throw provincesRes.error;
         if (profilesRes.error) throw profilesRes.error;
 
-        // จัดการข้อมูลจังหวัด
+        // จัดการข้อมูลจังหวัด (ใช้ nameThai และ key ตาม JSON จริง)
         state.provincesMap.clear();
         const provincesForCache = [];
         (provincesRes.data || []).forEach(p => {
-            const name = p.nameThai || p.name_thai || p.name;
+            const name = p.nameThai || p.name;
             const key = p.key || p.slug || p.id;
             if (key && name) {
                 state.provincesMap.set(key.toString(), name);
@@ -428,16 +432,16 @@ async function fetchDataDelta() {
             }
         });
 
-        // 3. ใช้ฟังก์ชัน Genius Search ของคุณประมวลผล (เก็บข้อมูลครบเหมือนเดิม)
+        // 3. ประมวลผลโปรไฟล์ (ใช้ processProfileData ตัวที่แก้ใหม่ด้านล่าง)
         const fetchedProfiles = profilesRes.data || [];
-        state.allProfiles = fetchedProfiles.map(processProfileData).filter(Boolean);
+        state.allProfiles = fetchedProfiles.map(p => processProfileData(p)).filter(Boolean);
 
-        // 4. บันทึก Cache ลงเครื่องลูกค้า
+        // 4. บันทึก Cache
         try {
             localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(state.allProfiles));
             localStorage.setItem(CONFIG.KEYS.CACHE_PROVINCES, JSON.stringify(provincesForCache));
             localStorage.setItem(CONFIG.KEYS.LAST_SYNC, serverTimestamp);
-            console.log("💾 Cache updated.");
+            console.log("💾 Local Cache Updated.");
         } catch (e) {
             console.warn("⚠️ LocalStorage full:", e);
         }
@@ -448,7 +452,7 @@ async function fetchDataDelta() {
 
     } catch (err) {
         console.error('❌ Data load error:', err);
-        // Fallback: ถ้าเน็ตเน่า ให้ใช้ของเก่าที่มี
+        // Fallback: ถ้าเน็ตเน่า ใช้ของเก่า
         const staleData = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
         if (staleData) {
             state.allProfiles = JSON.parse(staleData);
@@ -461,7 +465,6 @@ async function fetchDataDelta() {
         state.isFetching = false;
     }
 }
-
 // =================================================================
 // ส่วนที่ 7: ULTIMATE SEARCH ENGINE (ฉบับแก้ไขสมบูรณ์และทดสอบแล้ว)
 // =================================================================
@@ -510,68 +513,46 @@ function initRealtimeSubscription() {
     console.log('zzz Realtime disabled. Using Smart Cache Strategy.');
 }
 
-// ✅ 2. ฟังก์ชันประมวลผลข้อมูล (เวอร์ชัน Genius Search)
 function processProfileData(p) {
     if (!p) return null;
 
     const displayName = getCleanName(p.name); 
 
-    // จัดการรูปภาพ
+    // 🔥 แก้ไขระบบรูปภาพ: รองรับทั้ง Path ใน Supabase และ URL เต็มจาก Cloudinary
     const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+    
     let imageObjects = imagePaths.map(path => {
-        const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-        return { src: data?.publicUrl || CONFIG.DEFAULT_OG_IMAGE };
+        // ตรวจสอบว่า path เป็น URL เต็ม (http/https) หรือไม่
+        if (typeof path === 'string' && path.startsWith('http')) {
+            return { src: path }; // ใช้ URL ตรงๆ เลย (Cloudinary)
+        } else {
+            // ถ้าเป็นชื่อไฟล์ธรรมดา ให้ดึงจาก Supabase Storage
+            const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
+            return { src: data?.publicUrl || CONFIG.DEFAULT_OG_IMAGE };
+        }
     });
+
+    // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder
     if (imageObjects.length === 0) imageObjects.push({ src: CONFIG.DEFAULT_OG_IMAGE });
 
-    // สุ่มคำ SEO
-    const v = SEO_WORDS.pick('styles');
-    const t = SEO_WORDS.pick('trust');
-    const g = SEO_WORDS.pick('guarantees');
+    // ดึงชื่อจังหวัดจาก Map
+    const provinceName = state.provincesMap.get(p.provinceKey) || 'ไม่ระบุ';
 
-    const provinceName = state.provincesMap.get(p.provinceKey) || 'เชียงใหม่';
-    const statsText = p.stats ? `สัดส่วน ${p.stats}` : '';
-    const locationText = p.location ? `พิกัด ${p.location}` : '';
-
-    // 🔥 GENIUS LOGIC: แกะชื่ออังกฤษจาก Slug (เช่น puep-87 -> puep)
-    // เพื่อให้ค้นหาคำว่า "Puep" หรือ "Pupe" แล้วเจอ
-    let englishName = '';
-    if (p.slug) {
-        // ตัดตัวเลขออก เอาแค่ตัวหนังสือภาษาอังกฤษ
-        englishName = p.slug.split('-').filter(part => isNaN(part)).join(' ');
-    }
-
-    // 🔥 GENIUS LOGIC: รวมทุกอย่างเป็น "ก้อนข้อความเดียว" สำหรับค้นหา
-    // รวม: ชื่อไทย, ชื่ออังกฤษ(จาก slug), ไอดี, จังหวัด, แท็ก, รายละเอียด, สัดส่วน
+    // เตรียม String สำหรับค้นหา (Universal Search)
+    const englishName = p.slug ? p.slug.split('-').filter(part => isNaN(part)).join(' ') : '';
     const universalSearchString = `
-        ${displayName} 
-        ${englishName} 
-        ${p.id} 
-        ${provinceName} 
-        ${p.provinceKey} 
+        ${displayName} ${englishName} ${p.id} ${provinceName} 
         ${p.styleTags ? p.styleTags.join(' ') : ''} 
-        ${p.description || ''} 
-        ${p.location || ''} 
-        ${p.stats || ''}
+        ${p.description || ''} ${p.location || ''} ${p.stats || ''}
     `.toLowerCase().replace(/\s+/g, ' ').trim();
-
-    // สร้าง Alt Text
-    const richAltText = `รูปตัวจริง${displayName} ไซด์ไลน์${provinceName} ${v} ${g} ${t} ${statsText} รับงานเอง ตรงปก`;
-    const imgTitleText = `${displayName} (${provinceName}) - ${v} ${g} [คลิกดูรูปเพิ่ม]`;
 
     return { 
         ...p, 
         displayName,
-        englishName, // เก็บไว้ใช้แสดงผลถ้าต้องการ
         images: imageObjects, 
-        altText: richAltText,
-        imgTitle: imgTitleText,
         provinceNameThai: provinceName,
-        
-        // ✅ ตัวแปรเทพสำหรับค้นหา (ใช้ตัวนี้ตัวเดียว ครอบจักรวาล)
         searchString: universalSearchString,
-        
-        _price: Number(String(p.rate).replace(/\D/g, '')) || 0, 
+        _price: Number(String(p.rate).replace(/\D/g, '')) || 0,
         _age: Number(p.age) || 0
     };
 }
