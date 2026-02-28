@@ -117,6 +117,10 @@ export default async (request, context) => {
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${optimizeImg(profiles[0].imagePath)}">
 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;800&display=swap" rel="stylesheet">
     <script type="application/ld+json">${JSON.stringify(itemListSchema)}</script>
     <style>
         :root { --p: #ec4899; --bg: #0f172a; --card: #1e293b; --txt: #f8fafc; }
