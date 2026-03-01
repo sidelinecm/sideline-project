@@ -543,41 +543,70 @@ function getOptimizedClientImage(path, width = 400) {
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
 }
 
+// =================================================================
+// 1. DATA PROCESSING (Data Layer) - แปลงข้อมูลจาก DB ให้พร้อมใช้
+// =================================================================
 function processProfileData(p) {
     if (!p) return null;
 
+    // 1. ชื่อ: ตัดคำนำหน้า "น้อง" ออกเพื่อความสวยงาม (ถ้ามี)
     const displayName = getCleanName(p.name); 
 
-    // 🔥 ระบบรูปภาพ: ผ่านตัวบีบอัด (Optimization) เสมอ
-    const imagePaths =[p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+    // 2. รูปภาพ: รวม imagePath (รูปปก) และ galleryPaths (อัลบั้ม) เข้าด้วยกัน
+    // รองรับทั้ง URL เต็ม (Cloudinary) และ Path ย่อ (Supabase Storage)
+    const rawGallery = Array.isArray(p.galleryPaths) ? p.galleryPaths : [];
+    const allImagePaths = [p.imagePath, ...rawGallery].filter(Boolean); // ตัดค่า null/undefined ทิ้ง
     
-    let imageObjects = imagePaths.map(path => {
-        // ดึงรูประดับ 400px สำหรับหน้าการ์ด และเก็บ URL ขนาดเต็มไว้ (กรณีเปิด Lightbox ค่อยโหลด)
+    // กรอง Path ซ้ำ (Unique)
+    const uniquePaths = [...new Set(allImagePaths)];
+
+    // สร้าง Object รูปภาพ พร้อม URL 2 ขนาด (รูปเล็กไว้โชว์เร็วๆ / รูปใหญ่ไว้ดูชัดๆ)
+    let imageObjects = uniquePaths.map(path => {
         return { 
-            src: getOptimizedClientImage(path, 400),
-            fullSrc: getOptimizedClientImage(path, 800) // รูปเต็มความละเอียด
+            src: getOptimizedClientImage(path, 400),  // รูปเล็ก (Thumbnail/Card)
+            fullSrc: getOptimizedClientImage(path, 800) // รูปใหญ่ (Lightbox)
         };
     });
 
-    if (imageObjects.length === 0) imageObjects.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
+    // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder กันเว็บพัง
+    if (imageObjects.length === 0) {
+        imageObjects.push({ 
+            src: CONFIG.DEFAULT_OG_IMAGE, 
+            fullSrc: CONFIG.DEFAULT_OG_IMAGE 
+        });
+    }
 
-    const provinceName = state.provincesMap.get(p.provinceKey) || 'ไม่ระบุ';
+    // 3. จังหวัด: ดึงชื่อไทยจาก Map
+    const provinceName = state.provincesMap.get(p.provinceKey) || p.provinceThai || 'ไม่ระบุ';
 
-    const englishName = p.slug ? p.slug.split('-').filter(part => isNaN(part)).join(' ') : '';
+    // 4. ราคา: แปลง Text "1500.-" ให้เป็นตัวเลข 1500
+    const numericPrice = Number(String(p.rate).replace(/\D/g, '')) || 0;
+    const formattedPrice = numericPrice > 0 ? numericPrice.toLocaleString() : 'สอบถาม';
+
+    // 5. String สำหรับระบบค้นหา (Search Engine)
     const universalSearchString = `
-        ${displayName} ${englishName} ${p.id} ${provinceName} 
-        ${p.styleTags ? p.styleTags.join(' ') : ''} 
-        ${p.description || ''} ${p.location || ''} ${p.stats || ''}
+        ${displayName} ${p.id} ${provinceName} 
+        ${Array.isArray(p.styleTags) ? p.styleTags.join(' ') : ''} 
+        ${p.description || ''} ${p.location || ''} 
+        ${p.stats || ''} ${p.skinTone || ''}
     `.toLowerCase().replace(/\s+/g, ' ').trim();
 
+    // 6. Return ข้อมูลที่ Clean แล้วกลับไป
     return { 
-        ...p, 
+        ...p, // ข้อมูลเดิมทั้งหมด (id, age, height, weight, etc.)
         displayName,
         images: imageObjects, 
         provinceNameThai: provinceName,
+        displayPrice: formattedPrice, // ราคาแบบมีลูกน้ำ (string)
+        _price: numericPrice,         // ราคาแบบตัวเลข (number) สำหรับเรียงลำดับ
         searchString: universalSearchString,
-        _price: Number(String(p.rate).replace(/\D/g, '')) || 0,
-        _age: Number(p.age) || 0
+        
+        // จัดการค่าว่างให้เป็น '-' เพื่อความสวยงาม
+        safeHeight: (p.height && p.height.trim()) ? p.height : '-',
+        safeWeight: (p.weight && p.weight.trim()) ? p.weight : '-',
+        safeStats: (p.stats && p.stats.trim()) ? p.stats : '-',
+        safeSkin: (p.skinTone && p.skinTone.trim()) ? p.skinTone : '-',
+        safeAge: (p.age && p.age.trim()) ? p.age : '-'
     };
 }
 
@@ -603,65 +632,53 @@ function populateProvinceDropdown() {
 }
 
 // =================================================================
-// [ฉบับแก้ไขสมบูรณ์ 100% - รองรับ Pretty URLs] - handleRouting
+// ✅ [FIXED] handleRouting (แก้หน้าเด้ง - ไม่ซ่อนฉากหลังแล้ว)
 // =================================================================
 async function handleRouting(dataLoaded = false) {
-    // แปลง path ให้เป็นตัวเล็ก เพื่อให้ตรวจสอบง่าย (เช่น /Blog -> /blog)
-    // และลบเครื่องหมาย / ท้ายสุดออก (เช่น /blog/ -> /blog) เพื่อความแม่นยำ
     let path = window.location.pathname.toLowerCase();
     if (path.length > 1 && path.endsWith('/')) {
         path = path.slice(0, -1);
     }
 
-    // ✅ --- START: ส่วนป้องกันหน้า Static (ฉบับอัปเกรด) ---
-    // 1. ระบุรายชื่อหน้า Static ทั้งหมดที่มีในเว็บ (หน้าที่มีไฟล์ HTML จริงๆ)
-    // ใส่เพิ่มได้เลยตามที่คุณมี เช่น '/contact', '/rules', '/register'
+    // --- ส่วนตรวจสอบหน้า Static ---
     const staticPages = ['/blog', '/about', '/faq', '/profiles', '/locations', '/contact', '/policy'];
-
-    // 2. ตรวจสอบเงื่อนไข 3 อย่าง:
-    // A: มีนามสกุล .html (แบบเดิม)
-    // B: เป็นหน้า Static ที่ระบุไว้ในรายการข้างบน
-    // C: หรือเป็นหน้าย่อยของ Static นั้นๆ (เช่น /blog/post-1)
     const isStaticPage = path.endsWith('.html') || 
                          path.endsWith('.htm') || 
                          staticPages.some(p => path === p || path.startsWith(p + '/'));
 
     if (isStaticPage) {
-        console.log(`🛑 Static page detected (${path}). Skipping dynamic logic.`);
-        
-        // ปิด Lightbox และซ่อนส่วนแสดงผลของแอป เพื่อไม่ให้ทับเนื้อหาจริง
+        console.log(`🛑 Static page detected (${path}).`);
         closeLightbox(false); 
+        // หน้า Static อาจจะซ่อน Profile Area ได้ถ้าต้องการ (เพื่อให้เห็น Content ของหน้า Static ชัดเจน)
         if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.add('hidden');
         if(dom.featuredSection) dom.featuredSection.classList.add('hidden');
-        
-        return; // 🛑 จบการทำงานทันที (Meta Tags ของหน้านั้นจะปลอดภัย)
+        return; 
     }
 
     // -------------------------------------------------------
-    // ส่วน Logic เดิม (ถูกต้องแล้ว)
+    // ส่วน Dynamic Logic (แก้ไขแล้ว)
     // -------------------------------------------------------
 
-    // 1. หน้าโปรไฟล์ (Profile Page)
+    // 1. หน้าโปรไฟล์ (Profile Page) -> เปิด Lightbox ทับหน้าเดิม
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
     if (profileMatch) {
         const slug = decodeURIComponent(profileMatch[1]);
         state.currentProfileSlug = slug;
         
-        // ลองหาใน Memory ก่อน ถ้าไม่มีค่อย Fetch ใหม่
         let profile = state.allProfiles.find(p => (p.slug || '').toLowerCase() === slug.toLowerCase());
         if (!profile && !dataLoaded) profile = await fetchSingleProfile(slug);
 
         if (profile) {
             openLightbox(profile);
-            updateAdvancedMeta(profile, null); // อัปเดต Meta เฉพาะคน
-            // ซ่อนหน้า List เพื่อ focus ที่ Lightbox
-            dom.profilesDisplayArea?.classList.add('hidden');
-            dom.featuredSection?.classList.add('hidden');
+            updateAdvancedMeta(profile, null);
+            
+            // ❌ ลบคำสั่งซ่อนฉากหลังออก! (เพื่อให้ Scroll อยู่ที่เดิม)
+            // dom.profilesDisplayArea?.classList.add('hidden'); 
+            // dom.featuredSection?.classList.add('hidden');
         } else if (dataLoaded) {
-            // ถ้าโหลดเสร็จแล้วแต่ไม่เจอ profile -> ดีดกลับหน้าแรก
+            // ถ้าไม่เจอ profile ให้ดีดกลับหน้าแรก
             history.replaceState(null, '', '/');
             closeLightbox(false);
-            dom.profilesDisplayArea?.classList.remove('hidden');
             state.currentProfileSlug = null;
         }
         return;
@@ -674,40 +691,40 @@ async function handleRouting(dataLoaded = false) {
         state.currentProfileSlug = null;
         closeLightbox(false);
         
-        // ตั้งค่า Dropdown ให้ตรงกับ URL
         if (dom.provinceSelect) dom.provinceSelect.value = provinceKey;
         
         if (dataLoaded) {
-            applyUltimateFilters(false); // กรองข้อมูล
+            applyUltimateFilters(false);
             const provinceName = state.provincesMap.get(provinceKey) || provinceKey;
             
-            // สร้าง SEO Data สำหรับหน้าจังหวัด
-            const completeTitle = `ไซด์ไลน์${provinceName} - รับงาน${provinceName} (ทีมงาน Sideline Chiangmai)`;
-            const completeDescription = `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก 100% ปลอดภัย การันตีคุณภาพโดยทีมงาน Sideline Chiangmai สาขา${provinceName}.`;
-
             const seoData = {
-                title: completeTitle, 
-                description: completeDescription,
+                title: `ไซด์ไลน์${provinceName} - รับงาน${provinceName}`, 
+                description: `รวมน้องๆ ไซด์ไลน์ ${provinceName} คัดคนสวย ตรงปก 100%`,
                 canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceKey}`,
                 provinceName: provinceName, 
                 profiles: state.allProfiles.filter(p => p.provinceKey === provinceKey)
             };
             
-            updateAdvancedMeta(null, seoData); // อัปเดต Meta จังหวัด
+            updateAdvancedMeta(null, seoData);
+            
+            // ✅ ต้องสั่งให้โชว์กลับมา (เผื่อมาจากหน้า Static ที่ถูกซ่อนไว้)
             dom.profilesDisplayArea?.classList.remove('hidden');
+            dom.featuredSection?.classList.remove('hidden'); 
         }
         return;
     }
 
-    // 3. หน้าแรก (Home Page - Default)
-    // ถ้าไม่เข้าเงื่อนไขข้างบนเลย จะตกมาที่นี่
+    // 3. หน้าแรก (Home Page)
     state.currentProfileSlug = null;
     closeLightbox(false);
+    
+    // ✅ ต้องสั่งให้โชว์กลับมาเสมอ
     dom.profilesDisplayArea?.classList.remove('hidden');
+    dom.featuredSection?.classList.remove('hidden'); 
     
     if (dataLoaded) {
         applyUltimateFilters(false);
-        updateAdvancedMeta(null, null); // อัปเดต Meta หน้าแรก
+        updateAdvancedMeta(null, null);
     }
 }
 
@@ -1181,7 +1198,7 @@ window.clearRecentSearches = function() {
 
 // ✅ เพิ่ม Event Listeners ใน DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
-    // ... โค้ดเดิม ...
+
     
     // ✅ เพิ่ม: แสดงประวัติการค้นหาเมื่อหน้าโหลดเสร็จ
     setTimeout(() => {
@@ -1650,20 +1667,30 @@ async function fetchSingleProfile(slug) {
     function closeLightbox(animate = true) {
         if (!dom.lightbox || dom.lightbox.classList.contains('hidden')) return;
 
+        const cleanup = () => {
+            dom.lightbox.classList.add('hidden');
+            document.body.style.overflow = ''; // คืนค่า Scroll ให้เลื่อนได้ปกติ
+            
+            // ✅ Fix: โฟกัสกลับที่เดิมโดย "ห้าม Scroll" (preventScroll: true)
+            if (state.lastFocusedElement) {
+                try {
+                    state.lastFocusedElement.focus({ preventScroll: true });
+                } catch (e) { /* browser might not support options */ }
+            }
+        };
+
         if (animate) {
             gsap.to(dom.lightbox, { opacity: 0, pointerEvents: 'none', duration: 0.2 });
             gsap.to(dom.lightboxWrapper, { 
                 scale: 0.95, opacity: 0, duration: 0.2, 
                 onComplete: () => {
-                    dom.lightbox.classList.add('hidden');
-                    document.body.style.overflow = '';
-                    state.lastFocusedElement?.focus();
+                    dom.lightbox.style.opacity = '0'; // ซ่อนให้ชัวร์
+                    cleanup();
                 }
             });
         } else {
-            dom.lightbox.classList.add('hidden');
             dom.lightbox.style.opacity = '0';
-            document.body.style.overflow = '';
+            cleanup();
         }
     }
 
@@ -1686,7 +1713,6 @@ function populateLightboxData(p) {
         descContainer: document.getElementById('lightboxDescriptionContainer'),
         descContent: document.getElementById('lightboxDescriptionContent'),
         lineBtnContainer: document.querySelector('.lightbox-details')
-        // ไม่ต้องใช้ dateAddedContainer แล้ว เพราะจะรวมเข้าไปใน detailsContainer
     };
 
     // --- 1. Header & Quote ---
@@ -1701,21 +1727,32 @@ function populateLightboxData(p) {
     if (els.avail) {
         let statusClass = 'status-inquire';
         let icon = '<i class="fas fa-question-circle"></i>';
-        if (p.availability?.toLowerCase().includes('ว่าง') || p.availability?.toLowerCase().includes('รับงาน')) {
+        let text = p.availability || 'สอบถาม';
+        
+        if (text.includes('ว่าง') || text.includes('รับงาน')) {
             statusClass = 'status-available';
             icon = '<i class="fas fa-check-circle"></i>';
-        } else if (p.availability?.toLowerCase().includes('ไม่ว่าง')) {
+        } else if (text.includes('ไม่ว่าง')) {
             statusClass = 'status-busy';
             icon = '<i class="fas fa-times-circle"></i>';
         }
-        els.avail.innerHTML = `<div class="lb-status-badge ${statusClass}">${icon} ${p.availability || 'สอบถาม'}</div>`;
+        
+        // ปรับ Badge ให้ดู Modern ขึ้น
+        els.avail.innerHTML = `
+            <div class="lb-status-badge ${statusClass}" style="padding: 6px 16px; border-radius: 50px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                ${icon} <span>${text}</span>
+            </div>`;
     }
 
     // --- 3. Image Gallery ---
     if (els.hero) {
         els.hero.src = p.images?.[0]?.src || '/images/placeholder-profile.webp';
         els.hero.alt = p.altText || `รูปโปรไฟล์ ${p.name}`;
+        // เพิ่ม Filter ให้รูปมืดลงนิดหน่อย เพื่อให้ตัวหนังสือขาวเด้งขึ้น
+        els.hero.style.filter = "brightness(0.85)"; 
     }
+    
+    // จัดการ Thumbnail (เหมือนเดิม)
     if (els.thumbs) {
         els.thumbs.innerHTML = '';
         const hasGallery = p.images && p.images.length > 1;
@@ -1725,17 +1762,21 @@ function populateLightboxData(p) {
                 const thumb = document.createElement('img');
                 thumb.className = `thumbnail ${i === 0 ? 'active' : ''}`;
                 thumb.src = img.src;
-                thumb.alt = `รูปภาพ ${i + 1} ของ ${p.name}`;
-                thumb.loading = 'lazy';
+                thumb.style.cssText = "width: 50px; height: 50px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s;";
+                if(i===0) thumb.style.borderColor = "#ec4899";
+                
                 thumb.onclick = () => {
                     if (els.hero) els.hero.src = img.src;
-                    els.thumbs.querySelector('.active')?.classList.remove('active');
-                    thumb.classList.add('active');
+                    Array.from(els.thumbs.children).forEach(c => c.style.borderColor = "transparent");
+                    thumb.style.borderColor = "#ec4899";
                 };
                 fragment.appendChild(thumb);
             });
             els.thumbs.appendChild(fragment);
-            els.thumbs.style.display = 'grid';
+            els.thumbs.style.display = 'flex';
+            els.thumbs.style.gap = '8px';
+            els.thumbs.style.justifyContent = 'center';
+            els.thumbs.style.padding = '10px 0';
         } else {
             els.thumbs.style.display = 'none';
         }
@@ -1744,68 +1785,72 @@ function populateLightboxData(p) {
     // --- 4. Style Tags ---
     if (els.tags) {
         els.tags.innerHTML = '';
-        const hasTags = Array.isArray(p.styleTags) && p.styleTags.length > 0 && p.styleTags[0] !== '';
-        if (hasTags) {
+        if (Array.isArray(p.styleTags) && p.styleTags.length > 0) {
             p.styleTags.forEach(t => {
-                if (t && t.trim() !== '') {
+                if (t && t.trim()) {
                     const span = document.createElement('span');
-                    span.className = 'tag-badge';
+                    // ปรับ Tag ให้ดูเรียบหรู
+                    span.style.cssText = "background: rgba(255, 255, 255, 0.1); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);";
                     span.textContent = t.trim();
                     els.tags.appendChild(span);
                 }
             });
             els.tags.style.display = 'flex';
+            els.tags.style.flexWrap = 'wrap';
+            els.tags.style.gap = '8px';
         } else {
             els.tags.style.display = 'none';
         }
     }
 
-    // --- 5. ✅ สร้าง HTML แสดงรายละเอียดทั้งหมดแบบสมบูรณ์ ---
+    // --- 5. รายละเอียด (ส่วนที่แก้ให้อ่านง่าย) ---
     if (els.detailsContainer) {
         const provinceName = state.provincesMap.get(p.provinceKey) || '';
-        const fullLocation = [provinceName, p.location ? `(${p.location})` : ''].filter(Boolean).join(' ').trim();
-        const dateToShow = p.lastUpdated || p.created_at;
-        const formattedDate = formatDate(dateToShow);
+        const fullLocation = [provinceName, p.location].filter(Boolean).join(' ').trim();
+        const formattedDate = formatDate(p.lastUpdated || p.created_at);
 
-        let detailsHTML = '';
+        // สร้างกล่องครอบข้อมูล (Glassmorphism)
+        let detailsHTML = `
+            <div style="background: rgba(30, 30, 30, 0.6); border-radius: 20px; padding: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; text-align: center;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px;">
+                        <div style="font-size: 10px; color: #aaa;">อายุ</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #fff;">${p.age || '-'}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px;">
+                        <div style="font-size: 10px; color: #aaa;">สัดส่วน</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #fff;">${p.stats || '-'}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px;">
+                        <div style="font-size: 10px; color: #aaa;">สูง/หนัก</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #fff;">${p.height||'-'}/${p.weight||'-'}</div>
+                    </div>
+                </div>
 
-        // --- ส่วนที่ 1: ข้อมูลทางกายภาพ ---
-        detailsHTML += `
-            <div class="stats-grid-container">
-                ${p.age ? `<div class="stat-box"><span class="stat-label">อายุ</span><span class="stat-value">${p.age} ปี</span></div>` : ''}
-                ${p.stats ? `<div class="stat-box"><span class="stat-label">สัดส่วน</span><span class="stat-value">${p.stats}</span></div>` : ''}
-                ${(p.height || p.weight) ? `<div class="stat-box"><span class="stat-label">สูง/หนัก</span><span class="stat-value">${p.height || '-'}/${p.weight || '-'}</span></div>` : ''}
-            </div>`;
-
-        // --- ส่วนที่ 2: ข้อมูลบริการและอื่นๆ ---
-        detailsHTML += '<div class="info-list-container mt-5 pt-5 border-t border-gray-200 dark:border-gray-700">';
-        
-        const infoRows = [
-            { label: 'สีผิว', value: p.skinTone, icon: 'fa-palette' },
-            { label: 'พิกัด', value: fullLocation, icon: 'fa-map-marker-alt', class: 'text-primary' },
-            { label: 'เรทราคา', value: p.rate, icon: 'fa-tag', class: 'text-green-600 dark:text-green-400' },
-            { label: 'อัปเดตล่าสุด', value: formattedDate, icon: 'fa-camera' }
-        ];
-
-        infoRows.forEach(row => {
-            if (row.value) {
-                detailsHTML += `
-                    <div class="info-row">
-                        <div class="info-label"><i class="fas ${row.icon} info-icon"></i> ${row.label}</div>
-                        <div class="info-value ${row.class || ''}">${row.value}</div>
-                    </div>`;
-            }
-        });
-        
-        detailsHTML += '</div>';
-        
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                        <span style="color: #ccc;"><i class="fas fa-map-marker-alt text-pink-500 mr-2"></i>พิกัด</span>
+                        <span style="color: #fff; font-weight: 500;">${fullLocation}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                        <span style="color: #ccc;"><i class="fas fa-tag text-green-400 mr-2"></i>เรทราคา</span>
+                        <span style="color: #4ade80; font-weight: bold; font-size: 16px;">${p.rate || 'สอบถาม'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                         <span style="color: #ccc;"><i class="fas fa-clock text-blue-400 mr-2"></i>อัปเดต</span>
+                        <span style="color: #eee;">${formattedDate}</span>
+                    </div>
+                </div>
+            </div>
+        `;
         els.detailsContainer.innerHTML = detailsHTML;
     }
 
-    // --- 6. Description ---
+    // --- 6. Description (เนื้อหาที่พี่บ่นว่าอ่านไม่เห็น) ---
     if (els.descContainer && els.descContent) {
-        const hasDescription = p.description && p.description.trim() !== '';
-        if (hasDescription) {
+        if (p.description) {
+            // ใส่ Background สีดำจางๆ ให้ข้อความอ่านออกแน่นอน 100%
+            els.descContent.style.cssText = "color: #e5e7eb; font-size: 15px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);";
             els.descContent.innerHTML = p.description.replace(/\n/g, '<br>');
             els.descContainer.style.display = 'block';
         } else {
@@ -1813,98 +1858,83 @@ function populateLightboxData(p) {
         }
     }
 
-// --- 7. LINE Button (Popup Guide Version - แบบมีหน้าต่างแจ้งเตือนลูกค้า) ---
+    // --- 7. LINE Button (แก้ให้ดูแพง ไม่บ้านนอก) ---
     const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
     if (oldWrapper) oldWrapper.remove();
     
     if (p.lineId && els.lineBtnContainer) {
         const wrapper = document.createElement('div');
         wrapper.id = 'line-btn-sticky-wrapper';
-        wrapper.className = 'lb-sticky-footer';
-
-        // 1. เตรียมข้อมูลสำหรับ Copy
-        const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
-        const autoMessage = `สวัสดีครับ สนใจน้อง ${p.name} เห็นจากเว็บ Sideline Chiangmai ครับ\n${profileUrl}`;
         
-        // 2. เตรียมลิงก์ LINE (รองรับทั้ง ID ธรรมดา และ Link เต็ม)
-        let finalLineUrl = p.lineId;
-        if (!p.lineId.startsWith('http')) {
-            // ใช้ ti/p/~ เพื่อไปหน้าเพิ่มเพื่อน
-            finalLineUrl = `https://line.me/ti/p/~${p.lineId}`;
-        }
+        // ทำให้ปุ่มลอย (Floating) สวยๆ ไม่ใช่แถบยาวเต็มจอ
+        wrapper.style.cssText = `
+            position: sticky;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: none; /* ให้คลิกทะลุพื้นที่ว่างได้ */
+            margin-top: 20px;
+        `;
+
+        const autoMessage = `สนใจน้อง ${p.name} เห็นจากเว็บ Sideline Chiangmai ครับ`;
+        let finalLineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/~${p.lineId}`;
 
         const link = document.createElement('a');
-        link.className = 'btn-line-action';
-        link.href = '#'; // ใส่ # ไว้ก่อนเพื่อดัก event
-        link.innerHTML = `<i class="fab fa-line text-xl"></i> แอดไลน์ ${p.name || ''}`;
+        // ปุ่มทรงแคปซูล เงาสวยๆ สีเขียว LINE แท้
+        link.style.cssText = `
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #06C755;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 100px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 10px 25px -5px rgba(6, 199, 85, 0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(5px);
+        `;
+        
+        link.innerHTML = `<i class="fab fa-line" style="font-size: 24px;"></i> <span>แอดไลน์ ${p.name}</span>`;
 
-        // 🔥 Event: กดปุ่มแล้วเด้ง Popup แจ้งเตือน
+        // Animation กดแล้วยุบ
+        link.onmousedown = () => link.style.transform = "scale(0.95)";
+        link.onmouseup = () => link.style.transform = "scale(1)";
+
         link.onclick = (e) => {
             e.preventDefault();
-
-            // A. สั่ง Copy ข้อความทันที
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(autoMessage).catch(console.error);
-            }
-
-            // B. สร้าง Popup (Modal) ขึ้นมาบังหน้าจอ
-            const modal = document.createElement('div');
-            // ใส่ Style แบบ Inline เพื่อให้มั่นใจว่าแสดงผลถูกต้องแน่นอน
-            modal.style.cssText = "position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease-out;";
+            if (navigator.clipboard) navigator.clipboard.writeText(autoMessage);
             
+            // Popup แบบ Luxury (เลิกใช้ alert)
+            const modal = document.createElement('div');
+            modal.style.cssText = "position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s;";
             modal.innerHTML = `
-                <div style="background: white; width: 100%; max-width: 340px; border-radius: 24px; padding: 30px 24px; text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-                    
-                    <!-- ไอคอนเช็คถูก -->
-                    <div style="width: 70px; height: 70px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 0 8px rgba(209, 250, 229, 0.3);">
-                        <i class="fas fa-check" style="font-size: 32px; color: #059669;"></i>
+                <div style="background: white; width: 90%; max-width: 320px; border-radius: 24px; padding: 30px 20px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+                    <div style="width: 60px; height: 60px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px;">
+                        <i class="fas fa-check"></i>
                     </div>
-
-                    <h3 style="font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 10px; line-height: 1.3;">คัดลอกข้อมูลแล้ว!</h3>
-                    
-                    <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
-                        ระบบบันทึกชื่อน้องให้แล้วครับ<br>
-                        เมื่อแอป LINE เปิดขึ้นมา<br>
-                        <span style="background: #fdf2f8; padding: 4px 12px; border-radius: 6px; font-weight: bold; color: #db2777; display: inline-block; margin-top: 4px; border: 1px solid #fbcfe8;">กรุณากด "วาง" (Paste) ในแชท</span>
-                    </p>
-
-                    <!-- ปุ่มไป LINE -->
-                    <a href="${finalLineUrl}" id="go-to-line-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px; background: #06c755; color: white; font-weight: bold; border-radius: 14px; text-decoration: none; font-size: 16px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4); transition: transform 0.1s;">
-                        <i class="fab fa-line" style="font-size: 24px;"></i> เปิด LINE ทันที
-                    </a>
-
-                    <!-- ปุ่มปิด -->
-                    <button id="close-modal-btn" style="margin-top: 16px; background: transparent; border: none; color: #9ca3af; font-size: 14px; cursor: pointer; padding: 8px;">
-                        ยกเลิก
-                    </button>
+                    <h3 style="color: #111827; font-size: 20px; font-weight: 800; margin-bottom: 8px;">บันทึกชื่อน้องแล้ว!</h3>
+                    <p style="color: #6b7280; font-size: 14px; margin-bottom: 24px;">กด <b>"วาง" (Paste)</b> ในแชทได้เลยครับ</p>
+                    <a href="${finalLineUrl}" id="real-line-btn" style="display: block; width: 100%; background: #06C755; color: white; padding: 14px; border-radius: 16px; font-weight: bold; text-decoration: none;">เปิด LINE เดี๋ยวนี้</a>
+                    <button id="close-popup" style="margin-top: 15px; background: transparent; border: none; color: #9ca3af; font-size: 13px;">ปิดหน้าต่าง</button>
                 </div>
             `;
-
             document.body.appendChild(modal);
-
-            // C. จัดการปุ่มใน Popup
-            const closeBtn = modal.querySelector('#close-modal-btn');
-            const goBtn = modal.querySelector('#go-to-line-btn');
-
-            const closeModal = () => {
-                modal.style.opacity = '0';
-                setTimeout(() => modal.remove(), 200);
-            };
-
-            closeBtn.onclick = closeModal;
-            modal.onclick = (ev) => { if(ev.target === modal) closeModal(); }; // กดพื้นหลังปิด
             
-            // พอกดปุ่มเขียว ให้ปิด Modal แล้วไป LINE
-            goBtn.onclick = () => {
-                setTimeout(closeModal, 500);
-            };
+            modal.querySelector('#real-line-btn').onclick = () => setTimeout(() => modal.remove(), 1000);
+            modal.querySelector('#close-popup').onclick = () => modal.remove();
+            modal.onclick = (ev) => { if(ev.target === modal) modal.remove(); };
         };
-        
+
         wrapper.appendChild(link);
         els.lineBtnContainer.appendChild(wrapper);
     }
 }
-
 // ==========================================
 // 💎 SEO STRATEGIC POOL (คลังคำศัพท์ LSI)
 // ==========================================
@@ -2243,82 +2273,181 @@ function updateResultCount(count, total, isFiltering) {
     }
 }
 
-function init3dCardHoverDelegate() {
-    // Disabled for performance optimization
-}
+// =================================================================
+// 🚀 PREMIUM UI & EFFECT FUNCTIONS (ฉบับอัปเกรดความเร็วและโหมดมืด)
+// =================================================================
 
+    // ✅ 1. 3D Card Effect: เพิ่มความพรีเมียม (ทำงานเฉพาะบนคอมพิวเตอร์เพื่อประหยัดแบตมือถือ)
+    function init3dCardHoverDelegate() {
+        if (window.innerWidth < 1024) return; // ข้ามถ้าเป็นมือถือ
+
+        document.body.addEventListener('mousemove', (e) => {
+            const card = e.target.closest('.profile-card-new');
+            if (!card) return;
+
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            // คำนวณองศาการเอียง
+            const rotateX = (centerY - y) / 15;
+            const rotateY = (x - centerX) / 15;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            card.style.transition = 'transform 0.1s ease-out';
+        });
+
+        document.body.addEventListener('mouseout', (e) => {
+            const card = e.target.closest('.profile-card-new');
+            if (card) {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                card.style.transition = 'transform 0.5s ease-out';
+            }
+        });
+    }
+
+    // ✅ 2. Header Scroll Effect: ปรับให้เนียนตาแบบ Glassmorphism
     function initHeaderScrollEffect() {
         if (!dom.pageHeader) return;
-        let ticking = false;
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    dom.pageHeader.classList.toggle('scrolled', window.scrollY > 50);
-                    ticking = false;
-                });
-                ticking = true;
+        
+        const updateHeader = () => {
+            const isScrolled = window.scrollY > 20;
+            dom.pageHeader.classList.toggle('scrolled', isScrolled);
+            
+            // ปรับแต่งสไตล์ผ่าน JS เพื่อความรวดเร็ว
+            if (isScrolled) {
+                dom.pageHeader.style.backgroundColor = 'rgba(15, 23, 42, 0.9)'; // สีเข้มโปร่งแสง
+                dom.pageHeader.style.backdropFilter = 'blur(12px)';
+                dom.pageHeader.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+            } else {
+                dom.pageHeader.style.backgroundColor = 'transparent';
+                dom.pageHeader.style.backdropFilter = 'none';
+                dom.pageHeader.style.boxShadow = 'none';
             }
-        }, { passive: true });
+        };
+
+        window.addEventListener('scroll', updateHeader, { passive: true });
+        updateHeader(); // รันครั้งแรกทันที
     }
 
+    // ✅ 3. Scroll Animations: ใช้คะแนน Performance สูงสุด
     function initScrollAnimations() {
-        const els = document.querySelectorAll('[data-animate-on-scroll]:not(.is-visible)');
+        const els = document.querySelectorAll('[data-animate-on-scroll]');
         if (!els.length) return;
-        const obs = new IntersectionObserver((entries, o) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) { e.target.classList.add('is-visible'); o.unobserve(e.target); }
+
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    obs.unobserve(entry.target);
+                }
             });
-        }, { threshold: 0.1 });
-        els.forEach(el => obs.observe(el));
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        els.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+            obs.observe(el);
+        });
     }
 
+    // ✅ 4. Social Marquee: แก้บั๊กกระตุกและเพิ่มความลื่นไหลด้วย GPU
     function initMarqueeEffect() {
         const marquee = document.querySelector('.social-marquee');
-        if (!marquee) return;
-        const wrapper = marquee.parentElement;
-        marquee.innerHTML += marquee.innerHTML;
-        let scroll = 0; let speed = 0.5; let isHover = false;
-        function loop() {
+        if (!marquee || marquee.dataset.initialized) return;
+
+        marquee.dataset.initialized = "true";
+        marquee.innerHTML += marquee.innerHTML; // คัดลอกเนื้อหาเพื่อทำ Loop
+
+        let scroll = 0;
+        let speed = 0.6; // ความเร็วที่อ่านง่ายพอดี
+        let isHover = false;
+
+        const loop = () => {
             if (!isHover) {
                 scroll -= speed;
-                if (scroll <= -marquee.scrollWidth / 2) scroll = 0;
+                if (Math.abs(scroll) >= marquee.scrollWidth / 2) {
+                    scroll = 0;
+                }
                 marquee.style.transform = `translate3d(${scroll}px, 0, 0)`;
             }
             requestAnimationFrame(loop);
-        }
+        };
+
+        marquee.parentElement.addEventListener('mouseenter', () => isHover = true);
+        marquee.parentElement.addEventListener('mouseleave', () => isHover = false);
         loop();
-        wrapper.addEventListener('mouseenter', () => isHover = true);
-        wrapper.addEventListener('mouseleave', () => isHover = false);
     }
 
+    // ✅ 5. Theme Toggle: ตั้งค่า Dark Mode เป็น Default + สลับไอคอน Sun/Moon
     function initThemeToggle() {
         const btns = document.querySelectorAll('.theme-toggle-btn');
+        const icons = document.querySelectorAll('.theme-toggle-icon');
+
         const apply = (theme) => {
-            document.documentElement.classList.toggle('dark', theme === 'dark');
+            const isDark = theme === 'dark';
+            document.documentElement.classList.toggle('dark', isDark);
             localStorage.setItem(CONFIG.KEYS.THEME, theme);
+
+            // สลับไอคอนอัตโนมัติ
+            icons.forEach(icon => {
+                if (isDark) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
         };
-        const saved = localStorage.getItem(CONFIG.KEYS.THEME) || 'light';
+
+        // 🚨 เริ่มต้นที่ DARK MODE (ถ้ายังไม่เคยเลือก)
+        const saved = localStorage.getItem(CONFIG.KEYS.THEME) || 'dark';
         apply(saved);
-        btns.forEach(b => b.onclick = () => apply(document.documentElement.classList.contains('dark') ? 'light' : 'dark'));
+
+        btns.forEach(b => {
+            b.onclick = () => {
+                const current = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                apply(current);
+            };
+        });
     }
 
+    // ✅ 6. Mobile Menu: ปรับปรุงการล็อค Scroll ให้สมบูรณ์
     function initMobileMenu() {
         const btn = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
         const backdrop = document.getElementById('menu-backdrop');
         const close = document.getElementById('close-sidebar-btn');
+        
         if (!btn || !sidebar) return;
+
         const toggle = (open) => {
             sidebar.classList.toggle('translate-x-full', !open);
-            sidebar.classList.toggle('open', open);
-            backdrop?.classList.toggle('hidden', !open);
+            if (backdrop) {
+                backdrop.classList.toggle('hidden', !open);
+                setTimeout(() => backdrop.style.opacity = open ? '1' : '0', 10);
+            }
+            // ล็อค Scroll หน้าเว็บไม่ให้ขยับตอนเปิดเมนู
             document.body.style.overflow = open ? 'hidden' : '';
+            document.body.style.touchAction = open ? 'none' : '';
         };
-        btn.onclick = () => toggle(true);
-        close.onclick = () => toggle(false);
-        backdrop.onclick = () => toggle(false);
-    }
 
+        btn.onclick = () => toggle(true);
+        if (close) close.onclick = () => toggle(false);
+        if (backdrop) backdrop.onclick = () => toggle(false);
+        
+        // ปิดเมนูอัตโนมัติเมื่อกดลิงก์
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.onclick = () => toggle(false);
+        });
+    }
 
 // ==========================================
 // ✨ UPGRADED: VIP AGE GATE (SEO & LUXURY VERSION)
