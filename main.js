@@ -192,6 +192,10 @@ function saveRecentSearch(term) {
 // =================================================================
     // 4. EVENT HANDLING (COMPLETE & FIXED)
     // =================================================================
+    
+    // ✅ ตัวแปรป้องกันการคลิกรัว (Throttle Flag) ประกาศไว้นอกฟังก์ชัน
+    let isLikeProcessing = false;
+
     function initGlobalClickListener() {
         console.log("👂 Global Click Listener is now active.");
         
@@ -199,33 +203,33 @@ function saveRecentSearch(term) {
             const target = event.target;
 
             // --- Priority 1: ตรวจสอบการคลิกที่ "ปุ่มหัวใจ" ก่อนเสมอ ---
+            // ต้องเช็คก่อนเพื่อป้องกันไม่ให้ Event ทะลุไปโดนการ์ดด้านหลัง
             const likeButton = target.closest('[data-action="like"]');
             if (likeButton) {
-                // หยุดทุกอย่างไม่ให้ทะลุไปโดนการ์ด
-                event.preventDefault();
-                event.stopPropagation();
+                event.preventDefault(); // ห้ามลิ้งก์ทำงาน (ถ้ามี)
+                event.stopPropagation(); // ห้าม Event ทะลุไปหา Parent (การ์ด)
                 
                 const profileId = likeButton.dataset.id;
                 
-                // ตรวจสอบว่ามี ID และมีฟังก์ชันให้เรียกใช้
+                // เรียกใช้ฟังก์ชันกดไลค์ (ถ้ามี ID)
                 if (profileId && typeof window.handleLikeClick === 'function') {
                     window.handleLikeClick(likeButton, profileId);
                 }
-                return; // จบการทำงานทันที
+                return; // จบการทำงานทันที ไม่ไปเช็คเงื่อนไขอื่น
             }
 
             // --- Priority 2: ถ้าไม่ใช่หัวใจ ค่อยเช็ค "การ์ด" เพื่อเปิด Lightbox ---
             const cardLink = target.closest('a.card-link');
             if (cardLink) {
-                event.preventDefault(); // หยุดการเปลี่ยนหน้าปกติ
+                event.preventDefault(); // หยุดการเปลี่ยนหน้าแบบปกติ (Link Navigation)
                 
                 const card = cardLink.closest('.profile-card-new');
                 const slug = card ? card.getAttribute('data-profile-slug') : null;
                 
                 if (slug) {
-                    state.lastFocusedElement = card;
-                    history.pushState(null, '', `/sideline/${slug}`);
-                    handleRouting(); // เปิด Lightbox
+                    state.lastFocusedElement = card; // จำตำแหน่งเดิมไว้เวลากดปิดจะโฟกัสถูกที่
+                    history.pushState(null, '', `/sideline/${slug}`); // เปลี่ยน URL สวยๆ
+                    handleRouting(); // เรียกฟังก์ชันเปิด Lightbox
                 }
                 return;
             }
@@ -233,13 +237,14 @@ function saveRecentSearch(term) {
             // --- Priority 3: ปุ่มปิด Lightbox ---
             const closeButton = target.closest('#closeLightboxBtn');
             const lightboxBackdrop = target.closest('#lightbox');
+            // เช็คว่ากดปุ่ม X หรือกดที่พื้นหลังสีดำ
             if (closeButton || (lightboxBackdrop && event.target === lightboxBackdrop)) {
-                 history.pushState(null, '', '/');
+                 history.pushState(null, '', '/'); // คืนค่า URL กลับหน้าแรก
                  handleRouting(); // ปิด Lightbox
             }
         });
 
-        // ปุ่ม ESC ปิด Lightbox
+        // รองรับปุ่ม ESC เพื่อปิด Lightbox
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && state.currentProfileSlug) {
                 history.pushState(null, '', '/');
@@ -248,22 +253,35 @@ function saveRecentSearch(term) {
         });
     }
 
-    // ✅ [ฟังก์ชันกดไลค์ที่สมบูรณ์: UI + LocalStorage + Database]
+    // ✅ [ฟังก์ชันกดไลค์ที่สมบูรณ์: Anti-Spam + Optimistic UI + Database Sync]
     window.handleLikeClick = async function(likeButton, profileId) {
+        // 🛡️ 1. Anti-Spam: ถ้ากำลังประมวลผลอยู่ ห้ามกดซ้ำ!
+        if (isLikeProcessing) return; 
+        isLikeProcessing = true; // ล็อคปุ่มทันที
+        
         console.log(`👍 Processing like for profile ID: ${profileId}`);
 
-        // 1. UI UPDATE (อัปเดตหน้าจอทันทีเพื่อให้ลื่นไหล)
+        // ⚡ 2. UI UPDATE (Optimistic UI): อัปเดตหน้าจอทันที ไม่ต้องรอ Database
         const isLiked = likeButton.classList.toggle('liked');
         const countSpan = likeButton.querySelector('.like-count');
         
+        // เอฟเฟกต์เด้งดึ๋งเล็กน้อยเมื่อกด
+        if (isLiked) {
+            const icon = likeButton.querySelector('i');
+            if(icon) {
+                icon.style.transform = "scale(1.4)";
+                setTimeout(() => icon.style.transform = "scale(1)", 200);
+            }
+        }
+        
         if (countSpan) {
-            // แปลงตัวเลข (กันเหนียวเผื่อมี comma)
+            // แปลงตัวเลข (ลบ comma ออกก่อนคำนวณ)
             let currentLikes = parseInt(countSpan.textContent.replace(/,/g, '') || '0');
-            // บวกหรือลบตามสถานะ
-            countSpan.textContent = isLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+            // บวกหรือลบตามสถานะใหม่
+            countSpan.textContent = isLiked ? (currentLikes + 1).toLocaleString() : Math.max(0, currentLikes - 1).toLocaleString();
         }
 
-        // 2. LOCAL STORAGE (บันทึกลงเครื่องผู้ใช้)
+        // 💾 3. LOCAL STORAGE: บันทึกสถานะลงเครื่องผู้ใช้
         try {
             const likedProfiles = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || '{}');
             if (isLiked) {
@@ -276,27 +294,29 @@ function saveRecentSearch(term) {
             console.error("Local storage error:", e);
         }
 
-        // 3. DATABASE UPDATE (ส่งไป Supabase - ส่วนที่ขาดไป)
+        // ☁️ 4. DATABASE UPDATE: ส่งคำสั่งไป Supabase (RPC)
         if (window.supabase) {
             try {
-                // เลือกชื่อฟังก์ชัน SQL
+                // เลือกชื่อฟังก์ชัน SQL ตามสถานะ (ต้องสร้าง RPC ใน Supabase ก่อน)
                 const rpcName = isLiked ? 'increment_likes' : 'decrement_likes';
                 
-                // 🔥 ส่งคำสั่งไปฐานข้อมูล (ใช้ชื่อตัวแปร profile_id_to_update ตาม SQL ของคุณ)
                 const { error } = await window.supabase.rpc(rpcName, { 
                     profile_id_to_update: profileId 
                 });
 
                 if (error) {
-                    console.error('❌ Supabase update failed:', error);
-                    // กรณี Error จริงจัง อาจจะเขียนโค้ด Rollback UI ตรงนี้ได้ (แต่ปกติไม่ต้องก็ได้)
+                    console.error('❌ Supabase update failed:', error.message);
+                    // (Optional) ถ้าซีเรียสเรื่องข้อมูลไม่ตรง สามารถเขียนโค้ด Rollback UI กลับตรงนี้ได้
                 } else {
-                    console.log(`✅ DB Updated: ${rpcName}`);
+                    // console.log(`✅ DB Updated: ${rpcName} success`);
                 }
             } catch (err) {
                 console.error("Connection error:", err);
             }
         }
+        
+        // ⏱️ 5. ปลดล็อค: หน่วงเวลา 1 วินาทีถึงจะกดไลค์ใหม่ได้ (ป้องกันยิง Database รัวๆ)
+        setTimeout(() => { isLikeProcessing = false; }, 1000);
     };
     
 function cacheDOMElements() {
@@ -513,32 +533,36 @@ function initRealtimeSubscription() {
     console.log('zzz Realtime disabled. Using Smart Cache Strategy.');
 }
 
+// ✅ ฟังก์ชันช่วยดึงรูปและบีบอัดให้ตรงกับระบบหลังบ้าน
+function getOptimizedClientImage(path, width = 400) {
+    if (!path) return CONFIG.DEFAULT_OG_IMAGE;
+    if (path.includes('res.cloudinary.com')) {
+        return path.replace('/upload/', `/upload/c_scale,w_${width},q_auto,f_auto/`);
+    }
+    if (path.startsWith('http')) return path;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
+}
+
 function processProfileData(p) {
     if (!p) return null;
 
     const displayName = getCleanName(p.name); 
 
-    // 🔥 แก้ไขระบบรูปภาพ: รองรับทั้ง Path ใน Supabase และ URL เต็มจาก Cloudinary
-    const imagePaths = [p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
+    // 🔥 ระบบรูปภาพ: ผ่านตัวบีบอัด (Optimization) เสมอ
+    const imagePaths =[p.imagePath, ...(Array.isArray(p.galleryPaths) ? p.galleryPaths : [])].filter(Boolean);
     
     let imageObjects = imagePaths.map(path => {
-        // ตรวจสอบว่า path เป็น URL เต็ม (http/https) หรือไม่
-        if (typeof path === 'string' && path.startsWith('http')) {
-            return { src: path }; // ใช้ URL ตรงๆ เลย (Cloudinary)
-        } else {
-            // ถ้าเป็นชื่อไฟล์ธรรมดา ให้ดึงจาก Supabase Storage
-            const { data } = supabase.storage.from(CONFIG.STORAGE_BUCKET).getPublicUrl(path);
-            return { src: data?.publicUrl || CONFIG.DEFAULT_OG_IMAGE };
-        }
+        // ดึงรูประดับ 400px สำหรับหน้าการ์ด และเก็บ URL ขนาดเต็มไว้ (กรณีเปิด Lightbox ค่อยโหลด)
+        return { 
+            src: getOptimizedClientImage(path, 400),
+            fullSrc: getOptimizedClientImage(path, 800) // รูปเต็มความละเอียด
+        };
     });
 
-    // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder
-    if (imageObjects.length === 0) imageObjects.push({ src: CONFIG.DEFAULT_OG_IMAGE });
+    if (imageObjects.length === 0) imageObjects.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
 
-    // ดึงชื่อจังหวัดจาก Map
     const provinceName = state.provincesMap.get(p.provinceKey) || 'ไม่ระบุ';
 
-    // เตรียม String สำหรับค้นหา (Universal Search)
     const englishName = p.slug ? p.slug.split('-').filter(part => isNaN(part)).join(' ') : '';
     const universalSearchString = `
         ${displayName} ${englishName} ${p.id} ${provinceName} 
@@ -1643,10 +1667,6 @@ async function fetchSingleProfile(slug) {
         }
     }
 
-/**
- * [ULTIMATE COMPLETE VERSION]
- * อัปเดตข้อมูลใน Lightbox ทั้งหมดให้ครบถ้วนตามตารางข้อมูล
- */
 function populateLightboxData(p) {
     if (!p) {
         console.error("populateLightboxData called with invalid profile data.");
