@@ -120,59 +120,57 @@ export default async (request, context) => {
         const metaDesc = `${baseDesc} ${trust} พิกัดรับงาน: ${p.location || provinceName} จองคิวทักไลน์เลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
-        // 👑 [Ultimate Schema] เทคนิค Multi-Entity ผูก 'Person' เข้ากับ 'Product'
         const schema = {
-            "@context": "https://schema.org/",
-            "@graph":[
-                {
-                    "@type": "ProfilePage",
-                    "@id": `${canonicalUrl}#webpage`,
-                    "url": canonicalUrl,
-                    "name": pageTitle,
-                    "description": metaDesc,
-                    "isPartOf": { "@type": "WebSite", "@id": `${CONFIG.DOMAIN}/#website` },
-                    "breadcrumb": {
-                        "@type": "BreadcrumbList",
-                        "itemListElement":[
-                            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                            { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
-                            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
-                        ]
-                    }
-                },
-                {
-                    "@type": ["Person", "Product"], 
-                    "@id": `${canonicalUrl}#person`,
-                    "name": `น้อง${displayName}`,
-                    "gender": "Female",
-                    "image": ogImageUrl,
-                    "description": metaDesc,
-                    "jobTitle": "Freelance Model & Entertainer",
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressLocality": p.location || provinceName,
-                        "addressRegion": provinceName,
-                        "addressCountry": "TH"
-                    },
-                    "brand": { "@type": "Brand", "name": BRAND_NAME },
-                    "offers": {
-                        "@type": "Offer",
-                        "price": numericPrice.toString(),
-                        "priceCurrency": "THB",
-                        "availability": (p.availability?.includes('ไม่ว่าง') || p.availability?.includes('ติดจอง')) 
-                                        ? "https://schema.org/OutOfStock" 
-                                        : "https://schema.org/InStock",
-                        "url": canonicalUrl,
-                        "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`
-                    },
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": ratingValue,
-                        "reviewCount": reviewCount.toString()
-                    }
-                }
-            ]
-        };
+    "@context": "https://schema.org/",
+    "@graph": [
+        {
+            "@type": "ProfilePage",
+            "@id": `${canonicalUrl}#webpage`,
+            "url": canonicalUrl,
+            "name": pageTitle,
+            "description": metaDesc,
+            "mainEntity": {
+                "@id": `${canonicalUrl}#person`
+            },
+            "isPartOf": {
+                "@id": `${CONFIG.DOMAIN}/#website`
+            }
+        },
+        {
+            "@type": ["Person", "Product"],
+            "@id": `${canonicalUrl}#person`,
+            "name": `น้อง${displayName}`,
+            "image": ogImageUrl,
+            "description": metaDesc,
+            "jobTitle": "Freelance Model & Entertainer",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": p.location || provinceName,
+                "addressRegion": provinceName,
+                "addressCountry": "TH"
+            },
+            "brand": {
+                "@type": "Brand",
+                "name": BRAND_NAME
+            },
+            "offers": {
+                "@type": "Offer",
+                "price": numericPrice.toString(),
+                "priceCurrency": "THB",
+                "availability": (p.availability?.includes('ไม่ว่าง') || p.availability?.includes('ติดจอง')) 
+                                ? "https://schema.org/OutOfStock" 
+                                : "https://schema.org/InStock",
+                "url": canonicalUrl,
+                "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": ratingValue,
+                "reviewCount": reviewCount.toString()
+            }
+        }
+    ]
+};
 
         // 🏗️ Semantic HTML5 + Inline CSS ที่รองรับ AI แบบสมบูรณ์
         const html = `<!DOCTYPE html>
