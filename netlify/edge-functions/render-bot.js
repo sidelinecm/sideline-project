@@ -88,7 +88,7 @@ export default async (request, context) => {
         const pageTitle = `น้อง${displayName} รับงานไซด์ไลน์${provinceName} - ${style} (${currentYearTH})`;
         const metaDesc = `น้อง${displayName} ${provinceName} รับงาน${style} ${trust} พิกัดรับงาน: ${p.location || provinceName} ตรงปก ไม่มัดจำ ดูรูปโปรไฟล์เต็มๆ ได้ที่นี่!`;
 
-        // 🌟 ยกระดับ Schema: เพิ่ม Breadcrumb และ Offer เพื่อดักจับ Google Rich Snippet เต็มรูปแบบ
+       // 🌟 Schema อัปเดตล่าสุด (แก้ Error Person Review)
         const schema = {
             "@context": "https://schema.org/",
             "@graph":[
@@ -109,11 +109,12 @@ export default async (request, context) => {
                     ]
                 },
                 {
-                    "@type": "Person",
+                    "@type": ["Person", "LocalBusiness"], // 👈 ทริคสำคัญ: รวม Person เข้ากับ LocalBusiness
                     "@id": `${canonicalUrl}#person`,
                     "name": `น้อง${displayName}`,
                     "image": ogImageUrl,
                     "jobTitle": "Freelance Entertainer",
+                    "priceRange": "฿฿", // 👈 บังคับใส่เมื่อมี LocalBusiness
                     "address": {
                         "@type": "PostalAddress",
                         "addressLocality": p.location || provinceName,

@@ -88,7 +88,7 @@ export default async (request, context) => {
             { q: `ทำไมต้องจองผ่านเว็บ Sideline ${provinceName}?`, a: `เราเป็นศูนย์รวมสาวสวยที่คัดคุณภาพตรงปก มีระบบรีวิวและสถานะการรับงานที่เป็นปัจจุบัน พร้อมช่วยเหลือลูกค้าตลอด 24 ชั่วโมง` }
         ];
 
-        // 🌟 Schema จัดเต็ม ครอบคลุมทุกมิติ
+        // 🌟 Schema จัดเต็ม ครอบคลุมทุกมิติ (แก้ Error ทะลุกรอบ Google)
         const schema = {
             "@context": "https://schema.org",
             "@graph":[
@@ -116,9 +116,11 @@ export default async (request, context) => {
                     }))
                 },
                 {
-                    "@type": "Service",
-                    "@id": `${canonicalUrl}#service`,
-                    "name": `บริการเพื่อนเที่ยวและไซด์ไลน์ ${provinceName}`,
+                    "@type": "LocalBusiness", // 👈 เปลี่ยนจาก Service เป็น LocalBusiness เพื่อให้โชว์ดาวได้
+                    "@id": `${canonicalUrl}#business`,
+                    "name": `บริการไซด์ไลน์ ${provinceName}`,
+                    "image": ogImage, // 👈 Google บังคับให้มีรูป
+                    "priceRange": "฿฿", // 👈 Google บังคับสำหรับ LocalBusiness
                     "provider": { "@type": "Organization", "name": DYNAMIC_BRAND },
                     "aggregateRating": {
                         "@type": "AggregateRating",
