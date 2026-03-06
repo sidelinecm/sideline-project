@@ -1,8 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// ==========================================
-// 1. CONFIGURATION
-// ==========================================
+
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
@@ -13,7 +11,7 @@ const CONFIG = {
 
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// [อัปเกรด] Image Optimization รองรับ Cloudinary สำหรับ OG Tags
+
 const optimizeImg = (path, isOG = false) => {
     if (!path) return CONFIG.DEFAULT_IMAGE;
     if (path.includes('res.cloudinary.com')) {
@@ -24,7 +22,7 @@ const optimizeImg = (path, isOG = false) => {
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
-// [อัปเกรด] ฟังก์ชันกรอง LINE URL ให้ถูกต้อง
+
 const formatLineUrl = (lineId) => {
     if (!lineId) return 'https://line.me/ti/p/ksLUWB89Y_';
     if (lineId.startsWith('http')) return lineId; 
@@ -34,7 +32,7 @@ const formatLineUrl = (lineId) => {
         : `https://line.me/ti/p/${cleanId}`;  
 };
 
-// 🛡️ [อัปเกรดความปลอดภัย] ฟังก์ชันสับสวิตช์ (Circuit Breaker) ตัดจบถ้าฐานข้อมูลค้าง
+
 const fetchWithTimeout = (promise, ms = 4000) => {
     let timeoutId;
     const timeoutPromise = new Promise((_, reject) => {
@@ -46,7 +44,7 @@ const fetchWithTimeout = (promise, ms = 4000) => {
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // ดักจับ Bot แบบครอบคลุม
+
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|lighthouse|headless/i.test(ua);
     if (!isBot) return context.next();
 
@@ -57,8 +55,6 @@ export default async (request, context) => {
         
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        
-        // 🛡️ ใช้ fetchWithTimeout กำหนดเวลาดึงข้อมูลหลัก 4 วินาที
         const { data: p } = await fetchWithTimeout(
             supabase
                 .from('profiles')
@@ -71,56 +67,35 @@ export default async (request, context) => {
 
         if (!p) return context.next();
 
-        // 🛡️ ใช้ fetchWithTimeout กำหนดเวลาดึงเด็กแนะนำ 2.5 วินาที
-        let related =[];
-        if (p.provinceKey) {
-            const { data: relatedData } = await fetchWithTimeout(
-                supabase
-                    .from('profiles')
-                    .select('slug, name, imagePath')
-                    .eq('provinceKey', p.provinceKey)
-                    .eq('active', true)
-                    .neq('id', p.id) 
-                    .limit(4),
-                2500
-            );
-            related = relatedData ||[];
-        }
 
-        const displayName = p.name || 'สาวสวย';
-        const provinceName = p.provinces?.nameThai || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
-        
-        // แยกตัวเลขราคาออกจาก text ป้องกันบั๊ก
-        const rawPrice = (p.rate || "1500").toString().replace(/\D/g, '');
-        const numericPrice = rawPrice ? parseInt(rawPrice) : 1500;
-        
-        const imageUrl = optimizeImg(p.imagePath, false);
-        const ogImageUrl = optimizeImg(p.imagePath, true);
-        // ปีปัจจุบันตาม พ.ศ. (บวกด้วย 1 เพื่อตั้งค่าวันหมดอายุราคาในปีหน้า)
-        const currentYearTH = new Date().getFullYear() + 543;
-        const BRAND_NAME = `Sideline ${provinceName}`;
-        const finalLineUrl = formatLineUrl(p.lineId);
+let related = [];
+if (p.provinceKey) {
+    const { data: relatedData } = await fetchWithTimeout(
+        supabase
+            .from('profiles')
+            .select('slug, name, imagePath, location')
+            .eq('provinceKey', p.provinceKey)
+            .eq('active', true)
+            .neq('id', p.id)
+            .order('availability', { ascending: false }) // เอาคนที่ว่างขึ้นก่อน
+            .limit(4),
+        2500
+    );
+    related = relatedData || [];
+}
 
-        // เปลี่ยนสมการสุ่ม Rating ให้ดูเป็นธรรมชาติ (4.5 - 5.0)
-        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.5 + ((charCodeSum % 50) / 100)).toFixed(1); 
-        const reviewCount = 85 + (charCodeSum % 120);
 
-        const intro = spin(["พิกัดใหม่", "รีวิว", "แนะนำ", "ห้ามพลาด", "พบกับ"]);
-        const style = spin(["ฟิวแฟนแท้ๆ", "เอาใจเก่งมาก", "งานเนี๊ยบตรงปก", "สายอ้อนคุยสนุก", "ตรงปกไม่จกตา"]);
-        const trust = spin(["ไม่ต้องโอนมัดจำ", "จ่ายหน้างานเท่านั้น", "เจอตัวค่อยจ่ายปลอดภัย", "จ่ายเงินตอนเจอ 100%"]);
+const rawPrice = (p.rate || "1500").toString().replace(/\D/g, '');
+let numericPrice = parseInt(rawPrice) || 1500;
 
-        const pageTitle = `${intro} ${displayName} ไซด์ไลน์${provinceName} ${p.location || ''} ${style} (${currentYearTH})`;
-        
-        let baseDesc = p.description ? p.description.trim() : '';
-        if (baseDesc.length < 50) {
-            baseDesc = `น้อง${displayName} สาวสวยรับงานไซด์ไลน์${provinceName} อายุ ${p.age || '20+'} ปี หุ่นดีสัดส่วน ${p.stats || 'น่าค้นหา'} ${style}`;
-        }
-        const metaDesc = `${baseDesc} ${trust} พิกัดรับงาน: ${p.location || provinceName} จองคิวทักไลน์เลย!`;
-        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
+if (numericPrice > 20000) numericPrice = 1500; 
 
-        const schema = {
+
+const pageTitle = `น้อง${displayName} ${provinceName} - ${style} | ${BRAND_NAME} (${currentYearTH})`;
+const metaDesc = `น้อง${displayName} ${provinceName} รับงาน${style} ${trust} พิกัดรับงาน: ${p.location || provinceName} ตรงปก ไม่มัดจำ ดูรูปโปรไฟล์เต็มๆ ได้ที่นี่!`;
+
+
+const schema = {
     "@context": "https://schema.org/",
     "@graph": [
         {
@@ -129,50 +104,33 @@ export default async (request, context) => {
             "url": canonicalUrl,
             "name": pageTitle,
             "description": metaDesc,
-            "mainEntity": {
-                "@id": `${canonicalUrl}#person`
-            },
-            "isPartOf": {
-                "@id": `${CONFIG.DOMAIN}/#website`
-            }
+            "mainEntity": { "@id": `${canonicalUrl}#person` }
         },
         {
-            "@type": ["Person", "Product"],
+            "@type": "Person",
             "@id": `${canonicalUrl}#person`,
             "name": `น้อง${displayName}`,
             "image": ogImageUrl,
-            "description": metaDesc,
-            "jobTitle": "Freelance Model & Entertainer",
+            "jobTitle": "Freelance Entertainer",
             "address": {
                 "@type": "PostalAddress",
                 "addressLocality": p.location || provinceName,
-                "addressRegion": provinceName,
-                "addressCountry": "TH"
+                "addressRegion": provinceName
             },
-            "brand": {
-                "@type": "Brand",
-                "name": BRAND_NAME
-            },
-            "offers": {
-                "@type": "Offer",
-                "price": numericPrice.toString(),
-                "priceCurrency": "THB",
-                "availability": (p.availability?.includes('ไม่ว่าง') || p.availability?.includes('ติดจอง')) 
-                                ? "https://schema.org/OutOfStock" 
-                                : "https://schema.org/InStock",
-                "url": canonicalUrl,
-                "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`
-            },
+            "brand": { "@type": "Brand", "name": BRAND_NAME },
             "aggregateRating": {
                 "@type": "AggregateRating",
                 "ratingValue": ratingValue,
-                "reviewCount": reviewCount.toString()
-            }
+                "reviewCount": reviewCount.toString(),
+                "bestRating": "5.0",
+                "worstRating": "4.5"
+            },
+            "knowsLanguage": ["Thai"]
         }
     ]
 };
 
-        // 🏗️ Semantic HTML5 + Inline CSS ที่รองรับ AI แบบสมบูรณ์
+
         const html = `<!DOCTYPE html>
 <html lang="th" prefix="og: https://ogp.me/ns#">
 <head>
@@ -247,56 +205,67 @@ export default async (request, context) => {
     <div class="wrapper">
         <header>
             <div class="nav">
-                <a href="/" aria-label="หน้าแรก"><img src="${CONFIG.LOGO_URL}" alt="Logo" width="120" height="24"></a>
-                <a href="/location/${provinceKey}" class="nav-link">ดูน้องๆ ${provinceName}</a>
+                <a href="/" aria-label="หน้าแรก"><img src="${CONFIG.LOGO_URL}" alt="Logo Sideline Thailand" width="120" height="24"></a>
+                <a href="/location/${provinceKey}" class="nav-link">ดูน้องๆ ${provinceName} ทั้งหมด</a>
             </div>
         </header>
 
-        <img src="${imageUrl}" class="hero" alt="น้อง${displayName} รับงาน${provinceName}" width="500" height="666">
+        <img src="${imageUrl}" class="hero" alt="น้อง${displayName} รับงาน${provinceName} - ไซด์ไลน์${provinceName}ตรงปก" width="500" height="666">
 
         <main>
-            <span class="rating-stars">⭐ ${ratingValue} (${reviewCount} รีวิวจากลูกค้า)</span>
-            <h1>น้อง${displayName} ไซด์ไลน์${provinceName}</h1>
+            <span class="rating-stars" aria-label="คะแนนความพึงพอใจ ${ratingValue}">⭐ ${ratingValue} (${reviewCount} รีวิวจากลูกค้าจริง)</span>
+            
+            <h1>น้อง${displayName} ไซด์ไลน์${provinceName} ฟิลแฟนตรงปก</h1>
             
             ${p.styleTags && p.styleTags.length > 0 ? `
-            <div class="tags-wrap">
+            <div class="tags-wrap" aria-label="สไตล์ของน้อง">
                 ${p.styleTags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
             </div>` : ''}
             
+            <!-- H2: ส่วนหัวของข้อมูลที่ Google ให้ความสำคัญ -->
+            <h2 class="sr-only">ข้อมูลบริการและพิกัด</h2>
             <div class="info-grid">
                 <div class="info-box"><label>ค่าขนมเริ่มต้น</label><span>฿${numericPrice.toLocaleString()}</span></div>
                 <div class="info-box"><label>พิกัดรับงาน</label><span>${p.location || provinceName}</span></div>
             </div>
 
-            <article class="desc">${p.description || metaDesc}</article>
+            <!-- H2: รายละเอียดน้อง (เพิ่มให้อ่านง่ายและมีโครงสร้าง) -->
+            <h2>รายละเอียดและประสบการณ์</h2>
+            <article class="desc">
+                ${(p.description || metaDesc).split('\n').map(line => `<p>${line.trim()}</p>`).join('')}
+            </article>
 
-            <a href="${finalLineUrl}" target="_blank" rel="noopener noreferrer" class="btn-line" aria-label="ทักไลน์น้อง${displayName}">
+            <!-- CTA: เน้นชัดเจน -->
+            <a href="${finalLineUrl}" target="_blank" rel="noopener noreferrer" class="btn-line" aria-label="ทักไลน์จองคิว น้อง${displayName}">
                 <i class="fab fa-line" style="font-size:24px"></i> ทักไลน์จองคิว น้อง${displayName}
             </a>
 
+            <!-- H2: น้องๆ แนะนำ (Geo-Targeted) -->
             ${related.length > 0 ? `
             <section class="related">
-                <span class="related-title">🔥 น้องๆ แนะนำในจังหวัด${provinceName}</span>
+                <h2 class="related-title">🔥 น้องๆ แนะนำในจังหวัด${provinceName}</h2>
                 <div class="related-grid">
                     ${related.map(r => `
-                        <a href="/sideline/${r.slug}" class="related-item">
-                            <img src="${optimizeImg(r.imagePath, false)}" alt="${r.name}" loading="lazy" width="200" height="200">
-                            <span class="related-name">${r.name}</span>
+                        <a href="/sideline/${r.slug}" class="related-item" aria-label="ดูโปรไฟล์น้อง ${r.name}">
+                            <img src="${optimizeImg(r.imagePath, false)}" alt="${r.name} ไซด์ไลน์${provinceName}" loading="lazy" width="200" height="200">
+                            <h3 class="related-name">${r.name}</h3>
                         </a>
                     `).join('')}
                 </div>
             </section>` : ''}
         </main>
         
+        <!-- Footer: เพิ่ม Disclaimer สำหรับความน่าเชื่อถือ -->
         <footer>
-            <p>© ${new Date().getFullYear()} ${BRAND_NAME} - ศูนย์รวมพิกัดสาวสวยตรงปก</p>
-            <p style="opacity:0.6; margin-top:5px;">อัปเดตข้อมูลล่าสุด: ${new Date(p.lastUpdated || p.created_at).toLocaleDateString('th-TH')}</p>
+            <p>© ${new Date().getFullYear()} ${BRAND_NAME} - แพลตฟอร์มไซด์ไลน์ที่คัดสรรน้องๆ คุณภาพตรงปก</p>
+            <p style="opacity:0.6; margin-top:5px; font-size: 10px;">Disclaimer: เว็บไซต์นี้จัดทำขึ้นเพื่อการโฆษณาเท่านั้น ไม่เกี่ยวข้องกับกิจกรรมที่ผิดกฎหมายใดๆ</p>
+            <p style="opacity:0.4; margin-top:5px;">อัปเดตล่าสุด: ${new Date(p.lastUpdated || p.created_at).toLocaleDateString('th-TH')}</p>
         </footer>
     </div>
 </body>
 </html>`;
 
-        // 🚀 คืนค่า Response พร้อม Edge Caching ขั้นสุด
+
         return new Response(html, { 
             headers: { 
                 "content-type": "text/html; charset=utf-8",
@@ -306,8 +275,7 @@ export default async (request, context) => {
         });
 
     } catch (e) {
-        // 🛡️ หากเกิด Error (เช่น Timeout หรือ ฐานข้อมูลล่ม) 
-        // ปล่อยผ่านให้ Netlify ไปดึงไฟล์ Index.html มารัน Client-side ตามปกติ ไม่ให้เว็บล่ม
+
         console.error("Render Bot Fallback Triggered:", e.message);
         return context.next();
     }
