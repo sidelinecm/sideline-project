@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
+// ⚙️ แนะนำให้ลบ Key ตรงนี้ออกเมื่อตั้งค่า Environment Variables ใน Netlify เสร็จแล้ว
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
@@ -27,13 +28,13 @@ const optimizeImg = (path, width = 600) => {
 
 const getLocalZones = (provinceKey) => {
     const zones = {
-        'chiangmai': ['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'ดอยสุเทพ'],
-        'khon-kaen': ['มข.', 'กังสดาล', 'ริมบึงแก่นนคร', 'หลังมอ', 'เซ็นทรัลขอนแก่น', 'ท่าพระ', 'บ้านฝาง'],
-        'phuket': ['ป่าตอง', 'กะตะ', 'กะรน', 'ตัวเมืองภูเก็ต', 'ฉลอง', 'ราไวย์', 'กมลา', 'สุรินทร์'],
-        'udonthani': ['ยูดีทาวน์', 'เซ็นทรัลอุดร', 'หนองประจักษ์', 'โพศรี', 'กุดจับ'],
-        'chiangrai': ['บ้านดู่', 'หอนาฬิกา', 'ริมกก', 'มฟล.', 'นาหมื่น']
+        'chiangmai':['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'ดอยสุเทพ'],
+        'khon-kaen':['มข.', 'กังสดาล', 'ริมบึงแก่นนคร', 'หลังมอ', 'เซ็นทรัลขอนแก่น', 'ท่าพระ', 'บ้านฝาง'],
+        'phuket':['ป่าตอง', 'กะตะ', 'กะรน', 'ตัวเมืองภูเก็ต', 'ฉลอง', 'ราไวย์', 'กมลา', 'สุรินทร์'],
+        'udonthani':['ยูดีทาวน์', 'เซ็นทรัลอุดร', 'หนองประจักษ์', 'โพศรี', 'กุดจับ'],
+        'chiangrai':['บ้านดู่', 'หอนาฬิกา', 'ริมกก', 'มฟล.', 'นาหมื่น']
     };
-    return zones[provinceKey.toLowerCase()] || ['ย่านใจกลางเมือง', 'พื้นที่ใกล้เคียง', 'โซนพรีเมียม'];
+    return zones[provinceKey.toLowerCase()] ||['ย่านใจกลางเมือง', 'พื้นที่ใกล้เคียง', 'โซนพรีเมียม'];
 };
 
 const fetchWithTimeout = (promise, ms = 3500) => {
@@ -44,19 +45,19 @@ const fetchWithTimeout = (promise, ms = 3500) => {
 };
 
 export default async (request, context) => {
-    // 🔍 Bot Detection (Enhanced)
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     const isBot = /bot|crawler|spider|google|facebook|twitter|line|whatsapp|telegram|discord|bing|slurp|yandex/i.test(ua);
     
     if (!isBot) return context.next();
 
+    // ✅ ดึงพารามิเตอร์นอก try..catch ป้องกันการเกิด Scope Error
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
+
+    if (!validateProvinceKey(provinceKey)) return context.next();
+
     try {
-        const url = new URL(request.url);
-        const pathParts = url.pathname.split('/').filter(Boolean);
-        const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
-
-        if (!validateProvinceKey(provinceKey)) return context.next();
-
         // 📦 Cache First Strategy
         const cache = await caches.open('province-v2');
         const cacheKey = `province:${provinceKey}`;
@@ -72,33 +73,35 @@ export default async (request, context) => {
             });
         }
 
-        // 🚀 Supabase Client (Singleton + Optimized)
-        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
+        // 🚀 ดึง API Key จาก Netlify Env Variables (ปลอดภัยขึ้น)
+        const envUrl = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_URL') : null;
+        const envKey = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_KEY') : null;
+        const supabaseUrl = envUrl || CONFIG.SUPABASE_URL;
+        const supabaseKey = envKey || CONFIG.SUPABASE_KEY;
+
+        const supabase = createClient(supabaseUrl, supabaseKey, {
             global: { headers: { 'TNT-Edge-Function': 'province-renderer' } }
         });
 
-        // ⚡ Parallel Queries (Enhanced)
+        // ⚡ Parallel Queries (พร้อมตัวป้องกัน Timeout)
         const [provinceRes, profilesRes] = await Promise.allSettled([
-            supabase
-                .from('provinces')
-                .select('nameThai, key')
-                .eq('key', provinceKey)
-                .maybeSingle()
-                .then(({ data, error }) => ({ data, error })),
+            fetchWithTimeout(
+                supabase.from('provinces').select('nameThai, key').eq('key', provinceKey).maybeSingle()
+            ).then(({ data, error }) => ({ data, error })),
             
-            supabase
-                .from('profiles')
+            fetchWithTimeout(
+                supabase.from('profiles')
                 .select('slug, name, imagePath, location, rate, isfeatured, availability, provinceKey, lastUpdated')
                 .eq('provinceKey', provinceKey)
                 .eq('active', true)
                 .order('isfeatured', { ascending: false })
                 .order('lastUpdated', { ascending: false, nullsFirst: true })
                 .limit(24)
-                .then(({ data, error }) => ({ data: data || [], error }))
+            ).then(({ data, error }) => ({ data: data || [], error }))
         ]);
 
         const provinceData = provinceRes.status === 'fulfilled' ? provinceRes.value.data : null;
-        const profiles = profilesRes.status === 'fulfilled' ? profilesRes.value.data : [];
+        const profiles = profilesRes.status === 'fulfilled' ? profilesRes.value.data :[];
 
         if (!provinceData || profiles.length === 0) return context.next();
 
@@ -126,7 +129,7 @@ export default async (request, context) => {
         const metaDesc = `รวมไซด์ไลน์${provinceName} ${profileCount} คน อัปเดต${currentYearTH} โซน ${localZones.slice(0, 5).join(', ')} ราคา ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}฿ รับงานเอง รูปตรงปก จ่ายหน้างาน`;
 
         // ❓ Dynamic FAQ
-        const faqData = [
+        const faqData =[
             { 
                 q: `ไซด์ไลน์${provinceName} ต้องโอนมัดจำก่อนไหม?`, 
                 a: `ไม่ต้องโอนมัดจำทุกโซนใน${provinceName} จ่ายเงินเมื่อเจอน้องๆ เท่านั้น ปลอดภัย 100%` 
@@ -141,10 +144,10 @@ export default async (request, context) => {
             }
         ];
 
-        // 🌟 Schema.org 2026 (Production Ready)
+        // 🌟 Schema.org 2026 (ปลอดภัยจาก Google Penalty ปรับลบเรตติ้งปลอมออก)
         const schema = {
             "@context": "https://schema.org",
-            "@graph": [
+            "@graph":[
                 {
                     "@type": "CollectionPage",
                     "@id": `${canonicalUrl}#page`,
@@ -156,7 +159,7 @@ export default async (request, context) => {
                 },
                 {
                     "@type": "BreadcrumbList",
-                    "itemListElement": [
+                    "itemListElement":[
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                         { "@type": "ListItem", "position": 2, "name": provinceName, "item": canonicalUrl }
                     ]
@@ -184,13 +187,6 @@ export default async (request, context) => {
                         "addressCountry": "TH"
                     },
                     "geo": { "@type": "GeoCoordinates", "addressCountry": "TH" },
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": "4.9",
-                        "reviewCount": (profileCount * 8 + 200).toString(),
-                        "bestRating": "5",
-                        "worstRating": "1"
-                    },
                     "offers": {
                         "@type": "AggregateOffer",
                         "lowPrice": minPrice,
@@ -270,7 +266,7 @@ export default async (request, context) => {
     <script type="application/ld+json">${JSON.stringify(schema, null, 2)}</script>
     
     <style>
-        /* 🎨 Production CSS (Performance Optimized) */
+        /* 🎨 Production CSS */
         :root {
             --primary: #db2777; --primary-dark: #be185d;
             --success: #06c755; --bg: #0f172a; --card: #1e293b;
@@ -291,7 +287,6 @@ export default async (request, context) => {
             max-width: 1200px; margin: 0 auto; padding: clamp(20px, 5vw, 40px);
         }
 
-        /* Hero Section */
         .hero {
             text-align: center; padding: clamp(40px, 10vw, 80px) 0;
             background: linear-gradient(135deg, rgba(219,39,119,0.1), rgba(15,23,42,0.8));
@@ -317,7 +312,6 @@ export default async (request, context) => {
         .stat-value { font-size: clamp(24px, 6vw, 36px); font-weight: 900; }
         .stat-label { font-size: 14px; color: var(--txt-muted); margin-top: 4px; }
 
-        /* Grid */
         .grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: clamp(20px, 4vw, 28px); margin-top: 40px;
@@ -350,7 +344,6 @@ export default async (request, context) => {
         }
         .location { color: var(--txt-muted); font-size: 14px; }
 
-        /* FAQ */
         .faq-section {
             margin-top: 80px; padding: 48px; background: rgba(255,255,255,0.02);
             border-radius: 24px; border: 1px solid var(--border);
@@ -367,13 +360,11 @@ export default async (request, context) => {
         }
         .faq-answer { color: var(--txt-muted); line-height: 1.7; }
 
-        /* Footer */
         footer {
             text-align: center; padding: 60px 24px 40px; color: #64748b;
             font-size: 13px; border-top: 1px solid var(--border); margin-top: 80px;
         }
 
-        /* Responsive & Accessibility */
         @media (max-width: 768px) { .container { padding: 20px 16px; } }
         .sr-only { position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0); }
         
@@ -478,6 +469,7 @@ export default async (request, context) => {
         return response;
 
     } catch (error) {
+        // ✅ ไม่เกิด Error แบบก่อนหน้าแล้ว เพราะรู้จักตัวแปร provinceKey ดีแล้ว
         console.error('[Province Renderer] Error:', {
             provinceKey,
             error: error.message,

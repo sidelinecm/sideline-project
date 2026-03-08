@@ -42,24 +42,23 @@ const fetchWithTimeout = (promise, ms = 3500) => {
 
 // 🛡️ Cache & Rate Limiting
 const getCacheKey = (slug) => `profile:${slug}`;
-const RATE_LIMIT_KEY = (slug) => `rate:${slug}`;
 
 export default async (request, context) => {
-    // 🔍 Bot Detection (Enhanced)
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     const isBot = /bot|crawler|spider|google|facebook|twitter|line|whatsapp|telegram|discord|bing|slurp|yandex/i.test(ua);
     
     if (!isBot) return context.next();
 
-    try {
-        const url = new URL(request.url);
-        const pathParts = url.pathname.split('/').filter(Boolean);
-        
-        if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
-        
-        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        if (!validateSlug(slug)) return context.next();
+    // ✅ ดึงพารามิเตอร์นอก try..catch
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    
+    if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
+    const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
 
+    if (!validateSlug(slug)) return context.next();
+
+    try {
         // 📦 Cache First Strategy
         const cache = await caches.open('profile-v2');
         const cacheKey = getCacheKey(slug);
@@ -74,37 +73,36 @@ export default async (request, context) => {
             });
         }
 
-        // 🚀 Supabase Client (Singleton Pattern)
-        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
+        // 🚀 ดึง API Key จาก Env (ปลอดภัย)
+        const envUrl = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_URL') : null;
+        const envKey = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_KEY') : null;
+        const supabaseUrl = envUrl || CONFIG.SUPABASE_URL;
+        const supabaseKey = envKey || CONFIG.SUPABASE_KEY;
+
+        const supabase = createClient(supabaseUrl, supabaseKey, {
             global: {
                 headers: { 'TNT-Edge-Function': 'profile-renderer' }
             }
         });
 
-        // ⚡ Parallel Queries with Fallback
+        // ⚡ Parallel Queries (พร้อม Timeout)
         const [profileRes, relatedRes] = await Promise.allSettled([
-            supabase
-                .from('profiles')
-                .select('*, provinces(nameThai, key)')
-                .eq('slug', slug)
-                .eq('active', true)
-                .maybeSingle()
-                .then(({ data, error }) => ({ data, error })),
+            fetchWithTimeout(
+                supabase.from('profiles').select('*, provinces(nameThai, key)')
+                .eq('slug', slug).eq('active', true).maybeSingle()
+            ).then(({ data, error }) => ({ data, error })),
             
-            supabase
-                .from('profiles')
-                .select('slug, name, imagePath, location')
-                .eq('active', true)
-                .order('availability', { ascending: false })
-                .limit(6)
-                .then(({ data, error }) => ({ data: data || [], error }))
+            fetchWithTimeout(
+                supabase.from('profiles').select('slug, name, imagePath, location')
+                .eq('active', true).order('availability', { ascending: false }).limit(6)
+            ).then(({ data, error }) => ({ data: data || [], error }))
         ]);
 
         const p = profileRes.status === 'fulfilled' ? profileRes.value.data : null;
         if (!p) return context.next();
 
         const related = (relatedRes.status === 'fulfilled' && relatedRes.value.data)
-            ?.filter(r => r.slug !== slug && r.provinceKey === p.provinceKey) || [];
+            ?.filter(r => r.slug !== slug && r.provinceKey === p.provinceKey) ||[];
 
         // 🎨 Generate Metadata
         const displayName = (p.name || 'สาวสวย').trim();
@@ -116,8 +114,8 @@ export default async (request, context) => {
         const imageUrl = optimizeImg(p.imagePath, false);
         const finalLineUrl = formatLineUrl(p.lineId);
         
-        const styles = ["ฟิวแฟนแท้ๆ", "เอาใจเก่งมาก", "งานเนี๊ยบตรงปก", "สายอ้อนคุยสนุก", "น้องรักสุดที่รัก"];
-        const trusts = ["ไม่ต้องโอนมัดจำ", "จ่ายหน้างานเท่านั้น", "ปลอดภัย 100%", "ตรงปกทุกเคส"];
+        const styles =["ฟิวแฟนแท้ๆ", "เอาใจเก่งมาก", "งานเนี๊ยบตรงปก", "สายอ้อนคุยสนุก", "น้องรักสุดที่รัก"];
+        const trusts =["ไม่ต้องโอนมัดจำ", "จ่ายหน้างานเท่านั้น", "ปลอดภัย 100%", "ตรงปกทุกเคส"];
         
         const style = spin(styles);
         const trust = spin(trusts);
@@ -125,17 +123,13 @@ export default async (request, context) => {
         const rawPrice = (p.rate || "1500").toString().replace(/\D/g, '');
         const numericPrice = Math.min(parseInt(rawPrice) || 1500, 25000);
         
-        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.3 + ((charCodeSum % 70) / 100)).toFixed(1);
-        const reviewCount = 92 + (charCodeSum % 150);
-
         const pageTitle = `น้อง${displayName} รับงานไซด์ไลน์${provinceName} - ${style} (${currentYearTH})`;
         const metaDesc = `น้อง${displayName} ${provinceName} รับงาน${style} ${trust} พิกัด: ${p.location || provinceName} ตรงปก จ่ายหน้างาน ดูโปรไฟล์เต็ม!`;
 
-        // 🌟 Schema.org 2026 Standards (Fixed & Enhanced)
+        // 🌟 Schema.org 2026 Standards (ลบเรตติ้งปลอมออก ปลอดภัยต่อ SEO)
         const schema = {
             "@context": "https://schema.org",
-            "@graph": [
+            "@graph":[
                 {
                     "@type": "WebPage",
                     "@id": `${canonicalUrl}#page`,
@@ -145,7 +139,7 @@ export default async (request, context) => {
                     "inLanguage": "th-TH",
                     "breadcrumb": {
                         "@type": "BreadcrumbList",
-                        "itemListElement": [
+                        "itemListElement":[
                             { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                             { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
                             { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
@@ -158,7 +152,7 @@ export default async (request, context) => {
                     "name": `น้อง${displayName}`,
                     "alternateName": displayName,
                     "url": canonicalUrl,
-                    "image": [ogImageUrl, imageUrl],
+                    "image":[ogImageUrl, imageUrl],
                     "telephone": finalLineUrl,
                     "priceRange": `฿${Math.floor(numericPrice/1000)}K+`,
                     "address": {
@@ -171,20 +165,13 @@ export default async (request, context) => {
                         "@type": "GeoCoordinates",
                         "addressCountry": "TH"
                     },
-                    "openingHoursSpecification": [{
+                    "openingHoursSpecification":[{
                         "@type": "OpeningHoursSpecification",
-                        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                        "dayOfWeek":["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
                         "opens": "00:00",
                         "closes": "23:59"
                     }],
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": ratingValue,
-                        "reviewCount": reviewCount,
-                        "bestRating": "5",
-                        "worstRating": "1"
-                    },
-                    "sameAs": [finalLineUrl]
+                    "sameAs":[finalLineUrl]
                 }
             ]
         };
@@ -203,7 +190,7 @@ export default async (request, context) => {
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="theme-color" content="#0f172a">
     
-    <!-- Open Graph -->
+    <!-- Open Graph (✅ แก้ไข BRAND_NAME เป็น Dynamic) -->
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:image" content="${ogImageUrl}">
@@ -212,7 +199,7 @@ export default async (request, context) => {
     <meta property="og:image:height" content="1600">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="profile">
-    <meta property="og:site_name" content="${BRAND_NAME}">
+    <meta property="og:site_name" content="Sideline ${provinceName}">
     <meta property="og:locale" content="th_TH">
 
     <!-- Twitter -->
@@ -236,7 +223,7 @@ export default async (request, context) => {
     <script type="application/ld+json">${JSON.stringify(schema, null, 2)}</script>
     
     <style>
-        /* 🎨 Modern CSS with Performance Optimizations */
+        /* 🎨 Modern CSS */
         :root {
             --primary: #db2777; --primary-dark: #be185d;
             --success: #06c755; --success-dark: #059669;
@@ -255,7 +242,6 @@ export default async (request, context) => {
             contain: layout style;
         }
         
-        /* Header - Fixed & Optimized */
         header {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: saturate(180%) blur(20px);
@@ -279,7 +265,6 @@ export default async (request, context) => {
         }
         .nav-link:hover { opacity: 0.8; }
 
-        /* Main Wrapper */
         .wrapper {
             width: 100%; max-width: 500px;
             background: var(--card); min-height: 100vh;
@@ -288,7 +273,6 @@ export default async (request, context) => {
             contain: layout style;
         }
         
-        /* Hero Image - Optimized */
         .hero {
             width: 100%; aspect-ratio: 3/4;
             object-fit: cover; background: #000;
@@ -298,13 +282,6 @@ export default async (request, context) => {
         
         main { padding: clamp(20px, 5vw, 28px); flex-grow: 1; contain: layout style; }
         
-        /* Rating Stars */
-        .rating-stars {
-            color: #fbbf24; font-size: clamp(13px, 3vw, 15px);
-            font-weight: 800; margin-bottom: 12px; display: block;
-        }
-        
-        /* Typography */
         h1 {
             font-size: clamp(22px, 6vw, 28px); font-weight: 800;
             margin: 0 0 16px; line-height: 1.25;
@@ -313,7 +290,6 @@ export default async (request, context) => {
             background-clip: text;
         }
         
-        /* Tags */
         .tags-wrap {
             display: flex; flex-wrap: wrap; gap: 8px;
             margin-bottom: 24px; contain: layout style;
@@ -324,7 +300,6 @@ export default async (request, context) => {
             font-weight: 600; backdrop-filter: blur(10px);
         }
 
-        /* Info Grid - Responsive */
         .info-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: clamp(10px, 3vw, 14px); margin-bottom: 28px;
@@ -344,7 +319,6 @@ export default async (request, context) => {
             font-size: clamp(16px, 4vw, 20px); font-weight: 800; color: var(--txt);
         }
 
-        /* Description */
         .desc {
             font-size: clamp(14px, 3.5vw, 16px); color: var(--txt-muted);
             margin-bottom: 32px; padding: 24px;
@@ -352,7 +326,6 @@ export default async (request, context) => {
             border: 1px solid var(--border); white-space: pre-line;
         }
         
-        /* CTA Button */
         .btn-line {
             display: flex; align-items: center; justify-content: center; gap: 12px;
             background: linear-gradient(135deg, var(--success), var(--success-dark));
@@ -368,7 +341,6 @@ export default async (request, context) => {
         }
         .btn-line i { font-size: 24px; }
 
-        /* Related Section */
         .related {
             margin-top: 48px; padding-top: 32px;
             border-top: 1px solid var(--border);
@@ -401,13 +373,11 @@ export default async (request, context) => {
             display: block; line-height: 1.3;
         }
 
-        /* Footer */
         footer {
             text-align: center; padding: 40px 24px 32px;
             color: #64748b; font-size: 12px; border-top: 1px solid var(--border);
         }
 
-        /* Accessibility */
         .sr-only {
             position: absolute; width: 1px; height: 1px;
             padding: 0; margin: -1px; overflow: hidden;
@@ -438,10 +408,6 @@ export default async (request, context) => {
              decoding="async">
 
         <main>
-            <span class="rating-stars" aria-label="คะแนน ${ratingValue} จาก ${reviewCount} รีวิว">
-                ⭐ ${ratingValue} (${reviewCount.toLocaleString('th-TH')} รีวิว)
-            </span>
-            
             <h1>น้อง${displayName}<br>ไซด์ไลน์${provinceName}<br>${style}</h1>
             
             ${p.styleTags && p.styleTags.length > 0 ? `
@@ -534,8 +500,9 @@ export default async (request, context) => {
         return response;
 
     } catch (error) {
+        // ✅ ไม่เกิด Error แบบก่อนหน้าแล้ว เพราะรู้จักตัวแปร slug 
         console.error('[Profile Renderer] Error:', {
-            slug: pathParts[pathParts.length - 1],
+            slug: slug, 
             error: error.message,
             timestamp: new Date().toISOString()
         });
