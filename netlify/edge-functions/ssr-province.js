@@ -8,7 +8,7 @@ const CONFIG = {
     DEFAULT_IMAGE: 'https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp'
 };
 
-// 🔧 Utility Functions (Production Optimized)
+// 🔧 Utility Functions
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const validateProvinceKey = (key) => {
@@ -36,7 +36,7 @@ const getLocalZones = (provinceKey) => {
     return zones[provinceKey.toLowerCase()] ||['ย่านใจกลางเมือง', 'พื้นที่ใกล้เคียง', 'โซนพรีเมียม'];
 };
 
-const fetchWithTimeout = (promise, ms = 3500) => {
+const fetchWithTimeout = (promise, ms = 8000) => {
     const timeout = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Request Timeout')), ms);
     });
@@ -49,7 +49,7 @@ export default async (request, context) => {
     
     if (!isBot) return context.next();
 
-    // ✅ ประกาศ URL และดึงค่าไว้ข้างนอก block try...catch
+    // ✅ ดึงพารามิเตอร์ URL นอก Try-Catch
     const url = new URL(request.url);
     const pathParts = url.pathname.split('/').filter(Boolean);
     const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
@@ -57,7 +57,7 @@ export default async (request, context) => {
     if (!validateProvinceKey(provinceKey)) return context.next();
 
     try {
-        // 📦 Cache First Strategy
+        // 📦 Cache Check
         const cache = await caches.open('province-v2');
         const cacheKey = `province:${provinceKey}`;
         let cached = await cache.match(cacheKey);
@@ -72,37 +72,59 @@ export default async (request, context) => {
             });
         }
 
-        // 🚀 Supabase Client (Singleton + Optimized)
-        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
+        // 🚀 Initialize Supabase
+        const envUrl = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_URL') : null;
+        const envKey = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_KEY') : null;
+        const supabaseUrl = envUrl || CONFIG.SUPABASE_URL;
+        const supabaseKey = envKey || CONFIG.SUPABASE_KEY;
+
+        const supabase = createClient(supabaseUrl, supabaseKey, {
             global: { headers: { 'TNT-Edge-Function': 'province-renderer' } }
         });
 
-        // ⚡ Parallel Queries (Enhanced)
+        // ⚡ Parallel Queries (พร้อม Timeout 8 วินาที เพื่อเช็คปัญหา Database)
         const [provinceRes, profilesRes] = await Promise.allSettled([
-            supabase
-                .from('provinces')
-                .select('nameThai, key')
-                .eq('key', provinceKey)
-                .maybeSingle()
-                .then(({ data, error }) => ({ data, error })),
+            fetchWithTimeout(
+                supabase.from('provinces').select('nameThai, key').eq('key', provinceKey).maybeSingle()
+            ).then(({ data, error }) => ({ data, error })),
             
-            supabase
-                .from('profiles')
+            fetchWithTimeout(
+                supabase.from('profiles')
                 .select('slug, name, imagePath, location, rate, isfeatured, availability, provinceKey, lastUpdated')
                 .eq('provinceKey', provinceKey)
                 .eq('active', true)
                 .order('isfeatured', { ascending: false })
                 .order('lastUpdated', { ascending: false, nullsFirst: true })
                 .limit(24)
-                .then(({ data, error }) => ({ data: data || [], error }))
+            ).then(({ data, error }) => ({ data: data || [], error }))
         ]);
+
+        // 🔍 ดึงค่า Error และ Data ออกมาตรวจสอบ
+        const provinceError = provinceRes.status === 'fulfilled' ? provinceRes.value.error : (provinceRes.reason?.message || 'Timeout');
+        const profilesError = profilesRes.status === 'fulfilled' ? profilesRes.value.error : (profilesRes.reason?.message || 'Timeout');
 
         const provinceData = provinceRes.status === 'fulfilled' ? provinceRes.value.data : null;
         const profiles = profilesRes.status === 'fulfilled' ? profilesRes.value.data :[];
 
-        if (!provinceData || profiles.length === 0) return context.next();
+        // 🚨 โหมด DEBUG: ถ้าดึงข้อมูลไม่ได้ ให้พ่นข้อความ Error โชว์ออกไปให้ Googlebot อ่าน
+        if (!provinceData || profiles.length === 0) {
+            const debugLog = `====== DEBUG INFO ======
+Province Key  : ${provinceKey}
+Has Province? : ${!!provinceData}
+Province Error: ${JSON.stringify(provinceError)}
+Profiles Count: ${profiles.length}
+Profiles Error: ${JSON.stringify(profilesError)}
+========================`;
+            
+            console.error('[DEBUG DATA MISSING]', debugLog);
+            
+            return new Response(debugLog, {
+                status: 200, // ส่งสถานะ 200 เพื่อให้ Googlebot ยอมอ่านข้อความ Debug
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            });
+        }
 
-        // 🎨 Generate Metadata (Enhanced)
+        // 🎨 Generate Metadata (ทำงานปกติถ้าข้อมูลมีครบ)
         const provinceName = provinceData.nameThai;
         const profileCount = profiles.length;
         const localZones = getLocalZones(provinceKey);
@@ -141,7 +163,7 @@ export default async (request, context) => {
             }
         ];
 
-        // 🌟 Schema.org 2026 (Production Ready)
+        // 🌟 Schema.org 2026 (ปลอดภัยจาก Google Penalty ปรับลบเรตติ้งปลอมออก)
         const schema = {
             "@context": "https://schema.org",
             "@graph":[
@@ -184,13 +206,6 @@ export default async (request, context) => {
                         "addressCountry": "TH"
                     },
                     "geo": { "@type": "GeoCoordinates", "addressCountry": "TH" },
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": "4.9",
-                        "reviewCount": (profileCount * 8 + 200).toString(),
-                        "bestRating": "5",
-                        "worstRating": "1"
-                    },
                     "offers": {
                         "@type": "AggregateOffer",
                         "lowPrice": minPrice,
@@ -270,7 +285,7 @@ export default async (request, context) => {
     <script type="application/ld+json">${JSON.stringify(schema, null, 2)}</script>
     
     <style>
-        /* 🎨 Production CSS (Performance Optimized) */
+        /* 🎨 Production CSS */
         :root {
             --primary: #db2777; --primary-dark: #be185d;
             --success: #06c755; --bg: #0f172a; --card: #1e293b;
@@ -291,7 +306,6 @@ export default async (request, context) => {
             max-width: 1200px; margin: 0 auto; padding: clamp(20px, 5vw, 40px);
         }
 
-        /* Hero Section */
         .hero {
             text-align: center; padding: clamp(40px, 10vw, 80px) 0;
             background: linear-gradient(135deg, rgba(219,39,119,0.1), rgba(15,23,42,0.8));
@@ -317,7 +331,6 @@ export default async (request, context) => {
         .stat-value { font-size: clamp(24px, 6vw, 36px); font-weight: 900; }
         .stat-label { font-size: 14px; color: var(--txt-muted); margin-top: 4px; }
 
-        /* Grid */
         .grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: clamp(20px, 4vw, 28px); margin-top: 40px;
@@ -350,7 +363,6 @@ export default async (request, context) => {
         }
         .location { color: var(--txt-muted); font-size: 14px; }
 
-        /* FAQ */
         .faq-section {
             margin-top: 80px; padding: 48px; background: rgba(255,255,255,0.02);
             border-radius: 24px; border: 1px solid var(--border);
@@ -367,13 +379,11 @@ export default async (request, context) => {
         }
         .faq-answer { color: var(--txt-muted); line-height: 1.7; }
 
-        /* Footer */
         footer {
             text-align: center; padding: 60px 24px 40px; color: #64748b;
             font-size: 13px; border-top: 1px solid var(--border); margin-top: 80px;
         }
 
-        /* Responsive & Accessibility */
         @media (max-width: 768px) { .container { padding: 20px 16px; } }
         .sr-only { position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0); }
         
