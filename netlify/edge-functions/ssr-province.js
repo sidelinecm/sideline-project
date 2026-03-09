@@ -476,9 +476,9 @@ Profiles Error: ${JSON.stringify(profilesError)}
             }
         });
 
+        
         await cache.put(cacheKey, response.clone());
         return response;
-
 
     } catch (error) {
         console.error('[Province Renderer] Error:', {
@@ -488,11 +488,12 @@ Profiles Error: ${JSON.stringify(profilesError)}
         });
 
         return new Response('Database Connection Timeout', {
-            status: 503, // เปลี่ยนจาก 404 เป็น 503
+            status: 503,
             headers: {
                 'cache-control': 'no-cache',
                 'x-error': 'province-render-failed',
-                'retry-after': '300' // บอก Google ให้กลับมาใหม่ใน 5 นาที
+                'retry-after': '300'
             }
         });
     }
+}; 
