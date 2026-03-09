@@ -147,237 +147,83 @@ export default async (request, context) => {
             ]
         };
 
-
-        // 📱 Production HTML Template
         const html = `<!DOCTYPE html>
-<html lang="th" prefix="og: http://ogp.me/ns#">
+<html lang="th" prefix="og: https://ogp.me/ns#">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>${pageTitle}</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
-    
-    <!-- SEO Enhanced -->
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#db2777">
     
-    <!-- Open Graph (Complete) -->
+    <!-- Meta Tags สำหรับ Social Share (LINE/FB) -->
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:image" content="${ogImage}">
-    <meta property="og:image:alt" content="ไซด์ไลน์${provinceName} ${profileCount} คน">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="${DYNAMIC_BRAND}">
-    <meta property="og:locale" content="th_TH">
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${pageTitle}">
     <meta name="twitter:description" content="${metaDesc}">
     <meta name="twitter:image" content="${ogImage}">
 
-    <!-- Preload Critical Resources -->
-    <link rel="preload" href="${ogImage}" as="image" fetchpriority="high">
-    <link rel="preload" href="${CONFIG.LOGO_URL}" as="image">
-    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preload" as="image" href="${optimizeImg(profiles[0]?.imagePath, 400)}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-    <!-- Schema -->
-    <script type="application/ld+json">${JSON.stringify(schema, null, 2)}</script>
-    
+    <script type="application/ld+json">${JSON.stringify(schema)}</script>
     <style>
-        /* 🎨 Production CSS */
-        :root {
-            --primary: #db2777; --primary-dark: #be185d;
-            --success: #06c755; --bg: #0f172a; --card: #1e293b;
-            --card-hover: #334155; --txt: #f8fafc; --txt-muted: #cbd5e1;
-            --border: rgba(255,255,255,0.08); --gold: #fbbf24;
-        }
-
-        *, *::before, *::after { box-sizing: border-box; }
-        * { margin: 0; padding: 0; }
-        
-        body {
-            font-family: 'Prompt', -apple-system, sans-serif;
-            background: var(--bg); color: var(--txt); line-height: 1.6;
-            overflow-x: hidden; contain: layout style;
-        }
-
-        .container {
-            max-width: 1200px; margin: 0 auto; padding: clamp(20px, 5vw, 40px);
-        }
-
-        .hero {
-            text-align: center; padding: clamp(40px, 10vw, 80px) 0;
-            background: linear-gradient(135deg, rgba(219,39,119,0.1), rgba(15,23,42,0.8));
-            border-radius: 24px; margin-bottom: 48px; backdrop-filter: blur(20px);
-        }
-        
-        h1 {
-            font-size: clamp(28px, 8vw, 48px); font-weight: 900;
-            background: linear-gradient(135deg, var(--txt), var(--primary), var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; line-height: 1.2; margin-bottom: 20px;
-        }
-
-        .stats {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 24px; margin: 32px 0; justify-items: center;
-        }
-        .stat {
-            text-align: center; background: rgba(255,255,255,0.05);
-            padding: 20px 16px; border-radius: 20px; border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-        }
-        .stat-value { font-size: clamp(24px, 6vw, 36px); font-weight: 900; }
-        .stat-label { font-size: 14px; color: var(--txt-muted); margin-top: 4px; }
-
-        .grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: clamp(20px, 4vw, 28px); margin-top: 40px;
-        }
-
-        .card {
-            background: var(--card); border-radius: 24px; padding: 24px;
-            text-decoration: none; color: inherit; border: 1px solid var(--border);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; overflow: hidden; contain: layout style;
-        }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 4px; background: linear-gradient(90deg, var(--primary), var(--gold));
-        }
-        .card:hover {
-            border-color: var(--primary); transform: translateY(-8px);
-            box-shadow: 0 32px 64px rgba(0,0,0,0.4); background: var(--card-hover);
-        }
-
-        .card-image {
-            width: 100%; aspect-ratio: 3/4; object-fit: cover;
-            border-radius: 16px; margin-bottom: 16px; loading: lazy;
-        }
-
-        .card-title { font-size: clamp(18px, 4vw, 22px); font-weight: 800; margin-bottom: 8px; }
-        .price { 
-            color: var(--gold); font-size: clamp(20px, 5vw, 28px); 
-            font-weight: 900; margin: 12px 0; 
-        }
-        .location { color: var(--txt-muted); font-size: 14px; }
-
-        .faq-section {
-            margin-top: 80px; padding: 48px; background: rgba(255,255,255,0.02);
-            border-radius: 24px; border: 1px solid var(--border);
-            backdrop-filter: blur(20px);
-        }
-        .faq-item {
-            margin-bottom: 32px; padding: 24px; background: rgba(255,255,255,0.03);
-            border-radius: 16px; border-left: 4px solid var(--primary);
-            transition: all 0.3s ease;
-        }
-        .faq-item:hover { background: rgba(255,255,255,0.05); transform: translateX(8px); }
-        .faq-question {
-            font-weight: 800; color: var(--primary); font-size: 18px; margin-bottom: 12px;
-        }
-        .faq-answer { color: var(--txt-muted); line-height: 1.7; }
-
-        footer {
-            text-align: center; padding: 60px 24px 40px; color: #64748b;
-            font-size: 13px; border-top: 1px solid var(--border); margin-top: 80px;
-        }
-
-        @media (max-width: 768px) { .container { padding: 20px 16px; } }
-        .sr-only { position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0); }
-        
-        @media (prefers-reduced-motion: reduce) {
-            * { transition-duration: 0.01ms !important; }
-        }
+        :root { --p: #db2777; --bg: #0f172a; --card: #1e293b; --txt: #f8fafc; }
+        body { font-family: 'Prompt', sans-serif; background: var(--bg); color: var(--txt); margin: 0; }
+        main { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+        h1 { font-size: 32px; font-weight: 900; margin-bottom: 10px; color: #fff; }
+        h2 { font-size: 24px; color: #fff; margin-top: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: var(--card); border-radius: 16px; padding: 15px; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.05); }
+        .card:hover { border-color: var(--p); transform: translateY(-5px); transition: 0.3s; }
+        .price { color: #fbbf24; font-weight: 900; font-size: 18px; }
+        .faq-section { margin-top: 60px; padding: 30px; background: rgba(255,255,255,0.03); border-radius: 16px; }
+        footer { text-align: center; padding: 40px; color: #64748b; font-size: 12px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Hero -->
-        <section class="hero" role="banner">
-            <h1>🔥 ไซด์ไลน์${provinceName}<br>น้องสวยรับงานเอง</h1>
-            <p style="font-size: clamp(16px, 4vw, 20px); max-width: 600px; margin: 0 auto; color: var(--txt-muted);">
-                รวม ${profileCount} คน โซน ${localZones.slice(0, 6).join(', ')} 
-                ราคา ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}฿ 
-                รูปตรงปก จ่ายหน้างาน
-            </p>
-            
-            <div class="stats" aria-label="สถิติ">
-                <div class="stat">
-                    <div class="stat-value">${profileCount}</div>
-                    <div class="stat-label">น้องๆ ออนไลน์</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">฿${minPrice.toLocaleString()}</div>
-                    <div class="stat-label">ราคาต่ำสุด</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">${localZones.length}+</div>
-                    <div class="stat-label">โซนครอบคลุม</div>
-                </div>
-            </div>
+    <main>
+        <section>
+            <h1>ไซด์ไลน์${provinceName} รับงานเอง</h1>
+            <p>ศูนย์รวมสาวสวย <strong>รับงาน${provinceName}</strong> เพื่อนเที่ยว ฟิวแฟน และน้องๆ เอนเตอร์เทนในย่าน ${localZones.slice(0, 5).join(', ')} การันตีตรงปก 100% ปลอดภัย จ่ายเงินหน้างานเท่านั้น</p>
         </section>
 
-        <!-- Profiles Grid -->
-        <section aria-labelledby="profiles-title">
-            <h2 id="profiles-title" style="font-size: clamp(24px, 6vw, 32px); font-weight: 900; color: var(--txt); margin-bottom: 32px;">
-                👩‍❤️‍💋‍👨 น้องๆ แนะนำ ${provinceName}
-            </h2>
-            <div class="grid">
-                ${profiles.slice(0, 18).map(p => {
-                    const rawPrice = (p.rate || "1500").toString().replace(/\D/g, '');
-                    const numericPrice = Math.min(parseInt(rawPrice) || 1500, 25000);
-                    return `
-                    <a href="/sideline/${p.slug}" class="card" aria-label="ดูโปรไฟล์น้อง ${p.name}">
-                        <img src="${optimizeImg(p.imagePath, 400)}" 
-                             alt="น้อง${p.name} ไซด์ไลน์${provinceName}" 
-                             class="card-image" width="300" height="400">
-                        <h3 class="card-title">${p.name}</h3>
-                        <div class="price">฿${numericPrice.toLocaleString('th-TH')}</div>
-                        <div class="location">${p.location || spin(localZones)}</div>
-                    </a>`;
-                }).join('')}
-            </div>
+        <h2>รายชื่อน้องๆ ไซด์ไลน์ ${provinceName} แนะนำ</h2>
+        <section class="grid">
+            ${profiles.map(p => {
+                const numericPrice = (parseInt((p.rate || "1500").toString().replace(/\D/g, '')) > 20000) ? 1500 : parseInt((p.rate || "1500").toString().replace(/\D/g, '')) || 1500;
+                return `
+                <a href="/sideline/${p.slug}" class="card" aria-label="ดูโปรไฟล์น้อง ${p.name}">
+                    <img src="${optimizeImg(p.imagePath, 400)}" alt="${p.name} ไซด์ไลน์${provinceName}" loading="lazy" width="300" height="400" style="width:100%; height:auto; aspect-ratio:3/4; object-fit:cover; border-radius:8px;">
+                    <h3 style="font-size:16px; margin: 10px 0 5px 0;">${p.name}</h3>
+                    <p class="price">฿${numericPrice.toLocaleString()}</p>
+                </a>`;
+            }).join('')}
         </section>
 
-        <!-- FAQ -->
-        <section class="faq-section" aria-labelledby="faq-title">
-            <h2 id="faq-title" style="font-size: clamp(24px, 6vw, 32px); font-weight: 900; color: var(--txt); margin-bottom: 32px; text-align: center;">
-                ❓ คำถามที่พบบ่อย
-            </h2>
+        <section class="faq-section">
+            <h2>คำถามที่พบบ่อย (FAQ) เกี่ยวกับไซด์ไลน์ ${provinceName}</h2>
             ${faqData.map(f => `
-                <article class="faq-item">
-                    <h3 class="faq-question">Q: ${f.q}</h3>
-                    <div class="faq-answer">A: ${f.a}</div>
-                </article>
+                <div style="margin-bottom:20px;">
+                    <p style="font-weight:800; color:var(--p); margin-bottom:5px;">Q: ${f.q}</p>
+                    <p style="color:#cbd5e1; font-size:14px;">A: ${f.a}</p>
+                </div>
             `).join('')}
         </section>
-    </div>
 
-    <!-- Footer -->
-    <footer role="contentinfo">
-        <p>© ${currentYearTH} <strong>${DYNAMIC_BRAND}</strong> - แพลตฟอร์มคุณภาพ ตรงปก จ่ายหน้างาน</p>
-        <p style="opacity:0.7; margin-top:8px;">
-            Disclaimer: จัดทำเพื่อการโฆษณา ไม่เกี่ยวข้องกิจกรรมผิดกฎหมาย
-        </p>
-        <p style="opacity:0.5; margin-top:4px; font-size:12px;">
-            อัปเดตล่าสุด: ${new Date().toLocaleDateString('th-TH', {
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            })}
-        </p>
-    </footer>
+        <footer>
+            <p>© ${YEAR_TH} ${DYNAMIC_BRAND} - แพลตฟอร์มไซด์ไลน์ที่น่าเชื่อถือที่สุดในไทย</p>
+            <p>Disclaimer: เว็บไซต์นี้จัดทำเพื่อการโฆษณาเท่านั้น ไม่เกี่ยวข้องกับการค้าประเวณีหรือกิจกรรมผิดกฎหมาย</p>
+        </footer>
+    </main>
 </body>
 </html>`;
 
