@@ -49,10 +49,9 @@ export default async (request, context) => {
     
     if (!isBot) return context.next();
 
-    // ✅ ดึงพารามิเตอร์ URL นอก Try-Catch
-    const url = new URL(request.url);
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
+const url = new URL(request.url); // <--- ต้องเพิ่มบรรทัดนี้ครับ!
+const pathParts = url.pathname.split('/').filter(Boolean);
+const provinceKey = pathParts[0] === 'location' ? pathParts[1] : (pathParts[pathParts.length - 1] || 'chiangmai');
 
     if (!validateProvinceKey(provinceKey)) return context.next();
 
@@ -480,6 +479,7 @@ Profiles Error: ${JSON.stringify(profilesError)}
         await cache.put(cacheKey, response.clone());
         return response;
 
+
     } catch (error) {
         console.error('[Province Renderer] Error:', {
             provinceKey,
@@ -487,12 +487,12 @@ Profiles Error: ${JSON.stringify(profilesError)}
             timestamp: new Date().toISOString()
         });
 
-        return new Response('Province data temporarily unavailable', {
-            status: 404,
+        return new Response('Database Connection Timeout', {
+            status: 503, // เปลี่ยนจาก 404 เป็น 503
             headers: {
-                'cache-control': 'public, s-maxage=300',
-                'x-error': 'province-miss'
+                'cache-control': 'no-cache',
+                'x-error': 'province-render-failed',
+                'retry-after': '300' // บอก Google ให้กลับมาใหม่ใน 5 นาที
             }
         });
     }
-};
