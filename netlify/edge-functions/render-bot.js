@@ -73,17 +73,8 @@ export default async (request, context) => {
             });
         }
 
-        // 🚀 Initialize Supabase
-        const envUrl = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_URL') : null;
-        const envKey = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_KEY') : null;
-        const supabaseUrl = envUrl || CONFIG.SUPABASE_URL;
-        const supabaseKey = envKey || CONFIG.SUPABASE_KEY;
-
-        const supabase = createClient(supabaseUrl, supabaseKey, {
-            global: {
-                headers: { 'TNT-Edge-Function': 'profile-renderer' }
-            }
-        });
+        // 🚀 Initialize Supabase (ใช้ค่าจาก CONFIG ตรงๆ ตามแบบที่เคยผ่าน)
+const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
         // ⚡ Parallel Queries (พร้อม Timeout 8 วินาที)
         const [profileRes, relatedRes] = await Promise.allSettled([
