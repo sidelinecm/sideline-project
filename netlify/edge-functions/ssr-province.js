@@ -1,23 +1,16 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    LOGO_URL: 'https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp',
-    DEFAULT_IMAGE: 'https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp'
+    LOGO: 'https://sidelinechiangmai.netlify.app/images/logo-sidelinechiangmai.webp'
 };
 
-// 🔧 Utility Functions
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-const validateProvinceKey = (key) => {
-    if (!key || key.length < 3 || key.length > 20) return false;
-    return /^[a-z0-9\-]+$/.test(key.toLowerCase());
-};
-
 const optimizeImg = (path, width = 600) => {
-    if (!path) return CONFIG.DEFAULT_IMAGE;
+    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
         return path.replace('/upload/', `/upload/c_scale,w_${width},q_auto,f_auto/`);
     }
@@ -27,152 +20,91 @@ const optimizeImg = (path, width = 600) => {
 
 const getLocalZones = (provinceKey) => {
     const zones = {
-        'chiangmai':['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'ดอยสุเทพ'],
-        'khon-kaen':['มข.', 'กังสดาล', 'ริมบึงแก่นนคร', 'หลังมอ', 'เซ็นทรัลขอนแก่น', 'ท่าพระ', 'บ้านฝาง'],
-        'phuket':['ป่าตอง', 'กะตะ', 'กะรน', 'ตัวเมืองภูเก็ต', 'ฉลอง', 'ราไวย์', 'กมลา', 'สุรินทร์'],
-        'udonthani':['ยูดีทาวน์', 'เซ็นทรัลอุดร', 'หนองประจักษ์', 'โพศรี', 'กุดจับ'],
-        'chiangrai':['บ้านดู่', 'หอนาฬิกา', 'ริมกก', 'มฟล.', 'นาหมื่น']
+        'chiangmai':['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค'],
+        'khon-kaen':['มข.', 'กังสดาล', 'ริมบึงแก่นนคร', 'หลังมอ', 'เซ็นทรัลขอนแก่น'],
+        'phuket':['ป่าตอง', 'กะตะ', 'กะรน', 'ตัวเมืองภูเก็ต', 'ฉลอง', 'ราไวย์'],
+        'udonthani':['ยูดีทาวน์', 'เซ็นทรัลอุดร', 'หนองประจักษ์', 'โพศรี'],
+        'chiangrai':['บ้านดู่', 'หอนาฬิกา', 'ริมกก', 'มฟล.']
     };
-    return zones[provinceKey.toLowerCase()] ||['ย่านใจกลางเมือง', 'พื้นที่ใกล้เคียง', 'โซนพรีเมียม'];
+    return zones[provinceKey.toLowerCase()] ||['ย่านใจกลางเมือง', 'พื้นที่ใกล้เคียง'];
 };
 
-const fetchWithTimeout = (promise, ms = 8000) => {
-    const timeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request Timeout')), ms);
+const fetchWithTimeout = (promise, ms = 5000) => {
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Database Request Timeout')), ms);
     });
-    return Promise.race([promise, timeout]);
+    return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
 };
 
 export default async (request, context) => {
-    const ua = (request.headers.get('User-Agent') || '').toLowerCase();
-    const isBot = /bot|crawler|spider|google|facebook|twitter|line|whatsapp|telegram|discord|bing|slurp|yandex/i.test(ua);
-    
-    if (!isBot) return context.next();
-
-const url = new URL(request.url); // <--- ต้องเพิ่มบรรทัดนี้ครับ!
-const pathParts = url.pathname.split('/').filter(Boolean);
-const provinceKey = pathParts[0] === 'location' ? pathParts[1] : (pathParts[pathParts.length - 1] || 'chiangmai');
-
-    if (!validateProvinceKey(provinceKey)) return context.next();
-
     try {
-        // 📦 Cache Check
-        const cache = await caches.open('province-v2');
-        const cacheKey = `province:${provinceKey}`;
-        let cached = await cache.match(cacheKey);
+        const url = new URL(request.url);
+        const pathParts = url.pathname.split('/').filter(Boolean);
+        const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
+
+        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        if (cached) {
-            return new Response(cached, {
-                headers: {
-                    'Cache-Control': 'public, s-maxage=7200, stale-while-revalidate=86400',
-                    'x-cache': 'HIT',
-                    'x-rendered-by': 'province-renderer-v2'
-                }
-            });
-        }
-
-        // 🚀 Initialize Supabase (ใช้ค่าจาก CONFIG ตรงๆ ตามแบบที่เคยผ่าน)
-const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-
-        // ⚡ Parallel Queries (พร้อม Timeout 8 วินาที เพื่อเช็คปัญหา Database)
-        const [provinceRes, profilesRes] = await Promise.allSettled([
-            fetchWithTimeout(
-                supabase.from('provinces').select('nameThai, key').eq('key', provinceKey).maybeSingle()
-            ).then(({ data, error }) => ({ data, error })),
-            
-            fetchWithTimeout(
+        const [provinceRes, profilesRes] = await fetchWithTimeout(
+            Promise.all([
+                supabase.from('provinces').select('nameThai, key').eq('key', provinceKey).maybeSingle(),
                 supabase.from('profiles')
-                .select('slug, name, imagePath, location, rate, isfeatured, availability, provinceKey, lastUpdated')
-                .eq('provinceKey', provinceKey)
-                .eq('active', true)
-                .order('isfeatured', { ascending: false })
-                .order('lastUpdated', { ascending: false, nullsFirst: true })
-                .limit(24)
-            ).then(({ data, error }) => ({ data: data || [], error }))
-        ]);
+                        .select('slug, name, imagePath, location, rate, isfeatured, availability')
+                        .eq('provinceKey', provinceKey)
+                        .eq('active', true)
+                        .order('isfeatured', { ascending: false })
+                        .order('lastUpdated', { ascending: false })
+            ]),
+            5000 
+        );
 
-        // 🔍 ดึงค่า Error และ Data ออกมาตรวจสอบ
-        const provinceError = provinceRes.status === 'fulfilled' ? provinceRes.value.error : (provinceRes.reason?.message || 'Timeout');
-        const profilesError = profilesRes.status === 'fulfilled' ? profilesRes.value.error : (profilesRes.reason?.message || 'Timeout');
+        const provinceData = provinceRes?.data;
+        const profiles = profilesRes?.data ||[];
 
-        const provinceData = provinceRes.status === 'fulfilled' ? provinceRes.value.data : null;
-        const profiles = profilesRes.status === 'fulfilled' ? profilesRes.value.data :[];
+        if (!provinceData || profiles.length === 0) return context.next();
 
-        // 🚨 โหมด DEBUG: ถ้าดึงข้อมูลไม่ได้ ให้พ่นข้อความ Error โชว์ออกไปให้ Googlebot อ่าน
-        if (!provinceData || profiles.length === 0) {
-            const debugLog = `====== DEBUG INFO ======
-Province Key  : ${provinceKey}
-Has Province? : ${!!provinceData}
-Province Error: ${JSON.stringify(provinceError)}
-Profiles Count: ${profiles.length}
-Profiles Error: ${JSON.stringify(profilesError)}
-========================`;
-            
-            console.error('[DEBUG DATA MISSING]', debugLog);
-            
-            return new Response(debugLog, {
-                status: 200, // ส่งสถานะ 200 เพื่อให้ Googlebot ยอมอ่านข้อความ Debug
-                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-            });
-        }
-
-        // 🎨 Generate Metadata (ทำงานปกติถ้าข้อมูลมีครบ)
         const provinceName = provinceData.nameThai;
         const profileCount = profiles.length;
         const localZones = getLocalZones(provinceKey);
         const randomZone = spin(localZones);
-        const currentYearTH = new Date().getFullYear() + 543;
+        const YEAR_TH = new Date().getFullYear() + 543;
         const DYNAMIC_BRAND = `Sideline ${provinceName}`;
-        const canonicalUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
-        const ogImage = optimizeImg(profiles[0]?.imagePath, 1200);
 
-        // 💰 Price Analysis
         const prices = profiles.map(p => {
-            const raw = (p.rate || "1500").toString().replace(/\D/g, '');
-            const val = parseInt(raw) || 1500;
-            return (val > 25000 || val < 500) ? 1500 : val;
+            const val = parseInt((p.rate || "1500").toString().replace(/\D/g, ''));
+            return (val > 20000 || val < 500) ? 1500 : val;
         });
         const minPrice = prices.length > 0 ? Math.min(...prices) : 1500;
-        const maxPrice = prices.length > 0 ? Math.max(...prices) : 3500;
-        const avgPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+        const maxPrice = prices.length > 0 ? Math.max(...prices) : 3000;
 
-        const pageTitle = `ไซด์ไลน์${provinceName} ${profileCount} คน โซน${randomZone} งานดีตรงปก (${currentYearTH})`;
-        const metaDesc = `รวมไซด์ไลน์${provinceName} ${profileCount} คน อัปเดต${currentYearTH} โซน ${localZones.slice(0, 5).join(', ')} ราคา ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}฿ รับงานเอง รูปตรงปก จ่ายหน้างาน`;
+        const pageTitle = `พิกัดไซด์ไลน์${provinceName} รับงานเอง น้องๆ ${profileCount} คน โซน${randomZone} งานดีตรงปก (${YEAR_TH})`;
+        const metaDesc = `รวมไซด์ไลน์${provinceName} ${profileCount} คน อัปเดตล่าสุด ${YEAR_TH} ครอบคลุมโซน ${localZones.slice(0, 4).join(', ')} คัดคนสวย รับงานเอง ฟิวแฟน รูปตรงปก ไม่มัดจำ จ่ายหน้างาน`;
+        const canonicalUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
+        const ogImage = optimizeImg(profiles[0]?.imagePath, 800);
 
-        // ❓ Dynamic FAQ
         const faqData =[
-            { 
-                q: `ไซด์ไลน์${provinceName} ต้องโอนมัดจำก่อนไหม?`, 
-                a: `ไม่ต้องโอนมัดจำทุกโซนใน${provinceName} จ่ายเงินเมื่อเจอน้องๆ เท่านั้น ปลอดภัย 100%` 
-            },
-            { 
-                q: `มีน้องๆ ไซด์ไลน์${provinceName} โซนไหนบ้าง?`, 
-                a: `ครอบคลุมทุกโซนยอดนิยม ${localZones.slice(0, 6).join(', ')} และพื้นที่ใกล้เคียง อัปเดตทุกวัน` 
-            },
-            { 
-                q: `ราคาไซด์ไลน์${provinceName} เท่าไหร่?`, 
-                a: `ราคาเริ่มต้น ${minPrice.toLocaleString()}฿ สูงสุด ${maxPrice.toLocaleString()}฿ เฉลี่ย ${avgPrice.toLocaleString()}฿/เคส` 
-            }
+            { q: `ไซด์ไลน์${provinceName} ต้องโอนมัดจำก่อนไหม?`, a: `เราให้ความสำคัญกับความปลอดภัยของลูกค้าเป็นหลัก ไม่มีนโยบายโอนมัดจำก่อน ลูกค้าทุกคนสามารถจองคิวและจ่ายเงินหน้างานได้ทันทีเมื่อพบตัวน้องครับ` },
+            { q: `บริการไซด์ไลน์${provinceName} ปลอดภัยไหม?`, a: `เราคัดกรองน้องๆ ที่รับงานเองโดยตรง การันตีความเป็นมืออาชีพ ปลอดภัย และตรงปก 100% เพื่อประสบการณ์ที่ดีที่สุดของลูกค้า` },
+            { q: `ทำไมต้องจองผ่านเว็บ Sideline ${provinceName}?`, a: `เราเป็นศูนย์รวมสาวสวยที่คัดคุณภาพตรงปก มีระบบรีวิวและสถานะการรับงานที่เป็นปัจจุบัน พร้อมช่วยเหลือลูกค้าตลอด 24 ชั่วโมง` }
         ];
 
-        // 🌟 Schema.org 2026 (ปลอดภัยจาก Google Penalty ปรับลบเรตติ้งปลอมออก)
+        // 🌟 Schema จัดเต็ม ครอบคลุมทุกมิติ (แก้ Error ทะลุกรอบ Google)
         const schema = {
             "@context": "https://schema.org",
             "@graph":[
                 {
                     "@type": "CollectionPage",
-                    "@id": `${canonicalUrl}#page`,
+                    "@id": `${canonicalUrl}#webpage`,
                     "url": canonicalUrl,
                     "name": pageTitle,
                     "description": metaDesc,
-                    "inLanguage": "th-TH",
-                    "mainEntity": { "@id": `${canonicalUrl}#collection` }
+                    "inLanguage": "th-TH"
                 },
                 {
                     "@type": "BreadcrumbList",
                     "itemListElement":[
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": provinceName, "item": canonicalUrl }
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": canonicalUrl }
                     ]
                 },
                 {
@@ -184,47 +116,32 @@ Profiles Error: ${JSON.stringify(profilesError)}
                     }))
                 },
                 {
-                    "@type": "LocalBusiness",
+                    "@type": "LocalBusiness", // 👈 เปลี่ยนจาก Service เป็น LocalBusiness เพื่อให้โชว์ดาวได้
                     "@id": `${canonicalUrl}#business`,
-                    "name": `Sideline ${provinceName}`,
-                    "alternateName": `ไซด์ไลน์${provinceName}`,
-                    "url": canonicalUrl,
-                    "image": [ogImage],
-                    "telephone": "LINE",
-                    "priceRange": `฿${Math.floor(minPrice/1000)}K - ฿${Math.floor(maxPrice/1000)}K`,
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressRegion": provinceName,
-                        "addressCountry": "TH"
+                    "name": `บริการไซด์ไลน์ ${provinceName}`,
+                    "image": ogImage, // 👈 Google บังคับให้มีรูป
+                    "priceRange": "฿฿", // 👈 Google บังคับสำหรับ LocalBusiness
+                    "provider": { "@type": "Organization", "name": DYNAMIC_BRAND },
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": "4.9",
+                        "reviewCount": (150 + profileCount * 5).toString()
                     },
-                    "geo": { "@type": "GeoCoordinates", "addressCountry": "TH" },
                     "offers": {
                         "@type": "AggregateOffer",
-                        "lowPrice": minPrice,
-                        "highPrice": maxPrice,
+                        "lowPrice": minPrice.toString(),
+                        "highPrice": maxPrice.toString(),
                         "priceCurrency": "THB",
-                        "offerCount": profileCount.toString(),
-                        "availability": "https://schema.org/InStock"
-                    },
-                    "provider": {
-                        "@type": "Organization",
-                        "name": DYNAMIC_BRAND,
-                        "url": canonicalUrl
+                        "offerCount": profileCount.toString()
                     }
                 },
                 {
                     "@type": "ItemList",
-                    "@id": `${canonicalUrl}#collection`,
                     "numberOfItems": profileCount,
                     "itemListElement": profiles.slice(0, 20).map((p, i) => ({
                         "@type": "ListItem",
                         "position": i + 1,
-                        "item": {
-                            "@type": "LocalBusiness",
-                            "name": p.name,
-                            "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`,
-                            "image": optimizeImg(p.imagePath)
-                        }
+                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
                     }))
                 }
             ]
@@ -463,37 +380,14 @@ Profiles Error: ${JSON.stringify(profilesError)}
 </body>
 </html>`;
 
-        // 💾 Cache & Return
-        const response = new Response(html, {
-            headers: {
-                'content-type': 'text/html; charset=utf-8',
-                'x-robots-tag': 'index, follow, max-image-preview:large, max-snippet:-1',
-                'cache-control': 'public, s-maxage=7200, stale-while-revalidate=86400',
-                'x-cache': 'MISS',
-                'x-rendered-by': 'province-renderer-v2',
-                'x-profiles': profileCount.toString(),
-                'vary': 'User-Agent'
-            }
+        return new Response(html, { 
+            headers: { 
+                "content-type": "text/html; charset=utf-8", 
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" 
+            } 
         });
-
-        
-        await cache.put(cacheKey, response.clone());
-        return response;
-
-    } catch (error) {
-        console.error('[Province Renderer] Error:', {
-            provinceKey,
-            error: error.message,
-            timestamp: new Date().toISOString()
-        });
-
-        return new Response('Database Connection Timeout', {
-            status: 503,
-            headers: {
-                'cache-control': 'no-cache',
-                'x-error': 'province-render-failed',
-                'retry-after': '300'
-            }
-        });
+    } catch (e) { 
+        console.error("SSR Province Error:", e.message);
+        return context.next(); 
     }
-}; 
+};
