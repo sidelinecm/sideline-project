@@ -36,7 +36,7 @@ const getLocalZones = (provinceKey) => {
         'chiangrai':['บ้านดู่', 'หอนาฬิกา', 'ริมกก', 'มฟล.', 'นอ', 'เวียงพิงค์'],
         'lampang':['ตัวเมืองลำปาง', 'เหมืองใหม่', 'นาแหน', 'แจ้หลวง', 'งาว', 'เถิน'],
         'phisanulok':['เซ็นทรัลพลัส', 'มหาวิทยาลัยนเรศวร', 'แพร่', 'วังทอง'],
-        'nakhonsawan':['เซ็นทรัลนครสวรรค์', 'บ้านไร่', 'โกรกพระ', 'ตาก'] // แก้ไขวงเล็บปิดให้ถูกต้องแล้ว
+        'nakhonsawan':['เซ็นทรัลนครสวรรค์', 'บ้านไร่', 'โกรกพระ', 'ตาก']
     };
     
     // ป้องกันกรณี provinceKey ไม่มีค่า (null/undefined) ก่อนใช้ .toLowerCase()
@@ -69,6 +69,9 @@ const supportsAvif = () => {
     });
 };
 
+// ⚡ สร้างตัวแปรเก็บ Instance ของ DB ไว้นอกฟังก์ชันเพื่อแชร์ข้าม Request
+let supabaseInstance = null;
+
 export default async (request, context) => {
     try {
         const url = new URL(request.url);
@@ -78,24 +81,30 @@ export default async (request, context) => {
         const PAGE_SIZE = 24;
         const offset = (page - 1) * PAGE_SIZE;
 
-        // 🚀 Environment-aware Supabase config
-        const supabaseUrl = typeof Netlify !== 'undefined' 
-            ? Netlify.env.get('SUPABASE_URL') || CONFIG.SUPABASE_URL 
-            : CONFIG.SUPABASE_URL;
-        const supabaseKey = typeof Netlify !== 'undefined' 
-            ? Netlify.env.get('SUPABASE_KEY') || CONFIG.SUPABASE_KEY 
-            : CONFIG.SUPABASE_KEY;
-            
-        const supabase = createClient(supabaseUrl, supabaseKey, {
-            auth: { autoRefreshToken: false, persistSession: false }
-        });
+        // 🚀 โหลด Database แค่ครั้งแรกครั้งเดียว (เพิ่มประสิทธิภาพ)
+        if (!supabaseInstance) {
+            const supabaseUrl = typeof Netlify !== 'undefined' 
+                ? Netlify.env.get('SUPABASE_URL') || CONFIG.SUPABASE_URL 
+                : CONFIG.SUPABASE_URL;
+            const supabaseKey = typeof Netlify !== 'undefined' 
+                ? Netlify.env.get('SUPABASE_KEY') || CONFIG.SUPABASE_KEY 
+                : CONFIG.SUPABASE_KEY;
+                
+            supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+                auth: { autoRefreshToken: false, persistSession: false }
+            });
+        }
+        
+        // ดึง Instance ที่มีอยู่มาใช้ทันที
+        const supabase = supabaseInstance;
 
-        // ⚡ ULTRA-OPTIMIZED Parallel Queries with Error Recovery
-        const [provinceRes, profilesRes, countRes] = await Promise.allSettled([
+        // ⚡ ULTRA-OPTIMIZED Parallel Queries with Error Recovery + Timeout Protection
+        const[provinceRes, profilesRes, countRes] = await Promise.allSettled([
             supabase.from('provinces')
                 .select('nameThai, key, description')
                 .eq('key', provinceKey)
-                .maybeSingle(),
+                .maybeSingle()
+                .timeout(5000),
                 
             supabase.from('profiles')
                 .select(`
@@ -107,16 +116,18 @@ export default async (request, context) => {
                 .eq('active', true)
                 .order('isfeatured', { ascending: false, nullsFirst: false })
                 .order('lastUpdated', { ascending: false })
-                .range(offset, offset + PAGE_SIZE - 1),
+                .range(offset, offset + PAGE_SIZE - 1)
+                .timeout(5000),
                 
             supabase.from('profiles')
                 .select('id', { count: 'exact', head: true })
                 .eq('provinceKey', provinceKey)
                 .eq('active', true)
+                .timeout(5000)
         ]);
 
         const provinceData = provinceRes.status === 'fulfilled' && provinceRes.value.data ? provinceRes.value.data : null;
-        const profiles = profilesRes.status === 'fulfilled' ? profilesRes.value.data || [] : [];
+        const profiles = profilesRes.status === 'fulfilled' ? profilesRes.value.data || [] :[];
         const totalCount = countRes.status === 'fulfilled' ? countRes.value.count || 0 : 0;
 
         if (!provinceData) {
@@ -152,7 +163,7 @@ export default async (request, context) => {
         const hasPrevPage = page > 1;
 
         // 🧠 Smart FAQ Generation
-        const faqData = [
+        const faqData =[
             { 
                 q: `ไซด์ไลน์${provinceName} ต้องจองล่วงหน้ากี่ชั่วโมง?`, 
                 a: `ส่วนใหญ่รับงานทันทีหรือภายใน 1-2 ชั่วโมง แนะนำเช็คสถานะ "ว่างรับงาน" ในโปรไฟล์ สามารถนัดได้เลยทันที` 
@@ -170,7 +181,7 @@ export default async (request, context) => {
         // 🚀 NEXT-LEVEL Schema.org 2026
         const schema = {
             "@context": "https://schema.org",
-            "@graph": [
+            "@graph":[
                 {
                     "@type": "CollectionPage",
                     "@id": `${canonicalUrl}#webpage`,
@@ -180,7 +191,7 @@ export default async (request, context) => {
                     "inLanguage": "th-TH",
                     "breadcrumb": {
                         "@type": "BreadcrumbList",
-                        "itemListElement": [
+                        "itemListElement":[
                             { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                             { "@type": "ListItem", "position": 2, "name": provinceName, "item": canonicalUrl }
                         ]
@@ -675,7 +686,7 @@ export default async (request, context) => {
                 const isFeatured = p.isfeatured;
                 const tags = Array.isArray(p.styleTags) && p.styleTags.length ? p.styleTags.slice(0, 3) : ["ฟิวแฟน", "ตรงปก"];
                 
-                const specs = [];
+                const specs =[];
                 if (p.age) specs.push(`อายุ ${p.age}`);
                 if (p.height) specs.push(`${p.height}ซม.`);
                 if (p.stats || p.measurements) specs.push(p.stats || p.measurements);
@@ -763,17 +774,17 @@ export default async (request, context) => {
             <h3>โซนให้บริการยอดนิยม ${provinceName}</h3>
             <p>น้องๆ กระจายตัวครอบคลุมทุกโซน ${localZones.slice(0, 6).join(', ')} สามารถเลือกน้องใกล้ตัวคุณได้ทันที ทุกโปรไฟล์อัปเดตสถานะแบบเรียลไทม์</p>
 
-            <div class="faq-grid">
+<div class="faq-grid">
                 <h3 style="grid-column: 1 / -1; margin-bottom: 8px; color: var(--txt); font-size: 24px;">
                     <i class="fa-solid fa-circle-question"></i> คำถามที่พบบ่อย
                 </h3>
                 ${faqData.map(f => `
-                    <article class="faq-item" itemscope itemtype="https://schema.org/QAPage">
-                        <h4 class="faq-q" itemprop="name">
+                    <article class="faq-item">
+                        <h4 class="faq-q">
                             <i class="fa-regular fa-circle-question"></i> ${f.q}
                         </h4>
-                        <div itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
-                            <p class="faq-a" itemprop="text">${f.a}</p>
+                        <div>
+                            <p class="faq-a">${f.a}</p>
                         </div>
                     </article>
                 `).join('')}

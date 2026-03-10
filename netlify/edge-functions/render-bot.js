@@ -50,6 +50,9 @@ const fetchWithTimeout = (promise, timeout = 5000, retries = 2) => {
     });
 };
 
+// ⚡ สร้างตัวแปรเก็บ Instance ของ DB ไว้นอกฟังก์ชันเพื่อแชร์ข้าม Request
+let supabaseInstance = null;
+
 export default async (request, context) => {
     // 🔥 Advanced Bot Detection 2026 (LINE/FB/Twitter/Google/Discord)
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
@@ -68,17 +71,22 @@ export default async (request, context) => {
     }
 
     try {
-        // 🚀 Environment + Latest Supabase Config
-        const supabaseUrl = typeof Netlify !== 'undefined' 
-            ? Netlify.env.get('SUPABASE_URL') || CONFIG.SUPABASE_URL 
-            : CONFIG.SUPABASE_URL;
-        const supabaseKey = typeof Netlify !== 'undefined' 
-            ? Netlify.env.get('SUPABASE_KEY') || CONFIG.SUPABASE_KEY 
-            : CONFIG.SUPABASE_KEY;
+        // 🚀 โหลด Database แค่ครั้งแรกครั้งเดียว (เพิ่มประสิทธิภาพ)
+        if (!supabaseInstance) {
+            const supabaseUrl = typeof Netlify !== 'undefined' 
+                ? Netlify.env.get('SUPABASE_URL') || CONFIG.SUPABASE_URL 
+                : CONFIG.SUPABASE_URL;
+            const supabaseKey = typeof Netlify !== 'undefined' 
+                ? Netlify.env.get('SUPABASE_KEY') || CONFIG.SUPABASE_KEY 
+                : CONFIG.SUPABASE_KEY;
 
-        const supabase = createClient(supabaseUrl, supabaseKey, {
-            auth: { autoRefreshToken: false, persistSession: false }
-        });
+            supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+                auth: { autoRefreshToken: false, persistSession: false }
+            });
+        }
+
+        // ดึง Instance ที่มีอยู่มาใช้ทันที
+        const supabase = supabaseInstance;
 
         // ⚡ ULTRA-FAST Query + Error Recovery
         const { data: profile, error } = await supabase
@@ -126,7 +134,7 @@ export default async (request, context) => {
         };
 
         // 🔥 ULTIMATE SEO Title + Meta (Keyword-First)
-        const keywords = [
+        const keywords =[
             `น้อง${displayName}`,
             `ไซด์ไลน์${provinceName}`,
             'รับงานเอง',
@@ -139,7 +147,7 @@ export default async (request, context) => {
         const metaDesc = `น้อง${displayName} ไซด์ไลน์${provinceName} รับงานเอง ${specs.age}ปี สัดส่วน${specs.stats} พิกัด${specs.location} ราคาเริ่ม ${numericPrice.toLocaleString()}฿ การันตีตรงปก ไม่มีมัดจำ ชำระหน้างาน`;
         
         // 🤖 Dynamic FAQ (Keyword Stuffing เฉพาะ Profile)
-        const faqData = [
+        const faqData =[
             { 
                 q: `น้อง${displayName} ไซด์ไลน์${provinceName} รับงานโซนไหน?`, 
                 a: `น้อง${displayName} รับงานโซน ${specs.location} และพื้นที่ใกล้เคียงใน${provinceName} สามารถนัดได้ทันทีหากสถานะ "ว่างรับงาน"` 
@@ -158,7 +166,7 @@ export default async (request, context) => {
         const reviewCount = Math.floor(Math.random() * 61) + 40; // 40-100 reviews
         const schema = {
             "@context": "https://schema.org",
-            "@graph": [
+            "@graph":[
                 {
                     "@type": "ProfilePage",
                     "@id": `${canonicalUrl}#webpage`,
@@ -168,7 +176,7 @@ export default async (request, context) => {
                     "mainEntity": { "@id": `${canonicalUrl}#person` },
                     "breadcrumb": {
                         "@type": "BreadcrumbList",
-                        "itemListElement": [
+                        "itemListElement":[
                             { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                             { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
                             { "@type": "ListItem", "position": 3, "name": `น้อง${displayName}`, "item": canonicalUrl }
@@ -176,7 +184,7 @@ export default async (request, context) => {
                     }
                 },
                 {
-                    "@type": ["Person", "TourGuide"],
+                    "@type":["Person", "TourGuide"],
                     "@id": `${canonicalUrl}#person`,
                     "name": `น้อง${displayName}`,
                     "alternateName": `น้อง${displayName} ไซด์ไลน์${provinceName}`,
