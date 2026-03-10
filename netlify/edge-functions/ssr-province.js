@@ -41,8 +41,9 @@ export default async (request, context) => {
         const pathParts = url.pathname.split('/').filter(Boolean);
         const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
 
-        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        
+const supabaseUrl = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_URL') || CONFIG.SUPABASE_URL : CONFIG.SUPABASE_URL;
+const supabaseKey = typeof Netlify !== 'undefined' ? Netlify.env.get('SUPABASE_KEY') || CONFIG.SUPABASE_KEY : CONFIG.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
         // ⚡ ดึงข้อมูลจากฐานข้อมูลจริงแบบครบถ้วนทุกฟิลด์
         const [provinceRes, profilesRes] = await Promise.allSettled([
             fetchWithTimeout(supabase.from('provinces').select('nameThai, key').eq('key', provinceKey).maybeSingle()),
