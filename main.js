@@ -1210,47 +1210,39 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * อัปเดต URL จากฟิลเตอร์ปัจจุบัน
+ * อัปเดต URL จากฟิลเตอร์ปัจจุบัน (SEO Clean URL Version)
  * @param {Object} query - ข้อมูลฟิลเตอร์
  */
 function updateUrlFromFilters(query) {
     try {
-        // สร้าง URL Parameters
-        const params = new URLSearchParams();
-        
-        if (query.text) params.set('q', encodeURIComponent(query.text));
-        if (query.province && query.province !== 'all') params.set('province', query.province);
-        if (query.avail && query.avail !== 'all') params.set('avail', query.avail);
-        if (query.featured) params.set('featured', 'true');
-        if (query.sort && query.sort !== 'featured') params.set('sort', query.sort);
-        
-        const paramsString = params.toString();
-        
-        // สร้าง pathname
-        let pathname = '/';
+        // 1. สร้าง Path ที่สะอาดที่สุด (เช่น /location/chiangmai)
+        let newUrl = '/';
         if (query.province && query.province !== 'all') {
-            pathname = `/location/${encodeURIComponent(query.province)}`;
+            newUrl = `/location/${encodeURIComponent(query.province)}`;
         }
         
-        // สร้าง URL สุดท้าย
-        const newUrl = paramsString ? `${pathname}?${paramsString}` : pathname;
+        // 2. อนุญาตให้ใส่เฉพาะการค้นหา (q) เท่านั้น ส่วนฟิลเตอร์อื่นๆ ให้เปลี่ยนแค่ UI หน้าจอ ไม่ต้องเปลี่ยน URL
+        const params = new URLSearchParams();
+        if (query.text) params.set('q', query.text); // ไม่ต้อง encodeURIComponent ซ้ำเพราะ URLSearchParams จัดการให้
         
-        // อัปเดต URL โดยไม่ reload หน้า
+        const paramsString = params.toString();
+        if (paramsString) {
+            newUrl = `${newUrl}?${paramsString}`;
+        }
+        
+        // 3. อัปเดต URL โดยไม่ reload หน้า และไม่มี ?province= ขยะโผล่มาอีก
         if (window.location.pathname + window.location.search !== newUrl) {
             history.pushState({ 
                 filters: query,
                 timestamp: Date.now() 
             }, '', newUrl);
             
-            console.log(`🌐 อัปเดต URL: ${newUrl}`);
+            console.log(`🌐 SEO URL Updated: ${newUrl}`);
         }
-        
     } catch (error) {
         console.error('❌ เกิดข้อผิดพลาดในการอัปเดต URL:', error);
     }
 }
-
-
 
 async function renderCardsIncrementally(container, profiles) {
     if (!container || !profiles) return;
@@ -1935,20 +1927,21 @@ function populateLightboxData(p) {
         els.lineBtnContainer.appendChild(wrapper);
     }
 }
+
 // ==========================================
 // 💎 SEO STRATEGIC POOL (คลังคำศัพท์ LSI)
 // ==========================================
 const SEO_POOL = {
-    styles: [
+    styles:[
         "ฟิวแฟนแท้ๆ", "งานเนี๊ยบดูแลดี", "สายหวานคุยสนุก", 
         "เอาใจเก่งสุดๆ", "สไตล์นางแบบ", "น่ารักขี้อ้อน", 
         "งานเอนเตอร์เทน", "คุยเก่งไม่เดดแอร์"
     ],
-    trust: [
+    trust:[
         "ไม่ต้องโอนก่อน", "ไม่มีมัดจำล่วงหน้า", "ไม่โอนจอง", 
         "จ่ายหน้างาน 100%", "นัดเจอจ่ายสด", "ปลอดภัยไร้กังวล"
     ],
-    guarantee: [
+    guarantee:[
         "ตัวจริงตรงรูป 100%", "รูปปัจจุบันไม่จกตา", "การันตีความสวย", 
         "ตรงปกไม่ผิดหวัง", "คัดงานคุณภาพ", "รับประกันความตรงปก"
     ],
@@ -1958,17 +1951,29 @@ const SEO_POOL = {
 };
 
 // =================================================================
-// 10. SEO META TAGS UPDATER (SMART & SAFE VERSION)
+// 10. SEO META TAGS UPDATER (ULTIMATE PERFECT VERSION)
 // =================================================================
-function updateAdvancedMeta(profile = null, pageData = null) {
-    // 1. ตรวจสอบว่ามีข้อมูล SEO ในไฟล์ HTML อยู่แล้วหรือไม่ (ป้องกันการเขียนทับหน้าแรก)
-    const hasExistingTitle = document.title && document.title !== "" && document.title !== "Document";
-    const hasExistingDesc = document.querySelector('meta[name="description"]')?.getAttribute('content');
 
-    // 2. ถ้าไม่ใช่หน้าโปรไฟล์ หรือ หน้าจังหวัด (เป็นหน้าที่มีไฟล์ HTML จริงๆ เช่น index.html)
-    // และมีการตั้งค่า Title/Desc ไว้แล้ว ให้หยุดทำงานทันที ไม่ต้องทับ
-    if (!profile && !pageData && hasExistingTitle && hasExistingDesc) {
-        console.log("SEO: พบข้อมูลเดิมในไฟล์ HTML แล้ว ข้ามการอัปเดตเพื่อป้องกันการเขียนทับ");
+// 🛡️ ตัวแปรช่วยป้องกันการทับข้อมูลของ SSR ในการโหลดหน้าครั้งแรก
+let isFirstLoad = true;
+
+// 🧹 ฟังก์ชันล้าง Schema เก่าทิ้งทุกครั้งที่เปลี่ยนหน้า (แก้บั๊ก Schema พอกหางหมู)
+function clearAllDynamicSchemas() {
+    const schemaIds =[
+        'schema-jsonld-person', 'schema-jsonld-list', 'schema-jsonld-faq', 
+        'schema-jsonld-breadcrumb', 'schema-jsonld-org', 'schema-jsonld-website'
+    ];
+    schemaIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+}
+
+function updateAdvancedMeta(profile = null, pageData = null) {
+    // 1. ถ้าเป็นการโหลดครั้งแรกสุด ปล่อยให้ SSR ทำงานไป ไม่ต้องเอา JS ไปกวน
+    if (isFirstLoad) {
+        console.log("SEO: First load detected. Using SSR Metadata.");
+        isFirstLoad = false;
         return; 
     }
 
@@ -1976,34 +1981,33 @@ function updateAdvancedMeta(profile = null, pageData = null) {
     const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html';
     const isDynamic = profile || pageData;
 
-    // ถ้าไม่ใช่หน้าแรก และ ไม่มีข้อมูล dynamic ก็ไม่ต้องทำอะไร
-    if (!isDynamic && !isRoot) {
-        return; 
-    }
+    // เคลียร์ Schema เก่าทิ้งก่อนเริ่มสร้างใหม่
+    clearAllDynamicSchemas();
 
-    // เตรียมตัวแปรพื้นฐาน (เฉพาะกรณีที่จำเป็นต้องใช้)
+    // เตรียมตัวแปรพื้นฐาน
     const YEAR_TH = new Date().getFullYear() + 543;
-    const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const thaiMonths =["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const d = new Date();
     const CURRENT_DATE = `${d.getDate()} ${thaiMonths[d.getMonth()]} ${YEAR_TH}`;
 
     const getCleanName = (rawName) => {
         if (!rawName) return "";
         let name = rawName.trim().replace(/^(น้อง\s?)/, '');
-        name = name.toLowerCase();
         return `น้อง${name.charAt(0).toUpperCase() + name.slice(1)}`;
     };
 
     // ==========================================
-    // CASE A: หน้าโปรไฟล์ (ส่วนนี้ต้องทำเพราะไม่มีไฟล์ HTML แยก)
+    // CASE A: หน้าโปรไฟล์น้องๆ
     // ==========================================
     if (profile) {
         const displayName = getCleanName(profile.name);
         const province = profile.provinceNameThai || 'เชียงใหม่';
         const priceInfo = profile.rate ? `ราคา ${profile.rate}` : 'สอบถามราคา';
         const workArea = profile.location ? `${profile.location}, ${province}` : province;
+        const profileUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`;
+        const provinceUrl = `${CONFIG.SITE_URL}/location/${profile.provinceKey || 'chiangmai'}`;
         
-        let statsParts = [];
+        let statsParts =[];
         if (profile.stats) statsParts.push(`สัดส่วน ${profile.stats}`);
         if (profile.age) statsParts.push(`อายุ ${profile.age}`);
         const detailsSnippet = statsParts.join('. '); 
@@ -2017,42 +2021,59 @@ function updateAdvancedMeta(profile = null, pageData = null) {
         document.title = finalTitle;
         updateMeta('description', finalDesc);
         updateMeta('keywords', `${displayName}, ไซด์ไลน์${province}, รับงาน${province}`);
-        updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`);
+        updateLink('canonical', profileUrl);
         
         updateOpenGraphMeta(profile, finalTitle, finalDesc, 'profile');
+        
+        // 🚀 ฝัง Schema คู่ (Person + Breadcrumb)
         injectSchema(generatePersonSchema(profile, finalDesc, province), 'schema-jsonld-person');
+        injectSchema(generateBreadcrumbSchema([
+            { name: "หน้าแรก", url: CONFIG.SITE_URL },
+            { name: `ไซด์ไลน์${province}`, url: provinceUrl },
+            { name: displayName, url: profileUrl }
+        ]), 'schema-jsonld-breadcrumb');
     }
 
     // ==========================================
     // CASE B: หน้าจังหวัด
     // ==========================================
     else if (pageData) {
-        // ทำงานเฉพาะเมื่อไม่มีข้อมูลในไฟล์ HTML มาก่อน
         const province = pageData.provinceName || 'เชียงใหม่';
+        const pageUrl = pageData.canonicalUrl || window.location.href;
         const pageTitle = `ไซด์ไลน์${province} รับงานเอง ตรงปก (${YEAR_TH})`;
-        const pageDesc = `รวมน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province}. อัปเดตล่าสุด ${CURRENT_DATE}.`;
+        const pageDesc = `รวมน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province}. อัปเดตล่าสุด ${CURRENT_DATE}. ปลอดภัย ไม่มัดจำ.`;
 
         document.title = pageTitle;
         updateMeta('description', pageDesc);
-        updateLink('canonical', pageData.canonicalUrl || window.location.href);
+        updateLink('canonical', pageUrl);
+        updateOpenGraphMeta(null, pageTitle, pageDesc, 'website');
+        
+        // 🚀 ฝัง Schema คู่ (Listing + Breadcrumb)
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
+        injectSchema(generateBreadcrumbSchema([
+            { name: "หน้าแรก", url: CONFIG.SITE_URL },
+            { name: `ไซด์ไลน์${province}`, url: pageUrl }
+        ]), 'schema-jsonld-breadcrumb');
     } 
     
     // ==========================================
-    // CASE C: หน้าแรก (Fallback)
-    // จะรันถึงตรงนี้ได้ แปลว่าหน้าแรกของคุณ "ไม่มี" Title/Desc ในไฟล์ index.html
+    // CASE C: หน้าแรก (Home)
     // ==========================================
     else if (isRoot) {
-        const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานไม่มัดจำ (${YEAR_TH})`;
-        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. ไม่ต้องโอนมัดจำ ปลอดภัย 100%`;
+        const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานไม่มัดจำ ฟิวแฟนตรงปก (${YEAR_TH})`;
+        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. รับงานเอง ไม่ผ่านเอเย่นต์ ไม่ต้องโอนมัดจำ ปลอดภัย 100%`;
 
         document.title = GLOBAL_TITLE;
         updateMeta('description', GLOBAL_DESC);
         updateLink('canonical', CONFIG.SITE_URL);
+        updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
         
-        // ใส่เฉพาะ Schema ที่จำเป็นเพื่อช่วย SEO
+        // 🚀 ฝัง Schema ชุดใหญ่สำหรับหน้าแรก
+        injectSchema(generateWebsiteSchema(), 'schema-jsonld-website');
+        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org');
         injectSchema(generateFAQPageSchema([
-            { question: "ต้องโอนมัดจำไหม?", answer: "ไม่ต้องค่ะ จ่ายเงินหน้างาน 100%" }
+            { question: "ต้องโอนมัดจำไหม?", answer: "ไม่ต้องค่ะ แพลตฟอร์มเราให้จ่ายเงินสดหน้างาน 100% เพื่อความปลอดภัย" },
+            { question: "การันตีตรงปกไหม?", answer: "เรารับประกันตัวจริงตรงรูป 100% ถ้านัดเจอแล้วไม่ตรงปก สามารถยกเลิกได้ทันทีไม่มีค่าใช้จ่าย" }
         ]), 'schema-jsonld-faq');
     }
 }
@@ -2075,8 +2096,6 @@ function updateOpenGraphMeta(profile, title, description, type) {
     
     updateMeta('og:image', imageUrl);
     updateMeta('og:image:secure_url', imageUrl); 
-    
-    // ✅ OPTIMIZED: เพิ่มขนาดรูปให้ Social Media โหลดเร็วขึ้น
     updateMeta('og:image:width', '800');
     updateMeta('og:image:height', '600');
     updateMeta('og:image:alt', title);
@@ -2089,8 +2108,6 @@ function updateOpenGraphMeta(profile, title, description, type) {
 
 function generatePersonSchema(p, descriptionOverride, provinceName) {
     if (!p) return null;
-    
-    // ✅ OPTIMIZED: ลบเครื่องหมายคอมม่าออกจากราคาเพื่อให้ Google Schema อ่านค่าได้ถูกต้อง
     const priceNumeric = (p.rate || "0").toString().replace(/\D/g, '');
     let cleanName = (p.name || '').replace(/^น้อง/, '').trim();
     const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
@@ -2118,9 +2135,9 @@ function generatePersonSchema(p, descriptionOverride, provinceName) {
             "price": priceNumeric,
             "priceCurrency": "THB",
             "availability": p.availability?.includes('ไม่ว่าง') ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำ (Cash on arrival only)"
+            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำ"
         },
-        "additionalProperty": [
+        "additionalProperty":[
             { "@type": "PropertyValue", "name": "Age", "value": p.age || "-" },
             { "@type": "PropertyValue", "name": "Stats", "value": p.stats || "-" },
             { "@type": "PropertyValue", "name": "Height", "value": p.height || "-" },
@@ -2138,29 +2155,23 @@ function generateFAQPageSchema(faqData) {
         "mainEntity": faqData.map(item => ({
             "@type": "Question",
             "name": item.question,
-            "acceptedAnswer": {
-                "@type": "Answer",
-                "text": item.answer
-            }
+            "acceptedAnswer": { "@type": "Answer", "text": item.answer }
         }))
     };
 }
 
-function generateBreadcrumbSchema(type, name) {
+// 🚀 อัปเกรดตัวสร้าง Breadcrumb ให้รองรับ Array (ยืดหยุ่น 100%)
+function generateBreadcrumbSchema(items) {
+    if (!items || items.length === 0) return null;
     return {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
-        "itemListElement": [{
+        "itemListElement": items.map((item, index) => ({
             "@type": "ListItem",
-            "position": 1,
-            "name": "หน้าแรก",
-            "item": CONFIG.SITE_URL
-        }, {
-            "@type": "ListItem",
-            "position": 2,
-            "name": type === 'location' ? `จังหวัด ${name}` : name,
-            "item": type === 'location' ? `${CONFIG.SITE_URL}/location/${encodeURIComponent(name)}` : undefined 
-        }]
+            "position": index + 1,
+            "name": item.name,
+            "item": item.url
+        }))
     };
 }
 
@@ -2217,8 +2228,6 @@ function generateOrganizationSchema() {
 
 function injectSchema(json, id = 'schema-jsonld') {
     if (!json) return;
-    
-    // ✅ OPTIMIZED: ลบ Script เก่าทิ้งก่อน เพื่อไม่ให้สะสมใน DOM (Performance)
     const oldScript = document.getElementById(id);
     if (oldScript) oldScript.remove();
 
@@ -2230,9 +2239,7 @@ function injectSchema(json, id = 'schema-jsonld') {
 }
 
 function updateMeta(propertyOrName, content) {
-    // ✅ OPTIMIZED: แยกแยะระหว่าง name และ property (og:) ให้ถูกต้อง
     let el = document.querySelector(`meta[name="${propertyOrName}"], meta[property="${propertyOrName}"]`);
-    
     if (!el) {
         el = document.createElement('meta');
         if (propertyOrName.startsWith('og:') || propertyOrName.startsWith('twitter:')) {
@@ -2257,10 +2264,7 @@ function updateLink(rel, href) {
 
 function updateResultCount(count, total, isFiltering) {
     if (!dom.resultCount) return;
-    
-    // ✅ OPTIMIZED: ใส่ลูกน้ำให้ตัวเลข (1,000) และจัดการ Class ให้แม่นยำ
     const formattedCount = count.toLocaleString();
-    
     if (count > 0) {
         dom.resultCount.innerHTML = `✅ พบ <span class="font-bold text-pink-600">${formattedCount}</span> โปรไฟล์${isFiltering ? '' : ''}`;
         dom.resultCount.classList.remove('hidden', 'no-results');
