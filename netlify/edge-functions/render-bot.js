@@ -270,9 +270,14 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
                     </a>
                 `).join('')}
             </div>
-            <div style="text-align:center;margin-top:1.5rem">
-                <!-- ✅ เพิ่มแค่นี้ --> <a href="${CONFIG.DOMAIN}/location/${provinceKey}" style="..." data-i18n='{"th":"ดูน้องๆ ${provinceName} ทั้งหมด →","en":"View all ${provinceName} →"}'> ดูน้องๆ ${provinceName} ทั้งหมด → </a>
-            </div>
+           <div style="text-align:center; margin-top:1.5rem;">
+    <a href="https://sidelinechiangmai.netlify.app/location/chiangmai" 
+       class="btn-line" 
+       style="padding: 0.8rem 1.5rem; font-size: 1rem; background: var(--card); border: 1px solid var(--p); box-shadow: none;"
+       data-i18n='{"th":"ดูน้องๆ เชียงใหม่ ทั้งหมด →","en":"View all เชียงใหม่ →"}'>
+       ดูน้องๆ เชียงใหม่ ทั้งหมด →
+    </a>
+</div>
         </section>` : ''}
 
         <!-- Testimonials -->
