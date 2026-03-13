@@ -1,7 +1,9 @@
 
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
+// ==========================================
+// 1. CONFIGURATION
+// ==========================================
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
@@ -14,35 +16,62 @@ const CONFIG = {
     ]
 };
 
-const optimizeImg = (path, w=400, h=533) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/default.webp?w=400&h=533&q=80`;
-    if (path.startsWith('http')) return `${path}?w=${w}&h=${h}&q=80&f=auto`;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}?w=${w}&h=${h}&q=80&f=auto`;
-};
+// ==========================================
+// 2. MOCK DATA (ข้อมูลรีวิว)
+// ==========================================
+const TESTIMONIALS = [
+    {
+        name: "พี่บอล",
+        rating: 5,
+        text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย"
+    },
+    {
+        name: "คุณเอก",
+        rating: 5,
+        text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ"
+    },
+    {
+        name: "พี่โจ",
+        rating: 5,
+        text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ"
+    }
+];
 
+// ฟังก์ชันสุ่มคำ (Spintax) เพื่อให้เนื้อหาไม่ซ้ำกันในสายตา Google
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// Testimonials สำหรับโปรไฟล์เดี่ยว
-const TESTIMONIALS = [
-    {name: 'พี่บอล', text: 'ตรงปกมาก! บริการดีเยี่ยม ฟิวแฟนแท้ๆ', rating: 5},
-    {name: 'คุณเอก', text: 'น้องเอาใจเก่งมาก สวยสมราคา', rating: 4.9},
-    {name: 'พี่โจ', text: 'จองง่าย ไม่ต้องโอนมัดจำ ปลอดภัย', rating: 5}
-];
+// ฟังก์ชันดึงรูปภาพแบบ Hybrid (รองรับทั้ง Cloudinary และ Supabase Storage)
+const optimizeImg = (path) => {
+    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    if (path.startsWith('http')) return path; // หากเป็นลิงก์ Cloudinary ให้ใช้ตรงๆ
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`; // หากเป็นชื่อไฟล์ให้ดึงจาก Supabase
+};
 
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
+    
+    // ตรวจสอบว่าเป็น Bot หรือ Social Media Crawler หรือไม่
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
+    
+    // ถ้าไม่ใช่ Bot ให้ปล่อยผ่านไปใช้ Client-side Rendering ปกติ
     if (!isBot) return context.next();
 
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
         
+        // ตรวจสอบว่าต้องเป็น URL รูปแบบ /sideline/{slug}
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
+        
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
+        
+        // ป้องกัน slug ที่เป็นคำสั่งระบบ
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
+        // เชื่อมต่อ Database
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        
+        // ดึงข้อมูล Profile และข้อมูลจังหวัดที่เชื่อมโยงกัน
         const { data: p } = await supabase
             .from('profiles')
             .select('*, provinces(nameThai, key)')
@@ -50,67 +79,93 @@ export default async (request, context) => {
             .eq('active', true)
             .maybeSingle();
 
+        // หากไม่พบข้อมูลโปรไฟล์ ให้ปล่อยไปหน้า 404 ของระบบหลัก
         if (!p) return context.next();
 
-        // ดึงโปรไฟล์เกี่ยวข้อง (Related Profiles)
+        // ดึงโปรไฟล์แนะนำในจังหวัดเดียวกัน (Related Profiles)
         let related = [];
         if (p.provinceKey) {
             const { data: relatedData } = await supabase
                 .from('profiles')
-                .select('slug, name, imagePath, location, rate')
+                .select('slug, name, imagePath, location')
                 .eq('provinceKey', p.provinceKey)
                 .eq('active', true)
-                .neq('id', p.id)
-                .order('isfeatured', { ascending: false })
-                .limit(6);
+                .neq('id', p.id) 
+                .limit(4);
             related = relatedData || [];
         }
 
-        // เตรียมข้อมูลแสดงผล
+        // เตรียมตัวแปรสำหรับแสดงผล
         const displayName = p.name || 'สาวสวย';
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
-        const displayPrice = parseInt(p.rate || "1500").toLocaleString() + "+.-";
+        const displayPrice = parseInt(p.rate || "1500").toLocaleString() + ".-";
         const imageUrl = optimizeImg(p.imagePath);
         
+        // จัดการลิงก์ LINE (รองรับทั้ง ID และ URL)
         let finalLineUrl = p.lineId || 'ksLUMz3p_o';
-        if (!finalLineUrl.startsWith('http')) finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
+        if (!finalLineUrl.startsWith('http')) {
+            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
+        }
 
-        // Rating สำหรับ Rich Snippets
-        const ratingValue = (4.7 + (slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % 4) / 10).toFixed(1);
-        const reviewCount = 150 + (slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % 100);
+        // จำลอง Rating เพื่อให้ Google แสดงผล Rich Snippets (ดาว)
+        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
+        const reviewCount = 150 + (charCodeSum % 100);
 
         // SEO Spintax
         const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
         const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง", "ขี้อ้อน"]);
-        const payWord = spin(["ไม่รับมัดจำ", "จ่ายหน้างาน", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
+        const payWord = spin(["ไม่รับมัดจำ", "จ่ายหน้างานเท่านั้น", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
         
-        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName}`;
-        const metaDesc = `${displayName} สาว${provinceName} อายุ ${p.age || '20+'} ${serviceWord} ${payWord} รูปตรงปก`;
+        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน รูปตรงปก 100%`;
+        const metaDesc = `${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
-        // Schema Markup ปรับปรุง
+        // สร้าง Schema Markup (JSON-LD)
         const schemaData = {
-            "@context": "https://schema.org",
+            "@context": "https://schema.org/",
             "@graph": [
                 {
-                    "@type": "LocalBusiness",
-                    "@id": canonicalUrl,
-                    "name": displayName,
-                    "image": imageUrl,
-                    "description": metaDesc,
-                    "address": {"@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH"},
-                    "url": canonicalUrl,
-                    "telephone": finalLineUrl,
-                    "priceRange": `฿${displayPrice}`
+                    "@type": ["Organization", "LocalBusiness"],
+                    "@id": `${CONFIG.DOMAIN}/#organization`,
+                    "name": CONFIG.BRAND_NAME,
+                    "url": CONFIG.DOMAIN,
+                    "image": [imageUrl],
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": provinceName,
+                        "addressCountry": "TH"
+                    },
+                    "sameAs": CONFIG.SOCIAL_PROFILES
                 },
                 {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
-                        {"@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN},
-                        {"@type": "ListItem", "position": 2, "name": provinceName, "item": `${CONFIG.DOMAIN}/location/${provinceKey}`},
-                        {"@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl}
+                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
+                        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
                     ]
+                },
+                {
+                    "@type": "Product",
+                    "@id": `${canonicalUrl}#product`,
+                    "name": pageTitle,
+                    "image": [imageUrl],
+                    "description": metaDesc,
+                    "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
+                    "offers": {
+                        "@type": "Offer",
+                        "price": (p.rate || "1500").toString().replace(/[^0-9]/g, ''),
+                        "priceCurrency": "THB",
+                        "availability": "https://schema.org/InStock",
+                        "url": canonicalUrl
+                    },
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": ratingValue,
+                        "reviewCount": reviewCount.toString()
+                    }
                 }
             ]
         };
