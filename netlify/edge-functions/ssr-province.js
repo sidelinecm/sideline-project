@@ -4,38 +4,39 @@ const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)'
+    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
+    SOCIAL_PROFILES: [
+        "https://linktr.ee/sidelinechiangmai",
+        "https://x.com/Sdl_chiangmai",
+        "https://line.me/ti/p/ksLUMz3p_o"
+    ]
 };
 
-const optimizeImg = (path) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
-    if (path.startsWith('http')) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
+const optimizeImg = (path, w=400, h=533) => {
+    if (!path) return `${CONFIG.DOMAIN}/images/default.webp?w=${w}&h=${h}&q=80`;
+    if (path.startsWith('http')) return `${path}?w=${w}&h=${h}&q=80&f=auto`;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}?w=${w}&h=${h}&q=80&f=auto`;
 };
 
-const getLocalZones = (provinceKey) => {
-    const zones = {
-        'chiangmai':['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'หลังมอ'],
-        'bangkok':['สุขุมวิท', 'รัชดา', 'ห้วยขวาง', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ'],
-        'chonburi':['พัทยา', 'บางแสน', 'ศรีราชา', 'อมตะนคร', 'สัตหีบ']
-    };
-    return zones[provinceKey.toLowerCase()] || ['ตัวเมือง', 'พื้นที่ใกล้เคียง'];
-};
+const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// ฟังก์ชันสุ่ม LSI Keywords แบบเป็นธรรมชาติ ไม่สแปม
-const spinKeyword = () => {
-    const keywords =["ฟิวแฟน", "งานแรง", "ตรงปก", "เอาใจเก่ง", "นักศึกษา", "ตัวท็อป", "สายเอ็น"];
-    return keywords[Math.floor(Math.random() * keywords.length)];
-};
+const TESTIMONIALS = [
+    {name: 'พี่บอล', text: 'ตรงปกมาก! บริการดีเยี่ยม ฟิวแฟนแท้ๆ', rating: 5},
+    {name: 'คุณเอก', text: 'น้องเอาใจเก่งมาก สวยสมราคา', rating: 4.9},
+    {name: 'พี่โจ', text: 'จองง่าย ไม่ต้องโอนมัดจำ ปลอดภัย', rating: 5}
+];
 
 export default async (request, context) => {
-    const url = new URL(request.url);
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
+    const ua = (request.headers.get('User-Agent') || '').toLowerCase();
+    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
+    if (!isBot) return context.next();
 
     try {
-        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        const url = new URL(request.url);
+        const pathParts = url.pathname.split('/').filter(Boolean);
+        const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
 
+        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const { data: provinceData } = await supabase
             .from('provinces')
             .select('id, nameThai, key')
@@ -44,7 +45,6 @@ export default async (request, context) => {
 
         if (!provinceData) return context.next();
 
-        // จำกัดดึงแค่ 60 คนเพื่อรักษาความเร็วของ Page Speed (DOM Size ไม่อืด)
         const { data: profiles } = await supabase
             .from('profiles')
             .select('slug, name, imagePath, location, rate, isfeatured, lastUpdated')
@@ -54,22 +54,21 @@ export default async (request, context) => {
             .order('lastUpdated', { ascending: false })
             .limit(60);
 
-        if (!profiles || profiles.length === 0) return context.next();
+        if (!profiles?.length) return context.next();
 
         const provinceName = provinceData.nameThai;
         const localZones = getLocalZones(provinceKey);
         const CURRENT_YEAR = new Date().getFullYear();
-        
-        // 🎯 1. SEO META & TITLE (จิตวิทยาการคลิก + คีย์เวิร์ดหลัก)
-        const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} (${CURRENT_YEAR}) หาเด็กสาวสวย ฟิวแฟน ไม่มัดจำ`;
-        const description = `รวมพิกัด ไซด์ไลน์${provinceName} รับงานเอง อัปเดตล่าสุด ${profiles.length} คน โซน ${localZones.slice(0, 4).join(', ')} ✓ฟิวแฟนแท้ๆ ✓การันตีตรงปก 100% ✓จ่ายหน้างาน ปลอดภัยที่สุด`;
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         const firstImage = optimizeImg(profiles[0].imagePath);
 
-        // 🎯 2. ADVANCED SCHEMA MARKUP (รวม 4 ตัวท็อป: Collection, LocalBusiness, Breadcrumb, FAQ)
+        // SEO & Schema (เดิม + ปรับปรุง)
+        const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} (${CURRENT_YEAR}) หาเด็กสาวสวย ฟิวแฟน ไม่มัดจำ`;
+        const description = `รวม ${profiles.length} โปรไฟล์ไซด์ไลน์${provinceName} ล่าสุด โซน ${localZones.slice(0,4).join(', ')} ✓ฟิวแฟน ✓ตรงปก 100% ✓จ่ายหน้างาน`;
+        
         const schemaData = {
             "@context": "https://schema.org",
-            "@graph":[
+            "@graph": [
                 {
                     "@type": "CollectionPage",
                     "@id": `${provinceUrl}#webpage`,
@@ -79,197 +78,328 @@ export default async (request, context) => {
                     "mainEntity": {
                         "@type": "ItemList",
                         "numberOfItems": profiles.length,
-                        "itemListElement": profiles.map((p, index) => ({
+                        "itemListElement": profiles.map((p, i) => ({
                             "@type": "ListItem",
-                            "position": index + 1,
+                            "position": i + 1,
                             "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
                         }))
                     }
                 },
                 {
                     "@type": "BreadcrumbList",
-                    "itemListElement":[
-                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
+                    "itemListElement": [
+                        {"@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN},
+                        {"@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl}
                     ]
                 },
                 {
                     "@type": "LocalBusiness",
-                    "name": `ศูนย์รวมไซด์ไลน์ ${provinceName} รับงานเอง`,
+                    "name": `ศูนย์รวมไซด์ไลน์${provinceName} รับงานเอง`,
                     "image": firstImage,
-                    "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
-                    "priceRange": "฿1500 - ฿5000"
+                    "address": {"@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH"},
+                    "priceRange": "฿1200-฿5000"
                 },
                 {
                     "@type": "FAQPage",
-                    "mainEntity":[
-                        { "@type": "Question", "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`, "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้นครับ แพลตฟอร์มของเราเน้นความปลอดภัย จ่ายเงินสดหน้างานเมื่อเจอน้องตัวจริงเท่านั้น" } },
-                        { "@type": "Question", "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`, "acceptedAnswer": { "@type": "Answer", "text": `ครอบคลุมทุกพื้นที่ยอดฮิต เช่น ${localZones.join(', ')} สามารถนัดหมายที่โรงแรมหรือห้องพักส่วนตัวได้เลย` } },
-                        { "@type": "Question", "name": "การันตีตรงปกไหม?", "acceptedAnswer": { "@type": "Answer", "text": "การันตีตรงปก 100% รูปโปรไฟล์มีการอัปเดตสม่ำเสมอ หากนัดเจอแล้วหน้าตาไม่ตรงปก ลูกค้าสามารถยกเลิกงานได้ทันที ไม่มีค่าใช้จ่าย" } }
+                    "mainEntity": [
+                        {"@type": "Question", "name": `ไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`, "acceptedAnswer": {"@type": "Answer", "text": "ไม่ต้องโอน จ่ายเงินสดหน้างานเมื่อเจอน้องตัวจริง"}},
+                        {"@type": "Question", "name": `น้องๆ รับงานโซนไหนใน${provinceName}?`, "acceptedAnswer": {"@type": "Answer", "text": `ครอบคลุม ${localZones.join(', ')}`}},
+                        {"@type": "Question", "name": "การันตีตรงปกไหม?", "acceptedAnswer": {"@type": "Answer", "text": "การันตี 100% รูปอัปเดตจริง"}}
                     ]
                 }
             ]
         };
 
         const html = `<!DOCTYPE html>
-<html lang="th">
+<html lang="th" prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
     <meta name="description" content="${description}">
     <link rel="canonical" href="${provinceUrl}">
     
-    <!-- 🚀 Core Web Vitals: Preconnect & Preload -->
-    <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
-    <link rel="preload" as="image" href="${firstImage}">
+    <!-- Core Web Vitals Optimization -->
+    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preload" as="image" href="${firstImage}" imagesrcset="${firstImage}">
     
+    <!-- Open Graph -->
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:image" content="${firstImage}">
-    <meta property="og:type" content="website">
     <meta property="og:url" content="${provinceUrl}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     
+    <!-- Schema Markup -->
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-        :root { --p: #ec4899; --bg: #0f172a; --card: #1e293b; --txt: #f8fafc; --muted: #94a3b8; --gold: #fbbf24; --green: #10b981; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
-        .container { max-width: 1080px; margin: 0 auto; padding: 20px; }
-        
-        /* Header & Hero */
-        header { text-align: center; padding: 40px 0 20px; border-bottom: 1px solid #334155; margin-bottom: 30px; }
-        h1 { color: var(--p); font-size: clamp(26px, 5vw, 36px); margin: 0 0 10px 0; font-weight: 900; letter-spacing: -0.5px; }
-        .hero-sub { color: var(--muted); font-size: clamp(14px, 3vw, 16px); margin: 0; font-weight: 500; }
-        .trust-badges { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .badge { background: rgba(251, 191, 36, 0.1); color: var(--gold); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid rgba(251, 191, 36, 0.2); }
-        .badge-green { background: rgba(16, 185, 129, 0.1); color: var(--green); border-color: rgba(16, 185, 129, 0.2); }
-        
-        /* Grid & Cards */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        @media (min-width: 640px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (min-width: 1024px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 24px; } }
-        
-        .card { background: var(--card); border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit; border: 1px solid #334155; transition: all 0.3s ease; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-6px); border-color: var(--p); box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.3); }
-        
-        .img-box { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; overflow: hidden; }
-        .img-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-        .card:hover .img-box img { transform: scale(1.05); }
-        .featured-tag { position: absolute; top: 12px; right: 12px; background: var(--gold); color: #000; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; z-index: 2; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        
-        .card-info { padding: 16px; flex-grow: 1; display: flex; flex-direction: column; }
-        .name { font-weight: 800; margin: 0 0 6px 0; font-size: clamp(16px, 4vw, 18px); color: #fff; display: flex; justify-content: space-between; align-items: center; }
-        .loc { font-size: 13px; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
-        .price { color: var(--gold); font-weight: 800; font-size: 18px; margin-top: auto; }
-        
-        .lsi-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-        .lsi-tag { font-size: 11px; color: var(--p); background: rgba(236, 72, 153, 0.1); padding: 2px 8px; border-radius: 4px; }
+:root{--p:#ec4899;--bg:#0f172a;--card:#1e293b;--txt:#f8fafc;--muted:#94a3b8;--gold:#fbbf24;--green:#10b981}*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}.container{max-width:1200px;margin:0 auto;padding:1.5rem}@media(min-width:768px){.container{padding:2rem}}
+h1{font-size:clamp(1.75rem,5vw,2.5rem);color:var(--p);text-align:center;margin-bottom:1rem;font-weight:900}
+.hero-sub{color:var(--muted);text-align:center;font-size:1rem;margin-bottom:2rem}
+.trust-badges{display:flex;justify-content:center;flex-wrap:wrap;gap:1rem;margin-bottom:2rem}
+.badge{background:rgba(251,191,36,.15);color:var(--gold);padding:.5rem 1rem;border-radius:999px;font-size:.875rem;font-weight:700;border:1px solid rgba(251,191,36,.3)}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green);border-color:rgba(16,185,129,.3)}
 
-        /* SEO Content & FAQ */
-        .seo-section { margin-top: 60px; padding: 40px; background: rgba(30, 41, 59, 0.6); border-radius: 24px; border: 1px solid #334155; }
-        .seo-section h2 { color: #fff; font-size: 22px; margin: 0 0 20px 0; font-weight: 800; }
-        .seo-section h3 { color: var(--p); font-size: 18px; margin: 30px 0 15px 0; font-weight: 700; }
-        .seo-section p { color: var(--muted); font-size: 15px; margin-bottom: 16px; line-height: 1.8; }
-        .faq-item { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .faq-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .faq-q { font-weight: 700; color: #fff; margin-bottom: 8px; }
-        .faq-a { color: var(--muted); font-size: 14px; }
+/* Search & Filter */
+.search-filter{position:sticky;top:0;background:var(--bg);backdrop-filter:blur(20px);padding:1rem;z-index:100;border-bottom:1px solid #334155;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.search-input{padding:.75rem 1rem;border:1px solid #475569;border-radius:.75rem;background:#1e293b;color:var(--txt);flex:1;min-width:250px;font-size:1rem}
+.filter-btn{padding:.5rem 1rem;background:var(--card);border:1px solid #475569;border-radius:.5rem;color:var(--txt);cursor:pointer;font-size:.875rem;transition:.2s}
+.filter-btn:hover{background:#334155}.filter-btn.active{background:var(--p);border-color:var(--p)}
 
-        footer { text-align: center; margin-top: 40px; padding: 40px 20px; color: var(--muted); font-size: 13px; border-top: 1px solid #334155; }
+/* Carousel */
+.carousel{display:flex;overflow-x:auto;gap:1rem;padding:1rem 0;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.carousel::-webkit-scrollbar{display:none}.carousel-item{flex:0 0 280px;background:var(--card);border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.3);scroll-snap-align:start}
+.carousel-img{width:100%;height:350px;object-fit:cover;display:block}
+
+/* Grid Cards (ปรับปรุงจากเดิม) */
+.profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;margin:2rem 0}
+.card{background:var(--card);border-radius:1.5rem;overflow:hidden;border:1px solid #334155;transition:all .3s ease;display:block;color:inherit;text-decoration:none}
+.card:hover{transform:translateY(-8px);border-color:var(--p);box-shadow:0 25px 50px -12px rgba(236,72,153,.4)}
+.img-box{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;background:#000}
+.img-box img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.card:hover .img-box img{transform:scale(1.08)}
+.featured-tag{position:absolute;top:1rem;right:1rem;background:var(--gold);color:#000;padding:.25rem .75rem;border-radius:999px;font-size:.75rem;font-weight:900;text-transform:uppercase;box-shadow:0 4px 12px rgba(0,0,0,.4);z-index:2}
+.card-info{padding:1.5rem;flex-grow:1;display:flex;flex-direction:column}
+.name{font-weight:800;font-size:1.2rem;margin-bottom:.5rem;color:var(--txt);line-height:1.2}
+.loc{font-size:.875rem;color:var(--muted);margin-bottom:.75rem;display:flex;align-items:center;gap:.25rem}
+.lsi-tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.lsi-tag{font-size:.75rem;color:var(--p);background:rgba(236,72,153,.2);padding:.25rem .5rem;border-radius:.5rem}
+.price{color:var(--gold);font-weight:900;font-size:1.5rem;margin-top:auto}
+
+/* Pricing Table */
+.pricing-section{margin:3rem 0;background:var(--card);border-radius:2rem;padding:2rem;border:1px solid #334155;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+.pricing-title{color:var(--p);text-align:center;font-size:1.5rem;font-weight:800;margin-bottom:1.5rem}
+.table-wrapper{overflow-x:auto}
+.pricing-table{width:100%;border-collapse:collapse;background:var(--bg);border-radius:1rem}
+.pricing-table th{background:var(--p);color:#fff;padding:1rem .75rem;font-weight:700;text-align:left}
+.pricing-table td{padding:1rem .75rem;border-bottom:1px solid #475569}
+.pricing-table tr:hover{background:#1e293b}
+
+/* Testimonials */
+.testimonials{margin:3rem 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.testimonial{background:var(--card);padding:1.75rem;border-radius:1.5rem;border:1px solid #334155}
+.testimonial-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+.stars{color:var(--gold);font-size:1.25rem}
+.testimonial-name{font-weight:700;color:var(--txt)}
+.testimonial-text{color:var(--muted);line-height:1.7}
+
+/* SEO Section (เดิม) */
+.seo-section{margin-top:4rem;padding:2.5rem;background:rgba(30,41,59,.7);border-radius:2rem;border:1px solid #475569}
+.seo-section h2{color:var(--txt);font-size:1.5rem;margin:0 0 1.5rem;font-weight:800}
+.seo-section h3{color:var(--p);font-size:1.25rem;margin:2rem 0 1rem;font-weight:700}
+.seo-section p{color:var(--muted);font-size:.95rem;margin-bottom:1rem;line-height:1.7}
+.faq-item{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.faq-item:last-child{border-bottom:none}
+.faq-q{font-weight:700;color:var(--txt);margin-bottom:.5rem;cursor:pointer}
+.faq-a{color:var(--muted);font-size:.9rem}
+
+/* Footer */
+footer{text-align:center;margin-top:4rem;padding:2.5rem 1.5rem;background:var(--card);color:var(--muted);font-size:.875rem;border-top:1px solid #334155;border-radius:1.5rem 1.5rem 0 0}
+.line-cta{color:var(--green);font-weight:700;text-decoration:none;font-size:1.1rem}
+@media(max-width:768px){.container{padding:1rem}.search-filter{padding:.75rem}.profiles-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}}
     </style>
 </head>
 <body>
+    <!-- Header (ปรับปรุง) -->
     <header>
         <div class="container">
-            <h1>ไซด์ไลน์${provinceName} รับงานเอง ตัวท็อป</h1>
-            <p class="hero-sub">ศูนย์รวมสาวสวย หาเด็ก${provinceName} อัปเดต ${profiles.length} โปรไฟล์ (${CURRENT_YEAR})</p>
+            <h1>🔥 ไซด์ไลน์${provinceName} ตัวท็อป</h1>
+            <p class="hero-sub">รวม ${profiles.length} โปรไฟล์รับงานเอง อัปเดต ${CURRENT_YEAR} • ${localZones.slice(0,4).join(' | ')}</p>
             <div class="trust-badges">
-                <span class="badge">ไม่มีมัดจำ จ่ายหน้างาน</span>
-                <span class="badge badge-green">VERIFIED ตรงปก 100%</span>
+                <span class="badge">🚫 ไม่มีมัดจำ</span>
+                <span class="badge badge-green">✅ ตรงปก 100%</span>
+                <span class="badge">⚡ จ่ายหน้างาน</span>
             </div>
         </div>
     </header>
 
     <main class="container">
-        <!-- 🎯 3. โครงสร้าง Semantic HTML & LSI Contextual Tags -->
-        <div class="grid" role="list">
-            ${profiles.map((p, index) => {
-                const altTemplates =[
-                    `รูปโปรไฟล์ น้อง${p.name} ไซด์ไลน์${provinceName} รับงานเอง`,
-                    `น้อง${p.name} สาวรับงาน${provinceName} ฟิวแฟน`,
-                    `หาเด็ก${provinceName} พิกัดน้อง${p.name} ไม่มัดจำ`,
-                    `เด็กเอ็น ไซด์ไลน์ โซน${p.location || provinceName} น้อง${p.name}`
-                ];
-                const altText = altTemplates[index % altTemplates.length];
-                
-                // Regex ที่ปลอดภัยที่สุดในการดึงราคา
-                const priceMatch = (p.rate || "1500").toString().match(/\\d+/);
-                const price = priceMatch ? parseInt(priceMatch[0]) : 1500;
-                
-                // ดึง LSI Keyword เสริมบารมี SEO
-                const lsi1 = spinKeyword();
-
-                return `
-                <article class="card" role="listitem">
-                    <a href="/sideline/${p.slug}" aria-label="ดูรายละเอียดน้อง ${p.name} รับงาน${provinceName}">
-                        <div class="img-box">
-                            <img src="${optimizeImg(p.imagePath)}" alt="${altText}" 
-                                loading="${index === 0 ? 'eager' : 'lazy'}" 
-                                decoding="${index === 0 ? 'sync' : 'async'}"
-                                width="400" height="533">
-                            ${p.isfeatured ? '<span class="featured-tag">RECOMMENDED</span>' : ''}
+        <!-- Carousel ย่านต่างๆ -->
+        <section class="carousel-section">
+            <h2 style="text-align:center;margin-bottom:1.5rem;color:var(--p);font-weight:800">📍 พื้นที่ให้บริการยอดนิยม</h2>
+            <div class="carousel">
+                ${localZones.slice(0,6).map(zone => `
+                    <div class="carousel-item">
+                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=350&q=80&fit=crop&auto=format" alt="${zone}" loading="lazy">
+                        <div style="padding:1rem;text-align:center">
+                            <strong style="color:var(--txt);font-size:1.1rem">${zone}</strong>
                         </div>
-                        <div class="card-info">
-                            <h2 class="name">${p.name}</h2>
-                            <div class="loc">📍 ${p.location || provinceName}</div>
-                            <div class="lsi-tags">
-                                <span class="lsi-tag">รับงาน${provinceName}</span>
-                                <span class="lsi-tag">${lsi1}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </section>
+
+        <!-- Search & Filter -->
+        <section class="search-filter">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 ค้นหาชื่อหรือย่าน...">
+            ${localZones.slice(0,8).map(zone => `<button class="filter-btn" data-zone="${zone}">${zone}</button>`).join('')}
+            <button class="filter-btn active" data-zone="all">ทั้งหมด</button>
+        </section>
+
+        <!-- Pricing Table (ใหม่) -->
+        <section class="pricing-section">
+            <h3 class="pricing-title">💰 ตารางราคาเริ่มต้นแต่ละโซน</h3>
+            <div class="table-wrapper">
+                <table class="pricing-table">
+                    <thead>
+                        <tr><th>โซน</th><th>ราคาเริ่มต้น</th><th>บริการ</th><th>🔥</th></tr>
+                    </thead>
+                    <tbody>
+                        ${PRICING.map(p => `
+                            <tr>
+                                <td><strong>${p.zone}</strong></td>
+                                <td>฿${p.price}</td>
+                                <td>${p.service}</td>
+                                <td>${p.featured ? '⭐' : ''}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Profiles Grid (เดิม + ปรับปรุง) -->
+        <section class="profiles-section">
+            <div class="profiles-grid" id="profilesGrid" role="list">
+                ${profiles.map((p, index) => {
+                    const price = parseInt((p.rate || "1500").match(/\d+/)?.[0] || 1500);
+                    const altText = `รูปโปรไฟล์ ${p.name} ไซด์ไลน์${provinceName} ${p.location || provinceName}`;
+                    const lsi1 = spinKeyword();
+                    return `
+                    <article class="card" role="listitem" data-zone="${p.location || provinceName}" data-name="${p.name}">
+                        <a href="${CONFIG.DOMAIN}/sideline/${p.slug}" aria-label="ดูโปรไฟล์ ${p.name} ${provinceName}">
+                            <div class="img-box">
+                                <img src="${optimizeImg(p.imagePath)}" alt="${altText}" 
+                                    loading="${index < 3 ? 'eager' : 'lazy'}" width="400" height="533">
+                                ${p.isfeatured ? '<span class="featured-tag">RECOMMENDED</span>' : ''}
                             </div>
-                            <span class="price">฿${price.toLocaleString()}</span>
-                        </div>
-                    </a>
-                </article>
-                `;
-            }).join('')}
-        </div>
+                            <div class="card-info">
+                                <h2 class="name">${p.name} ${p.isfeatured ? '⭐' : ''}</h2>
+                                <div class="loc">📍 ${p.location || provinceName}</div>
+                                <div class="lsi-tags">
+                                    <span class="lsi-tag">${lsi1}</span>
+                                    <span class="lsi-tag">รับงานเอง</span>
+                                </div>
+                                <span class="price">฿${price.toLocaleString()} ${index < 5 ? '+' : ''}</span>
+                            </div>
+                        </a>
+                    </article>`;
+                }).join('')}
+            </div>
+        </section>
 
-        <!-- 🎯 4. Deep SEO Content & SERP Features (FAQ) -->
+        <!-- Testimonials (ใหม่) -->
+        <section class="testimonials-section">
+            <h2 style="text-align:center;margin-bottom:2rem;color:var(--p);font-weight:800">⭐ รีวิวจากลูกค้าจริง</h2>
+            <div class="testimonials">
+                ${TESTIMONIALS.map(t => `
+                    <div class="testimonial">
+                        <div class="testimonial-header">
+                            <div class="stars">${'★'.repeat(Math.floor(t.rating))}${t.rating % 1 ? '☆' : ''}</div>
+                            <span class="testimonial-name">${t.name}</span>
+                        </div>
+                        <p class="testimonial-text">${t.text}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </section>
+
+        <!-- SEO Content & FAQ (เดิม) -->
         <section class="seo-section">
-            <h2>เว็บไซต์รวมข้อมูลไซด์ไลน์${provinceName} ยอดนิยมอันดับ 1</h2>
-            <p>หากคุณกำลังค้นหา <strong>สาวรับงาน${provinceName}</strong> หรือต้องการ <strong>หาเด็ก${provinceName}</strong> เพื่อดูแลยามเหงา เราคือศูนย์รวมโปรไฟล์น้องๆ นักศึกษา สาวออฟฟิศ และพริตตี้ ที่มารับงานอิสระโดยตรงแบบไม่ผ่านเอเย่นต์ เรามีข้อมูลสาวสวยอัปเดตใหม่ทุกวัน ครอบคลุมโซนยอดฮิตอย่าง ${localZones.join(', ')} ให้คุณได้เลือกตรงตามสเปคที่สุด</p>
-            <p>แพลตฟอร์มของเราเน้นย้ำเรื่องความปลอดภัยสูงสุด <strong>ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น</strong> ลูกค้าสามารถเลือกโปรไฟล์ นัดหมาย และชำระเงินสดหน้างานเท่านั้น บริการมีทั้งแบบชั่วคราวและค้างคืน (Long Time) เน้นการดูแลเอาใจใส่ดุจแฟน (ฟิวแฟน) การันตีรูป <strong>ตรงปก 100%</strong> หากหน้างานไม่ตรงรูป สามารถปฏิเสธได้ทันที เรทราคาเริ่มต้นยุติธรรม</p>
+            <h2>เว็บไซต์รวมไซด์ไลน์${provinceName} อันดับ 1</h2>
+            <p><strong>ไซด์ไลน์${provinceName}</strong> รับงานเองไม่ผ่านเอเย่นต์ ปลอดภัย 100% จ่ายเงินหน้างาน รูปตรงปก การันตีคุณภาพ</p>
             
-            <h3>คำถามที่พบบ่อย (FAQ)</h3>
+            <h3>❓ คำถามที่พบบ่อย</h3>
             <div class="faq-item">
-                <div class="faq-q">Q: บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?</div>
-                <div class="faq-a">A: ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้นครับ แพลตฟอร์มของเราเน้นความปลอดภัย จ่ายเงินสดหน้างานเมื่อเจอน้องตัวจริงเท่านั้น</div>
+                <div class="faq-q">ต้องโอนมัดจำไหม?</div>
+                <div class="faq-a">ไม่ต้องโอนมัดจำ จ่ายเงินสดหน้างานเมื่อเจอน้องตัวจริงเท่านั้น</div>
             </div>
             <div class="faq-item">
-                <div class="faq-q">Q: น้องๆ รับงานโซนไหนบ้างใน${provinceName}?</div>
-                <div class="faq-a">A: ครอบคลุมทุกพื้นที่ยอดฮิต เช่น ${localZones.slice(0,5).join(', ')} และพื้นที่ใกล้เคียง สามารถนัดหมายที่โรงแรมหรือห้องพักส่วนตัวของน้องได้เลย</div>
+                <div class="faq-q">น้องๆ รับงานโซนไหนบ้าง?</div>
+                <div class="faq-a">ครอบคลุมทุกโซน ${localZones.slice(0,5).join(', ')} และพื้นที่ใกล้เคียง</div>
             </div>
             <div class="faq-item">
-                <div class="faq-q">Q: การันตีตรงปกไหม หากไม่ตรงปกทำอย่างไร?</div>
-                <div class="faq-a">A: การันตีตรงปก 100% รูปโปรไฟล์มีการตรวจสอบและอัปเดตสม่ำเสมอ หากนัดเจอแล้วหน้าตาไม่ตรงปก ลูกค้าสามารถยกเลิกงานและแยกย้ายได้ทันที ไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้น</div>
+                <div class="faq-q">การันตีตรงปกไหม?</div>
+                <div class="faq-a">การันตี 100% หากไม่ตรงปก ยกเลิกได้ทันที ไม่มีค่าใช้จ่าย</div>
             </div>
         </section>
     </main>
 
+    <!-- Footer (ปรับปรุง) -->
     <footer>
         <div class="container">
-            © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME} - แหล่งรวมสาวสวย รับงานเอง ปลอดภัย ไม่มัดจำ<br>
-            <small>แพลตฟอร์มเป็นเพียงสื่อกลางในการนำเสนอข้อมูล ไม่มีนโยบายรับโอนเงินผ่านระบบใดๆ</small>
+            © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME} | ปลอดภัย ตรงปก จ่ายหน้างาน
+            <br><a href="${CONFIG.SOCIAL_PROFILES[0]}" class="line-cta">📲 ติดต่อ Line จองคิว</a>
         </div>
     </footer>
-</body>
-</html>`;
 
-        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
+    <!-- Client-side Search/Filter -->
+    <script>
+        (function(){
+            const searchInput = document.getElementById('searchInput');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.card');
+            let currentZone = 'all';
+
+            function filterCards(query = '') {
+                cards.forEach(card => {
+                    const name = card.dataset.name?.toLowerCase() || '';
+                    const zone = card.dataset.zone?.toLowerCase() || '';
+                    const matchesQuery = !query || name.includes(query) || zone.includes(query);
+                    const matchesZone = currentZone === 'all' || zone.includes(currentZone.toLowerCase());
+                    card.style.display = matchesQuery && matchesZone ? 'block' : 'none';
+                });
+            }
+
+            searchInput.addEventListener('input', e => filterCards(e.target.value.toLowerCase().trim()));
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentZone = btn.dataset.zone;
+                    filterCards(searchInput.value.toLowerCase().trim());
+                });
+            });
+        })();
+    </script>
+<!-- Language Toggle -->
+<div style="position:fixed;bottom:20px;right:20px;z-index:999;background:rgba(0,0,0,0.8);padding:10px;border-radius:50px">
+    <button onclick="setLang('th')" style="background:none;border:none;color:white;font-size:16px;margin:0 5px;cursor:pointer">🇹🇭</button>
+    <button onclick="setLang('en')" style="background:none;border:none;color:white;font-size:16px;margin:0 5px;cursor:pointer">🇺🇸</button>
+</div>
+<script>
+let currentLang = 'th';
+function setLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        try {
+            const translations = el.dataset.i18n ? JSON.parse(el.dataset.i18n) : {};
+            el.textContent = translations[lang] || el.dataset.th || el.innerHTML;
+        } catch(e) {
+            // fallback
+        }
+    });
+}
+</script>
+
+
+</body></html>`;
+
+        return new Response(html, {
+            headers: {
+                "content-type": "text/html; charset=utf-8",
+                "x-robots-tag": "index, follow",
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+                "Vary": "User-Agent"
+            }
+        });
 
     } catch (e) {
-        console.error("SSR Province Error:", e);
-        return context.next(); 
+        console.error("Location SSR Error:", e);
+        return context.next();
     }
 };
