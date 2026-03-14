@@ -40,11 +40,21 @@ const TESTIMONIALS = [
 // ฟังก์ชันสุ่มคำ (Spintax) เพื่อให้เนื้อหาไม่ซ้ำกันในสายตา Google
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// ฟังก์ชันดึงรูปภาพแบบ Hybrid (รองรับทั้ง Cloudinary และ Supabase Storage)
-const optimizeImg = (path) => {
+const optimizeImg = (path, width = 600, height = 800) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
-    if (path.startsWith('http')) return path; // หากเป็นลิงก์ Cloudinary ให้ใช้ตรงๆ
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`; // หากเป็นชื่อไฟล์ให้ดึงจาก Supabase
+    
+    // กรณีเป็น URL จาก Cloudinary
+    if (path.includes('res.cloudinary.com')) {
+        // แทรก parameter f_auto (เลือกฟอร์แมตอัตโนมัติเช่น WebP/AVIF) 
+        // และ q_auto (บีบอัดคุณภาพอัตโนมัติ) และการปรับขนาด
+        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+    }
+
+    // กรณีเป็น URL อื่นๆ (เช่นภายนอก)
+    if (path.startsWith('http')) return path;
+
+    // กรณีเป็นไฟล์จาก Supabase Storage
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
 export default async (request, context) => {
@@ -100,7 +110,7 @@ export default async (request, context) => {
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
         const displayPrice = parseInt(p.rate || "1500").toLocaleString() + ".-";
-        const imageUrl = optimizeImg(p.imagePath);
+const imageUrl = optimizeImg(p.imagePath, 600, 800);
         
         // จัดการลิงก์ LINE (รองรับทั้ง ID และ URL)
         let finalLineUrl = p.lineId || 'ksLUMz3p_o';
@@ -182,7 +192,21 @@ export default async (request, context) => {
     <!-- Core Web Vitals -->
     <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
     <link rel="preload" as="image" href="${imageUrl}">
+    <meta name="theme-color" content="#db2777">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     
+    <meta property="og:site_name" content="Sideline Chiangmai">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${pageTitle}">
+    <meta name="twitter:description" content="${metaDesc}">
+    <meta name="twitter:image" content="${imageUrl}">
+    
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <!-- Open Graph -->
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
@@ -209,107 +233,110 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Hero Image -->
-        <section class="hero-section">
-            <img src="${imageUrl}" class="hero-img" alt="${displayName} ${provinceName}" loading="eager" width="400" height="533">
-        </section>
+    <nav class="main-nav" aria-label="เมนูหลัก">
+        </nav>
 
-        <!-- Profile Header -->
-        <section class="profile-header">
-            <div class="rating">
+    <div class="container">
+        <header class="profile-header">
+            <section class="hero-section">
+                <img src="${imageUrl}" class="hero-img" alt="${displayName} ไซด์ไลน์${provinceName}" loading="eager" width="400" height="533">
+            </section>
+
+            <div class="rating" style="margin-top: 1rem; justify-content: center;">
                 <span class="stars">⭐</span>${ratingValue} <span>(${reviewCount} รีวิว)</span>
             </div>
             <h1>${pageTitle}</h1>
-        </section>
+        </header>
 
-        <!-- Info Grid -->
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">ค่าขนมเริ่มต้น</span>
-                <span class="info-value">฿${displayPrice}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">📍 พิกัดพื้นที่</span>
-                <span class="info-value">${p.location || provinceName}</span>
-            </div>
-        </div>
-
-        <!-- Description -->
-        <div class="description">${p.description || metaDesc}</div>
-
-        <!-- CTA Line -->
-        <section class="cta-section">
-            
-<!-- ✅ เพิ่มแค่นี้ --> <a href="${finalLineUrl}" class="btn-line" rel="noopener" data-i18n='{"th":"📲 ทักไลน์จองคิว ${displayName}","en":"📲 Contact ${displayName}"}'> 📲 ทักไลน์จองคิว ${displayName} </a>
-            <p style="margin-top:1rem;color:var(--muted);font-size:.9rem">จ่ายหน้างาน • ปลอดภัย 100% • ไม่มีมัดจำ</p>
-        </section>
-
-        <!-- Pricing Section -->
-        <section class="pricing-section">
-            <h3 class="pricing-title">💰 ราคาและบริการ</h3>
-            <div class="pricing-grid">
-                <div><strong>ST</strong><br>฿${parseInt(p.rate||1500).toLocaleString()}</div>
-                <div><strong>LT</strong><br>฿${(parseInt(p.rate||1500)*1.8).toLocaleString()}</div>
-                <div><strong>OT</strong><br>฿${(parseInt(p.rate||1500)*2.2).toLocaleString()}</div>
-            </div>
-        </section>
-
-        <!-- Related Profiles Carousel -->
-        ${related.length > 0 ? `
-        <section class="related-section">
-            <h2 class="related-title">🔥 น้องๆ แนะนำใน ${provinceName}</h2>
-            <div class="related-carousel">
-                ${related.map(r => `
-                    <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
-                        <img src="${optimizeImg(r.imagePath,200,200)}" class="related-img" alt="${r.name}" loading="lazy">
-                        <div class="related-info">
-                            <div class="related-name">${r.name}</div>
-                            <div class="related-loc">📍 ${r.location || provinceName}</div>
-                        </div>
-                    </a>
-                `).join('')}
-            </div>
-           <div style="text-align:center; margin-top:1.5rem;">
-    <a href="https://sidelinechiangmai.netlify.app/location/chiangmai" 
-       class="btn-line" 
-       style="padding: 0.8rem 1.5rem; font-size: 1rem; background: var(--card); border: 1px solid var(--p); box-shadow: none;"
-       data-i18n='{"th":"ดูน้องๆ เชียงใหม่ ทั้งหมด →","en":"View all เชียงใหม่ →"}'>
-       ดูน้องๆ เชียงใหม่ ทั้งหมด →
-    </a>
-</div>
-        </section>` : ''}
-
-        <!-- Testimonials -->
-        <section class="testimonials">
-            <h2 class="testimonials-title">⭐ รีวิวจากลูกค้าจริง</h2>
-            <div class="testimonial-grid">
-                ${TESTIMONIALS.map(t => `
-                    <div class="testimonial">
-                        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-                            <div style="color:var(--gold);font-size:1.2rem">${'★'.repeat(Math.floor(t.rating))}</div>
-                            <strong>${t.name}</strong>
-                        </div>
-                        <p style="color:var(--txt);margin:0">${t.text}</p>
+        <main>
+            <article>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">ค่าขนมเริ่มต้น</span>
+                        <span class="info-value">฿${displayPrice}</span>
                     </div>
-                `).join('')}
-            </div>
-        </section>
+                    <div class="info-item">
+                        <span class="info-label">📍 พิกัดพื้นที่</span>
+                        <span class="info-value">${p.location || provinceName}</span>
+                    </div>
+                </div>
 
-               <!-- Footer -->
+                <section class="description" itemprop="description">
+                    ${p.description || metaDesc}
+                </section>
+
+                <section class="cta-section" aria-label="ช่องทางการติดต่อ">
+                    <a href="${finalLineUrl}" class="btn-line" rel="noopener" data-i18n='{"th":"📲 ทักไลน์จองคิว ${displayName}","en":"📲 Contact ${displayName}"}'> 
+                        📲 ทักไลน์จองคิว ${displayName} 
+                    </a>
+                    <p style="margin-top:1rem;color:var(--muted);font-size:.9rem">จ่ายหน้างาน • ปลอดภัย 100% • ไม่มีมัดจำ</p>
+                </section>
+
+                <section class="pricing-section">
+                    <h2 class="pricing-title">💰 ราคาและบริการ</h2>
+                    <div class="pricing-grid">
+                        <div><strong>ST (ชั่วคราว)</strong><br>฿${parseInt(p.rate||1500).toLocaleString()}</div>
+                        <div><strong>LT (ค้างคืน)</strong><br>฿${(parseInt(p.rate||1500)*1.8).toLocaleString()}</div>
+                        <div><strong>OT (นอกสถานที่)</strong><br>฿${(parseInt(p.rate||1500)*2.2).toLocaleString()}</div>
+                    </div>
+                </section>
+            </article>
+
+            ${related.length > 0 ? `
+            <aside class="related-section" aria-label="น้องๆ แนะนำเพิ่มเติม">
+                <h2 class="related-title">🔥 น้องๆ แนะนำใน ${provinceName}</h2>
+                <nav class="related-carousel">
+                    ${related.map(r => `
+                        <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
+                            <img src="${optimizeImg(r.imagePath,200,200)}" class="related-img" alt="${r.name}" loading="lazy">
+                            <div class="related-info">
+                                <div class="related-name">${r.name}</div>
+                                <div class="related-loc">📍 ${r.location || provinceName}</div>
+                            </div>
+                        </a>
+                    `).join('')}
+                </nav>
+                <div style="text-align:center; margin-top:1.5rem;">
+                    <a href="${CONFIG.DOMAIN}/location/${provinceKey}" 
+                       class="btn-line" 
+                       style="padding: 0.8rem 1.5rem; font-size: 1rem; background: var(--card); border: 1px solid var(--p); box-shadow: none;"
+                       data-i18n='{"th":"ดูน้องๆ ${provinceName} ทั้งหมด →","en":"View all ${provinceName} →"}'>
+                       ดูน้องๆ ${provinceName} ทั้งหมด →
+                    </a>
+                </div>
+            </aside>` : ''}
+
+            <section class="testimonials">
+                <h2 class="testimonials-title">⭐ รีวิวจากลูกค้าจริง</h2>
+                <div class="testimonial-grid">
+                    ${TESTIMONIALS.map(t => `
+                        <div class="testimonial">
+                            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+                                <div style="color:var(--gold);font-size:1.2rem">${'★'.repeat(Math.floor(t.rating))}</div>
+                                <strong>${t.name}</strong>
+                            </div>
+                            <p style="color:var(--txt);margin:0">${t.text}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </section>
+        </main>
+
         <footer class="footer">
-            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME}<br>
-            <span data-i18n='{"th":"มั่นใจ ปลอดภัย ไม่มีการมัดจำ","en":"Safe • No deposit"}'>มั่นใจ ปลอดภัย ไม่มีการมัดจำ</span> | 
-            <a href="${CONFIG.SOCIAL_PROFILES[2]}" style="color:var(--s)" 
-               data-i18n='{"th":"📲 Line","en":"📲 Line"}'>📲 Line</a>
+            <div class="footer-content">
+                © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME}<br>
+                <span data-i18n='{"th":"มั่นใจ ปลอดภัย ไม่มีการมัดจำ","en":"Safe • No deposit"}'>มั่นใจ ปลอดภัย ไม่มีการมัดจำ</span> | 
+                <a href="${CONFIG.SOCIAL_PROFILES[2]}" style="color:var(--s)" 
+                   data-i18n='{"th":"📲 Line","en":"📲 Line"}'>📲 Line</a>
+            </div>
         </footer>
-    </div>  <!-- ปิด container -->
+    </div>
 
-    <!-- Language Toggle - อยู่นอก container -->
-    <div style="position:fixed;bottom:20px;right:20px;z-index:999;background:rgba(0,0,0,0.8);padding:10px;border-radius:50px;display:flex;gap:5px">
+    <aside class="lang-switcher" style="position:fixed;bottom:20px;right:20px;z-index:999;background:rgba(0,0,0,0.8);padding:10px;border-radius:50px;display:flex;gap:5px">
         <button onclick="setLang('th')" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:5px" title="ไทย">🇹🇭</button>
         <button onclick="setLang('en')" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:5px" title="English">🇺🇸</button>
-    </div>
+    </aside>
+
     <script>
     let currentLang = 'th';
     function setLang(lang) {
@@ -317,11 +344,9 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
         document.documentElement.lang = lang;
         document.querySelectorAll('[data-i18n]').forEach(el => {
             try {
-                const translations = el.dataset.i18n ? JSON.parse(el.dataset.i18n) : {};
-                el.textContent = translations[lang] || el.dataset.th || el.innerHTML;
-            } catch(e) {
-                // fallback
-            }
+                const translations = JSON.parse(el.dataset.i18n);
+                el.textContent = translations[lang] || translations['th'];
+            } catch(e) { }
         });
     }
     </script>

@@ -7,8 +7,12 @@ const CONFIG = {
     BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)'
 };
 
-const optimizeImg = (path) => {
+// ปรับขนาดรูปให้เล็กลงสำหรับหน้า List (400x533)
+const optimizeImg = (path, width = 400, height = 533) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    if (path.includes('res.cloudinary.com')) {
+        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill,g_face/`);
+    }
     if (path.startsWith('http')) return path;
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
@@ -266,10 +270,10 @@ export default async (request, context) => {
 </body>
 </html>`;
 
-        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
-
-    } catch (e) {
-        console.error("SSR Province Error:", e);
-        return context.next(); 
-    }
-};
+        return new Response(html, { 
+    headers: { 
+        "content-type": "text/html; charset=utf-8",
+        // เก็บหน้าเว็บไว้ที่ Server ของ Netlify 1 ชม. เพื่อลดภาระ Supabase และทำให้เว็บโหลดไวเหมือนฟ้าผ่า
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400"
+    } 
+});
