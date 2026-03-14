@@ -123,7 +123,7 @@ export default async (request, context) => {
     <title>${title}</title>
     <meta name="description" content="${description}">
     <link rel="canonical" href="${provinceUrl}">
-    
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <!-- 🚀 Core Web Vitals: Preconnect & Preload -->
     <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
     <link rel="preload" as="image" href="${firstImage}">

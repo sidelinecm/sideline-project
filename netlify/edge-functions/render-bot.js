@@ -188,7 +188,7 @@ const imageUrl = optimizeImg(p.imagePath, 600, 800);
     <title>${pageTitle} | รับงานเอง ฟิวแฟน รูปตรงปก</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
-    
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <!-- Core Web Vitals -->
     <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
     <link rel="preload" as="image" href="${imageUrl}">
