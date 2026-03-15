@@ -7,21 +7,14 @@ const CONFIG = {
     BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)'
 };
 
-const optimizeImg = (path, width = 400) => {
-    if (!path) return '/images/default.webp';
-    
-    // ถ้าเป็น Cloudinary ให้บีบอัดระดับ 'eco' (Economical) และเปลี่ยนเป็น WebP
+// ปรับขนาดรูปให้เล็กลงสำหรับหน้า List (400x533)
+const optimizeImg = (path, width = 400, height = 533) => {
+    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/f_webp,q_auto:eco,w_${width},c_limit/`);
+        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill,g_face/`);
     }
-    
-    // ถ้าเป็น Supabase Storage (พยายามเลี่ยงการเก็บรูปใหญ่ที่นี่)
-    if (path.includes('supabase.co/storage')) {
-        // ใช้ฟังก์ชัน URL Transformation ของ Supabase (ถ้าเปิดใช้งาน)
-        return `${path}?width=${width}&quality=70`;
-    }
-    
-    return path;
+    if (path.startsWith('http')) return path;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
 const getLocalZones = (provinceKey) => {
