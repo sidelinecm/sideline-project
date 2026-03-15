@@ -259,31 +259,71 @@ export default async (request, context) => {
         <p class="text-[9px] uppercase tracking-[0.5em] text-white/20">© ${CURRENT_YEAR} Secure Elite Selection. No Deposit Required.</p>
     </footer>
 
-    <script>
-        lucide.createIcons();
-        gsap.to('.reveal', { opacity: 1, y: 0, duration: 1.5, stagger: 0.3, ease: 'power4.out' });
+   <script>
+    lucide.createIcons();
+    gsap.to('.reveal', { opacity: 1, y: 0, duration: 1.5, stagger: 0.3, ease: 'power4.out' });
 
-        function openLB(p) {
-            const modal = document.querySelector('#lb > div');
-            document.getElementById('lb-name').innerText = p.name;
-            document.getElementById('lb-age').innerText = p.age || '22';
-            document.getElementById('lb-height').innerText = p.height || '165';
-            document.getElementById('lb-weight').innerText = p.weight || '48';
-            document.getElementById('lb-desc').innerText = p.desc || 'น้องสาวสวย งานพรีเมียม ฟิวแฟน เอาใจเก่ง พิกัด ${provinceName} ทักคุยได้เลยค่ะ';
-            document.getElementById('lb-img').src = "${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/" + p.imagePath;
-            document.getElementById('lb-line').onclick = () => window.open('https://line.me/ti/p/~' + (p.lineId || 'ksLUMz3p_o'));
-            
-            document.getElementById('lb').classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('scale-95', 'opacity-0'); modal.classList.add('scale-100', 'opacity-100'); }, 10);
-            document.body.style.overflow = 'hidden';
-        }
+    let currentGallery = [];
+    let currentImgIdx = 0;
 
-        function closeLB() {
-            const modal = document.querySelector('#lb > div');
-            modal.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { document.getElementById('lb').classList.add('hidden'); document.body.style.overflow = ''; }, 300);
+    function openLB(p) {
+        const modal = document.querySelector('#lb > div');
+        
+        // 1. ใส่ข้อมูลพื้นฐาน
+        document.getElementById('lb-name').innerText = p.name;
+        document.getElementById('lb-age').innerText = p.age || '22';
+        document.getElementById('lb-height').innerText = p.height || '165';
+        document.getElementById('lb-weight').innerText = p.weight || '48';
+        document.getElementById('lb-desc').innerText = p.description || p.quote || 'น้องสาวสวย งานพรีเมียม ฟิวแฟน เอาใจเก่ง พิกัด เชียงใหม่ ทักคุยได้เลยค่ะ';
+
+        // 2. ระบบรูปภาพและ Gallery
+        currentGallery = p.galleryPaths || [p.imagePath];
+        currentImgIdx = 0;
+        updateModalImage();
+
+        // 3. ระบบลิงก์ LINE (ตรวจสอบความถูกต้อง)
+        let lineLink = p.lineId || 'ksLUWB89Y_';
+        if (!lineLink.startsWith('http')) {
+            lineLink = 'https://line.me/ti/p/~' + lineLink;
         }
-    </script>
+        document.getElementById('lb-line').onclick = () => window.open(lineLink);
+        
+        // 4. แสดง Modal
+        document.getElementById('lb').classList.remove('hidden');
+        setTimeout(() => { 
+            modal.classList.remove('scale-95', 'opacity-0'); 
+            modal.classList.add('scale-100', 'opacity-100'); 
+        }, 10);
+        document.body.style.overflow = 'hidden';
+    }
+
+    // ฟังก์ชันเปลี่ยนรูปใน Gallery
+    function updateModalImage() {
+        let imgUrl = currentGallery[currentImgIdx];
+        if (!imgUrl.startsWith('http')) {
+            imgUrl = "https://zxetzqwjaiumqhrpumln.supabase.co/storage/v1/object/public/profile-images/" + imgUrl;
+        }
+        document.getElementById('lb-img').src = imgUrl;
+    }
+
+    // ฟังก์ชันปิด Modal
+    function closeLB() {
+        const modal = document.querySelector('#lb > div');
+        modal.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => { 
+            document.getElementById('lb').classList.add('hidden'); 
+            document.body.style.overflow = ''; 
+        }, 300);
+    }
+
+    // เพิ่มระบบปิดด้วยปุ่ม Esc และการกดลูกศรเปลี่ยนรูป
+    document.addEventListener('keydown', (e) => {
+        if (document.getElementById('lb').classList.contains('hidden')) return;
+        if (e.key === 'Escape') closeLB();
+        if (e.key === 'ArrowRight') { currentImgIdx = (currentImgIdx + 1) % currentGallery.length; updateModalImage(); }
+        if (e.key === 'ArrowLeft') { currentImgIdx = (currentImgIdx - 1 + currentGallery.length) % currentGallery.length; updateModalImage(); }
+    });
+</script>
 </body>
 </html>`;
 
