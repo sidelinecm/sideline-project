@@ -37,24 +37,21 @@ const TESTIMONIALS = [
     }
 ];
 
-// ฟังก์ชันสุ่มคำ (Spintax) เพื่อให้เนื้อหาไม่ซ้ำกันในสายตา Google
-const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-const optimizeImg = (path, width = 600, height = 800) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+const optimizeImg = (path, width = 400) => {
+    if (!path) return '/images/default.webp';
     
-    // กรณีเป็น URL จาก Cloudinary
+    // ถ้าเป็น Cloudinary ให้บีบอัดระดับ 'eco' (Economical) และเปลี่ยนเป็น WebP
     if (path.includes('res.cloudinary.com')) {
-        // แทรก parameter f_auto (เลือกฟอร์แมตอัตโนมัติเช่น WebP/AVIF) 
-        // และ q_auto (บีบอัดคุณภาพอัตโนมัติ) และการปรับขนาด
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+        return path.replace('/upload/', `/upload/f_webp,q_auto:eco,w_${width},c_limit/`);
     }
-
-    // กรณีเป็น URL อื่นๆ (เช่นภายนอก)
-    if (path.startsWith('http')) return path;
-
-    // กรณีเป็นไฟล์จาก Supabase Storage
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
+    
+    // ถ้าเป็น Supabase Storage (พยายามเลี่ยงการเก็บรูปใหญ่ที่นี่)
+    if (path.includes('supabase.co/storage')) {
+        // ใช้ฟังก์ชัน URL Transformation ของ Supabase (ถ้าเปิดใช้งาน)
+        return `${path}?width=${width}&quality=70`;
+    }
+    
+    return path;
 };
 
 export default async (request, context) => {
