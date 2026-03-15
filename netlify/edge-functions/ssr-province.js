@@ -71,49 +71,135 @@ export default async (request, context) => {
         const firstImage = optimizeImg(profiles[0].imagePath);
 
         // 🎯 2. ADVANCED SCHEMA MARKUP (รวม 4 ตัวท็อป: Collection, LocalBusiness, Breadcrumb, FAQ)
-        const schemaData = {
-            "@context": "https://schema.org",
-            "@graph":[
-                {
-                    "@type": "CollectionPage",
-                    "@id": `${provinceUrl}#webpage`,
-                    "url": provinceUrl,
-                    "name": title,
-                    "description": description,
-                    "mainEntity": {
-                        "@type": "ItemList",
-                        "numberOfItems": profiles.length,
-                        "itemListElement": profiles.map((p, index) => ({
-                            "@type": "ListItem",
-                            "position": index + 1,
-                            "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
-                        }))
-                    }
-                },
-                {
-                    "@type": "BreadcrumbList",
-                    "itemListElement":[
-                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
-                    ]
-                },
-                {
-                    "@type": "LocalBusiness",
-                    "name": `ศูนย์รวมไซด์ไลน์ ${provinceName} รับงานเอง`,
-                    "image": firstImage,
-                    "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
-                    "priceRange": "฿1500 - ฿5000"
-                },
-                {
-                    "@type": "FAQPage",
-                    "mainEntity":[
-                        { "@type": "Question", "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`, "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้นครับ แพลตฟอร์มของเราเน้นความปลอดภัย จ่ายเงินสดหน้างานเมื่อเจอน้องตัวจริงเท่านั้น" } },
-                        { "@type": "Question", "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`, "acceptedAnswer": { "@type": "Answer", "text": `ครอบคลุมทุกพื้นที่ยอดฮิต เช่น ${localZones.join(', ')} สามารถนัดหมายที่โรงแรมหรือห้องพักส่วนตัวได้เลย` } },
-                        { "@type": "Question", "name": "การันตีตรงปกไหม?", "acceptedAnswer": { "@type": "Answer", "text": "การันตีตรงปก 100% รูปโปรไฟล์มีการอัปเดตสม่ำเสมอ หากนัดเจอแล้วหน้าตาไม่ตรงปก ลูกค้าสามารถยกเลิกงานได้ทันที ไม่มีค่าใช้จ่าย" } }
-                    ]
-                }
-            ]
-        };
+       const schemaData = {
+  "@context": "https://schema.org",
+  "@graph": [
+
+    {
+      "@type": "WebSite",
+      "@id": `${CONFIG.DOMAIN}#website`,
+      "url": CONFIG.DOMAIN,
+      "name": CONFIG.BRAND_NAME,
+      "inLanguage": "th-TH",
+      "publisher": {
+        "@id": `${CONFIG.DOMAIN}#organization`
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    },
+
+    {
+      "@type": ["Organization","LocalBusiness"],
+      "@id": `${CONFIG.DOMAIN}#organization`,
+      "name": CONFIG.BRAND_NAME,
+      "url": CONFIG.DOMAIN,
+      "logo": `${CONFIG.DOMAIN}/images/logo.png`,
+      "image": firstImage,
+      "sameAs": [
+        "https://linktr.ee/sidelinechiangmai",
+        "https://x.com/Sdl_chiangmai",
+        "https://line.me/ti/p/ksLUMz3p_o"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": provinceName,
+        "addressCountry": "TH"
+      },
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": provinceName
+      },
+      "priceRange": "฿1500 - ฿5000"
+    },
+
+    {
+      "@type": "CollectionPage",
+      "@id": `${provinceUrl}#webpage`,
+      "url": provinceUrl,
+      "name": title,
+      "description": description,
+      "inLanguage": "th-TH",
+      "isPartOf": {
+        "@id": `${CONFIG.DOMAIN}#website`
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": firstImage
+      },
+      "breadcrumb": {
+        "@id": `${provinceUrl}#breadcrumb`
+      },
+      "mainEntity": {
+        "@id": `${provinceUrl}#itemlist`
+      }
+    },
+
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${provinceUrl}#breadcrumb`,
+      "itemListElement":[
+        {
+          "@type":"ListItem",
+          "position":1,
+          "name":"หน้าแรก",
+          "item": CONFIG.DOMAIN
+        },
+        {
+          "@type":"ListItem",
+          "position":2,
+          "name":`ไซด์ไลน์${provinceName}`,
+          "item": provinceUrl
+        }
+      ]
+    },
+
+    {
+      "@type": "ItemList",
+      "@id": `${provinceUrl}#itemlist`,
+      "numberOfItems": profiles.length,
+      "itemListElement": profiles.map((p, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
+      }))
+    },
+
+    {
+      "@type": "FAQPage",
+      "@id": `${provinceUrl}#faq`,
+      "mainEntity":[
+        {
+          "@type": "Question",
+          "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายหน้างานเมื่อเจอตัวจริงเท่านั้นเพื่อความปลอดภัย"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `ครอบคลุมโซนยอดนิยม เช่น ${localZones.join(', ')} และพื้นที่ใกล้เคียง สามารถนัดหมายที่โรงแรมหรือห้องพักได้`
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "การันตีตรงปกไหม?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "รูปโปรไฟล์มีการอัปเดตสม่ำเสมอ หากไม่ตรงปกสามารถยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่าย"
+          }
+        }
+      ]
+    }
+
+  ]
+};
 
         const html = `<!DOCTYPE html>
 <html lang="th">
