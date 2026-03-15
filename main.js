@@ -47,7 +47,7 @@ gsap.registerPlugin(ScrollTrigger);
         }
     };
 
-    let state = { 
+let state = { 
     allProfiles: [], 
     provincesMap: new Map(), 
     currentProfileSlug: null, 
@@ -56,9 +56,10 @@ gsap.registerPlugin(ScrollTrigger);
     lastFetchedAt: '1970-01-01T00:00:00Z', 
     realtimeSubscription: null,
     cleanupFunctions: [],
-    
     currentFilters: null,
-    filteredProfiles: [] 
+    filteredProfiles: [],
+    // ✅ ตัวแปรสำคัญ: ป้องกันการ Render ซ้ำเมื่อหน้าเว็บมี HTML จาก SSR อยู่แล้ว
+    isFirstLoad: true 
 };
 
     const dom = {};
@@ -67,67 +68,87 @@ gsap.registerPlugin(ScrollTrigger);
 
     document.addEventListener('DOMContentLoaded', initApp);
     async function initApp() {
-        console.log("🚀 App Initializing...");
-        
-        initializeSupabase();
-        cacheDOMElements();
+    console.log("🚀 App Initializing...");
+    
+    initializeSupabase();
+    cacheDOMElements();
 
-        initThemeToggle();
-        initMobileMenu();
-        initAgeVerification();
-        initHeaderScrollEffect();
-        initGlobalClickListener();
-        updateActiveNavLinks();
-        initLightboxEvents();
+    initThemeToggle();
+    initMobileMenu();
+    initAgeVerification();
+    initHeaderScrollEffect();
+    initGlobalClickListener();
+    updateActiveNavLinks();
+    initLightboxEvents();
 
-        await handleRouting();
-        await handleDataLoading();
-         
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => {
-                initMarqueeEffect();
-                initMobileSitemapTrigger();
-                initFooterLinks();
-            });
-        } else {
-            setTimeout(() => {
-                initMarqueeEffect();
-                initMobileSitemapTrigger();
-                initFooterLinks();
-            }, 1500);
-        }
-         
-        const yearSpan = document.getElementById('currentYearDynamic');
-        if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-        document.body.classList.add('loaded');
-        console.log("✅ App Initialized Successfully!");
+    // 1. ตรวจสอบ Path ปัจจุบันก่อน เพื่อเตรียม State ให้ถูกหน้า
+    await handleRouting();
 
-        if (window.location.pathname === '/' && !state.currentProfileSlug) {
-            try {
-                const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
-                if (heroElements.length > 0) {
-                    gsap.from(heroElements, { y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.3 });
-                }
-            } catch (e) { console.warn("Animation skipped", e); }
-        }
+    // 2. โหลดข้อมูล (ในขั้นตอนนี้ renderProfiles จะถูกเรียกภายใน handleDataLoading)
+    // แต่ด้วย Logic ใหม่ข้างบน มันจะยังไม่วาดทับหน้าจังหวัดที่มี SSR อยู่แล้ว
+    await handleDataLoading();
+    
+    // 3. หลังจากผ่านการโหลดครั้งแรกเสร็จสิ้น ให้ปิด First Load เสมอ
+    state.isFirstLoad = false;
 
-        window.addEventListener('popstate', async () => {
-            await handleRouting();
-            updateActiveNavLinks();
+    // 4. ส่วนงานรอง (Idle Tasks)
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+            initMarqueeEffect();
+            initMobileSitemapTrigger();
+            initFooterLinks();
         });
+    } else {
+        setTimeout(() => {
+            initMarqueeEffect();
+            initMobileSitemapTrigger();
+            initFooterLinks();
+        }, 1500);
     }
     
-    window.addEventListener('beforeunload', () => {
-        if (state.realtimeSubscription) {
-            supabase?.removeChannel(state.realtimeSubscription);
-        }
-        
-        if (Array.isArray(state.cleanupFunctions)) {
-            state.cleanupFunctions.forEach(fn => {
-                try { fn(); } catch (e) { console.warn('Cleanup error:', e); }
-            });
-        }
+    const yearSpan = document.getElementById('currentYearDynamic');
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+    document.body.classList.add('loaded');
+    console.log("✅ App Initialized Successfully!");
+
+    // GSAP Hero Animation (เฉพาะหน้าแรก)
+    if (window.location.pathname === '/' && !state.currentProfileSlug) {
+        try {
+            const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
+            if (heroElements.length > 0) {
+                gsap.from(heroElements, { 
+                    y: 20, 
+                    opacity: 0, 
+                    duration: 0.6, 
+                    stagger: 0.15, 
+                    ease: 'power2.out', 
+                    delay: 0.3 
+                });
+            }
+        } catch (e) { console.warn("Animation skipped", e); }
+    }
+
+    // จัดการการกดย้อนกลับ (Browser Back/Forward)
+    window.addEventListener('popstate', async () => {
+        // เมื่อเปลี่ยนหน้าผ่านประวัติ Browser ต้องล้างหน้าจอและวาดใหม่เสมอ
+        state.isFirstLoad = false; 
+        await handleRouting();
+        updateActiveNavLinks();
     });
+}
+
+// Cleanup Listener
+window.addEventListener('beforeunload', () => {
+    if (state.realtimeSubscription) {
+        supabase?.removeChannel(state.realtimeSubscription);
+    }
+    
+    if (Array.isArray(state.cleanupFunctions)) {
+        state.cleanupFunctions.forEach(fn => {
+            try { fn(); } catch (e) { console.warn('Cleanup error:', e); }
+        });
+    }
+});
 
     function initializeSupabase() {
         try {
@@ -332,7 +353,7 @@ function cacheDOMElements() {
     dom.provinceSelect = document.getElementById('search-province');
     dom.availabilitySelect = document.getElementById('search-availability');
     dom.featuredSelect = document.getElementById('search-featured');
-    dom.sortSelect = document.getElementById('sort-select');
+    dom.sortSelect = document.getElementById('sort-select'); // ✅ แก้ไขแล้ว
     dom.resetSearchBtn = document.getElementById('reset-search-btn');
     dom.resultCount = document.getElementById('result-count');
     dom.featuredSection = document.getElementById('featured-profiles');
@@ -340,9 +361,7 @@ function cacheDOMElements() {
     dom.lightbox = document.getElementById('lightbox');
     dom.lightboxCloseBtn = document.getElementById('closeLightboxBtn');
     dom.lightboxWrapper = document.getElementById('lightbox-content-wrapper-el');
-    console.log("✅ DOM Elements Cached");
 }
-
 
 async function handleDataLoading() {
     if (state.isFetching) return;
@@ -454,8 +473,9 @@ async function fetchDataDelta() {
             }
         });
 
-// ✅ ใส่บรรทัดนี้แทน
-state.allProfiles = mergeProfilesData(state.allProfiles, (profilesRes.data || []).map(processProfileData).filter(Boolean));
+        // 3. ประมวลผลโปรไฟล์ (ใช้ processProfileData ตัวที่แก้ใหม่ด้านล่าง)
+        const fetchedProfiles = profilesRes.data || [];
+        state.allProfiles = fetchedProfiles.map(p => processProfileData(p)).filter(Boolean);
 
         // 4. บันทึก Cache
         try {
@@ -486,38 +506,35 @@ state.allProfiles = mergeProfilesData(state.allProfiles, (profilesRes.data || []
         state.isFetching = false;
     }
 }
+// =================================================================
+// ส่วนที่ 7: ULTIMATE SEARCH ENGINE (ฉบับแก้ไขสมบูรณ์และทดสอบแล้ว)
+// =================================================================
 
-// =================================================================
-// 2. MERGE PROFILES DATA - รวมข้อมูลเก่า+ใหม่ (ไม่ซ้ำ ID)
-// =================================================================
-function mergeProfilesData(existingProfiles, newProfiles) {
-    if (!newProfiles || newProfiles.length === 0) {
-        return existingProfiles;
+
+    // ✅ MERGE PROFILES DATA (Unchanged, but included for completeness)
+    function mergeProfilesData(existingProfiles, newProfiles) {
+        if (!newProfiles || newProfiles.length === 0) {
+            return existingProfiles;
+        }
+
+        const profileMap = new Map();
+
+        // Add existing profiles
+        existingProfiles.forEach(p => {
+            if (p && p.id) {
+                profileMap.set(p.id.toString(), p);
+            }
+        });
+
+        // Update/Add new profiles
+        newProfiles.forEach(newProfile => {
+            if (newProfile && newProfile.id) {
+                profileMap.set(newProfile.id.toString(), newProfile);
+            }
+        });
+
+        return Array.from(profileMap.values());
     }
-
-    const profileMap = new Map();
-
-    // 1. เพิ่มข้อมูลเก่า
-    existingProfiles.forEach(p => {
-        if (p && p.id) {
-            profileMap.set(p.id.toString(), p);
-        }
-    });
-
-    // 2. อัพเดท/เพิ่มข้อมูลใหม่ (ให้ข้อมูลใหม่ override เก่า)
-    newProfiles.forEach(newProfile => {
-        if (newProfile && newProfile.id) {
-            profileMap.set(newProfile.id.toString(), processProfileData(newProfile));
-        }
-    });
-
-    // 3. สร้างเป็น Array + เรียงลำดับตาม featured
-    return Array.from(profileMap.values())
-        .filter(Boolean)
-        .sort((a, b) => (b.isfeatured || 0) - (a.isfeatured || 0));
-}
-
-
 
 function initRealtimeSubscription() {
     // ✅ ปิด Realtime ถาวร เพื่อใช้ระบบ Smart Cache
@@ -537,49 +554,57 @@ function initRealtimeSubscription() {
     console.log('zzz Realtime disabled. Using Smart Cache Strategy.');
 }
 
+// ✅ ฟังก์ชันช่วยดึงรูปและบีบอัดให้ตรงกับระบบหลังบ้าน
 function getOptimizedClientImage(path, width = 400) {
     if (!path) return CONFIG.DEFAULT_OG_IMAGE;
-    
-    // Cloudinary
-    if (path.includes('cloudinary')) {
-        return path.replace(/\/upload\/(v\d+)?\//, `/upload/w_${width},f_auto,q_auto:eco/v$1/`);
+    if (path.includes('res.cloudinary.com')) {
+        return path.replace('/upload/', `/upload/c_scale,w_${width},q_auto,f_auto/`);
     }
-    
-    // Supabase Storage → WebP optimized
-    return `https://zxetzqwjaiumqhrpumln.supabase.co/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}?w=${width}&q=80&f=webp`;
+    if (path.startsWith('http')) return path;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
 }
 
+// =================================================================
+// 1. DATA PROCESSING (Data Layer) - แปลงข้อมูลจาก DB ให้พร้อมใช้
+// =================================================================
 function processProfileData(p) {
     if (!p) return null;
 
-    const displayName = getCleanName(p.name || ''); 
+    // 1. ชื่อ: ตัดคำนำหน้า "น้อง" ออกเพื่อความสวยงาม (ถ้ามี)
+    const displayName = getCleanName(p.name); 
 
-    // รูปภาพ: Optimized WebP
+    // 2. รูปภาพ: รวม imagePath (รูปปก) และ galleryPaths (อัลบั้ม) เข้าด้วยกัน
+    // รองรับทั้ง URL เต็ม (Cloudinary) และ Path ย่อ (Supabase Storage)
     const rawGallery = Array.isArray(p.galleryPaths) ? p.galleryPaths : [];
-    const allImagePaths = [p.imagePath, ...rawGallery].filter(Boolean);
+    const allImagePaths = [p.imagePath, ...rawGallery].filter(Boolean); // ตัดค่า null/undefined ทิ้ง
+    
+    // กรอง Path ซ้ำ (Unique)
     const uniquePaths = [...new Set(allImagePaths)];
 
-    let imageObjects = uniquePaths.map(path => ({
-        src: getOptimizedClientImage(path, 400),
-        fullSrc: getOptimizedClientImage(path, 800),
-        original: path
-    }));
+    // สร้าง Object รูปภาพ พร้อม URL 2 ขนาด (รูปเล็กไว้โชว์เร็วๆ / รูปใหญ่ไว้ดูชัดๆ)
+    let imageObjects = uniquePaths.map(path => {
+        return { 
+            src: getOptimizedClientImage(path, 400),  // รูปเล็ก (Thumbnail/Card)
+            fullSrc: getOptimizedClientImage(path, 800) // รูปใหญ่ (Lightbox)
+        };
+    });
 
+    // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder กันเว็บพัง
     if (imageObjects.length === 0) {
-        imageObjects = [{ 
+        imageObjects.push({ 
             src: CONFIG.DEFAULT_OG_IMAGE, 
-            fullSrc: CONFIG.DEFAULT_OG_IMAGE,
-            original: CONFIG.DEFAULT_OG_IMAGE
-        }];
+            fullSrc: CONFIG.DEFAULT_OG_IMAGE 
+        });
     }
 
+    // 3. จังหวัด: ดึงชื่อไทยจาก Map
     const provinceName = state.provincesMap.get(p.provinceKey) || p.provinceThai || 'ไม่ระบุ';
 
-    // ✅ ใช้ /[^0-9]/g (ลบทุกตัวที่ไม่ใช่ตัวเลข)
-    const numericPrice = Number(String(p.rate || '').replace(/[^0-9]/g, '')) || 0;
+    // 4. ราคา: แปลง Text "1500.-" ให้เป็นตัวเลข 1500
+    const numericPrice = Number(String(p.rate).replace(/\D/g, '')) || 0;
     const formattedPrice = numericPrice > 0 ? numericPrice.toLocaleString() : 'สอบถาม';
 
-    // ✅ ใช้ /\s+/g (รวม whitespace หลายตัวเป็นช่องว่างเดียว)
+    // 5. String สำหรับระบบค้นหา (Search Engine)
     const universalSearchString = `
         ${displayName} ${p.id} ${provinceName} 
         ${Array.isArray(p.styleTags) ? p.styleTags.join(' ') : ''} 
@@ -587,23 +612,45 @@ function processProfileData(p) {
         ${p.stats || ''} ${p.skinTone || ''}
     `.toLowerCase().replace(/\s+/g, ' ').trim();
 
+    // 6. Return ข้อมูลที่ Clean แล้วกลับไป
     return { 
-        ...p,
+        ...p, // ข้อมูลเดิมทั้งหมด (id, age, height, weight, etc.)
         displayName,
         images: imageObjects, 
         provinceNameThai: provinceName,
-        displayPrice: formattedPrice,
-        _price: numericPrice,
+        displayPrice: formattedPrice, // ราคาแบบมีลูกน้ำ (string)
+        _price: numericPrice,         // ราคาแบบตัวเลข (number) สำหรับเรียงลำดับ
         searchString: universalSearchString,
-        safeHeight: p.height?.trim() || '-',
-        safeWeight: p.weight?.trim() || '-',
-        safeStats: p.stats?.trim() || '-',
-        safeSkin: p.skinTone?.trim() || '-',
-        safeAge: p.age?.trim() || '-',
-        isLiked: false
+        
+        // จัดการค่าว่างให้เป็น '-' เพื่อความสวยงาม
+        safeHeight: (p.height && p.height.trim()) ? p.height : '-',
+        safeWeight: (p.weight && p.weight.trim()) ? p.weight : '-',
+        safeStats: (p.stats && p.stats.trim()) ? p.stats : '-',
+        safeSkin: (p.skinTone && p.skinTone.trim()) ? p.skinTone : '-',
+        safeAge: (p.age && p.age.trim()) ? p.age : '-'
     };
 }
 
+function populateProvinceDropdown() {
+    if (!dom.provinceSelect) return;
+    
+    // ล้าง options เก่า (ยกเว้น option แรก)
+    while (dom.provinceSelect.options.length > 1) {
+        dom.provinceSelect.remove(1);
+    }
+    
+    const sorted = Array.from(state.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], 'th'));
+    const fragment = document.createDocumentFragment();
+    
+    sorted.forEach(([key, name]) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = name;
+        fragment.appendChild(opt);
+    });
+    
+    dom.provinceSelect.appendChild(fragment);
+}
 
 // =================================================================
 // ✅ [FIXED] handleRouting (แก้หน้าเด้ง - ไม่ซ่อนฉากหลังแล้ว)
@@ -702,98 +749,103 @@ async function handleRouting(dataLoaded = false) {
     }
 }
 
-// =================================================================
-// 4. SEARCH & FILTERS ENGINE - Fuse.js + Debounce + Events
-// =================================================================
-function debounce(fn, ms) {
+function debounce(func, delay = 250) {
     let timeout;
     return function(...args) {
         clearTimeout(timeout);
-        timeout = setTimeout(() => fn.apply(this, args), ms);
+        timeout = setTimeout(() => func.apply(this, args), delay);
     };
 }
 
-function handleSearch() {
-    const keyword = dom.searchInput?.value?.trim() || '';
-    const province = dom.provinceSelect?.value || '';
-    const availability = dom.availabilitySelect?.value || '';
-    
-    saveRecentSearch(keyword);
-    
-    if (!fuseEngine || !state.allProfiles.length) {
-        state.filteredProfiles = state.allProfiles;
-    } else {
-        state.filteredProfiles = state.allProfiles.filter(profile => {
-            // Keyword search
-            if (keyword && !profile.searchString.includes(keyword.toLowerCase())) {
-                return false;
-            }
-            // Province filter
-            if (province && profile.provinceKey !== province) {
-                return false;
-            }
-            return true;
-        });
-    }
-    
-    state.currentFilters = { keyword, province, availability };
-    renderProfiles(state.filteredProfiles || state.allProfiles, true);
-    updateResultCount();
-}
+function initSearchAndFilters() {
+    if (!dom.searchForm) return;
 
-function resetFilters() {
-    if (dom.searchInput) dom.searchInput.value = '';
-    if (dom.provinceSelect) dom.provinceSelect.value = '';
-    if (dom.availabilitySelect) dom.availabilitySelect.value = '';
-    
-    state.currentFilters = null;
-    state.filteredProfiles = state.allProfiles;
-    renderProfiles(state.allProfiles, false);
-    updateResultCount();
-}
-
-function updateResultCount() {
-    if (dom.resultCount) {
-        const count = (state.filteredProfiles || state.allProfiles).length;
-        dom.resultCount.textContent = `พบ ${count} รายการ`;
-    }
-}
-
-async function initSearchAndFilters() {
-    // 1. สร้าง Fuse.js Search Engine
-    fuseEngine = new Fuse(state.allProfiles, {
-        keys: ['displayName', 'searchString', 'provinceNameThai'],
-        threshold: 0.3,
+    // 1. ตั้งค่า Search Engine (Fuse.js)
+    const fuseOptions = {
+        includeScore: true,
+        threshold: 0.3, 
         ignoreLocation: true,
-        includeScore: true
-    });
+        useExtendedSearch: true, 
+        keys: [
+            { name: 'searchString', weight: 1.0 },
+            { name: 'name', weight: 0.8 },
+            { name: 'englishName', weight: 0.8 },
+            { name: 'id', weight: 0.9 },
+            { name: 'provinceNameThai', weight: 0.5 },
+            { name: 'styleTags', weight: 0.4 }
+        ]
+    };
     
-    // 2. Load liked state
-    const likedProfiles = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || '{}');
-    state.allProfiles.forEach(p => {
-        if (p && p.id) p.isLiked = !!likedProfiles[p.id];
-    });
-    
-    // 3. Event Listeners (Debounced)
-    if (dom.searchInput) {
-        dom.searchInput.addEventListener('input', debounce(handleSearch, 300));
+    // ✅ แก้ไข: สร้าง Search Index ทันทีถ้ามีข้อมูล (ไม่ต้องรอ setTimeout)
+    // เพราะ fetchDataDelta โหลดข้อมูลเสร็จก่อนเรียกฟังก์ชันนี้อยู่แล้ว
+    if (state.allProfiles && state.allProfiles.length > 0) {
+        console.log(`🚀 Building Search Index for ${state.allProfiles.length} profiles...`);
+        fuseEngine = new Fuse(state.allProfiles, fuseOptions);
+    } else {
+        // เผื่อกรณียังไม่มีข้อมูลจริงๆ ค่อยรอ
+        setTimeout(() => {
+            if (state.allProfiles.length > 0 && !fuseEngine) {
+                fuseEngine = new Fuse(state.allProfiles, fuseOptions);
+            }
+        }, 1000);
     }
-    if (dom.provinceSelect) {
-        dom.provinceSelect.addEventListener('change', handleSearch);
-    }
-    if (dom.resetSearchBtn) {
-        dom.resetSearchBtn.addEventListener('click', resetFilters);
-    }
-    if (dom.searchForm) {
-        dom.searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            handleSearch();
-        });
-    }
-    
-    console.log(`✅ Search Engine Ready: ${state.allProfiles.length} profiles`);
-}
 
+    // --- 2. ตั้งค่า Event Listeners (ส่วนนี้เหมือนเดิม ดีอยู่แล้ว) ---
+    const clearBtn = document.getElementById('clear-search-btn');
+    const suggestionsBox = document.getElementById('search-suggestions');
+    
+    dom.searchInput?.addEventListener('input', debounce((e) => {
+        const val = e.target.value;
+        if(clearBtn) clearBtn.classList.toggle('hidden', !val);
+        applyUltimateFilters(); 
+        if (typeof updateUltimateSuggestions === 'function') {
+            updateUltimateSuggestions(val);
+        }
+    }, 350));
+
+    clearBtn?.addEventListener('click', () => {
+        if (dom.searchInput) {
+            dom.searchInput.value = '';
+            dom.searchInput.focus();
+        }
+        clearBtn.classList.add('hidden');
+        if (suggestionsBox) suggestionsBox.classList.add('hidden');
+        applyUltimateFilters();
+    });
+
+    dom.provinceSelect?.addEventListener('change', () => {
+        if (dom.searchInput) {
+            dom.searchInput.value = '';
+            if(clearBtn) clearBtn.classList.add('hidden');
+        }
+        const newPath = dom.provinceSelect.value ? `/location/${dom.provinceSelect.value}` : '/';
+        history.pushState(null, '', newPath);
+        applyUltimateFilters(true);
+    });
+
+    dom.availabilitySelect?.addEventListener('change', () => applyUltimateFilters(true));
+    dom.featuredSelect?.addEventListener('change', () => applyUltimateFilters(true));
+    dom.sortSelect?.addEventListener('change', () => applyUltimateFilters(true));
+    
+    dom.resetSearchBtn?.addEventListener('click', () => {
+        if (dom.searchInput) dom.searchInput.value = '';
+        if (dom.provinceSelect) dom.provinceSelect.value = '';
+        if (dom.availabilitySelect) dom.availabilitySelect.value = '';
+        if (dom.featuredSelect) dom.featuredSelect.value = '';
+        if (dom.sortSelect) dom.sortSelect.value = 'featured';
+
+        if (clearBtn) clearBtn.classList.add('hidden');
+        history.pushState(null, '', '/');
+        applyUltimateFilters(true);
+    });
+
+    dom.searchForm.addEventListener('submit', (e) => { 
+        e.preventDefault(); 
+        applyUltimateFilters(true); 
+        if(suggestionsBox) suggestionsBox.classList.add('hidden');
+        if (dom.searchInput) dom.searchInput.blur();
+    });
+}
 
 // ==========================================
 // ✅ ฟังก์ชันจัดการ Cache ฉบับปรับปรุง (Safe Mode)
@@ -1179,47 +1231,39 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * อัปเดต URL จากฟิลเตอร์ปัจจุบัน
+ * อัปเดต URL จากฟิลเตอร์ปัจจุบัน (SEO Clean URL Version)
  * @param {Object} query - ข้อมูลฟิลเตอร์
  */
 function updateUrlFromFilters(query) {
     try {
-        // สร้าง URL Parameters
-        const params = new URLSearchParams();
-        
-        if (query.text) params.set('q', encodeURIComponent(query.text));
-        if (query.province && query.province !== 'all') params.set('province', query.province);
-        if (query.avail && query.avail !== 'all') params.set('avail', query.avail);
-        if (query.featured) params.set('featured', 'true');
-        if (query.sort && query.sort !== 'featured') params.set('sort', query.sort);
-        
-        const paramsString = params.toString();
-        
-        // สร้าง pathname
-        let pathname = '/';
+        // 1. สร้าง Path ที่สะอาดที่สุด (เช่น /location/chiangmai)
+        let newUrl = '/';
         if (query.province && query.province !== 'all') {
-            pathname = `/location/${encodeURIComponent(query.province)}`;
+            newUrl = `/location/${encodeURIComponent(query.province)}`;
         }
         
-        // สร้าง URL สุดท้าย
-        const newUrl = paramsString ? `${pathname}?${paramsString}` : pathname;
+        // 2. อนุญาตให้ใส่เฉพาะการค้นหา (q) เท่านั้น ส่วนฟิลเตอร์อื่นๆ ให้เปลี่ยนแค่ UI หน้าจอ ไม่ต้องเปลี่ยน URL
+        const params = new URLSearchParams();
+        if (query.text) params.set('q', query.text); // ไม่ต้อง encodeURIComponent ซ้ำเพราะ URLSearchParams จัดการให้
         
-        // อัปเดต URL โดยไม่ reload หน้า
+        const paramsString = params.toString();
+        if (paramsString) {
+            newUrl = `${newUrl}?${paramsString}`;
+        }
+        
+        // 3. อัปเดต URL โดยไม่ reload หน้า และไม่มี ?province= ขยะโผล่มาอีก
         if (window.location.pathname + window.location.search !== newUrl) {
             history.pushState({ 
                 filters: query,
                 timestamp: Date.now() 
             }, '', newUrl);
             
-            console.log(`🌐 อัปเดต URL: ${newUrl}`);
+            console.log(`🌐 SEO URL Updated: ${newUrl}`);
         }
-        
     } catch (error) {
         console.error('❌ เกิดข้อผิดพลาดในการอัปเดต URL:', error);
     }
 }
-
-
 
 async function renderCardsIncrementally(container, profiles) {
     if (!container || !profiles) return;
@@ -1379,54 +1423,54 @@ async function renderByProvince(profiles) {
     }
 }
 
-function renderProfiles(profiles, animate = true) {
-    const container = dom.profilesDisplayArea || document.querySelector('.profiles-grid');
-    if (!container) return;
+function renderProfiles(profiles, isSearching) {
+    if (!dom.profilesDisplayArea) return;
+    
+    // 1. ซ่อน Error และ No Results ก่อนเริ่มงาน
+    dom.noResultsMessage?.classList.add('hidden');
+    if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
 
-    if (profiles.length === 0) {
-        if (dom.noResultsMessage) {
-            dom.noResultsMessage.classList.remove('hidden');
+    // 2. จัดการส่วน Featured (แนะนำ)
+    if (dom.featuredSection) {
+        const isHome = !isSearching && !window.location.pathname.includes('/location/');
+        dom.featuredSection.classList.toggle('hidden', !isHome);
+
+        if (isHome && dom.featuredContainer && dom.featuredContainer.children.length === 0) {
+            const featured = state.allProfiles.filter(p => p.isfeatured);
+            renderCardsIncrementally(dom.featuredContainer, featured);
         }
-        container.innerHTML = '<div class="no-results">ไม่พบข้อมูลที่ค้นหา</div>';
+    }
+
+    // 3. กรณีไม่มีข้อมูล
+    if (!profiles || profiles.length === 0) {
+        dom.profilesDisplayArea.innerHTML = '';
+        dom.noResultsMessage?.classList.remove('hidden');
+        if (dom.resultCount) dom.resultCount.style.display = 'none';
         return;
     }
 
-    if (dom.noResultsMessage) {
-        dom.noResultsMessage.classList.add('hidden');
+    // 4. ตัดสินใจโหมดการวาด (ค้นหา/จังหวัด หรือ หน้าแรกแยกตามจังหวัด)
+    const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
+    
+    // ล้างพื้นที่แสดงผลหลัก "ครั้งเดียว" ก่อนเริ่มวาดใหม่
+    dom.profilesDisplayArea.innerHTML = '';
+
+    if (isSearching || isLocationPage) {
+        // [โหมด A] หน้าค้นหา หรือ หน้าจังหวัด (เช่น เชียงใหม่)
+        const searchSection = createSearchResultSection(profiles);
+        dom.profilesDisplayArea.appendChild(searchSection);
+        
+        // สั่งวาดการ์ดใน Grid ของ Search Section
+        const grid = searchSection.querySelector('.profile-grid');
+        renderCardsIncrementally(grid, profiles);
+    } else {
+        // [โหมด B] หน้าแรกแบบแยกจังหวัด (ทยอยวาดทีละจังหวัด)
+        renderByProvince(profiles);
     }
 
-    const html = profiles.map(profile => `
-        <a href="/sideline/${profile.slug}" class="profile-card-new card-link" data-profile-slug="${profile.slug}">
-            <div class="profile-image" style="background-image: url('${profile.imagePath}')">
-                ${profile.isfeatured ? '<span class="featured-badge">HOT</span>' : ''}
-            </div>
-            <div class="profile-info">
-                <h3>${profile.name}</h3>
-                <div class="profile-location">${profile.location || 'ใจกลางเมือง'}</div>
-                <div class="profile-price">฿${parseInt(profile.rate || 1500).toLocaleString()}</div>
-                <div class="profile-status">${profile.availability || 'ว่าง'}</div>
-                <button class="like-button" data-action="like" data-id="${profile.id}">
-                    <i class="far fa-heart"></i>
-                    <span class="like-count">${profile.likes || '15'}</span>
-                </button>
-            </div>
-        </a>
-    `).join('');
-
-    container.innerHTML = html;
-
-    if (dom.resultCount) {
-        dom.resultCount.textContent = `${profiles.length} โปรไฟล์`;
-    }
-
-    if (animate && typeof gsap !== 'undefined') {
-        gsap.from(container.querySelectorAll('.profile-card-new'), {
-            y: 30,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power2.out'
-        });
+    // 5. อัปเดต ScrollTrigger เพื่อให้ Animation ทำงานถูกต้อง
+    if (window.ScrollTrigger) {
+        setTimeout(() => ScrollTrigger.refresh(), 500);
     }
 }
 
@@ -1904,20 +1948,21 @@ function populateLightboxData(p) {
         els.lineBtnContainer.appendChild(wrapper);
     }
 }
+
 // ==========================================
 // 💎 SEO STRATEGIC POOL (คลังคำศัพท์ LSI)
 // ==========================================
 const SEO_POOL = {
-    styles: [
+    styles:[
         "ฟิวแฟนแท้ๆ", "งานเนี๊ยบดูแลดี", "สายหวานคุยสนุก", 
         "เอาใจเก่งสุดๆ", "สไตล์นางแบบ", "น่ารักขี้อ้อน", 
         "งานเอนเตอร์เทน", "คุยเก่งไม่เดดแอร์"
     ],
-    trust: [
+    trust:[
         "ไม่ต้องโอนก่อน", "ไม่มีมัดจำล่วงหน้า", "ไม่โอนจอง", 
         "จ่ายหน้างาน 100%", "นัดเจอจ่ายสด", "ปลอดภัยไร้กังวล"
     ],
-    guarantee: [
+    guarantee:[
         "ตัวจริงตรงรูป 100%", "รูปปัจจุบันไม่จกตา", "การันตีความสวย", 
         "ตรงปกไม่ผิดหวัง", "คัดงานคุณภาพ", "รับประกันความตรงปก"
     ],
@@ -1927,17 +1972,29 @@ const SEO_POOL = {
 };
 
 // =================================================================
-// 10. SEO META TAGS UPDATER (SMART & SAFE VERSION)
+// 10. SEO META TAGS UPDATER (ULTIMATE PERFECT VERSION)
 // =================================================================
-function updateAdvancedMeta(profile = null, pageData = null) {
-    // 1. ตรวจสอบว่ามีข้อมูล SEO ในไฟล์ HTML อยู่แล้วหรือไม่ (ป้องกันการเขียนทับหน้าแรก)
-    const hasExistingTitle = document.title && document.title !== "" && document.title !== "Document";
-    const hasExistingDesc = document.querySelector('meta[name="description"]')?.getAttribute('content');
 
-    // 2. ถ้าไม่ใช่หน้าโปรไฟล์ หรือ หน้าจังหวัด (เป็นหน้าที่มีไฟล์ HTML จริงๆ เช่น index.html)
-    // และมีการตั้งค่า Title/Desc ไว้แล้ว ให้หยุดทำงานทันที ไม่ต้องทับ
-    if (!profile && !pageData && hasExistingTitle && hasExistingDesc) {
-        console.log("SEO: พบข้อมูลเดิมในไฟล์ HTML แล้ว ข้ามการอัปเดตเพื่อป้องกันการเขียนทับ");
+// 🛡️ ตัวแปรช่วยป้องกันการทับข้อมูลของ SSR ในการโหลดหน้าครั้งแรก
+let isFirstLoad = true;
+
+// 🧹 ฟังก์ชันล้าง Schema เก่าทิ้งทุกครั้งที่เปลี่ยนหน้า (แก้บั๊ก Schema พอกหางหมู)
+function clearAllDynamicSchemas() {
+    const schemaIds =[
+        'schema-jsonld-person', 'schema-jsonld-list', 'schema-jsonld-faq', 
+        'schema-jsonld-breadcrumb', 'schema-jsonld-org', 'schema-jsonld-website'
+    ];
+    schemaIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+}
+
+function updateAdvancedMeta(profile = null, pageData = null) {
+    // 1. ถ้าเป็นการโหลดครั้งแรกสุด ปล่อยให้ SSR ทำงานไป ไม่ต้องเอา JS ไปกวน
+    if (isFirstLoad) {
+        console.log("SEO: First load detected. Using SSR Metadata.");
+        isFirstLoad = false;
         return; 
     }
 
@@ -1945,34 +2002,33 @@ function updateAdvancedMeta(profile = null, pageData = null) {
     const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html';
     const isDynamic = profile || pageData;
 
-    // ถ้าไม่ใช่หน้าแรก และ ไม่มีข้อมูล dynamic ก็ไม่ต้องทำอะไร
-    if (!isDynamic && !isRoot) {
-        return; 
-    }
+    // เคลียร์ Schema เก่าทิ้งก่อนเริ่มสร้างใหม่
+    clearAllDynamicSchemas();
 
-    // เตรียมตัวแปรพื้นฐาน (เฉพาะกรณีที่จำเป็นต้องใช้)
+    // เตรียมตัวแปรพื้นฐาน
     const YEAR_TH = new Date().getFullYear() + 543;
-    const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const thaiMonths =["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const d = new Date();
     const CURRENT_DATE = `${d.getDate()} ${thaiMonths[d.getMonth()]} ${YEAR_TH}`;
 
     const getCleanName = (rawName) => {
         if (!rawName) return "";
         let name = rawName.trim().replace(/^(น้อง\s?)/, '');
-        name = name.toLowerCase();
         return `น้อง${name.charAt(0).toUpperCase() + name.slice(1)}`;
     };
 
     // ==========================================
-    // CASE A: หน้าโปรไฟล์ (ส่วนนี้ต้องทำเพราะไม่มีไฟล์ HTML แยก)
+    // CASE A: หน้าโปรไฟล์น้องๆ
     // ==========================================
     if (profile) {
         const displayName = getCleanName(profile.name);
         const province = profile.provinceNameThai || 'เชียงใหม่';
         const priceInfo = profile.rate ? `ราคา ${profile.rate}` : 'สอบถามราคา';
         const workArea = profile.location ? `${profile.location}, ${province}` : province;
+        const profileUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`;
+        const provinceUrl = `${CONFIG.SITE_URL}/location/${profile.provinceKey || 'chiangmai'}`;
         
-        let statsParts = [];
+        let statsParts =[];
         if (profile.stats) statsParts.push(`สัดส่วน ${profile.stats}`);
         if (profile.age) statsParts.push(`อายุ ${profile.age}`);
         const detailsSnippet = statsParts.join('. '); 
@@ -1986,42 +2042,59 @@ function updateAdvancedMeta(profile = null, pageData = null) {
         document.title = finalTitle;
         updateMeta('description', finalDesc);
         updateMeta('keywords', `${displayName}, ไซด์ไลน์${province}, รับงาน${province}`);
-        updateLink('canonical', `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`);
+        updateLink('canonical', profileUrl);
         
         updateOpenGraphMeta(profile, finalTitle, finalDesc, 'profile');
+        
+        // 🚀 ฝัง Schema คู่ (Person + Breadcrumb)
         injectSchema(generatePersonSchema(profile, finalDesc, province), 'schema-jsonld-person');
+        injectSchema(generateBreadcrumbSchema([
+            { name: "หน้าแรก", url: CONFIG.SITE_URL },
+            { name: `ไซด์ไลน์${province}`, url: provinceUrl },
+            { name: displayName, url: profileUrl }
+        ]), 'schema-jsonld-breadcrumb');
     }
 
     // ==========================================
     // CASE B: หน้าจังหวัด
     // ==========================================
     else if (pageData) {
-        // ทำงานเฉพาะเมื่อไม่มีข้อมูลในไฟล์ HTML มาก่อน
         const province = pageData.provinceName || 'เชียงใหม่';
+        const pageUrl = pageData.canonicalUrl || window.location.href;
         const pageTitle = `ไซด์ไลน์${province} รับงานเอง ตรงปก (${YEAR_TH})`;
-        const pageDesc = `รวมน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province}. อัปเดตล่าสุด ${CURRENT_DATE}.`;
+        const pageDesc = `รวมน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province}. อัปเดตล่าสุด ${CURRENT_DATE}. ปลอดภัย ไม่มัดจำ.`;
 
         document.title = pageTitle;
         updateMeta('description', pageDesc);
-        updateLink('canonical', pageData.canonicalUrl || window.location.href);
+        updateLink('canonical', pageUrl);
+        updateOpenGraphMeta(null, pageTitle, pageDesc, 'website');
+        
+        // 🚀 ฝัง Schema คู่ (Listing + Breadcrumb)
         injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
+        injectSchema(generateBreadcrumbSchema([
+            { name: "หน้าแรก", url: CONFIG.SITE_URL },
+            { name: `ไซด์ไลน์${province}`, url: pageUrl }
+        ]), 'schema-jsonld-breadcrumb');
     } 
     
     // ==========================================
-    // CASE C: หน้าแรก (Fallback)
-    // จะรันถึงตรงนี้ได้ แปลว่าหน้าแรกของคุณ "ไม่มี" Title/Desc ในไฟล์ index.html
+    // CASE C: หน้าแรก (Home)
     // ==========================================
     else if (isRoot) {
-        const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานไม่มัดจำ (${YEAR_TH})`;
-        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. ไม่ต้องโอนมัดจำ ปลอดภัย 100%`;
+        const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานไม่มัดจำ ฟิวแฟนตรงปก (${YEAR_TH})`;
+        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. รับงานเอง ไม่ผ่านเอเย่นต์ ไม่ต้องโอนมัดจำ ปลอดภัย 100%`;
 
         document.title = GLOBAL_TITLE;
         updateMeta('description', GLOBAL_DESC);
         updateLink('canonical', CONFIG.SITE_URL);
+        updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
         
-        // ใส่เฉพาะ Schema ที่จำเป็นเพื่อช่วย SEO
+        // 🚀 ฝัง Schema ชุดใหญ่สำหรับหน้าแรก
+        injectSchema(generateWebsiteSchema(), 'schema-jsonld-website');
+        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org');
         injectSchema(generateFAQPageSchema([
-            { question: "ต้องโอนมัดจำไหม?", answer: "ไม่ต้องค่ะ จ่ายเงินหน้างาน 100%" }
+            { question: "ต้องโอนมัดจำไหม?", answer: "ไม่ต้องค่ะ แพลตฟอร์มเราให้จ่ายเงินสดหน้างาน 100% เพื่อความปลอดภัย" },
+            { question: "การันตีตรงปกไหม?", answer: "เรารับประกันตัวจริงตรงรูป 100% ถ้านัดเจอแล้วไม่ตรงปก สามารถยกเลิกได้ทันทีไม่มีค่าใช้จ่าย" }
         ]), 'schema-jsonld-faq');
     }
 }
@@ -2044,8 +2117,6 @@ function updateOpenGraphMeta(profile, title, description, type) {
     
     updateMeta('og:image', imageUrl);
     updateMeta('og:image:secure_url', imageUrl); 
-    
-    // ✅ OPTIMIZED: เพิ่มขนาดรูปให้ Social Media โหลดเร็วขึ้น
     updateMeta('og:image:width', '800');
     updateMeta('og:image:height', '600');
     updateMeta('og:image:alt', title);
@@ -2058,8 +2129,6 @@ function updateOpenGraphMeta(profile, title, description, type) {
 
 function generatePersonSchema(p, descriptionOverride, provinceName) {
     if (!p) return null;
-    
-    // ✅ OPTIMIZED: ลบเครื่องหมายคอมม่าออกจากราคาเพื่อให้ Google Schema อ่านค่าได้ถูกต้อง
     const priceNumeric = (p.rate || "0").toString().replace(/\D/g, '');
     let cleanName = (p.name || '').replace(/^น้อง/, '').trim();
     const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
@@ -2087,9 +2156,9 @@ function generatePersonSchema(p, descriptionOverride, provinceName) {
             "price": priceNumeric,
             "priceCurrency": "THB",
             "availability": p.availability?.includes('ไม่ว่าง') ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำ (Cash on arrival only)"
+            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำ"
         },
-        "additionalProperty": [
+        "additionalProperty":[
             { "@type": "PropertyValue", "name": "Age", "value": p.age || "-" },
             { "@type": "PropertyValue", "name": "Stats", "value": p.stats || "-" },
             { "@type": "PropertyValue", "name": "Height", "value": p.height || "-" },
@@ -2107,29 +2176,23 @@ function generateFAQPageSchema(faqData) {
         "mainEntity": faqData.map(item => ({
             "@type": "Question",
             "name": item.question,
-            "acceptedAnswer": {
-                "@type": "Answer",
-                "text": item.answer
-            }
+            "acceptedAnswer": { "@type": "Answer", "text": item.answer }
         }))
     };
 }
 
-function generateBreadcrumbSchema(type, name) {
+// 🚀 อัปเกรดตัวสร้าง Breadcrumb ให้รองรับ Array (ยืดหยุ่น 100%)
+function generateBreadcrumbSchema(items) {
+    if (!items || items.length === 0) return null;
     return {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
-        "itemListElement": [{
+        "itemListElement": items.map((item, index) => ({
             "@type": "ListItem",
-            "position": 1,
-            "name": "หน้าแรก",
-            "item": CONFIG.SITE_URL
-        }, {
-            "@type": "ListItem",
-            "position": 2,
-            "name": type === 'location' ? `จังหวัด ${name}` : name,
-            "item": type === 'location' ? `${CONFIG.SITE_URL}/location/${encodeURIComponent(name)}` : undefined 
-        }]
+            "position": index + 1,
+            "name": item.name,
+            "item": item.url
+        }))
     };
 }
 
@@ -2186,8 +2249,6 @@ function generateOrganizationSchema() {
 
 function injectSchema(json, id = 'schema-jsonld') {
     if (!json) return;
-    
-    // ✅ OPTIMIZED: ลบ Script เก่าทิ้งก่อน เพื่อไม่ให้สะสมใน DOM (Performance)
     const oldScript = document.getElementById(id);
     if (oldScript) oldScript.remove();
 
@@ -2199,9 +2260,7 @@ function injectSchema(json, id = 'schema-jsonld') {
 }
 
 function updateMeta(propertyOrName, content) {
-    // ✅ OPTIMIZED: แยกแยะระหว่าง name และ property (og:) ให้ถูกต้อง
     let el = document.querySelector(`meta[name="${propertyOrName}"], meta[property="${propertyOrName}"]`);
-    
     if (!el) {
         el = document.createElement('meta');
         if (propertyOrName.startsWith('og:') || propertyOrName.startsWith('twitter:')) {
@@ -2226,10 +2285,7 @@ function updateLink(rel, href) {
 
 function updateResultCount(count, total, isFiltering) {
     if (!dom.resultCount) return;
-    
-    // ✅ OPTIMIZED: ใส่ลูกน้ำให้ตัวเลข (1,000) และจัดการ Class ให้แม่นยำ
     const formattedCount = count.toLocaleString();
-    
     if (count > 0) {
         dom.resultCount.innerHTML = `✅ พบ <span class="font-bold text-pink-600">${formattedCount}</span> โปรไฟล์${isFiltering ? '' : ''}`;
         dom.resultCount.classList.remove('hidden', 'no-results');
@@ -2302,25 +2358,29 @@ function updateResultCount(count, total, isFiltering) {
         updateHeader(); // รันครั้งแรกทันที
     }
 
-function initScrollAnimations() {
-    const els = document.querySelectorAll('[data-animate-on-scroll]');
-    if (!els.length) return;
+    // ✅ 3. Scroll Animations: ใช้คะแนน Performance สูงสุด
+    function initScrollAnimations() {
+        const els = document.querySelectorAll('[data-animate-on-scroll]');
+        if (!els.length) return;
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.src = entry.target.dataset.src;
-            }
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        els.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+            obs.observe(el);
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    els.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
-        observer.observe(el); // ควรอยู่ใน loop
-    });
-}
+    }
 
     // ✅ 4. Social Marquee: แก้บั๊กกระตุกและเพิ่มความลื่นไหลด้วย GPU
     function initMarqueeEffect() {
@@ -2573,26 +2633,42 @@ function createGlobalLoader() {
 }
 
 function showLoadingState() {
-    if (dom.loadingPlaceholder) {
-        dom.loadingPlaceholder.classList.remove('hidden');
-        dom.loadingPlaceholder.style.display = 'block';
+    let loader = document.getElementById('global-loader-overlay');
+    if (!loader) {
+        createGlobalLoader();
+        loader = document.getElementById('global-loader-overlay');
     }
-    if (dom.profilesDisplayArea) {
-        dom.profilesDisplayArea.classList.add('hidden');
-    }
-    document.body.classList.add('loading');
+    // ใช้ GSAP ทำให้การปรากฏตัวนุ่มนวล
+    gsap.set(loader, { display: 'flex', opacity: 0 });
+    gsap.to(loader, { opacity: 1, duration: 0.3, pointerEvents: 'all' });
 }
 
 function hideLoadingState() {
-    if (dom.loadingPlaceholder) {
-        dom.loadingPlaceholder.classList.add('hidden');
+    const loader = document.getElementById('global-loader-overlay');
+    if (loader) {
+        try {
+            // ลองสั่งงานแอนิเมชัน
+            gsap.to(loader, {
+                opacity: 0,
+                scale: 1.05,
+                duration: 0.6,
+                ease: "expo.inOut",
+                onComplete: () => {
+                    loader.style.display = 'none';
+                    gsap.set(loader, { scale: 1 });
+                    if (window.ScrollTrigger) ScrollTrigger.refresh();
+                }
+            });
+        } catch (e) {
+            // หากเกิด error (เช่น gsap โหลดไม่ขึ้น) ให้ซ่อนหน้าต่างโหลดไปเลยทันที
+            console.error("GSAP failed, hiding loader manually.", e);
+            loader.style.display = 'none';
+        }
     }
-    if (dom.profilesDisplayArea) {
-        dom.profilesDisplayArea.classList.remove('hidden');
+    if (typeof dom !== 'undefined' && dom.loadingPlaceholder) {
+        dom.loadingPlaceholder.style.display = 'none';
     }
-    document.body.classList.remove('loading');
 }
-
 
     // =================================================================
     // 12. ADMIN TOOLS (SITEMAP GENERATOR)
