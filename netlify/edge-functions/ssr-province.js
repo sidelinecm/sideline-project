@@ -1,47 +1,55 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// 1. CONFIGURATION
+// ==========================================
+// 1. CONFIGURATION (ตั้งค่าครบทุกจุด)
+// ==========================================
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
     BRAND_NAME: 'Sideline Chiang Mai',
-    BRAND_TH: 'ไซด์ไลน์เชียงใหม่'
+    BRAND_TH: 'ไซด์ไลน์เชียงใหม่',
+    TWITTER: '@sidelinecm'
 };
 
-// 2. HELPERS (SEO & IMAGES)
+// ==========================================
+// 2. HELPERS (ฟังก์ชันจัดการรูปภาพและ SEO)
+// ==========================================
 const optimizeImg = (path, width = 400, height = 533) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
-    if (path.includes('res.cloudinary.com')) return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill,g_face/`);
+    if (path.includes('res.cloudinary.com')) {
+        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill,g_face/`);
+    }
     if (path.startsWith('http')) return path;
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
 const getLocalZones = (provinceKey) => {
     const zones = {
-        'chiangmai': ['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค'],
+        'chiangmai': ['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'หลังมอ'],
         'bangkok': ['สุขุมวิท', 'รัชดา', 'ห้วยขวาง', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ'],
-        'chonburi': ['พัทยา', 'บางแสน', 'ศรีราชา', 'อมตะนคร', 'สัตหีบ']
     };
     return zones[provinceKey.toLowerCase()] || ['ตัวเมือง', 'พื้นที่ใกล้เคียง'];
 };
 
-const spinContent = (province, zones) => {
+const generateSpinContent = (province, zones) => {
     const intros = [
-        `ยินดีต้อนรับสู่แหล่งรวมสาวสวย **รับงาน${province}** ที่ดีที่สุดในขณะนี้`,
-        `สัมผัสประสบการณ์สุดพรีเมียมกับน้องๆ **ไซด์ไลน์${province}** ตัวท็อปเกรดพรีเมียม`,
-        `ศูนย์รวมโปรไฟล์คุณภาพ **เด็กเอ็น${province}** ฟิวแฟน การันตีตรงปก 100%`
+        `ยินดีต้อนรับสู่แหล่งรวมสาวสวย **รับงาน${province}** ที่ดีที่สุด คัดเกรดพรีเมียม`,
+        `สัมผัสประสบการณ์ฟิวแฟนสุดประทับใจกับน้องๆ **ไซด์ไลน์${province}** รับงานเองไม่ผ่านคนกลาง`,
+        `ศูนย์รวมโปรไฟล์คุณภาพ **เด็กเอ็น${province}** การันตีตรงปก 100% อัปเดตใหม่ล่าสุด`
     ];
     const features = [
-        `เราคัดสรรน้องๆ รับงานเองในโซน **${zones.slice(0, 4).join(', ')}** มาให้เลือกอย่างจุใจ`,
-        `บริการเหนือระดับ เน้นความปลอดภัยสูงสุด **ไม่ต้องโอนมัดจำ** เจอตัวจริงแล้วค่อยจ่ายเงิน`,
-        `อัปเดตข้อมูลใหม่ล่าสุดประจำปี ${new Date().getFullYear()} ครอบคลุมพื้นที่ ${zones.slice(4, 7).join(', ')}`
+        `เน้นความปลอดภัยสูงสุดด้วยนโยบาย **ไม่ต้องโอนมัดจำ** เจอตัวจริงแล้วค่อยจ่ายเงินหน้างานเท่านั้น`,
+        `ครอบคลุมพื้นที่ยอดนิยมในโซน **${zones.slice(0, 5).join(', ')}** นัดหมายง่าย เดินทางสะดวก`,
+        `รูปจริงทุกคน หากไม่ตรงปกสามารถยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ ทั้งสิ้น`
     ];
     const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    return `<p class="leading-loose">${spin(intros)} ${spin(features)} พร้อมการันตีความพึงพอใจและบริการที่เอาใจเก่งที่สุด</p>`;
+    return `<p class="mb-4">${spin(intros)}</p><p>${spin(features)}</p>`;
 };
 
-// 3. MAIN FUNCTION
+// ==========================================
+// 3. MAIN SSR FUNCTION
+// ==========================================
 export default async (request, context) => {
     const url = new URL(request.url);
     const pathParts = url.pathname.split('/').filter(Boolean);
@@ -50,14 +58,19 @@ export default async (request, context) => {
     try {
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        // ดึงข้อมูลจังหวัด
-        const { data: provinceData } = await supabase.from('provinces').select('*').eq('key', provinceKey).maybeSingle();
+        // 3.1 ดึงข้อมูลจังหวัด
+        const { data: provinceData } = await supabase
+            .from('provinces')
+            .select('id, nameThai, key')
+            .eq('key', provinceKey)
+            .maybeSingle();
+
         if (!provinceData) return context.next();
 
-        // ดึงโปรไฟล์ (จำกัด 60 คนเพื่อความเร็ว)
+        // 3.2 ดึงข้อมูลโปรไฟล์ (ดึง Column ครบทุกตัวที่ต้องใช้ใน UI และ Modal)
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('*')
+            .select('slug, name, imagePath, galleryPaths, location, rate, isfeatured, age, height, weight, description, quote, lineId, lastUpdated')
             .eq('provinceKey', provinceData.key)
             .eq('active', true)
             .order('isfeatured', { ascending: false })
@@ -72,7 +85,7 @@ export default async (request, context) => {
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         const firstImage = optimizeImg(profiles[0].imagePath, 1200, 630);
 
-        // 🎯 4. SEO & SCHEMA GRAPH
+        // 🎯 4. SEO & SCHEMA MARKUP (สมบูรณ์ 100%)
         const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} (${CURRENT_YEAR}) | ฟิวแฟน ไม่มัดจำ ตรงปก 100%`;
         const description = `รวมน้องๆ ไซด์ไลน์${provinceName} รับงานเอง อัปเดตล่าสุด ${profiles.length} คน โซน ${zones.slice(0, 4).join(', ')} ✓การันตีตรงปก ✓ไม่ต้องโอนมัดจำ ✓จ่ายหน้างาน ปลอดภัยที่สุด`;
 
@@ -83,7 +96,8 @@ export default async (request, context) => {
                     "@type": "WebSite",
                     "@id": `${CONFIG.DOMAIN}#website`,
                     "url": CONFIG.DOMAIN,
-                    "name": CONFIG.BRAND_NAME
+                    "name": CONFIG.BRAND_NAME,
+                    "potentialAction": { "@type": "SearchAction", "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
                 },
                 {
                     "@type": "CollectionPage",
@@ -91,32 +105,40 @@ export default async (request, context) => {
                     "url": provinceUrl,
                     "name": title,
                     "description": description,
-                    "image": firstImage
+                    "image": firstImage,
+                    "breadcrumb": {
+                        "@type": "BreadcrumbList",
+                        "itemListElement": [
+                            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                            { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์ ${provinceName}`, "item": provinceUrl }
+                        ]
+                    }
                 },
                 {
                     "@type": "FAQPage",
                     "mainEntity": [
                         { "@type": "Question", "name": `บริการไซด์ไลน์ ${provinceName} ต้องโอนมัดจำไหม?`, "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำ 100% ครับ แพลตฟอร์มของเราเน้นความปลอดภัย จ่ายเงินสดหน้างานเมื่อเจอตัวจริงเท่านั้น" } },
-                        { "@type": "Question", "name": "รับประกันตรงปกจริงไหม?", "acceptedAnswer": { "@type": "Answer", "text": "การันตีรูปตรงปก 100% ครับ หากนัดเจอแล้วไม่ตรงปก สามารถยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่าย" } }
+                        { "@type": "Question", "name": "รับประกันตรงปกไหม?", "acceptedAnswer": { "@type": "Answer", "text": "การันตีรูปตรงปก 100% หากนัดเจอแล้วไม่ตรงปก สามารถยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่าย" } }
                     ]
                 }
             ]
         };
 
-        // 🎯 5. GENERATE HTML
+        // 🎯 5. GENERATE HTML CARDS
         const cardsHTML = profiles.map((p, i) => `
-            <article class="profile-card group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden cursor-pointer border border-white/5 hover:border-gold/50 transition-all duration-500" 
+            <article class="profile-card group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden cursor-pointer border border-white/5 hover:border-gold/5 transition-all duration-500" 
                      onclick='openLB(${JSON.stringify(p)})'>
                 <div class="aspect-[3/4] relative overflow-hidden">
-                    <img src="${optimizeImg(p.imagePath)}" alt="น้อง${p.name} รับงาน${provinceName} โซน ${p.location || provinceName}" 
+                    <img src="${optimizeImg(p.imagePath)}" alt="น้อง${p.name} รับงาน${provinceName} พิกัด ${p.location || provinceName}" 
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                         ${i < 4 ? 'loading="eager"' : 'loading="lazy"'} decoding="async">
+                         ${i < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async">
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                     <div class="absolute bottom-4 left-4">
                         <span class="bg-black/60 backdrop-blur-md text-gold text-[9px] px-3 py-1 rounded-full border border-gold/20 font-bold uppercase italic tracking-widest">● Verified</span>
                     </div>
+                    ${p.isfeatured ? '<div class="absolute top-4 right-4 bg-gold text-black text-[8px] font-black px-3 py-1 rounded-full uppercase shadow-xl">Recommended</div>' : ''}
                 </div>
-                <div class="p-5">
+                <div class="p-6">
                     <div class="flex justify-between items-center mb-1">
                         <h3 class="font-bold text-lg italic shimmer-gold">${p.name}</h3>
                         <span class="text-gold text-xs font-bold">★ ${p.rate || '4.9'}</span>
@@ -125,6 +147,7 @@ export default async (request, context) => {
                 </div>
             </article>`).join('');
 
+        // 🎯 6. FULL HTML OUTPUT
         const html = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
@@ -133,15 +156,19 @@ export default async (request, context) => {
     <title>${title}</title>
     <meta name="description" content="${description}" />
     <link rel="canonical" href="${provinceUrl}" />
-    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-    <link rel="preload" as="image" href="${firstImage}">
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     
-    <!-- Meta Open Graph -->
+    <!-- Social Meta Tags -->
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:image" content="${firstImage}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="${CONFIG.TWITTER}">
+
+    <!-- Preconnect & Preload -->
+    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preload" as="image" href="${firstImage}">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -170,11 +197,11 @@ export default async (request, context) => {
     <header class="relative h-[70vh] flex items-center justify-center text-center px-6">
         <div class="absolute inset-0 z-0">
             <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black z-10"></div>
-            <img src="${firstImage}" class="w-full h-full object-cover opacity-30" alt="Hero ${provinceName}">
+            <img src="${firstImage}" class="w-full h-full object-cover opacity-30" alt="พรีเมียมไซด์ไลน์ ${provinceName}">
         </div>
-        <div class="relative z-20 max-w-4xl space-y-6">
-            <p class="reveal text-[9px] tracking-[0.6em] uppercase font-bold text-gold opacity-0">Premium Service Reach</p>
-            <h1 class="reveal text-4xl md:text-7xl font-serif font-bold leading-tight opacity-0">
+        <div class="relative z-20 max-w-5xl space-y-6">
+            <p class="reveal text-[10px] tracking-[0.6em] uppercase font-black text-gold opacity-0">Premium Selection</p>
+            <h1 class="reveal text-4xl md:text-8xl font-serif font-bold leading-tight opacity-0">
                 <span class="font-light italic text-white/80">The Finest</span> <br>
                 <span class="shimmer-gold">${provinceName}</span>
             </h1>
@@ -182,158 +209,138 @@ export default async (request, context) => {
     </header>
 
     <main class="max-w-[1500px] mx-auto px-6 py-12">
-        <!-- 🎯 SEO Content Section -->
-        <section class="mb-16 glass-ui p-8 md:p-12 rounded-[3rem] text-center border-gold/10">
-            <h2 class="text-2xl md:text-4xl font-serif shimmer-gold mb-6 italic">ข้อมูลไซด์ไลน์ ${provinceName} อัปเดตล่าสุด</h2>
-            <div class="text-white/60 text-sm md:text-base leading-relaxed max-w-4xl mx-auto">
-                ${spinContent(provinceName, zones)}
+        <section class="mb-20 glass-ui p-8 md:p-16 rounded-[3.5rem] text-center border-gold/10">
+            <h2 class="text-2xl md:text-4xl font-serif shimmer-gold mb-8 italic">เว็บรวมข้อมูล ไซด์ไลน์ ${provinceName} อันดับ 1</h2>
+            <div class="text-white/60 text-base md:text-lg leading-loose max-w-4xl mx-auto font-light">
+                ${generateSpinContent(provinceName, zones)}
             </div>
-            <div class="flex flex-wrap justify-center gap-3 mt-8">
-                ${zones.map(z => `<span class="text-[10px] px-4 py-2 bg-white/5 rounded-full border border-white/5 uppercase font-bold tracking-tighter">#รับงาน${z}</span>`).join('')}
+            <div class="flex flex-wrap justify-center gap-2 mt-10">
+                ${zones.map(z => `<span class="text-[9px] px-5 py-2 bg-white/5 rounded-full border border-white/5 uppercase font-bold text-white/40">#รับงาน${z}</span>`).join('')}
             </div>
         </section>
 
-        <!-- 🎯 Grid Gallery -->
-        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8 mb-24">
+        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10 mb-24">
             ${cardsHTML}
         </div>
 
-        <!-- 🎯 FAQ Section -->
-        <section class="grid md:grid-cols-2 gap-12 mb-24">
-            <div class="space-y-8">
-                <h2 class="text-3xl font-serif shimmer-gold">Frequently Asked <span class="italic text-white">Questions</span></h2>
-                <div class="space-y-4">
-                    <details class="glass-ui p-6 rounded-3xl border-white/5 cursor-pointer group">
-                        <summary class="flex justify-between font-bold text-xs tracking-widest uppercase">ต้องโอนมัดจำก่อนจองไหม? <i data-lucide="plus" class="w-4 h-4 transition-transform group-open:rotate-45"></i></summary>
-                        <p class="mt-4 text-sm text-white/50 leading-loose">ไม่ต้องโอนมัดจำ 100% ครับ แพลตฟอร์มของเราเน้นความปลอดภัยสูงสุด ลูกค้าไม่ต้องโอนเงินก่อนนัดเจอเด็ดขาด เจอตัวจริงแล้วค่อยจ่ายเงินหน้างานเท่านั้น</p>
+        <section class="grid md:grid-cols-2 gap-16 mb-24 items-start">
+            <div class="space-y-10">
+                <h2 class="text-3xl md:text-5xl font-serif shimmer-gold leading-tight">Frequently Asked <br><span class="italic text-white">Questions</span></h2>
+                <div class="space-y-6">
+                    <details class="glass-ui p-8 rounded-3xl border-white/5 cursor-pointer group">
+                        <summary class="flex justify-between font-bold text-sm tracking-widest uppercase items-center">ต้องโอนมัดจำก่อนจองคิวหรือไม่? <i data-lucide="plus" class="w-5 h-5 transition-transform group-open:rotate-45 text-gold"></i></summary>
+                        <p class="mt-6 text-sm text-white/50 leading-loose">**ไม่ต้องโอนมัดจำเด็ดขาดครับ** ลูกค้าจ่ายเงินหน้างานเมื่อเจอตัวจริงเท่านั้น เพื่อความปลอดภัย 100%</p>
                     </details>
-                    <details class="glass-ui p-6 rounded-3xl border-white/5 cursor-pointer group">
-                        <summary class="flex justify-between font-bold text-xs tracking-widest uppercase">โปรไฟล์ตรงปกจริงไหม? <i data-lucide="plus" class="w-4 h-4 transition-transform group-open:rotate-45"></i></summary>
-                        <p class="mt-4 text-sm text-white/50 leading-loose">เราคัดกรองน้องๆ ที่รับงานเองเป็นหลัก รูปภาพส่วนใหญ่เป็นรูปจริง หากไม่ตรงปกสามารถยกเลิกงานได้ทันทีครับ</p>
+                    <details class="glass-ui p-8 rounded-3xl border-white/5 cursor-pointer group">
+                        <summary class="flex justify-between font-bold text-sm tracking-widest uppercase items-center">รับประกันว่าน้องๆ จะตรงปกจริงไหม? <i data-lucide="plus" class="w-5 h-5 transition-transform group-open:rotate-45 text-gold"></i></summary>
+                        <p class="mt-6 text-sm text-white/50 leading-loose">โปรไฟล์ทั้งหมดได้รับการคัดกรองเบื้องต้น เราการันตีรูปตรงปก หากนัดเจอแล้วไม่ตรงปก ลูกค้ามีสิทธิ์ยกเลิกงานได้ทันทีครับ</p>
                     </details>
                 </div>
             </div>
-            <div class="glass-ui p-10 rounded-[3rem] flex flex-col justify-center border-gold/10">
-                <h3 class="text-2xl font-serif shimmer-gold mb-4 italic">Exclusive Service Area</h3>
-                <p class="text-xs text-white/40 leading-loose uppercase tracking-widest mb-6">
-                    ครอบคลุมพื้นที่ยอดนิยม: ${zones.join(', ')} และจังหวัดใกล้เคียง นัดหมายง่าย ปลอดภัย ไร้กังวล
-                </p>
-                <div class="flex gap-4">
-                    <div class="text-center"><div class="text-2xl font-bold text-gold">${profiles.length}+</div><div class="text-[8px] uppercase tracking-widest opacity-50">Active Girls</div></div>
-                    <div class="w-[1px] h-10 bg-white/10"></div>
-                    <div class="text-center"><div class="text-2xl font-bold text-gold">24/7</div><div class="text-[8px] uppercase tracking-widest opacity-50">Support</div></div>
+            <div class="glass-ui p-12 rounded-[3.5rem] border-gold/10 flex flex-col justify-center">
+                <h3 class="text-2xl md:text-3xl font-serif shimmer-gold mb-6 italic">Elite Service Area</h3>
+                <p class="text-sm text-white/40 leading-loose uppercase tracking-widest mb-10">ครอบคลุมพื้นที่: ${zones.join(', ')} และพื้นที่ใกล้เคียง นัดหมายง่าย ปลอดภัย ไร้กังวล</p>
+                <div class="grid grid-cols-2 gap-8 border-t border-white/10 pt-10">
+                    <div><div class="text-3xl font-bold text-gold mb-1">${profiles.length}+</div><div class="text-[10px] uppercase text-white/30 font-bold">Active Members</div></div>
+                    <div><div class="text-3xl font-bold text-gold mb-1">100%</div><div class="text-[10px] uppercase text-white/30 font-bold">No Deposit</div></div>
                 </div>
             </div>
         </section>
     </main>
 
     <!-- 🎯 Lightbox Modal -->
-    <div id="lb" class="fixed inset-0 z-[2000] hidden bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div id="lb" class="fixed inset-0 z-[2000] hidden bg-black/98 backdrop-blur-3xl flex items-center justify-center p-4">
         <div class="absolute inset-0" onclick="closeLB()"></div>
-        <div class="relative w-full max-w-5xl bg-[#080808] border border-white/10 rounded-[3rem] overflow-hidden flex flex-col lg:flex-row shadow-2xl scale-95 opacity-0 transition-all duration-500">
-            <button onclick="closeLB()" class="absolute top-6 right-6 z-50 p-2 glass-ui rounded-full hover:bg-gold transition"><i data-lucide="x" class="text-white w-5 h-5"></i></button>
-            <div class="lg:w-1/2 h-[45vh] lg:h-[75vh] bg-black">
-                <img id="lb-img" class="w-full h-full object-contain" src="">
+        <div class="relative w-full max-w-6xl bg-[#080808] border border-white/10 rounded-[3rem] overflow-hidden flex flex-col lg:flex-row shadow-2xl scale-95 opacity-0 transition-all duration-500">
+            <button onclick="closeLB()" class="absolute top-8 right-8 z-50 p-3 glass-ui rounded-full hover:bg-gold transition group"><i data-lucide="x" class="text-white w-6 h-6 group-hover:rotate-90 transition-transform"></i></button>
+            <div class="lg:w-[55%] h-[45vh] lg:h-[80vh] bg-black relative">
+                <img id="lb-img" class="w-full h-full object-contain" src="" alt="Profile Gallery">
+                <div id="gallery-nav" class="absolute inset-y-0 inset-x-0 flex justify-between items-center px-6 pointer-events-none">
+                    <button onclick="changeImg(-1)" class="p-4 glass-ui rounded-full pointer-events-auto hover:bg-gold/20 text-white transition"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                    <button onclick="changeImg(1)" class="p-4 glass-ui rounded-full pointer-events-auto hover:bg-gold/20 text-white transition"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                </div>
             </div>
-            <div class="lg:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                <p class="text-[9px] font-bold tracking-[0.4em] uppercase text-gold mb-2 italic">Identity Verified Companion</p>
-                <h2 id="lb-name" class="text-4xl md:text-6xl font-serif font-bold shimmer-gold mb-6 uppercase"></h2>
-                <div class="grid grid-cols-3 gap-4 mb-8">
-                    <div class="glass-ui p-4 rounded-3xl text-center"><div id="lb-age" class="text-xl font-bold"></div><div class="text-[8px] uppercase text-white/40 mt-1">Age</div></div>
-                    <div class="glass-ui p-4 rounded-3xl text-center"><div id="lb-height" class="text-xl font-bold"></div><div class="text-[8px] uppercase text-white/40 mt-1">Height</div></div>
-                    <div class="glass-ui p-4 rounded-3xl text-center"><div id="lb-weight" class="text-xl font-bold"></div><div class="text-[8px] uppercase text-white/40 mt-1">Weight</div></div>
+            <div class="lg:w-[45%] p-10 md:p-16 flex flex-col justify-center bg-gradient-to-br from-[#0a0a0a] to-[#050505]">
+                <h2 id="lb-name" class="text-4xl md:text-7xl font-serif font-bold shimmer-gold mb-8 uppercase tracking-tighter"></h2>
+                <div class="grid grid-cols-3 gap-5 mb-10">
+                    <div class="glass-ui p-5 rounded-[2rem] text-center"><div id="lb-age" class="text-2xl font-bold">--</div><div class="text-[9px] uppercase text-white/40 mt-1 font-bold">Age</div></div>
+                    <div class="glass-ui p-5 rounded-[2rem] text-center"><div id="lb-height" class="text-2xl font-bold">--</div><div class="text-[9px] uppercase text-white/40 mt-1 font-bold">Height</div></div>
+                    <div class="glass-ui p-5 rounded-[2rem] text-center"><div id="lb-weight" class="text-2xl font-bold">--</div><div class="text-[9px] uppercase text-white/40 mt-1 font-bold">Weight</div></div>
                 </div>
-                <div class="glass-ui p-6 rounded-3xl mb-8 border-white/5">
-                    <p id="lb-desc" class="text-sm text-white/50 leading-loose italic"></p>
+                <div class="glass-ui p-8 rounded-[2.5rem] mb-10 border-white/5">
+                    <p id="lb-desc" class="text-sm text-white/60 leading-relaxed italic whitespace-pre-line"></p>
                 </div>
-                <button id="lb-line" class="w-full py-5 bg-gradient-to-r from-[#aa771c] to-[#fbf5b7] text-black font-extrabold uppercase tracking-[0.2em] rounded-full shadow-2xl hover:scale-105 transition-transform">📲 Add LINE จองคิวตอนนี้</button>
+                <button id="lb-line" class="w-full py-6 bg-gradient-to-r from-[#aa771c] to-[#fbf5b7] text-black font-black uppercase tracking-[0.3em] rounded-full shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3"><i data-lucide="message-circle" class="w-5 h-5"></i> Add LINE จองคิว</button>
             </div>
         </div>
     </div>
 
-    <footer class="py-16 text-center border-t border-white/5 bg-[#030303]">
-        <div class="font-serif shimmer-gold text-2xl mb-4 tracking-[0.3em] uppercase">${CONFIG.BRAND_TH}</div>
-        <div class="flex justify-center gap-8 text-[9px] font-bold tracking-widest text-white/30 uppercase mb-8">
-            <a href="/faq">FAQ</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a>
-        </div>
-        <p class="text-[9px] uppercase tracking-[0.5em] text-white/20">© ${CURRENT_YEAR} Secure Elite Selection. No Deposit Required.</p>
+    <footer class="py-20 text-center border-t border-white/5 bg-[#030303]">
+        <div class="font-serif shimmer-gold text-3xl mb-6 tracking-[0.4em] uppercase">${CONFIG.BRAND_TH}</div>
+        <p class="text-[10px] uppercase tracking-[0.6em] text-white/10 font-bold">© ${CURRENT_YEAR} Secure Elite Selection. All Rights Reserved.</p>
     </footer>
 
-   <script>
-    lucide.createIcons();
-    gsap.to('.reveal', { opacity: 1, y: 0, duration: 1.5, stagger: 0.3, ease: 'power4.out' });
+    <script>
+        lucide.createIcons();
+        gsap.to('.reveal', { opacity: 1, y: 0, duration: 1.5, stagger: 0.3, ease: 'power4.out' });
 
-    let currentGallery = [];
-    let currentImgIdx = 0;
+        let currentGallery = [];
+        let currentIdx = 0;
 
-    function openLB(p) {
-        const modal = document.querySelector('#lb > div');
-        
-        // 1. ใส่ข้อมูลพื้นฐาน
-        document.getElementById('lb-name').innerText = p.name;
-        document.getElementById('lb-age').innerText = p.age || '22';
-        document.getElementById('lb-height').innerText = p.height || '165';
-        document.getElementById('lb-weight').innerText = p.weight || '48';
-        document.getElementById('lb-desc').innerText = p.description || p.quote || 'น้องสาวสวย งานพรีเมียม ฟิวแฟน เอาใจเก่ง พิกัด เชียงใหม่ ทักคุยได้เลยค่ะ';
+        function openLB(p) {
+            const modal = document.querySelector('#lb > div');
+            document.getElementById('lb-name').innerText = p.name;
+            document.getElementById('lb-age').innerText = p.age || '--';
+            document.getElementById('lb-height').innerText = p.height || '--';
+            document.getElementById('lb-weight').innerText = p.weight || '--';
+            document.getElementById('lb-desc').innerText = p.description || p.quote || 'น้องสาวสวย งานดี บริการระดับพรีเมียม ทักคุยได้เลยค่ะ';
+            
+            // Gallery Setup
+            currentGallery = p.galleryPaths && p.galleryPaths.length > 0 ? p.galleryPaths : [p.imagePath];
+            currentIdx = 0;
+            updateModalImage();
 
-        // 2. ระบบรูปภาพและ Gallery
-        currentGallery = p.galleryPaths || [p.imagePath];
-        currentImgIdx = 0;
-        updateModalImage();
-
-        // 3. ระบบลิงก์ LINE (ตรวจสอบความถูกต้อง)
-        let lineLink = p.lineId || 'ksLUWB89Y_';
-        if (!lineLink.startsWith('http')) {
-            lineLink = 'https://line.me/ti/p/~' + lineLink;
+            // Line Link Setup
+            let line = p.lineId || 'ksLUWB89Y_';
+            let lineUrl = line.startsWith('http') ? line : 'https://line.me/ti/p/~' + line;
+            document.getElementById('lb-line').onclick = () => window.open(lineUrl, '_blank');
+            
+            document.getElementById('lb').classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('scale-95', 'opacity-0'); modal.classList.add('scale-100', 'opacity-100'); }, 10);
+            document.body.style.overflow = 'hidden';
+            document.getElementById('gallery-nav').style.display = currentGallery.length > 1 ? 'flex' : 'none';
         }
-        document.getElementById('lb-line').onclick = () => window.open(lineLink);
-        
-        // 4. แสดง Modal
-        document.getElementById('lb').classList.remove('hidden');
-        setTimeout(() => { 
-            modal.classList.remove('scale-95', 'opacity-0'); 
-            modal.classList.add('scale-100', 'opacity-100'); 
-        }, 10);
-        document.body.style.overflow = 'hidden';
-    }
 
-    // ฟังก์ชันเปลี่ยนรูปใน Gallery
-    function updateModalImage() {
-        let imgUrl = currentGallery[currentImgIdx];
-        if (!imgUrl.startsWith('http')) {
-            imgUrl = "https://zxetzqwjaiumqhrpumln.supabase.co/storage/v1/object/public/profile-images/" + imgUrl;
+        function updateModalImage() {
+            let path = currentGallery[currentIdx];
+            document.getElementById('lb-img').src = path.startsWith('http') ? path : "${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/" + path;
         }
-        document.getElementById('lb-img').src = imgUrl;
-    }
 
-    // ฟังก์ชันปิด Modal
-    function closeLB() {
-        const modal = document.querySelector('#lb > div');
-        modal.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => { 
-            document.getElementById('lb').classList.add('hidden'); 
-            document.body.style.overflow = ''; 
-        }, 300);
-    }
+        function changeImg(dir) {
+            currentIdx = (currentIdx + dir + currentGallery.length) % currentGallery.length;
+            updateModalImage();
+        }
 
-    // เพิ่มระบบปิดด้วยปุ่ม Esc และการกดลูกศรเปลี่ยนรูป
-    document.addEventListener('keydown', (e) => {
-        if (document.getElementById('lb').classList.contains('hidden')) return;
-        if (e.key === 'Escape') closeLB();
-        if (e.key === 'ArrowRight') { currentImgIdx = (currentImgIdx + 1) % currentGallery.length; updateModalImage(); }
-        if (e.key === 'ArrowLeft') { currentImgIdx = (currentImgIdx - 1 + currentGallery.length) % currentGallery.length; updateModalImage(); }
-    });
-</script>
+        function closeLB() {
+            const modal = document.querySelector('#lb > div');
+            modal.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { document.getElementById('lb').classList.add('hidden'); document.body.style.overflow = ''; }, 300);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('lb').classList.contains('hidden')) return;
+            if (e.key === 'Escape') closeLB();
+            if (e.key === 'ArrowRight' && currentGallery.length > 1) changeImg(1);
+            if (e.key === 'ArrowLeft' && currentGallery.length > 1) changeImg(-1);
+        });
+    </script>
 </body>
 </html>`;
 
-        return new Response(html, { 
-            headers: { 
-                "content-type": "text/html; charset=utf-8", 
-                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=60" 
-            } 
-        });
+        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600" } });
+
     } catch (e) {
+        console.error('Master SSR Error:', e);
         return context.next();
     }
 };
