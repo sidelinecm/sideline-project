@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // ==========================================
-// 1. CONFIGURATION (ตั้งค่าครบทุกจุด)
+// 1. CONFIGURATION
 // ==========================================
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
@@ -13,7 +13,7 @@ const CONFIG = {
 };
 
 // ==========================================
-// 2. HELPERS (ฟังก์ชันจัดการรูปภาพและ SEO)
+// 2. HELPERS
 // ==========================================
 const optimizeImg = (path, width = 400, height = 533) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
@@ -58,7 +58,6 @@ export default async (request, context) => {
     try {
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        // 3.1 ดึงข้อมูลจังหวัด
         const { data: provinceData } = await supabase
             .from('provinces')
             .select('id, nameThai, key')
@@ -67,7 +66,6 @@ export default async (request, context) => {
 
         if (!provinceData) return context.next();
 
-        // 3.2 ดึงข้อมูลโปรไฟล์ (ดึง Column ครบทุกตัวที่ต้องใช้ใน UI และ Modal)
         const { data: profiles } = await supabase
             .from('profiles')
             .select('slug, name, imagePath, galleryPaths, location, rate, isfeatured, age, height, weight, description, quote, lineId, lastUpdated')
@@ -85,7 +83,6 @@ export default async (request, context) => {
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         const firstImage = optimizeImg(profiles[0].imagePath, 1200, 630);
 
-        // 🎯 4. SEO & SCHEMA MARKUP (สมบูรณ์ 100%)
         const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} (${CURRENT_YEAR}) | ฟิวแฟน ไม่มัดจำ ตรงปก 100%`;
         const description = `รวมน้องๆ ไซด์ไลน์${provinceName} รับงานเอง อัปเดตล่าสุด ${profiles.length} คน โซน ${zones.slice(0, 4).join(', ')} ✓การันตีตรงปก ✓ไม่ต้องโอนมัดจำ ✓จ่ายหน้างาน ปลอดภัยที่สุด`;
 
@@ -97,7 +94,27 @@ export default async (request, context) => {
                     "@id": `${CONFIG.DOMAIN}#website`,
                     "url": CONFIG.DOMAIN,
                     "name": CONFIG.BRAND_NAME,
-                    "potentialAction": { "@type": "SearchAction", "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
+                    "inLanguage": "th-TH",
+                    "publisher": { "@id": `${CONFIG.DOMAIN}#organization` },
+                    "potentialAction": {
+                        "@type": "SearchAction",
+                        "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`,
+                        "query-input": "required name=search_term_string"
+                    }
+                },
+                {
+                    "@type": ["Organization","LocalBusiness"],
+                    "@id": `${CONFIG.DOMAIN}#organization`,
+                    "name": CONFIG.BRAND_NAME,
+                    "url": CONFIG.DOMAIN,
+                    "image": firstImage,
+                    "sameAs": [
+                        "https://linktr.ee/sidelinechiangmai",
+                        "https://x.com/Sdl_chiangmai",
+                        "https://line.me/ti/p/ksLUMz3p_o"
+                    ],
+                    "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
+                    "priceRange": "฿1500 - ฿5000"
                 },
                 {
                     "@type": "CollectionPage",
@@ -105,26 +122,52 @@ export default async (request, context) => {
                     "url": provinceUrl,
                     "name": title,
                     "description": description,
-                    "image": firstImage,
-                    "breadcrumb": {
-                        "@type": "BreadcrumbList",
-                        "itemListElement": [
-                            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                            { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์ ${provinceName}`, "item": provinceUrl }
-                        ]
-                    }
+                    "image": { "@type": "ImageObject", "url": firstImage },
+                    "breadcrumb": { "@id": `${provinceUrl}#breadcrumb` },
+                    "mainEntity": { "@id": `${provinceUrl}#itemlist` }
+                },
+                {
+                    "@type": "BreadcrumbList",
+                    "@id": `${provinceUrl}#breadcrumb`,
+                    "itemListElement":[
+                        { "@type":"ListItem", "position":1, "name":"หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type":"ListItem", "position":2, "name":`ไซด์ไลน์${provinceName}`, "item": provinceUrl }
+                    ]
+                },
+                {
+                    "@type": "ItemList",
+                    "@id": `${provinceUrl}#itemlist`,
+                    "numberOfItems": profiles.length,
+                    "itemListElement": profiles.map((p, index) => ({
+                        "@type": "ListItem",
+                        "position": index + 1,
+                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
+                    }))
                 },
                 {
                     "@type": "FAQPage",
-                    "mainEntity": [
-                        { "@type": "Question", "name": `บริการไซด์ไลน์ ${provinceName} ต้องโอนมัดจำไหม?`, "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำ 100% ครับ แพลตฟอร์มของเราเน้นความปลอดภัย จ่ายเงินสดหน้างานเมื่อเจอตัวจริงเท่านั้น" } },
-                        { "@type": "Question", "name": "รับประกันตรงปกไหม?", "acceptedAnswer": { "@type": "Answer", "text": "การันตีรูปตรงปก 100% หากนัดเจอแล้วไม่ตรงปก สามารถยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่าย" } }
+                    "@id": `${provinceUrl}#faq`,
+                    "mainEntity":[
+                        {
+                            "@type": "Question",
+                            "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายหน้างานเมื่อเจอตัวจริงเท่านั้นเพื่อความปลอดภัย" }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": `ครอบคลุมโซนยอดนิยม เช่น ${zones.join(', ')} และพื้นที่ใกล้เคียง สามารถนัดหมายที่โรงแรมหรือห้องพักได้` }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "การันตีตรงปกไหม?",
+                            "acceptedAnswer": { "@type": "Answer", "text": "รูปโปรไฟล์มีการอัปเดตสม่ำเสมอ หากไม่ตรงปกสามารถยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่าย" }
+                        }
                     ]
                 }
             ]
         };
 
-        // 🎯 5. GENERATE HTML CARDS
         const cardsHTML = profiles.map((p, i) => `
             <article class="profile-card group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden cursor-pointer border border-white/5 hover:border-gold/5 transition-all duration-500" 
                      onclick='openLB(${JSON.stringify(p)})'>
@@ -147,7 +190,6 @@ export default async (request, context) => {
                 </div>
             </article>`).join('');
 
-        // 🎯 6. FULL HTML OUTPUT
         const html = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
@@ -157,26 +199,13 @@ export default async (request, context) => {
     <meta name="description" content="${description}" />
     <link rel="canonical" href="${provinceUrl}" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    
-    <!-- Social Meta Tags -->
-    <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${description}">
-    <meta property="og:image" content="${firstImage}">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="${CONFIG.TWITTER}">
-
-    <!-- Preconnect & Preload -->
-    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-    <link rel="preload" as="image" href="${firstImage}">
-
+    <meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:image" content="${firstImage}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="${CONFIG.TWITTER}">
+    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin><link rel="preload" as="image" href="${firstImage}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Prompt:wght@300;400;700&display=swap" rel="stylesheet" />
-    
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-
     <style>
         :root { --dark: #050505; --gold: #d4af37; }
         body { background: var(--dark); color: #fff; font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; overflow-x: hidden; }
@@ -193,36 +222,20 @@ export default async (request, context) => {
         <a href="/" class="text-xl md:text-2xl font-serif font-bold tracking-[0.2em] shimmer-gold">${CONFIG.BRAND_NAME}</a>
         <div class="text-[10px] font-bold tracking-widest text-white/50 uppercase">Explore / ${provinceName}</div>
     </nav>
-
     <header class="relative h-[70vh] flex items-center justify-center text-center px-6">
-        <div class="absolute inset-0 z-0">
-            <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black z-10"></div>
-            <img src="${firstImage}" class="w-full h-full object-cover opacity-30" alt="พรีเมียมไซด์ไลน์ ${provinceName}">
-        </div>
+        <div class="absolute inset-0 z-0"><div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black z-10"></div><img src="${firstImage}" class="w-full h-full object-cover opacity-30" alt="พรีเมียมไซด์ไลน์ ${provinceName}"></div>
         <div class="relative z-20 max-w-5xl space-y-6">
             <p class="reveal text-[10px] tracking-[0.6em] uppercase font-black text-gold opacity-0">Premium Selection</p>
-            <h1 class="reveal text-4xl md:text-8xl font-serif font-bold leading-tight opacity-0">
-                <span class="font-light italic text-white/80">The Finest</span> <br>
-                <span class="shimmer-gold">${provinceName}</span>
-            </h1>
+            <h1 class="reveal text-4xl md:text-8xl font-serif font-bold leading-tight opacity-0"><span class="font-light italic text-white/80">The Finest</span> <br><span class="shimmer-gold">${provinceName}</span></h1>
         </div>
     </header>
-
     <main class="max-w-[1500px] mx-auto px-6 py-12">
         <section class="mb-20 glass-ui p-8 md:p-16 rounded-[3.5rem] text-center border-gold/10">
             <h2 class="text-2xl md:text-4xl font-serif shimmer-gold mb-8 italic">เว็บรวมข้อมูล ไซด์ไลน์ ${provinceName} อันดับ 1</h2>
-            <div class="text-white/60 text-base md:text-lg leading-loose max-w-4xl mx-auto font-light">
-                ${generateSpinContent(provinceName, zones)}
-            </div>
-            <div class="flex flex-wrap justify-center gap-2 mt-10">
-                ${zones.map(z => `<span class="text-[9px] px-5 py-2 bg-white/5 rounded-full border border-white/5 uppercase font-bold text-white/40">#รับงาน${z}</span>`).join('')}
-            </div>
+            <div class="text-white/60 text-base md:text-lg leading-loose max-w-4xl mx-auto font-light">${generateSpinContent(provinceName, zones)}</div>
+            <div class="flex flex-wrap justify-center gap-2 mt-10">${zones.map(z => `<span class="text-[9px] px-5 py-2 bg-white/5 rounded-full border border-white/5 uppercase font-bold text-white/40">#รับงาน${z}</span>`).join('')}</div>
         </section>
-
-        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10 mb-24">
-            ${cardsHTML}
-        </div>
-
+        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10 mb-24">${cardsHTML}</div>
         <section class="grid md:grid-cols-2 gap-16 mb-24 items-start">
             <div class="space-y-10">
                 <h2 class="text-3xl md:text-5xl font-serif shimmer-gold leading-tight">Frequently Asked <br><span class="italic text-white">Questions</span></h2>
@@ -247,8 +260,6 @@ export default async (request, context) => {
             </div>
         </section>
     </main>
-
-    <!-- 🎯 Lightbox Modal -->
     <div id="lb" class="fixed inset-0 z-[2000] hidden bg-black/98 backdrop-blur-3xl flex items-center justify-center p-4">
         <div class="absolute inset-0" onclick="closeLB()"></div>
         <div class="relative w-full max-w-6xl bg-[#080808] border border-white/10 rounded-[3rem] overflow-hidden flex flex-col lg:flex-row shadow-2xl scale-95 opacity-0 transition-all duration-500">
@@ -267,26 +278,18 @@ export default async (request, context) => {
                     <div class="glass-ui p-5 rounded-[2rem] text-center"><div id="lb-height" class="text-2xl font-bold">--</div><div class="text-[9px] uppercase text-white/40 mt-1 font-bold">Height</div></div>
                     <div class="glass-ui p-5 rounded-[2rem] text-center"><div id="lb-weight" class="text-2xl font-bold">--</div><div class="text-[9px] uppercase text-white/40 mt-1 font-bold">Weight</div></div>
                 </div>
-                <div class="glass-ui p-8 rounded-[2.5rem] mb-10 border-white/5">
-                    <p id="lb-desc" class="text-sm text-white/60 leading-relaxed italic whitespace-pre-line"></p>
-                </div>
+                <div class="glass-ui p-8 rounded-[2.5rem] mb-10 border-white/5"><p id="lb-desc" class="text-sm text-white/60 leading-relaxed italic whitespace-pre-line"></p></div>
                 <button id="lb-line" class="w-full py-6 bg-gradient-to-r from-[#aa771c] to-[#fbf5b7] text-black font-black uppercase tracking-[0.3em] rounded-full shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3"><i data-lucide="message-circle" class="w-5 h-5"></i> Add LINE จองคิว</button>
             </div>
         </div>
     </div>
-
     <footer class="py-20 text-center border-t border-white/5 bg-[#030303]">
         <div class="font-serif shimmer-gold text-3xl mb-6 tracking-[0.4em] uppercase">${CONFIG.BRAND_TH}</div>
         <p class="text-[10px] uppercase tracking-[0.6em] text-white/10 font-bold">© ${CURRENT_YEAR} Secure Elite Selection. All Rights Reserved.</p>
     </footer>
-
     <script>
-        lucide.createIcons();
-        gsap.to('.reveal', { opacity: 1, y: 0, duration: 1.5, stagger: 0.3, ease: 'power4.out' });
-
-        let currentGallery = [];
-        let currentIdx = 0;
-
+        lucide.createIcons(); gsap.to('.reveal', { opacity: 1, y: 0, duration: 1.5, stagger: 0.3, ease: 'power4.out' });
+        let currentGallery = []; let currentIdx = 0;
         function openLB(p) {
             const modal = document.querySelector('#lb > div');
             document.getElementById('lb-name').innerText = p.name;
@@ -294,39 +297,26 @@ export default async (request, context) => {
             document.getElementById('lb-height').innerText = p.height || '--';
             document.getElementById('lb-weight').innerText = p.weight || '--';
             document.getElementById('lb-desc').innerText = p.description || p.quote || 'น้องสาวสวย งานดี บริการระดับพรีเมียม ทักคุยได้เลยค่ะ';
-            
-            // Gallery Setup
             currentGallery = p.galleryPaths && p.galleryPaths.length > 0 ? p.galleryPaths : [p.imagePath];
-            currentIdx = 0;
-            updateModalImage();
-
-            // Line Link Setup
+            currentIdx = 0; updateModalImage();
             let line = p.lineId || 'ksLUWB89Y_';
             let lineUrl = line.startsWith('http') ? line : 'https://line.me/ti/p/~' + line;
             document.getElementById('lb-line').onclick = () => window.open(lineUrl, '_blank');
-            
             document.getElementById('lb').classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('scale-95', 'opacity-0'); modal.classList.add('scale-100', 'opacity-100'); }, 10);
             document.body.style.overflow = 'hidden';
             document.getElementById('gallery-nav').style.display = currentGallery.length > 1 ? 'flex' : 'none';
         }
-
         function updateModalImage() {
             let path = currentGallery[currentIdx];
             document.getElementById('lb-img').src = path.startsWith('http') ? path : "${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/" + path;
         }
-
-        function changeImg(dir) {
-            currentIdx = (currentIdx + dir + currentGallery.length) % currentGallery.length;
-            updateModalImage();
-        }
-
+        function changeImg(dir) { currentIdx = (currentIdx + dir + currentGallery.length) % currentGallery.length; updateModalImage(); }
         function closeLB() {
             const modal = document.querySelector('#lb > div');
             modal.classList.add('scale-95', 'opacity-0');
             setTimeout(() => { document.getElementById('lb').classList.add('hidden'); document.body.style.overflow = ''; }, 300);
         }
-
         document.addEventListener('keydown', (e) => {
             if (document.getElementById('lb').classList.contains('hidden')) return;
             if (e.key === 'Escape') closeLB();
