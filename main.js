@@ -47,7 +47,7 @@ gsap.registerPlugin(ScrollTrigger);
         }
     };
 
-let state = { 
+    let state = { 
     allProfiles: [], 
     provincesMap: new Map(), 
     currentProfileSlug: null, 
@@ -56,10 +56,9 @@ let state = {
     lastFetchedAt: '1970-01-01T00:00:00Z', 
     realtimeSubscription: null,
     cleanupFunctions: [],
+    // ✅ เพิ่ม 2 บรรทัดนี้
     currentFilters: null,
-    filteredProfiles: [],
-    // ✅ ตัวแปรสำคัญ: ป้องกันการ Render ซ้ำเมื่อหน้าเว็บมี HTML จาก SSR อยู่แล้ว
-    isFirstLoad: true 
+    filteredProfiles: [] 
 };
 
     const dom = {};
@@ -68,87 +67,67 @@ let state = {
 
     document.addEventListener('DOMContentLoaded', initApp);
     async function initApp() {
-    console.log("🚀 App Initializing...");
-    
-    initializeSupabase();
-    cacheDOMElements();
+        console.log("🚀 App Initializing...");
+        
+        initializeSupabase();
+        cacheDOMElements();
 
-    initThemeToggle();
-    initMobileMenu();
-    initAgeVerification();
-    initHeaderScrollEffect();
-    initGlobalClickListener();
-    updateActiveNavLinks();
-    initLightboxEvents();
-
-    // 1. ตรวจสอบ Path ปัจจุบันก่อน เพื่อเตรียม State ให้ถูกหน้า
-    await handleRouting();
-
-    // 2. โหลดข้อมูล (ในขั้นตอนนี้ renderProfiles จะถูกเรียกภายใน handleDataLoading)
-    // แต่ด้วย Logic ใหม่ข้างบน มันจะยังไม่วาดทับหน้าจังหวัดที่มี SSR อยู่แล้ว
-    await handleDataLoading();
-    
-    // 3. หลังจากผ่านการโหลดครั้งแรกเสร็จสิ้น ให้ปิด First Load เสมอ
-    state.isFirstLoad = false;
-
-    // 4. ส่วนงานรอง (Idle Tasks)
-    if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => {
-            initMarqueeEffect();
-            initMobileSitemapTrigger();
-            initFooterLinks();
-        });
-    } else {
-        setTimeout(() => {
-            initMarqueeEffect();
-            initMobileSitemapTrigger();
-            initFooterLinks();
-        }, 1500);
-    }
-    
-    const yearSpan = document.getElementById('currentYearDynamic');
-    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-    document.body.classList.add('loaded');
-    console.log("✅ App Initialized Successfully!");
-
-    // GSAP Hero Animation (เฉพาะหน้าแรก)
-    if (window.location.pathname === '/' && !state.currentProfileSlug) {
-        try {
-            const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
-            if (heroElements.length > 0) {
-                gsap.from(heroElements, { 
-                    y: 20, 
-                    opacity: 0, 
-                    duration: 0.6, 
-                    stagger: 0.15, 
-                    ease: 'power2.out', 
-                    delay: 0.3 
-                });
-            }
-        } catch (e) { console.warn("Animation skipped", e); }
-    }
-
-    // จัดการการกดย้อนกลับ (Browser Back/Forward)
-    window.addEventListener('popstate', async () => {
-        // เมื่อเปลี่ยนหน้าผ่านประวัติ Browser ต้องล้างหน้าจอและวาดใหม่เสมอ
-        state.isFirstLoad = false; 
-        await handleRouting();
+        initThemeToggle();
+        initMobileMenu();
+        initAgeVerification();
+        initHeaderScrollEffect();
+        initGlobalClickListener();
         updateActiveNavLinks();
-    });
-}
+        initLightboxEvents();
 
-// Cleanup Listener
-window.addEventListener('beforeunload', () => {
-    if (state.realtimeSubscription) {
-        supabase?.removeChannel(state.realtimeSubscription);
-    }
-    
-    if (Array.isArray(state.cleanupFunctions)) {
-        state.cleanupFunctions.forEach(fn => {
-            try { fn(); } catch (e) { console.warn('Cleanup error:', e); }
+        await handleRouting();
+        await handleDataLoading();
+         
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => {
+                initMarqueeEffect();
+                initMobileSitemapTrigger();
+                initFooterLinks();
+            });
+        } else {
+            setTimeout(() => {
+                initMarqueeEffect();
+                initMobileSitemapTrigger();
+                initFooterLinks();
+            }, 1500);
+        }
+         
+        const yearSpan = document.getElementById('currentYearDynamic');
+        if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+        document.body.classList.add('loaded');
+        console.log("✅ App Initialized Successfully!");
+
+        if (window.location.pathname === '/' && !state.currentProfileSlug) {
+            try {
+                const heroElements = document.querySelectorAll('#hero-h1, #hero-p, #hero-form');
+                if (heroElements.length > 0) {
+                    gsap.from(heroElements, { y: 20, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out', delay: 0.3 });
+                }
+            } catch (e) { console.warn("Animation skipped", e); }
+        }
+
+        window.addEventListener('popstate', async () => {
+            await handleRouting();
+            updateActiveNavLinks();
         });
     }
-});
+    
+    window.addEventListener('beforeunload', () => {
+        if (state.realtimeSubscription) {
+            supabase?.removeChannel(state.realtimeSubscription);
+        }
+        
+        if (Array.isArray(state.cleanupFunctions)) {
+            state.cleanupFunctions.forEach(fn => {
+                try { fn(); } catch (e) { console.warn('Cleanup error:', e); }
+            });
+        }
+    });
 
     function initializeSupabase() {
         try {
@@ -159,23 +138,31 @@ window.addEventListener('beforeunload', () => {
             console.error("❌ Supabase Init Failed:", e);
         }
     }
+    
+function formatDate(dateString) {
+    if (!dateString) return 'ไม่ระบุ';
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
 
-    function formatDate(dateString) {
-        if (!dateString) return 'ไม่ระบุ';
-        try {
-            const date = new Date(dateString);
-            const thaiMonths = [
-                'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-                'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
-            ];
-            const day = date.getDate();
-            const month = thaiMonths[date.getMonth()];
-            const year = date.getFullYear() + 543;
-            return `${day} ${month} ${year}`;
-        } catch (e) {
-            return 'ไม่ระบุ';
-        }
+        // ระบบ Relative Time (ช่วยให้เว็บดู Active ตลอดเวลา)
+        if (diffInSeconds < 60) return 'เมื่อครู่นี้';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} นาทีที่แล้ว`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ชม.ที่แล้ว`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} วันที่แล้ว`;
+
+        // ถ้าเกิน 7 วัน ให้แสดงวันที่แบบย่อพรีเมียม
+        const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        const day = date.getDate();
+        const month = thaiMonths[date.getMonth()];
+        const year = (date.getFullYear() + 543).toString().slice(-2); // เช่น 69
+        
+        return `${day} ${month} ${year}`;
+    } catch (e) {
+        return 'ไม่ระบุ';
     }
+}
 
 function saveRecentSearch(term) {
     if (!term || term.trim() === '') return;
@@ -407,7 +394,7 @@ async function fetchDataDelta() {
     try {
         console.log("🔄 Checking for updates via 'lastUpdated'...");
 
-        // 1. ดึงเวลาอัปเดตล่าสุดจาก Server
+        // 1. ดึงเวลาอัปเดตล่าสุด (ใช้ lastUpdated ตามโครงสร้างฐานข้อมูลจริงของคุณ)
         const { data: latestEntry, error: checkError } = await supabase
             .from('profiles')
             .select('lastUpdated')
@@ -415,8 +402,12 @@ async function fetchDataDelta() {
             .limit(1)
             .maybeSingle();
 
-        if (checkError) throw checkError;
+        if (checkError) {
+            console.error("Supabase Check Error:", checkError);
+            throw checkError;
+        }
 
+        // แปลงเวลาเป็น String เพื่อใช้เทียบ (ถ้าไม่มีข้อมูลให้ใช้ '0')
         const serverTimestamp = latestEntry?.lastUpdated 
             ? new Date(latestEntry.lastUpdated).getTime().toString() 
             : '0';
@@ -425,39 +416,31 @@ async function fetchDataDelta() {
         const hasCachedProfiles = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
         const hasCachedProvinces = localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES);
 
-        // 🚀 [SMART CACHE LOGIC]
+        // 🚀 SMART CACHE: ถ้าเวลาตรงกัน ไม่ต้องโหลดใหม่
         if (localTimestamp === serverTimestamp && hasCachedProfiles && hasCachedProvinces) {
             console.log("✅ ข้อมูลเป็นปัจจุบัน (Data Usage: 0)");
             
-            const cachedRaw = JSON.parse(hasCachedProfiles);
-            
-            // 🚩 [FIX 1] ป้องกันข้อมูลซ้ำจาก Cache เดิมที่มีปัญหา (Deduplication)
-            // ใช้ Map กรองด้วย slug เพื่อความมั่นใจ 100%
-            state.allProfiles = Array.from(
-                new Map(cachedRaw.map(p => [p.slug, p])).values()
-            );
-
+            state.allProfiles = JSON.parse(hasCachedProfiles);
             const cachedProv = JSON.parse(hasCachedProvinces);
+            
             state.provincesMap.clear();
             cachedProv.forEach(p => state.provincesMap.set(p.key.toString(), p.name));
             
             populateProvinceDropdown();
-            
-            // ส่งไป Render (ซึ่งใน renderProfiles จะมีตัวเช็ค SSR อีกชั้น)
             renderProfiles(state.allProfiles, false);
             
             state.isFetching = false;
             return true;
         }
 
-        // 2. [FETCH FRESH DATA] เมื่อมีการอัปเดตหรือไม่มี Cache
-        console.log("🚀 Found updates or No cache! Fetching fresh data...");
+        // 2. ถ้าข้อมูลไม่อัพเดท ให้โหลดใหม่ทั้งหมด
+        console.log("🚀 Found updates! Fetching fresh data...");
 
         const [provincesRes, profilesRes] = await Promise.all([
             supabase.from('provinces').select('*'),
             supabase.from('profiles')
                 .select('*')
-                .eq('active', true) 
+                .eq('active', true) // โหลดเฉพาะคนที่ Active
                 .order('isfeatured', { ascending: false })
                 .order('created_at', { ascending: false })
         ]);
@@ -465,7 +448,7 @@ async function fetchDataDelta() {
         if (provincesRes.error) throw provincesRes.error;
         if (profilesRes.error) throw profilesRes.error;
 
-        // จัดการข้อมูลจังหวัด
+        // จัดการข้อมูลจังหวัด (ใช้ nameThai และ key ตาม JSON จริง)
         state.provincesMap.clear();
         const provincesForCache = [];
         (provincesRes.data || []).forEach(p => {
@@ -477,22 +460,16 @@ async function fetchDataDelta() {
             }
         });
 
-        // 3. [DATA INTEGRITY PROCESS] ประมวลผลและกรองข้อมูลซ้ำ
-        const rawFetched = profilesRes.data || [];
-        
-        // 🚩 [FIX 2] กรองข้อมูลซ้ำจาก Server ทันทีด้วย slug ก่อนเข้าสู่ State
-        // ป้องกันกรณี Database มี Record ซ้อนหรือ Query ผิดพลาด
-        const processed = rawFetched.map(p => processProfileData(p)).filter(Boolean);
-        state.allProfiles = Array.from(
-            new Map(processed.map(p => [p.slug, p])).values()
-        );
+        // 3. ประมวลผลโปรไฟล์ (ใช้ processProfileData ตัวที่แก้ใหม่ด้านล่าง)
+        const fetchedProfiles = profilesRes.data || [];
+        state.allProfiles = fetchedProfiles.map(p => processProfileData(p)).filter(Boolean);
 
-        // 4. [ATOMIC CACHE UPDATE] บันทึกเฉพาะข้อมูลที่ผ่านการกรองแล้ว
+        // 4. บันทึก Cache
         try {
             localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(state.allProfiles));
             localStorage.setItem(CONFIG.KEYS.CACHE_PROVINCES, JSON.stringify(provincesForCache));
             localStorage.setItem(CONFIG.KEYS.LAST_SYNC, serverTimestamp);
-            console.log("💾 Local Cache Updated (Clean & Unique).");
+            console.log("💾 Local Cache Updated.");
         } catch (e) {
             console.warn("⚠️ LocalStorage full:", e);
         }
@@ -503,12 +480,10 @@ async function fetchDataDelta() {
 
     } catch (err) {
         console.error('❌ Data load error:', err);
-        
-        // Fallback: ถ้าเน็ตมีปัญหา พยายามใช้ Cache เท่าที่มี
+        // Fallback: ถ้าเน็ตเน่า ใช้ของเก่า
         const staleData = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
         if (staleData) {
-            const parsedStale = JSON.parse(staleData);
-            state.allProfiles = Array.from(new Map(parsedStale.map(p => [p.slug, p])).values());
+            state.allProfiles = JSON.parse(staleData);
             renderProfiles(state.allProfiles, false);
         } else {
             showErrorState(err);
@@ -1435,100 +1410,54 @@ async function renderByProvince(profiles) {
     }
 }
 
-/**
- * ✅ ULTIMATE RENDER ENGINE: สมบูรณ์และถูกต้องที่สุด
- * แก้ไขปัญหา: การแสดงผลซ้ำจาก SSR, ป้องกันข้อมูลซ้ำใน Array, และรองรับ SEO/Layout ทุกโหมด
- */
 function renderProfiles(profiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
-
-    // [POINT 1: SSR HYDRATION GUARD]
-    // ถ้าหน้าเว็บมี HTML จาก SSR (server-side rendering) อยู่แล้ว และเป็นการโหลดครั้งแรก
-    // เราจะ "ข้าม" การวาดซ้ำเพื่อป้องกันการเห็นโปรไฟล์ซ้ำกัน 2 ชุด
-    const hasSSRContent = dom.profilesDisplayArea.querySelector('.profile-card-new') !== null;
-    if (state.isFirstLoad && hasSSRContent && !isSearching) {
-        console.log("🚀 [System] SSR content detected. Skipping initial client-render to prevent duplication.");
-        state.isFirstLoad = false; // ปลดล็อกเพื่อให้การทำงานครั้งต่อไป (เช่น filter) ทำงานปกติ
-        return;
-    }
-
-    // [POINT 2: UI RESET]
-    // ซ่อน Error และ No Results ก่อนเริ่มงาน
+    
+    // 1. ซ่อน Error และ No Results ก่อนเริ่มงาน
     dom.noResultsMessage?.classList.add('hidden');
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
 
-    // [POINT 3: FEATURED SECTION LOGIC]
+    // 2. จัดการส่วน Featured (แนะนำ)
     if (dom.featuredSection) {
-        // แสดงส่วนแนะนำ เฉพาะหน้าแรกที่ไม่ใช่การค้นหาและไม่ใช่หน้าจังหวัด
-        const isHome = !isSearching && 
-                       !window.location.pathname.includes('/location/') && 
-                       !window.location.pathname.includes('/province/');
-        
+        const isHome = !isSearching && !window.location.pathname.includes('/location/');
         dom.featuredSection.classList.toggle('hidden', !isHome);
 
         if (isHome && dom.featuredContainer && dom.featuredContainer.children.length === 0) {
-            // กรองเฉพาะตัวท็อป และต้อง Unique (ใช้ Map กันพลาด)
-            const featured = Array.from(new Map(
-                state.allProfiles.filter(p => p.isfeatured).map(p => [p.slug, p])
-            ).values());
-            
-            // ใช้ฟังก์ชันเดิมที่คุณมีเพื่อทยอยวาด (เพื่อ Performance)
-            if (typeof renderCardsIncrementally === 'function') {
-                renderCardsIncrementally(dom.featuredContainer, featured);
-            }
+            const featured = state.allProfiles.filter(p => p.isfeatured);
+            renderCardsIncrementally(dom.featuredContainer, featured);
         }
     }
 
-    // [POINT 4: DATA INTEGRITY (DEDUPLICATION)]
-    // ป้องกันกรณี Record ซ้ำจาก Database หรือ Cache Merge โดยใช้ slug เป็นคีย์หลัก
-    const cleanProfiles = Array.from(new Map(profiles.map(p => [p.slug, p])).values());
-
-    // [POINT 5: EMPTY STATE]
-    if (!cleanProfiles || cleanProfiles.length === 0) {
+    // 3. กรณีไม่มีข้อมูล
+    if (!profiles || profiles.length === 0) {
         dom.profilesDisplayArea.innerHTML = '';
         dom.noResultsMessage?.classList.remove('hidden');
         if (dom.resultCount) dom.resultCount.style.display = 'none';
         return;
     }
 
-    // [POINT 6: RENDERING MODES]
-    const isLocationPage = window.location.pathname.includes('/location/') || 
-                           window.location.pathname.includes('/province/');
+    // 4. ตัดสินใจโหมดการวาด (ค้นหา/จังหวัด หรือ หน้าแรกแยกตามจังหวัด)
+    const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
     
-    // 🚩 หัวใจสำคัญ: ล้างพื้นที่แสดงผลหลัก "ครั้งเดียว" ก่อนเริ่มวาดใหม่
+    // ล้างพื้นที่แสดงผลหลัก "ครั้งเดียว" ก่อนเริ่มวาดใหม่
     dom.profilesDisplayArea.innerHTML = '';
 
     if (isSearching || isLocationPage) {
         // [โหมด A] หน้าค้นหา หรือ หน้าจังหวัด (เช่น เชียงใหม่)
-        // สร้าง Section ผลลัพธ์ (ฟังก์ชันเดิมของคุณ)
-        if (typeof createSearchResultSection === 'function') {
-            const searchSection = createSearchResultSection(cleanProfiles);
-            dom.profilesDisplayArea.appendChild(searchSection);
-            
-            // ค้นหา Grid ภายใน Section ที่เพิ่งสร้าง
-            const grid = searchSection.querySelector('.profile-grid') || 
-                         searchSection.querySelector('.profiles-grid');
-            
-            if (grid && typeof renderCardsIncrementally === 'function') {
-                renderCardsIncrementally(grid, cleanProfiles);
-            }
-        }
+        const searchSection = createSearchResultSection(profiles);
+        dom.profilesDisplayArea.appendChild(searchSection);
+        
+        // สั่งวาดการ์ดใน Grid ของ Search Section
+        const grid = searchSection.querySelector('.profile-grid');
+        renderCardsIncrementally(grid, profiles);
     } else {
-        // [โหมด B] หน้าแรกแบบแยกจังหวัด (ทยอยวาดทีละจังหวัดตาม Logic เดิม)
-        if (typeof renderByProvince === 'function') {
-            renderByProvince(cleanProfiles);
-        }
+        // [โหมด B] หน้าแรกแบบแยกจังหวัด (ทยอยวาดทีละจังหวัด)
+        renderByProvince(profiles);
     }
 
-    // [POINT 7: POST-RENDER REFRESH]
-    // อัปเดต ScrollTrigger (GSAP) เพื่อให้ Lazy Load และ Animation ทำงานถูกต้อง
+    // 5. อัปเดต ScrollTrigger เพื่อให้ Animation ทำงานถูกต้อง
     if (window.ScrollTrigger) {
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                ScrollTrigger.refresh();
-                state.isFirstLoad = false; // ปิดสถานะโหลดครั้งแรกอย่างสมบูรณ์
-            }, 200);
-        });
+        setTimeout(() => ScrollTrigger.refresh(), 500);
     }
 }
 
@@ -1600,10 +1529,10 @@ function createProfileCard(p, index = 20) {
                     <i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
                 </p>
 
-                <div class="flex justify-between items-end border-t border-white/10 pt-2">
-                    <div class="date-stamp text-[10px] text-gray-400">
-                        อัปเดต: ${formatDate(p.created_at)}
-                    </div>
+<div class="date-stamp text-[10px] text-gray-400 flex items-center gap-1">
+    <i class="far fa-clock text-[9px]"></i> 
+    <span>อัปเดต: ${formatDate(p.created_at)}</span>
+</div>
                     
                     <!-- Layer 4: ปุ่มหัวใจ (Z-Index สูงสุด เพื่อให้กดติดแน่นอน) -->
                     <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors"
