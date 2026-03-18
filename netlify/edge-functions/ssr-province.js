@@ -19,8 +19,7 @@ const CONFIG = {
         bangkok: { name: 'กรุงเทพ', zones: ['สุขุมวิท', 'รัชดา', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ', 'เอกมัย'] },
         chonburi: { name: 'พัทยา', zones: ['พัทยาเหนือ', 'พัทยากลาง', 'พัทยาใต้', 'บางแสน', 'ศรีราชา'] }
     },
-    
-SOCIAL_LINKS: {
+    SOCIAL_LINKS: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@sidelinecm',
         twitter: 'https://twitter.com/sidelinechiangmai',
@@ -96,7 +95,7 @@ export default async (request, context) => {
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         const firstImage = optimizeImg(profiles[0].imagePath, 1200, 630);
 
-        // 🎯 4. SEO CONFIGURATION
+        // 🎯 4. SEO CONFIGURATION (Updated Schema to avoid Search Console warnings)
         const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_YEAR}) | น้องๆ รับงานเอง ฟิวแฟน ไม่มัดจำ`;
         const description = `รวมพิกัด ไซด์ไลน์${provinceName} รับงานเอง อัปเดตล่าสุด ${profiles.length} คน โซน ${zones.slice(0, 4).join(', ')} ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด`;
 
@@ -108,17 +107,25 @@ export default async (request, context) => {
                     "@id": `${CONFIG.DOMAIN}#website`,
                     "url": CONFIG.DOMAIN,
                     "name": CONFIG.BRAND_NAME,
-                    "publisher": { "@id": `${CONFIG.DOMAIN}#organization` },
-                    "potentialAction": { "@type": "SearchAction", "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
+                    "publisher": { "@id": `${CONFIG.DOMAIN}#organization` }
                 },
                 {
-                    "@type": ["Organization","LocalBusiness"],
+                    "@type": ["Organization", "LocalBusiness"],
                     "@id": `${CONFIG.DOMAIN}#organization`,
                     "name": CONFIG.BRAND_NAME,
                     "url": CONFIG.DOMAIN,
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": firstImage
+                    },
                     "image": firstImage,
                     "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
-                    "priceRange": "฿1500 - ฿5000"
+                    "priceRange": "฿1500 - ฿5000",
+                    "contactPoint": {
+                        "@type": "ContactPoint",
+                        "url": CONFIG.SOCIAL_LINKS.line,
+                        "contactType": "customer service"
+                    }
                 },
                 {
                     "@type": "CollectionPage",
@@ -126,48 +133,20 @@ export default async (request, context) => {
                     "url": provinceUrl,
                     "name": title,
                     "description": description,
-                    "image": { "@type": "ImageObject", "url": firstImage },
-                    "breadcrumb": { "@id": `${provinceUrl}#breadcrumb` },
-                    "mainEntity": { "@id": `${provinceUrl}#itemlist` }
+                    "breadcrumb": { "@id": `${provinceUrl}#breadcrumb` }
                 },
                 {
                     "@type": "BreadcrumbList",
                     "@id": `${provinceUrl}#breadcrumb`,
-                    "itemListElement":[
-                        { "@type":"ListItem", "position":1, "name":"หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type":"ListItem", "position":2, "name":`ไซด์ไลน์${provinceName}`, "item": provinceUrl }
-                    ]
-                },
-                {
-                    "@type": "ItemList",
-                    "@id": `${provinceUrl}#itemlist`,
-                    "numberOfItems": profiles.length,
-                    "itemListElement": profiles.map((p, index) => ({
-                        "@type": "ListItem",
-                        "position": index + 1,
-                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
-                    }))
-                },
-                {
-                    "@type": "FAQPage",
-                    "@id": `${provinceUrl}#faq`,
-                    "mainEntity":[
-                        {
-                            "@type": "Question",
-                            "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายหน้างานเมื่อเจอตัวจริงเท่านั้นเพื่อความปลอดภัย" }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": `ครอบคลุมโซนยอดนิยม เช่น ${zones.slice(0, 5).join(', ')} และพื้นที่ใกล้เคียง สามารถนัดหมายที่โรงแรมหรือห้องพักได้` }
-                        }
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                     ]
                 }
             ]
         };
 
-        // 🎯 5. GENERATE HTML CARDS (NAVIGATE TO INDIVIDUAL PROFILE)
+        // 🎯 5. GENERATE HTML CARDS
         const cardsHTML = profiles.map((p, i) => `
             <a href="/sideline/${p.slug}" class="profile-card block group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-gold/30 transition-all duration-500 shadow-2xl">
                 <div class="aspect-[3/4] relative overflow-hidden">
@@ -189,7 +168,7 @@ export default async (request, context) => {
                 </div>
             </a>`).join('');
 
-// 🎯 6. FULL HTML OUTPUT (Updated with Social & Premium Footer)
+        // 🎯 6. FULL HTML OUTPUT
         const html = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
@@ -199,24 +178,22 @@ export default async (request, context) => {
     <meta name="description" content="${description}" />
     <link rel="canonical" href="${provinceUrl}" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:image" content="${firstImage}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="${CONFIG.TWITTER}">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
+    <meta property="og:image" content="${firstImage}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="${CONFIG.TWITTER}">
     
-   <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-<link rel="preload" as="image" href="${firstImage}">
-<!-- ใช้ CDN ที่เชื่อถือได้สำหรับ Font Awesome -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" />
+    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preload" as="image" href="${firstImage}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" />
 
-<!-- Tailwind CSS จาก CDN ที่เชื่อถือได้ -->
-<script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-<!-- GSAP จาก cdnjs -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
-<!-- Lucide จาก jsDelivr -->
-<script src="https://cdn.jsdelivr.net/npm/lucide/dist/lucide.min.js"></script>
-
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Prompt:wght@300;400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Prompt:wght@300;400;700&display=swap" rel="stylesheet" />
     
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
@@ -234,19 +211,19 @@ export default async (request, context) => {
     </style>
 </head>
 <body class="bg-[#050505]">
-    <nav class="fixed top-0 w-full z-[100] px-6 py-4 flex justify-between items-center transition-all duration-500 backdrop-blur-md border-b border-gold/10 bg-black/20">
+    <nav id="main-nav" class="fixed top-0 w-full z-[100] px-6 py-4 flex justify-between items-center transition-all duration-500 backdrop-blur-md border-b border-gold/10 bg-black/20">
         <a href="/" class="text-xl md:text-2xl font-serif font-bold tracking-[0.2em] shimmer-gold">${CONFIG.BRAND_NAME}</a>
         <div class="text-[10px] font-bold tracking-widest text-white/50 uppercase">Directory / ${provinceName}</div>
     </nav>
 
-    <header class="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center px-6">
+    <header class="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center px-6 overflow-hidden">
         <div class="absolute inset-0 z-0">
             <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/70 to-[#050505] z-10"></div>
-            <img src="${firstImage}" class="w-full h-full object-cover opacity-30" alt="ไซด์ไลน์${provinceName}">
+            <img src="${firstImage}" class="w-full h-full object-cover opacity-30 transform scale-105" alt="ไซด์ไลน์${provinceName}">
         </div>
         <div class="relative z-20 max-w-5xl space-y-6">
-            <p class="reveal text-[10px] tracking-[0.6em] uppercase font-black text-gold opacity-0">Premium Selection</p>
-            <h1 class="reveal text-4xl md:text-8xl font-serif font-bold leading-tight opacity-0">
+            <p class="reveal text-[10px] tracking-[0.6em] uppercase font-black text-gold opacity-0 translate-y-4">Premium Selection</p>
+            <h1 class="reveal text-4xl md:text-8xl font-serif font-bold leading-tight opacity-0 translate-y-4">
                 <span class="font-light italic text-white/80">Premium</span> <br>
                 <span class="shimmer-gold">ไซด์ไลน์${provinceName}</span>
             </h1>
@@ -281,7 +258,6 @@ export default async (request, context) => {
                     <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-black border border-white/20 px-4 py-2 rounded-xl text-sm"><i class="fab fa-tiktok"></i> TikTok</a>
                     <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-[#1da1f2] px-4 py-2 rounded-xl text-sm"><i class="fab fa-twitter"></i> Twitter</a>
                     <a href="${CONFIG.SOCIAL_LINKS.biosite}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-rose-500 px-4 py-2 rounded-xl text-sm">Bio.site</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-indigo-600 px-4 py-2 rounded-xl text-sm"><i class="fas fa-cloud"></i> Bluesky</a>
                 </div>
             </div>
             
@@ -298,11 +274,11 @@ export default async (request, context) => {
                 <div class="space-y-4">
                     <details class="glass-ui p-6 rounded-2xl cursor-pointer group">
                         <summary class="flex justify-between font-bold text-xs uppercase tracking-widest items-center">ต้องโอนมัดจำก่อนไหม? <i data-lucide="plus" class="w-4 h-4 transition-transform group-open:rotate-45 text-gold"></i></summary>
-                        <p class="mt-4 text-sm text-white/50 leading-relaxed">ไม่ต้องโอนมัดจำครับ ระบบของเราเน้นนัดเจอ จ่ายเงินหน้างานเท่านั้น เพื่อความปลอดภัยสูงสุดของลูกค้า</p>
+                        <div class="mt-4 text-sm text-white/50 leading-relaxed">ไม่ต้องโอนมัดจำครับ ระบบของเราเน้นนัดเจอ จ่ายเงินหน้างานเท่านั้น เพื่อความปลอดภัยสูงสุดของลูกค้า</div>
                     </details>
                     <details class="glass-ui p-6 rounded-2xl cursor-pointer group">
                         <summary class="flex justify-between font-bold text-xs uppercase tracking-widest items-center">รูปภาพตรงปกหรือไม่? <i data-lucide="plus" class="w-4 h-4 transition-transform group-open:rotate-45 text-gold"></i></summary>
-                        <p class="mt-4 text-sm text-white/50 leading-relaxed">เราคัดกรองโปรไฟล์ที่มีคุณภาพ หากนัดแล้วไม่ตรงปก ลูกค้าสามารถปฏิเสธและยกเลิกงานได้ทันทีครับ</p>
+                        <div class="mt-4 text-sm text-white/50 leading-relaxed">เราคัดกรองโปรไฟล์อย่างดี หากนัดแล้วไม่ตรงปก ลูกค้าสามารถยกเลิกงานได้ทันทีครับ</div>
                     </details>
                 </div>
             </div>
@@ -323,7 +299,7 @@ export default async (request, context) => {
                 <div class="md:col-span-4 space-y-6">
                     <div class="text-2xl font-serif shimmer-gold tracking-widest uppercase">${CONFIG.BRAND_NAME}</div>
                     <p class="text-xs leading-relaxed text-gray-400 max-w-sm">
-                        แพลตฟอร์มไซด์ไลน์อันดับ 1 ใน${provinceName} มุ่งเน้นความโปร่งใส ปลอดภัย และบริการระดับพรีเมียม เพื่อประสบการณ์ที่ดีที่สุดของคุณ
+                        แพลตฟอร์มไซด์ไลน์อันดับ 1 ใน${provinceName} มุ่งเน้นความโปร่งใส ปลอดภัย และบริการระดับพรีเมียม
                     </p>
                 </div>
                 <div class="md:col-span-2 md:col-start-6">
@@ -331,7 +307,6 @@ export default async (request, context) => {
                     <ul class="space-y-3 text-[11px] text-gray-500">
                         <li><a href="/" class="hover:text-gold transition-colors">หน้าแรก</a></li>
                         <li><a href="/profiles.html" class="hover:text-gold transition-colors">ค้นหาน้องๆ</a></li>
-                        <li><a href="/blog.html" class="hover:text-gold transition-colors">บทความน่ารู้</a></li>
                     </ul>
                 </div>
                 <div class="md:col-span-3">
@@ -342,7 +317,6 @@ export default async (request, context) => {
                 </div>
                 <div class="md:col-span-3">
                     <h3 class="text-white text-xs font-bold mb-6 uppercase tracking-widest">จองคิวน้องๆ</h3>
-                    <p class="text-[10px] text-gray-500 mb-4 uppercase">Admin Service: 10.00 - 04.00 น.</p>
                     <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="inline-flex items-center justify-center gap-2 bg-[#06c755] text-white px-6 py-3 rounded-xl text-sm font-bold hover:scale-105 transition-transform w-full shadow-lg shadow-green-500/10">
                         <i class="fab fa-line text-lg"></i> แอดไลน์จองคิว
                     </a>
@@ -355,25 +329,38 @@ export default async (request, context) => {
                     <a href="/terms.html" class="hover:text-gold transition">Terms</a>
                 </div>
             </div>
-            <div class="mt-10 text-[9px] text-gray-700 text-center max-w-2xl mx-auto leading-loose uppercase tracking-tighter opacity-50">
-                เว็บไซต์นี้เป็นเพียงสื่อกลางข้อมูลเท่านั้น ข้อมูลทั้งหมดถูกคัดกรองเพื่อความบันเทิงสำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น
-            </div>
         </div>
     </footer>
 
     <script>
-        lucide.createIcons();
-        gsap.to('.reveal', { opacity: 1, y: 0, duration: 1.2, stagger: 0.2, ease: 'power3.out' });
-        
-        // Sticky Header Effect
-        window.onscroll = function() {
-            const nav = document.querySelector('nav');
-            if (window.pageYOffset > 50) {
-                nav.classList.add('bg-black/80', 'py-3');
-            } else {
-                nav.classList.remove('bg-black/80', 'py-3');
+        function initializePage() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
-        };
+            if (typeof gsap !== 'undefined') {
+                gsap.to('.reveal', { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 1.2, 
+                    stagger: 0.2, 
+                    ease: 'power3.out' 
+                });
+            }
+            const nav = document.getElementById('main-nav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.add('bg-black/80', 'py-3');
+                } else {
+                    nav.classList.remove('bg-black/80', 'py-3');
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            initializePage();
+        }
     </script>
 </body>
 </html>`;
