@@ -201,13 +201,22 @@ export default async (request, context) => {
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:image" content="${firstImage}"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="${CONFIG.TWITTER}">
     
-    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-    <link rel="preload" as="image" href="${firstImage}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Prompt:wght@300;400;700&display=swap" rel="stylesheet" />
+   <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+<link rel="preload" as="image" href="${firstImage}">
+<!-- ใช้ CDN ที่เชื่อถือได้สำหรับ Font Awesome -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" />
+
+<!-- Tailwind CSS จาก CDN ที่เชื่อถือได้ -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- GSAP จาก cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<!-- Lucide จาก jsDelivr -->
+<script src="https://cdn.jsdelivr.net/npm/lucide/dist/lucide.min.js"></script>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Prompt:wght@300;400;700&display=swap" rel="stylesheet" />
     
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
