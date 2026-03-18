@@ -1,370 +1,374 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // ==========================================
-// 1. CONFIGURATION
+// 1. CONFIGURATION & HOT LINKS
 // ==========================================
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
-    SOCIAL_PROFILES: [
-        "https://linktr.ee/sidelinechiangmai",
-        "https://x.com/Sdl_chiangmai",
-        "https://line.me/ti/p/ksLUMz3p_o"
-    ]
+    BRAND_NAME: 'Sideline Chiang Mai',
+    BRAND_TH: 'ไซด์ไลน์เชียงใหม่',
+    TWITTER: '@sidelinecm',
+    // Province Master List (SEO Optimized)
+    PROVINCES: {
+        chiangmai: { name: 'เชียงใหม่', zones: ['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'ดอนคำ', 'บ้านสวน'] },
+        lampang: { name: 'ลำปาง', zones: ['เกาะคา', 'เมืองลำปาง', 'แจ้ห่ม', 'งาว', 'เถิน', 'แม่ทะ'] },
+        chiangrai: { name: 'เชียงราย', zones: ['ตัวเมืองเชียงราย', 'แม่จัน', 'เชียงของ', 'พาน', 'เทิง', 'แม่สรวย'] },
+        phayao: { name: 'พะเยา', zones: ['ตัวเมืองพะเยา', 'เชียงคำ', 'เชียงม่วน', 'จุน'] },
+        bangkok: { name: 'กรุงเทพ', zones: ['สุขุมวิท', 'รัชดา', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ', 'เอกมัย'] },
+        chonburi: { name: 'พัทยา', zones: ['พัทยาเหนือ', 'พัทยากลาง', 'พัทยาใต้', 'บางแสน', 'ศรีราชา'] }
+    },
+    SOCIAL_LINKS: {
+        line: 'https://line.me/ti/p/ksLUWB89Y_',
+        tiktok: 'https://tiktok.com/@sidelinecm',
+        twitter: 'https://twitter.com/sidelinechiangmai',
+        linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
+        biosite: 'https://bio.site/firstfiwfans.com',
+        linktree: 'https://linktr.ee/kissmodel',
+        bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
+    }
 };
 
 // ==========================================
-// 2. MOCK DATA (ข้อมูลรีวิว)
+// 2. HELPERS (IMAGE & SEO CONTENT)
 // ==========================================
-const TESTIMONIALS = [
-    {
-        name: "พี่บอล",
-        rating: 5,
-        text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย"
-    },
-    {
-        name: "คุณเอก",
-        rating: 5,
-        text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ"
-    },
-    {
-        name: "พี่โจ",
-        rating: 5,
-        text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ"
-    }
-];
-
-// ฟังก์ชันสุ่มคำ (Spintax) เพื่อให้เนื้อหาไม่ซ้ำกันในสายตา Google
-const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-const optimizeImg = (path, width = 600, height = 800) => {
+const optimizeImg = (path, width = 400, height = 533) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
-    
-    // กรณีเป็น URL จาก Cloudinary
     if (path.includes('res.cloudinary.com')) {
-        // แทรก parameter f_auto (เลือกฟอร์แมตอัตโนมัติเช่น WebP/AVIF) 
-        // และ q_auto (บีบอัดคุณภาพอัตโนมัติ) และการปรับขนาด
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill,g_face/`);
     }
-
-    // กรณีเป็น URL อื่นๆ (เช่นภายนอก)
     if (path.startsWith('http')) return path;
-
-    // กรณีเป็นไฟล์จาก Supabase Storage
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
+const getLocalZones = (provinceKey) => {
+    const zones = {
+        'chiangmai': ['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค'],
+        'bangkok': ['สุขุมวิท', 'รัชดา', 'ห้วยขวาง', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ'],
+        'chonburi': ['พัทยา', 'บางแสน', 'ศรีราชา', 'อมตะนคร']
+    };
+    return zones[provinceKey.toLowerCase()] || ['ตัวเมือง', 'พื้นที่ใกล้เคียง'];
+};
+
+// ฟังก์ชันสุ่มเนื้อหา SEO แบบพรีเมียม
+const generateMasterSeoText = (province, zones, count) => {
+    const intros = [
+        `หาเด็ก**${province}** อยู่ใช่ไหม? พบกับน้องๆ **ไซด์ไลน์${province}** รับงานเองที่คัดสรรมาแล้วว่าตรงปก 100%`,
+        `ศูนย์รวมโปรไฟล์คุณภาพ **รับงาน${province}** ทั้งน้องๆ นักศึกษา และพริตตี้พาร์ทไทม์ พร้อมดูแลคุณแบบฟิวแฟน`,
+        `อยากหาเพื่อนเที่ยว เพื่อนดื่มใน **${province}**? เรามีน้องๆ **เด็กเอ็น${province}** ตัวท็อปพรีเมียมให้เลือกกว่า ${count} คน`
+    ];
+    const features = [
+        `ครอบคลุมทุกพิกัดสำคัญในโซน **${zones.slice(0, 4).join(', ')}** ไม่ต้องผ่านโมเดลลิ่ง ติดต่อตรงได้ทันที`,
+        `ปลอดภัยสูงสุดด้วยระบบ **จ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ** น้องๆ ทุกคนพร้อมให้บริการอย่างจริงใจ`,
+        `อัปเดตข้อมูลล่าสุดปี 2026 เน้นงานดี งานแรง เอาใจเก่ง พิกัด ${zones.slice(4, 7).join(', ')} นัดหมายง่าย`
+    ];
+    const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    return `<p class="mb-4">${spin(intros)}</p><p>${spin(features)}</p>`;
+};
+
+// ==========================================
+// 3. MAIN SSR FUNCTION
+// ==========================================
 export default async (request, context) => {
-    const ua = (request.headers.get('User-Agent') || '').toLowerCase();
-    
-    // ตรวจสอบว่าเป็น Bot หรือ Social Media Crawler หรือไม่
-    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
-    
-    // ถ้าไม่ใช่ Bot ให้ปล่อยผ่านไปใช้ Client-side Rendering ปกติ
-    if (!isBot) return context.next();
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    const provinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
 
     try {
-        const url = new URL(request.url);
-        const pathParts = url.pathname.split('/').filter(Boolean);
-        
-        // ตรวจสอบว่าต้องเป็น URL รูปแบบ /sideline/{slug}
-        if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
-        
-        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        
-        // ป้องกัน slug ที่เป็นคำสั่งระบบ
-        if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
-
-        // เชื่อมต่อ Database
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        
-        // ดึงข้อมูล Profile และข้อมูลจังหวัดที่เชื่อมโยงกัน
-        const { data: p } = await supabase
-            .from('profiles')
-            .select('*, provinces(nameThai, key)')
-            .eq('slug', slug)
-            .eq('active', true)
-            .maybeSingle();
 
-        // หากไม่พบข้อมูลโปรไฟล์ ให้ปล่อยไปหน้า 404 ของระบบหลัก
-        if (!p) return context.next();
+        // 3.1 Fetch Data
+        const { data: provinceData } = await supabase.from('provinces').select('id, nameThai, key').eq('key', provinceKey).maybeSingle();
+        if (!provinceData) return context.next();
 
-        // ดึงโปรไฟล์แนะนำในจังหวัดเดียวกัน (Related Profiles)
-        let related = [];
-        if (p.provinceKey) {
-            const { data: relatedData } = await supabase
-                .from('profiles')
-                .select('slug, name, imagePath, location')
-                .eq('provinceKey', p.provinceKey)
-                .eq('active', true)
-                .neq('id', p.id) 
-                .limit(4);
-            related = relatedData || [];
-        }
+        const { data: profiles } = await supabase.from('profiles')
+            .select('slug, name, imagePath, location, rate, isfeatured, lastUpdated')
+            .eq('provinceKey', provinceData.key).eq('active', true)
+            .order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false }).limit(60);
 
-        // เตรียมตัวแปรสำหรับแสดงผล
-        const displayName = p.name || 'สาวสวย';
-        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
-        const displayPrice = parseInt(p.rate || "1500").toLocaleString() + ".-";
-const imageUrl = optimizeImg(p.imagePath, 600, 800);
-        
-        // จัดการลิงก์ LINE (รองรับทั้ง ID และ URL)
-        let finalLineUrl = p.lineId || 'ksLUMz3p_o';
-        if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
-        }
+        if (!profiles || profiles.length === 0) return context.next();
 
-        // จำลอง Rating เพื่อให้ Google แสดงผล Rich Snippets (ดาว)
-        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
-        const reviewCount = 150 + (charCodeSum % 100);
+        const provinceName = provinceData.nameThai;
+        const zones = getLocalZones(provinceKey);
+        const CURRENT_YEAR = new Date().getFullYear();
+        const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
+        const firstImage = optimizeImg(profiles[0].imagePath, 1200, 630);
 
-        // SEO Spintax
-        const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
-        const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง", "ขี้อ้อน"]);
-        const payWord = spin(["ไม่รับมัดจำ", "จ่ายหน้างานเท่านั้น", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
-        
-        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน รูปตรงปก 100%`;
-        const metaDesc = `${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
-        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
+        // 🎯 4. SEO CONFIGURATION (Updated Schema to avoid Search Console warnings)
+        const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_YEAR}) | น้องๆ รับงานเอง ฟิวแฟน ไม่มัดจำ`;
+        const description = `รวมพิกัด ไซด์ไลน์${provinceName} รับงานเอง อัปเดตล่าสุด ${profiles.length} คน โซน ${zones.slice(0, 4).join(', ')} ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด`;
 
-        // สร้าง Schema Markup (JSON-LD)
         const schemaData = {
-            "@context": "https://schema.org/",
+            "@context": "https://schema.org",
             "@graph": [
                 {
+                    "@type": "WebSite",
+                    "@id": `${CONFIG.DOMAIN}#website`,
+                    "url": CONFIG.DOMAIN,
+                    "name": CONFIG.BRAND_NAME,
+                    "publisher": { "@id": `${CONFIG.DOMAIN}#organization` }
+                },
+                {
                     "@type": ["Organization", "LocalBusiness"],
-                    "@id": `${CONFIG.DOMAIN}/#organization`,
+                    "@id": `${CONFIG.DOMAIN}#organization`,
                     "name": CONFIG.BRAND_NAME,
                     "url": CONFIG.DOMAIN,
-                    "image": [imageUrl],
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressLocality": provinceName,
-                        "addressCountry": "TH"
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": firstImage
                     },
-                    "sameAs": CONFIG.SOCIAL_PROFILES
+                    "image": firstImage,
+                    "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
+                    "priceRange": "฿1500 - ฿5000",
+                    "contactPoint": {
+                        "@type": "ContactPoint",
+                        "url": CONFIG.SOCIAL_LINKS.line,
+                        "contactType": "customer service"
+                    }
+                },
+                {
+                    "@type": "CollectionPage",
+                    "@id": `${provinceUrl}#webpage`,
+                    "url": provinceUrl,
+                    "name": title,
+                    "description": description,
+                    "breadcrumb": { "@id": `${provinceUrl}#breadcrumb` }
                 },
                 {
                     "@type": "BreadcrumbList",
+                    "@id": `${provinceUrl}#breadcrumb`,
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
-                        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                     ]
-                },
-                {
-                    "@type": "Product",
-                    "@id": `${canonicalUrl}#product`,
-                    "name": pageTitle,
-                    "image": [imageUrl],
-                    "description": metaDesc,
-                    "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
-                    "offers": {
-                        "@type": "Offer",
-                        "price": (p.rate || "1500").toString().replace(/[^0-9]/g, ''),
-                        "priceCurrency": "THB",
-                        "availability": "https://schema.org/InStock",
-                        "url": canonicalUrl
-                    },
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": ratingValue,
-                        "reviewCount": reviewCount.toString()
-                    }
                 }
             ]
         };
 
+        // 🎯 5. GENERATE HTML CARDS
+        const cardsHTML = profiles.map((p, i) => `
+            <a href="/sideline/${p.slug}" class="profile-card block group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-gold/30 transition-all duration-500 shadow-2xl">
+                <div class="aspect-[3/4] relative overflow-hidden">
+                    <img src="${optimizeImg(p.imagePath)}" alt="น้อง${p.name} รับงาน${provinceName} พิกัด ${p.location || provinceName}" 
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                         ${i < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="bg-black/60 backdrop-blur-md text-gold text-[9px] px-3 py-1 rounded-full border border-gold/20 font-bold uppercase italic tracking-widest">● Verified Profile</span>
+                    </div>
+                    ${p.isfeatured ? '<div class="absolute top-4 right-4 bg-gold text-black text-[8px] font-black px-3 py-1 rounded-full uppercase shadow-xl">Recommended</div>' : ''}
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="font-bold text-lg italic shimmer-gold">${p.name}</h3>
+                        <span class="text-gold text-xs font-bold">★ ${p.rate || '4.9'}</span>
+                    </div>
+                    <p class="text-[9px] text-white/40 font-bold uppercase tracking-widest">${p.location || provinceName}</p>
+                </div>
+            </a>`).join('');
+
+        // 🎯 6. FULL HTML OUTPUT
         const html = `<!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} | รับงานเอง ฟิวแฟน รูปตรงปก</title>
-    <meta name="description" content="${metaDesc}">
-    <link rel="canonical" href="${canonicalUrl}">
-    <meta name="robots" content="index, follow, max-image-preview:large">
-    <!-- Core Web Vitals -->
-    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-    <link rel="preload" as="image" href="${imageUrl}">
-    <meta name="theme-color" content="#db2777">
-    <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    
-    <meta property="og:site_name" content="Sideline Chiangmai">
-    
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${pageTitle}">
-    <meta name="twitter:description" content="${metaDesc}">
-    <meta name="twitter:image" content="${imageUrl}">
-    
-    <link rel="shortcut icon" href="/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-    <!-- Open Graph -->
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
-    <meta property="og:image" content="${imageUrl}">
-    <meta property="og:url" content="${canonicalUrl}">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>${title}</title>
+    <meta name="description" content="${description}" />
+    <link rel="canonical" href="${provinceUrl}" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
+    <meta property="og:image" content="${firstImage}">
     <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="${CONFIG.TWITTER}">
     
-    <!-- Schema -->
+    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preload" as="image" href="${firstImage}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Prompt:wght@300;400;700&display=swap" rel="stylesheet" />
+    
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-:root{--p:#ec4899;--s:#10b981;--bg:#0f172a;--card:#1e293b;--txt:#f8fafc;--gold:#fbbf24;--muted:#94a3b8}*{box-sizing:border-box;margin:0}body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}.container{max-width:500px;margin:0 auto;padding:1.5rem;background:var(--card);min-height:100vh}@media(min-width:768px){.container{max-width:600px;padding:2rem}}
-.hero-section{position:relative}.hero-img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:1.5rem;box-shadow:0 20px 40px rgba(0,0,0,.4)}
-.profile-header{padding:2rem 0 1rem}.rating{display:flex;align-items:center;gap:.5rem;color:var(--gold);font-weight:700;font-size:1.1rem;margin-bottom:1rem}.stars{font-size:1.3rem}
-h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1rem 0;line-height:1.2;text-align:center}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0}.info-item{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);border-radius:1.5rem;padding:1.5rem;text-align:center}.info-label{font-size:.8rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:.5rem;display:block}.info-value{font-size:1.4rem;font-weight:900;color:var(--txt)}
-.description{background:rgba(255,255,255,.05);border-radius:1.5rem;padding:1.75rem;margin:2rem 0;border:1px solid rgba(255,255,255,.1);white-space:pre-line;font-size:1rem;line-height:1.7}
-.cta-section{text-align:center;margin:2.5rem 0}.btn-line{display:inline-flex;align-items:center;gap:1rem;background:linear-gradient(135deg,var(--s),#059669);color:#fff;padding:1.25rem 2.5rem;border-radius:3rem;font-weight:800;font-size:1.2rem;text-decoration:none;box-shadow:0 15px 35px rgba(16,185,129,.4);transition:all .3s}.btn-line:hover{transform:translateY(-3px);box-shadow:0 20px 45px rgba(16,185,129,.5)}
-.related-section{margin:3rem 0}.related-title{color:var(--p);font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:2rem;border-bottom:2px solid rgba(236,72,153,.3);padding-bottom:1rem}.related-carousel{display:flex;overflow-x:auto;gap:1.5rem;padding:1rem 0;scroll-snap-type:x mandatory;scrollbar-width:none}.related-carousel::-webkit-scrollbar{display:none}.related-card{flex:0 0 160px;background:var(--bg);border-radius:1.5rem;overflow:hidden;border:1px solid rgba(255,255,255,.1);text-decoration:none;color:inherit;transition:.3s;scroll-snap-align:start}.related-card:hover{transform:translateY(-8px)}.related-img{width:100%;aspect-ratio:1/1;object-fit:cover}.related-info{padding:1rem;text-align:center}.related-name{font-weight:700;font-size:1rem;margin-bottom:.25rem}.related-loc{font-size:.8rem;color:var(--muted)}
-.pricing-section{margin:2rem 0;background:rgba(255,255,255,.05);border-radius:1.5rem;padding:1.75rem;border:1px solid rgba(255,255,255,.1)}.pricing-title{color:var(--p);text-align:center;font-weight:800;margin-bottom:1.5rem}.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem}
-.testimonials{margin:3rem 0}.testimonials-title{color:var(--p);text-align:center;font-weight:800;margin-bottom:2rem}.testimonial-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}.testimonial{background:rgba(255,255,255,.05);padding:1.5rem;border-radius:1.5rem;border:1px solid rgba(255,255,255,.1)}
-.footer{text-align:center;padding:2.5rem 1rem 1.5rem;background:rgba(0,0,0,.3);border-radius:1.5rem 1.5rem 0 0;margin-top:3rem;color:var(--muted);font-size:.9rem}
-@media(max-width:480px){.container{padding:1rem}.info-grid{grid-template-columns:1fr}.related-card{flex:0 0 140px}}
+        :root { --dark: #050505; --gold: #d4af37; --glass: rgba(255, 255, 255, 0.03); }
+        body { background: var(--dark); color: #fff; font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; overflow-x: hidden; margin: 0; }
+        .font-serif { font-family: 'Cinzel', serif; }
+        .shimmer-gold { background: linear-gradient(135deg, #b38728 0%, #fbf5b7 50%, #aa771c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto; animation: shine 4s linear infinite; }
+        @keyframes shine { to { background-position: 200% center; } }
+        .glass-ui { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .profile-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px -20px rgba(212, 175, 55, 0.3); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .social-item { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .social-item:hover { transform: scale(1.05); filter: brightness(1.2); }
     </style>
 </head>
-<body>
-    <nav class="main-nav" aria-label="เมนูหลัก">
-        </nav>
+<body class="bg-[#050505]">
+    <nav id="main-nav" class="fixed top-0 w-full z-[100] px-6 py-4 flex justify-between items-center transition-all duration-500 backdrop-blur-md border-b border-gold/10 bg-black/20">
+        <a href="/" class="text-xl md:text-2xl font-serif font-bold tracking-[0.2em] shimmer-gold">${CONFIG.BRAND_NAME}</a>
+        <div class="text-[10px] font-bold tracking-widest text-white/50 uppercase">Directory / ${provinceName}</div>
+    </nav>
 
-    <div class="container">
-        <header class="profile-header">
-            <section class="hero-section">
-                <img src="${imageUrl}" class="hero-img" alt="${displayName} ไซด์ไลน์${provinceName}" loading="eager" width="400" height="533">
-            </section>
+    <header class="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center px-6 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/70 to-[#050505] z-10"></div>
+            <img src="${firstImage}" class="w-full h-full object-cover opacity-30 transform scale-105" alt="ไซด์ไลน์${provinceName}">
+        </div>
+        <div class="relative z-20 max-w-5xl space-y-6">
+            <p class="reveal text-[10px] tracking-[0.6em] uppercase font-black text-gold opacity-0 translate-y-4">Premium Selection</p>
+            <h1 class="reveal text-4xl md:text-8xl font-serif font-bold leading-tight opacity-0 translate-y-4">
+                <span class="font-light italic text-white/80">Premium</span> <br>
+                <span class="shimmer-gold">ไซด์ไลน์${provinceName}</span>
+            </h1>
+        </div>
+    </header>
 
-            <div class="rating" style="margin-top: 1rem; justify-content: center;">
-                <span class="stars">⭐</span>${ratingValue} <span>(${reviewCount} รีวิว)</span>
+    <main class="max-w-[1500px] mx-auto px-6 py-12">
+        <section class="mb-20 glass-ui p-8 md:p-16 rounded-[3.5rem] text-center">
+            <h2 class="text-2xl md:text-4xl font-serif shimmer-gold mb-8 italic">หาเด็ก${provinceName} น้องๆ รับงานเอง ตัวท็อป</h2>
+            <div class="text-white/60 text-base md:text-lg leading-loose max-w-4xl mx-auto font-light">
+                ${generateMasterSeoText(provinceName, zones, profiles.length)}
             </div>
-            <h1>${pageTitle}</h1>
-        </header>
-
-        <main>
-            <article>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">ค่าขนมเริ่มต้น</span>
-                        <span class="info-value">฿${displayPrice}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">📍 พิกัดพื้นที่</span>
-                        <span class="info-value">${p.location || provinceName}</span>
-                    </div>
-                </div>
-
-                <section class="description" itemprop="description">
-                    ${p.description || metaDesc}
-                </section>
-
-                <section class="cta-section" aria-label="ช่องทางการติดต่อ">
-                    <a href="${finalLineUrl}" class="btn-line" rel="noopener" data-i18n='{"th":"📲 ทักไลน์จองคิว ${displayName}","en":"📲 Contact ${displayName}"}'> 
-                        📲 ทักไลน์จองคิว ${displayName} 
-                    </a>
-                    <p style="margin-top:1rem;color:var(--muted);font-size:.9rem">จ่ายหน้างาน • ปลอดภัย 100% • ไม่มีมัดจำ</p>
-                </section>
-
-                <section class="pricing-section">
-                    <h2 class="pricing-title">💰 ราคาและบริการ</h2>
-                    <div class="pricing-grid">
-                        <div><strong>ST (ชั่วคราว)</strong><br>฿${parseInt(p.rate||1500).toLocaleString()}</div>
-                        <div><strong>LT (ค้างคืน)</strong><br>฿${(parseInt(p.rate||1500)*1.8).toLocaleString()}</div>
-                        <div><strong>OT (นอกสถานที่)</strong><br>฿${(parseInt(p.rate||1500)*2.2).toLocaleString()}</div>
-                    </div>
-                </section>
-            </article>
-
-            ${related.length > 0 ? `
-            <aside class="related-section" aria-label="น้องๆ แนะนำเพิ่มเติม">
-                <h2 class="related-title">🔥 น้องๆ แนะนำใน ${provinceName}</h2>
-                <nav class="related-carousel">
-                    ${related.map(r => `
-                        <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
-                            <img src="${optimizeImg(r.imagePath,200,200)}" class="related-img" alt="${r.name}" loading="lazy">
-                            <div class="related-info">
-                                <div class="related-name">${r.name}</div>
-                                <div class="related-loc">📍 ${r.location || provinceName}</div>
-                            </div>
-                        </a>
-                    `).join('')}
-                </nav>
-                <div style="text-align:center; margin-top:1.5rem;">
-                    <a href="${CONFIG.DOMAIN}/location/${provinceKey}" 
-                       class="btn-line" 
-                       style="padding: 0.8rem 1.5rem; font-size: 1rem; background: var(--card); border: 1px solid var(--p); box-shadow: none;"
-                       data-i18n='{"th":"ดูน้องๆ ${provinceName} ทั้งหมด →","en":"View all ${provinceName} →"}'>
-                       ดูน้องๆ ${provinceName} ทั้งหมด →
-                    </a>
-                </div>
-            </aside>` : ''}
-
-            <section class="testimonials">
-                <h2 class="testimonials-title">⭐ รีวิวจากลูกค้าจริง</h2>
-                <div class="testimonial-grid">
-                    ${TESTIMONIALS.map(t => `
-                        <div class="testimonial">
-                            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-                                <div style="color:var(--gold);font-size:1.2rem">${'★'.repeat(Math.floor(t.rating))}</div>
-                                <strong>${t.name}</strong>
-                            </div>
-                            <p style="color:var(--txt);margin:0">${t.text}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            </section>
-        </main>
-
-        <footer class="footer">
-            <div class="footer-content">
-                © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME}<br>
-                <span data-i18n='{"th":"มั่นใจ ปลอดภัย ไม่มีการมัดจำ","en":"Safe • No deposit"}'>มั่นใจ ปลอดภัย ไม่มีการมัดจำ</span> | 
-                <a href="${CONFIG.SOCIAL_PROFILES[2]}" style="color:var(--s)" 
-                   data-i18n='{"th":"📲 Line","en":"📲 Line"}'>📲 Line</a>
+            <div class="flex flex-wrap justify-center gap-2 mt-10">
+                ${zones.slice(0,6).map(z => `<span class="text-[9px] px-5 py-2 bg-white/5 rounded-full border border-white/5 uppercase font-bold text-white/30">#รับงาน${z}</span>`).join('')}
             </div>
-        </footer>
-    </div>
+        </section>
 
-    <aside class="lang-switcher" style="position:fixed;bottom:20px;right:20px;z-index:999;background:rgba(0,0,0,0.8);padding:10px;border-radius:50px;display:flex;gap:5px">
-        <button onclick="setLang('th')" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:5px" title="ไทย">🇹🇭</button>
-        <button onclick="setLang('en')" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:5px" title="English">🇺🇸</button>
-    </aside>
+        <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10 mb-24">
+            ${cardsHTML}
+        </div>
+
+        <section class="social-media-section text-center py-12 bg-white/5 rounded-[3rem] border border-white/5 mb-24">
+            <div class="px-4 mb-8">
+                <h2 class="text-xl md:text-2xl font-bold shimmer-gold mb-2">ติดตามเราบน Social Media <i class="fas fa-hand-point-down ml-1"></i></h2>
+                <p class="text-sm text-gray-400">อัปเดตโปรไฟล์ใหม่ล่าสุดและโปรโมชั่นพิเศษก่อนใคร</p>
+            </div>
+
+            <div class="social-marquee-wrap overflow-x-auto hide-scrollbar px-4">
+                <div class="flex flex-nowrap md:justify-center gap-4 py-2">
+                    <a href="${CONFIG.SOCIAL_LINKS.linkedin}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-[#0077b5] px-4 py-2 rounded-xl text-sm"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-[#06c755] px-4 py-2 rounded-xl text-sm"><i class="fab fa-line"></i> LINE</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-black border border-white/20 px-4 py-2 rounded-xl text-sm"><i class="fab fa-tiktok"></i> TikTok</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-[#1da1f2] px-4 py-2 rounded-xl text-sm"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.biosite}" target="_blank" rel="nofollow" class="social-item inline-flex items-center gap-2 font-bold text-white bg-rose-500 px-4 py-2 rounded-xl text-sm">Bio.site</a>
+                </div>
+            </div>
+            
+            <div class="mt-8 px-6">
+                <p class="inline-block text-[10px] md:text-xs font-bold text-white bg-red-700/80 px-6 py-2 rounded-full uppercase tracking-widest">
+                    เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น
+                </p>
+            </div>
+        </section>
+
+        <section class="grid md:grid-cols-2 gap-10 mb-24 items-start">
+            <div class="space-y-6">
+                <h2 class="text-3xl font-serif shimmer-gold uppercase tracking-tighter">Common <span class="text-white italic">Questions</span></h2>
+                <div class="space-y-4">
+                    <details class="glass-ui p-6 rounded-2xl cursor-pointer group">
+                        <summary class="flex justify-between font-bold text-xs uppercase tracking-widest items-center">ต้องโอนมัดจำก่อนไหม? <i data-lucide="plus" class="w-4 h-4 transition-transform group-open:rotate-45 text-gold"></i></summary>
+                        <div class="mt-4 text-sm text-white/50 leading-relaxed">ไม่ต้องโอนมัดจำครับ ระบบของเราเน้นนัดเจอ จ่ายเงินหน้างานเท่านั้น เพื่อความปลอดภัยสูงสุดของลูกค้า</div>
+                    </details>
+                    <details class="glass-ui p-6 rounded-2xl cursor-pointer group">
+                        <summary class="flex justify-between font-bold text-xs uppercase tracking-widest items-center">รูปภาพตรงปกหรือไม่? <i data-lucide="plus" class="w-4 h-4 transition-transform group-open:rotate-45 text-gold"></i></summary>
+                        <div class="mt-4 text-sm text-white/50 leading-relaxed">เราคัดกรองโปรไฟล์อย่างดี หากนัดแล้วไม่ตรงปก ลูกค้าสามารถยกเลิกงานได้ทันทีครับ</div>
+                    </details>
+                </div>
+            </div>
+            <div class="glass-ui p-10 rounded-[3rem] border-gold/10">
+                <h3 class="text-xl font-serif shimmer-gold mb-4 italic">Exclusive Area Coverage</h3>
+                <p class="text-[10px] text-white/40 uppercase tracking-[0.2em] mb-8 leading-loose">บริการครอบคลุมพิกัด: <span class="text-white/80">${zones.slice(0, 5).join(' • ')}</span></p>
+                <div class="grid grid-cols-2 gap-6 border-t border-white/10 pt-8">
+                    <div><div class="text-2xl font-bold text-gold">${profiles.length}+</div><div class="text-[9px] uppercase text-white/30 font-bold">Active Now</div></div>
+                    <div><div class="text-2xl font-bold text-gold">100%</div><div class="text-[9px] uppercase text-white/30 font-bold">Safe Service</div></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white/5 pt-20 pb-10 border-t border-white/5">
+        <div class="max-w-[1500px] mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-20">
+                <div class="md:col-span-4 space-y-6">
+                    <div class="text-2xl font-serif shimmer-gold tracking-widest uppercase">${CONFIG.BRAND_NAME}</div>
+                    <p class="text-xs leading-relaxed text-gray-400 max-w-sm">
+                        แพลตฟอร์มไซด์ไลน์อันดับ 1 ใน${provinceName} มุ่งเน้นความโปร่งใส ปลอดภัย และบริการระดับพรีเมียม
+                    </p>
+                </div>
+                <div class="md:col-span-2 md:col-start-6">
+                    <h3 class="text-white text-xs font-bold mb-6 uppercase tracking-widest">เมนูหลัก</h3>
+                    <ul class="space-y-3 text-[11px] text-gray-500">
+                        <li><a href="/" class="hover:text-gold transition-colors">หน้าแรก</a></li>
+                        <li><a href="/profiles.html" class="hover:text-gold transition-colors">ค้นหาน้องๆ</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-3">
+                    <h3 class="text-white text-xs font-bold mb-6 uppercase tracking-widest">พิกัดยอดนิยม</h3>
+                    <ul class="grid grid-cols-1 gap-3 text-[11px] text-gray-500">
+                        ${zones.slice(0,4).map(z => `<li><a href="#" class="hover:text-gold transition-colors flex items-center gap-2"><span class="w-1 h-1 bg-gold/30 rounded-full"></span> รับงาน${z}</a></li>`).join('')}
+                    </ul>
+                </div>
+                <div class="md:col-span-3">
+                    <h3 class="text-white text-xs font-bold mb-6 uppercase tracking-widest">จองคิวน้องๆ</h3>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="inline-flex items-center justify-center gap-2 bg-[#06c755] text-white px-6 py-3 rounded-xl text-sm font-bold hover:scale-105 transition-transform w-full shadow-lg shadow-green-500/10">
+                        <i class="fab fa-line text-lg"></i> แอดไลน์จองคิว
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-[9px] text-gray-600 uppercase tracking-[0.3em]">© 2026 ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
+                <div class="flex gap-8 text-[9px] text-gray-600 font-bold uppercase tracking-widest">
+                    <a href="/privacy-policy.html" class="hover:text-gold transition">Privacy</a>
+                    <a href="/terms.html" class="hover:text-gold transition">Terms</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script>
-    let currentLang = 'th';
-    function setLang(lang) {
-        currentLang = lang;
-        document.documentElement.lang = lang;
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            try {
-                const translations = JSON.parse(el.dataset.i18n);
-                el.textContent = translations[lang] || translations['th'];
-            } catch(e) { }
-        });
-    }
+        function initializePage() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            if (typeof gsap !== 'undefined') {
+                gsap.to('.reveal', { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 1.2, 
+                    stagger: 0.2, 
+                    ease: 'power3.out' 
+                });
+            }
+            const nav = document.getElementById('main-nav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.add('bg-black/80', 'py-3');
+                } else {
+                    nav.classList.remove('bg-black/80', 'py-3');
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            initializePage();
+        }
     </script>
 </body>
 </html>`;
 
-
-        return new Response(html, {
-            headers: {
-                "content-type": "text/html; charset=utf-8",
-                "x-robots-tag": "index, follow",
-                "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
-                "Vary": "User-Agent"
-            }
-        });
+        return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600" } });
 
     } catch (e) {
-        console.error("Profile SSR Error:", e);
+        console.error('Master SSR Error:', e);
         return context.next();
     }
 };
