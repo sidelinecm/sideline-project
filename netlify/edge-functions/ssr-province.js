@@ -323,6 +323,7 @@ export default async (request, context) => {
                         แพลตฟอร์มไซด์ไลน์อันดับ 1 ใน${provinceName} มุ่งเน้นความโปร่งใส ปลอดภัย และบริการระดับพรีเมียม
                     </p>
                 </div>
+                
                 <div class="md:col-span-2 md:col-start-6">
                     <h3 class="text-white text-xs font-bold mb-6 uppercase tracking-widest">เมนูหลัก</h3>
                     <ul class="space-y-3 text-[11px] text-gray-500">
@@ -330,19 +331,22 @@ export default async (request, context) => {
                         <li><a href="/profiles.html" class="hover:text-gold transition-colors">ค้นหาน้องๆ</a></li>
                     </ul>
                 </div>
+
                 <div class="md:col-span-3">
                     <h3 class="text-white text-xs font-bold mb-6 uppercase tracking-widest">พิกัดยอดนิยม</h3>
                     <ul class="grid grid-cols-1 gap-3 text-[11px] text-gray-500">
                         ${zones.slice(0,4).map(z => `<li><a href="#" class="hover:text-gold transition-colors flex items-center gap-2"><span class="w-1 h-1 bg-gold/30 rounded-full"></span> รับงาน${z}</a></li>`).join('')}
                     </ul>
                 </div>
+
                 <div class="md:col-span-3">
                     <h3 class="text-white text-xs font-bold mb-6 uppercase tracking-widest">จองคิวน้องๆ</h3>
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="inline-flex items-center justify-center gap-2 bg-[#06c755] text-white px-6 py-3 rounded-xl text-sm font-bold hover:scale-105 transition-transform w-full shadow-lg shadow-green-500/10">
-                        <i class="fab fa-line text-lg"></i> แอดไลน์จองคิว
+                    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 bg-[#06c755] text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-[#05b34c] transition-all shadow-lg shadow-green-500/10">
+                        <i class="fab fa-line text-xl"></i> แอดไลน์จองคิว
                     </a>
                 </div>
             </div>
+
             <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
                 <p class="text-[9px] text-gray-600 uppercase tracking-[0.3em]">© 2026 ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
                 <div class="flex gap-8 text-[9px] text-gray-600 font-bold uppercase tracking-widest">
@@ -352,6 +356,10 @@ export default async (request, context) => {
             </div>
         </div>
     </footer>
+
+    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; background-color: #06c755; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 2px solid white;">
+        <i class="fab fa-line" style="font-size: 32px;"></i>
+    </a>
 
     <script>
         function initializePage() {
