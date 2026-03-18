@@ -1,20 +1,19 @@
 [build]
-  # ตรวจสอบว่าไฟล์ index.html ของคุณอยู่ที่ root (.) หรือใน folder ชื่อ public/dist
-  # ถ้าไฟล์อยู่ที่ root ให้ใช้ "." ถ้าอยู่ใน public ให้แก้เป็น "public"
   publish = "." 
   functions = "netlify/functions"
+  [build.processing]
+    skip_processing = false
 
-[build.processing]
-  skip_processing = false
-
-# --- [1] Headers (Global) ---
+# Headers ใหม่ (แทนที่ส่วน [1] เดิม)
 [[headers]]
   for = "/*"
   [headers.values]
-    # ❌ ลบ X-Robots-Tag ออก ให้ไปคุมในไฟล์ JS หรือ Meta tag แทน
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "no-referrer-when-downgrade"
-    # เพิ่ม Cache-Control เบื้องต้น (Edge Function จะ override เองถ้าจำเป็น)
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Cache-Control = "public, max-age=0, must-revalidate"
 
 # --- [2] Edge Functions ---
