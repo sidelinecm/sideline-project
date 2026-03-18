@@ -528,11 +528,10 @@ const html = `<!DOCTYPE html>
     </script>
 </body>
 </html>`;
+return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600" } });
 
-// ✅ FIX 5: Optimal Cache Headers
-return new Response(html, { 
-    headers: { 
-        "content-type": "text/html; charset=utf-8", 
-        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600"
-    } 
-});
+    } catch (e) {
+        console.error('Master SSR Error:', e);
+        return context.next();
+    }
+};
