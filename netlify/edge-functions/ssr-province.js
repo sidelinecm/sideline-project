@@ -19,7 +19,8 @@ const CONFIG = {
         bangkok: { name: 'กรุงเทพ', zones: ['สุขุมวิท', 'รัชดา', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ', 'เอกมัย'] },
         chonburi: { name: 'พัทยา', zones: ['พัทยาเหนือ', 'พัทยากลาง', 'พัทยาใต้', 'บางแสน', 'ศรีราชา'] }
     },
-    SOCIAL_LINKS: {
+    
+SOCIAL_LINKS: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@sidelinecm',
         twitter: 'https://twitter.com/sidelinechiangmai',
@@ -95,7 +96,7 @@ export default async (request, context) => {
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         const firstImage = optimizeImg(profiles[0].imagePath, 1200, 630);
 
-        // 🎯 4. SEO CONFIGURATION (Updated Schema to avoid Search Console warnings)
+        // 🎯 4. SEO CONFIGURATION
         const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_YEAR}) | น้องๆ รับงานเอง ฟิวแฟน ไม่มัดจำ`;
         const description = `รวมพิกัด ไซด์ไลน์${provinceName} รับงานเอง อัปเดตล่าสุด ${profiles.length} คน โซน ${zones.slice(0, 4).join(', ')} ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด`;
 
@@ -107,25 +108,17 @@ export default async (request, context) => {
                     "@id": `${CONFIG.DOMAIN}#website`,
                     "url": CONFIG.DOMAIN,
                     "name": CONFIG.BRAND_NAME,
-                    "publisher": { "@id": `${CONFIG.DOMAIN}#organization` }
+                    "publisher": { "@id": `${CONFIG.DOMAIN}#organization` },
+                    "potentialAction": { "@type": "SearchAction", "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
                 },
                 {
-                    "@type": ["Organization", "LocalBusiness"],
+                    "@type": ["Organization","LocalBusiness"],
                     "@id": `${CONFIG.DOMAIN}#organization`,
                     "name": CONFIG.BRAND_NAME,
                     "url": CONFIG.DOMAIN,
-                    "logo": {
-                        "@type": "ImageObject",
-                        "url": firstImage
-                    },
                     "image": firstImage,
                     "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
-                    "priceRange": "฿1500 - ฿5000",
-                    "contactPoint": {
-                        "@type": "ContactPoint",
-                        "url": CONFIG.SOCIAL_LINKS.line,
-                        "contactType": "customer service"
-                    }
+                    "priceRange": "฿1500 - ฿5000"
                 },
                 {
                     "@type": "CollectionPage",
@@ -133,14 +126,42 @@ export default async (request, context) => {
                     "url": provinceUrl,
                     "name": title,
                     "description": description,
-                    "breadcrumb": { "@id": `${provinceUrl}#breadcrumb` }
+                    "image": { "@type": "ImageObject", "url": firstImage },
+                    "breadcrumb": { "@id": `${provinceUrl}#breadcrumb` },
+                    "mainEntity": { "@id": `${provinceUrl}#itemlist` }
                 },
                 {
                     "@type": "BreadcrumbList",
                     "@id": `${provinceUrl}#breadcrumb`,
-                    "itemListElement": [
-                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
+                    "itemListElement":[
+                        { "@type":"ListItem", "position":1, "name":"หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type":"ListItem", "position":2, "name":`ไซด์ไลน์${provinceName}`, "item": provinceUrl }
+                    ]
+                },
+                {
+                    "@type": "ItemList",
+                    "@id": `${provinceUrl}#itemlist`,
+                    "numberOfItems": profiles.length,
+                    "itemListElement": profiles.map((p, index) => ({
+                        "@type": "ListItem",
+                        "position": index + 1,
+                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
+                    }))
+                },
+                {
+                    "@type": "FAQPage",
+                    "@id": `${provinceUrl}#faq`,
+                    "mainEntity":[
+                        {
+                            "@type": "Question",
+                            "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายหน้างานเมื่อเจอตัวจริงเท่านั้นเพื่อความปลอดภัย" }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": `ครอบคลุมโซนยอดนิยม เช่น ${zones.slice(0, 5).join(', ')} และพื้นที่ใกล้เคียง สามารถนัดหมายที่โรงแรมหรือห้องพักได้` }
+                        }
                     ]
                 }
             ]
