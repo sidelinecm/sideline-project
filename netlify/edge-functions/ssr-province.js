@@ -160,11 +160,9 @@ export default async (request, context) => {
         const CURRENT_YEAR = new Date().getFullYear();
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         
-// แก้ไขบรรทัด firstImage
 const firstImage = (profiles && profiles.length > 0) 
-    ? optimizeImg(profiles[0].imagePath, 1200, 630, true) 
+    ? optimizeImg(profiles[0].imagePath, 1200, 630) // ไม่ต้องใส่ true บรรทัดนี้ เพราะฟังก์ชันรับแค่ 3 parameter
     : `${CONFIG.DOMAIN}/default-share.jpg`;
-
         // สร้างเนื้อหา SEO Hero (ส่วนที่ขาดไปในตอนแรก)
         const seoText = generateMasterSeoText(provinceName, zones, profiles.length);
         
@@ -283,7 +281,7 @@ const firstImage = (profiles && profiles.length > 0)
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" media="print" onload="this.media='all'">
-    
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography" defer></script>
     <script>
@@ -386,6 +384,19 @@ const firstImage = (profiles && profiles.length > 0)
         .fab-line {
             bottom: calc(clamp(1.25rem, 6vw, 2.25rem) + env(safe-area-inset-bottom));
         }
+.profile-card .aspect-\[3\/4\] {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4; /* ล็อคสัดส่วนที่ระดับ Container */
+    overflow: hidden;
+    background: #1a1a1a; /* สีสำรอง */
+}
+
+.profile-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ป้องกันรูปเบี้ยว 100% */
+}
     </style>
 </head>
 <body class="bg-[#050505] text-white selection:bg-gold/30">
@@ -398,13 +409,12 @@ const firstImage = (profiles && profiles.length > 0)
         </div>
     </nav>
 
-    <header class="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center px-6 overflow-hidden">
+<header class="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center px-6 overflow-hidden">
         <div class="absolute inset-0 z-0">
             <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/70 to-[#050505] z-10"></div>
-            <img src="${firstImage}" 
-                 class="w-full h-full object-cover opacity-30 transform scale-105" 
-                 alt="ไซด์ไลน์${provinceName} รับงานพรีเมียม"
-                 fetchpriority="high">
+            <img src="${optimizeImg(profiles[0].imagePath, 1200, 800)}" 
+                 alt="ไซด์ไลน์${provinceName}" 
+                 class="absolute top-0 left-0 w-full h-full object-cover object-center opacity-40">
         </div>
         <div class="relative z-20 max-w-5xl space-y-6">
             <p class="reveal text-[10px] tracking-[0.6em] uppercase font-black text-gold opacity-0 translate-y-4">
