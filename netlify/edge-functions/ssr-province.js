@@ -13,7 +13,11 @@ const CONFIG = {
     SOCIAL_LINKS: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@sidelinecm',
-        twitter: 'https://twitter.com/sidelinechiangmai'
+        twitter: 'https://twitter.com/sidelinechiangmai',
+        linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
+        biosite: 'https://bio.site/firstfiwfans.com',
+        linktree: 'https://linktr.ee/kissmodel',
+        bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
     }
 };
 
@@ -274,40 +278,43 @@ export default async (request, context) => {
         }
 
 // ==========================================
-        // 6. RENDER THE ULTIMATE HTML (OPTIMIZED)
+        // 6. RENDER THE ULTIMATE HTML (MAXIMIZED SCO & SEO)
         // ==========================================
         const html = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>${title}</title>
-    <meta name="description" content="${description}" />
+    <title>${title} | ตัวท็อปเกรดพรีเมียม รับงานเอง 100%</title>
+    <meta name="description" content="${description} หาเด็ก${provinceName} น้องนักศึกษา พริตตี้พาร์ทไทม์ ครบทุกโซน รูปตรงปก ไม่ต้องโอนมัดจำ ปลอดภัยแน่นอน" />
+    <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, น้องนักศึกษา${provinceName}, หาเพื่อนเที่ยว${provinceName}, ไม่มัดจำ" />
     <link rel="canonical" href="${provinceUrl}" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:image" content="${firstImage}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     
     <!-- Resource Hints -->
     <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;600;700&family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <!-- Tailwind Standard CDN with Custom Config -->
+    <!-- Tailwind Standard CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
         tailwind.config = { theme: { extend: { colors: { gold: '#d4af37' }, fontFamily: { serif:['Cinzel', 'serif'] } } } };
     </script>
     
     <style>
-        :root { --dark: #050505; --gold: #d4af37; }
-        body { background: var(--dark); color: #f8f9fa; font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; min-height: 100vh; }
+        :root { --dark: #050505; --gold: #d4af37; --glass: rgba(15, 15, 15, 0.8); }
+        body { background: var(--dark); color: #f8f9fa; font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; min-height: 100vh; overflow-x: hidden; }
         
-        /* Performance: ข้ามการวาดส่วนที่ยังมองไม่เห็น */
+        /* SCO Optimization: Rendering Performance */
         .css-content-visibility { content-visibility: auto; contain-intrinsic-size: 800px; }
         
-        /* Shimmer Gold Effect */
+        /* Premium Shimmer Gold */
         .shimmer-gold { 
             background: linear-gradient(135deg, #b38728 0%, #fbf5b7 45%, #d4af37 55%, #aa771c 100%); 
             background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
@@ -315,67 +322,74 @@ export default async (request, context) => {
         }
         @keyframes shimmer { to { background-position: 200% center; } }
         
-        /* Zero CLS: จองพื้นที่รูปภาพอัตราส่วน 3:4 */
+        /* Zero CLS Aspect Ratio 3:4 */
         .img-aspect-ratio { position: relative; padding-bottom: 133.33%; overflow: hidden; background: #111; border-radius: inherit; }
-        .img-aspect-ratio img { position: absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+        .img-aspect-ratio img { position: absolute; inset:0; width:100%; height:100%; object-fit:cover; transition: transform 0.7s ease; }
         
-        /* Glass UI */
-        .glass-ui { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+        /* UI Enhancement */
+        .glass-ui { background: var(--glass); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+        .hero-gradient { background: linear-gradient(to bottom, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0.8) 70%, #050505 100%); }
     </style>
 
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-[100] transition-all duration-300 py-3 md:py-4 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl">
-        <div class="container flex justify-between items-center max-w-7xl mx-auto px-4">
-            <a href="/" class="text-xl md:text-2xl font-serif font-bold tracking-widest shimmer-gold">Sideline CM</a>
-            <div class="hidden md:flex items-center gap-3 text-[10px] md:text-[11px] font-bold tracking-[0.2em] text-white/40 uppercase">
-                <a href="/" class="hover:text-gold transition-colors">Home</a> <span>/</span>
+    <nav class="fixed top-0 w-full z-[100] transition-all duration-500 py-3 md:py-4 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl">
+        <div class="container mx-auto px-4 flex justify-between items-center max-w-7xl">
+            <a href="/" class="text-xl md:text-2xl font-serif font-black tracking-widest shimmer-gold">Sideline CM</a>
+            <div class="hidden md:flex items-center gap-6 text-[11px] font-bold tracking-[0.2em] text-white/50 uppercase">
+                <a href="/" class="hover:text-gold transition-colors">Home</a>
+                <a href="/profiles" class="hover:text-gold transition-colors">Directory</a>
                 <span class="text-gold border-b border-gold/30 pb-0.5">${provinceName}</span>
             </div>
-            <a href="${CONFIG.SOCIAL_LINKS.line}" class="md:hidden flex items-center justify-center w-9 h-9 rounded-full bg-[#06c755]/10 text-[#06c755] border border-[#06c755]/30">
+            <a href="${CONFIG.SOCIAL_LINKS.line}" class="flex items-center gap-2 bg-[#06c755] text-white px-4 py-1.5 rounded-full font-bold text-xs hover:scale-105 transition-transform">
                 <i class="fab fa-line text-lg"></i>
+                <span class="hidden xs:inline">LINE OA</span>
             </a>
         </div>
     </nav>
 
-    <!-- Header Section -->
-    <header class="relative min-h-[50vh] md:min-h-[65vh] flex flex-col items-center justify-center text-center px-4 pt-24 pb-10 overflow-hidden">
+    <!-- Header Section (H1) -->
+    <header class="relative min-h-[60vh] md:min-h-[75vh] flex flex-col items-center justify-center text-center px-4 pt-24 overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <div class="absolute inset-0 bg-gradient-to-b from-[#050505]/95 via-[#050505]/80 to-[#050505] z-10"></div>
-            ${safeProfiles.length > 0 ? `<img src="${firstImage}" class="w-full h-full object-cover opacity-[0.15] scale-110 blur-[2px]" alt="Background" fetchpriority="high">` : ''}
+            <div class="absolute inset-0 hero-gradient z-10"></div>
+            ${safeProfiles.length > 0 ? `<img src="${firstImage}" class="w-full h-full object-cover opacity-25 scale-110 blur-[1px]" alt="ไซด์ไลน์${provinceName}" fetchpriority="high">` : ''}
         </div>
         
-        <div class="relative z-20 max-w-4xl mx-auto space-y-4 md:space-y-6">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/20 bg-green-500/10 text-green-400 text-[10px] md:text-[11px] font-bold tracking-widest uppercase mb-2 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                อัปเดตล่าสุด: ${CURRENT_MONTH} ${CURRENT_YEAR}
+        <div class="relative z-20 max-w-5xl mx-auto space-y-6">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/20 bg-gold/10 text-gold text-[10px] md:text-xs font-black tracking-[0.3em] uppercase">
+                <span class="w-2 h-2 rounded-full bg-gold animate-pulse"></span>
+                Top Rated Collection ${CURRENT_YEAR}
             </div>
-            <h1 class="font-serif font-bold drop-shadow-2xl text-[clamp(2.5rem,8vw,6.5rem)] leading-[1.05]">
-                <span class="block text-2xl md:text-3xl lg:text-4xl text-white/80 italic font-light mb-2 md:mb-4">Exclusive</span>
-                <span class="block shimmer-gold">ไซด์ไลน์${provinceName}</span>
+            <!-- H1: Main Keyword -->
+            <h1 class="font-serif font-black drop-shadow-2xl text-[clamp(2.5rem,9vw,6.5rem)] leading-[0.9] md:leading-[1.05]">
+                <span class="block text-2xl md:text-4xl text-white/80 italic font-light mb-2 md:mb-4">Premium Selection</span>
+                <span class="block shimmer-gold uppercase">หาเด็กไซด์ไลน์${provinceName}</span>
             </h1>
-            <p class="text-sm md:text-base text-white/50 max-w-2xl mx-auto mt-4 font-light tracking-wide">
-                รวบรวมพิกัดน้องๆ ทั่ว${provinceName} เน้นงานตรงปก ฟิวแฟน ไม่ต้องผ่านโมเดลลิ่ง ปลอดภัย 100%
+            <p class="text-sm md:text-xl text-white/60 max-w-2xl mx-auto font-light leading-relaxed">
+                พบกับน้องๆ <strong>รับงาน${provinceName}</strong> ตัวท็อปที่คัดสรรมาเพื่อคุณโดยเฉพาะ ตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ จ่ายเงินหน้างานเท่านั้น
             </p>
         </div>
     </header>
 
-    <main class="container max-w-7xl mx-auto py-8 md:py-12 px-4">
+    <main class="container mx-auto max-w-7xl py-8 px-4">
         
-        <!-- SEO Text Block -->
-        <section class="mb-12 md:mb-20 glass-ui rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 text-center relative overflow-hidden shadow-2xl">
+        <!-- SCO Content Block (H2) -->
+        <section class="mb-12 md:mb-24 glass-ui rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-16 text-center relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/50 to-transparent"></div>
             <div class="max-w-4xl mx-auto relative z-10">
+                <!-- H2: Strategic Keyword Placement -->
                 ${generateUltimateSeoText(provinceName, provinceKey, safeProfiles.length)}
             </div>
             
-            <div class="border-t border-white/10 mt-8 md:mt-10 pt-8 md:pt-10 relative z-10">
-                <h3 class="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.2em] mb-6">📍 ค้นหาตามพิกัดยอดฮิตใน${provinceName}</h3>
-                <div class="flex flex-wrap justify-center gap-2.5 md:gap-3">
+            <!-- Silo Internal Links (SEO Power) -->
+            <div class="mt-12 border-t border-white/10 pt-10">
+                <h3 class="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mb-8">📍 พิกัดบริการยอดฮิตใน${provinceName}</h3>
+                <div class="flex flex-wrap justify-center gap-2.5 md:gap-4">
                     ${zones.map(z => `
                         <a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" 
-                           class="text-[11px] md:text-xs px-5 py-2.5 rounded-full border border-white/10 font-bold uppercase tracking-widest bg-white/5 hover:bg-gold hover:text-black hover:border-gold transition-all duration-300 shadow-lg">
+                           class="text-[10px] md:text-xs px-5 py-2.5 rounded-full border border-white/10 font-bold uppercase tracking-widest bg-white/5 hover:bg-gold hover:text-black hover:border-gold transition-all duration-300">
                            #รับงาน${z}
                         </a>
                     `).join('')}
@@ -383,47 +397,124 @@ export default async (request, context) => {
             </div>
         </section>
 
-        <!-- Listing Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8 mb-20">
+        <!-- Profile Grid: Grid-Cols-2 on Mobile -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-8 mb-20 md:mb-32">
             ${safeProfiles.length > 0 ? cardsHTML : `
-                <div class="col-span-full py-20 text-center glass-ui rounded-[2rem] border-dashed border-2 border-white/10">
-                    <i class="fas fa-gem text-4xl text-gold/50 mb-6 animate-pulse"></i>
-                    <h3 class="text-2xl font-serif text-white/90 mb-4">Coming Very Soon</h3>
-                    <p class="text-white/50 max-w-sm mx-auto mb-8 text-sm">กำลังคัดกรองน้องๆ โซน${provinceName} เพื่อมาตรฐานที่สูงที่สุด</p>
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" class="inline-flex items-center gap-2 bg-[#06c755] text-white px-8 py-3.5 rounded-full font-bold hover:bg-[#05b34c] transition-all shadow-xl shadow-green-500/20">แอดไลน์สอบถามคิว</a>
+                <div class="col-span-full py-32 text-center glass-ui rounded-3xl border-dashed border-2 border-white/10">
+                    <i class="fas fa-gem text-5xl text-gold/30 mb-6 animate-pulse"></i>
+                    <h3 class="text-2xl font-serif text-white/90">Coming Soon...</h3>
+                    <p class="text-white/40 mt-2">เรากำลังคัดกรองน้องๆ โซน${provinceName} เพื่อมาตรฐานที่ดีที่สุด</p>
                 </div>
             `}
         </div>
 
-        <!-- Safety Footer Section -->
-        <footer class="border-t border-white/10 pt-16 pb-12 mt-20 text-center md:text-left">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto">
-                <div>
-                    <h3 class="text-xl font-serif text-gold mb-3">${CONFIG.BRAND_NAME}</h3>
-                    <p class="text-xs text-white/40 leading-relaxed">
-                        ศูนย์รวม <strong>รับงาน${provinceName}</strong> อันดับ 1 เน้นความโปร่งใส ปลอดภัย<br> จ่ายเงินหน้างาน 100% ไม่ต้องโอนมัดจำ ป้องกันมิจฉาชีพ
-                    </p>
-                </div>
-                <div class="md:text-right space-y-4">
-                    <p class="inline-block text-[10px] font-bold text-red-300 bg-red-900/30 border border-red-500/20 px-4 py-2 rounded-lg uppercase tracking-widest">
-                        🔞 เฉพาะผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น
-                    </p>
-                    <div class="flex justify-center md:justify-end gap-6 text-[10px] text-white/30 uppercase tracking-widest font-bold">
-                        <a href="/privacy" class="hover:text-gold transition-colors">Privacy</a>
-                        <a href="/terms" class="hover:text-gold transition-colors">Terms</a>
-                        <span>&copy; ${CURRENT_YEAR}</span>
+        <!-- Selling Points Section (H3) -->
+        <section class="mb-20 md:mb-32">
+            <h2 class="text-2xl md:text-4xl font-serif text-center mb-12 md:mb-20 shimmer-gold italic uppercase">ทำไมต้องเลือกใช้บริการกับเรา?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-ui p-10 rounded-[2.5rem] border-t border-white/10 hover:border-gold/30 transition-colors group">
+                    <div class="w-16 h-16 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-shield-heart text-gold text-3xl"></i>
                     </div>
+                    <h3 class="text-xl font-bold mb-4 italic text-white">ปลอดภัย 100%</h3>
+                    <p class="text-white/50 text-sm leading-relaxed">มั่นใจสูงสุดด้วยระบบ <strong>ไม่ต้องโอนมัดจำล่วงหน้า</strong> ป้องกันการโดนโกง ลูกค้าจ่ายเงินหน้างานเมื่อเจอตัวน้องจริงเท่านั้น</p>
+                </div>
+                <div class="glass-ui p-10 rounded-[2.5rem] border-t border-white/10 hover:border-gold/30 transition-colors group">
+                    <div class="w-16 h-16 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-camera-retro text-gold text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 italic text-white">รูปตรงปก ไม่จกตา</h3>
+                    <p class="text-white/50 text-sm leading-relaxed">เรามีการตรวจสอบโปรไฟล์อย่างเข้มงวด คัดเฉพาะน้องๆ ที่ทำงานจริง <strong>ตรงปกแน่นอน</strong> หากไม่ตรงปกยินดีให้ยกเลิกได้ทันที</p>
+                </div>
+                <div class="glass-ui p-10 rounded-[2.5rem] border-t border-white/10 hover:border-gold/30 transition-colors group">
+                    <div class="w-16 h-16 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-user-graduate text-gold text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 italic text-white">น้องนักศึกษา & พริตตี้</h3>
+                    <p class="text-white/50 text-sm leading-relaxed">รวบรวมน้องๆ หลากหลายสไตล์ ทั้ง <strong>นักศึกษา มหาวิทยาลัยชื่อดัง</strong> พริตตี้ นางแบบ และพนักงานออฟฟิศพาร์ทไทม์</p>
                 </div>
             </div>
-        </footer>
+        </section>
+
+        <!-- Local FAQ Section -->
+        <section class="max-w-4xl mx-auto mb-20 md:mb-32">
+            <h2 class="text-2xl md:text-3xl font-serif text-center mb-10 shimmer-gold uppercase">คำถามที่พบบ่อย (FAQ)</h2>
+            <div class="space-y-4">
+                <details class="glass-ui p-6 rounded-2xl group cursor-pointer border border-white/5">
+                    <summary class="flex justify-between items-center font-bold text-sm md:text-base text-white/80 uppercase tracking-wide">
+                        จองคิวน้องๆ ไซด์ไลน์${provinceName} ยังไง?
+                        <i class="fas fa-chevron-down text-gold transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <p class="mt-4 text-white/50 text-sm leading-relaxed">ง่ายๆ เพียงเลือกโปรไฟล์น้องที่ถูกใจ แล้วแอดไลน์เพื่อสอบถามคิวงาน เมื่อตกลงเวลากันได้แล้ว ก็นัดเจอและจ่ายเงินหน้างานได้เลยครับ</p>
+                </details>
+                <details class="glass-ui p-6 rounded-2xl group cursor-pointer border border-white/5">
+                    <summary class="flex justify-between items-center font-bold text-sm md:text-base text-white/80 uppercase tracking-wide">
+                        ต้องเตรียมตัวอย่างไรบ้าง?
+                        <i class="fas fa-chevron-down text-gold transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <p class="mt-4 text-white/50 text-sm leading-relaxed">เพียงเตรียมที่พักหรือโรงแรมที่สะดวก แจ้งพิกัดให้น้องทราบ และให้เกียรติน้องๆ ในการให้บริการ เพื่อรับประสบการณ์ฟิวแฟนที่ดีที่สุดครับ</p>
+                </details>
+            </div>
+        </section>
     </main>
 
-    <!-- Floating Line Button -->
+    <!-- RICH SEO FOOTER -->
+    <footer class="bg-[#020202] border-t border-white/5 pt-24 pb-12">
+        <div class="container mx-auto max-w-7xl px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+                <div class="md:col-span-2 space-y-8">
+                    <h3 class="text-3xl font-serif shimmer-gold font-black italic tracking-widest uppercase">${CONFIG.BRAND_NAME}</h3>
+                    <p class="text-white/40 text-sm leading-loose max-w-md font-light">
+                        ผู้นำด้านแพลตฟอร์มรวบรวมข้อมูล <strong>ไซด์ไลน์${provinceName}</strong> และเครือข่ายรับงานที่ใหญ่ที่สุดในประเทศไทย เรามุ่งเน้นความโปร่งใส ปลอดภัย และการรักษาความเป็นส่วนตัวของลูกค้าเป็นอันดับหนึ่ง มั่นใจได้ว่าทุกการนัดหมายจะเป็นความประทับใจระดับพรีเมียม
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center hover:bg-gold hover:text-black transition-all border border-white/10"><i class="fab fa-line text-xl"></i></a>
+                        <a href="${CONFIG.SOCIAL_LINKS.twitter}" class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center hover:bg-gold hover:text-black transition-all border border-white/10"><i class="fab fa-x-twitter text-xl"></i></a>
+                        <a href="${CONFIG.SOCIAL_LINKS.tiktok}" class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center hover:bg-gold hover:text-black transition-all border border-white/10"><i class="fab fa-tiktok text-xl"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-white text-xs font-bold uppercase tracking-[0.4em] mb-8 border-b border-gold/30 pb-2 inline-block">Popular Services</h4>
+                    <ul class="space-y-4 text-white/40 text-xs font-light tracking-wide uppercase">
+                        <li><a href="#" class="hover:text-gold transition-colors italic">รับงานน้องนักศึกษา</a></li>
+                        <li><a href="#" class="hover:text-gold transition-colors italic">พริตตี้เอนเตอร์เทน</a></li>
+                        <li><a href="#" class="hover:text-gold transition-colors italic">เพื่อนเที่ยวพรีเมียม</a></li>
+                        <li><a href="#" class="hover:text-gold transition-colors italic">ไซด์ไลน์ ตัวท็อป</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white text-xs font-bold uppercase tracking-[0.4em] mb-8 border-b border-gold/30 pb-2 inline-block">Help & Policy</h4>
+                    <ul class="space-y-4 text-white/40 text-xs font-light tracking-wide uppercase">
+                        <li><a href="/privacy" class="hover:text-gold transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms" class="hover:text-gold transition-colors">Terms of Service</a></li>
+                        <li><a href="/contact" class="hover:text-gold transition-colors">Support Center</a></li>
+                        <li class="pt-4">
+                            <span class="inline-block text-[10px] text-red-500/80 font-bold border border-red-500/20 px-4 py-2 rounded-lg leading-relaxed">
+                                🔞 ผู้ใช้งานต้องมีอายุ 20 ปีขึ้นไปเท่านั้น
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-10 gap-6">
+                <p class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-bold">&copy; 2026 ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
+                <div class="flex gap-8 text-[9px] text-white/30 uppercase font-black tracking-widest">
+                    <span class="flex items-center gap-2"><i class="fas fa-bolt text-gold"></i> Fast Load SSR</span>
+                    <span class="flex items-center gap-2"><i class="fas fa-lock text-gold"></i> SSL Secure</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global Floating Action Button -->
     <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" 
-       class="fixed bottom-6 right-6 md:bottom-8 md:right-8 w-14 h-14 md:w-16 md:h-16 bg-gradient-to-tr from-[#06c755] to-[#04a045] rounded-full flex items-center justify-center text-white text-3xl shadow-[0_10px_30px_rgba(6,199,85,0.4)] hover:-translate-y-2 hover:scale-105 transition-all duration-300 z-[99] border-2 border-white/20 group"
-       aria-label="ติดต่อแอดมิน">
+       class="fixed bottom-6 right-6 md:bottom-10 md:right-10 w-14 h-14 md:w-16 md:h-16 bg-gradient-to-tr from-[#06c755] to-[#04a045] rounded-full flex items-center justify-center text-white text-2xl md:text-3xl shadow-[0_10px_30px_rgba(6,199,85,0.4)] hover:-translate-y-2 hover:scale-105 transition-all duration-300 z-[99] border-2 border-white/20 group"
+       aria-label="แอดไลน์จองคิว">
         <i class="fab fa-line drop-shadow-lg group-hover:rotate-12 transition-transform"></i>
-        <span class="absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-[#050505] rounded-full animate-bounce"></span>
+        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-[#050505] rounded-full animate-bounce flex items-center justify-center text-[10px] font-bold italic">1</span>
     </a>
 
     <!-- Scripts -->
