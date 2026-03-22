@@ -57,6 +57,8 @@ const optimizeImg = (path, width = 600, height = 800) => {
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
+const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
@@ -261,9 +263,7 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
                     </div>
                 </div>
 
-                <section class="description" itemprop="description">
-                    ${p.description || metaDesc}
-                </section>
+                <section class="description" itemprop="description"> ${escapeHTML(p.description) || metaDesc} </section>
 
                 <section class="cta-section" aria-label="ช่องทางการติดต่อ">
                     <a href="${finalLineUrl}" class="btn-line" rel="noopener" data-i18n='{"th":"📲 ทักไลน์จองคิว ${displayName}","en":"📲 Contact ${displayName}"}'> 
