@@ -40,52 +40,50 @@ const TESTIMONIALS = [
 // ฟังก์ชันสุ่มคำ (Spintax) เพื่อให้เนื้อหาไม่ซ้ำกันในสายตา Google
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// ปรับปรุงการ Optimize รูปภาพให้รองรับ Format ที่หลากหลายขึ้น
 const optimizeImg = (path, width = 600, height = 800) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    
+    // กรณีเป็น URL จาก Cloudinary
     if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill,g_face/`);
+        // แทรก parameter f_auto (เลือกฟอร์แมตอัตโนมัติเช่น WebP/AVIF) 
+        // และ q_auto (บีบอัดคุณภาพอัตโนมัติ) และการปรับขนาด
+        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
     }
+
+    // กรณีเป็น URL อื่นๆ (เช่นภายนอก)
     if (path.startsWith('http')) return path;
-    // ปรับเป็น Storage API ของ Supabase หากเป็น Path ปกติ
+
+    // กรณีเป็นไฟล์จาก Supabase Storage
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
-// นำมาวางเพิ่มในโค้ดใหม่
-const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '';
-
-const formatDate = (dateString) => {
-    if (!dateString) return 'ไม่ระบุ';
-    try {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
-        if (diffInSeconds < 60) return 'เมื่อครู่นี้';
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} นาทีที่แล้ว`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ชม.ที่แล้ว`;
-        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} วันที่แล้ว`;
-        const thaiMonths =['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${(date.getFullYear() + 543).toString().slice(-2)}`;
-    } catch (e) { return 'ไม่ระบุ'; }
-};
-
+const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
 
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
+    
+    // ตรวจสอบว่าเป็น Bot หรือ Social Media Crawler หรือไม่
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
     
+    // ถ้าไม่ใช่ Bot ให้ปล่อยผ่านไปใช้ Client-side Rendering ปกติ
     if (!isBot) return context.next();
 
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
+        
+        // ตรวจสอบว่าต้องเป็น URL รูปแบบ /sideline/{slug}
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
         
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
+        
+        // ป้องกัน slug ที่เป็นคำสั่งระบบ
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
+        // เชื่อมต่อ Database
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
+        // ดึงข้อมูล Profile และข้อมูลจังหวัดที่เชื่อมโยงกัน
         const { data: p } = await supabase
             .from('profiles')
             .select('*, provinces(nameThai, key)')
@@ -93,39 +91,39 @@ export default async (request, context) => {
             .eq('active', true)
             .maybeSingle();
 
+        // หากไม่พบข้อมูลโปรไฟล์ ให้ปล่อยไปหน้า 404 ของระบบหลัก
         if (!p) return context.next();
 
-        // ดึงข้อมูล Related เพิ่มเติม (แนะนำให้ดึงแบบสุ่มเล็กน้อย)
-        const { data: relatedData } = await supabase
-            .from('profiles')
-            .select('slug, name, imagePath, location')
-            .eq('provinceKey', p.provinceKey)
-            .eq('active', true)
-            .neq('id', p.id) 
-            .limit(4);
-        const related = relatedData || [];
+        // ดึงโปรไฟล์แนะนำในจังหวัดเดียวกัน (Related Profiles)
+        let related = [];
+        if (p.provinceKey) {
+            const { data: relatedData } = await supabase
+                .from('profiles')
+                .select('slug, name, imagePath, location')
+                .eq('provinceKey', p.provinceKey)
+                .eq('active', true)
+                .neq('id', p.id) 
+                .limit(4);
+            related = relatedData || [];
+        }
 
-        // จัดการเรื่องราคาให้แม่นยำ
-        const rawRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
-        const basePrice = parseInt(rawRate);
-        const displayPrice = basePrice.toLocaleString() + ".-";
-
-        // เตรียมตัวแปร (Escape ทุกตัว)
-        const displayName = escapeHTML(p.name || 'สาวสวย');
-        const provinceName = escapeHTML(p.provinces?.nameThai || p.location || 'เชียงใหม่');
-        const locationName = escapeHTML(p.location || provinceName);
-        const imageUrl = optimizeImg(p.imagePath, 600, 800);
+        // เตรียมตัวแปรสำหรับแสดงผล
+        const displayName = p.name || 'สาวสวย';
+        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
+        const provinceKey = p.provinces?.key || 'chiangmai';
+        const displayPrice = parseInt(p.rate || "1500").toLocaleString() + ".-";
+const imageUrl = optimizeImg(p.imagePath, 600, 800);
         
-        // Final Line URL
+        // จัดการลิงก์ LINE (รองรับทั้ง ID และ URL)
         let finalLineUrl = p.lineId || 'ksLUMz3p_o';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        // Rating Logic (Deterministic)
+        // จำลอง Rating เพื่อให้ Google แสดงผล Rich Snippets (ดาว)
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.7 + (charCodeSum % 3) / 10).toFixed(1);
-        const reviewCount = 120 + (charCodeSum % 80);
+        const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
+        const reviewCount = 150 + (charCodeSum % 100);
 
         // SEO Spintax
         const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
@@ -360,7 +358,7 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
             headers: {
                 "content-type": "text/html; charset=utf-8",
                 "x-robots-tag": "index, follow",
-                "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600",
+                "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
                 "Vary": "User-Agent"
             }
         });
