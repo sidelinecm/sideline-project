@@ -267,7 +267,7 @@ export default async (request, context) => {
                         <div class="absolute top-3 left-3 z-20 flex flex-col gap-2">
                             <span class="bg-black/80 backdrop-blur-md text-white text-[9px] px-2.5 py-1.5 rounded-lg border border-white/10 font-bold flex items-center gap-1.5 uppercase tracking-tighter">
                                 <span class="w-1.5 h-1.5 ${isAvailable ? 'bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]' : 'bg-red-500'} rounded-full"></span> 
-                                ${isAvailable ? 'พร้อมรับงาน' : 'ติดธุระ'}
+                                ${isAvailable ? 'พร้อมรับงาน' : 'ว่างค่ะ'}
                             </span>
                         </div>
 
