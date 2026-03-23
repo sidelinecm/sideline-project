@@ -1,29 +1,51 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // ==========================================
-// 1. SYSTEM CONFIGURATION & HOT LINKS
+// 1. SYSTEM CONFIGURATION
 // ==========================================
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline CM',
+    BRAND_NAME: 'Sideline CM (Thailand)',
     STORAGE_BUCKET: 'profile-images',
-    SOCIAL_LINKS: {
-        line: 'https://line.me/ti/p/ksLUWB89Y_'
+    SOCIAL: {
+        line: 'https://line.me/ti/p/ksLUWB89Y_',
+        twitter: 'https://twitter.com/sidelinechiangmai',
+        tiktok: 'https://tiktok.com/@sidelinecm'
+    }
+};
+
+// ฐานข้อมูล LSI Keywords สำหรับสร้างเนื้อหาและลิงก์เชื่อมต่อ
+const PROVINCE_LSI = {
+    'chiangmai': {
+        zones: ['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'คูเมือง'],
+        tags: ['สาวเหนือ', 'นักศึกษา มช.', 'ขาวหมวย', 'ตัวท็อปเชียงใหม่'],
+        desc: 'ศูนย์รวมน้องๆ ไซด์ไลน์เชียงใหม่ พิกัดยอดฮิตนิมมานและสันติธรรม'
+    },
+    'lampang': {
+        zones: ['ตัวเมืองลำปาง', 'เกาะคา', 'ห้างฉัตร', 'แม่เมาะ', 'สบตุ๋ย'],
+        tags: ['สาวลำปาง', 'รับงานลำปาง', 'ตรงปก100%', 'นักศึกษาลำปาง'],
+        desc: 'พิกัดลับน้องๆ ลำปาง รับงานเอง ฟิวแฟน ดูแลดีระดับพรีเมียม'
+    },
+    'bangkok': {
+        zones: ['สุขุมวิท', 'รัชดา', 'ลาดพร้าว', 'ห้วยขวาง', 'สาทร', 'สีลม', 'ทองหล่อ'],
+        tags: ['พริตตี้ กทม.', 'นางแบบ', 'ตัวท็อปกรุงเทพ', 'เด็กเอ็นกทม.'],
+        desc: 'น้องๆ ไซด์ไลน์กรุงเทพฯ ครอบคลุมโซน BTS และ MRT ทั่วกรุง'
+    },
+    'default': {
+        zones: ['ตัวเมือง', 'พื้นที่ใกล้เคียง', 'โซนยอดฮิต', 'โรงแรมชั้นนำ', 'คอนโดหรู'],
+        tags: ['สาวสวย', 'ฟิวแฟน', 'ตรงปก', 'รับงานเอง'],
+        desc: 'บริการน้องๆ ไซด์ไลน์เกรดพรีเมียม การันตีตรงปก ไม่ต้องโอนมัดจำ'
     }
 };
 
 // ==========================================
-// 2. UTILITIES (Sync กับ Client 100%)
+// 2. CORE UTILITIES (SYNC WITH CLIENT JS)
 // ==========================================
-const escapeHTML = (str) => {
-    return str ? String(str).replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-    }[tag])) : '';
-};
+const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '';
 
-const optimizeImg = (path, width = 400) => {
+const optimizeImg = (path, width = 400, height = 533) => {
     if (!path) return `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
     if (path.includes('res.cloudinary.com')) {
         return path.replace('/upload/', `/upload/c_scale,w_${width},q_auto,f_auto/`);
@@ -38,21 +60,13 @@ const formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
-        
         if (diffInSeconds < 60) return 'เมื่อครู่นี้';
         if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} นาทีที่แล้ว`;
         if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ชม.ที่แล้ว`;
         if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} วันที่แล้ว`;
-        
         const thaiMonths =['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        const day = date.getDate();
-        const month = thaiMonths[date.getMonth()];
-        const year = (date.getFullYear() + 543).toString().slice(-2);
-        
-        return `${day} ${month} ${year}`;
-    } catch (e) {
-        return 'ไม่ระบุ';
-    }
+        return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${(date.getFullYear() + 543).toString().slice(-2)}`;
+    } catch (e) { return 'ไม่ระบุ'; }
 };
 
 // ==========================================
@@ -67,17 +81,11 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        const { data: provinceData, error: provError } = await supabase
-            .from('provinces')
-            .select('id, nameThai, key')
-            .eq('key', provinceKey)
-            .maybeSingle();
+        // Fetch Data
+        const { data: provinceData } = await supabase.from('provinces').select('*').eq('key', provinceKey).maybeSingle();
+        if (!provinceData) return context.next();
 
-        if (!provinceData || provError) {
-            return context.next();
-        }
-
-        const { data: profiles, error: profilesError } = await supabase
+        const { data: profiles } = await supabase
             .from('profiles')
             .select('id, slug, name, imagePath, galleryPaths, location, rate, isfeatured, lastUpdated, created_at, active, availability, likes')
             .eq('provinceKey', provinceData.key)
@@ -86,327 +94,271 @@ export default async (request, context) => {
             .order('created_at', { ascending: false })
             .limit(80);
 
-        if (profilesError) {
-            console.error('Fetch Profiles Error:', profilesError);
-        }
-
-        const safeProfiles = profiles ||[];
-        const provinceName = escapeHTML(provinceData.nameThai);
+        const safeProfiles = profiles || [];
+        const provinceName = provinceData.nameThai;
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
+        const seoInfo = PROVINCE_LSI[provinceKey] || PROVINCE_LSI['default'];
         
-        let firstImage = `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
-        if (safeProfiles.length > 0) {
-            firstImage = optimizeImg(safeProfiles[0].imagePath || (safeProfiles[0].galleryPaths && safeProfiles[0].galleryPaths[0]), 800);
-        }
+        const firstImg = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
 
         // ==========================================
-        // 4. SEO & SCHEMA MARKUP
+        // 4. METADATA & SCHEMA (FULL JSON-LD)
         // ==========================================
         const CURRENT_YEAR = new Date().getFullYear() + 543;
-        const thaiMonthsFull =["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-        const CURRENT_MONTH = thaiMonthsFull[new Date().getMonth()];
-        
-        const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ไม่มัดจำ`;
-        const description = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน รับงานเอง ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างาน`;
+        const pageTitle = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (อัปเดต ${CURRENT_YEAR}) | ตรงปก ไม่มัดจำ`;
+        const pageDesc = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน รับงานเอง ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างานที่${provinceName}`;
 
         const schemaData = {
             "@context": "https://schema.org",
-            "@graph":[
+            "@graph": [
                 {
                     "@type": "LocalBusiness",
-                    "@id": `${provinceUrl}/#business`,
-                    "name": `รับงาน${provinceName} - ไซด์ไลน์พรีเมียม`,
+                    "name": `บริการไซด์ไลน์${provinceName} Premium`,
+                    "image": firstImg,
                     "url": provinceUrl,
-                    "image": firstImage,
-                    "description": description,
                     "priceRange": "฿1500 - ฿5000",
-                    "address": { 
-                        "@type": "PostalAddress", 
-                        "addressLocality": provinceName, 
-                        "addressCountry": "TH" 
-                    }
-                },
-                {
-                    "@type": "ItemList",
-                    "name": `รายชื่อไซด์ไลน์ในจังหวัด ${provinceName}`,
-                    "numberOfItems": safeProfiles.length,
-                    "itemListElement": safeProfiles.slice(0, 10).map((p, index) => ({
-                        "@type": "ListItem",
-                        "position": index + 1,
-                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
-                    }))
+                    "description": pageDesc,
+                    "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" }
                 },
                 {
                     "@type": "BreadcrumbList",
-                    "itemListElement":[
+                    "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
+                        { "@type": "ListItem", "position": 2, "name": provinceName, "item": provinceUrl }
                     ]
+                },
+                {
+                    "@type": "ItemList",
+                    "name": `รายชื่อน้องๆ ไซด์ไลน์ ${provinceName}`,
+                    "numberOfItems": safeProfiles.length,
+                    "itemListElement": safeProfiles.slice(0, 20).map((p, i) => ({
+                        "@type": "ListItem",
+                        "position": i + 1,
+                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
+                    }))
                 }
             ]
         };
 
         // ==========================================
-        // 5. HTML GENERATION (CARDS)
+        // 5. HTML CARDS GENERATION (SYNC WITH CLIENT)
         // ==========================================
-        let cardsHTML = '';
-        if (safeProfiles.length > 0) {
-            cardsHTML = safeProfiles.map((p, i) => {
-                let cleanName = escapeHTML((p.name || '').trim().replace(/^(น้อง\s?)/, ''));
-                cleanName = cleanName.toLowerCase();
-                cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-                cleanName = `น้อง${cleanName}`;
-                
-                const pLoc = escapeHTML(p.location || '');
-                const fullLocation = [provinceName, pLoc].filter(Boolean).join(' ').trim();
-                
-                const imgSrc = optimizeImg(p.imagePath || (p.galleryPaths && p.galleryPaths[0]), 400);
-                
-                let statusClass = 'status-inquire';
-                let availText = escapeHTML(p.availability || 'สอบถาม');
-                const availLower = availText.toLowerCase();
-                if (availLower.includes('ว่าง') || availLower.includes('รับงาน')) {
-                    statusClass = 'status-available';
-                } else if (availLower.includes('ไม่ว่าง') || availLower.includes('พัก')) {
-                    statusClass = 'status-busy';
-                }
+        let cardsHTML = safeProfiles.map((p, i) => {
+            let cleanName = escapeHTML((p.name || '').trim().replace(/^(น้อง\s?)/, ''));
+            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+            const displayName = `น้อง${cleanName}`;
+            
+            const pLoc = escapeHTML(p.location || '');
+            const fullLoc = [provinceName, pLoc].filter(Boolean).join(' ').trim();
+            const imgSrc = optimizeImg(p.imagePath || (p.galleryPaths && p.galleryPaths[0]), 400);
+            
+            let statusClass = 'status-inquire';
+            let availText = escapeHTML(p.availability || 'สอบถาม');
+            if (availText.includes('ว่าง') || availText.includes('รับงาน')) statusClass = 'status-available';
+            else if (availText.includes('ไม่ว่าง') || availText.includes('พัก')) statusClass = 'status-busy';
 
-                const likeCount = p.likes || 0;
-                const formattedDate = formatDate(p.created_at || p.lastUpdated);
+            const likeCount = p.likes || 0;
+            const updatedDate = formatDate(p.created_at || p.lastUpdated);
 
-                const isEager = i < 6;
-                const loadingAttr = isEager ? `loading="eager" fetchpriority="high"` : `loading="lazy"`;
-
-                return `
-                <div class="profile-card-new-container">
-                    <div class="profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1" 
-                         data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug)}">
-                        
-                        <!-- Layer 0: Skeleton & Image -->
-                        <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0"></div>
-                        <img src="${imgSrc}" 
-                             alt="${cleanName} - ไซด์ไลน์${provinceName}"
-                             class="card-image w-full h-full object-cover transition-opacity duration-700 absolute inset-0 z-0 opacity-100"
-                             ${loadingAttr} width="300" height="400">
-                             
-                        <!-- Layer 1: Badges -->
-                        <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
-                            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-md bg-white/10 border border-white/20 text-[10px] font-bold px-2 py-1 rounded-full text-white">
-                                ${availText}
-                            </span>
-                            ${p.isfeatured ? '<span class="featured-badge bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
-                        </div>
-
-                        <!-- Layer 2: Link -->
-                        <a href="/sideline/${escapeHTML(p.slug)}" class="card-link absolute inset-0 z-10" tabindex="-1"></a>
-
-                        <!-- Layer 3: Overlay & Content -->
-                        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-3 flex flex-col justify-between pointer-events-none" style="z-index: 20;">
-                            <div class="card-header mt-8"></div>
-                            
-                            <div class="card-footer-content pointer-events-auto">
-                                <h3 class="text-lg font-bold text-white drop-shadow-md leading-tight truncate pr-2">${cleanName}</h3>
-                                <p class="text-xs text-gray-300 flex items-center mt-0.5 mb-2">
-                                    <i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${fullLocation}
-                                </p>
-                                <div class="date-stamp text-[10px] text-gray-400 flex items-center gap-1">
-                                    <i class="far fa-clock text-[9px]"></i> 
-                                    <span>อัปเดต: ${formattedDate}</span>
-                                </div>
-                                
-                                <!-- Layer 4: Like Button -->
-                                <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like hover:text-pink-400 transition-colors mt-1"
-                                     style="pointer-events: auto !important; z-index: 50 !important;"
-                                     data-action="like" data-id="${p.id}" role="button">
-                                    <i class="fas fa-heart text-lg transition-transform duration-200 group-hover/like:scale-110"></i>
-                                    <span class="like-count text-sm font-bold">${likeCount}</span>
-                                </div>
+            return `
+            <div class="profile-card-new-container">
+                <div class="profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" 
+                     data-profile-id="${p.id}" data-profile-slug="${p.slug}">
+                    <img src="${imgSrc}" alt="${displayName} - ไซด์ไลน์${provinceName}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="${i < 4 ? 'eager' : 'lazy'}">
+                    <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
+                        <span class="${statusClass} text-[10px] font-bold px-2.5 py-1 rounded-full text-white shadow-md backdrop-blur-md bg-opacity-80">${availText}</span>
+                        ${p.isfeatured ? '<span class="bg-yellow-400 text-black text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
+                    </div>
+                    <a href="/sideline/${p.slug}" class="absolute inset-0 z-10"></a>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-3 flex flex-col justify-end pointer-events-none">
+                        <h3 class="text-lg font-bold text-white drop-shadow-md truncate pointer-events-auto">${displayName}</h3>
+                        <p class="text-xs text-gray-300 flex items-center mt-0.5 pointer-events-auto"><i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${fullLoc}</p>
+                        <div class="flex justify-between items-center mt-2 pointer-events-auto">
+                            <span class="text-[9px] text-gray-400 flex items-center gap-1"><i class="far fa-clock"></i> อัปเดต: ${updatedDate}</span>
+                            <div class="flex items-center gap-1.5 text-white bg-black/40 px-2 py-0.5 rounded-full border border-white/10" data-action="like" data-id="${p.id}">
+                                <i class="fas fa-heart text-pink-500"></i><span class="text-xs font-bold">${likeCount}</span>
                             </div>
                         </div>
                     </div>
-                </div>`;
-            }).join('');
-        } else {
-            cardsHTML = `
-                <div class="col-span-full text-center py-12">
-                    <p class="text-gray-500 dark:text-gray-400 text-lg">🚀 เตรียมพบกับน้องๆ ไซด์ไลน์${provinceName} เร็วๆ นี้...</p>
                 </div>
-            `;
-        }
+            </div>`;
+        }).join('');
 
         // ==========================================
-        // 6. RENDER THE ULTIMATE HTML
+        // 6. FINAL HTML RENDERING
         // ==========================================
         const html = `<!DOCTYPE html>
 <html lang="th" class="dark scroll-smooth">
 <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#111111">
-    
-    <title>${title}</title>
-    <meta name="description" content="${description}" />
+    <title>${pageTitle}</title>
+    <meta name="description" content="${pageDesc}" />
     <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ตรงปก, ไม่มัดจำ, นัดเจอจ่ายหน้างาน" />
     <link rel="canonical" href="${provinceUrl}" />
-
-    <!-- Open Graph (LINE/FB/X) -->
+    
+    <!-- Open Graph Tags -->
     <meta property="og:type" content="website" />
+    <meta property="og:title" content="🔥 ${pageTitle}" />
+    <meta property="og:description" content="${pageDesc}" />
+    <meta property="og:image" content="${firstImg}" />
     <meta property="og:url" content="${provinceUrl}" />
-    <meta property="og:title" content="${title}" />
-    <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${firstImage}" />
-    <meta property="og:image:secure_url" content="${firstImage}" />
-    <meta property="og:image:width" content="800" />
-    <meta property="og:image:height" content="600" />
-    <meta property="og:locale" content="th_TH" />
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}" />
-
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:image" content="${firstImage}" />
 
     <!-- Schema Markup -->
-    <script type="application/ld+json" id="schema-jsonld-list">${JSON.stringify(schemaData["@graph"][0])}</script>
-    <script type="application/ld+json" id="schema-jsonld-breadcrumb">${JSON.stringify(schemaData["@graph"][2])}</script>
+    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 
-    <!-- Tailwind CSS CDN -->
+    <!-- UI Core Assets -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { 
-            darkMode: 'class',
-            theme: { extend: { colors: { primary: '#ec4899' } } } 
-        };
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#ec4899', gold: '#d4af37' } } } };
     </script>
-
-    <!-- Anti-FOUC & Dark Mode Script -->
-    <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
-
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .tailwind-loading { opacity: 0; transition: opacity 0.3s ease-in-out; }
-        .tailwind-loaded { opacity: 1; }
-
-        /* Custom Card Styles from Client CSS */
+        body { font-family: 'Prompt', sans-serif; background: #050505; color: #fff; }
+        .shimmer-gold { background: linear-gradient(135deg, #b38728 0%, #fbf5b7 45%, #d4af37 55%, #aa771c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-ui { background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .status-available { background: #22c55e !important; }
+        .status-busy { background: #ef4444 !important; }
+        .status-inquire { background: #6b7280 !important; }
         .profile-card-new { aspect-ratio: 3/4; }
-        .status-available { background-color: rgba(34, 197, 94, 0.85) !important; color: white !important; }
-        .status-busy { background-color: rgba(239, 68, 68, 0.85) !important; color: white !important; }
-        .status-inquire { background-color: rgba(107, 114, 128, 0.85) !important; color: white !important; }
-        .liked i { color: #ec4899 !important; transform: scale(1.1); }
+        .tailwind-loading { opacity: 0; }
+        .tailwind-loaded { opacity: 1; transition: opacity 0.5s ease-in; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-[#050505] dark:text-gray-100 min-h-screen">
-
+<body class="tailwind-loading">
+    
     <!-- Navbar -->
-    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-gray-200 dark:border-white/10 px-4 py-3 flex justify-between items-center">
-        <a href="/" class="text-xl font-black text-pink-500 tracking-wider">SIDELINE CM</a>
-        <button id="themeToggle" class="theme-toggle-btn w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-lg shadow-inner">
-            <i class="theme-toggle-icon fas fa-sun dark:fa-moon"></i>
-        </button>
+    <nav class="sticky top-0 z-[100] bg-black/80 backdrop-blur-xl border-b border-white/10 px-4 py-4">
+        <div class="container mx-auto flex justify-between items-center max-w-7xl">
+            <a href="/" class="text-2xl font-black shimmer-gold italic tracking-tighter">SIDELINE CM</a>
+            <a href="${CONFIG.SOCIAL.line}" class="bg-[#06c755] text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
+                <i class="fab fa-line text-lg"></i> LINE OA
+            </a>
+        </div>
     </nav>
 
-    <!-- Hero SEO Section -->
-    <header class="pt-8 pb-4 px-4 text-center max-w-4xl mx-auto">
-        <h1 class="text-2xl md:text-4xl font-black mb-3 dark:text-white leading-tight">
-            งานเอนเตอร์เทน ไซด์ไลน์${provinceName} <br>
-            <span class="text-pink-500 text-xl md:text-2xl">รูปตรงปก • ไม่โอนมัดจำ • ปลอดภัย 100%</span>
-        </h1>
-        <p class="text-sm md:text-base text-gray-600 dark:text-gray-400">
-            รวมโปรไฟล์น้องๆ ยอดนิยม ครบทุกย่าน ติดต่อตรงไม่ผ่านเอเย่นต์ รับประกันความพึงพอใจ
-        </p>
+    <!-- Hero Header -->
+    <header class="pt-16 pb-10 text-center px-4">
+        <div class="inline-block px-4 py-1 rounded-full border border-gold/30 bg-gold/10 text-gold text-[10px] font-bold uppercase tracking-widest mb-6">Verified Profiles ${CURRENT_YEAR}</div>
+        <h1 class="text-3xl md:text-6xl font-black mb-4 leading-tight italic uppercase">ไซด์ไลน์<span class="text-primary">${provinceName}</span></h1>
+        <p class="text-lg md:text-xl text-gold font-bold mb-2">รูปตรงปก • ไม่มัดจำ • นัดเจอจ่ายหน้างาน</p>
+        <p class="text-gray-400 text-sm max-w-2xl mx-auto">${seoInfo.desc}</p>
     </header>
 
-    <!-- 🟢 พื้นที่แสดงผลโปรไฟล์ (Id ตรงกับ Client Script) -->
-    <div id="profiles-display-area">
-        <div class="section-content-wrapper animate-fade-in-up">
-            <div class="px-4 sm:px-6 pt-8 pb-4">
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 dark:border-gray-700 pb-4">
-                    <div>
-                        <h3 class="text-2xl md:text-3xl font-extrabold text-gray-800 dark:text-white leading-tight">
-                            📍 น้องๆ ในจังหวัด <span class="text-pink-600">${provinceName}</span>
-                        </h3>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <span class="inline-flex items-center px-4 py-2 rounded-lg bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 font-bold text-sm border border-pink-100 dark:border-pink-800">
-                            พบ ${safeProfiles.length} รายการ
-                        </span>
-                    </div>
+    <!-- SEO Content Block (The Missing Content) -->
+    <section class="max-w-4xl mx-auto px-4 mb-16">
+        <div class="glass-ui rounded-3xl p-8 border-l-4 border-primary">
+            <h2 class="text-2xl font-bold text-white mb-4">ทำไมต้องนัดน้องๆ ไซด์ไลน์${provinceName} กับเรา?</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-gray-300 text-sm leading-relaxed">
+                <div class="space-y-3">
+                    <p>✅ <strong>ระบบรูปจริง 100%:</strong> เราคัดกรองโปรไฟล์อย่างเข้มงวด มั่นใจได้ว่าน้องที่นัดเจอจะตรงปกเหมือนในรูปแน่นอน</p>
+                    <p>✅ <strong>ปลอดภัยสูงสุด:</strong> ไม่มีการโอนมัดจำจองคิวใดๆ ทั้งสิ้น ป้องกันมิจฉาชีพ 100% ลูกค้าชำระเงินเมื่อพบตัวน้องแล้วเท่านั้น</p>
+                </div>
+                <div class="space-y-3">
+                    <p>✅ <strong>บริการระดับพรีเมียม:</strong> น้องๆ <strong>${seoInfo.tags.join(', ')}</strong> ของเราเน้นงานฟิวแฟน ดูแลดี สุภาพ และมีความเป็นส่วนตัวสูง</p>
+                    <p>✅ <strong>นัดง่ายทุกที่:</strong> ครอบคลุมพิกัด ${seoInfo.zones.slice(0, 5).join(', ')} และพื้นที่ใกล้เคียงใน${provinceName}</p>
                 </div>
             </div>
-            
-            <!-- Grid บังคับ 2 คอลัมน์บนมือถือ ตามสไตล์ที่คุณต้องการ -->
-            <div class="profile-grid grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-4 sm:px-6 pb-12">
-                ${cardsHTML}
+        </div>
+    </section>
+
+    <!-- Internal Linking (The Missing Links) -->
+    <section class="max-w-7xl mx-auto px-4 mb-12">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 italic">📍 พิกัดบริการยอดฮิตใน${provinceName}:</p>
+        <div class="flex flex-wrap gap-2">
+            ${seoInfo.zones.map(z => `<a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold hover:bg-primary transition-all shadow-sm">#รับงาน${z}</a>`).join('')}
+        </div>
+    </section>
+
+    <!-- Profile Grid -->
+    <main class="container mx-auto px-4 max-w-7xl pb-32">
+        <div class="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+            <h3 class="text-xl font-bold flex items-center gap-2"><i class="fas fa-users text-primary text-sm"></i> โปรไฟล์น้องๆ ${provinceName}</h3>
+            <span class="text-xs font-bold bg-primary/20 text-primary px-3 py-1 rounded-lg border border-primary/30">พบ ${safeProfiles.length} คน</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
+            ${cardsHTML}
+        </div>
+    </main>
+
+    <!-- Footer System (The Missing Footer) -->
+    <footer class="bg-[#020202] border-t border-white/10 pt-24 pb-12">
+        <div class="container mx-auto max-w-7xl px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-black shimmer-gold italic">SIDELINE CM</h3>
+                    <p class="text-gray-500 text-sm leading-loose">แพลตฟอร์มรวบรวมโปรไฟล์อิสระ <strong>ไซด์ไลน์${provinceName}</strong> และเครือข่ายรับงานที่ใหญ่ที่สุดในไทย เรามุ่งเน้นความโปร่งใส ปลอดภัย และรักษาความเป็นส่วนตัวสูงสุดของลูกค้า</p>
+                    <div class="flex gap-4">
+                        <a href="${CONFIG.SOCIAL.line}" class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-gold hover:text-black transition-all border border-white/10"><i class="fab fa-line text-xl"></i></a>
+                        <a href="${CONFIG.SOCIAL.twitter}" class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-gold hover:text-black transition-all border border-white/10"><i class="fab fa-x-twitter text-xl"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white text-xs font-bold uppercase tracking-[0.3em] mb-8 border-b border-primary/30 pb-2 inline-block">บริการยอดนิยม</h4>
+                    <ul class="space-y-4 text-gray-500 text-sm font-light">
+                        <li><a href="#" class="hover:text-primary transition-colors italic">รับงานน้องนักศึกษา${provinceName}</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors italic">พริตตี้เอนเตอร์เทน (En)</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors italic">เพื่อนเที่ยวพรีเมียม</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors italic">สาวสวยตรงปก ไม่มัดจำ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white text-xs font-bold uppercase tracking-[0.3em] mb-8 border-b border-primary/30 pb-2 inline-block">คำแนะนำและความปลอดภัย</h4>
+                    <ul class="space-y-4 text-gray-500 text-sm font-light">
+                        <li><a href="/policy" class="hover:text-primary transition-colors">นโยบายความเป็นส่วนตัว</a></li>
+                        <li><a href="/faq" class="hover:text-primary transition-colors">คำถามที่พบบ่อย (FAQ)</a></li>
+                        <li class="pt-4">
+                            <span class="inline-block text-[10px] text-red-500 font-bold border border-red-500/30 px-4 py-2 rounded-xl leading-relaxed uppercase tracking-tighter">
+                                🔞 สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-10 gap-6">
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest font-bold">&copy; 2026 ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
+                <div class="flex gap-8 text-[9px] text-gray-600 uppercase font-black tracking-widest">
+                    <span class="flex items-center gap-2"><i class="fas fa-bolt text-gold"></i> SSR TECHNOLOGY</span>
+                    <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-gold"></i> SSL VERIFIED</span>
+                </div>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <!-- Container สำหรับ Client Script โหลดข้อมูล (ซ่อนไว้ก่อน) -->
-    <div id="loading-profiles-placeholder" style="display: none;"></div>
+    <!-- Floating CTA Button (The Missing Action) -->
+    <a href="${CONFIG.SOCIAL.line}" target="_blank" aria-label="ทักไลน์สอบถามคิวน้องๆ"
+       class="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-tr from-[#06c755] to-[#04a045] rounded-full flex items-center justify-center text-white text-3xl shadow-[0_10px_30px_rgba(6,199,85,0.4)] hover:scale-110 transition-all z-[99] border-2 border-white/20">
+        <i class="fab fa-line"></i>
+        <span class="absolute -top-1 -right-1 w-6 h-6 bg-red-600 border-2 border-[#050505] rounded-full animate-bounce flex items-center justify-center text-[10px] font-bold shadow-lg">1</span>
+    </a>
 
+    <!-- Hydra Initialization Script -->
     <script>
-        // ป้องกัน FOUC (เว็บกระพริบ)
-        document.body.classList.add('tailwind-loading');
-        const checkTailwind = setInterval(() => {
-            if (window.tailwind) {
-                clearInterval(checkTailwind);
-                document.body.classList.remove('tailwind-loading');
-                document.body.classList.add('tailwind-loaded');
-                
-                // เช็คสถานะการกดไลค์จาก LocalStorage ให้รูปหัวใจตรงกับเครื่องผู้ใช้ทันที
-                setTimeout(() => {
-                    const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
-                    document.querySelectorAll('.profile-card-new').forEach(card => {
-                        const id = card.getAttribute('data-profile-id');
-                        if (id && likedProfiles[id]) {
-                            const btn = card.querySelector('.like-button-wrapper');
-                            if (btn) btn.classList.add('liked');
-                        }
-                    });
-                }, 100);
-            }
-        }, 50);
+        document.body.classList.remove('tailwind-loading');
+        document.body.classList.add('tailwind-loaded');
         
+        // Sync Likes with LocalStorage on load
         setTimeout(() => {
-            clearInterval(checkTailwind);
-            document.body.classList.remove('tailwind-loading');
-            document.body.classList.add('tailwind-loaded');
-        }, 2000);
+            const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
+            document.querySelectorAll('.profile-card-new').forEach(card => {
+                const id = card.getAttribute('data-profile-id');
+                if (id && likedProfiles[id]) {
+                    const btn = card.querySelector('[data-action="like"]');
+                    if (btn) btn.classList.add('text-pink-500');
+                }
+            });
+        }, 300);
     </script>
 </body>
 </html>`;
 
-        // ==========================================
-        // 7. RETURN CACHED RESPONSE
-        // ==========================================
-        return new Response(html, { 
-            headers: { 
-                "Content-Type": "text/html; charset=utf-8", 
-                "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600",
-                "X-Content-Type-Options": "nosniff",
-                "X-Frame-Options": "DENY",
-                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-                "Referrer-Policy": "strict-origin-when-cross-origin"
-            } 
-        });
-
+        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" } });
     } catch (e) {
         console.error('SSR Critical Error:', e);
-        return new Response('<h1 style="text-align:center;margin-top:20%;font-family:sans-serif;">ระบบกำลังอัปเดตชั่วคราว...</h1>', { 
-            status: 500, 
-            headers: { "Content-Type": "text/html; charset=utf-8" } 
-        });
+        return new Response('<h1>System Maintenance...</h1>', { status: 500, headers: { "Content-Type": "text/html" } });
     }
 };
