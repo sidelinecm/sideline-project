@@ -51,8 +51,23 @@ const optimizeImg = (path, width = 600, height = 800) => {
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
-// ปรับปรุงฟังก์ชัน Escape ให้ครอบคลุม
-const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+// นำมาวางเพิ่มในโค้ดใหม่
+const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '';
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'ไม่ระบุ';
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        if (diffInSeconds < 60) return 'เมื่อครู่นี้';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} นาทีที่แล้ว`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ชม.ที่แล้ว`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} วันที่แล้ว`;
+        const thaiMonths =['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${(date.getFullYear() + 543).toString().slice(-2)}`;
+    } catch (e) { return 'ไม่ระบุ'; }
+};
 
 
 export default async (request, context) => {
@@ -345,7 +360,7 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
             headers: {
                 "content-type": "text/html; charset=utf-8",
                 "x-robots-tag": "index, follow",
-                "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
+                "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600",
                 "Vary": "User-Agent"
             }
         });

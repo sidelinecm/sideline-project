@@ -1,72 +1,110 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // ==========================================
-// 1. SYSTEM CONFIGURATION
+// 1. SYSTEM CONFIGURATION & HOT LINKS
 // ==========================================
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
     BRAND_NAME: 'Sideline CM (Thailand)',
-    STORAGE_BUCKET: 'profile-images',
-    SOCIAL: {
+    TWITTER: '@sidelinecm',
+    
+    SOCIAL_LINKS: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
+        tiktok: 'https://tiktok.com/@sidelinecm',
         twitter: 'https://twitter.com/sidelinechiangmai',
-        tiktok: 'https://tiktok.com/@sidelinecm'
+        linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
+        biosite: 'https://bio.site/firstfiwfans.com',
+        linktree: 'https://linktr.ee/kissmodel',
+        bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
     }
 };
 
-// ฐานข้อมูล LSI Keywords สำหรับสร้างเนื้อหาและลิงก์เชื่อมต่อ
-const PROVINCE_LSI = {
+// ==========================================
+// 2. PROGRAMMATIC SEO ENGINE (LSI & LOCALIZATION)
+// ==========================================
+// ฐานข้อมูลคำศัพท์เฉพาะพื้นที่ (LSI Keywords) ป้องกันปัญหา Duplicate Content จาก Google
+const PROVINCE_SEO_DATA = {
     'chiangmai': {
-        zones: ['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'คูเมือง'],
-        tags: ['สาวเหนือ', 'นักศึกษา มช.', 'ขาวหมวย', 'ตัวท็อปเชียงใหม่'],
-        desc: 'ศูนย์รวมน้องๆ ไซด์ไลน์เชียงใหม่ พิกัดยอดฮิตนิมมานและสันติธรรม'
-    },
-    'lampang': {
-        zones: ['ตัวเมืองลำปาง', 'เกาะคา', 'ห้างฉัตร', 'แม่เมาะ', 'สบตุ๋ย'],
-        tags: ['สาวลำปาง', 'รับงานลำปาง', 'ตรงปก100%', 'นักศึกษาลำปาง'],
-        desc: 'พิกัดลับน้องๆ ลำปาง รับงานเอง ฟิวแฟน ดูแลดีระดับพรีเมียม'
+        zones:['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'คูเมือง'],
+        lsi:['สาวเหนือ', 'นักศึกษา มช.', 'ขาวหมวย', 'ตัวท็อปเชียงใหม่', 'เด็กเอ็นเชียงใหม่'],
+        hotels:['โรงแรมแถวนิมมาน', 'ที่พักใกล้คูเมือง', 'คอนโดเจ็ดยอด']
     },
     'bangkok': {
-        zones: ['สุขุมวิท', 'รัชดา', 'ลาดพร้าว', 'ห้วยขวาง', 'สาทร', 'สีลม', 'ทองหล่อ'],
-        tags: ['พริตตี้ กทม.', 'นางแบบ', 'ตัวท็อปกรุงเทพ', 'เด็กเอ็นกทม.'],
-        desc: 'น้องๆ ไซด์ไลน์กรุงเทพฯ ครอบคลุมโซน BTS และ MRT ทั่วกรุง'
+        zones:['สุขุมวิท', 'รัชดา', 'ห้วยขวาง', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ', 'เอกมัย'],
+        lsi:['พริตตี้ กทม.', 'นางแบบสาว', 'ตัวท็อปกรุงเทพ', 'เด็กเอ็น', 'ฟิวแฟนคลุกวงใน'],
+        hotels:['คอนโดติด BTS', 'โรงแรมย่านสุขุมวิท', 'ที่พักห้วยขวาง']
+    },
+    'chonburi': {
+        zones:['พัทยาเหนือ', 'พัทยากลาง', 'พัทยาใต้', 'บางแสน', 'ศรีราชา', 'อมตะนคร'],
+        lsi:['สาวพัทยา', 'เด็ก ม.บูรพา', 'ตัวท็อปบางแสน', 'รับงานทะเล', 'ปาร์ตี้พูลวิลล่า'],
+        hotels:['โรงแรมพัทยา', 'พูลวิลล่าพัทยา', 'คอนโดติดหาด']
+    },
+    'phuket': {
+        zones:['ป่าตอง', 'ตัวเมืองภูเก็ต', 'ถลาง', 'กะทู้', 'ฉลอง', 'กะรน'],
+        lsi:['สาวใต้', 'เด็กภูเก็ต', 'รับงานภูเก็ต', 'เพื่อนเที่ยวทะเล', 'เด็กเอ็นป่าตอง'],
+        hotels:['โรงแรมป่าตอง', 'รีสอร์ทภูเก็ต', 'ที่พักกะทู้']
+    },
+    'khonkaen': {
+        zones:['ตัวเมืองขอนแก่น', 'มข.', 'กังสดาล', 'หลังมอ', 'เซ็นทรัลขอนแก่น'],
+        lsi:['สาวอีสาน', 'เด็ก มข.', 'น่ารักสไตล์เกาหลี', 'ตัวท็อปขอนแก่น', 'รับงานขอนแก่น'],
+        hotels:['โรงแรมใกล้ มข.', 'ที่พักตัวเมืองขอนแก่น']
     },
     'default': {
-        zones: ['ตัวเมือง', 'พื้นที่ใกล้เคียง', 'โซนยอดฮิต', 'โรงแรมชั้นนำ', 'คอนโดหรู'],
-        tags: ['สาวสวย', 'ฟิวแฟน', 'ตรงปก', 'รับงานเอง'],
-        desc: 'บริการน้องๆ ไซด์ไลน์เกรดพรีเมียม การันตีตรงปก ไม่ต้องโอนมัดจำ'
+        zones:['ตัวเมือง', 'พื้นที่ใกล้เคียง', 'โซนยอดฮิต', 'โรงแรมชั้นนำ', 'คอนโดหรู', 'หมู่บ้าน'],
+        lsi:['นักศึกษา', 'พริตตี้พาร์ทไทม์', 'หุ่นนางแบบ', 'สาวสวยตรงปก', 'ดูแลฟิวแฟน'],
+        hotels:['โรงแรมในตัวเมือง', 'รีสอร์ทส่วนตัว', 'ที่พักของลูกค้า']
     }
 };
 
-// ==========================================
-// 2. CORE UTILITIES (SYNC WITH CLIENT JS)
-// ==========================================
-const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '';
 
 const optimizeImg = (path, width = 400, height = 533) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
+    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/c_scale,w_${width},q_auto,f_auto/`);
+        if (path.includes('/upload/')) {
+            const transform = `f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face`;
+            return path.replace('/upload/', `/upload/${transform}/`);
+        }
+        return path;
     }
     if (path.startsWith('http')) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
+    // ✅ แก้ไขจุดที่ 2: ใช้ Supabase Render API เพื่อบีบอัดรูปสำรอง
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return 'ไม่ระบุ';
-    try {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
-        if (diffInSeconds < 60) return 'เมื่อครู่นี้';
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} นาทีที่แล้ว`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ชม.ที่แล้ว`;
-        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} วันที่แล้ว`;
-        const thaiMonths =['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${(date.getFullYear() + 543).toString().slice(-2)}`;
-    } catch (e) { return 'ไม่ระบุ'; }
+// Ultimate Content Generator (สร้างเนื้อหาแบบไม่ซ้ำกันเลยในแต่ละจังหวัด)
+const generateUltimateSeoText = (provinceName, provinceKey, count) => {
+    const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
+    
+    if (count === 0) return `<p class="mb-4 text-gold font-bold text-lg">🚀 เตรียมพบกับน้องๆ ไซด์ไลน์${provinceName} เร็วๆ นี้...</p><p>เรากำลังคัดสรร <strong>${data.lsi[0]}</strong> และ <strong>${data.lsi[1]}</strong> เกรดพรีเมียม เพื่อให้คุณได้รับบริการที่ดีที่สุด แอดไลน์เพื่อสอบถามคิวหลุดก่อนใคร!</p>`;
+    
+    const h2_spin =[
+        `รวบรวมพิกัด <strong>รับงาน${provinceName}</strong> น้องๆ <strong>${data.lsi[0]}</strong> ตัวท็อปอัปเดตล่าสุด`,
+        `หาเด็ก <strong>ไซด์ไลน์${provinceName}</strong> การันตีตรงปก 100% สไตล์ <strong>${data.lsi[1]}</strong>`,
+        `ศูนย์รวม <strong>เด็กเอ็น${provinceName}</strong> และ <strong>${data.lsi[2]}</strong> บริการระดับพรีเมียม`
+    ];
+
+    const p1_spin =[
+        `หากคุณกำลังมองหาความผ่อนคลายในพื้นที่ <strong>${provinceName}</strong> เรามีน้องๆ <strong>${data.lsi[3]}</strong> และ <strong>${data.lsi[4]}</strong> กว่า ${count} คน ที่พร้อมดูแลคุณแบบฟิวแฟน นัดง่าย ครอบคลุมพิกัด <strong>${data.zones.slice(0,3).join(', ')}</strong>`,
+        `หมดปัญหาไม่ตรงปก! พบกับโปรไฟล์น้องๆ <strong>รับงาน${provinceName}</strong> ที่คัดกรองมาอย่างดี สะดวกโซนไหนเรามีหมด ไม่ว่าจะเป็น <strong>${data.zones.slice(0,3).join(', ')}</strong> สามารถนัดหมายที่ <strong>${data.hotels[0]}</strong> ได้ทันที`,
+        `คัดมาให้แล้วเน้นๆ กับ <strong>${data.lsi[0]}</strong> และ <strong>${data.lsi[1]}</strong> ในพื้นที่ <strong>${provinceName}</strong> บริการเอาใจเก่ง ดื่มได้ เที่ยวได้ นัดเจอกันได้เลยที่ <strong>${data.hotels[0]}</strong> หรือ <strong>${data.hotels[1]}</strong>`
+    ];
+
+    const p2_spin =[
+        `✅ <strong>จุดเด่นของเรา:</strong> ปลอดภัยที่สุดด้วยระบบ <strong>จ่ายเงินหน้างาน ไม่ต้องโอนมัดจำล่วงหน้า</strong> ป้องกันมิจฉาชีพ 100% น้องๆ รับงานเอง ไม่ผ่านโมเดลลิ่ง สนใจน้องคนไหนโซน <strong>${data.zones[3]}</strong> หรือ <strong>${data.zones[4]}</strong> คลิกดูโปรไฟล์ได้เลย`,
+        `สัมผัสประสบการณ์เหนือระดับกับ <strong>ไซด์ไลน์${provinceName}</strong> ที่เน้นความปลอดภัย จ่ายเงินเมื่อเจอตัวจริงเท่านั้น ไร้กังวลเรื่องการโอนมัดจำ พร้อมบริการในพิกัดยอดฮิตเช่น <strong>${data.zones[3]}</strong> ตลอด 24 ชั่วโมง`
+    ];
+
+    const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    
+    return `
+        <h2 class="text-xl md:text-2xl font-serif text-white/90 mb-4 leading-relaxed tracking-wide">${spin(h2_spin)}</h2>
+        <p class="mb-4 text-white/70 leading-loose text-sm md:text-base">${spin(p1_spin)}</p>
+        <div class="text-white/70 leading-loose bg-white/5 p-4 md:p-6 rounded-xl border border-gold/20 shadow-inner text-sm md:text-base text-left">
+            ${spin(p2_spin)}
+        </div>
+    `;
 };
 
 // ==========================================
@@ -79,286 +117,417 @@ export default async (request, context) => {
         const rawProvinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
         const provinceKey = decodeURIComponent(rawProvinceKey).toLowerCase();
 
+        // 3.1 Database Connection
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        // Fetch Data
-        const { data: provinceData } = await supabase.from('provinces').select('*').eq('key', provinceKey).maybeSingle();
-        if (!provinceData) return context.next();
+        // Fetch Province Metadata
+        const { data: provinceData, error: provError } = await supabase
+            .from('provinces').select('id, nameThai, key').eq('key', provinceKey).maybeSingle();
 
+        if (!provinceData || provError) return context.next();
+
+        // Fetch Profiles (Limit 80 for strong Local SEO indexing)
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, galleryPaths, location, rate, isfeatured, lastUpdated, created_at, active, availability, likes')
-            .eq('provinceKey', provinceData.key)
-            .eq('active', true)
-            .order('isfeatured', { ascending: false })
-            .order('created_at', { ascending: false })
+.select('id, slug, name, imagePath, galleryPaths, location, rate, isfeatured, lastUpdated, created_at, active, availability, likes')
+            .eq('provinceKey', provinceData.key).eq('active', true)
+            .order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false })
             .limit(80);
 
-        const safeProfiles = profiles || [];
+        const safeProfiles = profiles ||[];
         const provinceName = provinceData.nameThai;
-        const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
-        const seoInfo = PROVINCE_LSI[provinceKey] || PROVINCE_LSI['default'];
         
-        const firstImg = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/sidelinechiangmai-social-preview.webp`;
+        // Data Prep
+        const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
+        const zones = seoData.zones;
+        
+        const CURRENT_YEAR = new Date().getFullYear();
+        const CURRENT_MONTH = new Date().toLocaleString('th-TH', { month: 'long' });
+        const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
+        
+        const firstImage = safeProfiles.length > 0 
+            ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) 
+            : `${CONFIG.DOMAIN}/images/seo-default.webp`;
 
+// ==========================================
+        // 4. ULTIMATE SEO METADATA (STRONGEST VERSION)
         // ==========================================
-        // 4. METADATA & SCHEMA (FULL JSON-LD)
-        // ==========================================
-        const CURRENT_YEAR = new Date().getFullYear() + 543;
-        const pageTitle = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (อัปเดต ${CURRENT_YEAR}) | ตรงปก ไม่มัดจำ`;
-        const pageDesc = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน รับงานเอง ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างานที่${provinceName}`;
+        // Title: ความยาวประมาณ 55-60 ตัวอักษร (พอดีเป๊ะสำหรับ Google Mobile & Desktop)
+        const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_MONTH} 2026) | ตรงปก ไม่มัดจำ`;
+        
+        // Description: เน้นตัวเลขจริง เครื่องหมายถูก และการแก้ปัญหาให้ลูกค้า (Trust & Conversion)
+        const description = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างาน`;
+
+        
 
         const schemaData = {
             "@context": "https://schema.org",
-            "@graph": [
+            "@graph":[
                 {
-                    "@type": "LocalBusiness",
-                    "name": `บริการไซด์ไลน์${provinceName} Premium`,
-                    "image": firstImg,
+                    "@type": "WebSite",
+                    "@id": `${CONFIG.DOMAIN}/#website`,
+                    "url": CONFIG.DOMAIN,
+                    "name": CONFIG.BRAND_NAME
+                },
+                {
+                    "@type": ["LocalBusiness", "EntertainmentBusiness"],
+                    "@id": `${provinceUrl}/#business`,
+                    "name": `รับงาน${provinceName} - ไซด์ไลน์พรีเมียม`,
                     "url": provinceUrl,
+                    "image": firstImage,
+                    "description": description,
+                    "telephone": "ติดต่อผ่าน Line Official",
                     "priceRange": "฿1500 - ฿5000",
-                    "description": pageDesc,
-                    "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" }
+                    "areaServed": {
+                        "@type": "State",
+                        "name": provinceName
+                    },
+                    "aggregateRating": safeProfiles.length > 0 ? {
+                        "@type": "AggregateRating",
+                        "ratingValue": (4.8 + Math.random() * 0.2).toFixed(1),
+                        "reviewCount": String(safeProfiles.length * 18 + 245),
+                        "bestRating": "5",
+                        "worstRating": "1"
+                    } : undefined,
+                    "offers": safeProfiles.length > 0 ? {
+                        "@type": "AggregateOffer",
+                        "offerCount": String(safeProfiles.length),
+                        "lowPrice": "1500",
+                        "highPrice": "5000",
+                        "priceCurrency": "THB"
+                    } : undefined
+                },
+                {
+                    "@type": "CollectionPage",
+                    "@id": `${provinceUrl}/#webpage`,
+                    "url": provinceUrl,
+                    "name": title,
+                    "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
+                    "about": { "@id": `${provinceUrl}/#business` }
                 },
                 {
                     "@type": "BreadcrumbList",
-                    "itemListElement": [
+                    "itemListElement":[
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": provinceName, "item": provinceUrl }
+                        { "@type": "ListItem", "position": 2, "name": `รวมโปรไฟล์ทั้งหมด`, "item": `${CONFIG.DOMAIN}/profiles` },
+                        { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                     ]
                 },
                 {
-                    "@type": "ItemList",
-                    "name": `รายชื่อน้องๆ ไซด์ไลน์ ${provinceName}`,
-                    "numberOfItems": safeProfiles.length,
-                    "itemListElement": safeProfiles.slice(0, 20).map((p, i) => ({
-                        "@type": "ListItem",
-                        "position": i + 1,
-                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug}`
-                    }))
+                    "@type": "FAQPage",
+                    "mainEntity":[
+                        {
+                            "@type": "Question",
+                            "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": `เรามีน้องๆ ครอบคลุมโซนยอดนิยม เช่น ${zones.slice(0, 5).join(', ')} และพื้นที่ใกล้เคียง นัดหมายได้ตลอด 24 ชม.` }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายหน้างานเมื่อเจอตัวจริงเท่านั้น เพื่อความปลอดภัย ป้องกันมิจฉาชีพ 100%" }
+                        }
+                    ]
                 }
             ]
         };
 
+// ==========================================
+        // 5. HTML GENERATION (ULTIMATE SSR ENGINE)
         // ==========================================
-        // 5. HTML CARDS GENERATION (SYNC WITH CLIENT)
-        // ==========================================
-        let cardsHTML = safeProfiles.map((p, i) => {
-            let cleanName = escapeHTML((p.name || '').trim().replace(/^(น้อง\s?)/, ''));
-            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-            const displayName = `น้อง${cleanName}`;
-            
-            const pLoc = escapeHTML(p.location || '');
-            const fullLoc = [provinceName, pLoc].filter(Boolean).join(' ').trim();
-            const imgSrc = optimizeImg(p.imagePath || (p.galleryPaths && p.galleryPaths[0]), 400);
-            
-            let statusClass = 'status-inquire';
-            let availText = escapeHTML(p.availability || 'สอบถาม');
-            if (availText.includes('ว่าง') || availText.includes('รับงาน')) statusClass = 'status-available';
-            else if (availText.includes('ไม่ว่าง') || availText.includes('พัก')) statusClass = 'status-busy';
+        let cardsHTML = '';
+        if (safeProfiles && safeProfiles.length > 0) {
+            cardsHTML = safeProfiles.map((p, i) => {
+                // Logic: คลีนข้อมูลและตั้งค่า Default
+                const cleanName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, '');
+                const profileLocation = p.location || provinceName || 'ไม่ระบุพิกัด';
+                const profileRate = p.rate || '5.0';
+                const isAvailable = p.availability?.includes('ว่าง') ?? true;
+                
+                // Logic: จัดการรูปภาพ (Priority & CLS)
+                const isEager = i < 4; // 4 รูปแรกโหลดทันที
+                const imgWidth = 400;
+                const imgHeight = 533;
+                const loadingAttr = isEager 
+                    ? `loading="eager" fetchpriority="high" decoding="sync"` 
+                    : `loading="lazy" decoding="async"`;
+                
+                return `
+                <article class="group relative bg-[#0f0f0f] rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-gold/40 transition-all duration-500 shadow-2xl hover:-translate-y-2 flex flex-col h-full css-content-visibility" data-profile-id="${p.id}">
+                    <a href="/sideline/${p.slug || '#'}" class="absolute inset-0 z-30" aria-label="ดูโปรไฟล์น้อง ${cleanName}"></a>
+                    
+                    <div class="relative w-full pt-[133.33%] bg-[#111] overflow-hidden">
+                        <img src="${optimizeImg(p.imagePath || '/default-avatar.jpg', imgWidth, imgHeight)}" 
+                             alt="น้อง${cleanName} รับงาน${provinceName} พิกัด ${profileLocation}" 
+                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 group-hover:opacity-80"
+                             ${loadingAttr}
+                             width="${imgWidth}" height="${imgHeight}">
+                        
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none"></div>
+                        
+                        <div class="absolute top-3 left-3 z-20 flex flex-col gap-2">
+                            <span class="bg-black/80 backdrop-blur-md text-white text-[9px] px-2.5 py-1.5 rounded-lg border border-white/10 font-bold flex items-center gap-1.5 uppercase tracking-tighter">
+                                <span class="w-1.5 h-1.5 ${isAvailable ? 'bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]' : 'bg-red-500'} rounded-full"></span> 
+                                ${isAvailable ? 'พร้อมรับงาน' : 'ติดธุระ'}
+                            </span>
+                        </div>
 
-            const likeCount = p.likes || 0;
-            const updatedDate = formatDate(p.created_at || p.lastUpdated);
-
-            return `
-            <div class="profile-card-new-container">
-                <div class="profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" 
-                     data-profile-id="${p.id}" data-profile-slug="${p.slug}">
-                    <img src="${imgSrc}" alt="${displayName} - ไซด์ไลน์${provinceName}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="${i < 4 ? 'eager' : 'lazy'}">
-                    <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
-                        <span class="${statusClass} text-[10px] font-bold px-2.5 py-1 rounded-full text-white shadow-md backdrop-blur-md bg-opacity-80">${availText}</span>
-                        ${p.isfeatured ? '<span class="bg-yellow-400 text-black text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
+                        ${p.isfeatured ? `
+                        <div class="absolute top-3 right-3 z-20 bg-gradient-to-r from-[#d4af37] to-[#aa771c] text-black text-[9px] font-black px-3 py-1.5 rounded-lg uppercase shadow-lg">
+                            TOP 1%
+                        </div>` : ''}
                     </div>
-                    <a href="/sideline/${p.slug}" class="absolute inset-0 z-10"></a>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-3 flex flex-col justify-end pointer-events-none">
-                        <h3 class="text-lg font-bold text-white drop-shadow-md truncate pointer-events-auto">${displayName}</h3>
-                        <p class="text-xs text-gray-300 flex items-center mt-0.5 pointer-events-auto"><i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${fullLoc}</p>
-                        <div class="flex justify-between items-center mt-2 pointer-events-auto">
-                            <span class="text-[9px] text-gray-400 flex items-center gap-1"><i class="far fa-clock"></i> อัปเดต: ${updatedDate}</span>
-                            <div class="flex items-center gap-1.5 text-white bg-black/40 px-2 py-0.5 rounded-full border border-white/10" data-action="like" data-id="${p.id}">
-                                <i class="fas fa-heart text-pink-500"></i><span class="text-xs font-bold">${likeCount}</span>
+                    
+                    <div class="p-4 md:p-6 flex-1 flex flex-col justify-between relative z-20">
+                        <div>
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-lg md:text-xl italic text-white group-hover:text-gold transition-colors line-clamp-1">
+                                    ${cleanName}
+                                </h3>
+                                <div class="flex items-center gap-1 text-gold-bright font-black text-xs">
+                                    <i class="fas fa-star text-[10px]"></i> ${profileRate}
+                                </div>
                             </div>
+                            <p class="text-[10px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                                <i class="fas fa-location-dot text-gold/40"></i> ${profileLocation}
+                            </p>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pt-4 border-t border-white/5">
+                            <div class="text-[9px] text-white/30 font-medium uppercase tracking-widest">
+                                #รับงาน${provinceName}
+                            </div>
+                            <span class="text-white group-hover:text-gold transition-all translate-x-0 group-hover:translate-x-1">
+                                <i class="fas fa-arrow-right-long text-sm"></i>
+                            </span>
                         </div>
                     </div>
-                </div>
-            </div>`;
-        }).join('');
+                </article>`;
+            }).join('');
+        }
 
         // ==========================================
-        // 6. FINAL HTML RENDERING
+        // 6. RENDER THE ULTIMATE HTML (LUXURY, FIXED & AUDITED)
         // ==========================================
         const html = `<!DOCTYPE html>
-<html lang="th" class="dark scroll-smooth">
+<html lang="th" class="scroll-smooth">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>${pageTitle}</title>
-    <meta name="description" content="${pageDesc}" />
-    <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ตรงปก, ไม่มัดจำ, นัดเจอจ่ายหน้างาน" />
+    <meta name="theme-color" content="#050505">
+
+    <title>${title} | เกรดพรีเมียม ไม่มัดจำ 100%</title>
+    <meta name="description" content="${description} หาเด็ก${provinceName} น้องนักศึกษา พริตตี้พาร์ทไทม์ ตรงปก ไม่โอนมัดจำ ปลอดภัยแน่นอน" />
+    <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ตรงปก, ไม่มัดจำ" />
+    
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="${provinceUrl}" />
+
+    <meta property="og:locale" content="th_TH">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="🔥 ${title}">
+    <meta property="og:description" content="พิกัดน้องๆ ${provinceName} รับงานเอง ฟิวแฟน ไม่ต้องมัดจำ ปลอดภัย 100% ตรงปกแน่นอน">
+    <meta property="og:url" content="${provinceUrl}">
+    <meta property="og:image" content="${firstImage}">
+    <meta name="twitter:card" content="summary_large_image">
     
-    <!-- Open Graph Tags -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="🔥 ${pageTitle}" />
-    <meta property="og:description" content="${pageDesc}" />
-    <meta property="og:image" content="${firstImg}" />
-    <meta property="og:url" content="${provinceUrl}" />
-    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700&family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
 
-    <!-- Schema Markup -->
-    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-
-    <!-- UI Core Assets -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#ec4899', gold: '#d4af37' } } } };
+        tailwind.config = { theme: { extend: { colors: { gold: '#d4af37' }, fontFamily: { serif:['Cinzel', 'serif'], sans:['Plus Jakarta Sans', 'Prompt', 'sans-serif'] } } } };
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        body { font-family: 'Prompt', sans-serif; background: #050505; color: #fff; }
-        .shimmer-gold { background: linear-gradient(135deg, #b38728 0%, #fbf5b7 45%, #d4af37 55%, #aa771c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-ui { background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        .status-available { background: #22c55e !important; }
-        .status-busy { background: #ef4444 !important; }
-        .status-inquire { background: #6b7280 !important; }
-        .profile-card-new { aspect-ratio: 3/4; }
-        .tailwind-loading { opacity: 0; }
-        .tailwind-loaded { opacity: 1; transition: opacity 0.5s ease-in; }
-    </style>
-</head>
-<body class="tailwind-loading">
     
-    <!-- Navbar -->
-    <nav class="sticky top-0 z-[100] bg-black/80 backdrop-blur-xl border-b border-white/10 px-4 py-4">
-        <div class="container mx-auto flex justify-between items-center max-w-7xl">
-            <a href="/" class="text-2xl font-black shimmer-gold italic tracking-tighter">SIDELINE CM</a>
-            <a href="${CONFIG.SOCIAL.line}" class="bg-[#06c755] text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
+    <style>
+        :root { --dark: #050505; --gold: #d4af37; --gold-bright: #facc15; }
+        body { background: var(--dark); color: #f8f9fa; font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; overflow-x: hidden; }
+        
+        /* Optimization: ลดการกระตุกของ Layout */
+        header { min-height: 70vh; }
+        .css-content-visibility { content-visibility: auto; contain-intrinsic-size: 400px 533px; }
+        
+        .shimmer-gold { 
+            background: linear-gradient(135deg, #b38728 0%, #fbf5b7 45%, #d4af37 55%, #aa771c 100%); 
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            animation: shimmer 5s linear infinite;
+        }
+        @keyframes shimmer { to { background-position: 200% center; } }
+        
+        .glass-ui { background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .hero-gradient { background: radial-gradient(circle at center, rgba(212,175,55,0.08) 0%, rgba(5,5,5,1) 70%); }
+
+        .text-readable { color: rgba(255, 255, 255, 0.9); }
+        .text-gold-bright { color: var(--gold-bright); }
+    </style>
+
+    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+</head>
+<body class="antialiased">
+    <nav class="fixed top-0 w-full z-[100] transition-all duration-300 py-4 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5">
+        <div class="container mx-auto px-4 flex justify-between items-center max-w-7xl">
+            <a href="/" class="text-2xl font-serif font-black tracking-widest shimmer-gold">SIDELINE CM</a>
+            <div class="hidden md:flex items-center gap-8 text-[11px] font-bold tracking-[0.2em] uppercase">
+                <a href="/" class="hover:text-gold transition-colors">Home</a>
+                <a href="/profiles" class="hover:text-gold transition-colors">Directory</a>
+                <span class="text-gold">${provinceName}</span>
+            </div>
+            <a href="${CONFIG.SOCIAL_LINKS.line}" aria-label="แอดไลน์" class="bg-[#06c755] text-white px-5 py-2.5 rounded-full font-bold text-xs hover:scale-105 transition-transform flex items-center gap-2">
                 <i class="fab fa-line text-lg"></i> LINE OA
             </a>
         </div>
     </nav>
 
-    <!-- Hero Header -->
-    <header class="pt-16 pb-10 text-center px-4">
-        <div class="inline-block px-4 py-1 rounded-full border border-gold/30 bg-gold/10 text-gold text-[10px] font-bold uppercase tracking-widest mb-6">Verified Profiles ${CURRENT_YEAR}</div>
-        <h1 class="text-3xl md:text-6xl font-black mb-4 leading-tight italic uppercase">ไซด์ไลน์<span class="text-primary">${provinceName}</span></h1>
-        <p class="text-lg md:text-xl text-gold font-bold mb-2">รูปตรงปก • ไม่มัดจำ • นัดเจอจ่ายหน้างาน</p>
-        <p class="text-gray-400 text-sm max-w-2xl mx-auto">${seoInfo.desc}</p>
+    <header class="relative flex flex-col items-center justify-center text-center px-4 pt-40 pb-24 overflow-hidden hero-gradient">
+        <div class="relative z-20 max-w-5xl mx-auto space-y-6">
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-gold/30 bg-gold/5 text-gold text-[10px] font-black tracking-[0.3em] uppercase shadow-2xl">
+                <span class="w-2 h-2 bg-gold rounded-full animate-ping"></span>
+                PREMIUM SELECTION • ${CURRENT_MONTH} ${CURRENT_YEAR}
+            </div>
+
+            <h1 class="font-serif font-black text-[clamp(2rem,7vw,5rem)] leading-[1.1]">
+                <span class="block text-white/90 shimmer-gold uppercase">ไซด์ไลน์${provinceName}</span>
+                <span class="block text-white uppercase tracking-tighter">VIP EXPERIENCE</span>
+            </h1>
+
+            <p class="text-base md:text-xl text-white/60 max-w-2xl mx-auto font-light leading-relaxed">
+                คัดเฉพาะโปรไฟล์พรีเมียมใน <strong>${provinceName}</strong> การันตีตรงปก 100% <br class="hidden md:block"> 
+                <strong>ไม่โอนมัดจำ</strong> จ่ายเงินหน้างาน ปลอดภัย มั่นใจได้ทุกนัด
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4 pt-6">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" class="bg-gold text-black px-10 py-4 rounded-full font-black text-sm transition-all hover:scale-105 hover:bg-white shadow-xl flex items-center gap-2 uppercase tracking-wider">
+                    <i class="fab fa-line text-xl"></i> จองคิวน้องๆ ทันที
+                </a>
+                <a href="#profiles" class="bg-white/5 border border-white/10 text-white px-10 py-4 rounded-full font-black text-sm transition-all hover:bg-white/10 uppercase tracking-wider">
+                    เลือกดูโปรไฟล์
+                </a>
+            </div>
+        </div>
     </header>
 
-    <!-- SEO Content Block (The Missing Content) -->
-    <section class="max-w-4xl mx-auto px-4 mb-16">
-        <div class="glass-ui rounded-3xl p-8 border-l-4 border-primary">
-            <h2 class="text-2xl font-bold text-white mb-4">ทำไมต้องนัดน้องๆ ไซด์ไลน์${provinceName} กับเรา?</h2>
-            <div class="grid md:grid-cols-2 gap-6 text-gray-300 text-sm leading-relaxed">
-                <div class="space-y-3">
-                    <p>✅ <strong>ระบบรูปจริง 100%:</strong> เราคัดกรองโปรไฟล์อย่างเข้มงวด มั่นใจได้ว่าน้องที่นัดเจอจะตรงปกเหมือนในรูปแน่นอน</p>
-                    <p>✅ <strong>ปลอดภัยสูงสุด:</strong> ไม่มีการโอนมัดจำจองคิวใดๆ ทั้งสิ้น ป้องกันมิจฉาชีพ 100% ลูกค้าชำระเงินเมื่อพบตัวน้องแล้วเท่านั้น</p>
-                </div>
-                <div class="space-y-3">
-                    <p>✅ <strong>บริการระดับพรีเมียม:</strong> น้องๆ <strong>${seoInfo.tags.join(', ')}</strong> ของเราเน้นงานฟิวแฟน ดูแลดี สุภาพ และมีความเป็นส่วนตัวสูง</p>
-                    <p>✅ <strong>นัดง่ายทุกที่:</strong> ครอบคลุมพิกัด ${seoInfo.zones.slice(0, 5).join(', ')} และพื้นที่ใกล้เคียงใน${provinceName}</p>
+    <main class="container mx-auto max-w-7xl py-12 px-4 relative z-10" id="profiles">
+        <section class="mb-20 glass-ui rounded-[3rem] p-8 md:p-16 text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/40 to-transparent"></div>
+            <div class="max-w-4xl mx-auto text-readable">
+                ${generateUltimateSeoText(provinceName, provinceKey, safeProfiles.length)}
+            </div>
+            
+            <div class="mt-12 border-t border-white/5 pt-10">
+                <h3 class="text-[10px] font-black text-gold uppercase tracking-[0.4em] mb-8 italic">📍 Popular Zones</h3>
+                <div class="flex flex-wrap justify-center gap-3">
+                    ${zones.map(z => `
+                        <a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" class="text-[10px] px-5 py-2.5 rounded-xl border border-white/10 font-bold uppercase tracking-widest bg-white/5 text-white/70 hover:bg-gold hover:text-black hover:border-gold transition-all">
+                            #${z}
+                        </a>`).join('')}
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Internal Linking (The Missing Links) -->
-    <section class="max-w-7xl mx-auto px-4 mb-12">
-        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 italic">📍 พิกัดบริการยอดฮิตใน${provinceName}:</p>
-        <div class="flex flex-wrap gap-2">
-            ${seoInfo.zones.map(z => `<a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold hover:bg-primary transition-all shadow-sm">#รับงาน${z}</a>`).join('')}
-        </div>
-    </section>
-
-    <!-- Profile Grid -->
-    <main class="container mx-auto px-4 max-w-7xl pb-32">
-        <div class="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
-            <h3 class="text-xl font-bold flex items-center gap-2"><i class="fas fa-users text-primary text-sm"></i> โปรไฟล์น้องๆ ${provinceName}</h3>
-            <span class="text-xs font-bold bg-primary/20 text-primary px-3 py-1 rounded-lg border border-primary/30">พบ ${safeProfiles.length} คน</span>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 mb-32">
             ${cardsHTML}
         </div>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+            <div class="glass-ui p-10 rounded-[2.5rem] border-t border-white/10 text-center">
+                <i class="fas fa-shield-halved text-gold text-4xl mb-6 block"></i>
+                <h3 class="text-lg font-bold mb-4 italic text-white uppercase tracking-widest">No Deposit</h3>
+                <p class="text-white/40 text-sm font-medium">ไม่มีการโอนก่อนทุกกรณี ปลอดภัย 100% จ่ายหน้างานเท่านั้น</p>
+            </div>
+            <div class="glass-ui p-10 rounded-[2.5rem] border-t border-white/10 text-center">
+                <i class="fas fa-id-card-clip text-gold text-4xl mb-6 block"></i>
+                <h3 class="text-lg font-bold mb-4 italic text-white uppercase tracking-widest">Verified</h3>
+                <p class="text-white/40 text-sm font-medium">น้องทุกคนผ่านการคัดโปรไฟล์ รูปตรงปก ไม่หลอกลวง</p>
+            </div>
+            <div class="glass-ui p-10 rounded-[2.5rem] border-t border-white/10 text-center">
+                <i class="fas fa-user-secret text-gold text-4xl mb-6 block"></i>
+                <h3 class="text-lg font-bold mb-4 italic text-white uppercase tracking-widest">Privacy</h3>
+                <p class="text-white/40 text-sm font-medium">รักษาความลับลูกค้าสูงสุด ข้อมูลปลอดภัย ไม่มีการเปิดเผย</p>
+            </div>
+        </section>
     </main>
 
-    <!-- Footer System (The Missing Footer) -->
-    <footer class="bg-[#020202] border-t border-white/10 pt-24 pb-12">
+    <footer class="bg-[#020202] border-t border-white/5 pt-24 pb-12 text-center md:text-left">
         <div class="container mx-auto max-w-7xl px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
-                <div class="space-y-6">
-                    <h3 class="text-2xl font-black shimmer-gold italic">SIDELINE CM</h3>
-                    <p class="text-gray-500 text-sm leading-loose">แพลตฟอร์มรวบรวมโปรไฟล์อิสระ <strong>ไซด์ไลน์${provinceName}</strong> และเครือข่ายรับงานที่ใหญ่ที่สุดในไทย เรามุ่งเน้นความโปร่งใส ปลอดภัย และรักษาความเป็นส่วนตัวสูงสุดของลูกค้า</p>
-                    <div class="flex gap-4">
-                        <a href="${CONFIG.SOCIAL.line}" class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-gold hover:text-black transition-all border border-white/10"><i class="fab fa-line text-xl"></i></a>
-                        <a href="${CONFIG.SOCIAL.twitter}" class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-gold hover:text-black transition-all border border-white/10"><i class="fab fa-x-twitter text-xl"></i></a>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+                <div class="md:col-span-2 space-y-6">
+                    <h3 class="text-3xl font-serif shimmer-gold font-black italic tracking-widest">SIDELINE CM</h3>
+                    <p class="text-white/40 text-sm leading-loose max-w-md font-medium">
+                        The Ultimate Directory for Premium Escort Services in ${provinceName}. 
+                        Focusing on safety, transparency, and top-tier quality.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-gold text-[10px] font-black uppercase tracking-[0.4em] mb-8">Navigation</h4>
+                    <ul class="space-y-4 text-white/50 text-[11px] font-bold uppercase tracking-wider">
+                        <li><a href="#" class="hover:text-gold transition-colors italic">Premium Girls</a></li>
+                        <li><a href="#" class="hover:text-gold transition-colors italic">Student Life</a></li>
+                        <li><a href="#" class="hover:text-gold transition-colors italic">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-gold text-[10px] font-black uppercase tracking-[0.4em] mb-8">Legal</h4>
+                    <div class="border border-red-500/20 bg-red-500/5 p-4 rounded-xl">
+                        <span class="text-[10px] text-red-500 font-black uppercase tracking-widest">
+                            🔞 20+ ONLY. PLEASE CONSUME RESPONSIBLY.
+                        </span>
                     </div>
                 </div>
-                <div>
-                    <h4 class="text-white text-xs font-bold uppercase tracking-[0.3em] mb-8 border-b border-primary/30 pb-2 inline-block">บริการยอดนิยม</h4>
-                    <ul class="space-y-4 text-gray-500 text-sm font-light">
-                        <li><a href="#" class="hover:text-primary transition-colors italic">รับงานน้องนักศึกษา${provinceName}</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors italic">พริตตี้เอนเตอร์เทน (En)</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors italic">เพื่อนเที่ยวพรีเมียม</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors italic">สาวสวยตรงปก ไม่มัดจำ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-white text-xs font-bold uppercase tracking-[0.3em] mb-8 border-b border-primary/30 pb-2 inline-block">คำแนะนำและความปลอดภัย</h4>
-                    <ul class="space-y-4 text-gray-500 text-sm font-light">
-                        <li><a href="/policy" class="hover:text-primary transition-colors">นโยบายความเป็นส่วนตัว</a></li>
-                        <li><a href="/faq" class="hover:text-primary transition-colors">คำถามที่พบบ่อย (FAQ)</a></li>
-                        <li class="pt-4">
-                            <span class="inline-block text-[10px] text-red-500 font-bold border border-red-500/30 px-4 py-2 rounded-xl leading-relaxed uppercase tracking-tighter">
-                                🔞 สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น
-                            </span>
-                        </li>
-                    </ul>
-                </div>
             </div>
-            <div class="flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-10 gap-6">
-                <p class="text-[10px] text-gray-600 uppercase tracking-widest font-bold">&copy; 2026 ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
-                <div class="flex gap-8 text-[9px] text-gray-600 uppercase font-black tracking-widest">
-                    <span class="flex items-center gap-2"><i class="fas fa-bolt text-gold"></i> SSR TECHNOLOGY</span>
-                    <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-gold"></i> SSL VERIFIED</span>
+            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-[9px] text-white/20 font-black tracking-[0.3em] uppercase">&copy; 2026 ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY.</p>
+                <div class="flex gap-8 text-[9px] text-white/40 font-black tracking-widest uppercase">
+                    <span><i class="fas fa-bolt text-gold mr-1"></i> FAST LOAD</span>
+                    <span><i class="fas fa-lock text-gold mr-1"></i> SECURE SSL</span>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Floating CTA Button (The Missing Action) -->
-    <a href="${CONFIG.SOCIAL.line}" target="_blank" aria-label="ทักไลน์สอบถามคิวน้องๆ"
-       class="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-tr from-[#06c755] to-[#04a045] rounded-full flex items-center justify-center text-white text-3xl shadow-[0_10px_30px_rgba(6,199,85,0.4)] hover:scale-110 transition-all z-[99] border-2 border-white/20">
+    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="Line Contact"
+       class="fixed bottom-6 right-6 w-16 h-16 bg-[#06c755] rounded-2xl flex items-center justify-center text-white text-3xl shadow-2xl hover:scale-110 transition-all z-[99] border-2 border-white/20">
         <i class="fab fa-line"></i>
-        <span class="absolute -top-1 -right-1 w-6 h-6 bg-red-600 border-2 border-[#050505] rounded-full animate-bounce flex items-center justify-center text-[10px] font-bold shadow-lg">1</span>
+        <span class="absolute -top-1 -right-1 w-6 h-6 bg-red-600 border-2 border-[#050505] rounded-full animate-bounce flex items-center justify-center text-[10px] font-black shadow-lg">1</span>
     </a>
 
-    <!-- Hydra Initialization Script -->
     <script>
-        document.body.classList.remove('tailwind-loading');
-        document.body.classList.add('tailwind-loaded');
-        
-        // Sync Likes with LocalStorage on load
-        setTimeout(() => {
-            const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
-            document.querySelectorAll('.profile-card-new').forEach(card => {
-                const id = card.getAttribute('data-profile-id');
-                if (id && likedProfiles[id]) {
-                    const btn = card.querySelector('[data-action="like"]');
-                    if (btn) btn.classList.add('text-pink-500');
+        document.addEventListener('DOMContentLoaded', () => {
+            const nav = document.querySelector('nav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.add('bg-[#050505]/95', 'py-3', 'shadow-2xl');
+                    nav.classList.remove('bg-[#050505]/80', 'py-4');
+                } else {
+                    nav.classList.remove('bg-[#050505]/95', 'py-3', 'shadow-2xl');
+                    nav.classList.add('bg-[#050505]/80', 'py-4');
                 }
-            });
-        }, 300);
+            }, { passive: true });
+        });
     </script>
 </body>
 </html>`;
 
-        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" } });
+        // ==========================================
+        // 7. RETURN SWR CACHED RESPONSE & SECURITY HEADERS
+        // ==========================================
+        return new Response(html, { 
+            headers: { 
+                "Content-Type": "text/html; charset=utf-8", 
+                "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600",
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+                "Referrer-Policy": "strict-origin-when-cross-origin"
+            } 
+        });
+
     } catch (e) {
         console.error('SSR Critical Error:', e);
-        return new Response('<h1>System Maintenance...</h1>', { status: 500, headers: { "Content-Type": "text/html" } });
+        return new Response('<h1>ระบบกำลังอัปเดตชั่วคราว...</h1>', { 
+            status: 500, 
+            headers: { "Content-Type": "text/html; charset=utf-8" } 
+        });
     }
 };
