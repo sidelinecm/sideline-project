@@ -73,6 +73,13 @@
   status = 301
   force = true
 
+[[redirects]]
+  query = {province = ":p"}   # ตัวนี้จะจับคำว่า lampang, chiangmai, bangkok ฯลฯ
+  from = "/location/:any"     # ตัวนี้จะจับ path อะไรก็ได้หลัง /location/
+  to = "/location/:p"         # แล้วส่งไปที่ path ใหม่โดยใช้ค่าจาก province
+  status = 301
+  force = true
+
 # --- [4] SPA Fallback (กฎสุดท้าย) ---
 # สำคัญ: ถ้า Edge Function (render-bot) สั่ง context.next() 
 # มันจะหลุดมาที่กฎนี้ เพื่อให้ Client-Side Rendering ทำงานต่อ (ไม่เกิดหน้าขาว)
