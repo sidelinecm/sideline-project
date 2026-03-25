@@ -77,58 +77,32 @@ const optimizeImg = (path, width = 400, height = 533) => {
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
-// ==========================================
-// ULTIMATE SEO TEXT GENERATOR
-// ==========================================
+// Ultimate Content Generator (สร้างเนื้อหาแบบไม่ซ้ำกันเลยในแต่ละจังหวัด)
 const generateUltimateSeoText = (provinceName, provinceKey, count) => {
-    const data = NORTHERN_SEO_DATA[provinceKey] || NORTHERN_SEO_DATA['default'];
-    const safe = {
-        lsi: data?.lsi || ['สาวสวย', 'น่ารัก', 'บริการดี'],
-        zones: data?.zones || ['ตัวเมือง'],
-        hotels: data?.hotels || ['โรงแรมในเมือง']
-    };
-
-    // Stable SEO rotation (ไม่ random)
-    const hashCode = (str) => str.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-    const spin = (arr) => arr[Math.abs(hashCode(provinceKey)) % arr.length];
-
-    if (count === 0) {
-        return `
-        <section class="glass-ui p-12 md:p-20 rounded-[3rem] text-center border-2 border-dashed border-gold/30 shadow-2xl mb-24">
-            <div class="text-5xl mb-8">🚀</div>
-            <h2 class="text-3xl md:text-5xl font-serif font-black text-gold mb-8">กำลังเปิดระบบ ${provinceName}</h2>
-            <p class="text-xl md:text-2xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
-                เรากำลังคัดกรองน้องๆ <strong>${safe.lsi[0]}</strong> และ <strong>${safe.lsi[1]}</strong><br>
-                คุณภาพพรีเมียมในโซน <strong>${safe.zones.slice(0,4).join(', ')}</strong>
-            </p>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-md mx-auto mb-12">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-12 py-5 rounded-3xl font-bold text-xl shadow-2xl hover:shadow-emerald/30 hover:scale-105 transition-all flex items-center gap-3 w-full sm:w-auto">
-                    <i class="fab fa-line text-xl"></i> แอดไลน์รับแจ้งเตือน
-                </a>
-            </div>
-            <div class="flex flex-wrap justify-center gap-3 max-w-2xl">
-                ${safe.zones.slice(0,8).map(z => `<span class="px-4 py-2 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold uppercase">#${z}</span>`).join('')}
-            </div>
-        </section>`;
-    }
-
-    const h2_options = [
-        `รวมพิกัด <strong>รับงาน${provinceName}</strong> น้องๆ <strong>${safe.lsi[0]}</strong> ${count}+ ตัวท็อป`,
-        `หา <strong>ไซด์ไลน์${provinceName}</strong> พบ <strong>${safe.lsi[1]}</strong> เกรดพรีเมียม รูปตรงปก`,
-        `ศูนย์รวม <strong>เด็กเอ็น${provinceName}</strong> และ <strong>${safe.lsi[2]}</strong> จ่ายหน้างาน`,
-        `น้องท็อป <strong>${provinceName}</strong> ${count}+ คน ฟิวแฟน 24 ชม.`
+    const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
+    
+    if (count === 0) return `<p class="mb-4 text-gold font-bold text-lg">🚀 เตรียมพบกับน้องๆ ไซด์ไลน์${provinceName} เร็วๆ นี้...</p><p>เรากำลังคัดสรร <strong>${data.lsi[0]}</strong> และ <strong>${data.lsi[1]}</strong> เกรดพรีเมียม เพื่อให้คุณได้รับบริการที่ดีที่สุด แอดไลน์เพื่อสอบถามคิวหลุดก่อนใคร!</p>`;
+    
+    const h2_spin =[
+        `รวบรวมพิกัด <strong>รับงาน${provinceName}</strong> น้องๆ <strong>${data.lsi[0]}</strong> ตัวท็อปอัปเดตล่าสุด`,
+        `หาเด็ก <strong>ไซด์ไลน์${provinceName}</strong> การันตีตรงปก 100% สไตล์ <strong>${data.lsi[1]}</strong>`,
+        `ศูนย์รวม <strong>เด็กเอ็น${provinceName}</strong> และ <strong>${data.lsi[2]}</strong> บริการระดับพรีเมียม`
     ];
 
-    const intro_options = [
-        `ค้นพบประสบการณ์พรีเมียมใน <strong>${provinceName}</strong> กับน้องๆ <strong>${safe.lsi[0]}</strong> กว่า ${count} ท่าน ครอบคลุมทุกโซนยอดนิยม <strong>${safe.zones.slice(0,3).join(', ')}</strong> นัดเจอได้ที่ <strong>${safe.hotels[0]}</strong> สะดวกสุดๆ`,
-        `กำลังมองหา <strong>รับงาน${provinceName}</strong> ที่ปลอดภัย? เราคัดน้องๆ <strong>${safe.lsi[1]}</strong> ผ่านการยืนยันตัวตน รูปตรงปก 100% บริการครบโซน <strong>${safe.zones.slice(2,5).join(', ')}</strong>`,
-        `เบื่อปัญหาไซด์ไลน์ไม่ตรงปก? <strong>${provinceName}</strong> มีน้องๆ <strong>${safe.lsi[0]}</strong> ${count}+ คน พร้อมให้บริการโซน <strong>${safe.zones[0]}</strong> และ <strong>${safe.zones[1]}</strong> ตลอด 24 ชม.`
+    const p1_spin =[
+        `หากคุณกำลังมองหาความผ่อนคลายในพื้นที่ <strong>${provinceName}</strong> เรามีน้องๆ <strong>${data.lsi[3]}</strong> และ <strong>${data.lsi[4]}</strong> กว่า ${count} คน ที่พร้อมดูแลคุณแบบฟิวแฟน นัดง่าย ครอบคลุมพิกัด <strong>${data.zones.slice(0,3).join(', ')}</strong>`,
+        `หมดปัญหาไม่ตรงปก! พบกับโปรไฟล์น้องๆ <strong>รับงาน${provinceName}</strong> ที่คัดกรองมาอย่างดี สะดวกโซนไหนเรามีหมด ไม่ว่าจะเป็น <strong>${data.zones.slice(0,3).join(', ')}</strong> สามารถนัดหมายที่ <strong>${data.hotels[0]}</strong> ได้ทันที`,
+        `คัดมาให้แล้วเน้นๆ กับ <strong>${data.lsi[0]}</strong> และ <strong>${data.lsi[1]}</strong> ในพื้นที่ <strong>${provinceName}</strong> บริการเอาใจเก่ง ดื่มได้ เที่ยวได้ นัดเจอกันได้เลยที่ <strong>${data.hotels[0]}</strong> หรือ <strong>${data.hotels[1]}</strong>`
     ];
 
-    const safety_options = [
-        `🛡️ <strong>ปลอดภัย 100%:</strong> จ่ายเงินเมื่อเจอน้องจริง ไม่ต้องโอนมัดจำ`,
-        `⭐ <strong>บริการระดับ VIP:</strong> ฟิวแฟน ดูแลดี รูปตรงปกรับประกัน`
+    const p2_spin =[
+        `✅ <strong>จุดเด่นของเรา:</strong> ปลอดภัยที่สุดด้วยระบบ <strong>จ่ายเงินหน้างาน ไม่ต้องโอนมัดจำล่วงหน้า</strong> ป้องกันมิจฉาชีพ 100% น้องๆ รับงานเอง ไม่ผ่านโมเดลลิ่ง สนใจน้องคนไหนโซน <strong>${data.zones[3]}</strong> หรือ <strong>${data.zones[4]}</strong> คลิกดูโปรไฟล์ได้เลย`,
+        `สัมผัสประสบการณ์เหนือระดับกับ <strong>ไซด์ไลน์${provinceName}</strong> ที่เน้นความปลอดภัย จ่ายเงินเมื่อเจอตัวจริงเท่านั้น ไร้กังวลเรื่องการโอนมัดจำ พร้อมบริการในพิกัดยอดฮิตเช่น <strong>${data.zones[3]}</strong> ตลอด 24 ชั่วโมง`
     ];
+
+    const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    
+    
 
     return `
     <section class="glass-ui p-10 md:p-16 lg:p-20 rounded-[3rem] shadow-3xl mb-24 md:mb-32 relative overflow-hidden">
@@ -986,12 +960,22 @@ const html = `
 
 
 
-        return new Response(html, {
-            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        return new Response(html, { 
+            headers: { 
+                "Content-Type": "text/html; charset=utf-8", 
+                "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600",
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+                "Referrer-Policy": "strict-origin-when-cross-origin"
+            } 
         });
 
-    } catch (error) {
-        console.error('Error:', error);
-        return new Response('เกิดข้อผิดพลาด กรุณาลองใหม่', { status: 500 });
+    } catch (e) {
+        console.error('SSR Critical Error:', e);
+        return new Response('<h1>ระบบกำลังอัปเดตชั่วคราว...</h1>', { 
+            status: 500, 
+            headers: { "Content-Type": "text/html; charset=utf-8" } 
+        });
     }
 };
