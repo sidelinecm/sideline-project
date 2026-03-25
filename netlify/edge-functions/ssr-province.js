@@ -58,22 +58,18 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-// ==========================================
-// IMAGE OPTIMIZER (Cloudinary + Supabase)
-// ==========================================
+
 const optimizeImg = (path, width = 400, height = 533) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
-    
-    // Cloudinary Auto-optimization
-    if (path.includes('res.cloudinary.com') && path.includes('/upload/')) {
-        const transform = `f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face`;
-        return path.replace('/upload/', `/upload/${transform}/`);
+    if (path.includes('res.cloudinary.com')) {
+        if (path.includes('/upload/')) {
+            const transform = `f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face`;
+            return path.replace('/upload/', `/upload/${transform}/`);
+        }
+        return path;
     }
-    
-    // External URLs (pass-through)
     if (path.startsWith('http')) return path;
-    
-    // Supabase Storage Render API
+    // ✅ แก้ไขจุดที่ 2: ใช้ Supabase Render API เพื่อบีบอัดรูปสำรอง
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
@@ -102,202 +98,67 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
 
     const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
     
-    
-
     return `
-    <section class="glass-ui p-10 md:p-16 lg:p-20 rounded-[3rem] shadow-3xl mb-24 md:mb-32 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-transparent pointer-events-none"></div>
-        
-        <div class="relative z-10 max-w-6xl mx-auto">
-            <header class="text-center mb-12 md:mb-20">
-                <h2 class="text-3xl md:text-5xl lg:text-6xl font-serif font-black leading-tight shimmer-gold mb-6">
-                    ${spin(h2_options)}
-                </h2>
-            </header>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-start mb-16">
-                <!-- Main Content -->
-                <div class="space-y-6">
-                    <p class="text-lg md:text-xl lg:text-2xl text-white/90 leading-relaxed font-medium">
-                        ${spin(intro_options)}
-                    </p>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-6 border-t border-white/10">
-                        <div class="text-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                            <div class="text-2xl mb-2">🕒</div>
-                            <div class="font-bold text-white">24 ชม.</div>
-                            <div class="text-xs text-white/70">ทุกวัน</div>
-                        </div>
-                        <div class="text-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                            <div class="text-2xl mb-2">💰</div>
-                            <div class="font-bold text-white">1,500฿ ขึ้นไป</div>
-                            <div class="text-xs text-white/70">จ่ายหน้างาน</div>
-                        </div>
-                        <div class="text-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                            <div class="text-2xl mb-2">📱</div>
-                            <div class="font-bold text-white">ตอบ 5นาที</div>
-                            <div class="text-xs text-white/70">LINE Official</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Trust & Safety -->
-                <div class="bg-gradient-to-br from-white/3 via-black/20 to-transparent backdrop-blur-xl border border-gold/20 p-8 md:p-10 lg:p-12 rounded-[2.5rem] shadow-2xl">
-                    <div class="text-4xl mb-6 flex items-center justify-center gap-3 text-emerald-400">
-                        <i class="fas fa-shield-alt"></i>
-                        ${spin(safety_options)}
-                    </div>
-                    <div class="grid grid-cols-3 gap-4 text-center pt-6 border-t border-white/10">
-                        <div>
-                            <div class="text-sm font-bold text-gold uppercase tracking-wider">#รับงาน${provinceName}</div>
-                            <div class="text-xs text-white/60">${safe.lsi[1]}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-emerald-400 uppercase tracking-wider">#ตรงปก100</div>
-                            <div class="text-xs text-white/60">วิดีโอ Live</div>
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-purple-400 uppercase tracking-wider">#VIPService</div>
-                            <div class="text-xs text-white/60">ฟิวแฟน</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Hot Zones -->
-            <div class="pt-12 border-t border-white/10">
-                <h3 class="text-2xl md:text-3xl font-serif font-bold text-center mb-10 text-gold uppercase tracking-tight flex items-center gap-4 justify-center">
-                    <i class="fas fa-map-marker-alt text-3xl"></i>
-                    โซนยอดนิยม ${provinceName}
-                </h3>
-                <div class="flex flex-wrap justify-center gap-3 md:gap-4 max-w-6xl mx-auto">
-                    ${safe.zones.slice(0, 15).map((z, i) => `
-                        <a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" 
-                           class="group relative text-xs md:text-sm px-6 md:px-8 py-4 md:py-5 rounded-3xl border-2 border-white/20 bg-white/5 font-bold uppercase tracking-widest hover:bg-gradient-to-r hover:from-gold hover:to-orange-500 hover:text-black hover:border-gold/50 hover:shadow-2xl hover:shadow-gold/25 hover:scale-105 transition-all duration-300 shadow-lg text-white overflow-hidden"
-                           style="animation-delay: ${i * 50}ms"
-                           aria-label="รับงานโซน ${z} ${provinceName}">
-                            <span>${z}</span>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                        </a>
-                    `).join('')}
-                </div>
-            </div>
+        <h2 class="text-xl md:text-2xl font-serif text-white/90 mb-4 leading-relaxed tracking-wide">${spin(h2_spin)}</h2>
+        <p class="mb-4 text-white/70 leading-loose text-sm md:text-base">${spin(p1_spin)}</p>
+        <div class="text-white/70 leading-loose bg-white/5 p-4 md:p-6 rounded-xl border border-gold/20 shadow-inner text-sm md:text-base text-left">
+            ${spin(p2_spin)}
         </div>
-    </section>`;
+    `;
 };
 
 // ==========================================
-// MAIN HANDLER
+// 3. MAIN SSR EDGE FUNCTION
 // ==========================================
-export default async (request) => {
+export default async (request, context) => {
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
         const rawProvinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
-        const provinceKey = Object.keys(NORTHERN_SEO_DATA).includes(rawProvinceKey) ? rawProvinceKey : 'chiangmai';
+        const provinceKey = decodeURIComponent(rawProvinceKey).toLowerCase();
 
+        // 3.1 Database Connection
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        
-        // Fetch province & profiles
-        const [{ data: provinceData }, { data: profiles }] = await Promise.all([
-            supabase.from('provinces').select('nameThai, key').eq('key', provinceKey).maybeSingle(),
-            supabase.from('profiles').select('id, slug, name, imagePath, location, rate, isfeatured, lastUpdated, availability, created_at').eq('provinceKey', provinceKey).eq('active', true).order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false }).limit(80)
-        ]);
 
-        if (!provinceData) {
-            return new Response('Province not found', { status: 404 });
-        }
+        // Fetch Province Metadata
+        const { data: provinceData, error: provError } = await supabase
+            .from('provinces').select('id, nameThai, key').eq('key', provinceKey).maybeSingle();
 
+        if (!provinceData || provError) return context.next();
+
+        // Fetch Profiles (Limit 80 for strong Local SEO indexing)
+        const { data: profiles } = await supabase
+            .from('profiles').select('slug, name, imagePath, location, rate, isfeatured, lastUpdated')
+            .eq('provinceKey', provinceData.key).eq('active', true)
+            .order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false })
+            .limit(80);
+
+        const safeProfiles = profiles ||[];
         const provinceName = provinceData.nameThai;
-        const safeProfiles = profiles || [];
-        const seoData = NORTHERN_SEO_DATA[provinceKey] || NORTHERN_SEO_DATA['default'];
-        const zones = seoData.zones || ['ตัวเมือง'];
+        
+        // Data Prep
+        const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
+        const zones = seoData.zones;
+        
+        const CURRENT_YEAR = new Date().getFullYear();
+        const CURRENT_MONTH = new Date().toLocaleString('th-TH', { month: 'long' });
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
-        const firstImage = safeProfiles.length ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/seo-default.webp`;
+        
+        const firstImage = safeProfiles.length > 0 
+            ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) 
+            : `${CONFIG.DOMAIN}/images/seo-default.webp`;
 
-        // Generate Profile Cards
-        let cardsHTML = '';
-        if (safeProfiles.length > 0) {
-            cardsHTML = safeProfiles.map((p, i) => {
-                const cleanName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/i, '');
-                const profileLocation = (p.location || provinceName || 'ไม่ระบุ').slice(0, 28);
-                const profileRate = p.rate || '2.0';
-                const isAvailable = p.availability?.includes('รับงาน') ?? true;
-                const statusText = isAvailable ? '🟢 พร้อมรับงาน' : '🟡 รอคิว';
-                
-                const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
-                const d = new Date(dateStr);
-                const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-                const dateDisplay = `อัปเดต ${d.getDate()} ${months[d.getMonth()]} ${(d.getFullYear()+543).toString().slice(-2)}`;
-                
-                const loadingAttr = i < 6 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy" decoding="async"';
-                
-                return `
-                <article class="group/card relative bg-gradient-to-b from-slate-900/95 via-black/80 to-transparent rounded-[2rem] overflow-hidden border-2 border-white/5 hover:border-gold/60 hover:shadow-[0_35px_60px_rgba(212,175,55,0.3)] hover:shadow-3xl hover:-translate-y-3 transition-all duration-700 flex flex-col h-[420px] md:h-[460px] cursor-pointer backdrop-blur-sm" data-profile-id="${p.id}">
-                    <!-- Click overlay -->
-                    <a href="/sideline/${p.slug || p.id}" class="absolute inset-0 z-20 hover:no-underline focus:outline-none" aria-label="ดูโปรไฟล์เต็ม ${cleanName} ${provinceName}"></a>
-                    
-                    <!-- Profile Image -->
-                    <div class="w-full h-[60%] md:h-[62%] bg-gradient-to-br from-slate-900/90 to-black/80 overflow-hidden relative group-hover/card:scale-[1.03]">
-                        <img src="${optimizeImg(p.imagePath, 380, 500)}" 
-                             alt="${cleanName} ${provinceName} - น้องสาวสวยรูปตรงปก" 
-                             width="380" height="500"
-                             class="absolute inset-0 w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-1000 ${loadingAttr}"
-                             onerror="this.src='${CONFIG.DOMAIN}/images/default.webp'">
-                        
-                        <!-- Online Status -->
-                        <div class="absolute top-4 left-4 z-20">
-                            <div class="bg-black/85 backdrop-blur-xl border-2 border-emerald-400/50 text-emerald-400 text-xs md:text-sm px-3 md:px-4 py-2 md:py-2.5 rounded-2xl shadow-2xl font-bold tracking-wide flex items-center gap-2 min-w-[100px] justify-center">
-                                <span class="w-3 h-3 bg-emerald-400 rounded-full shadow-lg animate-pulse"></span>
-                                ${statusText}
-                            </div>
-                        </div>
-                        
-                        <!-- Featured Badge -->
-                        ${p.isfeatured ? `
-                        <div class="absolute top-4 right-4 z-20 bg-gradient-to-br from-gold/95 to-orange-500/95 backdrop-blur-xl border-2 border-gold/40 text-black text-xs md:text-sm font-black px-4 md:px-5 py-2.5 md:py-3 rounded-2xl shadow-2xl tracking-wider flex items-center gap-1.5 min-w-[90px] justify-center">
-                            <i class="fas fa-crown text-xs"></i>
-                            ตัวท็อป
-                        </div>` : ''}
-                    </div>
-                    
-                    <!-- Profile Info -->
-                    <div class="flex-1 p-6 md:p-7 flex flex-col justify-between h-[38%] md:h-[38%] relative z-10">
-                        <!-- Name & Rate -->
-                        <div class="space-y-3 mb-1">
-                            <div class="flex items-start justify-between gap-3">
-                                <h3 class="font-black text-lg md:text-xl leading-tight line-clamp-1 text-white group-hover/card:text-gold group-hover/card:drop-shadow-lg transition-all duration-500">
-                                    ${cleanName}
-                                </h3>
-                                <span class="text-xs md:text-sm font-black px-3 py-1.5 md:px-3.5 md:py-2 bg-gradient-to-r from-emerald-500/20 via-emerald-400/30 to-emerald-500/20 text-emerald-400 rounded-xl border-2 border-emerald-400/40 shadow-md whitespace-nowrap">
-                                    ฿${profileRate}k
-                                </span>
-                            </div>
-                            
-                            <!-- Location -->
-                            <p class="text-sm md:text-base text-slate-300/90 flex items-center gap-2 line-clamp-1 group-hover/card:text-gold/90 transition-colors">
-                                <i class="fas fa-location-dot text-gold/70 w-4 h-4 flex-shrink-0 mt-0.5"></i>
-                                <span>${profileLocation}</span>
-                            </p>
-                        </div>
-                        
-                        <!-- Updated & CTA -->
-                        <div class="pt-4 mt-auto border-t border-white/10 flex items-center justify-between text-xs md:text-sm text-slate-400/90 font-medium tracking-wide">
-                            <span class="flex items-center gap-1.5">
-                                <i class="fas fa-clock text-gold/70 text-xs"></i>
-                                ${dateDisplay}
-                            </span>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-arrow-right text-gold text-lg group-hover/card:translate-x-2 transition-transform duration-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </article>`;
-            }).join('');
-        }
+// ==========================================
+        // 4. ULTIMATE SEO METADATA (STRONGEST VERSION)
+        // ==========================================
+        // Title: ความยาวประมาณ 55-60 ตัวอักษร (พอดีเป๊ะสำหรับ Google Mobile & Desktop)
+        const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_MONTH} 2026) | ตรงปก ไม่มัดจำ`;
+        
+        // Description: เน้นตัวเลขจริง เครื่องหมายถูก และการแก้ปัญหาให้ลูกค้า (Trust & Conversion)
+        const description = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างาน`;
 
-        // ==========================================
-        // ULTIMATE HTML TEMPLATE (Enterprise SEO)
-        // ==========================================
+        
+
         const schemaData = {
             "@context": "https://schema.org",
             "@graph":[
@@ -369,8 +230,109 @@ export default async (request) => {
             ]
         };
 
+        // ==========================================
+// 5. HTML GENERATION (REFINED ZERO CLS)
+// ==========================================
+let cardsHTML = '';
+        if (safeProfiles && safeProfiles.length > 0) {
+            cardsHTML = safeProfiles.map((p, i) => {
+                // Logic: คลีนข้อมูลและตั้งค่า Default
+                const cleanName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, '');
+                const profileLocation = p.location || provinceName || 'ไม่ระบุพิกัด';
+                const profileRate = p.rate || '5.0';
+                
+                // แก้ไขการแสดงสถานะ
+                const isAvailable = p.availability?.includes('ว่าง') ?? true;
+                const statusText = isAvailable ? 'พร้อมรับงาน' : 'ติดจอง';
+                
+                // เพิ่ม Logic แปลงวันที่
+                const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
+                const d = new Date(dateStr);
+                const day = d.getDate();
+                const months =['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+                const month = months[d.getMonth()];
+                const year = (d.getFullYear() + 543).toString().slice(-2);
+                const dateDisplay = `อัปเดต ${day} ${month} ${year}`;
+                
+                // Logic: จัดการรูปภาพ (Priority & CLS)
+                const isEager = i < 4; 
+                const imgWidth = 400;
+                const imgHeight = 533;
+                const loadingAttr = isEager 
+                    ? `loading="eager" fetchpriority="high" decoding="sync"` 
+                    : `loading="lazy" decoding="async"`;
+                
+                return `
+                <article class="group relative bg-[#0f0f0f] rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-gold/40 transition-all duration-500 shadow-2xl hover:-translate-y-2 flex flex-col h-full css-content-visibility" data-profile-id="${p.id}">
+                    <a href="/sideline/${p.slug || '#'}" class="absolute inset-0 z-30" aria-label="ดูโปรไฟล์น้อง ${cleanName}"></a>
+                    
+                    <div class="relative w-full pt-[133.33%] bg-[#111] overflow-hidden">
+                        <img src="${optimizeImg(p.imagePath || '/default-avatar.jpg', imgWidth, imgHeight)}" 
+                             alt="น้อง${cleanName} รับงาน${provinceName} พิกัด ${profileLocation}" 
+                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 group-hover:opacity-80"
+                             ${loadingAttr}
+                             width="${imgWidth}" height="${imgHeight}">
+                        
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none"></div>
+                        
+                        <!-- ป้ายสถานะ ซ้ายบน (ทรงแคปซูล พร้อมไฟ LED กระพริบ) -->
+                        <div class="absolute top-3 left-3 z-20">
+                            <div class="bg-black/60 backdrop-blur-md border border-white/10 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-400'} opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                                </span>
+                                <span class="font-medium tracking-wide">${statusText}</span>
+                            </div>
+                        </div>
 
-const html = `
+                        <!-- ป้ายยืนยันตัวตน ขวาบน (แทน TOP 1%) -->
+                        <div class="absolute top-3 right-3 z-20">
+                            <div class="bg-gradient-to-r from-blue-600/90 to-blue-400/90 backdrop-blur-md border border-blue-300/30 text-white text-[9px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-blue-500/30">
+                                <i class="fas fa-circle-check text-white"></i> ยืนยันตัวตนแล้ว
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 md:p-6 flex-1 flex flex-col justify-between relative z-20">
+                        <div>
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-lg md:text-xl italic text-white group-hover:text-gold transition-colors line-clamp-1">
+                                    ${cleanName}
+                                </h3>
+                                <div class="flex items-center gap-1 text-gold-bright font-black text-xs">
+                                    <i class="fas fa-star text-[10px]"></i> ${profileRate}
+                                </div>
+                            </div>
+                            
+                            <!-- พื้นที่แสดงพิกัด และ วันที่ (ซ้าย-ขวา) -->
+                            <div class="flex items-center justify-between mt-1 mb-4">
+                                <p class="text-[10px] text-white/50 font-medium flex items-center gap-1.5">
+                                    <i class="fas fa-location-dot text-gold/60"></i> ${profileLocation}
+                                </p>
+                                <p class="text-[9px] text-white/30 font-light flex items-center gap-1">
+                                    <i class="far fa-clock"></i> ${dateDisplay}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pt-4 border-t border-white/5">
+                            <div class="text-[9px] text-white/30 font-medium uppercase tracking-widest">
+                                #รับงาน${provinceName}
+                            </div>
+                            <span class="text-white group-hover:text-gold transition-all translate-x-0 group-hover:translate-x-1">
+                                <i class="fas fa-arrow-right-long text-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </article>`;
+            }).join('');
+        }
+
+// ==========================================
+        // 6. RENDER THE ULTIMATE HTML (LUXURY, FIXED & AUDITED)
+        // ==========================================
+        const html = `
 <!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
