@@ -144,6 +144,7 @@ export default async (request, context) => {
         const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ไม่มัดจำ`;
         const description = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างาน`;
 
+        // คืนค่า SCHEMA DATA แบบเต็มระบบกลับมา
         const schemaData = {
             "@context": "https://schema.org",
             "@graph":[
@@ -154,7 +155,7 @@ export default async (request, context) => {
                     "name": CONFIG.BRAND_NAME
                 },
                 {
-                    "@type": ["LocalBusiness", "EntertainmentBusiness"],
+                    "@type":["LocalBusiness", "EntertainmentBusiness"],
                     "@id": `${provinceUrl}/#business`,
                     "name": `รับงาน${provinceName} - ไซด์ไลน์พรีเมียม`,
                     "url": provinceUrl,
@@ -180,6 +181,37 @@ export default async (request, context) => {
                         "highPrice": "5000",
                         "priceCurrency": "THB"
                     } : undefined
+                },
+                {
+                    "@type": "CollectionPage",
+                    "@id": `${provinceUrl}/#webpage`,
+                    "url": provinceUrl,
+                    "name": title,
+                    "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
+                    "about": { "@id": `${provinceUrl}/#business` }
+                },
+                {
+                    "@type": "BreadcrumbList",
+                    "itemListElement":[
+                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                        { "@type": "ListItem", "position": 2, "name": `รวมโปรไฟล์ทั้งหมด`, "item": `${CONFIG.DOMAIN}/profiles` },
+                        { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
+                    ]
+                },
+                {
+                    "@type": "FAQPage",
+                    "mainEntity":[
+                        {
+                            "@type": "Question",
+                            "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": `เรามีน้องๆ ครอบคลุมโซนยอดนิยม เช่น ${zones.slice(0, 5).join(', ')} และพื้นที่ใกล้เคียง นัดหมายได้ตลอด 24 ชม.` }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
+                            "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายหน้างานเมื่อเจอตัวจริงเท่านั้น เพื่อความปลอดภัย ป้องกันมิจฉาชีพ 100%" }
+                        }
+                    ]
                 }
             ]
         };
@@ -194,11 +226,9 @@ export default async (request, context) => {
                 const profileLocation = p.location || provinceName || 'ไม่ระบุพิกัด';
                 const profileRate = p.rate || '5.0';
                 
-                // Logic: สถานะรับงาน (มีไฟ LED กระพริบ)
                 const isAvailable = p.availability?.includes('ว่าง') ?? true;
                 const statusText = isAvailable ? 'พร้อมรับงาน' : 'ติดจอง';
                 
-                // Logic: วันที่อัปเดต (แสดงแบบอ่านง่าย เช่น "อัปเดต 26 มี.ค. 69")
                 const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
                 const d = new Date(dateStr);
                 const day = d.getDate();
@@ -227,26 +257,27 @@ export default async (request, context) => {
                         
                         <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none"></div>
                         
-                        <!-- NEW BADGE: สถานะรับงาน (ซ้ายบน) -->
-                        <div class="absolute top-3 left-3 z-20">
-                            <div class="bg-black/70 backdrop-blur-md border border-white/10 text-white text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+                        <!-- แก้ปัญหาป้ายทับกัน: ใช้ Flex Wrapper ควบคุมซ้าย-ขวา ชัดเจน -->
+                        <div class="absolute top-3 left-0 w-full px-3 flex justify-between items-start z-20 pointer-events-none">
+                            
+                            <!-- ป้ายสถานะ (ชิดซ้าย) -->
+                            <div class="bg-black/80 backdrop-blur-md border border-white/10 text-white text-[10px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg pointer-events-auto">
                                 <span class="relative flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-400'} opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
                                 </span>
                                 <span class="font-bold tracking-wide">${statusText}</span>
                             </div>
-                        </div>
 
-                        <!-- NEW BADGE: ยืนยันตัวตนแล้ว (ขวาบน) แทนที่ TOP 1% -->
-                        <div class="absolute top-3 right-3 z-20">
-                            <div class="bg-gradient-to-r from-[#1d4ed8]/90 to-[#3b82f6]/90 backdrop-blur-md border border-blue-400/30 text-white text-[9px] font-black px-2.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-[0_0_15px_rgba(59,130,246,0.4)]">
-                                <i class="fas fa-certificate text-white/90"></i> ยืนยันตัวตนแล้ว
+                            <!-- ป้ายยืนยันตัวตน (ชิดขวา) -->
+                            <div class="bg-gradient-to-r from-[#1d4ed8]/95 to-[#3b82f6]/95 backdrop-blur-md border border-blue-400/30 text-white text-[9px] font-bold px-2 py-1.5 rounded-full flex items-center gap-1 shadow-lg shadow-blue-500/30 pointer-events-auto">
+                                <i class="fas fa-check-circle text-white/90"></i> ยืนยันแล้ว
                             </div>
+                            
                         </div>
                     </div>
                     
-                    <div class="p-4 md:p-6 flex-1 flex flex-col justify-between relative z-20">
+                    <div class="p-4 md:p-5 flex-1 flex flex-col justify-between relative z-20">
                         <div>
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="font-bold text-lg md:text-xl italic text-white group-hover:text-gold transition-colors line-clamp-1">
@@ -257,18 +288,18 @@ export default async (request, context) => {
                                 </div>
                             </div>
                             
-                            <!-- NEW LAYOUT: พิกัด (ซ้าย) และ วันที่ (ขวา) อยู่บรรทัดเดียวกัน -->
+                            <!-- พิกัด (ซ้าย) & วันที่ (ขวา) แบบป้องกันการบีบตัว -->
                             <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
-                                <p class="text-[10px] text-white/60 font-medium flex items-center gap-1.5">
+                                <p class="text-[10px] text-white/60 font-medium flex items-center gap-1.5 line-clamp-1 mr-2">
                                     <i class="fas fa-location-dot text-gold/60"></i> ${profileLocation}
                                 </p>
-                                <p class="text-[9px] text-white/40 font-light flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md">
+                                <p class="text-[9px] text-white/40 font-light flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md shrink-0">
                                     <i class="far fa-clock"></i> ${dateDisplay}
                                 </p>
                             </div>
                         </div>
                         
-                        <div class="flex items-center justify-between pt-2">
+                        <div class="flex items-center justify-between pt-1">
                             <div class="text-[9px] text-white/30 font-medium uppercase tracking-widest">
                                 #รับงาน${provinceName}
                             </div>
