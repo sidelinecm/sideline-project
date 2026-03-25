@@ -231,21 +231,18 @@ export default async (request, context) => {
         };
 
         // ==========================================
-// 5. HTML GENERATION (REFINED ZERO CLS)
-// ==========================================
-let cardsHTML = '';
+        // 5. HTML GENERATION - PREMIUM CARDS
+        // ==========================================
+        let cardsHTML = '';
         if (safeProfiles && safeProfiles.length > 0) {
             cardsHTML = safeProfiles.map((p, i) => {
-                // Logic: คลีนข้อมูลและตั้งค่า Default
                 const cleanName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, '');
                 const profileLocation = p.location || provinceName || 'ไม่ระบุพิกัด';
                 const profileRate = p.rate || '5.0';
                 
-                // แก้ไขการแสดงสถานะ
                 const isAvailable = p.availability?.includes('ว่าง') ?? true;
                 const statusText = isAvailable ? 'พร้อมรับงาน' : 'ติดจอง';
                 
-                // เพิ่ม Logic แปลงวันที่
                 const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
                 const d = new Date(dateStr);
                 const day = d.getDate();
@@ -254,7 +251,6 @@ let cardsHTML = '';
                 const year = (d.getFullYear() + 543).toString().slice(-2);
                 const dateDisplay = `อัปเดต ${day} ${month} ${year}`;
                 
-                // Logic: จัดการรูปภาพ (Priority & CLS)
                 const isEager = i < 4; 
                 const imgWidth = 400;
                 const imgHeight = 533;
@@ -275,28 +271,29 @@ let cardsHTML = '';
                         
                         <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none"></div>
                         
-                        <!-- ป้ายสถานะ ซ้ายบน (ทรงแคปซูล พร้อมไฟ LED กระพริบ) -->
-                        <div class="absolute top-3 left-3 z-20">
-                            <div class="bg-black/60 backdrop-blur-md border border-white/10 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
+                        <!-- แก้ปัญหาป้ายทับกัน: ใช้ Flex Wrapper ควบคุมซ้าย-ขวา ชัดเจน -->
+                        <div class="absolute top-3 left-0 w-full px-3 flex justify-between items-start z-20 pointer-events-none">
+                            
+                            <!-- ป้ายสถานะ (ชิดซ้าย) -->
+                            <div class="bg-black/80 backdrop-blur-md border border-white/10 text-white text-[10px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg pointer-events-auto">
                                 <span class="relative flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-400'} opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
                                 </span>
-                                <span class="font-medium tracking-wide">${statusText}</span>
+                                <span class="font-bold tracking-wide">${statusText}</span>
                             </div>
-                        </div>
 
-                        <!-- ป้ายยืนยันตัวตน ขวาบน (แทน TOP 1%) -->
-                        <div class="absolute top-3 right-3 z-20">
-                            <div class="bg-gradient-to-r from-blue-600/90 to-blue-400/90 backdrop-blur-md border border-blue-300/30 text-white text-[9px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-blue-500/30">
-                                <i class="fas fa-circle-check text-white"></i> ยืนยันตัวตนแล้ว
+                            <!-- ป้ายยืนยันตัวตน (ชิดขวา) -->
+                            <div class="bg-gradient-to-r from-[#1d4ed8]/95 to-[#3b82f6]/95 backdrop-blur-md border border-blue-400/30 text-white text-[9px] font-bold px-2 py-1.5 rounded-full flex items-center gap-1 shadow-lg shadow-blue-500/30 pointer-events-auto">
+                                <i class="fas fa-check-circle text-white/90"></i> ยืนยันแล้ว
                             </div>
+                            
                         </div>
                     </div>
                     
-                    <div class="p-4 md:p-6 flex-1 flex flex-col justify-between relative z-20">
+                    <div class="p-4 md:p-5 flex-1 flex flex-col justify-between relative z-20">
                         <div>
-                            <div class="flex justify-between items-start mb-1">
+                            <div class="flex justify-between items-start mb-2">
                                 <h3 class="font-bold text-lg md:text-xl italic text-white group-hover:text-gold transition-colors line-clamp-1">
                                     ${cleanName}
                                 </h3>
@@ -305,18 +302,18 @@ let cardsHTML = '';
                                 </div>
                             </div>
                             
-                            <!-- พื้นที่แสดงพิกัด และ วันที่ (ซ้าย-ขวา) -->
-                            <div class="flex items-center justify-between mt-1 mb-4">
-                                <p class="text-[10px] text-white/50 font-medium flex items-center gap-1.5">
+                            <!-- พิกัด (ซ้าย) & วันที่ (ขวา) แบบป้องกันการบีบตัว -->
+                            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+                                <p class="text-[10px] text-white/60 font-medium flex items-center gap-1.5 line-clamp-1 mr-2">
                                     <i class="fas fa-location-dot text-gold/60"></i> ${profileLocation}
                                 </p>
-                                <p class="text-[9px] text-white/30 font-light flex items-center gap-1">
+                                <p class="text-[9px] text-white/40 font-light flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md shrink-0">
                                     <i class="far fa-clock"></i> ${dateDisplay}
                                 </p>
                             </div>
                         </div>
                         
-                        <div class="flex items-center justify-between pt-4 border-t border-white/5">
+                        <div class="flex items-center justify-between pt-1">
                             <div class="text-[9px] text-white/30 font-medium uppercase tracking-widest">
                                 #รับงาน${provinceName}
                             </div>
@@ -332,197 +329,126 @@ let cardsHTML = '';
 // ==========================================
         // 6. RENDER THE ULTIMATE HTML (LUXURY, FIXED & AUDITED)
         // ==========================================
-        const html = `
-<!DOCTYPE html>
+        const html = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
-    <!-- Essential Meta (Critical) -->
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#d4af37">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#050505">
 
-    <!-- 🔥 ENTERPRISE SEO (Google Loves This) -->
-    <title>${provinceName} ไซด์ไลน์น้องท็อป ${safeProfiles.length}+ รูปตรงปก จ่ายหน้างาน | Sideline CM</title>
-    <meta name="description" content="${provinceName} ${safeProfiles.length}+ รับงานน้องนักศึกษา พริตตี้ รูปตรงปก 100% ไม่ต้องโอนมัดจำ เริ่ม 1,500฿ LINE ตอบ 5นาที 24 ชม.">
-    <meta name="keywords" content="${provinceName} ไซด์ไลน์,รับงาน${provinceName},น้องนักศึกษา${provinceName},พริตตี้${provinceName},รูปตรงปก${provinceName},ไม่มัดจำ${provinceName},น้องท็อป${provinceName}">
-    <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
-    <link rel="canonical" href="${provinceUrl}">
+    <title>${title} | เกรดพรีเมียม ไม่มัดจำ 100%</title>
+    <meta name="description" content="${description} หาเด็ก${provinceName} น้องนักศึกษา พริตตี้พาร์ทไทม์ ตรงปก ไม่โอนมัดจำ ปลอดภัยแน่นอน" />
+    <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ตรงปก, ไม่มัดจำ" />
     
-    <!-- Schema.org Breadcrumbs + LocalBusiness -->
-    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="${provinceUrl}" />
 
-    <!-- Open Graph + Twitter -->
-    <meta property="og:title" content="${provinceName} - น้องท็อป ${safeProfiles.length}+ รูปตรงปก">
-    <meta property="og:description" content="${provinceName} ${safeProfiles.length}+ น้องนักศึกษา พริตตี้ รูปตรงปก 100%">
-    <meta property="og:image" content="${firstImage}">
-    <meta property="og:url" content="${provinceUrl}">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:locale" content="th_TH">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="🔥 ${title}">
+    <meta property="og:description" content="พิกัดน้องๆ ${provinceName} รับงานเอง ฟิวแฟน ไม่ต้องมัดจำ ปลอดภัย 100% ตรงปกแน่นอน">
+    <meta property="og:url" content="${provinceUrl}">
+    <meta property="og:image" content="${firstImage}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${provinceName} น้องท็อป ${safeProfiles.length}+">
-
-    <!-- Preload Critical Resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700&family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
 
-    <!-- Tailwind + Custom Config -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
-        tailwind.config = {
-            theme: { 
-                extend: { 
-                    colors: { 
-                        gold: '#d4af37',
-                        'gold-dark': '#b8972e',
-                        glass: 'rgba(15,15,15,0.95)'
-                    }, 
-                    fontFamily: { 
-                        serif: ['Cinzel', 'serif'],
-                        sans: ['Plus Jakarta Sans', 'sans-serif']
-                    },
-                    animation: {
-                        'shimmer': 'shimmer 3s linear infinite',
-                        'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                    }
-                } 
-            }
-        }
+        tailwind.config = { theme: { extend: { colors: { gold: '#d4af37' }, fontFamily: { serif:['Cinzel', 'serif'], sans:['Plus Jakarta Sans', 'Prompt', 'sans-serif'] } } } };
     </script>
-
-    <!-- CRITICAL CSS (Zero CLS + Perfect Typography) -->
+    
     <style>
-        :root { 
-            --dark: #050505; 
-            --gold: #d4af37; 
-            --glass: rgba(15,15,15,0.97); 
-            --gradient-gold: linear-gradient(135deg, #d4af37 0%, #f7d794 50%, #d4af37 100%);
-        }
+        :root { --dark: #050505; --gold: #d4af37; --gold-bright: #facc15; }
+        body { background: var(--dark); color: #f8f9fa; font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; overflow-x: hidden; }
         
-        * { box-sizing: border-box; }
-        body { 
-            background: var(--dark); 
-            color: #f8f9fa; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            overflow-x: hidden; 
-            line-height: 1.7;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
-        }
+        header { min-height: 70vh; }
+        .css-content-visibility { content-visibility: auto; contain-intrinsic-size: 400px 533px; }
         
-        /* Typography Scale (Golden Ratio) */
-        h1 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.1; }
-        h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); line-height: 1.2; }
-        h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 1.3; }
-        
-        /* Shimmer Animation */
         .shimmer-gold { 
-            background: var(--gradient-gold); 
-            background-size: 200% auto; 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            background-clip: text;
-            animation: shimmer 3s linear infinite; 
+            background: linear-gradient(135deg, #b38728 0%, #fbf5b7 45%, #d4af37 55%, #aa771c 100%); 
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            animation: shimmer 5s linear infinite;
         }
-        @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        @keyframes shimmer { to { background-position: 200% center; } }
         
-        /* Glass Morphism */
-        .glass-ui { 
-            background: var(--glass); 
-            backdrop-filter: blur(24px); 
-            border: 1px solid rgba(255,255,255,0.08); 
-            box-shadow: 0 25px 45px -15px rgba(0,0,0,0.5);
-        }
-        
-        /* Card Grid Perfect */
-        .profile-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            align-items: start;
-        }
-        @media (max-width: 640px) { .profile-grid { gap: 1rem; } }
-        
-        /* FAQ Animation */
-        details summary { list-style: none; }
-        details[open] summary ~ * { animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; height: 0; } to { opacity: 1; height: auto; } }
-        
-        /* Zero CLS */
-        img { content-visibility: auto; contain-intrinsic-size: 360px 480px; }
+        .glass-ui { background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .hero-gradient { background: radial-gradient(circle at center, rgba(212,175,55,0.08) 0%, rgba(5,5,5,1) 70%); }
     </style>
+
+    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 </head>
 
 <body>
-    <!-- ===== NAVIGATION (Sticky + SEO Friendly) ===== -->
-    <nav class="fixed top-0 w-full z-[100] py-3 border-b border-white/5 bg-black/95 backdrop-blur-xl transition-all duration-500" role="banner">
-        <div class="container mx-auto px-4 max-w-7xl flex items-center justify-between">
-            <a href="/" class="text-2xl font-serif font-black tracking-tight shimmer-gold group hover:scale-105 transition-all" aria-label="Sideline CM หน้าแรก">
-                Sideline CM
-            </a>
-            
-            <div class="hidden md:flex items-center gap-8 text-sm font-semibold tracking-tight text-white/90">
-                <a href="/" class="hover:text-gold transition-colors py-2">หน้าแรก</a>
-                <a href="/profiles" class="hover:text-gold transition-colors py-2">ทุกจังหวัด</a>
-                <span class="px-3 py-2 bg-gold/10 rounded-xl text-gold font-bold text-xs uppercase tracking-wider">${provinceName}</span>
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-[100] transition-all duration-300 py-3 md:py-4 border-b border-white/10 bg-[#050505]/95 backdrop-blur-xl">
+        <div class="container mx-auto px-4 flex justify-between items-center max-w-7xl">
+            <a href="/" class="text-xl md:text-2xl font-serif font-black tracking-widest shimmer-gold" aria-label="หน้าหลัก Sideline CM">Sideline CM</a>
+            <div class="hidden md:flex items-center gap-6 text-[11px] font-bold tracking-[0.2em] text-white/90 uppercase">
+                <a href="/" class="hover:text-gold transition-colors">Home</a>
+                <a href="/profiles" class="hover:text-gold transition-colors">Directory</a>
+                <span class="text-gold border-b border-gold/40 pb-0.5">${provinceName}</span>
             </div>
-            
-            <a href="${CONFIG.SOCIAL_LINKS.line}" class="group bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-8 py-3 rounded-2xl font-bold text-sm shadow-2xl hover:shadow-emerald/25 hover:scale-105 transition-all duration-300 flex items-center gap-2" rel="noopener" aria-label="LINE ติดต่อสอบถามน้องๆ ${provinceName}">
+            <!-- ✅ เพิ่ม aria-label แก้ปัญหาลิงก์ไม่มีชื่อ -->
+            <a href="${CONFIG.SOCIAL_LINKS.line}" aria-label="แอดไลน์สอบถามคิวน้องๆ ทันที" class="flex items-center gap-2 bg-[#06c755] text-white px-4 py-2 rounded-full font-bold text-xs hover:scale-105 transition-transform shadow-lg shadow-green-600/20">
                 <i class="fab fa-line text-lg"></i>
-                LINE 5นาที
+                <span class="hidden xs:inline">LINE OA</span>
             </a>
         </div>
     </nav>
 
-    <!-- ===== HERO SECTION (H1 + Above Fold SEO) ===== -->
-    <header class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-24 pb-16 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/30 to-black">
-        <!-- Trust Badge -->
-        <div class="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
-            <div class="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500/95 to-teal-500/95 backdrop-blur-xl px-8 py-4 rounded-3xl text-sm font-black uppercase tracking-widest text-white shadow-2xl border border-emerald-300/50 animate-pulse-soft">
-                <span class="w-3 h-3 bg-emerald-400 rounded-full animate-ping"></span>
-                ✅ รูปตรงปก 100% | ไม่ต้องโอน | จ่ายหน้างานเท่านั้น
-            </div>
+    <header class="relative min-h-[70vh] flex flex-col items-center justify-center text-center px-4 pt-32 pb-20 overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 hero-gradient z-10"></div>
+        ${safeProfiles.length > 0 ? `
+            <img src="${firstImage.replace('q_auto:best', 'q_auto:eco')}" 
+                 class="w-full h-full object-cover opacity-30 scale-105" 
+                 alt="ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟนตรงปก" 
+                 fetchpriority="high" 
+                 decoding="sync">
+        ` : ''}
+    </div>
+    
+    <div class="relative z-20 max-w-5xl mx-auto space-y-8">
+        <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-gold/40 bg-black/60 backdrop-blur-md text-gold text-[10px] md:text-xs font-black tracking-[0.4em] uppercase shadow-2xl">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-gold"></span>
+            </span>
+            Verified Profiles • ${CURRENT_MONTH} ${CURRENT_YEAR}
         </div>
 
-        <main class="relative z-20 max-w-6xl mx-auto space-y-8 px-6">
-            <!-- H1: Primary SEO Target -->
-            <h1 class="font-serif font-black leading-none max-w-4xl mx-auto">
-                <span class="block text-4xl md:text-6xl lg:text-8xl shimmer-gold drop-shadow-2xl mb-6">${provinceName}</span>
-                <span class="block text-2xl md:text-4xl lg:text-5xl text-white/90 font-light italic mb-8">น้องท็อป ${safeProfiles.length}+ คน รูปตรงปก</span>
-                <span class="block text-xl md:text-2xl lg:text-3xl text-gold font-bold tracking-tight bg-white/10 px-6 py-3 rounded-2xl inline-block">
-                    เริ่ม 1,500฿/ชม. • LINE ตอบ 5นาที • 24 ชม.
-                </span>
-            </h1>
+        <h1 class="font-serif font-black drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] text-[clamp(2.2rem,8vw,5.5rem)] leading-[1] md:leading-[1.1]">
+            <span class="block text-xl md:text-3xl text-white/80 italic font-light tracking-[0.2em] mb-3 uppercase">Exclusive Service</span>
+            <span class="block shimmer-gold uppercase tracking-tight">
+                ไซด์ไลน์${provinceName} <span class="text-white">&</span> รับงาน${provinceName}
+            </span>
+            <span class="block text-lg md:text-2xl text-gold-bright mt-4 font-sans tracking-[0.1em] font-bold">
+                การันตีตรงปก 100% • ไม่ต้องโอนมัดจำ • จ่ายหน้างาน
+            </span>
+        </h1>
 
-            <!-- Hero Paragraph (Featured Snippet) -->
-            <p class="text-lg md:text-xl lg:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed font-medium">
-                🔥 ศูนย์รวม <strong>น้องนักศึกษา พริตตี้ Event นางแบบ</strong> ${provinceName} คัดเกรดพรีเมียม รูปตรงปก 100% 
-                ไม่ต้องโอนมัดจำ ปลอดภัยสูงสุด บริการครบทุกโซนยอดนิยม
-            </p>
+        <p class="text-base md:text-xl text-white/90 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-md">
+            สัมผัสประสบการณ์เหนือระดับกับน้องๆ <strong>ไซด์ไลน์${provinceName}</strong> เกรดพรีเมียม 
+            นัดง่ายปลอดภัยในโซน <strong>${seoData.zones.slice(0, 3).join(', ')}</strong> 
+            เน้นงานคุณภาพ <strong>ฟิวแฟน</strong> ดูแลดีที่สุดใน${provinceName}
+        </p>
 
-            <!-- CTA Buttons -->
-            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-2xl mx-auto">
-                <a href="#profiles" class="group w-full sm:w-auto bg-gradient-to-r from-gold to-orange-500 text-black px-12 py-6 md:py-7 rounded-3xl font-black text-xl shadow-2xl hover:shadow-gold/50 hover:scale-105 transition-all duration-500 flex items-center gap-4 justify-center">
-                    <i class="fas fa-heart text-2xl group-hover:animate-bounce"></i>
-                    ดูน้องๆ ${safeProfiles.length}+ คน
-                </a>
-                <a href="${CONFIG.SOCIAL_LINKS.line}" class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-3xl flex items-center justify-center text-white text-2xl md:text-3xl shadow-2xl hover:shadow-emerald/50 hover:-translate-y-2 transition-all duration-500 ring-4 ring-emerald-400/30">
-                    <i class="fab fa-line"></i>
-                </a>
-            </div>
+        <div class="flex flex-wrap justify-center gap-4 pt-4">
+            <a href="${CONFIG.SOCIAL_LINKS.line}" class="bg-[#06c755] hover:bg-[#05b34c] text-white px-8 py-4 rounded-full font-black text-sm transition-all hover:scale-105 shadow-[0_10px_20px_rgba(6,199,85,0.3)] flex items-center gap-2">
+                <i class="fab fa-line text-xl"></i> จองคิวน้องๆ ทันที
+            </a>
+            <a href="#profiles" class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-full font-black text-sm transition-all hover:bg-white/20">
+                เลือกดูโปรไฟล์
+            </a>
+        </div>
+    </div>
+</header>
 
-            <!-- Trust Indicators -->
-            <p class="text-sm md:text-base text-white/80 uppercase tracking-wider font-semibold flex flex-wrap justify-center items-center gap-6 bg-black/50 px-8 py-4 rounded-2xl max-w-2xl mx-auto">
-                <span class="flex items-center gap-1"><i class="fas fa-users"></i> 🔞 20+ เท่านั้น</span>
-                <span class="flex items-center gap-1"><i class="fas fa-star"></i> ⭐ 4.9/5 (${safeProfiles.length * 2}+ รีวิว)</span>
-                <span>อัพเดท ${new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-            </p>
-        </main>
-    </header>
 
     <!-- ===== MAIN CONTENT (Semantic HTML5) ===== -->
     <main class="container mx-auto max-w-7xl py-12 px-6 lg:px-8 relative z-10" role="main">
