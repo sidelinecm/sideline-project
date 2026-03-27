@@ -331,7 +331,7 @@ export default async (request, context) => {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#050505">
-    <title>${title} | เกรดพรีเมียม ไม่มีมัดจำ100%</title>
+    <title>${title} | เกรดพรีเมียม ฟิวแฟน100%</title>
     <meta name="description" content="${description} หาเด็ก${provinceName} ตรงปกฟิวแฟน ไม่โอนมัดจำ ปลอดภัยแน่นอน" />
     <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ตรงปก, ไม่มีมัดจำ" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
