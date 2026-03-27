@@ -4,7 +4,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 // 1. SYSTEM CONFIGURATION & HOT LINKS
 // ==========================================
 const CONFIG = {
-    // แนะนำ: ในอนาคตควรย้าย SUPABASE_KEY ไปไว้ใน Environment Variables ของ Netlify เพื่อความปลอดภัย
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
@@ -161,7 +160,6 @@ export default async (request, context) => {
         const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
         const zones = seoData.zones;
         
-        // FIX: บังคับ Timezone เป็นประเทศไทย ป้องกันเวลาเพี้ยนบน Server
         const now = new Date();
         const CURRENT_YEAR = now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok', year: 'numeric' });
         const CURRENT_MONTH = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', month: 'long' });
@@ -174,7 +172,6 @@ export default async (request, context) => {
         const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ไม่มัดจำ`;
         const description = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก 100% ✓น้องนักศึกษา ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างาน`;
 
-        // FIX: สร้าง Rating แบบคงที่อิงจากจำนวนโปรไฟล์ (ป้องกัน Google แบน Schema)
         const deterministicRating = safeProfiles.length > 0 ? (4.6 + (safeProfiles.length % 4) / 10).toFixed(1) : "5.0";
         const deterministicReviews = safeProfiles.length > 0 ? String(safeProfiles.length * 12 + 154) : "154";
 
@@ -230,38 +227,28 @@ export default async (request, context) => {
                         { "@type": "ListItem", "position": 2, "name": `รวมโปรไฟล์ทั้งหมด`, "item": `${CONFIG.DOMAIN}/profiles` },
                         { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                     ]
-                },
-                {
-                    "@type": "FAQPage",
-                    "mainEntity":[
-                        {
-                            "@type": "Question",
-                            "name": `น้องๆ รับงานโซนไหนบ้างใน${provinceName}?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": `เรามีน้องๆ ครอบคลุมโซนยอดนิยม เช่น ${zones.slice(0, 5).join(', ')} และพื้นที่ใกล้เคียง นัดหมายได้ตลอด 24 ชม.` }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": "ไม่ต้องโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายหน้างานเมื่อเจอตัวจริงเท่านั้น เพื่อความปลอดภัย ป้องกันมิจฉาชีพ 100%" }
-                        }
-                    ]
                 }
             ]
         };
 
         // ==========================================
-        // 5. HTML GENERATION - PREMIUM CARDS (SEO OPTIMIZED)
+        // 5. HTML GENERATION - PREMIUM CARDS (UI/UX Fixed)
         // ==========================================
         let cardsHTML = '';
         if (safeProfiles && safeProfiles.length > 0) {
             cardsHTML = safeProfiles.map((p, i) => {
                 const cleanName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, '');
                 const profileLocation = p.location || provinceName || 'ไม่ระบุพิกัด';
-                
-                // FIX: สร้าง Rating ในการ์ดให้สอดคล้องกับ Schema และไม่ใช้ Random
                 const cardRating = (4.5 + (i % 5) / 10).toFixed(1); 
                 
-                const isAvailable = p.availability?.includes('ว่าง') ?? true;
+                // FIX 1: แก้ไขตรรกะเช็คสถานะ "ติดจอง" ให้ทำงานถูกต้อง
+                const busyKeywords = ['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'];
+                let isAvailable = true;
+                if (p.availability) {
+                    const availText = p.availability.toLowerCase();
+                    // ถ้าในข้อความมีคำว่า ติดจอง, ไม่ว่าง ฯลฯ ค่อยเปลี่ยนเป็น false
+                    isAvailable = !busyKeywords.some(kw => availText.includes(kw));
+                }
                 const statusText = isAvailable ? 'พร้อมรับงาน' : 'ติดจอง';
                 
                 const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
@@ -270,7 +257,6 @@ export default async (request, context) => {
                 const months =['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
                 const month = months[d.getMonth()];
                 const year = (d.getFullYear() + 543).toString().slice(-2);
-                const dateDisplay = `อัปเดต ${day} ${month} ${year}`;
                 
                 const seoKeywords =[
                     `ไซด์ไลน์${provinceName}`,
@@ -291,7 +277,6 @@ export default async (request, context) => {
                     ? `loading="eager" fetchpriority="high" decoding="sync"` 
                     : `loading="lazy" decoding="async"`;
                 
-                // FIX: Fallback กรณีไม่มี slug ให้ใช้ ID ป้องกันลิงก์พัง 404
                 const profileLink = `/sideline/${p.slug || p.id || '#'}`;
                 
                 return `
@@ -300,7 +285,6 @@ export default async (request, context) => {
                     <a href="${profileLink}" itemprop="url" class="absolute inset-0 z-30" aria-label="${linkTitle}" title="${linkTitle}"></a>
                     
                     <div class="relative w-full pt-[133.33%] bg-[#111] overflow-hidden">
-                        
                         <img itemprop="image"
                              src="${optimizeImg(p.imagePath || '/default-avatar.jpg', imgWidth, imgHeight)}" 
                              alt="${imgAlt}" 
@@ -311,8 +295,9 @@ export default async (request, context) => {
                         
                         <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none"></div>
                         
-                        <div class="absolute top-3 left-0 w-full px-3 flex justify-between items-start z-20 pointer-events-none">
-                            <div class="bg-black/80 backdrop-blur-md border border-white/10 text-white text-[10px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg pointer-events-auto">
+                        <!-- ปรับปรุงขนาดป้ายให้เล็กลงในมือถือ ป้องกันการทับซ้อน -->
+                        <div class="absolute top-3 left-0 w-full px-2 md:px-3 flex justify-between items-start z-20 pointer-events-none">
+                            <div class="bg-black/80 backdrop-blur-md border border-white/10 text-white text-[8px] md:text-[10px] px-2 py-1 md:px-2.5 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 shadow-lg pointer-events-auto">
                                 <span class="relative flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-400'} opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
@@ -320,39 +305,42 @@ export default async (request, context) => {
                                 <span class="font-bold tracking-wide">${statusText}</span>
                             </div>
 
-                            <div class="bg-gradient-to-r from-[#1d4ed8]/95 to-[#3b82f6]/95 backdrop-blur-md border border-blue-400/30 text-white text-[9px] font-bold px-2 py-1.5 rounded-full flex items-center gap-1 shadow-lg shadow-blue-500/30 pointer-events-auto">
-                                <i class="fas fa-check-circle text-white/90"></i> ยืนยันแล้ว
+                            <div class="bg-gradient-to-r from-[#1d4ed8]/95 to-[#3b82f6]/95 backdrop-blur-md border border-blue-400/30 text-white text-[8px] md:text-[9px] font-bold px-1.5 py-1 md:px-2 md:py-1.5 rounded-full flex items-center gap-1 shadow-lg shadow-blue-500/30 pointer-events-auto">
+                                <i class="fas fa-check-circle text-white/90"></i> <span class="hidden sm:inline">ยืนยันแล้ว</span><span class="sm:hidden">ยืนยัน</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="p-4 md:p-5 flex-1 flex flex-col justify-between relative z-20">
+                    <div class="p-3 md:p-5 flex-1 flex flex-col justify-between relative z-20">
                         <div>
                             <div class="flex justify-between items-start mb-2">
-                                <h3 itemprop="name" class="font-bold text-lg md:text-xl italic text-white group-hover:text-gold transition-colors line-clamp-1">
+                                <h3 itemprop="name" class="font-bold text-base md:text-xl italic text-white group-hover:text-gold transition-colors line-clamp-1 pr-1">
                                     ${cleanName}
                                 </h3>
-                                <div class="flex items-center gap-1 text-gold-bright font-black text-xs" aria-label="คะแนน ${cardRating} ดาว">
-                                    <i class="fas fa-star text-[10px]"></i> ${cardRating}
+                                <div class="flex items-center gap-1 text-gold-bright font-black text-[9px] md:text-xs pt-1 shrink-0" aria-label="คะแนน ${cardRating} ดาว">
+                                    <i class="fas fa-star text-[8px] md:text-[10px]"></i> ${cardRating}
                                 </div>
                             </div>
                             
-                            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
-                                <p itemprop="homeLocation" class="text-[10px] text-white/60 font-medium flex items-center gap-1.5 line-clamp-1 mr-2">
-                                    <i class="fas fa-location-dot text-gold/60"></i> ${profileLocation}
+                            <!-- FIX 2: เปลี่ยน Layout พิกัดและวันที่ เป็น "บน-ล่าง" (แนวตั้ง) ป้องกันการบีบอัด -->
+                            <div class="flex flex-col gap-1.5 mb-3 border-b border-white/5 pb-3">
+                                <p itemprop="homeLocation" class="text-[10px] text-white/70 font-medium flex items-center gap-1.5 w-full">
+                                    <i class="fas fa-location-dot text-gold/60 w-3 text-center"></i> 
+                                    <span class="truncate">${profileLocation}</span>
                                 </p>
-                                <p class="text-[9px] text-white/40 font-light flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md shrink-0">
-                                    <i class="far fa-clock"></i> ${dateDisplay}
+                                <p class="text-[9px] text-white/40 font-light flex items-center gap-1.5 w-full">
+                                    <i class="far fa-clock w-3 text-center"></i> 
+                                    <span class="truncate">อัปเดต ${day} ${month} ${year}</span>
                                 </p>
                             </div>
                         </div>
                         
                         <div class="flex items-center justify-between pt-1">
-                            <div class="text-[9px] text-white/30 font-medium uppercase tracking-widest">
+                            <div class="text-[8px] md:text-[9px] text-white/30 font-medium uppercase tracking-widest truncate max-w-[80%]">
                                 #${targetKeyword}
                             </div>
-                            <span class="text-white group-hover:text-gold transition-all translate-x-0 group-hover:translate-x-1">
-                                <i class="fas fa-arrow-right-long text-sm"></i>
+                            <span class="text-white group-hover:text-gold transition-all translate-x-0 group-hover:translate-x-1 shrink-0">
+                                <i class="fas fa-arrow-right-long text-xs md:text-sm"></i>
                             </span>
                         </div>
                     </div>
@@ -459,6 +447,16 @@ export default async (request, context) => {
 
     <main class="container mx-auto max-w-7xl px-4 relative z-10" id="profiles">
         
+        <!-- FIX 3: เพิ่มหัวข้อ (Section Title) ก่อนแสดง Grid รูปภาพ -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-4 mt-8">
+            <div>
+                <h2 class="text-xl md:text-3xl font-serif font-bold text-white tracking-wide border-l-4 border-gold pl-3">
+                    โปรไฟล์อัปเดตล่าสุด
+                </h2>
+                <p class="text-white/50 text-[10px] md:text-sm mt-2 pl-4">พบกับน้องๆ ไซด์ไลน์${provinceName} กว่า ${safeProfiles.length} คน พร้อมให้บริการ</p>
+            </div>
+        </div>
+
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 mb-16">
             ${cardsHTML}
         </div>
