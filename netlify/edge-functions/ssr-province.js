@@ -7,11 +7,11 @@ const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline CM (Thailand)',
-    TWITTER: '@sidelinecm',
+    BRAND_NAME: 'sideline chiangmai (Thailand)',
+    TWITTER: '@sidelinechiangmai',
     SOCIAL_LINKS: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
-        tiktok: 'https://tiktok.com/@sidelinecm',
+        tiktok: 'https://tiktok.com/@sidelinechiangmai',
         twitter: 'https://twitter.com/sidelinechiangmai',
         linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
         biosite: 'https://bio.site/firstfiwfans.com',
@@ -331,9 +331,9 @@ export default async (request, context) => {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#050505">
-    <title>${title} | เกรดพรีเมียม ไม่มัดจำ 100%</title>
-    <meta name="description" content="${description} หาเด็ก${provinceName} ตรงปก ไม่โอนมัดจำ ปลอดภัยแน่นอน" />
-    <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ตรงปก, ไม่มัดจำ" />
+    <title>${title} | เกรดพรีเมียม ไม่มีมัดจำ100%</title>
+    <meta name="description" content="${description} หาเด็ก${provinceName} ตรงปกฟิวแฟน ไม่โอนมัดจำ ปลอดภัยแน่นอน" />
+    <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ตรงปก, ไม่มีมัดจำ" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="${provinceUrl}" />
     ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 400, 533)}">` : ''}
@@ -344,42 +344,114 @@ export default async (request, context) => {
     <meta property="og:locale" content="th_TH"><meta property="og:type" content="website">
     <meta property="og:title" content="🔥 ${title}"><meta property="og:url" content="${provinceUrl}"><meta property="og:image" content="${firstImage}"><meta name="twitter:card" content="summary_large_image">
 
-    <style id="fouc-prevention">
-        html { opacity: 0; visibility: hidden; }
-        html.tailwind-ready { opacity: 1; visibility: visible; transition: opacity 0.4s ease-in; }
-    </style>
+   <!-- 1. Fail-Safe FOUC Prevention (ป้องกันหน้าจอกระพริบและจอดำ) -->
+<style id="fouc-prevention">
+    html { opacity: 0; visibility: hidden; background: #050505; }
+    html.tailwind-ready { opacity: 1; visibility: visible; transition: opacity 0.5s ease-in; }
+</style>
 
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script>
-        tailwind.config = { 
-            theme: { 
-                extend: { 
-                    colors: { 
-                        midnight: '#050505', charcoal: '#111111',
-                        gold: { light: '#fde047', DEFAULT: '#d4af37', dark: '#854d0e' },
-                        crimson: '#e11d48', emerald: '#10b981',
-                    }, 
-                    fontFamily: { serif: ['Cinzel', 'serif'], sans: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'] },
-                    animation: { 'heartbeat': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite' }
-                } 
+<!-- 2. Tailwind Engine & Consolidated Config -->
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+    tailwind.config = { 
+        theme: { 
+            extend: { 
+                colors: { 
+                    midnight: '#050505', 
+                    charcoal: '#121212', // ปรับให้สว่างกว่าพื้นหลังเล็กน้อยเพื่อให้เห็นมิติ
+                    gold: {
+                        light: '#fde047',
+                        DEFAULT: '#e5c05b', // สว่างขึ้นเพื่อให้ Contrast ผ่านเกณฑ์ AA
+                        dark: '#b38728'
+                    },
+                    crimson: '#f43f5e', // สว่างขึ้นเล็กน้อย
+                    emerald: '#10b981',
+                }, 
+                fontFamily: { 
+                    serif: ['Cinzel', 'serif'], 
+                    sans: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'] 
+                },
+                animation: { 'heartbeat': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite' }
             } 
-        };
-        const showPage = () => document.documentElement.classList.add('tailwind-ready');
-        setTimeout(showPage, 100); setTimeout(showPage, 1200);
-    </script>
+        } 
+    };
+
+    // ฟังก์ชันเปิดหน้าเว็บ (Safety Net)
+    const showPage = () => document.documentElement.classList.add('tailwind-ready');
+    window.addEventListener('DOMContentLoaded', () => setTimeout(showPage, 100));
+    setTimeout(showPage, 1500); // กรณีเน็ตช้ามาก หรือ CDN ไม่โหลด
+</script>
+
+<!-- 3. Custom Luxury Styles & Accessibility Fixes -->
+<style>
+    /* พื้นหลังแบบหรูหรา */
+    body { 
+        background-color: #050505; 
+        background-image: radial-gradient(circle at 50% 0%, #1a1500 0%, #050505 70%); 
+        color: #f8f9fa; 
+        overflow-x: hidden; 
+    }
+
+    /* แก้ปัญหา Contrast สำหรับข้อความจาง (Muted Text) */
+    .text-contrast-muted { color: #a1a1aa !important; } /* สว่างกว่าสีเทาทั่วไป เพื่อให้อ่านออก */
+    .text-contrast-dim { color: #d4d4d8 !important; }
+
+    /* กระจกฝ้า (Glassmorphism) แบบ High-Contrast */
+    .glass-dark { 
+        background: rgba(15, 15, 15, 0.85); 
+        backdrop-filter: blur(12px); 
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(229, 192, 91, 0.3); /* ขอบทองสว่างขึ้น */
+    }
+
+    /* อนิเมชันตัวหนังสือสีทองวิ่ง (Luxury Shimmer) */
+    .shimmer-gold { 
+        background: linear-gradient(135deg, #b38728 0%, #fff6c5 45%, #ffffff 50%, #fff6c5 55%, #b38728 100%); 
+        background-size: 200% auto; 
+        -webkit-background-clip: text; 
+        background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        animation: shimmer 5s linear infinite; 
+    }
+    @keyframes shimmer { to { background-position: 200% center; } }
+
+    /* การ์ดสไตล์นิตยสาร (Premium Magazine Card) */
+    .mag-card { 
+        transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); 
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .mag-card:hover { 
+        transform: translateY(-10px); 
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 10px 30px -10px rgba(229, 192, 91, 0.2); 
+        border-color: rgba(229, 192, 91, 0.4); 
+    }
     
-    <style>
-        body { background-color: #050505; background-image: radial-gradient(circle at 50% 0%, #1a1500 0%, #050505 50%); color: #f8f9fa; overflow-x: hidden; }
-        .glass-dark { background: rgba(10, 10, 10, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(212, 175, 55, 0.2); }
-        .shimmer-gold { background: linear-gradient(135deg, #b38728 0%, #fff6c5 45%, #d4af37 55%, #aa771c 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 5s linear infinite; }
-        @keyframes shimmer { to { background-position: 200% center; } }
-        .mag-card { transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .mag-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.25); border-color: rgba(212, 175, 55, 0.4); }
-        .mag-img { transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease; filter: brightness(0.8); }
-        .mag-card:hover .mag-img { transform: scale(1.1); filter: brightness(1.05); }
-        .gradient-overlay { background: linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,0.7) 40%, transparent 100%); }
-        .css-content-visibility { content-visibility: auto; contain-intrinsic-size: 400px 533px; }
-    </style>
+    /* เอฟเฟกต์รูปภาพ */
+    .mag-img { 
+        transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease; 
+        filter: brightness(0.85) contrast(1.1); 
+    }
+    .mag-card:hover .mag-img { 
+        transform: scale(1.1); 
+        filter: brightness(1.05) contrast(1.1); 
+    }
+
+    /* เงาไล่ระดับด้านล่างรูป (Gradient Overlay) ปรับให้อ่านตัวหนังสือชัดขึ้น 100% */
+    .gradient-overlay { 
+        background: linear-gradient(to top, 
+            rgba(5,5,5,1) 0%, 
+            rgba(5,5,5,0.9) 20%, 
+            rgba(5,5,5,0.4) 50%, 
+            transparent 100%); 
+        z-index: 10;
+    }
+
+    /* ประสิทธิภาพด้านการเรนเดอร์ */
+    .css-content-visibility { 
+        content-visibility: auto; 
+        contain-intrinsic-size: 400px 533px; 
+    }
+</style>
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 </head>
 <body class="antialiased">
@@ -417,7 +489,7 @@ export default async (request, context) => {
         <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-4 mt-8">
             <div>
                 <h2 class="text-xl md:text-3xl font-serif font-bold text-white tracking-wide border-l-4 border-gold pl-3 uppercase">
-                    <span class="shimmer-gold italic">Verified</span> โปรไฟล์ล่าสุด
+                    <span class="shimmer-gold italic">Verified</span> โปรไฟล์น้องๆรับงานล่าสุด
                 </h2>
                 <p class="text-white/50 text-[10px] md:text-sm mt-2 pl-4">พบกับน้องๆ ไซด์ไลน์${provinceName} กว่า ${safeProfiles.length} คน พร้อมให้บริการ</p>
             </div>
@@ -433,18 +505,74 @@ export default async (request, context) => {
         </section>
     </main>
 
-    <footer class="bg-[#020202] border-t border-white/5 pt-24 pb-12 text-center md:text-left">
-        <div class="container mx-auto max-w-7xl px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
-                <div class="md:col-span-2 space-y-6">
-                    <h3 class="text-3xl font-serif shimmer-gold font-black italic tracking-widest underline underline-offset-8 decoration-gold/20">SIDELINE CM</h3>
-                    <p class="text-white/40 text-sm leading-loose max-w-md font-medium">The Ultimate Directory for Premium Escort Services in ${provinceName}. Focusing on safety, transparency, and top-tier quality.</p>
+   <footer class="bg-[#020202] border-t border-white/10 pt-24 pb-12 text-center md:text-left">
+    <div class="container mx-auto max-w-7xl px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+            
+            <!-- Column 1: Brand & Intro -->
+            <div class="md:col-span-2 space-y-6">
+                <h3 class="text-3xl font-serif shimmer-gold font-black italic tracking-widest underline underline-offset-8 decoration-gold/20">
+                    sideline chiangmai
+                </h3>
+                <!-- ปรับจาก white/40 เป็น white/70 เพื่อ Contrast ที่ดีขึ้น -->
+                <p class="text-white/70 text-sm leading-loose max-w-md font-medium">
+                    The Ultimate Directory for Premium Escort Services in ${provinceName}. 
+                    Focusing on safety, transparency, and top-tier quality for a truly high-end experience.
+                </p>
+                
+                <!-- เพิ่ม Social Icons เพื่อให้ Google รู้จักตัวตนเว็บมากขึ้น -->
+                <div class="flex justify-center md:justify-start gap-4 pt-2">
+                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-gold hover:border-gold transition-all" aria-label="Follow us on Twitter">
+                        <i class="fab fa-x-twitter"></i>
+                    </a>
+                    <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-gold hover:border-gold transition-all" aria-label="Follow us on TikTok">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-gold hover:border-gold transition-all" aria-label="Contact us on Line">
+                        <i class="fab fa-line"></i>
+                    </a>
                 </div>
-                <div><h4 class="text-gold text-[10px] font-black uppercase tracking-[0.4em] mb-8">Legal</h4><div class="border border-red-500/20 bg-red-500/5 p-4 rounded-xl"><span class="text-[10px] text-red-500 font-black uppercase tracking-widest">🔞 20+ ONLY. CONSUME RESPONSIBLY.</span></div></div>
             </div>
-            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6"><p class="text-[9px] text-white/20 font-black tracking-[0.3em] uppercase">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY.</p></div>
+
+            <!-- Column 2: Links (SEO Benefit) -->
+            <div>
+                <h4 class="text-gold text-[10px] font-black uppercase tracking-[0.4em] mb-8">Navigation</h4>
+                <ul class="space-y-4 text-white/70 text-[11px] font-bold uppercase tracking-wider">
+                    <li><a href="/" class="hover:text-gold transition-colors italic">Home</a></li>
+                    <li><a href="/profiles" class="hover:text-gold transition-colors italic">All Profiles</a></li>
+                    <li><a href="/location/chiangmai" class="hover:text-gold transition-colors italic">Chiang Mai Escorts</a></li>
+                    <li><a href="/location/bangkok" class="hover:text-gold transition-colors italic">Bangkok Escorts</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Legal & Safety -->
+            <div>
+                <h4 class="text-gold text-[10px] font-black uppercase tracking-[0.4em] mb-8">Legal</h4>
+                <div class="border border-red-500/30 bg-red-500/5 p-5 rounded-2xl shadow-lg shadow-red-500/5">
+                    <span class="text-[10px] text-red-500 font-black uppercase tracking-[0.2em] leading-relaxed block mb-2">
+                        🔞 20+ ONLY
+                    </span>
+                    <p class="text-[9px] text-white/60 leading-relaxed font-medium">
+                        All models are independent adults. Please consume content responsibly.
+                    </p>
+                </div>
+            </div>
         </div>
-    </footer>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <!-- ปรับจาก white/20 เป็น white/60 เพื่อให้อ่านออก -->
+            <p class="text-[10px] text-white/60 font-black tracking-[0.3em] uppercase">
+                &copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY. ALL RIGHTS RESERVED.
+            </p>
+            
+            <div class="flex gap-8 text-[9px] text-white/40 font-black tracking-widest uppercase">
+                <span><i class="fas fa-shield-alt text-gold mr-1"></i> SECURE SSL</span>
+                <span><i class="fas fa-bolt text-gold mr-1"></i> FAST LOADING</span>
+            </div>
+        </div>
+    </div>
+</footer>
 
     <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="fixed bottom-6 right-6 w-16 h-16 bg-[#06c755] rounded-2xl flex items-center justify-center text-white text-3xl shadow-2xl hover:scale-110 transition-all z-[99] border-2 border-white/20">
         <i class="fab fa-line"></i><span class="absolute -top-1 -right-1 w-6 h-6 bg-red-600 border-2 border-[#050505] rounded-full animate-bounce flex items-center justify-center text-[10px] font-black shadow-lg">1</span>
