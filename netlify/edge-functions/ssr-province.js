@@ -486,7 +486,7 @@ export default async (request, context) => {
             </div>
             
             <h1 class="font-serif text-4xl md:text-5xl lg:text-7xl leading-tight text-white/95">
-                <span class="block font-light">ไซด์ไลน์${provinceName}</span>
+                <span class="block font-light">รับงานไซด์ไลน์${provinceName}</span>
                 <span class="block text-2xl md:text-4xl mt-4 font-sans font-light tracking-wider text-white/60">คัดเกรดพรีเมียม ไม่โอนมัดจำ</span>
             </h1>
             
