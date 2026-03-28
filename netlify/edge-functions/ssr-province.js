@@ -303,74 +303,74 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                 const profileLink = `/sideline/${p.slug || p.id || '#'}`;
                 
                 return `
-                <article itemscope itemtype="http://schema.org/Person" class="group relative bg-[#0d0d0d] rounded-[1.25rem] overflow-hidden border border-white/5 flex flex-col h-full transition-all duration-500 hover:border-gold/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)]" data-profile-id="${p.id}">
-                    <a href="${profileLink}" itemprop="url" class="absolute inset-0 z-40" aria-label="ดูโปรไฟล์ ${cleanName}" title="ดูโปรไฟล์ ${cleanName}"></a>
-                    
-                    <div class="relative w-full pt-[135%] bg-[#050505] overflow-hidden">
-                        <img itemprop="image" 
-                             src="${optimizeImg(p.imagePath, 450, 600)}" 
-                             alt="${imgAlt}" 
-                             class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 scale-[1.01] group-hover:scale-110 group-hover:rotate-1" 
-                             ${i < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} 
-                             width="450" height="600">
-                        
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-black/30 z-10"></div>
-                        
-                        <div class="absolute top-4 left-4 right-4 flex justify-between items-start z-20 pointer-events-none">
-                            <div class="flex items-center gap-2 bg-black/40 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/10 shadow-2xl">
-                                <span class="relative flex h-1.5 w-1.5">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'} opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'}"></span>
-                                </span>
-                                <span class="text-[9px] text-white font-bold tracking-widest uppercase">${statusText}</span>
-                            </div>
-                            
-                            <div class="bg-black/40 backdrop-blur-xl p-2 rounded-full border border-gold/30 shadow-2xl">
-                                <svg class="w-3 h-3 text-gold" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
+<article itemscope itemtype="http://schema.org/Person" class="group relative bg-[#0d0d0d] rounded-[1.25rem] overflow-hidden border border-white/10 flex flex-col h-full transition-all duration-500 hover:border-gold/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)]" data-profile-id="${p.id}">
+    <a href="${profileLink}" itemprop="url" class="absolute inset-0 z-40" aria-label="ดูโปรไฟล์ของ ${cleanName}" title="ดูโปรไฟล์ของ ${cleanName}"></a>
+    
+    <div class="relative w-full pt-[135%] bg-[#050505] overflow-hidden">
+        <img itemprop="image" 
+             src="${optimizeImg(p.imagePath, 450, 600)}" 
+             alt="${imgAlt}" 
+             class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 scale-[1.01] group-hover:scale-110 group-hover:rotate-1" 
+             ${i < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} 
+             width="450" height="600">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-black/30 z-10"></div>
+        
+        <div class="absolute top-4 left-4 right-4 flex justify-between items-start z-20 pointer-events-none">
+            <div class="flex items-center gap-2 bg-black/60 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/20 shadow-2xl">
+                <span class="relative flex h-1.5 w-1.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'} opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'}"></span>
+                </span>
+                <span class="text-[9px] text-white font-bold tracking-widest uppercase">${statusText}</span>
+            </div>
+            
+            <div class="bg-black/60 backdrop-blur-xl p-2 rounded-full border border-gold/40 shadow-2xl">
+                <svg class="w-3 h-3 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+        </div>
+    </div>
 
-                    <div class="px-5 pb-5 pt-0 flex-1 flex flex-col justify-between relative z-20 -mt-12">
-                        <div>
-                            <div class="flex justify-between items-end mb-4">
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] text-gold font-bold tracking-[0.2em] uppercase mb-1 opacity-80">${targetKeyword}</span>
-                                    <h3 itemprop="name" class="font-serif font-medium text-2xl text-white group-hover:text-gold transition-colors line-clamp-1 tracking-wide">
-                                        ${cleanName}
-                                    </h3>
-                                </div>
-                                <div class="bg-white/[0.03] backdrop-blur-md px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/5 mb-1">
-                                    <i class="fas fa-star text-gold text-[10px]"></i>
-                                    <span class="text-white text-[11px] font-bold tracking-tighter">${cardRating}</span>
-                                </div>
-                            </div>
+    <div class="px-5 pb-5 pt-0 flex-1 flex flex-col justify-between relative z-20 -mt-12">
+        <div>
+            <div class="flex justify-between items-end mb-4">
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-gold font-bold tracking-[0.2em] uppercase mb-1 opacity-100">${targetKeyword}</span>
+                    <h3 itemprop="name" class="font-serif font-medium text-2xl text-white group-hover:text-gold transition-colors line-clamp-1 tracking-wide">
+                        ${cleanName}
+                    </h3>
+                </div>
+                <div class="bg-white/[0.05] backdrop-blur-md px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10 mb-1">
+                    <i class="fas fa-star text-gold text-[10px]"></i>
+                    <span class="text-white text-[11px] font-bold tracking-tighter">${cardRating}</span>
+                </div>
+            </div>
 
-                            <div class="space-y-2 mb-5 border-t border-white/5 pt-4">
-                                <div itemprop="homeLocation" class="text-[11px] text-white/50 font-light flex items-center gap-3">
-                                    <i class="fas fa-map-marker-alt text-gold/60 w-3 text-center"></i>
-                                    <span class="truncate tracking-wide">${profileLocation}</span>
-                                </div>
-                                <div class="text-[11px] text-white/30 font-light flex items-center gap-3">
-                                    <i class="far fa-calendar-alt w-3 text-center"></i>
-                                    <span>อัปเดตข้อมูลล่าสุดเมื่อ ${dateDisplay}</span>
-                                </div>
-                            </div>
-                        </div>
+            <div class="space-y-2 mb-5 border-t border-white/10 pt-4">
+                <div itemprop="homeLocation" class="text-[11px] text-white/70 font-light flex items-center gap-3">
+                    <i class="fas fa-map-marker-alt text-gold/80 w-3 text-center"></i>
+                    <span class="truncate tracking-wide">${profileLocation}</span>
+                </div>
+                <div class="text-[11px] text-white/50 font-light flex items-center gap-3">
+                    <i class="far fa-calendar-alt w-3 text-center text-white/40"></i>
+                    <span>อัปเดตเมื่อ ${dateDisplay}</span>
+                </div>
+            </div>
+        </div>
 
-                        <div class="flex items-center justify-between pt-1 group/btn">
-                            <div class="flex flex-col">
-                                <span class="text-[8px] text-white/30 uppercase tracking-[0.2em]">Starting at</span>
-                                <span class="text-sm font-bold text-white tracking-tight">฿${p.rate || 'สอบถาม'}</span>
-                            </div>
-                            <div class="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center text-white/20 group-hover:border-gold group-hover:text-gold transition-all duration-500 group-hover:translate-x-1">
-                                <i class="fas fa-arrow-right text-[10px]"></i>
-                            </div>
-                        </div>
-                    </div>
-                </article>`;
+        <div class="flex items-center justify-between pt-1 group/btn">
+            <div class="flex flex-col">
+                <span class="text-[8px] text-white/50 uppercase tracking-[0.2em]">Starting at</span>
+                <span class="text-sm font-bold text-white tracking-tight">฿${p.rate || 'สอบถาม'}</span>
+            </div>
+            <div class="h-8 w-8 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:border-gold group-hover:text-gold transition-all duration-500 group-hover:translate-x-1">
+                <i class="fas fa-arrow-right text-[10px]"></i>
+            </div>
+        </div>
+    </div>
+</article>`;
             }).join('');
         }
 
@@ -567,58 +567,58 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         </div>
     </main>
 
-    <footer class="border-t border-white/5 bg-[#050505] pt-24 pb-12 mt-20">
-        <div class="container mx-auto px-6 lg:px-12 max-w-[1400px]">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8 mb-20">
-                <div class="md:col-span-5 space-y-8">
-                    <h3 class="text-2xl font-serif tracking-[0.3em] text-white uppercase">
-                        SIDELINE<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
-                    </h3>
-                    <p class="text-[12px] text-low-contrast leading-relaxed max-w-sm font-light tracking-wide">
-                        Thailand's most prestigious directory for premium adult services. We redefine the standard of excellence and safety.
-                    </p>
-                    <div class="flex gap-6">
-                        <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" class="text-white/40 hover:text-gold transition-all text-xl"><i class="fab fa-x-twitter"></i></a>
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="text-white/40 hover:text-gold transition-all text-xl"><i class="fab fa-line"></i></a>
-                    </div>
-                </div>
-
-                <div class="md:col-span-3">
-                    <h4 class="text-[10px] font-bold text-white/20 tracking-[0.4em] uppercase mb-8">Navigation</h4>
-                    <ul class="space-y-4 text-[12px] text-low-contrast font-medium uppercase tracking-widest">
-                        <li><a href="/" class="hover:text-gold transition-colors">Home</a></li>
-                        <li><a href="/profiles" class="hover:text-gold transition-colors">Directory</a></li>
-                        <li><a href="/location/chiangmai" class="hover:text-gold transition-colors">Chiang Mai</a></li>
-                    </ul>
-                </div>
-
-                <div class="md:col-span-4">
-                    <h4 class="text-[10px] font-bold text-white/20 tracking-[0.4em] uppercase mb-8">Legal & Privacy</h4>
-                    <p class="text-[11px] text-very-low-contrast leading-relaxed font-light mb-6 uppercase tracking-wider">
-                        Models are independent contractors. You must be 20+ to enter. We provide information only and do not facilitate transactions.
-                    </p>
-                    <div class="inline-flex items-center gap-2 border border-white/10 px-4 py-1.5 rounded-full text-[10px] text-gold uppercase tracking-[0.2em] font-semibold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span> 20+ Only
-                    </div>
+<footer class="border-t border-white/10 bg-[#050505] pt-24 pb-12 mt-20">
+    <div class="container mx-auto px-6 lg:px-12 max-w-[1400px]">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8 mb-20">
+            <div class="md:col-span-5 space-y-8">
+                <h3 class="text-2xl font-serif tracking-[0.3em] text-white uppercase">
+                    SIDELINE<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
+                </h3>
+                <p class="text-[12px] text-white/70 leading-relaxed max-w-sm font-light tracking-wide">
+                    Thailand's most prestigious directory for premium adult services. We redefine the standard of excellence and safety.
+                </p>
+                <div class="flex gap-6">
+                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" aria-label="Twitter" class="text-white/60 hover:text-gold transition-all text-xl"><i class="fab fa-x-twitter"></i></a>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="Line" class="text-white/60 hover:text-gold transition-all text-xl"><i class="fab fa-line"></i></a>
                 </div>
             </div>
 
-            <div class="border-t border-white/5 pt-16 mb-20">
-                <h4 class="text-[10px] font-bold text-white/20 tracking-[0.5em] uppercase mb-12 text-center">Service Coverage</h4>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    ${provinceLinksHtml}
-                </div>
+            <div class="md:col-span-3">
+                <h4 class="text-[10px] font-bold text-white/50 tracking-[0.4em] uppercase mb-8">Navigation</h4>
+                <ul class="space-y-4 text-[12px] text-white/80 font-medium uppercase tracking-widest">
+                    <li><a href="/" class="underline decoration-white/20 underline-offset-4 hover:text-gold transition-colors">Home</a></li>
+                    <li><a href="/profiles" class="underline decoration-white/20 underline-offset-4 hover:text-gold transition-colors">Directory</a></li>
+                    <li><a href="/location/chiangmai" class="underline decoration-white/20 underline-offset-4 hover:text-gold transition-colors">Chiang Mai</a></li>
+                </ul>
             </div>
 
-            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-very-low-contrast uppercase tracking-[0.3em] font-medium">
-                <p>&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY.</p>
-                <div class="flex gap-8">
-                    <span class="hover:text-gold transition-colors cursor-pointer">Terms</span>
-                    <span class="hover:text-gold transition-colors cursor-pointer">Privacy</span>
+            <div class="md:col-span-4">
+                <h4 class="text-[10px] font-bold text-white/50 tracking-[0.4em] uppercase mb-8">Legal & Privacy</h4>
+                <p class="text-[11px] text-white/60 leading-relaxed font-light mb-6 uppercase tracking-wider">
+                    Models are independent contractors. You must be 20+ to enter. We provide information only and do not facilitate transactions.
+                </p>
+                <div class="inline-flex items-center gap-2 border border-gold/40 px-4 py-1.5 rounded-full text-[10px] text-gold uppercase tracking-[0.2em] font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span> 20+ Only
                 </div>
             </div>
         </div>
-    </footer>
+
+        <div class="border-t border-white/10 pt-16 mb-20">
+            <h4 class="text-[10px] font-bold text-white/50 tracking-[0.5em] uppercase mb-12 text-center">Service Coverage</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-center">
+                ${provinceLinksHtml}
+            </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-white/40 uppercase tracking-[0.3em] font-medium">
+            <p>&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY.</p>
+            <div class="flex gap-8">
+                <a href="/terms" class="hover:text-gold underline decoration-white/10 underline-offset-4 transition-colors">Terms</a>
+                <a href="/privacy" class="hover:text-gold underline decoration-white/10 underline-offset-4 transition-colors">Privacy</a>
+            </div>
+        </div>
+    </div>
+</footer>
 
     <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="fixed bottom-10 right-10 bg-[#070707] border border-white/10 hover:border-gold/50 p-1.5 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:-translate-y-2 transition-all duration-500 z-[90] group">
         <div class="bg-[#06c755] rounded-full px-6 py-3 flex items-center gap-3">
