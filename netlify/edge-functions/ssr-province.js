@@ -119,16 +119,15 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
 };
 
 // ==========================================
-// 3. MAIN SSR EDGE FUNCTION
+// 3. MAIN SSR EDGE FUNCTION (แบบสมบูรณ์)
 // ==========================================
 export default async (request, context) => {
     try {
         const url = new URL(request.url);
 
-        // 🟢 ส่วนที่แก้ไข: ตรวจสอบและ Redirect หากมี Query String ?province=
+        // 🟢 ตรวจสอบและ Redirect หากมี Query String ?province=
         if (url.searchParams.has("province")) {
             const provinceValue = url.searchParams.get("province");
-            // สร้าง URL ใหม่ให้เป็นแบบ /location/lampang
             const cleanUrl = new URL(`/location/${provinceValue}`, url.origin);
             return Response.redirect(cleanUrl.toString(), 301); 
         }
@@ -139,14 +138,13 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        // ดึงข้อมูลจังหวัด
+        // 1. ดึงข้อมูลจังหวัดปัจจุบัน
         const { data: provinceData, error: provError } = await supabase
             .from('provinces').select('id, nameThai, key').eq('key', provinceKey).maybeSingle();
 
-        // ถ้าไม่พบข้อมูลจังหวัด ให้ไปที่ขั้นตอนถัดไป (เช่นแสดงหน้า 404 หรือหน้า Default)
         if (!provinceData || provError) return context.next();
 
-        // ดึงข้อมูลโปรไฟล์น้องๆ
+        // 2. ดึงข้อมูลโปรไฟล์น้องๆ ในจังหวัดนั้น
         const { data: profiles } = await supabase
             .from('profiles')
             .select('id, slug, name, imagePath, galleryPaths, location, rate, isfeatured, lastUpdated, created_at, active, availability, likes')
@@ -154,18 +152,25 @@ export default async (request, context) => {
             .order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false })
             .limit(80);
 
+        // 3. [ใหม่] ดึงข้อมูลจังหวัดทั้งหมดเพื่อทำ Footer Links (SEO)
+        const { data: allProvinces } = await supabase
+            .from('provinces')
+            .select('key, nameThai')
+            .order('nameThai', { ascending: true });
+
         const safeProfiles = profiles || [];
         const provinceName = provinceData.nameThai;
+        const deterministicRating = (4.5 + (safeProfiles.length % 5) / 10).toFixed(1);
+const deterministicReviews = 50 + (safeProfiles.length * 2);
         const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
         const zones = seoData.zones;
         
         const now = new Date();
         const CURRENT_YEAR = now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok', year: 'numeric' });
         const CURRENT_MONTH = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', month: 'long' });
-        
-        // กำหนด URL หลักที่เป็น Clean URL เสมอ
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         
+        // สร้างข้อมูล Schema และ SEO
         const firstImage = safeProfiles.length > 0 
             ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) 
             : `${CONFIG.DOMAIN}/images/seo-default.webp`;
@@ -173,10 +178,17 @@ export default async (request, context) => {
         const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ไม่มัดจำ`;
         const description = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก 100% ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างาน`;
 
-        const deterministicRating = safeProfiles.length > 0 ? (4.6 + (safeProfiles.length % 4) / 10).toFixed(1) : "5.0";
-        const deterministicReviews = safeProfiles.length > 0 ? String(safeProfiles.length * 12 + 154) : "154";
+        // 4. สร้าง HTML สำหรับ Province Links ใน Footer
+        const provinceLinksHtml = allProvinces && allProvinces.length > 0 
+            ? allProvinces.map(p => `
+                <a href="/location/${p.key}" 
+                   class="text-[10px] text-white/40 hover:text-gold transition-all duration-300 border-b border-transparent hover:border-gold/30 pb-0.5 whitespace-nowrap">
+                   ไซด์ไลน์${p.nameThai}
+                </a>
+            `).join('')
+            : '';
 
-        const schemaData = {
+       const schemaData = {
             "@context": "https://schema.org",
             "@graph": [
                 {
@@ -384,55 +396,37 @@ export default async (request, context) => {
 
     <meta name="geo.region" content="TH-50" />
     <meta name="geo.placename" content="${provinceName}" />
-    <meta name="geo.position" content="18.7883;98.9853" />
-    <meta name="ICBM" content="18.7883, 98.9853" />
-
-    <meta property="og:locale" content="th_TH">
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:url" content="${provinceUrl}">
     <meta property="og:image" content="${firstImage}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="${CONFIG.TWITTER}">
-    <meta name="twitter:title" content="${title}">
-    <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${firstImage}">
 
     <link rel="shortcut icon" href="/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
-    <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-    <link rel="modulepreload" href="/main.js">
     <link rel="preload" href="${firstImage}" as="image" fetchpriority="high">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Prompt:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
 
     <script type="application/ld+json">
         ${JSON.stringify(schemaData)}
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?minify=true"></script>
     <script>
         tailwind.config = { 
             theme: { 
                 extend: { 
-                    colors: { 
-                        gold: { DEFAULT: '#C5A059', hover: '#D4AF37' }
-                    }, 
+                    colors: { gold: { DEFAULT: '#C5A059', hover: '#D4AF37' } },
                     fontFamily: { 
                         serif: ['"Playfair Display"', 'serif'], 
                         sans: ['Outfit', 'Prompt', 'sans-serif'] 
@@ -443,86 +437,109 @@ export default async (request, context) => {
     </script>
 
     <style>
+        /* 🎨 Critical UI & Performance Style */
+        :root { --bg: #070707; --gold: #C5A059; }
         body { 
-            background-color: #070707; 
-            color: #e5e5e5; 
+            background-color: var(--bg); 
+            color: #fafafa; 
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            margin: 0;
+            font-family: 'Outfit', 'Prompt', sans-serif;
         }
         .nav-glass {
-            background: rgba(7, 7, 7, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            background: rgba(7, 7, 7, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         .hero-glow {
-            background: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.08) 0%, rgba(7, 7, 7, 0) 60%);
+            background: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.12) 0%, rgba(7, 7, 7, 0) 70%);
         }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #070707; }
+        .profile-card-shadow {
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .profile-card-shadow:hover { transform: translateY(-8px); }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #C5A059; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+        /* Fix Contrast for Small Text */
+        .text-low-contrast { color: rgba(255, 255, 255, 0.55); }
+        .text-very-low-contrast { color: rgba(255, 255, 255, 0.4); }
     </style>
 </head>
 
 <body class="selection:bg-gold/30 selection:text-white">
-    <nav class="fixed top-0 w-full z-[100] nav-glass transition-all duration-300 py-4">
+    <nav class="fixed top-0 w-full z-[100] nav-glass transition-all duration-500 py-4">
         <div class="container mx-auto px-6 lg:px-12 flex justify-between items-center max-w-[1400px]">
-            <a href="/" class="text-xl md:text-2xl font-serif tracking-[0.2em] text-white hover:text-gold transition-colors">
-                SIDELINE<span class="text-gold italic ml-1">CM</span>
+            <a href="/" class="text-xl md:text-2xl font-serif tracking-[0.2em] text-white hover:text-gold transition-all">
+                SIDELINE<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
             </a>
-            <div class="hidden md:flex items-center gap-10 text-[10px] font-medium tracking-[0.25em] uppercase text-white/60">
-                <a href="/" class="hover:text-white transition-colors">Home</a>
-                <a href="/profiles" class="hover:text-white transition-colors">Directory</a>
-                <span class="text-gold border-b border-gold pb-1">${provinceName}</span>
+            <div class="hidden md:flex items-center gap-10 text-[10px] font-medium tracking-[0.25em] uppercase">
+                <a href="/" class="text-white/60 hover:text-white transition-colors">Home</a>
+                <a href="/profiles" class="text-white/60 hover:text-white transition-colors">Directory</a>
+                <span class="text-gold border-b-2 border-gold/50 pb-1">${provinceName}</span>
             </div>
         </div>
     </nav>
 
-    <header class="relative pt-40 pb-20 px-6 hero-glow flex flex-col items-center justify-center text-center">
-        <div class="max-w-4xl mx-auto space-y-8">
-            <div class="inline-block px-4 py-1.5 border border-gold/20 rounded-full text-[9px] font-medium tracking-[0.3em] uppercase text-gold mb-4">
-                Exclusive Directory • ${CURRENT_MONTH}
+    <header class="relative pt-44 pb-24 px-6 hero-glow flex flex-col items-center justify-center text-center overflow-hidden">
+        <div class="max-w-4xl mx-auto space-y-10 z-10">
+            <div class="inline-block px-5 py-2 border border-gold/30 rounded-full text-[10px] font-semibold tracking-[0.3em] uppercase text-gold bg-gold/5 mb-2">
+                Premium Directory • ${CURRENT_MONTH}
             </div>
             
-            <h1 class="font-serif text-4xl md:text-5xl lg:text-7xl leading-tight text-white/95">
-                <span class="block font-light">รับงานไซด์ไลน์${provinceName}</span>
-                <span class="block text-2xl md:text-4xl mt-4 font-sans font-light tracking-wider text-white/60">คัดเกรดพรีเมียม ไม่โอนมัดจำ</span>
+            <h1 class="font-serif text-5xl md:text-6xl lg:text-8xl leading-[1.1] text-white">
+                <span class="block font-light opacity-90">ไซด์ไลน์${provinceName}</span>
+                <span class="block text-2xl md:text-4xl lg:text-5xl mt-6 font-sans font-extralight tracking-[0.15em] text-white/50">High-End Escort Service</span>
             </h1>
             
-            <div class="flex flex-wrap justify-center gap-3 pt-8">
-                ${zones.slice(0, 5).map(z => `<a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" class="text-[10px] px-5 py-2 rounded-full border border-white/10 font-medium tracking-wide hover:border-gold hover:text-gold text-white/50 transition-all duration-300">#${z}</a>`).join('')}
+            <div class="flex flex-wrap justify-center gap-3 pt-6">
+                ${zones.slice(0, 6).map(z => `<a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" class="text-[10px] px-6 py-2.5 rounded-full border border-white/10 font-medium tracking-widest hover:border-gold hover:text-gold text-white/40 hover:bg-gold/5 transition-all duration-500">#${z.toUpperCase()}</a>`).join('')}
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-6 lg:px-12 max-w-[1400px] pb-32">
-        <div class="flex items-end justify-between mb-10 border-b border-white/5 pb-4">
-            <h2 class="text-xl md:text-2xl font-serif text-white tracking-wide">
-                Selected <span class="text-gold italic">Profiles</span>
+        <div class="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
+            <h2 class="text-2xl md:text-3xl font-serif text-white tracking-wide">
+                Exclusive <span class="text-gold italic">Profiles</span>
             </h2>
-            <span class="text-[10px] text-white/40 tracking-widest uppercase">${safeProfiles.length} Models</span>
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-[10px] text-white/50 tracking-[0.2em] uppercase font-medium">${safeProfiles.length} Online Now</span>
+            </div>
         </div>
         
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 mb-24">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10 mb-28">
             ${cardsHTML}
         </div>
 
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 mb-32 max-w-5xl mx-auto px-4">
-            <div class="text-center space-y-4">
-                <i class="fas fa-shield-alt text-2xl text-gold/80"></i>
-                <h3 class="text-sm font-medium tracking-widest uppercase text-white/90">No Deposit</h3>
-                <p class="text-xs text-white/40 leading-relaxed font-light">ไม่มีการโอนมัดจำล่วงหน้า จ่ายเงินสดหน้างานเพื่อความสบายใจสูงสุด</p>
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20 mb-40 max-w-6xl mx-auto px-4">
+            <div class="text-center group">
+                <div class="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500">
+                    <i class="fas fa-shield-alt text-2xl text-gold"></i>
+                </div>
+                <h3 class="text-xs font-bold tracking-[0.2em] uppercase text-white mb-4">No Deposit</h3>
+                <p class="text-[11px] text-low-contrast leading-relaxed font-light">จ่ายเงินที่หน้างานเท่านั้น ไม่มีการโอนมัดจำล่วงหน้า ปลอดภัย 100%</p>
             </div>
-            <div class="text-center space-y-4">
-                <i class="fas fa-gem text-2xl text-gold/80"></i>
-                <h3 class="text-sm font-medium tracking-widest uppercase text-white/90">Verified Quality</h3>
-                <p class="text-xs text-white/40 leading-relaxed font-light">โปรไฟล์ผ่านการคัดสรร ยืนยันตัวตนว่าตรงปกและพร้อมดูแลระดับ VIP</p>
+            <div class="text-center group">
+                <div class="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500">
+                    <i class="fas fa-gem text-2xl text-gold"></i>
+                </div>
+                <h3 class="text-xs font-bold tracking-[0.2em] uppercase text-white mb-4">Quality Verified</h3>
+                <p class="text-[11px] text-low-contrast leading-relaxed font-light">คัดกรองเฉพาะงานคุณภาพ ตรงปก พร้อมการดูแลระดับพรีเมียม</p>
             </div>
-            <div class="text-center space-y-4">
-                <i class="fas fa-lock text-2xl text-gold/80"></i>
-                <h3 class="text-sm font-medium tracking-widest uppercase text-white/90">Absolute Privacy</h3>
-                <p class="text-xs text-white/40 leading-relaxed font-light">ข้อมูลของลูกค้าจะถูกเก็บเป็นความลับสูงสุด ปลอดภัย 100%</p>
+            <div class="text-center group">
+                <div class="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500">
+                    <i class="fas fa-fingerprint text-2xl text-gold"></i>
+                </div>
+                <h3 class="text-xs font-bold tracking-[0.2em] uppercase text-white mb-4">Privacy Focus</h3>
+                <p class="text-[11px] text-low-contrast leading-relaxed font-light">เราให้ความสำคัญกับความเป็นส่วนตัวของลูกค้าเป็นอันดับหนึ่ง</p>
             </div>
         </section>
 
@@ -531,27 +548,25 @@ export default async (request, context) => {
         </div>
     </main>
 
-    <footer class="border-t border-white/5 bg-[#050505] pt-20 pb-10">
+    <footer class="border-t border-white/5 bg-[#050505] pt-24 pb-12 mt-20">
         <div class="container mx-auto px-6 lg:px-12 max-w-[1400px]">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 mb-16">
-                
-                <div class="md:col-span-5 space-y-6">
-                    <h3 class="text-2xl font-serif tracking-[0.2em] text-white">
-                        SIDELINE<span class="text-gold italic ml-1">CM</span>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8 mb-20">
+                <div class="md:col-span-5 space-y-8">
+                    <h3 class="text-2xl font-serif tracking-[0.3em] text-white uppercase">
+                        SIDELINE<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
                     </h3>
-                    <p class="text-xs text-white/40 leading-relaxed max-w-sm font-light">
-                        The ultimate directory for premium escort services in ${provinceName}. 
-                        Curated selections for exclusive experiences.
+                    <p class="text-[12px] text-low-contrast leading-relaxed max-w-sm font-light tracking-wide">
+                        Thailand's most prestigious directory for premium adult services. We redefine the standard of excellence and safety.
                     </p>
-                    <div class="flex gap-4 pt-4">
-                        <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" class="text-white/30 hover:text-gold transition-colors text-lg"><i class="fab fa-x-twitter"></i></a>
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="text-white/30 hover:text-gold transition-colors text-lg"><i class="fab fa-line"></i></a>
+                    <div class="flex gap-6">
+                        <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" class="text-white/40 hover:text-gold transition-all text-xl"><i class="fab fa-x-twitter"></i></a>
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="text-white/40 hover:text-gold transition-all text-xl"><i class="fab fa-line"></i></a>
                     </div>
                 </div>
 
                 <div class="md:col-span-3">
-                    <h4 class="text-[9px] font-semibold text-white/30 tracking-[0.3em] uppercase mb-6">Explore</h4>
-                    <ul class="space-y-4 text-xs text-white/60 font-light">
+                    <h4 class="text-[10px] font-bold text-white/20 tracking-[0.4em] uppercase mb-8">Navigation</h4>
+                    <ul class="space-y-4 text-[12px] text-low-contrast font-medium uppercase tracking-widest">
                         <li><a href="/" class="hover:text-gold transition-colors">Home</a></li>
                         <li><a href="/profiles" class="hover:text-gold transition-colors">Directory</a></li>
                         <li><a href="/location/chiangmai" class="hover:text-gold transition-colors">Chiang Mai</a></li>
@@ -559,45 +574,53 @@ export default async (request, context) => {
                 </div>
 
                 <div class="md:col-span-4">
-                    <h4 class="text-[9px] font-semibold text-white/30 tracking-[0.3em] uppercase mb-6">Disclaimer</h4>
-                    <p class="text-[10px] text-white/30 leading-relaxed font-light mb-4">
-                        This site contains adult material. All models depicted are 20 years of age or older. 
-                        We do not act as an agency; we simply provide a high-end directory platform.
+                    <h4 class="text-[10px] font-bold text-white/20 tracking-[0.4em] uppercase mb-8">Legal & Privacy</h4>
+                    <p class="text-[11px] text-very-low-contrast leading-relaxed font-light mb-6 uppercase tracking-wider">
+                        Models are independent contractors. You must be 20+ to enter. We provide information only and do not facilitate transactions.
                     </p>
-                    <span class="inline-block border border-white/10 px-3 py-1 rounded text-[9px] text-white/50 uppercase tracking-widest">
-                        20+ Only
-                    </span>
+                    <div class="inline-flex items-center gap-2 border border-white/10 px-4 py-1.5 rounded-full text-[10px] text-gold uppercase tracking-[0.2em] font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span> 20+ Only
+                    </div>
                 </div>
             </div>
 
-            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] text-white/30 uppercase tracking-widest">
-                <p>&copy; ${CURRENT_YEAR} SIDELINE CHIANGMAI. ALL RIGHTS RESERVED.</p>
-                <div class="flex gap-6">
-                    <span>Premium Directory</span>
-                    <span>Secure Platform</span>
+            <div class="border-t border-white/5 pt-16 mb-20">
+                <h4 class="text-[10px] font-bold text-white/20 tracking-[0.5em] uppercase mb-12 text-center">Service Coverage</h4>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    ${provinceLinksHtml}
+                </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-very-low-contrast uppercase tracking-[0.3em] font-medium">
+                <p>&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY.</p>
+                <div class="flex gap-8">
+                    <span class="hover:text-gold transition-colors cursor-pointer">Terms</span>
+                    <span class="hover:text-gold transition-colors cursor-pointer">Privacy</span>
                 </div>
             </div>
         </div>
     </footer>
 
-    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="fixed bottom-8 right-8 bg-[#0a0a0a] border border-white/10 hover:border-[#06c755] px-6 py-3.5 rounded-full flex items-center gap-3 text-white shadow-[0_10px_40px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-all duration-300 z-[90] group">
-        <i class="fab fa-line text-[#06c755] text-xl group-hover:scale-110 transition-transform"></i>
-        <span class="text-xs font-medium tracking-wider uppercase">Contact Us</span>
+    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="fixed bottom-10 right-10 bg-[#070707] border border-white/10 hover:border-gold/50 p-1.5 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:-translate-y-2 transition-all duration-500 z-[90] group">
+        <div class="bg-[#06c755] rounded-full px-6 py-3 flex items-center gap-3">
+            <i class="fab fa-line text-white text-2xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-[11px] text-white font-bold tracking-[0.2em] uppercase">Line Us</span>
+        </div>
     </a>
 
     <script>
-        // Scroll effect for navbar (Minimalist transition)
         document.addEventListener('DOMContentLoaded', () => {
             const nav = document.querySelector('nav');
-            window.addEventListener('scroll', () => {
+            const handleScroll = () => {
                 if (window.scrollY > 50) { 
-                    nav.style.background = 'rgba(7, 7, 7, 0.95)';
-                    nav.style.padding = '0.75rem 0';
+                    nav.classList.add('py-3', 'shadow-2xl');
+                    nav.style.background = 'rgba(7, 7, 7, 0.98)';
                 } else { 
-                    nav.style.background = 'rgba(7, 7, 7, 0.7)';
-                    nav.style.padding = '1rem 0';
+                    nav.classList.remove('py-3', 'shadow-2xl');
+                    nav.style.background = 'rgba(7, 7, 7, 0.75)';
                 }
-            }, { passive: true });
+            };
+            window.addEventListener('scroll', handleScroll, { passive: true });
         });
     </script>
 </body>
