@@ -182,7 +182,7 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         const provinceLinksHtml = allProvinces && allProvinces.length > 0 
             ? allProvinces.map(p => `
                 <a href="/location/${p.key}" 
-                   class="text-[10px] text-white/40 hover:text-gold transition-all duration-300 border-b border-transparent hover:border-gold/30 pb-0.5 whitespace-nowrap">
+                   class="text-[10px] text-white/70 hover:text-gold transition-all duration-300 border-b border-transparent hover:border-gold/30 pb-0.5 py-1.5 whitespace-nowrap">
                    ไซด์ไลน์${p.nameThai}
                 </a>
             `).join('')
@@ -574,27 +574,27 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                 <h3 class="text-2xl font-serif tracking-[0.3em] text-white uppercase">
                     SIDELINE<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
                 </h3>
-                <p class="text-[12px] text-white/70 leading-relaxed max-w-sm font-light tracking-wide">
+                <p class="text-[12px] text-white/80 leading-relaxed max-w-sm font-light tracking-wide">
                     Thailand's most prestigious directory for premium adult services. We redefine the standard of excellence and safety.
                 </p>
                 <div class="flex gap-6">
-                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" aria-label="Twitter" class="text-white/60 hover:text-gold transition-all text-xl"><i class="fab fa-x-twitter"></i></a>
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="Line" class="text-white/60 hover:text-gold transition-all text-xl"><i class="fab fa-line"></i></a>
+                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" aria-label="Twitter" class="text-white/70 hover:text-gold transition-all text-xl"><i class="fab fa-x-twitter"></i></a>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="Line" class="text-white/70 hover:text-gold transition-all text-xl"><i class="fab fa-line"></i></a>
                 </div>
             </div>
 
             <div class="md:col-span-3">
-                <h4 class="text-[10px] font-bold text-white/50 tracking-[0.4em] uppercase mb-8">Navigation</h4>
-                <ul class="space-y-4 text-[12px] text-white/80 font-medium uppercase tracking-widest">
-                    <li><a href="/" class="underline decoration-white/20 underline-offset-4 hover:text-gold transition-colors">Home</a></li>
-                    <li><a href="/profiles" class="underline decoration-white/20 underline-offset-4 hover:text-gold transition-colors">Directory</a></li>
-                    <li><a href="/location/chiangmai" class="underline decoration-white/20 underline-offset-4 hover:text-gold transition-colors">Chiang Mai</a></li>
+                <h4 class="text-[10px] font-bold text-white/70 tracking-[0.4em] uppercase mb-8">Navigation</h4>
+                <ul class="space-y-4 text-[12px] text-white/90 font-medium uppercase tracking-widest">
+                    <li><a href="/" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Home</a></li>
+                    <li><a href="/profiles" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Directory</a></li>
+                    <li><a href="/location/chiangmai" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Chiang Mai</a></li>
                 </ul>
             </div>
 
             <div class="md:col-span-4">
-                <h4 class="text-[10px] font-bold text-white/50 tracking-[0.4em] uppercase mb-8">Legal & Privacy</h4>
-                <p class="text-[11px] text-white/60 leading-relaxed font-light mb-6 uppercase tracking-wider">
+                <h4 class="text-[10px] font-bold text-white/70 tracking-[0.4em] uppercase mb-8">Legal & Privacy</h4>
+                <p class="text-[11px] text-white/80 leading-relaxed font-light mb-6 uppercase tracking-wider">
                     Models are independent contractors. You must be 20+ to enter. We provide information only and do not facilitate transactions.
                 </p>
                 <div class="inline-flex items-center gap-2 border border-gold/40 px-4 py-1.5 rounded-full text-[10px] text-gold uppercase tracking-[0.2em] font-semibold">
@@ -604,44 +604,45 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         </div>
 
         <div class="border-t border-white/10 pt-16 mb-20">
-            <h4 class="text-[10px] font-bold text-white/50 tracking-[0.5em] uppercase mb-12 text-center">Service Coverage</h4>
+            <h4 class="text-[10px] font-bold text-white/70 tracking-[0.5em] uppercase mb-12 text-center">Service Coverage</h4>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-center">
                 ${provinceLinksHtml}
             </div>
         </div>
 
-        <div class="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-white/40 uppercase tracking-[0.3em] font-medium">
+        <div class="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-white/70 uppercase tracking-[0.3em] font-medium">
             <p>&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY.</p>
             <div class="flex gap-8">
-                <a href="/terms" class="hover:text-gold underline decoration-white/10 underline-offset-4 transition-colors">Terms</a>
-                <a href="/privacy" class="hover:text-gold underline decoration-white/10 underline-offset-4 transition-colors">Privacy</a>
+                <a href="/terms" class="hover:text-gold underline decoration-white/30 underline-offset-4 transition-colors">Terms</a>
+                <a href="/privacy" class="hover:text-gold underline decoration-white/30 underline-offset-4 transition-colors">Privacy</a>
             </div>
         </div>
     </div>
 </footer>
 
-    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="fixed bottom-10 right-10 bg-[#070707] border border-white/10 hover:border-gold/50 p-1.5 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:-translate-y-2 transition-all duration-500 z-[90] group">
-        <div class="bg-[#06c755] rounded-full px-6 py-3 flex items-center gap-3">
-            <i class="fab fa-line text-white text-2xl group-hover:scale-110 transition-transform"></i>
-            <span class="text-[11px] text-white font-bold tracking-[0.2em] uppercase">Line Us</span>
-        </div>
-    </a>
+<a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="fixed bottom-10 right-10 bg-[#070707] border border-white/20 hover:border-gold/50 p-1.5 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:-translate-y-2 transition-all duration-500 z-[90] group">
+    <div class="bg-[#06c755] rounded-full px-6 py-3 flex items-center gap-3">
+        <i class="fab fa-line text-white text-2xl group-hover:scale-110 transition-transform"></i>
+        <span class="text-[11px] text-white font-bold tracking-[0.2em] uppercase">Line Us</span>
+    </div>
+</a>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const nav = document.querySelector('nav');
-            const handleScroll = () => {
-                if (window.scrollY > 50) { 
-                    nav.classList.add('py-3', 'shadow-2xl');
-                    nav.style.background = 'rgba(7, 7, 7, 0.98)';
-                } else { 
-                    nav.classList.remove('py-3', 'shadow-2xl');
-                    nav.style.background = 'rgba(7, 7, 7, 0.75)';
-                }
-            };
-            window.addEventListener('scroll', handleScroll, { passive: true });
-        });
-    </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nav = document.querySelector('nav');
+        if (!nav) return; // ป้องกัน error ถ้าไม่มี nav ในหน้านั้น
+        const handleScroll = () => {
+            if (window.scrollY > 50) { 
+                nav.classList.add('py-3', 'shadow-2xl');
+                nav.style.background = 'rgba(7, 7, 7, 0.98)';
+            } else { 
+                nav.classList.remove('py-3', 'shadow-2xl');
+                nav.style.background = 'rgba(7, 7, 7, 0.75)';
+            }
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+    });
+</script>
 </body>
 </html>`;
 
