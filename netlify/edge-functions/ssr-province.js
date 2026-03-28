@@ -487,22 +487,41 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         </div>
     </nav>
 
-    <header class="relative pt-44 pb-24 px-6 hero-glow flex flex-col items-center justify-center text-center overflow-hidden">
-        <div class="max-w-4xl mx-auto space-y-10 z-10">
-            <div class="inline-block px-5 py-2 border border-gold/30 rounded-full text-[10px] font-semibold tracking-[0.3em] uppercase text-gold bg-gold/5 mb-2">
-                Premium Directory • ${CURRENT_MONTH}
-            </div>
-            
-            <h1 class="font-serif text-5xl md:text-6xl lg:text-8xl leading-[1.1] text-white">
-                <span class="block font-light opacity-90">ไซด์ไลน์${provinceName}</span>
-                <span class="block text-2xl md:text-4xl lg:text-5xl mt-6 font-sans font-extralight tracking-[0.15em] text-white/50">High-End Escort Service</span>
-            </h1>
-            
-            <div class="flex flex-wrap justify-center gap-3 pt-6">
-                ${zones.slice(0, 6).map(z => `<a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" class="text-[10px] px-6 py-2.5 rounded-full border border-white/10 font-medium tracking-widest hover:border-gold hover:text-gold text-white/40 hover:bg-gold/5 transition-all duration-500">#${z.toUpperCase()}</a>`).join('')}
-            </div>
+<header class="relative pt-44 pb-24 px-6 hero-glow flex flex-col items-center justify-center text-center overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-50"></div>
+
+    <div class="max-w-5xl mx-auto space-y-10 z-10">
+        <div class="inline-block px-5 py-2 border border-gold/30 rounded-full text-[10px] font-semibold tracking-[0.3em] uppercase text-gold bg-gold/10 mb-2 animate-pulse">
+            อัปเดตล่าสุด • ${CURRENT_MONTH} ${new Date().getFullYear() + 543}
         </div>
-    </header>
+        
+        <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl leading-[1.1] text-white">
+            <span class="block font-light opacity-95 tracking-tight">
+                ไซด์ไลน์<span class="text-gold font-normal">${provinceName}</span>
+            </span>
+            <span class="block text-xl md:text-3xl lg:text-4xl mt-8 font-sans font-light tracking-[0.1em] text-white/60 max-w-3xl mx-auto leading-relaxed">
+                แหล่งรวมน้องๆ <span class="text-white/80">งานพรีเมียม ตรงปก</span> 
+                <span class="hidden md:inline">มั่นใจความปลอดภัย</span> 
+                <span class="text-gold/80 italic">ไม่ต้องโอนมัดจำ</span>
+            </span>
+        </h1>
+        
+        <div class="flex flex-wrap justify-center gap-3 pt-8 max-w-3xl mx-auto">
+            ${zones.slice(0, 8).map(z => `
+                <a href="/search?zone=${encodeURIComponent(z)}&province=${provinceKey}" 
+                   title="หาไซด์ไลน์ ${z} ${provinceName}"
+                   class="text-[11px] px-6 py-2.5 rounded-full border border-white/10 font-medium tracking-widest hover:border-gold hover:text-gold text-white/50 hover:bg-gold/5 transition-all duration-500 backdrop-blur-sm">
+                   #${z.toUpperCase()}
+                </a>
+            `).join('')}
+        </div>
+
+        <p class="text-[10px] text-white/30 tracking-[0.2em] uppercase pt-4">
+            <i class="fas fa-check-circle text-gold/50 mr-2"></i> 
+            Verified ${safeProfiles.length} Profiles in ${provinceName}
+        </p>
+    </div>
+</header>
 
     <main class="container mx-auto px-6 lg:px-12 max-w-[1400px] pb-32">
         <div class="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
