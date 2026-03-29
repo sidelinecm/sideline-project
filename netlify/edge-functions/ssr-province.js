@@ -683,3 +683,9 @@ const response = new Response(html, {
 });
 
 return response;
+// 🔴 จุดที่ต้องเพิ่ม (ถ้ายังไม่มี):
+    } catch (error) {
+        console.error("SSR Error:", error);
+        return new Response("Internal Server Error", { status: 500 });
+    }
+};
