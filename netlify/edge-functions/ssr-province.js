@@ -662,7 +662,7 @@ a:hover {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const nav = document.querySelector('nav');
-        if (!nav) return; // ป้องกัน error ถ้าไม่มี nav ในหน้านั้น
+        if (!nav) return;
         const handleScroll = () => {
             if (window.scrollY > 50) { 
                 nav.classList.add('py-3', 'shadow-2xl');
@@ -676,10 +676,10 @@ a:hover {
     });
 </script>
 </body>
-</html>`;
+</html>`;  // <- ✅ backtick ก่อน semicolon
 
-const cacheTtlSeconds = 60 * 5;        // 5 นาที (s-maxage)
-const staleTtlSeconds = 60 * 60;       // 1 ชั่วโมง stale-while-revalidate
+const cacheTtlSeconds = 60 * 5;
+const staleTtlSeconds = 60 * 60;
 
 const response = new Response(html, {
     headers: {
