@@ -409,13 +409,21 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
-    <link rel="preload" href="${firstImage}" as="image" fetchpriority="high">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Prompt:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
+<link rel="preload" href="${firstImage}" as="image" fetchpriority="high">
+
+<link rel="preload" href="https://fonts.gstatic.com/s/outfit/v11/QGYvz_MVcyn370aHd8BM.woff2" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Prompt:wght@300;400;500&display=swap">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+      media="print" onload="this.media='all'">
+<noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</noscript>
 
     <script type="application/ld+json">
         ${JSON.stringify(schemaData)}
@@ -436,41 +444,123 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         };
     </script>
 
-    <style>
-        /* 🎨 Critical UI & Performance Style */
-        :root { --bg: #070707; --gold: #C5A059; }
-        body { 
-            background-color: var(--bg); 
-            color: #fafafa; 
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-            margin: 0;
-            font-family: 'Outfit', 'Prompt', sans-serif;
-        }
-        .nav-glass {
-            background: rgba(7, 7, 7, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .hero-glow {
-            background: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.12) 0%, rgba(7, 7, 7, 0) 70%);
-        }
-        .profile-card-shadow {
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .profile-card-shadow:hover { transform: translateY(-8px); }
-        
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+<style>
+    /* 🎨 Critical UI & Performance Style */
+    :root { 
+        --bg: #070707; 
+        --gold: #C5A059; 
+        --gold-light: #D4AF37;
+        /* แก้ปัญหา Contrast: ใช้สีขาวที่สว่างขึ้นสำหรับข้อความเล็ก */
+        --text-main: #FFFFFF;
+        --text-muted: #BCBCBC; /* ปรับจาก 0.55 เป็นค่าที่อ่านง่ายขึ้นแต่ยังดูหรู */
+        --line-green: #059641; /* เข้มขึ้นเพื่อให้ผ่านเกณฑ์ Accessibility */
+    }
 
-        /* Fix Contrast for Small Text */
-        .text-low-contrast { color: rgba(255, 255, 255, 0.55); }
-        .text-very-low-contrast { color: rgba(255, 255, 255, 0.4); }
-    </style>
+    /* เนื้อหาหลัก: ปรับปรุง Rendering */
+    body { 
+        background-color: var(--bg); 
+        color: var(--text-main); 
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+        margin: 0;
+        /* ป้องกัน Layout Shift โดยการจองฟอนต์สำรองที่ขนาดใกล้เคียงกัน */
+        font-family: 'Outfit', 'Prompt', system-ui, -apple-system, sans-serif;
+        line-height: 1.5;
+        text-rendering: optimizeSpeed;
+    }
+
+    /* Navbar: ใช้ hardware acceleration เพื่อความลื่นไหล */
+    .nav-glass {
+        background: rgba(7, 7, 7, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        will-change: transform, background; /* บอกบราวเซอร์ล่วงหน้าว่าจะมีการเปลี่ยนแปลง */
+    }
+
+    /* ปรับแต่ง Class สำหรับตอน Scroll (ทำงานคู่กับ JS requestAnimationFrame) */
+    .nav-scrolled {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+        background: rgba(7, 7, 7, 0.95) !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* Hero Section: ปรับปรุง Gradient ให้เบาเครื่องขึ้น */
+    .hero-glow {
+        background: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.15) 0%, rgba(7, 7, 7, 0) 75%);
+        contain: paint; /* จำกัดขอบเขตการวาดเพื่อเพิ่ม performance */
+    }
+
+    /* Profile Cards: ใช้ Transform แทนการขยับ Layout */
+    .profile-card-shadow {
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
+        transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        will-change: transform;
+        backface-visibility: hidden; /* ลดอาการภาพสั่นในบางบราวเซอร์ */
+    }
+    
+    .profile-card-shadow:hover { 
+        transform: translateY(-8px) scale(1.01); 
+    }
+
+    /* Floating Line Button: แก้ปัญหา CLS และ Contrast */
+    .line-float-btn {
+        width: 155px; /* ระบุขนาดคงที่ */
+        height: 50px;
+        contain: layout size;
+    }
+    .line-bg-optimized {
+        background-color: var(--line-green);
+        box-shadow: 0 15px 45px rgba(5, 150, 65, 0.3);
+    }
+
+    /* Custom Scrollbar: ทำให้เรียบเนียน */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { 
+        background: #333; 
+        border-radius: 10px;
+        transition: background 0.3s;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+    /* ✅ แก้ไขปัญหา Contrast ตามรายงาน (Accessibility Fix) */
+    /* เดิม 0.55/0.4 อ่านยากมากบนพื้นดำ */
+    .text-low-contrast { color: var(--text-muted); } 
+    .text-very-low-contrast { color: rgba(255, 255, 255, 0.5); }
+
+    /* Utility สำหรับป้องกันการกระตุกของภาพ (CLS Fix) */
+    img {
+        max-width: 100%;
+        height: auto;
+        font-style: italic; /* แสดง alt text สวยๆ ถ้าภาพโหลดไม่ขึ้น */
+        vertical-align: middle;
+        shape-margin: 0.75rem;
+    }
+    /* จองพื้นที่ปุ่ม LINE เพื่อแก้ CLS */
+.line-float-btn {
+    width: 156px; /* ขนาดโดยประมาณของปุ่มรวม padding */
+    height: 54px;
+    display: block;
+    contain: layout style; /* บอกบราวเซอร์ว่าไม่ต้องคำนวณเลย์เอาต์ข้างนอกใหม่เมื่อปุ่มขยับ */
+}
+
+/* สไตล์ของ Nav เมื่อสโครล */
+.nav-glass {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: background, padding; /* เตรียม GPU ให้พร้อม */
+}
+
+.nav-scrolled {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+    background: rgba(7, 7, 7, 0.98) !important;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+</style>
 </head>
 
 <body class="selection:bg-gold/30 selection:text-white">
@@ -620,27 +710,43 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
     </div>
 </footer>
 
-<a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="fixed bottom-10 right-10 bg-[#070707] border border-white/20 hover:border-gold/50 p-1.5 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:-translate-y-2 transition-all duration-500 z-[90] group">
-    <div class="bg-[#06c755] rounded-full px-6 py-3 flex items-center gap-3">
+<a href="${CONFIG.SOCIAL_LINKS.line}" 
+   target="_blank" 
+   rel="noopener noreferrer"
+   class="fixed bottom-10 right-10 p-1.5 rounded-full z-[90] group line-float-btn transition-all duration-500 hover:-translate-y-2"
+   aria-label="ติดต่อเราผ่าน LINE">
+    <div class="bg-[#059641] border border-white/10 rounded-full px-6 py-3 flex items-center gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
         <i class="fab fa-line text-white text-2xl group-hover:scale-110 transition-transform"></i>
-        <span class="text-[11px] text-white font-bold tracking-[0.2em] uppercase">Line Us</span>
+        <span class="text-[12px] text-white font-bold tracking-[0.2em] uppercase">Line Us</span>
     </div>
 </a>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const nav = document.querySelector('nav');
-        if (!nav) return; // ป้องกัน error ถ้าไม่มี nav ในหน้านั้น
-        const handleScroll = () => {
-            if (window.scrollY > 50) { 
-                nav.classList.add('py-3', 'shadow-2xl');
-                nav.style.background = 'rgba(7, 7, 7, 0.98)';
-            } else { 
-                nav.classList.remove('py-3', 'shadow-2xl');
-                nav.style.background = 'rgba(7, 7, 7, 0.75)';
+        if (!nav) return;
+
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        const updateNav = () => {
+            // ใช้การเพิ่ม/ลบ Class แทนการเขียน Style โดยตรง
+            if (window.scrollY > 50) {
+                nav.classList.add('nav-scrolled');
+            } else {
+                nav.classList.remove('nav-scrolled');
             }
+            ticking = false;
         };
-        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            // เทคนิค Throttling ด้วย requestAnimationFrame 
+            // ช่วยลดภาระ CPU และแก้ปัญหา Forced Reflow ได้ขาด
+            if (!ticking) {
+                window.requestAnimationFrame(updateNav);
+                ticking = true;
+            }
+        }, { passive: true }); // passive: true ช่วยให้การสโครลบนมือถือลื่นขึ้นมาก
     });
 </script>
 </body>
