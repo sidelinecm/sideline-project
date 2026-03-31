@@ -1,10 +1,16 @@
+# ==========================================
+# 1. Build Settings
+# ==========================================
 [build]
-  publish = "." 
-  functions = "netlify/functions"
-  [build.processing]
-    skip_processing = false
+  publish = "."                  # โฟลเดอร์ที่เก็บไฟล์ index.html (Root)
+  functions = "netlify/functions" # โฟลเดอร์สำหรับ Serverless Functions (ถ้ามี)
 
-# Headers ใหม่ (แทนที่ส่วน [1] เดิม)
+[build.processing]
+  skip_processing = false        # อนุญาตให้ Netlify ช่วย Optimize ไฟล์ (เช่น Minify)
+
+# ==========================================
+# 2. Security Headers (Best Practices)
+# ==========================================
 [[headers]]
   for = "/*"
   [headers.values]
@@ -16,73 +22,60 @@
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# --- [2] Edge Functions ---
-# Netlify จะรัน Edge Functions ก่อน Redirects เสมอ
-# ตรวจสอบให้แน่ใจว่าไฟล์ชื่อ sitemap.js, render-bot.js, ssr-province.js อยู่ใน folder netlify/edge-functions
-
+# ==========================================
+# 3. Edge Functions (รันก่อน Redirects เสมอ)
+# ==========================================
+# ตรวจสอบไฟล์ใน: netlify/edge-functions/
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "render-bot"
+  function = "render-bot"        # สำหรับทำ Dynamic Rendering / SEO
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "ssr-province"
+  function = "ssr-province"      # สำหรับ Server-side Logic ของจังหวัด
   path = "/location/*"
 
-# --- [3] Redirects ---
+# ==========================================
+# 4. Redirects & Rewrite Rules
+# ==========================================
 
-# 3.1 บังคับ HTTPS (SEO Standard)
+# --- 4.1 Force HTTPS (SEO Standard) ---
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
 
-# 3.2 จัดการ Link เก่าที่เสีย (สำคัญมากสำหรับคะแนน SEO เดิม)
-[[redirects]]
-  from = "/sideline/nongmaprang-154-154-154"
-  to = "/sideline/nongmaprang-154"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/sideline/obwi-96-96-96"
-  to = "/sideline/obwi-96"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/sideline/pay-136-136-136"
-  to = "/sideline/pay-136"
-  status = 301
-  force = true
-
-# ดักจับลิงก์ภาษาไทย
+# --- 4.2 จัดการ URL ภาษาไทย (SEO Fix) ---
+# แก้ไขลิงก์ที่ถูก Encode มาให้เป็น Clean URL
 [[redirects]]
   from = "/sideline/%E0%B8%9B%E0%B8%B9%E0%B9%80%E0%B8%9B%E0%B9%82"
   to = "/sideline/puep-87"
   status = 301
 
-# จัดการนามสกุลไฟล์เก่า .html
+# --- 4.3 จัดการนามสกุลไฟล์เก่า (.html) ---
+# แก้ไขจาก * เป็น :splat เพื่อให้ส่งค่าไปยังปลายทางได้ถูกต้อง
 [[redirects]]
-  from = "/profiles/*.html"
+  from = "/profiles/:splat.html"
   to = "/profiles/:splat"
   status = 301
   force = true
 
+# --- 4.4 จัดการ Query Parameters (Location Filtering) ---
+# เปลี่ยนจาก /location/something?province=bangkok -> /location/bangkok
 [[redirects]]
-  query = {province = ":p"}   # ตัวนี้จะจับคำว่า lampang, chiangmai, bangkok ฯลฯ
-  from = "/location/:any"     # ตัวนี้จะจับ path อะไรก็ได้หลัง /location/
-  to = "/location/:p"         # แล้วส่งไปที่ path ใหม่โดยใช้ค่าจาก province
+  query = {province = ":p"}
+  from = "/location/*"
+  to = "/location/:p"
   status = 301
   force = true
 
-# --- [4] SPA Fallback (กฎสุดท้าย) ---
-# สำคัญ: ถ้า Edge Function (render-bot) สั่ง context.next() 
-# มันจะหลุดมาที่กฎนี้ เพื่อให้ Client-Side Rendering ทำงานต่อ (ไม่เกิดหน้าขาว)
+# --- 4.5 SPA Fallback (กฎสุดท้าย) ---
+# สำคัญ: ต้องอยู่ล่างสุดเสมอ!
+# ถ้าไม่มีไฟล์จริง และ Edge Function ปล่อยผ่าน (Next) จะส่งไปที่ index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
