@@ -713,11 +713,22 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
 <a href="${CONFIG.SOCIAL_LINKS.line}" 
    target="_blank" 
    rel="noopener noreferrer"
-   class="fixed bottom-10 right-10 p-1.5 rounded-full z-[90] group line-float-btn transition-all duration-500 hover:-translate-y-2"
-   aria-label="ติดต่อเราผ่าน LINE">
-    <div class="bg-[#059641] border border-white/10 rounded-full px-6 py-3 flex items-center gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-        <i class="fab fa-line text-white text-2xl group-hover:scale-110 transition-transform"></i>
-        <span class="text-[12px] text-white font-bold tracking-[0.2em] uppercase">Line Us</span>
+   class="fixed bottom-10 right-10 z-[90] group transition-all duration-500 hover:-translate-y-2 focus:outline-none focus:ring-4 focus:ring-green-500/50 rounded-full"
+   aria-label="ติดต่อสอบถามข้อมูลเพิ่มเติมผ่าน LINE">
+    
+    <div class="bg-[#06b64d] border border-white/20 rounded-full px-5 py-3 flex items-center gap-3 shadow-[0_15px_30px_-5px_rgba(6,182,77,0.4)] hover:shadow-[0_20px_40px_-5px_rgba(6,182,77,0.5)] transition-shadow duration-300">
+        <div class="relative flex items-center justify-center">
+            <i class="fab fa-line text-white text-3xl group-hover:scale-110 transition-transform duration-300"></i>
+            <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+        </div>
+
+        <div class="flex flex-col items-start leading-tight">
+            <span class="text-[10px] text-white/80 uppercase tracking-widest font-medium">Contact</span>
+            <span class="text-[15px] text-white font-bold tracking-tight">ติดต่อสอบถาม</span>
+        </div>
     </div>
 </a>
 
