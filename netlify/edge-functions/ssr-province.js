@@ -608,7 +608,7 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
     <main class="container mx-auto px-6 lg:px-12 max-w-[1400px] pb-32">
         <div class="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
             <h2 class="text-2xl md:text-3xl font-serif text-white tracking-wide">
-                Exclusive <span class="text-gold italic">Profiles</span>
+                โปรไฟล์น้องๆ <span class="text-gold italic">รับงาน</span>
             </h2>
             <div class="flex items-center gap-3">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
@@ -654,7 +654,7 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8 mb-20">
             <div class="md:col-span-5 space-y-8">
                 <h3 class="text-2xl font-serif tracking-[0.3em] text-white uppercase">
-                    SIDELINE<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
+                    ไซด์ไลน์<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
                 </h3>
                 <p class="text-[12px] text-white/80 leading-relaxed max-w-sm font-light tracking-wide">
                     Thailand's most prestigious directory for premium adult services. We redefine the standard of excellence and safety.
@@ -670,7 +670,7 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                 <ul class="space-y-4 text-[12px] text-white/90 font-medium uppercase tracking-widest">
                     <li><a href="/" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Home</a></li>
                     <li><a href="/profiles" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Directory</a></li>
-                    <li><a href="/location/chiangmai" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Chiang Mai</a></li>
+                    <li><a href="/location/chiangmai" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">เชียงใหม่</a></li>
                 </ul>
             </div>
 
