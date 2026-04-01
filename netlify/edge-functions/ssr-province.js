@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // ==========================================
-// 1. SYSTEM CONFIGURATION
+// 1. SYSTEM CONFIGURATION & DATA (ปรับปรุง SEO & Uniqueness)
 // ==========================================
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
@@ -24,8 +24,12 @@ const PROVINCE_SEO_DATA = {
     'chiangmai': {
         zones:['นิมมาน', 'สันติธรรม', 'ช้างเผือก', 'เจ็ดยอด', 'แม่โจ้', 'หางดง', 'สันทราย', 'รวมโชค', 'คูเมือง', 'หลังมอ'],
         lsi:['สาวเหนือ', 'นักศึกษา มช.', 'ตัวท็อปเชียงใหม่', 'เด็กเอ็นเชียงใหม่', 'ไซด์ไลน์เชียงใหม่', 'คนเมือง', 'ฟิวแฟนเชียงใหม่', 'รับงานเมืองเชียงใหม่'],
+        intents:['ชั่วคราว', 'ค้างคืน', 'เพื่อนเที่ยวคาเฟ่', 'N-VIP ชงเหล้า', 'ปาร์ตี้พูลวิลล่า'],
+        traits:['ผิวขาวจั๊วะ', 'หน้าหมวย', 'ตัวเล็กสเปคป๋า', 'หุ่นนางแบบ', 'พูดเหนืออ้อนๆ', 'หน้าอกตู้ม'],
         hotels:['โรงแรมแถวนิมมาน', 'ที่พักใกล้คูเมือง', 'คอนโดเจ็ดยอด', 'รีสอร์ทแม่ริม'],
         services:['รับงานชั่วคราว-ค้างคืน', 'ดูแลฟิวแฟนเดินนิมมาน', 'ปาร์ตี้พูลวิลล่าเชียงใหม่', 'นวดผ่อนคลายส่วนตัว'],
+        avgPrice: "1,500 - 4,000",
+        uniqueIntro: "เชียงใหม่ไม่ได้มีดีแค่คาเฟ่และยอดดอย แต่ที่นี่ยังเป็นศูนย์รวมน้องๆ สาวเหนือผิวขาวออร่า พูดจาเจ้าคะเจ้าขา ที่พร้อมดูแลคุณแบบฟิวแฟนคลุกวงใน ไม่ว่าคุณจะพักอยู่โซนนิมมาน สันติธรรม หรือรีสอร์ทส่วนตัว เรามีทั้งน้องนักศึกษา มช. และพริตตี้ท้องถิ่นที่ผ่านการสกรีนความตรงปกมาแล้ว 100%",
         faqs:[
             { q: "หาไซด์ไลน์เชียงใหม่ โซนไหนเดินทางสะดวกสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นโซนที่น้องๆ รับงานเยอะที่สุด และมีโรงแรมระดับพรีเมียมรองรับมากมาย" },
             { q: "น้องๆ รับงานเชียงใหม่ มีโปรไฟล์แบบไหนบ้าง?", a: "เรามีตั้งแต่น้องนักศึกษา ไปจนถึงนางแบบสาวเหนือผิวขาวออร่า การันตีความตรงปกและมารยาทระดับ VIP ทุกคน" }
@@ -34,8 +38,12 @@ const PROVINCE_SEO_DATA = {
     'bangkok': {
         zones:['สุขุมวิท', 'รัชดา', 'ห้วยขวาง', 'ลาดพร้าว', 'สาทร', 'สีลม', 'ทองหล่อ', 'เอกมัย', 'ปิ่นเกล้า'],
         lsi:['พริตตี้ กทม.', 'นางแบบสาว', 'ตัวท็อปกรุงเทพ', 'เด็กเอ็น', 'ฟิวแฟนคลุกวงใน', 'รับงานกรุงเทพ', 'ไซด์ไลน์ กทม'],
+        intents:['ชั่วคราว', 'ค้างคืน', 'N-Vip ขึ้นห้อง', 'เพื่อนเที่ยวทองหล่อ', 'ปาร์ตี้ไพรเวท'],
+        traits:['ลูกคุณหนู', 'สายฝอ', 'ศัลยกรรมเป๊ะ', 'หุ่นสับ', 'เอาใจเก่ง', 'ลุคพนักงานออฟฟิศ'],
         hotels:['คอนโดติด BTS', 'โรงแรมย่านสุขุมวิท', 'ที่พักห้วยขวาง'],
         services:['ดูแลแบบฟิวแฟนเต็มรูปแบบ', 'เพื่อนเที่ยวกลางคืนทองหล่อ', 'รับงาน N-Vip'],
+        avgPrice: "2,000 - 5,000+",
+        uniqueIntro: "เมืองหลวงแห่งแสงสี ที่นี่คือศูนย์รวมตัวท็อปพรีเมียมที่สุดของประเทศ รับงานกรุงเทพครอบคลุมตั้งแต่สุขุมวิท ทองหล่อ ยันรัชดานัดง่าย เดินทางสะดวกด้วย BTS/MRT คัดเน้นๆ เฉพาะงานคุณภาพระดับ VIP ปลอดภัย ไร้กังวลเรื่องมิจฉาชีพ",
         faqs:[
             { q: "เด็กเอ็นกรุงเทพ ส่วนใหญ่รับงานโซนไหน?", a: "โซนยอดฮิตคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ นัดหมายตามคอนโดหรูติด BTS/MRT ได้สะดวก" },
             { q: "ความปลอดภัยในการเรียกไซด์ไลน์ กทม.?", a: "เราเน้นระบบ 'ไม่โอนมัดจำ' ลูกค้าเจอตัวน้อง จ่ายเงินหน้างานเท่านั้น ป้องกันมิจฉาชีพ 100%" }
@@ -44,8 +52,12 @@ const PROVINCE_SEO_DATA = {
     'default': {
         zones:['ตัวเมือง', 'พื้นที่ใกล้เคียง', 'โซนยอดฮิต', 'โรงแรมชั้นนำ', 'คอนโดหรู'],
         lsi:['นักศึกษา', 'พริตตี้พาร์ทไทม์', 'หุ่นนางแบบ', 'สาวสวยตรงปก', 'ดูแลฟิวแฟน'],
+        intents:['ชั่วคราว', 'ค้างคืน', 'เพื่อนเที่ยว', 'ฟิวแฟน'],
+        traits:['หน้าตาน่ารัก', 'หุ่นดี', 'เอาใจเก่ง', 'บริการประทับใจ'],
         hotels: ['โรงแรมในตัวเมือง', 'รีสอร์ทส่วนตัว'],
         services:['ฟิวแฟนส่วนตัว', 'เพื่อนเที่ยว-ดูหนัง', 'นวดผ่อนคลาย'],
+        avgPrice: "1,500 - 3,500",
+        uniqueIntro: "หากคุณกำลังมองหาช่วงเวลาการพักผ่อนเหนือระดับ เรารวบรวมน้องๆ เกรดพรีเมียมที่ผ่านการคัดสรรอย่างเข้มงวด การันตีความตรงปก 100% พร้อมให้บริการในพื้นที่ นัดหมายได้อย่างเป็นส่วนตัว ปลอดภัย ไม่มีการบังคับโอนมัดจำ",
         faqs:[
             { q: "ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายเงินสดหน้างานเมื่อเจอตัวน้องจริงเท่านั้น" },
             { q: "รับประกันความตรงปกไหม?", a: "รูปโปรไฟล์ทุกรูปผ่านการคัดกรอง ยืนยันตัวตนแล้วว่าตรงปกและพร้อมให้บริการระดับพรีเมียม" }
@@ -67,43 +79,75 @@ const optimizeImg = (path, width = 600, height = 800) => {
 };
 
 // ==========================================
-// 2. SEO HTML GENERATION (REFINED UI)
+// 2. SEO HTML GENERATION (Local Hub Content)
 // ==========================================
 const generateUltimateSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
     
     return `
-    <article class="text-left space-y-12 text-white/70 leading-loose font-light px-4 md:px-8">
-        <section class="text-center max-w-3xl mx-auto mb-16">
+    <article class="text-left space-y-16 text-white/70 leading-loose font-light px-4 md:px-8">
+        
+        <section class="text-center max-w-4xl mx-auto">
             <h2 class="text-2xl md:text-4xl font-serif text-white mb-6 tracking-wide">
                 สัมผัสประสบการณ์ <span class="text-gold italic">ไซด์ไลน์${provinceName}</span> ระดับพรีเมียม
             </h2>
-            <div class="w-12 h-[1px] bg-gold/50 mx-auto mb-6"></div>
-            <p class="text-sm md:text-base">
-                หากคุณกำลังมองหาช่วงเวลาการพักผ่อนเหนือระดับ <strong>รับงาน${provinceName}</strong> ของเราคือคำตอบ เรารวบรวม <strong>${data.lsi[1]}</strong> และ <strong>${data.lsi[2]}</strong> เกรดพรีเมียมที่ผ่านการคัดสรรอย่างเข้มงวด การันตีความตรงปก 100% พร้อมให้บริการในพื้นที่ <strong>${data.zones.slice(0,4).join(', ')}</strong> นัดหมายได้อย่างเป็นส่วนตัว
+            <div class="w-12 h-[1px] bg-gold/50 mx-auto mb-8"></div>
+            <p class="text-sm md:text-base md:leading-relaxed text-white/80">
+                ${data.uniqueIntro}
             </p>
         </section>
 
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="border border-white/5 bg-[#0a0a0a] p-8 rounded-2xl">
-                <h3 class="text-lg font-serif text-gold mb-6 tracking-widest uppercase">Premium Services</h3>
-                <ul class="space-y-4 text-sm">
-                    ${data.services.map(srv => `
-                        <li class="flex items-start gap-3">
-                            <span class="text-gold mt-1 text-[10px]"><i class="fas fa-circle"></i></span>
-                            <span class="text-white/80">${srv}</span>
-                        </li>
-                    `).join('')}
-                </ul>
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 border-y border-white/5 py-12 my-12">
+            <div>
+                <h3 class="text-xl font-serif text-gold mb-6 tracking-wide">เรทราคาเฉลี่ยใน${provinceName}</h3>
+                <p class="text-sm mb-6">จากข้อมูลน้องๆ <strong>${count} คน</strong> ที่พร้อมรับงานในระบบของเรา เรทราคามาตรฐานอยู่ที่ประมาณ:</p>
+                <div class="bg-[#0a0a0a] border border-white/5 rounded-xl p-6">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
+                        <span class="text-white/90">เรทเริ่มต้น (ชั่วคราว)</span>
+                        <span class="text-gold font-medium">~ 1,500 ฿</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
+                        <span class="text-white/90">เรทค้างคืน / ฟิวแฟน</span>
+                        <span class="text-gold font-medium">~ 3,000 ฿</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/90">เรท N-VIP / พูลวิลล่า</span>
+                        <span class="text-gold font-medium">4,000+ ฿</span>
+                    </div>
+                </div>
+                <p class="text-[10px] text-white/40 mt-3">* ราคาอาจเปลี่ยนแปลงตามข้อตกลงและโปรไฟล์ของน้องแต่ละคน</p>
             </div>
-            <div class="border border-white/5 bg-[#0a0a0a] p-8 rounded-2xl">
-                <h3 class="text-lg font-serif text-gold mb-6 tracking-widest uppercase">Coverage Areas</h3>
-                <p class="text-sm mb-4">บริการครอบคลุมพื้นที่ <strong>${data.zones.join(', ')}</strong></p>
-                <p class="text-sm">รวมถึงการนัดหมายตาม <strong>${data.hotels[0]}</strong> หรือที่พักส่วนตัวของลูกค้า เพื่อความเป็นส่วนตัวสูงสุด</p>
+            
+            <div>
+                <h3 class="text-xl font-serif text-gold mb-6 tracking-wide">คู่มือเจาะลึกโซน (Zone Guide)</h3>
+                <p class="text-sm mb-6">พื้นที่ยอดฮิตสำหรับการนัดหมายที่ปลอดภัยและเดินทางสะดวกที่สุด:</p>
+                <div class="space-y-4">
+                    ${data.zones.slice(0, 3).map((zone, idx) => `
+                        <div class="flex gap-4 items-start bg-white/[0.02] p-4 rounded-xl">
+                            <div class="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center shrink-0 font-serif">${idx + 1}</div>
+                            <div>
+                                <h4 class="font-medium text-white text-sm">โซน${zone}</h4>
+                                <p class="text-xs text-white/50 mt-1">แหล่งรวมโรงแรมและ ${data.hotels[0] || 'ที่พักส่วนตัว'} เหมาะสำหรับการนัดหมายน้องๆ สาย${data.lsi[idx % data.lsi.length]} อย่างเป็นส่วนตัว</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         </section>
 
-        <section class="pt-12 border-t border-white/5">
+        <section class="max-w-4xl mx-auto bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
+            <h3 class="text-lg font-serif text-gold mb-6 tracking-widest uppercase text-center">Premium Services</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                ${data.services.map(srv => `
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-check text-gold/60 text-xs"></i>
+                        <span class="text-sm text-white/80">${srv}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </section>
+
+        <section class="pt-8">
             <h3 class="text-xl font-serif text-white mb-8 text-center tracking-wide">คำถามที่พบบ่อย (FAQ)</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                 ${data.faqs.map(faq => `
@@ -119,13 +163,12 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
 };
 
 // ==========================================
-// 3. MAIN SSR EDGE FUNCTION (แบบสมบูรณ์)
+// 3. MAIN SSR EDGE FUNCTION
 // ==========================================
 export default async (request, context) => {
     try {
         const url = new URL(request.url);
 
-        // 🟢 ตรวจสอบและ Redirect หากมี Query String ?province=
         if (url.searchParams.has("province")) {
             const provinceValue = url.searchParams.get("province");
             const cleanUrl = new URL(`/location/${provinceValue}`, url.origin);
@@ -138,13 +181,11 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        // 1. ดึงข้อมูลจังหวัดปัจจุบัน
         const { data: provinceData, error: provError } = await supabase
             .from('provinces').select('id, nameThai, key').eq('key', provinceKey).maybeSingle();
 
         if (!provinceData || provError) return context.next();
 
-        // 2. ดึงข้อมูลโปรไฟล์น้องๆ ในจังหวัดนั้น
         const { data: profiles } = await supabase
             .from('profiles')
             .select('id, slug, name, imagePath, galleryPaths, location, rate, isfeatured, lastUpdated, created_at, active, availability, likes')
@@ -152,16 +193,13 @@ export default async (request, context) => {
             .order('isfeatured', { ascending: false }).order('lastUpdated', { ascending: false })
             .limit(80);
 
-        // 3. [ใหม่] ดึงข้อมูลจังหวัดทั้งหมดเพื่อทำ Footer Links (SEO)
         const { data: allProvinces } = await supabase
             .from('provinces')
             .select('key, nameThai')
             .order('nameThai', { ascending: true });
 
-        const safeProfiles = profiles || [];
+        const safeProfiles = profiles ||[];
         const provinceName = provinceData.nameThai;
-        const deterministicRating = (4.5 + (safeProfiles.length % 5) / 10).toFixed(1);
-const deterministicReviews = 50 + (safeProfiles.length * 2);
         const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
         const zones = seoData.zones;
         
@@ -170,7 +208,6 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         const CURRENT_MONTH = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', month: 'long' });
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         
-        // สร้างข้อมูล Schema และ SEO
         const firstImage = safeProfiles.length > 0 
             ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) 
             : `${CONFIG.DOMAIN}/images/seo-default.webp`;
@@ -178,7 +215,6 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ไม่มัดจำ`;
         const description = `รวมน้องๆ ไซด์ไลน์${provinceName} ตัวท็อป ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก 100% ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายหน้างาน`;
 
-        // 4. สร้าง HTML สำหรับ Province Links ใน Footer
         const provinceLinksHtml = allProvinces && allProvinces.length > 0 
             ? allProvinces.map(p => `
                 <a href="/location/${p.key}" 
@@ -188,9 +224,15 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
             `).join('')
             : '';
 
-       const schemaData = {
+        // [เตรียมตัวแปร Authority] แสดงเวลาที่เว็บไซต์ถูกอัปเดตล่าสุดจริงๆ
+        const latestUpdateDate = safeProfiles.length > 0 && safeProfiles[0].lastUpdated 
+            ? new Date(safeProfiles[0].lastUpdated).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+            : new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+        // Schema ปลอดภัย ลบ AggregateRating ปลอมออก
+        const schemaData = {
             "@context": "https://schema.org",
-            "@graph": [
+            "@graph":[
                 {
                     "@type": "WebSite",
                     "@id": `${CONFIG.DOMAIN}/#website`,
@@ -198,22 +240,15 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                     "name": CONFIG.BRAND_NAME
                 },
                 {
-                    "@type": ["LocalBusiness", "EntertainmentBusiness"],
+                    "@type":["LocalBusiness", "EntertainmentBusiness"],
                     "@id": `${provinceUrl}/#business`,
                     "name": `ไซด์ไลน์${provinceName} - รับงานตรงปกพรีเมียม`,
                     "url": provinceUrl,
                     "image": firstImage,
                     "description": description,
                     "telephone": "ติดต่อผ่าน Line Official",
-                    "priceRange": "฿1500 - ฿5000",
+                    "priceRange": "฿1500 - ฿5000+",
                     "areaServed": { "@type": "State", "name": provinceName },
-                    "aggregateRating": safeProfiles.length > 0 ? {
-                        "@type": "AggregateRating",
-                        "ratingValue": deterministicRating,
-                        "reviewCount": deterministicReviews,
-                        "bestRating": "5",
-                        "worstRating": "1"
-                    } : undefined,
                     "offers": safeProfiles.length > 0 ? {
                         "@type": "AggregateOffer",
                         "offerCount": String(safeProfiles.length),
@@ -235,7 +270,7 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                 {
                     "@type": "BreadcrumbList",
                     "@id": `${provinceUrl}/#breadcrumb`,
-                    "itemListElement": [
+                    "itemListElement":[
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                         { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${CONFIG.DOMAIN}/profiles` },
                         { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
@@ -254,7 +289,7 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                 {
                     "@type": "FAQPage",
                     "@id": `${provinceUrl}/#faq`,
-                    "mainEntity": [
+                    "mainEntity":[
                         {
                             "@type": "Question",
                             "name": `บริการไซด์ไลน์${provinceName} ต้องโอนมัดจำไหม?`,
@@ -263,26 +298,20 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                         {
                             "@type": "Question",
                             "name": `น้องๆ ใน${provinceName} รับงานโซนไหนบ้าง?`,
-                            "acceptedAnswer": { "@type": "Answer", "text": `ครอบคลุมโซนยอดนิยม เช่น ${zones.slice(0, 5).join(', ')} และโรงแรมชั้นนำในตัวเมือง` }
+                            "acceptedAnswer": { "@type": "Answer", "text": `ครอบคลุมโซนยอดนิยม เช่น ${zones.slice(0, 5).join(', ')} และโรงแรมชั้นนำในตัวเมือง นัดง่ายเดินทางสะดวก` }
                         }
                     ]
                 }
             ]
         };
 
-// ==========================================
-        // 5. HTML GENERATION - PREMIUM CARDS (ULTIMATE EDITION)
-        // ==========================================
         let cardsHTML = '';
         if (safeProfiles && safeProfiles.length > 0) {
             cardsHTML = safeProfiles.map((p, i) => {
-                // 1. Data Sanitization & Formatting
                 const cleanName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, '');
                 const profileLocation = p.location || provinceName || 'ไม่ระบุพิกัด';
-                const cardRating = (4.7 + (i % 4) / 10).toFixed(1); 
                 
-                // 2. Availability Logic
-                const busyKeywords = ['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'];
+                const busyKeywords =['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'];
                 let isAvailable = true;
                 if (p.availability) {
                     const availText = p.availability.toLowerCase();
@@ -290,17 +319,34 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                 }
                 const statusText = isAvailable ? 'พร้อมรับงาน' : 'ติดจอง';
 
-                // 3. Date Formatting (Thai Style)
                 const dateStr = p.lastUpdated || p.created_at || new Date().toISOString();
                 const d = new Date(dateStr);
-                const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                const months =['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
                 const dateDisplay = `${d.getDate()} ${months[d.getMonth()]} ${(d.getFullYear() + 543).toString().slice(-2)}`;
                 
-                // 4. Advanced SEO Optimization
-                const seoKeywords = [`ไซด์ไลน์${provinceName}`, `รับงาน${provinceName}`, `เด็กเอ็น${provinceName}`, `ฟิวแฟน${provinceName}`, `พริตตี้${provinceName}`];
-                const targetKeyword = seoKeywords[i % seoKeywords.length];
-                const imgAlt = `น้อง${cleanName} ${targetKeyword} พิกัด ${profileLocation} - รูปตรงปก ไม่โอนมัดจำ`;
+                const intents = seoData.intents ||['รับงานชั่วคราว', 'รับงานค้างคืน', 'เพื่อนเที่ยว', 'ฟิวแฟน'];
+                const traits = seoData.traits ||['น่ารัก', 'หุ่นดี', 'เอาใจเก่ง', 'บริการประทับใจ'];
+                const lsiKeywords = seoData.lsi ||[`ไซด์ไลน์${provinceName}`, `รับงาน${provinceName}`, `เด็กเอ็น${provinceName}`];
+                
+                const targetIntent = intents[i % intents.length];
+                const targetTrait = traits[i % traits.length];
+                const targetKeyword = lsiKeywords[i % lsiKeywords.length];
+                
+                const imgAlt = `รับงาน${profileLocation} น้อง${cleanName} สไตล์${targetTrait} บริการ${targetIntent} ปลอดภัยไม่โอนมัดจำ`;
                 const profileLink = `/sideline/${p.slug || p.id || '#'}`;
+
+                let badgeHTML = '';
+                const rateNum = p.rate ? parseInt(String(p.rate).replace(/\D/g, '')) : 0;
+                
+                if (rateNum >= 4000) {
+                    badgeHTML = `<span class="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[9px] px-2 py-0.5 rounded-sm font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(168,85,247,0.4)]">VIP Class</span>`;
+                } else if (i < 3 && p.isfeatured) {
+                    badgeHTML = `<span class="bg-gradient-to-r from-orange-600 to-red-600 text-white text-[9px] px-2 py-0.5 rounded-sm font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(234,88,12,0.4)]">Trending</span>`;
+                } else if (p.isfeatured || rateNum >= 2500) {
+                    badgeHTML = `<span class="bg-gold/20 text-gold border border-gold/30 text-[9px] px-2 py-0.5 rounded-sm font-bold tracking-widest uppercase backdrop-blur-sm">Recommend</span>`;
+                } else {
+                    badgeHTML = `<span class="bg-white/10 text-white/80 border border-white/10 text-[9px] px-2 py-0.5 rounded-sm font-bold tracking-widest uppercase backdrop-blur-sm">Verified</span>`;
+                }
                 
                 return `
 <article itemscope itemtype="http://schema.org/Person" class="group relative bg-[#0d0d0d] rounded-[1.25rem] overflow-hidden border border-white/10 flex flex-col h-full transition-all duration-500 hover:border-gold/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)]" data-profile-id="${p.id}">
@@ -310,11 +356,12 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         <img itemprop="image" 
              src="${optimizeImg(p.imagePath, 450, 600)}" 
              alt="${imgAlt}" 
+             title="${imgAlt}"
              class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 scale-[1.01] group-hover:scale-110 group-hover:rotate-1" 
              ${i < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} 
              width="450" height="600">
         
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-black/30 z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-black/40 z-10"></div>
         
         <div class="absolute top-4 left-4 right-4 flex justify-between items-start z-20 pointer-events-none">
             <div class="flex items-center gap-2 bg-black/60 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/20 shadow-2xl">
@@ -324,27 +371,22 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                 </span>
                 <span class="text-[9px] text-white font-bold tracking-widest uppercase">${statusText}</span>
             </div>
-            
-            <div class="bg-black/60 backdrop-blur-xl p-2 rounded-full border border-gold/40 shadow-2xl">
-                <svg class="w-3 h-3 text-gold" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-            </div>
+            ${badgeHTML}
         </div>
     </div>
 
     <div class="px-5 pb-5 pt-0 flex-1 flex flex-col justify-between relative z-20 -mt-12">
         <div>
             <div class="flex justify-between items-end mb-4">
-                <div class="flex flex-col">
-                    <span class="text-[9px] text-gold font-bold tracking-[0.2em] uppercase mb-1 opacity-100">${targetKeyword}</span>
-                    <h3 itemprop="name" class="font-serif font-medium text-2xl text-white group-hover:text-gold transition-colors line-clamp-1 tracking-wide">
+                <div class="flex flex-col pr-2">
+                    <span class="text-[9px] text-gold font-bold tracking-[0.2em] uppercase mb-1 opacity-100 line-clamp-1">${targetKeyword}</span>
+                    <h3 itemprop="name" class="font-serif font-medium text-2xl text-white group-hover:text-gold transition-colors line-clamp-1 tracking-wide drop-shadow-lg">
                         ${cleanName}
                     </h3>
                 </div>
-                <div class="bg-white/[0.05] backdrop-blur-md px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10 mb-1">
-                    <i class="fas fa-star text-gold text-[10px]"></i>
-                    <span class="text-white text-[11px] font-bold tracking-tighter">${cardRating}</span>
+                <div class="bg-[#059641]/20 backdrop-blur-md px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#059641]/30 mb-1" title="ยืนยันตัวตนแล้ว">
+                    <i class="fas fa-shield-check text-[#059641] text-[10px]"></i>
+                    <span class="text-[#059641] text-[10px] font-bold tracking-tighter uppercase">ตรงปก</span>
                 </div>
             </div>
 
@@ -354,18 +396,18 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
                     <span class="truncate tracking-wide">${profileLocation}</span>
                 </div>
                 <div class="text-[11px] text-white/50 font-light flex items-center gap-3">
-                    <i class="far fa-calendar-alt w-3 text-center text-white/40"></i>
+                    <i class="far fa-clock w-3 text-center text-white/40"></i>
                     <span>อัปเดตเมื่อ ${dateDisplay}</span>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center justify-between pt-1 group/btn">
+        <div class="flex items-center justify-between pt-1 group/btn border-t border-white/5 pt-3">
             <div class="flex flex-col">
-                <span class="text-[8px] text-white/50 uppercase tracking-[0.2em]">Starting at</span>
-                <span class="text-sm font-bold text-white tracking-tight">฿${p.rate || 'สอบถาม'}</span>
+                <span class="text-[8px] text-white/50 uppercase tracking-[0.2em]">${targetIntent} เริ่มต้น</span>
+                <span class="text-sm font-bold text-white tracking-tight text-gold">฿${p.rate || 'สอบถาม'}</span>
             </div>
-            <div class="h-8 w-8 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:border-gold group-hover:text-gold transition-all duration-500 group-hover:translate-x-1">
+            <div class="h-8 w-8 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:border-gold group-hover:bg-gold/10 group-hover:text-gold transition-all duration-500 group-hover:translate-x-1">
                 <i class="fas fa-arrow-right text-[10px]"></i>
             </div>
         </div>
@@ -408,7 +450,7 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
- <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
@@ -437,18 +479,15 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
     </script>
 
 <style>
-    /* 🎨 Critical UI & Performance Style */
     :root { 
         --bg: #070707; 
         --gold: #C5A059; 
         --gold-light: #D4AF37;
-        /* แก้ปัญหา Contrast: ใช้สีขาวที่สว่างขึ้นสำหรับข้อความเล็ก */
         --text-main: #FFFFFF;
-        --text-muted: #BCBCBC; /* ปรับจาก 0.55 เป็นค่าที่อ่านง่ายขึ้นแต่ยังดูหรู */
-        --line-green: #059641; /* เข้มขึ้นเพื่อให้ผ่านเกณฑ์ Accessibility */
+        --text-muted: #BCBCBC; 
+        --line-green: #059641; 
     }
 
-    /* เนื้อหาหลัก: ปรับปรุง Rendering */
     body { 
         background-color: var(--bg); 
         color: var(--text-main); 
@@ -456,22 +495,19 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         -moz-osx-font-smoothing: grayscale;
         overflow-x: hidden;
         margin: 0;
-        /* ป้องกัน Layout Shift โดยการจองฟอนต์สำรองที่ขนาดใกล้เคียงกัน */
         font-family: 'Outfit', 'Prompt', system-ui, -apple-system, sans-serif;
         line-height: 1.5;
         text-rendering: optimizeSpeed;
     }
 
-    /* Navbar: ใช้ hardware acceleration เพื่อความลื่นไหล */
     .nav-glass {
         background: rgba(7, 7, 7, 0.8);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        will-change: transform, background; /* บอกบราวเซอร์ล่วงหน้าว่าจะมีการเปลี่ยนแปลง */
+        will-change: transform, background; 
     }
 
-    /* ปรับแต่ง Class สำหรับตอน Scroll (ทำงานคู่กับ JS requestAnimationFrame) */
     .nav-scrolled {
         padding-top: 0.75rem !important;
         padding-bottom: 0.75rem !important;
@@ -479,27 +515,24 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
-    /* Hero Section: ปรับปรุง Gradient ให้เบาเครื่องขึ้น */
     .hero-glow {
         background: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.15) 0%, rgba(7, 7, 7, 0) 75%);
-        contain: paint; /* จำกัดขอบเขตการวาดเพื่อเพิ่ม performance */
+        contain: paint; 
     }
 
-    /* Profile Cards: ใช้ Transform แทนการขยับ Layout */
     .profile-card-shadow {
         box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
         transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         will-change: transform;
-        backface-visibility: hidden; /* ลดอาการภาพสั่นในบางบราวเซอร์ */
+        backface-visibility: hidden; 
     }
     
     .profile-card-shadow:hover { 
         transform: translateY(-8px) scale(1.01); 
     }
 
-    /* Floating Line Button: แก้ปัญหา CLS และ Contrast */
     .line-float-btn {
-        width: 155px; /* ระบุขนาดคงที่ */
+        width: 155px; 
         height: 50px;
         contain: layout size;
     }
@@ -508,7 +541,6 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         box-shadow: 0 15px 45px rgba(5, 150, 65, 0.3);
     }
 
-    /* Custom Scrollbar: ทำให้เรียบเนียน */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { 
@@ -518,40 +550,16 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
     }
     ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
-    /* ✅ แก้ไขปัญหา Contrast ตามรายงาน (Accessibility Fix) */
-    /* เดิม 0.55/0.4 อ่านยากมากบนพื้นดำ */
     .text-low-contrast { color: var(--text-muted); } 
     .text-very-low-contrast { color: rgba(255, 255, 255, 0.5); }
 
-    /* Utility สำหรับป้องกันการกระตุกของภาพ (CLS Fix) */
     img {
         max-width: 100%;
         height: auto;
-        font-style: italic; /* แสดง alt text สวยๆ ถ้าภาพโหลดไม่ขึ้น */
+        font-style: italic; 
         vertical-align: middle;
         shape-margin: 0.75rem;
     }
-    /* จองพื้นที่ปุ่ม LINE เพื่อแก้ CLS */
-.line-float-btn {
-    width: 156px; /* ขนาดโดยประมาณของปุ่มรวม padding */
-    height: 54px;
-    display: block;
-    contain: layout style; /* บอกบราวเซอร์ว่าไม่ต้องคำนวณเลย์เอาต์ข้างนอกใหม่เมื่อปุ่มขยับ */
-}
-
-/* สไตล์ของ Nav เมื่อสโครล */
-.nav-glass {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: background, padding; /* เตรียม GPU ให้พร้อม */
-}
-
-.nav-scrolled {
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-    background: rgba(7, 7, 7, 0.98) !important;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-}
 </style>
 </head>
 
@@ -604,6 +612,26 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         </p>
     </div>
 </header>
+
+<!-- REALTIME STATS BAR (Authority E-E-A-T) -->
+<div class="border-y border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md relative z-20 mb-16">
+    <div class="container mx-auto px-6 max-w-5xl">
+        <div class="grid grid-cols-3 divide-x divide-white/10 py-6">
+            <div class="text-center px-2">
+                <div class="text-xl md:text-3xl font-serif text-gold">${safeProfiles.length}</div>
+                <div class="text-[9px] md:text-[11px] text-white/50 uppercase tracking-widest mt-1">น้องๆ พร้อมรับงาน</div>
+            </div>
+            <div class="text-center px-2">
+                <div class="text-xl md:text-3xl font-serif text-white">${latestUpdateDate}</div>
+                <div class="text-[9px] md:text-[11px] text-white/50 uppercase tracking-widest mt-1">อัปเดตสถานะล่าสุด</div>
+            </div>
+            <div class="text-center px-2">
+                <div class="text-xl md:text-3xl font-serif text-emerald-500">100%</div>
+                <div class="text-[9px] md:text-[11px] text-white/50 uppercase tracking-widest mt-1">รับประกันไม่โอนมัดจำ</div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <main class="container mx-auto px-6 lg:px-12 max-w-[1400px] pb-32">
         <div class="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
@@ -733,7 +761,6 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         let ticking = false;
 
         const updateNav = () => {
-            // ใช้การเพิ่ม/ลบ Class แทนการเขียน Style โดยตรง
             if (window.scrollY > 50) {
                 nav.classList.add('nav-scrolled');
             } else {
@@ -743,13 +770,11 @@ const deterministicReviews = 50 + (safeProfiles.length * 2);
         };
 
         window.addEventListener('scroll', () => {
-            // เทคนิค Throttling ด้วย requestAnimationFrame 
-            // ช่วยลดภาระ CPU และแก้ปัญหา Forced Reflow ได้ขาด
             if (!ticking) {
                 window.requestAnimationFrame(updateNav);
                 ticking = true;
             }
-        }, { passive: true }); // passive: true ช่วยให้การสโครลบนมือถือลื่นขึ้นมาก
+        }, { passive: true }); 
     });
 </script>
 </body>
