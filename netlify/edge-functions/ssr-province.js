@@ -591,7 +591,7 @@ export default async (request, context) => {
                 ไซด์ไลน์<span class="text-gold font-normal">${provinceName}</span>
             </span>
             <span class="block text-xl md:text-3xl lg:text-4xl mt-8 font-sans font-light tracking-[0.1em] text-white/60 max-w-3xl mx-auto leading-relaxed">
-                แหล่งรวมน้องๆ <span class="text-white/80">งานพรีเมียม ตรงปก</span> 
+                แหล่งรวมน้องๆ รับงานไซด์ไลน์ <span class="text-white/80">งานพรีเมียม ตรงปก</span> 
                 <span class="hidden md:inline">มั่นใจความปลอดภัย</span> 
                 <span class="text-gold/80 italic">ไม่ต้องโอนมัดจำ</span>
             </span>
