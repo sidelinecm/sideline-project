@@ -106,13 +106,14 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
                         <span class="text-white/90">เรทเริ่มต้น (ชั่วคราว)</span>
                         <span class="text-gold font-medium">~ 1,500 ฿</span>
                     </div>
+                    <!-- 💡 แก้ไขส่วนนี้เป็น "ติดต่อสอบถาม" -->
                     <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
                         <span class="text-white/90">เรทค้างคืน / ฟิวแฟน</span>
-                        <span class="text-gold font-medium">~ 3,000 ฿</span>
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="text-gold font-medium text-sm hover:text-white transition-colors underline decoration-gold/30 underline-offset-4">ติดต่อสอบถาม</a>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-white/90">เรท N-VIP / พูลวิลล่า</span>
-                        <span class="text-gold font-medium">4,000+ ฿</span>
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="text-gold font-medium text-sm hover:text-white transition-colors underline decoration-gold/30 underline-offset-4">ติดต่อสอบถาม</a>
                     </div>
                 </div>
                 <p class="text-[10px] text-white/40 mt-3">* ราคาอาจเปลี่ยนแปลงตามข้อตกลงและโปรไฟล์ของน้องแต่ละคน</p>
