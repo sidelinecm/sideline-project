@@ -352,49 +352,65 @@ export default async (request, context) => {
                 }
                 
 return `
-<article class="profile-card group relative overflow-hidden flex flex-col h-full">
-    <a href="${profileLink}" class="absolute inset-0 z-40"></a>
+<article class="profile-card group relative overflow-hidden flex flex-col h-full bg-[#121212] rounded-[24px] border border-white/5 hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 shadow-2xl">
+    <a href="${profileLink}" class="absolute inset-0 z-40" aria-label="ดูโปรไฟล์น้อง ${cleanName}"></a>
     
     <div class="relative aspect-[3/4] overflow-hidden">
         <img src="${optimizeImg(p.imagePath, 500, 660)}" 
-             class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+             alt="${imgAlt}"
+             class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
              loading="lazy">
-        <div class="absolute inset-0 img-gradient z-10"></div>
         
-        <div class="absolute top-4 left-4 z-20">
-            <div class="bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-                <span class="h-1.5 w-1.5 rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'} animate-pulse"></span>
-                <span class="text-[9px] text-white font-bold tracking-widest uppercase">${statusText}</span>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-black/20 z-10"></div>
+        
+        <div class="absolute top-3 left-3 z-20">
+            <div class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 flex items-center gap-2 shadow-lg">
+                <span class="h-2 w-2 rounded-full ${isAvailable ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-rose-500'} ${isAvailable ? 'animate-pulse' : ''}"></span>
+                <span class="text-[8px] md:text-[9px] text-white font-bold tracking-[0.1em] uppercase">${statusText}</span>
             </div>
         </div>
-        <div class="absolute top-4 right-4 z-20">${badgeHTML}</div>
+
+        <div class="absolute top-3 right-3 z-20 flex flex-col gap-1.5 items-end">
+            ${badgeHTML}
+        </div>
     </div>
 
-    <div class="p-5 flex-1 flex flex-col justify-between">
+    <div class="p-5 flex-1 flex flex-col justify-between relative z-20">
         <div>
-            <div class="flex justify-between items-start mb-2">
-                <span class="text-[10px] text-gold font-bold tracking-[0.2em] uppercase">${targetKeyword}</span>
-                <span class="text-[9px] text-white/30 italic">${dateDisplay}</span>
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-[10px] text-gold font-bold tracking-[0.15em] uppercase px-2 py-0.5 bg-gold/5 rounded border border-gold/10">
+                    ${targetKeyword}
+                </span>
+                <span class="text-[9px] text-white/30 font-light italic">${dateDisplay}</span>
             </div>
-            <h3 class="font-serif text-2xl text-white group-hover:text-gold transition-colors truncate">
+
+            <h3 class="font-serif text-2xl text-white group-hover:text-gold transition-colors duration-300 truncate leading-tight">
                 ${cleanName}
             </h3>
             
-            <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/5">
+            <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/5">
                 <div class="space-y-1">
-                    <p class="text-[9px] text-white/40 uppercase tracking-wider">Location</p>
-                    <p class="text-xs text-white/80 font-light truncate"><i class="fas fa-map-marker-alt text-gold/60 mr-1.5"></i>${profileLocation}</p>
+                    <p class="text-[9px] text-white/40 uppercase tracking-[0.1em]">Location</p>
+                    <p class="text-xs text-white/80 font-light truncate">
+                        <i class="fas fa-map-marker-alt text-gold/60 mr-1.5"></i>${profileLocation}
+                    </p>
                 </div>
                 <div class="space-y-1 text-right">
-                    <p class="text-[9px] text-white/40 uppercase tracking-wider">Rate</p>
-                    <p class="text-sm text-gold font-bold">฿${p.rate || 'สอบถาม'}</p>
+                    <p class="text-[9px] text-white/40 uppercase tracking-[0.1em]">Rate</p>
+                    <p class="text-[15px] text-gold font-bold tabular-nums">
+                        ฿${p.rate || 'สอบถาม'}
+                    </p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-5 flex items-center justify-between text-[10px] text-white/40 border-t border-white/5 pt-3">
-            <span class="uppercase tracking-widest italic">${targetIntent}</span>
-            <span class="group-hover:text-gold transition-colors uppercase">คลิกดูรูปเพิ่ม <i class="fas fa-arrow-right ml-1 scale-75"></i></span>
+        <div class="mt-6 flex items-center justify-between text-[10px] border-t border-white/5 pt-4">
+            <span class="text-white/40 uppercase tracking-widest italic font-light">
+                <i class="far fa-star text-gold/40 mr-1"></i> ${targetIntent}
+            </span>
+            <span class="text-white/60 group-hover:text-gold transition-all duration-300 uppercase font-medium tracking-tighter flex items-center">
+                คลิกดูรูปเพิ่ม <i class="fas fa-chevron-right ml-1.5 text-[8px] transition-transform group-hover:translate-x-1"></i>
+            </span>
         </div>
     </div>
 </article>`;
