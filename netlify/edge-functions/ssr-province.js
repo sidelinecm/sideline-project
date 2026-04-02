@@ -351,59 +351,50 @@ export default async (request, context) => {
                     badgeHTML = `<span class="bg-white/10 text-white/80 border border-white/10 text-[9px] px-2 py-0.5 rounded-sm font-bold tracking-widest uppercase backdrop-blur-sm">Verified</span>`;
                 }
                 
-// ค้นหาบรรทัดที่เริ่มด้วย return ` และวางทับด้วยโค้ดด้านล่างนี้
 return `
-<article itemscope itemtype="http://schema.org/Person" class="group relative bg-[#0d0d0d] rounded-2xl overflow-hidden border border-white/5 flex flex-col h-full transition-all duration-700 hover:border-gold/40 hover:shadow-[0_20px_50px_-20px_rgba(197,160,89,0.3)]" data-profile-id="${p.id}">
-    <a href="${profileLink}" itemprop="url" class="absolute inset-0 z-40"></a>
+<article class="profile-card group relative overflow-hidden flex flex-col h-full">
+    <a href="${profileLink}" class="absolute inset-0 z-40"></a>
     
-    <div class="relative w-full pt-[140%] bg-[#050505] overflow-hidden">
-        <img itemprop="image" 
-             src="${optimizeImg(p.imagePath, 450, 630)}" 
-             alt="${imgAlt}" 
-             class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1" 
-             ${i < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} 
-             width="450" height="630">
+    <div class="relative aspect-[3/4] overflow-hidden">
+        <img src="${optimizeImg(p.imagePath, 500, 660)}" 
+             class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+             loading="lazy">
+        <div class="absolute inset-0 img-gradient z-10"></div>
         
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-transparent z-10 opacity-90"></div>
-        
-        <div class="absolute top-4 left-4 flex flex-col gap-2 z-20 pointer-events-none">
-            <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'} opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'}"></span>
-                </span>
+        <div class="absolute top-4 left-4 z-20">
+            <div class="bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+                <span class="h-1.5 w-1.5 rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'} animate-pulse"></span>
                 <span class="text-[9px] text-white font-bold tracking-widest uppercase">${statusText}</span>
             </div>
         </div>
-        <div class="absolute top-4 right-4 z-20 pointer-events-none">
-            ${badgeHTML}
-        </div>
+        <div class="absolute top-4 right-4 z-20">${badgeHTML}</div>
     </div>
 
-    <div class="px-5 pb-6 pt-0 flex-1 flex flex-col justify-between relative z-20 -mt-16">
+    <div class="p-5 flex-1 flex flex-col justify-between">
         <div>
-            <div class="mb-4">
-                <span class="text-[9px] text-gold font-bold tracking-[0.3em] uppercase mb-1 block opacity-80">${targetKeyword}</span>
-                <h3 itemprop="name" class="font-serif font-medium text-2xl md:text-3xl text-white group-hover:text-gold transition-colors line-clamp-1 tracking-wide">
-                    ${cleanName}
-                </h3>
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-[10px] text-gold font-bold tracking-[0.2em] uppercase">${targetKeyword}</span>
+                <span class="text-[9px] text-white/30 italic">${dateDisplay}</span>
             </div>
-
-            <div class="grid grid-cols-2 gap-2 mb-6 border-y border-white/5 py-4">
-                <div class="text-[10px] text-white/40 uppercase tracking-widest font-light">Location
-                    <span class="block text-white/80 mt-1 font-normal truncate">${profileLocation}</span>
+            <h3 class="font-serif text-2xl text-white group-hover:text-gold transition-colors truncate">
+                ${cleanName}
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/5">
+                <div class="space-y-1">
+                    <p class="text-[9px] text-white/40 uppercase tracking-wider">Location</p>
+                    <p class="text-xs text-white/80 font-light truncate"><i class="fas fa-map-marker-alt text-gold/60 mr-1.5"></i>${profileLocation}</p>
                 </div>
-                <div class="text-[10px] text-white/40 uppercase tracking-widest font-light">Rate
-                    <span class="block text-gold mt-1 font-bold">฿${p.rate || 'สอบถาม'}</span>
+                <div class="space-y-1 text-right">
+                    <p class="text-[9px] text-white/40 uppercase tracking-wider">Rate</p>
+                    <p class="text-sm text-gold font-bold">฿${p.rate || 'สอบถาม'}</p>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center justify-between group/btn">
-            <span class="text-[10px] text-white/40 uppercase tracking-[0.2em] italic">${targetIntent}</span>
-            <div class="h-10 w-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 group-hover:border-gold group-hover:bg-gold group-hover:text-black transition-all duration-500 transform group-hover:rotate-45">
-                <i class="fas fa-arrow-up-right text-[12px]"></i>
-            </div>
+        <div class="mt-5 flex items-center justify-between text-[10px] text-white/40 border-t border-white/5 pt-3">
+            <span class="uppercase tracking-widest italic">${targetIntent}</span>
+            <span class="group-hover:text-gold transition-colors uppercase">คลิกดูรูปเพิ่ม <i class="fas fa-arrow-right ml-1 scale-75"></i></span>
         </div>
     </div>
 </article>`;
@@ -474,64 +465,54 @@ return `
 
 <style>
     :root { 
-        --bg: #050505; 
-        --gold: #C5A059; 
-        --gold-light: #E8D2A6;
+        --bg: #070707; 
+        --card-bg: #121212;
+        --gold: #D4AF37; 
+        --gold-light: #F3E5AB;
+        --text-main: rgba(255, 255, 255, 0.95);
+        --text-sub: rgba(255, 255, 255, 0.5);
     }
 
     body { 
         background-color: var(--bg); 
-        color: #fff; 
+        color: var(--text-main);
         -webkit-font-smoothing: antialiased;
         font-family: 'Outfit', 'Prompt', sans-serif;
     }
 
+    /* Navigation ใหม่: โปร่งใสและนุ่มนวล */
     .nav-glass {
-        background: rgba(5, 5, 5, 0.8);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: transparent;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .hero-glow {
-        background: radial-gradient(circle at 50% -20%, rgba(197, 160, 89, 0.12) 0%, rgba(5, 5, 5, 0) 70%);
+    .nav-scrolled {
+        background: rgba(7, 7, 7, 0.85) !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.15) !important;
+        padding-top: 0.8rem !important;
+        padding-bottom: 0.8rem !important;
     }
 
-    .text-gold-gradient {
-        background: linear-gradient(to bottom right, #E8D2A6, #C5A059);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    /* Card Design: แก้ปัญหาตัวหนังสือซ้อนภาพ */
+    .profile-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 24px;
+        transition: all 0.4s ease;
     }
 
-    /* Scrollbar ปรับให้สวยงาม */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
-    /* เพิ่มเติมเพื่อให้ Navigation ทำงานสมบูรณ์ */
-.nav-glass { 
-    background: transparent; 
-    border-bottom: 1px solid transparent; 
-}
-nav {
-    /* ทำให้ตอนเปลี่ยนสีหรือหดขนาด ดูนุ่มนวล (Smooth transition) */
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-/* คลาสที่จะถูกเติมเข้าโดย JavaScript เมื่อเลื่อนหน้าจอ */
-.nav-scrolled {
-    background: rgba(5, 5, 5, 0.8) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2) !important;
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-}
+    .profile-card:hover {
+        border-color: rgba(212, 175, 55, 0.3);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px -20px rgba(212, 175, 55, 0.2);
+    }
 
-/* เพิ่มความเนียนให้การขยายรูป */
-img { transition: transform 0.7s cubic-bezier(0.2, 1, 0.3, 1); }
-
-/* สไตล์สำหรับข้อความความคมชัดต่ำใน SEO Section */
-.text-low-contrast { color: rgba(255, 255, 255, 0.4); }
+    /* Image Overlay: ค่อยๆ ไล่เงาจากข้างล่าง ไม่ให้บังหน้าน้อง */
+    .img-gradient {
+        background: linear-gradient(to top, var(--card-bg) 0%, rgba(18, 18, 18, 0) 40%);
+    }
 </style>
 </head>
 
@@ -725,36 +706,24 @@ img { transition: transform 0.7s cubic-bezier(0.2, 1, 0.3, 1); }
 </a>
 
 <script>
-    // ใช้ IIFE เพื่อความปลอดภัยของขอบเขตตัวแปร
     (() => {
         const nav = document.querySelector('nav');
         if (!nav) return;
 
         let ticking = false;
-
         const updateNav = () => {
-            const scrollPos = window.pageYOffset || window.scrollY;
-            
-            // ใช้ classList.toggle เพื่อความสะอาดของโค้ด
-            // เพิ่มเงื่อนไขให้ทำงานเมื่อตำแหน่งเปลี่ยนไปจริงๆ เท่านั้น
-            const shouldBeScrolled = scrollPos > 50;
-            if (nav.classList.contains('nav-scrolled') !== shouldBeScrolled) {
-                nav.classList.toggle('nav-scrolled', shouldBeScrolled);
-            }
-            
+            const scrollPos = window.scrollY || window.pageYOffset;
+            nav.classList.toggle('nav-scrolled', scrollPos > 50);
             ticking = false;
         };
 
-        // ตรวจสอบทันทีที่โหลดหน้า
-        updateNav();
-
-        // ใช้ requestAnimationFrame เพื่อให้การเลื่อนหน้าจอ (Scroll) ลื่นไหลที่สุด ไม่กิน CPU
         window.addEventListener('scroll', () => {
             if (!ticking) {
                 window.requestAnimationFrame(updateNav);
                 ticking = true;
             }
         }, { passive: true });
+        updateNav();
     })();
 </script>
 </body>
