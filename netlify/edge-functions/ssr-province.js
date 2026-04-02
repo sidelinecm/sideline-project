@@ -1,3 +1,7 @@
+
+ฟัง เมิงแก้ไขส่วนการแสดงผลทุกๆอย่างใหม่ให้สวยงาม จากเดิมตอนนี้ สร้างแค่ส่วนที่ต้องแก้ไขเพิ่มเติมมาให้นำไปวางทับโค้ดเดิมเป็นส่วนๆและใช้งานได้สมบรูณ
+
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 // ==========================================
@@ -349,67 +353,58 @@ export default async (request, context) => {
                     badgeHTML = `<span class="bg-white/10 text-white/80 border border-white/10 text-[9px] px-2 py-0.5 rounded-sm font-bold tracking-widest uppercase backdrop-blur-sm">Verified</span>`;
                 }
                 
-                return `
-<article itemscope itemtype="http://schema.org/Person" class="group relative bg-[#0d0d0d] rounded-[1.25rem] overflow-hidden border border-white/10 flex flex-col h-full transition-all duration-500 hover:border-gold/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.7)]" data-profile-id="${p.id}">
-    <a href="${profileLink}" itemprop="url" class="absolute inset-0 z-40" aria-label="ดูโปรไฟล์ของ ${cleanName}" title="ดูโปรไฟล์ของ ${cleanName}"></a>
+// ค้นหาบรรทัดที่เริ่มด้วย return ` และวางทับด้วยโค้ดด้านล่างนี้
+return `
+<article itemscope itemtype="http://schema.org/Person" class="group relative bg-[#0d0d0d] rounded-2xl overflow-hidden border border-white/5 flex flex-col h-full transition-all duration-700 hover:border-gold/40 hover:shadow-[0_20px_50px_-20px_rgba(197,160,89,0.3)]" data-profile-id="${p.id}">
+    <a href="${profileLink}" itemprop="url" class="absolute inset-0 z-40"></a>
     
-    <div class="relative w-full pt-[135%] bg-[#050505] overflow-hidden">
+    <div class="relative w-full pt-[140%] bg-[#050505] overflow-hidden">
         <img itemprop="image" 
-             src="${optimizeImg(p.imagePath, 450, 600)}" 
+             src="${optimizeImg(p.imagePath, 450, 630)}" 
              alt="${imgAlt}" 
-             title="${imgAlt}"
-             class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 scale-[1.01] group-hover:scale-110 group-hover:rotate-1" 
+             class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1" 
              ${i < 4 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} 
-             width="450" height="600">
+             width="450" height="630">
         
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-black/40 z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-transparent z-10 opacity-90"></div>
         
-        <div class="absolute top-4 left-4 right-4 flex justify-between items-start z-20 pointer-events-none">
-            <div class="flex items-center gap-2 bg-black/60 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/20 shadow-2xl">
-                <span class="relative flex h-1.5 w-1.5">
+        <div class="absolute top-4 left-4 flex flex-col gap-2 z-20 pointer-events-none">
+            <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'} opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'}"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-emerald-400' : 'bg-rose-500'}"></span>
                 </span>
                 <span class="text-[9px] text-white font-bold tracking-widest uppercase">${statusText}</span>
             </div>
+        </div>
+        <div class="absolute top-4 right-4 z-20 pointer-events-none">
             ${badgeHTML}
         </div>
     </div>
 
-    <div class="px-5 pb-5 pt-0 flex-1 flex flex-col justify-between relative z-20 -mt-12">
+    <div class="px-5 pb-6 pt-0 flex-1 flex flex-col justify-between relative z-20 -mt-16">
         <div>
-            <div class="flex justify-between items-end mb-4">
-                <div class="flex flex-col pr-2">
-                    <span class="text-[9px] text-gold font-bold tracking-[0.2em] uppercase mb-1 opacity-100 line-clamp-1">${targetKeyword}</span>
-                    <h3 itemprop="name" class="font-serif font-medium text-2xl text-white group-hover:text-gold transition-colors line-clamp-1 tracking-wide drop-shadow-lg">
-                        ${cleanName}
-                    </h3>
-                </div>
-                <div class="bg-[#059641]/20 backdrop-blur-md px-2 py-1.5 rounded-lg flex items-center gap-1.5 border border-[#059641]/30 mb-1" title="ยืนยันตัวตนแล้ว">
-                    <i class="fas fa-shield-check text-[#059641] text-[10px]"></i>
-                    <span class="text-[#059641] text-[10px] font-bold tracking-tighter uppercase">ตรงปก</span>
-                </div>
+            <div class="mb-4">
+                <span class="text-[9px] text-gold font-bold tracking-[0.3em] uppercase mb-1 block opacity-80">${targetKeyword}</span>
+                <h3 itemprop="name" class="font-serif font-medium text-2xl md:text-3xl text-white group-hover:text-gold transition-colors line-clamp-1 tracking-wide">
+                    ${cleanName}
+                </h3>
             </div>
 
-            <div class="space-y-2 mb-5 border-t border-white/10 pt-4">
-                <div itemprop="homeLocation" class="text-[11px] text-white/70 font-light flex items-center gap-3">
-                    <i class="fas fa-map-marker-alt text-gold/80 w-3 text-center"></i>
-                    <span class="truncate tracking-wide">${profileLocation}</span>
+            <div class="grid grid-cols-2 gap-2 mb-6 border-y border-white/5 py-4">
+                <div class="text-[10px] text-white/40 uppercase tracking-widest font-light">Location
+                    <span class="block text-white/80 mt-1 font-normal truncate">${profileLocation}</span>
                 </div>
-                <div class="text-[11px] text-white/50 font-light flex items-center gap-3">
-                    <i class="far fa-clock w-3 text-center text-white/40"></i>
-                    <span>อัปเดตเมื่อ ${dateDisplay}</span>
+                <div class="text-[10px] text-white/40 uppercase tracking-widest font-light">Rate
+                    <span class="block text-gold mt-1 font-bold">฿${p.rate || 'สอบถาม'}</span>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center justify-between pt-1 group/btn border-t border-white/5 pt-3">
-            <div class="flex flex-col">
-                <span class="text-[8px] text-white/50 uppercase tracking-[0.2em]">${targetIntent} เริ่มต้น</span>
-                <span class="text-sm font-bold text-white tracking-tight text-gold">฿${p.rate || 'สอบถาม'}</span>
-            </div>
-            <div class="h-8 w-8 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:border-gold group-hover:bg-gold/10 group-hover:text-gold transition-all duration-500 group-hover:translate-x-1">
-                <i class="fas fa-arrow-right text-[10px]"></i>
+        <div class="flex items-center justify-between group/btn">
+            <span class="text-[10px] text-white/40 uppercase tracking-[0.2em] italic">${targetIntent}</span>
+            <div class="h-10 w-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 group-hover:border-gold group-hover:bg-gold group-hover:text-black transition-all duration-500 transform group-hover:rotate-45">
+                <i class="fas fa-arrow-up-right text-[12px]"></i>
             </div>
         </div>
     </div>
@@ -481,90 +476,68 @@ export default async (request, context) => {
 
 <style>
     :root { 
-        --bg: #070707; 
+        --bg: #050505; 
         --gold: #C5A059; 
-        --gold-light: #D4AF37;
-        --text-main: #FFFFFF;
-        --text-muted: #BCBCBC; 
-        --line-green: #059641; 
+        --gold-light: #E8D2A6;
     }
 
     body { 
         background-color: var(--bg); 
-        color: var(--text-main); 
+        color: #fff; 
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        overflow-x: hidden;
-        margin: 0;
-        font-family: 'Outfit', 'Prompt', system-ui, -apple-system, sans-serif;
-        line-height: 1.5;
-        text-rendering: optimizeSpeed;
+        font-family: 'Outfit', 'Prompt', sans-serif;
     }
 
     .nav-glass {
-        background: rgba(7, 7, 7, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        will-change: transform, background; 
-    }
-
-    .nav-scrolled {
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
-        background: rgba(7, 7, 7, 0.95) !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background: rgba(5, 5, 5, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .hero-glow {
-        background: radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.15) 0%, rgba(7, 7, 7, 0) 75%);
-        contain: paint; 
+        background: radial-gradient(circle at 50% -20%, rgba(197, 160, 89, 0.12) 0%, rgba(5, 5, 5, 0) 70%);
     }
 
-    .profile-card-shadow {
-        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
-        transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        will-change: transform;
-        backface-visibility: hidden; 
-    }
-    
-    .profile-card-shadow:hover { 
-        transform: translateY(-8px) scale(1.01); 
+    .text-gold-gradient {
+        background: linear-gradient(to bottom right, #E8D2A6, #C5A059);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
-    .line-float-btn {
-        width: 155px; 
-        height: 50px;
-        contain: layout size;
-    }
-    .line-bg-optimized {
-        background-color: var(--line-green);
-        box-shadow: 0 15px 45px rgba(5, 150, 65, 0.3);
-    }
-
-    ::-webkit-scrollbar { width: 6px; }
+    /* Scrollbar ปรับให้สวยงาม */
+    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { 
-        background: #333; 
-        border-radius: 10px;
-        transition: background 0.3s;
-    }
+    ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+    /* เพิ่มเติมเพื่อให้ Navigation ทำงานสมบูรณ์ */
+.nav-glass { 
+    background: transparent; 
+    border-bottom: 1px solid transparent; 
+}
+nav {
+    /* ทำให้ตอนเปลี่ยนสีหรือหดขนาด ดูนุ่มนวล (Smooth transition) */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* คลาสที่จะถูกเติมเข้าโดย JavaScript เมื่อเลื่อนหน้าจอ */
+.nav-scrolled {
+    background: rgba(5, 5, 5, 0.8) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2) !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
 
-    .text-low-contrast { color: var(--text-muted); } 
-    .text-very-low-contrast { color: rgba(255, 255, 255, 0.5); }
+/* เพิ่มความเนียนให้การขยายรูป */
+img { transition: transform 0.7s cubic-bezier(0.2, 1, 0.3, 1); }
 
-    img {
-        max-width: 100%;
-        height: auto;
-        font-style: italic; 
-        vertical-align: middle;
-        shape-margin: 0.75rem;
-    }
+/* สไตล์สำหรับข้อความความคมชัดต่ำใน SEO Section */
+.text-low-contrast { color: rgba(255, 255, 255, 0.4); }
 </style>
 </head>
 
-<body class="selection:bg-gold/30 selection:text-white">
+<body class="selection:bg-gold/30 selection:text-white antialiased text-white/90 bg-[#050505] overflow-x-hidden scroll-smooth">
     <nav class="fixed top-0 w-full z-[100] nav-glass transition-all duration-500 py-4">
         <div class="container mx-auto px-6 lg:px-12 flex justify-between items-center max-w-[1400px]">
             <a href="/" class="text-xl md:text-2xl font-serif tracking-[0.2em] text-white hover:text-gold transition-all">
@@ -754,29 +727,37 @@ export default async (request, context) => {
 </a>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    // ใช้ IIFE เพื่อความปลอดภัยของขอบเขตตัวแปร
+    (() => {
         const nav = document.querySelector('nav');
         if (!nav) return;
 
-        let lastScrollY = window.scrollY;
         let ticking = false;
 
         const updateNav = () => {
-            if (window.scrollY > 50) {
-                nav.classList.add('nav-scrolled');
-            } else {
-                nav.classList.remove('nav-scrolled');
+            const scrollPos = window.pageYOffset || window.scrollY;
+            
+            // ใช้ classList.toggle เพื่อความสะอาดของโค้ด
+            // เพิ่มเงื่อนไขให้ทำงานเมื่อตำแหน่งเปลี่ยนไปจริงๆ เท่านั้น
+            const shouldBeScrolled = scrollPos > 50;
+            if (nav.classList.contains('nav-scrolled') !== shouldBeScrolled) {
+                nav.classList.toggle('nav-scrolled', shouldBeScrolled);
             }
+            
             ticking = false;
         };
 
+        // ตรวจสอบทันทีที่โหลดหน้า
+        updateNav();
+
+        // ใช้ requestAnimationFrame เพื่อให้การเลื่อนหน้าจอ (Scroll) ลื่นไหลที่สุด ไม่กิน CPU
         window.addEventListener('scroll', () => {
             if (!ticking) {
                 window.requestAnimationFrame(updateNav);
                 ticking = true;
             }
-        }, { passive: true }); 
-    });
+        }, { passive: true });
+    })();
 </script>
 </body>
 </html>`;
