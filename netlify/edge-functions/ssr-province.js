@@ -555,7 +555,7 @@ return `
             </p>
             <div class="flex flex-col gap-4">
                 <button onclick="acceptAgeGate()" class="bg-gold text-black font-bold py-3.5 px-6 rounded-full text-sm uppercase tracking-widest hover:bg-white transition-colors w-full">
-                    ข้าพเจ้าอายุ 20 ปีขึ้นไป (ENTER)
+                    🚨ยืนยัน อายุเกิน 20 ปีขึ้นไป🚨(ENTER)
                 </button>
                 <a href="https://www.google.com" class="text-white/40 text-xs font-light hover:text-white transition-colors py-2">
                     ข้าพเจ้าอายุไม่ถึง 20 ปี (LEAVE)
@@ -592,7 +592,7 @@ return `
             <span class="block text-xl md:text-3xl lg:text-4xl mt-8 font-sans font-light tracking-[0.1em] text-white/60 max-w-3xl mx-auto leading-relaxed">
                 ศูนย์รวมโปรไฟล์ <span class="text-white/80">นางแบบและเพื่อนเที่ยวพรีเมียม</span> 
                 <span class="hidden md:inline">มั่นใจความปลอดภัย</span> 
-                <span class="text-gold/80 italic">ไม่มีโอนมัดจำ</span>
+                <span class="text-gold/80 italic">ไม่มีโอนมัดจำ🚨</span>
             </span>
         </h1>
         
