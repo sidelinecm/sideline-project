@@ -460,8 +460,7 @@ return `
 </article>`;
             }).join('');
         }
-
-        const html = `<!DOCTYPE html>
+        const html = String.raw`<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
     <meta charset="utf-8" />
