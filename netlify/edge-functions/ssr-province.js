@@ -622,20 +622,21 @@ return `
     </div>
 </header>
 
-<div class="border-y border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md relative z-20 mb-16">
+<!-- 🚀 1. ปรับปรุง Stats Bar เพื่อแก้ CLS (ใช้ min-h และล็อคบรรทัดตัวเลข) -->
+<div class="border-y border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md relative z-20 mb-16 min-h-[105px] md:min-h-[135px] flex items-center shadow-2xl">
     <div class="container mx-auto px-6 max-w-5xl">
         <div class="grid grid-cols-3 divide-x divide-white/10 py-6">
             <div class="text-center px-2">
-                <div class="text-xl md:text-3xl font-serif text-gold">${safeProfiles.length}</div>
-                <div class="text-[9px] md:text-[11px] text-white/50 uppercase tracking-widest mt-1">น้องๆ พร้อมรับงาน</div>
+                <div class="text-2xl md:text-4xl font-serif text-gold leading-none mb-1.5 h-6 md:h-9">${safeProfiles.length}</div>
+                <div class="text-[9px] md:text-[11px] text-white/70 uppercase tracking-widest font-medium mt-1">น้องๆ พร้อมรับงาน</div>
             </div>
             <div class="text-center px-2">
-                <div class="text-xl md:text-3xl font-serif text-white">${latestUpdateDate}</div>
-                <div class="text-[9px] md:text-[11px] text-white/50 uppercase tracking-widest mt-1">อัปเดตสถานะล่าสุด</div>
+                <div class="text-2xl md:text-4xl font-serif text-white leading-none mb-1.5 h-6 md:h-9">${latestUpdateDate}</div>
+                <div class="text-[9px] md:text-[11px] text-white/70 uppercase tracking-widest font-medium mt-1">อัปเดตสถานะล่าสุด</div>
             </div>
             <div class="text-center px-2">
-                <div class="text-xl md:text-3xl font-serif text-emerald-500">100%</div>
-                <div class="text-[9px] md:text-[11px] text-white/50 uppercase tracking-widest mt-1">รับประกันไม่โอนมัดจำ</div>
+                <div class="text-2xl md:text-4xl font-serif text-emerald-500 leading-none mb-1.5 h-6 md:h-9">100%</div>
+                <div class="text-[9px] md:text-[11px] text-white/70 uppercase tracking-widest font-medium mt-1">รับประกันไม่โอนมัดจำ</div>
             </div>
         </div>
     </div>
@@ -643,46 +644,48 @@ return `
 
 <main class="container mx-auto px-6 lg:px-12 max-w-[1400px] pb-32" id="profiles">
         
-        <nav aria-label="Breadcrumb" class="mb-4">
-            <ol class="flex items-center space-x-2 text-[10px] md:text-xs text-white/40 font-medium tracking-widest uppercase">
+        <!-- 🎨 2. ปรับ Contrast Breadcrumb (จาก white/40 เป็น white/60) เพื่อให้อ่านง่าย -->
+        <nav aria-label="Breadcrumb" class="mb-6">
+            <ol class="flex items-center space-x-2 text-[10px] md:text-xs text-white/60 font-medium tracking-widest uppercase">
                 <li><a href="/" class="hover:text-gold transition-colors">Home</a></li>
-                <li><span class="mx-1 opacity-50">/</span></li>
+                <li><span class="mx-1 opacity-70">/</span></li>
                 <li><a href="/profiles" class="hover:text-gold transition-colors">Directory</a></li>
-                <li><span class="mx-1 opacity-50">/</span></li>
+                <li><span class="mx-1 opacity-70">/</span></li>
                 <li class="text-gold" aria-current="page">${provinceName}</li>
             </ol>
         </nav>
 
-        <div class="flex items-end justify-between mb-6 border-b border-white/10 pb-6">
-            <h2 class="text-2xl md:text-3xl font-serif text-white tracking-wide">
-                โปรไฟล์น้องๆ <span class="text-gold italic">พรีเมียม</span>
+        <div class="flex items-end justify-between mb-8 border-b border-white/10 pb-6">
+            <h2 class="text-2xl md:text-4xl font-serif text-white tracking-wide">
+                โปรไฟล์น้องๆ <span class="text-gold italic font-light">พรีเมียม</span>
             </h2>
             <div class="flex items-center gap-3">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span class="text-[10px] text-white/50 tracking-[0.2em] uppercase font-medium">${safeProfiles.length} Online Now</span>
+                <span class="text-[10px] text-white/70 tracking-[0.2em] uppercase font-semibold">${safeProfiles.length} Online Now</span>
             </div>
         </div>
         
-        <div class="flex flex-wrap items-center gap-3 mb-10">
-            <span class="text-[10px] text-white/40 uppercase tracking-[0.2em] mr-2 hidden md:inline-block">Filter:</span>
-            <button class="text-[10px] md:text-[11px] px-4 py-2 rounded-full bg-gold/10 text-gold border border-gold/30 hover:bg-gold hover:text-black font-semibold tracking-wider uppercase transition-all duration-300">
+        <!-- 🎨 3. ปรับ Contrast Filter Bar -->
+        <div class="flex flex-wrap items-center gap-3 mb-12">
+            <span class="text-[10px] text-white/60 uppercase tracking-[0.2em] mr-2 hidden md:inline-block font-bold">Filter:</span>
+            <button class="text-[10px] md:text-[11px] px-5 py-2.5 rounded-full bg-gold/10 text-gold border border-gold/30 hover:bg-gold hover:text-black font-bold tracking-wider uppercase transition-all duration-300">
                 ⭐ มาแรง (Trending)
             </button>
-            <button class="text-[10px] md:text-[11px] px-4 py-2 rounded-full bg-white/[0.03] text-white/70 border border-white/10 hover:border-gold hover:text-gold font-medium tracking-wider uppercase transition-all duration-300">
+            <button class="text-[10px] md:text-[11px] px-5 py-2.5 rounded-full bg-white/[0.05] text-white/90 border border-white/10 hover:border-gold hover:text-gold font-semibold tracking-wider uppercase transition-all duration-300">
                 💰 เรทเริ่มต้น 1,500
             </button>
-            <button class="text-[10px] md:text-[11px] px-4 py-2 rounded-full bg-white/[0.03] text-white/70 border border-white/10 hover:border-gold hover:text-gold font-medium tracking-wider uppercase transition-all duration-300">
+            <button class="text-[10px] md:text-[11px] px-5 py-2.5 rounded-full bg-white/[0.05] text-white/90 border border-white/10 hover:border-gold hover:text-gold font-semibold tracking-wider uppercase transition-all duration-300">
                 💎 VIP Class
             </button>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10 mb-16">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10 mb-20">
             ${cardsHTML}
         </div>
 
         ${safeProfiles.length >= 80 ? `
         <div class="flex justify-center mb-28">
-            <a href="/search?province=${provinceKey}" class="group relative inline-flex items-center gap-3 px-8 py-3 bg-[#121212] border border-white/20 text-white text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase rounded-full hover:border-gold hover:text-gold transition-all duration-300 overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:shadow-[0_0_20px_rgba(197,160,89,0.2)] hover:-translate-y-1">
+            <a href="/search?province=${provinceKey}" class="group relative inline-flex items-center gap-3 px-10 py-4 bg-[#121212] border border-white/20 text-white text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase rounded-full hover:border-gold hover:text-gold transition-all duration-300 overflow-hidden shadow-2xl hover:-translate-y-1">
                 <span class="relative z-10">ดูโปรไฟล์ทั้งหมด</span>
                 <i class="fas fa-arrow-right relative z-10 text-[10px] group-hover:translate-x-1 transition-transform"></i>
                 <div class="absolute inset-0 h-full w-0 bg-gold/10 group-hover:w-full transition-all duration-500 ease-out z-0"></div>
@@ -690,27 +693,28 @@ return `
         </div>
         ` : '<div class="mb-28"></div>'}
 
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20 mb-40 max-w-6xl mx-auto px-4">
+        <!-- 🎨 4. ปรับ Contrast ส่วน Trust Signals (ข้อความสว่างขึ้น) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20 mb-40 max-w-6xl mx-auto px-4 border-t border-white/5 pt-20">
             <div class="text-center group">
-                <div class="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500">
-                    <i class="fas fa-shield-alt text-2xl text-gold"></i>
+                <div class="w-20 h-20 mx-auto mb-8 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500 bg-[#0a0a0a]">
+                    <i class="fas fa-shield-alt text-3xl text-gold"></i>
                 </div>
-                <h3 class="text-xs font-bold tracking-[0.2em] uppercase text-white mb-4">No Deposit</h3>
-                <p class="text-[11px] text-low-contrast leading-relaxed font-light">ชำระเงินกับผู้ให้บริการโดยตรงเมื่อพบตัวจริง ไม่มีการโอนมัดจำล่วงหน้า ปลอดภัย 100%</p>
+                <h3 class="text-sm font-bold tracking-[0.2em] uppercase text-white mb-4">No Deposit</h3>
+                <p class="text-xs text-white/70 leading-relaxed font-light">ชำระเงินกับผู้ให้บริการโดยตรงเมื่อพบตัวจริง ไม่มีการโอนมัดจำล่วงหน้า ปลอดภัย 100%</p>
             </div>
             <div class="text-center group">
-                <div class="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500">
-                    <i class="fas fa-gem text-2xl text-gold"></i>
+                <div class="w-20 h-20 mx-auto mb-8 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500 bg-[#0a0a0a]">
+                    <i class="fas fa-gem text-3xl text-gold"></i>
                 </div>
-                <h3 class="text-xs font-bold tracking-[0.2em] uppercase text-white mb-4">Quality Verified</h3>
-                <p class="text-[11px] text-low-contrast leading-relaxed font-light">คัดกรองเฉพาะงานคุณภาพ ตรงปก พร้อมการดูแลระดับพรีเมียม</p>
+                <h3 class="text-sm font-bold tracking-[0.2em] uppercase text-white mb-4">Quality Verified</h3>
+                <p class="text-xs text-white/70 leading-relaxed font-light">คัดกรองเฉพาะงานคุณภาพ ตรงปก พร้อมการดูแลระดับพรีเมียม</p>
             </div>
             <div class="text-center group">
-                <div class="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500">
-                    <i class="fas fa-user-secret text-2xl text-gold"></i>
+                <div class="w-20 h-20 mx-auto mb-8 rounded-full border border-gold/20 flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-500 bg-[#0a0a0a]">
+                    <i class="fas fa-user-secret text-3xl text-gold"></i>
                 </div>
-                <h3 class="text-xs font-bold tracking-[0.2em] uppercase text-white mb-4">Privacy Focus</h3>
-                <p class="text-[11px] text-low-contrast leading-relaxed font-light">เราให้ความสำคัญกับความเป็นส่วนตัวของลูกค้าเป็นอันดับหนึ่ง ข้อมูลถูกเก็บเป็นความลับ</p>
+                <h3 class="text-sm font-bold tracking-[0.2em] uppercase text-white mb-4">Privacy Focus</h3>
+                <p class="text-xs text-white/70 leading-relaxed font-light">เราให้ความสำคัญกับความเป็นส่วนตัวของลูกค้าเป็นอันดับหนึ่ง ข้อมูลถูกเก็บเป็นความลับ</p>
             </div>
         </section>
 
@@ -719,6 +723,7 @@ return `
         </div>
     </main>
 
+<!-- 🎨 5. ปรับ Contrast Footer (ตัวหนังสือสว่างขึ้น) -->
 <footer class="border-t border-white/10 bg-[#050505] pt-24 pb-12 mt-20">
     <div class="container mx-auto px-6 lg:px-12 max-w-[1400px]">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8 mb-20">
@@ -726,30 +731,30 @@ return `
                 <h3 class="text-2xl font-serif tracking-[0.3em] text-white uppercase">
                     ไซด์ไลน์<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
                 </h3>
-                <p class="text-[12px] text-white/80 leading-relaxed max-w-sm font-light tracking-wide">
+                <p class="text-[13px] text-white/90 leading-relaxed max-w-sm font-light tracking-wide">
                     Thailand's most prestigious directory for premium personal companion and modeling services. We redefine the standard of excellence, privacy, and safety.
                 </p>
                 <div class="flex gap-6">
-                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" aria-label="Twitter" class="text-white/70 hover:text-gold transition-all text-xl"><i class="fab fa-x-twitter"></i></a>
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="Line" class="text-white/70 hover:text-gold transition-all text-xl"><i class="fab fa-line"></i></a>
+                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" aria-label="Twitter" class="text-white/80 hover:text-gold transition-all text-2xl"><i class="fab fa-x-twitter"></i></a>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="Line" class="text-white/80 hover:text-gold transition-all text-2xl"><i class="fab fa-line"></i></a>
                 </div>
             </div>
 
             <div class="md:col-span-3">
-                <h4 class="text-[10px] font-bold text-white/70 tracking-[0.4em] uppercase mb-8">Navigation</h4>
-                <ul class="space-y-4 text-[12px] text-white/90 font-medium uppercase tracking-widest">
-                    <li><a href="/" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Home</a></li>
-                    <li><a href="/profiles" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">Directory</a></li>
-                    <li><a href="/location/chiangmai" class="underline decoration-white/30 underline-offset-4 hover:text-gold transition-colors">เชียงใหม่</a></li>
+                <h4 class="text-[10px] font-black text-white/60 tracking-[0.4em] uppercase mb-8">Navigation</h4>
+                <ul class="space-y-4 text-[13px] text-white font-medium uppercase tracking-widest">
+                    <li><a href="/" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">Home</a></li>
+                    <li><a href="/profiles" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">Directory</a></li>
+                    <li><a href="/location/chiangmai" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">เชียงใหม่</a></li>
                 </ul>
             </div>
 
             <div class="md:col-span-4">
-                <h4 class="text-[10px] font-bold text-white/70 tracking-[0.4em] uppercase mb-8">Legal & Privacy</h4>
-                <p class="text-[11px] text-white/80 leading-relaxed font-light mb-6 uppercase tracking-wider">
+                <h4 class="text-[10px] font-black text-white/60 tracking-[0.4em] uppercase mb-8">Legal & Privacy</h4>
+                <p class="text-[12px] text-white/90 leading-relaxed font-light mb-6 uppercase tracking-wider">
                     Models are independent contractors. You must be 20+ to enter. We provide information only and do not facilitate transactions.
                 </p>
-                <div class="inline-flex items-center gap-2 border border-gold/40 px-4 py-1.5 rounded-full text-[10px] text-gold uppercase tracking-[0.2em] font-semibold">
+                <div class="inline-flex items-center gap-2 border border-gold/50 px-5 py-2 rounded-full text-[10px] text-gold uppercase tracking-[0.25em] font-bold bg-gold/5">
                     <span class="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span> 20+ Only
                 </div>
             </div>
