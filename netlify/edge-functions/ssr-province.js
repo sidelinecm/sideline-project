@@ -448,21 +448,7 @@ const schemaData = {
     ]
 };
 
-// Helper function สำหรับ rating
-const avgRating = (profiles) => {
-    const ratings = profiles
-        .map(p => parseFloat(p.likes || 0) / 10 || 4.5) // likes -> rating mock
-        .filter(r => r > 0);
-    return ratings.length ? Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length * 10) / 10 : 4.8;
-};
 
-// CHIANGMAI_COORDS (เพิ่ม object global หรือจาก Supabase)
-const CHIANGMAI_COORDS = {
-    'นิมมาน': { lat: 18.8000, lng: 98.9500 },
-    'สันติธรรม': { lat: 18.8100, lng: 98.9600 },
-    'ช้างเผือก': { lat: 18.7900, lng: 98.9700 },
-    // ... zones อื่น
-};
 
         // 🤖 2. เช็คว่าเป็นบอท Google/Bing หรือไม่ (SEO)
         const userAgent = request.headers.get('user-agent') || '';
