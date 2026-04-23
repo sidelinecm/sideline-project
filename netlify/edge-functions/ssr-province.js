@@ -175,12 +175,23 @@ const optimizeImg = (path, width = 600, height = 800) => {
 };
 
 // ==========================================
-// 2. SEO HTML GENERATION (Ultimate Hyper-Local Content)
+// 2. SEO HTML GENERATION (Ultimate Hyper-Local Content - Master Edition)
 // ==========================================
 const generateUltimateSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
     
-    // ระบบสุ่มคำสรุปเพื่อความ Unique ของแต่ละหน้า
+    // --- 1. ระบบจัดการราคาแบบ Robust (ป้องกัน Error 100%) ---
+    const priceRange = data.avgPrice || "1,500 - 3,500";
+    const priceParts = priceRange.split('-');
+    const startPrice = priceParts[0] ? priceParts[0].trim() : "1,500";
+    const endPrice = priceParts[1] ? priceParts[1].trim() : "3,500";
+
+    // --- 2. ระบบสุ่มเนื้อหาเพื่อความ Unique (Internal Linking & Variation) ---
+    const otherProvinces = Object.keys(PROVINCE_SEO_DATA)
+        .filter(key => key !== provinceKey && key !== 'default')
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 4);
+
     const summaries = [
         `รวบรวมโปรไฟล์น้องๆ งานดีระดับ Top Class ใน${provinceName} ไว้ที่นี่ที่เดียว`,
         `บริการเพื่อนเที่ยวและเอนเตอร์เทนระดับพรีเมียม ครอบคลุมโซน${data.zones[0]} และพื้นที่ใกล้เคียง`,
@@ -207,43 +218,44 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
 
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             <div class="lg:col-span-2 bg-gradient-to-b from-white/[0.03] to-transparent border border-white/5 rounded-3xl p-8 shadow-2xl">
-                <h3 class="text-xl font-serif text-gold mb-6 flex items-center gap-3">
+                <h3 class="text-xl font-serif text-gold mb-6 flex items-center gap-3 text-left">
                     <i class="fas fa-chart-line text-sm opacity-50"></i>
                     บทวิเคราะห์ตลาดและเรทราคาใน${provinceName}
                 </h3>
-                <div class="space-y-6">
-                    <p class="text-sm">ปัจจุบันเรามีฐานข้อมูลน้องๆ <strong>${count} ท่าน</strong> ที่พร้อมให้บริการในเขต${provinceName} โดยแบ่งตามประเภทงานดังนี้:</p>
+                <div class="space-y-6 text-left">
+                    <p class="text-sm text-white/60">ปัจจุบันเรามีฐานข้อมูลน้องๆ <strong>${count} ท่าน</strong> ที่พร้อมให้บริการในเขต${provinceName} โดยแบ่งตามประเภทงานดังนี้:</p>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="p-4 rounded-2xl bg-black/40 border border-white/5 group hover:border-gold/30 transition-all">
                             <span class="text-xs text-white/40 block mb-1">เริ่มต้น (Standard)</span>
                             <div class="flex justify-between items-end">
-                                <span class="text-white/90 text-sm italic">${data.lsi[0]}</span>
-                                <span class="text-gold font-serif">฿${data.avgPrice.split('-')[0]}++</span>
+                                <span class="text-white/90 text-sm italic">${data.lsi[0] || 'สายรับงาน'}</span>
+                                <span class="text-gold font-serif text-lg">฿${startPrice}++</span>
                             </div>
                         </div>
                         <div class="p-4 rounded-2xl bg-black/40 border border-white/5 group hover:border-gold/30 transition-all">
                             <span class="text-xs text-white/40 block mb-1">พรีเมียม (High-End)</span>
                             <div class="flex justify-between items-end">
                                 <span class="text-white/90 text-sm italic">นางแบบ / VIP</span>
-                                <span class="text-gold font-serif">฿${data.avgPrice.split('-')[1]}++</span>
+                                <span class="text-gold font-serif text-lg">฿${endPrice}++</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flex gap-3 items-center bg-gold/5 p-4 rounded-xl border border-gold/10">
+                    <div class="flex gap-3 items-center bg-gold/5 p-4 rounded-xl border border-gold/10 shadow-[0_0_15px_rgba(212,175,55,0.05)]">
                         <i class="fas fa-shield-alt text-gold text-lg"></i>
                         <p class="text-[11px] leading-relaxed text-gold/80">
-                            <strong>นโยบายความปลอดภัย:</strong> เว็บไซต์ของเราเน้นย้ำระบบ <span class="underline">"ไม่โอนมัดจำก่อนเจอตัว"</span> เพื่อป้องกันมิจฉาชีพ 100% สบายใจได้ทั้งผู้ใช้บริการและผู้ให้บริการ
+                            <strong>นโยบายความปลอดภัย:</strong> เว็บไซต์ของเราเน้นย้ำระบบ <span class="underline decoration-gold/30">"ไม่โอนมัดจำก่อนเจอตัว"</span> เพื่อป้องกันมิจฉาชีพ 100% สบายใจได้ทั้งผู้ใช้บริการและผู้ให้บริการ
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gold/5 border border-gold/10 rounded-3xl p-8 flex flex-col justify-center text-center">
-                <h4 class="text-white font-serif text-lg mb-4">พร้อมสัมผัสประสบการณ์?</h4>
-                <p class="text-xs text-white/50 mb-8 leading-relaxed">คัดกรองน้องๆ ที่ตรงสเปคคุณที่สุดใน${provinceName} ทักสอบถามคิวงานได้ตลอด 24 ชม.</p>
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="block w-full py-4 bg-gold text-black font-bold rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+            <div class="bg-gold/5 border border-gold/10 rounded-3xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <h4 class="text-white font-serif text-lg mb-4 relative z-10">พร้อมสัมผัสประสบการณ์?</h4>
+                <p class="text-xs text-white/50 mb-8 leading-relaxed relative z-10">คัดกรองน้องๆ ที่ตรงสเปคคุณที่สุดใน${provinceName} ทักสอบถามคิวงานได้ตลอด 24 ชม.</p>
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="relative z-10 block w-full py-4 bg-gold text-black font-bold rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-[0_0_25px_rgba(212,175,55,0.3)] active:scale-95">
                     <i class="fab fa-line mr-2"></i> จองคิวน้องๆ ทันที
                 </a>
             </div>
@@ -251,7 +263,7 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
 
         <section>
             <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
-                <div class="max-w-xl">
+                <div class="max-w-xl text-left">
                     <h3 class="text-2xl font-serif text-white mb-4 italic">คู่มือโซนยอดนิยม (Hyper-Local Guide)</h3>
                     <p class="text-sm text-white/50">${randomSummary}</p>
                 </div>
@@ -262,18 +274,18 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 ${data.zones.slice(0, 6).map((zone, idx) => `
-                    <div class="group relative overflow-hidden bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:bg-white/[0.02] transition-all">
+                    <div class="group relative overflow-hidden bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:bg-white/[0.02] transition-all duration-300 text-left">
                         <div class="absolute -right-4 -top-4 text-5xl font-serif text-white/[0.02] group-hover:text-gold/[0.05] transition-colors">${idx + 1}</div>
                         <h4 class="text-gold font-medium mb-2 flex items-center gap-2">
-                            <i class="fas fa-map-marker-alt text-[10px]"></i>
+                            <i class="fas fa-map-marker-alt text-[10px] opacity-70"></i>
                             โซน${zone}
                         </h4>
                         <p class="text-[11px] text-white/40 leading-relaxed mb-4">
-                            ครอบคลุมแหล่งที่พักระดับ 5 ดาว และ ${data.hotels[idx % data.hotels.length] || 'ที่พักส่วนตัว'} เหมาะสำหรับผู้ที่ต้องการความปลอดภัยเป็นส่วนตัว
+                            แหล่งรวมโรงแรมและ ${data.hotels[idx % data.hotels.length] || 'ที่พักส่วนตัว'} เหมาะสำหรับการนัดหมายน้องๆ สาย${data.lsi[idx % data.lsi.length]} อย่างเป็นส่วนตัว
                         </p>
                         <div class="flex flex-wrap gap-2">
-                            <span class="text-[9px] px-2 py-1 bg-white/5 rounded-md text-white/60">${data.lsi[idx % data.lsi.length]}</span>
-                            <span class="text-[9px] px-2 py-1 bg-white/5 rounded-md text-white/60">${data.traits[idx % data.traits.length]}</span>
+                            <span class="text-[9px] px-2 py-1 bg-white/5 rounded-md text-white/60 border border-white/5">${data.lsi[idx % data.lsi.length]}</span>
+                            <span class="text-[9px] px-2 py-1 bg-white/5 rounded-md text-white/60 border border-white/5">${data.traits[idx % data.traits.length]}</span>
                         </div>
                     </div>
                 `).join('')}
@@ -281,14 +293,14 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
         </section>
 
         <section class="relative py-12">
-            <div class="absolute inset-0 bg-gold/[0.02] rounded-[3rem] -rotate-1"></div>
+            <div class="absolute inset-0 bg-gold/[0.02] rounded-[3rem] -rotate-1 border border-white/[0.02]"></div>
             <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-8">
-                <div>
+                <div class="text-left">
                     <h3 class="text-xl font-serif text-gold mb-6 tracking-widest uppercase italic">Exclusive Amenities</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-left">
                         ${data.services.map(srv => `
                             <div class="flex items-center gap-3 group">
-                                <div class="w-5 h-5 rounded-full border border-gold/30 flex items-center justify-center group-hover:bg-gold transition-all">
+                                <div class="w-5 h-5 rounded-full border border-gold/30 flex items-center justify-center group-hover:bg-gold transition-all duration-300">
                                     <i class="fas fa-check text-[8px] text-gold group-hover:text-black"></i>
                                 </div>
                                 <span class="text-sm text-white/80 group-hover:text-white transition-colors">${srv}</span>
@@ -296,7 +308,7 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
                         `).join('')}
                     </div>
                 </div>
-                <div class="border-l border-white/5 pl-8 hidden lg:block">
+                <div class="border-l border-white/5 pl-8 hidden lg:block text-left">
                     <p class="text-sm italic text-white/40 leading-loose">
                         "เราคัดสรรพริตตี้และนางแบบใน${provinceName}ด้วยมาตรฐานสูงสุด ไม่เพียงแค่ความสวยภายนอก แต่เรายังให้ความสำคัญกับมารยาท การรักษาความลับลูกค้า และความตรงปก เพื่อให้ทุกการนัดหมายคือความประทับใจที่คุณต้องกลับมาซ้ำ"
                     </p>
@@ -309,16 +321,48 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
                 <h3 class="text-2xl font-serif text-white mb-2">คำถามที่พบบ่อย (FAQ)</h3>
                 <p class="text-[10px] text-gold/50 tracking-[0.2em] uppercase">Everything you need to know</p>
             </div>
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-1 gap-4 text-left">
                 ${data.faqs.map(faq => `
-                    <div class="p-6 bg-[#0a0a0a] border border-white/5 rounded-2xl hover:border-gold/20 transition-all group">
+                    <div class="p-6 bg-[#0a0a0a] border border-white/5 rounded-2xl hover:border-gold/20 transition-all duration-300 group">
                         <h4 class="text-sm font-medium text-gold mb-3 flex items-center gap-3">
-                            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 group-hover:scale-150 transition-all"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 group-hover:scale-150 group-hover:bg-gold transition-all duration-500"></span>
                             ${faq.q}
                         </h4>
                         <p class="text-sm text-white/50 leading-relaxed pl-4 border-l border-white/5">${faq.a}</p>
                     </div>
                 `).join('')}
+            </div>
+        </section>
+
+        <section class="border-t border-white/5 pt-16 text-left">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 text-center md:text-left">
+                <div>
+                    <h3 class="text-xl font-serif text-white mb-2 tracking-wide italic">พื้นที่บริการใกล้เคียงที่น่าสนใจ</h3>
+                    <p class="text-xs text-white/40">สำรวจโปรไฟล์น้องๆ ในจังหวัดอื่นๆ ที่เดินทางสะดวกจาก${provinceName}</p>
+                </div>
+                <a href="/" class="text-[10px] text-gold/60 uppercase tracking-widest border border-gold/20 px-4 py-2 rounded-full hover:bg-gold hover:text-black transition-all">ดูรายชื่อทั้งหมด</a>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                ${otherProvinces.map(key => {
+                    const pData = PROVINCE_SEO_DATA[key];
+                    return `
+                        <a href="/${key}" class="group p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:border-gold/30 transition-all text-center">
+                            <span class="block text-white group-hover:text-gold transition-colors font-medium mb-1">
+                                ${pData.name}
+                            </span>
+                            <span class="block text-[10px] text-white/30 uppercase tracking-tighter group-hover:text-white/50">
+                                Sideline ${key.toUpperCase()}
+                            </span>
+                        </a>
+                    `;
+                }).join('')}
+            </div>
+            
+            <div class="mt-12 p-6 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent text-center">
+                <p class="text-[11px] text-white/30 leading-relaxed max-w-3xl mx-auto">
+                    ข้อมูล ไซด์ไลน์${provinceName} นี้จัดทำขึ้นเพื่อรวบรวมโปรไฟล์ที่ผ่านการตรวจสอบเบื้องต้น เพื่อความปลอดภัยสูงสุดกรุณานัดหมายผ่านช่องทางที่ระบุไว้ และปฏิบัติตามกฎความปลอดภัยอย่างเคร่งครัด
+                </p>
             </div>
         </section>
 
