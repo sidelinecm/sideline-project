@@ -174,19 +174,14 @@ const optimizeImg = (path, width = 600, height = 800) => {
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=85`;
 };
 
-// ==========================================
-// 2. SEO HTML GENERATION (Ultimate Hyper-Local Content - Master Edition)
-// ==========================================
 const generateUltimateSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
     
-    // --- 1. ระบบจัดการราคาแบบ Robust (ป้องกัน Error 100%) ---
     const priceRange = data.avgPrice || "1,500 - 3,500";
     const priceParts = priceRange.split('-');
     const startPrice = priceParts[0] ? priceParts[0].trim() : "1,500";
     const endPrice = priceParts[1] ? priceParts[1].trim() : "3,500";
 
-    // --- 2. ระบบสุ่มเนื้อหาเพื่อความ Unique (Internal Linking & Variation) ---
     const otherProvinces = Object.keys(PROVINCE_SEO_DATA)
         .filter(key => key !== provinceKey && key !== 'default')
         .sort(() => 0.5 - Math.random())
@@ -200,62 +195,61 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
     const randomSummary = summaries[Math.floor(Math.random() * summaries.length)];
 
     return `
-    <article class="text-left space-y-16 text-white/70 leading-loose font-light px-4 md:px-12 pb-20">
+    <article class="text-left space-y-16 text-gray-300 leading-loose font-light px-4 md:px-12 pb-20">
         
         <section class="text-center max-w-5xl mx-auto pt-10">
             <h2 class="text-2xl md:text-5xl font-serif text-white mb-6 tracking-wider">
-                ศูนย์รวม <span class="text-gold italic underline decoration-gold/20 underline-offset-8">ไซด์ไลน์${provinceName}</span> ระดับพรีเมียม
+                ศูนย์รวม <span class="text-gold italic underline decoration-gold/40 underline-offset-8">ไซด์ไลน์${provinceName}</span> ระดับพรีเมียม
             </h2>
             <div class="flex items-center justify-center gap-4 mb-8">
-                <div class="w-16 h-[1px] bg-gradient-to-r from-transparent to-gold/50"></div>
-                <span class="text-[10px] uppercase tracking-[0.3em] text-gold/60 font-medium">The Ultimate Experience</span>
-                <div class="w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/50"></div>
+                <div class="w-16 h-[1px] bg-gradient-to-r from-transparent to-gold"></div>
+                <span class="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">The Ultimate Experience</span>
+                <div class="w-16 h-[1px] bg-gradient-to-l from-transparent to-gold"></div>
             </div>
-            <p class="text-base md:text-lg md:leading-relaxed text-white/80 max-w-3xl mx-auto italic">
+            <p class="text-base md:text-lg md:leading-relaxed text-white max-w-3xl mx-auto italic">
                 "${data.uniqueIntro}"
             </p>
         </section>
 
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-            <div class="lg:col-span-2 bg-gradient-to-b from-white/[0.03] to-transparent border border-white/5 rounded-3xl p-8 shadow-2xl">
+            <div class="lg:col-span-2 bg-white/[0.05] border border-white/10 rounded-3xl p-8 shadow-2xl">
                 <h3 class="text-xl font-serif text-gold mb-6 flex items-center gap-3 text-left">
-                    <i class="fas fa-chart-line text-sm opacity-50"></i>
+                    <i class="fas fa-chart-line text-sm opacity-70"></i>
                     บทวิเคราะห์ตลาดและเรทราคาใน${provinceName}
                 </h3>
                 <div class="space-y-6 text-left">
-                    <p class="text-sm text-white/60">ปัจจุบันเรามีฐานข้อมูลน้องๆ <strong>${count} ท่าน</strong> ที่พร้อมให้บริการในเขต${provinceName} โดยแบ่งตามประเภทงานดังนี้:</p>
+                    <p class="text-sm text-gray-200">ปัจจุบันเรามีฐานข้อมูลน้องๆ <strong class="text-white">${count} ท่าน</strong> ที่พร้อมให้บริการในเขต${provinceName} โดยแบ่งตามประเภทงานดังนี้:</p>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-black/40 border border-white/5 group hover:border-gold/30 transition-all">
-                            <span class="text-xs text-white/40 block mb-1">เริ่มต้น (Standard)</span>
+                        <div class="p-4 rounded-2xl bg-black/60 border border-white/10 group hover:border-gold transition-all">
+                            <span class="text-xs text-gray-400 block mb-1">เริ่มต้น (Standard)</span>
                             <div class="flex justify-between items-end">
-                                <span class="text-white/90 text-sm italic">${data.lsi[0] || 'สายรับงาน'}</span>
-                                <span class="text-gold font-serif text-lg">฿${startPrice}++</span>
+                                <span class="text-white text-sm italic">${data.lsi[0] || 'สายรับงาน'}</span>
+                                <span class="text-gold font-serif text-lg font-bold">฿${startPrice}++</span>
                             </div>
                         </div>
-                        <div class="p-4 rounded-2xl bg-black/40 border border-white/5 group hover:border-gold/30 transition-all">
-                            <span class="text-xs text-white/40 block mb-1">พรีเมียม (High-End)</span>
+                        <div class="p-4 rounded-2xl bg-black/60 border border-white/10 group hover:border-gold transition-all">
+                            <span class="text-xs text-gray-400 block mb-1">พรีเมียม (High-End)</span>
                             <div class="flex justify-between items-end">
-                                <span class="text-white/90 text-sm italic">นางแบบ / VIP</span>
-                                <span class="text-gold font-serif text-lg">฿${endPrice}++</span>
+                                <span class="text-white text-sm italic">นางแบบ / VIP</span>
+                                <span class="text-gold font-serif text-lg font-bold">฿${endPrice}++</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flex gap-3 items-center bg-gold/5 p-4 rounded-xl border border-gold/10 shadow-[0_0_15px_rgba(212,175,55,0.05)]">
+                    <div class="flex gap-3 items-center bg-gold/10 p-4 rounded-xl border border-gold/20 shadow-lg">
                         <i class="fas fa-shield-alt text-gold text-lg"></i>
-                        <p class="text-[11px] leading-relaxed text-gold/80">
-                            <strong>นโยบายความปลอดภัย:</strong> เว็บไซต์ของเราเน้นย้ำระบบ <span class="underline decoration-gold/30">"ไม่โอนมัดจำก่อนเจอตัว"</span> เพื่อป้องกันมิจฉาชีพ 100% สบายใจได้ทั้งผู้ใช้บริการและผู้ให้บริการ
+                        <p class="text-[11px] leading-relaxed text-white">
+                            <strong class="text-gold">นโยบายความปลอดภัย:</strong> เว็บไซต์ของเราเน้นย้ำระบบ <span class="underline decoration-gold font-bold">"ไม่โอนมัดจำก่อนเจอตัว"</span> เพื่อป้องกันมิจฉาชีพ 100%
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gold/5 border border-gold/10 rounded-3xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
-                <div class="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <h4 class="text-white font-serif text-lg mb-4 relative z-10">พร้อมสัมผัสประสบการณ์?</h4>
-                <p class="text-xs text-white/50 mb-8 leading-relaxed relative z-10">คัดกรองน้องๆ ที่ตรงสเปคคุณที่สุดใน${provinceName} ทักสอบถามคิวงานได้ตลอด 24 ชม.</p>
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="relative z-10 block w-full py-4 bg-gold text-black font-bold rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-[0_0_25px_rgba(212,175,55,0.3)] active:scale-95">
+            <div class="bg-gold/10 border border-gold/20 rounded-3xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
+                <h4 class="text-white font-serif text-lg mb-4 relative z-10 font-bold">พร้อมสัมผัสประสบการณ์?</h4>
+                <p class="text-xs text-gray-200 mb-8 leading-relaxed relative z-10">คัดกรองน้องๆ ที่ตรงสเปคคุณที่สุดใน${provinceName} ทักสอบถามคิวงานได้ตลอด 24 ชม.</p>
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="relative z-10 block w-full py-4 bg-gold text-black font-bold rounded-full hover:bg-white transition-all transform hover:scale-105 shadow-xl active:scale-95">
                     <i class="fab fa-line mr-2"></i> จองคิวน้องๆ ทันที
                 </a>
             </div>
@@ -265,27 +259,27 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
             <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
                 <div class="max-w-xl text-left">
                     <h3 class="text-2xl font-serif text-white mb-4 italic">คู่มือโซนยอดนิยม (Hyper-Local Guide)</h3>
-                    <p class="text-sm text-white/50">${randomSummary}</p>
+                    <p class="text-sm text-gray-400">${randomSummary}</p>
                 </div>
-                <div class="text-[10px] uppercase tracking-widest text-gold/40 border-b border-gold/20 pb-2">
+                <div class="text-[10px] uppercase tracking-widest text-gold font-bold border-b border-gold/40 pb-2">
                     Verified Locations in ${provinceName}
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 ${data.zones.slice(0, 6).map((zone, idx) => `
-                    <div class="group relative overflow-hidden bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:bg-white/[0.02] transition-all duration-300 text-left">
-                        <div class="absolute -right-4 -top-4 text-5xl font-serif text-white/[0.02] group-hover:text-gold/[0.05] transition-colors">${idx + 1}</div>
-                        <h4 class="text-gold font-medium mb-2 flex items-center gap-2">
-                            <i class="fas fa-map-marker-alt text-[10px] opacity-70"></i>
+                    <div class="group relative overflow-hidden bg-white/[0.03] border border-white/10 p-6 rounded-2xl hover:bg-white/[0.05] transition-all duration-300 text-left">
+                        <div class="absolute -right-4 -top-4 text-5xl font-serif text-white/5 group-hover:text-gold/10 transition-colors">${idx + 1}</div>
+                        <h4 class="text-gold font-bold mb-2 flex items-center gap-2">
+                            <i class="fas fa-map-marker-alt text-[10px]"></i>
                             โซน${zone}
                         </h4>
-                        <p class="text-[11px] text-white/40 leading-relaxed mb-4">
+                        <p class="text-[11px] text-gray-300 leading-relaxed mb-4">
                             แหล่งรวมโรงแรมและ ${data.hotels[idx % data.hotels.length] || 'ที่พักส่วนตัว'} เหมาะสำหรับการนัดหมายน้องๆ สาย${data.lsi[idx % data.lsi.length]} อย่างเป็นส่วนตัว
                         </p>
                         <div class="flex flex-wrap gap-2">
-                            <span class="text-[9px] px-2 py-1 bg-white/5 rounded-md text-white/60 border border-white/5">${data.lsi[idx % data.lsi.length]}</span>
-                            <span class="text-[9px] px-2 py-1 bg-white/5 rounded-md text-white/60 border border-white/5">${data.traits[idx % data.traits.length]}</span>
+                            <span class="text-[9px] px-2 py-1 bg-white/10 rounded-md text-white border border-white/10">${data.lsi[idx % data.lsi.length]}</span>
+                            <span class="text-[9px] px-2 py-1 bg-white/10 rounded-md text-white border border-white/10">${data.traits[idx % data.traits.length]}</span>
                         </div>
                     </div>
                 `).join('')}
@@ -293,23 +287,23 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
         </section>
 
         <section class="relative py-12">
-            <div class="absolute inset-0 bg-gold/[0.02] rounded-[3rem] -rotate-1 border border-white/[0.02]"></div>
+            <div class="absolute inset-0 bg-white/[0.02] rounded-[3rem] border border-white/10"></div>
             <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-8">
                 <div class="text-left">
-                    <h3 class="text-xl font-serif text-gold mb-6 tracking-widest uppercase italic">Exclusive Amenities</h3>
+                    <h3 class="text-xl font-serif text-gold mb-6 tracking-widest uppercase italic font-bold">Exclusive Amenities</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-left">
                         ${data.services.map(srv => `
                             <div class="flex items-center gap-3 group">
-                                <div class="w-5 h-5 rounded-full border border-gold/30 flex items-center justify-center group-hover:bg-gold transition-all duration-300">
+                                <div class="w-5 h-5 rounded-full border border-gold flex items-center justify-center group-hover:bg-gold transition-all duration-300">
                                     <i class="fas fa-check text-[8px] text-gold group-hover:text-black"></i>
                                 </div>
-                                <span class="text-sm text-white/80 group-hover:text-white transition-colors">${srv}</span>
+                                <span class="text-sm text-gray-200 group-hover:text-white transition-colors">${srv}</span>
                             </div>
                         `).join('')}
                     </div>
                 </div>
-                <div class="border-l border-white/5 pl-8 hidden lg:block text-left">
-                    <p class="text-sm italic text-white/40 leading-loose">
+                <div class="border-l border-white/10 pl-8 hidden lg:block text-left">
+                    <p class="text-sm italic text-gray-400 leading-loose">
                         "เราคัดสรรพริตตี้และนางแบบใน${provinceName}ด้วยมาตรฐานสูงสุด ไม่เพียงแค่ความสวยภายนอก แต่เรายังให้ความสำคัญกับมารยาท การรักษาความลับลูกค้า และความตรงปก เพื่อให้ทุกการนัดหมายคือความประทับใจที่คุณต้องกลับมาซ้ำ"
                     </p>
                 </div>
@@ -319,39 +313,39 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
         <section class="max-w-4xl mx-auto pt-8">
             <div class="text-center mb-12">
                 <h3 class="text-2xl font-serif text-white mb-2">คำถามที่พบบ่อย (FAQ)</h3>
-                <p class="text-[10px] text-gold/50 tracking-[0.2em] uppercase">Everything you need to know</p>
+                <p class="text-[10px] text-gold font-bold tracking-[0.2em] uppercase">Everything you need to know</p>
             </div>
             <div class="grid grid-cols-1 gap-4 text-left">
                 ${data.faqs.map(faq => `
-                    <div class="p-6 bg-[#0a0a0a] border border-white/5 rounded-2xl hover:border-gold/20 transition-all duration-300 group">
-                        <h4 class="text-sm font-medium text-gold mb-3 flex items-center gap-3">
-                            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 group-hover:scale-150 group-hover:bg-gold transition-all duration-500"></span>
+                    <div class="p-6 bg-white/[0.03] border border-white/10 rounded-2xl hover:border-gold/40 transition-all duration-300 group">
+                        <h4 class="text-sm font-bold text-gold mb-3 flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
                             ${faq.q}
                         </h4>
-                        <p class="text-sm text-white/50 leading-relaxed pl-4 border-l border-white/5">${faq.a}</p>
+                        <p class="text-sm text-gray-300 leading-relaxed pl-4 border-l border-white/10">${faq.a}</p>
                     </div>
                 `).join('')}
             </div>
         </section>
 
-        <section class="border-t border-white/5 pt-16 text-left">
+        <section class="border-t border-white/10 pt-16 text-left">
             <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 text-center md:text-left">
                 <div>
-                    <h3 class="text-xl font-serif text-white mb-2 tracking-wide italic">พื้นที่บริการใกล้เคียงที่น่าสนใจ</h3>
-                    <p class="text-xs text-white/40">สำรวจโปรไฟล์น้องๆ ในจังหวัดอื่นๆ ที่เดินทางสะดวกจาก${provinceName}</p>
+                    <h3 class="text-xl font-serif text-white mb-2 tracking-wide italic font-bold">พื้นที่บริการใกล้เคียงที่น่าสนใจ</h3>
+                    <p class="text-xs text-gray-400">สำรวจโปรไฟล์น้องๆ ในจังหวัดอื่นๆ ที่เดินทางสะดวกจาก${provinceName}</p>
                 </div>
-                <a href="/" class="text-[10px] text-gold/60 uppercase tracking-widest border border-gold/20 px-4 py-2 rounded-full hover:bg-gold hover:text-black transition-all">ดูรายชื่อทั้งหมด</a>
+                <a href="/" class="text-[10px] text-white font-bold uppercase tracking-widest border border-gold px-4 py-2 rounded-full hover:bg-gold hover:text-black transition-all">ดูรายชื่อทั้งหมด</a>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 ${otherProvinces.map(key => {
                     const pData = PROVINCE_SEO_DATA[key];
                     return `
-                        <a href="/${key}" class="group p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:border-gold/30 transition-all text-center">
-                            <span class="block text-white group-hover:text-gold transition-colors font-medium mb-1">
+                        <a href="/${key}" class="group p-4 bg-white/[0.05] border border-white/10 rounded-2xl hover:border-gold transition-all text-center">
+                            <span class="block text-white group-hover:text-gold transition-colors font-bold mb-1">
                                 ${pData.name}
                             </span>
-                            <span class="block text-[10px] text-white/30 uppercase tracking-tighter group-hover:text-white/50">
+                            <span class="block text-[10px] text-gray-400 uppercase tracking-tighter group-hover:text-white">
                                 Sideline ${key.toUpperCase()}
                             </span>
                         </a>
@@ -359,8 +353,8 @@ const generateUltimateSeoText = (provinceName, provinceKey, count) => {
                 }).join('')}
             </div>
             
-            <div class="mt-12 p-6 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent text-center">
-                <p class="text-[11px] text-white/30 leading-relaxed max-w-3xl mx-auto">
+            <div class="mt-12 p-6 bg-white/[0.02] text-center border-t border-white/5">
+                <p class="text-[11px] text-gray-400 leading-relaxed max-w-3xl mx-auto">
                     ข้อมูล ไซด์ไลน์${provinceName} นี้จัดทำขึ้นเพื่อรวบรวมโปรไฟล์ที่ผ่านการตรวจสอบเบื้องต้น เพื่อความปลอดภัยสูงสุดกรุณานัดหมายผ่านช่องทางที่ระบุไว้ และปฏิบัติตามกฎความปลอดภัยอย่างเคร่งครัด
                 </p>
             </div>
@@ -984,24 +978,30 @@ if (safeProfiles && safeProfiles.length > 0) {
 <a href="${CONFIG.SOCIAL_LINKS.line}" 
    target="_blank" 
    rel="noopener noreferrer"
-   class="fixed bottom-10 right-10 z-[90] group transition-all duration-500 hover:-translate-y-2 focus:outline-none focus:ring-4 focus:ring-green-500/50 rounded-full"
+   /* 1. ใช้ transform-gpu เพื่อให้ลื่นไหลและไม่ขยับ Layout ส่วนอื่น */
+   /* 2. ระบุ w-auto h-auto และใช้ flex เพื่อให้ขนาดปุ่มนิ่ง */
+   class="fixed bottom-10 right-10 z-[90] group transition-transform duration-300 hover:-translate-y-2 focus:outline-none focus:ring-4 focus:ring-green-500/50 rounded-full will-change-transform"
    aria-label="ติดต่อสอบถามข้อมูลเพิ่มเติมผ่าน LINE">
     
-    <div class="bg-[#059645] border border-white/30 rounded-full px-6 py-3 flex items-center gap-3 shadow-[0_15px_30px_-5px_rgba(5,150,69,0.4)] hover:shadow-[0_20px_40px_-5px_rgba(5,150,69,0.5)] transition-shadow duration-300">
+    /* แก้ Contrast: ใช้ bg-[#067d3b] (เขียวที่เข้มขึ้นเล็กน้อย) เพื่อให้ตัดกับตัวหนังสือสีขาวได้คะแนนสูงขึ้น */
+    <div class="bg-[#067d3b] border border-white/40 rounded-full px-6 py-3 flex items-center gap-3 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_-5px_rgba(0,0,0,0.4)] transition-all duration-300">
         
-        <div class="relative flex items-center justify-center">
+        <div class="relative flex items-center justify-center w-8 h-8">
+            /* แก้ไอคอนให้เด่นชัด */
             <i class="fab fa-line text-white text-3xl group-hover:scale-110 transition-transform duration-300" aria-hidden="true"></i>
             
+            /* จุดแจ้งเตือน: ใช้สีแดงที่สว่างขึ้นเพื่อให้ตัดกับสีเขียวพื้นหลัง */
             <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600"></span>
+                <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500 border border-white/20"></span>
             </span>
         </div>
 
-        <!-- 🎨 7. แก้ Contrast ปุ่ม Contact: จาก text-white/90 เป็น text-white เพื่อให้สว่างขึ้น -->
-        <div class="flex flex-col items-start leading-tight">
-            <span class="text-[12px] text-white uppercase tracking-wider font-semibold">Contact</span>
-            <span class="text-[16px] text-white font-black tracking-normal">ติดต่อสอบถาม</span>
+        <div class="flex flex-col items-start leading-none">
+            /* แก้ Contrast: ใช้ text-white แบบ 100% (ไม่มี opacity) และเพิ่ม font-bold */
+            <span class="text-[11px] text-white uppercase tracking-[0.1em] font-bold opacity-100">Contact Us</span>
+            /* เพิ่มขนาดตัวอักษรภาษาไทยเป็น 18px เพื่อการอ่านที่ง่ายขึ้น (Accessibility) */
+            <span class="text-[18px] text-white font-black tracking-normal">ติดต่อสอบถาม</span>
         </div>
     </div>
 </a>
