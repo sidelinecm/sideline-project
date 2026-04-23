@@ -1,29 +1,24 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// ==========================================
-// 1. CONFIGURATION
-// ==========================================
+
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
-    SOCIAL_PROFILES: [
-line: 'https://line.me/ti/p/ksLUWB89Y_',
+    BRAND_NAME: 'sidelinechiangmai (ไซด์ไลน์เชียงใหม่)',
+SOCIAL_PROFILES: {
+        line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@sidelinechiangmai',
         twitter: 'https://twitter.com/sidelinechiangmai',
         linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
         biosite: 'https://bio.site/firstfiwfans.com',
         linktree: 'https://linktr.ee/kissmodel',
         bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
-    
-    ]
+    }
 };
 
-// ==========================================
-// 2. MOCK DATA (ข้อมูลรีวิว)
-// ==========================================
+
 const TESTIMONIALS = [
     {
         name: "พี่บอล",
@@ -47,17 +42,16 @@ const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const optimizeImg = (path, width = 600, height = 800) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     
-    // กรณีเป็น URL จาก Cloudinary
+
     if (path.includes('res.cloudinary.com')) {
-        // แทรก parameter f_auto (เลือกฟอร์แมตอัตโนมัติเช่น WebP/AVIF) 
-        // และ q_auto (บีบอัดคุณภาพอัตโนมัติ) และการปรับขนาด
+
         return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
     }
 
-    // กรณีเป็น URL อื่นๆ (เช่นภายนอก)
+
     if (path.startsWith('http')) return path;
 
-    // กรณีเป็นไฟล์จาก Supabase Storage
+
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
@@ -66,7 +60,7 @@ const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;',
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // ตรวจสอบว่าเป็น Bot หรือ Social Media Crawler หรือไม่
+
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
     
 
@@ -80,14 +74,12 @@ export default async (request, context) => {
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
         
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        
-        // ป้องกัน slug ที่เป็นคำสั่งระบบ
+
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
-        // เชื่อมต่อ Database
+
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // ดึงข้อมูล Profile และข้อมูลจังหวัดที่เชื่อมโยงกัน
         const { data: p } = await supabase
             .from('profiles')
             .select('*, provinces(nameThai, key)')
@@ -95,10 +87,10 @@ export default async (request, context) => {
             .eq('active', true)
             .maybeSingle();
 
-        // หากไม่พบข้อมูลโปรไฟล์ ให้ปล่อยไปหน้า 404 ของระบบหลัก
+
         if (!p) return context.next();
 
-        // ดึงโปรไฟล์แนะนำในจังหวัดเดียวกัน (Related Profiles)
+
         let related = [];
         if (p.provinceKey) {
             const { data: relatedData } = await supabase
@@ -118,18 +110,18 @@ export default async (request, context) => {
         const displayPrice = parseInt(p.rate || "1500").toLocaleString() + ".-";
 const imageUrl = optimizeImg(p.imagePath, 600, 800);
         
-        // จัดการลิงก์ LINE (รองรับทั้ง ID และ URL)
+
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        // จำลอง Rating เพื่อให้ Google แสดงผล Rich Snippets (ดาว)
+
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
 
-        // SEO Spintax
+
         const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
         const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง", "ขี้อ้อน"]);
         const payWord = spin(["ไม่รับมัดจำ", "จ่ายหน้างานเท่านั้น", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
@@ -138,7 +130,7 @@ const imageUrl = optimizeImg(p.imagePath, 600, 800);
         const metaDesc = `${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
-        // สร้าง Schema Markup (JSON-LD)
+
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
