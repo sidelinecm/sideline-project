@@ -10,9 +10,14 @@ const CONFIG = {
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
     BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
     SOCIAL_PROFILES: [
-        "https://linktr.ee/sidelinechiangmai",
-        "https://x.com/Sdl_chiangmai",
-        "https://line.me/ti/p/ksLUMz3p_o"
+line: 'https://line.me/ti/p/ksLUWB89Y_',
+        tiktok: 'https://tiktok.com/@sidelinechiangmai',
+        twitter: 'https://twitter.com/sidelinechiangmai',
+        linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
+        biosite: 'https://bio.site/firstfiwfans.com',
+        linktree: 'https://linktr.ee/kissmodel',
+        bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
+    
     ]
 };
 
@@ -37,7 +42,6 @@ const TESTIMONIALS = [
     }
 ];
 
-// ฟังก์ชันสุ่มคำ (Spintax) เพื่อให้เนื้อหาไม่ซ้ำกันในสายตา Google
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const optimizeImg = (path, width = 600, height = 800) => {
@@ -65,14 +69,14 @@ export default async (request, context) => {
     // ตรวจสอบว่าเป็น Bot หรือ Social Media Crawler หรือไม่
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
     
-    // ถ้าไม่ใช่ Bot ให้ปล่อยผ่านไปใช้ Client-side Rendering ปกติ
+
     if (!isBot) return context.next();
 
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
         
-        // ตรวจสอบว่าต้องเป็น URL รูปแบบ /sideline/{slug}
+
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
         
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
@@ -103,11 +107,11 @@ export default async (request, context) => {
                 .eq('provinceKey', p.provinceKey)
                 .eq('active', true)
                 .neq('id', p.id) 
-                .limit(4);
+                .limit(6);
             related = relatedData || [];
         }
 
-        // เตรียมตัวแปรสำหรับแสดงผล
+
         const displayName = p.name || 'สาวสวย';
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
@@ -115,7 +119,7 @@ export default async (request, context) => {
 const imageUrl = optimizeImg(p.imagePath, 600, 800);
         
         // จัดการลิงก์ LINE (รองรับทั้ง ID และ URL)
-        let finalLineUrl = p.lineId || 'ksLUMz3p_o';
+        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
