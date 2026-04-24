@@ -39,23 +39,23 @@ const TESTIMONIALS = [
 
 const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-const optimizeImg = (path, width = 600, height = 800) => {
+
+const optimizeImg = (path, width = 450, height = 600) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     
-
     if (path.includes('res.cloudinary.com')) {
 
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+        return path.replace('/upload/', `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
     }
 
-
     if (path.startsWith('http')) return path;
-
 
     return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
-const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+}[tag])) : '';
 
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
@@ -63,80 +63,55 @@ export default async (request, context) => {
 
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
     
-
     if (!isBot) return context.next();
 
     try {
         const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
         
-
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
         
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
 
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
-
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
         const { data: p } = await supabase
             .from('profiles')
-            .select('*, provinces(nameThai, key)')
+            .select('*, provinces(nameThai, key, slug)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
 
-
         if (!p) return context.next();
-
-
-        let related = [];
-        if (p.provinceKey) {
-            const { data: relatedData } = await supabase
-                .from('profiles')
-                .select('slug, name, imagePath, location')
-                .eq('provinceKey', p.provinceKey)
-                .eq('active', true)
-                .neq('id', p.id) 
-                .limit(6);
-            related = relatedData || [];
-        }
-
 
         const displayName = p.name || 'สาวสวย';
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
         const displayPrice = parseInt(p.rate || "1500").toLocaleString() + ".-";
-const imageUrl = optimizeImg(p.imagePath, 600, 800);
         
+
+        const imageUrl = optimizeImg(p.imagePath, 500, 667); 
 
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
-
-
 
         const titleIntro = spin(["แนะนำ", "รีวิว", "มาแรง", "ตัวท็อป"]); 
         const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง", "ขี้อ้อน"]);
         const payWord = spin(["ไม่มีมัดจำ", "จ่ายหน้างาน", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
         
-
         const pageTitle = `${titleIntro} น้อง${displayName} ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน ตรงปก`;
-        
-
         const metaDesc = `น้อง${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเอง ไม่ผ่านเอเย่นต์ ${payWord} พิกัด${p.location || provinceName} ทักไลน์จองคิวเลย!`;
-        
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
 
-        const schemaData = {
+                const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
                 {
@@ -193,15 +168,22 @@ const imageUrl = optimizeImg(p.imagePath, 600, 800);
     <title>${pageTitle} | รับงานเอง ฟิวแฟน รูปตรงปก</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
-    <meta name="robots" content="index, follow, max-image-preview:large">
-    <!-- Core Web Vitals -->
-    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-    <link rel="preload" as="image" href="${imageUrl}">
-    <meta name="theme-color" content="#db2777">
+    
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     
+    <meta name="theme-color" content="#db2777">
+    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    
+    <link rel="preload" as="image" href="${imageUrl}" fetchpriority="high">
+    
     <meta property="og:site_name" content="Sideline Chiangmai">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="${pageTitle}">
+    <meta property="og:description" content="${metaDesc}">
+    <meta property="og:image" content="${imageUrl}">
+    <meta property="og:url" content="${canonicalUrl}">
     
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${pageTitle}">
@@ -212,15 +194,9 @@ const imageUrl = optimizeImg(p.imagePath, 600, 800);
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-    <!-- Open Graph -->
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
-    <meta property="og:image" content="${imageUrl}">
-    <meta property="og:url" content="${canonicalUrl}">
-    <meta property="og:type" content="website">
-    
-    <!-- Schema -->
+
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+
     
     <style>
 :root{--p:#ec4899;--s:#10b981;--bg:#0f172a;--card:#1e293b;--txt:#f8fafc;--gold:#fbbf24;--muted:#94a3b8}*{box-sizing:border-box;margin:0}body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}.container{max-width:500px;margin:0 auto;padding:1.5rem;background:var(--card);min-height:100vh}@media(min-width:768px){.container{max-width:600px;padding:2rem}}
@@ -244,13 +220,24 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
     <div class="container">
         <header class="profile-header">
             <section class="hero-section">
-                <img src="${imageUrl}" class="hero-img" alt="${displayName} ไซด์ไลน์${provinceName}" loading="eager" width="400" height="533">
+                <img src="${imageUrl}" 
+                     class="hero-img" 
+                     alt="รูปโปรไฟล์ น้อง${displayName}" 
+                     loading="eager" 
+                     fetchpriority="high"
+                     width="400" 
+                     height="533"
+                     decoding="async">
             </section>
 
-            <div class="rating" style="margin-top: 1rem; justify-content: center;">
-                <span class="stars">⭐</span>${ratingValue} <span>(${reviewCount} รีวิว)</span>
+            <div class="rating-display">
+                <span class="stars" aria-hidden="true">⭐</span>
+                <strong>${ratingValue}</strong> 
+                <span class="review-count">(${reviewCount} รีวิว)</span>
             </div>
-            <h1>${pageTitle}</h1>
+
+            <h1 class="main-title">น้อง${displayName} (${provinceName})</h1>
+            <p class="seo-title">${pageTitle}</p>
         </header>
 
         <main>

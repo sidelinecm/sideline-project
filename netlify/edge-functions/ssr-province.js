@@ -171,17 +171,17 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-const optimizeImg = (path, width = 600, height = 800) => {
+const optimizeImg = (path, width = 400, height = 533) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
         if (path.includes('/upload/')) {
-            const transform = `f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face`;
+            const transform = `f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face`;
             return path.replace('/upload/', `/upload/${transform}/`);
         }
         return path;
     }
     if (path.startsWith('http')) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=85`;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=75`;
 };
 
 const generateUltimateSeoText = (provinceName, provinceKey, count) => {
@@ -649,7 +649,7 @@ if (safeProfiles && safeProfiles.length > 0) {
     <meta name="theme-color" content="#070707">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="sidelinechiangmai">
+    <meta name="apple-mobile-web-app-title" content="${CONFIG.BRAND_NAME}">
 
     <title>${title}</title>
     <meta name="description" content="${description}" />
@@ -657,11 +657,13 @@ if (safeProfiles && safeProfiles.length > 0) {
     <link rel="canonical" href="${provinceUrl}" />
     
     <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
 
     <meta name="geo.region" content="TH" />
     <meta name="geo.placename" content="${provinceName}" />
-    <meta name="geo.position" content="13.736717;100.523186" /> <meta name="ICBM" content="13.736717, 100.523186" />
+    <meta name="geo.position" content="13.736717;100.523186" /> 
+    <meta name="ICBM" content="13.736717, 100.523186" />
 
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:type" content="website">
@@ -674,32 +676,27 @@ if (safeProfiles && safeProfiles.length > 0) {
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="${CONFIG.TWITTER}">
-    <meta name="twitter:creator" content="${CONFIG.TWITTER}">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${firstImage}">
 
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
+    <link rel="dns-prefetch" href="https://line.me">
+    
+    <link rel="preload" href="${firstImage}" as="image" fetchpriority="high">
+
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
-    
-    <link rel="dns-prefetch" href="https://line.me">
-    <link rel="dns-prefetch" href="https://www.tiktok.com">
-    <link rel="dns-prefetch" href="https://twitter.com">
 
-    <link rel="preload" href="${firstImage}" as="image" fetchpriority="high">
-
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Prompt:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
-    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Prompt:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
 
     <script type="application/ld+json">
         ${JSON.stringify(schemaData)}
     </script>
+
 
 
 
