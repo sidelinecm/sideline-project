@@ -17,7 +17,7 @@ const CONFIG = {
     }
 };
 
-// แก้ไข 1: เพิ่ม property `name: 'ชื่อจังหวัด'` เข้าไปในทุกๆ Object เพื่อแก้ปัญหาแสดงผล undefined
+
 const PROVINCE_SEO_DATA = {
     'chiangmai': {
         name: 'เชียงใหม่',
@@ -926,29 +926,50 @@ if (safeProfiles && safeProfiles.length > 0) {
         </div>
     </main>
 
-<footer class="border-t border-white/10 bg-[#050505] pt-24 pb-12 mt-20">
+<footer itemscope itemtype="https://schema.org/Organization" class="border-t border-white/10 bg-[#050505] pt-24 pb-12 mt-20">
+    <meta itemprop="name" content="${CONFIG.BRAND_NAME}">
+    
     <div class="container mx-auto px-6 lg:px-12 max-w-[1400px]">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8 mb-20">
             <div class="md:col-span-5 space-y-8">
                 <h3 class="text-2xl font-serif tracking-[0.3em] text-white uppercase">
                     ไซด์ไลน์<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
                 </h3>
-                <p class="text-[13px] text-white/90 leading-relaxed max-w-sm font-light tracking-wide">
+                <p itemprop="description" class="text-[13px] text-white/90 leading-relaxed max-w-sm font-light tracking-wide">
                     Thailand's most prestigious directory for premium personal companion and modeling services. We redefine the standard of excellence, privacy, and safety.
                 </p>
-                <div class="flex gap-6">
-                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" aria-label="Twitter" class="text-white/80 hover:text-gold transition-all text-2xl"><i class="fab fa-x-twitter"></i></a>
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="Line" class="text-white/80 hover:text-gold transition-all text-2xl"><i class="fab fa-line"></i></a>
+                
+                <div class="flex flex-wrap gap-5 pt-2">
+                    <a itemprop="sameAs" href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="Line" class="text-white/80 hover:text-[#00B900] transition-colors text-2xl">
+                        <i class="fab fa-line"></i>
+                    </a>
+                    <a itemprop="sameAs" href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener noreferrer" aria-label="Twitter (X)" class="text-white/80 hover:text-white transition-colors text-2xl">
+                        <i class="fab fa-x-twitter"></i>
+                    </a>
+                    <a itemprop="sameAs" href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="text-white/80 hover:text-[#ff0050] transition-colors text-2xl">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                    <a itemprop="sameAs" href="${CONFIG.SOCIAL_LINKS.linkedin}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="text-white/80 hover:text-[#0077b5] transition-colors text-2xl">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a itemprop="sameAs" href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="noopener noreferrer" aria-label="Linktree" class="text-white/80 hover:text-[#43E660] transition-colors text-2xl">
+                        <i class="fas fa-tree"></i> </a>
+                    <a itemprop="sameAs" href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener noreferrer" aria-label="Bluesky" class="text-white/80 hover:text-[#0085ff] transition-colors text-2xl">
+                        <i class="fas fa-cloud"></i> </a>
+                    <a itemprop="sameAs" href="${CONFIG.SOCIAL_LINKS.biosite}" target="_blank" rel="noopener noreferrer" aria-label="BioSite" class="text-white/80 hover:text-gold transition-colors text-2xl">
+                        <i class="fas fa-link"></i> </a>
                 </div>
             </div>
 
             <div class="md:col-span-3">
                 <h4 class="text-[10px] font-black text-white/60 tracking-[0.4em] uppercase mb-8">Navigation</h4>
-                <ul class="space-y-4 text-[13px] text-white font-medium uppercase tracking-widest">
-                    <li><a href="/" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">Home</a></li>
-                    <li><a href="/profiles" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">Directory</a></li>
-                    <li><a href="/location/chiangmai" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">เชียงใหม่</a></li>
-                </ul>
+                <nav aria-label="Footer Navigation">
+                    <ul class="space-y-4 text-[13px] text-white font-medium uppercase tracking-widest">
+                        <li><a href="/" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">Home</a></li>
+                        <li><a href="/profiles" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors">Directory</a></li>
+                        <li><a href="/location/chiangmai" class="underline decoration-white/30 underline-offset-8 hover:text-gold transition-colors" title="ไซด์ไลน์เชียงใหม่">เชียงใหม่</a></li>
+                    </ul>
+                </nav>
             </div>
 
             <div class="md:col-span-4">
@@ -964,22 +985,22 @@ if (safeProfiles && safeProfiles.length > 0) {
 
         <div class="border-t border-white/10 pt-16 mb-20">
             <h4 class="text-[10px] font-bold text-white/70 tracking-[0.5em] uppercase mb-12 text-center">Service Coverage</h4>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-center">
+            <nav aria-label="Service Areas" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-center">
                 ${provinceLinksHtml}
-            </div>
+            </nav>
         </div>
 
         <div class="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-white/70 uppercase tracking-[0.3em] font-medium">
-            <p>&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. LUXURY DIRECTORY.</p>
+            <p>&copy; ${CURRENT_YEAR} <span itemprop="legalName">${CONFIG.BRAND_NAME}</span>. LUXURY DIRECTORY.</p>
             <div class="flex gap-8">
-                <a href="/terms" class="hover:text-gold underline decoration-white/30 underline-offset-4 transition-colors">Terms</a>
-                <a href="/privacy" class="hover:text-gold underline decoration-white/30 underline-offset-4 transition-colors">Privacy</a>
+                <a href="/terms" rel="nofollow" class="hover:text-gold underline decoration-white/30 underline-offset-4 transition-colors">Terms</a>
+                <a href="/privacy" rel="nofollow" class="hover:text-gold underline decoration-white/30 underline-offset-4 transition-colors">Privacy</a>
             </div>
         </div>
     </div>
 </footer>
 
-<!-- แก้ไข 3: ลบ Comment ที่เป็น /* ... */ ใน HTML ออกทั้งหมดเพราะมันจะแสดงผลเป็นตัวอักษรทับหน้าเว็บ -->
+
 <a href="${CONFIG.SOCIAL_LINKS.line}" 
    target="_blank" 
    rel="noopener noreferrer"

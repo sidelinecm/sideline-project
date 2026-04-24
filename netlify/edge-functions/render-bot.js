@@ -122,12 +122,17 @@ const imageUrl = optimizeImg(p.imagePath, 600, 800);
         const reviewCount = 150 + (charCodeSum % 100);
 
 
-        const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
+
+        const titleIntro = spin(["แนะนำ", "รีวิว", "มาแรง", "ตัวท็อป"]); 
         const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง", "ขี้อ้อน"]);
-        const payWord = spin(["ไม่มีมัดจำ ", "ชำระค่าบริการหน้างานเท่านั้น", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
+        const payWord = spin(["ไม่มีมัดจำ", "จ่ายหน้างาน", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
         
-        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน รูปตรงปก 100%`;
-        const metaDesc = `${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
+
+        const pageTitle = `${titleIntro} น้อง${displayName} ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน ตรงปก`;
+        
+
+        const metaDesc = `น้อง${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเอง ไม่ผ่านเอเย่นต์ ${payWord} พิกัด${p.location || provinceName} ทักไลน์จองคิวเลย!`;
+        
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
 
@@ -139,26 +144,28 @@ const imageUrl = optimizeImg(p.imagePath, 600, 800);
                     "@id": `${CONFIG.DOMAIN}/#organization`,
                     "name": CONFIG.BRAND_NAME,
                     "url": CONFIG.DOMAIN,
+                    "telephone": "+66994238888",
                     "image": [imageUrl],
                     "address": {
                         "@type": "PostalAddress",
                         "addressLocality": provinceName,
+                        "addressRegion": provinceName,
                         "addressCountry": "TH"
                     },
-                    "sameAs": CONFIG.SOCIAL_PROFILES
+                    "sameAs": Object.values(CONFIG.SOCIAL_PROFILES)
                 },
                 {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
-                        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${p.provinces?.slug || 'chiangmai'}` },
+                        { "@type": "ListItem", "position": 3, "name": `น้อง${displayName}`, "item": canonicalUrl }
                     ]
                 },
                 {
                     "@type": "Product",
                     "@id": `${canonicalUrl}#product`,
-                    "name": pageTitle,
+                    "name": `น้อง${displayName} ไซด์ไลน์${provinceName}`,
                     "image": [imageUrl],
                     "description": metaDesc,
                     "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
@@ -269,7 +276,7 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
                 </section>
 
                 <section class="pricing-section">
-                    <h2 class="pricing-title">💰 ราคาและบริการ</h2>
+                    <h2 class="pricing-title">💰 ราคาและค่าบริการ</h2>
                     <div class="pricing-grid">
                         <div><strong>ST (ชั่วคราว)</strong><br>฿${parseInt(p.rate||1500).toLocaleString()}</div>
                         <div><strong>LT (ค้างคืน)</strong><br>฿${(parseInt(p.rate||1500)*1.8).toLocaleString()}</div>
@@ -280,7 +287,7 @@ h1{color:var(--p);font-size:clamp(1.75rem,5vw,2.5rem);font-weight:900;margin:1re
 
             ${related.length > 0 ? `
             <aside class="related-section" aria-label="น้องๆ แนะนำเพิ่มเติม">
-                <h2 class="related-title">🔥 น้องๆ แนะนำใน ${provinceName}</h2>
+                <h2 class="related-title">🔥 น้องๆรับงาน แนะนำใน ${provinceName}</h2>
                 <nav class="related-carousel">
                     ${related.map(r => `
                         <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
