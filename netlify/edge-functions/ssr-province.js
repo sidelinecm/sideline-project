@@ -774,6 +774,14 @@ if (safeProfiles && safeProfiles.length > 0) {
   .profile-card { perspective: 1000px; transition: transform 0.6s; }
 .profile-card:hover { transform: rotateY(180deg); box-shadow: 0 20px 40px rgba(217,30,24,0.3); }
 @keyframes shimmer { 0% { background-position: -200%; } 100% { background-position: 200%; } }
+
+#age-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 9999; /* ต้องสูงกว่า 100 ของ Navbar */
+    background: #050505;
+    display: flex;
+}
     </style>
 </head>
 
@@ -1067,87 +1075,83 @@ if (safeProfiles && safeProfiles.length > 0) {
 </a>
 
 <script>
-    (() => {
-        const nav = document.querySelector('nav');
-        if (!nav) return;
-
-        let ticking = false;
-        const updateNav = () => {
-            const scrollPos = window.scrollY || window.pageYOffset;
-            nav.classList.toggle('nav-scrolled', scrollPos > 50);
-            ticking = false;
-        };
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(updateNav);
-                ticking = true;
-            }
-        }, { passive: true });
-        updateNav();
-    })();
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const ageGate = document.getElementById('age-gate');
-        if(!ageGate) return;
-        
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. จัดการ Age Gate
+    const ageGate = document.getElementById('age-gate');
+    if (ageGate) {
         if (localStorage.getItem('ageVerified') === 'true') {
             ageGate.style.display = 'none';
         } else {
             document.body.style.overflow = 'hidden';
         }
-    });
-    // Mobile Menu Logic & Navbar Scroll Effect
-document.addEventListener("DOMContentLoaded", () => {
+    }
+
+    // 2. ตัวแปรสำหรับ Navbar และ Mobile Menu
+    const nav = document.getElementById('main-nav') || document.querySelector('nav');
     const btn = document.getElementById('mobile-menu-btn');
     const menu = document.getElementById('mobile-menu');
-    const nav = document.getElementById('main-nav');
-    const spans = btn.querySelectorAll('span');
+    const spans = btn?.querySelectorAll('span');
+    
+    if (!nav) return;
+
     let isMenuOpen = false;
 
-    // Toggle Menu
-    btn.addEventListener('click', () => {
-        isMenuOpen = !isMenuOpen;
-        
-        if (isMenuOpen) {
-            menu.classList.remove('translate-x-full');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-            // Animate Hamburger to X
-            spans[0].style.transform = 'translateY(8px) rotate(45deg)';
-            spans[1].style.opacity = '0';
-            spans[2].style.transform = 'translateY(-8px) rotate(-45deg)';
-        } else {
-            menu.classList.add('translate-x-full');
-            document.body.style.overflow = ''; 
-            // Revert X to Hamburger
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
-        }
-    });
+    // 3. จัดการ Mobile Menu
+    if (btn && menu && spans) {
+        btn.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                menu.classList.remove('translate-x-full');
+                document.body.style.overflow = 'hidden';
+                spans[0].style.transform = 'translateY(8px) rotate(45deg)';
+                spans[1].style.opacity = '0';
+                spans[2].style.transform = 'translateY(-8px) rotate(-45deg)';
+            } else {
+                menu.classList.add('translate-x-full');
+                document.body.style.overflow = '';
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            }
+        });
+    }
 
-    // Navbar Scroll Effect
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            nav.classList.add('bg-[#050505]/95', 'border-white/10', 'shadow-2xl');
+    // 4. จัดการ Navbar Scroll (ใช้ตัวเดียวจบ)
+    let ticking = false;
+    const updateNav = () => {
+        const scrollPos = window.scrollY || window.pageYOffset;
+        if (scrollPos > 50) {
+            nav.classList.add('bg-[#050505]/95', 'border-white/10', 'shadow-2xl', 'nav-scrolled');
             nav.classList.remove('bg-gradient-to-b', 'border-white/0');
         } else {
-            nav.classList.remove('bg-[#050505]/95', 'border-white/10', 'shadow-2xl');
+            nav.classList.remove('bg-[#050505]/95', 'border-white/10', 'shadow-2xl', 'nav-scrolled');
             nav.classList.add('bg-gradient-to-b', 'border-white/0');
         }
-    });
-});
-    window.acceptAgeGate = function() {
-        const ageGate = document.getElementById('age-gate');
-        if(!ageGate) return;
-        
-        localStorage.setItem('ageVerified', 'true');
-        ageGate.style.opacity = '0';
-        document.body.style.overflow = 'auto'; 
-        setTimeout(() => {
-            ageGate.style.display = 'none';
-        }, 500); 
+        ticking = false;
     };
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(updateNav);
+            ticking = true;
+        }
+    }, { passive: true });
+    
+    updateNav(); // รันครั้งแรกตอนโหลดหน้า
+});
+
+// Global Function สำหรับปุ่มใน Age Gate
+window.acceptAgeGate = function() {
+    const ageGate = document.getElementById('age-gate');
+    if(!ageGate) return;
+    
+    localStorage.setItem('ageVerified', 'true');
+    ageGate.style.opacity = '0';
+    document.body.style.overflow = 'auto'; 
+    setTimeout(() => {
+        ageGate.style.display = 'none';
+    }, 500); 
+};
 </script>
 </body>
 </html>`;
