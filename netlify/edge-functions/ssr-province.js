@@ -552,7 +552,7 @@ if (safeProfiles && safeProfiles.length > 0) {
         const targetTrait = traits[i % traits.length];
         const targetKeyword = lsiKeywords[i % lsiKeywords.length];
 
-        // แก้ไข Alt Tag ให้ตรงตามต้องการ: ชื่อ... รับงานไซด์ไลน์ ตัวเมือง...
+
         const imgAlt = `น้อง${cleanName} รับงานไซด์ไลน์ ${profileLocation} ตัวเมือง สไตล์${targetTrait} บริการ${targetIntent}`;
         const profileLink = `/sideline/${p.slug || p.id || '#'}`;
 
@@ -569,29 +569,36 @@ if (safeProfiles && safeProfiles.length > 0) {
 
 const loadingAttr = i < 6 ? 'fetchpriority="high"' : 'loading="lazy"';
         
+
+        const displayImg = optimizeImg(p.imagePath, 350, 460);
+
+
+        const cleanLocation = profileLocation.includes('ตัวเมือง') ? profileLocation : `${profileLocation} ตัวเมือง`;
+        const optimizedAlt = `น้อง${cleanName} รับงานไซด์ไลน์ ${cleanLocation} สไตล์${targetTrait} บริการ${targetIntent}`;
+
         return `
 <article class="profile-card group relative flex flex-col h-full bg-[#121212] rounded-[24px] border border-white/5 hover:border-gold/30 transition-all duration-300 hover:-translate-y-1 shadow-2xl overflow-hidden" style="contain: paint;">
-    <a href="${profileLink}" class="absolute inset-0 z-40" aria-label="ดูโปรไฟล์น้อง${cleanName} รับงานไซด์ไลน์ ${profileLocation} ตัวเมือง"></a>
+    <a href="${profileLink}" class="absolute inset-0 z-40" aria-label="ดูโปรไฟล์น้อง${cleanName} รับงานไซด์ไลน์ ${cleanLocation}"></a>
     
-    <div class="relative aspect-[3/4] overflow-hidden bg-[#1a1a1a]">
-        <img src="${optimizeImg(p.imagePath, 500, 660)}" 
-             alt="${imgAlt}"
-             title="น้อง${cleanName} รับงานไซด์ไลน์ ${profileLocation} ตัวเมือง"
+    <div class="relative aspect-[3/4] overflow-hidden bg-[#1b1b1b]">
+        <img src="${displayImg}" 
+             alt="${optimizedAlt}"
+             title="น้อง${cleanName} รับงานไซด์ไลน์ ${cleanLocation}"
              class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
              style="will-change: transform;"
              ${loadingAttr}
              decoding="async">
         
-        <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-black/20 z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-black/30 z-10"></div>
         
         <div class="absolute top-3 left-3 z-20">
-            <div class="bg-black/80 px-2.5 py-1 rounded-lg border border-white/10 flex items-center gap-2 shadow-lg">
-                <span class="h-2 w-2 rounded-full ${isAvailable ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-rose-500'} ${isAvailable ? 'animate-pulse' : ''}"></span>
-                <span class="text-[8px] md:text-[9px] text-white font-bold tracking-[0.1em] uppercase">${statusText}</span>
+            <div class="bg-black/80 px-2.5 py-1 rounded-lg border border-white/10 flex items-center gap-2">
+                <span class="h-1.5 w-1.5 rounded-full ${isAvailable ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-rose-500'} ${isAvailable ? 'animate-pulse' : ''}"></span>
+                <span class="text-[9px] text-white font-bold uppercase tracking-wider">${statusText}</span>
             </div>
         </div>
 
-        <div class="absolute top-3 right-3 z-20 flex flex-col gap-1.5 items-end">
+        <div class="absolute top-3 right-3 z-20">
             ${badgeHTML}
         </div>
     </div>
@@ -599,38 +606,37 @@ const loadingAttr = i < 6 ? 'fetchpriority="high"' : 'loading="lazy"';
     <div class="p-5 flex-1 flex flex-col justify-between relative z-20">
         <div>
             <div class="flex justify-between items-center mb-3">
-                <span class="text-[10px] text-gold font-bold tracking-[0.15em] uppercase px-2 py-0.5 bg-gold/5 rounded border border-gold/10">
+                <span class="text-[10px] text-gold font-bold tracking-[0.1em] uppercase px-2 py-0.5 bg-gold/5 rounded border border-gold/10">
                     ${targetKeyword}
                 </span>
-                <span class="text-[9px] text-white/30 font-light italic">${dateDisplay}</span>
+                <span class="text-[9px] text-white/30 font-light">${dateDisplay}</span>
             </div>
 
-            <h3 class="text-2xl text-white group-hover:text-gold transition-colors duration-300 truncate leading-tight font-serif">
-                น้อง${cleanName} <span class="text-[11px] font-sans text-white/40 block mt-1 tracking-wide font-light">รับงาน${profileLocation} ตัวเมือง</span>
+            <h3 class="text-xl text-white group-hover:text-gold transition-colors duration-300 truncate font-serif">
+                น้อง${cleanName}
             </h3>
+            <p class="text-[11px] text-white/40 mt-1 font-light italic">รับงาน${cleanLocation}</p>
             
             <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/5">
-                <div class="space-y-1">
-                    <p class="text-[9px] text-white/40 uppercase tracking-[0.1em]">พิกัดตัวเมือง</p>
-                    <p class="text-xs text-white/80 font-light truncate">
-                        <i class="fas fa-map-marker-alt text-gold/60 mr-1.5"></i>${profileLocation}
+                <div class="space-y-0.5">
+                    <p class="text-[8px] text-white/30 uppercase tracking-widest">พิกัด</p>
+                    <p class="text-xs text-white/80 truncate">
+                        <i class="fas fa-map-marker-alt text-gold/50 mr-1"></i>${profileLocation}
                     </p>
                 </div>
-                <div class="space-y-1 text-right">
-                    <p class="text-[9px] text-white/40 uppercase tracking-[0.1em]">ค่าขนม</p>
-                    <p class="text-[15px] text-gold font-bold tabular-nums">
-                        ฿${p.rate || 'สอบถาม'}
-                    </p>
+                <div class="space-y-0.5 text-right">
+                    <p class="text-[8px] text-white/30 uppercase tracking-widest">ค่าขนม</p>
+                    <p class="text-[15px] text-gold font-bold">฿${p.rate || 'สอบถาม'}</p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-6 flex items-center justify-between text-[10px] border-t border-white/5 pt-4">
-            <span class="text-white/40 uppercase tracking-widest italic font-light">
-                <i class="far fa-star text-gold/40 mr-1"></i> บริการ${targetIntent}
+        <div class="mt-5 flex items-center justify-between text-[10px] border-t border-white/5 pt-4">
+            <span class="text-white/40 uppercase tracking-widest font-light">
+                ${targetIntent}
             </span>
-            <span class="text-white/60 group-hover:text-gold transition-all duration-300 uppercase font-medium tracking-tighter flex items-center">
-                รายละเอียดงาน <i class="fas fa-chevron-right ml-1.5 text-[8px] transition-transform group-hover:translate-x-1"></i>
+            <span class="text-white/60 group-hover:text-gold transition-all duration-300 uppercase font-bold flex items-center">
+                ดูงาน <i class="fas fa-chevron-right ml-1 text-[7px]"></i>
             </span>
         </div>
     </div>
