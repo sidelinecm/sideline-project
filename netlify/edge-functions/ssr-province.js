@@ -567,24 +567,25 @@ if (safeProfiles && safeProfiles.length > 0) {
             badgeHTML = `<span class="bg-white/10 text-white/80 border border-white/10 text-[9px] px-2 py-0.5 rounded-sm font-bold tracking-widest uppercase backdrop-blur-sm">Verified</span>`;
         }
 
-        const loadingAttr = i < 6 ? 'fetchpriority="high"' : 'loading="lazy"';
+const loadingAttr = i < 6 ? 'fetchpriority="high"' : 'loading="lazy"';
         
         return `
-<article class="profile-card group relative overflow-hidden flex flex-col h-full bg-[#121212] rounded-[24px] border border-white/5 hover:border-gold/30 transition-all duration-500 hover:-translate-y-2 shadow-2xl">
+<article class="profile-card group relative flex flex-col h-full bg-[#121212] rounded-[24px] border border-white/5 hover:border-gold/30 transition-all duration-300 hover:-translate-y-1 shadow-2xl overflow-hidden" style="contain: paint;">
     <a href="${profileLink}" class="absolute inset-0 z-40" aria-label="ดูโปรไฟล์น้อง${cleanName} รับงานไซด์ไลน์ ${profileLocation} ตัวเมือง"></a>
     
-    <div class="relative aspect-[3/4] overflow-hidden">
+    <div class="relative aspect-[3/4] overflow-hidden bg-[#1a1a1a]">
         <img src="${optimizeImg(p.imagePath, 500, 660)}" 
              alt="${imgAlt}"
              title="น้อง${cleanName} รับงานไซด์ไลน์ ${profileLocation} ตัวเมือง"
-             class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+             class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+             style="will-change: transform;"
              ${loadingAttr}
              decoding="async">
         
         <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-black/20 z-10"></div>
         
         <div class="absolute top-3 left-3 z-20">
-            <div class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 flex items-center gap-2 shadow-lg">
+            <div class="bg-black/80 px-2.5 py-1 rounded-lg border border-white/10 flex items-center gap-2 shadow-lg">
                 <span class="h-2 w-2 rounded-full ${isAvailable ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-rose-500'} ${isAvailable ? 'animate-pulse' : ''}"></span>
                 <span class="text-[8px] md:text-[9px] text-white font-bold tracking-[0.1em] uppercase">${statusText}</span>
             </div>
@@ -604,7 +605,7 @@ if (safeProfiles && safeProfiles.length > 0) {
                 <span class="text-[9px] text-white/30 font-light italic">${dateDisplay}</span>
             </div>
 
-            <h3 class="font-serif text-2xl text-white group-hover:text-gold transition-colors duration-300 truncate leading-tight">
+            <h3 class="text-2xl text-white group-hover:text-gold transition-colors duration-300 truncate leading-tight font-serif">
                 น้อง${cleanName} <span class="text-[11px] font-sans text-white/40 block mt-1 tracking-wide font-light">รับงาน${profileLocation} ตัวเมือง</span>
             </h3>
             
@@ -629,7 +630,7 @@ if (safeProfiles && safeProfiles.length > 0) {
                 <i class="far fa-star text-gold/40 mr-1"></i> บริการ${targetIntent}
             </span>
             <span class="text-white/60 group-hover:text-gold transition-all duration-300 uppercase font-medium tracking-tighter flex items-center">
-                ดูโปรไฟล์งาน <i class="fas fa-chevron-right ml-1.5 text-[8px] transition-transform group-hover:translate-x-1"></i>
+                รายละเอียดงาน <i class="fas fa-chevron-right ml-1.5 text-[8px] transition-transform group-hover:translate-x-1"></i>
             </span>
         </div>
     </div>
