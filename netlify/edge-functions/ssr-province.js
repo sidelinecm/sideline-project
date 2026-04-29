@@ -729,7 +729,13 @@ if (safeProfiles && safeProfiles.length > 0) {
     scroll-behavior: smooth;
     overflow-x: hidden;
   }
-  
+          body { font-family: 'Outfit', 'Prompt', sans-serif; background: #050505; color: white; }
+        .font-serif { font-family: "Playfair Display", serif; }
+        .text-gold { color: #C5A059; }
+        .bg-gold { background-color: #C5A059; }
+        .border-gold { border-color: #C5A059; }
+        .nav-scrolled { background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #mobile-menu { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
   .glass { 
     background: var(--glass-bg); 
     border: 1px solid var(--glass-border); 
@@ -785,62 +791,48 @@ if (safeProfiles && safeProfiles.length > 0) {
     </style>
 </head>
 
-<body class="selection:bg-gold selection:text-black antialiased text-white/90 bg-[#050505] overflow-x-hidden scroll-smooth">
+<body class="antialiased overflow-x-hidden selection:bg-gold selection:text-black">
 
-    ${ageGateHTML}
-
-<nav id="main-nav" class="fixed top-0 w-full z-[100] transition-all duration-500 py-4 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm border-b border-white/0">
-    <div class="container mx-auto px-6 lg:px-12 flex justify-between items-center max-w-[1400px]">
-        <a href="/" class="text-xl md:text-2xl font-serif tracking-[0.2em] text-white hover:text-gold transition-all z-50 relative">
+<nav id="main-nav" class="fixed top-0 w-full z-[100] transition-all duration-500 py-4 bg-gradient-to-b from-black/80 to-transparent">
+    <div class="max-w-[1400px] mx-auto px-6 lg:px-12 flex justify-between items-center h-16">
+        <a href="/" class="text-xl md:text-2xl font-serif tracking-[0.2em] text-white hover:text-gold transition-all relative z-[110]">
             SIDELINE<span class="text-gold italic ml-1">${provinceData.key.toUpperCase()}</span>
         </a>
 
         <div class="hidden md:flex items-center gap-8 text-[11px] font-medium tracking-[0.2em] uppercase">
             <a href="/" class="text-white/60 hover:text-white transition-colors">Home</a>
             <a href="/profiles" class="text-white/60 hover:text-white transition-colors">Directory</a>
-            
             <div class="relative group">
-                <button class="flex items-center gap-2 text-gold border-b border-gold/30 pb-1 hover:border-gold transition-colors">
+                <button class="flex items-center gap-2 text-gold border-b border-gold/30 pb-1 hover:border-gold transition-colors uppercase">
                     ${provinceName} <i class="fas fa-chevron-down text-[8px] transition-transform group-hover:rotate-180"></i>
                 </button>
-                <div class="absolute top-full right-0 mt-4 w-48 bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-2xl translate-y-2 group-hover:translate-y-0">
-                    ${allProvinces.slice(0, 5).map(p => `
-                        <a href="/location/${p.key}" class="block px-4 py-3 text-[10px] text-white/70 hover:text-gold hover:bg-white/5 rounded-xl transition-all">
-                            ไซด์ไลน์${p.nameThai}
-                        </a>
-                    `).join('')}
-                    <a href="/" class="block px-4 py-3 text-[10px] text-gold font-bold hover:bg-white/5 rounded-xl transition-all text-center border-t border-white/5 mt-1">
-                        ดูทั้งหมด
-                    </a>
+                <div class="absolute top-full right-0 mt-4 w-48 bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-2xl">
+                    ${allProvinces.slice(0, 5).map(p => `<a href="/location/${p.key}" class="block px-4 py-3 text-[10px] text-white/70 hover:text-gold hover:bg-white/5 rounded-xl transition-all">ไซด์ไลน์${p.nameThai}</a>`).join('')}
+                    <a href="/" class="block px-4 py-3 text-[10px] text-gold font-bold hover:bg-white/5 rounded-xl transition-all text-center border-t border-white/5 mt-1">ดูทั้งหมด</a>
                 </div>
             </div>
         </div>
 
-        <button id="mobile-menu-btn" class="md:hidden relative z-50 w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none">
-            <span class="block w-6 h-[2px] bg-white transition-transform duration-300 origin-center"></span>
-            <span class="block w-6 h-[2px] bg-white transition-opacity duration-300"></span>
-            <span class="block w-6 h-[2px] bg-white transition-transform duration-300 origin-center"></span>
+        <button id="mobile-menu-btn" class="md:hidden relative z-[110] w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none" aria-label="Menu">
+            <span class="block w-6 h-[2px] bg-white transition-all duration-300"></span>
+            <span class="block w-6 h-[2px] bg-white transition-all duration-300"></span>
+            <span class="block w-6 h-[2px] bg-white transition-all duration-300"></span>
         </button>
     </div>
 </nav>
 
-<div id="mobile-menu" class="fixed inset-0 z-[90] bg-[#050505]/98 backdrop-blur-2xl translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col justify-center items-center">
+<div id="mobile-menu" class="fixed inset-0 z-[90] bg-[#050505]/98 backdrop-blur-2xl translate-x-full flex flex-col justify-center items-center">
     <div class="flex flex-col items-center gap-8 text-center">
-        <a href="/" class="mobile-link text-2xl font-serif text-white hover:text-gold transition-colors tracking-widest uppercase">Home</a>
-        <a href="/profiles" class="mobile-link text-2xl font-serif text-white hover:text-gold transition-colors tracking-widest uppercase">Directory</a>
-        
+        <a href="/" class="text-2xl font-serif text-white hover:text-gold tracking-widest uppercase">Home</a>
+        <a href="/profiles" class="text-2xl font-serif text-white hover:text-gold tracking-widest uppercase">Directory</a>
         <div class="w-12 h-[1px] bg-white/20 my-4"></div>
-        
-        <p class="text-[10px] text-gold tracking-[0.3em] uppercase mb-2">Locations</p>
+        <p class="text-[10px] text-gold tracking-[0.3em] uppercase mb-2">Popular Locations</p>
         <div class="flex flex-wrap justify-center gap-3 px-6 max-w-sm">
-            ${allProvinces.slice(0, 6).map(p => `
-                <a href="/location/${p.key}" class="mobile-link text-[12px] px-4 py-2 border border-white/10 rounded-full text-white/70 hover:bg-gold hover:text-black hover:border-gold transition-all">
-                    ${p.nameThai}
-                </a>
-            `).join('')}
+            ${allProvinces.slice(0, 8).map(p => `<a href="/location/${p.key}" class="text-[12px] px-4 py-2 border border-white/10 rounded-full text-white/70 hover:bg-gold hover:text-black transition-all">${p.nameThai}</a>`).join('')}
         </div>
     </div>
 </div>
+
 
 <header class="relative pt-44 pb-32 px-6 flex flex-col items-center justify-center text-center overflow-hidden min-h-[70vh]">
     <div class="absolute inset-0 z-0">
