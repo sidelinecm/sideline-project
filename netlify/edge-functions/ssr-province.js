@@ -513,7 +513,7 @@ export default async (request, context) => {
         }
 
         // ==========================================
-        // MAIN HTML STRUCTURE (Dark Mode Unified)
+        // MAIN HTML STRUCTURE
         // ==========================================
         const html = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth dark:bg-gray-900 dark:text-gray-100 dark">
@@ -542,12 +542,12 @@ export default async (request, context) => {
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class', // Enables dark mode matching index.html
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         primary: '#0F172A',
-                        accent: '#db2777', /* Matched Pink */
+                        accent: '#db2777', 
                         bg: '#F8FAFC',
                         success: '#15803D',
                         warning: '#D97706'
@@ -602,22 +602,34 @@ export default async (request, context) => {
                 <a href="/blog.html" class="hover:text-pink-500 transition-colors">บทความ</a>
             </div>
             
-            <button id="mobile-menu-btn" class="md:hidden text-gray-800 dark:text-gray-200 p-2 focus:outline-none focus:ring-2 focus:ring-pink-500 rounded-lg" aria-label="เปิดเมนูนำทาง" aria-expanded="false" aria-controls="mobile-menu">
-                <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <button id="mobile-menu-btn" class="md:hidden text-gray-800 dark:text-gray-200 w-10 h-10 flex items-center justify-center focus:outline-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="เปิดเมนูนำทาง">
+                <i class="fas fa-bars text-xl"></i>
             </button>
         </div>
     </nav>
 
-    <div id="mobile-menu" class="hidden fixed inset-0 z-40 bg-white/95 dark:bg-gray-900/98 backdrop-blur-md pt-20 px-6 transform transition-transform" aria-hidden="true">
-        <div class="flex flex-col gap-5 text-base font-bold text-gray-800 dark:text-gray-100 mt-4 overflow-y-auto max-h-[80vh]">
-            <a href="/" class="hover:text-pink-500 border-b border-gray-200 dark:border-gray-800 pb-3 flex items-center gap-3"><i class="fas fa-home w-5 text-center text-gray-400"></i> หน้าแรก</a>
-            <a href="/profiles.html" class="hover:text-pink-500 border-b border-gray-200 dark:border-gray-800 pb-3 flex items-center gap-3"><i class="fas fa-users w-5 text-center text-gray-400"></i> น้องๆ ทั้งหมด</a>
-            <a href="/locations.html" class="hover:text-pink-500 border-b border-gray-200 dark:border-gray-800 pb-3 flex items-center gap-3"><i class="fas fa-map-marker-alt w-5 text-center text-gray-400"></i> พิกัดบริการ</a>
-            <a href="/about.html" class="hover:text-pink-500 border-b border-gray-200 dark:border-gray-800 pb-3 flex items-center gap-3"><i class="fas fa-info-circle w-5 text-center text-gray-400"></i> เกี่ยวกับเรา</a>
-            <a href="/faq.html" class="hover:text-pink-500 border-b border-gray-200 dark:border-gray-800 pb-3 flex items-center gap-3"><i class="fas fa-question-circle w-5 text-center text-gray-400"></i> คำถามพบบ่อย</a>
-            <a href="/blog.html" class="hover:text-pink-500 border-b border-gray-200 dark:border-gray-800 pb-3 flex items-center gap-3"><i class="fas fa-newspaper w-5 text-center text-gray-400"></i> บทความ</a>
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="mt-4 bg-[#06c755] text-white py-3 rounded-xl text-center shadow-md font-bold flex justify-center items-center gap-2"><i class="fab fa-line text-xl"></i> ติดต่อผ่าน LINE</a>
+    <!-- Slide-in Sidebar Menu (เหมือน index.html) -->
+    <div id="menu-backdrop" class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out bg-black/60 backdrop-blur-sm" aria-hidden="true"></div>
+    
+    <div id="sidebar" class="fixed top-0 right-0 w-64 sm:w-72 h-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-l border-gray-200 dark:border-gray-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" role="dialog" aria-labelledby="sidebar-nav-heading" aria-hidden="true" tabindex="-1">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
+            <h3 id="sidebar-nav-heading" class="text-lg font-bold text-pink-600 dark:text-pink-500">เมนู</h3>
+            <button id="close-sidebar-btn" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300" aria-label="ปิดเมนู">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+        
+        <nav aria-label="เมนูนำทางหลักในแถบด้านข้าง" class="flex-grow overflow-y-auto p-4 space-y-2">
+            <a href="/" class="flex items-center gap-4 py-3 px-4 font-bold text-base text-gray-800 dark:text-gray-200 hover:bg-pink-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-400 rounded-xl transition-colors"><i class="fas fa-home w-5 text-center text-gray-400"></i><span>หน้าแรก</span></a>
+            <a href="/profiles.html" class="flex items-center gap-4 py-3 px-4 font-bold text-base text-gray-800 dark:text-gray-200 hover:bg-pink-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-400 rounded-xl transition-colors"><i class="fas fa-users w-5 text-center text-gray-400"></i><span>น้องๆ ทั้งหมด</span></a>
+            <a href="/locations.html" class="flex items-center gap-4 py-3 px-4 font-bold text-base text-gray-800 dark:text-gray-200 hover:bg-pink-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-400 rounded-xl transition-colors"><i class="fas fa-map-marker-alt w-5 text-center text-gray-400"></i><span>พิกัดบริการ</span></a>
+            <a href="/about.html" class="flex items-center gap-4 py-3 px-4 font-bold text-base text-gray-800 dark:text-gray-200 hover:bg-pink-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-400 rounded-xl transition-colors"><i class="fas fa-info-circle w-5 text-center text-gray-400"></i><span>เกี่ยวกับเรา</span></a>
+            <a href="/faq.html" class="flex items-center gap-4 py-3 px-4 font-bold text-base text-gray-800 dark:text-gray-200 hover:bg-pink-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-400 rounded-xl transition-colors"><i class="fas fa-question-circle w-5 text-center text-gray-400"></i><span>คำถามพบบ่อย</span></a>
+            <a href="/blog.html" class="flex items-center gap-4 py-3 px-4 font-bold text-base text-gray-800 dark:text-gray-200 hover:bg-pink-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-400 rounded-xl transition-colors"><i class="fas fa-newspaper w-5 text-center text-gray-400"></i><span>บทความ</span></a>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-200 dark:border-gray-800 shrink-0">
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener nofollow" class="w-full flex items-center justify-center gap-2 bg-[#06c755] text-white py-3 rounded-xl font-bold hover:bg-[#05a546] transition-colors shadow-lg shadow-green-500/20"><i class="fab fa-line text-xl" aria-hidden="true"></i><span>ติดต่อผ่าน LINE</span></a>
         </div>
     </div>
 
@@ -646,7 +658,6 @@ export default async (request, context) => {
             ยินดีให้บริการค่ะ
         </p>
 
-        <!-- Transparency Banner -->
         <div class="max-w-3xl mx-auto mt-8 px-4">
             <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 p-4 rounded-2xl text-center shadow-sm backdrop-blur-sm">
                 <h3 class="text-green-400 font-extrabold text-lg md:text-xl flex items-center justify-center gap-2">
@@ -663,7 +674,6 @@ export default async (request, context) => {
             </div>
         </div>
 
-        <!-- Social Media Section -->
         <section class="text-center py-8 md:py-10 bg-gray-900/90 rounded-2xl shadow-inner mt-8 md:mt-12 max-w-4xl mx-auto border border-gray-800 px-2 backdrop-blur-md">
             <div>
                 <h2 class="text-sm md:text-base text-gray-100 max-w-xl mx-auto px-4 font-extrabold" style="text-shadow:0 0 4px rgba(255,255,255,.3)">
@@ -801,6 +811,7 @@ export default async (request, context) => {
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // Navbar Scroll Effect
         const nav = document.querySelector('nav');
         if (nav) {
             window.addEventListener('scroll', () => {
@@ -812,30 +823,33 @@ export default async (request, context) => {
             }, { passive: true });
         }
 
+        // Sidebar Menu Logic (เหมือน index.html)
         const menuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const iconOpen = document.getElementById('menu-icon-open');
-        const iconClose = document.getElementById('menu-icon-close');
+        const closeBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('menu-backdrop');
 
-        if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
-                
-                if (!isExpanded) {
-                    mobileMenu.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    mobileMenu.classList.add('hidden');
-                    document.body.style.overflow = '';
-                }
-
-                menuBtn.setAttribute('aria-expanded', !isExpanded);
-                mobileMenu.setAttribute('aria-hidden', isExpanded);
-
-                iconOpen.classList.toggle('hidden');
-                iconClose.classList.toggle('hidden');
-            });
+        function openMenu() {
+            backdrop.classList.remove('hidden');
+            // Trigger reflow
+            void backdrop.offsetWidth;
+            backdrop.classList.remove('opacity-0');
+            sidebar.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
         }
+
+        function closeMenu() {
+            backdrop.classList.add('opacity-0');
+            sidebar.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 300); // Wait for transition
+        }
+
+        if(menuBtn) menuBtn.addEventListener('click', openMenu);
+        if(closeBtn) closeBtn.addEventListener('click', closeMenu);
+        if(backdrop) backdrop.addEventListener('click', closeMenu);
     });
 </script>
 </body>
