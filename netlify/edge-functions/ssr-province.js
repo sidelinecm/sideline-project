@@ -243,11 +243,22 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
             ${data.faqs && data.faqs.length > 0 ? `
             <div class="mt-10 relative z-10 border-t border-white/5 pt-10">
                 <h3 class="text-xl font-bold text-white mb-6 text-center">คำถามที่พบบ่อย (FAQ)</h3>
-                <div class="space-y-4 max-w-4xl mx-auto">
-                    ${data.faqs.map(faq => `
-                        <div class="bg-black/40 rounded-2xl p-5 md:p-6 border border-white/5">
-                            <h4 class="font-bold text-white text-sm md:text-base mb-2 flex gap-2 items-start"><span class="text-rose-500">Q:</span> ${faq.q}</h4>
-                            <p class="text-zinc-400 text-sm md:text-base leading-relaxed flex gap-2 items-start"><span class="text-zinc-400">A:</span> ${faq.a}</p>
+                <div class="space-y-4 max-w-4xl mx-auto" id="faq-accordion">
+                    ${data.faqs.map((faq, index) => `
+                        <div class="faq-item bg-black/40 rounded-2xl border border-white/5 overflow-hidden">
+                            <button class="faq-question w-full text-left p-5 md:p-6 flex justify-between items-center gap-4 group" aria-expanded="false" aria-controls="faq-answer-${index}">
+                                <h4 class="font-bold text-white text-sm md:text-base flex gap-2 items-start">
+                                    <span class="text-rose-500">Q:</span> ${faq.q}
+                                </h4>
+                                <i class="fas fa-chevron-down text-zinc-400 group-hover:text-white transition-transform duration-300 shrink-0"></i>
+                            </button>
+                            <div id="faq-answer-${index}" class="faq-answer max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                                <div class="px-5 md:px-6 pb-5 md:pb-6">
+                                    <p class="text-zinc-400 text-sm md:text-base leading-relaxed flex gap-2 items-start border-t border-white/10 pt-4">
+                                        <span class="text-zinc-400">A:</span> ${faq.a}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -393,13 +404,13 @@ export default async (request, context) => {
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-green-400' : 'bg-red-400'} opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-green-500' : 'bg-red-500'}"></span>
                             </span>
-                            <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider">${isAvailable ? 'พร้อมเรียก' : 'ติดจอง'}</span>
+                            <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider">${isAvailable ? 'พร้อมรับงาน' : 'ติดจอง'}</span>
                         </div>
                         
                         ${(i < 3 || p.isfeatured) ? `
                         <div class="absolute top-3 right-3 md:top-4 md:right-4 z-20 bg-gradient-to-r from-rose-500 to-pink-600 px-2.5 py-1 rounded-full border border-white/20 shadow-lg flex items-center gap-1">
                             <i class="fas fa-fire text-white text-[9px] md:text-[10px] animate-pulse"></i>
-                            <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider">HOT</span>
+                            <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider">งานดี</span>
                         </div>` : ''}
                         
                         <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none"></div>
@@ -414,8 +425,8 @@ export default async (request, context) => {
                                     </div>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <span class="block text-[9px] md:text-[10px] text-zinc-400 font-medium uppercase tracking-wider mb-0.5">Start</span>
-                                    <span class="font-black text-lg md:text-xl text-white drop-shadow-md tracking-tight">฿${p.rate || 'Ask'}</span>
+                                    <span class="block text-[9px] md:text-[10px] text-zinc-400 font-medium uppercase tracking-wider mb-0.5">เรทเริ่ม</span>
+                                    <span class="font-black text-lg md:text-xl text-white drop-shadow-md tracking-tight">฿${p.rate || 'สอบถาม'}</span>
                                 </div>
                             </div>
                             
@@ -435,7 +446,7 @@ export default async (request, context) => {
             cardsHTML = `<div class="col-span-full flex flex-col items-center justify-center py-24 text-center">
                 <i class="fas fa-hourglass-half text-4xl text-zinc-700 mb-4 animate-pulse"></i>
                 <h3 class="text-xl font-bold text-white mb-2">กำลังอัปเดตระบบ</h3>
-                <p class="text-zinc-400 text-sm">ไม่พบโปรไฟล์ในขณะนี้ กรุณาลองใหม่อีกครั้ง</p>
+                <p class="text-zinc-400 text-sm">ไม่พบโปรไฟล์ในโซนนี้ขณะนี้ กรุณาลองใหม่อีกครั้ง</p>
             </div>`;
         }
 
@@ -524,6 +535,9 @@ export default async (request, context) => {
         
         .pb-safe { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
+        .faq-answer { grid-template-rows: 0fr; }
+        .faq-item[aria-expanded="true"] .faq-answer { grid-template-rows: 1fr; }
+        .faq-item[aria-expanded="true"] .faq-question i { transform: rotate(180deg); }
     </style>
 </head>
 
@@ -598,7 +612,7 @@ export default async (request, context) => {
                     <a href="#profiles-grid" class="w-full sm:w-auto bg-white text-black px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:scale-105 transition-transform text-center shadow-lg">
                         ดูโปรไฟล์น้องๆ
                     </a>
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="ติดต่อแอดมินผ่าน LINE" class="w-full sm:w-auto bg-[#048839]/20 text-[#048839] border border-[#048839]/50 px-8 py-3.5 md:py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#048839]/30 transition-colors">
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="ติดต่อแอดมินผ่าน LINE" class="w-full sm:w-auto bg-white/5 border border-white/10 text-white px-8 py-3.5 md:py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
                         <i class="fab fa-line text-lg"></i> ปรึกษาแอดมิน
                     </a>
                 </div>
@@ -625,7 +639,7 @@ export default async (request, context) => {
             </div>
         </div>
 
-        <!-- Social Marquee แบบ Premium Design -->
+        <!-- Social Marquee -->
         <div class="max-w-4xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
             <div class="text-center mb-4">
                 <p class="text-xs md:text-sm text-zinc-400 font-medium uppercase tracking-widest">Connect With Us</p>
@@ -635,14 +649,9 @@ export default async (request, context) => {
                     <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-[#00c300]/10 border border-[#00c300]/30 rounded-full text-xs font-bold text-[#00c300] hover:bg-[#00c300]/20 transition-colors"><i class="fab fa-line text-sm"></i> LINE</a>
                     <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500/10 border border-sky-500/30 rounded-full text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors"><i class="fab fa-twitter text-sm"></i> Twitter</a>
                     <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-xs font-bold text-white hover:bg-white/20 transition-colors"><i class="fab fa-tiktok text-sm"></i> TikTok</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.linkedin}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-[#0077b5]/10 border border-[#0077b5]/30 rounded-full text-xs font-bold text-[#0077b5] hover:bg-[#0077b5]/20 transition-colors"><i class="fab fa-linkedin text-sm"></i> LinkedIn</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full text-xs font-bold text-green-400 hover:bg-green-500/20 transition-colors"><i class="fas fa-link text-sm"></i> Linktree</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors"><i class="fas fa-cloud text-sm"></i> Bluesky</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.biosite}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-full text-xs font-bold text-rose-400 hover:bg-rose-500/20 transition-colors"><i class="fas fa-globe text-sm"></i> Bio.site</a>
                 </div>
             </div>
             
-            <!-- ป้ายเตือนอายุ 20+ แบบ Premium Design -->
             <div class="mt-2 flex justify-center">
                 <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-950/40 border border-red-500/20 text-red-400 text-[10px] md:text-xs font-bold tracking-wider uppercase shadow-inner backdrop-blur-sm">
                     <i class="fas fa-exclamation-triangle"></i> เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
@@ -715,7 +724,6 @@ export default async (request, context) => {
                     </ul>
                 </div>
 
-                <!-- Dynamic Provinces Links ในรูปแบบ Scroll เล็กๆ ที่ดูพรีเมียม -->
                 <div class="md:col-span-4">
                     <h3 class="text-white text-sm font-bold mb-6 tracking-widest uppercase">พื้นที่ให้บริการทั้งหมด</h3>
                     <div class="flex flex-col gap-3 text-sm font-medium text-zinc-400 h-[180px] overflow-y-auto pr-3 custom-scrollbar">
@@ -758,7 +766,6 @@ export default async (request, context) => {
                 <span class="text-[9px] font-bold tracking-wide">VIP</span>
             </a>
             
-            <!-- Center Floating Action Button for LINE -->
             <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" aria-label="ติดต่อแอดมินผ่าน LINE" class="flex flex-col items-center justify-center w-full h-full group relative -top-4">
                 <div class="w-12 h-12 bg-gradient-to-tr from-[#048839] to-[#03702e] rounded-full flex items-center justify-center text-white shadow-[0_5px_15px_rgba(4,136,57,0.4)] group-active:scale-95 transition-transform border-[3px] border-black">
                     <i class="fab fa-line text-[22px]"></i>
@@ -822,6 +829,35 @@ export default async (request, context) => {
         if(menuBtn) menuBtn.addEventListener('click', () => toggleMenu(true));
         if(closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
         if(overlay) overlay.addEventListener('click', () => toggleMenu(false));
+        
+        // FAQ Accordion Logic
+        const faqContainer = document.getElementById('faq-accordion');
+        if (faqContainer) {
+            const faqItems = faqContainer.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const questionButton = item.querySelector('.faq-question');
+                const answerPanel = item.querySelector('.faq-answer');
+                
+                questionButton.addEventListener('click', () => {
+                    const isExpanded = questionButton.getAttribute('aria-expanded') === 'true';
+                    
+                    // Close all items before opening the new one
+                    faqItems.forEach(i => {
+                        i.setAttribute('aria-expanded', 'false');
+                        i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+                        i.querySelector('.faq-answer').style.maxHeight = '0px';
+                        i.querySelector('.faq-question i').style.transform = 'rotate(0deg)';
+                    });
+                    
+                    if (!isExpanded) {
+                        item.setAttribute('aria-expanded', 'true');
+                        questionButton.setAttribute('aria-expanded', 'true');
+                        answerPanel.style.maxHeight = answerPanel.scrollHeight + 'px';
+                        questionButton.querySelector('i').style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        }
     });
 </script>
 </body>
