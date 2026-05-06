@@ -312,8 +312,8 @@ export default async (request, context) => {
         
         const firstImage = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/seo-default.webp`;
 
-        const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟน เด็กเอ็น | ไม่มัดจำ อัปเดต ${CURRENT_MONTH}`;
-        const description = `รวมน้องๆ รับงาน${provinceName} ไซด์ไลน์${provinceName} เด็กเอ็น เกรด VIP ${safeProfiles.length} คน โซน ${(seoData.zones||['ตัวเมือง']).slice(0,3).join(', ')} ✓ตรงปก 100% ✓ไม่โอนมัดจำ ✓จ่ายเงินหน้างาน`;
+        const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟน เด็กเอ็น | ไม่มีมัดจำ อัปเดต ${CURRENT_MONTH}`;
+        const description = `รวมน้องๆ รับงาน${provinceName} ไซด์ไลน์${provinceName} เด็กเอ็น เกรด VIP ${safeProfiles.length} คน โซน ${(seoData.zones||['ตัวเมือง']).slice(0,3).join(', ')} ✓ตรงปก 100% ✓ไม่โอนมัดจำ ✓จ่ายเงินหน้างานเท่านั้น`;
 
         const priceParts = (seoData.avgPrice || "1,500 - 3,500").split('-');
         const startPrice = priceParts[0] ? priceParts[0].trim() : "1,500";
@@ -639,23 +639,77 @@ export default async (request, context) => {
             </div>
         </div>
 
-        <!-- Social Marquee -->
-        <div class="max-w-4xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
-            <div class="text-center mb-4">
-                <p class="text-xs md:text-sm text-zinc-400 font-medium uppercase tracking-widest">Connect With Us</p>
+<!-- Social Marquee -->
+        <div class="max-w-6xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="text-center mb-5">
+                <span class="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-[0.2em] bg-zinc-900/50 px-4 py-1.5 rounded-full border border-white/5">
+                    Connect With Our Official Channels
+                </span>
             </div>
-            <div class="overflow-x-auto no-scrollbar pb-4">
-                <div class="flex flex-nowrap justify-start sm:justify-center gap-3 w-max mx-auto px-2">
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-[#00c300]/10 border border-[#00c300]/30 rounded-full text-xs font-bold text-[#00c300] hover:bg-[#00c300]/20 transition-colors"><i class="fab fa-line text-sm"></i> LINE</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500/10 border border-sky-500/30 rounded-full text-xs font-bold text-sky-400 hover:bg-sky-500/20 transition-colors"><i class="fab fa-twitter text-sm"></i> Twitter</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="nofollow noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-xs font-bold text-white hover:bg-white/20 transition-colors"><i class="fab fa-tiktok text-sm"></i> TikTok</a>
+
+            <!-- Scrollable Container -->
+            <div class="overflow-x-auto no-scrollbar pb-6">
+                <div class="flex flex-nowrap justify-start lg:justify-center gap-3 w-max mx-auto px-4">
+                    
+                    <!-- LINE -->
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="nofollow noopener" 
+                       class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00c300]/10 border border-[#00c300]/20 rounded-full text-xs font-bold text-[#00c300] hover:bg-[#00c300]/20 hover:scale-105 transition-all duration-300">
+                        <i class="fab fa-line text-base"></i> LINE
+                    </a>
+
+                    <!-- Twitter / X -->
+                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="nofollow noopener" 
+                       class="flex items-center gap-2.5 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white hover:bg-white/10 hover:scale-105 transition-all duration-300">
+                        <i class="fab fa-x-twitter text-base"></i> TWITTER
+                    </a>
+
+                    <!-- TikTok -->
+                    <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="nofollow noopener" 
+                       class="flex items-center gap-2.5 px-5 py-2.5 bg-[#ff0050]/10 border border-[#ff0050]/20 rounded-full text-xs font-bold text-[#ff0050] hover:bg-[#ff0050]/20 hover:scale-105 transition-all duration-300">
+                        <i class="fab fa-tiktok text-base"></i> TIKTOK
+                    </a>
+
+                    <!-- Bluesky -->
+                    <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="nofollow noopener" 
+                       class="flex items-center gap-2.5 px-5 py-2.5 bg-[#0085ff]/10 border border-[#0085ff]/20 rounded-full text-xs font-bold text-[#0085ff] hover:bg-[#0085ff]/20 hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-cloud text-base"></i> BLUESKY
+                    </a>
+
+                    <!-- Linktree -->
+                    <a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="nofollow noopener" 
+                       class="flex items-center gap-2.5 px-5 py-2.5 bg-[#39e09b]/10 border border-[#39e09b]/20 rounded-full text-xs font-bold text-[#39e09b] hover:bg-[#39e09b]/20 hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-link text-base"></i> LINKTREE
+                    </a>
+
+                    <!-- LinkedIn -->
+                    <a href="${CONFIG.SOCIAL_LINKS.linkedin}" target="_blank" rel="nofollow noopener" 
+                       class="flex items-center gap-2.5 px-5 py-2.5 bg-[#0077b5]/10 border border-[#0077b5]/20 rounded-full text-xs font-bold text-[#0077b5] hover:bg-[#0077b5]/20 hover:scale-105 transition-all duration-300">
+                        <i class="fab fa-linkedin text-base"></i> LINKEDIN
+                    </a>
+
+                    <!-- Bio.site -->
+                    <a href="${CONFIG.SOCIAL_LINKS.biosite}" target="_blank" rel="nofollow noopener" 
+                       class="flex items-center gap-2.5 px-5 py-2.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-xs font-bold text-purple-400 hover:bg-purple-500/20 hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-id-card text-base"></i> BIO.SITE
+                    </a>
+
                 </div>
             </div>
             
-            <div class="mt-2 flex justify-center">
-                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-950/40 border border-red-500/20 text-red-400 text-[10px] md:text-xs font-bold tracking-wider uppercase shadow-inner backdrop-blur-sm">
-                    <i class="fas fa-exclamation-triangle"></i> เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
-                </span>
+            <!-- Warning Badge -->
+            <div class="mt-4 flex justify-center">
+                <div class="group relative">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-red-500/20 to-rose-500/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000"></div>
+                    <div class="relative flex items-center gap-3 px-6 py-3 rounded-xl bg-black border border-red-500/20 text-red-500 shadow-2xl">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                            <span class="text-[14px] font-black">20+</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[11px] md:text-xs font-bold tracking-wider uppercase">Age Verification Required</span>
+                            <span class="text-[9px] md:text-[10px] text-zinc-500 font-medium">เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
