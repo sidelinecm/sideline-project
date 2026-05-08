@@ -911,6 +911,7 @@ const schemaData = {
         const overlay = document.getElementById('sidebar-overlay');
 
         function toggleMenu(show) {
+            if (!sidebar || !overlay) return;
             if (show) {
                 overlay.classList.remove('hidden');
                 void overlay.offsetWidth; 
@@ -937,34 +938,41 @@ const schemaData = {
                 const questionButton = item.querySelector('.faq-question');
                 const answerPanel = item.querySelector('.faq-answer');
                 
-                questionButton.addEventListener('click', () => {
-                    const isExpanded = questionButton.getAttribute('aria-expanded') === 'true';
-                    
-                    faqItems.forEach(i => {
-                        i.setAttribute('aria-expanded', 'false');
-                        i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-                        i.querySelector('.faq-answer').style.maxHeight = '0px';
-                        i.querySelector('.faq-question i').style.transform = 'rotate(0deg)';
+                if (questionButton && answerPanel) {
+                    questionButton.addEventListener('click', () => {
+                        const isExpanded = questionButton.getAttribute('aria-expanded') === 'true';
+                        
+                        faqItems.forEach(i => {
+                            i.setAttribute('aria-expanded', 'false');
+                            const qBtn = i.querySelector('.faq-question');
+                            const aPan = i.querySelector('.faq-answer');
+                            const icon = qBtn.querySelector('i');
+                            
+                            if(qBtn) qBtn.setAttribute('aria-expanded', 'false');
+                            if(aPan) aPan.style.maxHeight = '0px';
+                            if(icon) icon.style.transform = 'rotate(0deg)';
+                        });
+                        
+                        if (!isExpanded) {
+                            item.setAttribute('aria-expanded', 'true');
+                            questionButton.setAttribute('aria-expanded', 'true');
+                            answerPanel.style.maxHeight = answerPanel.scrollHeight + 'px';
+                            const currentIcon = questionButton.querySelector('i');
+                            if(currentIcon) currentIcon.style.transform = 'rotate(180deg)';
+                        }
                     });
-                    
-                    if (!isExpanded) {
-                        item.setAttribute('aria-expanded', 'true');
-                        questionButton.setAttribute('aria-expanded', 'true');
-                        answerPanel.style.maxHeight = answerPanel.scrollHeight + 'px';
-                        questionButton.querySelector('i').style.transform = 'rotate(180deg)';
-                    }
-                });
+                }
             });
         }
 
-        // 4. INTERSECTION OBSERVER API (Sensual Entrance Animation)
+        // 4. INTERSECTION OBSERVER API (Fixed Selector SyntaxError)
         const observerOptions = {
             root: null,
             rootMargin: '0px 0px -50px 0px', 
             threshold: 0.1
         };
 
-        const observer = new IntersectionObserver((entries, observer) => {
+        const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.style.animationPlayState = 'running';
@@ -974,6 +982,7 @@ const schemaData = {
             });
         }, observerOptions);
 
+        // Profile Cards Animation
         const profileCards = document.querySelectorAll('#profiles-grid > div.grid > a');
         profileCards.forEach(card => {
             card.style.animationPlayState = 'paused';
@@ -981,7 +990,11 @@ const schemaData = {
             observer.observe(card);
         });
         
-        const contentSections = document.querySelectorAll('.cyber-glass.p-6, .cyber-glass.rounded-\\[2\\.5rem\\]');
+        /** * แก้ไขปัญหา SyntaxError: 
+         * ใช้ Attribute Selector แทนการระบุคลาสที่มีตัวเลข/เครื่องหมายพิเศษของ Tailwind โดยตรง
+         */
+        const contentSections = document.querySelectorAll('.cyber-glass.p-6, [class*="rounded-[2.5rem]"]');
+        
         contentSections.forEach((section, index) => {
             section.style.opacity = '0';
             section.style.transform = 'translateY(30px)';
