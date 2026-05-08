@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8?target=deno';
 
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
