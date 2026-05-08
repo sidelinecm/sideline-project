@@ -181,19 +181,23 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-const optimizeImg = (path, width = 400, height = 500) => {
+const optimizeImg = (path, width = 320, height = 400) => { 
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    
     if (path.includes('res.cloudinary.com')) {
         if (path.includes('/upload/')) {
-            return path.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
+
+            return path.replace('/upload/', `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
         }
         return path;
     }
+    
     if (path.startsWith('http')) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=85`;
+    
+
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
-// Security Helper: ป้องกัน XSS Injection
 const escapeHTML = (str) => {
     if (!str) return '';
     return String(str).replace(/[&<>'"]/g, tag => ({
@@ -436,30 +440,28 @@ export default async (request, context) => {
             const traits = seoData.traits ||["ผิวขาวออร่า", "หุ่นนางแบบ", "ตรงปก 100%", "บริการเป็นกันเอง", "คุยสนุกเอาใจเก่ง", "สเปกพรีเมียม"];
 
             cardsHTML = safeProfiles.map((p, i) => {
-                // 1. Data Cleaning & Defensive Checks (with XSS Protection)
+
                 const rawName = (p.name || 'ไม่ระบุชื่อ').replace(/^(น้อง\s?)/, '');
                 const cleanName = escapeHTML(rawName);
                 const profileLocation = escapeHTML(p.location || provinceName || 'ไม่ระบุโซน');
                 const isAvailable = !['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'].some(kw => (p.availability || '').toLowerCase().includes(kw));
                 const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
                 
-                // 2. Formatting
+
                 const mockRating = (4.8 + Math.random() * 0.2).toFixed(1); 
                 const animDelay = (i % 10) * 50;
                 const displayRate = p.rate ? Number(p.rate).toLocaleString() : 'สอบถาม';
-
-                // 3. Smart SEO - Dynamic Image Alt Text Generation
                 const lsiKeyword = seoData.lsi && seoData.lsi.length > 0 ? seoData.lsi[i % seoData.lsi.length] : `รับงาน${provinceName}`;
                 const myIntent = intents[i % intents.length];
                 const myTrait = traits[i % traits.length];
                 const smartAlt = `${myIntent} น้อง${cleanName} ${profileLocation} ${myTrait} ${lsiKeyword}`;
 
-                // 4. Core Web Vitals Optimization
+
                 const imageAttributes = i < 4 
                     ? 'fetchpriority="high" decoding="sync"' 
                     : 'loading="lazy" decoding="async"';
 
-                // 5. Dynamic Status Colors (Tailwind Fix)
+
                 const statusBgClass = isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]';
                 const statusTextClass = isAvailable ? 'text-[#00F3FF]' : 'text-[#FF007F]';
                 const statusBorderClass = isAvailable ? 'border-[#00F3FF]/30' : 'border-[#FF007F]/30';
@@ -473,13 +475,15 @@ export default async (request, context) => {
                     
                     <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
                         
-                        <!-- Optimized Image Tag -->
-                        <img src="${optimizeImg(p.imagePath, 400, 500)}" 
-                             width="400" height="500"
+                     <img src="${optimizeImg(p.imagePath, 320, 400)}" 
+                             width="320" height="400"
                              onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
                              alt="${smartAlt}"
                              class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
-                             style="filter: contrast(1.05) saturate(1.1);" 
+                             style="filter: contrast(1.02) saturate(1.05);" 
+                             loading="lazy"
+                             decoding="async"
+                             fetchpriority="low"
                              ${imageAttributes}>
                              
                         <!-- Overlays & Shadows (Hardware Accelerated) -->
@@ -874,9 +878,9 @@ export default async (request, context) => {
                     </ul>
                 </nav>
 
-                <nav aria-label="พื้นที่ให้บริการทั้งหมด" class="md:col-span-4">
-                    <h3 class="text-[#7000FF] text-sm font-bold mb-6 tracking-widest uppercase font-orbitron text-neon-purple">Areas</h3>
-                    <ul class="flex flex-col gap-3 text-sm font-medium text-zinc-300 h-[180px] overflow-y-auto pr-3 custom-scrollbar">
+<nav aria-label="พื้นที่ให้บริการทั้งหมด" class="md:col-span-4">
+                    <h3 class="text-[#A855F7] text-sm font-bold mb-6 tracking-widest uppercase font-orbitron">จังหวัดที่มีน้องๆรับงาน</h3>
+                    <ul class="flex flex-col gap-3 text-sm font-medium text-zinc-100 h-[180px] overflow-y-auto pr-3 custom-scrollbar">
                         ${allProvinces.map(p => `
                             <li>
                                 <a href="/location/${p.key}" class="hover:text-[#00F3FF] hover:text-shadow-[0_0_10px_rgba(0,243,255,0.8)] transition-all flex items-center justify-between group">
@@ -893,14 +897,14 @@ export default async (request, context) => {
             </div>
 
             <div class="border-t border-[#3D1A5F] pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-                <p class="text-[10px] md:text-xs text-zinc-300 uppercase tracking-widest font-medium font-orbitron">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. All rights reserved.</p>
-                <div class="flex gap-6 text-[10px] md:text-xs text-zinc-300 font-medium uppercase tracking-widest justify-center font-orbitron">
+                <p class="text-[10px] md:text-xs text-zinc-100 uppercase tracking-widest font-medium font-orbitron">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. All rights reserved.</p>
+                <div class="flex gap-6 text-[10px] md:text-xs text-zinc-100 font-medium uppercase tracking-widest justify-center font-orbitron">
                     <a href="/privacy-policy.html" class="hover:text-[#00F3FF] transition-colors">Privacy</a>
                     <a href="/terms.html" class="hover:text-[#00F3FF] transition-colors">Terms</a>
                 </div>
             </div>
             
-            <p class="mt-6 text-[10px] text-zinc-400 leading-relaxed font-light text-center">
+            <p class="mt-6 text-[10px] text-zinc-300 leading-relaxed font-light text-center">
                 แพลตฟอร์มนี้เป็นเพียงสื่อกลางข้อมูล การติดต่อและชำระเงินเกิดขึ้นระหว่างลูกค้าและผู้ให้บริการโดยตรง จัดทำขึ้นสำหรับผู้มีอายุ 20 ปีขึ้นไปเท่านั้น
             </p>
         </div>
