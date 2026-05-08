@@ -193,6 +193,18 @@ const optimizeImg = (path, width = 400, height = 500) => {
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=85`;
 };
 
+// Security Helper: ป้องกัน XSS Injection
+const escapeHTML = (str) => {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag] || tag));
+};
+
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
     return `
@@ -206,7 +218,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                     <i class="fas fa-crown" aria-hidden="true"></i> Exclusive Guide
                 </span>
                 <h2 id="seo-section-title" class="text-3xl md:text-4xl font-black text-white mb-6 tracking-tight leading-tight text-neon">
-                    ทำไมต้องเลือก <br class="md:hidden"/><span class="text-[#FF007F]" style="text-shadow: 0 0 15px rgba(255,0,127,0.5);">ไซด์ไลน์${provinceName}</span> กับเรา?
+                    ทำไมต้องเลือก <br class="md:hidden"/><span class="text-[#FF007F]" style="text-shadow: 0 0 15px rgba(255,0,127,0.5);">ไซด์ไลน์${escapeHTML(provinceName)}</span> กับเรา?
                 </h2>
                 <p class="text-zinc-300 text-sm md:text-base leading-relaxed md:leading-loose max-w-3xl mx-auto">
                     ${data.uniqueIntro} คัดสรรน้องๆ ระดับ Top Class กว่า <strong class="text-white font-bold">${count} ท่าน</strong>
@@ -218,9 +230,9 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                     <div class="w-12 h-12 bg-[#3D1A5F] rounded-2xl flex items-center justify-center text-[#7000FF] text-xl mb-5 border border-[#7000FF] shadow-[0_0_10px_rgba(112,0,255,0.5)]">
                         <i class="fas fa-map-marked-alt text-white" aria-hidden="true"></i>
                     </div>
-                    <h3 class="text-lg md:text-xl font-bold text-white mb-4 text-neon-purple">ครอบคลุมทุกโซนใน${provinceName}</h3>
+                    <h3 class="text-lg md:text-xl font-bold text-white mb-4 text-neon-purple">ครอบคลุมทุกโซนใน${escapeHTML(provinceName)}</h3>
                     <div class="flex flex-wrap gap-2.5">
-                        ${(data.zones ||['ตัวเมือง']).slice(0, 6).map(z => `<span class="px-3.5 py-1.5 bg-[#0A0014]/80 rounded-lg text-xs md:text-sm font-medium text-zinc-300 border border-[#3D1A5F]">${z}</span>`).join('')}
+                        ${(data.zones ||['ตัวเมือง']).slice(0, 6).map(z => `<span class="px-3.5 py-1.5 bg-[#0A0014]/80 rounded-lg text-xs md:text-sm font-medium text-zinc-300 border border-[#3D1A5F]">${escapeHTML(z)}</span>`).join('')}
                     </div>
                 </article>
 
@@ -245,14 +257,14 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                         <div class="faq-item cyber-glass rounded-2xl overflow-hidden hover:border-[#7000FF] transition-colors">
                             <button class="faq-question w-full text-left p-5 md:p-6 flex justify-between items-center gap-4 group" aria-expanded="false" aria-controls="faq-answer-${index}">
                                 <h4 class="font-bold text-white text-sm md:text-base flex gap-2 items-start leading-snug">
-                                    <span class="text-[#FF007F]" style="text-shadow: 0 0 8px rgba(255,0,127,0.8);" aria-hidden="true">Q:</span> ${faq.q}
+                                    <span class="text-[#FF007F]" style="text-shadow: 0 0 8px rgba(255,0,127,0.8);" aria-hidden="true">Q:</span> ${escapeHTML(faq.q)}
                                 </h4>
                                 <i class="fas fa-chevron-down text-[#7000FF] group-hover:text-[#FF007F] transition-colors duration-300 shrink-0" aria-hidden="true"></i>
                             </button>
                             <div id="faq-answer-${index}" class="faq-answer max-h-0 overflow-hidden transition-all duration-500 ease-in-out bg-[#0A0014]/50" role="region" aria-labelledby="faq-question-${index}">
                                 <div class="px-5 md:px-6 pb-5 md:pb-6">
                                     <p class="text-zinc-300 text-sm md:text-base leading-relaxed flex gap-2 items-start border-t border-[#3D1A5F] pt-4">
-                                        <span class="text-[#00F3FF]" style="text-shadow: 0 0 8px rgba(0,243,255,0.8);" aria-hidden="true">A:</span> ${faq.a}
+                                        <span class="text-[#00F3FF]" style="text-shadow: 0 0 8px rgba(0,243,255,0.8);" aria-hidden="true">A:</span> ${escapeHTML(faq.a)}
                                     </p>
                                 </div>
                             </div>
@@ -314,7 +326,7 @@ export default async (request, context) => {
         const endPrice = priceParts[1] ? priceParts[1].trim() : "5,000";
         const validUntil = new Date(now.setFullYear(now.getFullYear() + 1)).toISOString().split('T')[0];
 
-const schemaData = {
+        const schemaData = {
             "@context": "https://schema.org",
             "@graph":[
                 {
@@ -367,13 +379,13 @@ const schemaData = {
                         "latitude": seoData.geo.lat,
                         "longitude": seoData.geo.lng
                     },
-                    "aggregateRating": {
+                    "aggregateRating": safeProfiles.length > 0 ? {
                         "@type": "AggregateRating",
-                        "ratingValue": "4.9",
-                        "reviewCount": String(safeProfiles.length * 12 + 85),
+                        "ratingValue": "4.8",
+                        "reviewCount": String(safeProfiles.length * 3 + 12),
                         "bestRating": "5",
                         "worstRating": "1"
-                    },
+                    } : undefined,
                     "offers": safeProfiles.length > 0 ? {
                         "@type": "AggregateOffer",
                         "offerCount": String(safeProfiles.length),
@@ -419,49 +431,81 @@ const schemaData = {
 
         let cardsHTML = '';
         if (safeProfiles && safeProfiles.length > 0) {
+            
+            const intents = seoData.intents ||["หาเพื่อนเที่ยว", "น้องเอนเตอร์เทน", "รับงานนอกสถานที่", "ฟีลแฟน", "เพื่อนเที่ยวกลางคืน", "เด็กเอ็น VIP"];
+            const traits = seoData.traits ||["ผิวขาวออร่า", "หุ่นนางแบบ", "ตรงปก 100%", "บริการเป็นกันเอง", "คุยสนุกเอาใจเก่ง", "สเปกพรีเมียม"];
+
             cardsHTML = safeProfiles.map((p, i) => {
-                const cleanName = (p.name || 'ไม่ระบุชื่อ').replace(/^(น้อง\s?)/, '');
-                const profileLocation = p.location || provinceName;
+                // 1. Data Cleaning & Defensive Checks (with XSS Protection)
+                const rawName = (p.name || 'ไม่ระบุชื่อ').replace(/^(น้อง\s?)/, '');
+                const cleanName = escapeHTML(rawName);
+                const profileLocation = escapeHTML(p.location || provinceName || 'ไม่ระบุโซน');
                 const isAvailable = !['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'].some(kw => (p.availability || '').toLowerCase().includes(kw));
-                const profileLink = `/sideline/${p.slug || p.id}`;
+                const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
+                
+                // 2. Formatting
                 const mockRating = (4.8 + Math.random() * 0.2).toFixed(1); 
                 const animDelay = (i % 10) * 50;
+                const displayRate = p.rate ? Number(p.rate).toLocaleString() : 'สอบถาม';
+
+                // 3. Smart SEO - Dynamic Image Alt Text Generation
                 const lsiKeyword = seoData.lsi && seoData.lsi.length > 0 ? seoData.lsi[i % seoData.lsi.length] : `รับงาน${provinceName}`;
-                const loadingAttr = i < 4 ? 'fetchpriority="high"' : 'loading="lazy"';
+                const myIntent = intents[i % intents.length];
+                const myTrait = traits[i % traits.length];
+                const smartAlt = `${myIntent} น้อง${cleanName} ${profileLocation} ${myTrait} ${lsiKeyword}`;
+
+                // 4. Core Web Vitals Optimization
+                const imageAttributes = i < 4 
+                    ? 'fetchpriority="high" decoding="sync"' 
+                    : 'loading="lazy" decoding="async"';
+
+                // 5. Dynamic Status Colors (Tailwind Fix)
+                const statusBgClass = isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]';
+                const statusTextClass = isAvailable ? 'text-[#00F3FF]' : 'text-[#FF007F]';
+                const statusBorderClass = isAvailable ? 'border-[#00F3FF]/30' : 'border-[#FF007F]/30';
+                const statusShadowClass = isAvailable ? 'shadow-[0_0_10px_rgba(0,243,255,0.2)]' : 'shadow-[0_0_10px_rgba(255,0,127,0.2)]';
 
                 return `
                 <article class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both;">
-                    <a href="${profileLink}" aria-label="ดูโปรไฟล์น้อง ${cleanName} พื้นที่ ${profileLocation}" class="block absolute inset-0 z-30"></a>
+                    
+                    <!-- SEO & Accessibility Link -->
+                    <a href="${profileLink}" aria-label="ดูโปรไฟล์ ${smartAlt}" class="block absolute inset-0 z-30"></a>
+                    
                     <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
                         
+                        <!-- Optimized Image Tag -->
                         <img src="${optimizeImg(p.imagePath, 400, 500)}" 
                              width="400" height="500"
                              onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
-                             alt="รูปภาพโปรไฟล์ของน้อง ${cleanName} ${lsiKeyword}"
+                             alt="${smartAlt}"
                              class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
                              style="filter: contrast(1.05) saturate(1.1);" 
-                             ${loadingAttr}>
+                             ${imageAttributes}>
                              
-                        <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/30 to-[#FF007F]/20 mix-blend-soft-light z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700"></div>
-
-                        <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.9),inset_0_0_20px_rgba(10,0,20,0.6)] z-10 pointer-events-none"></div>
-
+                        <!-- Overlays & Shadows (Hardware Accelerated) -->
+                        <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/30 to-[#FF007F]/20 mix-blend-soft-light z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700" style="transform: translateZ(0);"></div>
+                        <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.9),inset_0_0_20px_rgba(10,0,20,0.6)] z-10 pointer-events-none" style="transform: translateZ(0);"></div>
                         <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/70 to-transparent z-10 pointer-events-none"></div>
                         
-                        <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full shadow-[0_0_10px_rgba(0,243,255,0.2)] border border-[#00F3FF]/30">
+                        <!-- Status Badge (Dynamic Colors) -->
+                        <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full ${statusShadowClass} border ${statusBorderClass}">
                             <span class="relative flex h-2 w-2" aria-hidden="true">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]'} opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]'} shadow-[0_0_5px_currentColor]"></span>
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${statusBgClass} opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 ${statusBgClass} shadow-[0_0_5px_currentColor]"></span>
                             </span>
-                            <span class="text-[9px] md:text-[10px] font-bold ${isAvailable ? 'text-[#00F3FF]' : 'text-[#FF007F]'} uppercase tracking-wider font-orbitron">${isAvailable ? 'ONLINE' : 'BUSY'}</span>
+                            <span class="text-[9px] md:text-[10px] font-bold ${statusTextClass} uppercase tracking-wider font-orbitron">
+                                ${isAvailable ? 'ONLINE' : 'BUSY'}
+                            </span>
                         </div>
                         
+                        <!-- Hot Badge -->
                         ${(i < 3 || p.isfeatured) ? `
                         <div class="absolute top-3 right-3 md:top-4 md:right-4 z-20 bg-[#FF007F] px-2.5 py-1 rounded-full border border-white/20 shadow-[0_0_15px_rgba(255,0,127,0.8)] flex items-center gap-1">
                             <i class="fas fa-fire text-white text-[9px] md:text-[10px] animate-pulse" aria-hidden="true"></i>
                             <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider font-orbitron">HOT</span>
                         </div>` : ''}
                         
+                        <!-- Bottom Info Area -->
                         <div class="absolute bottom-0 inset-x-0 p-4 md:p-5 z-20">
                             <div class="flex items-end justify-between gap-2">
                                 <div class="flex-1 min-w-0">
@@ -473,10 +517,11 @@ const schemaData = {
                                 </div>
                                 <div class="text-right shrink-0">
                                     <span class="block text-[9px] md:text-[10px] text-zinc-300 font-medium uppercase tracking-wider mb-0.5 font-orbitron">RATE</span>
-                                    <span class="font-black text-lg md:text-xl text-[#FF007F] tracking-tight text-neon">฿${p.rate || 'สอบถาม'}</span>
+                                    <span class="font-black text-lg md:text-xl text-[#FF007F] tracking-tight text-neon">฿${displayRate}</span>
                                 </div>
                             </div>
                             
+                            <!-- Hover Action Area -->
                             <div class="mt-3 md:mt-4 flex items-center justify-between md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
                                 <div class="flex items-center gap-1 text-[#00F3FF] text-[10px] md:text-xs font-bold cyber-glass px-2 py-1 rounded-lg border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.2)]">
                                     <i class="fas fa-star" aria-hidden="true"></i> ${mockRating}
@@ -490,10 +535,19 @@ const schemaData = {
                 </article>`;
             }).join('');
         } else {
-            cardsHTML = `<div class="col-span-full flex flex-col items-center justify-center py-24 text-center">
-                <i class="fas fa-hourglass-half text-4xl text-[#7000FF] mb-4 animate-pulse" aria-hidden="true"></i>
-                <h3 class="text-xl font-bold text-white mb-2 text-neon">กำลังอัปเดตระบบ</h3>
-                <p class="text-zinc-300 text-sm">ไม่พบโปรไฟล์ในโซนนี้ขณะนี้ กรุณาลองใหม่อีกครั้ง</p>
+            // Premium Empty State
+            cardsHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-20 md:py-32 text-center cyber-glass rounded-[2rem] border border-[#3D1A5F]/50">
+                <div class="w-20 h-20 bg-[#1A0B2E] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(112,0,255,0.2)] border border-[#7000FF]/30">
+                    <i class="fas fa-hourglass-half text-3xl text-[#00F3FF] animate-pulse" aria-hidden="true"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-3 text-neon-cyan tracking-wide">กำลังอัปเดตระบบ</h3>
+                <p class="text-zinc-400 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+                    ขณะนี้กำลังจัดเตรียมโปรไฟล์น้องๆ ระดับ VIP ในโซน<strong class="text-white">${escapeHTML(provinceName)}</strong><br/>กรุณากลับมาตรวจสอบใหม่อีกครั้งในภายหลัง
+                </p>
+                <a href="/" class="mt-8 btn-neon px-8 py-3 rounded-full text-sm font-bold font-orbitron tracking-widest uppercase">
+                    กลับหน้าหลัก
+                </a>
             </div>`;
         }
 
@@ -535,6 +589,9 @@ const schemaData = {
     
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high">
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high">
+    
+    <!-- LCP Profile Image Preload -->
+    ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 400, 500)}" fetchpriority="high">` : ''}
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -686,7 +743,7 @@ const schemaData = {
                     <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#FF007F] animate-pulse shadow-[0_0_8px_#FF007F]" aria-hidden="true"></span> Exclusive Escort
                 </div>
                 <h1 class="text-3xl md:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-4 md:mb-6 tracking-tight">
-                    <span class="text-[#FF007F] text-neon" style="text-shadow: 0 0 20px rgba(255,0,127,0.8);">รับงานไซด์ไลน์${provinceName}</span><br/>
+                    <span class="text-[#FF007F] text-neon" style="text-shadow: 0 0 20px rgba(255,0,127,0.8);">รับงานไซด์ไลน์${escapeHTML(provinceName)}</span><br/>
                     <span class="text-white text-neon">Premium Service</span>
                 </h1>
                 <p class="text-zinc-300 text-sm md:text-lg mb-6 md:mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
@@ -707,7 +764,7 @@ const schemaData = {
                     <img src="/images/hero-sidelinechiangmai-1200.webp" 
                          srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w"
                          sizes="(max-width: 640px) 100vw, 50vw"
-                         alt="บริการรับงาน ไซด์ไลน์ ${provinceName} ระดับ VIP" 
+                         alt="บริการรับงาน ไซด์ไลน์ ${escapeHTML(provinceName)} ระดับ VIP" 
                          width="1200" height="1200"
                          class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 group-hover:brightness-110 transition-all duration-1000"
                          fetchpriority="high">
@@ -772,7 +829,7 @@ const schemaData = {
             <div class="flex items-end justify-between mb-6 md:mb-8">
                 <div>
                     <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron text-neon">โปรไฟล์น้องๆรับงาน</h2>
-                    <p class="text-zinc-300 text-[10px] md:text-sm font-light mt-1">คอลเลกชันน้องๆ ไซด์ไลน์ โซน${provinceName}</p>
+                    <p class="text-zinc-300 text-[10px] md:text-sm font-light mt-1">คอลเลกชันน้องๆ ไซด์ไลน์ โซน${escapeHTML(provinceName)}</p>
                 </div>
                 <div class="text-[10px] md:text-xs text-[#00F3FF] flex items-center gap-1.5 cyber-glass px-2.5 py-1 rounded-full border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.1)]">
                     <span class="w-1.5 h-1.5 rounded-full bg-[#00F3FF] inline-block animate-pulse shadow-[0_0_5px_#00F3FF]" aria-hidden="true"></span> อัปเดต: ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
@@ -825,7 +882,7 @@ const schemaData = {
                                 <a href="/location/${p.key}" class="hover:text-[#00F3FF] hover:text-shadow-[0_0_10px_rgba(0,243,255,0.8)] transition-all flex items-center justify-between group">
                                     <div class="flex items-center gap-2">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#3D1A5F] group-hover:bg-[#00F3FF] group-hover:shadow-[0_0_8px_#00F3FF] transition-all" aria-hidden="true"></span>
-                                        รับงาน${p.nameThai}
+                                        รับงาน${escapeHTML(p.nameThai)}
                                     </div>
                                     <i class="fas fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity text-[#00F3FF]" aria-hidden="true"></i>
                                 </a>
