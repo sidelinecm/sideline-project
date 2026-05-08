@@ -185,7 +185,7 @@ const optimizeImg = (path, width = 400, height = 500) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
         if (path.includes('/upload/')) {
-            // แก้ไข q_auto:best เป็น q_auto:eco ประหยัดขนาดภาพ (แก้ไข Performance Lighthouse)
+            // ปรับแก้เป็น eco ช่วยลดขนาดไฟล์ภาพตามคำแนะนำ Lighthouse
             return path.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
         }
         return path;
@@ -199,7 +199,6 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
     return `
     <section class="mt-12 md:mt-20 mb-10 px-4">
         <div class="cyber-glass rounded-[2.5rem] p-6 md:p-12 relative overflow-hidden shadow-[0_0_30px_rgba(112,0,255,0.15)]">
-            <!-- เพิ่ม contain: strict; และ transform: translateZ(0); ป้องกัน CLS (แก้ไข Layout Shift Lighthouse) -->
             <div class="absolute -top-32 -right-32 w-[300px] h-[300px] bg-[#FF007F]/20 blur-[80px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
             <div class="absolute -bottom-32 -left-32 w-[300px] h-[300px] bg-[#7000FF]/20 blur-[80px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
             
@@ -210,7 +209,6 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                 <h2 class="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight leading-tight text-neon">
                     ทำไมต้องเลือก <br class="md:hidden"/><span class="text-[#FF007F]" style="text-shadow: 0 0 15px rgba(255,0,127,0.5);">ไซด์ไลน์${provinceName}</span> กับเรา?
                 </h2>
-                <!-- ปรับแก้สีข้อความเพื่อ Contrast Ratio (แก้ไข Accessibility Lighthouse) -->
                 <p class="text-zinc-300 text-sm md:text-base leading-relaxed">
                     ${data.uniqueIntro} คัดสรรน้องๆ ระดับ Top Class กว่า <strong class="text-white">${count} ท่าน</strong>
                 </p>
@@ -437,7 +435,6 @@ const schemaData = {
                     
                     <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
                         
-                        <!-- 🌟 1. รูปภาพที่ถูกเร่งความคมชัดด้วย AI + CSS Filters 🌟 -->
                         <img src="${optimizeImg(p.imagePath, 400, 500)}" 
                              width="400" height="500"
                              onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
@@ -446,16 +443,12 @@ const schemaData = {
                              style="filter: contrast(1.05) saturate(1.1);" 
                              ${loadingAttr}>
                              
-                        <!-- 🌟 2. แผ่นฟิล์มย้อมสี Cyber-Tint (ทำให้ภาพกลืนไปกับเว็บ) 🌟 -->
                         <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/30 to-[#FF007F]/20 mix-blend-soft-light z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700"></div>
 
-                        <!-- 🌟 3. Vignette Shadow (กรอบเงาดำรอบรูป ซ่อนฉากหลังรกๆ) 🌟 -->
                         <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.9),inset_0_0_20px_rgba(10,0,20,0.6)] z-10 pointer-events-none"></div>
 
-                        <!-- 🌟 4. Gradient ด้านล่างเข้มๆ เพื่อให้ตัวหนังสืออ่านง่าย 🌟 -->
                         <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/70 to-transparent z-10 pointer-events-none"></div>
                         
-                        <!-- ================= Badge สถานะ ================= -->
                         <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full shadow-[0_0_10px_rgba(0,243,255,0.2)] border border-[#00F3FF]/30">
                             <span class="relative flex h-2 w-2">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]'} opacity-75"></span>
@@ -470,7 +463,6 @@ const schemaData = {
                             <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider font-orbitron">HOT</span>
                         </div>` : ''}
                         
-                        <!-- ================= ข้อมูลและปุ่มด้านล่าง ================= -->
                         <div class="absolute bottom-0 inset-x-0 p-4 md:p-5 z-20">
                             <div class="flex items-end justify-between gap-2">
                                 <div class="flex-1 min-w-0">
@@ -520,7 +512,6 @@ const schemaData = {
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="${provinceUrl}" />
     
-    <!-- Meta Open Graph -->
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="${title}">
@@ -528,7 +519,6 @@ const schemaData = {
     <meta property="og:url" content="${provinceUrl}">
     <meta property="og:image" content="${firstImage}">
 
-    <!-- ปรับลด Preconnect เหลือ 3 รายการตามที่แจ้งใน Lighthouse และเปลี่ยนรายการอื่นเป็น dns-prefetch แทน -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -542,8 +532,8 @@ const schemaData = {
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high">
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high">
 
-    <!-- เพิ่ม defer ในสคริปต์ Tailwind เพื่อป้องกันการ Block การ Render (LCP Fix) -->
-    <script defer src="https://cdn.tailwindcss.com"></script>
+    <!-- จุดที่แก้ไข: เอา defer ออก เพื่อให้ Tailwind ทำงานและแสดง CSS ได้ถูกต้องตามปกติ -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         window.tailwind = window.tailwind || {};
         tailwind.config = {
@@ -603,7 +593,6 @@ const schemaData = {
         .btn-neon {
             background: #FF007F;
             color: #ffffff;
-            /* เพิ่ม Text Shadow ช่วยแก้ปัญหา Contrast Ratio ของปุ่มที่อาจมองไม่ชัด */
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
             box-shadow: 0 0 15px rgba(255, 0, 127, 0.6), 0 0 30px rgba(255, 0, 127, 0.3);
             transition: all 0.3s ease;
@@ -693,7 +682,6 @@ const schemaData = {
 
     <header class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
         <div class="absolute inset-0 bg-[#0A0014] overflow-hidden pointer-events-none -z-10">
-            <!-- เพิ่ม contain: strict; และ transform: translateZ(0); ป้องกัน CLS (Layout Shift) -->
             <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
             <div class="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
         </div>
@@ -999,10 +987,7 @@ const schemaData = {
             observer.observe(card);
         });
         
-        /** * แก้ไขปัญหา SyntaxError: 
-         * ใช้ Attribute Selector แทนการระบุคลาสที่มีตัวเลข/เครื่องหมายพิเศษของ Tailwind โดยตรง
-         */
-        const contentSections = document.querySelectorAll('.cyber-glass.p-6, [class*="rounded-[2.5rem]"]');
+        const contentSections = document.querySelectorAll('.cyber-glass.p-6,[class*="rounded-[2.5rem]"]');
         
         contentSections.forEach((section, index) => {
             section.style.opacity = '0';
