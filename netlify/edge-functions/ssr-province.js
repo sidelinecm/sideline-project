@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8?target=deno';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
@@ -934,7 +934,7 @@ export default async (request, context) => {
             section.style.opacity = '0';
             section.style.transform = 'translateY(30px)';
             section.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
-            section.style.transitionDelay = `${(index % 3) * 150}ms`;
+            section.style.transitionDelay = ((index % 3) * 150) + 'ms';
             
             const sectionObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
