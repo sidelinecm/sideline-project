@@ -185,7 +185,8 @@ const optimizeImg = (path, width = 400, height = 500) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
         if (path.includes('/upload/')) {
-            return path.replace('/upload/', `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face,e_improve,e_sharpen:100,e_saturation:15/`);
+            // แก้ไข q_auto:best เป็น q_auto:eco ประหยัดขนาดภาพ (แก้ไข Performance Lighthouse)
+            return path.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
         }
         return path;
     }
@@ -198,8 +199,9 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
     return `
     <section class="mt-12 md:mt-20 mb-10 px-4">
         <div class="cyber-glass rounded-[2.5rem] p-6 md:p-12 relative overflow-hidden shadow-[0_0_30px_rgba(112,0,255,0.15)]">
-            <div class="absolute -top-32 -right-32 w-[300px] h-[300px] bg-[#FF007F]/20 blur-[80px] rounded-full pointer-events-none"></div>
-            <div class="absolute -bottom-32 -left-32 w-[300px] h-[300px] bg-[#7000FF]/20 blur-[80px] rounded-full pointer-events-none"></div>
+            <!-- เพิ่ม contain: strict; และ transform: translateZ(0); ป้องกัน CLS (แก้ไข Layout Shift Lighthouse) -->
+            <div class="absolute -top-32 -right-32 w-[300px] h-[300px] bg-[#FF007F]/20 blur-[80px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+            <div class="absolute -bottom-32 -left-32 w-[300px] h-[300px] bg-[#7000FF]/20 blur-[80px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
             
             <div class="relative z-10 text-center max-w-3xl mx-auto mb-10">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full cyber-glass text-xs font-semibold text-[#FF007F] uppercase tracking-widest mb-4 font-orbitron shadow-[0_0_10px_rgba(255,0,127,0.2)]">
@@ -208,6 +210,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                 <h2 class="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight leading-tight text-neon">
                     ทำไมต้องเลือก <br class="md:hidden"/><span class="text-[#FF007F]" style="text-shadow: 0 0 15px rgba(255,0,127,0.5);">ไซด์ไลน์${provinceName}</span> กับเรา?
                 </h2>
+                <!-- ปรับแก้สีข้อความเพื่อ Contrast Ratio (แก้ไข Accessibility Lighthouse) -->
                 <p class="text-zinc-300 text-sm md:text-base leading-relaxed">
                     ${data.uniqueIntro} คัดสรรน้องๆ ระดับ Top Class กว่า <strong class="text-white">${count} ท่าน</strong>
                 </p>
@@ -316,7 +319,7 @@ export default async (request, context) => {
 
 const schemaData = {
             "@context": "https://schema.org",
-            "@graph": [
+            "@graph":[
                 {
                     "@type": "WebSite",
                     "@id": `${CONFIG.DOMAIN}/#website`,
@@ -342,14 +345,14 @@ const schemaData = {
                 {
                     "@type": "BreadcrumbList",
                     "@id": `${provinceUrl}/#breadcrumb`,
-                    "itemListElement": [
+                    "itemListElement":[
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                         { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${CONFIG.DOMAIN}/profiles.html` },
                         { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                     ]
                 },
                 {
-                    "@type": ["LocalBusiness", "ModelingAgency"],
+                    "@type":["LocalBusiness", "ModelingAgency"],
                     "@id": `${provinceUrl}/#business`,
                     "name": `ไซด์ไลน์${provinceName} VIP - ${CONFIG.BRAND_NAME}`,
                     "image": firstImage,
@@ -387,7 +390,7 @@ const schemaData = {
                 {
                     "@type": "FAQPage",
                     "@id": `${provinceUrl}/#faq`,
-                    "mainEntity": [
+                    "mainEntity":[
                         {
                             "@type": "Question",
                             "name": `หาไซด์ไลน์${provinceName} งานตรงปกได้ที่ไหน?`,
@@ -478,7 +481,7 @@ const schemaData = {
                                     </div>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <span class="block text-[9px] md:text-[10px] text-zinc-400 font-medium uppercase tracking-wider mb-0.5 font-orbitron">RATE</span>
+                                    <span class="block text-[9px] md:text-[10px] text-zinc-300 font-medium uppercase tracking-wider mb-0.5 font-orbitron">RATE</span>
                                     <span class="font-black text-lg md:text-xl text-[#FF007F] tracking-tight text-neon">฿${p.rate || 'สอบถาม'}</span>
                                 </div>
                             </div>
@@ -499,7 +502,7 @@ const schemaData = {
             cardsHTML = `<div class="col-span-full flex flex-col items-center justify-center py-24 text-center">
                 <i class="fas fa-hourglass-half text-4xl text-[#7000FF] mb-4 animate-pulse"></i>
                 <h3 class="text-xl font-bold text-white mb-2 text-neon">กำลังอัปเดตระบบ</h3>
-                <p class="text-zinc-400 text-sm">ไม่พบโปรไฟล์ในโซนนี้ขณะนี้ กรุณาลองใหม่อีกครั้ง</p>
+                <p class="text-zinc-300 text-sm">ไม่พบโปรไฟล์ในโซนนี้ขณะนี้ กรุณาลองใหม่อีกครั้ง</p>
             </div>`;
         }
 
@@ -525,11 +528,12 @@ const schemaData = {
     <meta property="og:url" content="${provinceUrl}">
     <meta property="og:image" content="${firstImage}">
 
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <!-- ปรับลด Preconnect เหลือ 3 รายการตามที่แจ้งใน Lighthouse และเปลี่ยนรายการอื่นเป็น dns-prefetch แทน -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
     
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" as="style">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
@@ -538,8 +542,10 @@ const schemaData = {
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high">
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- เพิ่ม defer ในสคริปต์ Tailwind เพื่อป้องกันการ Block การ Render (LCP Fix) -->
+    <script defer src="https://cdn.tailwindcss.com"></script>
     <script>
+        window.tailwind = window.tailwind || {};
         tailwind.config = {
             theme: {
                 extend: {
@@ -596,7 +602,9 @@ const schemaData = {
 
         .btn-neon {
             background: #FF007F;
-            color: white;
+            color: #ffffff;
+            /* เพิ่ม Text Shadow ช่วยแก้ปัญหา Contrast Ratio ของปุ่มที่อาจมองไม่ชัด */
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
             box-shadow: 0 0 15px rgba(255, 0, 127, 0.6), 0 0 30px rgba(255, 0, 127, 0.3);
             transition: all 0.3s ease;
         }
@@ -664,7 +672,7 @@ const schemaData = {
     <div id="sidebar-menu" class="fixed top-0 right-0 h-full w-72 bg-[#0A0014] border-l border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.2)] z-[70] transform translate-x-full transition-transform duration-300 flex flex-col pt-safe">
         <div class="flex items-center justify-between p-5 border-b border-[#3D1A5F]">
             <h2 class="text-lg font-black text-[#FF007F] uppercase tracking-widest font-orbitron text-neon">MENU</h2>
-            <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="w-8 h-8 flex items-center justify-center rounded-full cyber-glass text-zinc-400 hover:text-white hover:border-[#FF007F]">
+            <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="w-8 h-8 flex items-center justify-center rounded-full cyber-glass text-zinc-300 hover:text-white hover:border-[#FF007F]">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -685,8 +693,9 @@ const schemaData = {
 
     <header class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
         <div class="absolute inset-0 bg-[#0A0014] overflow-hidden pointer-events-none -z-10">
-            <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full"></div>
-            <div class="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-[#FF007F]/10 blur-[100px] rounded-full"></div>
+            <!-- เพิ่ม contain: strict; และ transform: translateZ(0); ป้องกัน CLS (Layout Shift) -->
+            <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+            <div class="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
         </div>
 
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
@@ -734,7 +743,7 @@ const schemaData = {
 
         <div class="max-w-6xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
             <div class="text-center mb-5">
-                <span class="text-[10px] md:text-xs text-zinc-400 font-bold uppercase tracking-[0.2em] cyber-glass px-4 py-1.5 rounded-full font-orbitron shadow-[0_0_10px_rgba(112,0,255,0.2)]">
+                <span class="text-[10px] md:text-xs text-zinc-300 font-bold uppercase tracking-[0.2em] cyber-glass px-4 py-1.5 rounded-full font-orbitron shadow-[0_0_10px_rgba(112,0,255,0.2)]">
                     Connect With Our Official Channels
                 </span>
             </div>
@@ -843,14 +852,14 @@ const schemaData = {
             </div>
 
             <div class="border-t border-[#3D1A5F] pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-                <p class="text-[10px] md:text-xs text-zinc-400 uppercase tracking-widest font-medium font-orbitron">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. All rights reserved.</p>
-                <div class="flex gap-6 text-[10px] md:text-xs text-zinc-400 font-medium uppercase tracking-widest justify-center font-orbitron">
+                <p class="text-[10px] md:text-xs text-zinc-300 uppercase tracking-widest font-medium font-orbitron">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. All rights reserved.</p>
+                <div class="flex gap-6 text-[10px] md:text-xs text-zinc-300 font-medium uppercase tracking-widest justify-center font-orbitron">
                     <a href="/privacy-policy.html" class="hover:text-[#00F3FF] transition-colors">Privacy</a>
                     <a href="/terms.html" class="hover:text-[#00F3FF] transition-colors">Terms</a>
                 </div>
             </div>
             
-            <p class="mt-6 text-[10px] text-zinc-500 leading-relaxed font-light text-center">
+            <p class="mt-6 text-[10px] text-zinc-400 leading-relaxed font-light text-center">
                 แพลตฟอร์มนี้เป็นเพียงสื่อกลางข้อมูล การติดต่อและชำระเงินเกิดขึ้นระหว่างลูกค้าและผู้ให้บริการโดยตรง จัดทำขึ้นสำหรับผู้มีอายุ 20 ปีขึ้นไปเท่านั้น
             </p>
         </div>
@@ -858,7 +867,7 @@ const schemaData = {
 
     <div class="fixed bottom-0 left-0 w-full md:hidden z-50 pb-[env(safe-area-inset-bottom)]" style="background: rgba(10, 0, 20, 0.9); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid #3D1A5F; box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);">
         <div class="flex items-center justify-around h-[60px] px-2">
-            <a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#00F3FF] hover:drop-shadow-[0_0_8px_rgba(0,243,255,0.8)] transition-all">
+            <a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-300 hover:text-[#00F3FF] hover:drop-shadow-[0_0_8px_rgba(0,243,255,0.8)] transition-all">
                 <i class="fas fa-home text-[18px] mb-1"></i>
                 <span class="text-[9px] font-medium tracking-wide">หน้าแรก</span>
             </a>
@@ -874,11 +883,11 @@ const schemaData = {
                 <span class="text-[10px] font-bold text-white mt-1 uppercase tracking-wider font-orbitron" style="text-shadow: 0 0 5px #FF007F;">จองคิว</span>
             </a>
 
-            <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#7000FF] hover:drop-shadow-[0_0_8px_rgba(112,0,255,0.8)] transition-all">
+            <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-300 hover:text-[#7000FF] hover:drop-shadow-[0_0_8px_rgba(112,0,255,0.8)] transition-all">
                 <i class="fas fa-map-marker-alt text-[18px] mb-1"></i>
                 <span class="text-[9px] font-medium tracking-wide">พื้นที่</span>
             </a>
-            <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-white transition-all">
+            <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-zinc-300 hover:text-white transition-all">
                 <i class="fas fa-search text-[18px] mb-1"></i>
                 <span class="text-[9px] font-medium tracking-wide">ค้นหา</span>
             </a>
@@ -965,7 +974,7 @@ const schemaData = {
             });
         }
 
-        // 4. INTERSECTION OBSERVER API (Fixed Selector SyntaxError)
+        // 4. INTERSECTION OBSERVER API
         const observerOptions = {
             root: null,
             rootMargin: '0px 0px -50px 0px', 
