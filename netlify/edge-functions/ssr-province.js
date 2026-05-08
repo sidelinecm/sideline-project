@@ -314,15 +314,20 @@ export default async (request, context) => {
         const endPrice = priceParts[1] ? priceParts[1].trim() : "5,000";
         const validUntil = new Date(now.setFullYear(now.getFullYear() + 1)).toISOString().split('T')[0];
 
-        const schemaData = {
+const schemaData = {
             "@context": "https://schema.org",
-            "@graph":[
+            "@graph": [
                 {
                     "@type": "WebSite",
                     "@id": `${CONFIG.DOMAIN}/#website`,
                     "url": CONFIG.DOMAIN,
                     "name": CONFIG.BRAND_NAME,
-                    "potentialAction": { "@type": "SearchAction", "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
+                    "publisher": { "@id": `${CONFIG.DOMAIN}/#business` },
+                    "potentialAction": {
+                        "@type": "SearchAction",
+                        "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`,
+                        "query-input": "required name=search_term_string"
+                    }
                 },
                 {
                     "@type": "CollectionPage",
@@ -331,27 +336,44 @@ export default async (request, context) => {
                     "name": title,
                     "description": description,
                     "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
-                    "breadcrumb": { "@id": `${provinceUrl}/#breadcrumb` }
+                    "breadcrumb": { "@id": `${provinceUrl}/#breadcrumb` },
+                    "about": { "@id": `${provinceUrl}/#business` }
                 },
                 {
                     "@type": "BreadcrumbList",
                     "@id": `${provinceUrl}/#breadcrumb`,
-                    "itemListElement":[
+                    "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
                         { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${CONFIG.DOMAIN}/profiles.html` },
                         { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                     ]
                 },
                 {
-                    "@type":["LocalBusiness", "ModelingAgency"],
+                    "@type": ["LocalBusiness", "ModelingAgency"],
                     "@id": `${provinceUrl}/#business`,
                     "name": `ไซด์ไลน์${provinceName} VIP - ${CONFIG.BRAND_NAME}`,
                     "image": firstImage,
                     "description": description,
                     "priceRange": `฿${startPrice} - ฿${endPrice}`,
-                    "address": { "@type": "PostalAddress", "addressRegion": provinceName, "addressCountry": "TH" },
-                    "geo": { "@type": "GeoCoordinates", "latitude": seoData.geo.lat, "longitude": seoData.geo.lng },
-                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": String(safeProfiles.length * 12 + 85), "bestRating": "5", "worstRating": "1" },
+                    "url": provinceUrl,
+                    "telephone": "", 
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressRegion": provinceName,
+                        "addressCountry": "TH"
+                    },
+                    "geo": {
+                        "@type": "GeoCoordinates",
+                        "latitude": seoData.geo.lat,
+                        "longitude": seoData.geo.lng
+                    },
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": "4.9",
+                        "reviewCount": String(safeProfiles.length * 12 + 85),
+                        "bestRating": "5",
+                        "worstRating": "1"
+                    },
                     "offers": safeProfiles.length > 0 ? {
                         "@type": "AggregateOffer",
                         "offerCount": String(safeProfiles.length),
@@ -361,6 +383,36 @@ export default async (request, context) => {
                         "availability": "https://schema.org/InStock",
                         "priceValidUntil": validUntil
                     } : undefined
+                },
+                {
+                    "@type": "FAQPage",
+                    "@id": `${provinceUrl}/#faq`,
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": `หาไซด์ไลน์${provinceName} งานตรงปกได้ที่ไหน?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": `คุณสามารถเลือกดูโปรไฟล์น้องๆ ไซด์ไลน์${provinceName} ที่คัดสรรมาอย่างดีได้ที่ ${CONFIG.BRAND_NAME} เราเน้นงานตรงปก อัปเดตใหม่ล่าสุด และไม่มีการเก็บมัดจำล่วงหน้า`
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `เรทราคาไซด์ไลน์ใน${provinceName} อยู่ที่ประมาณเท่าไหร่?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": `น้องๆ ไซด์ไลน์ในพื้นที่${provinceName} มีเรทราคาเริ่มต้นที่ประมาณ ${startPrice} ถึง ${endPrice} บาท ซึ่งเป็นราคารวมค่าห้องหรือตามตกลงกับน้องโดยตรงครับ`
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "ขั้นตอนการจองงานต้องโอนมัดจำก่อนไหม?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "เพื่อความปลอดภัยของผู้ใช้บริการ เว็บไซต์เราไม่มีนโยบายให้โอนมัดจำก่อนทุกกรณี ท่านสามารถนัดเจอน้อง ตรวจสอบความถูกต้อง แล้วค่อยชำระเงินหน้างานได้เลยครับ"
+                            }
+                        }
+                    ]
                 }
             ]
         };
