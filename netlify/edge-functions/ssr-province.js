@@ -183,82 +183,92 @@ const PROVINCE_SEO_DATA = {
 
 const optimizeImg = (path, width = 320, height = 400) => { 
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    
     if (path.includes('res.cloudinary.com')) {
-        if (path.includes('/upload/')) return path.replace('/upload/', `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
+        if (path.includes('/upload/')) {
+
+            return path.replace('/upload/', `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
+        }
         return path;
     }
+    
     if (path.startsWith('http')) return path;
+    
+
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
 const escapeHTML = (str) => {
     if (!str) return '';
     return String(str).replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
     }[tag] || tag));
 };
 
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
     return `
-    <section aria-labelledby="seo-section-title" class="mt-16 md:mt-24 mb-10 px-4">
-        <div class="luxury-glass rounded-[2rem] p-8 md:p-14 relative overflow-hidden shadow-[0_15px_50px_rgba(15,5,5,0.8)] border border-luxury-deepwine/60">
-            <!-- Ambient Glow -->
-            <div class="absolute -top-32 -right-32 w-[400px] h-[400px] bg-luxury-burgundy/10 blur-[120px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
-            <div class="absolute -bottom-32 -left-32 w-[300px] h-[300px] bg-luxury-gold/5 blur-[100px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+    <section aria-labelledby="seo-section-title" class="mt-12 md:mt-20 mb-10 px-4">
+        <div class="cyber-glass rounded-[2.5rem] p-6 md:p-12 relative overflow-hidden shadow-[0_0_30px_rgba(112,0,255,0.15)]">
+            <div class="absolute -top-32 -right-32 w-[300px] h-[300px] bg-[#FF007F]/20 blur-[80px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+            <div class="absolute -bottom-32 -left-32 w-[300px] h-[300px] bg-[#7000FF]/20 blur-[80px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
             
-            <div class="relative z-10 text-center max-w-4xl mx-auto mb-12">
-                <span class="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-luxury-gold/20 bg-luxury-deepwine/20 text-[10px] md:text-xs font-light text-luxury-gold uppercase tracking-[0.25em] mb-6">
-                    <span class="w-1.5 h-1.5 rounded-full bg-luxury-rosegold" aria-hidden="true"></span> The VIP Standard
+            <div class="relative z-10 text-center max-w-4xl mx-auto mb-10">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full cyber-glass text-xs font-semibold text-[#FF007F] uppercase tracking-widest mb-4 font-orbitron shadow-[0_0_10px_rgba(255,0,127,0.2)]">
+                    <i class="fas fa-crown" aria-hidden="true"></i> Exclusive Guide
                 </span>
-                <h2 id="seo-section-title" class="text-3xl md:text-5xl font-serif text-luxury-cream mb-6 tracking-wide leading-[1.2]">
-                    สิทธิพิเศษแห่งค่ำคืน <br class="md:hidden"/><span class="text-luxury-rosegold italic font-serif">ไซด์ไลน์${escapeHTML(provinceName)}</span>
+                <h2 id="seo-section-title" class="text-3xl md:text-4xl font-black text-white mb-6 tracking-tight leading-tight text-neon">
+                    ทำไมต้องเลือก <br class="md:hidden"/><span class="text-[#FF007F]" style="text-shadow: 0 0 15px rgba(255,0,127,0.5);">ไซด์ไลน์${escapeHTML(provinceName)}</span> กับเรา?
                 </h2>
-                <p class="text-luxury-champagne/70 text-sm md:text-base leading-relaxed md:leading-loose max-w-3xl mx-auto font-light tracking-wide">
-                    ${data.uniqueIntro} คัดสรรเฉพาะนางแบบระดับพรีเมียมกว่า <strong class="text-luxury-cream font-medium">${count} ท่าน</strong> เพื่อให้มั่นใจว่าคุณจะได้รับประสบการณ์ที่สมบูรณ์แบบที่สุด
+                <p class="text-zinc-300 text-sm md:text-base leading-relaxed md:leading-loose max-w-3xl mx-auto">
+                    ${data.uniqueIntro} คัดสรรน้องๆ ระดับ Top Class กว่า <strong class="text-white font-bold">${count} ท่าน</strong>
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 relative z-10">
-                <article class="p-8 rounded-2xl transition-all duration-700 hover:bg-luxury-deepwine/10 border border-luxury-deepwine/30 hover:border-luxury-gold/20 group">
-                    <div class="text-luxury-gold text-2xl mb-6 opacity-80 group-hover:opacity-100 transition-opacity">
-                        <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 relative z-10">
+                <article class="cyber-glass p-6 md:p-8 rounded-3xl transition-colors hover:shadow-[0_0_20px_rgba(112,0,255,0.3)] hover:border-[#7000FF]">
+                    <div class="w-12 h-12 bg-[#3D1A5F] rounded-2xl flex items-center justify-center text-[#7000FF] text-xl mb-5 border border-[#7000FF] shadow-[0_0_10px_rgba(112,0,255,0.5)]">
+                        <i class="fas fa-map-marked-alt text-white" aria-hidden="true"></i>
                     </div>
-                    <h3 class="text-lg md:text-xl font-serif text-luxury-cream mb-5 tracking-wide">จุดนัดพบใน${escapeHTML(provinceName)}</h3>
-                    <div class="flex flex-wrap gap-3">
-                        ${(data.zones ||['ตัวเมือง']).slice(0, 6).map(z => `<span class="px-4 py-1.5 bg-luxury-base/60 rounded-full text-[11px] md:text-xs font-light text-luxury-champagne/80 border border-luxury-deepwine/40 tracking-[0.1em]">${escapeHTML(z)}</span>`).join('')}
+                    <h3 class="text-lg md:text-xl font-bold text-white mb-4 text-neon-purple">ครอบคลุมทุกโซนใน${escapeHTML(provinceName)}</h3>
+                    <div class="flex flex-wrap gap-2.5">
+                        ${(data.zones ||['ตัวเมือง']).slice(0, 6).map(z => `<span class="px-3.5 py-1.5 bg-[#0A0014]/80 rounded-lg text-xs md:text-sm font-medium text-zinc-300 border border-[#3D1A5F]">${escapeHTML(z)}</span>`).join('')}
                     </div>
                 </article>
 
-                <article class="p-8 rounded-2xl transition-all duration-700 hover:bg-luxury-deepwine/10 border border-luxury-deepwine/30 hover:border-luxury-gold/20 group">
-                    <div class="text-luxury-gold text-2xl mb-6 opacity-80 group-hover:opacity-100 transition-opacity">
-                        <i class="fas fa-shield-check" aria-hidden="true"></i>
+                <article class="cyber-glass p-6 md:p-8 rounded-3xl transition-colors hover:shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:border-[#00F3FF]">
+                    <div class="w-12 h-12 bg-[#3D1A5F] rounded-2xl flex items-center justify-center text-[#00F3FF] text-xl mb-5 border border-[#00F3FF] shadow-[0_0_10px_rgba(0,243,255,0.5)]">
+                        <i class="fas fa-shield-check text-white" aria-hidden="true"></i>
                     </div>
-                    <h3 class="text-lg md:text-xl font-serif text-luxury-cream mb-5 tracking-wide">เอกสิทธิ์ความปลอดภัย</h3>
+                    <h3 class="text-lg md:text-xl font-bold text-white mb-4 text-neon-cyan">มาตรฐานความปลอดภัยสูงสุด</h3>
                     <ul class="space-y-4">
-                        <li class="flex items-start gap-4 text-sm md:text-base text-luxury-champagne/70 font-light leading-relaxed"><i class="fas fa-check text-luxury-gold/70 mt-1" aria-hidden="true"></i> <span><strong class="text-luxury-cream font-normal">ชำระเงินเมื่อพบเจอ:</strong> ปราศจากการโอนล่วงหน้า</span></li>
-                        <li class="flex items-start gap-4 text-sm md:text-base text-luxury-champagne/70 font-light leading-relaxed"><i class="fas fa-check text-luxury-gold/70 mt-1" aria-hidden="true"></i> <span><strong class="text-luxury-cream font-normal">ยืนยันตัวตน:</strong> ทุกโปรไฟล์ผ่านการตรวจสอบความถูกต้อง</span></li>
-                        <li class="flex items-start gap-4 text-sm md:text-base text-luxury-champagne/70 font-light leading-relaxed"><i class="fas fa-check text-luxury-gold/70 mt-1" aria-hidden="true"></i> <span><strong class="text-luxury-cream font-normal">ความลับขั้นสูงสุด:</strong> ข้อมูลส่วนตัวถูกเก็บเป็นความลับ 100%</span></li>
+                        <li class="flex items-start gap-3 text-sm md:text-base text-zinc-300 leading-relaxed"><i class="fas fa-check-circle text-[#00F3FF] shadow-[0_0_5px_rgba(0,243,255,0.8)] rounded-full mt-1" aria-hidden="true"></i> <span><strong class="text-white">ไม่มัดจำ:</strong> เจอตัวจริงค่อยจ่ายเงิน</span></li>
+                        <li class="flex items-start gap-3 text-sm md:text-base text-zinc-300 leading-relaxed"><i class="fas fa-check-circle text-[#00F3FF] shadow-[0_0_5px_rgba(0,243,255,0.8)] rounded-full mt-1" aria-hidden="true"></i> <span><strong class="text-white">ตรงปก:</strong> ตรวจสอบโปรไฟล์ทุกเคส</span></li>
+                        <li class="flex items-start gap-3 text-sm md:text-base text-zinc-300 leading-relaxed"><i class="fas fa-check-circle text-[#00F3FF] shadow-[0_0_5px_rgba(0,243,255,0.8)] rounded-full mt-1" aria-hidden="true"></i> <span><strong class="text-white">ความลับ:</strong> ปกปิดข้อมูลลูกค้า 100%</span></li>
                     </ul>
                 </article>
             </div>
 
             ${data.faqs && data.faqs.length > 0 ? `
-            <div class="mt-16 relative z-10 pt-12 border-t border-luxury-deepwine/30">
-                <h3 class="text-2xl md:text-3xl font-serif text-luxury-cream mb-10 text-center tracking-wide">Concierge & FAQ</h3>
+            <div class="mt-12 relative z-10 border-t border-[#3D1A5F] pt-10">
+                <h3 class="text-xl md:text-2xl font-bold text-white mb-8 text-center text-neon">คำถามที่พบบ่อย (FAQ)</h3>
                 <div class="space-y-4 max-w-4xl mx-auto" id="faq-accordion">
                     ${data.faqs.map((faq, index) => `
-                        <div class="faq-item bg-luxury-base/40 rounded-xl overflow-hidden hover:border-luxury-gold/20 transition-all duration-700 border border-luxury-deepwine/20">
-                            <button class="faq-question w-full text-left p-6 flex justify-between items-center gap-4 group" aria-expanded="false" aria-controls="faq-answer-${index}">
-                                <h4 class="font-normal text-luxury-cream text-sm md:text-base flex gap-4 items-start leading-relaxed tracking-wide">
-                                    <span class="text-luxury-gold font-serif italic" aria-hidden="true">Q.</span> ${escapeHTML(faq.q)}
+                        <div class="faq-item cyber-glass rounded-2xl overflow-hidden hover:border-[#7000FF] transition-colors">
+                            <button class="faq-question w-full text-left p-5 md:p-6 flex justify-between items-center gap-4 group" aria-expanded="false" aria-controls="faq-answer-${index}">
+                                <h4 class="font-bold text-white text-sm md:text-base flex gap-2 items-start leading-snug">
+                                    <span class="text-[#FF007F]" style="text-shadow: 0 0 8px rgba(255,0,127,0.8);" aria-hidden="true">Q:</span> ${escapeHTML(faq.q)}
                                 </h4>
-                                <i class="fas fa-chevron-down text-luxury-champagne/40 group-hover:text-luxury-gold/80 transition-colors duration-500 shrink-0 text-sm" aria-hidden="true"></i>
+                                <i class="fas fa-chevron-down text-[#7000FF] group-hover:text-[#FF007F] transition-colors duration-300 shrink-0" aria-hidden="true"></i>
                             </button>
-                            <div id="faq-answer-${index}" class="faq-answer max-h-0 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" role="region" aria-labelledby="faq-question-${index}">
-                                <div class="px-6 pb-6 pt-2">
-                                    <p class="text-luxury-champagne/70 font-light text-sm md:text-base leading-relaxed flex gap-4 items-start">
-                                        <span class="text-luxury-rosegold font-serif italic" aria-hidden="true">A.</span> ${escapeHTML(faq.a)}
+                            <div id="faq-answer-${index}" class="faq-answer max-h-0 overflow-hidden transition-all duration-500 ease-in-out bg-[#0A0014]/50" role="region" aria-labelledby="faq-question-${index}">
+                                <div class="px-5 md:px-6 pb-5 md:pb-6">
+                                    <p class="text-zinc-300 text-sm md:text-base leading-relaxed flex gap-2 items-start border-t border-[#3D1A5F] pt-4">
+                                        <span class="text-[#00F3FF]" style="text-shadow: 0 0 8px rgba(0,243,255,0.8);" aria-hidden="true">A:</span> ${escapeHTML(faq.a)}
                                     </p>
                                 </div>
                             </div>
@@ -312,7 +322,7 @@ export default async (request, context) => {
         
         const firstImage = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/seo-default.webp`;
 
-        const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟน เด็กเอ็น | VIP Club อัปเดต ${CURRENT_MONTH}`;
+        const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟน เด็กเอ็น | ไม่มีมัดจำ อัปเดต ${CURRENT_MONTH}`;
         const description = `รวมน้องๆ รับงาน${provinceName} ไซด์ไลน์${provinceName} เด็กเอ็น เกรด VIP ${safeProfiles.length} คน โซน ${(seoData.zones||['ตัวเมือง']).slice(0,3).join(', ')} ✓ตรงปก 100% ✓ไม่โอนมัดจำ ✓จ่ายเงินหน้างานเท่านั้น`;
 
         const priceParts = (seoData.avgPrice || "1,500 - 3,500").split('-');
@@ -350,7 +360,7 @@ export default async (request, context) => {
                     "@id": `${provinceUrl}/#breadcrumb`,
                     "itemListElement":[
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": "Exclusive Escorts", "item": `${CONFIG.DOMAIN}/profiles.html` },
+                        { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${CONFIG.DOMAIN}/profiles.html` },
                         { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                     ]
                 },
@@ -375,8 +385,8 @@ export default async (request, context) => {
                     },
                     "aggregateRating": safeProfiles.length > 0 ? {
                         "@type": "AggregateRating",
-                        "ratingValue": "4.9",
-                        "reviewCount": String(safeProfiles.length * 5 + 24),
+                        "ratingValue": "4.8",
+                        "reviewCount": String(safeProfiles.length * 3 + 12),
                         "bestRating": "5",
                         "worstRating": "1"
                     } : undefined,
@@ -393,57 +403,52 @@ export default async (request, context) => {
                 {
                     "@type": "FAQPage",
                     "@id": `${provinceUrl}/#faq`,
-                    "mainEntity": [
+                    "mainEntity":[
                         {
                             "@type": "Question",
-                            "name": `หาไซด์ไลน์${provinceName} ที่ตรงปกและปลอดภัยได้ที่ไหน?`,
+                            "name": `หาไซด์ไลน์${provinceName} งานตรงปกได้ที่ไหน?`,
                             "acceptedAnswer": {
                                 "@type": "Answer",
-                                "text": `คุณสามารถค้นหาน้องๆ รับงานใน${provinceName} เกรดพรีเมียมที่ผ่านการคัดกรองตัวตนแล้วได้ที่ ${CONFIG.BRAND_NAME} เราเน้นงานคุณภาพระดับ VIP และการันตีความปลอดภัยสูงสุดให้กับลูกค้า`
+                                "text": `คุณสามารถเลือกดูโปรไฟล์น้องๆ ไซด์ไลน์${provinceName} ที่คัดสรรมาอย่างดีได้ที่ ${CONFIG.BRAND_NAME} เราเน้นงานตรงปก อัปเดตใหม่ล่าสุด และไม่มีการเก็บมัดจำล่วงหน้า`
                             }
                         },
                         {
                             "@type": "Question",
-                            "name": `เรทราคาสาวไซด์ไลน์ใน${provinceName} โดยเฉลี่ยอยู่ที่เท่าไหร่?`,
+                            "name": `เรทราคาไซด์ไลน์ใน${provinceName} อยู่ที่ประมาณเท่าไหร่?`,
                             "acceptedAnswer": {
                                 "@type": "Answer",
-                                "text": `เรทราคาของน้องๆ ใน${provinceName} จะเริ่มต้นที่ประมาณ ฿${startPrice} ถึง ฿${endPrice}+ ขึ้นอยู่กับโปรไฟล์และประเภทการบริการที่คุณเลือกครับ`
+                                "text": `น้องๆ ไซด์ไลน์ในพื้นที่${provinceName} มีเรทราคาเริ่มต้นที่ประมาณ ${startPrice} ถึง ${endPrice} บาท ซึ่งเป็นราคารวมค่าห้องหรือตามตกลงกับน้องโดยตรงครับ`
                             }
                         },
                         {
                             "@type": "Question",
-                            "name": `จองงานไซด์ไลน์${provinceName} ต้องโอนมัดจำก่อนไหม?`,
+                            "name": "ขั้นตอนการจองงานต้องโอนมัดจำก่อนไหม?",
                             "acceptedAnswer": {
                                 "@type": "Answer",
-                                "text": "เพื่อความสบายใจสูงสุด เว็บไซต์ของเรามีนโยบาย 'ไม่โอนมัดจำล่วงหน้าทุกกรณี' ท่านสามารถนัดเจอน้อง ตรวจสอบความถูกต้อง แล้วค่อยชำระค่าบริการหน้างานได้เลยครับ"
+                                "text": "เพื่อความปลอดภัยของผู้ใช้บริการ เว็บไซต์เราไม่มีนโยบายให้โอนมัดจำก่อนทุกกรณี ท่านสามารถนัดเจอน้อง ตรวจสอบความถูกต้อง แล้วค่อยชำระเงินหน้างานได้เลยครับ"
                             }
-                        },
-                        ...(seoData.faqs || []).map(faq => ({
-                            "@type": "Question",
-                            "name": faq.q,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": faq.a
-                            }
-                        }))
+                        }
                     ]
                 }
             ]
         };
 
-        let cardsHTML = '';
+let cardsHTML = '';
         if (safeProfiles && safeProfiles.length > 0) {
             
-            const intents = seoData.intents ||["หาเพื่อนเที่ยว", "น้องเอนเตอร์เทน", "รับงานนอกสถานที่", "ฟีลแฟน", "เพื่อนเที่ยวกลางคืน", "เด็กเอ็น VIP"];
-            const traits = seoData.traits ||["ผิวขาวออร่า", "หุ่นนางแบบ", "ตรงปก 100%", "บริการเป็นกันเอง", "คุยสนุกเอาใจเก่ง", "สเปกพรีเมียม"];
+
+            const intents = seoData.intents || ["หาเพื่อนเที่ยว", "น้องเอนเตอร์เทน", "รับงานนอกสถานที่", "ฟีลแฟน", "เพื่อนเที่ยวกลางคืน", "เด็กเอ็น VIP"];
+            const traits = seoData.traits || ["ผิวขาวออร่า", "หุ่นนางแบบ", "ตรงปก 100%", "บริการเป็นกันเอง", "คุยสนุกเอาใจเก่ง", "สเปกพรีเมียม"];
 
             cardsHTML = safeProfiles.map((p, i) => {
+
 
                 const rawName = (p.name || 'ไม่ระบุชื่อ').replace(/^(น้อง\s?)/, '');
                 const cleanName = escapeHTML(rawName);
                 const profileLocation = escapeHTML(p.location || provinceName || 'ไม่ระบุโซน');
                 const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
                 
+
                 const isAvailable = !['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'].some(kw => 
                     (p.availability || '').toLowerCase().includes(kw)
                 );
@@ -451,115 +456,132 @@ export default async (request, context) => {
 
                 let displayRate = 'สอบถาม';
                 if (p.rate) {
+
                     const cleanRateValue = String(p.rate).replace(/,/g, '').trim();
                     const numRate = Number(cleanRateValue);
+                    
                     if (!isNaN(numRate) && cleanRateValue !== '') {
+
                         displayRate = numRate.toLocaleString();
                     } else {
+                      
                         displayRate = escapeHTML(p.rate);
                     }
                 }
 
-                const animDelay = (i % 10) * 50; 
+
+                const mockRating = (4.8 + Math.random() * 0.2).toFixed(1); 
+                const animDelay = (i % 10) * 50; // Staggered Animation
                 const lsiKeyword = seoData.lsi && seoData.lsi.length > 0 ? seoData.lsi[i % seoData.lsi.length] : `รับงาน${provinceName}`;
                 const myIntent = intents[i % intents.length];
                 const myTrait = traits[i % traits.length];
                 
+
                 const smartAlt = `${myIntent} น้อง${cleanName} ${profileLocation} ${myTrait} ${lsiKeyword}`;
+
 
                 const imageAttributes = i < 4 
                     ? 'fetchpriority="high" decoding="sync"' 
                     : 'loading="lazy" decoding="async"';
 
-                // Subtle Status Indicator
-                const statusDot = isAvailable ? 'bg-[#4ADE80] shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-[#F87171] shadow-[0_0_8px_rgba(248,113,113,0.5)]';
-                const statusText = isAvailable ? 'Available' : 'Reserved';
 
-return `
-<article class="block group relative rounded-2xl overflow-hidden transform transition-all duration-[1000ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.02] hover:shadow-[0_25px_60px_rgba(0,0,0,0.9)] bg-luxury-base border border-luxury-deepwine/40 hover:border-luxury-gold/30 animate-fade-in-up active:scale-[0.98]" style="animation-delay: ${animDelay}ms; animation-fill-mode: both;">
-    
-    <a href="${profileLink}" aria-label="ดูโปรไฟล์ ${smartAlt}" class="block absolute inset-0 z-30"></a>
-    
-    <div class="relative aspect-[4/5] w-full overflow-hidden bg-luxury-base">
-        
-        <img src="${optimizeImg(p.imagePath, 320, 400)}" 
-             width="320" height="400"
-             onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
-             alt="${smartAlt}"
-             class="absolute inset-0 w-full h-full object-cover transform scale-[1.05] group-hover:scale-[1.12] transition-transform duration-[2s] ease-[cubic-bezier(0.22,1,0.36,1)]"
-             style="filter: contrast(1.05) brightness(0.85) saturate(1.1); group-hover:filter: brightness(1);" 
-             ${imageAttributes}>
-             
-        <!-- 🔥 The Critical Fix: Inner Glow Layer (ปรากฏเมื่อ Hover เท่านั้น) -->
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none z-10 shadow-[inset_0_0_50px_rgba(128,0,32,0.6)]" aria-hidden="true"></div>
-        
-        <!-- Deep Burgundy Gradient Overlay (Always there) -->
-        <div class="absolute inset-x-0 bottom-0 h-[75%] bg-gradient-to-t from-luxury-base via-luxury-base/80 to-transparent z-10 pointer-events-none opacity-95"></div>
-        
-        <!-- Status Indicator -->
-        <div class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-luxury-base/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-luxury-deepwine/50">
-            <span class="w-1.5 h-1.5 rounded-full ${statusDot}" aria-hidden="true"></span>
-            <span class="text-[8px] text-luxury-cream font-light uppercase tracking-widest">${statusText}</span>
-        </div>
-        
-        <!-- Info Area (Emerging from Darkness) -->
-        <div class="absolute bottom-0 inset-x-0 p-6 z-20 translate-y-2 group-hover:translate-y-0 transition-transform duration-[1000ms] ease-[cubic-bezier(0.22,1,0.36,1)]">
-            <h3 class="text-2xl md:text-4xl font-serif italic text-luxury-cream leading-tight mb-2 drop-shadow-2xl">${cleanName}</h3>
-            
-            <div class="flex items-center justify-between border-t border-luxury-gold/10 pt-4 mt-2">
-                <div class="text-left">
-                    <span class="block text-[8px] text-luxury-champagne/40 uppercase tracking-[0.3em] mb-1">Session Rate</span>
-                    <span class="font-serif text-xl text-luxury-gold tracking-widest">฿${displayRate}</span>
-                </div>
-                <div class="h-8 w-8 rounded-full border border-luxury-gold/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-1000 transform group-hover:rotate-45">
-                    <i class="fas fa-arrow-up-right text-luxury-gold text-[10px]"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</article>`;
+                const statusBgClass = isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]';
+                const statusTextClass = isAvailable ? 'text-[#00F3FF]' : 'text-[#FF007F]';
+                const statusBorderClass = isAvailable ? 'border-[#00F3FF]/30' : 'border-[#FF007F]/30';
+                const statusShadowClass = isAvailable ? 'shadow-[0_0_10px_rgba(0,243,255,0.2)]' : 'shadow-[0_0_10px_rgba(255,0,127,0.2)]';
+
+                return `
+                <article class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both;">
+                    
+                    <!-- ลิงก์ครอบคลุมทั้งการ์ดเพื่อ SEO และ UX -->
+                    <a href="${profileLink}" aria-label="ดูโปรไฟล์ ${smartAlt}" class="block absolute inset-0 z-30"></a>
+                    
+                    <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
+                        
+                        <!-- รูปภาพโปรไฟล์ -->
+                        <img src="${optimizeImg(p.imagePath, 320, 400)}" 
+                             width="320" height="400"
+                             onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
+                             alt="${smartAlt}"
+                             class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
+                             style="filter: contrast(1.02) saturate(1.05);" 
+                             ${imageAttributes}>
+                             
+                        <!-- เลเยอร์ตกแต่ง (Overlay) -->
+                        <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/30 to-[#FF007F]/20 mix-blend-soft-light z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700" style="transform: translateZ(0);"></div>
+                        <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.9),inset_0_0_20px_rgba(10,0,20,0.6)] z-10 pointer-events-none" style="transform: translateZ(0);"></div>
+                        <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/70 to-transparent z-10 pointer-events-none"></div>
+                        
+                        <!-- แถบสถานะ (Online / Busy) -->
+                        <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full ${statusShadowClass} border ${statusBorderClass}">
+                            <span class="relative flex h-2 w-2" aria-hidden="true">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${statusBgClass} opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 ${statusBgClass} shadow-[0_0_5px_currentColor]"></span>
+                            </span>
+                            <span class="text-[9px] md:text-[10px] font-bold ${statusTextClass} uppercase tracking-wider font-orbitron">
+                                ${isAvailable ? 'ONLINE' : 'BUSY'}
+                            </span>
+                        </div>
+                        
+                        <!-- ป้าย Hot (สำหรับคนที่เป็น Featured หรือ 3 คนแรก) -->
+                        ${(i < 3 || p.isfeatured) ? `
+                        <div class="absolute top-3 right-3 md:top-4 md:right-4 z-20 bg-[#FF007F] px-2.5 py-1 rounded-full border border-white/20 shadow-[0_0_15px_rgba(255,0,127,0.8)] flex items-center gap-1">
+                            <i class="fas fa-fire text-white text-[9px] md:text-[10px] animate-pulse" aria-hidden="true"></i>
+                            <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider font-orbitron">HOT</span>
+                        </div>` : ''}
+                        
+                        <!-- ข้อมูลน้องๆ ด้านล่าง -->
+                        <div class="absolute bottom-0 inset-x-0 p-4 md:p-5 z-20">
+                            <div class="flex items-end justify-between gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-xl md:text-3xl font-bold text-white leading-none mb-1.5 truncate drop-shadow-lg text-neon">${cleanName}</h3>
+                                    <div class="flex items-center gap-1.5 text-zinc-300 text-[10px] md:text-sm">
+                                        <i class="fas fa-map-marker-alt text-[#7000FF] drop-shadow-[0_0_5px_rgba(112,0,255,0.8)]" aria-hidden="true"></i>
+                                        <span class="truncate">${profileLocation}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="block text-[9px] md:text-[10px] text-zinc-300 font-medium uppercase tracking-wider mb-0.5 font-orbitron">RATE</span>
+                                    <span class="font-black text-lg md:text-xl text-[#FF007F] tracking-tight text-neon">฿${displayRate}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- ปุ่ม View และ Rating (แสดงผลสวยงามเมื่อ Hover บน PC) -->
+                            <div class="mt-3 md:mt-4 flex items-center justify-between md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
+                                <div class="flex items-center gap-1 text-[#00F3FF] text-[10px] md:text-xs font-bold cyber-glass px-2 py-1 rounded-lg border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.2)]">
+                                    <i class="fas fa-star" aria-hidden="true"></i> ${mockRating}
+                                </div>
+                                <div class="btn-neon text-[10px] md:text-xs font-bold px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-1.5 font-orbitron" aria-hidden="true">
+                                    VIEW <i class="fas fa-arrow-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>`;
             }).join('');
         } else {
-    cardsHTML = `
-    <div class="col-span-full relative overflow-hidden py-32 md:py-48 text-center rounded-[3rem] border border-luxury-deepwine/20 bg-luxury-base">
-        <!-- Background Artistic Elements -->
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(74,4,4,0.4),transparent_70%)]"></div>
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-luxury-gold/50 to-transparent"></div>
-        
-        <div class="relative z-10 px-6">
-            <div class="mb-10 opacity-30">
-                <i class="fas fa-key text-3xl text-luxury-gold"></i>
-            </div>
-            
-            <h3 class="text-4xl md:text-7xl font-serif italic text-luxury-cream mb-8 tracking-tighter leading-none opacity-90">
-                A Private <br class="md:hidden"/> Affair...
-            </h3>
-            
-            <p class="text-luxury-champagne/50 text-sm md:text-xl max-w-2xl mx-auto font-light leading-relaxed italic tracking-wide">
-                "เรากำลังคัดสรรนางแบบระดับพรีเมียมอย่างพิถีพิถัน <br class="hidden md:block"/> 
-                เพื่อสร้างประสบการณ์ที่ไม่มีใครเหมือนในโซนนี้เร็วๆ นี้"
-            </p>
-            
-            <div class="mt-16 flex flex-col md:flex-row items-center justify-center gap-6">
-                <a href="/" class="btn-luxury px-12 py-4 rounded-full text-[10px] tracking-[0.4em] font-bold uppercase">
-                    The Collection
+
+            cardsHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-20 md:py-32 text-center cyber-glass rounded-[2rem] border border-[#3D1A5F]/50">
+                <div class="w-20 h-20 bg-[#1A0B2E] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(112,0,255,0.2)] border border-[#7000FF]/30">
+                    <i class="fas fa-hourglass-half text-3xl text-[#00F3FF] animate-pulse" aria-hidden="true"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-3 text-neon-cyan tracking-wide">กำลังอัปเดตระบบ</h3>
+                <p class="text-zinc-400 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+                    ขณะนี้กำลังจัดเตรียมโปรไฟล์น้องๆ ระดับ VIP ในโซน <strong class="text-white">${escapeHTML(provinceName)}</strong><br/>กรุณากลับมาตรวจสอบใหม่อีกครั้งในภายหลัง
+                </p>
+                <a href="/" class="mt-8 btn-neon px-8 py-3 rounded-full text-sm font-bold font-orbitron tracking-widest uppercase">
+                    กลับหน้าหลัก
                 </a>
-                <a href="${CONFIG.SOCIAL_LINKS.line}" class="text-luxury-gold/60 hover:text-luxury-gold text-[9px] tracking-[0.2em] uppercase font-medium transition-colors">
-                    Contact Concierge
-                </a>
-            </div>
-        </div>
-        
-        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-luxury-deepwine to-transparent opacity-30"></div>
-    </div>`;
-}
+            </div>`;
+        }
 
         const html = `<!DOCTYPE html>
-<html lang="th" class="scroll-smooth bg-theme-dark">
+<html lang="th" class="scroll-smooth bg-[#0A0014]">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#111827">
+    <meta name="theme-color" content="#0A0014">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
@@ -586,197 +608,267 @@ return `
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
     
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Prompt:wght@300;400;500&display=swap" as="style">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Prompt:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap"></noscript>
     
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high">
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high">
     
+    <!-- LCP Profile Image Preload -->
     ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 400, 500)}" fetchpriority="high">` : ''}
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        window.tailwind = window.tailwind || {};
         tailwind.config = {
             theme: {
                 extend: {
                     colors: { 
-                        'theme-dark': '#111827',
-                        'theme-light': '#F9FAFB',
-                        'theme-muted': '#9CA3AF',
-                        'theme-accent': '#D1B06B',
-                        'theme-accent-hover': '#E0C48A',
-                        'theme-border': 'rgba(255, 255, 255, 0.1)',
-                        'theme-panel': '#1F2937'
+                        cyber: {
+                            bg: '#0A0014',
+                            card: '#1A0B2E',
+                            border: '#3D1A5F',
+                            pink: '#FF007F',
+                            purple: '#7000FF',
+                            cyan: '#00F3FF'
+                        },
+                        zinc: { 900: '#1A0B2E', 950: '#0A0014' }
                     },
                     fontFamily: { 
-                        sans: ['Prompt', 'Inter', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif']
+                        sans:['Prompt', 'Inter', 'sans-serif'],
+                        orbitron:['Orbitron', 'sans-serif']
                     },
                     keyframes: {
-                        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(40px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        'scale-in': { '0%': { transform: 'scale(0.9)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+                        'slide-in': { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(0)' } },
+                        'pulse-glow': { '0%, 100%': { opacity: 1, textShadow: '0 0 10px rgba(255,0,127,0.8)' }, '50%': { opacity: .7, textShadow: '0 0 20px rgba(255,0,127,1)' } }
                     },
                     animation: {
-                        'fade-in-up': 'fade-in-up 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in-up': 'fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'scale-in': 'scale-in 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'slide-in': 'slide-in 0.3s ease-out forwards',
+                        'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     }
                 }
             }
         }
     </script>
-    
+
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
+
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 
     <style>
         body { 
-            font-family: 'Prompt', sans-serif; 
-            background-color: #111827;
-            color: #F9FAFB;
-            background-image: radial-gradient(circle at 50% 0%, rgba(249, 250, 251, 0.05) 0px, transparent 60%);
-            background-attachment: fixed;
+            margin: 0; font-family: 'Prompt', sans-serif; background-color: #0A0014; color: #fff; 
+            background-image: radial-gradient(at 50% 0%, rgba(112, 0, 255, 0.15) 0px, transparent 60%);
+            -webkit-tap-highlight-color: transparent; 
         }
-        .btn-primary {
-            background-color: #D1B06B;
-            color: #111827;
-            transition: background-color 0.3s ease;
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(112, 0, 255, 0.5); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 0, 127, 0.8); }
+
+        .btn-neon {
+            background: #FF007F;
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.6), 0 0 30px rgba(255, 0, 127, 0.3);
+            transition: all 0.3s ease;
         }
-        .btn-primary:hover {
-            background-color: #E0C48A;
+        .btn-neon:hover {
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.9), 0 0 50px rgba(255, 0, 127, 0.5);
+            transform: scale(1.05);
         }
-        .pb-safe { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+        .text-neon { text-shadow: 0 0 10px rgba(255, 0, 127, 0.5); }
+        .text-neon-cyan { text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
+        .text-neon-purple { text-shadow: 0 0 10px rgba(112, 0, 255, 0.5); }
+        .cyber-glass {
+            background: rgba(26, 11, 46, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #3D1A5F;
+        }
+        .cyber-card-glow:hover { box-shadow: 0 0 25px rgba(112, 0, 255, 0.3); border-color: #7000FF; }
+        
+        .pb-safe { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
+        .faq-answer { grid-template-rows: 0fr; }
+        .faq-item[aria-expanded="true"] .faq-answer { grid-template-rows: 1fr; }
+        .faq-item[aria-expanded="true"] .faq-question i { transform: rotate(180deg); }
     </style>
 </head>
 
 <body class="antialiased flex flex-col min-h-screen pb-safe md:pb-0">
 
-    <nav aria-label="เมนูหลัก" id="navbar" class="fixed top-0 w-full z-50 pt-safe bg-theme-dark/80 backdrop-blur-lg border-b border-theme-border transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
+    <nav aria-label="เมนูหลัก" class="fixed top-0 w-full z-50 pt-safe transition-transform duration-300" id="navbar" style="background: rgba(10, 0, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid #3D1A5F; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-20 flex items-center justify-between">
             <a href="/" class="flex items-center" aria-label="หน้าหลัก ${CONFIG.BRAND_NAME}">
-                <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ ${CONFIG.BRAND_NAME}" width="168" height="28" class="h-[20px] md:h-[26px] w-auto">
+                <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ ${CONFIG.BRAND_NAME}" width="168" height="28" class="h-[24px] md:h-[30px] w-auto brightness-200" style="filter: drop-shadow(0 0 8px rgba(255,0,127,0.5));">
             </a>
             
-            <div class="hidden md:flex items-center gap-10 text-[11px] font-light text-theme-muted tracking-[0.15em] uppercase">
-                <a href="/" class="hover:text-theme-light transition-colors">หน้าแรก</a>
-                <a href="/profiles.html" class="text-theme-accent relative after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-theme-accent" aria-current="page">รวมโปรไฟล์</a>
-                <a href="/locations.html" class="hover:text-theme-light transition-colors">พื้นที่ให้บริการ</a>
-                <a href="/about.html" class="hover:text-theme-light transition-colors">เกี่ยวกับเรา</a>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
+                <a href="/" class="hover:text-white hover:text-neon transition-all">หน้าแรก</a>
+                <a href="/profiles.html" class="text-white font-bold relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-[2px] after:bg-[#FF007F] after:shadow-[0_0_10px_#FF007F]" aria-current="page">น้องๆ VIP</a>
+                <a href="/locations.html" class="hover:text-white hover:text-neon transition-all">พิกัดบริการ</a>
+                <a href="/about.html" class="hover:text-white hover:text-neon transition-all">เกี่ยวกับเรา</a>
+                <a href="/blog.html" class="hover:text-white hover:text-neon transition-all">บทความ</a>
             </div>
             
-            <div class="flex items-center gap-4">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อจองคิวผ่าน LINE" class="hidden md:flex items-center gap-2 btn-primary px-6 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase">
-                    ติดต่อจองคิว
+            <div class="flex items-center gap-3">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินผ่าน LINE" class="hidden md:flex items-center gap-2 btn-neon px-5 py-2.5 rounded-full text-sm font-bold">
+                    <i class="fab fa-line text-lg" aria-hidden="true"></i> แอดไลน์จอง
                 </a>
                 
-                <button id="menu-btn" aria-label="เปิดเมนูนำทางบนมือถือ" aria-expanded="false" aria-controls="sidebar-menu" class="md:hidden w-10 h-10 flex items-center justify-center text-theme-light/80 hover:text-theme-light border border-theme-border rounded-full transition-colors">
+                <button id="menu-btn" aria-label="เปิดเมนูนำทางบนมือถือ" aria-expanded="false" aria-controls="sidebar-menu" class="md:hidden w-10 h-10 flex items-center justify-center text-[#FF007F] cyber-glass rounded-full hover:shadow-[0_0_15px_rgba(255,0,127,0.5)]">
                     <i class="fas fa-bars" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
     </nav>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-theme-dark/95 backdrop-blur-xl z-[60] hidden opacity-0 transition-opacity duration-700" aria-hidden="true"></div>
-    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-[280px] bg-theme-dark border-l border-theme-border shadow-[-20px_0_50px_rgba(0,0,0,0.5)] z-[70] transform translate-x-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col pt-safe">
-        <div class="flex items-center justify-between p-6 border-b border-theme-border">
-            <span class="text-xs font-serif italic text-theme-accent tracking-widest">เมนู</span>
-            <button id="close-menu-btn" aria-label="ปิดเมนูนำทางบนมือถือ" class="w-8 h-8 flex items-center justify-center rounded-full text-theme-muted hover:text-theme-light transition-colors">
-                <i class="fas fa-times font-light text-lg" aria-hidden="true"></i>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-[#0A0014]/80 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
+    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-72 bg-[#0A0014] border-l border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.2)] z-[70] transform translate-x-full transition-transform duration-300 flex flex-col pt-safe">
+        <div class="flex items-center justify-between p-5 border-b border-[#3D1A5F]">
+            <span class="text-lg font-black text-[#FF007F] uppercase tracking-widest font-orbitron text-neon">MENU</span>
+            <button id="close-menu-btn" aria-label="ปิดเมนูนำทางบนมือถือ" class="w-8 h-8 flex items-center justify-center rounded-full cyber-glass text-zinc-300 hover:text-white hover:border-[#FF007F]">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>
-        <div class="flex-1 overflow-y-auto p-6 space-y-4 mt-2">
-            <a href="/" class="block text-sm font-light text-theme-muted hover:text-theme-accent transition-colors tracking-wide">หน้าแรก</a>
-            <a href="/profiles.html" class="block text-sm font-serif italic text-theme-accent tracking-wide">รวมโปรไฟล์</a>
-            <a href="/locations.html" class="block text-sm font-light text-theme-muted hover:text-theme-accent transition-colors tracking-wide">พื้นที่ให้บริการ</a>
-            <a href="/about.html" class="block text-sm font-light text-theme-muted hover:text-theme-accent transition-colors tracking-wide">เกี่ยวกับเรา</a>
-            <a href="/faq.html" class="block text-sm font-light text-theme-muted hover:text-theme-accent transition-colors tracking-wide">คำถามที่พบบ่อย</a>
+        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+            <a href="/" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-home w-6 text-center text-[#FF007F]" aria-hidden="true"></i> หน้าแรก</a>
+            <a href="/profiles.html" class="flex items-center gap-4 p-3 rounded-xl cyber-glass text-white font-bold border-[#FF007F] shadow-[0_0_15px_rgba(255,0,127,0.2)]"><i class="fas fa-gem w-6 text-center text-[#FF007F] animate-pulse" aria-hidden="true"></i> น้องๆ VIP</a>
+            <a href="/locations.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-map-marker-alt w-6 text-center text-[#FF007F]" aria-hidden="true"></i> พิกัดบริการ</a>
+            <a href="/about.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-info-circle w-6 text-center text-[#FF007F]" aria-hidden="true"></i> เกี่ยวกับเรา</a>
+            <a href="/faq.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-question-circle w-6 text-center text-[#FF007F]" aria-hidden="true"></i> คำถามพบบ่อย</a>
+            <a href="/blog.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-newspaper w-6 text-center text-[#FF007F]" aria-hidden="true"></i> บทความ</a>
         </div>
-        <div class="p-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-full btn-primary py-4 rounded-sm text-[10px] font-bold tracking-[0.2em] uppercase">
-                ติดต่อจองคิว
+        <div class="p-5 border-t border-[#3D1A5F] pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินผ่าน LINE" class="flex items-center justify-center gap-2 w-full btn-neon text-white py-3.5 rounded-xl font-bold uppercase tracking-wider font-orbitron">
+                <i class="fab fa-line text-xl" aria-hidden="true"></i> ติดต่อแอดมิน
             </a>
         </div>
     </nav>
 
-    <header class="pt-28 pb-10 md:pt-40 md:pb-16 px-4 relative">
-        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20 relative z-10">
-            <div class="flex-1 text-center lg:text-left z-10 animate-fade-in-up" style="opacity: 0;">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-theme-accent/30 bg-theme-panel text-[10px] font-light text-theme-accent uppercase tracking-[0.25em] mb-6">
-                    บริการระดับ VIP
+    <header class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
+        <div class="absolute inset-0 bg-[#0A0014] overflow-hidden pointer-events-none -z-10" aria-hidden="true">
+            <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+            <div class="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
+            <div class="flex-1 text-center lg:text-left z-10 animate-fade-in-up">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full cyber-glass text-[10px] md:text-xs font-semibold text-white uppercase tracking-widest mb-4 md:mb-6 font-orbitron shadow-[0_0_10px_rgba(255,0,127,0.2)]">
+                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#FF007F] animate-pulse shadow-[0_0_8px_#FF007F]" aria-hidden="true"></span> Exclusive Escort
                 </div>
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif text-theme-light leading-[1.1] mb-6 tracking-wide drop-shadow-md">
-                    ไซด์ไลน์<span class="text-theme-accent italic font-serif">${escapeHTML(provinceName)}</span><br/>
-                    <span class="text-2xl md:text-4xl text-theme-muted font-light italic mt-3 block">ส่วนตัวและเอ็กซ์คลูซีฟ</span>
+                <h1 class="text-3xl md:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-4 md:mb-6 tracking-tight">
+                    <span class="text-[#FF007F] text-neon" style="text-shadow: 0 0 20px rgba(255,0,127,0.8);">รับงานไซด์ไลน์${escapeHTML(provinceName)}</span><br/>
+                    <span class="text-white text-neon">Premium Service</span>
                 </h1>
-                <p class="text-theme-muted text-sm md:text-base mb-10 max-w-lg mx-auto lg:mx-0 font-light leading-relaxed tracking-wide">
-                    ยกระดับการพักผ่อนด้วยบริการเพื่อนเที่ยวระดับพรีเมียม ปลอดภัย เป็นส่วนตัว และชำระเงินเมื่อพบเจอเท่านั้น สัมผัสความเหนือระดับได้ที่นี่
+                <p class="text-zinc-300 text-sm md:text-lg mb-6 md:mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
+                    ยกระดับการพักผ่อนหาเพื่อน กิน เที่ยว ดูหนัง ฟังเพลง แบบฟิวแฟนด้วยบริการระดับ VIP ตรงปก ปลอดภัย ไม่มีการบังคับโอนมัดจำล่วงหน้า จ่ายเงินเมื่อเจอตัวจริงเท่านั้น
                 </p>
-                <div class="flex flex-col sm:flex-row items-center gap-5 justify-center lg:justify-start">
-                    <a href="#profiles-grid" class="w-full sm:w-auto btn-primary px-10 py-4 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-center">
-                        ดูโปรไฟล์ทั้งหมด
+                <div class="flex flex-col sm:flex-row items-center gap-3 md:gap-4 justify-center lg:justify-start">
+                    <a href="#profiles-grid" class="w-full sm:w-auto btn-neon px-8 py-3.5 md:py-4 rounded-full font-bold text-sm text-center font-orbitron">
+                        ดูโปรไฟล์น้องๆ
+                    </a>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ปรึกษาแอดมินผ่าน LINE" class="w-full sm:w-auto cyber-glass hover:bg-[#1A0B2E] text-white px-8 py-3.5 md:py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(112,0,255,0.4)]">
+                        <i class="fab fa-line text-lg text-[#00c300]" aria-hidden="true"></i> ปรึกษาแอดมิน
                     </a>
                 </div>
             </div>
             
-            <div class="flex-1 w-full max-w-md lg:max-w-full animate-fade-in-up" style="animation-delay: 0.2s; opacity: 0;">
-                <div class="relative rounded-t-[10rem] rounded-b-2xl overflow-hidden aspect-[3/4] md:aspect-[4/5] border border-theme-border shadow-[0_20px_60px_rgba(0,0,0,0.5)] group">
+            <div class="flex-1 w-full max-w-md lg:max-w-full animate-scale-in">
+                <div class="relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden aspect-[4/5] md:aspect-square border border-[#3D1A5F] shadow-[0_0_40px_rgba(255,0,127,0.2)] group">
                     <img src="/images/hero-sidelinechiangmai-1200.webp" 
                          srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w"
                          sizes="(max-width: 640px) 100vw, 50vw"
                          alt="บริการรับงาน ไซด์ไลน์ ${escapeHTML(provinceName)} ระดับ VIP" 
-                         width="1200" height="1500"
-                         class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-[2s] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                         width="1200" height="1200"
+                         class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 group-hover:brightness-110 transition-all duration-1000"
                          fetchpriority="high">
-                    <div class="absolute inset-0 bg-gradient-to-t from-theme-dark via-theme-dark/10 to-transparent opacity-90" aria-hidden="true"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0A0014]/90 via-[#0A0014]/20 to-transparent" aria-hidden="true"></div>
+                    <div class="absolute bottom-5 left-5 right-5 md:bottom-8 md:left-8 md:right-8 cyber-glass rounded-2xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#00F3FF] flex items-center justify-center text-[#0A0014] shadow-[0_0_15px_rgba(0,243,255,0.8)]"><i class="fas fa-shield-check text-lg md:text-xl" aria-hidden="true"></i></div>
+                        <div>
+                            <span class="block text-white font-bold text-sm tracking-wide font-orbitron text-neon-cyan">Verified & Safe</span>
+                            <span class="block text-zinc-300 text-[10px] md:text-xs font-light mt-0.5">คัดกรองประวัติและยืนยันตัวตนแล้ว</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <section aria-label="ช่องทางติดต่อและโซเชียลมีเดีย" class="max-w-6xl mx-auto mt-16 md:mt-24 px-4 animate-fade-in-up" style="animation-delay: 0.6s; opacity: 0;">
-            <nav aria-label="ติดตามเราทางโซเชียลมีเดีย">
-                <ul class="flex flex-wrap justify-center gap-2 md:gap-4 w-full mx-auto px-4 mb-10">
-                    <li><a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อเราผ่าน LINE" title="ติดต่อเราผ่าน LINE" class="block p-2 text-theme-muted hover:text-theme-accent transition-colors duration-500 text-xl"><i class="fab fa-line" aria-hidden="true"></i></a></li>
-                    <li><a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามเราบน X (Twitter)" title="ติดตามเราบน X (Twitter)" class="block p-2 text-theme-muted hover:text-theme-accent transition-colors duration-500 text-xl"><i class="fab fa-x-twitter" aria-hidden="true"></i></a></li>
-                    <li><a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามเราบน TikTok" title="ติดตามเราบน TikTok" class="block p-2 text-theme-muted hover:text-theme-accent transition-colors duration-500 text-xl"><i class="fab fa-tiktok" aria-hidden="true"></i></a></li>
-                    <li><a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามเราบน BlueSky" title="ติดตามเราบน BlueSky" class="block p-2 text-theme-muted hover:text-theme-accent transition-colors duration-500 text-xl"><i class="fas fa-cloud" aria-hidden="true"></i></a></li>
-                    <li><a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="noopener noreferrer" aria-label="รวมลิงก์ทั้งหมดบน Linktree" title="รวมลิงก์ทั้งหมดบน Linktree" class="block p-2 text-theme-muted hover:text-theme-accent transition-colors duration-500 text-xl"><i class="fas fa-link" aria-hidden="true"></i></a></li>
-                </ul>
+        <section aria-label="ช่องทางติดต่อทางการ" class="max-w-6xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="text-center mb-5">
+                <span class="text-[10px] md:text-xs text-zinc-300 font-bold uppercase tracking-[0.2em] cyber-glass px-4 py-1.5 rounded-full font-orbitron shadow-[0_0_10px_rgba(112,0,255,0.2)]">
+                    Connect With Our Official Channels
+                </span>
+            </div>
+
+            <nav aria-label="โซเชียลมีเดีย" class="overflow-x-auto no-scrollbar pb-6">
+                <div class="flex flex-nowrap justify-start lg:justify-center gap-3 w-max mx-auto px-4">
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00c300]/10 border border-[#00c300]/30 rounded-full text-xs font-bold text-[#00c300] hover:bg-[#00c300]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(0,195,0,0.4)] transition-all duration-300 font-orbitron"><i class="fab fa-line text-base" aria-hidden="true"></i> LINE</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-white/5 border border-white/20 rounded-full text-xs font-bold text-white hover:bg-white/10 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 font-orbitron"><i class="fab fa-x-twitter text-base" aria-hidden="true"></i> TWITTER</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#ff0050]/10 border border-[#ff0050]/30 rounded-full text-xs font-bold text-[#ff0050] hover:bg-[#ff0050]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,0,80,0.4)] transition-all duration-300 font-orbitron"><i class="fab fa-tiktok text-base" aria-hidden="true"></i> TIKTOK</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#0085ff]/10 border border-[#0085ff]/30 rounded-full text-xs font-bold text-[#0085ff] hover:bg-[#0085ff]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(0,133,255,0.4)] transition-all duration-300 font-orbitron"><i class="fas fa-cloud text-base" aria-hidden="true"></i> BLUESKY</a>
+                    <a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#39e09b]/10 border border-[#39e09b]/30 rounded-full text-xs font-bold text-[#39e09b] hover:bg-[#39e09b]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(57,224,155,0.4)] transition-all duration-300 font-orbitron"><i class="fas fa-link text-base" aria-hidden="true"></i> LINKTREE</a>
+                </div>
             </nav>
-            <div class="flex justify-center">
-                <div class="flex items-center gap-4 px-6 py-3 border-y border-theme-border">
-                    <span class="text-theme-accent text-xs font-serif italic">บริการเอ็กซ์คลูซีฟ</span>
-                    <div class="w-px h-4 bg-theme-border"></div>
-                    <span class="text-[9px] text-theme-muted tracking-[0.2em] uppercase font-light">สำหรับสมาชิกอายุ 20+ เท่านั้น</span>
+            
+            <div class="mt-4 flex justify-center">
+                <div class="group relative" role="alert" aria-live="polite">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-[#FF007F]/40 to-[#7000FF]/40 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000" aria-hidden="true"></div>
+                    <div class="relative flex items-center gap-3 px-6 py-3 rounded-xl bg-[#0A0014] border border-[#FF007F]/30 text-[#FF007F] shadow-[0_0_15px_rgba(255,0,127,0.2)]">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-[#FF007F]/20 flex items-center justify-center border border-[#FF007F]/40 shadow-[0_0_10px_#FF007F]">
+                            <span class="text-[14px] font-black font-orbitron">20+</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[11px] md:text-xs font-bold tracking-wider uppercase font-orbitron text-neon">Age Verification Required</span>
+                            <span class="text-[9px] md:text-[10px] text-zinc-300 font-medium">เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </header>
 
     <main class="w-full relative z-20">
-        <nav aria-label="ตัวกรองและหมวดหมู่" class="sticky top-16 md:top-20 z-40 bg-theme-dark/80 backdrop-blur-xl border-y border-theme-border py-4 px-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-            <div class="max-w-7xl mx-auto flex overflow-x-auto no-scrollbar gap-4 items-center snap-x">
-                <button aria-label="กรองข้อมูลล่าสุด" class="snap-start shrink-0 text-theme-accent border-b border-theme-accent px-2 py-1 text-[10px] md:text-xs font-medium tracking-[0.15em] uppercase">อัพเดทล่าสุด</button>
-                <button aria-label="กรองโปรไฟล์มาแรง" class="snap-start shrink-0 text-theme-muted hover:text-theme-light px-2 py-1 text-[10px] md:text-xs font-light tracking-[0.15em] uppercase transition-colors">ยอดนิยม</button>
-                <button aria-label="เลือกโซนให้บริการ" class="snap-start shrink-0 text-theme-muted hover:text-theme-light px-2 py-1 text-[10px] md:text-xs font-light tracking-[0.15em] uppercase transition-colors flex items-center gap-1.5">เลือกโซน <i class="fas fa-chevron-down text-[8px]" aria-hidden="true"></i></button>
+        <nav aria-label="ตัวกรองและหมวดหมู่" class="sticky top-14 md:top-20 z-40 bg-[#0A0014]/90 backdrop-blur-xl border-y border-[#3D1A5F] py-2.5 md:py-3 px-4 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+            <div class="max-w-7xl mx-auto flex overflow-x-auto no-scrollbar gap-2.5 items-center snap-x">
+                <button aria-label="กรองข้อมูลล่าสุด" class="snap-start shrink-0 bg-white text-[#0A0014] px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-[0_0_10px_rgba(255,255,255,0.5)]">ล่าสุด</button>
+                <button aria-label="กรองโปรไฟล์มาแรง" class="snap-start shrink-0 cyber-glass text-white px-5 py-2 rounded-full text-xs font-medium whitespace-nowrap hover:shadow-[0_0_15px_rgba(255,0,127,0.4)] hover:border-[#FF007F] transition-all flex items-center gap-1.5"><i class="fas fa-fire text-[#FF007F]" aria-hidden="true"></i> มาแรง</button>
+                <button aria-label="เลือกโซนให้บริการ" class="snap-start shrink-0 cyber-glass text-white px-5 py-2 rounded-full text-xs font-medium whitespace-nowrap hover:shadow-[0_0_15px_rgba(112,0,255,0.4)] hover:border-[#7000FF] transition-all flex items-center gap-1.5"><i class="fas fa-map-marker-alt text-[#7000FF]" aria-hidden="true"></i> เลือกโซน <i class="fas fa-chevron-down text-[10px] ml-1 opacity-50" aria-hidden="true"></i></button>
+                <button aria-label="ราคาต่ำกว่า 2000 บาท" class="snap-start shrink-0 cyber-glass text-white px-5 py-2 rounded-full text-xs font-medium whitespace-nowrap hover:border-white/30 transition-all">&lt; 2,000 ฿</button>
+                <button aria-label="ราคา 2000 ถึง 3500 บาท" class="snap-start shrink-0 cyber-glass text-white px-5 py-2 rounded-full text-xs font-medium whitespace-nowrap hover:border-white/30 transition-all">2,000 - 3,500 ฿</button>
             </div>
         </nav>
 
-        <section id="profiles-grid" aria-label="รายการโปรไฟล์น้องๆ" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-24 scroll-mt-28">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <section id="profiles-grid" aria-label="รายการโปรไฟล์น้องๆ" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 scroll-mt-24">
+            <div class="flex items-end justify-between mb-6 md:mb-8">
                 <div>
-                    <h2 class="text-2xl md:text-4xl font-serif text-theme-light tracking-wide">รวม<span class="text-theme-accent italic">โปรไฟล์</span></h2>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron text-neon">โปรไฟล์น้องๆรับงาน</h2>
+                    <p class="text-zinc-300 text-[10px] md:text-sm font-light mt-1">คอลเลกชันน้องๆ ไซด์ไลน์ โซน${escapeHTML(provinceName)}</p>
                 </div>
-                <div class="text-[9px] text-theme-muted tracking-[0.1em] uppercase font-light">
-                    อัพเดทล่าสุด: ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
+                <div class="text-[10px] md:text-xs text-[#00F3FF] flex items-center gap-1.5 cyber-glass px-2.5 py-1 rounded-full border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.1)]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#00F3FF] inline-block animate-pulse shadow-[0_0_5px_#00F3FF]" aria-hidden="true"></span> อัปเดต: ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
                 </div>
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5 lg:gap-6">
                 ${cardsHTML}
             </div>
             
             ${safeProfiles.length >= 80 ? `
-            <div class="mt-20 text-center">
-                <a href="/search?province=${provinceKey}" aria-label="โหลดโปรไฟล์เพิ่มเติม" class="inline-block border border-theme-accent/50 text-theme-accent px-12 py-4 rounded-full text-[10px] font-medium tracking-[0.25em] uppercase hover:bg-theme-accent hover:text-theme-dark transition-colors duration-300">
-                    ดูเพิ่มเติม
+            <div class="mt-12 md:mt-16 text-center">
+                <a href="/search?province=${provinceKey}" aria-label="โหลดโปรไฟล์เพิ่มเติม" class="inline-flex items-center gap-2 cyber-glass text-white px-8 py-3.5 rounded-full text-sm font-bold hover:shadow-[0_0_20px_rgba(255,0,127,0.5)] hover:border-[#FF007F] transition-all uppercase tracking-widest font-orbitron group">
+                    LOAD MORE <i class="fas fa-arrow-down text-[#FF007F] group-hover:translate-y-1 transition-transform" aria-hidden="true"></i>
                 </a>
             </div>` : ''}
         </section>
@@ -786,33 +878,38 @@ return `
         </div>
     </main>
 
-    <footer class="bg-theme-dark border-t border-theme-border pt-20 pb-32 md:pb-20 text-left relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+    <footer class="bg-[#0A0014] border-t border-[#3D1A5F] pt-12 pb-24 md:pb-12 text-left relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
-                <div class="md:col-span-5 space-y-6">
-                    <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ ${CONFIG.BRAND_NAME}" class="h-5 w-auto" width="168" height="28" loading="lazy">
-                    <p class="text-xs md:text-sm text-theme-muted leading-relaxed font-light max-w-sm tracking-wide">
-                        คลับส่วนตัวระดับพรีเมียม ศูนย์รวมนางแบบที่ปลอดภัย คัดกรองอย่างเข้มงวดและรักษาความลับลูกค้าเป็นอันดับหนึ่ง
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
+                <div class="md:col-span-5 space-y-5">
+                    <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ ${CONFIG.BRAND_NAME}" class="h-8 w-auto brightness-200" width="168" height="28" loading="lazy" style="filter: drop-shadow(0 0 5px rgba(255,0,127,0.3));">
+                    <p class="text-sm text-zinc-300 leading-relaxed font-light max-w-sm">
+                        คลับพักผ่อนระดับพรีเมียม ศูนย์รวมนางแบบและเพื่อนเที่ยวที่ปลอดภัย เราคัดกรองโปรไฟล์อย่างเข้มงวดและรักษาความลับลูกค้าเป็นอันดับหนึ่ง
                     </p>
                 </div>
 
                 <nav aria-label="ลิงก์ส่วนต่างๆ ภายในเว็บ" class="md:col-span-3">
-                    <h3 class="text-theme-accent text-[10px] font-bold mb-6 tracking-[0.25em] uppercase font-serif">เมนู</h3>
-                    <ul class="space-y-4 text-xs md:text-sm font-light text-theme-muted tracking-wide">
-                        <li><a href="/profiles.html" class="hover:text-theme-light transition-colors">นางแบบทั้งหมด</a></li>
-                        <li><a href="/locations.html" class="hover:text-theme-light transition-colors">พื้นที่ให้บริการ</a></li>
-                        <li><a href="/faq.html" class="hover:text-theme-light transition-colors">วิธีจองคิว</a></li>
-                        <li><a href="/about.html" class="hover:text-theme-light transition-colors">เกี่ยวกับคลับ</a></li>
+                    <h3 class="text-[#FF007F] text-sm font-bold mb-6 tracking-widest uppercase font-orbitron text-neon">Explore</h3>
+                    <ul class="space-y-4 text-sm font-medium text-zinc-300">
+                        <li><a href="/profiles.html" class="hover:text-[#FF007F] hover:text-shadow-[0_0_10px_rgba(255,0,127,0.8)] transition-all">ค้นหาน้องๆ VIP</a></li>
+                        <li><a href="/locations.html" class="hover:text-[#FF007F] hover:text-shadow-[0_0_10px_rgba(255,0,127,0.8)] transition-all">โซนให้บริการ</a></li>
+                        <li><a href="/faq.html" class="hover:text-[#FF007F] hover:text-shadow-[0_0_10px_rgba(255,0,127,0.8)] transition-all">ขั้นตอนการจอง</a></li>
+                        <li><a href="/about.html" class="hover:text-[#FF007F] hover:text-shadow-[0_0_10px_rgba(255,0,127,0.8)] transition-all">เกี่ยวกับเรา</a></li>
+                        <li><a href="/blog.html" class="hover:text-[#FF007F] hover:text-shadow-[0_0_10px_rgba(255,0,127,0.8)] transition-all">บทความน่ารู้</a></li>
                     </ul>
                 </nav>
 
-                <nav aria-label="พื้นที่ให้บริการทั้งหมด" class="md:col-span-4">
-                    <h3 class="text-theme-accent text-[10px] font-bold mb-6 tracking-[0.25em] uppercase font-serif">พื้นที่ให้บริการ</h3>
-                    <ul class="flex flex-col gap-3 text-xs md:text-sm font-light text-theme-muted h-[140px] overflow-y-auto pr-3 custom-scrollbar tracking-wide">
+<nav aria-label="พื้นที่ให้บริการทั้งหมด" class="md:col-span-4">
+                    <h3 class="text-[#A855F7] text-sm font-bold mb-6 tracking-widest uppercase font-orbitron">จังหวัดที่มีน้องๆรับงาน</h3>
+                    <ul class="flex flex-col gap-3 text-sm font-medium text-zinc-100 h-[180px] overflow-y-auto pr-3 custom-scrollbar">
                         ${allProvinces.map(p => `
                             <li>
-                                <a href="/location/${p.key}" class="hover:text-theme-light transition-colors flex items-center justify-between group">
-                                    <span>${escapeHTML(p.nameThai)}</span>
+                                <a href="/location/${p.key}" class="hover:text-[#00F3FF] hover:text-shadow-[0_0_10px_rgba(0,243,255,0.8)] transition-all flex items-center justify-between group">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3D1A5F] group-hover:bg-[#00F3FF] group-hover:shadow-[0_0_8px_#00F3FF] transition-all" aria-hidden="true"></span>
+                                        รับงาน${escapeHTML(p.nameThai)}
+                                    </div>
+                                    <i class="fas fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity text-[#00F3FF]" aria-hidden="true"></i>
                                 </a>
                             </li>
                         `).join('')}
@@ -820,57 +917,60 @@ return `
                 </nav>
             </div>
 
-            <div class="border-t border-theme-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-                <p class="text-[9px] text-theme-muted uppercase tracking-[0.2em] font-light">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. สงวนลิขสิทธิ์</p>
-                <div class="flex gap-6 text-[9px] text-theme-muted uppercase tracking-[0.2em] font-light">
-                    <a href="/privacy-policy.html" class="hover:text-theme-light transition-colors">ความเป็นส่วนตัว</a>
-                    <a href="/terms.html" class="hover:text-theme-light transition-colors">ข้อกำหนด</a>
+            <div class="border-t border-[#3D1A5F] pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                <p class="text-[10px] md:text-xs text-zinc-100 uppercase tracking-widest font-medium font-orbitron">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. All rights reserved.</p>
+                <div class="flex gap-6 text-[10px] md:text-xs text-zinc-100 font-medium uppercase tracking-widest justify-center font-orbitron">
+                    <a href="/privacy-policy.html" class="hover:text-[#00F3FF] transition-colors">Privacy</a>
+                    <a href="/terms.html" class="hover:text-[#00F3FF] transition-colors">Terms</a>
                 </div>
             </div>
+            
+            <p class="mt-6 text-[10px] text-zinc-300 leading-relaxed font-light text-center">
+                แพลตฟอร์มนี้เป็นเพียงสื่อกลางข้อมูล การติดต่อและชำระเงินเกิดขึ้นระหว่างลูกค้าและผู้ให้บริการโดยตรง จัดทำขึ้นสำหรับผู้มีอายุ 20 ปีขึ้นไปเท่านั้น
+            </p>
         </div>
     </footer>
-    
-    <nav aria-label="เมนูนำทางหลักบนมือถือ" class="fixed bottom-0 left-0 w-full md:hidden z-50 pb-[env(safe-area-inset-bottom)] bg-theme-dark/80 backdrop-blur-lg border-t border-theme-border">
-        <ul class="flex items-center justify-around h-[70px] px-2 m-0 list-none">
+
+    <nav aria-label="เมนูนำทางหลักบนมือถือ" class="fixed bottom-0 left-0 w-full md:hidden z-50 pb-[env(safe-area-inset-bottom)]" style="background: rgba(10, 0, 20, 0.9); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid #3D1A5F; box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);">
+        <ul class="flex items-center justify-around h-[60px] px-2 m-0 list-none">
             <li class="w-full h-full">
-                <a href="/" class="flex flex-col items-center justify-center w-full h-full text-theme-muted hover:text-theme-accent transition-colors">
-                    <i class="fas fa-home text-[16px] mb-1.5 font-light" aria-hidden="true"></i>
-                    <span class="text-[8px] font-light tracking-[0.1em] uppercase">หน้าแรก</span>
+                <a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-300 hover:text-[#00F3FF] hover:drop-shadow-[0_0_8px_rgba(0,243,255,0.8)] transition-all">
+                    <i class="fas fa-home text-[18px] mb-1" aria-hidden="true"></i>
+                    <span class="text-[9px] font-medium tracking-wide">หน้าแรก</span>
                 </a>
             </li>
             <li class="w-full h-full">
-                <a href="/profiles.html" class="flex flex-col items-center justify-center w-full h-full text-theme-accent">
-                    <i class="fas fa-gem text-[16px] mb-1.5 drop-shadow-[0_0_5px_rgba(209,176,107,0.3)]" aria-hidden="true"></i>
-                    <span class="text-[8px] font-medium tracking-[0.1em] uppercase font-serif">โปรไฟล์</span>
+                <a href="/profiles.html" class="flex flex-col items-center justify-center w-full h-full text-[#FF007F]">
+                    <i class="fas fa-gem text-[18px] mb-1 drop-shadow-[0_0_10px_rgba(255,0,127,0.8)] animate-pulse" aria-hidden="true"></i>
+                    <span class="text-[9px] font-bold tracking-wide font-orbitron text-neon">VIP</span>
                 </a>
             </li>
             <li class="w-full h-full relative">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center w-full h-full group absolute -top-6 left-0">
-                    <div class="w-14 h-14 bg-theme-accent rounded-full flex items-center justify-center text-theme-dark border border-theme-accent-hover shadow-[0_5px_15px_rgba(0,0,0,0.5)] group-active:scale-95 transition-transform duration-300">
-                        <i class="fas fa-paper-plane text-[18px]" aria-hidden="true"></i>
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินเพื่อจองคิว" class="flex flex-col items-center justify-center w-full h-full group absolute -top-10 left-0">
+                    <div class="w-12 h-12 btn-neon rounded-full flex items-center justify-center text-white group-active:scale-95 transition-transform border-[3px] border-[#0A0014]">
+                        <i class="fab fa-line text-[22px]" aria-hidden="true"></i>
                     </div>
+                    <span class="text-[10px] font-bold text-white mt-1 uppercase tracking-wider font-orbitron" style="text-shadow: 0 0 5px #FF007F;">จองคิว</span>
                 </a>
             </li>
             <li class="w-full h-full">
-                <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-theme-muted hover:text-theme-accent transition-colors">
-                    <i class="fas fa-map-marker-alt text-[16px] mb-1.5 font-light" aria-hidden="true"></i>
-                    <span class="text-[8px] font-light tracking-[0.1em] uppercase">พื้นที่</span>
+                <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-300 hover:text-[#7000FF] hover:drop-shadow-[0_0_8px_rgba(112,0,255,0.8)] transition-all">
+                    <i class="fas fa-map-marker-alt text-[18px] mb-1" aria-hidden="true"></i>
+                    <span class="text-[9px] font-medium tracking-wide">พื้นที่</span>
                 </a>
             </li>
             <li class="w-full h-full">
-                <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-theme-muted hover:text-theme-accent transition-colors">
-                    <i class="fas fa-search text-[16px] mb-1.5 font-light" aria-hidden="true"></i>
-                    <span class="text-[8px] font-light tracking-[0.1em] uppercase">ค้นหา</span>
+                <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-zinc-300 hover:text-white transition-all">
+                    <i class="fas fa-search text-[18px] mb-1" aria-hidden="true"></i>
+                    <span class="text-[9px] font-medium tracking-wide">ค้นหา</span>
                 </a>
             </li>
         </ul>
     </nav>
 
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // App-like Navbar Hide/Show
+        // 1. App-like Navbar Hide/Show on Scroll
         let lastScrollY = window.scrollY;
         const navbar = document.getElementById('navbar');
         
@@ -887,7 +987,7 @@ return `
             lastScrollY = window.scrollY;
         }, { passive: true });
 
-        // Sidebar
+        // 2. Sidebar Menu Logic
         const menuBtn = document.getElementById('menu-btn');
         const closeBtn = document.getElementById('close-menu-btn');
         const sidebar = document.getElementById('sidebar-menu');
@@ -907,7 +1007,7 @@ return `
                 sidebar.classList.add('translate-x-full');
                 document.body.style.overflow = '';
                 menuBtn.setAttribute('aria-expanded', 'false');
-                setTimeout(() => overlay.classList.add('hidden'), 700);
+                setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
 
@@ -915,24 +1015,28 @@ return `
         if(closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
         if(overlay) overlay.addEventListener('click', () => toggleMenu(false));
         
-        // FAQ Accordion
+        // 3. FAQ Accordion Logic
         const faqContainer = document.getElementById('faq-accordion');
         if (faqContainer) {
             const faqItems = faqContainer.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
                 const questionButton = item.querySelector('.faq-question');
                 const answerPanel = item.querySelector('.faq-answer');
+                
                 if (questionButton && answerPanel) {
                     questionButton.addEventListener('click', () => {
                         const isExpanded = questionButton.getAttribute('aria-expanded') === 'true';
+                        
                         faqItems.forEach(i => {
                             const qBtn = i.querySelector('.faq-question');
                             const aPan = i.querySelector('.faq-answer');
                             const icon = qBtn.querySelector('i');
+                            
                             if(qBtn) qBtn.setAttribute('aria-expanded', 'false');
                             if(aPan) aPan.style.maxHeight = '0px';
                             if(icon) icon.style.transform = 'rotate(0deg)';
                         });
+                        
                         if (!isExpanded) {
                             questionButton.setAttribute('aria-expanded', 'true');
                             answerPanel.style.maxHeight = answerPanel.scrollHeight + 'px';
@@ -944,8 +1048,13 @@ return `
             });
         }
 
-        // Intersection Observer for Smooth Entrances
-        const observerOptions = { root: null, rootMargin: '0px 0px -50px 0px', threshold: 0.1 };
+        // 4. INTERSECTION OBSERVER API (For Animations)
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -50px 0px', 
+            threshold: 0.1
+        };
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -956,10 +1065,32 @@ return `
             });
         }, observerOptions);
 
-        const animateElements = document.querySelectorAll('#profiles-grid article, header > div > div, header section');
-        animateElements.forEach(el => {
-            el.style.animationPlayState = 'paused';
-            observer.observe(el);
+        const profileCards = document.querySelectorAll('#profiles-grid article');
+        profileCards.forEach(card => {
+            card.style.animationPlayState = 'paused';
+            card.style.opacity = '0'; 
+            observer.observe(card);
+        });
+        
+        const contentSections = document.querySelectorAll('.cyber-glass.p-6, [class*="rounded-[2.5rem]"]');
+        
+        contentSections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+            section.style.transitionDelay = ((index % 3) * 150) + 'ms';
+            
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        sectionObserver.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '0px 0px -100px 0px' });
+            
+            sectionObserver.observe(section);
         });
     });
 </script>
@@ -974,7 +1105,7 @@ return `
         });
     } catch (e) {
         console.error('SSR Critical Error:', e);
-        return new Response('<div style="font-family:\'Playfair Display\', serif;text-align:center;padding:50px;color:#D4AF37;background:#0F0505;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:50px;height:50px;border:1px solid #4A0404;border-top-color:#D4AF37;border-radius:50%;animation:spin 1.5s cubic-bezier(0.22,1,0.36,1) infinite;margin-bottom:20px;"></div><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style><h1 style="font-size:14px;font-weight:normal;letter-spacing:0.3em;font-style:italic;">Curating Elegance...</h1></div>', { 
+        return new Response('<div style="font-family:sans-serif;text-align:center;padding:50px;color:#fff;background:#0A0014;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:50px;height:50px;border:3px solid #3D1A5F;border-top-color:#FF007F;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;box-shadow:0 0 15px rgba(255,0,127,0.5);"></div><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style><h1 style="font-size:18px;font-weight:bold;color:#FF007F;text-shadow:0 0 10px rgba(255,0,127,0.5);letter-spacing:2px;font-family:\'Orbitron\', sans-serif;">SYSTEM INITIALIZING</h1></div>', { 
             status: 500, 
             headers: { "Content-Type": "text/html; charset=utf-8" } 
         });
