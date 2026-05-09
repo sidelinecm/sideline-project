@@ -433,111 +433,102 @@ export default async (request, context) => {
             ]
         };
 
-        let cardsHTML = '';
-        if (safeProfiles && safeProfiles.length > 0) {
-            
-            const intents = seoData.intents ||["หาเพื่อนเที่ยว", "น้องเอนเตอร์เทน", "รับงานนอกสถานที่", "ฟีลแฟน", "เพื่อนเที่ยวกลางคืน", "เด็กเอ็น VIP"];
-            const traits = seoData.traits ||["ผิวขาวออร่า", "หุ่นนางแบบ", "ตรงปก 100%", "บริการเป็นกันเอง", "คุยสนุกเอาใจเก่ง", "สเปกพรีเมียม"];
+        cardsHTML = safeProfiles.map((p, i) => {
+            const rawName = (p.name || 'ไม่ระบุชื่อ').replace(/^(น้อง\s?)/, '');
+            const cleanName = escapeHTML(rawName);
+            const profileLocation = escapeHTML(p.location || provinceName || 'ไม่ระบุโซน');
+            const isAvailable = !['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'].some(kw => (p.availability || '').toLowerCase().includes(kw));
+            const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
 
-            cardsHTML = safeProfiles.map((p, i) => {
+            const mockRating = (4.8 + Math.random() * 0.2).toFixed(1); 
+            const animDelay = (i % 10) * 50;
 
-                const rawName = (p.name || 'ไม่ระบุชื่อ').replace(/^(น้อง\s?)/, '');
-                const cleanName = escapeHTML(rawName);
-                const profileLocation = escapeHTML(p.location || provinceName || 'ไม่ระบุโซน');
-                const isAvailable = !['ติดจอง', 'ไม่ว่าง', 'พัก', 'หยุด'].some(kw => (p.availability || '').toLowerCase().includes(kw));
-                const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
+            // แก้ไขส่วนดึงราคา: กรองอักขระพิเศษออกเพื่อให้แสดงผลได้ถูกต้อง ไม่เป็น NaN
+            const rawRate = String(p.rate || '').replace(/[^0-9]/g, '');
+            const parsedRate = parseInt(rawRate, 10);
+            const displayRate = (!isNaN(parsedRate) && parsedRate > 0) 
+                ? parsedRate.toLocaleString() 
+                : 'สอบถาม';
+
+            const lsiKeyword = seoData.lsi && seoData.lsi.length > 0 ? seoData.lsi[i % seoData.lsi.length] : `รับงาน${provinceName}`;
+            const myIntent = intents[i % intents.length];
+            const myTrait = traits[i % traits.length];
+            const smartAlt = `${myIntent} น้อง${cleanName} ${profileLocation} ${myTrait} ${lsiKeyword}`;
+
+            const imageAttributes = i < 4 
+                ? 'fetchpriority="high" decoding="sync"' 
+                : 'loading="lazy" decoding="async"';
+
+            const statusBgClass = isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]';
+            const statusTextClass = isAvailable ? 'text-[#00F3FF]' : 'text-[#FF007F]';
+            const statusBorderClass = isAvailable ? 'border-[#00F3FF]/30' : 'border-[#FF007F]/30';
+            const statusShadowClass = isAvailable ? 'shadow-[0_0_10px_rgba(0,243,255,0.2)]' : 'shadow-[0_0_10px_rgba(255,0,127,0.2)]';
+
+            return `
+            <article class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both;">
                 
-
-                const mockRating = (4.8 + Math.random() * 0.2).toFixed(1); 
-                const animDelay = (i % 10) * 50;
-                const displayRate = p.rate ? Number(p.rate).toLocaleString() : 'สอบถาม';
-                const lsiKeyword = seoData.lsi && seoData.lsi.length > 0 ? seoData.lsi[i % seoData.lsi.length] : `รับงาน${provinceName}`;
-                const myIntent = intents[i % intents.length];
-                const myTrait = traits[i % traits.length];
-                const smartAlt = `${myIntent} น้อง${cleanName} ${profileLocation} ${myTrait} ${lsiKeyword}`;
-
-
-                const imageAttributes = i < 4 
-                    ? 'fetchpriority="high" decoding="sync"' 
-                    : 'loading="lazy" decoding="async"';
-
-
-                const statusBgClass = isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]';
-                const statusTextClass = isAvailable ? 'text-[#00F3FF]' : 'text-[#FF007F]';
-                const statusBorderClass = isAvailable ? 'border-[#00F3FF]/30' : 'border-[#FF007F]/30';
-                const statusShadowClass = isAvailable ? 'shadow-[0_0_10px_rgba(0,243,255,0.2)]' : 'shadow-[0_0_10px_rgba(255,0,127,0.2)]';
-
-                return `
-                <article class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both;">
+                <a href="${profileLink}" aria-label="ดูโปรไฟล์ ${smartAlt}" class="block absolute inset-0 z-30"></a>
+                
+                <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
                     
-                    <!-- SEO & Accessibility Link -->
-                    <a href="${profileLink}" aria-label="ดูโปรไฟล์ ${smartAlt}" class="block absolute inset-0 z-30"></a>
+                    <img src="${optimizeImg(p.imagePath, 320, 400)}" 
+                         width="320" height="400"
+                         onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
+                         alt="${smartAlt}"
+                         class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
+                         style="filter: contrast(1.02) saturate(1.05);" 
+                         loading="lazy"
+                         decoding="async"
+                         fetchpriority="low"
+                         ${imageAttributes}>
+                         
+                    <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/30 to-[#FF007F]/20 mix-blend-soft-light z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700" style="transform: translateZ(0);"></div>
+                    <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.9),inset_0_0_20px_rgba(10,0,20,0.6)] z-10 pointer-events-none" style="transform: translateZ(0);"></div>
+                    <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/70 to-transparent z-10 pointer-events-none"></div>
                     
-                    <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
-                        
-                     <img src="${optimizeImg(p.imagePath, 320, 400)}" 
-                             width="320" height="400"
-                             onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
-                             alt="${smartAlt}"
-                             class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
-                             style="filter: contrast(1.02) saturate(1.05);" 
-                             loading="lazy"
-                             decoding="async"
-                             fetchpriority="low"
-                             ${imageAttributes}>
-                             
-                        <!-- Overlays & Shadows (Hardware Accelerated) -->
-                        <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/30 to-[#FF007F]/20 mix-blend-soft-light z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700" style="transform: translateZ(0);"></div>
-                        <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.9),inset_0_0_20px_rgba(10,0,20,0.6)] z-10 pointer-events-none" style="transform: translateZ(0);"></div>
-                        <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/70 to-transparent z-10 pointer-events-none"></div>
-                        
-                        <!-- Status Badge (Dynamic Colors) -->
-                        <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full ${statusShadowClass} border ${statusBorderClass}">
-                            <span class="relative flex h-2 w-2" aria-hidden="true">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${statusBgClass} opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 ${statusBgClass} shadow-[0_0_5px_currentColor]"></span>
-                            </span>
-                            <span class="text-[9px] md:text-[10px] font-bold ${statusTextClass} uppercase tracking-wider font-orbitron">
-                                ${isAvailable ? 'ONLINE' : 'BUSY'}
-                            </span>
-                        </div>
-                        
-                        <!-- Hot Badge -->
-                        ${(i < 3 || p.isfeatured) ? `
-                        <div class="absolute top-3 right-3 md:top-4 md:right-4 z-20 bg-[#FF007F] px-2.5 py-1 rounded-full border border-white/20 shadow-[0_0_15px_rgba(255,0,127,0.8)] flex items-center gap-1">
-                            <i class="fas fa-fire text-white text-[9px] md:text-[10px] animate-pulse" aria-hidden="true"></i>
-                            <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider font-orbitron">HOT</span>
-                        </div>` : ''}
-                        
-                        <!-- Bottom Info Area -->
-                        <div class="absolute bottom-0 inset-x-0 p-4 md:p-5 z-20">
-                            <div class="flex items-end justify-between gap-2">
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="text-xl md:text-3xl font-bold text-white leading-none mb-1.5 truncate drop-shadow-lg text-neon">${cleanName}</h3>
-                                    <div class="flex items-center gap-1.5 text-zinc-300 text-[10px] md:text-sm">
-                                        <i class="fas fa-map-marker-alt text-[#7000FF] drop-shadow-[0_0_5px_rgba(112,0,255,0.8)]" aria-hidden="true"></i>
-                                        <span class="truncate">${profileLocation}</span>
-                                    </div>
-                                </div>
-                                <div class="text-right shrink-0">
-                                    <span class="block text-[9px] md:text-[10px] text-zinc-300 font-medium uppercase tracking-wider mb-0.5 font-orbitron">RATE</span>
-                                    <span class="font-black text-lg md:text-xl text-[#FF007F] tracking-tight text-neon">฿${displayRate}</span>
+                    <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full ${statusShadowClass} border ${statusBorderClass}">
+                        <span class="relative flex h-2 w-2" aria-hidden="true">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${statusBgClass} opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 ${statusBgClass} shadow-[0_0_5px_currentColor]"></span>
+                        </span>
+                        <span class="text-[9px] md:text-[10px] font-bold ${statusTextClass} uppercase tracking-wider font-orbitron">
+                            ${isAvailable ? 'ONLINE' : 'BUSY'}
+                        </span>
+                    </div>
+                    
+                    ${(i < 3 || p.isfeatured) ? `
+                    <div class="absolute top-3 right-3 md:top-4 md:right-4 z-20 bg-[#FF007F] px-2.5 py-1 rounded-full border border-white/20 shadow-[0_0_15px_rgba(255,0,127,0.8)] flex items-center gap-1">
+                        <i class="fas fa-fire text-white text-[9px] md:text-[10px] animate-pulse" aria-hidden="true"></i>
+                        <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider font-orbitron">HOT</span>
+                    </div>` : ''}
+                    
+                    <div class="absolute bottom-0 inset-x-0 p-4 md:p-5 z-20">
+                        <div class="flex items-end justify-between gap-2">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-xl md:text-3xl font-bold text-white leading-none mb-1.5 truncate drop-shadow-lg text-neon">${cleanName}</h3>
+                                <div class="flex items-center gap-1.5 text-zinc-300 text-[10px] md:text-sm">
+                                    <i class="fas fa-map-marker-alt text-[#7000FF] drop-shadow-[0_0_5px_rgba(112,0,255,0.8)]" aria-hidden="true"></i>
+                                    <span class="truncate">${profileLocation}</span>
                                 </div>
                             </div>
-                            
-                            <!-- Hover Action Area -->
-                            <div class="mt-3 md:mt-4 flex items-center justify-between md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
-                                <div class="flex items-center gap-1 text-[#00F3FF] text-[10px] md:text-xs font-bold cyber-glass px-2 py-1 rounded-lg border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.2)]">
-                                    <i class="fas fa-star" aria-hidden="true"></i> ${mockRating}
-                                </div>
-                                <div class="btn-neon text-[10px] md:text-xs font-bold px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-1.5 font-orbitron" aria-hidden="true">
-                                    VIEW <i class="fas fa-arrow-right"></i>
-                                </div>
+                            <div class="text-right shrink-0">
+                                <span class="block text-[9px] md:text-[10px] text-zinc-300 font-medium uppercase tracking-wider mb-0.5 font-orbitron">RATE</span>
+                                <span class="font-black text-lg md:text-xl text-[#FF007F] tracking-tight text-neon">฿${displayRate}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 md:mt-4 flex items-center justify-between md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
+                            <div class="flex items-center gap-1 text-[#00F3FF] text-[10px] md:text-xs font-bold cyber-glass px-2 py-1 rounded-lg border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.2)]">
+                                <i class="fas fa-star" aria-hidden="true"></i> ${mockRating}
+                            </div>
+                            <div class="btn-neon text-[10px] md:text-xs font-bold px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-1.5 font-orbitron" aria-hidden="true">
+                                VIEW <i class="fas fa-arrow-right"></i>
                             </div>
                         </div>
                     </div>
-                </article>`;
-            }).join('');
+                </div>
+            </article>`;
+        }).join('');
         } else {
             // Premium Empty State
             cardsHTML = `
