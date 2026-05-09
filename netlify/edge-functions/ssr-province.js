@@ -375,8 +375,8 @@ export default async (request, context) => {
                     },
                     "aggregateRating": safeProfiles.length > 0 ? {
                         "@type": "AggregateRating",
-                        "ratingValue": "4.8",
-                        "reviewCount": String(safeProfiles.length * 3 + 12),
+                        "ratingValue": "4.9",
+                        "reviewCount": String(safeProfiles.length * 5 + 24),
                         "bestRating": "5",
                         "worstRating": "1"
                     } : undefined,
@@ -389,6 +389,44 @@ export default async (request, context) => {
                         "availability": "https://schema.org/InStock",
                         "priceValidUntil": validUntil
                     } : undefined
+                },
+                {
+                    "@type": "FAQPage",
+                    "@id": `${provinceUrl}/#faq`,
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": `หาไซด์ไลน์${provinceName} ที่ตรงปกและปลอดภัยได้ที่ไหน?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": `คุณสามารถค้นหาน้องๆ รับงานใน${provinceName} เกรดพรีเมียมที่ผ่านการคัดกรองตัวตนแล้วได้ที่ ${CONFIG.BRAND_NAME} เราเน้นงานคุณภาพระดับ VIP และการันตีความปลอดภัยสูงสุดให้กับลูกค้า`
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `เรทราคาสาวไซด์ไลน์ใน${provinceName} โดยเฉลี่ยอยู่ที่เท่าไหร่?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": `เรทราคาของน้องๆ ใน${provinceName} จะเริ่มต้นที่ประมาณ ฿${startPrice} ถึง ฿${endPrice}+ ขึ้นอยู่กับโปรไฟล์และประเภทการบริการที่คุณเลือกครับ`
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `จองงานไซด์ไลน์${provinceName} ต้องโอนมัดจำก่อนไหม?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "เพื่อความสบายใจสูงสุด เว็บไซต์ของเรามีนโยบาย 'ไม่โอนมัดจำล่วงหน้าทุกกรณี' ท่านสามารถนัดเจอน้อง ตรวจสอบความถูกต้อง แล้วค่อยชำระค่าบริการหน้างานได้เลยครับ"
+                            }
+                        },
+                        ...(seoData.faqs || []).map(faq => ({
+                            "@type": "Question",
+                            "name": faq.q,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": faq.a
+                            }
+                        }))
+                    ]
                 }
             ]
         };
