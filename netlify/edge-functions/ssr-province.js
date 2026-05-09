@@ -432,7 +432,9 @@ export default async (request, context) => {
                 }
             ]
         };
-
+        
+        let cardsHTML = '';
+        if (safeProfiles && safeProfiles.length > 0) {
         cardsHTML = safeProfiles.map((p, i) => {
             const rawName = (p.name || 'ไม่ระบุชื่อ').replace(/^(น้อง\s?)/, '');
             const cleanName = escapeHTML(rawName);
@@ -443,7 +445,6 @@ export default async (request, context) => {
             const mockRating = (4.8 + Math.random() * 0.2).toFixed(1); 
             const animDelay = (i % 10) * 50;
 
-            // แก้ไขส่วนดึงราคา: กรองอักขระพิเศษออกเพื่อให้แสดงผลได้ถูกต้อง ไม่เป็น NaN
             const rawRate = String(p.rate || '').replace(/[^0-9]/g, '');
             const parsedRate = parseInt(rawRate, 10);
             const displayRate = (!isNaN(parsedRate) && parsedRate > 0) 
@@ -672,6 +673,7 @@ export default async (request, context) => {
         .faq-answer { grid-template-rows: 0fr; }
         .faq-item[aria-expanded="true"] .faq-answer { grid-template-rows: 1fr; }
         .faq-item[aria-expanded="true"] .faq-question i { transform: rotate(180deg); }
+        
     </style>
 </head>
 
