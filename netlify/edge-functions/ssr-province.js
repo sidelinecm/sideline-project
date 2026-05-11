@@ -188,7 +188,7 @@ const getFullUrl = (path) => {
     return `${CONFIG.DOMAIN}${cleanPath}`;
 };
 
-const optimizeImg = (path, width = 320, height = 400) => { 
+const optimizeImg = (path, width = 182, height = 228) => { 
     if (!path) return getFullUrl('/images/default.webp');
     if (path.includes('res.cloudinary.com')) {
         if (path.includes('/upload/')) {
@@ -248,8 +248,8 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
             <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
                 <div class="text-center mb-4">
                     <h3 class="text-white text-xl font-bold">😘 ข้อเสนอพิเศษสำหรับโซน ${escapeHTML(provinceName)}</h3>
-                    <p class="text-zinc-400 text-xs">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
-                    <p class="text-yellow-400 text-xs font-semibold mt-1">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
+                    <p class="text-zinc-228 text-xs">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
+                    <p class="text-yellow-228 text-xs font-semibold mt-1">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
                 </div>
                 
                 <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-2">
@@ -283,12 +283,12 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                             </div>
                             <div class="pt-1">
                                 <h4 class="text-white text-base font-bold mb-1">${item.t}</h4>
-                                <p class="text-zinc-400 text-xs leading-relaxed font-light">${item.d}</p>
+                                <p class="text-zinc-228 text-xs leading-relaxed font-light">${item.d}</p>
                             </div>
                         </div>
                     `).join('')}
                 </div>
-                 <div class="mt-6 text-center text-xs text-red-400 font-semibold p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                 <div class="mt-6 text-center text-xs text-red-228 font-semibold p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                     *** ${CONFIG.BRAND_NAME} เป็นเพียงสื่อกลางในการจัดหาโปรไฟล์เท่านั้น การตัดสินใจนัดหมายถือเป็นความรับผิดชอบของลูกค้าและผู้ให้บริการโดยตรง ***
                 </div>
             </div>
@@ -504,8 +504,8 @@ export default async (request, context) => {
                 <article class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both;">
                     <a href="${profileLink}" aria-label="ดูโปรไฟล์ ${smartAlt}" class="block absolute inset-0 z-30"></a>
                     <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
-                        <img src="${optimizeImg(p.imagePath, 320, 400)}" 
-                             width="320" height="400"
+                        <img src="${optimizeImg(p.imagePath, 182, 228)}" 
+                             width="182" height="228"
                              onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
                              alt="${smartAlt}"
                              class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
@@ -561,7 +561,7 @@ export default async (request, context) => {
                     <i class="fas fa-hourglass-half text-3xl text-[#00F3FF] animate-pulse" aria-hidden="true"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-white mb-3 text-neon-cyan tracking-wide">กำลังอัปเดตระบบ</h3>
-                <p class="text-zinc-400 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+                <p class="text-zinc-228 text-sm md:text-base max-w-md mx-auto leading-relaxed">
                     ขณะนี้กำลังจัดเตรียมโปรไฟล์น้องๆ ระดับ VIP ในโซน <strong class="text-white">${escapeHTML(provinceName)}</strong><br/>กรุณากลับมาตรวจสอบใหม่อีกครั้งในภายหลัง
                 </p>
                 <a href="/" class="mt-8 btn-neon px-8 py-3 rounded-full text-sm font-bold font-orbitron tracking-widest uppercase">
@@ -601,14 +601,14 @@ export default async (request, context) => {
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
     
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" as="style">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap"></noscript>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap"></noscript>
     
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high">
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high">
     
-    ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 400, 500)}" fetchpriority="high">` : ''}
+    ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 228, 500)}" fetchpriority="high">` : ''}
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -751,7 +751,7 @@ export default async (request, context) => {
     <header class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
         <div class="absolute inset-0 bg-[#0A0014] overflow-hidden pointer-events-none -z-10" aria-hidden="true">
             <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
-            <div class="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+            <div class="absolute bottom-[10%] right-[10%] w-[228px] h-[228px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
         </div>
 
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
@@ -799,22 +799,49 @@ export default async (request, context) => {
             </div>
         </div>
 
-        <section aria-label="ช่องทางติดต่อทางการ" class="max-w-6xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
-            <div class="text-center mb-5">
-                <span class="text-[10px] md:text-xs text-zinc-300 font-bold uppercase tracking-[0.2em] cyber-glass px-4 py-1.5 rounded-full font-orbitron shadow-[0_0_10px_rgba(112,0,255,0.2)]">
-                    Connect With Our Official Channels
-                </span>
-            </div>
+<section aria-label="ช่องทางติดต่อทางการ" class="max-w-6xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
+    <!-- ส่วนหัวข้อ: ปรับตัวหนังสือให้ขาวชัดเจนขึ้น -->
+    <div class="text-center mb-5">
+        <span class="text-[10px] md:text-xs text-white font-bold uppercase tracking-[0.2em] bg-zinc-800/80 px-4 py-1.5 rounded-full font-orbitron shadow-[0_0_10px_rgba(112,0,255,0.4)] border border-white/20">
+            Connect With Our Official Channels
+        </span>
+    </div>
 
-            <nav aria-label="โซเชียลมีเดีย" class="overflow-x-auto no-scrollbar pb-6">
-                <div class="flex flex-nowrap justify-start lg:justify-center gap-3 w-max mx-auto px-4">
-                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00c300]/10 border border-[#00c300]/30 rounded-full text-xs font-bold text-[#00c300] hover:bg-[#00c300]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(0,195,0,0.4)] transition-all duration-300 font-orbitron"><i class="fab fa-line text-base" aria-hidden="true"></i> LINE</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-white/5 border border-white/20 rounded-full text-xs font-bold text-white hover:bg-white/10 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 font-orbitron"><i class="fab fa-x-twitter text-base" aria-hidden="true"></i> TWITTER</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#ff0050]/10 border border-[#ff0050]/30 rounded-full text-xs font-bold text-[#ff0050] hover:bg-[#ff0050]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,0,80,0.4)] transition-all duration-300 font-orbitron"><i class="fab fa-tiktok text-base" aria-hidden="true"></i> TIKTOK</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#0085ff]/10 border border-[#0085ff]/30 rounded-full text-xs font-bold text-[#0085ff] hover:bg-[#0085ff]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(0,133,255,0.4)] transition-all duration-300 font-orbitron"><i class="fas fa-cloud text-base" aria-hidden="true"></i> BLUESKY</a>
-                    <a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#39e09b]/10 border border-[#39e09b]/30 rounded-full text-xs font-bold text-[#39e09b] hover:bg-[#39e09b]/20 hover:scale-105 hover:shadow-[0_0_15px_rgba(57,224,155,0.4)] transition-all duration-300 font-orbitron"><i class="fas fa-link text-base" aria-hidden="true"></i> LINKTREE</a>
-                </div>
-            </nav>
+    <nav aria-label="โซเชียลมีเดีย" class="overflow-x-auto no-scrollbar pb-6">
+        <div class="flex flex-nowrap justify-start lg:justify-center gap-3 w-max mx-auto px-4">
+            
+            <!-- LINE: ปรับสีเขียวให้สว่างขึ้น (Neon Green) -->
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00c300]/20 border border-[#00c300]/50 rounded-full text-xs font-bold text-[#00ff00] hover:bg-[#00c300]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fab fa-line text-base" aria-hidden="true"></i> LINE
+            </a>
+
+            <!-- TWITTER: ปรับพื้นหลังให้เข้มขึ้นเพื่อให้ตัวหนังสือขาวเด่นออกมา -->
+            <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-white/10 border border-white/40 rounded-full text-xs font-bold text-white hover:bg-white/20 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fab fa-x-twitter text-base" aria-hidden="true"></i> TWITTER
+            </a>
+
+            <!-- TIKTOK: เพิ่ม Contrast สีชมพูแดง -->
+            <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#ff0050]/20 border border-[#ff0050]/50 rounded-full text-xs font-bold text-[#ff3d7f] hover:bg-[#ff0050]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fab fa-tiktok text-base" aria-hidden="true"></i> TIKTOK
+            </a>
+
+            <!-- BLUESKY: ปรับสีฟ้าให้เข้มสว่าง (Vivid Blue) -->
+            <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#0085ff]/20 border border-[#0085ff]/50 rounded-full text-xs font-bold text-[#40a9ff] hover:bg-[#0085ff]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fas fa-cloud text-base" aria-hidden="true"></i> BLUESKY
+            </a>
+
+            <!-- LINKTREE: ปรับสีเขียวมิ้นต์ให้สว่างขึ้น -->
+            <a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#39e09b]/20 border border-[#39e09b]/50 rounded-full text-xs font-bold text-[#5df5b7] hover:bg-[#39e09b]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fas fa-link text-base" aria-hidden="true"></i> LINKTREE
+            </a>
+
+        </div>
+    </nav>
             
             <div class="mt-4 flex justify-center">
                 <div class="group relative" role="alert" aria-live="polite">
@@ -928,7 +955,7 @@ export default async (request, context) => {
     <nav aria-label="เมนูนำทางหลักบนมือถือ" class="fixed bottom-0 left-0 w-full md:hidden z-50 pb-[env(safe-area-inset-bottom)]" style="background: rgba(10, 0, 20, 0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid #3D1A5F; box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);">
         <ul class="flex items-center justify-around h-[65px] px-2 m-0 list-none">
             <li class="w-full h-full">
-                <a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#00F3FF] transition-all">
+                <a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-228 hover:text-[#00F3FF] transition-all">
                     <i class="fas fa-home text-[20px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] font-medium tracking-wide">หน้าแรก</span>
                 </a>
@@ -948,13 +975,13 @@ export default async (request, context) => {
                 </a>
             </li>
             <li class="w-full h-full">
-                <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#7000FF] transition-all">
+                <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-228 hover:text-[#7000FF] transition-all">
                     <i class="fas fa-map-marker-alt text-[20px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] font-medium tracking-wide">พื้นที่</span>
                 </a>
             </li>
             <li class="w-full h-full">
-                <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-white transition-all">
+                <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-zinc-228 hover:text-white transition-all">
                     <i class="fas fa-search text-[20px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] font-medium tracking-wide">ค้นหา</span>
                 </a>
