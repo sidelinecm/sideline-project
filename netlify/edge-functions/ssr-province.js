@@ -28,7 +28,7 @@ const PROVINCE_SEO_DATA = {
         hotels:['โรงแรมระดับพรีเมียมแถวนิมมาน', 'ที่พักใกล้คูเมือง', 'คอนโดหรูเจ็ดยอด', 'รีสอร์ทส่วนตัวแม่ริม'],
         services:['บริการเอนเตอร์เทนส่วนตัว', 'ดูแลฟิวแฟนเดินนิมมาน', 'ปาร์ตี้พูลวิลล่าระดับ VIP', 'เพื่อนเที่ยวผ่อนคลายส่วนตัว'],
         avgPrice: "1,500 - 4,000",
-        uniqueIntro: "หากคุณกำลังมองหาน้องๆ <strong>รับงานเชียงใหม่</strong> หรือ <strong>สาวไซด์ไลน์เชียงใหม่</strong> ระดับพรีเมียม ที่นี่คือศูนย์รวมนางแบบและเพื่อนเที่ยวสาวเหนือผิวออร่า ที่พร้อมดูแลคุณแบบฟิวแฟน ไม่ว่าคุณจะพักอยู่โซนนิมมาน สันติธรรม หรือรีสอร์ทส่วนตัว เรามีตั้งแต่น้องนักศึกษาไปจนถึงพริตตี้ท้องถิ่น การันตีความตรงปก 100% ปลอดภัย ไร้กังวลเรื่องโอนมัดจำ",
+        uniqueIntro: "กำลังมองหาน้องๆ <strong>รับงานเชียงใหม่</strong> หรือ <strong>สาวไซด์ไลน์เชียงใหม่</strong> ระดับพรีเมียมอยู่ใช่ไหม? ที่นี่คือศูนย์รวมนางแบบและเพื่อนเที่ยวสาวเหนือผิวออร่า พร้อมดูแลคุณแบบฟิวแฟนในทุกโซนของเชียงใหม่ ไม่ว่าจะเป็นนิมมาน, สันติธรรม หรือรีสอร์ทส่วนตัว การันตีความตรงปก 100% ปลอดภัย ไร้กังวลเรื่องโอนมัดจำ",
         faqs:[
             { q: "หาน้องๆ รับงานเชียงใหม่ โซนไหนเดินทางสะดวกและเป็นส่วนตัวสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นโซนที่น้องๆ พร้อมให้บริการมากที่สุด และมีโรงแรมระดับพรีเมียมรองรับการนัดหมายอย่างปลอดภัย" },
             { q: "ความปลอดภัยในการเรียกสาวไซด์ไลน์เชียงใหม่?", a: "เราเน้นระบบ 'ไม่โอนมัดจำ' ลูกค้าเจอตัวน้อง จ่ายเงินหน้างานเท่านั้น ป้องกันมิจฉาชีพ 100% พร้อมเก็บข้อมูลลูกค้าเป็นความลับสูงสุด" },
@@ -173,7 +173,7 @@ const PROVINCE_SEO_DATA = {
         hotels:['โรงแรมในตัวเมือง', 'รีสอร์ทส่วนตัว'],
         services:['ฟิวแฟนส่วนตัว', 'เพื่อนเที่ยว-ดูหนัง', 'เอนเตอร์เทนผ่อนคลาย'],
         avgPrice: "1,500 - 3,500",
-        uniqueIntro: "หากคุณกำลังมองหาช่วงเวลาการพักผ่อนเหนือระดับ เรารวบรวมน้องๆ <strong>รับงานส่วนตัว</strong>และ<strong>ไซด์ไลน์เกรดพรีเมียม</strong> ที่ผ่านการคัดสรรอย่างเข้มงวด การันตีความตรงปก 100% พร้อมให้บริการในพื้นที่ นัดหมายได้อย่างเป็นส่วนตัว ปลอดภัย ไม่มีการบังคับโอนมัดจำ จ่ายเงินเมื่อเจอตัวจริงเท่านั้น",
+        uniqueIntro: "หากคุณกำลังมองหาช่วงเวลาการพักผ่อนเหนือระดับในพื้นที่ของคุณ เรารวบรวมน้องๆ <strong>รับงานส่วนตัว</strong>และ<strong>ไซด์ไลน์เกรดพรีเมียม</strong> ที่ผ่านการคัดสรรอย่างเข้มงวด การันตีความตรงปก 100% พร้อมให้บริการ นัดหมายได้อย่างเป็นส่วนตัว ปลอดภัย ไม่มีการบังคับโอนมัดจำ จ่ายเงินเมื่อเจอตัวจริงเท่านั้น",
         faqs:[
             { q: "ใช้บริการน้องๆ รับงาน ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายเงินสดหน้างานเมื่อเจอตัวน้องจริงเท่านั้น เพื่อความปลอดภัยสูงสุดของคุณ" },
             { q: "รับประกันความตรงปกไหม?", a: "รูปโปรไฟล์ทุกรูปผ่านการคัดกรอง ยืนยันตัวตนแล้วว่าตรงปกและพร้อมให้บริการระดับพรีเมียมอย่างแท้จริง" }
@@ -209,84 +209,101 @@ const escapeHTML = (str) => {
 
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
+    
+    const termsAndConditions = [
+        {t: "การจองคิวงานส่วนตัว", d: "เพื่อความเป็นส่วนตัวสูงสุด สมาชิก 1 ท่าน สามารถจองคิวงานได้ครั้งละ 1 คิวเท่านั้น ป้องกันความสับสนและรักษาคุณภาพบริการ"},
+        {t: "ความปลอดภัยทางการเงิน", d: "ชำระเงินหน้างานเมื่อพบตัวน้องจริงเท่านั้น! เราไม่มีนโยบายให้โอนมัดจำล่วงหน้าทุกกรณี ปลอดภัยจากมิจฉาชีพ 100%"},
+        {t: "การตรวจสอบโปรไฟล์", d: "น้องๆ ทุกคนผ่านการตรวจสอบรูปภาพและยืนยันตัวตนแล้ว รับประกันโปรไฟล์ตรงปก เพื่อประสบการณ์ที่ดีที่สุดของคุณ"},
+        {t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับสูงสุด และจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น"}
+    ];
+
     return `
     <section class="mt-8 px-4 space-y-8 pb-10">
-        <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto">
-            <a href="${CONFIG.SOCIAL_LINKS.line}" class="flex flex-col items-center justify-center py-4 rounded-2xl bg-[#06C755] text-white shadow-[0_0_20px_rgba(6,199,85,0.4)] active:scale-95 transition-all">
-                <i class="fab fa-line text-2xl mb-1.5"></i>
-                <span class="text-[10px] font-black font-orbitron tracking-widest">LINE</span>
-            </a>
-            <a href="${CONFIG.SOCIAL_LINKS.twitter}" class="flex flex-col items-center justify-center py-4 rounded-2xl bg-black text-white border border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)] active:scale-95 transition-all">
-                <i class="fab fa-x-twitter text-2xl mb-1.5"></i>
-                <span class="text-[10px] font-black font-orbitron tracking-widest">TWITTER</span>
-            </a>
-            <a href="${CONFIG.SOCIAL_LINKS.bluesky}" class="flex flex-col items-center justify-center py-4 rounded-2xl bg-[#0085ff] text-white shadow-[0_0_20px_rgba(0,133,255,0.4)] active:scale-95 transition-all">
-                <i class="fas fa-paper-plane text-2xl mb-1.5"></i>
-                <span class="text-[10px] font-black font-orbitron tracking-widest">TELEGRAM</span>
-            </a>
+
+        <!-- Social Links Header -->
+        <div class="max-w-md mx-auto p-4 space-y-4">
+            <div class="flex items-center justify-center">
+                <div class="px-6 py-2 bg-gradient-to-r from-[#FF007F] to-[#7000FF] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.5)]">
+                    <span class="text-white font-bold text-lg tracking-widest font-orbitron">VIP PROMOTION</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#06C755] text-white shadow-[0_0_15px_rgba(6,199,85,0.4)] active:scale-95 transition-all">
+                    <i class="fab fa-line text-xl"></i>
+                    <span class="text-sm font-bold">LINE</span>
+                </a>
+                <a href="${CONFIG.SOCIAL_LINKS.twitter}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-black text-white border border-zinc-700 shadow-[0_0_15px_rgba(0,0,0,0.5)] active:scale-95 transition-all">
+                    <i class="fab fa-x-twitter text-xl"></i>
+                    <span class="text-sm font-bold">X</span>
+                </a>
+                <a href="${CONFIG.SOCIAL_LINKS.bluesky}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#0085ff] text-white shadow-[0_0_15px_rgba(0,133,255,0.4)] active:scale-95 transition-all">
+                    <i class="fas fa-paper-plane text-xl"></i>
+                    <span class="text-sm font-bold">Telegram</span>
+                </a>
+            </div>
         </div>
 
-        <div class="relative overflow-hidden rounded-[2.5rem] border border-[#FF007F]/40 bg-[#0A0014] shadow-[0_0_30px_rgba(255,0,127,0.2)]">
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#FF007F]/20 blur-[60px]"></div>
-            <div class="relative z-10 p-6 md:p-8">
-                <div class="flex items-center justify-center gap-3 mb-5">
-                    <span class="text-2xl animate-bounce">🔥</span>
-                    <h2 class="text-2xl font-black text-white font-orbitron tracking-tight text-neon uppercase">VIP Promotion</h2>
-                    <span class="text-2xl animate-bounce">🔥</span>
+        <!-- Promotion Box -->
+        <div class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.3)] max-w-md mx-auto">
+            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
+                <div class="text-center mb-4">
+                    <h3 class="text-white text-xl font-bold">😘 ข้อเสนอพิเศษสำหรับโซน ${escapeHTML(provinceName)}</h3>
+                    <p class="text-zinc-400 text-xs">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
+                    <p class="text-yellow-400 text-xs font-semibold mt-1">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
                 </div>
-                <div class="bg-[#1A0B2E]/80 border border-[#3D1A5F] rounded-2xl p-5 mb-6 text-center shadow-inner">
-                    <p class="text-sm md:text-base text-zinc-300 leading-relaxed font-light">
-                        สิทธิพิเศษสำหรับลูกค้า <span class="text-[#00F3FF] font-bold text-neon-cyan">รับงาน${escapeHTML(provinceName)}</span> <br class="hidden md:block"/>
-                        พบกับน้องๆ ระดับพรีเมียม <strong class="text-[#FF007F]">ไม่โอนมัดจำล่วงหน้า</strong> <br class="hidden md:block"/>
-                        การันตีความปลอดภัยและข้อมูลส่วนตัวเป็นความลับ 100%
+                
+                <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-2">
+                    <p class="text-white text-center text-sm font-semibold">
+                        <span class="text-[#00F3FF]">👍 รับประกันความพึงพอใจ</span> 
+                        <span class="text-zinc-300">เมื่อยืนยันการจองด้วยรหัสนี้</span>
                     </p>
-                </div>
-                <div class="flex items-center justify-between bg-gradient-to-r from-[#FF007F] to-[#7000FF] p-[2px] rounded-[1.25rem] max-w-md mx-auto">
-                    <div class="w-full bg-[#0A0014] rounded-[1.15rem] py-3 px-5 flex items-center justify-between">
-                        <div class="text-left">
-                            <p class="text-[9px] text-[#FF007F] font-bold uppercase tracking-widest mb-1">Promo Code</p>
-                            <p class="text-xl md:text-2xl font-black text-white font-orbitron tracking-tighter">VIP-${provinceKey.toUpperCase()}</p>
-                        </div>
-                        <button class="bg-[#FF007F] text-white text-[10px] md:text-xs font-bold px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(255,0,127,0.6)] active:scale-90 transition-all font-orbitron">
-                            COPY CODE
-                        </button>
+                    <div class="bg-black/50 rounded-lg flex items-center justify-center gap-3 py-2.5">
+                        <i class="fas fa-gem text-lg text-[#FF007F]"></i>
+                        <span class="text-white font-bold text-lg tracking-wider">Code : </span>
+                        <span class="text-yellow-300 font-bold text-lg tracking-wider">VIP-${provinceKey.toUpperCase()}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-[#0A0014]/80 backdrop-blur-xl rounded-[2.5rem] p-6 md:p-10 border border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.1)]">
-            <div class="text-center mb-8">
-                <span class="inline-block px-4 py-1.5 rounded-full bg-[#7000FF]/10 text-[#00F3FF] text-[10px] font-bold font-orbitron tracking-[0.3em] border border-[#00F3FF]/30 mb-3 uppercase shadow-[0_0_10px_rgba(0,243,255,0.2)]">Galaxy VIP Standard</span>
-                <h3 class="text-2xl font-black text-white font-orbitron text-neon">เงื่อนไขการใช้บริการ</h3>
-            </div>
-            <div class="space-y-4">
-                ${[
-                    {t: "การจองงานส่วนตัว", d: "สมาชิก 1 คน ต่อ 1 คิวงานเท่านั้น เพื่อป้องกันความสับสนและรักษาความเป็นส่วนตัว"},
-                    {t: "ความปลอดภัยทางการเงิน", d: "จ่ายเงินหน้างานเมื่อเจอตัวน้องจริงเท่านั้น ปลอดภัย 100% ไร้มิจฉาชีพ"},
-                    {t: "การตรวจสอบโปรไฟล์", d: "น้องๆ ทุกคนผ่านการตรวจสอบรูปภาพและยืนยันตัวตนว่าตรงปกทุกกรณี"},
-                    {t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายจะถูกเก็บเป็นความลับสูงสุดและลบออกจากระบบทันทีหลังจบงาน"}
-                ].map((item, idx) => `
-                    <div class="flex gap-4 md:gap-6 items-center p-4 md:p-6 rounded-2xl bg-[#1A0B2E]/40 border border-[#3D1A5F]/40 group hover:border-[#FF007F]/50 hover:bg-[#1A0B2E]/80 transition-all duration-300">
-                        <div class="w-12 h-12 shrink-0 rounded-full bg-[#0A0014] border-2 border-[#FF007F] flex items-center justify-center text-[#FF007F] font-black font-orbitron text-xl shadow-[0_0_15px_rgba(255,0,127,0.4)] group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,0,127,0.8)] transition-all">
-                            ${idx + 1}
-                        </div>
-                        <div>
-                            <h4 class="text-white text-sm md:text-base font-bold mb-1 group-hover:text-[#FF007F] transition-colors">${item.t}</h4>
-                            <p class="text-zinc-400 text-[11px] md:text-xs leading-relaxed font-light">${item.d}</p>
-                        </div>
+        <!-- Terms and Conditions Box -->
+        <div class="p-[2px] bg-gradient-to-b from-[#7000FF] to-[#FF007F] rounded-3xl shadow-[0_0_30px_rgba(112,0,255,0.3)] max-w-md mx-auto">
+            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
+                <div class="text-center mb-6">
+                    <div class="inline-block px-5 py-2 bg-black/30 border border-[#3D1A5F] rounded-full">
+                        <h3 class="text-white text-xl font-bold tracking-wide">เงื่อนไขการใช้บริการ</h3>
                     </div>
-                `).join('')}
+                </div>
+                
+                <div class="space-y-4">
+                    ${termsAndConditions.map((item, idx) => `
+                        <div class="flex gap-4 items-start p-4 rounded-2xl bg-[#0A0014]/50 border border-[#3D1A5F]/70">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-[#FF007F] to-[#7000FF] flex items-center justify-center text-white font-bold text-lg shadow-[0_0_10px_rgba(255,0,127,0.5)]">
+                                ${idx + 1}
+                            </div>
+                            <div class="pt-1">
+                                <h4 class="text-white text-base font-bold mb-1">${item.t}</h4>
+                                <p class="text-zinc-400 text-xs leading-relaxed font-light">${item.d}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                 <div class="mt-6 text-center text-xs text-red-400 font-semibold p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                    *** ${CONFIG.BRAND_NAME} เป็นเพียงสื่อกลางในการจัดหาโปรไฟล์เท่านั้น การตัดสินใจนัดหมายถือเป็นความรับผิดชอบของลูกค้าและผู้ให้บริการโดยตรง ***
+                </div>
             </div>
         </div>
 
-        <div class="text-center py-8 px-6 bg-[#1A0B2E]/30 rounded-[2rem] border border-[#3D1A5F]/40">
-            <p class="text-zinc-400 text-xs md:text-sm font-light leading-loose italic">
-                "${data.uniqueIntro}"
+        <!-- Unique Intro Box -->
+        <div class="text-center py-8 px-6 bg-[#1A0B2E]/30 rounded-[2rem] border border-[#3D1A5F]/40 max-w-2xl mx-auto">
+             <h3 class="text-xl font-bold text-white mb-4 text-neon-cyan">ทำไมต้องเลือกไซด์ไลน์ ${escapeHTML(provinceName)} จากเรา?</h3>
+            <p class="text-zinc-300 text-sm md:text-base font-light leading-loose">
+                ${data.uniqueIntro}
             </p>
         </div>
     </section>`;
 };
+
 
 export default async (request, context) => {
     try {
@@ -329,8 +346,8 @@ export default async (request, context) => {
         
         const firstImage = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/seo-default.webp`;
 
-        const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟน เด็กเอ็น | ไม่มีมัดจำ อัปเดต ${CURRENT_MONTH}`;
-        const description = `รวมน้องๆ รับงาน${provinceName} ไซด์ไลน์${provinceName} เด็กเอ็น เกรด VIP ${safeProfiles.length} คน โซน ${(seoData.zones||['ตัวเมือง']).slice(0,3).join(', ')} ✓ตรงปก 100% ✓ไม่โอนมัดจำ ✓จ่ายเงินหน้างานเท่านั้น`;
+        const title = `ไซด์ไลน์${provinceName} (${safeProfiles.length > 0 ? `${safeProfiles.length}+ คน` : 'เกรดพรีเมียม'}) รับงานเด็กเอ็น VIP ไม่ต้องมัดจำ`;
+        const description = `รวมน้องๆ รับงาน${provinceName} และไซด์ไลน์${provinceName} ระดับ VIP ${safeProfiles.length} โปรไฟล์ โซน ${(seoData.zones||['ตัวเมือง']).slice(0,3).join(', ')} และอีกมากมาย ✓การันตีตรงปก 100% ✓ไม่บังคับโอนมัดจำ ✓จ่ายเงินสดหน้างานเท่านั้น`;
 
         const priceParts = (seoData.avgPrice || "1,500 - 3,500").split('-');
         const startPrice = priceParts[0] ? priceParts[0].trim() : "1,500";
@@ -472,7 +489,7 @@ export default async (request, context) => {
                 const myIntent = intents[i % intents.length];
                 const myTrait = traits[i % traits.length];
                 
-                const smartAlt = `${myIntent} น้อง${cleanName} ${profileLocation} ${myTrait} ${lsiKeyword}`;
+                const smartAlt = `น้อง${cleanName} - ${lsiKeyword} โซน${profileLocation} | ${myTrait}, ${myIntent}`;
 
                 const imageAttributes = i < 4 
                     ? 'fetchpriority="high" decoding="sync"' 
@@ -740,18 +757,20 @@ export default async (request, context) => {
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
             <div class="flex-1 text-center lg:text-left z-10 animate-fade-in-up">
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full cyber-glass text-[10px] md:text-xs font-semibold text-white uppercase tracking-widest mb-4 md:mb-6 font-orbitron shadow-[0_0_10px_rgba(255,0,127,0.2)]">
-                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#FF007F] animate-pulse shadow-[0_0_8px_#FF007F]" aria-hidden="true"></span> Exclusive Escort
+                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#FF007F] animate-pulse shadow-[0_0_8px_#FF007F]" aria-hidden="true"></span> ${CONFIG.BRAND_NAME}
                 </div>
+                
                 <h1 class="text-3xl md:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-4 md:mb-6 tracking-tight">
-                    <span class="text-[#FF007F] text-neon" style="text-shadow: 0 0 20px rgba(255,0,127,0.8);">รับงานไซด์ไลน์${escapeHTML(provinceName)}</span><br/>
-                    <span class="text-white text-neon">Premium Service</span>
+                    <span class="text-[#FF007F] text-neon" style="text-shadow: 0 0 20px rgba(255,0,127,0.8);">ไซด์ไลน์${escapeHTML(provinceName)}</span><br/>
+                    <span class="text-white text-neon-cyan">คัดเกรด VIP (เด็กเอ็นพรีเมียม)</span>
                 </h1>
                 <p class="text-zinc-300 text-sm md:text-lg mb-6 md:mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
-                    ยกระดับการพักผ่อนหาเพื่อน กิน เที่ยว ดูหนัง ฟังเพลง แบบฟิวแฟนด้วยบริการระดับ VIP ตรงปก ปลอดภัย ไม่มีการบังคับโอนมัดจำล่วงหน้า จ่ายเงินเมื่อเจอตัวจริงเท่านั้น
+                    สัมผัสประสบการณ์พักผ่อนเหนือระดับใน **${escapeHTML(provinceName)}** กับน้องๆ **ไซด์ไลน์ VIP** ที่คัดมาเพื่อคุณ ไม่ว่าจะเป็น **เพื่อนเที่ยวน่ารักๆ** หรือ **เด็กเอ็น** ดูแลในปาร์ตี้ส่วนตัว ที่นี่คือศูนย์รวมบริการพรีเมียมที่รับประกันความตรงปก ปลอดภัย 100% **ไม่ต้องโอนมัดจำ**
                 </p>
+
                 <div class="flex flex-col sm:flex-row items-center gap-3 md:gap-4 justify-center lg:justify-start">
                     <a href="#profiles-grid" class="w-full sm:w-auto btn-neon px-8 py-3.5 md:py-4 rounded-full font-bold text-sm text-center font-orbitron">
-                        ดูโปรไฟล์น้องๆ
+                        ดูโปรไฟล์น้องๆ ทั้งหมด
                     </a>
                     <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ปรึกษาแอดมินผ่าน LINE" class="w-full sm:w-auto cyber-glass hover:bg-[#1A0B2E] text-white px-8 py-3.5 md:py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(112,0,255,0.4)]">
                         <i class="fab fa-line text-lg text-[#00c300]" aria-hidden="true"></i> ปรึกษาแอดมิน
@@ -828,11 +847,11 @@ export default async (request, context) => {
         <section id="profiles-grid" aria-label="รายการโปรไฟล์น้องๆ" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 scroll-mt-24">
             <div class="flex items-end justify-between mb-6 md:mb-8">
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron text-neon">โปรไฟล์น้องๆรับงาน</h2>
-                    <p class="text-zinc-300 text-[10px] md:text-sm font-light mt-1">คอลเลกชันน้องๆ ไซด์ไลน์ โซน${escapeHTML(provinceName)}</p>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron text-neon">น้องๆ ไซด์ไลน์${escapeHTML(provinceName)} พร้อมดูแลคุณ</h2>
+                    <p class="text-zinc-300 text-[10px] md:text-sm font-light mt-1">อัปเดตล่าสุด: ${CURRENT_MONTH} ${CURRENT_YEAR}</p>
                 </div>
                 <div class="text-[10px] md:text-xs text-[#00F3FF] flex items-center gap-1.5 cyber-glass px-2.5 py-1 rounded-full border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.1)]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#00F3FF] inline-block animate-pulse shadow-[0_0_5px_#00F3FF]" aria-hidden="true"></span> อัปเดต: ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#00F3FF] inline-block animate-pulse shadow-[0_0_5px_#00F3FF]" aria-hidden="true"></span> สดใหม่: ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
                 </div>
             </div>
             
