@@ -181,8 +181,15 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-const optimizeImg = (path, width = 320, height = 400) => { 
+const getFullUrl = (path) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    if (path.startsWith('http')) return path;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${CONFIG.DOMAIN}${cleanPath}`;
+};
+
+const optimizeImg = (path, width = 320, height = 400) => { 
+    if (!path) return getFullUrl('/images/default.webp');
     if (path.includes('res.cloudinary.com')) {
         if (path.includes('/upload/')) {
             return path.replace('/upload/', `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
@@ -196,11 +203,7 @@ const optimizeImg = (path, width = 320, height = 400) => {
 const escapeHTML = (str) => {
     if (!str) return '';
     return String(str).replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[tag] || tag));
 };
 
