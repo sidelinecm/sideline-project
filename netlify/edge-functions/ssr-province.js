@@ -210,98 +210,101 @@ const escapeHTML = (str) => {
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
     
-    const termsAndConditions = [
-        {t: "การจองคิวงานส่วนตัว", d: "เพื่อความเป็นส่วนตัวสูงสุด สมาชิก 1 ท่าน สามารถจองคิวงานได้ครั้งละ 1 คิวเท่านั้น ป้องกันความสับสนและรักษาคุณภาพบริการ"},
+    const termsAndConditions =[
+        {t: "การจองคิวน้องๆ ส่วนตัว", d: `เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน${escapeHTML(provinceName)} สมาชิก 1 ท่าน สามารถจองคิวงานได้ครั้งละ 1 คิวเท่านั้น เพื่อรักษาคุณภาพบริการแบบ VIP`},
         {t: "ความปลอดภัยทางการเงิน", d: "ชำระเงินหน้างานเมื่อพบตัวน้องจริงเท่านั้น! เราไม่มีนโยบายให้โอนมัดจำล่วงหน้าทุกกรณี ปลอดภัยจากมิจฉาชีพ 100%"},
-        {t: "การตรวจสอบโปรไฟล์", d: "น้องๆ ทุกคนผ่านการตรวจสอบรูปภาพและยืนยันตัวตนแล้ว รับประกันโปรไฟล์ตรงปก เพื่อประสบการณ์ที่ดีที่สุดของคุณ"},
-        {t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับสูงสุด และจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น"}
+        {t: "การตรวจสอบโปรไฟล์", d: "รูปโปรไฟล์น้องๆ ทุกคนผ่านการตรวจสอบและยืนยันตัวตนแล้ว รับประกันความตรงปก เพื่อประสบการณ์ที่ดีที่สุดของคุณ"},
+        {t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับระดับสูงสุด และจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น"}
     ];
 
     return `
-    <section class="mt-8 px-4 space-y-8 pb-10">
+    <section class="mt-8 px-4 space-y-8 pb-10" aria-labelledby="promo-terms-heading">
+        
+        <!-- SEO Semantic: ซ่อน H2 ไว้ให้บอท Google อ่าน เพื่อให้โครงสร้างหัวข้อ (H2 -> H3 -> H4) ถูกต้อง 100% -->
+        <h2 id="promo-terms-heading" class="sr-only">โปรโมชั่นและเงื่อนไขการเรียกไซด์ไลน์${escapeHTML(provinceName)}</h2>
 
-<div class="max-w-md mx-auto p-4 space-y-4">
-    <div class="flex items-center justify-center">
-        <!-- ปรับ Gradient ให้เข้มขึ้นเล็กน้อย -->
-        <div class="px-6 py-2 bg-gradient-to-r from-[#e60073] to-[#5e00d6] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.3)]">
-            <span class="text-white font-bold text-lg tracking-widest">VIP PROMOTION</span>
-        </div>
-    </div>
-    
-    <div class="grid grid-cols-3 gap-3">
+        <div class="max-w-md mx-auto p-4 space-y-4">
+            <div class="flex items-center justify-center">
+                <div class="px-6 py-2 bg-gradient-to-r from-[#e60073] to-[#5e00d6] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.3)]">
+                    <span class="text-white font-bold text-lg tracking-widest">VIP PROMOTION</span>
+                </div>
+            </div>
+            
+            <!-- แก้ไข Grid เป็น 2 คอลัมน์ให้สมดุล และดึงลิงก์จาก CONFIG มาใช้จริง -->
+            <div class="grid grid-cols-2 gap-3 max-w-[320px] mx-auto">
+                <a href="${CONFIG.SOCIAL_LINKS.twitter || '#'}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามผ่าน X (Twitter)" class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#000000] hover:bg-zinc-800 active:scale-95 transition-all shadow-md border border-zinc-800">
+                    <i class="fab fa-x-twitter text-xl text-white" aria-hidden="true"></i>
+                    <span class="text-sm font-bold text-white">X Twitter</span>
+                </a>
 
-
-        <!-- X (Black): ปกติผ่านอยู่แล้วเพราะสีดำตัดกับขาวได้ดีที่สุด -->
-        <a href="#" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#000000] hover:bg-gray-800 active:scale-95 transition-all shadow-md">
-            <i class="fab fa-x-twitter text-xl text-white"></i>
-            <span class="text-sm font-bold text-white">X</span>
-        </a>
-
-        <!-- Telegram/Bluesky: ปรับสีฟ้าให้เข้มขึ้นจาก #0085ff เป็น #0071da -->
-        <a href="#" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#0071da] hover:bg-[#005fb8] active:scale-95 transition-all shadow-md">
-            <i class="fas fa-paper-plane text-xl text-white"></i>
-            <span class="text-sm font-bold text-white">Telegram</span>
-        </a>
-    </div>
-</div>
-
-<!-- Promotion Box -->
-<div class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.3)] max-w-md mx-auto">
-    <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
-        <div class="text-center mb-4">
-            <h3 class="text-white text-xl font-bold">😘 ข้อเสนอพิเศษสำหรับโซน ${escapeHTML(provinceName)}</h3>
-            <p class="text-zinc-228 text-xs">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
-            <p class="text-yellow-228 text-xs font-semibold mt-1">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
-        </div>
-        <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-2">
-            <p class="text-white text-center text-sm font-semibold">
-                <span class="text-[#00F3FF]">👍 รับประกันความพึงพอใจ</span> 
-                <span class="text-zinc-300">เมื่อยืนยันการจองด้วยรหัสนี้</span>
-            </p>
-            <div class="bg-black/50 rounded-lg flex items-center justify-center gap-3 py-2.5">
-                <i class="fas fa-gem text-lg text-[#FF007F]"></i>
-                <span class="text-white font-bold text-lg tracking-wider">Code : </span>
-                <span class="text-yellow-300 font-bold text-lg tracking-wider">VIP-${provinceKey.toUpperCase()}</span>
+                <!-- Telegram/Bluesky -->
+                <a href="${CONFIG.SOCIAL_LINKS.bluesky || '#'}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามผ่าน Telegram หรือ Bluesky" class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#0071da] hover:bg-[#005fb8] active:scale-95 transition-all shadow-md">
+                    <i class="fas fa-paper-plane text-xl text-white" aria-hidden="true"></i>
+                    <span class="text-sm font-bold text-white">Telegram</span>
+                </a>
             </div>
         </div>
-    </div>
-</div>
+
+        <!-- Promotion Box -->
+        <div class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.3)] max-w-md mx-auto relative overflow-hidden">
+            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5 relative z-10">
+                <div class="text-center mb-4">
+                    <h3 class="text-white text-xl font-bold"><span aria-hidden="true">😘</span> ข้อเสนอพิเศษโซน${escapeHTML(provinceName)}</h3>
+                    <p class="text-zinc-300 text-xs mt-1">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
+                    <p class="text-yellow-400 text-xs font-semibold mt-1.5 animate-pulse">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
+                </div>
+                <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-3">
+                    <p class="text-white text-center text-sm font-semibold">
+                        <span class="text-[#00F3FF]"><i class="fas fa-thumbs-up" aria-hidden="true"></i> รับประกันความพึงพอใจ</span><br/>
+                        <span class="text-zinc-400 text-xs font-light">เมื่อยืนยันการจองด้วยรหัสนี้</span>
+                    </p>
+                    <div class="bg-black/60 rounded-xl flex items-center justify-center gap-3 py-3 border border-[#FF007F]/30 shadow-[inset_0_0_10px_rgba(255,0,127,0.2)]">
+                        <i class="fas fa-gem text-lg text-[#FF007F]" aria-hidden="true"></i>
+                        <span class="text-white font-bold text-lg tracking-wider font-orbitron">CODE : </span>
+                        <span class="text-yellow-400 font-black text-xl tracking-wider font-orbitron drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">VIP-${provinceKey.toUpperCase()}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Terms and Conditions Box -->
         <div class="p-[2px] bg-gradient-to-b from-[#7000FF] to-[#FF007F] rounded-3xl shadow-[0_0_30px_rgba(112,0,255,0.3)] max-w-md mx-auto">
             <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
                 <div class="text-center mb-6">
-                    <div class="inline-block px-5 py-2 bg-black/30 border border-[#3D1A5F] rounded-full">
-                        <h3 class="text-white text-xl font-bold tracking-wide">เงื่อนไขการใช้บริการ</h3>
+                    <div class="inline-block px-5 py-2 bg-black/30 border border-[#3D1A5F] rounded-full shadow-[inset_0_0_10px_rgba(112,0,255,0.2)]">
+                        <h3 class="text-white text-lg font-bold tracking-wide">เงื่อนไขการใช้บริการ</h3>
                     </div>
                 </div>
                 
                 <div class="space-y-4">
                     ${termsAndConditions.map((item, idx) => `
-                        <div class="flex gap-4 items-start p-4 rounded-2xl bg-[#0A0014]/50 border border-[#3D1A5F]/70">
-                            <div class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-[#FF007F] to-[#7000FF] flex items-center justify-center text-white font-bold text-lg shadow-[0_0_10px_rgba(255,0,127,0.5)]">
+                        <div class="flex gap-4 items-start p-4 rounded-2xl bg-[#0A0014]/50 border border-[#3D1A5F]/70 transition-colors hover:border-[#7000FF]/50">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-[#FF007F] to-[#7000FF] flex items-center justify-center text-white font-bold text-lg shadow-[0_0_10px_rgba(255,0,127,0.5)] font-orbitron">
                                 ${idx + 1}
                             </div>
                             <div class="pt-1">
-                                <h4 class="text-white text-base font-bold mb-1">${item.t}</h4>
-                                <p class="text-zinc-228 text-xs leading-relaxed font-light">${item.d}</p>
+                                <!-- ใช้ H4 ต่อจาก H3 ถูกต้องตามหลัก SEO -->
+                                <h4 class="text-white text-sm md:text-base font-bold mb-1">${item.t}</h4>
+                                <p class="text-zinc-300 text-xs leading-relaxed font-light">${item.d}</p>
                             </div>
                         </div>
                     `).join('')}
                 </div>
-                 <div class="mt-6 text-center text-xs text-red-228 font-semibold p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                    *** ${CONFIG.BRAND_NAME} เป็นเพียงสื่อกลางในการจัดหาโปรไฟล์เท่านั้น การตัดสินใจนัดหมายถือเป็นความรับผิดชอบของลูกค้าและผู้ให้บริการโดยตรง ***
+                
+                <div class="mt-6 text-center text-[10px] md:text-xs text-red-400 font-medium p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl leading-relaxed">
+                    *** <strong class="text-red-300">${CONFIG.BRAND_NAME}</strong> เป็นเพียงสื่อกลางในการจัดหาโปรไฟล์เท่านั้น การตัดสินใจนัดหมายถือเป็นความรับผิดชอบของลูกค้าและผู้ให้บริการโดยตรง ***
                 </div>
             </div>
         </div>
 
         <!-- Unique Intro Box -->
-        <div class="text-center py-8 px-6 bg-[#1A0B2E]/30 rounded-[2rem] border border-[#3D1A5F]/40 max-w-2xl mx-auto">
-             <h3 class="text-xl font-bold text-white mb-4 text-neon-cyan">ทำไมต้องเลือกไซด์ไลน์ ${escapeHTML(provinceName)} จากเรา?</h3>
+        <div class="text-center py-8 px-6 bg-[#1A0B2E]/40 rounded-[2rem] border border-[#3D1A5F]/40 max-w-2xl mx-auto backdrop-blur-sm shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+             <h3 class="text-xl md:text-2xl font-bold text-white mb-4 text-neon-cyan drop-shadow-md">ทำไมต้องเลือกไซด์ไลน์${escapeHTML(provinceName)} จากเรา?</h3>
             <p class="text-zinc-300 text-sm md:text-base font-light leading-loose">
                 ${data.uniqueIntro}
             </p>
         </div>
+        
     </section>`;
 };
 
@@ -490,10 +493,12 @@ export default async (request, context) => {
                 const myIntent = intents[i % intents.length];
                 const myTrait = traits[i % traits.length];
                 
-                const smartAlt = `น้อง${cleanName} - ${lsiKeyword} โซน${profileLocation} | ${myTrait}, ${myIntent}`;
+
+                const smartAlt = `รูปโปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} พิกัดโซน${profileLocation} จุดเด่น${myTrait} เหมาะกับผู้ที่ต้องการ${myIntent}`;
+
 
                 const imageAttributes = i < 4 
-                    ? 'fetchpriority="high" decoding="sync"' 
+                    ? 'loading="eager" fetchpriority="high" decoding="sync"' 
                     : 'loading="lazy" decoding="async"';
 
                 const statusBgClass = isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]';
@@ -503,19 +508,25 @@ export default async (request, context) => {
 
                 return `
     <article class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both; content-visibility: auto;">
-        <a href="${profileLink}" aria-label="ดูโปรไฟล์ ${smartAlt}" class="block absolute inset-0 z-30"></a>
+        
+        <!-- SEO & A11y อัปเกรด: ใส่ sr-only เพื่ออธิบายลิงก์ให้ Google Bot และ Screen Reader เข้าใจอย่างถ่องแท้ -->
+        <a href="${profileLink}" title="ดูข้อมูลรับงานและเรทราคาของน้อง${cleanName}" class="block absolute inset-0 z-30">
+            <span class="sr-only">ดูโปรไฟล์ รายละเอียด และเรทราคาการรับงานของน้อง${cleanName} โซน${profileLocation}</span>
+        </a>
+        
         <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
+            <!-- อัปเกรด Title ลงในรูปภาพเพื่อเพิ่ม Tooltip และ Contextual SEO -->
             <img src="${optimizeImg(p.imagePath, 182, 228)}" 
                  width="182" height="228"
-                 loading="lazy"
                  onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
                  alt="${smartAlt}"
+                 title="น้อง${cleanName} - ${lsiKeyword}"
                  class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
                  ${imageAttributes}>
             
             <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/20 to-[#FF007F]/10 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700"></div>
             <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.8)] z-10 pointer-events-none"></div>
-            <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/70 to-transparent z-10 pointer-events-none"></div>
+            <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/80 to-transparent z-10 pointer-events-none"></div>
             
             <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full ${statusShadowClass} border ${statusBorderClass}">
                 <span class="relative flex h-2 w-2" aria-hidden="true">
@@ -560,13 +571,14 @@ export default async (request, context) => {
     </article>`;
             }).join('');
         } else {
+            // แก้ไข Typo text-zinc-400 ให้เป็น text-zinc-300
             cardsHTML = `
             <div class="col-span-full flex flex-col items-center justify-center py-20 md:py-32 text-center cyber-glass rounded-[2rem] border border-[#3D1A5F]/50">
                 <div class="w-20 h-20 bg-[#1A0B2E] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(112,0,255,0.2)] border border-[#7000FF]/30">
                     <i class="fas fa-hourglass-half text-3xl text-[#00F3FF] animate-pulse" aria-hidden="true"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-white mb-3 text-neon-cyan tracking-wide">กำลังอัปเดตระบบ</h3>
-                <p class="text-zinc-228 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+                <h2 class="text-2xl font-bold text-white mb-3 text-neon-cyan tracking-wide">กำลังอัปเดตระบบ</h2>
+                <p class="text-zinc-300 text-sm md:text-base max-w-md mx-auto leading-relaxed">
                     ขณะนี้กำลังจัดเตรียมโปรไฟล์น้องๆ ระดับ VIP ในโซน <strong class="text-white">${escapeHTML(provinceName)}</strong><br/>กรุณากลับมาตรวจสอบใหม่อีกครั้งในภายหลัง
                 </p>
                 <a href="/" class="mt-8 btn-neon px-8 py-3 rounded-full text-sm font-bold font-orbitron tracking-widest uppercase">
@@ -578,55 +590,87 @@ export default async (request, context) => {
         const html = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth bg-[#0A0014]">
 <head>
+<!-- 
+    ========================================================================
+    © 2026 SIDELINE CHIANGMAI. All Rights Reserved.
+    WARNING: This source code, layout, and content are protected by copyright laws.
+    Unauthorized crawling, scraping, or copying is strictly prohibited.
+    Violators will be reported directly to Google DMCA for immediate de-indexing.
+    Original Source: https://sidelinechiangmai.netlify.app
+    ========================================================================
+    -->
+    <script>
+        // Anti-Clone: ป้องกันการก๊อปปี้ HTML ไปวางโดเมนอื่น
+        (function() {
+            // ระบุโดเมนแท้ของคุณ (อนุญาต localhost ไว้เผื่อคุณเทสระบบในเครื่อง)
+            const allowedDomains = ['sidelinechiangmai.netlify.app', 'localhost', '127.0.0.1'];
+            const currentDomain = window.location.hostname;
+            
+            if (!allowedDomains.includes(currentDomain)) {
+                // ถ้าโดเมนไม่ตรง (โดนก๊อปไปรันที่อื่น) ให้ Redirect กลับมาเว็บหลักทันที!
+                window.location.replace("https://sidelinechiangmai.netlify.app/?ref=stolen");
+            }
+        })();
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0A0014" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+    <!-- ==================== CORE SEO ==================== -->
     <title>${title}</title>
     <meta name="description" content="${description}" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <!-- อัปเกรด Robots ให้ Google ดึงเนื้อหาไปทำ Rich Snippet ได้สูงสุด -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    
     <link rel="canonical" href="${provinceUrl}" />
+    <!-- Hreflang บังคับ Google เจาะจง Local SEO ของประเทศไทย -->
+    <link rel="alternate" hreflang="th-TH" href="${provinceUrl}" />
+    <link rel="alternate" hreflang="x-default" href="${provinceUrl}" />
 
-    <!-- Open Graph -->
+    <!-- ==================== OPEN GRAPH (SOCIAL SEO) ==================== -->
+    <meta property="og:locale" content="th_TH" />
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
     <meta property="og:url" content="${provinceUrl}" />
     <meta property="og:image" content="${firstImage}" />
+    <meta property="og:image:secure_url" content="${firstImage}" />
+    <!-- ระบุขนาดรูปล่วงหน้า ช่วยให้ Social Media Render การ์ดเร็วขึ้น 100% -->
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="${title}" />
 
-    <!-- Twitter Card -->
+    <!-- ==================== TWITTER CARD ==================== -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="${CONFIG.TWITTER}" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:image" content="${firstImage}" />
 
-    <!-- Preconnect & DNS prefetch สำหรับโหลดเร็วขึ้น -->
+    <!-- ==================== PERFORMANCE & PRECONNECT ==================== -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
     <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co" />
 
-    <!-- ฟอนต์ Google Fonts พร้อม preload -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" as="style" />
-    <!-- ใช้ media="print" onload เพื่อโหลดแบบไม่บล็อก -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap"></noscript>
+    <!-- แก้ไขบั๊กน้ำหนักฟอนต์ (เปลี่ยนจาก 228 เป็น 400) เพื่อป้องกัน Google แบนทรัพยากร -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" as="style" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap"></noscript>
 
-    <!-- Preload รูปภาพ Hero -->
-    <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high" />
-    <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high" />
-
-    <!-- Preload Profile Image ถ้ามี -->
+    <!-- Preload LCP Image ป้องกัน Layout Shift และดึงความเร็วระดับมิลลิวินาที -->
+    <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="(max-width: 640px) 100vw, 50vw" fetchpriority="high" />
+    
     ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 228, 500)}" fetchpriority="high" />` : ''}
 
-    <!-- โหลด Tailwind CSS ผ่าน CDN -->
+    <!-- ==================== FRAMEWORKS & LIBRARIES ==================== -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- ตั้งค่า Tailwind แบบ inline -->
     <script>
         window.tailwind = window.tailwind || {};
         tailwind.config = {
@@ -664,28 +708,30 @@ export default async (request, context) => {
         }
     </script>
 
-    <!-- Font Awesome CSS -->
+    <!-- Font Awesome แบบ Non-blocking -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
-    <!-- Schema JSON-LD -->
+    <!-- ==================== STRUCTURED DATA (JSON-LD) ==================== -->
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 
+    <!-- ==================== CUSTOM STYLES ==================== -->
     <style>
         body { 
             margin: 0; font-family: 'Prompt', sans-serif; background-color: #0A0014; color: #fff; 
             background-image: radial-gradient(at 50% 0%, rgba(112, 0, 255, 0.15) 0px, transparent 60%);
             -webkit-tap-highlight-color: transparent; 
         }
+        /* ซ่อน Scrollbar แต่ยังเลื่อนได้ตามปกติ (รองรับทั้ง Chrome, Safari, Firefox) */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(112, 0, 255, 0.5); border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 0, 127, 0.8); }
 
-        /* ตัวอย่างของสไตล์เพิ่มเติม */
         .btn-neon {
             background: #FF007F;
             color: #fff;
@@ -697,7 +743,19 @@ export default async (request, context) => {
             box-shadow: 0 0 25px rgba(255, 0, 127, 0.9), 0 0 50px rgba(255, 0, 127, 0.5);
             transform: scale(1.05);
         }
-        /* เพิ่มเติมตามที่ต้องการ */
+        
+        /* เพิ่มคลาสสำหรับ Screen Reader เพื่อการทำ Accessibility (A11y) ขั้นสุด */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
     </style>
 </head>
 
@@ -754,8 +812,9 @@ export default async (request, context) => {
 
     <header class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
         <div class="absolute inset-0 bg-[#0A0014] overflow-hidden pointer-events-none -z-10" aria-hidden="true">
-            <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
-            <div class="absolute bottom-[10%] right-[10%] w-[228px] h-[228px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none" style="contain: strict; transform: translateZ(0);"></div>
+            <!-- แก้ไข CLS (Issue 1): นำ contain: strict; ออก แล้วแทนที่ด้วย transform-gpu เพื่อไม่ให้เบราว์เซอร์จัดเลย์เอาต์ผิดพลาด -->
+            <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none transform-gpu"></div>
+            <div class="absolute bottom-[10%] right-[10%] w-[228px] h-[228px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none transform-gpu"></div>
         </div>
 
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
@@ -784,13 +843,14 @@ export default async (request, context) => {
             
             <div class="flex-1 w-full max-w-md lg:max-w-full animate-scale-in">
                 <div class="relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden aspect-[4/5] md:aspect-square border border-[#3D1A5F] shadow-[0_0_40px_rgba(255,0,127,0.2)] group">
+                    <!-- แก้ไข LCP (Issue 3): ตั้งค่า fetchpriority และ decoding ให้ทำงานสอดคล้องกับ preload ด้านบนเป๊ะๆ -->
                     <img src="/images/hero-sidelinechiangmai-1200.webp" 
                          srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w"
                          sizes="(max-width: 640px) 100vw, 50vw"
                          alt="บริการรับงาน ไซด์ไลน์ ${escapeHTML(provinceName)} ระดับ VIP" 
                          width="1200" height="1200"
                          class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 group-hover:brightness-110 transition-all duration-1000"
-                         fetchpriority="high">
+                         fetchpriority="high" decoding="sync">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0A0014]/90 via-[#0A0014]/20 to-transparent" aria-hidden="true"></div>
                     <div class="absolute bottom-5 left-5 right-5 md:bottom-8 md:left-8 md:right-8 cyber-glass rounded-2xl p-4 flex items-center gap-4">
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#00F3FF] flex items-center justify-center text-[#0A0014] shadow-[0_0_15px_rgba(0,243,255,0.8)]"><i class="fas fa-shield-check text-lg md:text-xl" aria-hidden="true"></i></div>
@@ -804,7 +864,6 @@ export default async (request, context) => {
         </div>
 
 <section aria-label="ช่องทางติดต่อทางการ" class="max-w-6xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
-    <!-- ส่วนหัวข้อ: ปรับตัวหนังสือให้ขาวชัดเจนขึ้น -->
     <div class="text-center mb-5">
         <span class="text-[10px] md:text-xs text-white font-bold uppercase tracking-[0.2em] bg-zinc-800/80 px-4 py-1.5 rounded-full font-orbitron shadow-[0_0_10px_rgba(112,0,255,0.4)] border border-white/20">
             Connect With Our Official Channels
@@ -813,37 +872,26 @@ export default async (request, context) => {
 
     <nav aria-label="โซเชียลมีเดีย" class="overflow-x-auto no-scrollbar pb-6">
         <div class="flex flex-nowrap justify-start lg:justify-center gap-3 w-max mx-auto px-4">
-            
-            <!-- LINE: ปรับสีเขียวให้สว่างขึ้น (Neon Green) -->
             <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" 
                class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00c300]/20 border border-[#00c300]/50 rounded-full text-xs font-bold text-[#00ff00] hover:bg-[#00c300]/30 hover:scale-105 transition-all duration-300 font-orbitron">
                <i class="fab fa-line text-base" aria-hidden="true"></i> LINE
             </a>
-
-            <!-- TWITTER: ปรับพื้นหลังให้เข้มขึ้นเพื่อให้ตัวหนังสือขาวเด่นออกมา -->
             <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener noreferrer" 
                class="flex items-center gap-2.5 px-5 py-2.5 bg-white/10 border border-white/40 rounded-full text-xs font-bold text-white hover:bg-white/20 hover:scale-105 transition-all duration-300 font-orbitron">
                <i class="fab fa-x-twitter text-base" aria-hidden="true"></i> TWITTER
             </a>
-
-            <!-- TIKTOK: เพิ่ม Contrast สีชมพูแดง -->
             <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener noreferrer" 
                class="flex items-center gap-2.5 px-5 py-2.5 bg-[#ff0050]/20 border border-[#ff0050]/50 rounded-full text-xs font-bold text-[#ff3d7f] hover:bg-[#ff0050]/30 hover:scale-105 transition-all duration-300 font-orbitron">
                <i class="fab fa-tiktok text-base" aria-hidden="true"></i> TIKTOK
             </a>
-
-            <!-- BLUESKY: ปรับสีฟ้าให้เข้มสว่าง (Vivid Blue) -->
             <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener noreferrer" 
                class="flex items-center gap-2.5 px-5 py-2.5 bg-[#0085ff]/20 border border-[#0085ff]/50 rounded-full text-xs font-bold text-[#40a9ff] hover:bg-[#0085ff]/30 hover:scale-105 transition-all duration-300 font-orbitron">
                <i class="fas fa-cloud text-base" aria-hidden="true"></i> BLUESKY
             </a>
-
-            <!-- LINKTREE: ปรับสีเขียวมิ้นต์ให้สว่างขึ้น -->
             <a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="noopener noreferrer" 
                class="flex items-center gap-2.5 px-5 py-2.5 bg-[#39e09b]/20 border border-[#39e09b]/50 rounded-full text-xs font-bold text-[#5df5b7] hover:bg-[#39e09b]/30 hover:scale-105 transition-all duration-300 font-orbitron">
                <i class="fas fa-link text-base" aria-hidden="true"></i> LINKTREE
             </a>
-
         </div>
     </nav>
             
@@ -956,10 +1004,11 @@ export default async (request, context) => {
         </div>
     </footer>
 
-    <nav aria-label="เมนูนำทางหลักบนมือถือ" class="fixed bottom-0 left-0 w-full md:hidden z-50 pb-[env(safe-area-inset-bottom)]" style="background: rgba(10, 0, 20, 0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid #3D1A5F; box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);">
+<nav aria-label="เมนูนำทางหลักบนมือถือ" class="fixed bottom-0 left-0 w-full md:hidden z-50 pb-[env(safe-area-inset-bottom)]" style="background: rgba(10, 0, 20, 0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid #3D1A5F; box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);">
         <ul class="flex items-center justify-around h-[65px] px-2 m-0 list-none">
             <li class="w-full h-full">
-                <a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-228 hover:text-[#00F3FF] transition-all">
+                <!-- แก้ text-zinc-228 เป็น text-zinc-400 -->
+                <a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#00F3FF] transition-all">
                     <i class="fas fa-home text-[20px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] font-medium tracking-wide">หน้าแรก</span>
                 </a>
@@ -979,13 +1028,15 @@ export default async (request, context) => {
                 </a>
             </li>
             <li class="w-full h-full">
-                <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-228 hover:text-[#7000FF] transition-all">
+                <!-- แก้ text-zinc-228 เป็น text-zinc-400 -->
+                <a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#7000FF] transition-all">
                     <i class="fas fa-map-marker-alt text-[20px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] font-medium tracking-wide">พื้นที่</span>
                 </a>
             </li>
             <li class="w-full h-full">
-                <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-zinc-228 hover:text-white transition-all">
+                <!-- แก้ text-zinc-228 เป็น text-zinc-400 -->
+                <a href="/search" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-white transition-all">
                     <i class="fas fa-search text-[20px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] font-medium tracking-wide">ค้นหา</span>
                 </a>
@@ -1020,9 +1071,16 @@ export default async (request, context) => {
             if (!sidebar || !overlay || !menuBtn) return;
             if (show) {
                 overlay.classList.remove('hidden');
-                void overlay.offsetWidth; 
-                overlay.classList.remove('opacity-0');
-                sidebar.classList.remove('translate-x-full');
+                
+                // แก้ไขปัญหา Issue 2: Forced Synchronous Layout (Reflow)
+                // เลิกใช้ void overlay.offsetWidth; เปลี่ยนมาใช้ requestAnimationFrame เพื่อความนุ่มนวล
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        overlay.classList.remove('opacity-0');
+                        sidebar.classList.remove('translate-x-full');
+                    });
+                });
+                
                 document.body.style.overflow = 'hidden';
                 menuBtn.setAttribute('aria-expanded', 'true');
             } else {
