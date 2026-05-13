@@ -220,28 +220,30 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
     return `
     <section class="mt-8 px-4 space-y-8 pb-10">
 
-<!-- ตัวอย่างปรับปรุงให้พื้นหลังและข้อความมีความคอนทราสต์สูงขึ้น -->
-<!-- Social Links Header -->
 <div class="max-w-md mx-auto p-4 space-y-4">
     <div class="flex items-center justify-center">
-        <div class="px-6 py-2 bg-gradient-to-r from-[#FF007F] to-[#7000FF] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.5)]">
-            <span class="text-white font-bold text-lg tracking-widest font-orbitron">VIP PROMOTION</span>
+        <!-- ปรับ Gradient ให้เข้มขึ้นเล็กน้อย -->
+        <div class="px-6 py-2 bg-gradient-to-r from-[#e60073] to-[#5e00d6] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.3)]">
+            <span class="text-white font-bold text-lg tracking-widest">VIP PROMOTION</span>
         </div>
     </div>
+    
     <div class="grid grid-cols-3 gap-3">
-        <!-- LINE Button -->
-        <a href="${CONFIG.SOCIAL_LINKS.line}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#06C755] hover:bg-[#059e4f] active:scale-95 transition-all shadow-[0_0_15px_rgba(6,199,85,0.4)]">
-            <i class="fab fa-line text-xl"></i>
+        <!-- LINE: ใช้สีที่เข้มขึ้นจาก #06C755 เป็น #05a647 เพื่อให้ผ่านเกณฑ์คอนทราสต์ -->
+        <a href="#" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#05a647] hover:bg-[#048a3b] active:scale-95 transition-all shadow-md">
+            <i class="fab fa-line text-xl text-white"></i>
             <span class="text-sm font-bold text-white">LINE</span>
         </a>
-        <!-- Twitter/X Button -->
-        <a href="${CONFIG.SOCIAL_LINKS.twitter}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-black hover:bg-gray-800 active:scale-95 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-            <i class="fab fa-x-twitter text-xl"></i>
+
+        <!-- X (Black): ปกติผ่านอยู่แล้วเพราะสีดำตัดกับขาวได้ดีที่สุด -->
+        <a href="#" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#000000] hover:bg-gray-800 active:scale-95 transition-all shadow-md">
+            <i class="fab fa-x-twitter text-xl text-white"></i>
             <span class="text-sm font-bold text-white">X</span>
         </a>
-        <!-- Bluesky/Telegram Button -->
-        <a href="${CONFIG.SOCIAL_LINKS.bluesky}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#0085ff] hover:bg-[#006fdd] active:scale-95 transition-all shadow-[0_0_15px_rgba(0,133,255,0.4)]">
-            <i class="fas fa-paper-plane text-xl"></i>
+
+        <!-- Telegram/Bluesky: ปรับสีฟ้าให้เข้มขึ้นจาก #0085ff เป็น #0071da -->
+        <a href="#" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#0071da] hover:bg-[#005fb8] active:scale-95 transition-all shadow-md">
+            <i class="fas fa-paper-plane text-xl text-white"></i>
             <span class="text-sm font-bold text-white">Telegram</span>
         </a>
     </div>
