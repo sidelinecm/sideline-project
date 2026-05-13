@@ -6,6 +6,8 @@ const CONFIG = {
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
     BRAND_NAME: 'SIDELINE CHIANGMAI',
     TWITTER: '@sidelinechiangmai',
+    DESCRIPTION: 'ศูนย์รวมน้องๆ ไซด์ไลน์และเด็กเอ็นคัดเกรด VIP ทั่วประเทศไทย รับประกันโปรไฟล์ตรงปก ปลอดภัย 100% ไม่ต้องโอนมัดจำก่อนเจอตัวจริง',
+    PHONE: '091-7895644',
     SOCIAL_LINKS: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@sidelinecm',
@@ -14,6 +16,9 @@ const CONFIG = {
         biosite: 'https://bio.site/firstfiwfans.com',
         linktree: 'https://linktr.ee/kissmodel',
         bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
+    },
+    get SOCIALS() {
+        return Object.values(this.SOCIAL_LINKS);
     }
 };
 
@@ -207,6 +212,7 @@ const escapeHTML = (str) => {
     }[tag] || tag));
 };
 
+// ✅ FIX 8: แก้ไขฟังก์ชันให้ Render FAQ Section ด้วย
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
     
@@ -216,6 +222,32 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         {t: "การตรวจสอบโปรไฟล์", d: "รูปโปรไฟล์น้องๆ ทุกคนผ่านการตรวจสอบและยืนยันตัวตนแล้ว รับประกันความตรงปก เพื่อประสบการณ์ที่ดีที่สุดของคุณ"},
         {t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับระดับสูงสุด และจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น"}
     ];
+    
+    const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
+        <!-- FAQ Section -->
+        <div class="p-[2px] bg-gradient-to-b from-[#00F3FF] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(0,243,255,0.3)] max-w-md mx-auto">
+            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
+                <div class="text-center mb-6">
+                    <div class="inline-block px-5 py-2 bg-black/30 border border-[#3D1A5F] rounded-full shadow-[inset_0_0_10px_rgba(0,243,255,0.2)]">
+                        <h3 class="text-white text-lg font-bold tracking-wide">คำถามที่พบบ่อย (FAQ)</h3>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    ${data.faqs.map(faq => `
+                        <details class="group cyber-glass p-4 rounded-xl border border-transparent hover:border-[#3D1A5F] transition-colors duration-300">
+                            <summary class="flex justify-between items-center cursor-pointer text-white font-bold text-sm list-none group-open:text-[#00F3FF]">
+                                ${escapeHTML(faq.q)}
+                                <i class="fas fa-chevron-down transition-transform duration-300 group-open:rotate-180 text-[#7000FF] group-open:text-[#00F3FF]"></i>
+                            </summary>
+                            <p class="text-zinc-300 text-xs leading-relaxed font-light mt-3 pt-3 border-t border-[#3D1A5F]/50">
+                                ${escapeHTML(faq.a)}
+                            </p>
+                        </details>
+                    `).join('')}
+                </div>
+            </div>
+        </div>` : '';
+
 
     return `
     <section class="mt-8 px-4 space-y-8 pb-10" aria-labelledby="promo-terms-heading">
@@ -230,14 +262,12 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                 </div>
             </div>
             
-            <!-- แก้ไข Grid เป็น 2 คอลัมน์ให้สมดุล และดึงลิงก์จาก CONFIG มาใช้จริง -->
             <div class="grid grid-cols-2 gap-3 max-w-[320px] mx-auto">
                 <a href="${CONFIG.SOCIAL_LINKS.twitter || '#'}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามผ่าน X (Twitter)" class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#000000] hover:bg-zinc-800 active:scale-95 transition-all shadow-md border border-zinc-800">
                     <i class="fab fa-x-twitter text-xl text-white" aria-hidden="true"></i>
                     <span class="text-sm font-bold text-white">X Twitter</span>
                 </a>
 
-                <!-- Telegram/Bluesky -->
                 <a href="${CONFIG.SOCIAL_LINKS.bluesky || '#'}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามผ่าน Telegram หรือ Bluesky" class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#0071da] hover:bg-[#005fb8] active:scale-95 transition-all shadow-md">
                     <i class="fas fa-paper-plane text-xl text-white" aria-hidden="true"></i>
                     <span class="text-sm font-bold text-white">Telegram</span>
@@ -283,7 +313,6 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                                 ${idx + 1}
                             </div>
                             <div class="pt-1">
-                                <!-- ใช้ H4 ต่อจาก H3 ถูกต้องตามหลัก SEO -->
                                 <h4 class="text-white text-sm md:text-base font-bold mb-1">${item.t}</h4>
                                 <p class="text-zinc-300 text-xs leading-relaxed font-light">${item.d}</p>
                             </div>
@@ -296,6 +325,9 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                 </div>
             </div>
         </div>
+
+        <!-- Render FAQ Section Here -->
+        ${faqsHTML}
 
         <!-- Unique Intro Box -->
         <div class="text-center py-8 px-6 bg-[#1A0B2E]/40 rounded-[2rem] border border-[#3D1A5F]/40 max-w-2xl mx-auto backdrop-blur-sm shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
@@ -321,7 +353,15 @@ export default async (request, context) => {
 
         const pathParts = url.pathname.split('/').filter(Boolean);
         const rawProvinceKey = pathParts[pathParts.length - 1] || 'chiangmai';
-        const provinceKey = decodeURIComponent(rawProvinceKey).toLowerCase();
+        
+        // ✅ FIX 1: Runtime Crash: decodeURIComponent ไม่มี try-catch
+        let provinceKey = rawProvinceKey.toLowerCase();
+        try { 
+            provinceKey = decodeURIComponent(rawProvinceKey).toLowerCase(); 
+        } catch { 
+            // Fallback to the raw key if decoding fails
+            provinceKey = rawProvinceKey.toLowerCase(); 
+        }
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
@@ -343,9 +383,14 @@ export default async (request, context) => {
         const provinceName = provinceData.nameThai;
         const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
         
+        // ✅ FIX 2: Date Mutation Bug — ปีผิด!
         const now = new Date();
         const CURRENT_YEAR = now.getFullYear();
         const CURRENT_MONTH = now.toLocaleString('th-TH', { month: 'long' });
+        const futureDate = new Date(now); // copy a new instance
+        futureDate.setFullYear(futureDate.getFullYear() + 1);
+        const validUntil = futureDate.toISOString().split('T')[0];
+
         const provinceUrl = `${CONFIG.DOMAIN}/location/${provinceKey}`;
         
         const firstImage = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/seo-default.webp`;
@@ -356,149 +401,118 @@ export default async (request, context) => {
         const priceParts = (seoData.avgPrice || "1,500 - 3,500").split('-');
         const startPrice = priceParts[0] ? priceParts[0].trim() : "1,500";
         const endPrice = priceParts[1] ? priceParts[1].trim() : "5,000";
-        const validUntil = new Date(now.setFullYear(now.getFullYear() + 1)).toISOString().split('T')[0];
+
+        // Build Schema Graph
+        const schemaGraph = [
+            {
+              "@type": "Organization",
+              "@id": `${CONFIG.DOMAIN}/#organization`,
+              "name": CONFIG.BRAND_NAME,
+              "url": CONFIG.DOMAIN,
+              "logo": `${CONFIG.DOMAIN}/logo.png`,
+              "description": CONFIG.DESCRIPTION,
+              "sameAs": CONFIG.SOCIALS || [],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer service",
+                "telephone": CONFIG.PHONE || "",
+                "availableLanguage": ["th", "en"]
+              }
+            },
+            {
+              "@type": "WebSite",
+              "@id": `${CONFIG.DOMAIN}/#website`,
+              "url": CONFIG.DOMAIN,
+              "name": CONFIG.BRAND_NAME,
+              "publisher": { "@id": `${CONFIG.DOMAIN}/#organization` },
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`,
+                "query-input": "required name=search_term_string"
+              }
+            },
+            {
+              "@type": "WebPage",
+              "@id": `${provinceUrl}/#webpage`,
+              "url": provinceUrl,
+              "name": title,
+              "description": description,
+              "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
+              "breadcrumb": { "@id": `${provinceUrl}/#breadcrumb` },
+              "mainEntity": { "@id": `${provinceUrl}/#service` }
+            },
+            {
+              "@type": "BreadcrumbList",
+              "@id": `${provinceUrl}/#breadcrumb`,
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
+              ]
+            },
+            {
+              "@type": "Service",
+              "@id": `${provinceUrl}/#service`,
+              "name": `บริการในพื้นที่ ${provinceName}`,
+              "provider": { "@id": `${CONFIG.DOMAIN}/#organization` },
+              "areaServed": { "@type": "AdministrativeArea", "name": provinceName },
+              "description": description
+            },
+            {
+              "@type": "LocalBusiness",
+              "@id": `${CONFIG.DOMAIN}/#business`,
+              "name": CONFIG.BRAND_NAME,
+              "url": CONFIG.DOMAIN,
+              "image": firstImage,
+              "priceRange": "฿฿",
+              "telephone": CONFIG.PHONE || "",
+              "address": { "@type": "PostalAddress", "addressCountry": "TH" },
+              "geo": { "@type": "GeoCoordinates", "latitude": seoData?.geo?.lat, "longitude": seoData?.geo?.lng },
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+                "opens": "10:00",
+                "closes": "22:00"
+              }
+            }
+        ];
+
+        // ✅ FIX 3: Add FAQPage Schema if faqs exist
+        if (seoData.faqs && seoData.faqs.length > 0) {
+            schemaGraph.push({
+                "@type": "FAQPage",
+                "@id": `${provinceUrl}/#faq`,
+                "mainEntity": seoData.faqs.map(faq => ({
+                    "@type": "Question",
+                    "name": faq.q,
+                    "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+                }))
+            });
+        }
+
+        // ✅ FIX 4: Add ItemList Schema if profiles exist
+        if (safeProfiles && safeProfiles.length > 0) {
+            schemaGraph.push({
+                "@type": "ItemList",
+                "name": `รายชื่อไซด์ไลน์ VIP ใน ${provinceName}`,
+                "description": `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName}`,
+                "itemListElement": safeProfiles.slice(0, 10).map((p, i) => ({
+                    "@type": "ListItem",
+                    "position": i + 1,
+                    "item": {
+                        "@type": "Person",
+                        "name": p.name || 'ไม่ระบุชื่อ',
+                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`,
+                        "image": optimizeImg(p.imagePath, 182, 228),
+                        "description": `โปรไฟล์น้อง${p.name || ''} รับงานโซน ${p.location || provinceName}`
+                    }
+                }))
+            });
+        }
 
         const schemaData = {
-  "@context": "https://schema.org",
-  "@graph": [
-
-    /* =========================
-      1. ORGANIZATION (ENTITY ROOT)
-    ========================= */
-    {
-      "@type": "Organization",
-      "@id": `${CONFIG.DOMAIN}/#organization`,
-      "name": CONFIG.BRAND_NAME,
-      "url": CONFIG.DOMAIN,
-      "logo": `${CONFIG.DOMAIN}/logo.png`,
-      "description": CONFIG.DESCRIPTION,
-      "sameAs": CONFIG.SOCIALS || [],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "telephone": CONFIG.PHONE || "",
-        "availableLanguage": ["th", "en"]
-      }
-    },
-
-    /* =========================
-      2. WEBSITE (GLOBAL SIGNAL)
-    ========================= */
-    {
-      "@type": "WebSite",
-      "@id": `${CONFIG.DOMAIN}/#website`,
-      "url": CONFIG.DOMAIN,
-      "name": CONFIG.BRAND_NAME,
-      "publisher": {
-        "@id": `${CONFIG.DOMAIN}/#organization`
-      },
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string"
-      }
-    },
-
-    /* =========================
-      3. WEBPAGE (PROVINCE PAGE)
-    ========================= */
-    {
-      "@type": "WebPage",
-      "@id": `${provinceUrl}/#webpage`,
-      "url": provinceUrl,
-      "name": title,
-      "description": description,
-      "isPartOf": {
-        "@id": `${CONFIG.DOMAIN}/#website`
-      },
-      "breadcrumb": {
-        "@id": `${provinceUrl}/#breadcrumb`
-      },
-      "mainEntity": {
-        "@id": `${provinceUrl}/#service`
-      }
-    },
-
-    /* =========================
-      4. BREADCRUMB (CLEAN)
-    ========================= */
-    {
-      "@type": "BreadcrumbList",
-      "@id": `${provinceUrl}/#breadcrumb`,
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": CONFIG.DOMAIN
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Profiles",
-          "item": `${CONFIG.DOMAIN}/profiles`
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": provinceName,
-          "item": provinceUrl
-        }
-      ]
-    },
-
-    /* =========================
-      5. SERVICE (KEY FIX FOR LOCAL SEO)
-      👉 ใช้แทน LocalBusiness รายจังหวัด
-    ========================= */
-    {
-      "@type": "Service",
-      "@id": `${provinceUrl}/#service`,
-      "name": `บริการในพื้นที่ ${provinceName}`,
-      "provider": {
-        "@id": `${CONFIG.DOMAIN}/#organization`
-      },
-      "areaServed": {
-        "@type": "AdministrativeArea",
-        "name": provinceName
-      },
-      "description": description
-    },
-
-    /* =========================
-      6. LOCAL BUSINESS (SINGLE BRAND ENTITY ONLY)
-      👉 ห้ามแตกตามจังหวัดเด็ดขาด
-    ========================= */
-    {
-      "@type": "LocalBusiness",
-      "@id": `${CONFIG.DOMAIN}/#business`,
-      "name": CONFIG.BRAND_NAME,
-      "url": CONFIG.DOMAIN,
-      "image": firstImage,
-      "priceRange": "฿฿",
-      "telephone": CONFIG.PHONE || "",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "TH"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": seoData?.geo?.lat,
-        "longitude": seoData?.geo?.lng
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday","Tuesday","Wednesday",
-          "Thursday","Friday","Saturday","Sunday"
-        ],
-        "opens": "10:00",
-        "closes": "22:00"
-      }
-    }
-
-  ]
-};
+          "@context": "https://schema.org",
+          "@graph": schemaGraph
+        };
 
         let cardsHTML = '';
         if (safeProfiles && safeProfiles.length > 0) {
@@ -532,9 +546,7 @@ export default async (request, context) => {
                 const myIntent = intents[i % intents.length];
                 const myTrait = traits[i % traits.length];
                 
-
                 const smartAlt = `รูปโปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} พิกัดโซน${profileLocation} จุดเด่น${myTrait} เหมาะกับผู้ที่ต้องการ${myIntent}`;
-
 
                 const imageAttributes = i < 4 
                     ? 'loading="eager" fetchpriority="high" decoding="sync"' 
@@ -545,16 +557,15 @@ export default async (request, context) => {
                 const statusBorderClass = isAvailable ? 'border-[#00F3FF]/30' : 'border-[#FF007F]/30';
                 const statusShadowClass = isAvailable ? 'shadow-[0_0_10px_rgba(0,243,255,0.2)]' : 'shadow-[0_0_10px_rgba(255,0,127,0.2)]';
 
+                // Added id for ItemList Schema linking
                 return `
-    <article class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both; content-visibility: auto;">
+    <article id="profile-${p.id}" class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${animDelay}ms; animation-fill-mode: both; content-visibility: auto;">
         
-        <!-- SEO & A11y อัปเกรด: ใส่ sr-only เพื่ออธิบายลิงก์ให้ Google Bot และ Screen Reader เข้าใจอย่างถ่องแท้ -->
         <a href="${profileLink}" title="ดูข้อมูลรับงานและเรทราคาของน้อง${cleanName}" class="block absolute inset-0 z-30">
             <span class="sr-only">ดูโปรไฟล์ รายละเอียด และเรทราคาการรับงานของน้อง${cleanName} โซน${profileLocation}</span>
         </a>
         
         <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
-            <!-- อัปเกรด Title ลงในรูปภาพเพื่อเพิ่ม Tooltip และ Contextual SEO -->
             <img src="${optimizeImg(p.imagePath, 182, 228)}" 
                  width="182" height="228"
                  onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
@@ -610,13 +621,12 @@ export default async (request, context) => {
     </article>`;
             }).join('');
         } else {
-            // แก้ไข Typo text-zinc-400 ให้เป็น text-zinc-300
             cardsHTML = `
             <div class="col-span-full flex flex-col items-center justify-center py-20 md:py-32 text-center cyber-glass rounded-[2rem] border border-[#3D1A5F]/50">
                 <div class="w-20 h-20 bg-[#1A0B2E] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(112,0,255,0.2)] border border-[#7000FF]/30">
                     <i class="fas fa-hourglass-half text-3xl text-[#00F3FF] animate-pulse" aria-hidden="true"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-white mb-3 text-neon-cyan tracking-wide">กำลังอัปเดตระบบ</h2>
+                <h2 class="text-2xl font-bold text-white mb-3 text-neon-cyan tracking-wide">กำลังอัปเดตโปรไฟล์</h2>
                 <p class="text-zinc-300 text-sm md:text-base max-w-md mx-auto leading-relaxed">
                     ขณะนี้กำลังจัดเตรียมโปรไฟล์น้องๆ ระดับ VIP ในโซน <strong class="text-white">${escapeHTML(provinceName)}</strong><br/>กรุณากลับมาตรวจสอบใหม่อีกครั้งในภายหลัง
                 </p>
@@ -631,7 +641,7 @@ export default async (request, context) => {
 <head>
 <!-- 
     ========================================================================
-    © 2026 SIDELINE CHIANGMAI. All Rights Reserved.
+    © ${CURRENT_YEAR} SIDELINE CHIANGMAI. All Rights Reserved.
     WARNING: This source code, layout, and content are protected by copyright laws.
     Unauthorized crawling, scraping, or copying is strictly prohibited.
     Violators will be reported directly to Google DMCA for immediate de-indexing.
@@ -795,6 +805,42 @@ export default async (request, context) => {
             white-space: nowrap;
             border-width: 0;
         }
+        /* ✅ FIX 7: HTML Breadcrumb Styles */
+        .breadcrumb-nav { 
+            font-size: 0.75rem; 
+            color: #a1a1aa; 
+            display: flex;
+        }
+        .breadcrumb-nav ol { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            flex-wrap: wrap; 
+        }
+        .breadcrumb-nav li {
+            display: flex;
+            align-items: center;
+        }
+        .breadcrumb-nav li:not(:last-child)::after { 
+            content: '/'; 
+            margin-left: 0.5rem; 
+            color: #71717a; 
+        }
+        .breadcrumb-nav a { 
+            color: #d4d4d8; 
+            text-decoration: none; 
+            transition: color 0.2s;
+            display: inline-block;
+        }
+        .breadcrumb-nav a:hover { 
+            color: #FF007F; 
+        }
+        .breadcrumb-nav [itemprop="name"] { 
+            color: inherit;
+        }
     </style>
 </head>
 
@@ -858,6 +904,24 @@ export default async (request, context) => {
 
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
             <div class="flex-1 text-center lg:text-left z-10 animate-fade-in-up">
+                
+                <!-- ✅ FIX 7: Add visible HTML Breadcrumb -->
+                <nav aria-label="เส้นทางการนำทาง" class="breadcrumb-nav mb-4 justify-center lg:justify-start">
+                  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+                    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                      <a itemprop="item" href="${CONFIG.DOMAIN}">
+                        <span itemprop="name">หน้าแรก</span>
+                      </a>
+                      <meta itemprop="position" content="1" />
+                    </li>
+                    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                      <span itemprop="name">ไซด์ไลน์${escapeHTML(provinceName)}</span>
+                      <meta itemprop="item" content="${provinceUrl}" />
+                      <meta itemprop="position" content="2" />
+                    </li>
+                  </ol>
+                </nav>
+
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full cyber-glass text-[10px] md:text-xs font-semibold text-white uppercase tracking-widest mb-4 md:mb-6 font-orbitron shadow-[0_0_10px_rgba(255,0,127,0.2)]">
                     <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#FF007F] animate-pulse shadow-[0_0_8px_#FF007F]" aria-hidden="true"></span> ${CONFIG.BRAND_NAME}
                 </div>
@@ -962,10 +1026,10 @@ export default async (request, context) => {
             </div>
         </nav>
 
-        <section id="profiles-grid" aria-label="รายการโปรไฟล์น้องๆ" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 scroll-mt-24">
+        <section id="profiles-grid" aria-labelledby="profiles-heading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 scroll-mt-24">
             <div class="flex items-end justify-between mb-6 md:mb-8">
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron text-neon">น้องๆ ไซด์ไลน์${escapeHTML(provinceName)} พร้อมดูแลคุณ</h2>
+                    <h2 id="profiles-heading" class="text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron text-neon">น้องๆ ไซด์ไลน์${escapeHTML(provinceName)} พร้อมดูแลคุณ</h2>
                     <p class="text-zinc-300 text-[10px] md:text-sm font-light mt-1">อัปเดตล่าสุด: ${CURRENT_MONTH} ${CURRENT_YEAR}</p>
                 </div>
                 <div class="text-[10px] md:text-xs text-[#00F3FF] flex items-center gap-1.5 cyber-glass px-2.5 py-1 rounded-full border border-[#00F3FF]/30 shadow-[0_0_10px_rgba(0,243,255,0.1)]">
@@ -1222,7 +1286,8 @@ export default async (request, context) => {
             } 
         });
     } catch (e) {
-        return new Response('<div style="font-family:sans-serif;text-align:center;padding:50px;color:#fff;background:#0A0014;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:50px;height:50px;border:3px solid #3D1A5F;border-top-color:#FF007F;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;box-shadow:0 0 15px rgba(255,0,127,0.5);"></div><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style><h1 style="font-size:18px;font-weight:bold;color:#FF007F;text-shadow:0 0 10px rgba(255,0,127,0.5);letter-spacing:2px;font-family:\'Orbitron\', sans-serif;">SYSTEM INITIALIZING</h1></div>', { 
+        console.error("SSR Error:", e); // Log the full error to the server console
+        return new Response('<div style="font-family:sans-serif;text-align:center;padding:50px;color:#fff;background:#0A0014;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:50px;height:50px;border:3px solid #3D1A5F;border-top-color:#FF007F;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;box-shadow:0 0 15px rgba(255,0,127,0.5);"></div><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style><h1 style="font-size:18px;font-weight:bold;color:#FF007F;text-shadow:0 0 10px rgba(255,0,127,0.5);letter-spacing:2px;font-family:\'Orbitron\', sans-serif;">SYSTEM ERROR</h1><p style="color:#a1a1aa;font-size:12px;">Please check the server console for details.</p></div>', { 
             status: 500, 
             headers: { "Content-Type": "text/html; charset=utf-8" } 
         });
