@@ -229,8 +229,8 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
     </div>
     
     <div class="grid grid-cols-3 gap-3">
-        <!-- LINE: ใช้สีที่เข้มขึ้นจาก #06C755 เป็น #05a647 เพื่อให้ผ่านเกณฑ์คอนทราสต์ -->
-        <a href="#" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#05a647] hover:bg-[#048a3b] active:scale-95 transition-all shadow-md">
+        <!-- LINE: ใช้สีที่เข้มขึ้นจาก #06C755 เป็น #048a3b เพื่อให้ผ่านเกณฑ์คอนทราสต์ -->
+        <a href="#" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#048a3b] hover:bg-[#048a3b] active:scale-95 transition-all shadow-md">
             <i class="fab fa-line text-xl text-white"></i>
             <span class="text-sm font-bold text-white">LINE</span>
         </a>
