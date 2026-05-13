@@ -184,128 +184,162 @@ const PROVINCE_SEO_DATA = {
 const getFullUrl = (path) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.startsWith('http')) return path;
+
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     return `${CONFIG.DOMAIN}${cleanPath}`;
 };
 
-const optimizeImg = (path, width = 182, height = 228) => { 
+const optimizeImg = (path, width = 182, height = 228) => {
     if (!path) return getFullUrl('/images/default.webp');
+
     if (path.includes('res.cloudinary.com')) {
         if (path.includes('/upload/')) {
-            return path.replace('/upload/', `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
+            return path.replace(
+                '/upload/',
+                `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`
+            );
         }
         return path;
     }
+
     if (path.startsWith('http')) return path;
+
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
+/* ---------------------------
+   SECURITY LAYER (UPGRADED)
+---------------------------- */
 const escapeHTML = (str) => {
     if (!str) return '';
-    return String(str).replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-    }[tag] || tag));
+    return String(str).replace(/[&<>'"]/g, (tag) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag]));
 };
 
+const sanitizeKey = (key = '') =>
+    String(key)
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '');
+
+/* ---------------------------
+   TERMS BUILDER (PURE DATA)
+---------------------------- */
+const buildTerms = (provinceName) => ([
+    {
+        t: "Privacy & Confidentiality",
+        d: `ข้อมูลทั้งหมดในพื้นที่ ${escapeHTML(provinceName)} จะถูกจัดเก็บอย่างปลอดภัยและเป็นความลับ`
+    },
+    {
+        t: "Payment Safety",
+        d: "ระบบรองรับการชำระเงินแบบพบตัวจริง ลดความเสี่ยงการถูกหลอกลวง"
+    },
+    {
+        t: "Profile Verification",
+        d: "โปรไฟล์ทั้งหมดผ่านการตรวจสอบเพื่อเพิ่มความน่าเชื่อถือของระบบ"
+    },
+    {
+        t: "User Protection",
+        d: "ระบบออกแบบเพื่อความปลอดภัยของผู้ใช้งานทั้งสองฝ่าย"
+    }
+]);
+
+/* ---------------------------
+   SOCIAL BUILDER
+---------------------------- */
+const buildSocialLinks = (SOCIAL_LINKS = {}) => {
+    return `
+        <div class="grid grid-cols-2 gap-3 max-w-[320px] mx-auto">
+            <a href="${SOCIAL_LINKS.twitter || '#'}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="flex items-center justify-center py-2.5 rounded-lg bg-black text-white">
+                X / Twitter
+            </a>
+
+            <a href="${SOCIAL_LINKS.telegram || '#'}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="flex items-center justify-center py-2.5 rounded-lg bg-blue-600 text-white">
+                Telegram
+            </a>
+        </div>
+    `;
+};
+
+/* ---------------------------
+   MAIN RENDER (UPGRADED)
+---------------------------- */
 const generateAppSeoText = (provinceName, provinceKey, count) => {
-    const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA['default'];
-    
-    const termsAndConditions =[
-        {t: "การจองคิวน้องๆ ส่วนตัว", d: `เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน${escapeHTML(provinceName)} สมาชิก 1 ท่าน สามารถจองคิวงานได้ครั้งละ 1 คิวเท่านั้น เพื่อรักษาคุณภาพบริการแบบ VIP`},
-        {t: "ความปลอดภัยทางการเงิน", d: "ชำระเงินหน้างานเมื่อพบตัวน้องจริงเท่านั้น! เราไม่มีนโยบายให้โอนมัดจำล่วงหน้าทุกกรณี ปลอดภัยจากมิจฉาชีพ 100%"},
-        {t: "การตรวจสอบโปรไฟล์", d: "รูปโปรไฟล์น้องๆ ทุกคนผ่านการตรวจสอบและยืนยันตัวตนแล้ว รับประกันความตรงปก เพื่อประสบการณ์ที่ดีที่สุดของคุณ"},
-        {t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับระดับสูงสุด และจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น"}
-    ];
+    const data = PROVINCE_SEO_DATA?.[provinceKey] || PROVINCE_SEO_DATA?.default || {};
+    const safeKey = sanitizeKey(provinceKey);
+    const terms = buildTerms(provinceName);
 
     return `
-    <section class="mt-8 px-4 space-y-8 pb-10" aria-labelledby="promo-terms-heading">
-        
-        <!-- SEO Semantic: ซ่อน H2 ไว้ให้บอท Google อ่าน เพื่อให้โครงสร้างหัวข้อ (H2 -> H3 -> H4) ถูกต้อง 100% -->
-        <h2 id="promo-terms-heading" class="sr-only">โปรโมชั่นและเงื่อนไขการเรียกไซด์ไลน์${escapeHTML(provinceName)}</h2>
+<section class="mt-8 px-4 space-y-8 pb-10" aria-label="promotion-section-${safeKey}">
 
-        <div class="max-w-md mx-auto p-4 space-y-4">
-            <div class="flex items-center justify-center">
-                <div class="px-6 py-2 bg-gradient-to-r from-[#e60073] to-[#5e00d6] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.3)]">
-                    <span class="text-white font-bold text-lg tracking-widest">VIP PROMOTION</span>
-                </div>
-            </div>
-            
-            <!-- แก้ไข Grid เป็น 2 คอลัมน์ให้สมดุล และดึงลิงก์จาก CONFIG มาใช้จริง -->
-            <div class="grid grid-cols-2 gap-3 max-w-[320px] mx-auto">
-                <a href="${CONFIG.SOCIAL_LINKS.twitter || '#'}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามผ่าน X (Twitter)" class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#000000] hover:bg-zinc-800 active:scale-95 transition-all shadow-md border border-zinc-800">
-                    <i class="fab fa-x-twitter text-xl text-white" aria-hidden="true"></i>
-                    <span class="text-sm font-bold text-white">X Twitter</span>
-                </a>
+    <!-- HERO -->
+    <div class="max-w-md mx-auto p-4 space-y-4 text-center">
+        <div class="px-6 py-2 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full">
+            <span class="text-white font-bold">VIP PROMOTION</span>
+        </div>
+    </div>
 
-                <!-- Telegram/Bluesky -->
-                <a href="${CONFIG.SOCIAL_LINKS.bluesky || '#'}" target="_blank" rel="noopener noreferrer" aria-label="ติดตามผ่าน Telegram หรือ Bluesky" class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#0071da] hover:bg-[#005fb8] active:scale-95 transition-all shadow-md">
-                    <i class="fas fa-paper-plane text-xl text-white" aria-hidden="true"></i>
-                    <span class="text-sm font-bold text-white">Telegram</span>
-                </a>
-            </div>
+    ${buildSocialLinks(CONFIG.SOCIAL_LINKS)}
+
+    <!-- PROMO BOX -->
+    <div class="max-w-md mx-auto p-5 rounded-2xl bg-[#1A0B2E] border border-purple-600">
+
+        <h3 class="text-white text-xl font-bold text-center">
+            Special Offer ${escapeHTML(provinceName)}
+        </h3>
+
+        <div class="mt-4 text-center text-yellow-400 font-bold">
+            CODE: VIP-${safeKey.toUpperCase()}
         </div>
 
-        <!-- Promotion Box -->
-        <div class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.3)] max-w-md mx-auto relative overflow-hidden">
-            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5 relative z-10">
-                <div class="text-center mb-4">
-                    <h3 class="text-white text-xl font-bold"><span aria-hidden="true">😘</span> ข้อเสนอพิเศษโซน${escapeHTML(provinceName)}</h3>
-                    <p class="text-zinc-300 text-xs mt-1">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
-                    <p class="text-yellow-400 text-xs font-semibold mt-1.5 animate-pulse">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
-                </div>
-                <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-3">
-                    <p class="text-white text-center text-sm font-semibold">
-                        <span class="text-[#00F3FF]"><i class="fas fa-thumbs-up" aria-hidden="true"></i> รับประกันความพึงพอใจ</span><br/>
-                        <span class="text-zinc-400 text-xs font-light">เมื่อยืนยันการจองด้วยรหัสนี้</span>
-                    </p>
-                    <div class="bg-black/60 rounded-xl flex items-center justify-center gap-3 py-3 border border-[#FF007F]/30 shadow-[inset_0_0_10px_rgba(255,0,127,0.2)]">
-                        <i class="fas fa-gem text-lg text-[#FF007F]" aria-hidden="true"></i>
-                        <span class="text-white font-bold text-lg tracking-wider font-orbitron">CODE : </span>
-                        <span class="text-yellow-400 font-black text-xl tracking-wider font-orbitron drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">VIP-${provinceKey.toUpperCase()}</span>
+    </div>
+
+    <!-- TERMS -->
+    <div class="max-w-md mx-auto p-5 rounded-2xl bg-[#12081f] border border-purple-700">
+
+        <h2 class="text-white text-lg font-bold text-center mb-4">
+            Terms & Conditions
+        </h2>
+
+        <div class="space-y-4">
+            ${terms.map((item, i) => `
+                <div class="flex gap-3 p-3 border border-purple-800 rounded-xl">
+                    <div class="text-white font-bold">${i + 1}</div>
+                    <div>
+                        <h4 class="text-white font-semibold">${item.t}</h4>
+                        <p class="text-gray-300 text-sm">${item.d}</p>
                     </div>
                 </div>
-            </div>
+            `).join('')}
         </div>
 
-        <!-- Terms and Conditions Box -->
-        <div class="p-[2px] bg-gradient-to-b from-[#7000FF] to-[#FF007F] rounded-3xl shadow-[0_0_30px_rgba(112,0,255,0.3)] max-w-md mx-auto">
-            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
-                <div class="text-center mb-6">
-                    <div class="inline-block px-5 py-2 bg-black/30 border border-[#3D1A5F] rounded-full shadow-[inset_0_0_10px_rgba(112,0,255,0.2)]">
-                        <h3 class="text-white text-lg font-bold tracking-wide">เงื่อนไขการใช้บริการ</h3>
-                    </div>
-                </div>
-                
-                <div class="space-y-4">
-                    ${termsAndConditions.map((item, idx) => `
-                        <div class="flex gap-4 items-start p-4 rounded-2xl bg-[#0A0014]/50 border border-[#3D1A5F]/70 transition-colors hover:border-[#7000FF]/50">
-                            <div class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-[#FF007F] to-[#7000FF] flex items-center justify-center text-white font-bold text-lg shadow-[0_0_10px_rgba(255,0,127,0.5)] font-orbitron">
-                                ${idx + 1}
-                            </div>
-                            <div class="pt-1">
-                                <!-- ใช้ H4 ต่อจาก H3 ถูกต้องตามหลัก SEO -->
-                                <h4 class="text-white text-sm md:text-base font-bold mb-1">${item.t}</h4>
-                                <p class="text-zinc-300 text-xs leading-relaxed font-light">${item.d}</p>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div class="mt-6 text-center text-[10px] md:text-xs text-red-400 font-medium p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl leading-relaxed">
-                    *** <strong class="text-red-300">${CONFIG.BRAND_NAME}</strong> เป็นเพียงสื่อกลางในการจัดหาโปรไฟล์เท่านั้น การตัดสินใจนัดหมายถือเป็นความรับผิดชอบของลูกค้าและผู้ให้บริการโดยตรง ***
-                </div>
-            </div>
-        </div>
+    </div>
 
-        <!-- Unique Intro Box -->
-        <div class="text-center py-8 px-6 bg-[#1A0B2E]/40 rounded-[2rem] border border-[#3D1A5F]/40 max-w-2xl mx-auto backdrop-blur-sm shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-             <h3 class="text-xl md:text-2xl font-bold text-white mb-4 text-neon-cyan drop-shadow-md">ทำไมต้องเลือกไซด์ไลน์${escapeHTML(provinceName)} จากเรา?</h3>
-            <p class="text-zinc-300 text-sm md:text-base font-light leading-loose">
-                ${data.uniqueIntro}
-            </p>
-        </div>
-        
-    </section>`;
+    <!-- ABOUT -->
+    <div class="max-w-2xl mx-auto text-center p-6 bg-[#0f0618] rounded-2xl border border-purple-800">
+
+        <h3 class="text-white text-xl font-bold mb-3">
+            Why choose us in ${escapeHTML(provinceName)}?
+        </h3>
+
+        <p class="text-gray-300 leading-relaxed">
+            ${data.uniqueIntro || 'Service optimized for user experience and safety.'}
+        </p>
+
+    </div>
+
+</section>
+`;
 };
 
 
@@ -359,107 +393,146 @@ export default async (request, context) => {
         const validUntil = new Date(now.setFullYear(now.getFullYear() + 1)).toISOString().split('T')[0];
 
         const schemaData = {
-            "@context": "https://schema.org",
-            "@graph":[
-                {
-                    "@type": "WebSite",
-                    "@id": `${CONFIG.DOMAIN}/#website`,
-                    "url": CONFIG.DOMAIN,
-                    "name": CONFIG.BRAND_NAME,
-                    "publisher": { "@id": `${CONFIG.DOMAIN}/#business` },
-                    "potentialAction": {
-                        "@type": "SearchAction",
-                        "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`,
-                        "query-input": "required name=search_term_string"
-                    }
-                },
-                {
-                    "@type": "CollectionPage",
-                    "@id": `${provinceUrl}/#webpage`,
-                    "url": provinceUrl,
-                    "name": title,
-                    "description": description,
-                    "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
-                    "breadcrumb": { "@id": `${provinceUrl}/#breadcrumb` },
-                    "about": { "@id": `${provinceUrl}/#business` }
-                },
-                {
-                    "@type": "BreadcrumbList",
-                    "@id": `${provinceUrl}/#breadcrumb`,
-                    "itemListElement":[
-                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${CONFIG.DOMAIN}/profiles.html` },
-                        { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
-                    ]
-                },
-                {
-                    "@type":["LocalBusiness", "ModelingAgency"],
-                    "@id": `${provinceUrl}/#business`,
-                    "name": `ไซด์ไลน์${provinceName} VIP - ${CONFIG.BRAND_NAME}`,
-                    "image": firstImage,
-                    "description": description,
-                    "priceRange": `฿${startPrice} - ฿${endPrice}`,
-                    "url": provinceUrl,
-                    "telephone": "", 
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressRegion": provinceName,
-                        "addressCountry": "TH"
-                    },
-                    "geo": {
-                        "@type": "GeoCoordinates",
-                        "latitude": seoData.geo.lat,
-                        "longitude": seoData.geo.lng
-                    },
-                    "aggregateRating": safeProfiles.length > 0 ? {
-                        "@type": "AggregateRating",
-                        "ratingValue": "4.8",
-                        "reviewCount": String(safeProfiles.length * 3 + 12),
-                        "bestRating": "5",
-                        "worstRating": "1"
-                    } : undefined,
-                    "offers": safeProfiles.length > 0 ? {
-                        "@type": "AggregateOffer",
-                        "offerCount": String(safeProfiles.length),
-                        "lowPrice": startPrice.replace(/,/g, ''),
-                        "highPrice": endPrice.replace(/,/g, ''),
-                        "priceCurrency": "THB",
-                        "availability": "https://schema.org/InStock",
-                        "priceValidUntil": validUntil
-                    } : undefined
-                },
-                {
-                    "@type": "FAQPage",
-                    "@id": `${provinceUrl}/#faq`,
-                    "mainEntity":[
-                        {
-                            "@type": "Question",
-                            "name": `หาไซด์ไลน์${provinceName} งานตรงปกได้ที่ไหน?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": `คุณสามารถเลือกดูโปรไฟล์น้องๆ ไซด์ไลน์${provinceName} ที่คัดสรรมาอย่างดีได้ที่ ${CONFIG.BRAND_NAME} เราเน้นงานตรงปก อัปเดตใหม่ล่าสุด และไม่มีการเก็บมัดจำล่วงหน้า`
-                            }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `เรทราคาไซด์ไลน์ใน${provinceName} อยู่ที่ประมาณเท่าไหร่?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": `น้องๆ ไซด์ไลน์ในพื้นที่${provinceName} มีเรทราคาเริ่มต้นที่ประมาณ ${startPrice} ถึง ${endPrice} บาท ซึ่งเป็นราคารวมค่าห้องหรือตามตกลงกับน้องโดยตรงครับ`
-                            }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": "ขั้นตอนการจองงานต้องโอนมัดจำก่อนไหม?",
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": "เพื่อความปลอดภัยของผู้ใช้บริการ เว็บไซต์เราไม่มีนโยบายให้โอนมัดจำก่อนทุกกรณี ท่านสามารถนัดเจอน้อง ตรวจสอบความถูกต้อง แล้วค่อยชำระเงินหน้างานได้เลยครับ"
-                            }
-                        }
-                    ]
-                }
-            ]
-        };
+  "@context": "https://schema.org",
+  "@graph": [
+
+    /* =========================
+      1. ORGANIZATION (ENTITY ROOT)
+    ========================= */
+    {
+      "@type": "Organization",
+      "@id": `${CONFIG.DOMAIN}/#organization`,
+      "name": CONFIG.BRAND_NAME,
+      "url": CONFIG.DOMAIN,
+      "logo": `${CONFIG.DOMAIN}/logo.png`,
+      "description": CONFIG.DESCRIPTION,
+      "sameAs": CONFIG.SOCIALS || [],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "telephone": CONFIG.PHONE || "",
+        "availableLanguage": ["th", "en"]
+      }
+    },
+
+    /* =========================
+      2. WEBSITE (GLOBAL SIGNAL)
+    ========================= */
+    {
+      "@type": "WebSite",
+      "@id": `${CONFIG.DOMAIN}/#website`,
+      "url": CONFIG.DOMAIN,
+      "name": CONFIG.BRAND_NAME,
+      "publisher": {
+        "@id": `${CONFIG.DOMAIN}/#organization`
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    },
+
+    /* =========================
+      3. WEBPAGE (PROVINCE PAGE)
+    ========================= */
+    {
+      "@type": "WebPage",
+      "@id": `${provinceUrl}/#webpage`,
+      "url": provinceUrl,
+      "name": title,
+      "description": description,
+      "isPartOf": {
+        "@id": `${CONFIG.DOMAIN}/#website`
+      },
+      "breadcrumb": {
+        "@id": `${provinceUrl}/#breadcrumb`
+      },
+      "mainEntity": {
+        "@id": `${provinceUrl}/#service`
+      }
+    },
+
+    /* =========================
+      4. BREADCRUMB (CLEAN)
+    ========================= */
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${provinceUrl}/#breadcrumb`,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": CONFIG.DOMAIN
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Profiles",
+          "item": `${CONFIG.DOMAIN}/profiles`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": provinceName,
+          "item": provinceUrl
+        }
+      ]
+    },
+
+    /* =========================
+      5. SERVICE (KEY FIX FOR LOCAL SEO)
+      👉 ใช้แทน LocalBusiness รายจังหวัด
+    ========================= */
+    {
+      "@type": "Service",
+      "@id": `${provinceUrl}/#service`,
+      "name": `บริการในพื้นที่ ${provinceName}`,
+      "provider": {
+        "@id": `${CONFIG.DOMAIN}/#organization`
+      },
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": provinceName
+      },
+      "description": description
+    },
+
+    /* =========================
+      6. LOCAL BUSINESS (SINGLE BRAND ENTITY ONLY)
+      👉 ห้ามแตกตามจังหวัดเด็ดขาด
+    ========================= */
+    {
+      "@type": "LocalBusiness",
+      "@id": `${CONFIG.DOMAIN}/#business`,
+      "name": CONFIG.BRAND_NAME,
+      "url": CONFIG.DOMAIN,
+      "image": firstImage,
+      "priceRange": "฿฿",
+      "telephone": CONFIG.PHONE || "",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "TH"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": seoData?.geo?.lat,
+        "longitude": seoData?.geo?.lng
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday","Tuesday","Wednesday",
+          "Thursday","Friday","Saturday","Sunday"
+        ],
+        "opens": "10:00",
+        "closes": "22:00"
+      }
+    }
+
+  ]
+};
 
         let cardsHTML = '';
         if (safeProfiles && safeProfiles.length > 0) {
