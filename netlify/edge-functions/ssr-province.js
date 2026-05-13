@@ -30,7 +30,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
         <div class="max-w-md mx-auto p-4 space-y-4">
             <div class="flex items-center justify-center">
                 <div class="px-6 py-2 bg-gradient-to-r from-[#e60073] to-[#5e00d6] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.3)]">
-                    <span class="text-white font-bold text-lg tracking-widest">VIP PROMOTION</span>
+                    <span class="text-white font-bold text-lg tracking-widest">ช่องทางติดต่ออื่นๆ</span>
                 </div>
             </div>
             
