@@ -220,51 +220,54 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
     return `
     <section class="mt-8 px-4 space-y-8 pb-10">
 
-        <!-- Social Links Header -->
-        <div class="max-w-md mx-auto p-4 space-y-4">
-            <div class="flex items-center justify-center">
-                <div class="px-6 py-2 bg-gradient-to-r from-[#FF007F] to-[#7000FF] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.5)]">
-                    <span class="text-white font-bold text-lg tracking-widest font-orbitron">VIP PROMOTION</span>
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#06C755] text-white shadow-[0_0_15px_rgba(6,199,85,0.4)] active:scale-95 transition-all">
-                    <i class="fab fa-line text-xl"></i>
-                    <span class="text-sm font-bold">LINE</span>
-                </a>
-                <a href="${CONFIG.SOCIAL_LINKS.twitter}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-black text-white border border-zinc-700 shadow-[0_0_15px_rgba(0,0,0,0.5)] active:scale-95 transition-all">
-                    <i class="fab fa-x-twitter text-xl"></i>
-                    <span class="text-sm font-bold">X</span>
-                </a>
-                <a href="${CONFIG.SOCIAL_LINKS.bluesky}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#0085ff] text-white shadow-[0_0_15px_rgba(0,133,255,0.4)] active:scale-95 transition-all">
-                    <i class="fas fa-paper-plane text-xl"></i>
-                    <span class="text-sm font-bold">Telegram</span>
-                </a>
-            </div>
+<!-- ตัวอย่างปรับปรุงให้พื้นหลังและข้อความมีความคอนทราสต์สูงขึ้น -->
+<!-- Social Links Header -->
+<div class="max-w-md mx-auto p-4 space-y-4">
+    <div class="flex items-center justify-center">
+        <div class="px-6 py-2 bg-gradient-to-r from-[#FF007F] to-[#7000FF] rounded-full shadow-[0_0_20px_rgba(255,0,127,0.5)]">
+            <span class="text-white font-bold text-lg tracking-widest font-orbitron">VIP PROMOTION</span>
         </div>
+    </div>
+    <div class="grid grid-cols-3 gap-3">
+        <!-- LINE Button -->
+        <a href="${CONFIG.SOCIAL_LINKS.line}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#06C755] hover:bg-[#059e4f] active:scale-95 transition-all shadow-[0_0_15px_rgba(6,199,85,0.4)]">
+            <i class="fab fa-line text-xl"></i>
+            <span class="text-sm font-bold text-white">LINE</span>
+        </a>
+        <!-- Twitter/X Button -->
+        <a href="${CONFIG.SOCIAL_LINKS.twitter}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-black hover:bg-gray-800 active:scale-95 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            <i class="fab fa-x-twitter text-xl"></i>
+            <span class="text-sm font-bold text-white">X</span>
+        </a>
+        <!-- Bluesky/Telegram Button -->
+        <a href="${CONFIG.SOCIAL_LINKS.bluesky}" class="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#0085ff] hover:bg-[#006fdd] active:scale-95 transition-all shadow-[0_0_15px_rgba(0,133,255,0.4)]">
+            <i class="fas fa-paper-plane text-xl"></i>
+            <span class="text-sm font-bold text-white">Telegram</span>
+        </a>
+    </div>
+</div>
 
-        <!-- Promotion Box -->
-        <div class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.3)] max-w-md mx-auto">
-            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
-                <div class="text-center mb-4">
-                    <h3 class="text-white text-xl font-bold">😘 ข้อเสนอพิเศษสำหรับโซน ${escapeHTML(provinceName)}</h3>
-                    <p class="text-zinc-228 text-xs">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
-                    <p class="text-yellow-228 text-xs font-semibold mt-1">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
-                </div>
-                
-                <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-2">
-                    <p class="text-white text-center text-sm font-semibold">
-                        <span class="text-[#00F3FF]">👍 รับประกันความพึงพอใจ</span> 
-                        <span class="text-zinc-300">เมื่อยืนยันการจองด้วยรหัสนี้</span>
-                    </p>
-                    <div class="bg-black/50 rounded-lg flex items-center justify-center gap-3 py-2.5">
-                        <i class="fas fa-gem text-lg text-[#FF007F]"></i>
-                        <span class="text-white font-bold text-lg tracking-wider">Code : </span>
-                        <span class="text-yellow-300 font-bold text-lg tracking-wider">VIP-${provinceKey.toUpperCase()}</span>
-                    </div>
-                </div>
+<!-- Promotion Box -->
+<div class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.3)] max-w-md mx-auto">
+    <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5">
+        <div class="text-center mb-4">
+            <h3 class="text-white text-xl font-bold">😘 ข้อเสนอพิเศษสำหรับโซน ${escapeHTML(provinceName)}</h3>
+            <p class="text-zinc-228 text-xs">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
+            <p class="text-yellow-228 text-xs font-semibold mt-1">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
+        </div>
+        <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-2">
+            <p class="text-white text-center text-sm font-semibold">
+                <span class="text-[#00F3FF]">👍 รับประกันความพึงพอใจ</span> 
+                <span class="text-zinc-300">เมื่อยืนยันการจองด้วยรหัสนี้</span>
+            </p>
+            <div class="bg-black/50 rounded-lg flex items-center justify-center gap-3 py-2.5">
+                <i class="fas fa-gem text-lg text-[#FF007F]"></i>
+                <span class="text-white font-bold text-lg tracking-wider">Code : </span>
+                <span class="text-yellow-300 font-bold text-lg tracking-wider">VIP-${provinceKey.toUpperCase()}</span>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Terms and Conditions Box -->
         <div class="p-[2px] bg-gradient-to-b from-[#7000FF] to-[#FF007F] rounded-3xl shadow-[0_0_30px_rgba(112,0,255,0.3)] max-w-md mx-auto">
