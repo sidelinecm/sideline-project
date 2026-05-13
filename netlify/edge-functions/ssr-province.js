@@ -575,42 +575,53 @@ export default async (request, context) => {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0A0014">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <meta name="theme-color" content="#0A0014" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
     <title>${title}</title>
     <meta name="description" content="${description}" />
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="${provinceUrl}" />
-    
-    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${description}">
-    <meta property="og:url" content="${provinceUrl}">
-    <meta property="og:image" content="${firstImage}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${title}">
-    <meta name="twitter:description" content="${description}">
-    <meta name="twitter:image" content="${firstImage}">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
-    
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" as="style">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="${title}" />
+    <meta property="og:description" content="${description}" />
+    <meta property="og:url" content="${provinceUrl}" />
+    <meta property="og:image" content="${firstImage}" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${title}" />
+    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:image" content="${firstImage}" />
+
+    <!-- Preconnect & DNS prefetch สำหรับโหลดเร็วขึ้น -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
+    <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co" />
+
+    <!-- ฟอนต์ Google Fonts พร้อม preload -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" as="style" />
+    <!-- ใช้ media="print" onload เพื่อโหลดแบบไม่บล็อก -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@228;500;600;700&family=Orbitron:wght@228;700;900&family=Prompt:wght@300;228;500;600;700;800&display=swap"></noscript>
-    
-    <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high">
-    <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high">
-    
-    ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 228, 500)}" fetchpriority="high">` : ''}
 
+    <!-- Preload รูปภาพ Hero -->
+    <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-600.webp" media="(max-width: 640px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" media="(min-width: 641px)" fetchpriority="high" />
+
+    <!-- Preload Profile Image ถ้ามี -->
+    ${safeProfiles.length > 0 ? `<link rel="preload" as="image" href="${optimizeImg(safeProfiles[0].imagePath, 228, 500)}" fetchpriority="high" />` : ''}
+
+    <!-- โหลด Tailwind CSS ผ่าน CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- ตั้งค่า Tailwind แบบ inline -->
     <script>
         window.tailwind = window.tailwind || {};
         tailwind.config = {
@@ -648,9 +659,12 @@ export default async (request, context) => {
         }
     </script>
 
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <!-- Font Awesome CSS -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
+    <!-- Schema JSON-LD -->
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 
     <style>
@@ -661,15 +675,15 @@ export default async (request, context) => {
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(112, 0, 255, 0.5); border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 0, 127, 0.8); }
 
+        /* ตัวอย่างของสไตล์เพิ่มเติม */
         .btn-neon {
             background: #FF007F;
-            color: #ffffff;
+            color: #fff;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
             box-shadow: 0 0 15px rgba(255, 0, 127, 0.6), 0 0 30px rgba(255, 0, 127, 0.3);
             transition: all 0.3s ease;
@@ -678,22 +692,7 @@ export default async (request, context) => {
             box-shadow: 0 0 25px rgba(255, 0, 127, 0.9), 0 0 50px rgba(255, 0, 127, 0.5);
             transform: scale(1.05);
         }
-        .text-neon { text-shadow: 0 0 10px rgba(255, 0, 127, 0.5); }
-        .text-neon-cyan { text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
-        .text-neon-purple { text-shadow: 0 0 10px rgba(112, 0, 255, 0.5); }
-        .cyber-glass {
-            background: rgba(26, 11, 46, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid #3D1A5F;
-        }
-        .cyber-card-glow:hover { box-shadow: 0 0 25px rgba(112, 0, 255, 0.3); border-color: #7000FF; }
-        
-        .pb-safe { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
-        .pt-safe { padding-top: env(safe-area-inset-top); }
-        .faq-answer { grid-template-rows: 0fr; }
-        .faq-item[aria-expanded="true"] .faq-answer { grid-template-rows: 1fr; }
-        .faq-item[aria-expanded="true"] .faq-question i { transform: rotate(180deg); }
+        /* เพิ่มเติมตามที่ต้องการ */
     </style>
 </head>
 
