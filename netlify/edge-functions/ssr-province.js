@@ -47,27 +47,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
             </div>
         </div>
 
-        <!-- Promotion Box -->
-        <div class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.3)] max-w-md mx-auto relative overflow-hidden">
-            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-5 relative z-10">
-                <div class="text-center mb-4">
-                    <h3 class="text-white text-xl font-bold"><span aria-hidden="true">😘</span> ข้อเสนอพิเศษโซน${escapeHTML(e)}</h3>
-                    <p class="text-zinc-300 text-xs mt-1">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับ VIP</p>
-                    <p class="text-yellow-400 text-xs font-semibold mt-1.5 animate-pulse">⚠️ สิทธิ์มีจำนวนจำกัด ⚠️</p>
-                </div>
-                <div class="bg-[#0A0014]/50 border border-[#3D1A5F] rounded-2xl p-4 space-y-3">
-                    <p class="text-white text-center text-sm font-semibold">
-                        <span class="text-[#00F3FF]"><i class="fas fa-thumbs-up" aria-hidden="true"></i> รับประกันความพึงพอใจ</span><br/>
-                        <span class="text-zinc-400 text-xs font-light">เมื่อยืนยันการจองด้วยรหัสนี้</span>
-                    </p>
-                    <div class="bg-black/60 rounded-xl flex items-center justify-center gap-3 py-3 border border-[#FF007F]/30 shadow-[inset_0_0_10px_rgba(255,0,127,0.2)]">
-                        <i class="fas fa-gem text-lg text-[#FF007F]" aria-hidden="true"></i>
-                        <span class="text-white font-bold text-lg tracking-wider font-orbitron">CODE : </span>
-                        <span class="text-yellow-400 font-black text-xl tracking-wider font-orbitron drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">VIP-${t.toUpperCase()}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Terms and Conditions Box -->
         <div class="p-[2px] bg-gradient-to-b from-[#7000FF] to-[#FF007F] rounded-3xl shadow-[0_0_30px_rgba(112,0,255,0.3)] max-w-md mx-auto">
