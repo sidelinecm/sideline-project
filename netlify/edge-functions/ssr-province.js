@@ -307,19 +307,43 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
             <!-- Promotion Box -->
-            <section aria-labelledby="promo-heading" class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(255,0,127,0.2)] relative overflow-hidden h-full flex flex-col">
-                <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8 relative z-10 flex-1 flex flex-col justify-center">
+<!-- Promotion Box -->
+            <section aria-labelledby="promo-heading" class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_10px_30px_rgba(255,0,127,0.15)] relative overflow-hidden h-full flex flex-col">
+                <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8 relative z-10 flex-1 flex flex-col justify-between">
                     <div class="text-center mb-6">
-                        <h2 id="promo-heading" class="text-white text-xl md:text-2xl font-bold"><span aria-hidden="true">💎</span> ข้อเสนอและโปรโมชั่น VIP</h2>
-                        <p class="text-zinc-300 text-sm mt-2">แจ้งโค้ดนี้กับแอดมินเพื่อรับการดูแลระดับพิเศษในโซน${escapeHTML(provinceName)}</p>
+                        <h2 id="promo-heading" class="text-white text-lg md:text-xl font-bold tracking-tight">
+                            <span class="text-[#FF007F]">VIP</span> PROMOTION
+                        </h2>
+                        <p class="text-zinc-400 text-xs mt-1.5 font-light">แจ้งรหัสกับแอดมินเพื่อรับสิทธิ์ดูแลระดับพิเศษ</p>
                     </div>
-                    <div class="bg-[#0f0f0f]/60 border border-[#3D1A5F] rounded-2xl p-6">
-                        <div class="bg-black/80 rounded-xl flex items-center justify-center gap-4 py-5 border border-[#FF007F]/40 shadow-[inset_0_0_20px_rgba(255,0,127,0.2)]">
-                            <i class="fas fa-gem text-2xl text-[#FF007F]" aria-hidden="true"></i>
-                            <span class="text-white font-bold text-xl tracking-wider font-orbitron">CODE : </span>
-                            <span class="text-yellow-400 font-black text-3xl tracking-wider font-orbitron drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]">VIP-${provinceKey.toUpperCase()}</span>
+
+                    <!-- Voucher Design -->
+                    <div class="relative group">
+                        <!-- แสง Glow รอบรหัส -->
+                        <div class="absolute -inset-1 bg-gradient-to-r from-[#FF007F] to-[#7000FF] rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                        
+                        <div class="relative bg-[#0f0f0f] border border-dashed border-[#FF007F]/40 rounded-2xl p-4 md:p-6 overflow-hidden">
+                            <!-- วงกลมเจาะรูตั๋ว (ซ้าย-ขวา) -->
+                            <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#1A0B2E] border-r border-[#FF007F]/40 rounded-full"></div>
+                            <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#1A0B2E] border-l border-[#FF007F]/40 rounded-full"></div>
+                            
+                            <div class="flex flex-col items-center gap-2">
+                                <span class="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] font-orbitron">Exclusive Code</span>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-crown text-xs text-yellow-500/80"></i>
+                                    <span class="text-white font-black text-xl md:text-2xl tracking-[0.15em] font-orbitron drop-shadow-[0_0_8px_rgba(255,0,127,0.4)]">
+                                        VIP-${provinceKey.toUpperCase()}
+                                    </span>
+                                    <i class="fas fa-crown text-xs text-yellow-500/80"></i>
+                                </div>
+                                <div class="mt-2 px-3 py-0.5 rounded-full bg-[#FF007F]/10 border border-[#FF007F]/20">
+                                    <span class="text-[9px] text-[#FF007F] font-bold uppercase tracking-widest">Valid Today Only</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <p class="text-center text-[10px] text-zinc-500 mt-5 font-light italic">* สิทธิ์ VIP มีจำนวนจำกัดต่อวัน</p>
                 </div>
             </section>
 
