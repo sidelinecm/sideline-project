@@ -60,7 +60,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
                 
                 <div class="space-y-4">
                     ${i.map((e,t)=>`
-                        <div class="flex gap-4 items-start p-4 rounded-2xl bg-[#0A0014]/50 border border-[#3D1A5F]/70 transition-colors hover:border-[#7000FF]/50">
+                        <div class="flex gap-4 items-start p-4 rounded-2xl bg-[#0f0f0f]/50 border border-[#3D1A5F]/70 transition-colors hover:border-[#7000FF]/50">
                             <div class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-[#FF007F] to-[#7000FF] flex items-center justify-center text-white font-bold text-lg shadow-[0_0_10px_rgba(255,0,127,0.5)] font-orbitron">
                                 ${t+1}
                             </div>
@@ -89,67 +89,25 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
             </p>
         </div>
         
-    </section>`};export default(async(t,a)=>{try{let r=new URL(t.url);if(r.searchParams.has("province")){let i=r.searchParams.get("province"),s=new URL(`/location/${i}`,r.origin);return Response.redirect(s.toString(),301)}let n=r.pathname.split("/").filter(Boolean),o=n[n.length-1]||"chiangmai",l=o.toLowerCase();try{l=decodeURIComponent(o).toLowerCase()}catch{l=o.toLowerCase()}let $=e(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY),[d,c,p]=await Promise.all([$.from("provinces").select("id, nameThai, key").eq("key",l).maybeSingle(),$.from("profiles").select("id, slug, name, imagePath, location, rate, isfeatured, lastUpdated, active, availability").eq("provinceKey",l).eq("active",!0).order("isfeatured",{ascending:!1}).order("lastUpdated",{ascending:!1}).limit(80),$.from("provinces").select("key, nameThai").order("nameThai",{ascending:!0})]),m=d.data,x=c.data||[],f=p.data||[];if(!m)return a.next();let h=x,g=m.nameThai,b=PROVINCE_SEO_DATA[l]||PROVINCE_SEO_DATA.default,u=new Date,_=u.getFullYear(),v=u.toLocaleString("th-TH",{month:"long"}),w=new Date(u);w.setFullYear(w.getFullYear()+1),w.toISOString().split("T")[0];let y=`${CONFIG.DOMAIN}/location/${l}`,F=h.length>0?optimizeImg(h[0].imagePath,1200,630):`${CONFIG.DOMAIN}/images/seo-default.webp`,I=`ไซด์ไลน์${g} (${h.length>0?`${h.length}+ คน`:"เกรดพรีเมียม"}) รับงานเด็กเอ็น VIP ไม่ต้องมัดจำ`,A=`รวมน้องๆ รับงาน${g} และไซด์ไลน์${g} ระดับ VIP ${h.length} โปรไฟล์ โซน ${(b.zones||["ตัวเมือง"]).slice(0,3).join(", ")} และอีกมากมาย ✓การันตีตรงปก 100% ✓ไม่บังคับโอนมัดจำ ✓จ่ายเงินสดหน้างานเท่านั้น`,k=(b.avgPrice||"1,500 - 3,500").split("-");k[0]&&k[0].trim(),k[1]&&k[1].trim();let O=[{"@type":"Organization","@id":`${CONFIG.DOMAIN}/#organization`,name:CONFIG.BRAND_NAME,url:CONFIG.DOMAIN,logo:`${CONFIG.DOMAIN}/logo.png`,description:CONFIG.DESCRIPTION,sameAs:CONFIG.SOCIALS||[],contactPoint:{"@type":"ContactPoint",contactType:"customer service",telephone:CONFIG.PHONE||"",availableLanguage:["th","en"]}},{"@type":"WebSite","@id":`${CONFIG.DOMAIN}/#website`,url:CONFIG.DOMAIN,name:CONFIG.BRAND_NAME,publisher:{"@id":`${CONFIG.DOMAIN}/#organization`},potentialAction:{"@type":"SearchAction",target:`${CONFIG.DOMAIN}/search?q={search_term_string}`,"query-input":"required name=search_term_string"}},{"@type":"WebPage","@id":`${y}/#webpage`,url:y,name:I,description:A,isPartOf:{"@id":`${CONFIG.DOMAIN}/#website`},breadcrumb:{"@id":`${y}/#breadcrumb`},mainEntity:{"@id":`${y}/#service`}},{"@type":"BreadcrumbList","@id":`${y}/#breadcrumb`,itemListElement:[{"@type":"ListItem",position:1,name:"หน้าแรก",item:CONFIG.DOMAIN},{"@type":"ListItem",position:2,name:`ไซด์ไลน์${g}`,item:y}]},{"@type":"Service","@id":`${y}/#service`,name:`บริการในพื้นที่ ${g}`,provider:{"@id":`${CONFIG.DOMAIN}/#organization`},areaServed:{"@type":"AdministrativeArea",name:g},description:A},{"@type":"LocalBusiness","@id":`${CONFIG.DOMAIN}/#business`,name:CONFIG.BRAND_NAME,url:CONFIG.DOMAIN,image:F,priceRange:"฿฿",telephone:CONFIG.PHONE||"",address:{"@type":"PostalAddress",addressCountry:"TH"},geo:{"@type":"GeoCoordinates",latitude:b?.geo?.lat,longitude:b?.geo?.lng},openingHoursSpecification:{"@type":"OpeningHoursSpecification",dayOfWeek:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],opens:"10:00",closes:"22:00"}}];b.faqs&&b.faqs.length>0&&O.push({"@type":"FAQPage","@id":`${y}/#faq`,mainEntity:b.faqs.map(e=>({"@type":"Question",name:e.q,acceptedAnswer:{"@type":"Answer",text:e.a}}))}),h&&h.length>0&&O.push({"@type":"ItemList",name:`รายชื่อไซด์ไลน์ VIP ใน ${g}`,description:`รายชื่อโปรไฟล์ ${h.length} คนล่าสุดในพื้นที่ ${g}`,itemListElement:h.slice(0,10).map((e,t)=>({"@type":"ListItem",position:t+1,item:{"@type":"Person",name:e.name||"ไม่ระบุชื่อ",url:`${CONFIG.DOMAIN}/sideline/${e.slug||e.id}`,image:optimizeImg(e.imagePath,182,228),description:`โปรไฟล์น้อง${e.name||""} รับงานโซน ${e.location||g}`}}))});let N={"@context":"https://schema.org","@graph":O},S="";if(h&&h.length>0){let E=b.intents||["หาเพื่อนเที่ยว","น้องเอนเตอร์เทน","รับงานนอกสถานที่","ฟีลแฟน","เพื่อนเที่ยวกลางคืน","เด็กเอ็น VIP"],C=b.traits||["ผิวขาวออร่า","หุ่นนางแบบ","ตรงปก 100%","บริการเป็นกันเอง","คุยสนุกเอาใจเก่ง","สเปกพรีเมียม"];S=h.map((e,t)=>{let a=(e.name||"ไม่ระบุชื่อ").replace(/^(น้อง\s?)/,""),r=escapeHTML(a),i=escapeHTML(e.location||g||"ไม่ระบุโซน"),s=`/sideline/${escapeHTML(e.slug||e.id)}`,n=!["ติดจอง","ไม่ว่าง","พัก","หยุด"].some(t=>(e.availability||"").toLowerCase().includes(t)),o="สอบถาม";if(e.rate){let l=String(e.rate).replace(/,/g,"").trim(),$=Number(l);o=isNaN($)||""===l?escapeHTML(e.rate):$.toLocaleString()}let d=(4.8+.2*Math.random()).toFixed(1),c=t%10*50,p=b.lsi&&b.lsi.length>0?b.lsi[t%b.lsi.length]:`รับงาน${g}`,m=E[t%E.length],x=C[t%C.length],f=`รูปโปรไฟล์น้อง${r} บริการ${p} พิกัดโซน${i} จุดเด่น${x} เหมาะกับผู้ที่ต้องการ${m}`,h=t<4?'loading="eager" fetchpriority="high" decoding="sync"':'loading="lazy" decoding="async"',u=n?"bg-[#00F3FF]":"bg-[#FF007F]",_=n?"text-[#00F3FF]":"text-[#FF007F]",v=n?"border-[#00F3FF]/30":"border-[#FF007F]/30",w=n?"shadow-[0_0_10px_rgba(0,243,255,0.2)]":"shadow-[0_0_10px_rgba(255,0,127,0.2)]";return`
-    <article id="profile-${e.id}" class="block group relative cyber-glass rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cyber-card-glow animate-fade-in-up active:scale-95" style="animation-delay: ${c}ms; animation-fill-mode: both; content-visibility: auto;">
+    </section>`};export default(async(t,a)=>{try{let r=new URL(t.url);if(r.searchParams.has("province")){let i=r.searchParams.get("province"),s=new URL(`/location/${i}`,r.origin);return Response.redirect(s.toString(),301)}let n=r.pathname.split("/").filter(Boolean),o=n[n.length-1]||"chiangmai",l=o.toLowerCase();try{l=decodeURIComponent(o).toLowerCase()}catch{l=o.toLowerCase()}let $=e(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY),[d,c,p]=await Promise.all([$.from("provinces").select("id, nameThai, key").eq("key",l).maybeSingle(),$.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability").eq("provinceKey",l).eq("active",!0).order("isfeatured",{ascending:!1}).order("lastUpdated",{ascending:!1}).limit(80),$.from("provinces").select("key, nameThai").order("nameThai",{ascending:!0})]),m=d.data,x=c.data||[],f=p.data||[];if(!m)return a.next();let h=x,g=m.nameThai,b=PROVINCE_SEO_DATA[l]||PROVINCE_SEO_DATA.default,u=new Date,_=u.getFullYear(),v=u.toLocaleString("th-TH",{month:"long"}),w=new Date(u);w.setFullYear(w.getFullYear()+1),w.toISOString().split("T")[0];let y=`${CONFIG.DOMAIN}/location/${l}`,F=h.length>0?optimizeImg(h[0].imagePath,1200,630):`${CONFIG.DOMAIN}/images/seo-default.webp`,I=`ไซด์ไลน์${g} (${h.length>0?`${h.length}+ คน`:"เกรดพรีเมียม"}) รับงานเด็กเอ็น VIP ไม่ต้องมัดจำ`,A=`รวมน้องๆ รับงาน${g} และไซด์ไลน์${g} ระดับ VIP ${h.length} โปรไฟล์ โซน ${(b.zones||["ตัวเมือง"]).slice(0,3).join(", ")} และอีกมากมาย ✓การันตีตรงปก 100% ✓ไม่บังคับโอนมัดจำ ✓จ่ายเงินสดหน้างานเท่านั้น`,k=(b.avgPrice||"1,500 - 3,500").split("-");k[0]&&k[0].trim(),k[1]&&k[1].trim();let O=[{"@type":"Organization","@id":`${CONFIG.DOMAIN}/#organization`,name:CONFIG.BRAND_NAME,url:CONFIG.DOMAIN,logo:`${CONFIG.DOMAIN}/logo.png`,description:CONFIG.DESCRIPTION,sameAs:CONFIG.SOCIALS||[],contactPoint:{"@type":"ContactPoint",contactType:"customer service",telephone:CONFIG.PHONE||"",availableLanguage:["th","en"]}},{"@type":"WebSite","@id":`${CONFIG.DOMAIN}/#website`,url:CONFIG.DOMAIN,name:CONFIG.BRAND_NAME,publisher:{"@id":`${CONFIG.DOMAIN}/#organization`},potentialAction:{"@type":"SearchAction",target:`${CONFIG.DOMAIN}/search?q={search_term_string}`,"query-input":"required name=search_term_string"}},{"@type":"WebPage","@id":`${y}/#webpage`,url:y,name:I,description:A,isPartOf:{"@id":`${CONFIG.DOMAIN}/#website`},breadcrumb:{"@id":`${y}/#breadcrumb`},mainEntity:{"@id":`${y}/#service`}},{"@type":"BreadcrumbList","@id":`${y}/#breadcrumb`,itemListElement:[{"@type":"ListItem",position:1,name:"หน้าแรก",item:CONFIG.DOMAIN},{"@type":"ListItem",position:2,name:`ไซด์ไลน์${g}`,item:y}]},{"@type":"Service","@id":`${y}/#service`,name:`บริการในพื้นที่ ${g}`,provider:{"@id":`${CONFIG.DOMAIN}/#organization`},areaServed:{"@type":"AdministrativeArea",name:g},description:A},{"@type":"LocalBusiness","@id":`${CONFIG.DOMAIN}/#business`,name:CONFIG.BRAND_NAME,url:CONFIG.DOMAIN,image:F,priceRange:"฿฿",telephone:CONFIG.PHONE||"",address:{"@type":"PostalAddress",addressCountry:"TH"},geo:{"@type":"GeoCoordinates",latitude:b?.geo?.lat,longitude:b?.geo?.lng},openingHoursSpecification:{"@type":"OpeningHoursSpecification",dayOfWeek:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],opens:"10:00",closes:"22:00"}}];b.faqs&&b.faqs.length>0&&O.push({"@type":"FAQPage","@id":`${y}/#faq`,mainEntity:b.faqs.map(e=>({"@type":"Question",name:e.q,acceptedAnswer:{"@type":"Answer",text:e.a}}))}),h&&h.length>0&&O.push({"@type":"ItemList",name:`รายชื่อไซด์ไลน์ VIP ใน ${g}`,description:`รายชื่อโปรไฟล์ ${h.length} คนล่าสุดในพื้นที่ ${g}`,itemListElement:h.slice(0,10).map((e,t)=>({"@type":"ListItem",position:t+1,item:{"@type":"Person",name:e.name||"ไม่ระบุชื่อ",url:`${CONFIG.DOMAIN}/sideline/${e.slug||e.id}`,image:optimizeImg(e.imagePath,182,228),description:`โปรไฟล์น้อง${e.name||""} รับงานโซน ${e.location||g}`}}))});let N={"@context":"https://schema.org","@graph":O},S="";if(h&&h.length>0){let E=b.intents||["หาเพื่อนเที่ยว","น้องเอนเตอร์เทน","รับงานนอกสถานที่","ฟีลแฟน","เพื่อนเที่ยวกลางคืน","เด็กเอ็น VIP"],C=b.traits||["ผิวขาวออร่า","หุ่นนางแบบ","ตรงปก 100%","บริการเป็นกันเอง","คุยสนุกเอาใจเก่ง","สเปกพรีเมียม"];S=h.map((e,t)=>{let a=(e.name||"ไม่ระบุชื่อ").replace(/^(น้อง\s?)/,""),r=escapeHTML(a),i=escapeHTML(e.location||g||"ไม่ระบุโซน"),s=`/sideline/${escapeHTML(e.slug||e.id)}`,n=!["ติดจอง","ไม่ว่าง","พัก","หยุด"].some(t=>(e.availability||"").toLowerCase().includes(t)),o="สอบถาม";if(e.rate){let l=String(e.rate).replace(/,/g,"").trim(),$=Number(l);o=isNaN($)||""===l?escapeHTML(e.rate):$.toLocaleString()}let d=(4.8+.2*Math.random()).toFixed(1),c=t%10*50,p=b.lsi&&b.lsi.length>0?b.lsi[t%b.lsi.length]:`รับงาน${g}`,m=E[t%E.length],x=C[t%C.length],f=`รูปโปรไฟล์น้อง${r} บริการ${p} พิกัดโซน${i} จุดเด่น${x} เหมาะกับผู้ที่ต้องการ${m}`,h=t<4?'loading="eager" fetchpriority="high" decoding="sync"':'loading="lazy" decoding="async"',u=n?"bg-[#00F3FF]":"bg-[#FF007F]",_=n?"text-[#00F3FF]":"text-[#FF007F]",v=n?"border-[#00F3FF]/30":"border-[#FF007F]/30",w=n?"shadow-[0_0_10px_rgba(0,243,255,0.2)]":"shadow-[0_0_10px_rgba(255,0,127,0.2)]";return `
+  <div class="profile-card" onclick="window.location.href='${s}'">
+    ${(e.isfeatured || t < 3) ? '<div class="hot-badge">Hot</div>' : ''}
+    <img src="${optimizeImg(e.imagePath, 500, 667)}" 
+         alt="${r}" 
+         class="profile-image" 
+         ${h} />
+    <div class="overlay">
+      <div class="details">
+        <div class="name-line">${r} | ${e.age || '??'}</div>
+        <div class="info-line">${i}</div>
+<div class="price-line">
+          <span>${o} ${o === "สอบถาม" ? "" : "฿"}</span>
+          <span class="view-btn">View</span>
         
-        <a href="${s}" title="ดูข้อมูลรับงานและเรทราคาของน้อง${r}" class="block absolute inset-0 z-30">
-            <span class="sr-only">ดูโปรไฟล์ รายละเอียด และเรทราคาการรับงานของน้อง${r} โซน${i}</span>
-        </a>
-        
-        <div class="relative aspect-[4/5] w-full overflow-hidden bg-[#0A0014]">
-            <img src="${optimizeImg(e.imagePath,182,228)}" 
-                 width="182" height="228"
-                 onerror="this.onerror=null;this.src='${CONFIG.DOMAIN}/images/default.webp';"
-                 alt="${f}"
-                 title="น้อง${r} - ${p}"
-                 class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-1000 ease-out"
-                 ${h}>
-            
-            <div class="absolute inset-0 bg-gradient-to-tr from-[#7000FF]/20 to-[#FF007F]/10 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-700"></div>
-            <div class="absolute inset-0 shadow-[inset_0_0_60px_rgba(10,0,20,0.8)] z-10 pointer-events-none"></div>
-            <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0A0014] via-[#0A0014]/80 to-transparent z-10 pointer-events-none"></div>
-            
-            <div class="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex items-center gap-1.5 cyber-glass px-2.5 py-1 md:px-3 md:py-1.5 rounded-full ${w} border ${v}">
-                <span class="relative flex h-2 w-2" aria-hidden="true">
-                    ${t<6?`<span class="animate-ping absolute inline-flex h-full w-full rounded-full ${u} opacity-75"></span>`:""}
-                    <span class="relative inline-flex rounded-full h-2 w-2 ${u} shadow-[0_0_5px_currentColor]"></span>
-                </span>
-                <span class="text-[9px] md:text-[10px] font-bold ${_} uppercase tracking-wider font-orbitron">
-                    ${n?"ONLINE":"BUSY"}
-                </span>
-            </div>
-
-            ${t<3||e.isfeatured?`
-            <div class="absolute top-3 right-3 md:top-4 md:right-4 z-20 bg-[#FF007F] px-2.5 py-1 rounded-full border border-white/20 shadow-[0_0_15px_rgba(255,0,127,0.8)] flex items-center gap-1">
-                <i class="fas fa-fire text-white text-[9px] md:text-[10px] ${t<3?"animate-pulse":""}" aria-hidden="true"></i>
-                <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider font-orbitron">HOT</span>
-            </div>`:""}
-
-            <div class="absolute bottom-0 inset-x-0 p-4 md:p-5 z-20">
-                <div class="flex items-end justify-between gap-2">
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-xl md:text-3xl font-bold text-white leading-none mb-1.5 truncate drop-shadow-lg text-neon">${r}</h3>
-                        <div class="flex items-center gap-1.5 text-zinc-300 text-[10px] md:text-sm">
-                            <i class="fas fa-map-marker-alt text-[#7000FF] drop-shadow-[0_0_5px_rgba(112,0,255,0.8)]" aria-hidden="true"></i>
-                            <span class="truncate">${i}</span>
-                        </div>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <span class="block text-[9px] md:text-[10px] text-zinc-300 font-medium uppercase tracking-wider mb-0.5 font-orbitron">RATE</span>
-                        <span class="font-black text-lg md:text-xl text-[#FF007F] tracking-tight text-neon">฿${o}</span>
-                    </div>
-                </div>
-                <div class="mt-3 md:mt-4 flex items-center justify-between md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
-                    <div class="flex items-center gap-1 text-[#00F3FF] text-[10px] md:text-xs font-bold cyber-glass px-2 py-1 rounded-lg border border-[#00F3FF]/30">
-                        <i class="fas fa-star" aria-hidden="true"></i> ${d}
-                    </div>
-                    <div class="btn-neon text-[10px] md:text-xs font-bold px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-1.5 font-orbitron" aria-hidden="true">
-                        VIEW <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </article>`}).join("")}else S=`
+      </div>
+    </div>
+  </div>`;
+}).join("")}else S=`
             <div class="col-span-full flex flex-col items-center justify-center py-20 md:py-32 text-center cyber-glass rounded-[2rem] border border-[#3D1A5F]/50">
                 <div class="w-20 h-20 bg-[#1A0B2E] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(112,0,255,0.2)] border border-[#7000FF]/30">
                     <i class="fas fa-hourglass-half text-3xl text-[#00F3FF] animate-pulse" aria-hidden="true"></i>
@@ -162,7 +120,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
                     กลับหน้าหลัก
                 </a>
             </div>`;let q=`<!DOCTYPE html>
-<html lang="th" class="scroll-smooth bg-[#0A0014]">
+<html lang="th" class="scroll-smooth bg-[#0f0f0f]">
 <head>
 <!-- 
     ========================================================================
@@ -188,7 +146,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0A0014" />
+    <meta name="theme-color" content="#0f0f0f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -233,9 +191,9 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
     <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co" />
 
     <!-- แก้ไขบั๊กน้ำหนักฟอนต์ (เปลี่ยนจาก 228 เป็น 400) เพื่อป้องกัน Google แบนทรัพยากร -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" as="style" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap"></noscript>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@300;400;600&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" as="style" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@300;400;600&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@300;400;600&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600;700;800&display=swap"></noscript>
 
     <!-- Preload LCP Image ป้องกัน Layout Shift และดึงความเร็วระดับมิลลิวินาที -->
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="(max-width: 640px) 100vw, 50vw" fetchpriority="high" />
@@ -252,14 +210,14 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
                 extend: {
                     colors: { 
                         cyber: {
-                            bg: '#0A0014',
+                            bg: '#0f0f0f',
                             card: '#1A0B2E',
                             border: '#3D1A5F',
                             pink: '#FF007F',
                             purple: '#7000FF',
                             cyan: '#00F3FF'
                         },
-                        zinc: { 900: '#1A0B2E', 950: '#0A0014' }
+                        zinc: { 900: '#1A0B2E', 950: '#0f0f0f' }
                     },
                     fontFamily: { 
                         sans:['Prompt', 'Inter', 'sans-serif'],
@@ -293,10 +251,17 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
     <!-- ==================== CUSTOM STYLES ==================== -->
     <style>
         body { 
-            margin: 0; font-family: 'Prompt', sans-serif; background-color: #0A0014; color: #fff; 
-            background-image: radial-gradient(at 50% 0%, rgba(112, 0, 255, 0.15) 0px, transparent 60%);
-            -webkit-tap-highlight-color: transparent; 
-        }
+    margin: 0; 
+    /* เปลี่ยนฟอนต์หลักเป็น Kanit เพื่อความหรูหรา และใช้ Prompt เป็นฟอนต์สำรอง */
+    font-family: 'Kanit', 'Prompt', sans-serif; 
+    /* ใช้สีพื้นหลังดำเข้มแบบพรีเมียมตามตัวอย่าง */
+    background-color: #0f0f0f; 
+    color: #fff; 
+    /* แสง Gradient ด้านบนปรับให้ดูเนียนตาขึ้น */
+    background-image: radial-gradient(at 50% 0%, rgba(112, 0, 255, 0.1) 0px, transparent 70%);
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+}
         /* ซ่อน Scrollbar แต่ยังเลื่อนได้ตามปกติ (รองรับทั้ง Chrome, Safari, Firefox) */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -366,6 +331,62 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
         .breadcrumb-nav [itemprop="name"] { 
             color: inherit;
         }
+        /* --- สไตล์จากไฟล์ตัวอย่างเพื่อให้การ์ดสวย --- */
+  .grid-wrapper {
+    display: grid;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 1000px) { .grid-wrapper { grid-template-columns: repeat(4, 1fr); } }
+
+  .profile-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    padding-top: 133.33%; /* สัดส่วนรูป 3:4 */
+    background-color: #222;
+    cursor: pointer;
+    /* แอนิเมชั่นตอนโหลด */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: cardAppear 0.6s ease-out forwards;
+  }
+  @keyframes cardAppear { to { opacity: 1; transform: translateY(0); } }
+
+  .profile-image {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .profile-card:hover .profile-image { transform: scale(1.1); }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 15px;
+  }
+  .name-line { font-weight: 600; font-size: 1.1rem; color: #fff; }
+  .info-line { font-size: 0.85rem; color: #ccc; margin-bottom: 8px; }
+  .price-line { 
+    display: flex; justify-content: space-between; align-items: center; 
+    font-weight: 600; color: #FF007F; 
+  }
+  .view-btn { 
+    background: #fff; color: #000; padding: 4px 12px; 
+    border-radius: 20px; font-size: 0.75rem; 
+  }
+  .hot-badge {
+    position: absolute; top: 10px; right: 10px; z-index: 10;
+    background: #FF007F; color: #fff; padding: 2px 10px;
+    border-radius: 12px; font-size: 0.7rem; font-weight: bold;
+  }
     </style>
 </head>
 
@@ -397,8 +418,8 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
         </div>
     </nav>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-[#0A0014]/80 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
-    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-72 bg-[#0A0014] border-l border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.2)] z-[70] transform translate-x-full transition-transform duration-300 flex flex-col pt-safe">
+    <div id="sidebar-overlay" class="fixed inset-0 bg-[#0f0f0f]/80 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
+    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-72 bg-[#0f0f0f] border-l border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.2)] z-[70] transform translate-x-full transition-transform duration-300 flex flex-col pt-safe">
         <div class="flex items-center justify-between p-5 border-b border-[#3D1A5F]">
             <span class="text-lg font-black text-[#FF007F] uppercase tracking-widest font-orbitron text-neon">MENU</span>
             <button id="close-menu-btn" aria-label="ปิดเมนูนำทางบนมือถือ" class="w-8 h-8 flex items-center justify-center rounded-full cyber-glass text-zinc-300 hover:text-white hover:border-[#FF007F]">
@@ -421,7 +442,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
     </nav>
 
     <header class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
-        <div class="absolute inset-0 bg-[#0A0014] overflow-hidden pointer-events-none -z-10" aria-hidden="true">
+        <div class="absolute inset-0 bg-[#0f0f0f] overflow-hidden pointer-events-none -z-10" aria-hidden="true">
             <!-- แก้ไข CLS (Issue 1): นำ contain: strict; ออก แล้วแทนที่ด้วย transform-gpu เพื่อไม่ให้เบราว์เซอร์จัดเลย์เอาต์ผิดพลาด -->
             <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none transform-gpu"></div>
             <div class="absolute bottom-[10%] right-[10%] w-[228px] h-[228px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none transform-gpu"></div>
@@ -479,9 +500,9 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
                          width="1200" height="1200"
                          class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 group-hover:brightness-110 transition-all duration-1000"
                          fetchpriority="high" decoding="sync">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#0A0014]/90 via-[#0A0014]/20 to-transparent" aria-hidden="true"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0f0f0f]/90 via-[#0f0f0f]/20 to-transparent" aria-hidden="true"></div>
                     <div class="absolute bottom-5 left-5 right-5 md:bottom-8 md:left-8 md:right-8 cyber-glass rounded-2xl p-4 flex items-center gap-4">
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#00F3FF] flex items-center justify-center text-[#0A0014] shadow-[0_0_15px_rgba(0,243,255,0.8)]"><i class="fas fa-shield-check text-lg md:text-xl" aria-hidden="true"></i></div>
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#00F3FF] flex items-center justify-center text-[#0f0f0f] shadow-[0_0_15px_rgba(0,243,255,0.8)]"><i class="fas fa-shield-check text-lg md:text-xl" aria-hidden="true"></i></div>
                         <div>
                             <span class="block text-white font-bold text-sm tracking-wide font-orbitron text-neon-cyan">Verified & Safe</span>
                             <span class="block text-zinc-300 text-[10px] md:text-xs font-light mt-0.5">คัดกรองประวัติและยืนยันตัวตนแล้ว</span>
@@ -526,7 +547,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
             <div class="mt-4 flex justify-center">
                 <div class="group relative" role="alert" aria-live="polite">
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-[#FF007F]/40 to-[#7000FF]/40 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000" aria-hidden="true"></div>
-                    <div class="relative flex items-center gap-3 px-6 py-3 rounded-xl bg-[#0A0014] border border-[#FF007F]/30 text-[#FF007F] shadow-[0_0_15px_rgba(255,0,127,0.2)]">
+                    <div class="relative flex items-center gap-3 px-6 py-3 rounded-xl bg-[#0f0f0f] border border-[#FF007F]/30 text-[#FF007F] shadow-[0_0_15px_rgba(255,0,127,0.2)]">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-[#FF007F]/20 flex items-center justify-center border border-[#FF007F]/40 shadow-[0_0_10px_#FF007F]">
                             <span class="text-[14px] font-black font-orbitron">20+</span>
                         </div>
@@ -541,9 +562,9 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
     </header>
 
     <main class="w-full relative z-20">
-        <nav aria-label="ตัวกรองและหมวดหมู่" class="sticky top-14 md:top-20 z-40 bg-[#0A0014]/90 backdrop-blur-xl border-y border-[#3D1A5F] py-2.5 md:py-3 px-4 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+        <nav aria-label="ตัวกรองและหมวดหมู่" class="sticky top-14 md:top-20 z-40 bg-[#0f0f0f]/90 backdrop-blur-xl border-y border-[#3D1A5F] py-2.5 md:py-3 px-4 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
             <div class="max-w-7xl mx-auto flex overflow-x-auto no-scrollbar gap-2.5 items-center snap-x">
-                <button aria-label="กรองข้อมูลล่าสุด" class="snap-start shrink-0 bg-white text-[#0A0014] px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-[0_0_10px_rgba(255,255,255,0.5)]">ล่าสุด</button>
+                <button aria-label="กรองข้อมูลล่าสุด" class="snap-start shrink-0 bg-white text-[#0f0f0f] px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-[0_0_10px_rgba(255,255,255,0.5)]">ล่าสุด</button>
                 <button aria-label="กรองโปรไฟล์มาแรง" class="snap-start shrink-0 cyber-glass text-white px-5 py-2 rounded-full text-xs font-medium whitespace-nowrap hover:shadow-[0_0_15px_rgba(255,0,127,0.4)] hover:border-[#FF007F] transition-all flex items-center gap-1.5"><i class="fas fa-fire text-[#FF007F]" aria-hidden="true"></i> มาแรง</button>
                 <button aria-label="เลือกโซนให้บริการ" class="snap-start shrink-0 cyber-glass text-white px-5 py-2 rounded-full text-xs font-medium whitespace-nowrap hover:shadow-[0_0_15px_rgba(112,0,255,0.4)] hover:border-[#7000FF] transition-all flex items-center gap-1.5"><i class="fas fa-map-marker-alt text-[#7000FF]" aria-hidden="true"></i> เลือกโซน <i class="fas fa-chevron-down text-[10px] ml-1 opacity-50" aria-hidden="true"></i></button>
                 <button aria-label="ราคาต่ำกว่า 2000 บาท" class="snap-start shrink-0 cyber-glass text-white px-5 py-2 rounded-full text-xs font-medium whitespace-nowrap hover:border-white/30 transition-all">&lt; 2,000 ฿</button>
@@ -562,9 +583,9 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
                 </div>
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5 lg:gap-6">
-                ${S}
-            </div>
+<div class="grid-wrapper">
+    ${S}
+</div>
             
             ${h.length>=80?`
             <div class="mt-12 md:mt-16 text-center">
@@ -579,7 +600,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
         </div>
     </main>
 
-    <footer class="bg-[#0A0014] border-t border-[#3D1A5F] pt-12 pb-24 md:pb-12 text-left relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+    <footer class="bg-[#0f0f0f] border-t border-[#3D1A5F] pt-12 pb-24 md:pb-12 text-left relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
                 <div class="md:col-span-5 space-y-5">
@@ -649,7 +670,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
             </li>
             <li class="w-full h-full relative">
                 <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินเพื่อจองคิว" class="flex flex-col items-center justify-center w-full h-full group absolute -top-8 left-0">
-                    <div class="w-14 h-14 btn-neon rounded-full flex items-center justify-center text-white group-active:scale-95 transition-transform border-[4px] border-[#0A0014] shadow-[0_0_20px_rgba(255,0,127,0.6)]">
+                    <div class="w-14 h-14 btn-neon rounded-full flex items-center justify-center text-white group-active:scale-95 transition-transform border-[4px] border-[#0f0f0f] shadow-[0_0_20px_rgba(255,0,127,0.6)]">
                         <i class="fab fa-line text-[26px]" aria-hidden="true"></i>
                     </div>
                     <span class="text-[10px] font-bold text-white mt-1 uppercase tracking-wider font-orbitron" style="text-shadow: 0 0 5px #FF007F;">จองคิว</span>
@@ -700,8 +721,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
             if (show) {
                 overlay.classList.remove('hidden');
                 
-                // แก้ไขปัญหา Issue 2: Forced Synchronous Layout (Reflow)
-                // เลิกใช้ void overlay.offsetWidth; เปลี่ยนมาใช้ requestAnimationFrame เพื่อความนุ่มนวล
+
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         overlay.classList.remove('opacity-0');
@@ -772,7 +792,7 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
             });
         }, observerOptions);
 
-        const profileCards = document.querySelectorAll('#profiles-grid article');
+        const profileCards = document.querySelectorAll('.profile-card');
         profileCards.forEach(card => {
             card.style.animationPlayState = 'paused';
             card.style.opacity = '0'; 
@@ -802,4 +822,4 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
     });
 </script>
 </body>
-</html>`;return new Response(q,{headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=0, s-maxage=60, stale-while-revalidate=3600"}})}catch(L){return console.error("SSR Error:",L),new Response('<div style="font-family:sans-serif;text-align:center;padding:50px;color:#fff;background:#0A0014;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:50px;height:50px;border:3px solid #3D1A5F;border-top-color:#FF007F;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;box-shadow:0 0 15px rgba(255,0,127,0.5);"></div><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style><h1 style="font-size:18px;font-weight:bold;color:#FF007F;text-shadow:0 0 10px rgba(255,0,127,0.5);letter-spacing:2px;font-family:\'Orbitron\', sans-serif;">SYSTEM ERROR</h1><p style="color:#a1a1aa;font-size:12px;">Please check the server console for details.</p></div>',{status:500,headers:{"Content-Type":"text/html; charset=utf-8"}})}});
+</html>`;return new Response(q,{headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=0, s-maxage=60, stale-while-revalidate=3600"}})}catch(L){return console.error("SSR Error:",L),new Response('<div style="font-family:sans-serif;text-align:center;padding:50px;color:#fff;background:#0f0f0f;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:50px;height:50px;border:3px solid #3D1A5F;border-top-color:#FF007F;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;box-shadow:0 0 15px rgba(255,0,127,0.5);"></div><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style><h1 style="font-size:18px;font-weight:bold;color:#FF007F;text-shadow:0 0 10px rgba(255,0,127,0.5);letter-spacing:2px;font-family:\'Orbitron\', sans-serif;">SYSTEM ERROR</h1><p style="color:#a1a1aa;font-size:12px;">Please check the server console for details.</p></div>',{status:500,headers:{"Content-Type":"text/html; charset=utf-8"}})}});
