@@ -236,11 +236,13 @@ const getFullUrl = (path) => {
 const optimizeImg = (path, width = 182, height = 228) => {
     if (!path) return getFullUrl("/images/default.webp");
     if (path.includes("res.cloudinary.com")) {
-        if (path.includes("/upload/")) return path.replace("/upload/", `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
+        // แก้จาก q_auto:good เป็น q_auto:eco เพื่อบีบอัดภาพขั้นสุด
+        if (path.includes("/upload/")) return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
         return path;
     }
     if (path.startsWith("http")) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
+    // ปรับลด quality สำหรับ Supabase จาก 80 เหลือ 70
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
 };
 
 const escapeHTML = (str) => {
@@ -538,8 +540,12 @@ export default async (request, context) => {
 
                     ${(profile.isfeatured || index < 3) ? '<div class="absolute top-3 right-3 z-20 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] px-2 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-lg border border-white/20"><span class="text-[8px] sm:text-[10px] font-black text-black uppercase tracking-tighter">HOT VIP</span></div>' : ''}
                     
-                    <div class="relative aspect-[3/4] w-full overflow-hidden bg-[#0A0014]">
-                        <img src="${optimizeImg(profile.imagePath, 500, 667)}" 
+                   <div class="relative aspect-[3/4] w-full overflow-hidden bg-[#0A0014]">
+                        <!-- เพิ่ม srcset สร้างรูป 3 ขนาด (200px สำหรับมือถือ, 300px สำหรับแท็บเล็ต, 500px สำหรับคอม) -->
+                        <img src="${optimizeImg(profile.imagePath, 300, 400)}" 
+                             srcset="${optimizeImg(profile.imagePath, 200, 267)} 200w,
+                                     ${optimizeImg(profile.imagePath, 300, 400)} 300w,
+                                     ${optimizeImg(profile.imagePath, 500, 667)} 500w"
                              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                              alt="${smartAlt}" 
                              class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" 
@@ -843,19 +849,21 @@ export default async (request, context) => {
 
     </main>
 
-    <footer role="contentinfo" class="bg-[#0f0f0f] border-t border-[#3D1A5F] pt-12 pb-24 md:pb-12 text-left relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+<footer role="contentinfo" class="bg-[#0f0f0f] border-t border-[#3D1A5F] pt-12 pb-24 md:pb-12 text-left relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
                 <div class="md:col-span-5 space-y-4">
                     <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ ${CONFIG.BRAND_NAME}" class="h-8 w-auto brightness-200" width="168" height="28" loading="lazy">
-                    <p class="text-sm text-zinc-400 leading-relaxed font-light max-w-sm">
+                    <!-- แก้ zinc-400 เป็น zinc-300 ให้สว่างขึ้น -->
+                    <p class="text-sm text-zinc-300 leading-relaxed font-light max-w-sm">
                         คลับพักผ่อนระดับพรีเมียม ศูนย์รวมนางแบบและเพื่อนเที่ยวที่ปลอดภัย เราคัดกรองโปรไฟล์อย่างเข้มงวดและรักษาความลับลูกค้าเป็นอันดับหนึ่ง
                     </p>
                 </div>
 
                 <nav aria-label="เมนูส่วนล่าง" class="md:col-span-3">
                     <h3 class="text-[#FF007F] text-sm font-bold mb-5 font-orbitron">EXPLORE</h3>
-                    <ul class="space-y-3 text-sm text-zinc-400">
+                    <!-- แก้ zinc-400 เป็น zinc-300 ให้สว่างขึ้น -->
+                    <ul class="space-y-3 text-sm text-zinc-300">
                         <li><a href="/profiles.html" class="hover:text-[#FF007F]">ค้นหาน้องๆ VIP</a></li>
                         <li><a href="/locations.html" class="hover:text-[#FF007F]">โซนให้บริการ</a></li>
                         <li><a href="/faq.html" class="hover:text-[#FF007F]">ขั้นตอนการจอง</a></li>
@@ -863,7 +871,8 @@ export default async (request, context) => {
                 </nav>
 
                 <nav aria-label="จังหวัดอื่นๆ" class="md:col-span-4">
-                    <h3 class="text-[#7000FF] text-sm font-bold mb-5 font-orbitron">LOCATIONS</h3>
+                    <!-- แก้สีม่วง #7000FF เป็น #A855F7 ให้ผ่านเกณฑ์ Contrast -->
+                    <h3 class="text-[#A855F7] text-sm font-bold mb-5 font-orbitron">LOCATIONS</h3>
                     <ul class="flex flex-col gap-2.5 text-sm text-zinc-300 h-[150px] overflow-y-auto pr-3 custom-scrollbar">
                         ${allProvinces.map(p => `
                             <li>
@@ -878,13 +887,15 @@ export default async (request, context) => {
             </div>
 
             <div class="border-t border-[#3D1A5F] pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-[10px] md:text-xs text-zinc-500 font-orbitron">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. All rights reserved.</p>
-                <div class="flex gap-6 text-[10px] md:text-xs text-zinc-500 font-orbitron">
-                    <a href="/privacy-policy.html" class="hover:text-white">Privacy</a>
-                    <a href="/terms.html" class="hover:text-white">Terms</a>
+                <!-- แก้ zinc-500 เป็น zinc-400 ให้สว่างขึ้น -->
+                <p class="text-[10px] md:text-xs text-zinc-400 font-orbitron">&copy; ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. All rights reserved.</p>
+                <div class="flex gap-6 text-[10px] md:text-xs text-zinc-400 font-orbitron">
+                    <a href="/privacy-policy.html" class="hover:text-white transition-colors">Privacy</a>
+                    <a href="/terms.html" class="hover:text-white transition-colors">Terms</a>
                 </div>
             </div>
-            <p class="mt-4 text-[10px] text-zinc-500 text-center font-light">แพลตฟอร์มนี้เป็นเพียงสื่อกลาง ข้อมูลจัดทำขึ้นสำหรับผู้มีอายุ 20 ปีขึ้นไปเท่านั้น</p>
+            <!-- แก้ zinc-500 เป็น zinc-400 ให้สว่างขึ้น -->
+            <p class="mt-4 text-[10px] text-zinc-400 text-center font-light">แพลตฟอร์มนี้เป็นเพียงสื่อกลาง ข้อมูลจัดทำขึ้นสำหรับผู้มีอายุ 20 ปีขึ้นไปเท่านั้น</p>
         </div>
     </footer>
 
@@ -893,9 +904,9 @@ export default async (request, context) => {
         <ul class="flex items-center justify-around h-[65px] px-2 m-0 list-none">
             <li class="w-full h-full"><a href="/" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#00F3FF]"><i class="fas fa-home text-[20px] mb-1"></i><span class="text-[9px]">หน้าแรก</span></a></li>
             <li class="w-full h-full"><a href="/profiles.html" class="flex flex-col items-center justify-center w-full h-full text-[#FF007F]"><i class="fas fa-gem text-[20px] mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(255,0,127,0.8)]"></i><span class="text-[9px] font-bold">VIP</span></a></li>
-            <li class="w-full h-full relative">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center w-full h-full absolute -top-7 left-0">
-                    <div class="w-14 h-14 btn-neon rounded-full flex items-center justify-center text-white border-4 border-[#0f0f0f]"><i class="fab fa-line text-[26px]"></i></div>
+<li class="w-full h-full relative">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินเพื่อจองคิวผ่าน LINE" class="flex flex-col items-center justify-center w-full h-full absolute -top-7 left-0">
+                    <div class="w-14 h-14 btn-neon rounded-full flex items-center justify-center text-white border-4 border-[#0f0f0f]"><i class="fab fa-line text-[26px]" aria-hidden="true"></i></div>
                 </a>
             </li>
             <li class="w-full h-full"><a href="/locations.html" class="flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-[#7000FF]"><i class="fas fa-map-marker-alt text-[20px] mb-1"></i><span class="text-[9px]">พื้นที่</span></a></li>
