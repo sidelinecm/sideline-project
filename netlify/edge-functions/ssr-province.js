@@ -90,26 +90,24 @@ import{createClient as e}from"https://esm.sh/@supabase/supabase-js@2.39.8";let C
         </div>
         
     </section>`};export default(async(t,a)=>{try{let r=new URL(t.url);if(r.searchParams.has("province")){let i=r.searchParams.get("province"),s=new URL(`/location/${i}`,r.origin);return Response.redirect(s.toString(),301)}let n=r.pathname.split("/").filter(Boolean),o=n[n.length-1]||"chiangmai",l=o.toLowerCase();try{l=decodeURIComponent(o).toLowerCase()}catch{l=o.toLowerCase()}let $=e(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY),[d,c,p]=await Promise.all([$.from("provinces").select("id, nameThai, key").eq("key",l).maybeSingle(),$.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability").eq("provinceKey",l).eq("active",!0).order("isfeatured",{ascending:!1}).order("lastUpdated",{ascending:!1}).limit(80),$.from("provinces").select("key, nameThai").order("nameThai",{ascending:!0})]),m=d.data,x=c.data||[],f=p.data||[];if(!m)return a.next();let h=x,g=m.nameThai,b=PROVINCE_SEO_DATA[l]||PROVINCE_SEO_DATA.default,u=new Date,_=u.getFullYear(),v=u.toLocaleString("th-TH",{month:"long"}),w=new Date(u);w.setFullYear(w.getFullYear()+1),w.toISOString().split("T")[0];let y=`${CONFIG.DOMAIN}/location/${l}`,F=h.length>0?optimizeImg(h[0].imagePath,1200,630):`${CONFIG.DOMAIN}/images/seo-default.webp`,I=`ไซด์ไลน์${g} (${h.length>0?`${h.length}+ คน`:"เกรดพรีเมียม"}) รับงานเด็กเอ็น VIP ไม่ต้องมัดจำ`,A=`รวมน้องๆ รับงาน${g} และไซด์ไลน์${g} ระดับ VIP ${h.length} โปรไฟล์ โซน ${(b.zones||["ตัวเมือง"]).slice(0,3).join(", ")} และอีกมากมาย ✓การันตีตรงปก 100% ✓ไม่บังคับโอนมัดจำ ✓จ่ายเงินสดหน้างานเท่านั้น`,k=(b.avgPrice||"1,500 - 3,500").split("-");k[0]&&k[0].trim(),k[1]&&k[1].trim();let O=[{"@type":"Organization","@id":`${CONFIG.DOMAIN}/#organization`,name:CONFIG.BRAND_NAME,url:CONFIG.DOMAIN,logo:`${CONFIG.DOMAIN}/logo.png`,description:CONFIG.DESCRIPTION,sameAs:CONFIG.SOCIALS||[],contactPoint:{"@type":"ContactPoint",contactType:"customer service",telephone:CONFIG.PHONE||"",availableLanguage:["th","en"]}},{"@type":"WebSite","@id":`${CONFIG.DOMAIN}/#website`,url:CONFIG.DOMAIN,name:CONFIG.BRAND_NAME,publisher:{"@id":`${CONFIG.DOMAIN}/#organization`},potentialAction:{"@type":"SearchAction",target:`${CONFIG.DOMAIN}/search?q={search_term_string}`,"query-input":"required name=search_term_string"}},{"@type":"WebPage","@id":`${y}/#webpage`,url:y,name:I,description:A,isPartOf:{"@id":`${CONFIG.DOMAIN}/#website`},breadcrumb:{"@id":`${y}/#breadcrumb`},mainEntity:{"@id":`${y}/#service`}},{"@type":"BreadcrumbList","@id":`${y}/#breadcrumb`,itemListElement:[{"@type":"ListItem",position:1,name:"หน้าแรก",item:CONFIG.DOMAIN},{"@type":"ListItem",position:2,name:`ไซด์ไลน์${g}`,item:y}]},{"@type":"Service","@id":`${y}/#service`,name:`บริการในพื้นที่ ${g}`,provider:{"@id":`${CONFIG.DOMAIN}/#organization`},areaServed:{"@type":"AdministrativeArea",name:g},description:A},{"@type":"LocalBusiness","@id":`${CONFIG.DOMAIN}/#business`,name:CONFIG.BRAND_NAME,url:CONFIG.DOMAIN,image:F,priceRange:"฿฿",telephone:CONFIG.PHONE||"",address:{"@type":"PostalAddress",addressCountry:"TH"},geo:{"@type":"GeoCoordinates",latitude:b?.geo?.lat,longitude:b?.geo?.lng},openingHoursSpecification:{"@type":"OpeningHoursSpecification",dayOfWeek:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],opens:"10:00",closes:"22:00"}}];b.faqs&&b.faqs.length>0&&O.push({"@type":"FAQPage","@id":`${y}/#faq`,mainEntity:b.faqs.map(e=>({"@type":"Question",name:e.q,acceptedAnswer:{"@type":"Answer",text:e.a}}))}),h&&h.length>0&&O.push({"@type":"ItemList",name:`รายชื่อไซด์ไลน์ VIP ใน ${g}`,description:`รายชื่อโปรไฟล์ ${h.length} คนล่าสุดในพื้นที่ ${g}`,itemListElement:h.slice(0,10).map((e,t)=>({"@type":"ListItem",position:t+1,item:{"@type":"Person",name:e.name||"ไม่ระบุชื่อ",url:`${CONFIG.DOMAIN}/sideline/${e.slug||e.id}`,image:optimizeImg(e.imagePath,182,228),description:`โปรไฟล์น้อง${e.name||""} รับงานโซน ${e.location||g}`}}))});let N={"@context":"https://schema.org","@graph":O},S="";if(h&&h.length>0){let E=b.intents||["หาเพื่อนเที่ยว","น้องเอนเตอร์เทน","รับงานนอกสถานที่","ฟีลแฟน","เพื่อนเที่ยวกลางคืน","เด็กเอ็น VIP"],C=b.traits||["ผิวขาวออร่า","หุ่นนางแบบ","ตรงปก 100%","บริการเป็นกันเอง","คุยสนุกเอาใจเก่ง","สเปกพรีเมียม"];S=h.map((e,t)=>{let a=(e.name||"ไม่ระบุชื่อ").replace(/^(น้อง\s?)/,""),r=escapeHTML(a),i=escapeHTML(e.location||g||"ไม่ระบุโซน"),s=`/sideline/${escapeHTML(e.slug||e.id)}`,n=!["ติดจอง","ไม่ว่าง","พัก","หยุด"].some(t=>(e.availability||"").toLowerCase().includes(t)),o="สอบถาม";if(e.rate){let l=String(e.rate).replace(/,/g,"").trim(),$=Number(l);o=isNaN($)||""===l?escapeHTML(e.rate):$.toLocaleString()}let d=(4.8+.2*Math.random()).toFixed(1),c=t%10*50,p=b.lsi&&b.lsi.length>0?b.lsi[t%b.lsi.length]:`รับงาน${g}`,m=E[t%E.length],x=C[t%C.length],f=`รูปโปรไฟล์น้อง${r} บริการ${p} พิกัดโซน${i} จุดเด่น${x} เหมาะกับผู้ที่ต้องการ${m}`,h=t<4?'loading="eager" fetchpriority="high" decoding="sync"':'loading="lazy" decoding="async"',u=n?"bg-[#00F3FF]":"bg-[#FF007F]",_=n?"text-[#00F3FF]":"text-[#FF007F]",v=n?"border-[#00F3FF]/30":"border-[#FF007F]/30",w=n?"shadow-[0_0_10px_rgba(0,243,255,0.2)]":"shadow-[0_0_10px_rgba(255,0,127,0.2)]";return `
-            <div class="profile-card" onclick="window.location.href='${s}'">
-                ${(e.isfeatured || t < 3) ? '<div class="hot-badge">Hot</div>' : ''}
-                <img src="${optimizeImg(e.imagePath, 500, 667)}" 
-                     alt="${r}" 
-                     class="profile-image" 
-                     ${h} />
-                <div class="overlay">
-                    <div class="details">
-                        <div class="name-line">${r} | ${e.age || '??'}</div>
-                        <div class="info-line">${i}</div>
-                        <div class="price-line">
-                            <span>${o} ${o === "สอบถาม" ? "" : "฿"}</span>
-                            <span class="view-btn">View</span>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }).join("")
-    } else {
-        S = `
+  <div class="profile-card" onclick="window.location.href='${s}'">
+    ${(e.isfeatured || t < 3) ? '<div class="hot-badge">Hot</div>' : ''}
+    <img src="${optimizeImg(e.imagePath, 500, 667)}" 
+         alt="${r}" 
+         class="profile-image" 
+         ${h} />
+    <div class="overlay">
+      <div class="details">
+        <div class="name-line">${r} | ${e.age || '??'}</div>
+        <div class="info-line">${i}</div>
+<div class="price-line">
+          <span>${o} ${o === "สอบถาม" ? "" : "฿"}</span>
+          <span class="view-btn">View</span>
+        
+      </div>
+    </div>
+  </div>`;
+}).join("")}else S=`
             <div class="col-span-full flex flex-col items-center justify-center py-20 md:py-32 text-center cyber-glass rounded-[2rem] border border-[#3D1A5F]/50">
                 <div class="w-20 h-20 bg-[#1A0B2E] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(112,0,255,0.2)] border border-[#7000FF]/30">
                     <i class="fas fa-hourglass-half text-3xl text-[#00F3FF] animate-pulse" aria-hidden="true"></i>
