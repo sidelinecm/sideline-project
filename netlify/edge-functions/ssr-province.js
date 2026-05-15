@@ -327,12 +327,11 @@ return `
                             <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#1A0B2E] border-l border-[#FF007F]/40 rounded-full"></div>
                             
                             <div class="flex flex-col items-center gap-2">
-                                <!-- [แก้ไข] จุดเสี่ยงที่ 1: เปลี่ยนเป็นสีขาวโปร่งแสง 60% เพื่อผ่านเกณฑ์คอนทราสต์ ตัวอักษรเรียวเล็กเท่าเดิม -->
                                 <span class="text-[10px] text-white/60 font-bold uppercase tracking-[0.3em] font-orbitron">Exclusive Code</span>
                                 <div class="flex items-center gap-3">
                                     <i class="fas fa-crown text-xs text-yellow-500/80"></i>
                                     <span class="text-white font-black text-xl md:text-2xl tracking-[0.15em] font-orbitron drop-shadow-[0_0_8px_rgba(255,0,127,0.4)]">
-                                        VIP-\${provinceKey.toUpperCase()}
+                                        VIP-${provinceKey.toUpperCase()}
                                     </span>
                                     <i class="fas fa-crown text-xs text-yellow-500/80"></i>
                                 </div>
@@ -343,7 +342,6 @@ return `
                         </div>
                     </div>
 
-                    <!-- [แก้ไข] จุดเสี่ยงที่ 2: ใช้ข้อความจิ๋ว [10px] และเอียงเหมือนเดิม แต่ปรับเป็นสีขาวโปร่งแสง 50% พร้อมช่องไฟเพื่อให้อ่านง่าย -->
                     <p class="text-center text-[10px] text-white/50 mt-5 font-light italic tracking-wide">
                         * สิทธิ์ VIP มีจำนวนจำกัดต่อวัน
                     </p>
@@ -357,14 +355,14 @@ return `
                         <h3 id="terms-heading" class="text-white text-xl font-bold tracking-wide font-orbitron">เงื่อนไขการใช้บริการ</h3>
                     </div>
                     <div class="space-y-4">
-                        \${termsAndConditions.map((item, idx) => `
+                        ${termsAndConditions.map((item, idx) => `
                             <div class="flex gap-4 items-start p-3.5 rounded-xl bg-[#0f0f0f]/60 border border-[#3D1A5F]/70">
                                 <div class="w-8 h-8 shrink-0 rounded-full bg-[#7000FF]/20 text-[#00F3FF] flex items-center justify-center font-bold text-sm border border-[#7000FF]/50 font-orbitron">
-                                    \${idx + 1}
+                                    ${idx + 1}
                                 </div>
                                 <div class="pt-1">
-                                    <h4 class="text-white text-sm font-bold mb-1">\${item.t}</h4>
-                                    <p class="text-zinc-400 text-xs leading-relaxed font-light">\${item.d}</p>
+                                    <h4 class="text-white text-sm font-bold mb-1">${item.t}</h4>
+                                    <p class="text-zinc-400 text-xs leading-relaxed font-light">${item.d}</p>
                                 </div>
                             </div>
                         `).join("")}
@@ -373,19 +371,20 @@ return `
             </section>
         </div>
 
-        \${zonesHTML}
+        ${zonesHTML}
 
         <!-- Unique Intro Box (SEO Content) -->
         <section aria-labelledby="intro-heading" class="py-12 px-6 md:px-10 bg-[#1A0B2E]/40 rounded-[2.5rem] border border-[#3D1A5F]/40 max-w-4xl mx-auto backdrop-blur-sm shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-             <h2 id="intro-heading" class="text-2xl md:text-3xl font-bold text-white mb-6 text-neon-cyan drop-shadow-md text-center">ทำไมต้องเลือกไซด์ไลน์\${escapeHTML(provinceName)} จากเรา?</h2>
+             <h2 id="intro-heading" class="text-2xl md:text-3xl font-bold text-white mb-6 text-neon-cyan drop-shadow-md text-center">ทำไมต้องเลือกไซด์ไลน์${escapeHTML(provinceName)} จากเรา?</h2>
             <div class="text-zinc-200 text-sm md:text-base font-light leading-loose prose prose-invert max-w-none text-justify md:text-left">
-                \${data.uniqueIntro}
+                ${data.uniqueIntro}
             </div>
         </section>
 
-        \${faqsHTML}
+        ${faqsHTML}
         
-    </div>\`;
+    </div>
+`;
 };
 
 // Main Server-Side Rendering Function
