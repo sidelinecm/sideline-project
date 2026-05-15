@@ -273,6 +273,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         </section>
     ` : "";
 
+    // ✅ FIX: นำ Microdata (itemscope, itemtype, itemprop) ออกจาก HTML ให้เหลือแค่ JSON-LD บน <head> เท่านั้น
     const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
         <section class="p-[2px] bg-gradient-to-b from-[#00F3FF] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(0,243,255,0.15)] max-w-3xl mx-auto mt-12" aria-labelledby="faq-heading">
             <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8">
@@ -281,15 +282,15 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                         <h2 id="faq-heading" class="text-white text-xl font-bold tracking-wide">คำถามที่พบบ่อย (FAQ)</h2>
                     </div>
                 </div>
-                <div class="space-y-4" itemscope itemtype="https://schema.org/FAQPage">
+                <div class="space-y-4">
                     ${data.faqs.map(faq => `
-                        <details class="group cyber-glass p-5 rounded-2xl border border-[#3D1A5F]/50 hover:border-[#7000FF] transition-colors duration-300 bg-[#0f0f0f]/50" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                            <summary class="flex justify-between items-center cursor-pointer text-white font-bold text-sm md:text-base list-none group-open:text-[#00F3FF]" itemprop="name">
+                        <details class="group cyber-glass p-5 rounded-2xl border border-[#3D1A5F]/50 hover:border-[#7000FF] transition-colors duration-300 bg-[#0f0f0f]/50">
+                            <summary class="flex justify-between items-center cursor-pointer text-white font-bold text-sm md:text-base list-none group-open:text-[#00F3FF]">
                                 ${escapeHTML(faq.q)}
                                 <i class="fas fa-chevron-down transition-transform duration-300 group-open:rotate-180 text-[#7000FF] group-open:text-[#00F3FF]"></i>
                             </summary>
-                            <div class="mt-4 pt-4 border-t border-[#3D1A5F]/50" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                                <p class="text-zinc-300 text-sm leading-relaxed font-light" itemprop="text">
+                            <div class="mt-4 pt-4 border-t border-[#3D1A5F]/50">
+                                <p class="text-zinc-300 text-sm leading-relaxed font-light">
                                     ${escapeHTML(faq.a)}
                                 </p>
                             </div>
@@ -471,6 +472,7 @@ export default async (request, context) => {
             }
         ];
 
+        // ✅ JSON-LD FAQPage (ถูกต้องที่สุดตามหลัก Google)
         if (seoData.faqs && seoData.faqs.length > 0) {
             schemaGraph.push({
                 "@type": "FAQPage",
@@ -676,10 +678,11 @@ export default async (request, context) => {
         .btn-neon:hover { box-shadow: 0 0 25px rgba(255, 0, 127, 0.9); transform: scale(1.05); }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
         
+        /* ✅ FIX: นำ [itemprop="name"] ออกจาก CSS เพื่อรองรับการนำ Microdata ออกจาก HTML */
         .breadcrumb-nav { font-size: 0.75rem; color: #a1a1aa; display: flex; }
         .breadcrumb-nav ol { list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
         .breadcrumb-nav li:not(:last-child)::after { content: '/'; margin-left: 0.5rem; color: #71717a; }
-        .breadcrumb-nav a { color: #d4d4d8; text-decoration: none; transition: color 0.2s; }
+        .breadcrumb-nav a { color: #d4d4d8; text-decoration: none; transition: color 0.2s; display: inline-block; }
         .breadcrumb-nav a:hover { color: #FF007F; }
         
         /* Glassmorphism helpers */
@@ -741,13 +744,14 @@ export default async (request, context) => {
             <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
                 <div class="flex-1 text-center lg:text-left z-10 animate-fade-in-up">
                     
+                    <!-- ✅ FIX: นำ Microdata (itemscope) ออกจาก Breadcrumb เพื่อป้องกันการทำงานซ้อนทับกับ JSON-LD -->
                     <nav aria-label="เส้นทางการนำทาง" class="breadcrumb-nav mb-4 justify-center lg:justify-start">
-                      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
-                        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                          <a itemprop="item" href="${CONFIG.DOMAIN}"><span itemprop="name">หน้าแรก</span></a><meta itemprop="position" content="1" />
+                      <ol>
+                        <li>
+                          <a href="${CONFIG.DOMAIN}">หน้าแรก</a>
                         </li>
-                        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                          <span itemprop="name" aria-current="page">ไซด์ไลน์${escapeHTML(provinceName)}</span><meta itemprop="item" content="${provinceUrl}" /><meta itemprop="position" content="2" />
+                        <li>
+                          <span aria-current="page">ไซด์ไลน์${escapeHTML(provinceName)}</span>
                         </li>
                       </ol>
                     </nav>
@@ -822,7 +826,6 @@ export default async (request, context) => {
                 </div>
             </div>
             
-            <!-- ✅ FIX: 2 Columns Mobile, 3 Tablet, 4-5 Desktop -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-6">
                 ${cardsHTML}
             </div>
