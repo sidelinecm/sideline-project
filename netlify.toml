@@ -73,7 +73,15 @@
   status = 301
   force = true
 
-# --- 4.5 SPA Fallback (กฎสุดท้าย) ---
+# --- 4.5 Redirect หน้าแรกไปยังเชียงใหม่ (SEO Preservation) ---
+# ✅ สำคัญ: อยู่ก่อน SPA fallback
+# ⭐⭐ เพิ่มโค้ดนี้เข้าไป ⭐⭐
+[[redirects]]
+  from = "/"
+  to = "/location/chiangmai"
+  status = 301
+
+# --- 4.6 SPA Fallback (กฎสุดท้าย) ---
 # สำคัญ: ต้องอยู่ล่างสุดเสมอ!
 # ถ้าไม่มีไฟล์จริง และ Edge Function ปล่อยผ่าน (Next) จะส่งไปที่ index.html
 [[redirects]]
