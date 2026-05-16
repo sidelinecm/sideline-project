@@ -597,7 +597,12 @@ body { margin: 0; font-family: 'Kanit', 'Prompt', sans-serif; background-color: 
     <header role="banner" class="fixed top-0 w-full z-[999] transition-transform duration-300" id="navbar" style="background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(20px); border-bottom: 1px solid #3D1A5F; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="/" class="flex items-center" aria-label="หน้าหลัก ${CONFIG.BRAND_NAME}">
-                <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ ${CONFIG.BRAND_NAME}" width="168" height="28" class="h-7 w-auto brightness-200" style="filter: drop-shadow(0 0 8px rgba(255,0,127,0.5));">
+<img src="/images/logo-sidelinechiangmai.webp" 
+     alt="โลโก้ ${CONFIG.BRAND_NAME}" 
+     class="h-7 md:h-8 w-auto brightness-200" 
+     style="filter: drop-shadow(0 0 8px rgba(255,0,127,0.5));"
+     fetchpriority="high" 
+     decoding="sync">
             </a>
             
             <div class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
@@ -608,9 +613,9 @@ body { margin: 0; font-family: 'Kanit', 'Prompt', sans-serif; background-color: 
             
             <div class="flex items-center gap-3">
                 <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden md:flex items-center gap-2 btn-neon px-5 py-2 rounded-full text-sm font-bold"><i class="fab fa-line text-lg"></i> แอดไลน์จอง</a>
-                <button id="menu-btn" aria-label="เปิดเมนู" class="md:hidden flex items-center justify-center w-10 h-10 text-[#FF007F] cyber-glass rounded-full border border-[#FF007F]/30">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+<button id="close-menu-btn" aria-label="ปิดเมนู" class="text-white p-2">
+    <i class="fas fa-times text-xl" aria-hidden="true"></i>
+</button>
             </div>
         </div>
     </header>
@@ -704,13 +709,13 @@ body { margin: 0; font-family: 'Kanit', 'Prompt', sans-serif; background-color: 
         </div>
     </footer>
 
-    <!-- Mobile Bottom Navigation -->
+<!-- Mobile Bottom Navigation (A11y Optimized) -->
     <nav class="fixed bottom-0 left-0 w-full md:hidden z-[50] bg-[#0f0f0f]/95 backdrop-blur-xl border-t border-[#3D1A5F]">
         <ul class="flex justify-around h-16 items-center">
-            <li><a href="/" class="text-zinc-400 hover:text-[#00F3FF]"><i class="fas fa-home text-xl"></i></a></li>
-            <li><a href="/profiles.html" class="text-[#FF007F]"><i class="fas fa-gem text-xl animate-pulse"></i></a></li>
-            <li><a href="${CONFIG.SOCIAL_LINKS.line}" class="btn-neon p-4 rounded-full -mt-8"><i class="fab fa-line text-2xl"></i></a></li>
-            <li><a href="/locations.html" class="text-zinc-400 hover:text-[#7000FF]"><i class="fas fa-map-marker-alt text-xl"></i></a></li>
+            <li><a href="/" aria-label="หน้าแรก" class="text-zinc-400 hover:text-[#00F3FF]"><i class="fas fa-home text-xl" aria-hidden="true"></i></a></li>
+            <li><a href="/profiles.html" aria-label="ดูโปรไฟล์น้องๆ VIP" class="text-[#FF007F]"><i class="fas fa-gem text-xl animate-pulse" aria-hidden="true"></i></a></li>
+            <li><a href="${CONFIG.SOCIAL_LINKS.line}" aria-label="ติดต่อแอดมินทางไลน์" class="btn-neon p-4 rounded-full -mt-8"><i class="fab fa-line text-2xl" aria-hidden="true"></i></a></li>
+            <li><a href="/locations.html" aria-label="พื้นที่ให้บริการ" class="text-zinc-400 hover:text-[#7000FF]"><i class="fas fa-map-marker-alt text-xl" aria-hidden="true"></i></a></li>
         </ul>
     </nav>
 
