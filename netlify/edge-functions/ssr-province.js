@@ -520,16 +520,36 @@ export default async (request, context) => {
         </nav>
     </header>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-[#0f0f0f]/80 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300"></div>
-    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-72 bg-[#0f0f0f] border-l border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.2)] z-[70] transform translate-x-full transition-transform duration-300 flex flex-col pt-safe">
-        <div class="flex items-center justify-between p-5 border-b border-[#3D1A5F]"><span class="text-lg font-black text-[#FF007F] uppercase tracking-widest font-orbitron">MENU</span><button id="close-menu-btn" class="w-8 h-8 flex items-center justify-center rounded-full cyber-glass text-zinc-300 hover:text-white hover:border-[#FF007F]"><i class="fas fa-times"></i></button></div>
-        <div class="flex-1 overflow-y-auto p-4 space-y-2">
-            <a href="/" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 transition-all"><i class="fas fa-home w-6 text-[#FF007F]"></i> หน้าแรก</a>
-            <a href="/profiles.html" class="flex items-center gap-4 p-3 rounded-xl cyber-glass text-white font-bold"><i class="fas fa-gem w-6 text-[#FF007F] animate-pulse"></i> น้องๆ VIP</a>
-            <a href="/locations.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 transition-all"><i class="fas fa-map-marker-alt w-6 text-[#FF007F]"></i> พิกัดบริการ</a>
-        </div>
-        <div class="p-5 border-t border-[#3D1A5F]"><a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full btn-neon text-white py-3.5 rounded-xl font-bold uppercase font-orbitron"><i class="fab fa-line text-xl"></i> ติดต่อแอดมิน</a></div>
-    </nav>
+<div id="sidebar-overlay" class="fixed inset-0 bg-[#0f0f0f]/80 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300"></div>
+
+<nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-72 bg-[#0f0f0f] border-l border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.2)] z-[70] transform translate-x-full transition-transform duration-300 flex flex-col pt-safe">
+    <div class="flex items-center justify-between p-5 border-b border-[#3D1A5F]">
+        <span class="text-lg font-black text-[#FF007F] uppercase tracking-widest font-orbitron">MENU</span>
+        
+        <!-- แก้ไข: เพิ่ม aria-label และ aria-hidden ที่ไอคอนเพื่อความสมบูรณ์ -->
+        <button id="close-menu-btn" aria-label="ปิดเมนู" class="w-8 h-8 flex items-center justify-center rounded-full cyber-glass text-zinc-300 hover:text-white hover:border-[#FF007F]">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-4 space-y-2">
+        <a href="/" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 transition-all">
+            <i class="fas fa-home w-6 text-[#FF007F]" aria-hidden="true"></i> หน้าแรก
+        </a>
+        <a href="/profiles.html" class="flex items-center gap-4 p-3 rounded-xl cyber-glass text-white font-bold">
+            <i class="fas fa-gem w-6 text-[#FF007F] animate-pulse" aria-hidden="true"></i> น้องๆ VIP
+        </a>
+        <a href="/locations.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 transition-all">
+            <i class="fas fa-map-marker-alt w-6 text-[#FF007F]" aria-hidden="true"></i> พิกัดบริการ
+        </a>
+    </div>
+    
+    <div class="p-5 border-t border-[#3D1A5F]">
+        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full btn-neon text-white py-3.5 rounded-xl font-bold uppercase font-orbitron">
+            <i class="fab fa-line text-xl" aria-hidden="true"></i> ติดต่อแอดมิน
+        </a>
+    </div>
+</nav>
 
     <main class="w-full relative z-20 flex-1">
         <section aria-label="บทนำ" class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
@@ -615,9 +635,6 @@ export default async (request, context) => {
         </ul>
     </nav>
 
-// ==========================================
-// คัดลอกตั้งแต่บรรทัดนี้ไปวางทับส่วนท้ายของไฟล์เดิมได้เลย
-// ==========================================
 
 <script>
     (function() {
