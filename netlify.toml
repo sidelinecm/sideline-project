@@ -2,14 +2,14 @@
 # 1. Build Settings
 # ==========================================
 [build]
-  publish = "."                  # โฟลเดอร์ที่เก็บไฟล์ index.html (Root)
-  functions = "netlify/functions" # โฟลเดอร์สำหรับ Serverless Functions (ถ้ามี)
+  publish = "."
+  functions = "netlify/functions"
 
 [build.processing]
-  skip_processing = false        # อนุญาตให้ Netlify ช่วย Optimize ไฟล์ (เช่น Minify)
+  skip_processing = false
 
 # ==========================================
-# 2. Security Headers (Best Practices)
+# 2. Security & SEO Headers
 # ==========================================
 [[headers]]
   for = "/*"
@@ -20,52 +20,45 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Cache-Control = "public, max-age=0, must-revalidate"
+    # การตั้ง Cache ให้ Google เข้ามาอ่านข้อมูลใหม่ได้บ่อยขึ้น
+    Cache-Control = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400"
 
 # ==========================================
-# 3. Edge Functions (รันก่อน Redirects เสมอ)
+# 3. Edge Functions
 # ==========================================
-# ตรวจสอบไฟล์ใน: netlify/edge-functions/
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "render-bot"        # สำหรับทำ Dynamic Rendering / SEO
+  function = "render-bot"
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "ssr-province"      # สำหรับ Server-side Logic ของจังหวัด
+  function = "ssr-province"
   path = "/location/*"
 
 # ==========================================
-# 4. Redirects & Rewrite Rules
+# 4. SEO Redirects & Rewrites (หัวใจสำคัญในการกู้คืนอันดับ)
 # ==========================================
 
-# --- 4.1 Force HTTPS (SEO Standard) ---
+# 4.1 Force HTTPS
 [[redirects]]
   from = "http://sidelinechiangmai.netlify.app/*"
   to = "https://sidelinechiangmai.netlify.app/:splat"
   status = 301
   force = true
 
-# --- 4.2 จัดการ URL ภาษาไทย (SEO Fix) ---
-# แก้ไขลิงก์ที่ถูก Encode มาให้เป็น Clean URL
+# 4.2 หน้าแรก (Root) ต้องเป็น Rewrite (Status 200) ไม่ใช่ Redirect (301)
+# วิธีนี้จะทำให้ Google มองว่าหน้าแรกของคุณคือเนื้อหาของเชียงใหม่ โดยที่ URL ไม่เปลี่ยน
+# นี่คือเทคนิคกู้คืน Ranking ของหน้าแรกที่ดีที่สุด
 [[redirects]]
-  from = "/sideline/%E0%B8%9B%E0%B8%B9%E0%B9%80%E0%B8%9B%E0%B9%82"
-  to = "/sideline/puep-87"
-  status = 301
+  from = "/"
+  to = "/location/chiangmai"
+  status = 200
+  force = false
 
-# --- 4.3 จัดการนามสกุลไฟล์เก่า (.html) ---
-# แก้ไขจาก * เป็น :splat เพื่อให้ส่งค่าไปยังปลายทางได้ถูกต้อง
-[[redirects]]
-  from = "/profiles/:splat.html"
-  to = "/profiles/:splat"
-  status = 301
-  force = true
-
-# --- 4.4 จัดการ Query Parameters (Location Filtering) ---
-# เปลี่ยนจาก /location/something?province=bangkok -> /location/bangkok
+# 4.3 URL Normalization (จัดการ Query Parameter ให้เป็น Clean URL)
 [[redirects]]
   query = {province = ":p"}
   from = "/location/*"
@@ -73,17 +66,14 @@
   status = 301
   force = true
 
-# --- 4.5 Redirect หน้าแรกไปยังเชียงใหม่ (SEO Preservation) ---
-# ✅ สำคัญ: อยู่ก่อน SPA fallback
-# ⭐⭐ เพิ่มโค้ดนี้เข้าไป ⭐⭐
+# 4.4 Redirect นามสกุล .html ออก (Clean URL)
 [[redirects]]
-  from = "/"
-  to = "/location/chiangmai"
+  from = "/*.html"
+  to = "/:splat"
   status = 301
+  force = true
 
-# --- 4.6 SPA Fallback (กฎสุดท้าย) ---
-# สำคัญ: ต้องอยู่ล่างสุดเสมอ!
-# ถ้าไม่มีไฟล์จริง และ Edge Function ปล่อยผ่าน (Next) จะส่งไปที่ index.html
+# 4.5 SPA Fallback (ต้องอยู่ล่างสุดเสมอ)
 [[redirects]]
   from = "/*"
   to = "/index.html"
