@@ -258,8 +258,52 @@ const escapeHTML = (str) => {
     return String(str).replace(/[&<>'"]/g, tag => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[tag] || tag);
 };
 
+/**
+ * shareContent: Web Share API สำหรับการแชร์ลง Line/Social (UX Improvement)
+ */
+const shareContent = async (title, text, url) => {
+    if (navigator.share) {
+        try {
+            await navigator.share({ title, text, url });
+        } catch (err) {
+            console.log("Share failed:", err);
+        }
+    } else {
+
+        navigator.clipboard.writeText(url);
+        alert("คัดลอกลิงก์แล้ว! คุณสามารถนำไปวางใน Line ได้เลย");
+    }
+};
+
+/**
+ * smartLinkify: เปลี่ยนคำสำคัญในเนื้อหาให้เป็น Link ภายในเว็บอัตโนมัติ (SEO Optimization)
+ */
+const smartLinkify = (text, provinceKey, zones) => {
+    if (!text) return "";
+    let linkedText = text;
+    if (zones && zones.length > 0) {
+        zones.forEach(zone => {
+            const regex = new RegExp(`(${zone})`, 'g');
+            linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#00F3FF] hover:underline transition-colors font-medium">$1</a>`);
+        });
+    }
+
+    // 2. ทำ Link สำหรับคำที่เป็น Keyword หลัก (LSI Keywords)
+    const keywords = ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน"];
+    keywords.forEach(kw => {
+        const regex = new RegExp(`(${kw})`, 'g');
+        linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(kw)}" class="text-[#FF007F]/80 hover:text-[#FF007F] transition-colors">$1</a>`);
+    });
+
+    return linkedText;
+};
+
+/**
+ * generateAppSeoText: สร้างเนื้อหา SEO และ UI ส่วนล่างของหน้าเว็บ
+ */
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
+    
     const termsAndConditions = [
         { t: "การจองคิวน้องๆ ส่วนตัว", d: `เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน${escapeHTML(provinceName)} สมาชิก 1 ท่าน จองได้ครั้งละ 1 คิว เพื่อรักษาคุณภาพบริการแบบ VIP` },
         { t: "ความปลอดภัยทางการเงิน", d: "ชำระเงินหน้างานเมื่อพบตัวน้องจริงเท่านั้น! เราไม่มีนโยบายให้โอนมัดจำล่วงหน้าทุกกรณี ปลอดภัยจากมิจฉาชีพ 100%" },
@@ -267,6 +311,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         { t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับระดับสูงสุด และถูกลบทันทีหลังจากงานเสร็จสิ้น" }
     ];
 
+    // โซนยอดฮิต (Internal Linking Section)
     const zonesHTML = (data.zones && data.zones.length > 0) ? `
         <section class="mt-12 text-center">
             <h2 class="text-white text-xl font-bold mb-5 font-orbitron text-neon-cyan">📍 โซนรับงานยอดฮิตใน${escapeHTML(provinceName)}</h2>
@@ -279,6 +324,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
             </div>
         </section>` : "";
 
+    // FAQ Section
     const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
         <section class="p-[2px] bg-gradient-to-b from-[#00F3FF] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(0,243,255,0.15)] max-w-3xl mx-auto mt-12">
             <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8">
@@ -302,9 +348,12 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
             </div>
         </section>` : "";
 
+    // ประกอบร่าง HTML ทั้งหมด
     return `
     <div class="mt-12 px-4 space-y-12 pb-16">
+        <!-- VIP & Terms Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            <!-- VIP Promotion Card -->
             <section aria-labelledby="promo-heading" class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_10px_30px_rgba(255,0,127,0.15)] relative overflow-hidden h-full flex flex-col">
                 <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8 relative z-10 flex-1 flex flex-col justify-between">
                     <div class="text-center mb-6">
@@ -321,7 +370,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                             <span class="text-[10px] text-white/60 font-bold uppercase tracking-[0.3em] font-orbitron">Exclusive Code</span>
                             <div class="flex items-center justify-center gap-3 my-1">
                                 <i class="fas fa-crown text-xs text-yellow-500/80"></i>
-<span class="text-white font-black text-lg md:text-2xl tracking-[0.1em] font-orbitron drop-shadow-[0_0_8px_rgba(255,127,0,0.4)] break-all px-2">VIP-${provinceKey.toUpperCase()}</span>
+                                <span class="text-white font-black text-lg md:text-2xl tracking-[0.1em] font-orbitron drop-shadow-[0_0_8px_rgba(255,127,0,0.4)] break-all px-2">VIP-${provinceKey.toUpperCase()}</span>
                                 <i class="fas fa-crown text-xs text-yellow-500/80"></i>
                             </div>
                             <div class="mt-2 px-3 py-0.5 rounded-full bg-[#FF007F]/10 border border-[#FF007F]/20 inline-block">
@@ -333,6 +382,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                 </div>
             </section>
 
+            <!-- Terms & Conditions Card -->
             <section aria-labelledby="terms-heading" class="p-[2px] bg-gradient-to-b from-[#7000FF] to-[#FF007F] rounded-3xl shadow-[0_0_30px_rgba(112,0,255,0.2)] h-full flex flex-col">
                 <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8 flex-1">
                     <h3 id="terms-heading" class="text-white text-xl font-bold tracking-wide font-orbitron text-center mb-6">เงื่อนไขการใช้บริการ</h3>
@@ -349,11 +399,19 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                 </div>
             </section>
         </div>
+
+        <!-- Zones Section -->
         ${zonesHTML}
+
+        <!-- SEO Content Section (Smart Linkified) -->
         <section aria-labelledby="intro-heading" class="py-12 px-6 md:px-10 bg-[#1A0B2E]/40 rounded-[2.5rem] border border-[#3D1A5F]/40 max-w-4xl mx-auto backdrop-blur-sm shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
              <h2 id="intro-heading" class="text-2xl md:text-3xl font-bold text-white mb-6 text-neon-cyan drop-shadow-md text-center">ทำไมต้องเลือกไซด์ไลน์${escapeHTML(provinceName)} จากเรา?</h2>
-            <div class="text-zinc-200 text-sm md:text-base font-light leading-loose prose prose-invert max-w-none text-justify md:text-left">${data.uniqueIntro}</div>
+            <div class="text-zinc-200 text-sm md:text-base font-light leading-loose prose prose-invert max-w-none text-justify md:text-left">
+                ${smartLinkify(data.uniqueIntro, provinceKey, data.zones)}
+            </div>
         </section>
+
+        <!-- FAQ Section -->
         ${faqsHTML}
     </div>`;
 };
@@ -639,35 +697,48 @@ export default async (request, context) => {
 <script>
     (function() {
         /**
-         * [ NEXUS CORE RUNTIME ]
-         * Optimized by wawai | Nexus Mastermind
+         * [ NEXUS CORE RUNTIME - ULTRA OPTIMIZED ]
+         * Engine: High-Performance Entity Framework
+         * Optimization: Zero-Jank & Memory-Safe
+         * Mastermind: wawai | Nexus Mastermind
          */
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. [ DOM CACHING ] - ดึง Element มาเก็บไว้ครั้งเดียวเพื่อความเร็ว
-            const navbar = document.getElementById("navbar");
-            const menuBtn = document.getElementById("menu-btn");
-            const closeBtn = document.getElementById("close-menu-btn");
-            const sidebar = document.getElementById("sidebar-menu");
-            const overlay = document.getElementById("sidebar-overlay");
-            const animElements = document.querySelectorAll(".animate-fade-in-up");
             
+            // 1. [ DOM CACHING & SELECTORS ]
+            const elements = {
+                navbar: document.getElementById("navbar"),
+                menuBtn: document.getElementById("menu-btn"),
+                closeBtn: document.getElementById("close-menu-btn"),
+                sidebar: document.getElementById("sidebar-menu"),
+                overlay: document.getElementById("sidebar-overlay"),
+                animElements: document.querySelectorAll(".animate-fade-in-up"),
+                allImages: document.querySelectorAll('img')
+            };
+
             let lastScrollY = window.scrollY;
             let isTicking = false;
 
-            // 2. [ SMART NAVBAR LOGIC ] - ใช้ RequestAnimationFrame เพื่อไม่ให้เครื่องหน่วง
+            // 2. [ SMART NAVBAR SYSTEM ] - High-Performance Scroll Logic
+            // ใช้ RequestAnimationFrame เพื่อลดภาระ CPU/GPU (Zero-Jank)
             const handleScroll = () => {
                 if (!isTicking) {
                     window.requestAnimationFrame(() => {
-                        if (window.scrollY > 80) {
-                            if (window.scrollY > lastScrollY) {
-                                if (navbar) navbar.style.transform = "translateY(-100%)"; // ซ่อน
+                        const currentScrollY = window.scrollY;
+                        
+                        if (currentScrollY > 80) {
+                            if (currentScrollY > lastScrollY) {
+                                // Scroll Down -> Hide Navbar
+                                if (elements.navbar) elements.navbar.style.transform = "translateY(-100%)";
                             } else {
-                                if (navbar) navbar.style.transform = "translateY(0)"; // แสดง
+                                // Scroll Up -> Show Navbar
+                                if (elements.navbar) elements.navbar.style.transform = "translateY(0)";
                             }
                         } else {
-                            if (navbar) navbar.style.transform = "translateY(0)";
+                            // Top of page -> Show Navbar
+                            if (elements.navbar) elements.navbar.style.transform = "translateY(0)";
                         }
-                        lastScrollY = window.scrollY;
+                        
+                        lastScrollY = currentScrollY;
                         isTicking = false;
                     });
                     isTicking = true;
@@ -675,34 +746,42 @@ export default async (request, context) => {
             };
             window.addEventListener("scroll", handleScroll, { passive: true });
 
-            // 3. [ UI CONTROL SYSTEM ] - ควบคุมเมนูมือถือพร้อม ARIA Support
+            // 3. [ UI CONTROL SYSTEM ] - Mobile Sidebar & Accessibility (ARIA)
             const toggleMenu = (show) => {
+                const { sidebar, overlay, menuBtn } = elements;
                 if (!sidebar || !overlay) return;
+
                 if (show) {
                     overlay.classList.remove("hidden");
                     if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
+                    
+                    // Double-frame animation for smoother transition
                     requestAnimationFrame(() => {
                         overlay.classList.remove("opacity-0");
                         sidebar.classList.remove("translate-x-full");
                     });
-                    document.body.style.overflow = "hidden";
+                    document.body.style.overflow = "hidden"; // Prevent background scroll
                 } else {
                     overlay.classList.add("opacity-0");
                     sidebar.classList.add("translate-x-full");
                     if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
-                    document.body.style.overflow = "";
+                    document.body.style.overflow = ""; // Restore scroll
+                    
+                    // Delay hiding overlay to match CSS transition
                     setTimeout(() => overlay.classList.add("hidden"), 300);
                 }
             };
 
-            if(menuBtn) menuBtn.addEventListener("click", () => toggleMenu(true));
-            if(closeBtn) closeBtn.addEventListener("click", () => toggleMenu(false));
-            if(overlay) overlay.addEventListener("click", () => toggleMenu(false));
+            // Event Listeners for Menu
+            if(elements.menuBtn) elements.menuBtn.addEventListener("click", () => toggleMenu(true));
+            if(elements.closeBtn) elements.closeBtn.addEventListener("click", () => toggleMenu(false));
+            if(elements.overlay) elements.overlay.addEventListener("click", () => toggleMenu(false));
 
-            // 4. [ ADVANCED OBSERVER ] - จัดการแอนิเมชั่นและการเรนเดอร์
+            // 4. [ INTERSECTION OBSERVER ] - Lazy Animation & Performance
+            // ใช้ Observer เพื่อรันแอนิเมชั่นเฉพาะเมื่อ Element ปรากฏบนจอเท่านั้น
             const observerOptions = {
                 root: null,
-                rootMargin: "0px 0px -50px 0px",
+                rootMargin: "0px 0px -50px 0px", // เริ่มทำงานก่อนถึงขอบจอเล็กน้อย
                 threshold: 0.1
             };
 
@@ -713,30 +792,33 @@ export default async (request, context) => {
                         el.style.opacity = "1";
                         el.style.transform = "translateY(0)";
                         el.style.animationPlayState = "running";
-                        observer.unobserve(el); // รันครั้งเดียวแล้วหยุด ประหยัด CPU
+                        observer.unobserve(el); // Memory Cleanup: หยุดตรวจจับเมื่อทำงานเสร็จ
                     }
                 });
             }, observerOptions);
 
-            animElements.forEach(el => observer.observe(el));
+            elements.animElements.forEach(el => observer.observe(el));
 
-            // 5. [ GLOBAL IMAGE FALLBACK ] - ป้องกันรูปโปรไฟล์โหลดเสีย (Mastermind Style)
-            document.querySelectorAll('img').forEach(img => {
+            // 5. [ IMAGE RESILIENCE SYSTEM ] - Global Fallback
+            // ป้องกันรูปเสีย (Broken Images) ทั้งระบบ
+            elements.allImages.forEach(img => {
                 img.onerror = function() {
-                    if (this.src !== '/images/default.webp') {
-                        this.src = '/images/default.webp';
-                        this.srcset = ''; // ล้าง srcset ออกถ้ามี
+                    const fallback = '/images/default.webp';
+                    if (this.src !== fallback) {
+                        this.src = fallback;
+                        this.srcset = ''; // ล้าง srcset เพื่อป้องกันการดึงรูปเสียจาก cache
                     }
                 };
             });
 
-            // 6. [ BFCACHE & NAVIGATION RECOVERY ] - แก้ปัญหา Back Button หน้าพัง
+            // 6. [ NAVIGATION RECOVERY (BFCACHE) ]
+            // แก้ไขปัญหาเมื่อผู้ใช้กดปุ่ม "Back" แล้วหน้าเว็บค้างหรือแอนิเมชั่นไม่ทำงาน
             window.addEventListener("pageshow", (event) => {
-                // หากกดย้อนกลับ หรือดึงจาก Disk Cache
                 if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-                    if(navbar) navbar.style.transform = "translateY(0)";
-                    // รีเซ็ตการแสดงผลทันที ไม่รอ Observer
-                    animElements.forEach(el => {
+                    if(elements.navbar) elements.navbar.style.transform = "translateY(0)";
+                    
+                    // Force Reset Animations
+                    elements.animElements.forEach(el => {
                         el.style.opacity = "1";
                         el.style.transform = "translateY(0)";
                         el.style.transition = "none"; 
@@ -744,11 +826,25 @@ export default async (request, context) => {
                 }
             });
 
-            // 7. [ MASTERMIND SIGNATURE ]
+            // 7. [ SMOOTH SCROLLING ] - UX Enhancement
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // 8. [ MASTERMIND SIGNATURE ] - Console Identity
             console.clear();
-            console.log("%cwawai | Nexus Mastermind", "color:#FF007F; font-family:Orbitron; font-size:40px; font-weight:900; text-shadow:0 0 15px #FF007F;");
-            console.log("%cEntity Architecture: %c[READY]", "color:#fff;", "color:#00F3FF; font-weight:bold;");
-            console.log("%cPerformance Engine: %c[OPTIMIZED]", "color:#fff;", "color:#00F3FF; font-weight:bold;");
+            console.log("%cwawai | Nexus Mastermind", "color:#FF007F; font-family:Orbitron, sans-serif; font-size:35px; font-weight:900; text-shadow:0 0 15px #FF007F;");
+            console.log("%cEntity Architecture: %c[READY]", "color:#fff; font-weight:bold;", "color:#00F3FF; font-weight:bold;");
+            console.log("%cPerformance Engine: %c[OPTIMIZED]", "color:#fff; font-weight:bold;", "color:#00F3FF; font-weight:bold;");
+            console.log("%cSystem Status: %c[ALL SYSTEMS OPERATIONAL]", "color:#fff; font-weight:bold;", "color:#00FF00; font-weight:bold;");
         });
     })();
 </script>
