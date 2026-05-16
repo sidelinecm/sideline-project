@@ -706,7 +706,7 @@ export default async (request, context) => {
         ${generateAppSeoText(provinceName, provinceKey, safeProfiles.length)}
     </main>
 
-    <!-- 4. FOOTER -->
+<!-- 4. FOOTER -->
     <footer role="contentinfo" class="bg-[#0f0f0f] border-t border-[#3D1A5F] pt-10 pb-20 md:pb-10 text-left relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 mb-10">
@@ -736,7 +736,10 @@ export default async (request, context) => {
                     <a href="/terms.html" class="hover:text-white transition-colors">Terms of Service</a>
                 </div>
             </div>
-            <p class="mt-4 text-[9px] sm:text-[10px] text-zinc-500 text-center font-light">แพลตฟอร์มนี้เป็นเพียงสื่อกลาง ข้อมูลสำหรับผู้มีอายุ 20 ปีขึ้นไปเท่านั้น</p>
+            <!-- แก้ไขสีเป็น text-zinc-300 และปรับขนาดเป็น text-[11px] เพื่อผ่านเกณฑ์ Contrast Ratio ของ Google Lighthouse -->
+            <p class="mt-6 text-[11px] sm:text-[12px] text-zinc-300 text-center font-normal tracking-wide">
+                แพลตฟอร์มนี้เป็นเพียงสื่อกลาง ข้อมูลสำหรับผู้มีอายุ 20 ปีขึ้นไปเท่านั้น
+            </p>
         </div>
     </footer>
 
