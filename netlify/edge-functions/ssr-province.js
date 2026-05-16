@@ -593,48 +593,174 @@ body { margin: 0; font-family: 'Kanit', 'Prompt', sans-serif; background-color: 
 
 <body class="antialiased flex flex-col min-h-screen bg-[#0f0f0f] text-white">
 
-    <!-- Navbar ชุดเดียว (Combined & Optimized) -->
-    <header role="banner" class="fixed top-0 w-full z-[999] transition-transform duration-300" id="navbar" style="background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(20px); border-bottom: 1px solid #3D1A5F; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <nav aria-label="เมนูหลัก" class="fixed top-0 w-full z-50 pt-safe transition-transform duration-300" id="navbar" style="background: rgba(10, 0, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid #3D1A5F; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-20 flex items-center justify-between">
             <a href="/" class="flex items-center" aria-label="หน้าหลัก ${CONFIG.BRAND_NAME}">
-<img src="/images/logo-sidelinechiangmai.webp" 
-     alt="โลโก้ ${CONFIG.BRAND_NAME}" 
-     class="h-7 md:h-8 w-auto brightness-200" 
-     style="filter: drop-shadow(0 0 8px rgba(255,0,127,0.5));"
-     fetchpriority="high" 
-     decoding="sync">
+                <img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้ ${CONFIG.BRAND_NAME}" width="168" height="28" class="h-[24px] md:h-[30px] w-auto brightness-200" style="filter: drop-shadow(0 0 8px rgba(255,0,127,0.5));">
             </a>
             
             <div class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
-                <a href="/" class="hover:text-white transition-all">หน้าแรก</a>
-                <a href="/profiles.html" class="text-white font-bold border-b-2 border-[#FF007F]">น้องๆ VIP</a>
-                <a href="/locations.html" class="hover:text-white transition-all">พิกัดบริการ</a>
+                <a href="/" class="hover:text-white hover:text-neon transition-all">หน้าแรก</a>
+                <a href="/profiles.html" class="text-white font-bold relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-[2px] after:bg-[#FF007F] after:shadow-[0_0_10px_#FF007F]" aria-current="page">น้องๆ VIP</a>
+                <a href="/locations.html" class="hover:text-white hover:text-neon transition-all">พิกัดบริการ</a>
+                <a href="/about.html" class="hover:text-white hover:text-neon transition-all">เกี่ยวกับเรา</a>
+                <a href="/blog.html" class="hover:text-white hover:text-neon transition-all">บทความ</a>
             </div>
             
             <div class="flex items-center gap-3">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden md:flex items-center gap-2 btn-neon px-5 py-2 rounded-full text-sm font-bold"><i class="fab fa-line text-lg"></i> แอดไลน์จอง</a>
-<button id="close-menu-btn" aria-label="ปิดเมนู" class="text-white p-2">
-    <i class="fas fa-times text-xl" aria-hidden="true"></i>
-</button>
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินผ่าน LINE" class="hidden md:flex items-center gap-2 btn-neon px-5 py-2.5 rounded-full text-sm font-bold">
+                    <i class="fab fa-line text-lg" aria-hidden="true"></i> แอดไลน์จอง
+                </a>
+                
+                <button id="menu-btn" aria-label="เปิดเมนูนำทางบนมือถือ" aria-expanded="false" aria-controls="sidebar-menu" class="md:hidden w-10 h-10 flex items-center justify-center text-[#FF007F] cyber-glass rounded-full hover:shadow-[0_0_15px_rgba(255,0,127,0.5)]">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
             </div>
-        </div>
-    </header>
-
-    <!-- Sidebar & Overlay (เลเยอร์ซ้อนทับชัดเจน) -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[2000] hidden opacity-0 transition-opacity duration-300"></div>
-    <nav id="sidebar-menu" class="fixed top-0 right-0 h-full w-72 bg-[#0f0f0f] border-l border-[#3D1A5F] z-[3000] transform translate-x-full transition-transform duration-300 flex flex-col">
-        <div class="flex items-center justify-between p-5 border-b border-[#3D1A5F]">
-            <span class="text-[#FF007F] font-bold tracking-widest font-orbitron">MENU</span>
-            <button id="close-menu-btn" class="text-white p-2"><i class="fas fa-times text-xl"></i></button>
-        </div>
-        <div class="flex-1 overflow-y-auto p-4 space-y-2">
-            <a href="/" class="flex items-center gap-3 p-3 text-zinc-300 hover:text-white"><i class="fas fa-home"></i> หน้าแรก</a>
-            <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-bold bg-[#1A0B2E] rounded-lg"><i class="fas fa-gem text-[#FF007F]"></i> น้องๆ VIP</a>
-            <a href="/locations.html" class="flex items-center gap-3 p-3 text-zinc-300 hover:text-white"><i class="fas fa-map-marker-alt"></i> พิกัดบริการ</a>
         </div>
     </nav>
 
-    <!-- ใส่ <main> ของคุณต่อที่นี่... -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-[#0f0f0f]/80 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
+    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-72 bg-[#0f0f0f] border-l border-[#3D1A5F] shadow-[0_0_30px_rgba(112,0,255,0.2)] z-[70] transform translate-x-full transition-transform duration-300 flex flex-col pt-safe">
+        <div class="flex items-center justify-between p-5 border-b border-[#3D1A5F]">
+            <span class="text-lg font-black text-[#FF007F] uppercase tracking-widest font-orbitron text-neon">MENU</span>
+            <button id="close-menu-btn" aria-label="ปิดเมนูนำทางบนมือถือ" class="w-8 h-8 flex items-center justify-center rounded-full cyber-glass text-zinc-300 hover:text-white hover:border-[#FF007F]">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+            <a href="/" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-home w-6 text-center text-[#FF007F]" aria-hidden="true"></i> หน้าแรก</a>
+            <a href="/profiles.html" class="flex items-center gap-4 p-3 rounded-xl cyber-glass text-white font-bold border-[#FF007F] shadow-[0_0_15px_rgba(255,0,127,0.2)]"><i class="fas fa-gem w-6 text-center text-[#FF007F] animate-pulse" aria-hidden="true"></i> น้องๆ VIP</a>
+            <a href="/locations.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-map-marker-alt w-6 text-center text-[#FF007F]" aria-hidden="true"></i> พิกัดบริการ</a>
+            <a href="/about.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-info-circle w-6 text-center text-[#FF007F]" aria-hidden="true"></i> เกี่ยวกับเรา</a>
+            <a href="/faq.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-question-circle w-6 text-center text-[#FF007F]" aria-hidden="true"></i> คำถามพบบ่อย</a>
+            <a href="/blog.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-[#1A0B2E] text-zinc-300 hover:text-white hover:shadow-[inset_0_0_10px_rgba(112,0,255,0.5)] transition-all"><i class="fas fa-newspaper w-6 text-center text-[#FF007F]" aria-hidden="true"></i> บทความ</a>
+        </div>
+        <div class="p-5 border-t border-[#3D1A5F] pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินผ่าน LINE" class="flex items-center justify-center gap-2 w-full btn-neon text-white py-3.5 rounded-xl font-bold uppercase tracking-wider font-orbitron">
+                <i class="fab fa-line text-xl" aria-hidden="true"></i> ติดต่อแอดมิน
+            </a>
+        </div>
+    </nav>
+        <header class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
+        <div class="absolute inset-0 bg-[#0f0f0f] overflow-hidden pointer-events-none -z-10" aria-hidden="true">
+            <!-- แก้ไข CLS (Issue 1): นำ contain: strict; ออก แล้วแทนที่ด้วย transform-gpu เพื่อไม่ให้เบราว์เซอร์จัดเลย์เอาต์ผิดพลาด -->
+            <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none transform-gpu"></div>
+            <div class="absolute bottom-[10%] right-[10%] w-[228px] h-[228px] bg-[#FF007F]/10 blur-[100px] rounded-full pointer-events-none transform-gpu"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
+            <div class="flex-1 text-center lg:text-left z-10 animate-fade-in-up">
+                
+                <!-- ✅ FIX 7: Add visible HTML Breadcrumb -->
+                <nav aria-label="เส้นทางการนำทาง" class="breadcrumb-nav mb-4 justify-center lg:justify-start">
+                  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+                    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                      <a itemprop="item" href="${CONFIG.DOMAIN}">
+                        <span itemprop="name">หน้าแรก</span>
+                      </a>
+                      <meta itemprop="position" content="1" />
+                    </li>
+                    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                      <span itemprop="name">ไซด์ไลน์${escapeHTML(g)}</span>
+                      <meta itemprop="item" content="${y}" />
+                      <meta itemprop="position" content="2" />
+                    </li>
+                  </ol>
+                </nav>
+
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full cyber-glass text-[10px] md:text-xs font-semibold text-white uppercase tracking-widest mb-4 md:mb-6 font-orbitron shadow-[0_0_10px_rgba(255,0,127,0.2)]">
+                    <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#FF007F] animate-pulse shadow-[0_0_8px_#FF007F]" aria-hidden="true"></span> ${CONFIG.BRAND_NAME}
+                </div>
+                
+                <h1 class="text-3xl md:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-4 md:mb-6 tracking-tight">
+                    <span class="text-[#FF007F] text-neon" style="text-shadow: 0 0 20px rgba(255,0,127,0.8);">ไซด์ไลน์${escapeHTML(g)}</span><br/>
+                    <span class="text-white text-neon-cyan">คัดเกรด VIP (เด็กเอ็นพรีเมียม)</span>
+                </h1>
+                <p class="text-zinc-300 text-sm md:text-lg mb-6 md:mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
+                    สัมผัสประสบการณ์พักผ่อนเหนือระดับใน **${escapeHTML(g)}** กับน้องๆ **ไซด์ไลน์ VIP** ที่คัดมาเพื่อคุณ ไม่ว่าจะเป็น **เพื่อนเที่ยวน่ารักๆ** หรือ **เด็กเอ็น** ดูแลในปาร์ตี้ส่วนตัว ที่นี่คือศูนย์รวมบริการพรีเมียมที่รับประกันความตรงปก ปลอดภัย 100% **ไม่ต้องโอนมัดจำ**
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center gap-3 md:gap-4 justify-center lg:justify-start">
+                    <a href="#profiles-grid" class="w-full sm:w-auto btn-neon px-8 py-3.5 md:py-4 rounded-full font-bold text-sm text-center font-orbitron">
+                        ดูโปรไฟล์น้องๆ ทั้งหมด
+                    </a>
+                    <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ปรึกษาแอดมินผ่าน LINE" class="w-full sm:w-auto cyber-glass hover:bg-[#1A0B2E] text-white px-8 py-3.5 md:py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(112,0,255,0.4)]">
+                        <i class="fab fa-line text-lg text-[#00c300]" aria-hidden="true"></i> ปรึกษาแอดมิน
+                    </a>
+                </div>
+            </div>
+            
+            <div class="flex-1 w-full max-w-md lg:max-w-full animate-scale-in">
+                <div class="relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden aspect-[4/5] md:aspect-square border border-[#3D1A5F] shadow-[0_0_40px_rgba(255,0,127,0.2)] group">
+                    <!-- แก้ไข LCP (Issue 3): ตั้งค่า fetchpriority และ decoding ให้ทำงานสอดคล้องกับ preload ด้านบนเป๊ะๆ -->
+                    <img src="/images/hero-sidelinechiangmai-1200.webp" 
+                         srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w"
+                         sizes="(max-width: 640px) 100vw, 50vw"
+                         alt="บริการรับงาน ไซด์ไลน์ ${escapeHTML(g)} ระดับ VIP" 
+                         width="1200" height="1200"
+                         class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 group-hover:brightness-110 transition-all duration-1000"
+                         fetchpriority="high" decoding="sync">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0f0f0f]/90 via-[#0f0f0f]/20 to-transparent" aria-hidden="true"></div>
+                    <div class="absolute bottom-5 left-5 right-5 md:bottom-8 md:left-8 md:right-8 cyber-glass rounded-2xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#00F3FF] flex items-center justify-center text-[#0f0f0f] shadow-[0_0_15px_rgba(0,243,255,0.8)]"><i class="fas fa-shield-check text-lg md:text-xl" aria-hidden="true"></i></div>
+                        <div>
+                            <span class="block text-white font-bold text-sm tracking-wide font-orbitron text-neon-cyan">Verified & Safe</span>
+                            <span class="block text-zinc-300 text-[10px] md:text-xs font-light mt-0.5">คัดกรองประวัติและยืนยันตัวตนแล้ว</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<section aria-label="ช่องทางติดต่อทางการ" class="max-w-6xl mx-auto mt-10 md:mt-16 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
+    <div class="text-center mb-5">
+        <span class="text-[10px] md:text-xs text-white font-bold uppercase tracking-[0.2em] bg-zinc-800/80 px-4 py-1.5 rounded-full font-orbitron shadow-[0_0_10px_rgba(112,0,255,0.4)] border border-white/20">
+            Connect With Our Official Channels
+        </span>
+    </div>
+
+    <nav aria-label="โซเชียลมีเดีย" class="overflow-x-auto no-scrollbar pb-6">
+        <div class="flex flex-nowrap justify-start lg:justify-center gap-3 w-max mx-auto px-4">
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00c300]/20 border border-[#00c300]/50 rounded-full text-xs font-bold text-[#00ff00] hover:bg-[#00c300]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fab fa-line text-base" aria-hidden="true"></i> LINE
+            </a>
+            <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-white/10 border border-white/40 rounded-full text-xs font-bold text-white hover:bg-white/20 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fab fa-x-twitter text-base" aria-hidden="true"></i> TWITTER
+            </a>
+            <a href="${CONFIG.SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#ff0050]/20 border border-[#ff0050]/50 rounded-full text-xs font-bold text-[#ff3d7f] hover:bg-[#ff0050]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fab fa-tiktok text-base" aria-hidden="true"></i> TIKTOK
+            </a>
+            <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#0085ff]/20 border border-[#0085ff]/50 rounded-full text-xs font-bold text-[#40a9ff] hover:bg-[#0085ff]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fas fa-cloud text-base" aria-hidden="true"></i> BLUESKY
+            </a>
+            <a href="${CONFIG.SOCIAL_LINKS.linktree}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center gap-2.5 px-5 py-2.5 bg-[#39e09b]/20 border border-[#39e09b]/50 rounded-full text-xs font-bold text-[#5df5b7] hover:bg-[#39e09b]/30 hover:scale-105 transition-all duration-300 font-orbitron">
+               <i class="fas fa-link text-base" aria-hidden="true"></i> LINKTREE
+            </a>
+        </div>
+    </nav>
+            
+            <div class="mt-4 flex justify-center">
+                <div class="group relative" role="alert" aria-live="polite">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-[#FF007F]/40 to-[#7000FF]/40 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000" aria-hidden="true"></div>
+                    <div class="relative flex items-center gap-3 px-6 py-3 rounded-xl bg-[#0f0f0f] border border-[#FF007F]/30 text-[#FF007F] shadow-[0_0_15px_rgba(255,0,127,0.2)]">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-[#FF007F]/20 flex items-center justify-center border border-[#FF007F]/40 shadow-[0_0_10px_#FF007F]">
+                            <span class="text-[14px] font-black font-orbitron">20+</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[11px] md:text-xs font-bold tracking-wider uppercase font-orbitron text-neon">Age Verification Required</span>
+                            <span class="text-[9px] md:text-[10px] text-zinc-300 font-medium">เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </header>
+
     <main class="w-full relative z-20 flex-1">
         <section aria-label="บทนำ" class="pt-24 pb-8 md:pt-32 md:pb-16 px-4 relative">
             <div class="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#7000FF]/10 blur-[120px] rounded-full pointer-events-none transform-gpu -z-10"></div>
