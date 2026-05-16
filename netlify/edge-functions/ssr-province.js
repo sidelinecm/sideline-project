@@ -455,9 +455,9 @@ export default async (request, context) => {
         const firstImage = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/seo-default.webp`;
 
         const profileCountStr = safeProfiles.length > 0 ? `${safeProfiles.length}+ คน` : "คัดเกรด";
-        const title = `ไซด์ไลน์${provinceName} (อัปเดต ${CURRENT_MONTH} ${CURRENT_YEAR}) ${profileCountStr} VIP เด็กเอ็น ไม่มัดจำ | ${CONFIG.BRAND_NAME}`;
+        const title = `หาเด็ก${provinceName} ไซด์ไลน์${provinceName} เพื่อนเที่ยว (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ปลอดภัย ไม่มัดจำ`;
         const topZones = (seoData.zones || ["ตัวเมือง"]).slice(0, 3).join(" ");
-        const description = `ศูนย์รวมสาวไซด์ไลน์${provinceName}และเด็กเอ็น VIP กว่า ${safeProfiles.length} โปรไฟล์ โซน${topZones} การันตีตรงปก 100% ดูแลฟีลแฟน เจอตัวจ่ายเงินหน้างาน ปลอดภัย ไร้มัดจำ ดูโปรไฟล์ล่าสุดที่นี่`;
+        const description = `รวมโปรไฟล์น้องๆ ไซด์ไลน์${provinceName} เพื่อนเที่ยวระดับพรีเมียม ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก 100% ✓ไม่ต้องโอนมัดจำ ปลอดภัยที่สุด จ่ายเงินหน้างาน`;
 
         const schemaGraph = [
             { "@type": "Organization", "@id": `${CONFIG.DOMAIN}/#organization`, name: CONFIG.BRAND_NAME, url: CONFIG.DOMAIN, logo: `${CONFIG.DOMAIN}/logo.png`, description: CONFIG.DESCRIPTION, sameAs: CONFIG.SOCIALS, contactPoint: { "@type": "ContactPoint", contactType: "customer service", telephone: CONFIG.PHONE, availableLanguage: ["th", "en"] } },
