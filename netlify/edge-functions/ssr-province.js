@@ -16,7 +16,7 @@ const CONFIG = {
     DOMAIN: "https://sidelinechiangmai.netlify.app",
     BRAND_NAME: "SIDELINE CHIANGMAI",
     TWITTER: "@sidelinechiangmai",
-    DESCRIPTION: "ศูนย์รวมน้องๆ ไซด์ไลน์และเด็กเอ็นคัดเกรด VIP ทั่วประเทศไทย รับประกันโปรไฟล์ตรงปก ปลอดภัย 100% ไม่ต้องโอนมัดจำก่อนเจอตัวจริง",
+    DESCRIPTION: "แหล่งรวมน้องๆสาวๆ รับงานไซด์ไลน์ ฟิวแฟนเด็กเอ็นที่บริการ ระดับVIP ที่ตรวจสอบแล้วว่าตรงปกทั่วประเทศไทย รับประกันปลอดภัย ตรงปกฟิวแฟน100% บริการประทับใจ ไม่มีโอนมัดจำก่อนเจอตัวจริง📌อตัวจริง",
     PHONE: "091-7895644",
     SOCIAL_LINKS: {
         line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -474,7 +474,7 @@ export default async (request, context) => {
         ];
 
         if (seoData.faqs) schemaGraph.push({ "@type": "FAQPage", "@id": `${provinceUrl}/#faq`, mainEntity: seoData.faqs.map(faq => ({ "@type": "Question", name: faq.q, acceptedAnswer: { "@type": "Answer", text: faq.a } })) });
-        if (safeProfiles.length > 0) schemaGraph.push({ "@type": "ItemList", name: `รายชื่อไซด์ไลน์ VIP ใน ${provinceName}`, description: `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName}`, itemListElement: safeProfiles.slice(0, 10).map((p, i) => ({ "@type": "ListItem", position: i + 1, item: { "@type": "Person", name: p.name || "ไม่ระบุชื่อ", url: `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`, image: optimizeImg(p.imagePath, 300, 400), description: `โปรไฟล์น้อง${p.name || ""} รับงานโซน ${p.location || provinceName}` } })) });
+        if (safeProfiles.length > 0) schemaGraph.push({ "@type": "ItemList", name: `รายชื่อรับงานไซด์ไลน์ บริการระดับ VIP ใน ${provinceName}`, description: `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName}`, itemListElement: safeProfiles.slice(0, 10).map((p, i) => ({ "@type": "ListItem", position: i + 1, item: { "@type": "Person", name: p.name || "ไม่ระบุชื่อ", url: `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`, image: optimizeImg(p.imagePath, 300, 400), description: `โปรไฟล์น้อง${p.name || ""} รับงานโซน ${p.location || provinceName}` } })) });
 
         
 
@@ -657,7 +657,7 @@ export default async (request, context) => {
                     </h1>
                     <p class="text-zinc-300 text-sm md:text-base mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed px-2 sm:px-0">
                         สัมผัสประสบการณ์พักผ่อนหา เพื่อนกินเที่ยวออกเดทดูหนังฟังเพลงแบบฟิวแฟน ที่จังหวัด
-                        <strong>${escapeHTML(provinceName)}</strong> กับน้องๆ <strong>ไซด์ไลน์ VIP</strong> คัดพิเศษ การันตีความตรงปก ปลอดภัย 100% <strong>ไม่ต้องโอนมัดจำ</strong>
+                        <strong>${escapeHTML(provinceName)}</strong> กับน้องๆ <strong>รับงานไซด์ไลน์ บริการระดับ VIP</strong> คัดพิเศษ การันตีความตรงปก ปลอดภัย 100% <strong>ไม่ต้องโอนมัดจำ</strong>
                     </p>
                     <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center lg:justify-start w-full px-4 sm:px-0">
                         <a href="#profiles-grid" class="w-full sm:w-auto btn-neon px-8 py-3.5 md:py-4 rounded-full font-bold text-sm text-center shadow-[0_0_15px_rgba(255,0,127,0.4)]">ดูโปรไฟล์น้องๆ ทั้งหมด</a>
