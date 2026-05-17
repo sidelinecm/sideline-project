@@ -656,7 +656,7 @@ export default async (request, context) => {
                         <span class="text-white text-neon-cyan mt-2 inline-block">รับงานฟิวแฟน </span>
                     </h1>
                     <p class="text-zinc-300 text-sm md:text-base mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed px-2 sm:px-0">
-                        สัมผัสประสบการณ์พักผ่อนหา เพื่อนกินเที่ยวออกเดทดูหนังฟังเพลงแบยฟิวแฟน
+                        สัมผัสประสบการณ์พักผ่อนหา เพื่อนกินเที่ยวออกเดทดูหนังฟังเพลงแบบฟิวแฟน ที่จังหวัด
                         <strong>${escapeHTML(provinceName)}</strong> กับน้องๆ <strong>ไซด์ไลน์ VIP</strong> คัดพิเศษ การันตีความตรงปก ปลอดภัย 100% <strong>ไม่ต้องโอนมัดจำ</strong>
                     </p>
                     <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center lg:justify-start w-full px-4 sm:px-0">
