@@ -653,10 +653,11 @@ export default async (request, context) => {
                     </div>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-4 tracking-tight">
                         <span class="text-[#FF007F] drop-shadow-[0_0_15px_rgba(255,0,127,0.6)]">ไซด์ไลน์${escapeHTML(provinceName)}</span><br/>
-                        <span class="text-white text-neon-cyan mt-2 inline-block">คัดเกรด VIP</span>
+                        <span class="text-white text-neon-cyan mt-2 inline-block">รับงานฟิวแฟน </span>
                     </h1>
                     <p class="text-zinc-300 text-sm md:text-base mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed px-2 sm:px-0">
-                        สัมผัสประสบการณ์พักผ่อนเหนือระดับใน <strong>${escapeHTML(provinceName)}</strong> กับน้องๆ <strong>ไซด์ไลน์ VIP</strong> คัดพิเศษ การันตีความตรงปก ปลอดภัย 100% <strong>ไม่ต้องโอนมัดจำ</strong>
+                        สัมผัสประสบการณ์พักผ่อนหา เพื่อนกินเที่ยวออกเดทดูหนังฟังเพลงแบยฟิวแฟน
+                        <strong>${escapeHTML(provinceName)}</strong> กับน้องๆ <strong>ไซด์ไลน์ VIP</strong> คัดพิเศษ การันตีความตรงปก ปลอดภัย 100% <strong>ไม่ต้องโอนมัดจำ</strong>
                     </p>
                     <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center lg:justify-start w-full px-4 sm:px-0">
                         <a href="#profiles-grid" class="w-full sm:w-auto btn-neon px-8 py-3.5 md:py-4 rounded-full font-bold text-sm text-center shadow-[0_0_15px_rgba(255,0,127,0.4)]">ดูโปรไฟล์น้องๆ ทั้งหมด</a>
@@ -675,7 +676,7 @@ export default async (request, context) => {
                             <div class="w-10 h-10 rounded-full bg-[#00F3FF] flex items-center justify-center text-black shadow-[0_0_15px_rgba(0,243,255,0.8)] shrink-0"><i class="fas fa-shield-check text-lg"></i></div>
                             <div>
                                 <span class="block text-white font-bold text-xs sm:text-sm tracking-wide font-orbitron text-neon-cyan">Verified & Safe</span>
-                                <span class="block text-zinc-300 text-[9px] sm:text-[10px] font-light mt-0.5">คัดกรองประวัติและยืนยันตัวตนแล้ว</span>
+                                <span class="block text-zinc-300 text-[9px] sm:text-[10px] font-light mt-0.5">คัดกรองน้องๆที่บริการประทับใจไม่เคยมีประวัตเสียบริการเป็นมืออาชีพและยืนยันตัวตนแล้ว</span>
                             </div>
                         </div>
                     </div>
@@ -696,7 +697,7 @@ export default async (request, context) => {
         <section id="profiles-grid" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 scroll-mt-24">
             <div class="flex items-end justify-between mb-6 md:mb-8">
                 <div>
-                    <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron">น้องๆ ไซด์ไลน์${escapeHTML(provinceName)}</h2>
+                    <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight font-orbitron">น้องๆรับงาน ไซด์ไลน์${escapeHTML(provinceName)}</h2>
                     <p class="text-zinc-400 text-[10px] md:text-sm font-light mt-1">อัปเดตล่าสุด: ${CURRENT_MONTH} ${CURRENT_YEAR} | ${safeProfiles.length} โปรไฟล์</p>
                 </div>
             </div>
