@@ -467,43 +467,47 @@ export default async (request, context) => {
 
         const cardsHTML = safeProfiles.map((p, index) => {
             const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
-            const profileLocation = escapeHTML(p.location || provinceName);
+            const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
             const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
             const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-            const displayRate = p.rate ? (Number(String(p.rate).replace(/,/g, "")) ? Number(String(p.rate).replace(/,/g, "")).toLocaleString() : escapeHTML(p.rate)) : "สอบถาม";
-            const animDelay = (index % 15) * 50;
-            const lsiKeyword = seoData.lsi[index % seoData.lsi.length];
-            const smartAlt = `โปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} โซน${profileLocation}`;
+            let displayRate = p.rate ? (Number(String(p.rate).replace(/,/g, "")) ? Number(String(p.rate).replace(/,/g, "")).toLocaleString() : escapeHTML(p.rate)) : "สอบถาม";
+            const animDelay = (index % 10) * 50;
+            const lsiKeyword = seoData.lsi ? seoData.lsi[index % seoData.lsi.length] : `รับงาน${provinceName}`;
+            const smartAlt = `รูปโปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} พิกัดโซน${profileLocation}`;
+            const imageAttributes = index < 4 ? 'fetchpriority="high" decoding="sync"' : 'loading="lazy" decoding="async"';
 
             return `
-            <a href="${profileLink}" class="group block bg-white rounded-2xl overflow-hidden border border-gray-200/80 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 animate-fade-in-up" style="animation-delay: ${animDelay}ms; opacity: 0;">
-                <div class="relative aspect-w-3 aspect-h-4 w-full overflow-hidden">
-                    <img src="${optimizeImg(p.imagePath, 300, 400)}" 
-                         srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
-                         sizes="(max-width: 640px) 50vw, 25vw"
-                         alt="${smartAlt}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                         ${index < 4 ? 'fetchpriority="high"' : 'loading="lazy" decoding="async"'}>
-                    <div class="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full backdrop-blur-md bg-black/40 border border-white/20">
-                        <span class="relative flex h-2 w-2">
-                            ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>' : ''}
-                            <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-green-500' : 'bg-red-500'}"></span>
+            <article class="profile-card group relative bg-[#1A0B2E] rounded-[1.2rem] sm:rounded-[2rem] overflow-hidden border border-[#3D1A5F]/50 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,127,0,0.2)] animate-fade-in-up" style="animation-delay: ${animDelay}ms; content-visibility: auto;" onclick="window.location.href='${profileLink}'">
+                <a href="${profileLink}" class="absolute inset-0 z-30 pointer-events-auto"><span class="sr-only">ดูโปรไฟล์น้อง${cleanName}</span></a>
+                ${(p.isfeatured || index < 3) ? '<div class="absolute top-3 right-3 z-20 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] px-2 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-lg border border-white/20"><span class="text-[8px] sm:text-[10px] font-black text-black uppercase tracking-tighter">HOT VIP</span></div>' : ''}
+                <div class="relative aspect-[3/4] w-full overflow-hidden bg-[#0A0014]">
+<img src="${optimizeImg(p.imagePath, 300, 400)}" 
+     srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 300, 400)} 300w, ${optimizeImg(p.imagePath, 500, 667)} 500w"
+     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+     onerror="this.onerror=null; this.src='/images/default.webp';"
+     alt="${smartAlt}" class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0A0014] via-[#0A0014]/30 to-transparent z-10"></div>
+                    <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full backdrop-blur-md bg-black/50 border border-white/10">
+                        <span class="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                            ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00F3FF] opacity-75"></span>' : ''}
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 ${isAvailable ? 'bg-[#00F3FF]' : 'bg-[#FF007F]'}"></span>
                         </span>
-                        <span class="text-[9px] font-bold text-white tracking-wider uppercase">${isAvailable ? 'ONLINE' : 'BUSY'}</span>
+                        <span class="text-[8px] sm:text-[9px] font-bold text-white tracking-widest uppercase font-orbitron">${isAvailable ? 'ONLINE' : 'BUSY'}</span>
+                    </div>
+                    <div class="absolute bottom-0 inset-x-0 p-3 sm:p-5 z-20 flex flex-col justify-end">
+                        <h3 class="text-lg sm:text-2xl font-bold text-white leading-tight truncate drop-shadow-md">${cleanName} <span class="text-sm font-normal text-zinc-300">| ${p.age || '??'}</span></h3>
+                        <div class="flex items-center gap-1.5 text-zinc-300 text-[10px] sm:text-xs mb-3"><i class="fas fa-map-marker-alt text-[#7000FF]"></i><span class="truncate">${profileLocation}</span></div>
+                        <div class="flex justify-between items-center pt-2 sm:pt-3 border-t border-white/10">
+                            <div class="font-bold text-sm sm:text-lg text-[#FF007F] font-orbitron tracking-tight">${displayRate} ${displayRate === "สอบถาม" ? "" : "฿"}</div>
+                            <span class="bg-white/10 text-white px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold">VIEW</span>
+                        </div>
                     </div>
                 </div>
-                <div class="p-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-base font-bold text-gray-800 truncate">${cleanName} <span class="text-sm font-normal text-gray-500">(${p.age || '??'})</span></h3>
-                        ${(p.isfeatured) ? '<i class="fas fa-star text-amber-400" title="โปรไฟล์แนะนำ"></i>' : ''}
-                    </div>
-                    <p class="text-xs text-gray-500 mt-0.5 truncate"><i class="fas fa-map-marker-alt text-violet-500/80 mr-1"></i>${profileLocation}</p>
-                    <p class="text-right text-base font-bold text-violet-600 mt-2">${displayRate}${displayRate === "สอบถาม" ? "" : " ฿"}</p>
-                </div>
-            </a>`;
+            </article>`;
         }).join("");
-        
+
         const htmlTemplate = `<!DOCTYPE html>
-<html lang="th" class="scroll-smooth">
+<html lang="th" class="scroll-smooth bg-[#0f0f0f]">
 <head>
     <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>${title}</title><meta name="description" content="${description}"/>
     <link rel="canonical" href="${provinceUrl}" />
