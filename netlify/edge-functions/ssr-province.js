@@ -298,120 +298,98 @@ const smartLinkify = (text, provinceKey, zones) => {
     return linkedText;
 };
 
-/**
- * generateAppSeoText: สร้างเนื้อหา SEO และ UI ส่วนล่างของหน้าเว็บ
- */
+
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
     
-    const termsAndConditions = [
-        { t: "การจองคิวน้องๆ ส่วนตัว", d: `เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน${escapeHTML(provinceName)} สมาชิก 1 ท่าน จองได้ครั้งละ 1 คิว เพื่อรักษาคุณภาพบริการแบบ VIP` },
-        { t: "ความปลอดภัยทางการเงิน", d: "ชำระเงินหน้างานเมื่อพบตัวน้องจริงเท่านั้น! เราไม่มีนโยบายให้โอนมัดจำล่วงหน้าทุกกรณี ปลอดภัยจากมิจฉาชีพ 100%" },
-        { t: "การตรวจสอบโปรไฟล์", d: "รูปโปรไฟล์น้องๆ ทุกคนผ่านการตรวจสอบและยืนยันตัวตนแล้ว รับประกันความตรงปก" },
-        { t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับระดับสูงสุด และถูกลบทันทีหลังจากงานเสร็จสิ้น" }
+    const termsAndConditions =[
+        { t: "การจองคิวน้องๆ ส่วนตัว", d: `สมาชิก 1 ท่าน จองได้ครั้งละ 1 คิว เพื่อรักษาความเป็นส่วนตัวและคุณภาพการดูแลแบบ VIP` },
+        { t: "ความปลอดภัยทางการเงิน", d: "จ่ายเงินหน้างานเมื่อพบตัวน้องจริงเท่านั้น! เราไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณี ปลอดภัย 100%" },
+        { t: "การตรวจสอบโปรไฟล์", d: "รูปโปรไฟล์น้องๆ ทุกคนผ่านการตรวจสอบยืนยันตัวตนแล้ว รับประกันความตรงปก ไม่จกตา" },
+        { t: "การรักษาความลับ", d: "ข้อมูลการนัดหมายจะถูกเก็บเป็นความลับระดับสูงสุด และถูกลบทันทีหลังจากงานเสร็จสิ้น" }
     ];
 
-    // โซนยอดฮิต (Internal Linking Section)
+    // โซนยอดฮิต (Style: Clean Tags)
     const zonesHTML = (data.zones && data.zones.length > 0) ? `
-        <section class="mt-12 text-center">
-            <h2 class="text-white text-xl font-bold mb-5 font-orbitron text-neon-cyan">📍 โซนรับงานยอดฮิตใน${escapeHTML(provinceName)}</h2>
-            <div class="flex flex-wrap justify-center gap-2.5 max-w-3xl mx-auto">
+        <section class="mt-20 text-center">
+            <h2 class="text-2xl font-serif font-bold text-gray-900 mb-8">📍 โซนรับงานยอดฮิตใน${escapeHTML(provinceName)}</h2>
+            <div class="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
                 ${data.zones.map(zone => `
-                    <a href="/search?q=${encodeURIComponent(zone)}" class="px-5 py-2 rounded-full border border-[#3D1A5F] bg-[#1A0B2E]/60 text-zinc-300 text-sm font-medium hover:bg-[#7000FF]/30 hover:text-white hover:border-[#7000FF] transition-all">
+                    <a href="/search?q=${encodeURIComponent(zone)}" class="px-6 py-2.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium hover:border-purple-600 hover:text-purple-600 transition-all">
                         โซน${escapeHTML(zone)}
                     </a>
                 `).join("")}
             </div>
         </section>` : "";
 
-    // FAQ Section
+    // FAQ Section (Style: Clean Accordion)
     const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
-        <section class="p-[2px] bg-gradient-to-b from-[#00F3FF] to-[#7000FF] rounded-3xl shadow-[0_0_30px_rgba(0,243,255,0.15)] max-w-3xl mx-auto mt-12">
-            <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8">
-                <div class="text-center mb-8">
-                    <div class="inline-block px-6 py-2 bg-black/40 border border-[#3D1A5F] rounded-full shadow-[inset_0_0_10px_rgba(0,243,255,0.1)]">
-                        <h2 class="text-white text-xl font-bold tracking-wide">คำถามที่พบบ่อย (FAQ)</h2>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    ${data.faqs.map(faq => `
-                        <details class="group cyber-glass p-5 rounded-2xl border border-[#3D1A5F]/50 hover:border-[#7000FF] transition-colors duration-300 bg-[#0f0f0f]/50">
-                            <summary class="flex justify-between items-center cursor-pointer text-white font-bold text-sm md:text-base list-none group-open:text-[#00F3FF]">
-                                ${escapeHTML(faq.q)}
-                                <i class="fas fa-chevron-down transition-transform duration-300 group-open:rotate-180 text-[#7000FF] group-open:text-[#00F3FF]"></i>
-                            </summary>
-                            <div class="mt-4 pt-4 border-t border-[#3D1A5F]/50">
-                                <p class="text-zinc-300 text-sm leading-relaxed font-light">${escapeHTML(faq.a)}</p>
-                            </div>
-                        </details>`).join("")}
-                </div>
+        <section class="max-w-3xl mx-auto mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-serif font-bold text-gray-900">คำถามที่พบบ่อย (FAQ)</h2>
+            </div>
+            <div class="space-y-4">
+                ${data.faqs.map(faq => `
+                    <details class="group bg-white rounded-2xl border border-gray-100 hover:border-purple-200 transition-all duration-300">
+                        <summary class="flex justify-between items-center p-6 cursor-pointer text-gray-900 font-bold text-base list-none">
+                            ${escapeHTML(faq.q)}
+                            <i class="fas fa-plus text-gray-400 group-open:rotate-45 transition-transform duration-300"></i>
+                        </summary>
+                        <div class="px-6 pb-6 pt-0 border-t-0">
+                            <p class="text-gray-500 text-sm leading-relaxed">${escapeHTML(faq.a)}</p>
+                        </div>
+                    </details>`).join("")}
             </div>
         </section>` : "";
 
     // ประกอบร่าง HTML ทั้งหมด
     return `
-    <div class="mt-12 px-4 space-y-12 pb-16">
+    <div class="mt-24 px-6 space-y-24 pb-24">
+        
         <!-- VIP & Terms Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            <!-- VIP Promotion Card -->
-            <section aria-labelledby="promo-heading" class="p-[2px] bg-gradient-to-b from-[#FF007F] to-[#7000FF] rounded-3xl shadow-[0_10px_30px_rgba(255,0,127,0.15)] relative overflow-hidden h-full flex flex-col">
-                <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8 relative z-10 flex-1 flex flex-col justify-between">
-                    <div class="text-center mb-6">
-                        <h2 id="promo-heading" class="text-white text-lg md:text-xl font-bold tracking-tight">
-                            <span class="text-[#FF007F]">VIP</span> PROMOTION
-                        </h2>
-                        <p class="text-zinc-400 text-xs mt-1.5 font-light">แจ้งรหัสกับแอดมินเพื่อรับสิทธิ์ดูแลระดับพิเศษ</p>
-                    </div>
-                    <div class="relative group">
-                        <div class="absolute -inset-1 bg-gradient-to-r from-[#FF007F] to-[#7000FF] rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-                        <div class="relative bg-[#0f0f0f] border border-dashed border-[#FF007F]/40 rounded-2xl p-4 md:p-6 overflow-hidden text-center">
-                            <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#1A0B2E] border-r border-[#FF007F]/40 rounded-full"></div>
-                            <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#1A0B2E] border-l border-[#FF007F]/40 rounded-full"></div>
-                            <span class="text-[10px] text-white/60 font-bold uppercase tracking-[0.3em] font-orbitron">Exclusive Code</span>
-                            <div class="flex items-center justify-center gap-3 my-1">
-                                <i class="fas fa-crown text-xs text-yellow-500/80"></i>
-                                <span class="text-white font-black text-lg md:text-2xl tracking-[0.1em] font-orbitron drop-shadow-[0_0_8px_rgba(255,127,0,0.4)] break-all px-2">VIP-${provinceKey.toUpperCase()}</span>
-                                <i class="fas fa-crown text-xs text-yellow-500/80"></i>
-                            </div>
-                            <div class="mt-2 px-3 py-0.5 rounded-full bg-[#FF007F]/10 border border-[#FF007F]/20 inline-block">
-                                <span class="text-[9px] text-[#FF007F] font-bold uppercase tracking-widest">Valid Today Only</span>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-center text-[10px] text-white/50 mt-5 font-light italic">* สิทธิ์ VIP มีจำนวนจำกัดต่อวัน</p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            
+            <!-- VIP Promotion Card (Styled Minimal) -->
+            <div class="rounded-3xl border border-purple-100 bg-purple-50/50 p-8 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-purple-600 mb-2">VIP EXCLUSIVE</h2>
+                    <p class="text-gray-600 text-sm mb-6">แจ้งรหัสกับแอดมินเพื่อรับสิทธิ์ดูแลระดับพิเศษเฉพาะลูกค้าคนสำคัญ</p>
                 </div>
-            </section>
+                <div class="bg-white rounded-2xl p-6 border border-purple-100 shadow-sm text-center">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Promotion Code</span>
+                    <div class="text-2xl md:text-3xl font-black text-gray-900 my-2 tracking-widest font-serif">VIP-${provinceKey.toUpperCase()}</div>
+                    <span class="text-[9px] text-purple-600 bg-purple-100 px-3 py-1 rounded-full uppercase font-bold">Valid Today Only</span>
+                </div>
+            </div>
 
-            <!-- Terms & Conditions Card -->
-            <section aria-labelledby="terms-heading" class="p-[2px] bg-gradient-to-b from-[#7000FF] to-[#FF007F] rounded-3xl shadow-[0_0_30px_rgba(112,0,255,0.2)] h-full flex flex-col">
-                <div class="bg-[#1A0B2E] rounded-[1.4rem] p-6 md:p-8 flex-1">
-                    <h3 id="terms-heading" class="text-white text-xl font-bold tracking-wide font-orbitron text-center mb-6">เงื่อนไขการใช้บริการ</h3>
-                    <div class="space-y-4">
-                        ${termsAndConditions.map((item, idx) => `
-                            <div class="flex gap-4 items-start p-3.5 rounded-xl bg-[#0f0f0f]/60 border border-[#3D1A5F]/70">
-                                <div class="w-8 h-8 shrink-0 rounded-full bg-[#7000FF]/20 text-[#00F3FF] flex items-center justify-center font-bold text-sm border border-[#7000FF]/50 font-orbitron">${idx + 1}</div>
-                                <div class="pt-1">
-                                    <h4 class="text-white text-sm font-bold mb-1">${item.t}</h4>
-                                    <p class="text-zinc-400 text-xs leading-relaxed font-light">${item.d}</p>
-                                </div>
-                            </div>`).join("")}
-                    </div>
+            <!-- Terms & Conditions Card (Styled Minimal) -->
+            <div class="rounded-3xl border border-gray-100 bg-white p-8">
+                <h3 class="text-xl font-bold font-serif mb-6 text-gray-900">เงื่อนไขการใช้บริการ</h3>
+                <div class="space-y-6">
+                    ${termsAndConditions.map((item, idx) => `
+                        <div class="flex gap-4 items-start">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">${idx + 1}</div>
+                            <div class="pt-1">
+                                <h4 class="text-gray-900 text-sm font-bold mb-1">${item.t}</h4>
+                                <p class="text-gray-500 text-xs leading-relaxed font-light">${item.d}</p>
+                            </div>
+                        </div>`).join("")}
                 </div>
-            </section>
+            </div>
         </div>
 
-        <!-- Zones Section -->
+        <!-- Zones -->
         ${zonesHTML}
 
         <!-- SEO Content Section (Smart Linkified) -->
-        <section aria-labelledby="intro-heading" class="py-12 px-6 md:px-10 bg-[#1A0B2E]/40 rounded-[2.5rem] border border-[#3D1A5F]/40 max-w-4xl mx-auto backdrop-blur-sm shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-             <h2 id="intro-heading" class="text-2xl md:text-3xl font-bold text-white mb-6 text-neon-cyan drop-shadow-md text-center">ทำไมต้องเลือกไซด์ไลน์${escapeHTML(provinceName)} จากเรา?</h2>
-            <div class="text-zinc-200 text-sm md:text-base font-light leading-loose prose prose-invert max-w-none text-justify md:text-left">
+        <section class="py-16 px-8 bg-gray-50 rounded-[2.5rem] border border-gray-100 max-w-4xl mx-auto">
+             <h2 class="text-3xl font-serif font-bold text-gray-900 mb-8 text-center">ทำไมต้องเลือกไซด์ไลน์${escapeHTML(provinceName)} จากเรา?</h2>
+            <div class="text-gray-600 text-base font-light leading-loose prose prose-gray max-w-none text-justify md:text-center">
                 ${smartLinkify(data.uniqueIntro, provinceKey, data.zones)}
             </div>
         </section>
 
-        <!-- FAQ Section -->
+        <!-- FAQ -->
         ${faqsHTML}
     </div>`;
 };
@@ -563,27 +541,22 @@ export default async (request, context) => {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
-    <style>
-        body { margin: 0; font-family: 'Kanit', 'Prompt', sans-serif; background-color: #f8f9fa; color: #000; background-image: radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 70%); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 4px; }
-        
-        /* ปุ่มสไตล์ Light & Premium (Tech-Luxury) ดูน่าเชื่อถือและทันสมัย */
-        .btn-neon { background: #8B5CF6; color: #fff; box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .btn-neon:hover { background: #7C3AED; box-shadow: 0 4px 30px rgba(139, 92, 246, 0.4); transform: translateY(-2px); }
-        
-        /* สไตล์ Cyber Glass ธีมสว่าง สะอาด โปร่งใส (Translucent Premium) */
-        .cyber-glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        .breadcrumb-nav { font-size: 0.75rem; color: #6c757d; display: flex; font-weight: 300; }
-        .breadcrumb-nav ol { list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-        .breadcrumb-nav li:not(:last-child)::after { content: '→'; margin-left: 0.5rem; color: #ced4da; font-size: 0.7rem; }
-        .breadcrumb-nav a { color: #495057; text-decoration: none; transition: color 0.2s; }
-        .breadcrumb-nav a:hover { color: #8B5CF6; }
-        
-        #navbar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s; }
-    </style>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+    
+    :root { --primary: #7C3AED; } /* สีม่วงพรีเมียม */
+    body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+    
+    .glass-card { background: rgba(255,255,255,0.95); border: 1px solid #f0f0f0; border-radius: 24px; }
+    .btn-premium { background: #1a1a1a; color: #fff; transition: all 0.3s; }
+    .btn-premium:hover { background: var(--primary); transform: translateY(-2px); }
+    
+    /* สไตล์การแสดงผลรูปภาพ */
+    .profile-img-container { position: relative; overflow: hidden; border-radius: 16px; }
+    .profile-img-container img { transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .profile-img-container:hover img { transform: scale(1.05); }
+</style>
 </head>
 
 <body class="antialiased flex flex-col min-h-screen pb-[70px] md:pb-0">
