@@ -403,11 +403,12 @@ return `
         <div class="text-zinc-200 text-sm md:text-base font-light leading-loose prose prose-invert max-w-none text-justify md:text-left">
             ${smartLinkify(data.uniqueIntro, provinceKey, data.zones)}
         </div>
-    </section>
+        </section>
 
-    <!-- FAQ Section -->
-    ${faqsHTML}
-</div>`;
+        <!-- FAQ Section -->
+        ${faqsHTML}
+    </div>`;
+};
 
 export default async (request, context) => {
     try {
