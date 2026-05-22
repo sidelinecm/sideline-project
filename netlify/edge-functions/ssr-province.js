@@ -1,8 +1,8 @@
 /**
  * [ SYSTEM CORE ]
- * Project: Nexus Entity Framework (S-Tier) - ULTIMATE NEO-LUXURY NOIR
+ * Project: Nexus Entity Framework (S-Tier) - ULTIMATE CINEMATIC (S-TIER PERFECT)
  * Mastermind: wawai | Nexus Mastermind
- * Authority: Search Engine Dominance & Entity Engineering
+ * Authority: Search Engine Dominance & Premium UX Engineering
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -24,9 +24,7 @@ const CONFIG = {
         linktree: "https://linktr.ee/kissmodel",
         bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
     },
-    get SOCIALS() {
-        return Object.values(this.SOCIAL_LINKS);
-    }
+    get SOCIALS() { return Object.values(this.SOCIAL_LINKS); }
 };
 
 const PROVINCE_SEO_DATA = {
@@ -233,16 +231,11 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-Object.keys(PROVINCE_SEO_DATA).forEach(key => {
-    if(!PROVINCE_SEO_DATA[key].uniqueIntro) PROVINCE_SEO_DATA[key] = {...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key]};
-});
 
-// [ฟังก์ชันแกนหลักเดิมของคุณ นำกลับมาใช้ทั้งหมด]
 const getFullUrl = (path) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.startsWith("http")) return path;
-    const cleanPath = path.startsWith("/") ? path : `/${path}`;
-    return `${CONFIG.DOMAIN}${cleanPath}`;
+    return `${CONFIG.DOMAIN}${path.startsWith("/") ? path : `/${path}`}`;
 };
 
 const optimizeImg = (path, width = 500, height = 667) => {
@@ -251,7 +244,6 @@ const optimizeImg = (path, width = 500, height = 667) => {
         if (path.includes("/upload/")) return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
         return path;
     }
-    if (path.startsWith("http")) return path;
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=85`;
 };
 
@@ -260,152 +252,34 @@ const escapeHTML = (str) => {
     return String(str).replace(/[&<>'"]/g, tag => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[tag] || tag);
 };
 
-const shareContent = async (title, text, url) => {
-    if (navigator.share) {
-        try {
-            await navigator.share({ title, text, url });
-        } catch (err) {
-            console.log("Share failed:", err);
-        }
-    } else {
-        navigator.clipboard.writeText(url);
-        alert("คัดลอกลิงก์แล้ว");
-    }
-};
-
-const smartLinkify = (text, provinceKey, zones) => {
-    if (!text) return "";
-    let linkedText = text;
-    if (zones && zones.length > 0) {
-        zones.forEach(zone => {
-            const regex = new RegExp(`(${zone})`, 'g');
-            // ปรับสีลิงก์ให้เข้ากับ ธีม Noir
-            linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-brand-gold hover:underline transition-colors font-medium">$1</a>`);
-        });
-    }
-
-    const keywords = ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน"];
-    keywords.forEach(kw => {
-        const regex = new RegExp(`(${kw})`, 'g');
-        // ปรับสีลิงก์ให้เข้ากับ ธีม Noir
-        linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(kw)}" class="text-brand-pink/90 hover:text-brand-pink transition-colors font-bold">$1</a>`);
-    });
-
-    return linkedText;
-};
-
-const generateAppSeoText = (provinceName, provinceKey, count) => {
+const generateAppSeoText = (provinceName, provinceKey, introText) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
-    
-    const termsAndConditions = [
-        { t: "การจองคิวน้องๆ ส่วนตัว", d: `เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน${escapeHTML(provinceName)} สมาชิก 1 ท่าน จองได้ครั้งละ 1 คิว เพื่อรักษาคุณภาพบริการแบบ VIP` },
-        { t: "ความปลอดภัยทางการเงิน", d: "ชำระเงินหน้างานเมื่อพบตัวน้องจริงเท่านั้น! เราไม่มีนโยบายให้โอนมัดจำล่วงหน้าทุกกรณี ปลอดภัยจากมิจฉาชีพ 100%" },
-        { t: "การตรวจสอบโปรไฟล์", d: "รูปโปรไฟล์น้องๆ ทุกคนผ่านการตรวจสอบและยืนยันตัวตนแล้ว รับประกันความตรงปก" },
-        { t: "การรักษาความเป็นส่วนตัว", d: "ข้อมูลการนัดหมายและข้อมูลส่วนตัวของคุณจะถูกเก็บเป็นความลับระดับสูงสุด และถูกลบทันทีหลังจากงานเสร็จสิ้น" }
-    ];
-
-    const zonesHTML = (data.zones && data.zones.length > 0) ? `
-        <div class="reveal text-center relative z-10 pt-8">
-            <h2 class="text-2xl font-bold mb-10 flex items-center justify-center gap-3 text-white">
-                <i class="fas fa-map-location-dot text-brand-pink"></i> โซนรับงานยอดฮิตใน${escapeHTML(provinceName)}
-            </h2>
-            <div class="flex flex-wrap justify-center gap-3">
-                ${data.zones.map(zone => `
-                    <a href="/search?q=${encodeURIComponent(zone)}" class="px-8 py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-xs font-bold text-gray-300 hover:bg-white hover:text-black hover:scale-105 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.2)]">${escapeHTML(zone)}</a>
-                `).join("")}
-            </div>
-        </div>` : "";
-
-    const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
-        <div class="reveal max-w-3xl mx-auto space-y-6 pb-20 relative z-10 pt-10">
-            <h2 class="text-3xl font-black text-center mb-12 text-white">คำถามที่พบบ่อย (FAQ)</h2>
-            ${data.faqs.map((faq, idx) => `
-                <details class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300" ${idx === 0 ? 'open' : ''}>
-                    <summary class="flex justify-between items-center p-8 cursor-pointer list-none font-bold text-white text-lg">
-                        <span class="flex items-center gap-4">
-                            <span class="text-brand-pink text-xl"><i class="fas fa-comment-dots"></i></span>
-                            ${escapeHTML(faq.q)}
-                        </span>
-                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-open:bg-brand-pink group-open:rotate-45 transition-all">
-                            <i class="fas fa-plus text-xs text-white"></i>
-                        </div>
-                    </summary>
-                    <div class="px-8 pb-8 pt-2 ml-10 text-gray-400 text-sm font-light leading-relaxed border-l-2 border-brand-pink/30 ml-12">
-                        ${escapeHTML(faq.a)}
-                    </div>
-                </details>
-            `).join("")}
-        </div>` : "";
-
-
     return `
-        <section class="py-24 bg-brand-dark text-white relative overflow-hidden">
+        <section class="py-24 bg-brand-dark text-white relative overflow-hidden mt-10">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,51,102,0.08),transparent_50%)] pointer-events-none"></div>
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(212,175,55,0.05),transparent_50%)] pointer-events-none"></div>
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-brand-pink/50 to-transparent"></div>
-            
             <div class="max-w-7xl mx-auto px-6 space-y-32">
-                
-                <!-- VIP & Terms Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-                    <!-- VIP Promotion Card -->
-                    <div class="reveal bg-gradient-to-br from-[#0F0F13] to-[#050505] p-10 md:p-14 rounded-[3rem] border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                    <div class="reveal bg-gradient-to-br from-[#121217] to-[#050505] p-10 md:p-14 rounded-[3rem] border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative overflow-hidden group">
                         <div class="absolute -top-10 -right-10 w-40 h-40 bg-brand-gold/10 blur-3xl rounded-full transition-transform group-hover:scale-150 duration-700"></div>
-                        <div class="absolute top-8 right-10 text-white/5 text-8xl font-black select-none">VIP</div>
-                        
-                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-gold/10 rounded-full border border-brand-gold/20 mb-6">
-                            <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
-                            <span class="text-[9px] font-black uppercase tracking-[0.3em] text-brand-gold">Exclusive Code</span>
-                        </div>
-                        
-                        <h3 class="text-gray-300 text-sm md:text-base mb-8 font-light">แจ้งรหัสลับนี้กับแอดมิน เพื่อรับการดูแลจัดคิวระดับ <strong>Super VIP</strong> ทันที</h3>
-                        
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-gold/10 rounded-full border border-brand-gold/20 mb-6"><span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span><span class="text-[9px] font-black uppercase tracking-[0.3em] text-brand-gold">รหัสโปรโมชั่น VIP</span></div>
+                        <h3 class="text-gray-300 text-sm md:text-base mb-8 font-light leading-relaxed">แจ้งรหัสลับนี้กับแอดมิน เพื่อรับการดูแลจัดคิวระดับ <strong>Super VIP</strong> และการันตีความปลอดภัยสูงสุด</h3>
                         <div class="bg-[#1A1A20]/80 backdrop-blur-md rounded-3xl p-10 border border-white/5 text-center relative shadow-inner">
-                            <div class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-5 text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#FFF380] to-[#D4AF37] drop-shadow-[0_0_15px_rgba(212,175,55,0.3)] select-all">
-                                VIP-${provinceKey.toUpperCase()}
-                            </div>
-                            <span class="inline-block bg-gradient-to-r from-brand-pink to-purple-600 text-white px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(255,51,102,0.4)]">
-                                Valid Today Only
-                            </span>
+                            <div class="text-4xl md:text-6xl font-black tracking-tighter mb-5 text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#FFF380] to-[#D4AF37] drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">VIP-${provinceKey.toUpperCase()}</div>
+                            <span class="inline-block bg-gradient-to-r from-brand-pink to-purple-600 text-white px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg">สำหรับวันนี้เท่านั้น</span>
                         </div>
                     </div>
-
-                    <!-- Terms & Conditions Card -->
                     <div class="reveal space-y-10">
-                        <h3 class="text-3xl font-black tracking-tight flex items-center gap-4">
-                            <i class="fas fa-shield-check text-brand-pink"></i> เงื่อนไขการใช้บริการ
-                        </h3>
+                        <h3 class="text-3xl md:text-4xl font-black tracking-tight flex items-center gap-4"><i class="fas fa-shield-check text-brand-pink"></i> เงื่อนไขความปลอดภัย</h3>
                         <div class="space-y-6">
-                            ${termsAndConditions.map((item, idx) => `
-                                <div class="flex gap-6 items-start p-4 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10 group">
-                                    <div class="w-12 h-12 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-lg font-bold group-hover:bg-brand-pink transition-all shadow-lg text-white">${idx + 1}</div>
-                                    <div>
-                                        <h4 class="text-lg font-bold mb-1 text-white">${item.t}</h4>
-                                        <p class="text-gray-400 text-sm font-light leading-relaxed">${item.d}</p>
-                                    </div>
-                                </div>
-                            `).join("")}
+                            <div class="flex gap-6 items-start p-4 rounded-2xl hover:bg-white/5 transition-colors group"><div class="w-12 h-12 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-lg font-bold group-hover:bg-brand-pink transition-all text-white">1</div><div><h4 class="text-lg font-bold mb-1 text-white text-premium">นัดหมายแบบส่วนตัว VIP</h4><p class="text-gray-400 text-sm font-light">จองได้ครั้งละ 1 คิว เพื่อรักษาความเป็นส่วนตัวสูงสุดระดับพรีเมียม</p></div></div>
+                            <div class="flex gap-6 items-start p-4 rounded-2xl hover:bg-white/5 transition-colors group"><div class="w-12 h-12 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-lg font-bold group-hover:bg-green-500 transition-all text-white">2</div><div><h4 class="text-lg font-bold mb-1 text-white text-premium">จ่ายเงินหน้างาน 100%</h4><p class="text-gray-400 text-sm font-light">ชำระเงินเมื่อพบตัวน้องจริงเท่านั้น <strong class="text-green-400">ไม่มีนโยบายโอนมัดจำก่อนทุกกรณี</strong></p></div></div>
                         </div>
                     </div>
                 </div>
-
-                ${zonesHTML}
-
-                <!-- SEO Content Section (Smart Linkified) -->
-                <div class="reveal bg-white rounded-[4rem] p-10 md:p-20 text-brand-dark text-center shadow-[0_30px_60px_rgba(255,255,255,0.1)] relative z-10">
-                    <div class="max-w-3xl mx-auto space-y-10">
-                        <div class="w-20 h-20 bg-brand-dark text-brand-pink rounded-3xl flex items-center justify-center text-3xl mx-auto shadow-xl shadow-black/20 transform -rotate-6">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-tight">ทำไมต้องเลือกไซด์ไลน์<br><span class="text-brand-pink">${escapeHTML(provinceName)}</span> จากเรา?</h2>
-                        <div class="text-gray-600 text-sm md:text-lg font-light leading-loose space-y-8 text-left md:text-center">
-                            ${smartLinkify(data.uniqueIntro, provinceKey, data.zones)}
-                        </div>
-                    </div>
-                </div>
-
-                ${faqsHTML}
-
+                <div class="reveal text-center relative z-10"><h2 class="text-2xl font-bold mb-10 flex items-center justify-center gap-3 text-white"><i class="fas fa-map-location-dot text-brand-pink"></i> โซนรับงานยอดฮิตใน${escapeHTML(provinceName)}</h2><div class="flex flex-wrap justify-center gap-3">${data.zones.map(zone => `<a href="/search?q=${encodeURIComponent(zone)}" class="px-8 py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-xs font-bold text-gray-300 hover:bg-white hover:text-black hover:scale-105 transition-all shadow-lg">${escapeHTML(zone)}</a>`).join("")}</div></div>
+                <div class="reveal bg-white rounded-[4rem] p-10 md:p-20 text-brand-dark text-center shadow-2xl relative z-10"><div class="max-w-3xl mx-auto space-y-10"><div class="w-20 h-20 bg-brand-dark text-brand-pink rounded-3xl flex items-center justify-center text-3xl mx-auto shadow-xl transform -rotate-6"><i class="fas fa-heart"></i></div><h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-tight">ทำไมต้องเลือกไซด์ไลน์<br><span class="text-brand-pink">${escapeHTML(provinceName)}</span> จากเรา?</h2><div class="text-gray-600 text-sm md:text-lg font-light leading-loose space-y-6 text-left md:text-center">${introText}</div></div></div>
+                <div class="reveal max-w-3xl mx-auto space-y-6 pb-20 relative z-10"><h2 class="text-3xl font-black text-center mb-12 text-white">คำถามที่พบบ่อย (FAQ)</h2>${data.faqs.map((faq, idx) => `<details class="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300" ${idx === 0 ? 'open' : ''}><summary class="flex justify-between items-center p-8 cursor-pointer list-none font-bold text-white text-base md:text-lg"><span class="flex items-center gap-4"><span class="text-brand-pink text-xl"><i class="fas fa-comment-dots"></i></span>${escapeHTML(faq.q)}</span><div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-open:bg-brand-pink group-open:rotate-45 transition-all"><i class="fas fa-plus text-xs text-white"></i></div></summary><div class="px-8 pb-8 pt-2 ml-10 text-gray-400 text-sm font-light leading-relaxed border-l-2 border-brand-pink/30 md:ml-12">${escapeHTML(faq.a)}</div></details>`).join("")}</div>
             </div>
         </section>`;
 };
@@ -524,7 +398,7 @@ export default async (request, context) => {
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-        // 5. โครงสร้าง Cards (นำคุณสมบัติ SEO เชิงลึกเดิมกลับมา เช่น srcset, article, content-visibility)
+
         const cardsHTML = safeProfiles.map((p, index) => {
             const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
             const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
@@ -571,8 +445,8 @@ export default async (request, context) => {
             </article>`;
         }).join("");
 
-        const htmlTemplate = `<!DOCTYPE html>
-<html lang="th" class="scroll-smooth bg-white">
+        const htmlTemplate = `<!DOCTYPE html><html lang="th" class="scroll-smooth bg-white">
+        
 <head>
     <script>
         (function() {
@@ -595,269 +469,30 @@ export default async (request, context) => {
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600&display=swap" as="style" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'" />
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 50vw" fetchpriority="high" />
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { 
-            theme: { 
-                extend: { 
-                    colors: { brand: { pink: '#FF3366', dark: '#050505', gold: '#D4AF37' } },
-                    fontFamily: { sans:['Kanit', 'sans-serif'] },
-                    animation: { 'heartbeat': 'heartbeat 1.5s ease-in-out infinite both' },
-                    keyframes: { heartbeat: { '0%': { transform: 'scale(1)' }, '14%': { transform: 'scale(1.3)' }, '28%': { transform: 'scale(1)' }, '42%': { transform: 'scale(1.3)' }, '70%': { transform: 'scale(1)' } } }
-                } 
-            } 
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-    
-    <style>
-        :root { --glass: rgba(255, 255, 255, 0.85); }
-        body { background: #FFFFFF; color: #0A0A0A; -webkit-font-smoothing: antialiased; }
-        
-        .mesh-bg {
-            background-color: #ffffff;
-            background-image: radial-gradient(at 0% 0%, rgba(255, 51, 102, 0.05) 0px, transparent 50%),
-                              radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.05) 0px, transparent 50%);
-        }
-
-        .glass-effect { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.03); }
-        
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        
-        .profile-card { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid rgba(0,0,0,0.03); }
-        .profile-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 40px 80px -15px rgba(255,51,102,0.15); border-color: rgba(255,51,102,0.1); }
-
-        .btn-shine { position: relative; overflow: hidden; }
-        .btn-shine::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-            transform: rotate(45deg); animation: shine 3s infinite;
-        }
-        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-    </style>
-</head>
-
-<body class="mesh-bg flex flex-col min-h-screen pb-[90px] md:pb-0">
-
-    <!-- Premium Navbar -->
-    <header id="navbar" class="fixed top-0 w-full z-[100] transition-all duration-500 py-3">
-        <div class="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
-            <a href="/" class="z-10">
-                <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 brightness-0 opacity-90">
-            </a>
-            
-            <div class="hidden md:flex items-center gap-12 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">
-                <a href="/" class="hover:text-brand-pink transition-colors">Home</a>
-                <a href="/profiles.html" class="text-brand-dark border-b-2 border-brand-pink pb-1">VIP Models</a>
-                <a href="/locations.html" class="hover:text-brand-pink transition-colors">Locations</a>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="hidden sm:inline-flex items-center gap-2 bg-brand-dark text-white px-8 py-3.5 rounded-full text-[10px] font-black tracking-widest btn-shine shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:bg-brand-pink hover:shadow-[0_10px_20px_rgba(255,51,102,0.3)] transition-all">
-                    BOOK NOW <i class="fab fa-line text-sm"></i>
-                </a>
-                <button id="menu-btn" class="md:hidden w-11 h-11 flex items-center justify-center bg-white/90 backdrop-blur-md rounded-full border border-gray-100 shadow-sm active:scale-95 transition-transform">
-                    <i class="fas fa-bars-staggered text-sm text-brand-dark"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Fullscreen Mobile Menu -->
-    <div id="mobile-menu" class="fixed inset-0 bg-white/95 backdrop-blur-2xl z-[150] transform translate-y-[-100%] transition-transform duration-500 ease-in-out flex flex-col justify-center items-center gap-8 border-b-4 border-brand-pink">
-        <a href="/" class="text-3xl font-black text-brand-dark hover:text-brand-pink tracking-tighter">HOME</a>
-        <a href="/profiles.html" class="text-3xl font-black text-brand-pink tracking-tighter">VIP MODELS</a>
-        <a href="/locations.html" class="text-3xl font-black text-brand-dark hover:text-brand-pink tracking-tighter">LOCATIONS</a>
-        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="mt-8 px-10 py-4 bg-brand-dark text-white rounded-full font-black uppercase tracking-[0.2em] text-xs shadow-xl flex items-center gap-2">
-            Contact Admin <i class="fab fa-line text-lg"></i>
-        </a>
-        <button id="close-menu" class="absolute top-8 right-6 w-12 h-12 flex items-center justify-center rounded-full bg-gray-50 text-brand-dark border border-gray-200">
-            <i class="fas fa-times text-lg"></i>
-        </button>
-    </div>
-
-    <main class="flex-1">
-        
-        <!-- S-TIER HERO SECTION -->
-        <section class="pt-32 md:pt-40 pb-16 px-6">
-            <div class="max-w-7xl mx-auto text-center">
-                
-                <div class="reveal active flex flex-wrap justify-center gap-3 mb-10">
-                    <div class="flex items-center gap-2 px-4 py-1.5 bg-white border border-green-500/30 rounded-full shadow-sm text-green-600 text-[10px] md:text-xs font-bold">
-                        <i class="fas fa-shield-check text-green-500"></i> เจอตัวจริง จ่ายหน้างาน 100%
-                    </div>
-                    <div class="flex items-center gap-2 px-4 py-1.5 bg-white border border-brand-pink/20 rounded-full shadow-sm text-brand-pink text-[10px] md:text-xs font-bold">
-                        <i class="fas fa-ban"></i> ไม่มีการโอนมัดจำก่อน
-                    </div>
-                </div>
-
-                <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active">
-                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(255,51,102,0.15)] bg-gray-100 border-4 border-white">
-                        <img src="${firstImage}" alt="ไซด์ไลน์${escapeHTML(provinceName)} บริการพรีเมียม" class="w-full h-full object-cover transform transition-transform duration-[3s] group-hover:scale-105" fetchpriority="high">
-                        <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/40 pointer-events-none"></div>
-                    </div>
-                    <div class="absolute -top-10 -left-10 w-40 h-40 bg-brand-pink/15 blur-[60px] rounded-full pointer-events-none"></div>
-                    <div class="absolute -bottom-10 -right-10 w-60 h-60 bg-brand-gold/15 blur-[60px] rounded-full pointer-events-none"></div>
-                </div>
-
-                <div class="max-w-4xl mx-auto text-center reveal active">
-                    <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest mb-8 border border-green-200 shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-heartbeat"></span>
-                        ${safeProfiles.length} Profiles Online Now
-                    </div>
-                    
-                    <h1 class="text-5xl sm:text-7xl md:text-[5.5rem] font-black text-brand-dark leading-[1.05] tracking-tighter mb-8">
-                        ไซด์ไลน์<span class="text-brand-pink">${escapeHTML(provinceName)}</span><br>
-                        เพื่อนเที่ยวระดับ VIP
-                    </h1>
-                    
-                    <p class="text-gray-500 text-sm md:text-lg mb-12 font-light leading-relaxed max-w-2xl mx-auto px-4">
-                        สัมผัสประสบการณ์พักผ่อนหา เพื่อนกินเที่ยวออกเดทดูหนังฟังเพลงแบบฟิวแฟน ที่จังหวัด${escapeHTML(provinceName)} กับน้องๆ บริการระดับ VIP คัดพิเศษ 
-                        <span class="block mt-2 text-brand-dark font-medium underline underline-offset-4 decoration-brand-gold/50">การันตีโปรไฟล์ตรงปก ยืนยันตัวตนแล้วทุกรหัส</span>
-                    </p>
-                    
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
-                        <a href="#profiles" class="w-full sm:w-auto px-12 py-4 md:py-5 bg-brand-dark text-white rounded-full font-black text-xs md:text-sm tracking-widest hover:bg-brand-pink transition-all shadow-[0_10px_30px_rgba(0,0,0,0.15)] uppercase">
-                            Explore Profiles
-                        </a>
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="w-full sm:w-auto px-12 py-4 md:py-5 bg-white text-brand-dark border border-gray-200 rounded-full font-black text-xs md:text-sm hover:border-brand-pink hover:text-brand-pink transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-sm">
-                            <i class="fab fa-line text-xl"></i> Line Admin
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Dynamic Filter -->
-        <div class="sticky top-[64px] md:top-20 z-40 glass-effect py-4 overflow-x-auto no-scrollbar">
-            <div class="max-w-7xl mx-auto px-6 flex items-center justify-center sm:justify-start md:justify-center gap-3 min-w-max">
-                <button class="shrink-0 px-8 py-2.5 rounded-full bg-brand-dark text-white text-[10px] font-black uppercase tracking-widest shadow-md">Recent</button>
-                <button class="shrink-0 px-8 py-2.5 rounded-full bg-white border border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-brand-gold hover:border-brand-gold/30 transition-all shadow-sm">Hot VIP</button>
-                <button class="shrink-0 px-8 py-2.5 rounded-full bg-white border border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-brand-pink hover:border-brand-pink/30 transition-all shadow-sm"><i class="fas fa-location-dot"></i> Near Me</button>
-            </div>
-        </div>
-
-        <!-- Profiles Grid -->
-        <section id="profiles" class="max-w-7xl mx-auto px-6 py-20 scroll-mt-32">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-                <div class="reveal">
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-brand-dark">น้องๆรับงาน<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-purple-600">ไซด์ไลน์${escapeHTML(provinceName)}</span></h2>
-                    <p class="text-brand-pink text-[10px] font-black uppercase tracking-[0.3em] mt-4">Verified Profiles (${CURRENT_MONTH} ${CURRENT_YEAR})</p>
-                </div>
-                <div class="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest reveal">
-                    <span class="w-2 h-2 rounded-full bg-brand-pink"></span> Showing ${safeProfiles.length} Results
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-                ${cardsHTML}
-            </div>
-        </section>
-        
-        ${generateAppSeoText(provinceName, provinceKey, safeProfiles.length)}
-
+        <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{brand:{pink:'#FF3366',dark:'#050505',gold:'#D4AF37'}},fontFamily:{sans:['Kanit','sans-serif']},animation:{'heartbeat':'heartbeat 1.5s ease-in-out infinite both'},keyframes:{heartbeat:{'0%':{transform:'scale(1)'},'14%':{transform:'scale(1.3)'},'28%':{transform:'scale(1)'},'42%':{transform:'scale(1.3)'},'70%':{transform:'scale(1)'}}}}}}</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /><script type="application/ld+json">${JSON.stringify(schemaData)}</script><style>body{background:#FFFFFF;color:#0A0A0A;-webkit-font-smoothing:antialiased;}.mesh-bg{background-color:#ffffff;background-image:radial-gradient(at 0% 0%,rgba(255,51,102,0.05) 0px,transparent 50%),radial-gradient(at 100% 100%,rgba(212,175,55,0.05) 0px,transparent 50%);}.glass-effect{background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.03);}.reveal{opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.16,1,0.3,1);}.reveal.active{opacity:1;transform:translateY(0);}.profile-card{transition:all 0.6s cubic-bezier(0.16,1,0.3,1);}.profile-card:hover{transform:translateY(-12px) scale(1.02);box-shadow:0 40px 80px -15px rgba(255,51,102,0.15);}.btn-shine{position:relative;overflow:hidden;}.btn-shine::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent,rgba(255,255,255,0.3),transparent);transform:rotate(45deg);animation:shine 3s infinite;}@keyframes shine{0%{left:-100%;}100%{left:100%;}}.no-scrollbar::-webkit-scrollbar{display:none;}</style></head><body class="mesh-bg flex flex-col min-h-screen pb-[110px] md:pb-0">
+    <header id="navbar" class="fixed top-0 w-full z-[100] transition-all duration-500 py-3"><div class="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between"><a href="/" class="z-10"><img src="/images/logo-sidelinechiangmai.webp" alt="โลโก้" class="h-6 md:h-8 object-contain"></a><div class="hidden md:flex items-center gap-12 text-sm font-bold tracking-widest text-gray-400"><a href="/" class="hover:text-brand-pink transition-colors">หน้าแรก</a><a href="/profiles.html" class="text-brand-dark border-b-2 border-brand-pink pb-1">น้องๆ VIP</a><a href="/locations.html" class="hover:text-brand-pink transition-colors">พื้นที่ให้บริการ</a></div><div class="flex items-center gap-4"><a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="hidden sm:inline-flex items-center gap-2 bg-brand-dark text-white px-8 py-3.5 rounded-full text-xs font-black tracking-widest btn-shine shadow-xl hover:bg-brand-pink transition-all">ติดต่อจองคิว <i class="fab fa-line"></i></a><button id="menu-btn" class="md:hidden w-11 h-11 flex items-center justify-center bg-white/90 backdrop-blur-md rounded-full border border-gray-100 shadow-sm"><i class="fas fa-bars-staggered text-sm text-brand-dark"></i></button></div></div></header>
+    <div id="mobile-menu" class="fixed inset-0 bg-white/95 backdrop-blur-2xl z-[150] transform translate-y-[-100%] transition-transform duration-500 flex flex-col justify-center items-center gap-8 border-b-4 border-brand-pink"><a href="/" class="text-4xl font-black text-brand-dark tracking-tighter">หน้าแรก</a><a href="/profiles.html" class="text-4xl font-black text-brand-pink tracking-tighter">น้องๆ VIP</a><a href="/locations.html" class="text-4xl font-black text-brand-dark tracking-tighter">พิกัดบริการ</a><a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="mt-8 px-10 py-4 bg-brand-dark text-white rounded-full font-black uppercase text-sm shadow-xl">ติดต่อแอดมิน <i class="fab fa-line text-xl"></i></a><button id="close-menu" class="absolute top-8 right-6 w-12 h-12 flex items-center justify-center rounded-full bg-gray-50 text-brand-dark border border-gray-200"><i class="fas fa-times text-lg"></i></button></div>
+    <main class="flex-1"><section class="pt-32 md:pt-40 pb-16 px-6"><div class="max-w-7xl mx-auto text-center"><div class="reveal active flex flex-wrap justify-center gap-3 mb-10"><div class="px-4 py-1.5 bg-white border border-green-500/30 rounded-full text-green-600 text-[10px] md:text-xs font-bold"><i class="fas fa-shield-check"></i> เจอตัวจริง จ่ายหน้างาน 100%</div><div class="px-4 py-1.5 bg-white border border-brand-pink/20 rounded-full text-brand-pink text-[10px] md:text-xs font-bold"><i class="fas fa-ban"></i> ไม่มีการโอนมัดจำก่อน</div></div><div class="reveal relative w-full max-w-5xl mx-auto mb-12 group active"><div class="aspect-[16/9] md:aspect-[21/9] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(255,51,102,0.15)] border-4 border-white bg-gray-100"><img src="${heroBannerImage}" alt="Hero" class="w-full h-full object-cover transform transition-transform duration-[3s] group-hover:scale-105" fetchpriority="high"><div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30"></div></div></div><div class="max-w-4xl mx-auto text-center reveal active"><div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest mb-8 border border-green-200 shadow-sm"><span class="w-2 h-2 rounded-full bg-green-500 animate-heartbeat"></span> พบพริตตี้ว่างตอนนี้ ${safeProfiles.length} คน</div><h1 class="text-5xl sm:text-7xl md:text-[5.5rem] font-black text-brand-dark leading-[1.05] tracking-tighter mb-8">ไซด์ไลน์<span class="text-brand-pink">${escapeHTML(provinceName)}</span><br>เพื่อนเที่ยวระดับ VIP</h1><p class="text-gray-500 text-sm md:text-lg mb-12 font-light max-w-2xl mx-auto px-4 leading-relaxed">สัมผัสประสบการณ์พักผ่อนหาเพื่อนกินเที่ยวแบบฟิวแฟน ที่จังหวัด${escapeHTML(provinceName)} กับน้องๆ บริการระดับ VIP <span class="block mt-2 text-brand-dark font-medium underline underline-offset-4 decoration-brand-gold/50">การันตีโปรไฟล์ตรงปก ยืนยันตัวตนแล้วทุกรหัส</span></p><div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6"><a href="#profiles" class="w-full sm:w-auto px-10 py-4 md:py-5 bg-brand-dark text-white rounded-full font-bold text-sm tracking-widest hover:bg-brand-pink transition-all shadow-xl uppercase">ดูโปรไฟล์น้องๆ</a><a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="w-full sm:w-auto px-10 py-4 md:py-5 bg-white text-brand-dark border border-gray-200 rounded-full font-bold text-sm hover:border-brand-pink hover:text-brand-pink transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-sm"><i class="fab fa-line text-xl"></i> ปรึกษาแอดมิน</a></div></div></div></section>
+        <div class="sticky top-[64px] md:top-20 z-40 glass-effect py-4 overflow-x-auto no-scrollbar"><div class="max-w-7xl mx-auto px-6 flex items-center justify-center gap-3 min-w-max"><button class="shrink-0 px-8 py-2.5 rounded-full bg-brand-dark text-white text-xs font-bold tracking-widest shadow-md">อัปเดตล่าสุด</button><button class="shrink-0 px-8 py-2.5 rounded-full bg-white border border-gray-100 text-gray-500 text-xs font-bold hover:text-brand-gold transition-all">กำลังมาแรง</button><button class="shrink-0 px-8 py-2.5 rounded-full bg-white border border-gray-100 text-gray-500 text-xs font-bold flex items-center gap-2 hover:text-brand-pink"><i class="fas fa-location-dot"></i> ใกล้ฉัน</button></div></div>
+        <section id="profiles" class="max-w-7xl mx-auto px-6 py-20 scroll-mt-32"><div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"><div class="reveal"><h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-brand-dark">น้องๆรับงาน<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-purple-600">ไซด์ไลน์${escapeHTML(provinceName)}</span></h2><p class="text-brand-pink text-xs font-bold tracking-widest mt-4 uppercase">Verified Profiles (${CURRENT_MONTH} ${CURRENT_YEAR})</p></div><div class="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest reveal"><span class="w-2 h-2 rounded-full bg-brand-pink"></span> ค้นพบ ${safeProfiles.length} รายการ</div></div><div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">${cardsHTML}</div></section>
+        ${generateAppSeoText(provinceName, provinceKey, seoData.uniqueIntro)}
     </main>
-
-    <!-- Clean Premium Footer -->
-    <footer class="bg-white py-24 text-center border-t border-gray-100 relative z-10">
-        <div class="max-w-4xl mx-auto px-6">
-            <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-0 mb-12 opacity-90">
-            <h2 class="text-4xl md:text-6xl font-black text-brand-dark mb-10 tracking-tighter uppercase">
-                THANK YOU <br> <span class="text-brand-pink">FOR CHOOSING US</span>
-            </h2>
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="inline-flex items-center justify-center gap-3 bg-brand-dark text-white px-12 py-5 rounded-full font-black text-sm md:text-lg tracking-widest shadow-[0_15px_30px_rgba(0,0,0,0.15)] hover:scale-105 hover:bg-brand-pink transition-all btn-shine">
-                <i class="fab fa-line text-2xl text-[#00C300]"></i> LINE ADMIN
-            </a>
-            
-            <div class="mt-20 flex flex-wrap justify-center gap-x-6 gap-y-4">
-                ${allProvinces.slice(0, 10).map(p => `<a href="/location/${p.key}" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-brand-pink transition-colors">รับงาน${escapeHTML(p.nameThai)}</a>`).join("")}
-            </div>
-
-            <div class="mt-16 pt-10 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">© ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
-                <div class="flex gap-8 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                    <a href="/privacy-policy.html" class="hover:text-brand-dark transition-colors">Privacy</a>
-                    <a href="/terms.html" class="hover:text-brand-dark transition-colors">Terms</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Cinematic Mobile Navigation -->
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[90%] max-w-[360px]">
-        <div class="bg-black/90 backdrop-blur-xl border border-white/10 px-8 py-3 rounded-full flex items-center justify-between shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
-            <a href="/" class="text-gray-400 hover:text-white transition-colors p-2"><i class="fas fa-house text-lg"></i></a>
-            <a href="/profiles.html" class="text-brand-gold drop-shadow-[0_0_10px_rgba(212,175,55,0.6)] p-2"><i class="fas fa-gem text-xl"></i></a>
-            
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="w-16 h-16 bg-brand-pink text-white rounded-full flex items-center justify-center -mt-10 shadow-[0_0_30px_rgba(255,51,102,0.5)] border-[4px] border-[#0A0A0A] transform hover:scale-110 transition-transform btn-shine">
-                <i class="fab fa-line text-3xl"></i>
-            </a>
-            
-            <a href="/locations.html" class="text-gray-400 hover:text-white transition-colors p-2"><i class="fas fa-map-marker-alt text-lg"></i></a>
-            <a href="/search" class="text-gray-400 hover:text-white transition-colors p-2"><i class="fas fa-magnifying-glass text-lg"></i></a>
-        </div>
-    </nav>
-
+    <footer class="bg-white py-24 text-center border-t border-gray-100 relative z-10"><div class="max-w-4xl mx-auto px-6"><img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto mb-10 object-contain opacity-90"><h2 class="text-4xl md:text-5xl font-black text-brand-dark mb-10 tracking-tighter uppercase leading-tight">THANK YOU <br> <span class="text-brand-pink">ไซด์ไลน์${escapeHTML(provinceName)}</span></h2><a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="inline-flex items-center justify-center gap-3 bg-brand-pink text-white px-12 py-5 rounded-full font-black text-sm md:text-lg tracking-widest shadow-xl hover:scale-105 hover:bg-[#E62E5C] transition-all btn-shine"><i class="fab fa-line text-2xl"></i> LINE ADMIN</a><div class="mt-20 flex flex-wrap justify-center gap-x-6 gap-y-4">${allProvinces.slice(0, 12).map(p => `<a href="/location/${p.key}" class="text-xs font-bold text-gray-500 hover:text-brand-pink transition-colors">รับงาน${escapeHTML(p.nameThai)}</a>`).join("")}</div><div class="mt-16 pt-10 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6"><p class="text-[10px] font-bold text-gray-400 uppercase">© ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p><div class="flex gap-8 text-[10px] font-bold text-gray-400 uppercase"><a href="/privacy-policy.html">Privacy</a><a href="/terms.html">Terms</a></div></div></div></footer>
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] md:hidden w-[92%] max-w-[380px]"><div class="bg-black/90 backdrop-blur-xl border border-white/10 px-8 py-3.5 rounded-full flex items-center justify-between shadow-2xl"><a href="/" class="text-gray-400 p-2"><i class="fas fa-house text-lg"></i></a><a href="/profiles.html" class="text-brand-gold p-2"><i class="fas fa-gem text-xl"></i></a><a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" class="w-16 h-16 bg-brand-pink text-white rounded-full flex items-center justify-center -mt-10 shadow-xl border-[4px] border-[#0A0A0A] transform hover:scale-110 transition-transform btn-shine"><i class="fab fa-line text-3xl"></i></a><a href="/locations.html" class="text-gray-400 p-2"><i class="fas fa-map-marker-alt text-lg"></i></a><a href="/search" class="text-gray-400 p-2"><i class="fas fa-magnifying-glass text-lg"></i></a></div></nav>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -30px 0px" };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                        observer.unobserve(entry.target); 
-                    }
-                });
-            }, observerOptions);
+            const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('active'); observer.unobserve(entry.target); } }); }, { threshold: 0.1 });
             document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-            const nav = document.getElementById('navbar');
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 10) {
-                    nav.classList.add('glass-effect');
-                    nav.classList.remove('py-3');
-                } else {
-                    nav.classList.remove('glass-effect');
-                    nav.classList.add('py-3');
-                }
-            }, { passive: true });
-
-            const menuBtn = document.getElementById('menu-btn');
-            const closeMenuBtn = document.getElementById('close-menu');
-            const mobileMenu = document.getElementById('mobile-menu');
-            if(menuBtn && mobileMenu && closeMenuBtn) {
-                menuBtn.addEventListener('click', () => {
-                    mobileMenu.classList.remove('translate-y-[-100%]');
-                    document.body.style.overflow = 'hidden';
-                });
-                closeMenuBtn.addEventListener('click', () => {
-                    mobileMenu.classList.add('translate-y-[-100%]');
-                    document.body.style.overflow = '';
-                });
-            }
+            window.addEventListener('scroll', () => { const nav = document.getElementById('navbar'); if (window.scrollY > 10) { nav.classList.add('glass-effect'); nav.classList.remove('py-3'); } else { nav.classList.remove('glass-effect'); nav.classList.add('py-3'); } }, { passive: true });
+            const menuBtn = document.getElementById('menu-btn'), closeMenuBtn = document.getElementById('close-menu'), mobileMenu = document.getElementById('mobile-menu');
+            if(menuBtn) menuBtn.addEventListener('click', () => { mobileMenu.classList.remove('translate-y-[-100%]'); document.body.style.overflow = 'hidden'; });
+            if(closeMenuBtn) closeMenuBtn.addEventListener('click', () => { mobileMenu.classList.add('translate-y-[-100%]'); document.body.style.overflow = ''; });
         });
     </script>
-</body>
-</html>`;
+</body></html>`;
 
-        return new Response(htmlTemplate, { 
-            headers: { 
-                "Content-Type": "text/html; charset=utf-8", 
-                "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600" 
-            } 
-        });
-
+        return new Response(htmlTemplate, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600" } });
     } catch (error) {
-        console.error("SSR Error:", error);
-        return new Response('<div style="background:#000;color:#FF3366;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;"><div><h1>SYSTEM ERROR</h1><p>Contact Admin.</p></div></div>', { 
-            status: 500, 
-            headers: { "Content-Type": "text/html; charset=utf-8" } 
-        });
+        return new Response('<div style="background:#0A0A0A;color:#FF3366;height:100vh;display:flex;align-items:center;justify-content:center;"><h1>SYSTEM ERROR</h1></div>', { status: 500, headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
 };
