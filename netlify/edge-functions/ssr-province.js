@@ -197,7 +197,7 @@ const PROVINCE_SEO_DATA = {
         zones: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
         lsi: ["รับงานพิษณุโลก", "ไซด์ไลน์พิษณุโลก", "สาวไซด์ไลน์พิษณุโลก", "sideline พิษณุโลก", "น้องนักศึกษามน", "เด็กเอ็นพิษณุโลก"],
         intents: ["เพื่อนเที่ยวคาเฟ่", "ดูแลฟิวแฟนทานข้าว", "เอนเตอร์เทนส่วนตัว"],
-        traits: ["สาวสองแควหน้าหวาน", "น่ารักสไตล์นักศึกษา", "พูดเพราะเป็นกันเอง", "ดูแลเอาใจใส่เก่ง"],
+        traits: ["สาวสองแควหน้าหวาน", "น่ารักสไตล์นักศึกษา", "พูดเพราะเป็นกันเอง", "ดูแลเอาใจเก่ง"],
         hotels: ["โรงแรมหรูในเมือง", "ที่พักใกล้ ม.นเรศวร", "โรงแรมริมน้ำน่าน"],
         services: ["บริการเอนเตอร์เทนแบบฟิวแฟน", "เพื่อนเที่ยว-ดูหนัง"],
         avgPrice: "1,500 - 3,000",
@@ -244,14 +244,14 @@ const getFullUrl = (path) => {
     return `${CONFIG.DOMAIN}${cleanPath}`;
 };
 
-const optimizeImg = (path, width = 500, height = 667) => {
+const optimizeImg = (path, width = 182, height = 242) => {
     if (!path) return getFullUrl("/images/default.webp");
     if (path.includes("res.cloudinary.com")) {
         if (path.includes("/upload/")) return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
         return path;
     }
     if (path.startsWith("http")) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
 };
 
 const escapeHTML = (str) => {
@@ -562,61 +562,71 @@ export default async (request, context) => {
             const smartAlt = `รูปโปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} พิกัดโซน${profileLocation}`;
             const imageAttributes = index < 4 ? 'fetchpriority="high" decoding="sync"' : 'loading="lazy" decoding="async"';
 
-            return `
-            <article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
-                
-                <div class="relative h-full flex flex-col z-10 cursor-pointer" onclick="window.location.href='${profileLink}'">
-                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
-                        <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
-                    </a>
-                    
-                    ${(p.isfeatured || index < 3) ? `
-                    <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
-                        <i class="fas fa-crown text-[8px]"></i> HOT VIP
-                    </div>` : ''}
-                    
-                    <!-- Profile Image Container -->
-                    <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070A]">
-                        <img src="${optimizeImg(p.imagePath, 500, 667)}" 
-                             srcset="${optimizeImg(p.imagePath, 300, 400)} 300w, ${optimizeImg(p.imagePath, 500, 667)} 500w"
-                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                             onerror="this.onerror=null; this.src='/images/default.webp';"
-                             alt="${smartAlt}" 
-                             class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
-                             
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
-                        
-                        <!-- Status Dot (จากโค้ดใหม่) -->
-                        <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
-                            <span class="relative flex h-2 w-2">
-                                ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
-                                <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
-                            </span>
-                            <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
-                        </div>
+// คำนวณความกว้างที่เหมาะสม: ขนาดแสดงผลจริงคือ ~180px 
+// ดังนั้นใช้ 200px สำหรับจอปกติ และ 400px สำหรับจอความละเอียดสูง (Retina)
+const thumbW = 200; 
+const thumbH = 267; // อัตราส่วน 3:4
 
-                        <!-- Info Block Bottom (Over Image) -->
-                        <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
-                            <h3 class="text-[18px] md:text-[20px] font-[500] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
-                                ${cleanName} <span class="text-[11px] font-[300] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
-                            </h3>
-                            <p class="text-[11px] font-[300] text-white/70 flex items-center gap-1.5 truncate max-w-full">
-                                <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Bottom Interaction Footer -->
-                    <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
-                        <div>
-                            <span class="text-[16px] font-[500] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
-                        </div>
-                        <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[500] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
-                            View
-                        </div>
-                    </div>
-                </div>
-            </article>`;
+return `
+<article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
+    
+    <div class="relative h-full flex flex-col z-10 cursor-pointer" onclick="window.location.href='${profileLink}'">
+        <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
+            <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
+        </a>
+        
+        ${(p.isfeatured || index < 3) ? `
+        <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
+            <i class="fas fa-crown text-[8px]"></i> HOT VIP
+        </div>` : ''}
+        
+        <!-- Profile Image Container -->
+        <!-- แก้ไข: เพิ่ม bg-zinc-900 เพื่อลด CLS ระหว่างรอโหลดรูป -->
+        <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070a]">
+            <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
+                 srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
+                 sizes="(max-width: 640px) 45vw, 200px"
+                 width="${thumbW}" 
+                 height="${thumbH}"
+                 onerror="this.onerror=null; this.src='/images/default.webp';"
+                 alt="${smartAlt}" 
+                 class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
+                 
+            <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
+            
+            <!-- Status Dot -->
+            <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
+                <span class="relative flex h-2 w-2">
+                    ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
+                    <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
+                </span>
+                <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
+            </div>
+
+            <!-- Info Block Bottom -->
+            <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
+                <!-- แก้ไข: เปลี่ยน font-[182] กลับเป็น font-[600] หรือ font-bold -->
+                <h3 class="text-[18px] md:text-[20px] font-[600] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
+                    ${cleanName} <span class="text-[11px] font-[400] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
+                </h3>
+                <p class="text-[11px] font-[400] text-white/70 flex items-center gap-1.5 truncate max-w-full">
+                    <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Bottom Interaction Footer -->
+        <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
+            <div>
+                <!-- แก้ไข: เปลี่ยน font-[182] เป็น font-[600] -->
+                <span class="text-[16px] font-[600] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
+            </div>
+            <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[600] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
+                View
+            </div>
+        </div>
+    </div>
+</article>`;
         }).join("");
 
         const htmlTemplate = `<!DOCTYPE html>
@@ -772,8 +782,9 @@ export default async (request, context) => {
                 </div>
 
                 <!-- Premium Banner Display -->
+                <!-- เพิ่ม bg-zinc-900 เพื่อลด CLS ระหว่างรอรูปภาพ Banner โหลด -->
                 <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active">
-                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_40px_rgba(255,46,99,0.15)]">
+                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_40px_rgba(255,46,99,0.15)] bg-[#07070a]">
                         <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์${escapeHTML(provinceName)} รับงาน${escapeHTML(provinceName)} ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.03] opacity-80" fetchpriority="high">
                         <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-transparent to-transparent pointer-events-none"></div>
                         <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.02] to-transparent pointer-events-none"></div>
@@ -882,11 +893,14 @@ export default async (request, context) => {
             </nav>
 
             <div class="mt-20 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5 pt-8">
-                <p class="text-[10px] font-[300] text-white/30 uppercase tracking-widest">© ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
-                <div class="flex gap-6 text-[10px] font-[300] text-white/30 uppercase tracking-widest">
-                    <a href="/privacy-policy.html" class="hover:text-white transition-colors">PRIVACY</a>
-                    <a href="/terms.html" class="hover:text-white transition-colors">TERMS</a>
-                </div>
+<!-- แก้ที่ส่วน Footer จากเดิม text-white/30 เป็น white/60 หรือ zinc-400 เพื่อแก้ไข Contrast Ratio -->
+<p class="text-[10px] font-[300] text-white/60 uppercase tracking-widest">
+    © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.
+</p>
+<div class="flex gap-6 text-[10px] font-[300] text-white/60 uppercase tracking-widest">
+    <a href="/privacy-policy.html" class="hover:text-white transition-colors">PRIVACY</a>
+    <a href="/terms.html" class="hover:text-white transition-colors">TERMS</a>
+</div>
             </div>
         </div>
     </footer>
