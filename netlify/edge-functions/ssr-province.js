@@ -233,13 +233,9 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-if (typeof PROVINCE_SEO_DATA !== 'undefined' && PROVINCE_SEO_DATA) {
-    Object.keys(PROVINCE_SEO_DATA).forEach(key => {
-        if (PROVINCE_SEO_DATA[key] && !PROVINCE_SEO_DATA[key].uniqueIntro) {
-            PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
-        }
-    });
-}
+Object.keys(PROVINCE_SEO_DATA).forEach(key => {
+    if(!PROVINCE_SEO_DATA[key].uniqueIntro) PROVINCE_SEO_DATA[key] = {...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key]};
+});
 
 const getFullUrl = (path) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
@@ -260,49 +256,37 @@ const optimizeImg = (path, width = 182, height = 242) => {
 
 const escapeHTML = (str) => {
     if (!str) return "";
-    return String(str).replace(/[&<>'"]/g, tag => ({ 
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" 
-    })[tag] || tag);
+    return String(str).replace(/[&<>'"]/g, tag => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[tag] || tag);
 };
 
+// Utility ลบ HTML Tag ออกจาก String เพื่อความปลอดภัยใน Schema.org
 const stripHTML = (str) => {
     if (!str) return "";
     return str.replace(/<[^>]*>?/gm, '');
 };
 
-// อัปเกรดความปลอดภัยของกระบวนการสมาน Link และผสาน Layer ป้องกัน XSS
 const smartLinkify = (text, provinceKey, zones) => {
     if (!text) return "";
-    
-    // ป้องกันการยัดไส้สคริปต์ดิบเข้ามาทำงานในระบบ HTML
-    let safeText = escapeHTML(text);
-    
-    // โครงสร้างประมวลผล Regex Mapping สำหรับ Zones ยอดฮิต
+    let linkedText = text;
     if (zones && zones.length > 0) {
-        // เรียงจากชื่อยาวไปสั้น เพื่อป้องกันปัญหากลืนคำ (e.g. "นิมมานซอย 5" ต้องถูกประมวลผลก่อน "นิมมาน")
-        const sortedZones = [...zones].sort((a, b) => b.length - a.length);
-        sortedZones.forEach(zone => {
-            if (!zone) return;
-            const escapedZone = zone.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            const regex = new RegExp(`(${escapedZone})`, 'g');
-            safeText = safeText.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#FF2E63] hover:text-white transition-colors font-[500] border-b border-[#FF2E63]/30" aria-label="ค้นหาน้องๆ โซน ${escapeHTML(zone)}">$1</a>`);
+        zones.forEach(zone => {
+            const regex = new RegExp(`(${zone})`, 'g');
+            linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#FF2E63] hover:text-white transition-colors font-[500] border-b border-[#FF2E63]/30" aria-label="ค้นหาน้องๆ โซน ${zone}">$1</a>`);
         });
     }
 
-    // โครงสร้างประมวลผล คีย์เวิร์ดหลักสำหรับการทำ Internal Link SEO
     const keywords = ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน"];
     keywords.forEach(kw => {
         const regex = new RegExp(`(${kw})`, 'g');
-        safeText = safeText.replace(regex, `<a href="/search?q=${encodeURIComponent(kw)}" class="text-[#D4AF37] hover:text-white transition-colors font-[500] border-b border-[#D4AF37]/30" aria-label="บริการ ${kw}">$1</a>`);
+        linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(kw)}" class="text-[#D4AF37] hover:text-white transition-colors font-[500] border-b border-[#D4AF37]/30" aria-label="บริการ ${kw}">$1</a>`);
     });
 
-    return safeText;
+    return linkedText;
 };
 
+// [ Component: Dynamic SEO Content ] ผสานดีไซน์กล่อง VIP แบบใหม่เข้ากับธีม Luxury Noir
 const generateAppSeoText = (provinceName, provinceKey, count) => {
-    const data = (typeof PROVINCE_SEO_DATA !== 'undefined' && PROVINCE_SEO_DATA[provinceKey]) 
-        || (typeof PROVINCE_SEO_DATA !== 'undefined' && PROVINCE_SEO_DATA.default) 
-        || { zones: [], faqs: [], uniqueIntro: "" };
+    const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
     
     const termsAndConditions = [
         { t: "การจองคิวน้องๆ ส่วนตัว", d: `เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน${escapeHTML(provinceName)} สมาชิกจองได้ครั้งละ 1 คิว เพื่อรักษามาตรฐาน VIP` },
@@ -311,7 +295,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         { t: "ข้อมูลลับระดับสูงสุด", d: "ข้อมูลการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
     ];
 
-    const isDefaultZones = typeof PROVINCE_SEO_DATA !== 'undefined' && !PROVINCE_SEO_DATA[provinceKey];
+    const isDefaultZones = !PROVINCE_SEO_DATA[provinceKey];
 
     const zonesHTML = (data.zones && data.zones.length > 0 && !isDefaultZones) ? `
         <div class="reveal text-center relative z-10 pt-12 pb-8">
@@ -325,7 +309,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
             </div>
         </div>` : "";
 
-    const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
+const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
         <div class="reveal max-w-3xl mx-auto space-y-4 pb-20 relative z-10 pt-16">
             <h2 class="text-2xl md:text-3xl font-[500] text-center mb-10 text-white tracking-wide">คำถามที่พบบ่อย (FAQ)</h2>
             ${data.faqs.map((faq, idx) => `
@@ -343,10 +327,10 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                         <p>${escapeHTML(faq.a)}</p>
                     </div>
                 </details>
-             `).join("")}
+            `).join("")}
         </div>` : "";
-
-    const currentUrl = encodeURIComponent(`${CONFIG.DOMAIN}/${provinceKey}`);
+        
+        const currentUrl = encodeURIComponent(`${CONFIG.DOMAIN}/${provinceKey}`);
     const shareText = encodeURIComponent(`รวมน้องๆ สาวสวยไซด์ไลน์ ${provinceName} ฟิวแฟน บริการระดับ VIP ปลอดภัย ไร้มัดจำ 📌`);
 
     const xShareUrl = `https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareText}`;
@@ -357,7 +341,10 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         <section class="py-24 relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-6 space-y-24 md:space-y-32">
                 
+                <!-- VIP & Terms Grid (ผสาน UI การตลาดแบบใหม่ เข้ากับดีไซน์ Luxury) -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch relative z-10">
+                    
+                    <!-- Premium VIP Promo Card -->
                     <div class="reveal relative overflow-hidden rounded-[24px] p-[1px] bg-gradient-to-b from-[#FF2E63]/40 to-transparent group h-full flex flex-col">
                         <div class="glass-panel p-8 md:p-12 rounded-[24px] relative z-10 flex-1 flex flex-col justify-between h-full bg-[#0a0a0a]/80 backdrop-blur-3xl">
                             <div class="text-center mb-6">
@@ -367,23 +354,25 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                                 <p class="text-white/50 text-[13px] mt-2 font-[300]">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดเป็นสถานะ Super VIP ทันที</p>
                             </div>
                             
-                            <div class="relative py-6 mb-auto mt-auto">
+                            <div class="relative mt-auto mb-auto py-8">
                                 <div class="absolute inset-0 bg-gradient-to-r from-[#FF2E63]/10 to-[#FF8E53]/10 blur-xl rounded-full"></div>
-                                <div class="glass-panel border border-[#FF2E63]/20 bg-black/40 rounded-[20px] p-6 text-center relative flex flex-col items-center justify-center overflow-hidden">
-                                    <span class="text-[10px] text-brand-gold font-[500] uppercase tracking-[0.2em] mb-2"><i class="fas fa-gem mr-1"></i> Exclusive Code</span>
-                                    <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
-                                        <div class="text-2xl md:text-4xl font-[700] tracking-wider text-gradient-luxury select-all font-mono whitespace-nowrap">
-                                            VIP-${provinceKey.toUpperCase()}
-                                        </div>
-                                    </div>
-                                    <span class="inline-block bg-[#FF2E63]/10 border border-[#FF2E63]/20 text-[#FF2E63] px-4 py-1.5 rounded-full text-[9px] font-[500] uppercase tracking-widest mt-4 shrink-0">
-                                        ใช้ได้วันนี้เท่านั้น
-                                    </span>
-                                </div>
+<div class="glass-panel border border-[#FF2E63]/20 bg-black/40 rounded-[20px] p-6 text-center relative flex flex-col items-center justify-center overflow-hidden">
+    <span class="text-[10px] text-brand-gold font-[500] uppercase tracking-[0.2em] mb-2"><i class="fas fa-gem mr-1"></i> Exclusive Code</span>
+    <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
+        <!-- ปรับขนาดจาก 4xl เหลือ 2xl ในมือถือ -->
+        <div class="text-2xl md:text-4xl font-[700] tracking-wider text-gradient-luxury select-all font-mono whitespace-nowrap">
+            VIP-${provinceKey.toUpperCase()}
+        </div>
+    </div>
+    <span class="inline-block bg-[#FF2E63]/10 border border-[#FF2E63]/20 text-[#FF2E63] px-4 py-1.5 rounded-full text-[9px] font-[500] uppercase tracking-widest mt-4 shrink-0">
+        ใช้ได้วันนี้เท่านั้น
+    </span>
+</div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Terms List -->
                     <div class="reveal h-full flex flex-col">
                         <div class="glass-panel p-8 md:p-10 rounded-[24px] h-full flex-1 bg-[#0a0a0a]/80">
                             <h2 class="text-2xl font-[500] tracking-wide flex items-center gap-3 text-white mb-8">
@@ -406,6 +395,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
 
                 ${zonesHTML}
 
+                <!-- SEO Content Block (Smart Linkified) -->
                 <div class="reveal relative">
                     <div class="glass-panel rounded-[32px] p-8 md:p-16 text-center relative z-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10">
                         <div class="max-w-4xl mx-auto space-y-8 relative z-10">
@@ -496,13 +486,10 @@ export default async (request, context) => {
         const provinceData = provinceRes.data;
         if (!provinceData) return context.next();
 
-        const safeProfiles = profilesRes.data || [];
-        const allProvinces = allProvincesRes.data || [];
+        const safeProfiles = profilesRes.data ||[];
+        const allProvinces = allProvincesRes.data ||[];
         const provinceName = provinceData.nameThai;
-        
-        const seoData = (typeof PROVINCE_SEO_DATA !== 'undefined' && PROVINCE_SEO_DATA[provinceKey]) 
-            || (typeof PROVINCE_SEO_DATA !== 'undefined' && PROVINCE_SEO_DATA.default) 
-            || { zones: [], faqs: [], uniqueIntro: [], lsi: [] };
+        const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
         
         const now = new Date();
         const CURRENT_MONTH = now.toLocaleString("th-TH", { month: "short" });
@@ -515,8 +502,9 @@ export default async (request, context) => {
         const firstImage = safeProfiles.length > 0 ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) : `${CONFIG.DOMAIN}/images/hero-sidelinechiangmai-1200.webp`;
 
         const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} พรีเมียม (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ปลอดภัย 100%`;
-        const description = `รวมโปรไฟล์ ตัวท็อป! ไซด์ไลน์${provinceName} รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP ${safeProfiles.length} คน โซน ${(seoData.zones && seoData.zones.length > 0) ? seoData.zones.slice(0,3).join(', ') : provinceName} ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด`;
+        const description = `รวมโปรไฟล์ ตัวท็อป! ไซด์ไลน์${provinceName} รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด`;
 
+        // [ SEO CORE ] Schema.org Architecture ระดับสูง
         const cleanDescription = stripHTML(description);
 
         const schemaGraph = [
@@ -527,7 +515,7 @@ export default async (request, context) => {
                 url: CONFIG.DOMAIN, 
                 logo: { "@type": "ImageObject", url: `${CONFIG.DOMAIN}/logo.png` }, 
                 description: cleanDescription, 
-                sameAs: typeof CONFIG.SOCIALS !== 'undefined' ? CONFIG.SOCIALS : [], 
+                sameAs: CONFIG.SOCIALS, 
                 contactPoint: { "@type": "ContactPoint", contactType: "customer service", telephone: CONFIG.PHONE, availableLanguage: ["th", "en"] } 
             },
             { 
@@ -560,7 +548,7 @@ export default async (request, context) => {
             }
         ];
 
-        if (seoData.faqs && seoData.faqs.length > 0) {
+        if (seoData.faqs) {
             schemaGraph.push({ 
                 "@type": "FAQPage", 
                 "@id": `${provinceUrl}/#faq`, 
@@ -579,9 +567,8 @@ export default async (request, context) => {
                 name: `แคตตาล็อกน้องๆ รับงานไซด์ไลน์ ${provinceName}`, 
                 description: `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName} อัปเดต ${CURRENT_MONTH} ${CURRENT_YEAR}`, 
                 itemListElement: safeProfiles.slice(0, 12).map((p, i) => {
-                    // ปรับแต่งการคลีนตัวเลขราคาให้รองรับเคสสตริงว่างอย่างสมบูรณ์แบบ
-                    let rawPrice = p.rate ? String(p.rate).replace(/\D/g, '') : "";
-                    let numericPrice = (rawPrice && rawPrice.length > 0) ? rawPrice : "1500";
+                    let numericPrice = p.rate ? String(p.rate).replace(/\D/g, '') : "1500";
+                    if (!numericPrice || numericPrice.length === 0) numericPrice = "1500"; 
                     
                     return { 
                         "@type": "ListItem", 
@@ -607,81 +594,86 @@ export default async (request, context) => {
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
+        // [ CORE SELLING POINT ]: Supercharged Profile Cards (ผสานจุดเด่น 2 โค้ด)
         const cardsHTML = safeProfiles.map((p, index) => {
             const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
             const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
             const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
+            // เช็คสถานะว่าง
             const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-            
-            let displayRate = "สอบถาม";
-            if (p.rate) {
-                const numericCheck = String(p.rate).replace(/,/g, "");
-                displayRate = !isNaN(numericCheck) && numericCheck !== "" ? Number(numericCheck).toLocaleString() : escapeHTML(p.rate);
-            }
-            
+            let displayRate = p.rate ? (Number(String(p.rate).replace(/,/g, "")) ? Number(String(p.rate).replace(/,/g, "")).toLocaleString() : escapeHTML(p.rate)) : "สอบถาม";
             const animDelay = (index % 10) * 50;
-            const lsiKeyword = (seoData.lsi && seoData.lsi.length > 0) ? seoData.lsi[index % seoData.lsi.length] : `รับงาน${provinceName}`;
+            
+            const lsiKeyword = seoData.lsi ? seoData.lsi[index % seoData.lsi.length] : `รับงาน${provinceName}`;
             const smartAlt = `รูปโปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} พิกัดโซน${profileLocation}`;
             const imageAttributes = index < 4 ? 'fetchpriority="high" decoding="sync"' : 'loading="lazy" decoding="async"';
 
-            const thumbW = 200; 
-            const thumbH = 267;
+// คำนวณความกว้างที่เหมาะสม: ขนาดแสดงผลจริงคือ ~180px 
+// ดังนั้นใช้ 200px สำหรับจอปกติ และ 400px สำหรับจอความละเอียดสูง (Retina)
+const thumbW = 200; 
+const thumbH = 267; // อัตราส่วน 3:4
 
-            return `
-            <article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
-                <div class="relative h-full flex flex-col z-10 cursor-pointer" onclick="window.location.href='${profileLink}'">
-                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
-                        <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
-                    </a>
-                    
-                    ${(p.isfeatured || index < 3) ? `
-                    <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
-                        <i class="fas fa-crown text-[8px]"></i> HOT VIP
-                    </div>` : ''}
-                    
-                    <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070a]">
-                        <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
-                             srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
-                             sizes="(max-width: 640px) 45vw, 200px"
-                             width="${thumbW}" 
-                             height="${thumbH}"
-                             onerror="this.onerror=null; this.src='/images/default.webp';"
-                             alt="${smartAlt}" 
-                             class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
-                             
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
-                        
-                        <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
-                            <span class="relative flex h-2 w-2">
-                                ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
-                                <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
-                            </span>
-                            <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
-                        </div>
+return `
+<article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
+    
+    <div class="relative h-full flex flex-col z-10 cursor-pointer" onclick="window.location.href='${profileLink}'">
+        <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
+            <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
+        </a>
+        
+        ${(p.isfeatured || index < 3) ? `
+        <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
+            <i class="fas fa-crown text-[8px]"></i> HOT VIP
+        </div>` : ''}
+        
+        <!-- Profile Image Container -->
+        <!-- แก้ไข: เพิ่ม bg-zinc-900 เพื่อลด CLS ระหว่างรอโหลดรูป -->
+        <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070a]">
+            <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
+                 srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
+                 sizes="(max-width: 640px) 45vw, 200px"
+                 width="${thumbW}" 
+                 height="${thumbH}"
+                 onerror="this.onerror=null; this.src='/images/default.webp';"
+                 alt="${smartAlt}" 
+                 class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
+                 
+            <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
+            
+            <!-- Status Dot -->
+            <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
+                <span class="relative flex h-2 w-2">
+                    ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
+                    <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
+                </span>
+                <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
+            </div>
 
-                        <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
-                            <h3 class="text-[18px] md:text-[20px] font-[600] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
-                                ${cleanName} <span class="text-[11px] font-[400] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
-                            </h3>
-                            <p class="text-[11px] font-[400] text-white/70 flex items-center gap-1.5 truncate max-w-full">
-                                <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
-                        <div>
-                            <span class="text-[16px] font-[600] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
-                        </div>
-                        <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[600] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
-                            View
-                        </div>
-                    </div>
-                </div>
-            </article>`;
+            <!-- Info Block Bottom -->
+            <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
+                <!-- แก้ไข: เปลี่ยน font-[182] กลับเป็น font-[600] หรือ font-bold -->
+                <h3 class="text-[18px] md:text-[20px] font-[600] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
+                    ${cleanName} <span class="text-[11px] font-[400] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
+                </h3>
+                <p class="text-[11px] font-[400] text-white/70 flex items-center gap-1.5 truncate max-w-full">
+                    <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Bottom Interaction Footer -->
+        <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
+            <div>
+                <!-- แก้ไข: เปลี่ยน font-[182] เป็น font-[600] -->
+                <span class="text-[16px] font-[600] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
+            </div>
+            <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[600] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
+                View
+            </div>
+        </div>
+    </div>
+</article>`;
         }).join("");
-
-        // ดำเนินการต่อด้วยการเรนเดอร์ htmlTemplate ตามโครงสร้างของคุณ...
 
         const htmlTemplate = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
@@ -690,7 +682,7 @@ export default async (request, context) => {
         (function() {
             var auth = ['sidelinechiangmai.netlify.app', 'localhost', '127.0.0.1'];
             if (!auth.includes(window.location.hostname)) {
-                document.documentElement.innerHTML = '<div style="background:#000;color:#f00;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;"><h1>403 FORBIDDEN</h1><p>Unauthorized domain. Redirecting...</p></div>';
+                document.documentElement.innerHTML = '<div style="background:#07070A;color:#FF2E63;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;"><h1>403 FORBIDDEN</h1></div>';
                 setTimeout(function() { window.location.replace("https://sidelinechiangmai.netlify.app/?ref=stolen_by_" + btoa(window.location.hostname)); }, 1500);
             }
         })();
@@ -704,16 +696,13 @@ export default async (request, context) => {
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}" /><meta property="og:type" content="website" /><meta property="og:title" content="${title}" /><meta property="og:description" content="${description}" /><meta property="og:url" content="${provinceUrl}" /><meta property="og:image" content="${firstImage}" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:site" content="${CONFIG.TWITTER}" /><meta name="twitter:image" content="${firstImage}" />
     
     <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co" />
-
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" as="style" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" media="print" onload="this.media='all'; this.onload=null;" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" /></noscript>
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" media="print" onload="this.media='all'" />
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" fetchpriority="high" />
-
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        window.tailwind && (tailwind.config = { 
+        tailwind.config = { 
             theme: { 
                 extend: { 
                     colors: { 
@@ -725,12 +714,12 @@ export default async (request, context) => {
                             darker: '#111116'
                         } 
                     },
-                    fontFamily: { sans: ['Prompt', 'sans-serif'] }
+                    fontFamily: { sans:['Prompt', 'sans-serif'] }
                 } 
-            }
-        });
+            } 
+        }
     </script>
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
@@ -739,86 +728,39 @@ export default async (request, context) => {
             background-attachment: fixed;
             color: #FFFFFF; 
             -webkit-font-smoothing: antialiased; 
-            -moz-osx-font-smoothing: grayscale;
             min-height: 100vh;
             overflow-x: hidden;
-            text-rendering: optimizeLegibility;
         }
+        
         .glass-panel {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            will-change: backdrop-filter;
         }
+
         .text-gradient-luxury {
             background: linear-gradient(to right, #FF2E63, #FF8E53, #FF416C);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .reveal { 
-            opacity: 0; 
-            transform: translateY(30px); 
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: transform, opacity;
-        }
+        
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
+
         .btn-shimmer { position: relative; overflow: hidden; isolation: isolate; }
         .btn-shimmer::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
             transform: rotate(45deg); animation: shimmer 3s infinite linear; z-index: 1; pointer-events: none;
         }
         @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-        #navbar { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
+        
+        #navbar { transition: transform 0.3s ease-in-out; }
         #sidebar-menu { display: flex; } 
-   /* Social Share Deck - Custom S-Tier Style */
-.social-share-container {
-    background: rgba(255, 255, 255, 0.01);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 24px;
-    text-align: center;
-    margin: 40px auto;
-    max-width: 500px;
-}
-.share-title {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 16px;
-    font-weight: 500;
-}
-.share-deck {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-}
-.share-card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #8E929E;
-    font-size: 20px;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    cursor: pointer;
-    text-decoration: none;
-}
-/* Premium Brand Highlight on Hover */
-.share-card.x-share:hover { background: #000000; border-color: rgba(255,255,255,0.3); color: #FFF; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-.share-card.tg-share:hover { background: #24A1DE; border-color: #24A1DE; color: #FFF; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(36,161,222,0.3); }
-.share-card.line-share:hover { background: #06C755; border-color: #06C755; color: #FFF; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(6,199,85,0.3); }
     </style>
 </head>
 
