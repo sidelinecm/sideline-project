@@ -3,13 +3,12 @@
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE NEO-LUXURY NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, Conversion UI/UX & Entity Engineering
- * Optimization: Pure Performance SSR, WCAG AA Accessibility & Clean Link Injection
+ * Optimization: Pure Performance SSR, Spellbinding UI/UX & Elite Dark Theme
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const CONFIG = {
-    // ดึงค่าผ่าน Environment Variables หากมีการตั้งค่าบน Netlify เพื่อความปลอดภัยสูงสุด
     get SUPABASE_URL() {
         try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
     },
@@ -89,7 +88,7 @@ const PROVINCE_SEO_DATA = {
         avgPrice: "1,500 - 3,000",
         uniqueIntro: `
             <p class="mb-4">สัมผัสเสน่ห์ความผ่อนคลายอย่างเป็นส่วนตัวในเมืองรองที่เงียบสงบไปกับน้องๆ <strong>รับงานลำปาง</strong> และ <strong>ไซด์ไลน์ลำปาง</strong> ระดับพรีเมียมคัดเกรด ที่พร้อมดูแลคุณในฟิวแฟนอย่างใกล้ชิด อบอุ่น และเป็นกันเองด้วยกิริยามารยาทแบบสาวเหนือหน้าหวาน</p>
-            <p class="mb-4">นัดหมายได้อย่างเป็นส่วนตัวตามจุดสำคัญ ไม่ว่าจะเป็นย่านพักผ่อนหลักใน <strong>ตัวเมืองลำปาง, โซนสวนดอก</strong> ตลอดจนย่านนักศึกษาใกล้บริเวณ <strong>ม.ราชภัฏลำปาง</strong> น้องๆ ของเราพร้อมดูแลคุณในฐานะคนรู้ใจ ไม่ว่าจะเป็นเพื่อนเที่ยวคาเฟ่ หรือเด็กเอ็นชงเหล้าสร้างบรรยากาศงานปาร์ตี้ส่วนตัว</p>
+            <p class="mb-4">นัดหมายได้อย่างเป็นส่วนตัวตามจุดสำคัญ ไม่ว่าจะเป็นย่านพักผ่อนหลักใน <strong>ตัวเมืองลำปาง, โซนสวนดอก</strong> ตลอดจนย่านนักศึกษาใกล้บริเวณ <strong>ม.ราชภัฏลำปาง</strong> น้องๆ ของเราพร้อมดูแลคุณในฐานะคนรู้ใจ ไม่ว่าจะเป็นเพื่อนเที่ยวคาเฟ่ หรือเด็กเอ็นชงเหล้าสร้างบรรยากาศงานปาร์ตทีส่วนตัว</p>
             <p>เราให้ความสำคัญสูงสุดกับความโปร่งใสและปลอดภัย <strong>นัดหมายเจอตัวจริง จ่ายหน้างาน 100%</strong> รูปไม่ตกแต่งเกินจริง ปราศจากขั้นตอนการบังคับโอนเงินมัดจำล่วงหน้าทุกกรณี</p>
         `,
         faqs: [
@@ -634,6 +633,7 @@ export default async (request, context) => {
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
         // [ CORE SELLING POINT ]: Supercharged Profile Cards
+        // ✅ ออกแบบการจัดวาง UI/UX โทนสีใหม่ในระดับ MESMERIZING LUXURY EDITION คัดเงา แสง และความหนาของเลเยอร์เพื่อสะกดสายตา
         const cardsHTML = safeProfiles.map((p, index) => {
             const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
             const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
@@ -649,22 +649,25 @@ export default async (request, context) => {
             const thumbW = 200; 
             const thumbH = 267; 
 
-            // ✅ ลบคำสั่ง onclick="window.location.href='...'" ที่รันด้วย JS ออกไป เพื่อหลีกเลี่ยงการเกิดคลิกซ้อน (Double Clicks) 
-            // โดยให้ลิงก์ Semantic HTML ด้วยแท็ก a href ตัวเดิมที่คลุมครอบขนาด absolute เติมเต็มการ์ดจัดการคลิกอย่างเป็นธรรมชาติ
             return `
-            <article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
+            <article class="reveal group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
                 
                 <div class="relative h-full flex flex-col z-10">
-                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
+                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[24px]" aria-label="จองน้อง${cleanName}">
                         <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
                     </a>
                     
                     ${(p.isfeatured || index < 3) ? `
-                    <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
-                        <i class="fas fa-crown text-[8px]"></i> HOT VIP
+                    <!-- อัปเกรดความหรูหราของป้าย VIP ด้วยการไล่ระดับเฉดสีทอง Metallic, แสงสะท้อนและขอบทองบางเบา -->
+                    <div class="absolute top-0 right-0 bg-gradient-to-r from-[#D4AF37] via-[#FFF9E6] to-[#AA7C11] text-[#07070A] text-[9.5px] font-[800] px-4 py-2 rounded-bl-[16px] rounded-tr-[24px] shadow-[0_4px_20px_rgba(212,175,55,0.4)] z-20 tracking-[0.15em] uppercase flex items-center gap-1.5 border-b border-l border-[#FFF9E6]/30">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                        </span>
+                        <i class="fas fa-crown text-[8.5px] animate-bounce"></i> VIP
                     </div>` : ''}
                     
-                    <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070a]">
+                    <div class="relative aspect-[3/4] overflow-hidden rounded-t-[24px] border-b border-white/[0.06] bg-[#07070a]">
                         <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
                              srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
                              sizes="(max-width: 640px) 45vw, 200px"
@@ -672,33 +675,35 @@ export default async (request, context) => {
                              height="${thumbH}"
                              onerror="this.onerror=null; this.src='/images/default.webp';"
                              alt="${smartAlt}" 
-                             class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
+                             class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" ${imageAttributes} />
                              
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/20 to-transparent opacity-95 transition-opacity duration-500 z-10"></div>
                         
-                        <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
-                            <span class="relative flex h-2 w-2">
+                        <!-- ปรับปรุงจุดไฟสัญญาณ Online/Busy แบบสว่างเรืองแสงสะท้อนเลเยอร์กระจกหล่อเย็น -->
+                        <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/10 shadow-lg">
+                            <span class="relative flex h-2.5 w-2.5">
                                 ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
-                                <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
                             </span>
-                            <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
+                            <span class="text-[9px] font-[800] text-white tracking-[0.1em] uppercase">${isAvailable ? 'Online' : 'Busy'}</span>
                         </div>
 
-                        <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
-                            <h3 class="text-[18px] md:text-[20px] font-[600] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
-                                ${cleanName} <span class="text-[11px] font-[400] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
+                        <!-- Info Block Bottom ปรับความคมเข้มและเงาตัวอักษรให้ออกมาลอยมีมิติ (3D Floating Effect) -->
+                        <div class="absolute bottom-0 left-0 w-full px-5 pb-5 pt-10 text-white z-20 pointer-events-none flex flex-col justify-end">
+                            <h3 class="text-[20px] md:text-[22px] font-[700] leading-none tracking-tight flex items-center gap-2 mb-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
+                                ${cleanName} <span class="text-[11px] font-[600] text-white/90 bg-white/10 border border-white/20 px-2 py-0.5 rounded-md backdrop-blur-md">${p.age || '??'}</span>
                             </h3>
-                            <p class="text-[11px] font-[400] text-white/70 flex items-center gap-1.5 truncate max-w-full">
-                                <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
+                            <p class="text-[12px] font-[400] text-zinc-300 flex items-center gap-1.5 truncate max-w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                                <i class="fas fa-location-dot text-[#D4AF37]"></i> ${profileLocation}
                             </p>
                         </div>
                     </div>
                     
-                    <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
+                    <div class="p-4 flex justify-between items-center bg-black/20 backdrop-blur-md rounded-b-[24px] relative z-40 pointer-events-none">
                         <div>
-                            <span class="text-[16px] font-[600] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
+                            <span class="text-[18px] font-[700] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
                         </div>
-                        <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[600] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
+                        <div class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-[700] tracking-[0.2em] text-white/90 group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_20px_rgba(255,46,99,0.5)] transition-all duration-300 uppercase">
                             View
                         </div>
                     </div>
@@ -754,8 +759,9 @@ export default async (request, context) => {
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
+        /* ยกระดับสีพื้นหลังด้วยเฉดไล่ระดับออร่าดาร์กสเปซ คัดเงาให้สะกดสายตา */
         body { 
-            background: linear-gradient(135deg, #07070A 0%, #111116 100%); 
+            background: radial-gradient(circle at 50% 0%, #0c0a15 0%, #050508 50%, #020204 100%);
             background-attachment: fixed;
             color: #FFFFFF; 
             -webkit-font-smoothing: antialiased; 
@@ -763,15 +769,17 @@ export default async (request, context) => {
             overflow-x: hidden;
         }
         
+        /* ปรับระดับ Inner Glow ขอบกระจกและระดับการเบลอหลังจอกลาสเพื่อความมีมิติคู่สีพรีเมียม */
         .glass-panel {
             background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
 
         .text-gradient-luxury {
-            background: linear-gradient(to right, #FF2E63, #FF8E53, #FF416C);
+            background: linear-gradient(135deg, #FF2E63 10%, #FF8E53 50%, #FCF6BA 90%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -795,22 +803,26 @@ export default async (request, context) => {
     </style>
 </head>
 
-<body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white">
+<body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white relative">
 
-    <header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <!-- Decorative Ambient Glows บันทึกเงาเรืองแสงสีม่วงชมพูแผ่ออกมาเป็นวงกว้าง (Mesh Gradient) -->
+    <div class="absolute top-[10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-brand-pink/5 blur-[120px] pointer-events-none z-0"></div>
+    <div class="absolute top-[40%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-brand-gold/5 blur-[120px] pointer-events-none z-0"></div>
+
+    <header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
         <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
             <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg flex items-center gap-2" aria-label="กลับสู่หน้าแรก">
                 <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-90 object-contain">
             </a>
             
-            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
+            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[600] tracking-[0.2em] text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
                 <a href="/" class="hover:text-white transition-all">หน้าแรก</a>
                 <a href="/profiles.html" class="text-white border-b border-[#FF2E63] pb-1" aria-current="page">โปรไฟล์น้องๆ</a>
                 <a href="/locations.html" class="hover:text-white transition-all">พิกัดบริการ</a>
             </nav>
 
             <div class="flex items-center gap-3">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 glass-panel text-white px-6 py-2.5 rounded-full text-[11px] font-[500] tracking-widest hover:bg-white/10 transition-all btn-shimmer" aria-label="ติดต่อแอดมินทางไลน์">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 glass-panel text-white px-6 py-2.5 rounded-full text-[11px] font-[600] tracking-[0.15em] hover:bg-white/10 transition-all btn-shimmer" aria-label="ติดต่อแอดมินทางไลน์">
                     <i class="fab fa-line text-[#00E676] text-sm" aria-hidden="true"></i> จองคิวตอนนี้
                 </a>
                 
@@ -843,31 +855,31 @@ export default async (request, context) => {
         </div>
     </nav>
 
-    <main class="flex-1">
+    <main class="flex-1 z-10 relative">
         
         <section class="pt-32 md:pt-40 pb-16 px-6 relative">
             <div class="max-w-7xl mx-auto text-center relative z-10">
                 
                 <div class="reveal active flex flex-wrap justify-center gap-3 mb-10 relative z-20">
-                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500]">
+                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(0,230,118,0.1)]">
                         <i class="fas fa-shield-halved"></i> เจอตัวจริง จ่ายหน้างาน 100%
                     </div>
-                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#FF416C]/30 rounded-full text-[#FF416C]/90 text-[11px] md:text-[12px] font-[500]">
+                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#FF416C]/30 rounded-full text-[#FF416C]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(255,65,108,0.1)]">
                         <i class="fas fa-ban"></i> ไม่มีการโอนมัดจำก่อน
                     </div>
                 </div>
 
                 <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active">
-                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_40px_rgba(255,46,99,0.15)] bg-[#07070a]">
+                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_50px_rgba(255,46,99,0.2)] bg-[#07070a]">
                         <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์${escapeHTML(provinceName)} รับงาน${escapeHTML(provinceName)} ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.03] opacity-80" fetchpriority="high">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-transparent to-transparent pointer-events-none"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-transparent to-transparent pointer-events-none"></div>
                         <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.02] to-transparent pointer-events-none"></div>
                     </div>
                 </div>
 
                 <div class="max-w-4xl mx-auto text-center reveal active relative z-10">
                     
-                    <h1 class="text-[2.6rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.2)]">
+                    <h1 class="text-[2.6rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.25)]">
                         ไซด์ไลน์<span class="text-gradient-luxury">${escapeHTML(provinceName)}</span><br>
                         รับงานฟิวแฟน ตัวท็อป
                     </h1>
@@ -891,10 +903,10 @@ export default async (request, context) => {
                     </div>
                     
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
-                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 bg-white/95 text-[#07070A] rounded-full font-[500] text-[13px] tracking-widest hover:bg-white transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
+                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 bg-white/95 text-[#07070A] rounded-full font-[600] text-[13px] tracking-widest hover:bg-white transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
                             เลือกดูโปรไฟล์
                         </a>
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[500] text-[13px] hover:bg-white/[0.05] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] hover:bg-white/[0.05] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
                             <i class="fab fa-line text-lg text-[#00E676]" aria-hidden="true"></i> ติดต่อแอดมิน
                         </a>
                     </div>
@@ -902,9 +914,10 @@ export default async (request, context) => {
             </div>
         </section>
 
-        <div class="sticky top-[56px] md:top-[64px] z-40 py-3 overflow-x-auto no-scrollbar glass-panel border-x-0 border-t-0 shadow-none bg-[#07070A]/80">
+        <!-- ทับฟังก์ชัน Sticky ด้วยกระจกเรืองแสงที่นุ่มนวลกว่าเดิม -->
+        <div class="sticky top-[56px] md:top-[64px] z-40 py-3 overflow-x-auto no-scrollbar glass-panel border-x-0 border-t-0 shadow-[0_4px_24px_rgba(0,0,0,0.4)] bg-[#030305]/80">
             <nav class="max-w-7xl mx-auto px-6 flex items-center justify-center sm:justify-start md:justify-center gap-3 min-w-max" aria-label="หมวดหมู่โปรไฟล์">
-                <button aria-pressed="true" class="shrink-0 px-6 py-2 rounded-full bg-white/10 text-white text-[12px] font-[500] tracking-wider shadow-[0_4px_20px_rgba(255,255,255,0.1)] transition-all">น้องๆ ทั้งหมด</button>
+                <button aria-pressed="true" class="shrink-0 px-6 py-2 rounded-full bg-white/10 text-white text-[12px] font-[600] tracking-wider shadow-[0_4px_20px_rgba(255,255,255,0.1)] transition-all border border-white/10">น้องๆ ทั้งหมด</button>
                 <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] text-white/50 text-[12px] font-[400] tracking-wider hover:text-white transition-all">มาแรง & ยอดฮิต</button>
                 <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] text-white/50 text-[12px] font-[400] tracking-wider flex items-center gap-2 hover:text-white transition-all"><i class="fas fa-location-crosshairs" aria-hidden="true"></i> ใกล้ฉัน</button>
             </nav>
@@ -937,7 +950,7 @@ export default async (request, context) => {
 
     </main>
 
-    <footer class="bg-[#07070A] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
+    <footer class="bg-[#030305] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
         <div class="max-w-4xl mx-auto px-6 relative z-10">
             <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
             
@@ -972,7 +985,8 @@ export default async (request, context) => {
         </div>
     </footer>
 
-    <nav aria-label="เมนูนำทางด่วนมือถือ" class="fixed bottom-0 left-0 w-full md:hidden z-[100] glass-panel border-x-0 border-b-0 rounded-none bg-[#07070A]/95 pb-[env(safe-area-inset-bottom)]">
+    <!-- MOBILE BOTTOM NAVIGATION (UX ชั้นยอด พร้อมปุ่มกดกระจกแบนและเงาสะท้อนสไตล์ iOS Dock) -->
+    <nav aria-label="เมนูนำทางด่วนมือถือ" class="fixed bottom-3 left-4 right-4 md:hidden z-[100] glass-panel rounded-[20px] bg-black/85 pb-[env(safe-area-inset-bottom)] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10">
         <ul class="flex justify-around h-[65px] items-center m-0 p-0 list-none max-w-md mx-auto">
             <li class="w-full text-center">
                 <a href="/" aria-label="หน้าแรก" class="inline-flex flex-col items-center p-2 text-white/40 hover:text-white transition-colors">
@@ -983,11 +997,11 @@ export default async (request, context) => {
             <li class="w-full text-center">
                 <a href="/profiles.html" aria-label="ดูโปรไฟล์น้องๆ VIP" class="inline-flex flex-col items-center p-2 text-[#FF2E63]">
                     <i class="fas fa-gem text-[18px] mb-1 drop-shadow-[0_0_8px_rgba(255,46,99,0.5)]" aria-hidden="true"></i>
-                    <span class="text-[9px] font-[500] tracking-wider">VIP</span>
+                    <span class="text-[9px] font-[600] tracking-wider">VIP</span>
                 </a>
             </li>
             <li class="w-full text-center relative">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินทางไลน์" class="absolute left-1/2 -translate-x-1/2 bottom-4 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF2E63] to-[#FF416C] text-white rounded-full border-[4px] border-[#07070A] shadow-[0_5px_20px_rgba(255,46,99,0.5)] btn-shimmer active:scale-95 transition-transform">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินทางไลน์" class="absolute left-1/2 -translate-x-1/2 bottom-5 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF2E63] to-[#FF416C] text-white rounded-full border-[4px] border-[#07070A] shadow-[0_5px_20px_rgba(255,46,99,0.5)] btn-shimmer active:scale-95 transition-transform">
                     <i class="fab fa-line text-2xl" aria-hidden="true"></i>
                 </a>
             </li>
