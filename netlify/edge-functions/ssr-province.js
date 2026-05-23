@@ -349,17 +349,18 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                             
                             <div class="relative mt-auto mb-auto py-8">
                                 <div class="absolute inset-0 bg-gradient-to-r from-[#FF2E63]/10 to-[#FF8E53]/10 blur-xl rounded-full"></div>
-                                <div class="glass-panel border border-[#FF2E63]/20 bg-black/40 rounded-[20px] p-6 text-center relative flex flex-col items-center justify-center overflow-hidden">
-                                    <span class="text-[10px] text-brand-gold font-[500] uppercase tracking-[0.2em] mb-2"><i class="fas fa-gem mr-1"></i> Exclusive Code</span>
-                                    <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
-                                        <div class="text-4xl md:text-5xl font-[700] tracking-wider text-gradient-luxury select-all font-mono whitespace-nowrap">
-                                            VIP-${provinceKey.toUpperCase()}
-                                        </div>
-                                    </div>
-                                    <span class="inline-block bg-[#FF2E63]/10 border border-[#FF2E63]/20 text-[#FF2E63] px-4 py-1.5 rounded-full text-[9px] font-[500] uppercase tracking-widest mt-4 shrink-0">
-                                        ใช้ได้วันนี้เท่านั้น
-                                    </span>
-                                </div>
+<div class="glass-panel border border-[#FF2E63]/20 bg-black/40 rounded-[20px] p-6 text-center relative flex flex-col items-center justify-center overflow-hidden">
+    <span class="text-[10px] text-brand-gold font-[500] uppercase tracking-[0.2em] mb-2"><i class="fas fa-gem mr-1"></i> Exclusive Code</span>
+    <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
+        <!-- ปรับขนาดจาก 4xl เหลือ 2xl ในมือถือ -->
+        <div class="text-2xl md:text-4xl font-[700] tracking-wider text-gradient-luxury select-all font-mono whitespace-nowrap">
+            VIP-${provinceKey.toUpperCase()}
+        </div>
+    </div>
+    <span class="inline-block bg-[#FF2E63]/10 border border-[#FF2E63]/20 text-[#FF2E63] px-4 py-1.5 rounded-full text-[9px] font-[500] uppercase tracking-widest mt-4 shrink-0">
+        ใช้ได้วันนี้เท่านั้น
+    </span>
+</div>
                             </div>
                         </div>
                     </div>
@@ -705,15 +706,14 @@ export default async (request, context) => {
 <body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white">
 
     <!-- Premium Header Dock (Auto hide on scroll) -->
-    <header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-        <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
-            <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg flex items-center gap-2" aria-label="กลับสู่หน้าแรก">
-                <span class="text-[18px] md:text-[22px] font-[700] tracking-wide text-white uppercase" style="text-shadow: 0 4px 12px rgba(255, 46, 99, 0.2);">
-                    SIDELINE <span class="text-[#FF416C]">CHIANGMAI</span>
-                </span>
-            </a>
-            
-            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
+<header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
+        <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg flex items-center gap-2" aria-label="กลับสู่หน้าแรก">
+            <!-- เปลี่ยนจากตัวอักษรเป็นรูปภาพโลโก้ -->
+            <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-90 object-contain">
+        </a>
+        
+        <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
                 <a href="/" class="hover:text-white transition-all">หน้าแรก</a>
                 <a href="/profiles.html" class="text-white border-b border-[#FF2E63] pb-1" aria-current="page">โปรไฟล์น้องๆ</a>
                 <a href="/locations.html" class="hover:text-white transition-all">พิกัดบริการ</a>
@@ -857,18 +857,17 @@ export default async (request, context) => {
     </main>
 
 <!-- Clean Premium Footer Grid -->
-    <footer class="bg-[#07070A] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
-        <div class="max-w-4xl mx-auto px-6 relative z-10">
-            <!-- ปรับให้โลโก้สว่างขึ้นเพื่อให้เห็นชัดบนพื้นดำ -->
-            <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
-            
-            <!-- ดึงชื่อจังหวัดมาแสดงอัตโนมัติ -->
-            <h2 class="text-4xl md:text-6xl font-[800] text-white mb-10 tracking-tighter uppercase drop-shadow-md">
-                THANK YOU <br> 
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2E63] to-[#FF8E53]">
-                    ไซด์ไลน์${escapeHTML(provinceName)}
-                </span>
-            </h2>
+<footer class="bg-[#07070A] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
+    <div class="max-w-4xl mx-auto px-6 relative z-10">
+        <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
+        
+        <!-- ปรับขนาดจาก 4xl/6xl เหลือ 2xl/4xl -->
+        <h2 class="text-2xl md:text-4xl font-[800] text-white mb-10 tracking-tighter uppercase drop-shadow-md">
+            THANK YOU <br> 
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2E63] to-[#FF8E53]">
+                ไซด์ไลน์${escapeHTML(provinceName)}
+            </span>
+        </h2>
             
             <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 glass-panel text-white px-10 py-4 rounded-full font-[500] text-[13px] tracking-widest hover:bg-white/[0.05] transition-all btn-shimmer" aria-label="จองคิวผ่านไลน์">
                 <i class="fab fa-line text-xl text-[#00E676]" aria-hidden="true"></i> จองน้องๆ ตอนนี้
