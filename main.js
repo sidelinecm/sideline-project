@@ -56,9 +56,9 @@ gsap.registerPlugin(ScrollTrigger);
     lastFetchedAt: '1970-01-01T00:00:00Z', 
     realtimeSubscription: null,
     cleanupFunctions: [],
-    // ✅ เพิ่ม 2 บรรทัดนี้
     currentFilters: null,
-    filteredProfiles: [] 
+    filteredProfiles: [],
+    renderId: 0 // ✅ เพิ่มบรรทัดนี้เพื่อควบคุมคิวงานเรนเดอร์แบบ Async ไม่ให้ทำงานทับกัน
 };
 
     const dom = {};
@@ -1252,29 +1252,29 @@ function updateUrlFromFilters(query) {
     }
 }
 
-async function renderCardsIncrementally(container, profiles) {
+async function renderCardsIncrementally(container, profiles, renderId) {
     if (!container || !profiles) return;
     
-    // ล้างเนื้อหาเดิมในกรณีที่เป็น Grid เปล่า
     container.innerHTML = '';
     
     const fragment = document.createDocumentFragment();
-    // ถ้าโปรไฟล์เยอะ (เชียงใหม่) ให้วาดทีละ 4 ใบ เพื่อให้ UI ไม่ค้าง
     const BATCH_SIZE = profiles.length > 20 ? 4 : 8; 
 
     for (let i = 0; i < profiles.length; i++) {
+        // ✅ ตรวจสอบสถานะ: หากมีการเริ่มสั่งเรนเดอร์งานรอบใหม่ (Render ID เปลี่ยนแปลง) ให้ยกเลิกงานรอบนี้ทันที
+        if (renderId !== undefined && state.renderId !== renderId) {
+            console.log("🚫 Rendering aborted: Newer render session started.");
+            return;
+        }
+
         const card = createProfileCard(profiles[i], i);
         fragment.appendChild(card);
 
-        // เมื่อครบชุด (Batch) หรือใบสุดท้าย ให้เอาลงหน้าจอ
         if ((i + 1) % BATCH_SIZE === 0 || i === profiles.length - 1) {
             container.appendChild(fragment);
             
-            // 🟢 จุดสำคัญ: คืน Main Thread ให้ Browser ไปวาดรูปและรับคำสั่งจากผู้ใช้
-            // ใช้ requestAnimationFrame เพื่อความนุ่มนวลสูงสุด
             await new Promise(resolve => requestAnimationFrame(resolve));
             
-            // ถ้าข้อมูลเยอะมาก ให้หยุดพักเพิ่มอีกนิด (แก้ปัญหาเครื่องร้อน/ค้าง)
             if (profiles.length > 40) {
                 await new Promise(resolve => setTimeout(resolve, 10));
             }
@@ -1289,12 +1289,7 @@ function yieldToMain() {
     });
 }
 
-/**
- * สร้าง Section สำหรับแสดงผลการค้นหา หรือหน้าจังหวัด (ฉบับแก้ไข)
- * @param {Array<Object>} profiles - ข้อมูลโปรไฟล์ที่ผ่านการกรองแล้ว
- * @returns {HTMLElement} - Element ของ Section ที่สร้างเสร็จ
- */
-function createSearchResultSection(profiles) {
+function createSearchResultSection(profiles, renderId) {
     let headerText;
     const currentProvKey = dom.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE);
     const urlProvMatch = window.location.pathname.match(/\/(?:location|province)\/([^/]+)/);
@@ -1322,18 +1317,36 @@ function createSearchResultSection(profiles) {
     `;
     
     const gridContainer = wrapper.querySelector('.profile-grid');
-    renderCardsIncrementally(gridContainer, profiles); // มอบหมายงานให้ผู้ช่วย
+    renderCardsIncrementally(gridContainer, profiles, renderId); // ✅ ส่งผ่านตัวควบคุม Render ID ไปให้ลูกทำงานอย่างถูกต้อง
 
     return wrapper;
 }
 
-/**
- * สร้าง Section ของแต่ละจังหวัดสำหรับแสดงผลในหน้าแรก (ฉบับแก้ไข)
- * @param {string} key - Key ของจังหวัด
- * @param {string} name - ชื่อจังหวัด
- * @param {Array<Object>} profiles - โปรไฟล์ในจังหวัดนั้นๆ
- * @returns {HTMLElement} - Element ของ Section จังหวัด
- */
+function createProvinceSection(key, name, profiles, renderId) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'section-content-wrapper province-section mt-12';
+    wrapper.id = `province-${key}`;
+    wrapper.setAttribute('data-animate-on-scroll', '');
+    wrapper.innerHTML = `
+        <div class="p-6 md:p-8">
+            <a href="/location/${key}" class="group block">
+                <h2 class="province-section-header flex items-center gap-2.5 text-2xl font-bold text-gray-800 dark:text-gray-200 group-hover:text-pink-600 transition-colors">
+                    📍 จังหวัด ${name}
+                    <span class="ml-2 bg-pink-100 text-pink-700 text-xs font-medium px-2.5 py-0.5 rounded-full">${profiles.length}</span>
+                    <i class="fas fa-chevron-right text-sm opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0"></i>
+                </h2>
+            </a>
+        </div>
+        <div class="profile-grid grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-6 md:px-8 pb-8"></div>
+    `;
+
+    const gridContainer = wrapper.querySelector('.profile-grid');
+    renderCardsIncrementally(gridContainer, profiles, renderId); // ✅ ส่งผ่านตัวควบคุม Render ID ไปให้ลูกทำงานอย่างถูกต้อง
+
+    return wrapper;
+}
+
+
 function createProvinceSection(key, name, profiles) {
     const wrapper = document.createElement('div');
     wrapper.className = 'section-content-wrapper province-section mt-12';
@@ -1358,12 +1371,7 @@ function createProvinceSection(key, name, profiles) {
     return wrapper;
 }
 
-/**
- * จัดการแสดงผลหน้าแรกแบบแยกตามจังหวัด (High Performance & SEO Optimized)
- * ทำงานแบบ Asynchronous เพื่อไม่ให้หน้าเว็บค้าง
- */
-async function renderByProvince(profiles) {
-    // 1. Group ข้อมูล (จัดกลุ่มน้องๆ ตามจังหวัด)
+async function renderByProvince(profiles, renderId) {
     const groups = profiles.reduce((acc, p) => {
         const key = p.provinceKey || 'no_province';
         if (!acc[key]) acc[key] = [];
@@ -1371,41 +1379,39 @@ async function renderByProvince(profiles) {
         return acc;
     }, {});
 
-    // 2. Sort Keys (เรียงชื่อจังหวัด ก-ฮ)
     const keys = Object.keys(groups).sort((a, b) => {
         const nA = state.provincesMap.get(a) || a;
         const nB = state.provincesMap.get(b) || b;
         return nA.localeCompare(nB, 'th');
     });
 
-    // 3. ตรวจสอบข้อมูล
     if (keys.length === 0) {
         dom.noResultsMessage?.classList.remove('hidden');
         return;
     }
 
-
     for (const key of keys) {
+        // ✅ ตรวจสอบสถานะ: หากงานเก่ายังวาดไม่ครบจังหวัด แต่มีการเรนเดอร์รอบใหม่เข้ามา ให้ยกเลิกการวาดที่เหลือทันที
+        if (renderId !== undefined && state.renderId !== renderId) {
+            console.log("🚫 Province rendering aborted: Newer render session started.");
+            return;
+        }
+
         const name = state.provincesMap.get(key) || (key === 'no_province' ? 'ไม่ระบุจังหวัด' : key);
         
-        // สร้าง Section ของจังหวัดนั้น
-        const provinceSection = createProvinceSection(key, name, groups[key]);
+        const provinceSection = createProvinceSection(key, name, groups[key], renderId); // ✅ ส่งต่อ Render ID ไปยังส่วนลูก
         
-        // เพิ่ม Animation ให้สวยงาม (Fade In)
         provinceSection.style.opacity = '0';
         provinceSection.style.transform = 'translateY(20px)';
         provinceSection.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
         
-        // แปะลงหน้าเว็บ
         dom.profilesDisplayArea.appendChild(provinceSection);
 
-        // สั่งให้ Browser วาดทันที (Force Reflow) แล้วค่อยเล่น Animation
         requestAnimationFrame(() => {
             provinceSection.style.opacity = '1';
             provinceSection.style.transform = 'translateY(0)';
         });
 
-        // 🟢 สำคัญ: พักการทำงานชั่วครู่ เพื่อให้ UI ตอบสนองได้ (แก้ INP)
         await yieldToMain();
     }
 }
@@ -1413,22 +1419,23 @@ async function renderByProvince(profiles) {
 function renderProfiles(profiles, isSearching) {
     if (!dom.profilesDisplayArea) return;
     
-    // 1. ซ่อน Error และ No Results ก่อนเริ่มงาน
+    // ✅ 1. เพิ่มตัวเลข Render ID ทุกครั้งที่มีการสั่งเรนเดอร์ใหม่ เพื่อยกเลิกงานที่ค้างอยู่ก่อนหน้านี้
+    state.renderId = (state.renderId || 0) + 1;
+    const currentRenderId = state.renderId;
+
     dom.noResultsMessage?.classList.add('hidden');
     if (dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
 
-    // 2. จัดการส่วน Featured (แนะนำ)
     if (dom.featuredSection) {
         const isHome = !isSearching && !window.location.pathname.includes('/location/');
         dom.featuredSection.classList.toggle('hidden', !isHome);
 
         if (isHome && dom.featuredContainer && dom.featuredContainer.children.length === 0) {
             const featured = state.allProfiles.filter(p => p.isfeatured);
-            renderCardsIncrementally(dom.featuredContainer, featured);
+            renderCardsIncrementally(dom.featuredContainer, featured, currentRenderId); // ✅ ส่ง Render ID ไปคุมงาน
         }
     }
 
-    // 3. กรณีไม่มีข้อมูล
     if (!profiles || profiles.length === 0) {
         dom.profilesDisplayArea.innerHTML = '';
         dom.noResultsMessage?.classList.remove('hidden');
@@ -1436,26 +1443,22 @@ function renderProfiles(profiles, isSearching) {
         return;
     }
 
-    // 4. ตัดสินใจโหมดการวาด (ค้นหา/จังหวัด หรือ หน้าแรกแยกตามจังหวัด)
     const isLocationPage = window.location.pathname.includes('/location/') || window.location.pathname.includes('/province/');
     
-    // ล้างพื้นที่แสดงผลหลัก "ครั้งเดียว" ก่อนเริ่มวาดใหม่
     dom.profilesDisplayArea.innerHTML = '';
 
     if (isSearching || isLocationPage) {
         // [โหมด A] หน้าค้นหา หรือ หน้าจังหวัด (เช่น เชียงใหม่)
-        const searchSection = createSearchResultSection(profiles);
+        const searchSection = createSearchResultSection(profiles, currentRenderId); // ✅ ส่ง Render ID ไปคุมงาน
         dom.profilesDisplayArea.appendChild(searchSection);
         
-        // สั่งวาดการ์ดใน Grid ของ Search Section
-        const grid = searchSection.querySelector('.profile-grid');
-        renderCardsIncrementally(grid, profiles);
+        // ❌ ลบส่วนที่ดึงคลาส .profile-grid และสั่ง renderCardsIncrementally ออกตรงนี้ทั้งหมด! 
+        // เนื่องจากภายในฟังก์ชัน createSearchResultSection ได้วาดไปเรียบร้อยแล้ว
     } else {
         // [โหมด B] หน้าแรกแบบแยกจังหวัด (ทยอยวาดทีละจังหวัด)
-        renderByProvince(profiles);
+        renderByProvince(profiles, currentRenderId); // ✅ ส่ง Render ID ไปคุมงาน
     }
 
-    // 5. อัปเดต ScrollTrigger เพื่อให้ Animation ทำงานถูกต้อง
     if (window.ScrollTrigger) {
         setTimeout(() => ScrollTrigger.refresh(), 500);
     }
