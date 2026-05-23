@@ -784,7 +784,7 @@ export default async (request, context) => {
                     
                     <h1 class="text-5xl sm:text-7xl md:text-[5.5rem] font-black text-white leading-[1.05] tracking-tighter mb-8 drop-shadow-2xl">
                         ไซด์ไลน์<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-[#D4AF37] drop-shadow-[0_0_15px_rgba(255,51,102,0.4)]">${escapeHTML(provinceName)}</span><br>
-                        เพื่อนเที่ยวระดับ VIP
+                        รับงานฟิวแฟน ตรงปก
                     </h1>
                     
                     <p class="text-gray-300 text-sm md:text-lg mb-12 font-light leading-relaxed max-w-2xl mx-auto px-4">
@@ -832,7 +832,7 @@ export default async (request, context) => {
         <section id="profiles" class="max-w-[1440px] mx-auto px-4 md:px-8 py-24 scroll-mt-32">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 px-2">
                 <div class="reveal">
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-white drop-shadow-xl">รวมโปรไฟล์น้องๆ<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink via-purple-500 to-[#D4AF37]">ระดับ VIP</span></h2>
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-white drop-shadow-xl">รวมโปรไฟล์น้องๆ<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink via-purple-500 to-[#D4AF37]">รับงาน ลำปาง</span></h2>
                     <p class="text-brand-pink text-[10px] font-black uppercase tracking-[0.2em] mt-5 drop-shadow-[0_0_8px_rgba(255,51,102,0.6)] flex items-center gap-2">
                         <i class="fas fa-check-circle" aria-hidden="true"></i> ตรวจสอบแล้ว (${CURRENT_MONTH} ${CURRENT_YEAR})
                     </p>
