@@ -455,95 +455,102 @@ export default async (request, context) => {
         const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} พรีเมียม (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ปลอดภัย 100%`;
         const description = `ตัวท็อป! ไซด์ไลน์${provinceName} รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด`;
 
-        // [ EXTREME SEO ] Deep Entity Architecture Schema
-        const schemaGraph =[
-            { 
-                "@type": "Organization", 
-                "@id": `${CONFIG.DOMAIN}/#organization`, 
-                name: CONFIG.BRAND_NAME, 
-                url: CONFIG.DOMAIN, 
-                logo: { "@type": "ImageObject", url: `${CONFIG.DOMAIN}/logo.png` }, 
-                description: CONFIG.DESCRIPTION, 
-                sameAs: CONFIG.SOCIALS, 
-                contactPoint: { "@type": "ContactPoint", contactType: "customer service", telephone: CONFIG.PHONE, availableLanguage: ["th", "en"] } 
-            },
-            { 
-                "@type": "WebSite", 
-                "@id": `${CONFIG.DOMAIN}/#website`, 
-                url: CONFIG.DOMAIN, 
-                name: CONFIG.BRAND_NAME, 
-                publisher: { "@id": `${CONFIG.DOMAIN}/#organization` }, 
-                potentialAction: { "@type": "SearchAction", target: `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" } 
-            },
-            { 
-                "@type": "CollectionPage", 
-                "@id": `${provinceUrl}/#webpage`, 
-                url: provinceUrl, 
-                name: title, 
-                description: description, 
-                dateModified: ISO_DATE,
-                primaryImageOfPage: { "@type": "ImageObject", url: firstImage },
-                isPartOf: { "@id": `${CONFIG.DOMAIN}/#website` }, 
-                breadcrumb: { "@id": `${provinceUrl}/#breadcrumb` },
-                about: { "@id": `${provinceUrl}/#service` },
-                speakable: { "@type": "SpeakableSpecification", xpath: ["/html/head/title", "/html/head/meta[@name='description']/@content"] }
-            },
-            { 
-                "@type": "BreadcrumbList", 
-                "@id": `${provinceUrl}/#breadcrumb`, 
-                itemListElement:[
-                    { "@type": "ListItem", position: 1, name: "หน้าแรก", item: CONFIG.DOMAIN }, 
-                    { "@type": "ListItem", position: 2, name: `รับงาน${provinceName}`, item: provinceUrl }
-                ] 
-            },
-            { 
-                "@type": "Service", 
-                "@id": `${provinceUrl}/#service`, 
-                name: `บริการไซด์ไลน์และเด็กเอ็น VIP ในพื้นที่ ${provinceName}`, 
-                provider: { "@id": `${CONFIG.DOMAIN}/#organization` }, 
-                areaServed: { "@type": "AdministrativeArea", name: provinceName }, 
-                description: description,
-                category: "Entertainment",
-                hasOfferCatalog: { "@id": `${provinceUrl}/#catalog` }
-            }
-        ];
+// [ HYPER-ADVANCED SEO ] Deep Entity Architecture Schema (Refactored to Absolute Perfection)
+const schemaGraph = [
+    { 
+        "@type": "Organization", 
+        "@id": `${CONFIG.DOMAIN}/#organization`, 
+        name: CONFIG.BRAND_NAME, 
+        url: CONFIG.DOMAIN, 
+        logo: { "@type": "ImageObject", url: `${CONFIG.DOMAIN}/logo.png` }, 
+        description: CONFIG.DESCRIPTION, 
+        sameAs: CONFIG.SOCIALS, 
+        contactPoint: { "@type": "ContactPoint", contactType: "customer service", telephone: CONFIG.PHONE, availableLanguage: ["th", "en"] } 
+    },
+    { 
+        "@type": "WebSite", 
+        "@id": `${CONFIG.DOMAIN}/#website`, 
+        url: CONFIG.DOMAIN, 
+        name: CONFIG.BRAND_NAME, 
+        publisher: { "@id": `${CONFIG.DOMAIN}/#organization` }, 
+        potentialAction: { "@type": "SearchAction", target: `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" } 
+    },
+    { 
+        "@type": "CollectionPage", 
+        "@id": `${provinceUrl}/#webpage`, 
+        url: provinceUrl, 
+        name: title, 
+        description: description, 
+        dateModified: ISO_DATE,
+        primaryImageOfPage: { "@type": "ImageObject", url: firstImage },
+        isPartOf: { "@id": `${CONFIG.DOMAIN}/#website` }, 
+        breadcrumb: { "@id": `${provinceUrl}/#breadcrumb` },
+        about: { "@id": `${provinceUrl}/#service` },
+        speakable: { "@type": "SpeakableSpecification", xpath: ["/html/head/title", "/html/head/meta[@name='description']/@content"] }
+    },
+    { 
+        "@type": "BreadcrumbList", 
+        "@id": `${provinceUrl}/#breadcrumb`, 
+        itemListElement: [
+            { "@type": "ListItem", position: 1, name: "หน้าแรก", item: CONFIG.DOMAIN }, 
+            { "@type": "ListItem", position: 2, name: `รับงาน${provinceName}`, item: provinceUrl }
+        ] 
+    },
+    { 
+        "@type": "Service", 
+        "@id": `${provinceUrl}/#service`, 
+        name: `บริการไซด์ไลน์และเด็กเอ็น VIP ในพื้นที่ ${provinceName}`, 
+        serviceType: "Escort and Entertainment Service", // เพิ่มเพื่อให้บอทเข้าใจหมวดหมู่บริการที่ชัดเจนระดับสากล
+        provider: { "@id": `${CONFIG.DOMAIN}/#organization` }, 
+        areaServed: { "@type": "AdministrativeArea", name: provinceName }, 
+        description: description,
+        category: "Entertainment",
+        hasOfferCatalog: { "@id": `${provinceUrl}/#catalog` }
+    }
+];
 
-        if (seoData.faqs) {
-            schemaGraph.push({ "@type": "FAQPage", "@id": `${provinceUrl}/#faq`, mainEntity: seoData.faqs.map(faq => ({ "@type": "Question", name: faq.q, acceptedAnswer: { "@type": "Answer", text: faq.a } })) });
-        }
-        
-        if (safeProfiles.length > 0) {
-            schemaGraph.push({ 
-                "@type": "OfferCatalog", 
-                "@id": `${provinceUrl}/#catalog`,
-                name: `แคตตาล็อกน้องๆ รับงานไซด์ไลน์ ${provinceName}`, 
-                description: `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName} อัปเดต ${CURRENT_MONTH} ${CURRENT_YEAR}`, 
-                itemListElement: safeProfiles.slice(0, 12).map((p, i) => {
-                    let numericPrice = p.rate ? String(p.rate).replace(/\D/g, '') : "";
-                    if (!numericPrice || numericPrice.length === 0) numericPrice = "1500"; 
-                    
-                    return { 
-                        "@type": "ListItem", 
-                        position: i + 1, 
-                        item: { 
-                            "@type": "Person", 
-                            name: p.name || "ไม่ระบุชื่อ", 
-                            url: `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`, 
-                            image: optimizeImg(p.imagePath, 300, 400), 
-                            description: `โปรไฟล์น้อง${p.name || ""} รับงานโซน ${p.location || provinceName}`,
-                            offers: {
-                                "@type": "Offer",
-                                price: numericPrice,
-                                priceCurrency: "THB",
-                                availability: "https://schema.org/InStock"
-                            }
-                        } 
-                    };
-                }) 
-            });
-        }
+if (seoData.faqs) {
+    schemaGraph.push({ 
+        "@type": "FAQPage", 
+        "@id": `${provinceUrl}/#faq`, 
+        mainEntity: seoData.faqs.map(faq => ({ "@type": "Question", name: faq.q, acceptedAnswer: { "@type": "Answer", text: faq.a } })) 
+    });
+}
 
-        const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
+if (safeProfiles.length > 0) {
+    schemaGraph.push({ 
+        "@type": "OfferCatalog", 
+        "@id": `${provinceUrl}/#catalog`,
+        name: `แคตตาล็อกน้องๆ รับงานไซด์ไลน์ ${provinceName}`, 
+        description: `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName} อัปเดต ${CURRENT_MONTH} ${CURRENT_YEAR}`, 
+        itemListElement: safeProfiles.slice(0, 12).map((p, i) => {
+            // ปรับปรุงการสกัดตัวเลขให้ปลอดภัยระดับ Production-grade
+            let numericPrice = p.rate ? String(p.rate).replace(/\D/g, '') : "1500";
+            if (!numericPrice || numericPrice.length === 0) numericPrice = "1500"; 
+            
+            return { 
+                "@type": "ListItem", 
+                position: i + 1, 
+                item: { 
+                    "@type": "Person", 
+                    name: p.name || "ไม่ระบุชื่อ", 
+                    url: `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`, 
+                    image: optimizeImg(p.imagePath, 300, 400), 
+                    description: `โปรไฟล์น้อง${p.name || ""} รับงานโซน ${p.location || provinceName}`,
+                    offers: {
+                        "@type": "Offer",
+                        price: numericPrice,
+                        priceCurrency: "THB",
+                        availability: "https://schema.org/InStock",
+                        validFrom: ISO_DATE // ประกาศความสดใหม่ของราคาให้บอทรู้ว่าอัปเดตตลอดเวลา
+                    }
+                } 
+            };
+        }) 
+    });
+}
+
+const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
         // [ CORE SELLING POINT ]: Supercharged Profile Cards
         const cardsHTML = safeProfiles.map((p, index) => {
@@ -900,7 +907,7 @@ const htmlTemplate = `<!DOCTYPE html>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const observerOptions = { threshold: 0.05, rootMargin: "0px 0px -30px 0px" };
+            const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -914,13 +921,13 @@ const htmlTemplate = `<!DOCTYPE html>
             const nav = document.getElementById('navbar');
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 20) {
-                    nav.classList.add('glass-sticky');
+                    nav.classList.add('glass-effect');
                     nav.classList.remove('py-4');
-                    nav.classList.add('py-2.5');
+                    nav.classList.add('py-3');
                 } else {
-                    nav.classList.remove('glass-sticky');
+                    nav.classList.remove('glass-effect');
                     nav.classList.add('py-4');
-                    nav.classList.remove('py-2.5');
+                    nav.classList.remove('py-3');
                 }
             }, { passive: true });
 
@@ -942,7 +949,7 @@ const htmlTemplate = `<!DOCTYPE html>
         });
     </script>
 </body>
-</html>\`;
+</html>`;
 
         return new Response(htmlTemplate, { 
             headers: { 
@@ -953,7 +960,7 @@ const htmlTemplate = `<!DOCTYPE html>
 
     } catch (error) {
         console.error("SSR Error:", error);
-        return new Response('<div style="background:#07070A;color:#FF2E63;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;font-weight:bold;"><div><h1 style="font-size:3rem;margin-bottom:10px;letter-spacing:-0.05em;">SYSTEM ERROR</h1><p style="color:rgba(255,255,255,0.4);font-weight:normal;font-size:0.9rem;">Please contact system administrator.</p></div></div>', { 
+        return new Response('<div style="background:#050505;color:#FF3366;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;"><div><h1 style="font-size:3rem;margin-bottom:10px;">SYSTEM ERROR</h1><p style="color:#888;">Please contact system administrator.</p></div></div>', { 
             status: 500, 
             headers: { "Content-Type": "text/html; charset=utf-8" } 
         });
