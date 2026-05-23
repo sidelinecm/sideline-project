@@ -3,13 +3,19 @@
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE NEO-LUXURY NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, Conversion UI/UX & Entity Engineering
+ * Optimization: Pure Performance SSR, WCAG AA Accessibility & Clean Link Injection
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const CONFIG = {
-    SUPABASE_URL: "https://zxetzqwjaiumqhrpumln.supabase.co",
-    SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+    // ดึงค่าผ่าน Environment Variables หากมีการตั้งค่าบน Netlify เพื่อความปลอดภัยสูงสุด
+    get SUPABASE_URL() {
+        try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
+    },
+    get SUPABASE_KEY() {
+        try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
+    },
     DOMAIN: "https://sidelinechiangmai.netlify.app",
     BRAND_NAME: "SIDELINE CHIANGMAI",
     TWITTER: "@sidelinechiangmai",
@@ -41,9 +47,9 @@ const PROVINCE_SEO_DATA = {
         services: ["บริการเอนเตอร์เทนส่วนตัว", "ดูแลฟิวแฟนเดินนิมมาน", "ปาร์ตี้พูลวิลล่าระดับ VIP", "เพื่อนเที่ยวผ่อนคลายส่วนตัว"],
         avgPrice: "1,500 - 4,000",
         uniqueIntro: `
-            <p class="mb-4">สัมผัสประสบการณ์การพักผ่อนเหนือระดับในบรรยากาศเมืองเหนือไปกับ <strong>SIDELINE CHIANGMAI</strong> ศูนย์รวมน้องๆ <strong>รับงานเชียงใหม่</strong> และ <strong>สาวไซด์ไลน์เชียงใหม่</strong> ระดับพรีเมียมที่คัดสรรมาเพื่อดูแลคุณโดยเฉพาะ ไม่ว่าคุณจะเดินทางมาท่องเที่ยว พักผ่อนส่วนตัว หรือต้องการคนรู้ใจเดินควงแขน น้องๆ สาวเหนือผิวออร่า หน้าหมวย น่ารัก พร้อมให้บริการแบบฟีลแฟน (Girlfriend Experience) อย่างใกล้ชิด</p>
-            <p class="mb-4">ครอบคลุมทุกโซนยอดฮิตของเชียงใหม่ สะดวกนัดหมายทั้งการเดินเล่นชิลๆ ย่าน <strong>นิมมานเหมินท์</strong>, นัดพบแบบไพรเวทในคอนโดหรูย่าน <strong>เจ็ดยอด-สันติธรรม</strong>, หรือจัดปาร์ตี้พูลวิลล่าส่วนตัวในโซน <strong>แม่ริม และหางดง</strong> บริการของเราครอบคลุมตั้งแต่ <em>เด็กเอ็นชงเหล้า (N-VIP)</em> ไปจนถึงเพื่อนเที่ยวคาเฟ่แบบเต็มวัน</p>
-            <p><strong>ความปลอดภัยต้องมาก่อน:</strong> เราเข้าใจถึงความกังวลของคุณ จึงใช้ระบบ <strong>"เจอตัวจริง จ่ายเงินหน้างาน 100%"</strong> ไม่มีการบังคับโอนเงินมัดจำล่วงหน้าใดๆ ทั้งสิ้น โปรไฟล์น้องๆ ทุกคนผ่านการตรวจสอบยืนยันตัวตนแล้วว่าตรงปก ให้คุณผ่อนคลายและมีความสุขกับค่ำคืนที่เชียงใหม่อย่างไร้กังวล</p>
+            <p class="mb-4">สัมผัสประสบการณ์การพักผ่อนเหนือระดับท่ามกลางบรรยากาศเมืองเหนือไปกับ <strong>SIDELINE CHIANGMAI</strong> แหล่งรวบรวมน้องๆ ที่พร้อมให้บริการแบบฟิวแฟนระดับพรีเมียม ไม่ว่าคุณจะเดินทางมาเพื่อพักผ่อน ท่องเที่ยวส่วนตัว หรือต้องการเพื่อนร่วมเดินทางคู่กาย สาวเหนือผิวออร่าลุคหมวยน่ารัก พร้อมทำหน้าที่เป็นคนรู้ใจ (Girlfriend Experience) คอยดูแลคุณอย่างอบอุ่นและเป็นส่วนตัว</p>
+            <p class="mb-4">เราพร้อมให้บริการครอบคลุมทุกโซนยอดนิยมในเชียงใหม่ เพื่อความสะดวกในการเดินทางและนัดหมาย ไม่ว่าจะเป็นการเดินเล่นพักผ่อนย่าน <strong>นิมมานเหมินท์</strong>, นัดพบคุยงานอย่างมีสไตล์ตามพูลวิลล่าส่วนตัวในแถบ <strong>แม่ริม และหางดง</strong>, หรือความเป็นส่วนตัวสูงตามห้องพักส่วนตัวย่าน <strong>เจ็ดยอด และสันติธรรม</strong> โดยมีน้องๆ เด็กเอ็นเตอร์เทนระดับ VIP (N-VIP) คอยให้บริการดูแลครบทุกรูปแบบ</p>
+            <p><strong>ยึดถือความปลอดภัยและเป็นส่วนตัวสูงสุด:</strong> แพลตฟอร์มของเราให้บริการผ่านระบบ <strong>"นัดเจอจ่ายหน้างาน 100%"</strong> เพื่อความปลอดภัยสูงสุดโดยไม่มีเงื่อนไขโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น โปรไฟล์น้องๆ ทุกคนผ่านกระบวนการยืนยันตัวตนว่าตรงปก ให้คุณได้รับประสบการณ์อันน่าจดจำในค่ำคืนนี้อย่างสบายใจ</p>
         `,
         faqs: [
             { q: "หาน้องๆ รับงานเชียงใหม่ โซนไหนเดินทางสะดวกและเป็นส่วนตัวสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นโซนที่น้องๆ พร้อมให้บริการมากที่สุด เนื่องจากเดินทางสะดวก มีโรงแรมและคอนโดระดับพรีเมียมรองรับการนัดหมายอย่างปลอดภัย" },
@@ -62,9 +68,9 @@ const PROVINCE_SEO_DATA = {
         services: ["ดูแลแบบฟิวแฟนเต็มรูปแบบ", "เพื่อนเที่ยวกลางคืนทองหล่อ", "บริการ N-Vipส่วนตัว"],
         avgPrice: "2,000 - 5,000+",
         uniqueIntro: `
-            <p class="mb-4">มหานครแห่งแสงสีที่ไม่เคยหลับใหล ที่นี่คือคลับรวบรวมตัวท็อปพรีเมียมที่สุดของประเทศ บริการ <strong>รับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม.</strong> ที่พร้อมเสิร์ฟความเอ็กซ์คลูซีฟให้คุณถึงที่ ไม่ว่าจะเป็นน้องๆ นางแบบ พริตตี้ระดับท็อป หรือน้องๆ นักศึกษาลุคคุณหนู เรามีให้เลือกสรรอย่างครบครัน การันตีงานคุณภาพระดับ VIP ทุกโปรไฟล์</p>
-            <p class="mb-4">สะดวกสบายด้วยทำเลครอบคลุมตั้งแต่ใจกลางเมืองอย่าง <strong>สุขุมวิท, ทองหล่อ, เอกมัย</strong> ไปจนถึงย่านฮิตอย่าง <strong>รัชดา-ห้วยขวาง</strong> เดินทางง่ายด้วย BTS/MRT หรือนัดพบแบบเป็นส่วนตัวตามคอนโดหรูและโรงแรมชั้นนำ ไม่ว่าจะเป็นบริการเพื่อนเที่ยวกลางคืน หรือ Private VIP Entertain น้องๆ พร้อมดูแลดุจคนพิเศษ</p>
-            <p>ลืมความเสี่ยงเรื่องมิจฉาชีพไปได้เลย เรายึดหลัก <strong>ปลอดภัย จ่ายเงินหน้างาน ไร้กังวลเรื่องมัดจำ</strong> พบตัวจริง ถูกใจแล้วค่อยชำระเงิน ให้ค่ำคืนในกรุงเทพของคุณเป็นความทรงจำที่สมบูรณ์แบบที่สุด</p>
+            <p class="mb-4">มหานครแห่งแสงสีที่ไม่เคยหลับใหล ที่นี่คือแหล่งรวบรวมตัวท็อปพรีเมียมที่สุดของประเทศ บริการ <strong>รับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม.</strong> ที่พร้อมเสิร์ฟความพิเศษให้คุณถึงที่ ไม่ว่าจะเป็นน้องๆ นางแบบ พริตตี้ระดับแนวหน้า หรือน้องๆ นักศึกษาลุคคุณหนูเรียบร้อย เรามีให้เลือกสรรอย่างครบครัน มั่นใจได้ในงานคุณภาพระดับ VIP ทุกโปรไฟล์</p>
+            <p class="mb-4">สะดวกสบายด้วยทำเลครอบคลุมจุดสำคัญของเมืองหลวง ตั้งแต่ใจกลางย่านธุรกิจอย่าง <strong>สุขุมวิท, ทองหล่อ, เอกมัย</strong> ไปจนถึงโซนยอดฮิตอย่าง <strong>รัชดา-ห้วยขวาง</strong> เดินทางสะดวกนัดพบได้อย่างง่ายดายผ่านแนวรถไฟฟ้า BTS/MRT คอนโดหรู และโรงแรมชั้นนำทั่วไป พร้อมให้บริการดูแลคุณเป็นพิเศษแบบไม่มีสะดุด</p>
+            <p>หมดกังวลเรื่องปัญหาความปลอดภัยใดๆ เพราะเรายึดหลัก <strong>ปลอดภัย จ่ายหน้างาน ไร้กังวลเรื่องมัดจำ</strong> พบตัวจริง ถูกใจแล้วค่อยชำระเงิน ให้ค่ำคืนในกรุงเทพของคุณเป็นความทรงจำที่อบอุ่นและพิเศษที่สุด</p>
         `,
         faqs: [
             { q: "น้องๆ รับงานกรุงเทพ ส่วนใหญ่สะดวกโซนไหน?", a: "โซนยอดฮิตที่มีน้องๆ สแตนด์บายเยอะที่สุดคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งสะดวกต่อการนัดหมายตามคอนโดหรูหรือโรงแรมที่ติดรถไฟฟ้า" },
@@ -82,9 +88,9 @@ const PROVINCE_SEO_DATA = {
         services: ["บริการเอนเตอร์เทนผ่อนคลาย", "ดูแลแบบฟิวแฟน", "เพื่อนเที่ยวคาเฟ่ลำปาง"],
         avgPrice: "1,500 - 3,000",
         uniqueIntro: `
-            <p class="mb-4">เมืองรถม้าที่มีเสน่ห์ไม่แพ้ใคร พบกับน้องๆ <strong>รับงานลำปาง</strong> และ <strong>ไซด์ไลน์ลำปาง</strong> ระดับคัดเกรด ที่พร้อมดูแลคุณอย่างใกล้ชิดแบบฟีลแฟน สัมผัสความน่ารักของสาวเหนือหน้าหวาน บริการประทับใจ เอาใจเก่ง ให้ความรู้สึกอบอุ่นเหมือนมีคนรักมาคอยดูแล</p>
-            <p class="mb-4">นัดหมายง่ายและเป็นส่วนตัวในโซน <strong>ตัวเมืองลำปาง, ย่านสวนดอก</strong> รวมถึงบริเวณใกล้เคียงสถานศึกษาและ <strong>ม.ราชภัฏลำปาง</strong> ไม่ว่าจะเป็นการหาเพื่อนเที่ยวคาเฟ่ชิลๆ หรือน้องๆ เด็กเอ็นชงเหล้าปาร์ตี้ เราก็มีโปรไฟล์น้องนักศึกษาพาร์ทไทม์พร้อมให้บริการ</p>
-            <p>มั่นใจได้ในมาตรฐานความปลอดภัย <strong>เจอตัวจริง จ่ายเงินหน้างาน</strong> การันตีโปรไฟล์ตรงปก 100% รูปไม่แต่งเกินจริง ไม่ต้องกลัวโดนหลอกให้โอนมัดจำ</p>
+            <p class="mb-4">สัมผัสเสน่ห์ความผ่อนคลายอย่างเป็นส่วนตัวในเมืองรองที่เงียบสงบไปกับน้องๆ <strong>รับงานลำปาง</strong> และ <strong>ไซด์ไลน์ลำปาง</strong> ระดับพรีเมียมคัดเกรด ที่พร้อมดูแลคุณในฟิวแฟนอย่างใกล้ชิด อบอุ่น และเป็นกันเองด้วยกิริยามารยาทแบบสาวเหนือหน้าหวาน</p>
+            <p class="mb-4">นัดหมายได้อย่างเป็นส่วนตัวตามจุดสำคัญ ไม่ว่าจะเป็นย่านพักผ่อนหลักใน <strong>ตัวเมืองลำปาง, โซนสวนดอก</strong> ตลอดจนย่านนักศึกษาใกล้บริเวณ <strong>ม.ราชภัฏลำปาง</strong> น้องๆ ของเราพร้อมดูแลคุณในฐานะคนรู้ใจ ไม่ว่าจะเป็นเพื่อนเที่ยวคาเฟ่ หรือเด็กเอ็นชงเหล้าสร้างบรรยากาศงานปาร์ตี้ส่วนตัว</p>
+            <p>เราให้ความสำคัญสูงสุดกับความโปร่งใสและปลอดภัย <strong>นัดหมายเจอตัวจริง จ่ายหน้างาน 100%</strong> รูปไม่ตกแต่งเกินจริง ปราศจากขั้นตอนการบังคับโอนเงินมัดจำล่วงหน้าทุกกรณี</p>
         `,
         faqs: [
             { q: "หาไซด์ไลน์ลำปาง นัดเจอโซนไหนได้บ้าง?", a: "น้องๆ ส่วนใหญ่สะดวกในโซนตัวเมืองลำปาง, สวนดอก, พระบาท และโซนใกล้มหาวิทยาลัย สามารถนัดหมายตามโรงแรมหรือที่พักส่วนตัวได้อย่างปลอดภัย" },
@@ -102,9 +108,9 @@ const PROVINCE_SEO_DATA = {
         services: ["เอนเตอร์เทนพรีเมียมเชียงราย", "เพื่อนเที่ยวดูหนัง", "บริการดูแลฟิวแฟน"],
         avgPrice: "1,500 - 3,500",
         uniqueIntro: `
-            <p class="mb-4">เหนือสุดแดนสยาม ศูนย์รวมความน่ารักสไตล์สาวเหนือที่คุณต้องหลงใหล บริการ <strong>รับงานเชียงราย</strong> และ <strong>ไซด์ไลน์เชียงราย</strong> รวบรวมน้องๆ นักศึกษาลุคคุณหนู และนางแบบพริตตี้ท้องถิ่น ที่พร้อมดูแลคุณให้ผ่อนคลายจากความเหนื่อยล้า</p>
-            <p class="mb-4">พื้นที่ให้บริการครอบคลุมจุดสำคัญ ไม่ว่าจะเป็นทำเลใกล้มหาวิทยาลัยยอดฮิตอย่าง <strong>โซนบ้านดู่, ม.แม่ฟ้าหลวง (มฟล.)</strong> หรือใจกลาง <strong>ตัวเมืองเชียงราย และย่านริมกก</strong> น้องๆ พร้อมเป็นเพื่อนเที่ยวคาเฟ่ ดูหนัง หรือดูแลแบบฟีลแฟนส่วนตัวในโรงแรมหรู</p>
-            <p>เรามอบความมั่นใจสูงสุดด้วยนโยบาย <strong>ไม่มีการโอนมัดจำล่วงหน้า</strong> จ่ายเงินเมื่อพบตัวน้องเท่านั้น การันตีงานพรีเมียม ปลอดภัย คัดเน้นๆ เฉพาะงานคุณภาพตรงปก</p>
+            <p class="mb-4">ผ่อนคลายความเหนื่อยล้าท่ามกลางบรรยากาศโอบล้อมด้วยธรรมชาติเหนือสุดแดนสยาม บริการ <strong>รับงานเชียงราย</strong> และ <strong>ไซด์ไลน์เชียงราย</strong> รวบรวมน้องๆ นักศึกษาลุคเรียบร้อยน่ารักและนางแบบอิสระในพื้นที่ ที่พร้อมทำหน้าที่คอยดูแลเทคแคร์ผ่อนคลายอารมณ์ให้คุณอย่างใกล้ชิด</p>
+            <p class="mb-4">พื้นที่นัดหมายครอบคลุมย่านหลักอย่างสะดวกสบาย โดยเฉพาะย่านสถานศึกษาอย่าง <strong>โซนบ้านดู่, ใกล้ ม.แม่ฟ้าหลวง (มฟล.)</strong> ตลอดจนทำเลใจกลาง <strong>ตัวเมืองเชียงราย และย่านริมแม่น้ำกก</strong> พร้อมร่วมเดินทางกับคุณไม่ว่าจะไปทานข้าว คาเฟ่ชิลๆ หรือเพื่อนเที่ยวดูแลแบบเป็นส่วนตัว</p>
+            <p>จองคิวผ่อนคลายได้อย่างปลอดภัยที่สุดด้วยระบบ <strong>ไร้มัดจำ จ่ายเงินสดหน้างาน</strong> ยืนยันข้อมูลโปรไฟล์จริงตรงตามรูปภาพ ให้คุณท่องเที่ยวพักผ่อนได้อย่างผ่อนคลายที่สุด</p>
         `,
         faqs: [
             { q: "หาไซด์ไลน์เชียงราย โซนบ้านดู่ หรือ มฟล. นัดยากไหม?", a: "โซนบ้านดู่และใกล้ ม.แม่ฟ้าหลวง เป็นย่านยอดฮิตที่มีน้องๆ พาร์ทไทม์พร้อมให้บริการมากที่สุด นัดหมายได้ง่ายและรวดเร็วมากครับ" },
@@ -122,9 +128,9 @@ const PROVINCE_SEO_DATA = {
         services: ["เอนเตอร์เทนครบวงจร", "เพื่อนกินข้าว-ดูหนัง", "ฟิวแฟนระดับ VIP"],
         avgPrice: "1,500 - 4,000",
         uniqueIntro: `
-            <p class="mb-4">ศูนย์กลางความเจริญแห่งอีสาน พร้อมเสิร์ฟความน่ารักสดใสสไตล์สาวอีสานผิวขาวออร่า บริการ <strong>รับงานขอนแก่น</strong> และ <strong>ไซด์ไลน์ขอนแก่น</strong> คัดตัวท็อปจากรั้วมหาวิทยาลัยชื่อดัง และพริตตี้ระดับแนวหน้าในพื้นที่ พร้อมเนรมิตค่ำคืนของคุณให้พิเศษกว่าที่เคย</p>
-            <p class="mb-4">นัดพบได้อย่างเป็นส่วนตัวในย่านวัยรุ่นอย่าง <strong>กังสดาล, หลัง มข., โนนม่วง</strong> หรือโซนใจกลางเมืองแถว <strong>เซ็นทรัลขอนแก่น และบึงแก่นนคร</strong> ไม่ว่าคุณจะมองหาเด็กเอ็น N-VIP ดูแลปาร์ตี้ส่วนตัว หรือน้องๆ ที่บริการดูแลดั่งแฟน (ฟีลแฟน) เราก็มีให้เลือกอย่างจุใจ</p>
-            <p>ตัดปัญหาโอนก่อนแล้วโดนเททิ้ง! ที่นี่ใช้ระบบ <strong>จ่ายหน้างาน 100% ไม่ต้องลุ้นมัดจำ</strong> รูปภาพตรงปก ไม่จกตา มั่นใจได้ในความเป็นมืออาชีพและการรักษาความลับสูงสุด</p>
+            <p class="mb-4">พบกับความน่ารักสดใสสไตล์คนเมืองศูนย์กลางแห่งอีสานไปกับ <strong>SIDELINE CHIANGMAI</strong> ที่เปิดให้บริการคัดสรรน้องๆ <strong>รับงานขอนแก่น</strong> และ <strong>ไซด์ไลน์ขอนแก่น</strong> ระดับ VIP ทั้งลุคน้องนักศึกษาน่ารัก และพริตตี้สายบริการที่พร้อมดูแลคุณอย่างไร้ที่ติ</p>
+            <p class="mb-4">พื้นที่ให้บริการครอบคลุมทำเลฮิตหลัก ไม่ว่าจะเป็นย่านมหาวิทยาลัยชื่อดังอย่าง <strong>กังสดาล, หลัง มข., โนนม่วง</strong> ตลอดจนห้างหรูใจกลางเมืองแถว <strong>เซ็นทรัลขอนแก่น และบึงแก่นนคร</strong> พร้อมตอบสนองทุกความพึงพอใจทั้งบริการดูแลฟีลแฟนส่วนตัว และเด็กเอ็นเตอร์เทนชงเหล้าสไตล์ N-VIP</p>
+            <p>เราเปิดให้บริการด้วยความโปร่งใส ปราศจากเงื่อนไขมัดจำล่วงหน้าทุกกรณี <strong>ชำระเงินสดหน้างานเมื่อเจอตัวน้องจริง</strong> โปรไฟล์ตรงปก ยินดีให้บริการอย่างตรงไปตรงมาสูงสุด</p>
         `,
         faqs: [
             { q: "น้องๆ ไซด์ไลน์ขอนแก่น ส่วนใหญ่เป็นใคร?", a: "เรามีทั้งน้องๆ นักศึกษาพาร์ทไทม์ลุคน่ารักใสๆ และนางแบบพริตตี้สายแซ่บที่รับงานส่วนตัว ทุกคนผ่านการสัมภาษณ์และคัดโปรไฟล์มาอย่างดี" },
@@ -142,9 +148,9 @@ const PROVINCE_SEO_DATA = {
         services: ["เพื่อนเที่ยวทะเล", "เอนเตอร์เทนพูลวิลล่า", "ดูแล VIP ส่วนตัว"],
         avgPrice: "1,500 - 4,500",
         uniqueIntro: `
-            <p class="mb-4">เมืองท่องเที่ยวริมทะเลที่ไม่เคยหลับใหล รวมความเซ็กซี่ระดับตัวแม่ไว้ที่นี่ บริการ <strong>รับงานชลบุรี</strong> และ <strong>สาวไซด์ไลน์พัทยา</strong> ที่ครอบคลุมทุกโซนฮิตตั้งแต่เมืองพัทยา, หาดบางแสน, ศรีราชา ไปจนถึงใกล้นิคมอมตะนคร</p>
-            <p class="mb-4">ไม่ว่าคุณกำลังมองหาเพื่อนเที่ยวทะเลสุดชิลแถว <strong>บางแสน (ม.บูรพา)</strong>, น้องๆ ลุคอินเตอร์สุดแซ่บเพื่อเป็นคู่ควงใน <strong>พัทยา</strong>, หรือเด็กเอ็นสายปาร์ตี้ที่เชี่ยวชาญการเอนเตอร์เทนใน <strong>พูลวิลล่าส่วนตัว</strong> น้องๆ ของเราพร้อมลุยไปกับคุณและดูแลให้ประทับใจที่สุด</p>
-            <p>เที่ยวทะเลอย่างสบายใจ ปลอดภัยไร้กังวล ด้วยนโยบายเด็ดขาด <strong>ไม่รับโอนมัดจำ จ่ายเงินเมื่อถึงหน้างานเท่านั้น</strong> การันตีความแซ่บ รูปภาพโปรไฟล์ผ่านการตรวจสอบมาแล้วว่าตรงปก 100%</p>
+            <p class="mb-4">พักผ่อนริมฝั่งทะเลภาคตะวันออกไปกับความสุขที่ไร้ขีดจำกัด บริการ <strong>รับงานชลบุรี</strong> และ <strong>สาวไซด์ไลน์พัทยา</strong> คัดสรรน้องๆ ระดับคุณภาพที่พร้อมสแตนด์บายให้บริการดูแลคุณ ครอบคลุมทำเลฮิตและนิคมอุตสาหกรรมหลักทั้งหมด</p>
+            <p class="mb-4">พร้อมเปลี่ยนวันหยุดปกติให้เป็นวันที่แสนพิเศษ ไม่ว่าจะเป็นเพื่อนเที่ยวทะเลสบายๆ แถว <strong>บางแสน และรอบ ม.บูรพา</strong>, หรือน้องๆ ลุคอินเตอร์คอยเคียงข้างควงแขนยามค่ำคืนใน <strong>พัทยา</strong> ไปจนถึงบริการดูแลปาร์ตี้พูลวิลล่าส่วนตัวในย่าน <strong>ศรีราชา</strong> พร้อมเอาใจใส่คุณอย่างอบอุ่นที่สุด</p>
+            <p>จองคิวเดินทางไปเที่ยวทะเลได้อย่างไร้กังวล <strong>ระบบความปลอดภัยดีเยี่ยม จ่ายหน้างาน ไม่ต้องจ่ายค่ามัดจำ</strong> ตัวจริงผ่านการตรวจความตรงปกมาเป็นอย่างดี</p>
         `,
         faqs: [
             { q: "หาสาวไซด์ไลน์พัทยา-บางแสน รูปตรงปกไหม?", a: "เราเน้นการตรวจสอบรูปภาพให้ตรงกับตัวจริงที่สุด (No filter ลวงโลก) เพื่อให้ลูกค้าประทับใจตั้งแต่แรกพบและกลับมาใช้บริการซ้ำ" },
@@ -162,9 +168,9 @@ const PROVINCE_SEO_DATA = {
         services: ["บริการเอนเตอร์เทนแบบเป็นกันเอง", "ดูแลฟิวแฟนกินข้าวดูหนัง"],
         avgPrice: "1,500 - 3,000",
         uniqueIntro: `
-            <p class="mb-4">ค้นพบมนต์เสน่ห์ความน่ารักแบบฉบับสาวอีสานใต้ บริการ <strong>รับงานอุบล</strong> และ <strong>ไซด์ไลน์อุบล</strong> ที่รวบรวมน้องๆ หน้าหวาน เรียบร้อย ผิวเนียนสวย พร้อมจะดูแลเอาใจใส่คุณอย่างอบอุ่นในแบบฉบับฟีลแฟน (Girlfriend Experience)</p>
-            <p class="mb-4">น้องๆ สะดวกรับงานในพื้นที่ศูนย์กลางอย่าง <strong>ตัวเมืองอุบลราชธานี, วารินชำราบ</strong> และโซนสถานศึกษาอย่าง <strong>ม.อุบล</strong> นัดเจอง่ายตามโรงแรมหรูใกล้เซ็นทรัล หรือหาเพื่อนเที่ยวดูหนัง ทานข้าว น้องๆ ก็พร้อมเอนเตอร์เทนแบบเป็นกันเอง</p>
-            <p>เราให้ความสำคัญกับความปลอดภัยของลูกค้าเป็นอันดับหนึ่ง <strong>จ่ายเงินสดเมื่อพบตัวจริงเท่านั้น ไม่มีการบังคับโอนมัดจำ</strong> การันตีงานดี โปรไฟล์ตรงปก เพื่อค่ำคืนที่แสนพิเศษของคุณ</p>
+            <p class="mb-4">เปิดมุมมองพักผ่อนอย่างอบอุ่นเป็นกันเองสไตล์สาวอีสานใต้อารมณ์ดี บริการ <strong>รับงานอุบล</strong> และ <strong>ไซด์ไลน์อุบล</strong> รวบรวมน้องๆ หน้าหวานน่ารัก คุยสนุก และรักงานบริการ พร้อมดูแลประคับประคองคุณดั่งคนพิเศษดั่งฟีลแฟนอย่างประทับใจ</p>
+            <p class="mb-4">สะดวกนัดหมายและให้บริการครอบคลุมพื้นที่อย่างใกล้ชิด ทั้งย่านชุมชนใน <strong>ตัวเมืองอุบลราชธานี, วารินชำราบ</strong> รวมถึงพื้นที่ใกล้มหาวิทยาลัยแถว <strong>ม.อุบล</strong> ยินดีเป็นเพื่อนทานข้าว คาเฟ่ ดูหนัง หรือดูแลเอนเตอร์เทนส่วนตัวตามที่พักส่วนตัวใกล้เซ็นทรัล</p>
+            <p>เราเปิดให้บริการตามนโยบายจริยธรรมสูงสุด <strong>ตรงปก จ่ายเงินสดหน้างาน ไม่มีการขอเงินจองล่วงหน้า</strong> ปลอดภัย มั่นใจได้ในความเป็นส่วนตัวสูงสุด</p>
         `,
         faqs: [
             { q: "ไซด์ไลน์อุบล นัดเจอแถวไหนสะดวกและปลอดภัย?", a: "โซนตัวเมืองและบริเวณใกล้ห้างเซ็นทรัลอุบล ถือเป็นจุดนัดพบที่สะดวก มีโรงแรมและที่พักรองรับเยอะ ปลอดภัยและเป็นส่วนตัวที่สุดครับ" },
@@ -182,9 +188,9 @@ const PROVINCE_SEO_DATA = {
         services: ["บริการดูแลระดับ Exclusive", "เพื่อนเที่ยวกลางคืนยูดีทาวน์", "เอนเตอร์เทนส่วนตัว"],
         avgPrice: "1,500 - 4,000",
         uniqueIntro: `
-            <p class="mb-4">ที่สุดของความพรีเมียมในแดนอีสานเหนือ บริการ <strong>รับงานอุดร</strong> และ <strong>ไซด์ไลน์อุดร</strong> รวบรวมนางแบบ พริตตี้ และสาวสวยระดับ VIP หน้าเป๊ะ ผิวออร่า ที่พร้อมจะทำให้ค่ำคืนของคุณที่อุดรธานีเต็มไปด้วยสีสันและไม่มีวันลืม</p>
-            <p class="mb-4">สัมผัสไลฟ์สไตล์หรูหราด้วยน้องๆ ที่พร้อมเป็นเพื่อนเที่ยวกลางคืนในย่าน <strong>ยูดีทาวน์ (UD Town)</strong> หรือดูแลเอนเตอร์เทนแบบ Private ภายในที่พักโซน <strong>ตัวเมืองอุดร และเซ็นทรัล</strong> น้องๆ ของเราแต่งตัวเก่ง วางตัวดี เหมาะสำหรับควงออกงานหรือดูแลส่วนตัว</p>
-            <p>รับประกันคุณภาพด้วยบริการที่โปร่งใส <strong>ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำก่อน</strong> เพื่อให้ลูกค้าคนสำคัญเช่นคุณได้รับประสบการณ์ที่ดีที่สุดอย่างไร้กังวล</p>
+            <p class="mb-4">ผ่อนคลายกับระดับการบริการขั้นสูงสุดในดินแดนอีสานตอนบน บริการ <strong>รับงานอุดร</strong> และ <strong>ไซด์ไลน์อุดร</strong> คัดสรรน้องๆ หน้าตาดี ผิวพรรณสว่าง บุคลิกโดดเด่นระดับ VIP ที่พร้อมจะร่วมเป็นคนพิเศษเคียงคู่และเปิดประสบการณ์ผ่อนคลายร่วมกับคุณอย่างดีที่สุด</p>
+            <p class="mb-4">สอดรับกับวิถีชีวิตคนเมืองอย่างสะดวกสบาย ไม่ว่าจะเป็นเพื่อนควงแขนเดินเล่นช้อปปิ้งรอบ <strong>ยูดีทาวน์ (UD Town)</strong> หรือดูแลเอนเตอร์เทนแบบ Private ภายในโรงแรมพรีเมียมใกล้ <strong>เซ็นทรัลอุดร และตัวเมืองอุดร</strong> คุยเก่ง วางตัวดี เหมาะสมกับทุกวาระการนัดหมายของคุณ</p>
+            <p>ดูแลด้วยมารยาทชั้นดีอย่างซื่อสัตย์ <strong>การันตีรูปภาพตัวจริง ปลอดภัย ไม่ผ่านการโอนจองล่วงหน้า</strong> จ่ายเงินหน้างานเมื่อเจอตัวเพื่อความสบายใจสูงสุด</p>
         `,
         faqs: [
             { q: "หาเด็กเอ็นอุดร ย่านไหนตัวท็อปเยอะและสะดวกสุด?", a: "ย่านยูดีทาวน์ (UD Town) และบริเวณใกล้เซ็นทรัลอุดร เป็นแหล่งรวมที่พักชั้นนำและน้องๆ งานดีระดับพรีเมียมสะดวกรับงานมากที่สุดครับ" },
@@ -197,14 +203,14 @@ const PROVINCE_SEO_DATA = {
         zones: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
         lsi: ["รับงานพิษณุโลก", "ไซด์ไลน์พิษณุโลก", "สาวไซด์ไลน์พิษณุโลก", "sideline พิษณุโลก", "น้องนักศึกษามน", "เด็กเอ็นพิษณุโลก"],
         intents: ["เพื่อนเที่ยวคาเฟ่", "ดูแลฟิวแฟนทานข้าว", "เอนเตอร์เทนส่วนตัว"],
-        traits: ["สาวสองแควหน้าหวาน", "น่ารักสไตล์นักศึกษา", "พูดเพราะเป็นกันเอง", "ดูแลเอาใจเก่ง"],
+        traits: ["สาวเมืองสองแควหน้าหวาน", "น่ารักสไตล์นักศึกษา", "พูดเพราะเป็นกันเอง", "ดูแลเอาใจเก่ง"],
         hotels: ["โรงแรมหรูในเมือง", "ที่พักใกล้ ม.นเรศวร", "โรงแรมริมน้ำน่าน"],
         services: ["บริการเอนเตอร์เทนแบบฟิวแฟน", "เพื่อนเที่ยว-ดูหนัง"],
         avgPrice: "1,500 - 3,000",
         uniqueIntro: `
-            <p class="mb-4">สัมผัสความอบอุ่นและน่ารักแบบฉบับสาวเมืองสองแคว บริการ <strong>รับงานพิษณุโลก</strong> และ <strong>ไซด์ไลน์พิษณุโลก</strong> ศูนย์รวมน้องๆ นักศึกษาลุคน่ารักใสๆ และพริตตี้ท้องถิ่นที่พร้อมดูแลคุณอย่างเป็นกันเอง พูดจาไพเราะ และเอาใจใส่เก่งดั่งคนรัก</p>
-            <p class="mb-4">นัดหมายได้สะดวกและรวดเร็วในโซนยอดฮิต ไม่ว่าจะเป็นย่านมหาวิทยาลัยอย่าง <strong>ม.นเรศวร (มน.)</strong>, ใจกลาง <strong>ตัวเมืองพิษณุโลก</strong> หรือพักผ่อนแบบชิลๆ ตามโรงแรม <strong>ริมแม่น้ำน่าน</strong> มีให้เลือกทั้งเพื่อนเที่ยวคาเฟ่ ดูหนัง ทานข้าว หรือบริการดูแลแบบฟีลแฟนส่วนตัว</p>
-            <p>เรามอบความสบายใจสูงสุดแก่ลูกค้า <strong>การันตีความตรงปก ปลอดภัย ไร้มัดจำ</strong> จ่ายเงินสดกับน้องเมื่อพบตัวจริงเท่านั้น เพื่อสร้างความทรงจำที่น่าประทับใจในพิษณุโลกให้กับคุณ</p>
+            <p class="mb-4">ผ่อนคลายกับความเป็นกันเองของสาวเหนือตอนล่างในเมืองสองแคว บริการ <strong>รับงานพิษณุโลก</strong> และ <strong>ไซด์ไลน์พิษณุโลก</strong> ศูนย์รวมน้องๆ พาร์ทไทม์ลุคนักศึกษาสดใสน่ารัก ที่เพียบพร้อมด้วยมารยาทที่ดีงาม พูดจาไพเราะ และเอาใจใส่ดูแลดั่งคนพิเศษคอยเป็นที่ปรึกษาข้างกาย</p>
+            <p class="mb-4">นัดพบน้องๆ ได้อย่างส่วนตัวรวดเร็ว ทั้งพิกัดยอดนิยมใกล้มหาวิทยาลัยรอบ <strong>ม.นเรศวร (มน.)</strong>, ย่านท่องเที่ยวใจกลาง <strong>ตัวเมืองพิษณุโลก</strong> ตลอดจนโรงแรมพักผ่อนริมแม่น้ำ <strong>ริมน้ำน่าน</strong> ยินดีรับหน้าที่เป็นเพื่อนควงแขน ทานข้าว หรือเดินชิลคาเฟ่เพื่อผ่อนคลายความเหนื่อยล้า</p>
+            <p>เราพร้อมรักษาความพึงพอใจของสมาชิกระดับสูงสุด <strong>รูปภาพตรงตัว ปลอดภัย ไม่คิดค่ามัดจำ</strong> พบตัวจริงตรวจสิทธิ์ความตรงปกแล้วชำระเงินสดหน้างาน</p>
         `,
         faqs: [
             { q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดยากไหม?", a: "โซน ม.นเรศวร (มน.) เป็นโซนที่มีน้องๆ นักศึกษาพาร์ทไทม์รับงานเยอะที่สุด นัดหมายได้สะดวกและรวดเร็วมาก มีที่พักรองรับมากมาย" },
@@ -222,9 +228,9 @@ const PROVINCE_SEO_DATA = {
         services: ["ฟิวแฟนส่วนตัว", "เพื่อนเที่ยว-ดูหนัง", "เอนเตอร์เทนผ่อนคลาย"],
         avgPrice: "1,500 - 3,500",
         uniqueIntro: `
-            <p class="mb-4">หากคุณกำลังมองหาช่วงเวลาการพักผ่อนเหนือระดับในพื้นที่ของคุณ เรารวบรวมน้องๆ <strong>รับงานส่วนตัว</strong> และ <strong>ไซด์ไลน์เกรดพรีเมียม</strong> ที่ผ่านการคัดสรรอย่างเข้มงวด ทั้งรูปร่าง หน้าตา และมารยาทในการบริการ</p>
-            <p class="mb-4">ไม่ว่าคุณจะต้องการเพื่อนเที่ยวแก้เหงา เด็กเอ็นเตอร์เทนสำหรับงานปาร์ตี้ หรือการดูแลเอาใจใส่แบบฟีลแฟน (Girlfriend Experience) แบบเป็นส่วนตัว น้องๆ ของเราพร้อมเดินทางไปมอบความสุขให้คุณถึงที่พัก หรือโรงแรมชั้นนำในตัวเมือง</p>
-            <p>เรายึดมั่นในความปลอดภัยและความพึงพอใจของลูกค้าเป็นหลัก <strong>การันตีความตรงปก 100%</strong> พร้อมให้บริการ นัดหมายได้อย่างเป็นส่วนตัว ปลอดภัย ไม่มีการบังคับโอนมัดจำ จ่ายเงินเมื่อเจอตัวจริงเท่านั้น</p>
+            <p class="mb-4">เปิดโอกาสให้ตัวเองได้พักผ่อนกับความสุขอย่างเป็นส่วนตัวผ่านบริการ <strong>รับงานส่วนตัว</strong> และ <strong>สาวไซด์ไลน์</strong> เกรดพรีเมียมที่รวบรวมคนน่ารัก มารยาทดี บริการเอาใจเก่งมาดูแลอย่างอบอุ่น คลี่คลายความเครียดในแต่ละวันดุจมีคู่รักข้างกาย</p>
+            <p class="mb-4">น้องๆ ของเราพร้อมทำหน้าที่ดูแลอย่างใกล้ชิดตามโรงแรมพรีเมียมชั้นนำใน <strong>ตัวเมือง</strong> ไม่ว่าจุดประสงค์เพื่อการเดินทางท่องเที่ยว หาคนคอยเดินควงแขน ทานข้าว คาเฟ่ชิลๆ หรือปาร์ตี้เอนเตอร์เทนส่วนตัว ยินดีร่วมสร้างความประทับใจเคียงข้างคุณเสมอ</p>
+            <p>เราเปิดให้บริการบนความซื่อตรง ปลอดภัย และให้ความสำคัญกับข้อมูลส่วนบุคคล <strong>รับประกันรูปภาพตรงปก 100% เจอตัวจริงค่อยชำระเงิน ไร้ระบบมัดจำ</strong> ปลอดภัย สบายใจ ไร้ข้อกังวล</p>
         `,
         faqs: [
             { q: "ใช้บริการน้องๆ รับงาน ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายเงินสดหน้างานเมื่อเจอตัวน้องจริงเท่านั้น เพื่อความปลอดภัยสูงสุดของคุณและป้องกันมิจฉาชีพ" },
@@ -265,19 +271,25 @@ const stripHTML = (str) => {
     return str.replace(/<[^>]*>?/gm, '');
 };
 
+// -------------------------------------------------------------
+// ✅ [จุดแก้ไขที่ 5]: ลบ Regex flag 'g' เพื่อเปลี่ยนเฉพาะคำแรกในบทความ
+// เพื่อหลีกเลี่ยงปัญหา Link Soup สีชมพูปนทองสลับลายตาบนหน้าจอ
+// -------------------------------------------------------------
 const smartLinkify = (text, provinceKey, zones) => {
     if (!text) return "";
     let linkedText = text;
     if (zones && zones.length > 0) {
         zones.forEach(zone => {
-            const regex = new RegExp(`(${zone})`, 'g');
+            // ดึง flag 'g' ออกเพื่อให้แทนที่แค่ 1 ครั้งแรกที่เจอในบทความเท่านั้น
+            const regex = new RegExp(`(${zone})`, '');
             linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#FF2E63] hover:text-white transition-colors font-[500] border-b border-[#FF2E63]/30" aria-label="ค้นหาน้องๆ โซน ${zone}">$1</a>`);
         });
     }
 
     const keywords = ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน"];
     keywords.forEach(kw => {
-        const regex = new RegExp(`(${kw})`, 'g');
+        // ดึง flag 'g' ออกเพื่อให้แทนที่แค่ 1 ครั้งแรกที่เจอในบทความเท่านั้น
+        const regex = new RegExp(`(${kw})`, '');
         linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(kw)}" class="text-[#D4AF37] hover:text-white transition-colors font-[500] border-b border-[#D4AF37]/30" aria-label="บริการ ${kw}">$1</a>`);
     });
 
@@ -285,6 +297,8 @@ const smartLinkify = (text, provinceKey, zones) => {
 };
 
 // [ Component: Dynamic SEO Content ] ผสานดีไซน์กล่อง VIP แบบใหม่เข้ากับธีม Luxury Noir
+// ✅ ปรับสีอักษรรายละเอียดเงื่อนไขบริการ ข้อความคำอธิบายจังหวัด และเนื้อหา FAQ ให้สว่างและชัดเจนขึ้น 
+// เพื่อแก้ไข Contrast Ratio บนหน้าจอดาร์กโหมดตามมาตรฐาน WCAG AA
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
     
@@ -323,7 +337,8 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                             <i class="fas fa-plus text-sm"></i>
                         </div>
                     </summary>
-                    <div class="px-6 pb-6 pt-2 ml-[3.25rem] text-white/65 text-[14px] font-[300] leading-[1.6] border-l-2 border-[#FF2E63]/20">
+                    <!-- ปรับระดับสัดส่วนสี text-white/65 เป็น text-zinc-300 เพื่อให้อ่านง่ายและชัดเจนขึ้น -->
+                    <div class="px-6 pb-6 pt-2 ml-[3.25rem] text-zinc-300 text-[14px] font-[300] leading-[1.6] border-l-2 border-[#FF2E63]/20">
                         <p>${escapeHTML(faq.a)}</p>
                     </div>
                 </details>
@@ -351,7 +366,8 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                                 <h3 class="text-white text-2xl md:text-3xl font-[500] tracking-wide">
                                     <span class="text-[#FF2E63]">VIP</span> PROMOTION
                                 </h3>
-                                <p class="text-white/50 text-[13px] mt-2 font-[300]">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดเป็นสถานะ Super VIP ทันที</p>
+                                <!-- ปรับระดับสัดส่วนสี text-white/50 เป็น text-zinc-300/90 เพื่อความสว่างและชัดเจนขึ้น -->
+                                <p class="text-zinc-300/90 text-[13px] mt-2 font-[300]">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดเป็นสถานะ Super VIP ทันที</p>
                             </div>
                             
                             <div class="relative mt-auto mb-auto py-8">
@@ -359,7 +375,6 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
 <div class="glass-panel border border-[#FF2E63]/20 bg-black/40 rounded-[20px] p-6 text-center relative flex flex-col items-center justify-center overflow-hidden">
     <span class="text-[10px] text-brand-gold font-[500] uppercase tracking-[0.2em] mb-2"><i class="fas fa-gem mr-1"></i> Exclusive Code</span>
     <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
-        <!-- ปรับขนาดจาก 4xl เหลือ 2xl ในมือถือ -->
         <div class="text-2xl md:text-4xl font-[700] tracking-wider text-gradient-luxury select-all font-mono whitespace-nowrap">
             VIP-${provinceKey.toUpperCase()}
         </div>
@@ -384,7 +399,8 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                                         <div class="w-10 h-10 shrink-0 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-sm font-[700] text-white/40 group-hover:text-brand-pink group-hover:border-brand-pink/30 transition-all">0${idx + 1}</div>
                                         <div class="pt-0.5">
                                             <h3 class="text-[15px] font-[500] mb-1 text-white group-hover:text-brand-gold transition-colors">${item.t}</h3>
-                                            <p class="text-white/50 text-[12px] font-[300] leading-[1.6]">${item.d}</p>
+                                            <!-- ปรับระดับสัดส่วนสี text-white/50 เป็น text-zinc-300 เพื่อความชัดเจนในการแสดงผล -->
+                                            <p class="text-zinc-300 text-[12px] font-[300] leading-[1.6]">${item.d}</p>
                                         </div>
                                     </div>
                                 `).join("")}
@@ -406,7 +422,8 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                                 ที่สุดของบริการเพื่อนเที่ยว<br>
                                 <span class="text-gradient-luxury font-[700]">ไซด์ไลน์${escapeHTML(provinceName)}</span>
                             </h2>
-                            <div class="text-white/65 text-[14px] md:text-[15px] font-[300] leading-[1.8] space-y-6 text-left md:text-center px-2">
+                            <!-- ปรับระดับสัดส่วนสี text-white/65 เป็น text-zinc-300 ในกล่อง SEO ข้อความยาวเพื่อให้มีคอนทราสต์ชัดเจน -->
+                            <div class="text-zinc-300 text-[14px] md:text-[15px] font-[300] leading-[1.8] space-y-6 text-left md:text-center px-2">
                                 ${smartLinkify(data.uniqueIntro, provinceKey, data.zones)}
                             </div>
                         </div>
@@ -463,16 +480,34 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
 export default async (request, context) => {
     try {
         const url = new URL(request.url);
-        
-        if (url.searchParams.has("province")) {
-            const provinceValue = url.searchParams.get("province");
-            return Response.redirect(new URL(`/location/${provinceValue}`, url.origin).toString(), 301);
-        }
-
         const pathParts = url.pathname.split("/").filter(Boolean);
+        
+        // -------------------------------------------------------------
+        // ✅ [จุดแก้ไขที่ 1]: ดึง Key จังหวัดล่วงหน้าและแปลงข้อมูลให้ถูกต้อง
+        // -------------------------------------------------------------
         const rawProvinceKey = pathParts[pathParts.length - 1] || "chiangmai";
         let provinceKey = rawProvinceKey.toLowerCase();
         try { provinceKey = decodeURIComponent(rawProvinceKey).toLowerCase(); } catch { provinceKey = rawProvinceKey.toLowerCase(); }
+
+        // -------------------------------------------------------------
+        // ✅ [จุดแก้ไขที่ 2]: 301 Redirect หน้าพาร์ท /location/chiangmai ไปที่หน้าแรก (/)
+        // เพื่อป้องกันปัญหา Netlify ทำงานข้ามขั้นตอน Edge Function
+        // -------------------------------------------------------------
+        if (pathParts[0] === "location" && provinceKey === "chiangmai") {
+            return Response.redirect(new URL("/", url.origin).toString(), 301);
+        }
+
+        // -------------------------------------------------------------
+        // ✅ [จุดแก้ไขที่ 3]: ตรวจสอบและดักจับ Query Parameter (?province=) 
+        // หากผู้ใช้ขอข้อมูล chiangmai ให้ส่งตรงกลับไปหน้าแรก (/) ทันที
+        // -------------------------------------------------------------
+        if (url.searchParams.has("province")) {
+            const provinceValue = url.searchParams.get("province")?.toLowerCase();
+            if (provinceValue === "chiangmai") {
+                return Response.redirect(new URL("/", url.origin).toString(), 301);
+            }
+            return Response.redirect(new URL(`/location/${provinceValue}`, url.origin).toString(), 301);
+        }
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
@@ -486,8 +521,8 @@ export default async (request, context) => {
         const provinceData = provinceRes.data;
         if (!provinceData) return context.next();
 
-        const safeProfiles = profilesRes.data ||[];
-        const allProvinces = allProvincesRes.data ||[];
+        const safeProfiles = profilesRes.data || [];
+        const allProvinces = allProvincesRes.data || [];
         const provinceName = provinceData.nameThai;
         const seoData = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
         
@@ -496,6 +531,10 @@ export default async (request, context) => {
         const CURRENT_YEAR = now.getFullYear();
         const ISO_DATE = now.toISOString();
 
+        // -------------------------------------------------------------
+        // ✅ [จุดแก้ไขที่ 4]: ตั้งค่าตัวแปร URL และสิทธิ์การใช้งาน
+        // หากเปิดผ่านหน้าหลัก หรือ Key คือ chiangmai ลิงก์มาตรฐาน (Canonical) จะถูกอ้างอิงไปหน้าหลัก (/) เสมอ
+        // -------------------------------------------------------------
         const isChiangmai = (provinceKey === 'chiangmai');
         const provinceUrl = isChiangmai ? CONFIG.DOMAIN : `${CONFIG.DOMAIN}/location/${provinceKey}`;
         
@@ -594,12 +633,11 @@ export default async (request, context) => {
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-        // [ CORE SELLING POINT ]: Supercharged Profile Cards (ผสานจุดเด่น 2 โค้ด)
+        // [ CORE SELLING POINT ]: Supercharged Profile Cards
         const cardsHTML = safeProfiles.map((p, index) => {
             const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
             const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
             const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
-            // เช็คสถานะว่าง
             const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
             let displayRate = p.rate ? (Number(String(p.rate).replace(/,/g, "")) ? Number(String(p.rate).replace(/,/g, "")).toLocaleString() : escapeHTML(p.rate)) : "สอบถาม";
             const animDelay = (index % 10) * 50;
@@ -608,71 +646,64 @@ export default async (request, context) => {
             const smartAlt = `รูปโปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} พิกัดโซน${profileLocation}`;
             const imageAttributes = index < 4 ? 'fetchpriority="high" decoding="sync"' : 'loading="lazy" decoding="async"';
 
-// คำนวณความกว้างที่เหมาะสม: ขนาดแสดงผลจริงคือ ~180px 
-// ดังนั้นใช้ 200px สำหรับจอปกติ และ 400px สำหรับจอความละเอียดสูง (Retina)
-const thumbW = 200; 
-const thumbH = 267; // อัตราส่วน 3:4
+            const thumbW = 200; 
+            const thumbH = 267; 
 
-return `
-<article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
-    
-    <div class="relative h-full flex flex-col z-10 cursor-pointer" onclick="window.location.href='${profileLink}'">
-        <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
-            <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
-        </a>
-        
-        ${(p.isfeatured || index < 3) ? `
-        <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
-            <i class="fas fa-crown text-[8px]"></i> HOT VIP
-        </div>` : ''}
-        
-        <!-- Profile Image Container -->
-        <!-- แก้ไข: เพิ่ม bg-zinc-900 เพื่อลด CLS ระหว่างรอโหลดรูป -->
-        <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070a]">
-            <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
-                 srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
-                 sizes="(max-width: 640px) 45vw, 200px"
-                 width="${thumbW}" 
-                 height="${thumbH}"
-                 onerror="this.onerror=null; this.src='/images/default.webp';"
-                 alt="${smartAlt}" 
-                 class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
-                 
-            <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
-            
-            <!-- Status Dot -->
-            <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
-                <span class="relative flex h-2 w-2">
-                    ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
-                    <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
-                </span>
-                <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
-            </div>
+            // ✅ ลบคำสั่ง onclick="window.location.href='...'" ที่รันด้วย JS ออกไป เพื่อหลีกเลี่ยงการเกิดคลิกซ้อน (Double Clicks) 
+            // โดยให้ลิงก์ Semantic HTML ด้วยแท็ก a href ตัวเดิมที่คลุมครอบขนาด absolute เติมเต็มการ์ดจัดการคลิกอย่างเป็นธรรมชาติ
+            return `
+            <article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
+                
+                <div class="relative h-full flex flex-col z-10">
+                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
+                        <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
+                    </a>
+                    
+                    ${(p.isfeatured || index < 3) ? `
+                    <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
+                        <i class="fas fa-crown text-[8px]"></i> HOT VIP
+                    </div>` : ''}
+                    
+                    <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070a]">
+                        <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
+                             srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
+                             sizes="(max-width: 640px) 45vw, 200px"
+                             width="${thumbW}" 
+                             height="${thumbH}"
+                             onerror="this.onerror=null; this.src='/images/default.webp';"
+                             alt="${smartAlt}" 
+                             class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
+                             
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
+                        
+                        <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
+                            <span class="relative flex h-2 w-2">
+                                ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
+                                <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
+                            </span>
+                            <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
+                        </div>
 
-            <!-- Info Block Bottom -->
-            <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
-                <!-- แก้ไข: เปลี่ยน font-[182] กลับเป็น font-[600] หรือ font-bold -->
-                <h3 class="text-[18px] md:text-[20px] font-[600] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
-                    ${cleanName} <span class="text-[11px] font-[400] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
-                </h3>
-                <p class="text-[11px] font-[400] text-white/70 flex items-center gap-1.5 truncate max-w-full">
-                    <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
-                </p>
-            </div>
-        </div>
-        
-        <!-- Bottom Interaction Footer -->
-        <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
-            <div>
-                <!-- แก้ไข: เปลี่ยน font-[182] เป็น font-[600] -->
-                <span class="text-[16px] font-[600] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
-            </div>
-            <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[600] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
-                View
-            </div>
-        </div>
-    </div>
-</article>`;
+                        <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
+                            <h3 class="text-[18px] md:text-[20px] font-[600] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
+                                ${cleanName} <span class="text-[11px] font-[400] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
+                            </h3>
+                            <p class="text-[11px] font-[400] text-white/70 flex items-center gap-1.5 truncate max-w-full">
+                                <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
+                        <div>
+                            <span class="text-[16px] font-[600] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
+                        </div>
+                        <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[600] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
+                            View
+                        </div>
+                    </div>
+                </div>
+            </article>`;
         }).join("");
 
         const htmlTemplate = `<!DOCTYPE html>
@@ -766,15 +797,13 @@ return `
 
 <body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white">
 
-    <!-- Premium Header Dock (Auto hide on scroll) -->
-<header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-    <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
-        <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg flex items-center gap-2" aria-label="กลับสู่หน้าแรก">
-            <!-- เปลี่ยนจากตัวอักษรเป็นรูปภาพโลโก้ -->
-            <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-90 object-contain">
-        </a>
-        
-        <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
+    <header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+        <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
+            <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg flex items-center gap-2" aria-label="กลับสู่หน้าแรก">
+                <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-90 object-contain">
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
                 <a href="/" class="hover:text-white transition-all">หน้าแรก</a>
                 <a href="/profiles.html" class="text-white border-b border-[#FF2E63] pb-1" aria-current="page">โปรไฟล์น้องๆ</a>
                 <a href="/locations.html" class="hover:text-white transition-all">พิกัดบริการ</a>
@@ -785,7 +814,6 @@ return `
                     <i class="fab fa-line text-[#00E676] text-sm" aria-hidden="true"></i> จองคิวตอนนี้
                 </a>
                 
-                <!-- Hamburger Menu Trigger (Mobile) -->
                 <button id="menu-btn" aria-label="เปิดเมนู" aria-expanded="false" class="md:hidden flex items-center justify-center w-10 h-10 text-white glass-panel rounded-full hover:bg-white/10 transition-colors">
                     <i class="fas fa-bars text-[15px]" aria-hidden="true"></i>
                 </button>
@@ -793,7 +821,6 @@ return `
         </div>
     </header>
 
-    <!-- Sidebar Overlay & Menu (UX มือถือที่ยอดเยี่ยม) -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-[#07070A]/90 backdrop-blur-sm z-[2000] hidden opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
     <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-[280px] bg-[#07070A] border-l border-white/5 z-[3000] transform translate-x-full transition-transform duration-300 flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.8)]">
         <div class="flex items-center justify-between p-5 border-b border-white/5">
@@ -818,11 +845,9 @@ return `
 
     <main class="flex-1">
         
-        <!-- High-Conversion Hero Section (Luxury Noir) -->
         <section class="pt-32 md:pt-40 pb-16 px-6 relative">
             <div class="max-w-7xl mx-auto text-center relative z-10">
                 
-                <!-- Editorial Trust Badges -->
                 <div class="reveal active flex flex-wrap justify-center gap-3 mb-10 relative z-20">
                     <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500]">
                         <i class="fas fa-shield-halved"></i> เจอตัวจริง จ่ายหน้างาน 100%
@@ -832,8 +857,6 @@ return `
                     </div>
                 </div>
 
-                <!-- Premium Banner Display -->
-                <!-- เพิ่ม bg-zinc-900 เพื่อลด CLS ระหว่างรอรูปภาพ Banner โหลด -->
                 <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active">
                     <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_40px_rgba(255,46,99,0.15)] bg-[#07070a]">
                         <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์${escapeHTML(provinceName)} รับงาน${escapeHTML(provinceName)} ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.03] opacity-80" fetchpriority="high">
@@ -844,7 +867,6 @@ return `
 
                 <div class="max-w-4xl mx-auto text-center reveal active relative z-10">
                     
-                    <!-- Keyword-Rich H1 SEO -->
                     <h1 class="text-[2.6rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.2)]">
                         ไซด์ไลน์<span class="text-gradient-luxury">${escapeHTML(provinceName)}</span><br>
                         รับงานฟิวแฟน ตัวท็อป
@@ -854,7 +876,6 @@ return `
                         ค้นหาน้องๆ <strong>รับงาน${escapeHTML(provinceName)}</strong> เด็กเอ็นเตอร์เทน (N-VIP) บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
                     </p>
                     
-                    <!-- Advanced Search Console -->
                     <div class="max-w-xl mx-auto mt-4 mb-10 relative z-20 px-2">
                         <form action="/search" method="GET" class="relative group">
                             <label for="search-input" class="sr-only">ค้นหาน้องๆ โซน จังหวัด หรือชื่อ</label>
@@ -881,7 +902,6 @@ return `
             </div>
         </section>
 
-        <!-- Global Navigation Pills Dock -->
         <div class="sticky top-[56px] md:top-[64px] z-40 py-3 overflow-x-auto no-scrollbar glass-panel border-x-0 border-t-0 shadow-none bg-[#07070A]/80">
             <nav class="max-w-7xl mx-auto px-6 flex items-center justify-center sm:justify-start md:justify-center gap-3 min-w-max" aria-label="หมวดหมู่โปรไฟล์">
                 <button aria-pressed="true" class="shrink-0 px-6 py-2 rounded-full bg-white/10 text-white text-[12px] font-[500] tracking-wider shadow-[0_4px_20px_rgba(255,255,255,0.1)] transition-all">น้องๆ ทั้งหมด</button>
@@ -890,7 +910,6 @@ return `
             </nav>
         </div>
 
-        <!-- The Ultimate User Profile Grid -->
         <section id="profiles-grid" class="max-w-[1440px] mx-auto px-4 py-20 scroll-mt-24">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 px-2">
                 <div class="reveal">
@@ -918,19 +937,17 @@ return `
 
     </main>
 
-<!-- Clean Premium Footer Grid -->
-<footer class="bg-[#07070A] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
-    <div class="max-w-4xl mx-auto px-6 relative z-10">
-        <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
-        
-        <!-- ปรับขนาดจาก 4xl/6xl เหลือ 2xl/4xl -->
-        <h2 class="text-2xl md:text-4xl font-[800] text-white mb-10 tracking-tighter uppercase drop-shadow-md">
-            THANK YOU <br> 
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2E63] to-[#FF8E53]">
-                ไซด์ไลน์${escapeHTML(provinceName)}
-            </span>
-        </h2>
+    <footer class="bg-[#07070A] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+            <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
             
+            <h2 class="text-2xl md:text-4xl font-[800] text-white mb-10 tracking-tighter uppercase drop-shadow-md">
+                THANK YOU <br> 
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2E63] to-[#FF8E53]">
+                    ไซด์ไลน์${escapeHTML(provinceName)}
+                </span>
+            </h2>
+                
             <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 glass-panel text-white px-10 py-4 rounded-full font-[500] text-[13px] tracking-widest hover:bg-white/[0.05] transition-all btn-shimmer" aria-label="จองคิวผ่านไลน์">
                 <i class="fab fa-line text-xl text-[#00E676]" aria-hidden="true"></i> จองน้องๆ ตอนนี้
             </a>
@@ -944,19 +961,17 @@ return `
             </nav>
 
             <div class="mt-20 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5 pt-8">
-<!-- แก้ที่ส่วน Footer จากเดิม text-white/30 เป็น white/60 หรือ zinc-400 เพื่อแก้ไข Contrast Ratio -->
-<p class="text-[10px] font-[300] text-white/60 uppercase tracking-widest">
-    © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.
-</p>
-<div class="flex gap-6 text-[10px] font-[300] text-white/60 uppercase tracking-widest">
-    <a href="/privacy-policy.html" class="hover:text-white transition-colors">PRIVACY</a>
-    <a href="/terms.html" class="hover:text-white transition-colors">TERMS</a>
-</div>
+                <p class="text-[10px] font-[300] text-white/60 uppercase tracking-widest">
+                    © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.
+                </p>
+                <div class="flex gap-6 text-[10px] font-[300] text-white/60 uppercase tracking-widest">
+                    <a href="/privacy-policy.html" class="hover:text-white transition-colors">PRIVACY</a>
+                    <a href="/terms.html" class="hover:text-white transition-colors">TERMS</a>
+                </div>
             </div>
         </div>
     </footer>
 
-    <!-- MOBILE BOTTOM NAVIGATION (UX ชั้นยอด พร้อมปุ่มกดที่ชัดเจน) -->
     <nav aria-label="เมนูนำทางด่วนมือถือ" class="fixed bottom-0 left-0 w-full md:hidden z-[100] glass-panel border-x-0 border-b-0 rounded-none bg-[#07070A]/95 pb-[env(safe-area-inset-bottom)]">
         <ul class="flex justify-around h-[65px] items-center m-0 p-0 list-none max-w-md mx-auto">
             <li class="w-full text-center">
@@ -972,7 +987,6 @@ return `
                 </a>
             </li>
             <li class="w-full text-center relative">
-                <!-- Center Floating Line Button -->
                 <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินทางไลน์" class="absolute left-1/2 -translate-x-1/2 bottom-4 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF2E63] to-[#FF416C] text-white rounded-full border-[4px] border-[#07070A] shadow-[0_5px_20px_rgba(255,46,99,0.5)] btn-shimmer active:scale-95 transition-transform">
                     <i class="fab fa-line text-2xl" aria-hidden="true"></i>
                 </a>
@@ -994,7 +1008,6 @@ return `
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Intersection Observer (Animation)
             const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -1006,7 +1019,6 @@ return `
             }, observerOptions);
             document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-            // Sidebar Menu Logic
             const menuBtn = document.getElementById('menu-btn');
             const closeBtn = document.getElementById('close-menu-btn');
             const sidebar = document.getElementById('sidebar-menu');
@@ -1035,7 +1047,6 @@ return `
             if(closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
             if(overlay) overlay.addEventListener('click', () => toggleMenu(false));
 
-            // Navbar Auto-Hide Logic
             const navbar = document.getElementById("navbar");
             let lastScrollY = window.scrollY;
             let isTicking = false;
