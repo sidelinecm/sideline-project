@@ -201,13 +201,13 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
             </div>
         </div>` : "";
 
-    const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
-        <div class="reveal max-w-3xl mx-auto space-y-6 pb-20 relative z-10 pt-10" itemscope itemtype="https://schema.org/FAQPage">
+const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
+        <div class="reveal max-w-3xl mx-auto space-y-6 pb-20 relative z-10 pt-10">
             <h2 class="text-3xl md:text-4xl font-black text-center mb-12 text-white drop-shadow-lg tracking-tighter">คำถามที่พบบ่อย (FAQ)</h2>
             ${data.faqs.map((faq, idx) => `
-                <details class="group bg-[#0A0A0A]/80 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 shadow-xl" ${idx === 0 ? 'open' : ''} itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                <details class="group bg-[#0A0A0A]/80 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 shadow-xl" ${idx === 0 ? 'open' : ''}>
                     <summary class="flex justify-between items-center p-6 md:p-8 cursor-pointer list-none font-bold text-white text-lg hover:bg-white/5 transition-colors">
-                        <span class="flex items-center gap-4 pr-6" itemprop="name">
+                        <span class="flex items-center gap-4 pr-6">
                             <span class="text-brand-pink text-xl drop-shadow-[0_0_10px_rgba(255,51,102,0.4)]"><i class="fas fa-comment-dots"></i></span>
                             ${escapeHTML(faq.q)}
                         </span>
@@ -215,8 +215,8 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
                             <i class="fas fa-plus text-xs"></i>
                         </div>
                     </summary>
-                    <div class="px-6 md:px-8 pb-8 pt-2 ml-[3.25rem] text-gray-400 text-sm md:text-base font-light leading-relaxed border-l-2 border-brand-pink/30" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <span itemprop="text">${escapeHTML(faq.a)}</span>
+                    <div class="px-6 md:px-8 pb-8 pt-2 ml-[3.25rem] text-gray-400 text-sm md:text-base font-light leading-relaxed border-l-2 border-brand-pink/30">
+                        <span>${escapeHTML(faq.a)}</span>
                     </div>
                 </details>
             `).join("")}
