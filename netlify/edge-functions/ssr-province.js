@@ -36,7 +36,7 @@ const PROVINCE_SEO_DATA = {
         zones: ["นิมมาน", "สันติธรรม", "ช้างเผือก", "เจ็ดยอด", "แม่โจ้", "หางดง", "สันทราย", "รวมโชค", "คูเมือง", "หลังมอ"],
         lsi: ["รับงานเชียงใหม่", "สาวไซด์ไลน์เชียงใหม่", "sideline เชียงใหม่", "ไซต์ไลน์เชียงใหม่", "ไซไลเชียงใหม่", "นางแบบสาวเหนือ", "เพื่อนเที่ยวเชียงใหม่", "เด็กเอ็นเชียงใหม่"],
         intents: ["รับงานเอนเตอร์เทน", "ดูแลแบบเต็มวัน", "เพื่อนเที่ยวคาเฟ่", "N-VIP ชงเหล้า", "ปาร์ตี้พูลวิลล่า"],
-        traits: ["ผิวออร่าสว่าง", "หน้าหมวยน่ารัก", "ตัวเล็กสเปคป๋า", "หุ่นนางแบบ", "พูดเหนืออ้อนๆ", "สัดส่วนเป๊ะ", "เอาใจเก่ง"],
+        traits: ["ผิวออร่าสว่าง", "หน้าหมวยน่ารัก", "ตัวเล็กสเปคป๋า", "หุ่นนางแบบ", "พูดเหนืออ้อนๆ", "สัดส่วนเป๊ะ"],
         hotels: ["โรงแรมระดับพรีเมียมแถวนิมมาน", "ที่พักใกล้คูเมือง", "คอนโดหรูเจ็ดยอด", "รีสอร์ทส่วนตัวแม่ริม"],
         services: ["บริการเอนเตอร์เทนส่วนตัว", "ดูแลฟิวแฟนเดินนิมมาน", "ปาร์ตี้พูลวิลล่าระดับ VIP", "เพื่อนเที่ยวผ่อนคลายส่วนตัว"],
         avgPrice: "1,500 - 4,000",
@@ -57,7 +57,7 @@ const PROVINCE_SEO_DATA = {
         zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "สาทร", "สีลม", "ทองหล่อ", "เอกมัย", "ปิ่นเกล้า", "บางนา", "เลียบด่วน"],
         lsi: ["รับงานกรุงเทพ", "ไซด์ไลน์ กทม", "สาวไซด์ไลน์กรุงเทพ", "sideline bkk", "พริตตี้ กทม.", "เด็กเอ็นพรีเมียม", "เพื่อนเที่ยวส่วนตัว", "นางแบบรับงาน"],
         intents: ["เอนเตอร์เทนรายชั่วโมง", "ดูแลแบบเต็มวัน", "Private VIP Entertain", "เพื่อนเที่ยวทองหล่อ", "ปาร์ตี้ไพรเวท"],
-        traits: ["ลุคคุณหนู", "อินเตอร์สายฝอ", "ใบหน้าเป๊ะ", "หุ่นนางแบบ", "ดูแลฟิวแฟน", "ลุคออฟฟิศ"],
+        traits: ["ลูกคุณหนู", "ลุคอินเตอร์สายฝอ", "ใบหน้าเป๊ะ", "หุ่นนางแบบ", "ดูแลเอาใจเก่ง", "ลุคพนักงานออฟฟิศ"],
         hotels: ["คอนโดหรูติด BTS", "โรงแรมย่านสุขุมวิท", "ที่พักพรีเมียมห้วยขวาง", "โรงแรมหรูย่านสาทร"],
         services: ["ดูแลแบบฟิวแฟนเต็มรูปแบบ", "เพื่อนเที่ยวกลางคืนทองหล่อ", "บริการ N-Vipส่วนตัว"],
         avgPrice: "2,000 - 5,000+",
@@ -77,7 +77,7 @@ const PROVINCE_SEO_DATA = {
         zones: ["ตัวเมืองลำปาง", "สวนดอก", "พระบาท", "ม.ราชภัฏลำปาง", "เกาะคา", "แม่ทะ", "น้ำล้อม"],
         lsi: ["รับงานลำปาง", "ไซด์ไลน์ลำปาง", "สาวไซด์ไลน์ลำปาง", "sideline ลำปาง", "นักศึกษาลำปาง", "เพื่อนเที่ยวลำปาง", "เด็กเอ็นลำปาง"],
         intents: ["เอนเตอร์เทนส่วนตัว", "ดูแลฟิวแฟน", "เพื่อนเที่ยวชิลๆ", "ชงเหล้าปาร์ตี้"],
-        traits: ["สาวเหนือหน้าหวาน", "เป็นกันเอง", "เอาใจเก่งมาก", "ผิวขาวออร่า", "หุ่นสัดส่วนดี", "คุยสนุก"],
+        traits: ["สาวเหนือหน้าหวาน", "น่ารักเป็นกันเอง", "เอาใจเก่ง", "ผิวขาวออร่า", "สัดส่วนดี"],
         hotels: ["โรงแรมในตัวเมืองลำปาง", "รีสอร์ทส่วนตัวสวนดอก", "ที่พักใกล้ราชภัฏ"],
         services: ["บริการเอนเตอร์เทนผ่อนคลาย", "ดูแลแบบฟิวแฟน", "เพื่อนเที่ยวคาเฟ่ลำปาง"],
         avgPrice: "1,500 - 3,000",
@@ -91,13 +91,53 @@ const PROVINCE_SEO_DATA = {
             { q: "รับประกันความตรงปกและการบริการไหม?", a: "โปรไฟล์น้องๆ ทุกคนผ่านการคัดกรอง ยืนยันตัวตนแล้วว่าตรงปกแน่นอน เราเน้นมารยาทการบริการระดับพรีเมียม เพื่อให้ลูกค้าประทับใจและกลับมาใช้บริการซ้ำ" }
         ]
     },
+    chiangrai: {
+        name: "เชียงราย",
+        geo: { lat: 19.9105, lng: 99.8406 },
+        zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "ม.ราชภัฏเชียงราย", "หอนาฬิกา", "ริมกก"],
+        lsi: ["รับงานเชียงราย", "ไซด์ไลน์เชียงราย", "สาวไซด์ไลน์เชียงราย", "sideline เชียงราย", "น้องนักศึกษาเชียงราย", "เด็กเอ็นเชียงราย"],
+        intents: ["เพื่อนเที่ยวคาเฟ่เชียงราย", "เอนเตอร์เทนปาร์ตี้", "ดูแลฟิวแฟนส่วนตัว"],
+        traits: ["ลุคคุณหนูเชียงราย", "ขาวเนียนน่ารัก", "คุยเก่งอารมณ์ดี", "โปรไฟล์ดีตรงปก"],
+        hotels: ["โรงแรมหรูริมกก", "ที่พักย่านบ้านดู่", "รีสอร์ทส่วนตัวตัวเมือง"],
+        services: ["เอนเตอร์เทนพรีเมียมเชียงราย", "เพื่อนเที่ยวดูหนัง", "บริการดูแลฟิวแฟน"],
+        avgPrice: "1,500 - 3,500",
+        uniqueIntro: `
+            <p class="mb-4">เหนือสุดแดนสยาม ศูนย์รวมความน่ารักสไตล์สาวเหนือที่คุณต้องหลงใหล บริการ <strong>รับงานเชียงราย</strong> และ <strong>ไซด์ไลน์เชียงราย</strong> รวบรวมน้องๆ นักศึกษาลุคคุณหนู และนางแบบพริตตี้ท้องถิ่น ที่พร้อมดูแลคุณให้ผ่อนคลายจากความเหนื่อยล้า</p>
+            <p class="mb-4">พื้นที่ให้บริการครอบคลุมจุดสำคัญ ไม่ว่าจะเป็นทำเลใกล้มหาวิทยาลัยยอดฮิตอย่าง <strong>โซนบ้านดู่, ม.แม่ฟ้าหลวง (มฟล.)</strong> หรือใจกลาง <strong>ตัวเมืองเชียงราย และย่านริมกก</strong> น้องๆ พร้อมเป็นเพื่อนเที่ยวคาเฟ่ ดูหนัง หรือดูแลแบบฟีลแฟนส่วนตัวในโรงแรมหรู</p>
+            <p>เรามอบความมั่นใจสูงสุดด้วยนโยบาย <strong>ไม่มีการโอนมัดจำล่วงหน้า</strong> จ่ายเงินเมื่อพบตัวน้องเท่านั้น การันตีงานพรีเมียม ปลอดภัย คัดเน้นๆ เฉพาะงานคุณภาพตรงปก</p>
+        `,
+        faqs: [
+            { q: "หาไซด์ไลน์เชียงราย โซนบ้านดู่ หรือ มฟล. นัดยากไหม?", a: "โซนบ้านดู่และใกล้ ม.แม่ฟ้าหลวง เป็นย่านยอดฮิตที่มีน้องๆ พาร์ทไทม์พร้อมให้บริการมากที่สุด นัดหมายได้ง่ายและรวดเร็วมากครับ" },
+            { q: "ระบบการจ่ายเงินเป็นอย่างไร มีมัดจำไหม?", a: "เราเน้นความปลอดภัยของลูกค้าเป็นหลัก จ่ายเงินสดหน้างานหลังจากเจอตัวน้องแล้วเท่านั้น 100% ไม่มีมัดจำให้ปวดหัว" }
+        ]
+    },
+    khonkaen: {
+        name: "ขอนแก่น",
+        geo: { lat: 16.4322, lng: 102.8236 },
+        zones: ["มข.", "กังสดาล", "หลังมอ", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+        lsi: ["รับงานขอนแก่น", "ไซด์ไลน์ขอนแก่น", "สาวไซด์ไลน์ขอนแก่น", "sideline ขอนแก่น", "เด็กเอ็นขอนแก่น", "นักศึกษาขอนแก่น"],
+        intents: ["N-Vip ขอนแก่น", "เพื่อนเที่ยวกลางคืน", "ดูแลแบบฟิวแฟน"],
+        traits: ["สาวอีสานผิวขาว", "หน้าตาน่ารักหมวย", "หุ่นเพรียวสัดส่วนดี", "พูดจาเพราะ"],
+        hotels: ["โรงแรมหรูใกล้เซ็นทรัล", "ที่พักย่านกังสดาล", "คอนโดหรูหลังมอ"],
+        services: ["เอนเตอร์เทนครบวงจร", "เพื่อนกินข้าว-ดูหนัง", "ฟิวแฟนระดับ VIP"],
+        avgPrice: "1,500 - 4,000",
+        uniqueIntro: `
+            <p class="mb-4">ศูนย์กลางความเจริญแห่งอีสาน พร้อมเสิร์ฟความน่ารักสดใสสไตล์สาวอีสานผิวขาวออร่า บริการ <strong>รับงานขอนแก่น</strong> และ <strong>ไซด์ไลน์ขอนแก่น</strong> คัดตัวท็อปจากรั้วมหาวิทยาลัยชื่อดัง และพริตตี้ระดับแนวหน้าในพื้นที่ พร้อมเนรมิตค่ำคืนของคุณให้พิเศษกว่าที่เคย</p>
+            <p class="mb-4">นัดพบได้อย่างเป็นส่วนตัวในย่านวัยรุ่นอย่าง <strong>กังสดาล, หลัง มข., โนนม่วง</strong> หรือโซนใจกลางเมืองแถว <strong>เซ็นทรัลขอนแก่น และบึงแก่นนคร</strong> ไม่ว่าคุณจะมองหาเด็กเอ็น N-VIP ดูแลปาร์ตี้ส่วนตัว หรือน้องๆ ที่บริการดูแลดั่งแฟน (ฟีลแฟน) เราก็มีให้เลือกอย่างจุใจ</p>
+            <p>ตัดปัญหาโอนก่อนแล้วโดนเททิ้ง! ที่นี่ใช้ระบบ <strong>จ่ายหน้างาน 100% ไม่ต้องลุ้นมัดจำ</strong> รูปภาพตรงปก ไม่จกตา มั่นใจได้ในความเป็นมืออาชีพและการรักษาความลับสูงสุด</p>
+        `,
+        faqs: [
+            { q: "น้องๆ ไซด์ไลน์ขอนแก่น ส่วนใหญ่เป็นใคร?", a: "เรามีทั้งน้องๆ นักศึกษาพาร์ทไทม์ลุคน่ารักใสๆ และนางแบบพริตตี้สายแซ่บที่รับงานส่วนตัว ทุกคนผ่านการสัมภาษณ์และคัดโปรไฟล์มาอย่างดี" },
+            { q: "นัดหมายในขอนแก่นต้องทำอย่างไร ยุ่งยากไหม?", a: "ง่ายมากครับ เพียงเลือกน้องที่ถูกใจ ทักสอบถามคิวกับแอดมิน และนัดเจอในโรงแรมหรือคอนโดที่เป็นส่วนตัว จ่ายเงินหน้างานสะดวกที่สุด" }
+        ]
+    },
     chonburi: {
         name: "ชลบุรี",
         geo: { lat: 12.9236, lng: 100.8825 },
         zones: ["พัทยา", "บางแสน", "ศรีราชา", "อมตะนคร", "ตัวเมืองชลบุรี", "ม.บูรพา"],
         lsi: ["รับงานชลบุรี", "ไซด์ไลน์ชลบุรี", "สาวไซด์ไลน์พัทยา", "sideline ชลบุรี", "เพื่อนเที่ยวบางแสน", "เด็กเอ็นพัทยา"],
         intents: ["ปาร์ตี้ริมหาด", "พูลวิลล่าพัทยา", "ดูแลฟิวแฟนท่องเที่ยว", "N-Vip ชลบุรี"],
-        traits: ["ผิวแทนเซ็กซี่", "หุ่นนางแบบ", "อินเตอร์ลุค", "สายปาร์ตี้", "ไปไหนไปกัน", "เอาใจเก่ง"],
+        traits: ["ผิวแทนเซ็กซี่", "หุ่นนางแบบ", "อินเตอร์ลุค", "เอาใจเก่งมาก", "สายลุยไปไหนไปกัน"],
         hotels: ["โรงแรมหรูริมหาดพัทยา", "คอนโดหรูบางแสน", "รีสอร์ทส่วนตัวศรีราชา"],
         services: ["เพื่อนเที่ยวทะเล", "เอนเตอร์เทนพูลวิลล่า", "ดูแล VIP ส่วนตัว"],
         avgPrice: "1,500 - 4,500",
@@ -111,13 +151,73 @@ const PROVINCE_SEO_DATA = {
             { q: "น้องๆ รับงานพูลวิลล่า หรือจัดปาร์ตี้ไหม?", a: "มีครับ เรามีกลุ่มน้องๆ เด็กเอ็นสายปาร์ตี้ที่ชำนาญการเอนเตอร์เทนในพูลวิลล่าโดยเฉพาะ พร้อมสร้างสีสันให้ทริปพัทยาหรือบางแสนของคุณสนุกสุดเหวี่ยง" }
         ]
     },
+    ubonratchathani: {
+        name: "อุบลราชธานี",
+        geo: { lat: 15.2293, lng: 104.8570 },
+        zones: ["ตัวเมืองอุบล", "วารินชำราบ", "ม.อุบล", "เซ็นทรัลอุบล", "ทุ่งศรีเมือง"],
+        lsi: ["รับงานอุบล", "ไซด์ไลน์อุบล", "สาวไซด์ไลน์อุบล", "sideline อุบล", "เด็กเอ็นอุบล", "เพื่อนเที่ยวอุบล"],
+        intents: ["เอนเตอร์เทนส่วนตัว", "ดูแลฟิวแฟน", "เพื่อนเที่ยวงานเทศกาล"],
+        traits: ["สาวอีสานหน้าหวาน", "เรียบร้อยน่ารัก", "พูดจาดีเอาใจเก่ง", "ผิวเนียนสวย"],
+        hotels: ["โรงแรมในตัวเมืองอุบล", "ที่พักย่านวาริน", "โรงแรมหรูใกล้เซ็นทรัล"],
+        services: ["บริการเอนเตอร์เทนแบบเป็นกันเอง", "ดูแลฟิวแฟนกินข้าวดูหนัง"],
+        avgPrice: "1,500 - 3,000",
+        uniqueIntro: `
+            <p class="mb-4">ค้นพบมนต์เสน่ห์ความน่ารักแบบฉบับสาวอีสานใต้ บริการ <strong>รับงานอุบล</strong> และ <strong>ไซด์ไลน์อุบล</strong> ที่รวบรวมน้องๆ หน้าหวาน เรียบร้อย ผิวเนียนสวย พร้อมจะดูแลเอาใจใส่คุณอย่างอบอุ่นในแบบฉบับฟีลแฟน (Girlfriend Experience)</p>
+            <p class="mb-4">น้องๆ สะดวกรับงานในพื้นที่ศูนย์กลางอย่าง <strong>ตัวเมืองอุบลราชธานี, วารินชำราบ</strong> และโซนสถานศึกษาอย่าง <strong>ม.อุบล</strong> นัดเจอง่ายตามโรงแรมหรูใกล้เซ็นทรัล หรือหาเพื่อนเที่ยวดูหนัง ทานข้าว น้องๆ ก็พร้อมเอนเตอร์เทนแบบเป็นกันเอง</p>
+            <p>เราให้ความสำคัญกับความปลอดภัยของลูกค้าเป็นอันดับหนึ่ง <strong>จ่ายเงินสดเมื่อพบตัวจริงเท่านั้น ไม่มีการบังคับโอนมัดจำ</strong> การันตีงานดี โปรไฟล์ตรงปก เพื่อค่ำคืนที่แสนพิเศษของคุณ</p>
+        `,
+        faqs: [
+            { q: "ไซด์ไลน์อุบล นัดเจอแถวไหนสะดวกและปลอดภัย?", a: "โซนตัวเมืองและบริเวณใกล้ห้างเซ็นทรัลอุบล ถือเป็นจุดนัดพบที่สะดวก มีโรงแรมและที่พักรองรับเยอะ ปลอดภัยและเป็นส่วนตัวที่สุดครับ" },
+            { q: "มีการคัดกรองน้องๆ ที่มารับงานอย่างไร?", a: "เราคัดเลือกเฉพาะน้องๆ ที่มีใจรักงานบริการ มีตัวตนจริง และสัมภาษณ์ทัศนคติก่อนลงงานเสมอ เพื่อคุณภาพและมารยาทที่ดีที่สุด" }
+        ]
+    },
+    udonthani: {
+        name: "อุดรธานี",
+        geo: { lat: 17.3980, lng: 102.7931 },
+        zones: ["ตัวเมืองอุดร", "ยูดีทาวน์", "เซ็นทรัลอุดร", "หนองประจักษ์", "ราชภัฏอุดร"],
+        lsi: ["รับงานอุดร", "ไซด์ไลน์อุดร", "สาวไซด์ไลน์อุดร", "sideline อุดร", "เด็กเอ็นอุดร", "พริตตี้อุดร"],
+        intents: ["เพื่อนเที่ยว VIP อุดร", "ดูแลฟิวแฟนเอนเตอร์เทน", "N-Vip ปาร์ตี้"],
+        traits: ["ลุคอินเตอร์หน้าเป๊ะ", "ขาวสวยออร่า", "แต่งตัวเก่ง", "บุคลิกดีระดับพริตตี้"],
+        hotels: ["โรงแรมหรูใกล้ยูดีทาวน์", "ที่พักพรีเมียมตัวเมือง", "โรงแรมใกล้เซ็นทรัล"],
+        services: ["บริการดูแลระดับ Exclusive", "เพื่อนเที่ยวกลางคืนยูดีทาวน์", "เอนเตอร์เทนส่วนตัว"],
+        avgPrice: "1,500 - 4,000",
+        uniqueIntro: `
+            <p class="mb-4">ที่สุดของความพรีเมียมในแดนอีสานเหนือ บริการ <strong>รับงานอุดร</strong> และ <strong>ไซด์ไลน์อุดร</strong> รวบรวมนางแบบ พริตตี้ และสาวสวยระดับ VIP หน้าเป๊ะ ผิวออร่า ที่พร้อมจะทำให้ค่ำคืนของคุณที่อุดรธานีเต็มไปด้วยสีสันและไม่มีวันลืม</p>
+            <p class="mb-4">สัมผัสไลฟ์สไตล์หรูหราด้วยน้องๆ ที่พร้อมเป็นเพื่อนเที่ยวกลางคืนในย่าน <strong>ยูดีทาวน์ (UD Town)</strong> หรือดูแลเอนเตอร์เทนแบบ Private ภายในที่พักโซน <strong>ตัวเมืองอุดร และเซ็นทรัล</strong> น้องๆ ของเราแต่งตัวเก่ง วางตัวดี เหมาะสำหรับควงออกงานหรือดูแลส่วนตัว</p>
+            <p>รับประกันคุณภาพด้วยบริการที่โปร่งใส <strong>ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำก่อน</strong> เพื่อให้ลูกค้าคนสำคัญเช่นคุณได้รับประสบการณ์ที่ดีที่สุดอย่างไร้กังวล</p>
+        `,
+        faqs: [
+            { q: "หาเด็กเอ็นอุดร ย่านไหนตัวท็อปเยอะและสะดวกสุด?", a: "ย่านยูดีทาวน์ (UD Town) และบริเวณใกล้เซ็นทรัลอุดร เป็นแหล่งรวมที่พักชั้นนำและน้องๆ งานดีระดับพรีเมียมสะดวกรับงานมากที่สุดครับ" },
+            { q: "จองน้องๆ อุดรธานี ต้องทำอย่างไรให้ปลอดภัย?", a: "ทักแชทสอบถามคิวงานน้องที่สนใจกับแอดมิน นัดเวลาและสถานที่ให้ชัดเจน แล้วค่อยชำระเงินเมื่อพบตัวน้องจริงเท่านั้น ปลอดภัย 100%" }
+        ]
+    },
+    phitsanulok: {
+        name: "พิษณุโลก",
+        geo: { lat: 16.8211, lng: 100.2659 },
+        zones: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
+        lsi: ["รับงานพิษณุโลก", "ไซด์ไลน์พิษณุโลก", "สาวไซด์ไลน์พิษณุโลก", "sideline พิษณุโลก", "น้องนักศึกษามน", "เด็กเอ็นพิษณุโลก"],
+        intents: ["เพื่อนเที่ยวคาเฟ่", "ดูแลฟิวแฟนทานข้าว", "เอนเตอร์เทนส่วนตัว"],
+        traits: ["สาวสองแควหน้าหวาน", "น่ารักสไตล์นักศึกษา", "พูดเพราะเป็นกันเอง", "ดูแลเอาใจใส่เก่ง"],
+        hotels: ["โรงแรมหรูในเมือง", "ที่พักใกล้ ม.นเรศวร", "โรงแรมริมน้ำน่าน"],
+        services: ["บริการเอนเตอร์เทนแบบฟิวแฟน", "เพื่อนเที่ยว-ดูหนัง"],
+        avgPrice: "1,500 - 3,000",
+        uniqueIntro: `
+            <p class="mb-4">สัมผัสความอบอุ่นและน่ารักแบบฉบับสาวเมืองสองแคว บริการ <strong>รับงานพิษณุโลก</strong> และ <strong>ไซด์ไลน์พิษณุโลก</strong> ศูนย์รวมน้องๆ นักศึกษาลุคน่ารักใสๆ และพริตตี้ท้องถิ่นที่พร้อมดูแลคุณอย่างเป็นกันเอง พูดจาไพเราะ และเอาใจใส่เก่งดั่งคนรัก</p>
+            <p class="mb-4">นัดหมายได้สะดวกและรวดเร็วในโซนยอดฮิต ไม่ว่าจะเป็นย่านมหาวิทยาลัยอย่าง <strong>ม.นเรศวร (มน.)</strong>, ใจกลาง <strong>ตัวเมืองพิษณุโลก</strong> หรือพักผ่อนแบบชิลๆ ตามโรงแรม <strong>ริมแม่น้ำน่าน</strong> มีให้เลือกทั้งเพื่อนเที่ยวคาเฟ่ ดูหนัง ทานข้าว หรือบริการดูแลแบบฟีลแฟนส่วนตัว</p>
+            <p>เรามอบความสบายใจสูงสุดแก่ลูกค้า <strong>การันตีความตรงปก ปลอดภัย ไร้มัดจำ</strong> จ่ายเงินสดกับน้องเมื่อพบตัวจริงเท่านั้น เพื่อสร้างความทรงจำที่น่าประทับใจในพิษณุโลกให้กับคุณ</p>
+        `,
+        faqs: [
+            { q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดยากไหม?", a: "โซน ม.นเรศวร (มน.) เป็นโซนที่มีน้องๆ นักศึกษาพาร์ทไทม์รับงานเยอะที่สุด นัดหมายได้สะดวกและรวดเร็วมาก มีที่พักรองรับมากมาย" },
+            { q: "ต้องจ่ายเงินมัดจำก่อนไหม กลัวโดนหลอก?", a: "เพื่อความมั่นใจของลูกค้า เราไม่มีนโยบายให้ลูกค้าโอนเงินก่อนทุกกรณีครับ นัดเจอหน้างานแล้วค่อยจ่ายเงินเท่านั้น" }
+        ]
+    },
     default: {
         name: "จังหวัดอื่นๆ",
         geo: { lat: 13.7563, lng: 100.5018 },
         zones: ["ตัวเมือง", "พื้นที่ใกล้เคียง"],
         lsi: ["รับงานส่วนตัว", "สาวไซด์ไลน์", "sideline พรีเมียม", "เพื่อนเที่ยว", "เด็กเอ็น", "นักศึกษาพาร์ทไทม์", "สาวสวยตรงปก", "ดูแลฟิวแฟน"],
         intents: ["รับงานเอนเตอร์เทน", "ดูแลแบบเต็มวัน", "เพื่อนเที่ยว", "ฟิวแฟน"],
-        traits: ["หน้าตาน่ารัก", "หุ่นสัดส่วนดี", "เอาใจเก่งมาก", "บริการประทับใจ", "ฟีลแฟน", "ตรงปก"],
+        traits: ["หน้าตาน่ารัก", "บุคลิกดี", "เอาใจเก่ง", "บริการประทับใจ"],
         hotels: ["โรงแรมในตัวเมือง", "รีสอร์ทส่วนตัว"],
         services: ["ฟิวแฟนส่วนตัว", "เพื่อนเที่ยว-ดูหนัง", "เอนเตอร์เทนผ่อนคลาย"],
         avgPrice: "1,500 - 3,500",
@@ -178,7 +278,7 @@ const smartLinkify = (text, provinceKey, zones) => {
     return linkedText;
 };
 
-// [ Component: Dynamic SEO Footer Content ]
+// [ Component: Dynamic SEO Content ]
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
     
@@ -189,14 +289,17 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         { t: "ข้อมูลลับระดับสูงสุด", d: "ประวัติการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
     ];
 
-    const zonesHTML = (data.zones && data.zones.length > 0) ? `
+    // ตรวจสอบโซน หากมีคำว่า "ตัวเมือง" ให้ซ่อน Block นี้ทิ้งไปเลย เพื่อไม่ให้หน้าตาดูโล่งและอึดอัด
+    const isDefaultZones = data.zones && data.zones.some(z => z.includes("ตัวเมือง") || z.includes("พื้นที่ใกล้เคียง"));
+
+    const zonesHTML = (data.zones && data.zones.length > 0 && !isDefaultZones) ? `
         <div class="reveal text-center relative z-10 pt-8">
             <h2 class="text-2xl md:text-3xl font-black mb-8 flex items-center justify-center gap-3 text-white drop-shadow-lg">
                 <i class="fas fa-map-location-dot text-brand-pink drop-shadow-[0_0_10px_rgba(255,51,102,0.5)]"></i> โซนยอดฮิตใน${escapeHTML(provinceName)}
             </h2>
             <div class="flex flex-wrap justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
                 ${data.zones.map(zone => `
-                    <a href="/search?q=${encodeURIComponent(zone)}" class="px-6 py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-sm font-semibold text-gray-300 hover:bg-brand-pink hover:text-white hover:border-brand-pink hover:-translate-y-1 transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">${escapeHTML(zone)}</a>
+                    <a href="/search?q=${encodeURIComponent(zone)}" class="px-6 py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-sm font-semibold text-gray-300 hover:bg-brand-pink hover:text-white hover:border-brand-pink hover:-translate-y-1 transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.5)]" aria-label="ดูน้องๆ โซน${escapeHTML(zone)}">${escapeHTML(zone)}</a>
                 `).join("")}
             </div>
         </div>` : "";
@@ -216,7 +319,7 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                         </div>
                     </summary>
                     <div class="px-6 md:px-8 pb-8 pt-2 ml-[3.25rem] text-gray-400 text-sm md:text-base font-light leading-relaxed border-l-2 border-brand-pink/30">
-                        <span>${escapeHTML(faq.a)}</span>
+                        <p>${escapeHTML(faq.a)}</p>
                     </div>
                 </details>
             `).join("")}
@@ -229,30 +332,33 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,51,102,0.06),transparent_50%)] pointer-events-none mix-blend-screen"></div>
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(212,175,55,0.04),transparent_50%)] pointer-events-none mix-blend-screen"></div>
             
-            <div class="max-w-7xl mx-auto px-6 space-y-32">
+            <div class="max-w-7xl mx-auto px-6 space-y-24 md:space-y-32">
                 
                 <!-- VIP & Terms Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
                     <!-- Premium VIP Card -->
                     <div class="reveal bg-[#0A0A0A] p-1 md:p-1.5 rounded-[3rem] border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.8)] relative group">
                         <div class="absolute -inset-[1px] bg-gradient-to-br from-brand-pink via-purple-600 to-brand-gold rounded-[3rem] opacity-30 group-hover:opacity-100 transition-opacity duration-700 blur-[2px] -z-10"></div>
-                        <div class="bg-[#050505] rounded-[2.8rem] p-10 md:p-14 h-full relative overflow-hidden">
+                        <div class="bg-[#050505] rounded-[2.8rem] p-8 md:p-14 h-full relative overflow-hidden flex flex-col justify-center">
                             <div class="absolute -top-20 -right-20 w-60 h-60 bg-brand-gold/10 blur-[80px] rounded-full transition-transform group-hover:scale-150 duration-700"></div>
                             
-                            <div class="inline-flex items-center gap-3 px-4 py-1.5 bg-brand-gold/10 rounded-full border border-brand-gold/20 mb-8">
+                            <div class="inline-flex items-center gap-3 px-4 py-1.5 bg-brand-gold/10 rounded-full border border-brand-gold/20 mb-6 w-max">
                                 <span class="w-2.5 h-2.5 rounded-full bg-brand-gold animate-pulse shadow-[0_0_10px_#D4AF37]"></span>
-                                <span class="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-brand-gold">Exclusive Privilege</span>
+                                <span class="text-[10px] md:text-xs font-black tracking-[0.1em] text-brand-gold uppercase">สิทธิพิเศษระดับ VIP</span>
                             </div>
                             
-                            <h3 class="text-white text-3xl font-black mb-4 tracking-tighter drop-shadow-md">SECRET CODE</h3>
-                            <p class="text-gray-400 text-sm md:text-base mb-10 font-light leading-relaxed">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดสถานะเป็น <strong>Super VIP</strong> รับสิทธิ์เลือกล็อกคิวตัวท็อปก่อนใคร</p>
+                            <h3 class="text-white text-3xl font-black mb-4 tracking-tighter drop-shadow-md">รหัสลับ VIP</h3>
+                            <p class="text-gray-400 text-sm md:text-base mb-8 font-light leading-relaxed">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดสถานะเป็น <strong>Super VIP</strong> รับสิทธิ์เลือกล็อกคิวตัวท็อปก่อนใคร</p>
                             
-                            <div class="bg-black/80 backdrop-blur-xl rounded-3xl p-8 border border-white/10 text-center relative shadow-inner group-hover:border-brand-gold/50 transition-colors">
-                                <div class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#FFF380] to-[#D4AF37] drop-shadow-[0_0_20px_rgba(212,175,55,0.4)] select-all font-mono">
-                                    VIP-${provinceKey.toUpperCase()}
+                            <!-- SECRET CODE BLOCK (Perfectly Proportioned, No Break-All) -->
+                            <div class="bg-black/80 backdrop-blur-xl rounded-3xl py-8 px-4 border border-white/10 text-center relative shadow-inner group-hover:border-brand-gold/50 transition-colors flex flex-col items-center justify-center overflow-hidden">
+                                <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
+                                    <div class="text-[7vw] sm:text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#FFF380] to-[#D4AF37] drop-shadow-[0_0_20px_rgba(212,175,55,0.4)] select-all font-mono whitespace-nowrap">
+                                        VIP-${provinceKey.toUpperCase()}
+                                    </div>
                                 </div>
-                                <span class="inline-block bg-gradient-to-r from-brand-pink to-purple-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(255,51,102,0.4)]">
-                                    Valid Today
+                                <span class="inline-block bg-gradient-to-r from-brand-pink to-purple-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.1em] shadow-[0_0_20px_rgba(255,51,102,0.4)] mt-2 shrink-0">
+                                    ใช้ได้วันนี้เท่านั้น
                                 </span>
                             </div>
                         </div>
@@ -281,18 +387,18 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
 
                 <!-- SEO Content Block (Smart Linkified) -->
                 <div class="reveal relative p-[1px] rounded-[3rem] bg-gradient-to-b from-white/10 to-transparent overflow-hidden">
-                    <div class="bg-[#0A0A0A] rounded-[3rem] p-10 md:p-20 text-white text-center shadow-[0_30px_80px_rgba(0,0,0,0.9)] relative z-10">
+                    <div class="bg-[#0A0A0A] rounded-[3rem] p-8 md:p-20 text-white text-center shadow-[0_30px_80px_rgba(0,0,0,0.9)] relative z-10">
                         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
                         
-                        <div class="max-w-4xl mx-auto space-y-12 relative z-10">
-                            <div class="w-24 h-24 bg-black text-brand-pink rounded-full flex items-center justify-center text-4xl mx-auto shadow-[0_10px_40px_rgba(255,51,102,0.3)] border border-white/10 transform hover:rotate-12 transition-transform duration-500">
+                        <div class="max-w-4xl mx-auto space-y-10 relative z-10">
+                            <div class="w-20 h-20 md:w-24 md:h-24 bg-black text-brand-pink rounded-full flex items-center justify-center text-3xl md:text-4xl mx-auto shadow-[0_10px_40px_rgba(255,51,102,0.3)] border border-white/10 transform hover:rotate-12 transition-transform duration-500">
                                 <i class="fas fa-crown"></i>
                             </div>
-                            <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-tight drop-shadow-lg">
+                            <h2 class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-tight drop-shadow-lg">
                                 ที่สุดของบริการเพื่อนเที่ยว<br>
                                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink via-purple-500 to-[#D4AF37] drop-shadow-[0_0_10px_rgba(255,51,102,0.3)]">ไซด์ไลน์${escapeHTML(provinceName)}</span>
                             </h2>
-                            <div class="text-gray-300 text-sm md:text-lg font-light leading-loose space-y-8 text-left md:text-center px-4">
+                            <div class="text-gray-300 text-sm md:text-lg font-light leading-loose space-y-6 text-left md:text-center px-2">
                                 ${smartLinkify(data.uniqueIntro, provinceKey, data.zones)}
                             </div>
                         </div>
@@ -349,7 +455,7 @@ export default async (request, context) => {
         const title = `ไซด์ไลน์${provinceName} รับงาน${provinceName} พรีเมียม (${CURRENT_MONTH} ${CURRENT_YEAR}) | ตรงปก ปลอดภัย 100%`;
         const description = `ตัวท็อป! ไซด์ไลน์${provinceName} รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP ${safeProfiles.length} คน โซน ${seoData.zones.slice(0,3).join(', ')} ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด`;
 
-        // [ EXTREME SEO ] Deep Entity Architecture Schema (Flawless Version)
+        // [ EXTREME SEO ] Deep Entity Architecture Schema
         const schemaGraph =[
             { 
                 "@type": "Organization", 
@@ -393,7 +499,7 @@ export default async (request, context) => {
             { 
                 "@type": "Service", 
                 "@id": `${provinceUrl}/#service`, 
-                name: `บริการไซด์ไลน์และเด็กเอ็น VIPในพื้นที่ ${provinceName}`, 
+                name: `บริการไซด์ไลน์และเด็กเอ็น VIP ในพื้นที่ ${provinceName}`, 
                 provider: { "@id": `${CONFIG.DOMAIN}/#organization` }, 
                 areaServed: { "@type": "AdministrativeArea", name: provinceName }, 
                 description: description,
@@ -406,7 +512,6 @@ export default async (request, context) => {
             schemaGraph.push({ "@type": "FAQPage", "@id": `${provinceUrl}/#faq`, mainEntity: seoData.faqs.map(faq => ({ "@type": "Question", name: faq.q, acceptedAnswer: { "@type": "Answer", text: faq.a } })) });
         }
         
-        // Deep ItemList Enrichment (OfferCatalog) - Price Validation Fixed
         if (safeProfiles.length > 0) {
             schemaGraph.push({ 
                 "@type": "OfferCatalog", 
@@ -415,7 +520,7 @@ export default async (request, context) => {
                 description: `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName} อัปเดต ${CURRENT_MONTH} ${CURRENT_YEAR}`, 
                 itemListElement: safeProfiles.slice(0, 12).map((p, i) => {
                     let numericPrice = p.rate ? String(p.rate).replace(/\D/g, '') : "";
-                    if (!numericPrice || numericPrice.length === 0) numericPrice = "1500"; // SEO Fallback to prevent invalid price error
+                    if (!numericPrice || numericPrice.length === 0) numericPrice = "1500"; 
                     
                     return { 
                         "@type": "ListItem", 
@@ -449,7 +554,6 @@ export default async (request, context) => {
             let displayRate = p.rate ? (Number(String(p.rate).replace(/,/g, "")) ? Number(String(p.rate).replace(/,/g, "")).toLocaleString() : escapeHTML(p.rate)) : "สอบถาม";
             const animDelay = (index % 10) * 50;
             
-            // Dynamic Traits (เพื่อสร้างจุดขายบนหน้าการ์ด)
             const availableTraits = seoData.traits || ["ผิวออร่า", "น่ารัก", "บริการดี", "หุ่นสัดส่วนดี"];
             const randomTrait1 = availableTraits[index % availableTraits.length];
             const randomTrait2 = availableTraits[(index + 3) % availableTraits.length];
@@ -457,7 +561,6 @@ export default async (request, context) => {
             const lsiKeyword = seoData.lsi ? seoData.lsi[index % seoData.lsi.length] : `รับงาน${provinceName}`;
             const smartAlt = `รูปโปรไฟล์น้อง${cleanName} บริการ${lsiKeyword} พิกัดโซน${profileLocation}`;
             
-            // Critical LCP priority for top 4 cards
             const imageAttributes = index < 4 ? 'fetchpriority="high" decoding="sync"' : 'loading="lazy" decoding="async"';
 
             const hotBadge = (p.isfeatured || index < 3) ? `
@@ -469,14 +572,13 @@ export default async (request, context) => {
                 ? `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#00E676] animate-pulse shadow-[0_0_10px_#00E676]"></span> <span class="text-[9px] text-[#00E676] tracking-wider uppercase font-bold">ว่าง พร้อมรับงาน</span></div>` 
                 : `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span> <span class="text-[9px] text-red-500 tracking-wider uppercase font-bold">ติดจอง</span></div>`;
 
-            // Removed onclick from article to prevent double-click issues, relies entirely on the <a> tag
             return `
             <article class="reveal group relative rounded-[2.5rem] p-[2px] overflow-hidden bg-white/5 hover:bg-white/10 transition-colors duration-500" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
                 <!-- Holographic Hover Border -->
                 <div class="absolute inset-0 bg-gradient-to-br from-brand-pink via-transparent to-brand-gold opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[2px] z-0"></div>
                 
                 <div class="relative h-full bg-[#050505] rounded-[2.4rem] overflow-hidden flex flex-col z-10 border border-white/5 group-hover:border-transparent transition-colors">
-                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-[2.4rem]">
+                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-[2.4rem]" aria-label="จองน้อง${cleanName}">
                         <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
                     </a>
                     
@@ -517,7 +619,7 @@ export default async (request, context) => {
                     <!-- Bottom Rate Bar -->
                     <div class="p-5 flex justify-between items-center bg-gradient-to-b from-[#0A0A0A] to-[#050505] relative z-40 pointer-events-none">
                         <div>
-                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest mb-1">Rate / Course</span>
+                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest mb-1">เรทราคา / คอร์ส</span>
                             <span class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tighter">${displayRate} ${displayRate !== "สอบถาม" ? "<span class='text-brand-pink'>฿</span>" : ""}</span>
                         </div>
                         <div class="flex flex-col items-end gap-2">
@@ -576,7 +678,6 @@ export default async (request, context) => {
         :root { --glass: rgba(5, 5, 5, 0.85); }
         body { background: #050505; color: #FFFFFF; -webkit-font-smoothing: antialiased; }
         
-        /* Cinematic Noise Texture */
         .noise-overlay {
             position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.03;
             background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');
@@ -612,22 +713,22 @@ export default async (request, context) => {
     <!-- Premium Navbar -->
     <header id="navbar" class="fixed top-0 w-full z-[100] transition-all duration-500 py-4">
         <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
-            <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg">
-                <img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME} Logo" class="h-6 md:h-8 brightness-0 invert opacity-90 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+            <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg" aria-label="กลับสู่หน้าแรก">
+                <img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME} - โลโก้" class="h-6 md:h-8 brightness-0 invert opacity-90 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
             </a>
             
-            <nav class="hidden md:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.25em] text-gray-400" aria-label="Main Navigation">
-                <a href="/" class="hover:text-brand-pink hover:drop-shadow-[0_0_8px_rgba(255,51,102,0.5)] transition-all">Home</a>
-                <a href="/profiles.html" class="text-white border-b-2 border-brand-pink pb-1 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" aria-current="page">VIP Models</a>
-                <a href="/locations.html" class="hover:text-brand-pink hover:drop-shadow-[0_0_8px_rgba(255,51,102,0.5)] transition-all">Locations</a>
+            <nav class="hidden md:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.1em] text-gray-400" aria-label="เมนูนำทางหลัก">
+                <a href="/" class="hover:text-brand-pink hover:drop-shadow-[0_0_8px_rgba(255,51,102,0.5)] transition-all">หน้าแรก</a>
+                <a href="/profiles.html" class="text-white border-b-2 border-brand-pink pb-1 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" aria-current="page">โปรไฟล์น้องๆ</a>
+                <a href="/locations.html" class="hover:text-brand-pink hover:drop-shadow-[0_0_8px_rgba(255,51,102,0.5)] transition-all">พื้นที่รับงาน</a>
             </nav>
 
             <div class="flex items-center gap-4">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 bg-white text-[#050505] px-8 py-3 rounded-full text-[10px] font-black tracking-widest btn-shine shadow-[0_10px_20px_rgba(255,255,255,0.1)] hover:bg-brand-pink hover:text-white hover:shadow-[0_10px_30px_rgba(255,51,102,0.4)] transition-all border border-transparent">
-                    BOOK NOW <i class="fab fa-line text-sm"></i>
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 bg-white text-[#050505] px-8 py-3 rounded-full text-[10px] font-black tracking-widest btn-shine shadow-[0_10px_20px_rgba(255,255,255,0.1)] hover:bg-brand-pink hover:text-white hover:shadow-[0_10px_30px_rgba(255,51,102,0.4)] transition-all border border-transparent" aria-label="ติดต่อแอดมินทางไลน์">
+                    จองคิวตอนนี้ <i class="fab fa-line text-sm" aria-hidden="true"></i>
                 </a>
-                <button id="menu-btn" aria-label="Open Mobile Menu" class="md:hidden w-11 h-11 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 shadow-sm active:scale-95 transition-transform text-white hover:bg-white/20">
-                    <i class="fas fa-bars-staggered text-sm"></i>
+                <button id="menu-btn" aria-label="เปิดเมนูบนมือถือ" class="md:hidden w-11 h-11 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 shadow-sm active:scale-95 transition-transform text-white hover:bg-white/20">
+                    <i class="fas fa-bars-staggered text-sm" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
@@ -635,16 +736,16 @@ export default async (request, context) => {
 
     <!-- Fullscreen Mobile Menu -->
     <div id="mobile-menu" class="fixed inset-0 bg-[#050505]/98 backdrop-blur-3xl z-[150] transform translate-y-[-100%] transition-transform duration-500 ease-in-out flex flex-col justify-center items-center gap-8 border-b-4 border-brand-pink" aria-hidden="true">
-        <nav class="flex flex-col items-center gap-8" aria-label="Mobile Navigation">
-            <a href="/" class="text-3xl font-black text-gray-500 hover:text-white tracking-tighter transition-colors">HOME</a>
-            <a href="/profiles.html" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-[#D4AF37] tracking-tighter drop-shadow-[0_0_15px_rgba(255,51,102,0.4)]">VIP MODELS</a>
-            <a href="/locations.html" class="text-3xl font-black text-gray-500 hover:text-white tracking-tighter transition-colors">LOCATIONS</a>
+        <nav class="flex flex-col items-center gap-8" aria-label="เมนูบนมือถือ">
+            <a href="/" class="text-3xl font-black text-gray-500 hover:text-white tracking-tighter transition-colors">หน้าแรก</a>
+            <a href="/profiles.html" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-[#D4AF37] tracking-tighter drop-shadow-[0_0_15px_rgba(255,51,102,0.4)]">โปรไฟล์น้องๆ</a>
+            <a href="/locations.html" class="text-3xl font-black text-gray-500 hover:text-white tracking-tighter transition-colors">พื้นที่รับงาน</a>
         </nav>
-        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="mt-8 px-10 py-4 bg-white text-[#050505] rounded-full font-black uppercase tracking-[0.2em] text-xs shadow-[0_10px_30px_rgba(255,255,255,0.2)] flex items-center gap-3 hover:bg-brand-pink hover:text-white transition-colors">
-            Contact Admin <i class="fab fa-line text-xl"></i>
+        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="mt-8 px-10 py-4 bg-white text-[#050505] rounded-full font-black uppercase tracking-[0.1em] text-xs shadow-[0_10px_30px_rgba(255,255,255,0.2)] flex items-center gap-3 hover:bg-brand-pink hover:text-white transition-colors" aria-label="ติดต่อแอดมิน">
+            ติดต่อแอดมิน <i class="fab fa-line text-xl" aria-hidden="true"></i>
         </a>
-        <button id="close-menu" aria-label="Close Mobile Menu" class="absolute top-8 right-6 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 hover:bg-white/30 transition-colors">
-            <i class="fas fa-times text-lg"></i>
+        <button id="close-menu" aria-label="ปิดเมนู" class="absolute top-8 right-6 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 hover:bg-white/30 transition-colors">
+            <i class="fas fa-times text-lg" aria-hidden="true"></i>
         </button>
     </div>
 
@@ -665,7 +766,7 @@ export default async (request, context) => {
 
                 <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active">
                     <div class="aspect-[16/9] md:aspect-[21/9] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(255,51,102,0.2)] bg-[#111] border border-white/10 relative">
-                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="ไซด์ไลน์${escapeHTML(provinceName)} บริการพรีเมียม" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.03] opacity-70" fetchpriority="high">
+                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์${escapeHTML(provinceName)} รับงาน${escapeHTML(provinceName)} ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.03] opacity-70" fetchpriority="high">
                         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[#050505] pointer-events-none"></div>
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity duration-1000">
                             <div class="text-white font-black text-7xl md:text-[10rem] tracking-tighter mix-blend-overlay uppercase select-none drop-shadow-2xl blur-[1px]">${escapeHTML(provinceKey)}</div>
@@ -678,7 +779,7 @@ export default async (request, context) => {
                 <div class="max-w-4xl mx-auto text-center reveal active relative z-10">
                     <div class="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-green-500/10 text-green-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8 border border-green-500/20 shadow-[0_0_20px_rgba(0,230,118,0.1)] backdrop-blur-md">
                         <span class="w-2.5 h-2.5 rounded-full bg-[#00E676] animate-pulse shadow-[0_0_10px_#00E676]"></span>
-                        ${safeProfiles.length} VIP Profiles Online
+                        ${safeProfiles.length} โพสต์พร้อมให้บริการ
                     </div>
                     
                     <h1 class="text-5xl sm:text-7xl md:text-[5.5rem] font-black text-white leading-[1.05] tracking-tighter mb-8 drop-shadow-2xl">
@@ -690,26 +791,28 @@ export default async (request, context) => {
                         สัมผัสประสบการณ์พักผ่อนระดับพรีเมียม หาเพื่อนเที่ยว ออกเดท ดูหนัง ทานข้าว แบบฟีลแฟน ที่${escapeHTML(provinceName)} กับน้องๆ คัดเกรดพิเศษ 
                         <span class="block mt-3 text-brand-gold font-bold tracking-wide">การันตีโปรไฟล์ตรงปก ยืนยันตัวตนแล้วทุกรหัส 100%</span>
                     </p>
+                    
                     <!-- Smart Search Bar -->
-<div class="max-w-2xl mx-auto mt-4 mb-8 relative z-20 px-4">
-    <form action="/search" method="GET" class="relative group">
-        <div class="absolute inset-y-0 left-4 md:left-6 flex items-center pointer-events-none">
-            <i class="fas fa-magnifying-glass text-gray-400 group-focus-within:text-brand-pink transition-colors"></i>
-        </div>
-        <input type="text" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." required
-            class="w-full bg-[#050505]/80 backdrop-blur-xl border border-white/20 text-white rounded-full py-4 pl-12 md:pl-14 pr-24 md:pr-32 focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all font-light placeholder-gray-500 text-sm md:text-base">
-        <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-brand-pink text-white px-4 md:px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-white hover:text-brand-pink transition-all shadow-[0_0_15px_rgba(255,51,102,0.4)]">
-            ค้นหา
-        </button>
-    </form>
-</div>
+                    <div class="max-w-2xl mx-auto mt-4 mb-8 relative z-20 px-4">
+                        <form action="/search" method="GET" class="relative group">
+                            <label for="search-input" class="sr-only">ค้นหาน้องๆ โซน จังหวัด หรือชื่อ</label>
+                            <div class="absolute inset-y-0 left-4 md:left-6 flex items-center pointer-events-none">
+                                <i class="fas fa-magnifying-glass text-gray-400 group-focus-within:text-brand-pink transition-colors" aria-hidden="true"></i>
+                            </div>
+                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." required
+                                class="w-full bg-[#050505]/80 backdrop-blur-xl border border-white/20 text-white rounded-full py-4 pl-12 md:pl-14 pr-24 md:pr-32 focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all font-light placeholder-gray-500 text-sm md:text-base">
+                            <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-brand-pink text-white px-4 md:px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-white hover:text-brand-pink transition-all shadow-[0_0_15px_rgba(255,51,102,0.4)]" aria-label="ปุ่มค้นหา">
+                                ค้นหา
+                            </button>
+                        </form>
+                    </div>
                     
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-5 px-6">
-                        <a href="#profiles" class="w-full sm:w-auto px-12 py-4 md:py-5 bg-white text-[#050505] rounded-full font-black text-xs md:text-sm tracking-widest hover:bg-brand-pink hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.15)] hover:shadow-[0_15px_40px_rgba(255,51,102,0.4)] uppercase">
-                            Explore Collection
+                        <a href="#profiles" class="w-full sm:w-auto px-12 py-4 md:py-5 bg-white text-[#050505] rounded-full font-black text-xs md:text-sm tracking-widest hover:bg-brand-pink hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.15)] hover:shadow-[0_15px_40px_rgba(255,51,102,0.4)] uppercase" aria-label="เลื่อนลงไปดูโปรไฟล์">
+                            เลือกดูโปรไฟล์
                         </a>
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-12 py-4 md:py-5 bg-white/5 text-white border border-white/20 rounded-full font-black text-xs md:text-sm hover:border-brand-pink hover:bg-brand-pink/10 transition-all flex items-center justify-center gap-3 uppercase tracking-widest backdrop-blur-md">
-                            <i class="fab fa-line text-xl text-[#00C300]"></i> Booking Admin
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-12 py-4 md:py-5 bg-white/5 text-white border border-white/20 rounded-full font-black text-xs md:text-sm hover:border-brand-pink hover:bg-brand-pink/10 transition-all flex items-center justify-center gap-3 uppercase tracking-widest backdrop-blur-md" aria-label="แอดไลน์ติดต่อแอดมิน">
+                            <i class="fab fa-line text-xl text-[#00C300]" aria-hidden="true"></i> ติดต่อแอดมิน
                         </a>
                     </div>
                 </div>
@@ -718,10 +821,10 @@ export default async (request, context) => {
 
         <!-- Dynamic Glass Filter -->
         <div class="sticky top-[56px] md:top-[64px] z-40 glass-effect py-3.5 overflow-x-auto no-scrollbar">
-            <nav class="max-w-7xl mx-auto px-6 flex items-center justify-center sm:justify-start md:justify-center gap-3 min-w-max" aria-label="Profile Filters">
-                <button aria-pressed="true" class="shrink-0 px-8 py-2.5 rounded-full bg-white text-[#050505] text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(255,255,255,0.2)]">All VIP</button>
-                <button aria-pressed="false" class="shrink-0 px-8 py-2.5 rounded-full bg-[#0A0A0A] border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] hover:text-brand-gold hover:border-brand-gold/50 hover:bg-brand-gold/5 transition-all shadow-sm">Hot & Trending</button>
-                <button aria-pressed="false" class="shrink-0 px-8 py-2.5 rounded-full bg-[#0A0A0A] border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 hover:text-brand-pink hover:border-brand-pink/50 hover:bg-brand-pink/5 transition-all shadow-sm"><i class="fas fa-location-dot"></i> Near Me</button>
+            <nav class="max-w-7xl mx-auto px-6 flex items-center justify-center sm:justify-start md:justify-center gap-3 min-w-max" aria-label="หมวดหมู่โปรไฟล์">
+                <button aria-pressed="true" class="shrink-0 px-8 py-2.5 rounded-full bg-white text-[#050505] text-[10px] font-black tracking-[0.1em] shadow-[0_0_15px_rgba(255,255,255,0.2)]">น้องๆ ทั้งหมด</button>
+                <button aria-pressed="false" class="shrink-0 px-8 py-2.5 rounded-full bg-[#0A0A0A] border border-white/10 text-gray-400 text-[10px] font-black tracking-[0.1em] hover:text-brand-gold hover:border-brand-gold/50 hover:bg-brand-gold/5 transition-all shadow-sm">มาแรง & ยอดฮิต</button>
+                <button aria-pressed="false" class="shrink-0 px-8 py-2.5 rounded-full bg-[#0A0A0A] border border-white/10 text-gray-400 text-[10px] font-black tracking-[0.1em] flex items-center gap-2 hover:text-brand-pink hover:border-brand-pink/50 hover:bg-brand-pink/5 transition-all shadow-sm"><i class="fas fa-location-dot" aria-hidden="true"></i> ใกล้ฉัน</button>
             </nav>
         </div>
 
@@ -729,14 +832,14 @@ export default async (request, context) => {
         <section id="profiles" class="max-w-[1440px] mx-auto px-4 md:px-8 py-24 scroll-mt-32">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 px-2">
                 <div class="reveal">
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-white drop-shadow-xl">EXCLUSIVE<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink via-purple-500 to-[#D4AF37]">COLLECTION</span></h2>
-                    <p class="text-brand-pink text-[10px] font-black uppercase tracking-[0.4em] mt-5 drop-shadow-[0_0_8px_rgba(255,51,102,0.6)] flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i> Verified (${CURRENT_MONTH} ${CURRENT_YEAR})
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-white drop-shadow-xl">รวมโปรไฟล์น้องๆ<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink via-purple-500 to-[#D4AF37]">ระดับ VIP</span></h2>
+                    <p class="text-brand-pink text-[10px] font-black uppercase tracking-[0.2em] mt-5 drop-shadow-[0_0_8px_rgba(255,51,102,0.6)] flex items-center gap-2">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i> ตรวจสอบแล้ว (${CURRENT_MONTH} ${CURRENT_YEAR})
                     </p>
                 </div>
                 <div class="flex items-center gap-3 px-5 py-2.5 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 text-[10px] font-black text-gray-300 uppercase tracking-widest reveal shadow-lg">
                     <span class="w-2.5 h-2.5 rounded-full bg-brand-pink animate-pulse shadow-[0_0_10px_#FF3366]"></span> 
-                    Showing ${safeProfiles.length} VIPs
+                    กำลังแสดง ${safeProfiles.length} โปรไฟล์
                 </div>
             </div>
             
@@ -753,46 +856,50 @@ export default async (request, context) => {
     <footer class="bg-[#050505] py-24 text-center border-t border-white/10 relative z-10 overflow-hidden">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,51,102,0.08),transparent_70%)] pointer-events-none z-0"></div>
         <div class="max-w-4xl mx-auto px-6 relative z-10">
-            <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-8 md:h-10 mx-auto brightness-0 invert mb-12 opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+            <img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME} - โลโก้" class="h-8 md:h-10 mx-auto brightness-0 invert mb-12 opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" loading="lazy">
             <h2 class="text-4xl md:text-6xl font-black text-white mb-10 tracking-tighter uppercase drop-shadow-2xl">
                 รับงานไซด์ไลน์ <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-[#D4AF37] drop-shadow-[0_0_15px_rgba(255,51,102,0.4)]">${escapeHTML(provinceName)}</span>
             </h2>
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 bg-white text-[#050505] px-12 py-5 rounded-full font-black text-sm md:text-lg tracking-widest shadow-[0_15px_40px_rgba(255,255,255,0.15)] hover:scale-105 hover:bg-brand-pink hover:text-white hover:shadow-[0_20px_50px_rgba(255,51,102,0.4)] transition-all duration-300 btn-shine">
-                <i class="fab fa-line text-2xl text-[#00C300] bg-white rounded-full"></i> BOOKING NOW
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 bg-white text-[#050505] px-12 py-5 rounded-full font-black text-sm md:text-lg tracking-widest shadow-[0_15px_40px_rgba(255,255,255,0.15)] hover:scale-105 hover:bg-brand-pink hover:text-white hover:shadow-[0_20px_50px_rgba(255,51,102,0.4)] transition-all duration-300 btn-shine" aria-label="จองคิวผ่านไลน์">
+                <i class="fab fa-line text-2xl text-[#00C300] bg-white rounded-full" aria-hidden="true"></i> จองน้องๆ ตอนนี้
             </a>
             
-            <nav class="mt-24 flex flex-wrap justify-center gap-x-8 gap-y-6" aria-label="Province Links">
-                ${allProvinces.slice(0, 10).map(p => `<a href="/location/${p.key}" class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] hover:text-brand-pink hover:drop-shadow-[0_0_8px_rgba(255,51,102,0.5)] transition-all">รับงาน${escapeHTML(p.nameThai)}</a>`).join("")}
+            <div class="mt-24 mb-10 reveal">
+                <h3 class="text-xl md:text-2xl font-black text-white tracking-widest drop-shadow-md">พื้นที่รับงานจังหวัดอื่นๆ</h3>
+                <div class="w-20 h-1 bg-gradient-to-r from-brand-pink to-[#D4AF37] mx-auto mt-5 rounded-full shadow-[0_0_10px_rgba(255,51,102,0.5)]"></div>
+            </div>
+            
+            <nav class="flex flex-wrap justify-center gap-x-6 gap-y-4 md:gap-x-8 md:gap-y-6 reveal" aria-label="ลิงก์ไปยังพื้นที่รับงานอื่นๆ">
+                ${allProvinces.slice(0, 10).map(p => `<a href="/location/${p.key}" class="text-[10px] md:text-xs font-black text-gray-500 uppercase tracking-[0.15em] hover:text-brand-pink hover:drop-shadow-[0_0_8px_rgba(255,51,102,0.5)] transition-all">รับงาน${escapeHTML(p.nameThai)}</a>`).join("")}
             </nav>
 
-            <div class="mt-16 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">© ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
+            <div class="mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">© ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
                 <div class="flex gap-8 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">
-                    <a href="/privacy-policy.html" class="hover:text-white transition-colors">Privacy</a>
-                    <a href="/terms.html" class="hover:text-white transition-colors">Terms</a>
+                    <a href="/privacy-policy.html" class="hover:text-white transition-colors">นโยบายความเป็นส่วนตัว</a>
+                    <a href="/terms.html" class="hover:text-white transition-colors">เงื่อนไขการใช้บริการ</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Cinematic Mobile Navigation -->
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[90%] max-w-[380px]" aria-label="Quick Mobile Navigation">
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[90%] max-w-[380px]" aria-label="เมนูลัดบนมือถือ">
         <div class="bg-[#050505]/90 backdrop-blur-2xl border border-white/10 px-8 py-3.5 rounded-full flex items-center justify-between shadow-[0_30px_60px_rgba(0,0,0,0.9)]">
-            <a href="/" aria-label="Home" class="text-gray-500 hover:text-white transition-colors p-2 active:scale-95"><i class="fas fa-house text-lg"></i></a>
-            <a href="/profiles.html" aria-label="VIP Profiles" class="text-brand-gold drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] p-2 active:scale-95"><i class="fas fa-gem text-xl"></i></a>
+            <a href="/" aria-label="กลับสู่หน้าแรก" class="text-gray-500 hover:text-white transition-colors p-2 active:scale-95"><i class="fas fa-house text-lg" aria-hidden="true"></i></a>
+            <a href="/profiles.html" aria-label="ดูโปรไฟล์ระดับ VIP" class="text-brand-gold drop-shadow-[0_0_12px_rgba(212,175,55,0.8)] p-2 active:scale-95"><i class="fas fa-gem text-xl" aria-hidden="true"></i></a>
             
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="Contact Admin" class="relative w-16 h-16 bg-gradient-to-br from-brand-pink to-purple-600 text-white rounded-full flex items-center justify-center -mt-10 shadow-[0_10px_30px_rgba(255,51,102,0.6)] border-[4px] border-[#050505] transform hover:scale-110 active:scale-95 transition-all btn-shine z-50">
-                <i class="fab fa-line text-3xl drop-shadow-md"></i>
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" aria-label="ติดต่อแอดมินผ่านไลน์" class="relative w-16 h-16 bg-gradient-to-br from-brand-pink to-purple-600 text-white rounded-full flex items-center justify-center -mt-10 shadow-[0_10px_30px_rgba(255,51,102,0.6)] border-[4px] border-[#050505] transform hover:scale-110 active:scale-95 transition-all btn-shine z-50">
+                <i class="fab fa-line text-3xl drop-shadow-md" aria-hidden="true"></i>
             </a>
             
-            <a href="/locations.html" aria-label="Locations" class="text-gray-500 hover:text-white transition-colors p-2 active:scale-95"><i class="fas fa-map-marker-alt text-lg"></i></a>
-            <a href="/search" aria-label="Search" class="text-gray-500 hover:text-white transition-colors p-2 active:scale-95"><i class="fas fa-magnifying-glass text-lg"></i></a>
+            <a href="/locations.html" aria-label="ดูพื้นที่รับงาน" class="text-gray-500 hover:text-white transition-colors p-2 active:scale-95"><i class="fas fa-map-marker-alt text-lg" aria-hidden="true"></i></a>
+            <a href="/search" aria-label="ค้นหาน้องๆ" class="text-gray-500 hover:text-white transition-colors p-2 active:scale-95"><i class="fas fa-magnifying-glass text-lg" aria-hidden="true"></i></a>
         </div>
     </nav>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // High-Performance Intersection Observer for Animations
             const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -804,7 +911,6 @@ export default async (request, context) => {
             }, observerOptions);
             document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-            // Glassmorphism Navbar Scroll Effect
             const nav = document.getElementById('navbar');
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 20) {
@@ -818,7 +924,6 @@ export default async (request, context) => {
                 }
             }, { passive: true });
 
-            // Mobile Menu Controller
             const menuBtn = document.getElementById('menu-btn');
             const closeMenuBtn = document.getElementById('close-menu');
             const mobileMenu = document.getElementById('mobile-menu');
