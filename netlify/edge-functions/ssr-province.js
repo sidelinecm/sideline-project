@@ -295,7 +295,7 @@ const generateAppSeoText = (provinceName, provinceKey, count) => {
         { t: "ข้อมูลลับระดับสูงสุด", d: "ข้อมูลการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
     ];
 
-    const isDefaultZones = data.zones && data.zones.some(z => z.includes("ตัวเมือง") || z.includes("พื้นที่ใกล้เคียง"));
+    const isDefaultZones = !PROVINCE_SEO_DATA[provinceKey];
 
     const zonesHTML = (data.zones && data.zones.length > 0 && !isDefaultZones) ? `
         <div class="reveal text-center relative z-10 pt-12 pb-8">
