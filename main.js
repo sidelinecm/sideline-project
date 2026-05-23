@@ -1255,15 +1255,18 @@ function updateUrlFromFilters(query) {
 async function renderCardsIncrementally(container, profiles, renderId) {
     if (!container || !profiles) return;
     
+    // ✅ 1. บันทึกค่า Render ID ล่าสุดลงในคอนเทนเนอร์ตัวนี้โดยตรง เพื่อแยกสิทธิ์ควบคุมไม่ให้ปนกัน
+    container.dataset.activeRenderId = renderId;
+    
     container.innerHTML = '';
     
     const fragment = document.createDocumentFragment();
     const BATCH_SIZE = profiles.length > 20 ? 4 : 8; 
 
     for (let i = 0; i < profiles.length; i++) {
-        // ✅ ตรวจสอบสถานะ: หากมีการเริ่มสั่งเรนเดอร์งานรอบใหม่ (Render ID เปลี่ยนแปลง) ให้ยกเลิกงานรอบนี้ทันที
-        if (renderId !== undefined && state.renderId !== renderId) {
-            console.log("🚫 Rendering aborted: Newer render session started.");
+        // ✅ 2. ตรวจสอบ Render ID เฉพาะเจาะจงกับคอนเทนเนอร์ตัวนี้เท่านั้น (แก้ไขปัญหาโดนยกเลิกครึ่งทาง)
+        if (renderId !== undefined && Number(container.dataset.activeRenderId) !== renderId) {
+            console.log(`🚫 Rendering aborted for #${container.id || 'container'}: Newer session started.`);
             return;
         }
 
