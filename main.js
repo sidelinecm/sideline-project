@@ -353,36 +353,40 @@ function cacheDOMElements() {
 async function handleDataLoading() {
     if (state.isFetching) return;
 
-    showLoadingState();
+    showLoadingState(); // สั่งเปิดตัวโหลดหมุน ๆ สไตล์พรีเมียม
     let retryCount = 0;
     const maxRetries = 3;
     
-    while (retryCount < maxRetries) {
-        try {
-            const success = await fetchDataDelta();
-            if (success) {
-                initSearchAndFilters();
-                await handleRouting(true);
-                initRealtimeSubscription();
+    try {
+        while (retryCount < maxRetries) {
+            try {
+                const success = await fetchDataDelta();
+                if (success) {
+                    initSearchAndFilters();
+                    await handleRouting(true);
+                    initRealtimeSubscription();
+                    
+                    if(dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
+                    if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
+                    
+                    return; // สั่งหยุดทำงานเมื่อสำเร็จ ระบบจะวิ่งข้ามไปปิดตัวโหลดที่บล็อก finally ด้านล่างทันที
+                }
+            } catch (error) {
+                console.error(`Attempt ${retryCount + 1} failed:`, error);
+                retryCount++;
                 
-                if(dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
-                if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
-                
-                hideLoadingState();
-                return;
-            }
-        } catch (error) {
-            console.error(`Attempt ${retryCount + 1} failed:`, error);
-            retryCount++;
-            
-            if (retryCount < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                if (retryCount < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                }
             }
         }
+        
+        showErrorState("ไม่สามารถโหลดข้อมูลได้หลังจากลองใหม่หลายครั้ง");
+        
+    } finally {
+        // ✅ บล็อก finally นี้จะการันตีทำงานปิดตัวโหลดแน่นอน 100% เสมอ ไม่ว่าจะโหลดสำเร็จหรือพังก็ตาม
+        hideLoadingState(); 
     }
-    
-    showErrorState("ไม่สามารถโหลดข้อมูลได้หลังจากลองใหม่หลายครั้ง");
-    hideLoadingState();
 }
 
 
@@ -2584,41 +2588,51 @@ function updateActiveNavLinks() {
 function createGlobalLoader() {
     if (document.getElementById('global-loader-overlay')) return;
 
-    // เพิ่ม Style สำหรับ Keyframes ที่ดูนุ่มนวลกว่าเดิม
+    // เพิ่ม Style สำหรับอนิเมชันของวงแหวนทองคำพรีเมียมกะพริบเรืองแสง
     const style = document.createElement('style');
     style.innerHTML = `
-        @keyframes heart-pulse-custom {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(236, 72, 153, 0)); }
-            50% { transform: scale(1.15); filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.4)); }
+        @keyframes spin-clockwise-loader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .animate-heart-pulse { animation: heart-pulse-custom 1.2s infinite ease-in-out; }
+        @keyframes pulse-glow-loader {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 46, 99, 0.2)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(255, 46, 99, 0.7)); }
+        }
+        @keyframes text-blink-loader {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .anim-spin-slow-loader { animation: spin-clockwise-loader 2s linear infinite; }
+        .anim-pulse-loader { animation: pulse-glow-loader 1.5s infinite ease-in-out; }
+        .anim-blink-loader { animation: text-blink-loader 1.5s infinite ease-in-out; }
     `;
     document.head.appendChild(style);
 
     const loaderHTML = `
         <div id="global-loader-overlay" 
-             style="position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0b0f19; transition: opacity 0.5s ease;" 
-             class="dark:bg-gray-950">
+             style="position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #07070a; transition: opacity 0.4s ease; pointer-events: all;" 
+             class="dark:bg-[#07070a]">
             
-            <div style="position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
-                <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px dashed rgba(236, 72, 153, 0.2);" class="animate-spin"></div>
-                <div style="position: absolute; inset: 5px; border-radius: 9999px; background-color: #ec4899; opacity: 0.15;" class="animate-ping"></div>
+            <div style="position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <!-- วงแหวนประระดับความพรีเมียมสีทอง -->
+                <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px dashed rgba(212, 175, 55, 0.15);" class="anim-spin-slow-loader"></div>
+                <div style="position: absolute; inset: 6px; border-radius: 9999px; border: 2.5px solid transparent; border-top-color: #D4AF37; border-right-color: #FCF6BA;" class="anim-spin-slow-loader"></div>
                 
-                <div style="position: relative; z-index: 10; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #ec4899 0%, #9333ea 100%); box-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.5);">
-                    <i class="fas fa-heart animate-heart-pulse" style="font-size: 34px; color: #ffffff;"></i>
+                <!-- จุดเรืองแสงหัวใจแอมเบอร์พัลส์ตรงกลาง -->
+                <div style="position: relative; z-index: 10; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #FF2E63 0%, #FF8E53 100%); box-shadow: 0 10px 30px -5px rgba(255, 46, 99, 0.5);" class="anim-pulse-loader">
+                    <i class="fas fa-heart" style="font-size: 18px; color: #ffffff;"></i>
                 </div>
             </div>
             
-            <div style="margin-top: 32px; text-align: center;">
-                <h3 style="font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px;">Sideline Chiangmai</h3>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <p style="font-size: 13px; color: #ec4899; font-weight: 600; letter-spacing: 1px;">PREMIUM CURATED SELECTION</p>
-                    <div class="flex gap-1">
-                        <span class="w-1 h-1 bg-pink-500 rounded-full animate-bounce"></span>
-                        <span class="w-1 h-1 bg-pink-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-                        <span class="w-1 h-1 bg-pink-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
-                    </div>
-                </div>
+            <div style="text-align: center;">
+                <!-- ข้อความสถานะการโหลดพรีเมียม -->
+                <h3 class="anim-blink-loader" style="font-size: 14px; font-weight: 700; color: #D4AF37; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">
+                    กำลังตรวจสอบโปรไฟล์ตรงปก...
+                </h3>
+                <p style="font-size: 10px; color: #6b7280; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;">
+                    SIDELINE CHIANGMAI PREMIUM SELECTION
+                </p>
             </div>
         </div>
     `;
@@ -2631,30 +2645,38 @@ function showLoadingState() {
         createGlobalLoader();
         loader = document.getElementById('global-loader-overlay');
     }
-    // ใช้ GSAP ทำให้การปรากฏตัวนุ่มนวล
-    gsap.set(loader, { display: 'flex', opacity: 0 });
-    gsap.to(loader, { opacity: 1, duration: 0.3, pointerEvents: 'all' });
+    
+    // บล็อกความปลอดภัย: ป้องกันการกดสัมผัสหน้าจอส่วนหลังขณะกำลังดึงข้อมูล
+    loader.style.pointerEvents = 'all';
+    loader.style.display = 'flex';
+    
+    try {
+        gsap.killTweensOf(loader);
+        gsap.set(loader, { opacity: 0 });
+        gsap.to(loader, { opacity: 1, duration: 0.2, ease: 'power2.out' });
+    } catch (e) {
+        loader.style.opacity = '1';
+    }
 }
 
 function hideLoadingState() {
     const loader = document.getElementById('global-loader-overlay');
     if (loader) {
+        // ปลดบล็อกเลเยอร์ใส เพื่อให้ผู้ใช้งานสัมผัสและคลิกปุ่มหน้าเว็บด้านหลังได้ทันทีหลังโหลดเสร็จ
+        loader.style.pointerEvents = 'none'; 
+        
         try {
-            // ลองสั่งงานแอนิเมชัน
+            gsap.killTweensOf(loader);
             gsap.to(loader, {
                 opacity: 0,
-                scale: 1.05,
-                duration: 0.6,
-                ease: "expo.inOut",
+                duration: 0.4,
+                ease: "power2.inOut",
                 onComplete: () => {
                     loader.style.display = 'none';
-                    gsap.set(loader, { scale: 1 });
                     if (window.ScrollTrigger) ScrollTrigger.refresh();
                 }
             });
         } catch (e) {
-            // หากเกิด error (เช่น gsap โหลดไม่ขึ้น) ให้ซ่อนหน้าต่างโหลดไปเลยทันที
-            console.error("GSAP failed, hiding loader manually.", e);
             loader.style.display = 'none';
         }
     }
