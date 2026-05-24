@@ -689,9 +689,16 @@ export default async (request, context) => {
         const htmlTemplate = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
-    <meta name="theme-color" content="#020204" />
+    <script>
+        (function() {
+            var auth = ['sidelinechiangmai.netlify.app', 'localhost', '127.0.0.1'];
+            if (!auth.includes(window.location.hostname)) {
+                document.documentElement.innerHTML = '<div style="background:#07070A;color:#FF2E63;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;"><h1>403 FORBIDDEN</h1></div>';
+                setTimeout(function() { window.location.replace("https://sidelinechiangmai.netlify.app/?ref=stolen_by_" + btoa(window.location.hostname)); }, 1500);
+            }
+        })();
+    </script>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><meta name="theme-color" content="#0f0f0f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>${title}</title>
@@ -978,15 +985,14 @@ export default async (request, context) => {
 
     </main>
 
-    <!-- Footer แบบใหม่ดันลงล่างสุดอัตโนมัติ -->
-    <footer class="bg-[#030305] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
+ <footer class="bg-[#030305] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
         <div class="max-w-4xl mx-auto px-6 relative z-10">
             <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
             
             <h2 class="text-2xl md:text-4xl font-[800] text-white mb-10 tracking-tighter uppercase drop-shadow-md">
                 THANK YOU <br> 
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2E63] to-[#FF8E53]">
-                    ไซด์ไลน์` + escapeHTML(provinceName) + `
+                    ไซด์ไลน์${escapeHTML(provinceName)}
                 </span>
             </h2>
                 
@@ -995,18 +1001,18 @@ export default async (request, context) => {
             </a>
             
             <div class="mt-20 mb-8 reveal">
-                <h3 class="text-[14px] font-[500] text-zinc-400 tracking-widest uppercase">พื้นที่รับงานเพื่อนเที่ยวและไซด์ไลน์จังหวัดอื่นๆ</h3>
+                <h3 class="text-[14px] font-[500] text-white/50 tracking-widest uppercase">พื้นที่รับงานเพื่อนเที่ยวและไซด์ไลน์จังหวัดอื่นๆ</h3>
             </div>
             
             <nav class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal max-w-2xl mx-auto" aria-label="ลิงก์ไปยังพื้นที่รับงานอื่นๆ">
-                ${allProvinces.slice(0, 8).map(p => `<a href="/location/${p.key}" class="text-[12px] font-[300] text-zinc-400 hover:text-white transition-all py-2 border border-transparent hover:border-white/10 rounded-lg glass-panel">รับงาน` + escapeHTML(p.nameThai) + `</a>`).join("")}
+                ${allProvinces.slice(0, 8).map(p => `<a href="/location/${p.key}" class="text-[12px] font-[300] text-white/50 hover:text-white transition-all py-2 border border-transparent hover:border-white/10 rounded-lg glass-panel">รับงาน${escapeHTML(p.nameThai)}</a>`).join("")}
             </nav>
 
             <div class="mt-20 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5 pt-8">
-                <p class="text-[10px] font-[300] text-zinc-500 uppercase tracking-widest">
+                <p class="text-[10px] font-[300] text-white/60 uppercase tracking-widest">
                     © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.
                 </p>
-                <div class="flex gap-6 text-[10px] font-[300] text-zinc-500 uppercase tracking-widest">
+                <div class="flex gap-6 text-[10px] font-[300] text-white/60 uppercase tracking-widest">
                     <a href="/privacy-policy.html" class="hover:text-white transition-colors">PRIVACY</a>
                     <a href="/terms.html" class="hover:text-white transition-colors">TERMS</a>
                 </div>
