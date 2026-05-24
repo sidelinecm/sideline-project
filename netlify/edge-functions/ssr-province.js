@@ -3,13 +3,14 @@
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE NEO-LUXURY NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, Conversion UI/UX & Entity Engineering
- * Optimization: The Ultimate Merge (Performance SSR, Schema Graph, Best Quality Images & Security)
+ * Optimization: Pure Performance SSR, Advanced Schema Graph & Spellbinding UI/UX
  * Directory: netlify/edge-functions/ssr-province.js
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const CONFIG = {
+    // ดึงค่าผ่าน Environment Variables หากมีการตั้งค่าบน Netlify เพื่อความปลอดภัยสูงสุด
     get SUPABASE_URL() {
         try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
     },
@@ -35,6 +36,7 @@ const CONFIG = {
     }
 };
 
+// ✅ PROVINCE_SEO_DATA (ข้อมูลพิกัดและคำอธิบายจังหวัด)
 const PROVINCE_SEO_DATA = {
     chiangmai: {
         name: "เชียงใหม่",
@@ -239,13 +241,14 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
+// ✅ FIX #1: Merge default data for missing provinces
 Object.keys(PROVINCE_SEO_DATA).forEach(key => {
     if (!PROVINCE_SEO_DATA[key].uniqueIntro) {
         PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
     }
 });
 
-// ✅ IMAGE OPTIMIZATION (Quality: Best for Retina Display)
+// ✅ IMAGE OPTIMIZATION UTILITIES
 const getFullUrl = (path) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.startsWith("http")) return path;
@@ -253,23 +256,34 @@ const getFullUrl = (path) => {
     return `${CONFIG.DOMAIN}${cleanPath}`;
 };
 
+// ✅ FIX #2: Optimized image resizing (Best Quality)
 const optimizeImg = (path, width = 182, height = 242) => {
     if (!path) return getFullUrl("/images/default.webp");
+    
     if (path.includes("res.cloudinary.com")) {
         if (path.includes("/upload/")) {
-            return path.replace("/upload/", `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`);
+            return path.replace(
+                "/upload/",
+                `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`
+            );
         }
         return path;
     }
+    
     if (path.startsWith("http")) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
+    
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
 // ✅ SECURITY UTILITIES
 const escapeHTML = (str) => {
     if (!str) return "";
     return String(str).replace(/[&<>'"]/g, tag => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
     })[tag] || tag);
 };
 
@@ -447,61 +461,74 @@ export default async (request, context) => {
         const deterministicRating = (4.5 + (safeProfiles.length % 5) / 10).toFixed(1);
         const deterministicReviews = 50 + (safeProfiles.length * 2);
 
-        // Schema.org Graph Architecture
+        // Schema.org Graph Architecture (STRICT JSON FORMAT)
         const schemaGraph = [
             {
                 "@type": "Organization",
                 "@id": `${CONFIG.DOMAIN}/#organization`,
-                name: CONFIG.BRAND_NAME,
-                url: CONFIG.DOMAIN,
-                logo: { "@type": "ImageObject", url: `${CONFIG.DOMAIN}/logo.png` },
-                description: cleanDescription,
-                sameAs: CONFIG.SOCIALS,
-                contactPoint: { "@type": "ContactPoint", contactType: "customer service", telephone: CONFIG.PHONE, availableLanguage: ["th", "en"] }
+                "name": CONFIG.BRAND_NAME,
+                "url": CONFIG.DOMAIN,
+                "logo": { "@type": "ImageObject", "url": `${CONFIG.DOMAIN}/logo.png` },
+                "description": cleanDescription,
+                "sameAs": CONFIG.SOCIALS,
+                "contactPoint": { 
+                    "@type": "ContactPoint", 
+                    "contactType": "customer service", 
+                    "telephone": CONFIG.PHONE, 
+                    "availableLanguage": ["th", "en"] 
+                }
             },
             {
                 "@type": "WebSite",
                 "@id": `${CONFIG.DOMAIN}/#website`,
-                url: CONFIG.DOMAIN,
-                name: CONFIG.BRAND_NAME,
-                publisher: { "@id": `${CONFIG.DOMAIN}/#organization` },
-                potentialAction: { "@type": "SearchAction", target: `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
+                "url": CONFIG.DOMAIN,
+                "name": CONFIG.BRAND_NAME,
+                "publisher": { "@id": `${CONFIG.DOMAIN}/#organization` },
+                "potentialAction": { 
+                    "@type": "SearchAction", 
+                    "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`, 
+                    "query-input": "required name=search_term_string" 
+                }
             },
             {
                 "@type": ["LocalBusiness", "EntertainmentBusiness"],
                 "@id": `${provinceUrl}/#business`,
-                name: `ไซด์ไลน์${provinceName} บริการรับงานและเด็กเอ็น VIP`,
-                image: firstImage,
-                telephone: CONFIG.PHONE,
-                url: provinceUrl,
-                description: cleanDescription,
-                address: { "@type": "PostalAddress", addressLocality: provinceName, addressCountry: "TH" },
-                aggregateRating: safeProfiles.length > 0 ? {
+                "name": `ไซด์ไลน์${provinceName} บริการรับงานและเด็กเอ็น VIP`,
+                "image": firstImage,
+                "telephone": CONFIG.PHONE,
+                "url": provinceUrl,
+                "description": cleanDescription,
+                "address": { 
+                    "@type": "PostalAddress", 
+                    "addressLocality": provinceName, 
+                    "addressCountry": "TH" 
+                },
+                "aggregateRating": safeProfiles.length > 0 ? {
                     "@type": "AggregateRating",
-                    ratingValue: deterministicRating,
-                    reviewCount: String(deterministicReviews),
-                    bestRating: "5",
-                    worstRating: "1"
+                    "ratingValue": deterministicRating,
+                    "reviewCount": String(deterministicReviews),
+                    "bestRating": "5",
+                    "worstRating": "1"
                 } : undefined,
-                priceRange: "฿฿"
+                "priceRange": "฿฿"
             },
             {
                 "@type": "CollectionPage",
                 "@id": `${provinceUrl}/#webpage`,
-                url: provinceUrl,
-                name: title,
-                isPartOf: { "@id": `${CONFIG.DOMAIN}/#website` },
-                about: { "@id": `${provinceUrl}/#business` },
-                breadcrumb: { "@id": `${provinceUrl}/#breadcrumb` },
-                mainEntity: { "@id": `${provinceUrl}/#itemlist` }
+                "url": provinceUrl,
+                "name": title,
+                "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
+                "about": { "@id": `${provinceUrl}/#business` },
+                "breadcrumb": { "@id": `${provinceUrl}/#breadcrumb` },
+                "mainEntity": { "@id": `${provinceUrl}/#itemlist` }
             },
             {
                 "@type": "BreadcrumbList",
                 "@id": `${provinceUrl}/#breadcrumb`,
-                itemListElement: [
-                    { "@type": "ListItem", position: 1, name: "หน้าแรก", item: CONFIG.DOMAIN },
-                    { "@type": "ListItem", position: 2, name: "รวมโปรไฟล์", item: `${CONFIG.DOMAIN}/profiles` },
-                    { "@type": "ListItem", position": 3, name: `ไซด์ไลน์${provinceName}`, item: provinceUrl }
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+                    { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${CONFIG.DOMAIN}/profiles` },
+                    { "@type": "ListItem", "position": 3, "name": `ไซด์ไลน์${provinceName}`, "item": provinceUrl }
                 ]
             }
         ];
@@ -510,10 +537,10 @@ export default async (request, context) => {
             schemaGraph.push({
                 "@type": "FAQPage",
                 "@id": `${provinceUrl}/#faq`,
-                mainEntity: seoData.faqs.map(faq => ({
+                "mainEntity": seoData.faqs.map(faq => ({
                     "@type": "Question",
-                    name: stripHTML(faq.q),
-                    acceptedAnswer: { "@type": "Answer", text: stripHTML(faq.a) }
+                    "name": stripHTML(faq.q),
+                    "acceptedAnswer": { "@type": "Answer", "text": stripHTML(faq.a) }
                 }))
             });
         }
@@ -522,22 +549,28 @@ export default async (request, context) => {
             schemaGraph.push({
                 "@type": "ItemList",
                 "@id": `${provinceUrl}/#itemlist`,
-                name: `แคตตาล็อกน้องๆ รับงานไซด์ไลน์ ${provinceName}`,
-                description: `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName} อัปเดต ${CURRENT_MONTH} ${CURRENT_YEAR}`,
-                numberOfItems: safeProfiles.length,
-                itemListElement: safeProfiles.slice(0, 12).map((p, i) => {
+                "name": `แคตตาล็อกน้องๆ รับงานไซด์ไลน์ ${provinceName}`,
+                "description": `รายชื่อโปรไฟล์ ${safeProfiles.length} คนล่าสุดในพื้นที่ ${provinceName} อัปเดต ${CURRENT_MONTH} ${CURRENT_YEAR}`,
+                "numberOfItems": safeProfiles.length,
+                "itemListElement": safeProfiles.slice(0, 12).map((p, i) => {
                     let numericPrice = p.rate ? String(p.rate).replace(/\D/g, '') : "1500";
                     if (!numericPrice || numericPrice.length === 0) numericPrice = "1500";
                     return {
                         "@type": "ListItem",
-                        position: i + 1,
-                        item: {
+                        "position": i + 1,
+                        "item": {
                             "@type": "Person",
-                            name: p.name || "ไม่ระบุชื่อ",
-                            url: `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`,
-                            image: optimizeImg(p.imagePath, 300, 400),
-                            description: `โปรไฟล์น้อง${p.name || ""} รับงานโซน ${p.location || provinceName}`,
-                            offers: { "@type": "Offer", price: numericPrice, priceCurrency: "THB", availability: "https://schema.org/InStock", validFrom: ISO_DATE }
+                            "name": p.name || "ไม่ระบุชื่อ",
+                            "url": `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`,
+                            "image": optimizeImg(p.imagePath, 300, 400),
+                            "description": `โปรไฟล์น้อง${p.name || ""} รับงานโซน ${p.location || provinceName}`,
+                            "offers": { 
+                                "@type": "Offer", 
+                                "price": numericPrice, 
+                                "priceCurrency": "THB", 
+                                "availability": "https://schema.org/InStock", 
+                                "validFrom": ISO_DATE 
+                            }
                         }
                     };
                 })
@@ -567,7 +600,7 @@ export default async (request, context) => {
             return `
             <article class="reveal group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
                 
-                <div class="relative h-full flex flex-col z-10 cursor-pointer">
+                <div class="relative h-full flex flex-col z-10">
                     <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[24px]" aria-label="จองน้อง${cleanName}">
                         <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
                     </a>
