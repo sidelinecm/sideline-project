@@ -3,7 +3,8 @@
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE NEO-LUXURY NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, Conversion UI/UX & Entity Engineering
- * Optimization: Pure Performance SSR, Spellbinding UI/UX & Elite Dark Theme
+ * Optimization: Pure Performance SSR, Advanced Schema Graph & Spellbinding UI/UX
+ * Directory: netlify/edge-functions/ssr-province.js
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -48,7 +49,7 @@ const PROVINCE_SEO_DATA = {
         uniqueIntro: `
             <p class="mb-4">สัมผัสประสบการณ์การพักผ่อนเหนือระดับท่ามกลางบรรยากาศเมืองเหนือไปกับ <strong>SIDELINE CHIANGMAI</strong> แหล่งรวบรวมน้องๆ ที่พร้อมให้บริการแบบฟิวแฟนระดับพรีเมียม ไม่ว่าคุณจะเดินทางมาเพื่อพักผ่อน ท่องเที่ยวส่วนตัว หรือต้องการเพื่อนร่วมเดินทางคู่กาย สาวเหนือผิวออร่าลุคหมวยน่ารัก พร้อมทำหน้าที่เป็นคนรู้ใจ (Girlfriend Experience) คอยดูแลคุณอย่างอบอุ่นและเป็นส่วนตัว</p>
             <p class="mb-4">เราพร้อมให้บริการครอบคลุมทุกโซนยอดนิยมในเชียงใหม่ เพื่อความสะดวกในการเดินทางและนัดหมาย ไม่ว่าจะเป็นการเดินเล่นพักผ่อนย่าน <strong>นิมมานเหมินท์</strong>, นัดพบคุยงานอย่างมีสไตล์ตามพูลวิลล่าส่วนตัวในแถบ <strong>แม่ริม และหางดง</strong>, หรือความเป็นส่วนตัวสูงตามห้องพักส่วนตัวย่าน <strong>เจ็ดยอด และสันติธรรม</strong> โดยมีน้องๆ เด็กเอ็นเตอร์เทนระดับ VIP (N-VIP) คอยให้บริการดูแลครบทุกรูปแบบ</p>
-            <p><strong>ยึดถือความปลอดภัยและเป็นส่วนตัวสูงสุด:</strong> แพลตฟอร์มของเราให้บริการผ่านระบบ <strong>"นัดเจอจ่ายหน้างาน 100%"</strong> เพื่อความปลอดภัยสูงสุดโดยไม่มีเงื่อนไขโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น โปรไฟล์น้องๆ ทุกคนผ่านกระบวนการยืนยันตัวตนว่าตรงปก ให้คุณได้รับประสบการณ์อันน่าจดจำในค่ำคืนนี้อย่างสบายใจ</p>
+            <p><strong>ความปลอดภัยต้องมาก่อน:</strong> แพลตฟอร์มของเราให้บริการผ่านระบบ <strong>"นัดเจอจ่ายหน้างาน 100%"</strong> เพื่อความปลอดภัยสูงสุดโดยไม่มีเงื่อนไขโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น โปรไฟล์น้องๆ ทุกคนผ่านกระบวนการยืนยันตัวตนว่าตรงปก ให้คุณได้รับประสบการณ์อันน่าจดจำในค่ำคืนนี้อย่างสบายใจ</p>
         `,
         faqs: [
             { q: "หาน้องๆ รับงานเชียงใหม่ โซนไหนเดินทางสะดวกและเป็นส่วนตัวสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นโซนที่น้องๆ พร้อมให้บริการมากที่สุด เนื่องจากเดินทางสะดวก มีโรงแรมและคอนโดระดับพรีเมียมรองรับการนัดหมายอย่างปลอดภัย" },
@@ -270,25 +271,19 @@ const stripHTML = (str) => {
     return str.replace(/<[^>]*>?/gm, '');
 };
 
-// -------------------------------------------------------------
-// ✅ [จุดแก้ไขที่ 5]: ลบ Regex flag 'g' เพื่อเปลี่ยนเฉพาะคำแรกในบทความ
-// เพื่อหลีกเลี่ยงปัญหา Link Soup สีชมพูปนทองสลับลายตาบนหน้าจอ
-// -------------------------------------------------------------
 const smartLinkify = (text, provinceKey, zones) => {
     if (!text) return "";
     let linkedText = text;
     if (zones && zones.length > 0) {
         zones.forEach(zone => {
-            // ดึง flag 'g' ออกเพื่อให้แทนที่แค่ 1 ครั้งแรกที่เจอในบทความเท่านั้น
-            const regex = new RegExp(`(${zone})`, '');
+            const regex = new RegExp(`(${zone})`, 'g');
             linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#FF2E63] hover:text-white transition-colors font-[500] border-b border-[#FF2E63]/30" aria-label="ค้นหาน้องๆ โซน ${zone}">$1</a>`);
         });
     }
 
     const keywords = ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน"];
     keywords.forEach(kw => {
-        // ดึง flag 'g' ออกเพื่อให้แทนที่แค่ 1 ครั้งแรกที่เจอในบทความเท่านั้น
-        const regex = new RegExp(`(${kw})`, '');
+        const regex = new RegExp(`(${kw})`, 'g');
         linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(kw)}" class="text-[#D4AF37] hover:text-white transition-colors font-[500] border-b border-[#D4AF37]/30" aria-label="บริการ ${kw}">$1</a>`);
     });
 
@@ -296,8 +291,6 @@ const smartLinkify = (text, provinceKey, zones) => {
 };
 
 // [ Component: Dynamic SEO Content ] ผสานดีไซน์กล่อง VIP แบบใหม่เข้ากับธีม Luxury Noir
-// ✅ ปรับสีอักษรรายละเอียดเงื่อนไขบริการ ข้อความคำอธิบายจังหวัด และเนื้อหา FAQ ให้สว่างและชัดเจนขึ้น 
-// เพื่อแก้ไข Contrast Ratio บนหน้าจอดาร์กโหมดตามมาตรฐาน WCAG AA
 const generateAppSeoText = (provinceName, provinceKey, count) => {
     const data = PROVINCE_SEO_DATA[provinceKey] || PROVINCE_SEO_DATA.default;
     
@@ -336,8 +329,7 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                             <i class="fas fa-plus text-sm"></i>
                         </div>
                     </summary>
-                    <!-- ปรับระดับสัดส่วนสี text-white/65 เป็น text-zinc-300 เพื่อให้อ่านง่ายและชัดเจนขึ้น -->
-                    <div class="px-6 pb-6 pt-2 ml-[3.25rem] text-zinc-300 text-[14px] font-[300] leading-[1.6] border-l-2 border-[#FF2E63]/20">
+                    <div class="px-6 pb-6 pt-2 ml-[3.25rem] text-white/65 text-[14px] font-[300] leading-[1.6] border-l-2 border-[#FF2E63]/20">
                         <p>${escapeHTML(faq.a)}</p>
                     </div>
                 </details>
@@ -365,8 +357,7 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                                 <h3 class="text-white text-2xl md:text-3xl font-[500] tracking-wide">
                                     <span class="text-[#FF2E63]">VIP</span> PROMOTION
                                 </h3>
-                                <!-- ปรับระดับสัดส่วนสี text-white/50 เป็น text-zinc-300/90 เพื่อความสว่างและชัดเจนขึ้น -->
-                                <p class="text-zinc-300/90 text-[13px] mt-2 font-[300]">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดเป็นสถานะ Super VIP ทันที</p>
+                                <p class="text-white/50 text-[13px] mt-2 font-[300]">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดเป็นสถานะ Super VIP ทันที</p>
                             </div>
                             
                             <div class="relative mt-auto mb-auto py-8">
@@ -374,6 +365,7 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
 <div class="glass-panel border border-[#FF2E63]/20 bg-black/40 rounded-[20px] p-6 text-center relative flex flex-col items-center justify-center overflow-hidden">
     <span class="text-[10px] text-brand-gold font-[500] uppercase tracking-[0.2em] mb-2"><i class="fas fa-gem mr-1"></i> Exclusive Code</span>
     <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
+        <!-- ปรับขนาดจาก 4xl เหลือ 2xl ในมือถือ -->
         <div class="text-2xl md:text-4xl font-[700] tracking-wider text-gradient-luxury select-all font-mono whitespace-nowrap">
             VIP-${provinceKey.toUpperCase()}
         </div>
@@ -398,8 +390,7 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                                         <div class="w-10 h-10 shrink-0 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-sm font-[700] text-white/40 group-hover:text-brand-pink group-hover:border-brand-pink/30 transition-all">0${idx + 1}</div>
                                         <div class="pt-0.5">
                                             <h3 class="text-[15px] font-[500] mb-1 text-white group-hover:text-brand-gold transition-colors">${item.t}</h3>
-                                            <!-- ปรับระดับสัดส่วนสี text-white/50 เป็น text-zinc-300 เพื่อความชัดเจนในการแสดงผล -->
-                                            <p class="text-zinc-300 text-[12px] font-[300] leading-[1.6]">${item.d}</p>
+                                            <p class="text-white/50 text-[12px] font-[300] leading-[1.6]">${item.d}</p>
                                         </div>
                                     </div>
                                 `).join("")}
@@ -421,8 +412,7 @@ const faqsHTML = (data.faqs && data.faqs.length > 0) ? `
                                 ที่สุดของบริการเพื่อนเที่ยว<br>
                                 <span class="text-gradient-luxury font-[700]">ไซด์ไลน์${escapeHTML(provinceName)}</span>
                             </h2>
-                            <!-- ปรับระดับสัดส่วนสี text-white/65 เป็น text-zinc-300 ในกล่อง SEO ข้อความยาวเพื่อให้มีคอนทราสต์ชัดเจน -->
-                            <div class="text-zinc-300 text-[14px] md:text-[15px] font-[300] leading-[1.8] space-y-6 text-left md:text-center px-2">
+                            <div class="text-white/65 text-[14px] md:text-[15px] font-[300] leading-[1.8] space-y-6 text-left md:text-center px-2">
                                 ${smartLinkify(data.uniqueIntro, provinceKey, data.zones)}
                             </div>
                         </div>
@@ -633,7 +623,6 @@ export default async (request, context) => {
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
         // [ CORE SELLING POINT ]: Supercharged Profile Cards
-        // ✅ ออกแบบการจัดวาง UI/UX โทนสีใหม่ในระดับ MESMERIZING LUXURY EDITION คัดเงา แสง และความหนาของเลเยอร์เพื่อสะกดสายตา
         const cardsHTML = safeProfiles.map((p, index) => {
             const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
             const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
@@ -650,24 +639,20 @@ export default async (request, context) => {
             const thumbH = 267; 
 
             return `
-            <article class="reveal group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
+            <article class="reveal group relative rounded-[20px] overflow-hidden glass-panel hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(255,46,99,0.15)] transition-all duration-300" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง${cleanName}">
                 
-                <div class="relative h-full flex flex-col z-10">
-                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[24px]" aria-label="จองน้อง${cleanName}">
+                <div class="relative h-full flex flex-col z-10 cursor-pointer" onclick="window.location.href='${profileLink}'">
+                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[20px]" aria-label="จองน้อง${cleanName}">
                         <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
                     </a>
                     
                     ${(p.isfeatured || index < 3) ? `
-                    <!-- อัปเกรดความหรูหราของป้าย VIP ด้วยการไล่ระดับเฉดสีทอง Metallic, แสงสะท้อนและขอบทองบางเบา -->
-                    <div class="absolute top-0 right-0 bg-gradient-to-r from-[#D4AF37] via-[#FFF9E6] to-[#AA7C11] text-[#07070A] text-[9.5px] font-[800] px-4 py-2 rounded-bl-[16px] rounded-tr-[24px] shadow-[0_4px_20px_rgba(212,175,55,0.4)] z-20 tracking-[0.15em] uppercase flex items-center gap-1.5 border-b border-l border-[#FFF9E6]/30">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                        </span>
-                        <i class="fas fa-crown text-[8.5px] animate-bounce"></i> VIP
+                    <div class="absolute top-0 right-0 bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-[#0A0A0A] text-[9px] font-[700] px-3 py-1.5 rounded-bl-[16px] rounded-tr-[20px] shadow-[0_5px_15px_rgba(191,149,63,0.4)] z-20 tracking-wider uppercase flex items-center gap-1.5 border-b border-l border-[#FCF6BA]/50">
+                        <i class="fas fa-crown text-[8px]"></i> HOT VIP
                     </div>` : ''}
                     
-                    <div class="relative aspect-[3/4] overflow-hidden rounded-t-[24px] border-b border-white/[0.06] bg-[#07070a]">
+                    <!-- Profile Image Container -->
+                    <div class="relative aspect-[3/4] overflow-hidden rounded-t-[20px] border-b border-white/[0.06] bg-[#07070a]">
                         <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
                              srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
                              sizes="(max-width: 640px) 45vw, 200px"
@@ -675,35 +660,36 @@ export default async (request, context) => {
                              height="${thumbH}"
                              onerror="this.onerror=null; this.src='/images/default.webp';"
                              alt="${smartAlt}" 
-                             class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" ${imageAttributes} />
+                             class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-110" ${imageAttributes} />
                              
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/20 to-transparent opacity-95 transition-opacity duration-500 z-10"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-[#07070A]/30 to-transparent opacity-90 transition-opacity duration-500 z-10"></div>
                         
-                        <!-- ปรับปรุงจุดไฟสัญญาณ Online/Busy แบบสว่างเรืองแสงสะท้อนเลเยอร์กระจกหล่อเย็น -->
-                        <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/10 shadow-lg">
-                            <span class="relative flex h-2.5 w-2.5">
+                        <!-- Status Dot -->
+                        <div class="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10">
+                            <span class="relative flex h-2 w-2">
                                 ${isAvailable ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>' : ''}
-                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 ${isAvailable ? 'bg-[#00E676]' : 'bg-[#FF2E63]'}"></span>
                             </span>
-                            <span class="text-[9px] font-[800] text-white tracking-[0.1em] uppercase">${isAvailable ? 'Online' : 'Busy'}</span>
+                            <span class="text-[8px] font-[700] text-white tracking-widest uppercase">${isAvailable ? 'ว่างรับงาน' : 'ติดจอง'}</span>
                         </div>
 
-                        <!-- Info Block Bottom ปรับความคมเข้มและเงาตัวอักษรให้ออกมาลอยมีมิติ (3D Floating Effect) -->
-                        <div class="absolute bottom-0 left-0 w-full px-5 pb-5 pt-10 text-white z-20 pointer-events-none flex flex-col justify-end">
-                            <h3 class="text-[20px] md:text-[22px] font-[700] leading-none tracking-tight flex items-center gap-2 mb-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
-                                ${cleanName} <span class="text-[11px] font-[600] text-white/90 bg-white/10 border border-white/20 px-2 py-0.5 rounded-md backdrop-blur-md">${p.age || '??'}</span>
+                        <!-- Info Block Bottom -->
+                        <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-8 text-white z-20 pointer-events-none flex flex-col justify-end">
+                            <h3 class="text-[18px] md:text-[20px] font-[600] leading-tight tracking-wide flex items-center gap-2 mb-1.5 drop-shadow-md">
+                                ${cleanName} <span class="text-[11px] font-[400] text-white/70 bg-white/10 border border-white/10 px-1.5 py-0.5 rounded">${p.age || '??'}</span>
                             </h3>
-                            <p class="text-[12px] font-[400] text-zinc-300 flex items-center gap-1.5 truncate max-w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                                <i class="fas fa-location-dot text-[#D4AF37]"></i> ${profileLocation}
+                            <p class="text-[11px] font-[400] text-white/70 flex items-center gap-1.5 truncate max-w-full">
+                                <i class="fas fa-location-dot text-brand-gold"></i> ${profileLocation}
                             </p>
                         </div>
                     </div>
                     
-                    <div class="p-4 flex justify-between items-center bg-black/20 backdrop-blur-md rounded-b-[24px] relative z-40 pointer-events-none">
+                    <!-- Bottom Interaction Footer -->
+                    <div class="p-4 flex justify-between items-center bg-transparent relative z-40 pointer-events-none">
                         <div>
-                            <span class="text-[18px] font-[700] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
+                            <span class="text-[16px] font-[600] text-gradient-luxury tracking-wide">${displayRate} ${displayRate !== "สอบถาม" ? "฿" : ""}</span>
                         </div>
-                        <div class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-[700] tracking-[0.2em] text-white/90 group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_20px_rgba(255,46,99,0.5)] transition-all duration-300 uppercase">
+                        <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-[600] tracking-widest text-white group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_15px_rgba(255,46,99,0.4)] transition-all duration-300 uppercase">
                             View
                         </div>
                     </div>
@@ -759,9 +745,8 @@ export default async (request, context) => {
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-        /* ยกระดับสีพื้นหลังด้วยเฉดไล่ระดับออร่าดาร์กสเปซ คัดเงาให้สะกดสายตา */
         body { 
-            background: radial-gradient(circle at 50% 0%, #0c0a15 0%, #050508 50%, #020204 100%);
+            background: linear-gradient(135deg, #07070A 0%, #111116 100%); 
             background-attachment: fixed;
             color: #FFFFFF; 
             -webkit-font-smoothing: antialiased; 
@@ -769,17 +754,15 @@ export default async (request, context) => {
             overflow-x: hidden;
         }
         
-        /* ปรับระดับ Inner Glow ขอบกระจกและระดับการเบลอหลังจอกลาสเพื่อความมีมิติคู่สีพรีเมียม */
         .glass-panel {
             background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .text-gradient-luxury {
-            background: linear-gradient(135deg, #FF2E63 10%, #FF8E53 50%, #FCF6BA 90%);
+            background: linear-gradient(to right, #FF2E63, #FF8E53, #FF416C);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -803,26 +786,22 @@ export default async (request, context) => {
     </style>
 </head>
 
-<body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white relative">
+<body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white">
 
-    <!-- Decorative Ambient Glows บันทึกเงาเรืองแสงสีม่วงชมพูแผ่ออกมาเป็นวงกว้าง (Mesh Gradient) -->
-    <div class="absolute top-[10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-brand-pink/5 blur-[120px] pointer-events-none z-0"></div>
-    <div class="absolute top-[40%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-brand-gold/5 blur-[120px] pointer-events-none z-0"></div>
-
-    <header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+    <header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
             <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg flex items-center gap-2" aria-label="กลับสู่หน้าแรก">
                 <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-90 object-contain">
             </a>
             
-            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[600] tracking-[0.2em] text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
+            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
                 <a href="/" class="hover:text-white transition-all">หน้าแรก</a>
                 <a href="/profiles.html" class="text-white border-b border-[#FF2E63] pb-1" aria-current="page">โปรไฟล์น้องๆ</a>
                 <a href="/locations.html" class="hover:text-white transition-all">พิกัดบริการ</a>
             </nav>
 
             <div class="flex items-center gap-3">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 glass-panel text-white px-6 py-2.5 rounded-full text-[11px] font-[600] tracking-[0.15em] hover:bg-white/10 transition-all btn-shimmer" aria-label="ติดต่อแอดมินทางไลน์">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 glass-panel text-white px-6 py-2.5 rounded-full text-[11px] font-[500] tracking-widest hover:bg-white/10 transition-all btn-shimmer" aria-label="ติดต่อแอดมินทางไลน์">
                     <i class="fab fa-line text-[#00E676] text-sm" aria-hidden="true"></i> จองคิวตอนนี้
                 </a>
                 
@@ -855,7 +834,7 @@ export default async (request, context) => {
         </div>
     </nav>
 
-    <main class="flex-1 z-10 relative">
+    <main class="flex-1">
         
         <section class="pt-32 md:pt-40 pb-16 px-6 relative">
             <div class="max-w-7xl mx-auto text-center relative z-10">
@@ -1087,10 +1066,13 @@ export default async (request, context) => {
 </body>
 </html>`;
 
+        const cacheTtlSeconds = 300; 
+        const staleTtlSeconds = 86400; 
+
         return new Response(htmlTemplate, { 
             headers: { 
                 "Content-Type": "text/html; charset=utf-8", 
-                "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=3600" 
+                "Cache-Control": `public, max-age=0, s-maxage=${cacheTtlSeconds}, stale-while-revalidate=${staleTtlSeconds}, must-revalidate` 
             } 
         });
 
