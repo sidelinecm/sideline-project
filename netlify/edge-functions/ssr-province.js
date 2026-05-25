@@ -312,12 +312,8 @@ export default async (request, context) => {
             return buildErrorPage(500, "Configuration Error", "Server configuration is incomplete. Please contact administrator.", []);
         }
 
-        // -------------------------------------------------------------
-        // ✅ [แก้ไขคีย์ SEO จังหวัด] จัดการลบขีดกลางเพื่อหา SEO Text ให้ตรง
-        // -------------------------------------------------------------
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
-        // Fetch 80 Profiles for Maximum SEO Indexing
         const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
             supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
             supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability")
@@ -343,11 +339,7 @@ export default async (request, context) => {
         const now = new Date();
         const CURRENT_MONTH = now.toLocaleString("th-TH", { month: "short" });
         const CURRENT_YEAR = now.getFullYear();
-        const ISO_DATE = now.toISOString();
-
-        // -------------------------------------------------------------
-        // 6. CANONICAL & SEO ARCHITECTURE
-        // -------------------------------------------------------------
+        
         const isChiangmai = provinceKey === 'chiangmai';
         const provinceUrl = isChiangmai ? CONFIG.DOMAIN : `${CONFIG.DOMAIN}/location/${provinceKey}`;
         
@@ -355,21 +347,13 @@ export default async (request, context) => {
             ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) 
             : `${CONFIG.DOMAIN}/images/hero-sidelinechiangmai-1200.webp`;
 
-        // FIXED: Using string concatenations to bypass Deno's SWC parser bug handling multi-byte arrays
         const title = "ไซด์ไลน์" + provinceName + " รับงาน" + provinceName + " พรีเมียม (" + CURRENT_MONTH + " " + CURRENT_YEAR + ") | ตรงปก ปลอดภัย 100%";
         const description = "รวมโปรไฟล์ ตัวท็อป! ไซด์ไลน์" + provinceName + " รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP " + safeProfiles.length + " คน โซน " + seoData.zones.slice(0, 3).join(', ') + " ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด";
-
         const cleanDescription = stripHTML(description);
         
-        // -------------------------------------------------------------
-        // ✅ [อัลกอริทึมคะแนนดาวแปรผัน] เลี่ยงกฎสแปมสกีมา
-        // -------------------------------------------------------------
         const deterministicRating = safeProfiles.length > 0 ? (4.5 + (safeProfiles.length % 5) / 10).toFixed(1) : "4.5";
         const deterministicReviews = safeProfiles.length > 0 ? 50 + (safeProfiles.length * 2) : 10;
 
-        // -------------------------------------------------------------
-        // ✅ [โครงสร้าง Schema.org Catalog Graph]
-        // -------------------------------------------------------------
         const schemaGraph = [
             {
                 "@type": "Organization",
@@ -466,38 +450,49 @@ export default async (request, context) => {
                 const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
                 const profileLink = `/sideline/${escapeHTML(p.slug || p.id)}`;
                 const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-                let displayRate = p.rate
-                    ? Number(String(p.rate).replace(/,/g, ""))
-                        ? Number(String(p.rate).replace(/,/g, "")).toLocaleString()
-                        : escapeHTML(p.rate)
-                    : "สอบถาม";
-                const animDelay = (index % 10) * 50;
+                
+                // ✅ แก้ไข: จัดการรูปแบบอายุ ซ่อน '??'
+                const ageHtml = (p.age && p.age !== '??' && !isNaN(p.age)) 
+                    ? `<span class="text-[11px] font-[600] text-white/90 bg-white/10 border border-white/20 px-2 py-0.5 rounded-md backdrop-blur-md">${p.age}</span>` 
+                    : ``;
 
+                // ✅ แก้ไข: จัดรูปแบบราคาให้เป็น "1,500 ฿" เสมอเป๊ะๆ (ลบ '.-' ออก)
+                let displayRate = "สอบถาม";
+                if (p.rate) {
+                    const rawRate = String(p.rate).replace(/,/g, ""); // เอาลูกน้ำเก่าออกก่อน
+                    const numMatch = rawRate.match(/\d+/g); // ดึงมาเฉพาะตัวเลข
+                    if (numMatch) {
+                        const numericRate = parseInt(numMatch.join(""), 10);
+                        if (numericRate > 0) {
+                            displayRate = numericRate.toLocaleString() + " ฿";
+                        }
+                    } else if (rawRate.toLowerCase() !== "สอบถาม" && rawRate.trim() !== "") {
+                        displayRate = escapeHTML(rawRate); // กรณีเป็นคำพูดอื่นๆ
+                    }
+                }
+
+                const animDelay = (index % 10) * 50;
                 const lsiKeyword = seoData.lsi ? seoData.lsi[index % seoData.lsi.length] : "รับงาน" + provinceName;
                 const smartAlt = "รูปโปรไฟล์น้อง" + cleanName + " บริการ" + lsiKeyword + " พิกัดโซน" + profileLocation;
                 const imageAttributes = index < 4 ? 'fetchpriority="high" decoding="sync"' : 'loading="lazy" decoding="async"';
-
                 const thumbW = 200;
                 const thumbH = 267;
 
                 return `
             <article class="reveal group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง` + cleanName + `">
-                
                 <div class="relative h-full flex flex-col z-10">
                     <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[24px]" aria-label="จองน้อง` + cleanName + `">
                         <span class="sr-only">ดูรายละเอียดของน้อง` + cleanName + ` ` + lsiKeyword + `</span>
                     </a>
                     
-                    ${p.isfeatured || index < 3
-                        ? `
+                    ${p.isfeatured || index < 3 ? `
                     <div class="absolute top-0 right-0 bg-gradient-to-r from-[#D4AF37] via-[#FFF9E6] to-[#AA7C11] text-[#07070A] text-[9.5px] font-[800] px-4 py-2 rounded-bl-[16px] rounded-tr-[24px] shadow-[0_4px_20px_rgba(212,175,55,0.4)] z-20 tracking-[0.15em] uppercase flex items-center gap-1.5 border-b border-l border-[#FFF9E6]/30">
                         <span class="relative flex h-2 w-2">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                         </span>
                         <i class="fas fa-crown text-[8.5px] animate-bounce"></i> VIP
-                    </div>`
-                        : ''}
+                    </div>` : ''}
                     
                     <div class="relative aspect-[3/4] overflow-hidden rounded-t-[24px] border-b border-white/[0.06] bg-[#07070a]">
                         <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
@@ -521,19 +516,21 @@ export default async (request, context) => {
 
                         <div class="absolute bottom-0 left-0 w-full px-5 pb-5 pt-10 text-white z-20 pointer-events-none flex flex-col justify-end">
                             <h3 class="text-[20px] md:text-[22px] font-[700] leading-none tracking-tight flex items-center gap-2 mb-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
-                                ` + cleanName + ` <span class="text-[11px] font-[600] text-white/90 bg-white/10 border border-white/20 px-2 py-0.5 rounded-md backdrop-blur-md">${p.age || '??'}</span>
+                                ` + cleanName + ` ${ageHtml}
                             </h3>
-                            <p class="text-[12px] font-[400] text-zinc-300 flex items-center gap-1.5 truncate max-w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                                <i class="fas fa-location-dot text-[#D4AF37]"></i> ` + profileLocation + `
+                            <!-- ✅ แก้ไข: ตัดคำสถานที่ให้เป็น ... อัตโนมัติ ป้องกันการ์ดยืด (w-full truncate text-ellipsis) -->
+                            <p class="text-[12px] font-[400] text-zinc-300 flex items-center gap-1.5 w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                                <i class="fas fa-location-dot text-[#D4AF37] shrink-0"></i> 
+                                <span class="truncate whitespace-nowrap overflow-hidden text-ellipsis">` + profileLocation + `</span>
                             </p>
                         </div>
                     </div>
                     
                     <div class="p-4 flex justify-between items-center bg-black/20 backdrop-blur-md rounded-b-[24px] relative z-40 pointer-events-none">
                         <div>
-                            <span class="text-[18px] font-[700] text-gradient-luxury tracking-wide">` + displayRate + ` ` + (displayRate !== "สอบถาม" ? "฿" : "") + `</span>
+                            <span class="text-[18px] font-[700] text-gradient-luxury tracking-wide">` + displayRate + `</span>
                         </div>
-                        <div class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-[700] tracking-[0.2em] text-white/90 group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_20px_rgba(255,46,99,0.5)] transition-all duration-300 uppercase">
+                        <div class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-[700] tracking-[0.2em] text-white/90 group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_20px_rgba(255,46,99,0.5)] transition-all duration-300 uppercase shrink-0">
                             View
                         </div>
                     </div>
@@ -542,8 +539,6 @@ export default async (request, context) => {
             })
             .join("");
 
-        // ✅ SEPARATED SEO CONTENT GENERATOR (Contrast Ratio Fixed)
-        // FIXED: Using standard string concatenation prevents Deno SWC parsing errors from byte misalignment.
         const termsAndConditions = [
             { t: "การจองคิวน้องๆ ส่วนตัว", d: "เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน" + escapeHTML(provinceName) + " สมาชิกจองได้ครั้งละ 1 คิว เพื่อรักษามาตรฐาน VIP" },
             { t: "ความปลอดภัย 100% ไร้มัดจำ", d: "ชำระเงินหน้างานเมื่อเจอตัวน้องจริงเท่านั้น! หมดปัญหาการโดนหลอกโอนมัดจำ" },
@@ -551,9 +546,10 @@ export default async (request, context) => {
             { t: "ข้อมูลลับระดับสูงสุด", d: "ข้อมูลการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
         ];
 
+        // ✅ แก้ไข: เพิ่มช่องไฟ (pt-20 md:pt-28) ให้หน้าเว็บหายใจได้
         const isDefaultZones = !PROVINCE_SEO_DATA[provinceKey];
         const zonesHTML = (seoData.zones && seoData.zones.length > 0 && !isDefaultZones) ? `
-            <div class="reveal text-center relative z-10 pt-12 pb-8">
+            <div class="reveal text-center relative z-10 pt-20 md:pt-28 pb-10">
                 <h2 class="text-2xl md:text-3xl font-[500] mb-8 flex items-center justify-center gap-3 text-white tracking-wide">
                     <i class="fas fa-map-pin text-[#FF8E53]"></i> โซนยอดฮิต น้องๆไซด์ไลน์` + escapeHTML(provinceName) + `
                 </h2>
@@ -562,8 +558,9 @@ export default async (request, context) => {
                 </div>
             </div>` : "";
 
+        // ✅ แก้ไข: เพิ่มช่องไฟ FAQ (pt-20 md:pt-28)
         const faqsHTML = (seoData.faqs && seoData.faqs.length > 0) ? `
-            <div class="reveal max-w-3xl mx-auto space-y-4 pb-20 relative z-10 pt-16">
+            <div class="reveal max-w-3xl mx-auto space-y-4 pb-20 relative z-10 pt-20 md:pt-28">
                 <h2 class="text-2xl md:text-3xl font-[500] text-center mb-10 text-white tracking-wide">คำถามที่พบบ่อย (FAQ)</h2>
                 ${seoData.faqs.map((faq, idx) => `
                     <details class="group glass-panel rounded-2xl overflow-hidden transition-all duration-300" ${idx === 0 ? 'open' : ''}>
@@ -578,18 +575,13 @@ export default async (request, context) => {
                 `).join("")}
             </div>` : "";
 
-
         
         const currentUrl = encodeURIComponent(`${CONFIG.DOMAIN}/${provinceKey}`);
-    const shareText = encodeURIComponent(`รวมน้องๆ สาวสวยไซด์ไลน์ ${provinceName} ฟิวแฟน บริการระดับ VIP ปลอดภัย ไร้มัดจำ 📌`);
-
-    const xShareUrl = `https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareText}`;
-    const tgShareUrl = `https://t.me/share/url?url=${currentUrl}&text=${shareText}`;
-    const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${currentUrl}`;
+        const shareText = encodeURIComponent(`รวมน้องๆ สาวสวยไซด์ไลน์ ${provinceName} ฟิวแฟน บริการระดับ VIP ปลอดภัย ไร้มัดจำ 📌`);
     
         const fullSeoSectionHTML = `
             <section class="py-24 relative overflow-hidden">
-                <div class="max-w-7xl mx-auto px-6 space-y-24 md:space-y-32">
+                <div class="max-w-7xl mx-auto px-6 space-y-16 md:space-y-24">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch relative z-10">
                         <div class="reveal relative overflow-hidden rounded-[24px] p-[1px] bg-gradient-to-b from-[#FF2E63]/40 to-transparent group h-full flex flex-col">
                             <div class="glass-panel p-8 md:p-12 rounded-[24px] relative z-10 flex-1 flex flex-col justify-between h-full bg-[#0a0a0a]/80 backdrop-blur-3xl">
@@ -626,8 +618,10 @@ export default async (request, context) => {
                             </div>
                         </div>
                     </div>
+                    
                     ${zonesHTML}
-                    <div class="reveal relative">
+                    
+                    <div class="reveal relative mt-20 md:mt-28">
                         <div class="glass-panel rounded-[32px] p-8 md:p-16 text-center relative z-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10">
                             <div class="max-w-4xl mx-auto space-y-8 relative z-10">
                                 <div class="w-16 h-16 bg-black/40 border border-white/5 text-[#FF2E63] rounded-full flex items-center justify-center text-2xl mx-auto shadow-[0_10px_30px_rgba(255,46,99,0.2)]"><i class="fas fa-crown"></i></div>
@@ -638,54 +632,54 @@ export default async (request, context) => {
                             </div>
                         </div>
                     </div>
+                    
                     ${faqsHTML}
-                                    <div class="reveal relative max-w-2xl mx-auto z-10 mt-16 mb-8">
-                    <div class="bg-gray-100/95 backdrop-blur-xl rounded-[32px] p-8 md:p-12 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 relative overflow-hidden">
-                        <h3 class="text-[#8B0000] text-[16px] md:text-[18px] font-[700] mb-2 flex items-center justify-center gap-2 tracking-wide">
-                            ติดตามเราบน Social Media <i class="fas fa-bullhorn text-[#FF2E63]"></i>
-                        </h3>
-                        <p class="text-gray-500 text-[13px] font-[400] mb-8">อัปเดตโปรไฟล์ใหม่ล่าสุดและโปรโมชั่นพิเศษได้ก่อนใคร</p>
-                        
-                        <div class="flex flex-wrap justify-center gap-4 md:gap-6 mb-10">
-                            <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
-                                <div class="w-[65px] h-[65px] rounded-full bg-[#06C755] flex items-center justify-center text-white text-4xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fa-brands fa-line"></i>
-                                </div>
-                                <span class="text-gray-800 font-[700] text-[12px] tracking-wider">LINE</span>
-                            </a>
-                            <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
-                                <div class="w-[65px] h-[65px] rounded-full bg-black flex items-center justify-center text-white text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fa-brands fa-tiktok"></i>
-                                </div>
-                                <span class="text-gray-800 font-[700] text-[12px] tracking-wider">TikTok</span>
-                            </a>
-                            <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
-                                <div class="w-[65px] h-[65px] rounded-full bg-[#1DA1F2] flex items-center justify-center text-white text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fa-brands fa-twitter"></i>
-                                </div>
-                                <span class="text-gray-800 font-[700] text-[12px] tracking-wider">Twitter</span>
-                            </a>
-                            <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
-                                <div class="w-[65px] h-[65px] rounded-full bg-[#43E660] flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fas fa-link"></i>
-                                </div>
-                                <span class="text-gray-800 font-[700] text-[12px] tracking-wider">Linktree</span>
-                            </a>
+                    
+                    <div class="reveal relative max-w-2xl mx-auto z-10 mt-20 md:mt-28 mb-16">
+                        <div class="bg-gray-100/95 backdrop-blur-xl rounded-[32px] p-8 md:p-12 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 relative overflow-hidden">
+                            <h3 class="text-[#8B0000] text-[16px] md:text-[18px] font-[700] mb-2 flex items-center justify-center gap-2 tracking-wide">
+                                ติดตามเราบน Social Media <i class="fas fa-bullhorn text-[#FF2E63]"></i>
+                            </h3>
+                            <p class="text-gray-500 text-[13px] font-[400] mb-8">อัปเดตโปรไฟล์ใหม่ล่าสุดและโปรโมชั่นพิเศษได้ก่อนใคร</p>
+                            
+                            <div class="flex flex-wrap justify-center gap-4 md:gap-6 mb-10">
+                                <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
+                                    <div class="w-[65px] h-[65px] rounded-full bg-[#06C755] flex items-center justify-center text-white text-4xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fa-brands fa-line"></i>
+                                    </div>
+                                    <span class="text-gray-800 font-[700] text-[12px] tracking-wider">LINE</span>
+                                </a>
+                                <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
+                                    <div class="w-[65px] h-[65px] rounded-full bg-black flex items-center justify-center text-white text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fa-brands fa-tiktok"></i>
+                                    </div>
+                                    <span class="text-gray-800 font-[700] text-[12px] tracking-wider">TikTok</span>
+                                </a>
+                                <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
+                                    <div class="w-[65px] h-[65px] rounded-full bg-[#1DA1F2] flex items-center justify-center text-white text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fa-brands fa-twitter"></i>
+                                    </div>
+                                    <span class="text-gray-800 font-[700] text-[12px] tracking-wider">Twitter</span>
+                                </a>
+                                <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
+                                    <div class="w-[65px] h-[65px] rounded-full bg-[#43E660] flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-link"></i>
+                                    </div>
+                                    <span class="text-gray-800 font-[700] text-[12px] tracking-wider">Linktree</span>
+                                </a>
+                            </div>
+                            
+                            <div class="w-3/4 mx-auto h-[1px] bg-gray-300 mb-6"></div>
+                            <p class="text-[#D32F2F] text-[13px] md:text-[15px] font-[700] tracking-wide">
+                                เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
+                            </p>
                         </div>
-                        
-                        <div class="w-3/4 mx-auto h-[1px] bg-gray-300 mb-6"></div>
-                        <p class="text-[#D32F2F] text-[13px] md:text-[15px] font-[700] tracking-wide">
-                            เว็บไซต์นี้สำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
-                        </p>
                     </div>
                 </div>
-                </div>
-            <div class="w-1/2 mx-auto h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent mt-24"></div>
-                </div>
+                <div class="w-1/2 mx-auto h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent mt-24"></div>
             </section>
         `;
 
-        // ✅ HTML TEMPLATE (Clean Header, 100dvh Full-Bleed)
         const htmlTemplate = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
@@ -864,10 +858,9 @@ export default async (request, context) => {
         </div>
     </nav>
 
-    <!-- ✅ ดัน Footer ลงล่างอัตโนมัติด้วย flex-1 -->
     <main class="flex-1 w-full relative z-10">
-
-        <section class="pt-32 md:pt-40 pb-16 px-6 relative">
+        <!-- ✅ แก้ไข: เพิ่ม Padding Hero Section (pb-20 md:pb-24) -->
+        <section class="pt-32 md:pt-40 pb-20 md:pb-24 px-6 relative">
             <div class="max-w-7xl mx-auto text-center relative z-10">
 
                 <div class="reveal active flex flex-wrap justify-center gap-3 mb-10 relative z-20">
@@ -888,51 +881,34 @@ export default async (request, context) => {
                 </div>
 
                 <div class="max-w-4xl mx-auto text-center reveal active relative z-10">
-
                     <h1 class="text-[2.6rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.25)]">
                         ไซด์ไลน์<span class="text-gradient-luxury">` + escapeHTML(provinceName) + `</span><br>
                         รับงานฟิวแฟน ตัวท็อป
                     </h1>
-
                     <p class="text-white/70 text-[13px] md:text-[16px] font-[300] mb-10 max-w-2xl mx-auto leading-relaxed px-4">
                         ค้นหาน้องๆ <strong>รับงาน` + escapeHTML(provinceName) + `</strong> เด็กเอ็นเตอร์เทน (N-VIP) บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
                     </p>
 
-                    <div class="max-w-xl mx-auto mt-4 mb-10 relative z-20 px-2">
-                        <!-- ✅ ฟอร์มค้นหาพร้อมระบบป้องกันข้อผิดพลาด -->
+                    <!-- ✅ แก้ไข: เพิ่มพื้นที่ (mb-20) ก่อนถึงปุ่ม -->
+                    <div class="max-w-xl mx-auto mt-4 mb-20 relative z-20 px-2">
                         <form action="/search" method="GET" id="search-form" class="relative group">
                             <label for="search-input" class="sr-only">ค้นหาน้องๆ โซน จังหวัด หรือชื่อ</label>
                             <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
                                 <i class="fas fa-search text-white/40" aria-hidden="true"></i>
                             </div>
-                            <input 
-                                type="text" 
-                                id="search-input" 
-                                name="q" 
-                                placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." 
-                                minlength="2" 
-                                maxlength="50" 
-                                required 
-                                aria-describedby="search-error"
-                                class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/30 invalid:ring-[#FF416C]/30 shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all font-[300] placeholder:text-white/40 text-[14px]"
-                            >
+                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." minlength="2" maxlength="50" required aria-describedby="search-error" class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/30 invalid:ring-[#FF416C]/30 shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all font-[300] placeholder:text-white/40 text-[14px]">
                             <div id="search-error" class="text-[#FF416C] text-[12px] mt-2 hidden"></div>
-                            <button 
-                                type="submit" 
-                                class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[500] text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all btn-shimmer" 
-                                aria-label="ปุ่มค้นหา"
-                            >
-                                ค้นหา
-                            </button>
+                            <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[500] text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all btn-shimmer" aria-label="ปุ่มค้นหา">ค้นหา</button>
                         </form>
                     </div>
 
+                    <!-- ✅ แก้ไข: ปรับน้ำหนักปุ่มให้สวยงาม (LINE เขียวเด่นสุด / ดูโปรไฟล์ ขอบใส) -->
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
-                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 bg-white/95 text-[#07070A] rounded-full font-[600] text-[13px] tracking-widest hover:bg-white transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
-                            เลือกดูโปรไฟล์
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 bg-[#00E676] hover:bg-[#00C853] text-[#07070A] rounded-full font-[700] text-[13px] transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_10px_30px_rgba(0,230,118,0.3)] text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
+                            <i class="fab fa-line text-[20px]" aria-hidden="true"></i> ติดต่อแอดมิน
                         </a>
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] hover:bg-white/[0.05] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
-                            <i class="fab fa-line text-lg text-[#00E676]" aria-hidden="true"></i> ติดต่อแอดมิน
+                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] tracking-widest hover:bg-white/10 transition-all border border-white/20 uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
+                            เลือกดูโปรไฟล์
                         </a>
                     </div>
                 </div>
@@ -948,8 +924,8 @@ export default async (request, context) => {
             </nav>
         </div>
 
-        <!-- แคตตาล็อกโปรไฟล์ -->
-        <section id="profiles-grid" class="max-w-[1440px] mx-auto px-4 py-20 scroll-mt-24">
+        <!-- ✅ แก้ไข: เพิ่ม Padding py-24 md:py-32 ให้แคตตาล็อกโปรไฟล์ -->
+        <section id="profiles-grid" class="max-w-[1440px] mx-auto px-4 py-24 md:py-32 scroll-mt-24">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 px-2">
                 <div class="reveal">
                     <h2 class="text-3xl md:text-4xl font-[500] tracking-wide text-white">รวมโปรไฟล์ไซด์ไลน์ <span class="text-gradient-luxury font-[700]">` + escapeHTML(provinceName) + `</span></h2>
@@ -967,7 +943,6 @@ export default async (request, context) => {
                 </div>
             </div>
             
-            <!-- Skeleton Loader จำลองระหว่างโหลด -->
             <div id="skeleton-loader" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 ${Array(20).fill(`
                     <div class="rounded-[24px] overflow-hidden aspect-[3/4]">
@@ -985,7 +960,8 @@ export default async (request, context) => {
 
     </main>
 
- <footer class="bg-[#030305] py-16 md:py-20 text-center border-t border-white/5 relative z-10 pb-[90px] md:pb-20">
+    <!-- ✅ แก้ไข: เพิ่ม Padding ล่าง (pb-[110px]) ให้พ้นจาก Mobile Bottom Nav -->
+    <footer class="bg-[#030305] py-16 md:py-24 text-center border-t border-white/5 relative z-10 pb-[110px] md:pb-24">
         <div class="max-w-4xl mx-auto px-6 relative z-10">
             <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
             
@@ -1008,7 +984,7 @@ export default async (request, context) => {
                 ${allProvinces.slice(0, 8).map(p => `<a href="/location/${p.key}" class="text-[12px] font-[300] text-white/50 hover:text-white transition-all py-2 border border-transparent hover:border-white/10 rounded-lg glass-panel">รับงาน${escapeHTML(p.nameThai)}</a>`).join("")}
             </nav>
 
-            <div class="mt-20 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5 pt-8">
+            <div class="mt-24 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5 pt-8">
                 <p class="text-[10px] font-[300] text-white/60 uppercase tracking-widest">
                     © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.
                 </p>
@@ -1020,7 +996,7 @@ export default async (request, context) => {
         </div>
     </footer>
 
-    <!-- MOBILE BOTTOM NAVIGATION (UX ชั้นยอด สไตล์ iOS Dock) -->
+    <!-- MOBILE BOTTOM NAVIGATION -->
     <nav aria-label="เมนูนำทางด่วนมือถือ" class="fixed bottom-3 left-4 right-4 md:hidden z-[100] glass-panel rounded-[20px] bg-black/85 pb-[env(safe-area-inset-bottom)] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10">
         <ul class="flex justify-around h-[65px] items-center m-0 p-0 list-none max-w-md mx-auto">
             <li class="w-full text-center">
@@ -1058,7 +1034,6 @@ export default async (request, context) => {
     <!-- CORE JAVASCRIPT: Lazy Load + Animations + Form Validation -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // 1. INTERSECTION OBSERVER - Fade in animations
         const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -1070,7 +1045,6 @@ export default async (request, context) => {
         }, observerOptions);
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        // 2. SKELETON LOADER - Hide skeleton and show profiles smoothly
         setTimeout(() => {
             const skeleton = document.getElementById('skeleton-loader');
             const container = document.getElementById('profiles-container');
@@ -1080,7 +1054,6 @@ export default async (request, context) => {
             }
         }, 150);
 
-        // 3. FORM VALIDATION
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         const searchError = document.getElementById('search-error');
@@ -1110,7 +1083,6 @@ export default async (request, context) => {
             });
         }
 
-        // 4. MOBILE MENU
         const menuBtn = document.getElementById('menu-btn');
         const closeBtn = document.getElementById('close-menu-btn');
         const sidebar = document.getElementById('sidebar-menu');
@@ -1139,7 +1111,6 @@ export default async (request, context) => {
         if (closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
         if (overlay) overlay.addEventListener('click', () => toggleMenu(false));
 
-        // 5. NAVBAR HIDE ON SCROLL
         const navbar = document.getElementById("navbar");
         let lastScrollY = window.scrollY;
         let isTicking = false;
