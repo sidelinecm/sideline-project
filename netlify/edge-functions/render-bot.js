@@ -22,7 +22,6 @@ const TESTIMONIALS = [
     { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ" }
 ];
 
-// Deterministic Algorithm
 const getDeterministicWord = (arr, seedString) => {
     const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return arr[sum % arr.length];
@@ -33,19 +32,38 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
     return Math.floor(min + (sum % (max - min + 1)));
 };
 
+// TOP-TIER: รองรับ Image Transformation ทั้ง Cloudinary และ Supabase
 const optimizeImg = (path, width = 600, height = 800) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
         return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
     }
-    return path.startsWith('http') ? path : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
+    // หากเป็น HTTP ปกติให้คืนค่าเดิม หากเป็น Supabase ให้ต่อ Path พร้อม Transform (หาก Supabase ของคุณเปิด Image Transform ไว้)
+    return path.startsWith('http') 
+        ? path 
+        : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover`;
+};
+
+// TOP-TIER: สร้าง SrcSet ครอบคลุมทุก Platform
+const generateSrcSet = (path) => {
+    if (!path) return '';
+    const widths = [400, 600, 800];
+    return widths.map(w => {
+        const h = Math.round(w * (800 / 600)); 
+        return `${optimizeImg(path, w, h)} ${w}w`;
+    }).join(', ');
 };
 
 const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
 
+// TOP-TIER: ป้องกัน JSON Syntax Error (Strip HTML tags & escape quotes)
+const cleanForJSON = (str) => str ? str.replace(/<[^>]*>?/gm, '').replace(/"/g, '\\"').replace(/\n/g, ' ') : '';
+
 export default async (request, context) => {
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
-    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
+    
+    // Regex อัปเดตล่าสุด ป้องกัน Bot ตัวใหม่ๆ รบกวน
+    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo/i.test(ua);
     
     if (!isBot) return context.next();
 
@@ -60,6 +78,7 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
+        // Fetch หลัก
         const { data: p } = await supabase
             .from('profiles')
             .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, provinces(nameThai, key)')
@@ -67,13 +86,14 @@ export default async (request, context) => {
             .eq('active', true)
             .maybeSingle();
 
-        // TOP-TIER: บังคับยิง 404 กลับไปหา Bot ทันที เพื่อป้องกัน SEO Penalty (Soft-404)
-if (!p) {
-    return new Response(`<!DOCTYPE html><html lang="th"><head><meta name="robots" content="noindex, follow"><title>404 - ไม่พบหน้าเว็บ</title></head><body><h1>404 Not Found</h1></body></html>`, {
-        status: 404,
-        headers: { "content-type": "text/html; charset=utf-8" }
-    });
-}
+        if (!p) {
+            return new Response(`<!DOCTYPE html><html lang="th"><head><meta name="robots" content="noindex, follow"><title>404 - ไม่พบหน้าเว็บ</title></head><body><h1>404 Not Found</h1></body></html>`, {
+                status: 404,
+                headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "no-store" } // ป้องกัน CDN แคชหน้า 404
+            });
+        }
+
+        // Fetch Related (ทำแยกออกมาหลังจากชัวร์ว่า Profile มีจริง)
         let related = [];
         if (p.provinceKey) {
             const { data: relatedData } = await supabase
@@ -92,7 +112,10 @@ if (!p) {
         
         const rawRate = parseInt(p.rate || "1500");
         const displayPrice = rawRate.toLocaleString() + ".-";
-        const imageUrl = optimizeImg(p.imagePath, 600, 800);
+        
+        const baseImageUrl = optimizeImg(p.imagePath, 600, 800);
+        const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
+        const imageSrcSet = generateSrcSet(p.imagePath);
         
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
@@ -119,7 +142,6 @@ if (!p) {
         const metaDesc = `น้อง${displayName} สาวไซด์ไลน์${provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ${serviceWord} รับงานเอง ไม่ผ่านเอเย่นต์ ${payWord} พิกัดแถว ${p.location || provinceName} ทักไลน์จองคิวเลย!`;
         const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
 
-        // GENERATE JSON-LD REVIEWS
         const schemaReviews = TESTIMONIALS.map(t => ({
             "@type": "Review",
             "reviewRating": {
@@ -129,12 +151,11 @@ if (!p) {
             },
             "author": {
                 "@type": "Person",
-                "name": t.name
+                "name": cleanForJSON(t.name)
             },
-            "reviewBody": t.text
+            "reviewBody": cleanForJSON(t.text)
         }));
 
-        // ADVANCED ULTRA SCHEMA GRAPH (Pure JSON-LD)
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -143,7 +164,7 @@ if (!p) {
                     "@id": `${CONFIG.DOMAIN}/#organization`,
                     "name": CONFIG.BRAND_NAME,
                     "url": CONFIG.DOMAIN,
-                    "image": [imageUrl],
+                    "image": [baseImageUrl],
                     "address": {
                         "@type": "PostalAddress",
                         "addressLocality": provinceName,
@@ -164,8 +185,8 @@ if (!p) {
                     "@type": "Product",
                     "@id": `${canonicalUrl}#product`,
                     "name": `น้อง${displayName} ไซด์ไลน์${provinceName}`,
-                    "image": [imageUrl],
-                    "description": metaDesc,
+                    "image": [baseImageUrl],
+                    "description": cleanForJSON(metaDesc),
                     "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
                     "offers": {
                         "@type": "Offer",
@@ -180,7 +201,7 @@ if (!p) {
                         "ratingValue": ratingValue,
                         "reviewCount": reviewCount.toString()
                     },
-                    "review": schemaReviews, // <--- Injection ของรีวิวที่ถูกต้อง
+                    "review": schemaReviews,
                     "additionalProperty": [
                         { "@type": "PropertyValue", "name": "อายุ", "value": `${ageVal} ปี` },
                         { "@type": "PropertyValue", "name": "สัดส่วน", "value": bwhVal },
@@ -208,14 +229,6 @@ if (!p) {
                                 "@type": "Answer",
                                 "text": `สามารถคลิกที่ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บไซต์เพื่อเชื่อมต่อไปยัง Line ID ของน้อง หรือแอดไลน์ติดต่อเจ้าหน้าที่เพื่อเช็คตารางเวลาว่างและทำการนัดหมายน้อง${displayName} ได้ทันที`
                             }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `รูปโปรไฟล์ของน้อง${displayName} บนเว็บไซต์เป็นรูปตรงปกไหม?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": `รูปภาพทั้งหมดของน้อง${displayName} ผ่านการยืนยันตัวตน (Verified) การันตีงานตรงปกตามมาตรฐานของเว็บไซต์ไซด์ไลน์เชียงใหม่ บริการน่ารัก เป็นกันเอง ฟิวแฟนแน่นอน`
-                            }
                         }
                     ]
                 }
@@ -233,30 +246,29 @@ if (!p) {
     <meta name="robots" content="index, follow, max-image-preview:large">
     
     <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-    <link rel="preload" as="image" href="${imageUrl}">
+    <link rel="preload" as="image" href="${lcpImageUrl}" fetchpriority="high">
     <meta name="theme-color" content="#db2777">
-    <meta name="googlebot" content="index, follow, max-image-preview:large">
     
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${pageTitle}">
     <meta name="twitter:description" content="${metaDesc}">
-    <meta name="twitter:image" content="${imageUrl}">
-    <meta property="og:image" content="${imageUrl}">
-    <meta property="og:image:width" content="600">   <meta property="og:image:height" content="800">
+    <meta name="twitter:image" content="${baseImageUrl}">
+    <meta property="og:image" content="${baseImageUrl}">
+    <meta property="og:image:width" content="600">   
+    <meta property="og:image:height" content="800">
     
     <link rel="shortcut icon" href="/images/favicon.ico">
     
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
-    <meta property="og:image" content="${imageUrl}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
     
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-        :root { --p:#ec4899; --s:#10b981; --bg:#0f172a; --card:#1e293b; --txt:#f8fafc; --gold:#fbbf24; --muted:#94a3b8; --bw:rgba(255,255,255,0.06); }
+        :root { --p:#f472b6; --s:#34d399; --bg:#0f172a; --card:#1e293b; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
         .container { position: relative; max-width: 500px; margin: 0 auto; background: var(--card); min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.6); }
@@ -277,7 +289,7 @@ if (!p) {
         .spec-box dt { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
         .spec-box dd { font-size: 1.05rem; font-weight: 800; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
-        .info-item { background: rgba(236,72,153,0.04); border: 1px solid rgba(236,72,153,0.2); border-radius: 1.25rem; padding: 1.25rem 0.75rem; text-align: center; }
+        .info-item { background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2); border-radius: 1.25rem; padding: 1.25rem 0.75rem; text-align: center; }
         .info-label { font-size: 0.85rem; color: var(--p); font-weight: 700; display: block; }
         .info-value { font-size: 1.4rem; font-weight: 900; }
         .description { background: rgba(255,255,255,0.01); border-radius: 1.25rem; padding: 1.5rem; margin: 1.5rem 0; border: 1px solid var(--bw); white-space: pre-line; font-size: 1.05rem; }
@@ -302,14 +314,18 @@ if (!p) {
     <div class="container">
         <header class="fixed-nav">
             <div class="nav-content">
-                <a href="/" class="logo-link"><img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME}" class="logo-img"></a>
+                <a href="/" class="logo-link"><img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME}" class="logo-img" width="200" height="26" fetchpriority="high" decoding="sync"></a>
             </div>
         </header>
 
         <main class="main-content">
             <article>
                 <section class="hero-section">
-                    <img src="${imageUrl}" class="hero-img" alt="น้อง${displayName}" loading="eager" width="400" height="533">
+                    <img src="${lcpImageUrl}" 
+                         ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
+                         class="hero-img" alt="น้อง${displayName}" 
+                         loading="eager" fetchpriority="high" decoding="sync" 
+                         width="400" height="533">
                 </section>
 
                 <header class="profile-meta-header">
@@ -371,7 +387,7 @@ if (!p) {
                 <nav class="related-carousel">
                     ${related.map(r => `
                         <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
-                            <img src="${optimizeImg(r.imagePath, 200, 200)}" class="related-img" alt="${r.name}">
+                            <img src="${optimizeImg(r.imagePath, 200, 200)}" class="related-img" alt="${r.name}" loading="lazy" decoding="async" width="200" height="200">
                             <div style="padding:0.75rem;text-align:center;">
                                 <div style="font-weight:700;">${r.name}</div>
                             </div>
@@ -388,7 +404,7 @@ if (!p) {
                                 <div style="color:var(--gold);font-size:1.1rem">${'★'.repeat(Math.floor(t.rating))}</div>
                                 <strong style="font-size:0.95rem">${t.name}</strong>
                             </div>
-                            <p style="color:rgba(248,250,252,0.85);margin:0;font-size:0.95rem">${t.text}</p>
+                            <p style="color:var(--txt);margin:0;font-size:0.95rem">${t.text}</p>
                         </div>
                     `).join('')}
                 </div>
@@ -402,7 +418,6 @@ if (!p) {
 </body>
 </html>`;
 
-
         return new Response(html, {
             headers: {
                 "Content-Type": "text/html; charset=utf-8",
@@ -411,8 +426,8 @@ if (!p) {
                 "X-Content-Type-Options": "nosniff",
                 "X-Frame-Options": "DENY",
                 "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-                "X-XSS-Protection": "1; mode=block", // เสริมเกราะ XSS
-                "Content-Security-Policy": "default-src 'self'; img-src 'self' https: data:; script-src 'self' 'unsafe-inline' https://schema.org; style-src 'self' 'unsafe-inline';", // ล็อกการรันสคริปต์
+                "X-XSS-Protection": "1; mode=block",
+                "Content-Security-Policy": "default-src 'self'; img-src 'self' https: data:; script-src 'self' 'unsafe-inline' https://schema.org; style-src 'self' 'unsafe-inline';",
                 "Vary": "User-Agent"
             }
         });
