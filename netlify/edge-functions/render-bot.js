@@ -337,82 +337,59 @@ export default async (request, context) => {
                     </div>
                 </header>
 
-                <div class="info-grid">
+<div class="info-grid">
                     <div class="info-item">
-                        <span class="info-label">เรทค่าขนมเริ่มต้น</span>
-                        <span class="info-value">฿${displayPrice}</span>
+                        <span class="info-label">ค่าขนม</span>
+                        <span class="info-value">${displayPrice}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">📍 พิกัดพื้นที่รับงาน</span>
-                        <span class="info-value">${p.location || provinceName}</span>
+                        <span class="info-label">อายุ</span>
+                        <span class="info-value">${ageVal} ปี</span>
                     </div>
                 </div>
 
-                <section>
-                    <dl class="specs-grid">
-                        <div class="spec-box"><dt>อายุ</dt><dd>${ageVal} ปี</dd></div>
-                        <div class="spec-box"><dt>สัดส่วน</dt><dd>${bwhVal}</dd></div>
-                        <div class="spec-box"><dt>ส่วนสูง</dt><dd>${heightVal} ซม.</dd></div>
-                        <div class="spec-box"><dt>น้ำหนัก</dt><dd>${weightVal} กก.</dd></div>
-                    </dl>
-                </section>
+                <div class="specs-grid">
+                    <dl class="spec-box"><dt>สัดส่วน</dt><dd>${bwhVal}</dd></dl>
+                    <dl class="spec-box"><dt>ส่วนสูง</dt><dd>${heightVal} ซม.</dd></dl>
+                </div>
 
-                <section class="description">${escapeHTML(p.description) || metaDesc}</section>
+                <div class="description">
+                    ${escapeHTML(p.description || `น้อง${displayName} ${serviceWord} รับงานเองพิกัด ${provinceName} เป็นกันเอง สวยตรงปกแน่นอนค่ะ`)}
+                </div>
 
-                <section style="text-align:center; margin: 2.5rem 0;">
-                    <a href="${finalLineUrl}" class="btn-line">📲 ทักไลน์จองคิว น้อง${displayName}</a>
-                </section>
+                <a href="${finalLineUrl}" class="btn-line" rel="nofollow noopener" target="_blank">ทักไลน์จองคิว</a>
 
                 <section class="pricing-section">
-                    <h2 class="pricing-title">💰 ตารางอัตราค่าบริการ</h2>
+                    <h2 class="pricing-title">ราคาบริการ</h2>
                     <div class="pricing-grid">
-                        <div class="pricing-item"><strong>ST</strong><span>฿${rawRate.toLocaleString()}</span></div>
-                        <div class="pricing-item"><strong>LT</strong><span>฿${Math.floor(rawRate * 1.8).toLocaleString()}</span></div>
-                        <div class="pricing-item"><strong>OT</strong><span>฿${Math.floor(rawRate * 2.2).toLocaleString()}</span></div>
+                        <div class="pricing-item"><div>1 ชม.</div><strong>${rawRate}</strong></div>
+                        <div class="pricing-item"><div>2 ชม.</div><strong>${Math.floor(rawRate * 1.8)}</strong></div>
+                        <div class="pricing-item"><div>ค้างคืน</div><strong>${Math.floor(rawRate * 4.5)}</strong></div>
                     </div>
                 </section>
-            </article>
 
-            <section class="faq-section">
-                <h2 class="faq-title">💬 คำถามที่พบบ่อย</h2>
-                <div class="faq-item">
-                    <h3>Q: จองคิวต้องโอนมัดจำไหม?</h3>
-                    <p>ไม่ต้องโอนเงินมัดจำล่วงหน้า จ่ายหน้างาน 100%</p>
-                </div>
-            </section>
+                <section class="faq-section">
+                    <h2 class="faq-title">คำถามพบบ่อย</h2>
+                    <div class="faq-item">
+                        <h3>น้อง${displayName} มีมัดจำไหม?</h3>
+                        <p>${payWord}</p>
+                    </div>
+                </section>
 
-            ${related.length > 0 ? `
-            <aside style="margin: 2.5rem 0;">
-                <h2 style="color:var(--p);text-align:center;margin-bottom:1rem;">🔥 แนะนำสาวไซด์ไลน์เพิ่มเติม</h2>
-                <nav class="related-carousel">
-                    ${related.map(r => `
-                        <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
-                            <img src="${optimizeImg(r.imagePath, 200, 200)}" class="related-img" alt="${r.name}" loading="lazy" decoding="async" width="200" height="200">
-                            <div style="padding:0.75rem;text-align:center;">
-                                <div style="font-weight:700;">${r.name}</div>
-                            </div>
-                        </a>`).join('')}
-                </nav>
-            </aside>` : ''}
-
-            <section style="margin: 2.5rem 0;">
-                <h2 style="color:var(--p);text-align:center;margin-bottom:1.5rem;">⭐ รีวิวจากลูกค้าจริง</h2>
-                <div>
+                <section>
+                    <h2 class="faq-title">รีวิวจากลูกค้า</h2>
                     ${TESTIMONIALS.map(t => `
                         <div class="testimonial">
-                            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem">
-                                <div style="color:var(--gold);font-size:1.1rem">${'★'.repeat(Math.floor(t.rating))}</div>
-                                <strong style="font-size:0.95rem">${t.name}</strong>
-                            </div>
-                            <p style="color:var(--txt);margin:0;font-size:0.95rem">${t.text}</p>
+                            <strong>${escapeHTML(t.name)}</strong>
+                            <p>${escapeHTML(t.text)}</p>
                         </div>
                     `).join('')}
-                </div>
-            </section>
+                </section>
+            </article>
         </main>
         
         <footer class="footer">
-            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME}
+            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
 </body>
@@ -421,19 +398,14 @@ export default async (request, context) => {
         return new Response(html, {
             headers: {
                 "Content-Type": "text/html; charset=utf-8",
-                "X-Robots-Tag": "index, follow, max-image-preview:large",
-                "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400",
+                "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=3600",
                 "X-Content-Type-Options": "nosniff",
                 "X-Frame-Options": "DENY",
-                "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-                "X-XSS-Protection": "1; mode=block",
-                "Content-Security-Policy": "default-src 'self'; img-src 'self' https: data:; script-src 'self' 'unsafe-inline' https://schema.org; style-src 'self' 'unsafe-inline';",
-                "Vary": "User-Agent"
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
             }
         });
 
-    } catch (e) {
-        console.error("Profile SSR Error:", e);
-        return context.next();
+    } catch (err) {
+        return new Response("Internal Server Error", { status: 500 });
     }
 };
