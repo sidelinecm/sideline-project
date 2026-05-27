@@ -804,32 +804,49 @@ export default async (request, context) => {
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
         #navbar { transition: transform 0.3s ease-in-out; }
+        /* บังคับให้โครงสร้างระดับ Global วิ่งเข้าสู่จุดกึ่งกลางของ Viewport เสมอ */
+body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* ดักจับกรณีโครงสร้างหลักหลุดเซนเตอร์ */
+    justify-content: flex-start;
+}
+
+/* ล้างปัญหา Element ลูกหลุดไปชิดซ้ายบนจอขนาดใหญ่ */
+main, id^="app-container", .main-content {
+    width: 100%;
+    max-w: 80rem; /* 1280px */
+    margin-left: auto;
+    margin-right: auto;
+}
     </style>
 </head>
 
-<body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white relative animate-fade-in">
+<body class="flex flex-col pb-[70px] md:pb-0 selection:bg-brand-pink selection:text-white relative animate-fade-in w-full min-h-screen bg-[#07070A] overflow-x-hidden">
 
-    <div class="absolute top-[10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-brand-pink/5 blur-[120px] pointer-events-none z-0"></div>
-    <div class="absolute top-[40%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-brand-gold/5 blur-[120px] pointer-events-none z-0"></div>
+    <div class="absolute top-[5%] left-[-15%] w-[60vw] h-[60vw] rounded-full bg-brand-pink/5 blur-[140px] pointer-events-none z-0"></div>
+    <div class="absolute top-[35%] right-[-15%] w-[60vw] h-[60vw] rounded-full bg-brand-gold/4 blur-[140px] pointer-events-none z-0"></div>
 
-    <header id="navbar" class="fixed top-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+    <header id="navbar" class="fixed top-0 left-0 right-0 w-full z-[999] py-3 glass-panel border-x-0 border-t-0 shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] backdrop-blur-md transition-transform duration-300">
         <div class="max-w-7xl mx-auto px-6 h-14 md:h-16 flex items-center justify-between">
             <a href="/" class="z-10 focus:outline-none focus:ring-2 focus:ring-brand-pink rounded-lg flex items-center gap-2" aria-label="กลับสู่หน้าแรก">
-                <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-90 object-contain">
+                <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-95 object-contain">
             </a>
 
             <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
-                <a href="/" class="hover:text-white transition-all">หน้าแรก</a>
-                <a href="/profiles.html" class="text-white border-b border-[#FF2E63] pb-1" aria-current="page">โปรไฟล์น้องๆ</a>
-                <a href="/locations.html" class="hover:text-white transition-all">พิกัดบริการ</a>
+                <a href="/" class="hover:text-white transition-all duration-300 hover:tracking-wide">หน้าแรก</a>
+                <a href="/profiles.html" class="text-white border-b-2 border-[#FF2E63] pb-1 tracking-wide" aria-current="page">โปรไฟล์น้องๆ</a>
+                <a href="/locations.html" class="hover:text-white transition-all duration-300 hover:tracking-wide">พิกัดบริการ</a>
             </nav>
 
             <div class="flex items-center gap-3">
-                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 glass-panel text-white px-6 py-2.5 rounded-full text-[11px] font-[500] tracking-widest hover:bg-white/10 transition-all btn-shimmer" aria-label="ติดต่อแอดมินทางไลน์">
+                <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 glass-panel text-white px-6 py-2.5 rounded-full text-[11px] font-[600] tracking-widest hover:bg-white/10 hover:scale-105 transition-all duration-300 btn-shimmer border border-white/10" aria-label="ติดต่อแอดมินทางไลน์">
                     <i class="fab fa-line text-[#00E676] text-sm" aria-hidden="true"></i> จองคิวตอนนี้
                 </a>
 
-                <button id="menu-btn" aria-label="เปิดเมนู" aria-expanded="false" class="md:hidden flex items-center justify-center w-10 h-10 text-white glass-panel rounded-full hover:bg-white/10 transition-colors">
+                <button id="menu-btn" aria-label="เปิดเมนู" aria-expanded="false" class="md:hidden flex items-center justify-center w-10 h-10 text-white glass-panel rounded-full hover:bg-white/10 active:scale-95 transition-all border border-white/5">
                     <i class="fas fa-bars text-[15px]" aria-hidden="true"></i>
                 </button>
             </div>
@@ -837,9 +854,9 @@ export default async (request, context) => {
     </header>
 
     <div id="sidebar-overlay" class="fixed inset-0 bg-[#07070A]/90 backdrop-blur-sm z-[2000] hidden opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
-    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-[280px] bg-[#07070A] border-l border-white/5 z-[3000] transform translate-x-full transition-transform duration-300 flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.8)]">
+    <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-[280px] bg-[#07070A] border-l border-white/5 z-[3000] transform translate-x-full transition-transform duration-300 flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.9)]">
         <div class="flex items-center justify-between p-5 border-b border-white/5">
-            <span class="text-white font-[700] tracking-widest text-[16px]">MENU</span>
+            <span class="text-white font-[700] tracking-widest text-[15px] opacity-80">MENU</span>
             <button id="close-menu-btn" aria-label="ปิดเมนู" class="text-white/50 hover:text-white hover:bg-white/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                 <i class="fas fa-times text-lg" aria-hidden="true"></i>
             </button>
@@ -852,62 +869,60 @@ export default async (request, context) => {
             <a href="/faq.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-question-circle w-5 text-center text-[#FF2E63]"></i> คำถามพบบ่อย</a>
         </div>
         <div class="p-5 border-t border-white/5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white py-3.5 rounded-xl font-[500] uppercase tracking-widest text-[12px] btn-shimmer">
+            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white py-3.5 rounded-xl font-[600] uppercase tracking-widest text-[12px] btn-shimmer shadow-[0_4px_20px_rgba(255,46,99,0.3)]">
                 <i class="fab fa-line text-lg"></i> แอดไลน์จอง
             </a>
         </div>
     </nav>
 
-    <main class="flex-1 w-full relative z-10">
-        <!-- ✅ แก้ไข: เพิ่ม Padding Hero Section (pb-20 md:pb-24) -->
-        <section class="pt-32 md:pt-40 pb-20 md:pb-24 px-6 relative">
-            <div class="max-w-7xl mx-auto text-center relative z-10">
+    <main class="flex-1 w-full relative z-10 flex flex-col items-center">
+        
+        <section class="w-full pt-32 md:pt-40 pb-20 md:pb-24 px-6 relative flex flex-col items-center">
+            <div class="w-full max-w-7xl mx-auto text-center relative z-10 flex flex-col items-center">
 
                 <div class="reveal active flex flex-wrap justify-center gap-3 mb-10 relative z-20">
-                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(0,230,118,0.1)]">
+                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(0,230,118,0.1)] hover:bg-[#00E676]/5 transition-all duration-300">
                         <i class="fas fa-shield-halved"></i> เจอตัวจริง จ่ายหน้างาน 100%
                     </div>
-                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#FF416C]/30 rounded-full text-[#FF416C]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(255,65,108,0.1)]">
+                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#FF416C]/30 rounded-full text-[#FF416C]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(255,65,108,0.1)] hover:bg-[#FF416C]/5 transition-all duration-300">
                         <i class="fas fa-ban"></i> ไม่มีการโอนมัดจำก่อน
                     </div>
                 </div>
 
-                <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active">
-                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_50px_rgba(255,46,99,0.2)] bg-[#07070a]">
-                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์` + escapeHTML(provinceName) + ` รับงาน` + escapeHTML(provinceName) + ` ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.03] opacity-80" fetchpriority="high">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-transparent to-transparent pointer-events-none"></div>
-                        <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.02] to-transparent pointer-events-none"></div>
+                <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active px-2 sm:px-0">
+                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_50px_rgba(255,46,99,0.15)] bg-[#07070a] border border-white/5">
+                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์` + escapeHTML(provinceName) + ` รับงาน` + escapeHTML(provinceName) + ` ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.02] opacity-80" fetchpriority="high">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-transparent to-transparent pointer-events-none"></div>
+                        <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.01] to-transparent pointer-events-none"></div>
                     </div>
                 </div>
 
-                <div class="max-w-4xl mx-auto text-center reveal active relative z-10">
-                    <h1 class="text-[2.6rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.25)]">
-                        ไซด์ไลน์<span class="text-gradient-luxury">` + escapeHTML(provinceName) + `</span><br>
+                <div class="max-w-4xl mx-auto text-center reveal active relative z-10 flex flex-col items-center">
+                    <h1 class="text-[2.4rem] sm:text-[3rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.2)]">
+                        ไซด์ไลน์<span class="text-gradient-luxury font-[900]">` + escapeHTML(provinceName) + `</span><br>
                         รับงานฟิวแฟน ตัวท็อป
                     </h1>
                     <p class="text-white/70 text-[13px] md:text-[16px] font-[300] mb-10 max-w-2xl mx-auto leading-relaxed px-4">
                         ค้นหาน้องๆ <strong>รับงาน` + escapeHTML(provinceName) + `</strong> เด็กเอ็นเตอร์เทน (N-VIP) บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
                     </p>
 
-                    <!-- ✅ แก้ไข: เพิ่มพื้นที่ (mb-20) ก่อนถึงปุ่ม -->
-                    <div class="max-w-xl mx-auto mt-4 mb-20 relative z-20 px-2">
+                    <div class="w-full max-w-xl mx-auto mt-4 mb-20 relative z-20 px-4 sm:px-2">
                         <form action="/search" method="GET" id="search-form" class="relative group">
                             <label for="search-input" class="sr-only">ค้นหาน้องๆ โซน จังหวัด หรือชื่อ</label>
                             <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-white/40" aria-hidden="true"></i>
+                                <i class="fas fa-search text-white/40 group-focus-within:text-[#FF2E63] transition-colors" aria-hidden="true"></i>
                             </div>
-                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." minlength="2" maxlength="50" required aria-describedby="search-error" class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/30 invalid:ring-[#FF416C]/30 shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all font-[300] placeholder:text-white/40 text-[14px]">
+                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." minlength="2" maxlength="50" required aria-describedby="search-error" class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/20 shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-white/10 transition-all font-[300] placeholder:text-white/40 text-[14px]">
                             <div id="search-error" class="text-[#FF416C] text-[12px] mt-2 hidden"></div>
-                            <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[500] text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all btn-shimmer" aria-label="ปุ่มค้นหา">ค้นหา</button>
+                            <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[600] text-[11px] uppercase tracking-widest hover:opacity-95 active:scale-95 disabled:opacity-50 transition-all btn-shimmer" aria-label="ปุ่มค้นหา">ค้นหา</button>
                         </form>
                     </div>
 
-                    <!-- ✅ แก้ไข: ปรับน้ำหนักปุ่มให้สวยงาม (LINE เขียวเด่นสุด / ดูโปรไฟล์ ขอบใส) -->
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 bg-[#00E676] hover:bg-[#00C853] text-[#07070A] rounded-full font-[700] text-[13px] transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_10px_30px_rgba(0,230,118,0.3)] text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-6 max-w-md sm:max-w-xl">
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 bg-[#00E676] hover:bg-[#00C853] hover:scale-105 text-[#07070A] rounded-full font-[700] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_10px_30px_rgba(0,230,118,0.35)] text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
                             <i class="fab fa-line text-[20px]" aria-hidden="true"></i> ติดต่อแอดมิน
                         </a>
-                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] tracking-widest hover:bg-white/10 transition-all border border-white/20 uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
+                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] tracking-widest hover:bg-white/10 hover:border-white/40 hover:scale-105 transition-all duration-300 border border-white/20 uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
                             เลือกดูโปรไฟล์
                         </a>
                     </div>
@@ -915,26 +930,24 @@ export default async (request, context) => {
             </div>
         </section>
 
-        <!-- หมวดหมู่โปรไฟล์ (Sticky) -->
-        <div class="sticky top-[56px] md:top-[64px] z-40 py-3 overflow-x-auto no-scrollbar glass-panel border-x-0 border-t-0 shadow-none bg-[#07070A]/80">
-            <nav class="max-w-7xl mx-auto px-6 flex items-center justify-center sm:justify-start md:justify-center gap-3 min-w-max" aria-label="หมวดหมู่โปรไฟล์">
-                <button aria-pressed="true" class="shrink-0 px-6 py-2 rounded-full bg-white/10 text-white text-[12px] font-[500] tracking-wider shadow-[0_4px_20px_rgba(255,255,255,0.1)] transition-all">น้องๆ ทั้งหมด</button>
-                <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] text-white/50 text-[12px] font-[400] tracking-wider hover:text-white transition-all">มาแรง & ยอดฮิต</button>
-                <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] text-white/50 text-[12px] font-[400] tracking-wider flex items-center gap-2 hover:text-white transition-all"><i class="fas fa-location-crosshairs" aria-hidden="true"></i> ใกล้ฉัน</button>
+        <div class="sticky top-[56px] md:top-[64px] z-40 w-full py-3 overflow-x-auto no-scrollbar glass-panel border-x-0 border-t-0 shadow-none bg-[#07070A]/85 backdrop-blur-md border-b border-white/5">
+            <nav class="w-full max-w-7xl mx-auto px-6 flex items-center justify-center gap-3 min-w-max" aria-label="หมวดหมู่โปรไฟล์">
+                <button aria-pressed="true" class="shrink-0 px-6 py-2 rounded-full bg-white/10 text-white text-[12px] font-[600] tracking-wider shadow-[0_4px_20px_rgba(255,255,255,0.05)] border border-white/10 transition-all duration-300">น้องๆ ทั้งหมด</button>
+                <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/[0.02] border border-white/[0.06] text-white/50 text-[12px] font-[400] tracking-wider hover:text-white hover:bg-white/5 transition-all duration-300">มาแรง & ยอดฮิต</button>
+                <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/[0.02] border border-white/[0.06] text-white/50 text-[12px] font-[400] tracking-wider flex items-center gap-2 hover:text-white hover:bg-white/5 transition-all duration-300"><i class="fas fa-location-crosshairs" aria-hidden="true"></i> ใกล้ฉัน</button>
             </nav>
         </div>
 
-        <!-- ✅ แก้ไข: เพิ่ม Padding py-24 md:py-32 ให้แคตตาล็อกโปรไฟล์ -->
-        <section id="profiles-grid" class="max-w-[1440px] mx-auto px-4 py-24 md:py-32 scroll-mt-24">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 px-2">
+        <section id="profiles-grid" class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 scroll-mt-24 flex flex-col">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6 px-2 w-full">
                 <div class="reveal">
                     <h2 class="text-3xl md:text-4xl font-[500] tracking-wide text-white">รวมโปรไฟล์ไซด์ไลน์ <span class="text-gradient-luxury font-[700]">` + escapeHTML(provinceName) + `</span></h2>
-                    <p class="text-zinc-400 text-[12px] font-[300] uppercase tracking-widest mt-2 flex items-center gap-2">
-                        <i class="fas fa-check-circle" aria-hidden="true"></i> ตรวจสอบแล้ว (${CURRENT_MONTH} ${CURRENT_YEAR})
+                    <p class="text-zinc-400 text-[11px] font-[400] uppercase tracking-widest mt-2 flex items-center gap-2 opacity-80">
+                        <i class="fas fa-check-circle text-[#00E676]" aria-hidden="true"></i> ตรวจสอบแล้ว (${CURRENT_MONTH} ${CURRENT_YEAR})
                     </p>
                 </div>
                 
-                <div class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00E676]/[0.05] border border-[#00E676]/20 rounded-full text-[11px] font-[500] text-[#00E676]/90 uppercase tracking-widest reveal">
+                <div class="flex items-center gap-2.5 px-5 py-2.5 bg-[#00E676]/[0.04] border border-[#00E676]/20 rounded-full text-[11px] font-[600] text-[#00E676]/90 uppercase tracking-widest reveal self-start sm:self-auto shadow-[0_4px_12px_rgba(0,230,118,0.05)]">
                     <span class="relative flex h-2 w-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00E676]"></span>
@@ -943,27 +956,29 @@ export default async (request, context) => {
                 </div>
             </div>
             
-            <div id="skeleton-loader" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div id="skeleton-loader" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full justify-center justify-items-center">
                 ${Array(20).fill(`
-                    <div class="rounded-[24px] overflow-hidden aspect-[3/4]">
-                        <div class="w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-white/[0.02] animate-pulse rounded-[24px] border border-white/5"></div>
+                    <div class="rounded-[24px] overflow-hidden aspect-[3/4] w-full max-w-sm">
+                        <div class="w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-white/[0.01] animate-pulse rounded-[24px] border border-white/5"></div>
                     </div>
                 `).join("")}
             </div>
 
-            <div id="profiles-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 hidden">
+            <div id="profiles-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 hidden w-full justify-center justify-items-center">
                 ${cardsHTML}
             </div>
         </section>
         
-        ${fullSeoSectionHTML}
+        <div class="w-full flex flex-col items-center">
+            ${fullSeoSectionHTML}
+        </div>
 
     </main>
 
     <!-- ✅ แก้ไข: เพิ่ม Padding ล่าง (pb-[110px]) ให้พ้นจาก Mobile Bottom Nav -->
     <footer class="bg-[#030305] py-16 md:py-24 text-center border-t border-white/5 relative z-10 pb-[110px] md:pb-24">
         <div class="max-w-4xl mx-auto px-6 relative z-10">
-            <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-8 mx-auto brightness-200 mb-10 opacity-80" loading="lazy">
+
             
             <h2 class="text-2xl md:text-4xl font-[800] text-white mb-10 tracking-tighter uppercase drop-shadow-md">
                 THANK YOU <br> 
