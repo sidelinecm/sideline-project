@@ -880,55 +880,59 @@ main, id^="app-container", .main-content {
         </div>
     </nav>
 
-    <main class="flex-1 w-full relative z-10 flex flex-col items-center">
+<main class="flex-1 z-10 relative">
         
-        <section class="w-full pt-32 md:pt-40 pb-20 md:pb-24 px-6 relative flex flex-col items-center">
-            <div class="w-full max-w-7xl mx-auto text-center relative z-10 flex flex-col items-center">
-
+        <section class="pt-32 md:pt-40 pb-16 px-6 relative">
+            <div class="max-w-7xl mx-auto text-center relative z-10">
+                
                 <div class="reveal active flex flex-wrap justify-center gap-3 mb-10 relative z-20">
-                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(0,230,118,0.1)] hover:bg-[#00E676]/5 transition-all duration-300">
+                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(0,230,118,0.1)]">
                         <i class="fas fa-shield-halved"></i> เจอตัวจริง จ่ายหน้างาน 100%
                     </div>
-                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#FF416C]/30 rounded-full text-[#FF416C]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(255,65,108,0.1)] hover:bg-[#FF416C]/5 transition-all duration-300">
+                    <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#FF416C]/30 rounded-full text-[#FF416C]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(255,65,108,0.1)]">
                         <i class="fas fa-ban"></i> ไม่มีการโอนมัดจำก่อน
                     </div>
                 </div>
 
-                <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active px-2 sm:px-0">
-                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_50px_rgba(255,46,99,0.15)] bg-[#07070a] border border-white/5">
-                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์` + escapeHTML(provinceName) + ` รับงาน` + escapeHTML(provinceName) + ` ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.02] opacity-80" fetchpriority="high">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-transparent to-transparent pointer-events-none"></div>
-                        <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.01] to-transparent pointer-events-none"></div>
+                <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active">
+                    <div class="aspect-[16/9] md:aspect-[21/9] rounded-[24px] overflow-hidden glass-panel relative shadow-[0_0_50px_rgba(255,46,99,0.2)] bg-[#07070a]">
+                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์${escapeHTML(provinceName)} รับงาน${escapeHTML(provinceName)} ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.03] opacity-80" fetchpriority="high">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-transparent to-transparent pointer-events-none"></div>
+                        <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.02] to-transparent pointer-events-none"></div>
                     </div>
                 </div>
 
-                <div class="max-w-4xl mx-auto text-center reveal active relative z-10 flex flex-col items-center">
-                    <h1 class="text-[2.4rem] sm:text-[3rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.2)]">
-                        ไซด์ไลน์<span class="text-gradient-luxury font-[900]">` + escapeHTML(provinceName) + `</span><br>
+                <div class="max-w-4xl mx-auto text-center reveal active relative z-10">
+                    
+                    <h1 class="text-[2.6rem] md:text-[4rem] font-[800] text-white leading-[1.2] tracking-tight mb-6 drop-shadow-[0_10px_30px_rgba(255,46,99,0.25)]">
+                        ไซด์ไลน์<span class="text-gradient-luxury">${escapeHTML(provinceName)}</span><br>
                         รับงานฟิวแฟน ตัวท็อป
                     </h1>
+                    
                     <p class="text-white/70 text-[13px] md:text-[16px] font-[300] mb-10 max-w-2xl mx-auto leading-relaxed px-4">
-                        ค้นหาน้องๆ <strong>รับงาน` + escapeHTML(provinceName) + `</strong> เด็กเอ็นเตอร์เทน (N-VIP) บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
+                        ค้นหาน้องๆ <strong>รับงาน${escapeHTML(provinceName)}</strong> เด็กเอ็นเตอร์เทน (N-VIP) บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
                     </p>
-
-                    <div class="w-full max-w-xl mx-auto mt-4 mb-20 relative z-20 px-4 sm:px-2">
-                        <form action="/search" method="GET" id="search-form" class="relative group">
+                    
+                    <div class="max-w-xl mx-auto mt-4 mb-10 relative z-20 px-2">
+                        <form action="/search" method="GET" class="relative group">
                             <label for="search-input" class="sr-only">ค้นหาน้องๆ โซน จังหวัด หรือชื่อ</label>
                             <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-white/40 group-focus-within:text-[#FF2E63] transition-colors" aria-hidden="true"></i>
+                                <i class="fas fa-search text-white/40" aria-hidden="true"></i>
                             </div>
-                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." minlength="2" maxlength="50" required aria-describedby="search-error" class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/20 shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-white/10 transition-all font-[300] placeholder:text-white/40 text-[14px]">
-                            <div id="search-error" class="text-[#FF416C] text-[12px] mt-2 hidden"></div>
-                            <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[600] text-[11px] uppercase tracking-widest hover:opacity-95 active:scale-95 disabled:opacity-50 transition-all btn-shimmer" aria-label="ปุ่มค้นหา">ค้นหา</button>
+                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." required
+                                class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all font-[300] placeholder:text-white/40 text-[14px]">
+                            <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[500] text-[11px] uppercase tracking-widest hover:opacity-90 transition-all btn-shimmer" aria-label="ปุ่มค้นหา">
+                                ค้นหา
+                            </button>
                         </form>
                     </div>
-
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-6 max-w-md sm:max-w-xl">
-<a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 bg-[#009688] hover:bg-[#00796B] hover:scale-105 text-[#FFFFFF] rounded-full font-[700] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_10px_30px_rgba(0,150,136,0.35)]" aria-label="แอดไลน์ติดต่อแอดมิน">
-    <i class="fab fa-line text-[20px]" aria-hidden="true"></i> ติดต่อแอดมิน
-</a>
-                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] tracking-widest hover:bg-white/10 hover:border-white/40 hover:scale-105 transition-all duration-300 border border-white/20 uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
+                    
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
+                        <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 bg-white/95 text-[#07070A] rounded-full font-[600] text-[13px] tracking-widest hover:bg-white transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
                             เลือกดูโปรไฟล์
+                        </a>
+                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] hover:bg-white/[0.05] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
+                            <i class="fab fa-line text-lg text-[#00E676]" aria-hidden="true"></i> ติดต่อแอดมิน
                         </a>
                     </div>
                 </div>
