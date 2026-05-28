@@ -821,6 +821,11 @@ main, id^="app-container", .main-content {
     margin-left: auto;
     margin-right: auto;
 }
+/* ตัวอย่างการปรับสีพื้นหลังให้เด่นชัดขึ้น */
+.fixed.bottom-3.left-4.right-4.md\:hidden.z-\[100\] {
+    background-color: rgba(0, 230, 118, 0.9); /* สีเขียวเข้มขึ้นและมีความทึบสูงขึ้น */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* เงาเพื่อเน้นความลึก */
+}
     </style>
 </head>
 
