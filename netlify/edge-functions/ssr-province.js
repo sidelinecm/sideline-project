@@ -924,9 +924,9 @@ main, id^="app-container", .main-content {
                     </div>
 
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-6 max-w-md sm:max-w-xl">
-                        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 bg-[#00E676] hover:bg-[#00C853] hover:scale-105 text-[#07070A] rounded-full font-[700] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_10px_30px_rgba(0,230,118,0.35)] text-center" aria-label="แอดไลน์ติดต่อแอดมิน">
-                            <i class="fab fa-line text-[20px]" aria-hidden="true"></i> ติดต่อแอดมิน
-                        </a>
+<a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-10 py-4 bg-[#009688] hover:bg-[#00796B] hover:scale-105 text-[#FFFFFF] rounded-full font-[700] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_10px_30px_rgba(0,150,136,0.35)]" aria-label="แอดไลน์ติดต่อแอดมิน">
+    <i class="fab fa-line text-[20px]" aria-hidden="true"></i> ติดต่อแอดมิน
+</a>
                         <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 glass-panel text-white rounded-full font-[600] text-[13px] tracking-widest hover:bg-white/10 hover:border-white/40 hover:scale-105 transition-all duration-300 border border-white/20 uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
                             เลือกดูโปรไฟล์
                         </a>
