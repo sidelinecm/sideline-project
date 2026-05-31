@@ -38,7 +38,6 @@ const optimizeImg = (path, width = 600, height = 800) => {
     if (path.includes('res.cloudinary.com')) {
         return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
     }
-    // หากเป็น HTTP ปกติให้คืนค่าเดิม หากเป็น Supabase ให้ต่อ Path พร้อม Transform (หาก Supabase ของคุณเปิด Image Transform ไว้)
     return path.startsWith('http') 
         ? path 
         : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover`;
@@ -89,7 +88,7 @@ export default async (request, context) => {
         if (!p) {
             return new Response(`<!DOCTYPE html><html lang="th"><head><meta name="robots" content="noindex, follow"><title>404 - ไม่พบหน้าเว็บ</title></head><body><h1>404 Not Found</h1></body></html>`, {
                 status: 404,
-                headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "no-store" } // ป้องกัน CDN แคชหน้า 404
+                headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "no-store" } 
             });
         }
 
@@ -109,6 +108,11 @@ export default async (request, context) => {
         const displayName = p.name || 'สาวสวย';
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
+        
+        // ✅ แก้ปัญหา 301 Redirect: กำหนด URL ที่ถูกต้องสำหรับหน้าจังหวัด
+        const correctProvinceUrl = provinceKey === 'chiangmai' 
+            ? CONFIG.DOMAIN 
+            : `${CONFIG.DOMAIN}/location/${provinceKey}`;
         
         const rawRate = parseInt(p.rate || "1500");
         const displayPrice = rawRate.toLocaleString() + ".-";
@@ -140,7 +144,9 @@ export default async (request, context) => {
         
         const pageTitle = `${titleIntro} น้อง${displayName} ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน ตรงปก`;
         const metaDesc = `น้อง${displayName} สาวไซด์ไลน์${provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ${serviceWord} รับงานเอง ไม่ผ่านเอเย่นต์ ${payWord} พิกัดแถว ${p.location || provinceName} ทักไลน์จองคิวเลย!`;
-        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
+        
+        // ใช้ URL เข้ารหัสสำหรับตัวเองใน Schema
+        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(slug)}`;
 
         const schemaReviews = TESTIMONIALS.map(t => ({
             "@type": "Review",
@@ -177,7 +183,8 @@ export default async (request, context) => {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
+                        // ✅ ใส่ correctProvinceUrl เพื่อกัน Error 301
+                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl },
                         { "@type": "ListItem", "position": 3, "name": `น้อง${displayName}`, "item": canonicalUrl }
                     ]
                 },
@@ -276,7 +283,12 @@ export default async (request, context) => {
         .fixed-nav { position: absolute; top: 0; left: 0; width: 100%; z-index: 100; background: linear-gradient(to bottom, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.4) 100%); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bw); }
         .nav-content { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 64px; }
         .logo-img { height: 26px; width: auto; filter: brightness(2); opacity: 0.95; }
-        .main-content { padding: 84px 1.25rem 2rem 1.25rem; }
+        
+        /* ✅ แก้ไข CSS: จัด Breadcrumb และลิงก์ภายใน */
+        .breadcrumb { padding: 84px 1.25rem 0.5rem 1.25rem; font-size: 0.85rem; color: var(--muted); }
+        .breadcrumb a { color: var(--p); text-decoration: none; }
+        
+        .main-content { padding: 0.5rem 1.25rem 2rem 1.25rem; }
         .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 1.5rem; box-shadow: 0 24px 48px rgba(0,0,0,0.7); border: 1px solid var(--bw); display: block; }
         .profile-meta-header { text-align: center; margin: 1.5rem 0; }
         h1 { font-size: clamp(1.8rem, 5vw, 2.3rem); font-weight: 900; line-height: 1.2; }
@@ -302,11 +314,21 @@ export default async (request, context) => {
         .faq-title { color: var(--p); font-size: 1.25rem; font-weight: 800; text-align: center; margin-bottom: 1.25rem; }
         .faq-item { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; margin-bottom: 0.75rem; }
         .faq-item h3 { font-size: 1rem; color: var(--txt); margin-bottom: 0.5rem; }
-        .related-carousel { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 0.75rem; }
-        .related-card { flex: 0 0 145px; background: var(--bg); border-radius: 1.25rem; overflow: hidden; border: 1px solid var(--bw); text-decoration: none; color: inherit; }
-        .related-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+        
+        /* ✅ แก้ไข CSS: รองรับตารางน้องๆ ที่เกี่ยวข้องแบบ Grid ลิงก์ภายในแข็งแรง */
+        .related-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+        .related-card { background: rgba(255,255,255,0.03); border-radius: 1.25rem; overflow: hidden; border: 1px solid var(--bw); text-decoration: none; color: inherit; display: block; transition: border-color 0.2s; }
+        .related-card:hover { border-color: var(--p); }
+        .related-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
+        .related-name { padding: 0.75rem; text-align: center; font-weight: bold; font-size: 0.95rem; }
+        .view-all-btn { display: block; text-align: center; color: var(--p); text-decoration: underline; font-weight: bold; margin-top: 1rem; }
+        
         .testimonial { background: rgba(255,255,255,0.01); padding: 1.25rem; border-radius: 1.25rem; border: 1px solid var(--bw); margin-bottom: 1rem; }
+        
+        /* ✅ แก้ไข CSS: Footer และลิงก์ */
         .footer { text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--bw); margin-top: 3.5rem; color: var(--muted); font-size: 0.85rem; }
+        .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
+        .footer-nav a { color: var(--muted); text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -317,6 +339,13 @@ export default async (request, context) => {
                 <a href="/" class="logo-link"><img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME}" class="logo-img" width="200" height="26" fetchpriority="high" decoding="sync"></a>
             </div>
         </header>
+
+        <!-- ✅ 1. เพิ่ม Breadcrumb: สร้างลิงก์กลับไปหน้าจังหวัด/หน้าแรก -->
+        <nav aria-label="breadcrumb" class="breadcrumb">
+            <a href="/">หน้าแรก</a> &raquo; 
+            <a href="${correctProvinceUrl}">ไซด์ไลน์${provinceName}</a> &raquo; 
+            <span>น้อง${displayName}</span>
+        </nav>
 
         <main class="main-content">
             <article>
@@ -337,7 +366,7 @@ export default async (request, context) => {
                     </div>
                 </header>
 
-<div class="info-grid">
+                <div class="info-grid">
                     <div class="info-item">
                         <span class="info-label">ค่าขนม</span>
                         <span class="info-value">${displayPrice}</span>
@@ -385,10 +414,33 @@ export default async (request, context) => {
                         </div>
                     `).join('')}
                 </section>
+                
+                <!-- ✅ 2. เพิ่ม Related Profiles (ใยแมงมุม): เชื่อมหน้า Profile นี้เข้ากับโปรไฟล์อื่นๆ 47 หน้า -->
+                ${related.length > 0 ? `
+                <section class="faq-section" style="margin-top: 3.5rem;">
+                    <h2 class="faq-title">น้องๆ โซน${provinceName} ที่น่าสนใจ</h2>
+                    <div class="related-grid">
+                        ${related.map(r => `
+                            <!-- ✅ ใช้ encodeURIComponent เพื่อป้องกัน 303 Redirect -->
+                            <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="น้อง${escapeHTML(r.name)}">
+                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="น้อง${escapeHTML(r.name)}" loading="lazy" width="300" height="400">
+                                <div class="related-name">น้อง${escapeHTML(r.name)}</div>
+                            </a>
+                        `).join('')}
+                    </div>
+                    <a href="${correctProvinceUrl}" class="view-all-btn">ดูน้องๆ รับงานโซน${provinceName} ทั้งหมด</a>
+                </section>
+                ` : ''}
             </article>
         </main>
         
+        <!-- ✅ 3. เพิ่ม Footer Internal Links: ป้องกันทางตันขั้นสูงสุด -->
         <footer class="footer">
+            <nav class="footer-nav">
+                <a href="/">หน้าแรก</a>
+                <a href="/profiles.html">โปรไฟล์น้องๆ ทั้งหมด</a>
+                <a href="/locations.html">พิกัดรับงานทั่วประเทศ</a>
+            </nav>
             © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>

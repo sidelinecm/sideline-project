@@ -44,7 +44,7 @@ export default async () => {
 
         const today = new Date().toISOString();
 
-        // 1. หน้าแรก
+        // 1. หน้าแรก (รับหน้าที่เป็นหน้าของจังหวัดเชียงใหม่ไปในตัว)
         xml += `
 <url>
   <loc>${CONFIG.DOMAIN}/</loc>
@@ -54,7 +54,10 @@ export default async () => {
 </url>`;
 
         // 2. หน้า Static Pages ยอดนิยม
-        ['blog', 'contact', 'faq'].forEach(page => {
+        // ✅ แก้ไข: อัปเดตรายชื่อหน้าให้ตรงกับที่มีในเมนู/Footer จริงๆ 
+        // (เอา .html ออกถ้า URL จริงๆ ของคุณไม่ได้ใส่ แต่ถ้ามีก็ปล่อยไว้ตามชื่อไฟล์จริงบนระบบ)
+        const staticPages = ['profiles.html', 'locations.html', 'about.html', 'faq.html', 'terms.html', 'privacy-policy.html'];
+        staticPages.forEach(page => {
             xml += `
 <url>
   <loc>${CONFIG.DOMAIN}/${page}</loc>
@@ -67,7 +70,8 @@ export default async () => {
         // 3. หน้าจังหวัด (Location Pages)
         if (provinces) {
             provinces.forEach(p => {
-                if (p.key) {
+                // ✅ แก้ไข: ข้ามจังหวัดเชียงใหม่ (chiangmai) ไม่ให้พิมพ์ลง Sitemap เพื่อป้องกัน Redirect 301
+                if (p.key && p.key.toLowerCase() !== 'chiangmai') {
                     xml += `
 <url>
   <loc>${CONFIG.DOMAIN}/location/${encodeURIComponent(p.key)}</loc>
@@ -83,6 +87,7 @@ export default async () => {
         if (profiles) {
             profiles.forEach(p => {
                 if (p.slug) {
+                    // ✅ การใช้ encodeURIComponent ตรงนี้ถูกต้องเยี่ยมมากครับ! 
                     const safeSlug = encodeURIComponent(p.slug.trim());
                     // ใช้วันอัปเดตล่าสุดจริงจาก DB
                     const dateStr = p.lastUpdated || p.created_at || today;
