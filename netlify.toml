@@ -3,6 +3,8 @@
 # ==========================================
 [build]
   publish = "."
+  # edge functions ใน netlify ต้องอยู่ในโฟลเดอร์ netlify/edge-functions โดยอัตโนมัติ
+  # บรรทัด functions ด้านล่างคือ serverless functions ธรรมดา (ทิ้งไว้ได้ไม่เป็นไรครับ)
   functions = "netlify/functions"
 
 [build.processing]
@@ -34,31 +36,21 @@
   function = "render-bot"
   path = "/sideline/*"
 
+# ✅ ให้ ssr-province ดักจับหน้า /location/* ทั้งหมด
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
 
+# ✅ ให้ ssr-province ดักจับหน้าแรก (Root) ด้วย เพื่อให้เรนเดอร์เชียงใหม่
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/"
+
 # ==========================================
-# 4. SEO Redirects & Rewrites (หัวใจสำคัญในการกู้คืนอันดับ)
+# 4. SEO Redirects & Rewrites
 # ==========================================
 
-# 4.1 Force HTTPS
-[[redirects]]
-  from = "http://sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
-  status = 301
-  force = true
-
-# 4.2 หน้าแรก (Root) ต้องเป็น Rewrite (Status 200) ไม่ใช่ Redirect (301)
-# วิธีนี้จะทำให้ Google มองว่าหน้าแรกของคุณคือเนื้อหาของเชียงใหม่ โดยที่ URL ไม่เปลี่ยน
-# นี่คือเทคนิคกู้คืน Ranking ของหน้าแรกที่ดีที่สุด
-[[redirects]]
-  from = "/"
-  to = "/location/chiangmai"
-  status = 200
-  force = false
-
-# 4.3 URL Normalization (จัดการ Query Parameter ให้เป็น Clean URL)
+# 4.1 URL Normalization (จัดการ Query Parameter ให้เป็น Clean URL)
 [[redirects]]
   query = {province = ":p"}
   from = "/location/*"
@@ -66,14 +58,8 @@
   status = 301
   force = true
 
-# 4.4 Redirect นามสกุล .html ออก (Clean URL)
-[[redirects]]
-  from = "/*.html"
-  to = "/:splat"
-  status = 301
-  force = true
-
-# 4.5 SPA Fallback (ต้องอยู่ล่างสุดเสมอ)
+# 4.2 SPA Fallback (ต้องอยู่ล่างสุดเสมอ)
+# ดักจับหน้าที่หาไม่เจอให้วิ่งไปที่ index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
