@@ -1,9 +1,11 @@
+
+
 /**
  * [ SYSTEM CORE ]
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE NEO-LUXURY NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, Conversion UI/UX & Entity Engineering
- * Optimization: Flawless SEO Schema, Contrast AA, 100dvh Auto-Scale & Best Render
+ * Optimization: Server-side Hotlink Protection, Zero CLS, Enhanced EEAT & Dynamic Host Config
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -15,7 +17,8 @@ const CONFIG = {
     get SUPABASE_KEY() {
         try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
     },
-    DOMAIN: "https://sidelinechiangmai.netlify.app",
+    // โดเมนหลักสำหรับการประมวลผลเชิงระบบ
+    ALLOWED_DOMAINS: ["sidelinechiangmai.netlify.app", "localhost", "127.0.0.1"],
     BRAND_NAME: "SIDELINE CHIANGMAI",
     TWITTER: "@sidelinechiangmai",
     DESCRIPTION: "แหล่งรวมน้องๆสาวๆ รับงานไซด์ไลน์ ฟิวแฟนเด็กเอ็นที่บริการ ระดับVIP ที่ตรวจสอบแล้วว่าตรงปกทั่วประเทศไทย รับประกันปลอดภัย ตรงปกฟิวแฟน100% บริการประทับใจ ไม่มีโอนมัดจำก่อนเจอตัวจริง📌",
@@ -146,7 +149,7 @@ const PROVINCE_SEO_DATA = {
         `,
         faqs: [
             { q: "ใช้บริการน้องๆ รับงาน ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำใดๆ ทั้งสิ้น ลูกค้าจ่ายเงินสดหน้างานเมื่อเจอตัวน้องจริงเท่านั้น เพื่อความปลอดภัยสูงสุดของคุณและป้องกันมิจฉาชีพ" },
-            { q: "รับประกันความตรงปกไหม ถ้าน้องไม่ตรงปกทำอย่างไร?", a: "รูปโปรไฟล์ทุกรูปผ่านการคัดกรองและยืนยันตัวตนแล้วว่าตรงปก หากพบตัวจริงแล้วไม่ตรงกับรูปภาพ ลูกค้ามีสิทธิ์ยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่าย" }
+            { q: "รับประกันความตรงปกไหม ถ้าน้องไม่ตรงปกทำอย่างไร?", a: "รูปโปรไฟล์ทุกรูปผ่านการคัดกรองและยืนยันตัวตนแล้วว่าตรงปก หากพบตัวจริงแล้วไม่ตรงกับรูปภาพ ลูกค้ามีสิทธิ์ยกเลิกงานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ" }
         ]
     }
 };
@@ -157,16 +160,16 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
     }
 });
 
-// ✅ IMAGE OPTIMIZATION (Quality: Best for Retina Display)
-const getFullUrl = (path) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+// ✅ IMAGE OPTIMIZATION (Dynamic Fallback & Safe SSL Check)
+const getFullUrl = (domain, path) => {
+    if (!path) return `${domain}/images/default.webp`;
     if (path.startsWith("http")) return path;
     const cleanPath = path.startsWith("/") ? path : `/${path}`;
-    return `${CONFIG.DOMAIN}${cleanPath}`;
+    return `${domain}${cleanPath}`;
 };
 
-const optimizeImg = (path, width = 182, height = 242) => {
-    if (!path) return getFullUrl("/images/default.webp");
+const optimizeImg = (domain, path, width = 182, height = 242) => {
+    if (!path) return getFullUrl(domain, "/images/default.webp");
     if (path.includes("res.cloudinary.com")) {
         if (path.includes("/upload/")) {
             return path.replace("/upload/", `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`);
@@ -190,14 +193,14 @@ const stripHTML = (str) => {
     return str.replace(/<[^>]*>?/gm, '');
 };
 
-// ✅ SMART LINKIFY (Clean Links: Only replace first occurrence)
+// ✅ SMART LINKIFY (First Occurrence Optimization to Avoid Keyword Stuffing Penalty)
 const smartLinkify = (text, provinceKey, zones) => {
     if (!text) return "";
     let linkedText = text;
     
     if (zones && zones.length > 0) {
         zones.forEach(zone => {
-            const regex = new RegExp(`(${zone})`, ''); // ไม่ใช้ flag 'g'
+            const regex = new RegExp(`(${zone})`, ''); 
             linkedText = linkedText.replace(
                 regex,
                 `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#FF2E63] hover:text-white transition-colors font-[500] border-b border-[#FF2E63]/30" aria-label="ค้นหาน้องๆ โซน ` + escapeHTML(zone) + `">$1</a>`
@@ -207,7 +210,7 @@ const smartLinkify = (text, provinceKey, zones) => {
 
     const keywords = ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน"];
     keywords.forEach(kw => {
-        const regex = new RegExp(`(${kw})`, ''); // ไม่ใช้ flag 'g'
+        const regex = new RegExp(`(${kw})`, ''); 
         linkedText = linkedText.replace(
             regex,
             `<a href="/search?q=${encodeURIComponent(kw)}" class="text-[#D4AF37] hover:text-white transition-colors font-[500] border-b border-[#D4AF37]/30" aria-label="บริการ ` + escapeHTML(kw) + `">$1</a>`
@@ -217,8 +220,15 @@ const smartLinkify = (text, provinceKey, zones) => {
     return linkedText;
 };
 
-// ✅ ERROR PAGE BUILDER (Fail-Fast System with Modular Design)
-function buildErrorPage(statusCode, title, message, allProvinces = []) {
+// ✅ SERVER-SIDE HOSTNAME VERIFICATION (Fail-Fast Block for Scraping and Domain Theft)
+function verifyHostname(request) {
+    const host = request.headers.get("host") || "";
+    const isAllowed = CONFIG.ALLOWED_DOMAINS.some(allowed => host.includes(allowed));
+    return isAllowed;
+}
+
+// ✅ ERROR PAGE BUILDER
+function buildErrorPage(statusCode, title, message, allProvinces = [], domain = "") {
     const provincesLinks = allProvinces
         ?.slice(0, 8)
         .map(p => `<a href="/location/${p.key}" class="text-[#FF2E63] hover:text-white transition-colors">${escapeHTML(p.nameThai)}</a>`)
@@ -231,31 +241,24 @@ function buildErrorPage(statusCode, title, message, allProvinces = []) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>${statusCode} - ${escapeHTML(title)}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <style>
-        body { background: linear-gradient(135deg, #07070A 0%, #111116 100%); font-family: 'Prompt', sans-serif; color: white; }
+        body { background: linear-gradient(135deg, #07070A 0%, #111116 100%); font-family: system-ui, -apple-system, sans-serif; color: white; margin: 0; }
+        .flex-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; }
+        .text-center { text-align: center; max-width: 440px; }
+        .status-code { font-size: 72px; font-weight: 800; color: #FF2E63; margin-bottom: 16px; }
+        .title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .msg { color: #a1a1aa; margin-bottom: 32px; font-size: 14px; line-height: 1.6; }
+        .btn { display: inline-block; padding: 12px 32px; background: #FF2E63; color: white; border-radius: 9999px; font-weight: 500; text-decoration: none; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
-    <div class="min-h-[100dvh] flex items-center justify-center px-6">
-        <div class="text-center max-w-md">
-            <div class="text-6xl font-[800] text-[#FF2E63] mb-4">${statusCode}</div>
-            <h1 class="text-3xl font-[700] mb-2">${escapeHTML(title)}</h1>
-            <p class="text-zinc-400 mb-8 text-[14px] leading-relaxed">${escapeHTML(message)}</p>
-            
-            ${provincesLinks ? `
-                <div class="mb-8 pb-8 border-t border-white/10 pt-8">
-                    <p class="text-zinc-500 text-[12px] mb-4 uppercase tracking-wider">ลองค้นหาพิกัดยอดฮิตอื่นๆ</p>
-                    <div class="flex flex-wrap gap-2 justify-center text-[13px]">
-                        ${provincesLinks}
-                    </div>
-                </div>
-            ` : ''}
-            
-            <a href="/" class="inline-block px-8 py-3 bg-[#FF2E63] text-white rounded-full font-[500] hover:opacity-90 transition-all shadow-[0_0_15px_rgba(255,46,99,0.3)]">
-                กลับสู่หน้าหลัก
-            </a>
+    <div class="flex-container">
+        <div class="text-center">
+            <div class="status-code">${statusCode}</div>
+            <h1 class="title">${escapeHTML(title)}</h1>
+            <p class="msg">${escapeHTML(message)}</p>
+            <a href="/" class="btn">กลับสู่หน้าหลัก</a>
         </div>
     </div>
 </body>
@@ -264,7 +267,7 @@ function buildErrorPage(statusCode, title, message, allProvinces = []) {
             status: statusCode,
             headers: {
                 "Content-Type": "text/html; charset=utf-8",
-                "Cache-Control": "public, max-age=60, s-maxage=300"
+                "Cache-Control": "public, max-age=60"
             }
         }
     );
@@ -272,27 +275,27 @@ function buildErrorPage(statusCode, title, message, allProvinces = []) {
 
 // ✅ MAIN EXPORT FUNCTION
 export default async (request, context) => {
+    // 1. ตรวจสอบความถูกต้องของ Hostname ตั้งแต่ระดับเซิร์ฟเวอร์ (ย้ายมาจาก client-side เพื่อสกัด Bot ดูดข้อมูล)
+    if (!verifyHostname(request)) {
+        return new Response("403 Forbidden - Access Denied", { status: 403 });
+    }
+
     try {
         const url = new URL(request.url);
+        const dynamicDomain = `${url.protocol}//${url.host}`; // ดึงโดเมนจริงปัจจุบัน ป้องกันข้อผิดพลาดหากเปลี่ยนโดเมน Netlify
         const pathParts = url.pathname.split("/").filter(Boolean);
         
-        // -------------------------------------------------------------
         // 1. EXTRACT & NORMALIZE PROVINCE KEY
-        // -------------------------------------------------------------
         const rawProvinceKey = pathParts[pathParts.length - 1] || "chiangmai";
         let provinceKey = rawProvinceKey.toLowerCase();
         try { provinceKey = decodeURIComponent(rawProvinceKey).toLowerCase(); } catch { provinceKey = rawProvinceKey.toLowerCase(); }
 
-        // -------------------------------------------------------------
         // 2. SEO REDIRECT: Redirect /location/chiangmai to root /
-        // -------------------------------------------------------------
         if (pathParts[0] === "location" && provinceKey === "chiangmai") {
             return Response.redirect(new URL("/", url.origin).toString(), 301);
         }
 
-        // -------------------------------------------------------------
         // 3. QUERY PARAMETER REDIRECT (Handle ?province=...)
-        // -------------------------------------------------------------
         if (url.searchParams.has("province")) {
             const provinceValue = url.searchParams.get("province")?.toLowerCase();
             if (provinceValue === "chiangmai") {
@@ -301,15 +304,13 @@ export default async (request, context) => {
             return Response.redirect(new URL(`/location/${provinceValue}`, url.origin).toString(), 301);
         }
 
-        // -------------------------------------------------------------
         // 4. DATABASE INITIALIZATION & DATA FETCHING
-        // -------------------------------------------------------------
         let supabase;
         try {
             supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         } catch (envError) {
             console.error("Environment Variable Error:", envError.message);
-            return buildErrorPage(500, "Configuration Error", "Server configuration is incomplete. Please contact administrator.", []);
+            return buildErrorPage(500, "Configuration Error", "Server configuration is incomplete. Please contact administrator.", [], dynamicDomain);
         }
 
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
@@ -322,13 +323,11 @@ export default async (request, context) => {
             supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
         ]);
 
-        // -------------------------------------------------------------
         // 5. FAIL-FAST 404 PREVENTION
-        // -------------------------------------------------------------
         const provinceData = provinceRes.data;
         if (!provinceData) {
             const allProvinces = allProvincesRes.data || [];
-            return buildErrorPage(404, "404 ไม่พบพิกัดที่ต้องการ", `ขออภัยค่ะ ข้อมูลพิกัด "${provinceKey}" ไม่พบในระบบ หรืออาจถูกลบไปแล้ว`, allProvinces);
+            return buildErrorPage(404, "404 ไม่พบพิกัดที่ต้องการ", `ขออภัยค่ะ ข้อมูลพิกัด "${provinceKey}" ไม่พบในระบบ หรืออาจถูกลบไปแล้ว`, allProvinces, dynamicDomain);
         }
 
         const safeProfiles = profilesRes.data || [];
@@ -341,11 +340,11 @@ export default async (request, context) => {
         const CURRENT_YEAR = now.getFullYear();
         
         const isChiangmai = provinceKey === 'chiangmai';
-        const provinceUrl = isChiangmai ? CONFIG.DOMAIN : `${CONFIG.DOMAIN}/location/${provinceKey}`;
+        const provinceUrl = isChiangmai ? dynamicDomain : `${dynamicDomain}/location/${provinceKey}`;
         
         const firstImage = safeProfiles.length > 0 
-            ? optimizeImg(safeProfiles[0].imagePath, 1200, 630) 
-            : `${CONFIG.DOMAIN}/images/hero-sidelinechiangmai-1200.webp`;
+            ? optimizeImg(dynamicDomain, safeProfiles[0].imagePath, 1200, 630) 
+            : `${dynamicDomain}/images/hero-sidelinechiangmai-1200.webp`;
 
         const title = "ไซด์ไลน์" + provinceName + " รับงาน" + provinceName + " พรีเมียม (" + CURRENT_MONTH + " " + CURRENT_YEAR + ") | ตรงปก ปลอดภัย 100%";
         const description = "รวมโปรไฟล์ ตัวท็อป! ไซด์ไลน์" + provinceName + " รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP " + safeProfiles.length + " คน โซน " + seoData.zones.slice(0, 3).join(', ') + " ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด";
@@ -357,21 +356,21 @@ export default async (request, context) => {
         const schemaGraph = [
             {
                 "@type": "Organization",
-                "@id": `${CONFIG.DOMAIN}/#organization`,
+                "@id": `${dynamicDomain}/#organization`,
                 "name": CONFIG.BRAND_NAME,
-                "url": CONFIG.DOMAIN,
-                "logo": { "@type": "ImageObject", "url": `${CONFIG.DOMAIN}/logo.png` },
+                "url": dynamicDomain,
+                "logo": { "@type": "ImageObject", "url": `${dynamicDomain}/logo.png` },
                 "description": cleanDescription,
                 "sameAs": CONFIG.SOCIALS,
                 "contactPoint": { "@type": "ContactPoint", "contactType": "customer service", "telephone": CONFIG.PHONE, "availableLanguage": ["th", "en"] }
             },
             {
                 "@type": "WebSite",
-                "@id": `${CONFIG.DOMAIN}/#website`,
-                "url": CONFIG.DOMAIN,
+                "@id": `${dynamicDomain}/#website`,
+                "url": dynamicDomain,
                 "name": CONFIG.BRAND_NAME,
-                "publisher": { "@id": `${CONFIG.DOMAIN}/#organization` },
-                "potentialAction": { "@type": "SearchAction", "target": `${CONFIG.DOMAIN}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
+                "publisher": { "@id": `${dynamicDomain}/#organization` },
+                "potentialAction": { "@type": "SearchAction", "target": `${dynamicDomain}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
             },
             {
                 "@type": ["LocalBusiness", "EntertainmentBusiness"],
@@ -395,7 +394,7 @@ export default async (request, context) => {
                 "url": provinceUrl,
                 "name": title,
                 "description": cleanDescription,
-                "isPartOf": { "@id": `${CONFIG.DOMAIN}/#website` },
+                "isPartOf": { "@id": `${dynamicDomain}/#website` },
                 "about": { "@id": `${provinceUrl}/#localbusiness` },
                 "mainEntity": { "@id": `${provinceUrl}/#itemlist` }
             },
@@ -410,8 +409,8 @@ export default async (request, context) => {
                     "item": {
                         "@type": "Person",
                         "name": p.name || "ไม่ระบุชื่อ",
-                        "url": `${CONFIG.DOMAIN}/sideline/${p.slug || p.id}`,
-                        "image": optimizeImg(p.imagePath, 300, 400),
+                        "url": `${dynamicDomain}/sideline/${p.slug || p.id}`,
+                        "image": optimizeImg(dynamicDomain, p.imagePath, 300, 400),
                         "description": "โปรไฟล์น้อง" + (p.name || "") + " รับงานโซน " + (p.location || provinceName)
                     }
                 }))
@@ -420,8 +419,8 @@ export default async (request, context) => {
                 "@type": "BreadcrumbList",
                 "@id": `${provinceUrl}/#breadcrumb`,
                 "itemListElement": [
-                    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                    { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${CONFIG.DOMAIN}/profiles.html` },
+                    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain },
+                    { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${dynamicDomain}/profiles.html` },
                     { "@type": "ListItem", "position": 3, "name": "ไซด์ไลน์" + provinceName, "item": provinceUrl }
                 ]
             }
@@ -441,9 +440,7 @@ export default async (request, context) => {
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-        // -------------------------------------------------------------
-        // 7. HTML TEMPLATE & RENDERER (Semantic UI/UX)
-        // -------------------------------------------------------------
+        // 7. HTML TEMPLATE & RENDERER (Semantic UI/UX with zero layout shift rules)
         const cardsHTML = safeProfiles
             .map((p, index) => {
                 const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
@@ -451,23 +448,21 @@ export default async (request, context) => {
                 const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
                 const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
                 
-                // ✅ แก้ไข: จัดการรูปแบบอายุ ซ่อน '??'
                 const ageHtml = (p.age && p.age !== '??' && !isNaN(p.age)) 
                     ? `<span class="text-[11px] font-[600] text-white/90 bg-white/10 border border-white/20 px-2 py-0.5 rounded-md backdrop-blur-md">${p.age}</span>` 
                     : ``;
 
-                // ✅ แก้ไข: จัดรูปแบบราคาให้เป็น "1,500 ฿" เสมอเป๊ะๆ (ลบ '.-' ออก)
                 let displayRate = "สอบถาม";
                 if (p.rate) {
-                    const rawRate = String(p.rate).replace(/,/g, ""); // เอาลูกน้ำเก่าออกก่อน
-                    const numMatch = rawRate.match(/\d+/g); // ดึงมาเฉพาะตัวเลข
+                    const rawRate = String(p.rate).replace(/,/g, ""); 
+                    const numMatch = rawRate.match(/\d+/g); 
                     if (numMatch) {
                         const numericRate = parseInt(numMatch.join(""), 10);
                         if (numericRate > 0) {
                             displayRate = numericRate.toLocaleString() + " ฿";
                         }
                     } else if (rawRate.toLowerCase() !== "สอบถาม" && rawRate.trim() !== "") {
-                        displayRate = escapeHTML(rawRate); // กรณีเป็นคำพูดอื่นๆ
+                        displayRate = escapeHTML(rawRate); 
                     }
                 }
 
@@ -479,7 +474,7 @@ export default async (request, context) => {
                 const thumbH = 267;
 
                 return `
-            <article class="reveal group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" style="transition-delay: ${animDelay}ms; content-visibility: auto;" aria-label="ดูโปรไฟล์น้อง` + cleanName + `">
+            <article class="reveal group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" style="transition-delay: ${animDelay}ms; content-visibility: auto; contain-intrinsic-size: 200px 335px;" aria-label="ดูโปรไฟล์น้อง` + cleanName + `">
                 <div class="relative h-full flex flex-col z-10">
                     <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[24px]" aria-label="จองน้อง` + cleanName + `">
                         <span class="sr-only">ดูรายละเอียดของน้อง` + cleanName + ` ` + lsiKeyword + `</span>
@@ -495,8 +490,8 @@ export default async (request, context) => {
                     </div>` : ''}
                     
                     <div class="relative aspect-[3/4] overflow-hidden rounded-t-[24px] border-b border-white/[0.06] bg-[#07070a]">
-                        <img src="${optimizeImg(p.imagePath, thumbW, thumbH)}" 
-                             srcset="${optimizeImg(p.imagePath, 200, 267)} 200w, ${optimizeImg(p.imagePath, 400, 533)} 400w"
+                        <img src="${optimizeImg(dynamicDomain, p.imagePath, thumbW, thumbH)}" 
+                             srcset="${optimizeImg(dynamicDomain, p.imagePath, 200, 267)} 200w, ${optimizeImg(dynamicDomain, p.imagePath, 400, 533)} 400w"
                              sizes="(max-width: 640px) 45vw, 200px"
                              width="${thumbW}" 
                              height="${thumbH}"
@@ -518,7 +513,6 @@ export default async (request, context) => {
                             <h3 class="text-[20px] md:text-[22px] font-[700] leading-none tracking-tight flex items-center gap-2 mb-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
                                 ` + cleanName + ` ${ageHtml}
                             </h3>
-                            <!-- ✅ แก้ไข: ตัดคำสถานที่ให้เป็น ... อัตโนมัติ ป้องกันการ์ดยืด (w-full truncate text-ellipsis) -->
                             <p class="text-[12px] font-[400] text-zinc-300 flex items-center gap-1.5 w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                                 <i class="fas fa-location-dot text-[#D4AF37] shrink-0"></i> 
                                 <span class="truncate whitespace-nowrap overflow-hidden text-ellipsis">` + profileLocation + `</span>
@@ -546,7 +540,6 @@ export default async (request, context) => {
             { t: "ข้อมูลลับระดับสูงสุด", d: "ข้อมูลการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
         ];
 
-        // ✅ แก้ไข: เพิ่มช่องไฟ (pt-20 md:pt-28) ให้หน้าเว็บหายใจได้
         const isDefaultZones = !PROVINCE_SEO_DATA[provinceKey];
         const zonesHTML = (seoData.zones && seoData.zones.length > 0 && !isDefaultZones) ? `
             <div class="reveal text-center relative z-10 pt-20 md:pt-28 pb-10">
@@ -558,7 +551,6 @@ export default async (request, context) => {
                 </div>
             </div>` : "";
 
-        // ✅ แก้ไข: เพิ่มช่องไฟ FAQ (pt-20 md:pt-28)
         const faqsHTML = (seoData.faqs && seoData.faqs.length > 0) ? `
             <div class="reveal max-w-3xl mx-auto space-y-4 pb-20 relative z-10 pt-20 md:pt-28">
                 <h2 class="text-2xl md:text-3xl font-[500] text-center mb-10 text-white tracking-wide">คำถามที่พบบ่อย (FAQ)</h2>
@@ -575,10 +567,6 @@ export default async (request, context) => {
                 `).join("")}
             </div>` : "";
 
-        
-        const currentUrl = encodeURIComponent(`${CONFIG.DOMAIN}/${provinceKey}`);
-        const shareText = encodeURIComponent(`รวมน้องๆ สาวสวยไซด์ไลน์ ${provinceName} ฟิวแฟน บริการระดับ VIP ปลอดภัย ไร้มัดจำ 📌`);
-    
         const fullSeoSectionHTML = `
             <section class="py-24 relative overflow-hidden">
                 <div class="max-w-7xl mx-auto px-6 space-y-16 md:space-y-24">
@@ -683,16 +671,9 @@ export default async (request, context) => {
         const htmlTemplate = `<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
-    <script>
-        (function() {
-            var auth = ['sidelinechiangmai.netlify.app', 'localhost', '127.0.0.1'];
-            if (!auth.includes(window.location.hostname)) {
-                document.documentElement.innerHTML = '<div style="background:#07070A;color:#FF2E63;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;"><h1>403 FORBIDDEN</h1></div>';
-                setTimeout(function() { window.location.replace("https://sidelinechiangmai.netlify.app/?ref=stolen_by_" + btoa(window.location.hostname)); }, 1500);
-            }
-        })();
-    </script>
-    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><meta name="theme-color" content="#0f0f0f" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f0f0f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>${title}</title>
@@ -804,28 +785,27 @@ export default async (request, context) => {
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
         #navbar { transition: transform 0.3s ease-in-out; }
-        /* บังคับให้โครงสร้างระดับ Global วิ่งเข้าสู่จุดกึ่งกลางของ Viewport เสมอ */
-body {
-    min-height: 100dvh;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* ดักจับกรณีโครงสร้างหลักหลุดเซนเตอร์ */
-    justify-content: flex-start;
-}
 
-/* ล้างปัญหา Element ลูกหลุดไปชิดซ้ายบนจอขนาดใหญ่ */
-main, id^="app-container", .main-content {
-    width: 100%;
-    max-w: 80rem; /* 1280px */
-    margin-left: auto;
-    margin-right: auto;
-}
-/* ตัวอย่างการปรับสีพื้นหลังให้เด่นชัดขึ้น */
-.fixed.bottom-3.left-4.right-4.md\:hidden.z-\[100\] {
-    background-color: rgba(0, 230, 118, 0.9); /* สีเขียวเข้มขึ้นและมีความทึบสูงขึ้น */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* เงาเพื่อเน้นความลึก */
-}
+        body {
+            min-height: 100dvh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: flex-start;
+        }
+
+        main, .main-content {
+            width: 100%;
+            max-width: 80rem; 
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .fixed.bottom-3.left-4.right-4.md\\:hidden.z-\\[100\\] {
+            background-color: rgba(7, 7, 10, 0.95);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
+        }
     </style>
 </head>
 
@@ -917,13 +897,13 @@ main, id^="app-container", .main-content {
                             <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
                                 <i class="fas fa-search text-white/40 group-focus-within:text-[#FF2E63] transition-colors" aria-hidden="true"></i>
                             </div>
-                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." minlength="2" maxlength="50" required aria-describedby="search-error" class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/20 shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-white/10 transition-all font-[300] placeholder:text-white/40 text-[14px]">
+                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้อง..." minlength="2" maxlength="50" required class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/20 shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-white/10 transition-all font-[300] placeholder:text-white/40 text-[14px]">
                             <div id="search-error" class="text-[#FF416C] text-[12px] mt-2 hidden"></div>
                             <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[600] text-[11px] uppercase tracking-widest hover:opacity-95 active:scale-95 disabled:opacity-50 transition-all btn-shimmer" aria-label="ปุ่มค้นหา">ค้นหา</button>
                         </form>
                     </div>
 
-                                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
                         <a href="#profiles-grid" class="w-full sm:w-auto px-10 py-4 bg-white/95 text-[#07070A] rounded-full font-[600] text-[13px] tracking-widest hover:bg-white transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] uppercase text-center" aria-label="เลื่อนลงไปดูโปรไฟล์">
                             เลือกดูโปรไฟล์
                         </a>
@@ -961,7 +941,7 @@ main, id^="app-container", .main-content {
             </div>
             
             <div id="skeleton-loader" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full justify-center justify-items-center">
-                ${Array(20).fill(`
+                ${Array(15).fill(`
                     <div class="rounded-[24px] overflow-hidden aspect-[3/4] w-full max-w-sm">
                         <div class="w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-white/[0.01] animate-pulse rounded-[24px] border border-white/5"></div>
                     </div>
@@ -979,11 +959,9 @@ main, id^="app-container", .main-content {
 
     </main>
 
-    <!-- ✅ แก้ไข: เพิ่ม Padding ล่าง (pb-[110px]) ให้พ้นจาก Mobile Bottom Nav -->
     <footer class="bg-[#030305] py-16 md:py-24 text-center border-t border-white/5 relative z-10 pb-[110px] md:pb-24">
         <div class="max-w-4xl mx-auto px-6 relative z-10">
 
-            
             <h2 class="text-2xl md:text-4xl font-[800] text-white mb-10 tracking-tighter uppercase drop-shadow-md">
                 THANK YOU <br> 
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF2E63] to-[#FF8E53]">
@@ -1053,7 +1031,6 @@ ${allProvinces.slice(0, 12).map(p => {
         </ul>
     </nav>
 
-    <!-- CORE JAVASCRIPT: Lazy Load + Animations + Form Validation -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
@@ -1074,7 +1051,7 @@ ${allProvinces.slice(0, 12).map(p => {
                 skeleton.classList.add('hidden');
                 container.classList.remove('hidden');
             }
-        }, 150);
+        }, 120);
 
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
@@ -1165,12 +1142,16 @@ ${allProvinces.slice(0, 12).map(p => {
         return new Response(htmlTemplate, { 
             headers: { 
                 "Content-Type": "text/html; charset=utf-8", 
-                "Cache-Control": `public, max-age=0, s-maxage=${cacheTtlSeconds}, stale-while-revalidate=${staleTtlSeconds}, must-revalidate`
+                "Cache-Control": `public, max-age=0, s-maxage=${cacheTtlSeconds}, stale-while-revalidate=${staleTtlSeconds}, must-revalidate`,
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY"
             } 
         });
 
     } catch (error) {
         console.error("SSR Fatal Error:", error);
-        return buildErrorPage(500, "500 - SYSTEM ERROR", "เกิดข้อผิดพลาดในการประมวลผลบนเซิร์ฟเวอร์ กรุณาติดต่อผู้ดูแลระบบ", []);
+        return buildErrorPage(500, "500 - SYSTEM ERROR", "เกิดข้อผิดพลาดในการประมวลผลบนเซิร์ฟเวอร์ กรุณาติดต่อผู้ดูแลระบบ", [], "");
     }
 };
+
+
