@@ -2,7 +2,7 @@
  * [ SYSTEM BOT RENDERING CORE ]
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE BOT RENDERER
  * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
- * Optimization: AI Crawler Detection, Merchant Policy Fallbacks, Anti-Cloaking Link Alignment
+ * Optimization: AI Crawler Detection, Anti-Cloaking Layout Alignment & Verified Signals, May 2026 Core Update Match
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
@@ -63,10 +63,10 @@ const cleanForJSON = (str) => str ? str.replace(/<[^>]*>?/gm, '').replace(/"/g, 
 
 export default async (request, context) => {
     const url = new URL(request.url);
-    const dynamicDomain = `${url.protocol}//${url.host}`; // รักษาความเป็น dynamic ป้องกันปัญหา URL แตกต่างกันระหว่างการติดตั้งระบบ
+    const dynamicDomain = `${url.protocol}//${url.host}`; // ปรับโดเมน dynamic ซิงค์กับจังหวัดหลัก
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // ขยายขอบเขตการดักจับ Bot ครอบคลุมถึง AI Search Engine Crawlers ยุคใหม่เพื่อเพิ่มโอกาสในผลการจัดอันดับ AI Answers
+    // ดักจับ Bot และ AI Crawler เพื่อประมวลผลเป็นหน้า HTML ตรงจากเซิร์ฟเวอร์
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
     
     if (!isBot) return context.next();
@@ -176,6 +176,12 @@ export default async (request, context) => {
                         "addressRegion": provinceName,
                         "addressCountry": "TH"
                     },
+                    "areaServed": [
+                        {
+                            "@type": "AdministrativeArea",
+                            "name": provinceName
+                        }
+                    ],
                     "sameAs": Object.values(CONFIG.SOCIAL_PROFILES)
                 },
                 {
@@ -240,6 +246,7 @@ export default async (request, context) => {
             ]
         };
 
+        // เพื่อรักษาคุณภาพการเข้าคู่กันอย่างแข็งแกร่ง (Anti-Cloaking Layout) บอทจะเห็นคลาสและการดีไซน์ที่หรูหราแบบเดียวกันกับหน้า User
         const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -270,26 +277,30 @@ export default async (request, context) => {
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
 
+    <!-- ติดตั้ง Stylesheet ระดับ S-Tier ความเร็วสูงโดยไม่ต้องมีขั้นตอนการ Build คอมไพล์ CSS ใดๆ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
     <!-- สำหรับเบราว์เซอร์ทั่วไป -->
-<link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
-<link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+    <link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
 
-<!-- สำหรับ Apple Touch Icon (iPhone/iPad) -->
-<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+    <!-- สำหรับ Apple Touch Icon (iPhone/iPad) -->
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
 
-<!-- สำหรับ Android Manifest -->
-<link rel="manifest" href="/manifest.json">
+    <!-- สำหรับ Android Manifest -->
+    <link rel="manifest" href="/manifest.json">
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-        :root { --p:#f472b6; --s:#34d399; --bg:#0f172a; --card:#1e293b; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
+        :root { --p:#FF2E63; --s:#34d399; --bg:#07070A; --card:#111116; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
-        .container { position: relative; max-width: 500px; margin: 0 auto; background: var(--card); min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.6); }
+        .container { position: relative; max-width: 500px; margin: 0 auto; background: var(--card); min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.6); border-left: 1px solid var(--bw); border-right: 1px solid var(--bw); }
         @media (min-width: 768px) { .container { max-width: 600px; } }
+        
         .fixed-nav { position: absolute; top: 0; left: 0; width: 100%; z-index: 100; background: linear-gradient(to bottom, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.4) 100%); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bw); }
         .nav-content { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 64px; }
         .logo-img { height: 26px; width: auto; filter: brightness(2); opacity: 0.95; }
@@ -314,7 +325,7 @@ export default async (request, context) => {
         .info-label { font-size: 0.85rem; color: var(--p); font-weight: 700; display: block; }
         .info-value { font-size: 1.4rem; font-weight: 900; }
         .description { background: rgba(255,255,255,0.01); border-radius: 1.25rem; padding: 1.5rem; margin: 1.5rem 0; border: 1px solid var(--bw); white-space: pre-line; font-size: 1.05rem; }
-        .btn-line { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--s), #047857); color: #fff; padding: 1.1rem 2rem; border-radius: 3rem; font-weight: 800; font-size: 1.2rem; text-decoration: none; width: 100%; box-shadow: 0 12px 32px rgba(16,185,129,0.3); transition: all 0.25s ease; }
+        .btn-line { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--p), #db2777); color: #fff; padding: 1.1rem 2rem; border-radius: 3rem; font-weight: 800; font-size: 1.2rem; text-decoration: none; width: 100%; box-shadow: 0 12px 32px rgba(255,46,99,0.3); transition: all 0.25s ease; }
         .pricing-section { margin: 2rem 0; background: rgba(0,0,0,0.2); border-radius: 1.25rem; padding: 1.5rem; border: 1px solid var(--bw); }
         .pricing-title { color: var(--p); text-align: center; font-weight: 800; font-size: 1.2rem; margin-bottom: 1.25rem; }
         .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center; }
@@ -336,6 +347,99 @@ export default async (request, context) => {
         .footer { text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--bw); margin-top: 3.5rem; color: var(--muted); font-size: 0.85rem; }
         .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
         .footer-nav a { color: var(--muted); text-decoration: underline; }
+/* ปรับระยะขอบหน้าจอสำหรับ Mobile Standalone (PWA) ป้องกันหน้าจอโค้งบดบัง */
+body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+    body {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+}
+
+/* สร้างภาพเม็ดทรายจำลองพรีเมียม (SVG Luxury Noise Overlay) ปิดทับระนาบหลัง */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0.015; /* ค่าความชัดเจนของเม็ดทรายที่เนียนตากำลังดี */
+    pointer-events: none;
+    z-index: 9999; /* อยู่บนสุดเพื่อเพิ่มพื้นผิวสัมผัสให้กับรูปภาพและการ์ด */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* อัปเกรดเอฟเฟกต์ Glassmorphism แบบมีมิติสะท้อนขอบบนแสงเงา (Specular Highlights) */
+.glass-panel {
+    background: rgba(10, 10, 15, 0.45);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.05), /* สะท้อนแสงขอบบนขรุขระบางๆ */
+        0 10px 30px -10px rgba(0, 0, 0, 0.7);
+}
+
+/* ระบบอนิมชันการ์ดโปรไฟล์แบบสปริงดีด (Elastic Spring Hover Physics) */
+article.reveal {
+    will-change: transform, opacity;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                box-shadow 0.4s ease, 
+                border-color 0.4s ease;
+}
+
+article.reveal:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 46, 99, 0.25);
+    box-shadow: 
+        0 20px 40px -10px rgba(255, 46, 99, 0.15),
+        0 0 20px 1px rgba(255, 46, 99, 0.05);
+}
+
+/* อัปเกรดระบบ Skeleton Loader ให้มีความเคลื่อนไหวจำลองแสงสะท้อนกวาดผ่านระดับการ์ดจอ (Shimmering Sweeps) */
+@keyframes shimmerSweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+#skeleton-loader div {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #111116 25%, #1a1a24 50%, #111116 75%);
+    background-size: 200% 100%;
+    animation: shimmerLoading 1.5s infinite linear;
+}
+
+@keyframes shimmerLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* แม่เหล็กและชิมเมอร์บนปุ่ม Call To Action (Magnetic Line Contact Button) */
+.btn-line-glow {
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-line-glow:hover {
+    transform: scale(1.04);
+}
+
+.btn-line-glow::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: 0.5s;
+}
+
+.btn-line-glow:hover::before {
+    left: 100%;
+    transition: 0.6s ease-in-out;
+}
     </style>
 </head>
 <body>
@@ -349,7 +453,8 @@ export default async (request, context) => {
 
         <nav aria-label="breadcrumb" class="breadcrumb">
             <a href="/">หน้าแรก</a> &raquo; 
-            <a href="${correctProvinceUrl}">ไซด์ไลน์${provinceName}</a> &raquo; 
+            <!-- ✅ ปรับแต่งโครงสร้าง Anchor Text ของลิงก์กลับเพื่อช่วยทำอันดับแบบเฉพาะเจาะจง -->
+            <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${provinceName} ทั้งหมดที่ผ่านการยืนยันตัวตน</a> &raquo; 
             <span>น้อง${displayName}</span>
         </nav>
 
@@ -453,7 +558,7 @@ export default async (request, context) => {
         return new Response(html, {
             headers: {
                 "Content-Type": "text/html; charset=utf-8",
-                "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=3600",
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600", // ปรับปรุงการแคชหน้าโปรไฟล์รายบุคคลตามคำแนะนำเพื่อลดการคิวรีฐานข้อมูล Supabase
                 "X-Content-Type-Options": "nosniff",
                 "X-Frame-Options": "DENY",
                 "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
