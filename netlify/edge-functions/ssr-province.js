@@ -700,6 +700,18 @@ export default async (request, context) => {
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" as="style" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" media="print" onload="this.media='all'" />
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" fetchpriority="high" />
+<!-- สำหรับเบราว์เซอร์ทั่วไป -->
+<link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
+<link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+
+<!-- สำหรับ Apple Touch Icon (iPhone/iPad) -->
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+
+<!-- สำหรับ Android Manifest -->
+<link rel="manifest" href="/manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -828,7 +840,7 @@ export default async (request, context) => {
 
             <div class="flex items-center gap-3">
                 <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 glass-panel text-white px-6 py-2.5 rounded-full text-[11px] font-[600] tracking-widest hover:bg-white/10 hover:scale-105 transition-all duration-300 btn-shimmer border border-white/10" aria-label="ติดต่อแอดมินทางไลน์">
-                    <i class="fab fa-line text-[#00E676] text-sm" aria-hidden="true"></i> จองคิวตอนนี้
+                    <i class="fab fa-line text-[#00E676] text-sm" aria-hidden="true"></i> จองคิวตอนนี้😍
                 </a>
 
                 <button id="menu-btn" aria-label="เปิดเมนู" aria-expanded="false" class="md:hidden flex items-center justify-center w-10 h-10 text-white glass-panel rounded-full hover:bg-white/10 active:scale-95 transition-all border border-white/5">
