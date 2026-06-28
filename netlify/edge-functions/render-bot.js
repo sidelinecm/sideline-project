@@ -276,6 +276,7 @@ export default async (request, context) => {
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
+    <meta name="google-site-verification" content="7jnWDzrGXlGDdrjl2M75rIPhsjZbTRuzQSdPJ8c_lz4" />
 
     <!-- แก้ไขปัญหาการยุบตัวของความกว้างรูปภาพโปรไฟล์ผ่านเสิร์ชบอท โดยดึง Tailwind v3 กลับมาใช้คู่กัน -->
     <script src="https://cdn.tailwindcss.com"></script>

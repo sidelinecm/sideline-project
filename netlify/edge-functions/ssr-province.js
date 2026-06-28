@@ -694,6 +694,7 @@ export default async (request, context) => {
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
     <link rel="canonical" href="${provinceUrl}" />
     <link rel="alternate" hreflang="th-TH" href="${provinceUrl}" />
+    <meta name="google-site-verification" content="7jnWDzrGXlGDdrjl2M75rIPhsjZbTRuzQSdPJ8c_lz4" />
     
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}" />
     <meta property="og:type" content="website" />
@@ -712,6 +713,7 @@ export default async (request, context) => {
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" as="style" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" media="print" onload="this.media='all'" />
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" fetchpriority="high" />
+    
 
     <!-- เพื่อแก้ปัญหารูปลักษณ์พังบนสมาร์ทโฟน ดึงขุมพลังการคอมไพล์คลาส v3 JIT กลับมาทำงานทันที -->
     <script src="https://cdn.tailwindcss.com"></script>
