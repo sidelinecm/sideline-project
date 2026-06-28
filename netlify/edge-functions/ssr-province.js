@@ -1,10 +1,11 @@
 
+
 /**
  * [ SYSTEM CORE ]
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE NEO-LUXURY NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, Conversion UI/UX & Entity Engineering
- * Optimization: Production Static CDN, Zero Compile CSS, SGE-AEO Answer Architecture, Geo-Entity Schema
+ * Optimization: Production Play CDN, Zero Compile CSS, SGE-AEO Answer Architecture, Geo-Entity Schema
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -19,7 +20,7 @@ const CONFIG = {
     ALLOWED_DOMAINS: ["sidelinechiangmai.netlify.app", "localhost", "127.0.0.1"],
     BRAND_NAME: "SIDELINE CHIANGMAI",
     TWITTER: "@sidelinechiangmai",
-    DESCRIPTION: "แหล่งรวมน้องๆสาวๆ รับงานไซด์ไลน์ ฟิวแฟนเด็กเอ็นที่บริการ ระดับVIP ที่ตรวจสอบแล้วว่าตรงปกทั่วประเทศไทย รับประกันปลอดภัย ตรงปกฟิวแฟน100% บริการประทับใจ ไม่มีโอนมัดจำก่อนเจอตัวจริง📌",
+    DESCRIPTION: "แหล่งรวมน้องๆสาวๆ รับงานไซด์ไลน์ ฟิวแฟนเด็กเอ็นที่บริการ ระดับพรีเมียม ที่ตรวจสอบแล้วว่าตรงปกทั่วประเทศไทย รับประกันปลอดภัย ตรงปกฟิวแฟน100% บริการประทับใจ ไม่มีโอนมัดจำก่อนเจอตัวจริง📌",
     PHONE: "091-7895644",
     SOCIAL_LINKS: {
         line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -42,7 +43,7 @@ const PROVINCE_SEO_DATA = {
         zones: ["นิมมาน", "สันติธรรม", "ช้างเผือก", "เจ็ดยอด", "แม่โจ้", "หางดง", "สันทราย", "รวมโชค", "คูเมือง", "หลังมอ"],
         lsi: ["รับงานเชียงใหม่", "สาวไซด์ไลน์เชียงใหม่", "sideline เชียงใหม่", "ไซต์ไลน์เชียงใหม่", "ไซไลเชียงใหม่", "นางแบบสาวเหนือ", "เพื่อนเที่ยวเชียงใหม่", "เด็กเอ็นเชียงใหม่"],
         uniqueIntro: `
-            <p class="mb-4"><strong>ไซด์ไลน์เชียงใหม่</strong> คือ บริการเพื่อนเที่ยวนางแบบ และเด็กเอ็นเตอร์เทน (N-VIP) ในพื้นที่จังหวัดเชียงใหม่ที่เน้นการดูแลแบบฟิวแฟน (Girlfriend Experience) ปลอดภัย 100% นัดเจอตัวจริงเพื่อชำระเงินหน้างานโดยไม่มีเงื่อนไขโอนมัดจำล่วงหน้าทุกกรณี</p>
+            <p class="mb-4"><strong>ไซด์ไลน์เชียงใหม่</strong> คือ บริการเพื่อนเที่ยวนางแบบ และเด็กเอ็นเตอร์เทนระดับพรีเมียม ในพื้นที่จังหวัดเชียงใหม่ที่เน้นการดูแลแบบฟิวแฟน (Girlfriend Experience) ปลอดภัย 100% นัดเจอตัวจริงเพื่อชำระเงินหน้างานโดยไม่มีเงื่อนไขโอนมัดจำล่วงหน้าทุกกรณี</p>
             <p class="mb-4">เราพร้อมให้บริการครอบคลุมทุกโซนสำคัญเพื่อความสะดวกในการนัดหมาย ไม่ว่าจะเป็นการเดินเล่นพักผ่อนย่าน <strong>ถนนนิมมานเหมินท์</strong>, คุยงานสไตล์พูลวิลล่าส่วนตัวแถบ <strong>แม่ริม และหางดง</strong>, หรือความเป็นส่วนตัวสูงตามคอนโดพรีเมียมย่าน <strong>เจ็ดยอด และสันติธรรมพลาซ่า</strong> ตลอดจนสันทรายและแถบมหาวิทยาลัยแม่โจ้ ใกล้ห้างสรรพสินค้า MAYA และมหาวิทยาลัยเชียงใหม่ (มช.)</p>
             <p>โปรไฟล์น้องๆ ทุกคนได้รับการตรวจสอบประวัติและถ่ายภาพยืนยันตัวตนว่าตรงปก เพื่อให้คุณได้รับประสบการณ์พักผ่อนอย่างอบอุ่นและเป็นส่วนตัวสูงที่สุดในค่ำคืนนี้อย่างสบายใจ</p>
         `,
@@ -58,12 +59,12 @@ const PROVINCE_SEO_DATA = {
         zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "สาทร", "สีลม", "ทองหล่อ", "เอกมัย", "ปิ่นเกล้า", "บางนา", "เลียบด่วน"],
         lsi: ["รับงานกรุงเทพ", "ไซด์ไลน์ กทม", "สาวไซด์ไลน์กรุงเทพ", "sideline bkk", "พริตตี้ กทม.", "เด็กเอ็นพรีเมียม", "เพื่อนเที่ยวส่วนตัว", "นางแบบรับงาน"],
         uniqueIntro: `
-            <p class="mb-4"><strong>ไซด์ไลน์กรุงเทพ (ไซด์ไลน์ กทม.)</strong> คือ แหล่งรวมพริตตี้ นางแบบอิสระ และน้องๆ นักศึกษาพาร์ทไทม์รับงานส่วนตัวในเขตกรุงเทพมหานคร เน้นงานบริการดูแลฟิวแฟน (Girlfriend Experience) ระดับ VIP รูปตรงปกจริง และปลอดภัยสูงสุดด้วยระบบจ่ายเงินหน้างานไร้มัดจำ</p>
+            <p class="mb-4"><strong>ไซด์ไลน์กรุงเทพ (ไซด์ไลน์ กทม.)</strong> คือ แหล่งรวมพริตตี้ นางแบบอิสระ และน้องๆ นักศึกษาพาร์ทไทม์รับงานส่วนตัวในเขตกรุงเทพมหานคร เน้นงานบริการดูแลฟิวแฟน (Girlfriend Experience) ระดับพรีเมียม รูปตรงปกจริง และปลอดภัยสูงสุดด้วยระบบจ่ายเงินหน้างานไร้มัดจำ</p>
             <p class="mb-4">สะดวกสบายด้วยทำเลที่ตั้งครอบคลุมจุดแลนด์มาร์กสำคัญทั่วกรุง ตั้งแต่ย่านธุรกิจใจกลางเมืองอย่าง <strong>สุขุมวิท, ทองหล่อ, เอกมัย, สาทร และสีลม</strong> ไปจนถึงทำเลยอดนิยมของสายบันเทิงอย่าง <strong>รัชดา-ห้วยขวาง</strong> ตลอดจนย่านลาดพร้าว ปิ่นเกล้า และบางนา นัดพบคอนโดหรูและโรงแรมห้าดาว ใกล้สถานีรถไฟฟ้า BTS และ MRT เดินทางนัดหมายสะดวกรวดเร็ว</p>
             <p>มั่นใจได้ในระบบบริการที่เป็นส่วนตัวสูงสุด ปราศจากขั้นตอนการโกงเงินโอนมัดจำ คัดเฉพาะตัวท็อปเพื่องานสังสรรค์ ปาร์ตี้ หรือการพักผ่อนอย่างอบอุ่นสูงสุดของคุณ</p>
         `,
         faqs: [
-            { q: "น้องๆ รับงานกรุงเทพ ส่วนใหญ่สะดวกสแตนด์บายแถวไหนบ้าง?", a: "ย่านที่มีน้องๆ ประจำการอยู่หนาแน่นที่สุดคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งเป็นย่านคอนโดมิเนียมหรูและเดินทางด้วยรถไฟฟ้าได้รวดเร็ว" },
+            { q: "น้องๆ รับงานกรุงเทพ ส่วนใหญ่สะดวกสแตนด์บายแถวไหนบ้าง?", a: "ย่านที่มีน้องๆ ประจำการอยู่หนาแน่นที่สุดคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งเป็นย่านคอนโดมิเนียมหรูและเดินทางด้วยรถไฟฟ้า BTS และ MRT" },
             { q: "เรียกเด็กเอ็น หรือ สาวไซด์ไลน์ กทม. ต้องโอนมัดจำล่วงหน้าก่อนไหม?", a: "ไม่มีนโยบายการเก็บเงินมัดจำล่วงหน้าทุกกรณีครับ เพื่อความปลอดภัยของลูกค้ากทม. จะเป็นการจ่ายเงินสดหรือโอนชำระหน้างานหลังเจอตัวน้องตรงปกแล้วเท่านั้น" }
         ]
     },
@@ -104,7 +105,7 @@ const PROVINCE_SEO_DATA = {
         lsi: ["รับงานขอนแก่น", "ไซด์ไลน์ขอนแก่น", "สาวไซด์ไลน์ขอนแก่น", "sideline ขอนแก่น", "เด็กเอ็นขอนแก่น", "นักศึกษาขอนแก่น"],
         uniqueIntro: `
             <p class="mb-4"><strong>ไซด์ไลน์ขอนแก่น</strong> คือ ศูยน์รวมน้องๆ นักศึกษาพาร์ทไทม์หน้าตาน่ารักและพริตตี้สไตล์แซ่บซนในจังหวัดขอนแก่น คัดเฉพาะผู้ที่มีความจริงใจ มารยาทการดูแลดี และมีระบบป้องกันความปลอดภัยสูงสุดด้วยข้อตกลงเจอตัวจริงเพื่อชำระค่าขนมโดยไม่ต้องโอนเงินจองก่อน</p>
-            <p class="mb-4">พร้อมส่งมอบความผ่อนคลายในย่านเด่นของเมืองขอนแก่น ไม่ว่าจะเป็นทำเลใกล้มหาวิทยาลัยขอนแก่นแถบ <strong>กังสดาล, หลัง มข., โนนม่วง</strong> หรือคอนโดมิเนียมใกล้ห้างดังแถว <strong>เซ็นทรัลพลาซ่าขอนแก่น และโรงแรมวิวสวยแถบบึงแก่นนคร</strong> ยินดีดูแลฟีลแฟนอย่างใกล้ชิดและให้เกียรติลูกค้าสูงสุด</p>
+            <p class="mb-4">พื้นที่ให้บริการครอบคลุมทำเลฮิตหลัก ไม่ว่าจะเป็นย่านมหาวิทยาลัยชื่อดังอย่าง <strong>กังสดาล, หลัง มข., โนนม่วง</strong> หรือคอนโดมิเนียมใกล้ห้างดังแถว <strong>เซ็นทรัลพลาซ่าขอนแก่น และโรงแรมวิวสวยแถบบึงแก่นนคร</strong> ยินดีดูแลฟีลแฟนอย่างใกล้ชิดและให้เกียรติลูกค้าสูงสุด</p>
             <p>ตอบโจทย์ทั้งการจัดปาร์ตี้ส่วนตัวหรือหาคนรู้ใจเดินทางไปกินเที่ยว ยืนยันข้อมูลโปรไฟล์ตรงปกไม่ผ่านการตกแต่งเกินจริง เพื่อค่ำคืนที่แสนสุขใจของคุณ</p>
         `,
         faqs: [
@@ -135,7 +136,7 @@ const PROVINCE_SEO_DATA = {
         uniqueIntro: `
             <p class="mb-4"><strong>ไซด์ไลน์พิษณุโลก</strong> คือ บริการเพื่อนเทียวนางแบบอิสระ และน้องนักศึกษาพาร์ทไทม์ มหาวิทยาลัยนเรศวร (มน.) ที่รับงานส่วนตัวในเมืองสองแคว เน้นการดูแลประทับใจ ฟีลคู่รักหวานพูดเพราะ และปลอดภัยสูงสุดด้วยระบบนัดเจอตัวชำระเงินหน้างานไม่มีการเรียกมัดจำ</p>
             <p class="mb-4">เลือกนัดพบน้องๆ ได้ตามพิกัดยอดนิยม เช่น คอนโดหรูใกล้มหาวิทยาลัย <strong>ม.นเรศวร (มน.)</strong>, ย่านช้อปปิ้งใจกลางเมืองแถว <strong>เซ็นทรัลพลาซ่าพิษณุโลก</strong> ตลอดจนที่พักริมแม่น้ำสายหลักแถบ <strong>ริมน้ำน่าน</strong> ยินดีควงแขน ทานข้าว ช้อปปิ้ง หรือพูดคุยคลายเครียดในมุมส่วนตัวอย่างเป็นส่วนตัวสูงสุด</p>
-            <p>คัดกรองคุณภาพมารยาทและการใส่ใจบริการระดับ VIP รูปตรงปกไม่ดึงภาพฟิลเตอร์ลวงตา เพื่อให้ผู้ใช้บริการมั่นใจในความถูกต้องโปร่งใสสูงสุด</p>
+            <p>คัดกรองคุณภาพมารยาทและการใส่ใจบริการระดับพรีเมียม รูปตรงปกไม่ดึงภาพฟิลเตอร์ลวงตา เพื่อให้ผู้ใช้บริการมั่นใจในความถูกต้องโปร่งใสสูงสุด</p>
         `,
         faqs: [
             { q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดหมายยากไหมและสะดวกเวลาใด?", a: "โซน ม.นเรศวร (มน.) มีน้องๆ นักศึกษาพาร์ทไทม์พร้อมบริการหนาแน่นที่สุด สามารถจองและนัดพบตามโรงแรมหรือหอพักใกล้เคียงได้อย่างสะดวกรวดเร็วเกือบตลอดทั้งวัน" },
@@ -148,7 +149,7 @@ const PROVINCE_SEO_DATA = {
         zones: ["ตัวเมือง", "พื้นที่ใกล้เคียง"],
         lsi: ["รับงานส่วนตัว", "สาวไซด์ไลน์", "sideline พรีเมียม", "เพื่อนเที่ยว", "เด็กเอ็น", "นักศึกษาพาร์ทไทม์", "สาวสวยตรงปก", "ดูแลฟิวแฟน"],
         uniqueIntro: `
-            <p class="mb-4"><strong>บริการรับงานสาวไซด์ไลน์</strong> และเพื่อนเที่ยว VIP เกรดพรีเมียมคัดคุณภาพทั่วประเทศไทย รวบรวมน้องๆ ที่มีใจรักงานบริการ มารยาทเรียบร้อย และเอาใจใส่ดูแลดั่งคู่รักข้างกาย ปลอดภัยมั่นใจได้จริง 100% ด้วยเงื่อนไขการนัดพบหน้างานแล้วค่อยจ่ายเงิน</p>
+            <p class="mb-4"><strong>บริการรับงานสาวไซด์ไลน์</strong> และเพื่อนเที่ยวเกรดพรีเมียมคัดคุณภาพทั่วประเทศไทย รวบรวมน้องๆ ที่มีใจรักงานบริการ มารยาทเรียบร้อย และเอาใจใส่ดูแลดั่งคู่รักข้างกาย ปลอดภัยมั่นใจได้จริง 100% ด้วยเงื่อนไขการนัดพบหน้างานแล้วค่อยจ่ายเงิน</p>
             <p class="mb-4">น้องๆ ของเราพร้อมทำหน้าที่ดูแลอย่างใกล้ชิดตามจุดสำคัญในเขต <strong>ตัวเมือง และพื้นที่ใกล้เคียง</strong> ทั่วประเทศ ไม่ว่าเป้าหมายของคุณคือการนัดดินเนอร์ ไปเที่ยวคาเฟ่ หรือมองหาเพื่อนร่วมปาร์ตี้เอนเตอร์เทนส่วนตัว ยินดีร่วมสร้างความประทับใจเคียงข้างคุณเสมอ</p>
             <p>เรารักษาข้อมูลส่วนบุคคลของลูกค้าเป็นความลับระดับสูงสุด รูปภาพทุกคนตรวจสอบสิทธิ์แล้วตรงปก ปราศจากขั้นตอนการบังคับโอนค่ามัดจำล่วงหน้าให้เสี่ยงต่อการโดนหลอก</p>
         `,
@@ -352,7 +353,7 @@ export default async (request, context) => {
             : `${dynamicDomain}/images/hero-sidelinechiangmai-1200.webp`;
 
         const title = "ไซด์ไลน์" + provinceName + " รับงาน" + provinceName + " พรีเมียม (" + CURRENT_MONTH + " " + CURRENT_YEAR + ") | ตรงปก ปลอดภัย 100%";
-        const description = "รวมโปรไฟล์ ตัวท็อป! ไซด์ไลน์" + provinceName + " รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP " + safeProfiles.length + " คน โซน " + seoData.zones.slice(0, 3).join(', ') + " ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด";
+        const description = "รวมโปรไฟล์ ตัวท็อป! ไซด์ไลน์" + provinceName + " รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับพรีเมียม " + safeProfiles.length + " คน โซน " + seoData.zones.slice(0, 3).join(', ') + " ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด";
         const cleanDescription = stripHTML(description);
         
         const deterministicRating = safeProfiles.length > 0 ? (4.5 + (safeProfiles.length % 5) / 10).toFixed(1) : "4.5";
@@ -381,7 +382,7 @@ export default async (request, context) => {
             {
                 "@type": ["LocalBusiness", "EntertainmentBusiness"],
                 "@id": `${provinceUrl}/#localbusiness`,
-                "name": "ไซด์ไลน์" + provinceName + " บริการรับงานและเด็กเอ็น VIP",
+                "name": "ไซด์ไลน์" + provinceName + " บริการรับงานและเด็กเอ็นเตอร์เทนระดับพรีเมียม",
                 "image": firstImage,
                 "telephone": CONFIG.PHONE,
                 "url": provinceUrl,
@@ -507,7 +508,7 @@ export default async (request, context) => {
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                         </span>
-                        <i class="fas fa-crown text-[8.5px] animate-bounce"></i> VIP
+                        <i class="fas fa-star text-[8.5px] animate-bounce"></i> TOP
                     </div>` : ''}
                     
                     <div class="relative aspect-[3/4] overflow-hidden rounded-t-[24px] border-b border-white/[0.06] bg-[#07070a]">
@@ -522,7 +523,7 @@ export default async (request, context) => {
                              
                         <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/20 to-transparent opacity-95 transition-opacity duration-500 z-10"></div>
                         
-                        <!-- VIP Verified & Status Badges (Conversion Boosters) -->
+                        <!-- Verified & Status Badges (Conversion Boosters) -->
                         <div class="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
                             <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/10 shadow-lg">
                                 <span class="relative flex h-2.5 w-2.5">
@@ -562,7 +563,7 @@ export default async (request, context) => {
             .join("");
 
         const termsAndConditions = [
-            { t: "การจองคิวน้องๆ ส่วนตัว", d: "เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน" + escapeHTML(provinceName) + " สมาชิกจองได้ครั้งละ 1 คิว เพื่อรักษามาตรฐาน VIP" },
+            { t: "การจองคิวน้องๆ ส่วนตัว", d: "เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน" + escapeHTML(provinceName) + " สมาชิกจองได้ครั้งละ 1 คิว เพื่อรักษามาตรฐานการบริการ" },
             { t: "ความปลอดภัย 100% ไร้มัดจำ", d: "ชำระเงินหน้างานเมื่อเจอตัวน้องจริงเท่านั้น! หมดปัญหาการโดนหลอกโอนมัดจำ" },
             { t: "การตรวจสอบโปรไฟล์เข้มงวด", d: "รับประกันความตรงปก ไม่ตรงปกยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ" },
             { t: "ข้อมูลลับระดับสูงสุด", d: "ข้อมูลการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
@@ -595,29 +596,12 @@ export default async (request, context) => {
                 `).join("")}
             </div>` : "";
 
+        // ✅ ลบกล่องโปรโมชั่น (Promotion box) ออก และปรับให้กล่องเงื่อนไขขยายสมมาตรเต็มความกว้างอย่างสวยงาม
         const fullSeoSectionHTML = `
             <section class="py-24 relative overflow-hidden">
                 <div class="max-w-7xl mx-auto px-6 space-y-16 md:space-y-24">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch relative z-10">
-                        <div class="reveal relative overflow-hidden rounded-[24px] p-[1px] bg-gradient-to-b from-[#FF2E63]/40 to-transparent group h-full flex flex-col">
-                            <div class="glass-panel p-8 md:p-12 rounded-[24px] relative z-10 flex-1 flex flex-col justify-between h-full bg-[#0a0a0a]/80 backdrop-blur-3xl">
-                                <div class="text-center mb-6">
-                                    <h3 class="text-white text-2xl md:text-3xl font-[500] tracking-wide"><span class="text-[#FF2E63]">VIP</span> PROMOTION</h3>
-                                    <p class="text-zinc-300 text-[13px] mt-2 font-[300]">แจ้งรหัสลับนี้กับแอดมิน เพื่ออัปเกรดเป็นสถานะ Super VIP ทันที</p>
-                                </div>
-                                <div class="relative mt-auto mb-auto py-8">
-                                    <div class="absolute inset-0 bg-gradient-to-r from-[#FF2E63]/10 to-[#FF8E53]/10 blur-xl rounded-full"></div>
-                                    <div class="glass-panel border border-[#FF2E63]/20 bg-black/40 rounded-[20px] p-6 text-center relative flex flex-col items-center justify-center overflow-hidden">
-                                        <span class="text-[10px] text-brand-gold font-[500] uppercase tracking-[0.2em] mb-2"><i class="fas fa-gem mr-1"></i> Exclusive Code</span>
-                                        <div class="w-full overflow-x-auto no-scrollbar flex justify-center pb-2">
-                                            <div class="text-2xl md:text-4xl font-[700] tracking-wider text-gradient-luxury select-all font-mono whitespace-nowrap">VIP-${provinceKey.toUpperCase()}</div>
-                                        </div>
-                                        <span class="inline-block bg-[#FF2E63]/10 border border-[#FF2E63]/20 text-[#FF2E63] px-4 py-1.5 rounded-full text-[9px] font-[500] uppercase tracking-widest mt-4 shrink-0">ใช้ได้วันนี้เท่านั้น</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="reveal h-full flex flex-col">
+                    <div class="max-w-3xl mx-auto relative z-10 w-full">
+                        <div class="reveal h-full flex flex-col w-full">
                             <div class="glass-panel p-8 md:p-10 rounded-[24px] h-full flex-1 bg-[#0a0a0a]/80">
                                 <h2 class="text-2xl font-[500] tracking-wide flex items-center gap-3 text-white mb-8"><i class="fas fa-shield-halved text-gradient-luxury"></i> เงื่อนไขบริการ</h2>
                                 <div class="space-y-4">
@@ -640,8 +624,8 @@ export default async (request, context) => {
                     <div class="reveal relative mt-20 md:mt-28">
                         <div class="glass-panel rounded-[32px] p-8 md:p-16 text-center relative z-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10">
                             <div class="max-w-4xl mx-auto space-y-8 relative z-10">
-                                <div class="w-16 h-16 bg-black/40 border border-white/5 text-[#FF2E63] rounded-full flex items-center justify-center text-2xl mx-auto shadow-[0_10px_30px_rgba(255,46,99,0.2)]"><i class="fas fa-crown"></i></div>
-                                <h2 class="text-3xl md:text-4xl font-[500] tracking-wide leading-tight text-white">ที่สุดของบริการเพื่อนเที่ยว<br><span class="text-gradient-luxury font-[700]">ไซด์ไลน์` + escapeHTML(provinceName) + `</span></h2>
+                                <div class="w-16 h-16 bg-black/40 border border-white/5 text-[#FF2E63] rounded-full flex items-center justify-center text-2xl mx-auto shadow-[0_10px_30px_rgba(255,46,99,0.2)]"><i class="fas fa-gem"></i></div>
+                                <h2 class="text-3xl md:text-4xl font-[500] tracking-wide leading-tight text-white">ที่สุดของบริการเพื่อนเที่ยว<br><span class="text-gradient-luxury font-[700]">ไซด์ไลน์${escapeHTML(provinceName)}</span></h2>
                                 <div class="text-zinc-300 text-[14px] md:text-[15px] font-[300] leading-[1.8] space-y-6 text-left md:text-center px-2">
                                     ${smartLinkify(seoData.uniqueIntro, provinceKey, seoData.zones)}
                                 </div>
@@ -656,7 +640,7 @@ export default async (request, context) => {
                             <h3 class="text-[#8B0000] text-[16px] md:text-[18px] font-[700] mb-2 flex items-center justify-center gap-2 tracking-wide">
                                 ติดตามเราบน Social Media <i class="fas fa-bullhorn text-[#FF2E63]"></i>
                             </h3>
-                            <p class="text-gray-500 text-[13px] font-[400] mb-8">อัปเดตโปรไฟล์ใหม่ล่าสุดและโปรโมชั่นพิเศษได้ก่อนใคร</p>
+                            <p class="text-gray-500 text-[13px] font-[400] mb-8">อัปเดตโปรไฟล์ใหม่ล่าสุดและข้อเสนอพิเศษได้ก่อนใคร</p>
                             
                             <div class="flex flex-wrap justify-center gap-4 md:gap-6 mb-10">
                                 <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
@@ -729,8 +713,26 @@ export default async (request, context) => {
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" media="print" onload="this.media='all'" />
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" fetchpriority="high" />
 
-    <!-- เพื่อตัดปัญหา FOUC และการจัดหน้าเว็บที่เพี้ยนโดยไม่ต้องติดตั้ง build step ใดๆ ดึงสไตล์หลักจาก CDN ความเร็วสูง -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <!-- เพื่อแก้ปัญหารูปลักษณ์พังบนสมาร์ทโฟน ดึงขุมพลังการคอมไพล์คลาส v3 JIT กลับมาทำงานทันที -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            pink: 'var(--brand-pink, #FF2E63)',
+                            gold: 'var(--brand-gold, #FF8E53)',
+                            crimson: 'var(--brand-crimson, #FF416C)',
+                            dark: 'var(--brand-dark, #07070A)',
+                            darker: 'var(--brand-darker, #111116)'
+                        }
+                    },
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
 
     <!-- สำหรับเบราว์เซอร์ทั่วไป -->
     <link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
@@ -758,9 +760,18 @@ export default async (request, context) => {
         }
 
         /* -------------------------------------------------------------
-           [ PRODUCTION-READY V3 CSS UTILITY Fallback Maps for Tailwind v2 ]
-           แก้ไขคลาส JIT ของ v3 ให้ทำงานบน CDN v2 ได้สมบูรณ์แบบโดยไม่ต้อง Build
+           [ ZERO-FOUC PERFORMANCE FIX ]
+           ตั้งค่าเริ่มต้นป้องกันหน้ากระตุกแบบนุ่มนวลระหว่างรอ JIT Compiler ทำงาน
            ------------------------------------------------------------- */
+        body {
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+            font-family: var(--font-prompt);
+        }
+        body.tailwind-ready {
+            opacity: 1;
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(30px);
@@ -798,7 +809,6 @@ export default async (request, context) => {
             padding: 0;
             -webkit-text-size-adjust: 100%;
             overscroll-behavior-y: none;
-            font-family: var(--font-prompt);
         }
 
         body {
@@ -830,100 +840,99 @@ export default async (request, context) => {
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
         }
 
+        /* ปรับระยะขอบหน้าจอสำหรับ Mobile Standalone (PWA) ป้องกันหน้าจอโค้งบดบัง */
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+        }
 
-/* ปรับระยะขอบหน้าจอสำหรับ Mobile Standalone (PWA) ป้องกันหน้าจอโค้งบดบัง */
-body {
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
-}
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+        }
 
-@media (min-width: 768px) {
-    body {
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-}
+        /* สร้างภาพเม็ดทรายจำลองพรีเมียม (SVG Luxury Noise Overlay) ปิดทับระนาบหลัง */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.015; /* ค่าความชัดเจนของเม็ดทรายที่เนียนตากำลังดี */
+            pointer-events: none;
+            z-index: 9999; /* อยู่บนสุดเพื่อเพิ่มพื้นผิวสัมผัสให้กับรูปภาพและการ์ด */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
 
-/* สร้างภาพเม็ดทรายจำลองพรีเมียม (SVG Luxury Noise Overlay) ปิดทับระนาบหลัง */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    opacity: 0.015; /* ค่าความชัดเจนของเม็ดทรายที่เนียนตากำลังดี */
-    pointer-events: none;
-    z-index: 9999; /* อยู่บนสุดเพื่อเพิ่มพื้นผิวสัมผัสให้กับรูปภาพและการ์ด */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
+        /* อัปเกรดเอฟเฟกต์ Glassmorphism แบบมีมิติสะท้อนขอบบนแสงเงา (Specular Highlights) */
+        .glass-panel {
+            background: rgba(10, 10, 15, 0.45);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.05), /* สะท้อนแสงขอบบนขรุขระบางๆ */
+                0 10px 30px -10px rgba(0, 0, 0, 0.7);
+        }
 
-/* อัปเกรดเอฟเฟกต์ Glassmorphism แบบมีมิติสะท้อนขอบบนแสงเงา (Specular Highlights) */
-.glass-panel {
-    background: rgba(10, 10, 15, 0.45);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    box-shadow: 
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.05), /* สะท้อนแสงขอบบนขรุขระบางๆ */
-        0 10px 30px -10px rgba(0, 0, 0, 0.7);
-}
+        /* ระบบอนิมชันการ์ดโปรไฟล์แบบสปริงดีด (Elastic Spring Hover Physics) */
+        article.reveal {
+            will-change: transform, opacity;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        box-shadow 0.4s ease, 
+                        border-color 0.4s ease;
+        }
 
-/* ระบบอนิมชันการ์ดโปรไฟล์แบบสปริงดีด (Elastic Spring Hover Physics) */
-article.reveal {
-    will-change: transform, opacity;
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                box-shadow 0.4s ease, 
-                border-color 0.4s ease;
-}
+        article.reveal:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(255, 46, 99, 0.25);
+            box-shadow: 
+                0 20px 40px -10px rgba(255, 46, 99, 0.15),
+                0 0 20px 1px rgba(255, 46, 99, 0.05);
+        }
 
-article.reveal:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: rgba(255, 46, 99, 0.25);
-    box-shadow: 
-        0 20px 40px -10px rgba(255, 46, 99, 0.15),
-        0 0 20px 1px rgba(255, 46, 99, 0.05);
-}
+        /* อัปเกรดระบบ Skeleton Loader ให้มีความเคลื่อนไหวจำลองแสงสะท้อนกวาดผ่านระดับการ์ดจอ (Shimmering Sweeps) */
+        @keyframes shimmerSweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
 
-/* อัปเกรดระบบ Skeleton Loader ให้มีความเคลื่อนไหวจำลองแสงสะท้อนกวาดผ่านระดับการ์ดจอ (Shimmering Sweeps) */
-@keyframes shimmerSweep {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
+        #skeleton-loader div {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(90deg, #111116 25%, #1a1a24 50%, #111116 75%);
+            background-size: 200% 100%;
+            animation: shimmerLoading 1.5s infinite linear;
+        }
 
-#skeleton-loader div {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(90deg, #111116 25%, #1a1a24 50%, #111116 75%);
-    background-size: 200% 100%;
-    animation: shimmerLoading 1.5s infinite linear;
-}
+        @keyframes shimmerLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
 
-@keyframes shimmerLoading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
+        /* แม่เหล็กและชิมเมอร์บนปุ่ม Call To Action (Magnetic Line Contact Button) */
+        .btn-line-glow {
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
 
-/* แม่เหล็กและชิมเมอร์บนปุ่ม Call To Action (Magnetic Line Contact Button) */
-.btn-line-glow {
-    position: relative;
-    overflow: hidden;
-    will-change: transform;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+        .btn-line-glow:hover {
+            transform: scale(1.04);
+        }
 
-.btn-line-glow:hover {
-    transform: scale(1.04);
-}
+        .btn-line-glow::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: 0.5s;
+        }
 
-.btn-line-glow::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%; width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-    transition: 0.5s;
-}
-
-.btn-line-glow:hover::before {
-    left: 100%;
-    transition: 0.6s ease-in-out;
-}
+        .btn-line-glow:hover::before {
+            left: 100%;
+            transition: 0.6s ease-in-out;
+        }
     </style>
 </head>
 
@@ -940,7 +949,7 @@ article.reveal:hover {
 
             <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
                 <a href="/" class="hover:text-white transition-all duration-300 hover:tracking-wide">หน้าแรก</a>
-                <a href="/profiles.html" class="text-white border-b-2 border-[#FF2E63] pb-1 tracking-wide" aria-current="page">โปรไฟล์น้องๆ</a>
+                <a href="/profiles.html" class="text-white border-b-2 border-[#FF2E63] pb-1 tracking-wide" aria-current="page">โปรไฟล์น้องๆ ตัวท็อป</a>
                 <a href="/locations.html" class="hover:text-white transition-all duration-300 hover:tracking-wide">พิกัดบริการ</a>
             </nav>
 
@@ -966,7 +975,7 @@ article.reveal:hover {
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-2">
             <a href="/" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-home w-5 text-center text-[#FF2E63]"></i> หน้าแรก</a>
-            <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-[500] bg-white/5 border border-white/10 rounded-lg text-[14px]"><i class="fas fa-gem w-5 text-center text-[#FF2E63]"></i> น้องๆ VIP</a>
+            <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-[500] bg-white/5 border border-white/10 rounded-lg text-[14px]"><i class="fas fa-gem w-5 text-center text-[#FF2E63]"></i> น้องๆ แนะนำตัวท็อป</a>
             <a href="/locations.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-map-marker-alt w-5 text-center text-[#FF2E63]"></i> พิกัดบริการ</a>
             <a href="/about.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-info-circle w-5 text-center text-[#FF2E63]"></i> เกี่ยวกับเรา</a>
             <a href="/faq.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-question-circle w-5 text-center text-[#FF2E63]"></i> คำถามพบบ่อย</a>
@@ -994,7 +1003,7 @@ article.reveal:hover {
 
                 <div class="reveal relative w-full max-w-5xl mx-auto mb-16 group active px-2 sm:px-0">
                     <div class="aspect-[16/9] md:aspect-[21/9] rounded-3xl overflow-hidden glass-panel relative shadow-[0_0_50px_rgba(255,46,99,0.15)] bg-[#07070a] border border-white/5">
-                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์` + escapeHTML(provinceName) + ` รับงาน` + escapeHTML(provinceName) + ` ระดับ VIP" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.02] opacity-80" fetchpriority="high">
+                        <img src="/images/hero-sidelinechiangmai-1200.webp" srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" alt="รวมน้องๆ ไซด์ไลน์` + escapeHTML(provinceName) + ` รับงาน` + escapeHTML(provinceName) + ` ระดับพรีเมียม" class="w-full h-full object-cover transform transition-transform duration-[4s] group-hover:scale-[1.02] opacity-80" fetchpriority="high">
                         <div class="absolute inset-0 bg-gradient-to-t from-[#07070A] via-transparent to-transparent pointer-events-none"></div>
                         <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.01] to-transparent pointer-events-none"></div>
                     </div>
@@ -1006,7 +1015,7 @@ article.reveal:hover {
                         รับงานฟิวแฟน ตัวท็อป
                     </h1>
                     <p class="text-white/70 text-[13px] md:text-[16px] font-[300] mb-2 max-w-2xl mx-auto leading-relaxed px-4">
-                        ค้นหาน้องๆ <strong>รับงาน` + escapeHTML(provinceName) + `</strong> เด็กเอ็นเตอร์เทน (N-VIP) บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
+                        ค้นหาน้องๆ <strong>รับงาน` + escapeHTML(provinceName) + `</strong> เด็กเอ็นเตอร์เทน บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
                     </p>
 
                     <!-- Urgency UX (Scarcity Demand Signal) -->
@@ -1104,7 +1113,7 @@ article.reveal:hover {
             <nav class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal max-w-2xl mx-auto" aria-label="ลิงก์ไปยังพื้นที่รับงานอื่นๆ">
 ${allProvinces.slice(0, 12).map(p => {
     const linkHref = p.key === 'chiangmai' ? "/" : `/location/${p.key}`;
-    return `<a href="${linkHref}" class="text-[12px] font-[300] text-white/50 hover:text-white transition-all py-2 border border-transparent hover:border-white/10 rounded-lg glass-panel">ไซด์ไลน์${escapeHTML(p.nameThai)} VIP</a>`;
+    return `<a href="${linkHref}" class="text-[12px] font-[300] text-white/50 hover:text-white transition-all py-2 border border-transparent hover:border-white/10 rounded-lg glass-panel">ไซด์ไลน์${escapeHTML(p.nameThai)} ตัวท็อป</a>`;
 }).join("")}
             </nav>
 
@@ -1130,9 +1139,9 @@ ${allProvinces.slice(0, 12).map(p => {
                 </a>
             </li>
             <li class="w-full text-center">
-                <a href="/profiles.html" aria-label="ดูโปรไฟล์น้องๆ VIP" class="inline-flex flex-col items-center p-2 text-[#FF2E63]">
+                <a href="/profiles.html" aria-label="ดูโปรไฟล์น้องๆ แนะนำตัวท็อป" class="inline-flex flex-col items-center p-2 text-[#FF2E63]">
                     <i class="fas fa-gem text-[18px] mb-1 drop-shadow-[0_0_8px_rgba(255,46,99,0.5)]" aria-hidden="true"></i>
-                    <span class="text-[9px] font-[600] tracking-wider">VIP</span>
+                    <span class="text-[9px] font-[600] tracking-wider">TOP</span>
                 </a>
             </li>
             <li class="w-full text-center relative">
@@ -1158,6 +1167,11 @@ ${allProvinces.slice(0, 12).map(p => {
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // จัดการเปิดการแสดงผลเมื่อ Tailwind ได้รับการคอมไพล์สไตล์เสร็จสมบูรณ์เรียบร้อยแล้ว
+        setTimeout(() => {
+            document.body.classList.add('tailwind-ready');
+        }, 100);
+
         const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -1288,4 +1302,3 @@ ${allProvinces.slice(0, 12).map(p => {
         return buildErrorPage(500, "500 - SYSTEM ERROR", "เกิดข้อผิดพลาดในการประมวลผลบนเซิร์ฟเวอร์ กรุณาติดต่อผู้ดูแลระบบ", [], "");
     }
 };
-

@@ -9,7 +9,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bมลนิ", "roles": "anon" ... }',
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
     BRAND_NAME: 'Sideline Chiangmai (ไซด์ไลน์เชียงใหม่)',
     SOCIAL_PROFILES: {
@@ -277,8 +277,8 @@ export default async (request, context) => {
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
 
-    <!-- ติดตั้ง Stylesheet ระดับ S-Tier ความเร็วสูงโดยไม่ต้องมีขั้นตอนการ Build คอมไพล์ CSS ใดๆ -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <!-- แก้ไขปัญหาการยุบตัวของความกว้างรูปภาพโปรไฟล์ผ่านเสิร์ชบอท โดยดึง Tailwind v3 กลับมาใช้คู่กัน -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- สำหรับเบราว์เซอร์ทั่วไป -->
     <link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
