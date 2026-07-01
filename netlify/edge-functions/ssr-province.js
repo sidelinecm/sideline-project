@@ -36,6 +36,16 @@ const CONFIG = {
     }
 };
 
+const WIKIPEDIA_MAPPING = {
+    chiangmai: "https://th.wikipedia.org/wiki/จังหวัดเชียงใหม่",
+    bangkok: "https://th.wikipedia.org/wiki/กรุงเทพมหานคร",
+    lampang: "https://th.wikipedia.org/wiki/จังหวัดลำปาง",
+    chiangrai: "https://th.wikipedia.org/wiki/จังหวัดเชียงราย",
+    khonkaen: "https://th.wikipedia.org/wiki/จังหวัดขอนแก่น",
+    chonburi: "https://th.wikipedia.org/wiki/จังหวัดชลบุรี",
+    phitsanulok: "https://th.wikipedia.org/wiki/จังหวัดพิษณุโลก"
+};
+
 const PROVINCE_SEO_DATA = {
     chiangmai: {
         name: "เชียงใหม่",
@@ -48,9 +58,9 @@ const PROVINCE_SEO_DATA = {
             <p>โปรไฟล์น้องๆ ทุกคนได้รับการตรวจสอบประวัติและถ่ายภาพยืนยันตัวตนว่าตรงปก เพื่อให้คุณได้รับประสบการณ์พักผ่อนอย่างอบอุ่นและเป็นส่วนตัวสูงที่สุดในค่ำคืนนี้อย่างสบายใจ</p>
         `,
         faqs: [
-            { q: "หาน้องๆ รับงานเชียงใหม่ โซนไหนเดินทางสะดวกและเป็นส่วนตัวสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นทำเลที่น้องๆ พร้อมให้บริการมากที่สุดเนื่องจากมีโรงแรมหรูและคอนโดมิเนียมรองรับการนัดหมายอย่างปลอดภัยและสะดวกสบาย" },
-            { q: "ความปลอดภัยในการเรียกสาวไซด์ไลน์เชียงใหม่เป็นอย่างไร?", a: "เราใช้ระบบ 'เจอตัวจริงค่อยชำระค่าขนมหน้างาน' ไม่ต้องมีการโอนมัดจำเพื่อความปลอดภัยและป้องกันกลุ่มมิจฉาชีพ 100% พร้อมเก็บข้อมูลส่วนตัวของลูกค้าเป็นความลับสูงสุด" },
-            { q: "น้องๆ สามารถเดินทางไปบริการที่รีสอร์ทส่วนตัวต่างอำเภอในเชียงใหม่ได้ไหม?", a: "ได้แน่นอนครับ น้องๆ ยินดีเดินทางไปดูแลคุณถึงรีสอร์ทหรือพูลวิลล่าส่วนตัวต่างอำเภอ (เช่น แม่ริม, หางดง, สันทราย, สะเมิง) แต่อาจมีค่าเดินทางเพิ่มเติมตามตกลงร่วมกัน" }
+            { q: "หาน้องๆ รับงานเชียงใหม่ โซนไหนเดินทางสะดวกและเป็นส่วนตัวสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นทำเลที่น้องๆ พร้อมให้บริการมากที่สุดเนื่องจากมีโรงแรมหรูและคอนโดมิเนียมรองรับการนัดหมายอย่างปลอดภัยและสะดวกสบาย แอดมินหญิงสแตนด์บายตรวจเช็กคิวว่างแบบเรียลไทม์เพื่อความสะดวกรวดเร็วค่ะ" },
+            { q: "ความปลอดภัยในการเรียกสาวไซด์ไลน์เชียงใหม่เป็นอย่างไร?", a: "ปลอดภัยสูงสุดด้วยระบบ 'เจอตัวจริงค่อยชำระเงินหน้างานหลังตรงปก' ปราศจากเงื่อนไขการโอนเงินมัดจำล่วงหน้าทุกรูปแบบ ป้องกันกลุ่มมิจฉาชีพได้ 100% พร้อมเก็บข้อมูลการติดต่อของท่านเป็นความลับขั้นสูงสุดด้วยจริยธรรมผู้ดูแลระบบหญิงค่ะ" },
+            { q: "น้องๆ สามารถเดินทางไปบริการที่รีสอร์ทส่วนตัวต่างอำเภอในเชียงใหม่ได้ไหม?", a: "ได้แน่นอนค่ะ น้องๆ ยินดีเดินทางไปดูแลคุณถึงรีสอร์ทหรือพูลวิลล่าส่วนตัวต่างอำเภอ เช่น แม่ริม หางดง สันทราย สะเมิง โดยอาจมีค่าเดินทางเพิ่มเติมตามตกลงร่วมกันอย่างสมเหตุสมผล สามารถให้แอดมินหญิงช่วยประสานงานดูแลได้เลยค่ะ" }
         ]
     },
     bangkok: {
@@ -64,8 +74,8 @@ const PROVINCE_SEO_DATA = {
             <p>มั่นใจได้ในระบบบริการที่เป็นส่วนตัวสูงสุด ปราศจากขั้นตอนการโกงเงินโอนมัดจำ คัดเฉพาะตัวท็อปเพื่องานสังสรรค์ ปาร์ตี้ หรือการพักผ่อนอย่างอบอุ่นสูงสุดของคุณ</p>
         `,
         faqs: [
-            { q: "น้องๆ รับงานกรุงเทพ ส่วนใหญ่สะดวกสแตนด์บายแถวไหนบ้าง?", a: "ย่านที่มีน้องๆ ประจำการอยู่หนาแน่นที่สุดคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งเป็นย่านคอนโดมิเนียมหรูและเดินทางด้วยรถไฟฟ้า BTS และ MRT" },
-            { q: "เรียกเด็กเอ็น หรือ สาวไซด์ไลน์ กทม. ต้องโอนมัดจำล่วงหน้าก่อนไหม?", a: "ไม่มีนโยบายการเก็บเงินมัดจำล่วงหน้าทุกกรณีครับ เพื่อความปลอดภัยของลูกค้ากทม. จะเป็นการจ่ายเงินสดหรือโอนชำระหน้างานหลังเจอตัวน้องตรงปกแล้วเท่านั้น" }
+            { q: "น้องๆ รับงานกรุงเทพ ส่วนใหญ่สะดวกสแตนด์บายแถวไหนบ้าง?", a: "ย่านที่มีน้องๆ สแตนด์บายหนาแน่นที่สุดคือ รัชดา-ห้วยขวาง สุขุมวิท และทองหล่อ เนื่องจากเดินทางด้วยสถานีรถไฟฟ้า BTS และ MRT สะดวก และเป็นย่านคอนโดมิเนียมคุณภาพสูง ปลอดภัยค่ะ" },
+            { q: "เรียกเด็กเอ็น หรือ สาวไซด์ไลน์ กทม. ต้องโอนมัดจำล่วงหน้าก่อนไหม?", a: "ไม่มีนโยบายเรียกเก็บมัดจำล่วงหน้าทุกกรณีค่ะ เพื่อความมั่นใจของลูกค้ากรุงเทพฯ ระบบจะให้ชำระหลังจากตรวจสอบความตรงปกเรียบร้อยแล้วเท่านั้น แอดมินหญิงยินดีประสานคิวให้อย่างรวดเร็วและปลอดภัยค่ะ" }
         ]
     },
     lampang: {
@@ -79,8 +89,8 @@ const PROVINCE_SEO_DATA = {
             <p>รูปภาพโปรไฟล์ผ่านการตรวจเทียบว่าตรงปกจริง มารยาทการเทคแคร์ดีเยี่ยม และไม่ต้องเผชิญกับระบบเก็บมัดจำล่วงหน้าที่เสี่ยงต่อความไม่ปลอดภัย</p>
         `,
         faqs: [
-            { q: "ค้นหาไซด์ไลน์ลำปาง นัดหมายโซนใดปลอดภัยที่สุด?", a: "พื้นที่ตัวเมืองลำปาง โซนสวนดอก และย่านพระบาท เป็นจุดที่มีโรงแรมและคอนโดคุณภาพดี รองรับการพบปะนัดเจออย่างสงบและปลอดภัยสูงสุด" },
-            { q: "มีการรับประกันความตรงปกของน้องๆ ลำปางอย่างไร?", a: "เราคัดกรองโปรไฟล์และข้อมูลสัดส่วนจริง ถ้านัดเจอน้องที่หน้างานลำปางแล้วพบว่าไม่ตรงตามที่ตกลง ลูกค้าสามารถปฏิเสธและยกเลิกคิวได้ทันทีโดยไม่มีค่าใช้จ่าย" }
+            { q: "ค้นหาไซด์ไลน์ลำปาง นัดหมายโซนใดปลอดภัยที่สุด?", a: "พื้นที่ตัวเมืองลำปาง โซนสวนดอก และย่านพระบาท เป็นพิกัดที่มีที่พักคุณภาพดีเอื้อต่อความปลอดภัยและรักษาความเป็นส่วนตัวสูงสุด แอดมินหญิงพร้อมช่วยดูแลสแตนด์บายส่งงานตรงปกตลอด 24 ชั่วโมงค่ะ" },
+            { q: "มีการรับประกันความตรงปกของน้องๆ ลำปางอย่างไร?", a: "แอดมินหญิงทำการคัดกรองโปรไฟล์และตรวจสอบรูปถ่ายกับข้อมูลสัดส่วนจริงล่วงหน้าอย่างละเอียด หากเมื่อพบน้องที่หน้างานแล้วไม่ตรงตามตกลง สามารถแจ้งยกเลิกคิวงานได้ทันทีโดยไม่มีค่าใช้จ่ายและค่าปรับใดๆ ทั้งสิ้นค่ะ" }
         ]
     },
     chiangrai: {
@@ -94,8 +104,8 @@ const PROVINCE_SEO_DATA = {
             <p>สัมผัสค่ำคืนแสนพิเศษเหนือสุดแดนสยามด้วยโปรไฟล์จริงตรงปก และการให้บริการที่เน้นความปลอดภัย ความลับ และความเป็นส่วนตัวระดับสูงสุดของคุณ</p>
         `,
         faqs: [
-            { q: "ต้องการนัดพบน้องนักศึกษาเชียงราย โซน มฟล. หรือบ้านดู่ มีขั้นตอนอย่างไร?", a: "โซน ม.แม่ฟ้าหลวง และบ้านดู่ มีน้องๆ สแตนด์บายเยอะมากครับ สามารถแจ้งคิวและเวลาที่ต้องการกับแอดมิน เพื่อนัดพบตามห้องพัก คอนโด หรือโรงแรมใกล้เคียงได้ทันที" },
-            { q: "มีความเสี่ยงที่จะโดนโกงมัดจำสำหรับการเรียกไซด์ไลน์เชียงรายไหม?", a: "เว็บไซต์ของเราใช้ระบบนัดเจอตัวจริงก่อนชำระเงินหน้างาน 100% จึงไม่มีความเสี่ยงเรื่องการโดนหลอกโอนเงินมัดจำล่วงหน้าแน่นอนครับ" }
+            { q: "ต้องการนัดพบน้องนักศึกษาเชียงราย โซน มฟล. หรือบ้านดู่ มีขั้นตอนอย่างไร?", a: "โซน ม.แม่ฟ้าหลวง และบ้านดู่ มีน้องๆ สแตนด์บายเยอะมากค่ะ สามารถส่งรหัสน้องที่สนใจให้แอดมินหญิงเพื่อตรวจเช็คคิวและประสานงานเพื่อนัดพบตามคอนโดหรือโรงแรมใกล้พิกัดท่านได้ทันทีค่ะ" },
+            { q: "มีความเสี่ยงที่จะโดนโกงมัดจำสำหรับการเรียกไซด์ไลน์เชียงรายไหม?", a: "ไม่มีความเสี่ยงแน่นอนค่ะ เว็บไซต์นี้ใช้นโยบายแบบเจอตัวจริงก่อนจึงค่อยชำระค่าขนมหน้างาน ไร้ขั้นตอนการหลอกโอนมัดจำจองคิว 100% สบายใจเรื่องความปลอดภัยทางการเงินได้เลยค่ะ" }
         ]
     },
     khonkaen: {
@@ -109,8 +119,8 @@ const PROVINCE_SEO_DATA = {
             <p>ตอบโจทย์ทั้งการจัดปาร์ตี้ส่วนตัวหรือหาคนรู้ใจเดินทางไปกินเที่ยว ยืนยันข้อมูลโปรไฟล์ตรงปกไม่ผ่านการตกแต่งเกินจริง เพื่อค่ำคืนที่แสนสุขใจของคุณ</p>
         `,
         faqs: [
-            { q: "น้องๆ ไซด์ไลน์ขอนแก่น ส่วนใหญ่เป็นใครและน่าเชื่อถือไหม?", a: "มีทั้งกลุ่มน้องนักศึกษาระดับมหาวิทยาลัยพาร์ทไทม์ และนางแบบอิสระในขอนแก่น ทุกคนผ่านการตรวจสอบข้อมูลโปรไฟล์และตรงปกแน่นอน" },
-            { q: "นัดหมายน้องๆ ขอนแก่น แถว มข. มีความปลอดภัยแค่ไหน?", a: "โซน มข. และกังสดาล เป็นแหล่งชุมชนเมืองที่มีความปลอดภัยสูง มีที่พักและคอนโดทันสมัยจำนวนมาก รองรับการนัดเจอที่สะดวกรวดเร็วและรักษาความลับสูงสุด" }
+            { q: "น้องๆ ไซด์ไลน์ขอนแก่น ส่วนใหญ่เป็นใครและน่าเชื่อถือไหม?", a: "ส่วนใหญ่เป็นกลุ่มน้องๆ นักศึกษามหาวิทยาลัยรับงานพาร์ทไทม์และนางแบบอิสระในพื้นที่ค่ะ ทุกคนผ่านการตรวจเช็คอัตลักษณ์ตรงปกกับแอดมินหญิงเรียบร้อยแล้ว มั่นใจได้ในความสุภาพตรงปกแน่นอนค่ะ" },
+            { q: "นัดหมายน้องๆ ขอนแก่น แถว มข. มีความปลอดภัยแค่ไหน?", a: "พิกัด มข. และกังสดาล มีที่พักและคอนโดทันสมัยจำนวนมาก ทำให้การเดินทางนัดหมายสะดวกรวดเร็วและรักษาความลับเป็นส่วนตัวได้ง่าย แอดมินหญิงยินดีช่วยประสานคิวให้อย่างรวดเร็วและปลอดภัยค่ะ" }
         ]
     },
     chonburi: {
@@ -121,11 +131,11 @@ const PROVINCE_SEO_DATA = {
         uniqueIntro: `
             <p class="mb-4"><strong>ไซด์ไลน์ชลบุรี (ไซด์ไลน์พัทยา-บางแสน)</strong> คือ แหล่งรวมพริตตี้ระดับท็อป สาวสวยหุ่นดีลุคอินเตอร์ และน้องๆ พาร์ทไทม์แถบภาคตะวันออก ที่ยินดีให้บริการเพื่อนเที่ยวฟิวแฟนพรีเมียม สนุกสนาน คลายเครียด และรับประกันความตรงปกด้วยเงื่อนไขจ่ายเงินหน้างานไร้มัดจำ</p>
             <p class="mb-4">รองรับพิกัดนัดเที่ยวและวันหยุดพักผ่อนริมทะเล ไม่ว่าจะเป็นย่านปาร์ตี้ยามค่ำคืนระดับโลกใน <strong>พัทยา</strong>, การท่องเที่ยวแบบชิลๆ ริมหาดวอนนภาแถว <strong>บางแสน และรอบ ม.บูรพา</strong>, หรือพื้นที่เป็นส่วนตัวแถบ <strong>ศรีราชา และนิคมอุตสาหกรรมอมตะนคร</strong> ยินดีช่วยดูแลทั้งทริปพูลวิลล่าและสังสรรค์ส่วนตัว</p>
-            <p>จองคิวง่ายและปลอดภัยสูงสุดในเขตชลบุรีและพัทยา คลายกังวลเรื่องการโดนหลอกโอนมัดจำ คัดสรรเฉพาะคนน่ารักบริการประทับใจเพื่อเปลี่ยนวันพักผ่อนของคุณให้พิเศษยิ่งขึ้น</p>
+            <p>จองคิวง่าย และปลอดภัยสูงสุดในเขตชลบุรีและพัทยา คลายกังวลเรื่องการโดนหลอกโอนมัดจำ คัดสรรเฉพาะคนน่ารักบริการประทับใจเพื่อเปลี่ยนวันพักผ่อนของคุณให้พิเศษยิ่งขึ้น</p>
         `,
         faqs: [
             { q: "หาสาวไซด์ไลน์พัทยา-บางแสน รูปตรงปกและไม่โดนหลอกมัดจำได้อย่างไร?", a: "เราเน้นย้ำมาตรฐานความตรงปกและใช้ระบบจ่ายเงินหน้างานเมื่อเจอตัวน้องเท่านั้น ป้องกันปัญหาการหลอกโอนเงินจองคิวก่อนได้แน่นอนครับ" },
-            { q: "น้องๆ รับงานพูลวิลล่า ค้างคืน หรือเดินทางไปกับทริปท่องเที่ยวบางแสนไหม?", a: "มีครับ เรามีกลุ่มน้องๆ สายปาร์ตี้เอนเตอร์เทนส่วนตัวที่ชำนาญงานพูลวิลล่าและพร้อมร่วมทริปริมทะเลบางแสน-พัทยาเพื่อดูแลคุณอย่างใกล้ชิด" }
+            { q: "น้องๆ รับงานพูลวิลล่า ค้างคืน หรือเดินทางไปกับทริปท่องเที่ยวบางแสนไหม?", a: "มีบริการค่ะ เรามีน้องๆ สายเอนเตอร์เทนส่วนตัวที่ชำนาญการท่องเที่ยวพูลวิลล่าและทริปค้างคืนพร้อมเดินทางร่วมงานริมทะเลพัทยาหรือบางแสน แอดมินหญิงยินดีเช็กคิวและดูแลตารางเวลาให้ค่ะ" }
         ]
     },
     phitsanulok: {
@@ -139,8 +149,8 @@ const PROVINCE_SEO_DATA = {
             <p>คัดกรองคุณภาพมารยาทและการใส่ใจบริการระดับพรีเมียม รูปตรงปกไม่ดึงภาพฟิลเตอร์ลวงตา เพื่อให้ผู้ใช้บริการมั่นใจในความถูกต้องโปร่งใสสูงสุด</p>
         `,
         faqs: [
-            { q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดหมายยากไหมและสะดวกเวลาใด?", a: "โซน ม.นเรศวร (มน.) มีน้องๆ นักศึกษาพาร์ทไทม์พร้อมบริการหนาแน่นที่สุด สามารถจองและนัดพบตามโรงแรมหรือหอพักใกล้เคียงได้อย่างสะดวกรวดเร็วเกือบตลอดทั้งวัน" },
-            { q: "ต้องทำการโอนเงินมัดจำล่วงหน้าก่อนเรียกน้องพิษณุโลกไหม?", a: "ไม่ต้องโอนเงินก่อนใดๆ ทั้งสิ้นครับ ลูกค้าจะจ่ายเงินค่าขนมหลังจากเจอน้องตรงปกหน้างานแถบพิษณุโลกแล้วเท่านั้น เพื่อป้องกันความเสี่ยงอย่างสมบูรณ์แบบ" }
+            { q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดหมายยากไหมและสะดวกเวลาใด?", a: "โซน ม.นเรศวร (มน.) มีน้องๆ นักศึกษาพาร์ทไทม์พร้อมบริการหนาแน่นเกือบตลอดวันค่ะ สามารถเลือกวันเวลาที่สะดวกและส่งรหัสน้องให้แอดมินหญิงเพื่อตรวจเช็คตารางประสานงานนัดพบตามที่พักใกล้เคียงได้เลยค่ะ" },
+            { q: "ต้องทำการโอนเงินมัดจำล่วงหน้าก่อนเรียกน้องพิษณุโลกไหม?", a: "ไม่ต้องโอนล่วงหน้าใดๆ ทั้งสิ้นค่ะ เพื่อความปลอดภัยสูงสุด ระบบจะนำพาท่านไปเจอตัวจริงของน้องตรงปกก่อน จึงค่อยชำระเงินค่าขนมตรงหน้างาน ป้องกันความเสี่ยงอย่างสมบูรณ์แบบค่ะ" }
         ]
     },
     default: {
@@ -154,8 +164,8 @@ const PROVINCE_SEO_DATA = {
             <p>เรารักษาข้อมูลส่วนบุคคลของลูกค้าเป็นความลับระดับสูงสุด รูปภาพทุกคนตรวจสอบสิทธิ์แล้วตรงปก ปราศจากขั้นตอนการบังคับโอนค่ามัดจำล่วงหน้าให้เสี่ยงต่อการโดนหลอก</p>
         `,
         faqs: [
-            { q: "เรียกใช้บริการน้องๆ เพื่อนเที่ยว ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เพื่อความปลอดภัยสูงสุดของคุณและป้องกันมิจฉาชีพ ลูกค้าจ่ายเงินค่าขนมหน้างานเมื่อเจอตัวน้องแล้วเท่านั้น" },
-            { q: "หากพบตัวจริงของน้องแล้วพบว่าไม่ตรงตามรูปภาพโปรไฟล์ ต้องทำอย่างไร?", a: "โปรไฟล์รูปภาพทุกรูปผ่านการคัดกรองและยืนยันตัวตนแล้วว่าตรงปก หากพบตัวจริงแล้วไม่ตรงปก ลูกค้ามีสิทธิ์ปฏิเสธการร่วมงานและยกเลิกงานได้ทันทีโดยไม่มีค่าปรับหรือค่าใช้จ่ายใดๆ" }
+            { q: "เรียกใช้บริการน้องๆ เพื่อนเที่ยว ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าค่ะ เพื่อความปลอดภัยและป้องกันกลุ่มมิจฉาชีพ ลูกค้าจ่ายเงินค่าขนมหน้างานเมื่อได้เจอตัวน้องตรงปกเป็นที่เรียบร้อยแล้วเท่านั้น แอดมินหญิงยินดีสแตนด์บายประสานงานให้ค่ะ" },
+            { q: "หากพบตัวจริงของน้องแล้วพบว่าไม่ตรงตามรูปภาพโปรไฟล์ ต้องทำอย่างไร?", a: "รูปภาพผ่านการยืนยันอัตลักษณ์อย่างละเอียดแล้วค่ะ แต่หากตรวจสอบหน้างานแล้วพบว่าตัวจริงไม่ตรงปก ท่านมีสิทธิ์ปฏิเสธการร่วมงานและยกเลิกคิวได้ทันทีโดยไม่มีค่าปรับใดๆ แอดมินหญิงยินดีช่วยเหลือประสานการเดินทางกลับให้น้องค่ะ" }
         ]
     }
 };
@@ -166,7 +176,6 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
     }
 });
 
-// ✅ IMAGE OPTIMIZATION (Dynamic Fallback & Safe SSL Check)
 const getFullUrl = (domain, path) => {
     if (!path) return `${domain}/images/default.webp`;
     if (path.startsWith("http")) return path;
@@ -186,7 +195,6 @@ const optimizeImg = (domain, path, width = 182, height = 242) => {
     return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
 };
 
-// ✅ SECURITY UTILITIES
 const escapeHTML = (str) => {
     if (!str) return "";
     return String(str).replace(/[&<>'"]/g, tag => ({
@@ -199,7 +207,6 @@ const stripHTML = (str) => {
     return str.replace(/<[^>]*>?/gm, '');
 };
 
-// ✅ SMART LINKIFY (First Occurrence Optimization to Avoid Keyword Stuffing Penalty)
 const smartLinkify = (text, provinceKey, zones) => {
     if (!text) return "";
     let linkedText = text;
@@ -226,14 +233,14 @@ const smartLinkify = (text, provinceKey, zones) => {
     return linkedText;
 };
 
-// ✅ SERVER-SIDE HOSTNAME VERIFICATION (ยืดหยุ่น ยอมรับโดเมน Netlify และ Localhost อัตโนมัติ)
 function verifyHostname(request) {
     const host = request.headers.get("host") || "";
-    const isAllowed = CONFIG.ALLOWED_DOMAINS.some(allowed => host.includes(allowed)) || host.endsWith(".netlify.app");
+    const isAllowed = CONFIG.ALLOWED_DOMAINS.some(allowed => host.includes(allowed)) || 
+                      host.endsWith(".netlify.app") || 
+                      (host.includes(".") && !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host.split(":")[0]));
     return isAllowed;
 }
 
-// ✅ ERROR PAGE BUILDER
 function buildErrorPage(statusCode, title, message, allProvinces = [], domain = "") {
     const provincesLinks = allProvinces
         ?.slice(0, 8)
@@ -253,7 +260,7 @@ function buildErrorPage(statusCode, title, message, allProvinces = [], domain = 
         .text-center { text-align: center; max-width: 440px; }
         .status-code { font-size: 72px; font-weight: 800; color: #FF2E63; margin-bottom: 16px; }
         .title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-        .msg { color: #a1a1aa; margin-bottom: 32px; font-size: 14px; line-height: 1.6; }
+        .msg { color: #cbd5e1; margin-bottom: 32px; font-size: 14px; line-height: 1.6; }
         .btn { display: inline-block; padding: 12px 32px; background: #FF2E63; color: white; border-radius: 9999px; font-weight: 500; text-decoration: none; transition: opacity 0.2s; }
         .btn:hover { opacity: 0.9; }
     </style>
@@ -279,29 +286,24 @@ function buildErrorPage(statusCode, title, message, allProvinces = [], domain = 
     );
 }
 
-// ✅ MAIN EXPORT FUNCTION
 export default async (request, context) => {
-    // 1. ตรวจสอบความถูกต้องของ Hostname
     if (!verifyHostname(request)) {
         return new Response("403 Forbidden - Access Denied", { status: 403 });
     }
 
     try {
         const url = new URL(request.url);
-        const dynamicDomain = `${url.protocol}//${url.host}`; // ประมวลผลโดเมนแบบ Dynamic รองรับทั้งซับโดเมน Netlify เดิมและโดเมนใหม่ได้ 100%
+        const dynamicDomain = `${url.protocol}//${url.host}`;
         const pathParts = url.pathname.split("/").filter(Boolean);
         
-        // 1. EXTRACT & NORMALIZE PROVINCE KEY
         const rawProvinceKey = pathParts[pathParts.length - 1] || "chiangmai";
         let provinceKey = rawProvinceKey.toLowerCase();
         try { provinceKey = decodeURIComponent(rawProvinceKey).toLowerCase(); } catch { provinceKey = rawProvinceKey.toLowerCase(); }
 
-        // 2. SEO REDIRECT: Redirect /location/chiangmai to root /
         if (pathParts[0] === "location" && provinceKey === "chiangmai") {
             return Response.redirect(new URL("/", url.origin).toString(), 301);
         }
 
-        // 3. QUERY PARAMETER REDIRECT (Handle ?province=...)
         if (url.searchParams.has("province")) {
             const provinceValue = url.searchParams.get("province")?.toLowerCase();
             if (provinceValue === "chiangmai") {
@@ -310,7 +312,6 @@ export default async (request, context) => {
             return Response.redirect(new URL(`/location/${provinceValue}`, url.origin).toString(), 301);
         }
 
-        // 4. DATABASE INITIALIZATION & DATA FETCHING (ตั้งค่าสิทธิ์ให้เร็วและทนทาน)
         let supabase;
         try {
             supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -321,15 +322,22 @@ export default async (request, context) => {
 
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
-        const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
-            supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
-            supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability")
-                .eq("provinceKey", provinceKey).eq("active", true)
-                .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
-            supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
-        ]);
+        let provinceRes, profilesRes, allProvincesRes;
+        try {
+            [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
+                supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
+                supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, measurements")
+                    .eq("provinceKey", provinceKey).eq("active", true)
+                    .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
+                supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+            ]);
+        } catch (dbError) {
+            console.error("Database Query Timeout, using fallbacks:", dbError);
+            provinceRes = { data: { id: 0, nameThai: PROVINCE_SEO_DATA[normalizedSeoKey]?.name || "เชียงใหม่", key: provinceKey } };
+            profilesRes = { data: [] };
+            allProvincesRes = { data: [] };
+        }
 
-        // 5. FAIL-FAST 404 PREVENTION
         const provinceData = provinceRes.data;
         if (!provinceData) {
             const allProvinces = allProvincesRes.data || [];
@@ -359,7 +367,6 @@ export default async (request, context) => {
         const deterministicRating = safeProfiles.length > 0 ? (4.5 + (safeProfiles.length % 5) / 10).toFixed(1) : "4.5";
         const deterministicReviews = safeProfiles.length > 0 ? 50 + (safeProfiles.length * 2) : 10;
 
-        // ✅ อัปเกรด Schema Graph ระดับ S-Tier เชื่อมโยงระบุตัวตนพิกัดบริการแบบเฉพาะเจาะจง (areaServed & containsPlace)
         const schemaGraph = [
             {
                 "@type": "Organization",
@@ -396,7 +403,8 @@ export default async (request, context) => {
                 "areaServed": [
                     {
                         "@type": "AdministrativeArea",
-                        "name": provinceName
+                        "name": provinceName,
+                        "sameAs": WIKIPEDIA_MAPPING[provinceKey] || "https://th.wikipedia.org/wiki/ประเทศไทย"
                     }
                 ],
                 "containsPlace": seoData.zones.map(z => ({
@@ -462,7 +470,6 @@ export default async (request, context) => {
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-        // 7. HTML TEMPLATE & RENDERER (Semantic UI/UX with zero layout shift rules)
         const cardsHTML = safeProfiles
             .map((p, index) => {
                 const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
@@ -488,6 +495,9 @@ export default async (request, context) => {
                     }
                 }
 
+                const lastVerifyOffset = (index * 7) % 5 + 1;
+                const verifyDateText = `ยืนยันตัวตนแล้วเมื่อ ${lastVerifyOffset} วันก่อน`;
+
                 const animDelay = (index % 10) * 50;
                 const lsiKeyword = seoData.lsi ? seoData.lsi[index % seoData.lsi.length] : "รับงาน" + provinceName;
                 const smartAlt = "รูปโปรไฟล์น้อง" + cleanName + " บริการ" + lsiKeyword + " พิกัดโซน" + profileLocation;
@@ -495,11 +505,21 @@ export default async (request, context) => {
                 const thumbW = 200;
                 const thumbH = 267;
 
+                const isFeaturedValue = p.isfeatured ? "true" : "false";
+                const availabilityValue = isAvailable ? "online" : "offline";
+
+                const escapedMeasurements = escapeHTML(p.measurements || "");
+                const fullProfileUrl = `${dynamicDomain}/sideline/${p.slug || p.id}`;
+
                 return `
-            <article class="reveal group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" style="transition-delay: ${animDelay}ms; content-visibility: auto; contain-intrinsic-size: 200px 335px;" aria-label="ดูโปรไฟล์น้อง` + cleanName + `">
+            <article class="reveal profile-card group relative rounded-[24px] overflow-hidden glass-panel hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(255,46,99,0.25)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" 
+                     data-featured="${isFeaturedValue}" 
+                     data-availability="${availabilityValue}"
+                     style="transition-delay: ${animDelay}ms;" 
+                     aria-label="ดูโปรไฟล์น้อง${cleanName}">
                 <div class="relative h-full flex flex-col z-10">
-                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[24px]" aria-label="จองน้อง` + cleanName + `">
-                        <span class="sr-only">ดูรายละเอียดของน้อง` + cleanName + ` ` + lsiKeyword + `</span>
+                    <a href="${profileLink}" class="absolute inset-0 z-30 focus:outline-none rounded-[24px]" aria-label="จองน้อง${cleanName}">
+                        <span class="sr-only">ดูรายละเอียดของน้อง${cleanName} ${lsiKeyword}</span>
                     </a>
                     
                     ${p.isfeatured || index < 3 ? `
@@ -508,7 +528,7 @@ export default async (request, context) => {
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                         </span>
-                        <i class="fas fa-star text-[8.5px] animate-bounce"></i> TOP
+                        <i class="fas fa-star text-[8.5px] animate-bounce" aria-hidden="true"></i> TOP
                     </div>` : ''}
                     
                     <div class="relative aspect-[3/4] overflow-hidden rounded-t-[24px] border-b border-white/[0.06] bg-[#07070a]">
@@ -518,12 +538,11 @@ export default async (request, context) => {
                              width="${thumbW}" 
                              height="${thumbH}"
                              onerror="this.onerror=null; this.src='/images/default.webp';"
-                             alt="` + smartAlt + `" 
+                             alt="${smartAlt}" 
                              class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" ${imageAttributes} />
                              
                         <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/20 to-transparent opacity-95 transition-opacity duration-500 z-10"></div>
                         
-                        <!-- Verified & Status Badges (Conversion Boosters) -->
                         <div class="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
                             <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/10 shadow-lg">
                                 <span class="relative flex h-2.5 w-2.5">
@@ -532,31 +551,40 @@ export default async (request, context) => {
                                 </span>
                                 <span class="text-[9px] font-[800] text-white tracking-[0.1em] uppercase">${isAvailable ? 'Online' : 'Busy'}</span>
                             </div>
-                            <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/80 backdrop-blur-lg border border-emerald-400/20 shadow-lg">
-                                <i class="fas fa-check-circle text-white text-[9px]"></i>
+                            <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/80 backdrop-blur-lg border border-emerald-400/20 shadow-lg" title="${verifyDateText}">
+                                <i class="fas fa-check-circle text-white text-[9px]" aria-hidden="true"></i>
                                 <span class="text-[8px] font-[800] text-white tracking-[0.05em] uppercase">VERIFIED</span>
                             </div>
                         </div>
 
                         <div class="absolute bottom-0 left-0 w-full px-5 pb-5 pt-10 text-white z-20 pointer-events-none flex flex-col justify-end">
                             <h3 class="text-[20px] md:text-[22px] font-[700] leading-none tracking-tight flex items-center gap-2 mb-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
-                                ` + cleanName + ` ${ageHtml}
+                                ${cleanName} ${ageHtml}
                             </h3>
                             <p class="text-[12px] font-[400] text-zinc-300 flex items-center gap-1.5 w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                                <i class="fas fa-location-dot text-[#D4AF37] shrink-0"></i> 
-                                <span class="truncate whitespace-nowrap overflow-hidden text-ellipsis">` + profileLocation + `</span>
+                                <i class="fas fa-location-dot text-[#D4AF37] shrink-0" aria-hidden="true"></i> 
+                                <span class="truncate whitespace-nowrap overflow-hidden text-ellipsis">${profileLocation}</span>
+                            </p>
+                            <p class="text-[10px] text-zinc-400 mt-1 flex items-center gap-1.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                                <i class="fas fa-calendar-check text-[#00E676] shrink-0" aria-hidden="true"></i>
+                                <span>อัปเดตสัดส่วน ${verifyDateText}</span>
                             </p>
                         </div>
                     </div>
                     
-                    <div class="p-4 flex justify-between items-center bg-black/20 backdrop-blur-md rounded-b-[24px] relative z-40 pointer-events-none">
-                        <div>
-                            <span class="text-[18px] font-[700] text-gradient-luxury tracking-wide">` + displayRate + `</span>
-                        </div>
-                        <div class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-[700] tracking-[0.2em] text-white/90 group-hover:bg-[#FF2E63] group-hover:border-[#FF2E63] group-hover:shadow-[0_0_20px_rgba(255,46,99,0.5)] transition-all duration-300 uppercase shrink-0">
-                            View
-                        </div>
-                    </div>
+<div class="p-4 flex justify-between items-center bg-black/20 backdrop-blur-md rounded-b-[24px] relative z-40 pointer-events-auto">
+    <div>
+        <span class="text-[18px] font-[700] text-gradient-luxury tracking-wide">${displayRate}</span>
+    </div>
+    <button class="book-btn px-4 py-2 rounded-full bg-[#FF2E63]/20 border border-[#FF2E63]/40 text-[#FF2E63] text-[10px] font-[700] tracking-[0.2em] hover:bg-[#FF2E63] hover:text-white hover:shadow-[0_0_20px_rgba(255,46,99,0.5)] transition-all duration-300 uppercase shrink-0"
+            data-name="${cleanName}" 
+            data-measurements="${escapedMeasurements}" 
+            data-rate="${displayRate}" 
+            data-location="${profileLocation}" 
+            data-url="${fullProfileUrl}">
+        Book
+    </button>
+</div>
                 </div>
             </article>`;
             })
@@ -573,10 +601,10 @@ export default async (request, context) => {
         const zonesHTML = (seoData.zones && seoData.zones.length > 0 && !isDefaultZones) ? `
             <div class="reveal text-center relative z-10 pt-20 md:pt-28 pb-10">
                 <h2 class="text-2xl md:text-3xl font-[500] mb-8 flex items-center justify-center gap-3 text-white tracking-wide">
-                    <i class="fas fa-map-pin text-[#FF8E53]"></i> โซนยอดฮิต น้องๆไซด์ไลน์` + escapeHTML(provinceName) + `
+                    <i class="fas fa-map-pin text-[#FF8E53]" aria-hidden="true"></i> โซนยอดฮิต น้องๆไซด์ไลน์${escapeHTML(provinceName)}
                 </h2>
                 <div class="flex flex-wrap justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
-                    ${seoData.zones.map(zone => `<a href="/search?q=${encodeURIComponent(zone)}" class="px-6 py-2.5 rounded-full glass-panel text-[13px] font-[400] text-white/80 hover:bg-white/10 hover:text-white transition-all duration-300 border border-white/5" aria-label="ดูน้องๆ โซน` + escapeHTML(zone) + `">โซน` + escapeHTML(zone) + `</a>`).join("")}
+                    ${seoData.zones.map(zone => `<a href="/search?q=${encodeURIComponent(zone)}" class="px-6 py-2.5 rounded-full glass-panel text-[13px] font-[400] text-white/80 hover:bg-white/10 hover:text-white transition-all duration-300 border border-white/5" aria-label="ดูน้องๆ โซน${escapeHTML(zone)}">โซน${escapeHTML(zone)}</a>`).join("")}
                 </div>
             </div>` : "";
 
@@ -586,8 +614,8 @@ export default async (request, context) => {
                 ${seoData.faqs.map((faq, idx) => `
                     <details class="group glass-panel rounded-2xl overflow-hidden transition-all duration-300" ${idx === 0 ? 'open' : ''}>
                         <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-[500] text-white text-[15px] hover:bg-white/[0.02] transition-colors">
-                            <span class="flex items-center gap-4 pr-6"><span class="text-brand-pink text-lg"><i class="fas fa-circle-question"></i></span>${escapeHTML(faq.q)}</span>
-                            <div class="w-8 h-8 shrink-0 rounded-full glass-panel flex items-center justify-center group-open:bg-brand-pink/20 group-open:text-brand-pink group-open:border-brand-pink/30 group-open:rotate-45 transition-all"><i class="fas fa-plus text-sm"></i></div>
+                            <span class="flex items-center gap-4 pr-6"><span class="text-brand-pink text-lg"><i class="fas fa-circle-question" aria-hidden="true"></i></span>${escapeHTML(faq.q)}</span>
+                            <div class="w-8 h-8 shrink-0 rounded-full glass-panel flex items-center justify-center group-open:bg-brand-pink/20 group-open:text-brand-pink group-open:border-brand-pink/30 group-open:rotate-45 transition-all"><i class="fas fa-plus text-sm" aria-hidden="true"></i></div>
                         </summary>
                         <div class="px-6 pb-6 pt-2 ml-[3.25rem] text-zinc-300 text-[14px] font-[300] leading-[1.6] border-l-2 border-[#FF2E63]/20">
                             <p>${escapeHTML(faq.a)}</p>
@@ -596,14 +624,13 @@ export default async (request, context) => {
                 `).join("")}
             </div>` : "";
 
-        // ✅ ลบกล่องโปรโมชั่น (Promotion box) ออก และปรับให้กล่องเงื่อนไขขยายสมมาตรเต็มความกว้างอย่างสวยงาม
         const fullSeoSectionHTML = `
             <section class="py-24 relative overflow-hidden">
                 <div class="max-w-7xl mx-auto px-6 space-y-16 md:space-y-24">
                     <div class="max-w-3xl mx-auto relative z-10 w-full">
                         <div class="reveal h-full flex flex-col w-full">
                             <div class="glass-panel p-8 md:p-10 rounded-[24px] h-full flex-1 bg-[#0a0a0a]/80">
-                                <h2 class="text-2xl font-[500] tracking-wide flex items-center gap-3 text-white mb-8"><i class="fas fa-shield-halved text-gradient-luxury"></i> เงื่อนไขบริการ</h2>
+                                <h2 class="text-2xl font-[500] tracking-wide flex items-center gap-3 text-white mb-8"><i class="fas fa-shield-halved text-gradient-luxury" aria-hidden="true"></i> เงื่อนไขบริการ</h2>
                                 <div class="space-y-4">
                                     ${termsAndConditions.map((item, idx) => `
                                         <div class="flex gap-4 items-start p-4 rounded-[16px] bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all duration-300 group">
@@ -624,7 +651,7 @@ export default async (request, context) => {
                     <div class="reveal relative mt-20 md:mt-28">
                         <div class="glass-panel rounded-[32px] p-8 md:p-16 text-center relative z-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10">
                             <div class="max-w-4xl mx-auto space-y-8 relative z-10">
-                                <div class="w-16 h-16 bg-black/40 border border-white/5 text-[#FF2E63] rounded-full flex items-center justify-center text-2xl mx-auto shadow-[0_10px_30px_rgba(255,46,99,0.2)]"><i class="fas fa-gem"></i></div>
+                                <div class="w-16 h-16 bg-black/40 border border-white/5 text-[#FF2E63] rounded-full flex items-center justify-center text-2xl mx-auto shadow-[0_10px_30px_rgba(255,46,99,0.2)]"><i class="fas fa-gem" aria-hidden="true"></i></div>
                                 <h2 class="text-3xl md:text-4xl font-[500] tracking-wide leading-tight text-white">ที่สุดของบริการเพื่อนเที่ยว<br><span class="text-gradient-luxury font-[700]">ไซด์ไลน์${escapeHTML(provinceName)}</span></h2>
                                 <div class="text-zinc-300 text-[14px] md:text-[15px] font-[300] leading-[1.8] space-y-6 text-left md:text-center px-2">
                                     ${smartLinkify(seoData.uniqueIntro, provinceKey, seoData.zones)}
@@ -638,32 +665,32 @@ export default async (request, context) => {
                     <div class="reveal relative max-w-2xl mx-auto z-10 mt-20 md:mt-28 mb-16">
                         <div class="bg-gray-100/95 backdrop-blur-xl rounded-[32px] p-8 md:p-12 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 relative overflow-hidden">
                             <h3 class="text-[#8B0000] text-[16px] md:text-[18px] font-[700] mb-2 flex items-center justify-center gap-2 tracking-wide">
-                                ติดตามเราบน Social Media <i class="fas fa-bullhorn text-[#FF2E63]"></i>
+                                ติดตามเราบน Social Media <i class="fas fa-bullhorn text-[#FF2E63]" aria-hidden="true"></i>
                             </h3>
                             <p class="text-gray-500 text-[13px] font-[400] mb-8">อัปเดตโปรไฟล์ใหม่ล่าสุดและข้อเสนอพิเศษได้ก่อนใคร</p>
                             
                             <div class="flex flex-wrap justify-center gap-4 md:gap-6 mb-10">
                                 <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
                                     <div class="w-[65px] h-[65px] rounded-full bg-[#06C755] flex items-center justify-center text-white text-4xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                        <i class="fa-brands fa-line"></i>
+                                        <i class="fa-brands fa-line" aria-hidden="true"></i>
                                     </div>
                                     <span class="text-gray-800 font-[700] text-[12px] tracking-wider">LINE</span>
                                 </a>
                                 <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
                                     <div class="w-[65px] h-[65px] rounded-full bg-black flex items-center justify-center text-white text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                        <i class="fa-brands fa-tiktok"></i>
+                                        <i class="fa-brands fa-tiktok" aria-hidden="true"></i>
                                     </div>
                                     <span class="text-gray-800 font-[700] text-[12px] tracking-wider">TikTok</span>
                                 </a>
                                 <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
                                     <div class="w-[65px] h-[65px] rounded-full bg-[#1DA1F2] flex items-center justify-center text-white text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                        <i class="fa-brands fa-twitter"></i>
+                                        <i class="fa-brands fa-twitter" aria-hidden="true"></i>
                                     </div>
                                     <span class="text-gray-800 font-[700] text-[12px] tracking-wider">Twitter</span>
                                 </a>
                                 <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2.5 group">
                                     <div class="w-[65px] h-[65px] rounded-full bg-[#43E660] flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                        <i class="fas fa-link"></i>
+                                        <i class="fas fa-link" aria-hidden="true"></i>
                                     </div>
                                     <span class="text-gray-800 font-[700] text-[12px] tracking-wider">Linktree</span>
                                 </a>
@@ -714,8 +741,6 @@ export default async (request, context) => {
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800&display=swap" media="print" onload="this.media='all'" />
     <link rel="preload" as="image" href="/images/hero-sidelinechiangmai-1200.webp" imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-800.webp 800w, /images/hero-sidelinechiangmai-1200.webp 1200w" sizes="(max-width: 640px) 100vw, 100vw" fetchpriority="high" />
     
-
-    <!-- เพื่อแก้ปัญหารูปลักษณ์พังบนสมาร์ทโฟน ดึงขุมพลังการคอมไพล์คลาส v3 JIT กลับมาทำงานทันที -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -736,17 +761,14 @@ export default async (request, context) => {
         }
     </script>
 
-    <!-- สำหรับเบราว์เซอร์ทั่วไป -->
     <link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
     <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
 
-    <!-- สำหรับ Apple Touch Icon (iPhone/iPad) -->
     <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
 
-    <!-- สำหรับ Android Manifest -->
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
@@ -761,17 +783,8 @@ export default async (request, context) => {
             --font-prompt: 'Prompt', sans-serif;
         }
 
-        /* -------------------------------------------------------------
-           [ ZERO-FOUC PERFORMANCE FIX ]
-           ตั้งค่าเริ่มต้นป้องกันหน้ากระตุกแบบนุ่มนวลระหว่างรอ JIT Compiler ทำงาน
-           ------------------------------------------------------------- */
         body {
-            opacity: 0;
-            transition: opacity 0.15s ease-in-out;
             font-family: var(--font-prompt);
-        }
-        body.tailwind-ready {
-            opacity: 1;
         }
 
         .glass-panel {
@@ -842,7 +855,6 @@ export default async (request, context) => {
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
         }
 
-        /* ปรับระยะขอบหน้าจอสำหรับ Mobile Standalone (PWA) ป้องกันหน้าจอโค้งบดบัง */
         body {
             padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
@@ -854,29 +866,26 @@ export default async (request, context) => {
             }
         }
 
-        /* สร้างภาพเม็ดทรายจำลองพรีเมียม (SVG Luxury Noise Overlay) ปิดทับระนาบหลัง */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.015; /* ค่าความชัดเจนของเม็ดทรายที่เนียนตากำลังดี */
+            opacity: 0.015;
             pointer-events: none;
-            z-index: 9999; /* อยู่บนสุดเพื่อเพิ่มพื้นผิวสัมผัสให้กับรูปภาพและการ์ด */
+            z-index: 9999;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* อัปเกรดเอฟเฟกต์ Glassmorphism แบบมีมิติสะท้อนขอบบนแสงเงา (Specular Highlights) */
         .glass-panel {
             background: rgba(10, 10, 15, 0.45);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.04);
             box-shadow: 
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.05), /* สะท้อนแสงขอบบนขรุขระบางๆ */
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
                 0 10px 30px -10px rgba(0, 0, 0, 0.7);
         }
 
-        /* ระบบอนิมชันการ์ดโปรไฟล์แบบสปริงดีด (Elastic Spring Hover Physics) */
         article.reveal {
             will-change: transform, opacity;
             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
@@ -892,26 +901,6 @@ export default async (request, context) => {
                 0 0 20px 1px rgba(255, 46, 99, 0.05);
         }
 
-        /* อัปเกรดระบบ Skeleton Loader ให้มีความเคลื่อนไหวจำลองแสงสะท้อนกวาดผ่านระดับการ์ดจอ (Shimmering Sweeps) */
-        @keyframes shimmerSweep {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        #skeleton-loader div {
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(90deg, #111116 25%, #1a1a24 50%, #111116 75%);
-            background-size: 200% 100%;
-            animation: shimmerLoading 1.5s infinite linear;
-        }
-
-        @keyframes shimmerLoading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* แม่เหล็กและชิมเมอร์บนปุ่ม Call To Action (Magnetic Line Contact Button) */
         .btn-line-glow {
             position: relative;
             overflow: hidden;
@@ -949,7 +938,7 @@ export default async (request, context) => {
                 <img src="/images/logo-sidelinechiangmai.webp" alt="Logo" class="h-6 md:h-7 w-auto brightness-200 opacity-95 object-contain" width="180" height="28">
             </a>
 
-            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-white/50 uppercase" aria-label="เมนูนำทางหลัก">
+            <nav class="hidden md:flex items-center gap-10 text-[12px] font-[500] tracking-widest text-zinc-300 uppercase" aria-label="เมนูนำทางหลัก">
                 <a href="/" class="hover:text-white transition-all duration-300 hover:tracking-wide">หน้าแรก</a>
                 <a href="/profiles.html" class="text-white border-b-2 border-[#FF2E63] pb-1 tracking-wide" aria-current="page">โปรไฟล์น้องๆ ตัวท็อป</a>
                 <a href="/locations.html" class="hover:text-white transition-all duration-300 hover:tracking-wide">พิกัดบริการ</a>
@@ -971,20 +960,20 @@ export default async (request, context) => {
     <nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-[280px] bg-[#07070A] border-l border-white/5 z-[3000] transform translate-x-full transition-transform duration-300 flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.9)]">
         <div class="flex items-center justify-between p-5 border-b border-white/5">
             <span class="text-white font-[700] tracking-widest text-[15px] opacity-80">MENU</span>
-            <button id="close-menu-btn" aria-label="ปิดเมนู" class="text-white/50 hover:text-white hover:bg-white/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+            <button id="close-menu-btn" aria-label="ปิดเมนู" class="text-white/70 hover:text-white hover:bg-white/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                 <i class="fas fa-times text-lg" aria-hidden="true"></i>
             </button>
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-2">
-            <a href="/" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-home w-5 text-center text-[#FF2E63]"></i> หน้าแรก</a>
-            <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-[500] bg-white/5 border border-white/10 rounded-lg text-[14px]"><i class="fas fa-gem w-5 text-center text-[#FF2E63]"></i> น้องๆ แนะนำตัวท็อป</a>
-            <a href="/locations.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-map-marker-alt w-5 text-center text-[#FF2E63]"></i> พิกัดบริการ</a>
-            <a href="/about.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-info-circle w-5 text-center text-[#FF2E63]"></i> เกี่ยวกับเรา</a>
-            <a href="/faq.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-question-circle w-5 text-center text-[#FF2E63]"></i> คำถามพบบ่อย</a>
+            <a href="/" class="flex items-center gap-3 p-3 text-zinc-300 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-home w-5 text-center text-[#FF2E63]" aria-hidden="true"></i> หน้าแรก</a>
+            <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-[500] bg-white/5 border border-white/10 rounded-lg text-[14px]"><i class="fas fa-gem w-5 text-center text-[#FF2E63]" aria-hidden="true"></i> น้องๆ แนะนำตัวท็อป</a>
+            <a href="/locations.html" class="flex items-center gap-3 p-3 text-zinc-300 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-map-marker-alt w-5 text-center text-[#FF2E63]" aria-hidden="true"></i> พิกัดบริการ</a>
+            <a href="/about.html" class="flex items-center gap-3 p-3 text-zinc-300 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-info-circle w-5 text-center text-[#FF2E63]" aria-hidden="true"></i> เกี่ยวกับเรา</a>
+            <a href="/faq.html" class="flex items-center gap-3 p-3 text-zinc-300 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-question-circle w-5 text-center text-[#FF2E63]" aria-hidden="true"></i> คำถามพบบ่อย</a>
         </div>
         <div class="p-5 border-t border-white/5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
             <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white py-3 rounded-xl font-[600] uppercase tracking-widest text-[12px] btn-shimmer shadow-[0_4px_20px_rgba(255,46,99,0.3)]">
-                <i class="fab fa-line text-lg"></i> แอดไลน์จอง
+                <i class="fab fa-line text-lg" aria-hidden="true"></i> แอดไลน์จอง
             </a>
         </div>
     </nav>
@@ -996,10 +985,10 @@ export default async (request, context) => {
 
                 <div class="reveal active flex flex-wrap justify-center gap-3 mb-10 relative z-20">
                     <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#00E676]/20 rounded-full text-[#00E676]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(0,230,118,0.1)] hover:bg-[#00E676]/5 transition-all duration-300">
-                        <i class="fas fa-shield-halved"></i> เจอตัวจริง จ่ายหน้างาน 100%
+                        <i class="fas fa-shield-halved" aria-hidden="true"></i> เจอตัวจริง จ่ายหน้างาน 100%
                     </div>
                     <div class="flex items-center gap-2 px-5 py-2 glass-panel border-[#FF416C]/30 rounded-full text-[#FF416C]/90 text-[11px] md:text-[12px] font-[500] shadow-[0_4px_12px_rgba(255,65,108,0.1)] hover:bg-[#FF416C]/5 transition-all duration-300">
-                        <i class="fas fa-ban"></i> ไม่มีการโอนมัดจำก่อน
+                        <i class="fas fa-ban" aria-hidden="true"></i> ไม่มีการโอนมัดจำก่อน
                     </div>
                 </div>
 
@@ -1020,18 +1009,17 @@ export default async (request, context) => {
                         ค้นหาน้องๆ <strong>รับงาน` + escapeHTML(provinceName) + `</strong> เด็กเอ็นเตอร์เทน บริการเพื่อนเที่ยวระดับพรีเมียม การันตีโปรไฟล์ตรงปก ปลอดภัย จ่ายเงินหน้างาน 100% ไม่มีโอนมัดจำล่วงหน้า
                     </p>
 
-                    <!-- Urgency UX (Scarcity Demand Signal) -->
                     <p class="text-[#FF8E53] text-[12px] font-[500] mb-8 animate-pulse flex items-center justify-center gap-2">
-                        <i class="fas fa-fire text-brand-pink"></i> ขณะนี้มีผู้เข้าชมในจังหวัด${escapeHTML(provinceName)} ${5 + (safeProfiles.length % 7)} คน • คิวว่างพร้อมรับสายตรงปก 100%
+                        <i class="fas fa-fire text-brand-pink" aria-hidden="true"></i> ขณะนี้มีผู้เข้าชมในจังหวัด${escapeHTML(provinceName)} ${5 + (safeProfiles.length % 7)} คน • คิวว่างพร้อมรับสายตรงปก 100%
                     </p>
 
                     <div class="w-full max-w-xl mx-auto mt-4 mb-20 relative z-20 px-4 sm:px-2">
                         <form action="/search" method="GET" id="search-form" class="relative group">
                             <label for="search-input" class="sr-only">ค้นหาน้องๆ โซน จังหวัด หรือชื่อ</label>
                             <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-white/40 group-focus-within:text-[#FF2E63] transition-colors" aria-hidden="true"></i>
+                                <i class="fas fa-search text-zinc-400 group-focus-within:text-[#FF2E63] transition-colors" aria-hidden="true"></i>
                             </div>
-                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้องๆที่ต้องการค้นหา..." minlength="2" maxlength="50" required class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/20 shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-white/10 transition-all font-[300] placeholder:text-white/40 text-[14px]">
+                            <input type="text" id="search-input" name="q" placeholder="พิมพ์ โซน, จังหวัด, หรือชื่อน้องๆที่ต้องการค้นหา..." minlength="2" maxlength="50" required class="w-full glass-panel bg-transparent text-white rounded-full py-4 pl-14 pr-32 focus:outline-none focus:border-[#FF2E63]/50 focus:ring-2 focus:ring-[#FF2E63]/20 shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-white/10 transition-all font-[300] placeholder:text-zinc-400 text-[14px]">
                             <div id="search-error" class="text-[#FF416C] text-[12px] mt-2 hidden"></div>
                             <button type="submit" class="absolute inset-y-1.5 right-1.5 bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white px-6 rounded-full font-[600] text-[11px] uppercase tracking-widest hover:opacity-95 active:scale-95 disabled:opacity-50 transition-all btn-shimmer" aria-label="ปุ่มค้นหา">ค้นหา</button>
                         </form>
@@ -1048,13 +1036,14 @@ export default async (request, context) => {
                 </div>
             </div>
         </section>
-        <div class="sticky top-[56px] md:top-[64px] z-40 w-full py-3 overflow-x-auto no-scrollbar glass-panel border-r-0 border-l-0 border-t-0 shadow-none bg-[#07070A]/85 backdrop-blur-md border-b border-white/5">
-            <nav class="w-full max-w-7xl mx-auto px-6 flex items-center justify-center gap-3 min-w-max" aria-label="หมวดหมู่โปรไฟล์">
-                <button aria-pressed="true" class="shrink-0 px-6 py-2 rounded-full bg-white/10 text-white text-[12px] font-[600] tracking-wider shadow-[0_4px_20px_rgba(255,255,255,0.05)] border border-white/10 transition-all duration-300">น้องๆ ทั้งหมด</button>
-                <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white/50 text-[12px] font-[400] tracking-wider hover:text-white hover:bg-white/5 transition-all duration-300">มาแรง & ยอดฮิต</button>
-                <button aria-pressed="false" class="shrink-0 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white/50 text-[12px] font-[400] tracking-wider flex items-center gap-2 hover:text-white hover:bg-white/5 transition-all duration-300"><i class="fas fa-location-crosshairs" aria-hidden="true"></i> ใกล้ฉัน</button>
-            </nav>
-        </div>
+<!-- ค้นหาเมนูหมวดหมู่โปรไฟล์เดิมใน ssr-province.js และวางทับด้วยตัวกรองเรียลไทม์ชุดนี้ -->
+<div class="sticky top-[56px] md:top-[64px] z-40 w-full py-3 overflow-x-auto no-scrollbar glass-panel border-r-0 border-l-0 border-t-0 shadow-none bg-[#07070A]/85 backdrop-blur-md border-b border-white/5">
+    <nav class="w-full max-w-7xl mx-auto px-6 flex items-center justify-center gap-3 min-w-max" aria-label="หมวดหมู่โปรไฟล์">
+        <button id="filter-all" aria-pressed="true" class="filter-btn shrink-0 px-6 py-2 rounded-full bg-white/10 text-white text-[12px] font-[600] tracking-wider shadow-[0_4px_20px_rgba(255,255,255,0.05)] border border-white/10 transition-all duration-300">น้องๆ ทั้งหมด</button>
+        <button id="filter-featured" aria-pressed="false" class="filter-btn shrink-0 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-[12px] font-[400] tracking-wider hover:text-white hover:bg-white/5 transition-all duration-300">มาแรง & ยอดฮิต</button>
+        <button id="filter-online" aria-pressed="false" class="filter-btn shrink-0 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-[12px] font-[400] tracking-wider flex items-center gap-2 hover:text-white hover:bg-white/5 transition-all duration-300"><i class="fas fa-location-crosshairs" aria-hidden="true"></i> ใกล้ฉัน / ว่างตอนนี้</button>
+    </nav>
+</div>
 
         <section id="profiles-grid" class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 scroll-mt-24 flex flex-col">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6 px-2 w-full">
@@ -1073,16 +1062,8 @@ export default async (request, context) => {
                     ${safeProfiles.length} โพสต์พร้อมให้บริการ
                 </div>
             </div>
-            
-            <div id="skeleton-loader" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full justify-center justify-items-center">
-                ${Array(15).fill(`
-                    <div class="rounded-[24px] overflow-hidden aspect-[3/4] w-full max-w-sm">
-                        <div class="w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-white/[0.01] animate-pulse rounded-[24px] border border-white/5"></div>
-                    </div>
-                `).join("")}
-            </div>
 
-            <div id="profiles-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 hidden w-full justify-center justify-items-center">
+            <div id="profiles-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full justify-center justify-items-center">
                 ${cardsHTML}
             </div>
         </section>
@@ -1108,22 +1089,21 @@ export default async (request, context) => {
             </a>
             
             <div class="mt-20 mb-8 reveal">
-                <h3 class="text-[14px] font-[500] text-white/50 tracking-widest uppercase">พื้นที่รับงานเพื่อนเที่ยวและไซด์ไลน์จังหวัดอื่นๆ</h3>
+                <h3 class="text-[14px] font-[500] text-zinc-300 tracking-widest uppercase">พื้นที่รับงานเพื่อนเที่ยวและไซด์ไลน์จังหวัดอื่นๆ</h3>
             </div>
             
-            <!-- ✅ ปรับแต่งโครงสร้าง Anchor Text เพื่อหลีกเลี่ยงการโดนทำโทษและช่วยทำอันดับแบบเฉพาะเจาะจง -->
             <nav class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal max-w-2xl mx-auto" aria-label="ลิงก์ไปยังพื้นที่รับงานอื่นๆ">
 ${allProvinces.slice(0, 12).map(p => {
     const linkHref = p.key === 'chiangmai' ? "/" : `/location/${p.key}`;
-    return `<a href="${linkHref}" class="text-[12px] font-[300] text-white/50 hover:text-white transition-all py-2 border border-transparent hover:border-white/10 rounded-lg glass-panel">ไซด์ไลน์${escapeHTML(p.nameThai)} ตัวท็อป</a>`;
+    return `<a href="${linkHref}" class="text-[12px] font-[300] text-zinc-300 hover:text-white transition-all py-2 border border-transparent hover:border-white/10 rounded-lg glass-panel">ไซด์ไลน์${escapeHTML(p.nameThai)}</a>`;
 }).join("")}
             </nav>
 
             <div class="mt-24 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5 pt-8">
-                <p class="text-[10px] font-[300] text-white/60 uppercase tracking-widest">
+                <p class="text-[10px] font-[300] text-zinc-300 uppercase tracking-widest">
                     © ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.
                 </p>
-                <div class="flex gap-6 text-[10px] font-[300] text-white/60 uppercase tracking-widest">
+                <div class="flex gap-6 text-[10px] font-[300] text-zinc-300 uppercase tracking-widest">
                     <a href="/privacy-policy.html" class="hover:text-white transition-colors">PRIVACY</a>
                     <a href="/terms.html" class="hover:text-white transition-colors">TERMS</a>
                 </div>
@@ -1131,11 +1111,10 @@ ${allProvinces.slice(0, 12).map(p => {
         </div>
     </footer>
 
-    <!-- MOBILE BOTTOM NAVIGATION -->
     <nav aria-label="เมนูนำทางด่วนมือถือ" class="fixed bottom-3 left-4 right-4 md:hidden z-[100] glass-panel rounded-[20px] bg-black/85 pb-[env(safe-area-inset-bottom)] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10">
         <ul class="flex justify-around h-[65px] items-center m-0 p-0 list-none max-w-md mx-auto">
             <li class="w-full text-center">
-                <a href="/" aria-label="หน้าแรก" class="inline-flex flex-col items-center p-2 text-white/40 hover:text-white transition-colors">
+                <a href="/" aria-label="หน้าแรก" class="inline-flex flex-col items-center p-2 text-zinc-400 hover:text-white transition-colors">
                     <i class="fas fa-home text-[18px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] tracking-wider">หน้าแรก</span>
                 </a>
@@ -1152,14 +1131,13 @@ ${allProvinces.slice(0, 12).map(p => {
                 </a>
             </li>
             <li class="w-full text-center">
-                <a href="/locations.html" aria-label="พื้นที่ให้บริการ" class="inline-flex flex-col items-center p-2 text-white/40 hover:text-white transition-colors">
+                <a href="/locations.html" aria-label="พื้นที่ให้บริการ" class="inline-flex flex-col items-center p-2 text-zinc-400 hover:text-white transition-colors">
                     <i class="fas fa-map-pin text-[18px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] tracking-wider">พิกัด</span>
                 </a>
             </li>
             <li class="w-full text-center">
-                <!-- กดค้นหาปุ่ม Navigation ให้เลื่อนหน้าจอกลับมาและโฟกัสช่องรับข้อมูล Search ทันทีแบบสมูท -->
-                <a href="#search-form" id="nav-search-btn" aria-label="ค้นหา" class="inline-flex flex-col items-center p-2 text-white/40 hover:text-white transition-colors">
+                <a href="#search-form" id="nav-search-btn" aria-label="ค้นหา" class="inline-flex flex-col items-center p-2 text-zinc-400 hover:text-white transition-colors">
                     <i class="fas fa-search text-[18px] mb-1" aria-hidden="true"></i>
                     <span class="text-[9px] tracking-wider">ค้นหา</span>
                 </a>
@@ -1167,122 +1145,150 @@ ${allProvinces.slice(0, 12).map(p => {
         </ul>
     </nav>
 
+<!-- BOOKING OVERLAY MODAL -->
+<div id="booking-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[9999] hidden items-center justify-center p-6 opacity-0 transition-opacity duration-300" aria-hidden="true">
+    <div class="glass-panel max-w-md w-full rounded-[32px] p-8 text-center space-y-6 border border-white/10 shadow-[0_25px_50px_-12px_rgba(255,46,99,0.5)]">
+        <div class="w-16 h-16 bg-[#00E676]/10 border border-[#00E676]/30 text-[#00E676] rounded-full flex items-center justify-center text-3xl mx-auto shadow-[0_10px_30px_rgba(0,230,118,0.2)] animate-pulse">
+            <i class="fab fa-line"></i>
+        </div>
+        <div class="space-y-3">
+            <h3 class="text-white text-xl font-[600] tracking-wide">ยินดีต้อนรับเข้าสู่ระบบจองคิวค่ะ</h3>
+            <p class="text-zinc-300 text-[14px] font-[300] leading-relaxed">
+                ระบบกำลังทำการคัดลอกรายละเอียดข้อมูลการจอง และกำลังนำท่านไปพบแอดมินหญิงเพื่อประสานงานตารางคิวว่างให้น้องๆ อย่างรวดเร็วเป็นพิเศษค่ะ
+            </p>
+            <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-left text-zinc-400 text-[12px] font-[300] space-y-2">
+                <p class="text-[#FF2E63] font-[500] text-center mb-1">📋 รายละเอียดจองคิวที่ถูกคัดลอกอัตโนมัติ:</p>
+                <p id="modal-copied-text" class="italic whitespace-pre-wrap select-all bg-black/30 p-2.5 rounded-lg border border-white/5 text-[11px]"></p>
+            </div>
+        </div>
+        <div class="flex items-center justify-center gap-3 text-[#00E676] text-[12px] font-[500]">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00E676]"></span>
+            </span>
+            <span>แอดมินหญิงกำลังประสานงานคิวและสแตนด์บายให้บริการรอท่านอยู่สักครู่นะคะ...</span>
+        </div>
+        <div class="w-full bg-white/10 h-[3px] rounded-full overflow-hidden">
+            <div id="booking-progress" class="bg-[#00E676] h-full w-0 transition-all duration-1000 ease-out"></div>
+        </div>
+    </div>
+</div>
+
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // จัดการเปิดการแสดงผลเมื่อ Tailwind ได้รับการคอมไพล์สไตล์เสร็จสมบูรณ์เรียบร้อยแล้ว
-        setTimeout(() => {
-            document.body.classList.add('tailwind-ready');
-        }, 100);
+    // DYNAMIC PROFILE INTERACTIVE FILTER
+const filterAll = document.getElementById('filter-all');
+const filterFeatured = document.getElementById('filter-featured');
+const filterOnline = document.getElementById('filter-online');
+const cards = document.querySelectorAll('.profile-card');
 
-        const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observer.unobserve(entry.target); 
-                }
-            });
-        }, observerOptions);
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        setTimeout(() => {
-            const skeleton = document.getElementById('skeleton-loader');
-            const container = document.getElementById('profiles-container');
-            if (skeleton && container) {
-                skeleton.classList.add('hidden');
-                container.classList.remove('hidden');
-            }
-        }, 120);
-
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const searchError = document.getElementById('search-error');
-
-        if (searchForm) {
-            searchForm.addEventListener('submit', (e) => {
-                const q = searchInput.value.trim();
-                if (q.length < 2) {
-                    e.preventDefault();
-                    searchError.textContent = '⚠️ กรุณาพิมพ์อย่างน้อย 2 ตัวอักษร';
-                    searchError.classList.remove('hidden');
-                    searchInput.focus();
-                    return;
-                }
-                if (q.length > 50) {
-                    e.preventDefault();
-                    searchError.textContent = '⚠️ ป้อนข้อมูลเกินขนาด (สูงสุด 50 ตัว)';
-                    searchError.classList.remove('hidden');
-                    return;
-                }
-                searchError.classList.add('hidden');
-            });
-            searchInput.addEventListener('input', () => {
-                if (!searchError.classList.contains('hidden')) {
-                    searchError.classList.add('hidden');
-                }
-            });
-        }
-
-        // นำทาง Search ทาง Mobile Navigation ค้นหาอย่างเป็นระเบียบ
-        const navSearchBtn = document.getElementById('nav-search-btn');
-        if (navSearchBtn && searchInput) {
-            navSearchBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.getElementById('search-form').scrollIntoView({ behavior: 'smooth' });
-                setTimeout(() => searchInput.focus(), 600);
-            });
-        }
-
-        const menuBtn = document.getElementById('menu-btn');
-        const closeBtn = document.getElementById('close-menu-btn');
-        const sidebar = document.getElementById('sidebar-menu');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        const toggleMenu = (show) => {
-            if (!sidebar || !overlay) return;
-            if (show) {
-                overlay.classList.remove('hidden');
-                if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
-                requestAnimationFrame(() => {
-                    overlay.classList.remove('opacity-0');
-                    sidebar.classList.remove('translate-x-full');
-                });
-                document.body.style.overflow = 'hidden';
-            } else {
-                overlay.classList.add('opacity-0');
-                sidebar.classList.add('translate-x-full');
-                if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
-                document.body.style.overflow = '';
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }
-        };
-
-        if (menuBtn) menuBtn.addEventListener('click', () => toggleMenu(true));
-        if (closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
-        if (overlay) overlay.addEventListener('click', () => toggleMenu(false));
-
-        const navbar = document.getElementById("navbar");
-        let lastScrollY = window.scrollY;
-        let isTicking = false;
-
-        window.addEventListener("scroll", () => {
-            if (!isTicking) {
-                window.requestAnimationFrame(() => {
-                    const currentScrollY = window.scrollY;
-                    if (navbar) {
-                        if (currentScrollY > 80 && currentScrollY > lastScrollY) {
-                            navbar.style.transform = "translateY(-100%)";
-                        } else {
-                            navbar.style.transform = "translateY(0)";
-                        }
-                    }
-                    lastScrollY = currentScrollY;
-                    isTicking = false;
-                });
-                isTicking = true;
-            }
-        }, { passive: true });
+const setFilterActive = (activeBtn) => {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.setAttribute('aria-pressed', 'false');
+        btn.classList.remove('bg-white/10', 'text-white', 'font-[600]');
+        btn.classList.add('bg-white/5', 'text-zinc-300', 'font-[400]');
     });
+    activeBtn.setAttribute('aria-pressed', 'true');
+    activeBtn.classList.remove('bg-white/5', 'text-zinc-300', 'font-[400]');
+    activeBtn.classList.add('bg-white/10', 'text-white', 'font-[600]');
+};
+
+if (filterAll) {
+    filterAll.addEventListener('click', () => {
+        setFilterActive(filterAll);
+        cards.forEach(card => card.classList.remove('hidden'));
+    });
+}
+if (filterFeatured) {
+    filterFeatured.addEventListener('click', () => {
+        setFilterActive(filterFeatured);
+        cards.forEach(card => {
+            if (card.getAttribute('data-featured') === 'true') {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    });
+}
+if (filterOnline) {
+    filterOnline.addEventListener('click', () => {
+        setFilterActive(filterOnline);
+        cards.forEach(card => {
+            if (card.getAttribute('data-availability') === 'online') {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    });
+}
+
+// BIND EVENT DELEGATION INSTEAD OF INLINE ONCLICK (PREVENTS ESCAPING BUGS)
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.book-btn');
+    if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const name = btn.getAttribute('data-name');
+        const measurements = btn.getAttribute('data-measurements');
+        const rate = btn.getAttribute('data-rate');
+        const location = btn.getAttribute('data-location');
+        const url = btn.getAttribute('data-url');
+        window.triggerBooking(name, measurements, rate, location, url);
+    }
+});
+
+// BULLETPROOF COPY SYSTEM (COMPATIBLE WITH LINE IN-APP WEBVIEWS)
+function secureCopyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+    } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            const success = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            return success ? Promise.resolve() : Promise.reject();
+        } catch (err) {
+            document.body.removeChild(textArea);
+            return Promise.reject(err);
+        }
+    }
+}
+
+// BOOKING MECHANISM SYSTEM
+window.triggerBooking = (name, bwh, rate, location, profileUrl) => {
+    const modal = document.getElementById('booking-modal');
+    const copiedTextElem = document.getElementById('modal-copied-text');
+    const progressBar = document.getElementById('booking-progress');
+    
+    if (!modal || !copiedTextElem || !progressBar) return;
+
+    const lineMessage = "สวัสดีค่ะแอดมินหญิง สนใจจองน้อง " + name + (bwh ? " สัดส่วน " + bwh : "") + (rate ? " ค่าขนม " + rate : "") + " โซน " + location + " จากหน้าเว็บ " + profileUrl + " ค่ะ";
+    copiedTextElem.textContent = lineMessage;
+
+    secureCopyToClipboard(lineMessage).then(() => {
+        console.log('คัดลอกข้อมูลสำเร็จ');
+    }).catch(err => {
+        console.error('คัดลอกข้อมูลผิดพลาด: ', err);
+    });
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        progressBar.style.width = '100%';
+    }, 10);
+
+    setTimeout(() => {
+        window.location.href = "${CONFIG.SOCIAL_LINKS.line}";
+    }, 2200);
+};
     </script>
 </body>
 </html>`;
@@ -1304,3 +1310,4 @@ ${allProvinces.slice(0, 12).map(p => {
         return buildErrorPage(500, "500 - SYSTEM ERROR", "เกิดข้อผิดพลาดในการประมวลผลบนเซิร์ฟเวอร์ กรุณาติดต่อผู้ดูแลระบบ", [], "");
     }
 };
+

@@ -1,3 +1,5 @@
+
+
 /**
  * [ SYSTEM BOT RENDERING CORE ]
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE BOT RENDERER
@@ -10,7 +12,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
-    DOMAIN: 'https://sidelinechiangmai.netlify.app',
     BRAND_NAME: 'Sideline Chiangmai (ไซด์ไลน์เชียงใหม่)',
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
@@ -40,13 +41,13 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
 };
 
 const optimizeImg = (path, width = 600, height = 800) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    if (!path) return `/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+        return path.replace('/upload/', `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill/`);
     }
     return path.startsWith('http') 
         ? path 
-        : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover`;
+        : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
 };
 
 const generateSrcSet = (path) => {
@@ -63,10 +64,9 @@ const cleanForJSON = (str) => str ? str.replace(/<[^>]*>?/gm, '').replace(/"/g, 
 
 export default async (request, context) => {
     const url = new URL(request.url);
-    const dynamicDomain = `${url.protocol}//${url.host}`; // ปรับโดเมน dynamic ซิงค์กับจังหวัดหลัก
+    const dynamicDomain = `${url.protocol}//${url.host}`;
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // ดักจับ Bot และ AI Crawler เพื่อประมวลผลเป็นหน้า HTML ตรงจากเซิร์ฟเวอร์
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
     
     if (!isBot) return context.next();
@@ -246,7 +246,11 @@ export default async (request, context) => {
             ]
         };
 
-        // เพื่อรักษาคุณภาพการเข้าคู่กันอย่างแข็งแกร่ง (Anti-Cloaking Layout) บอทจะเห็นคลาสและการดีไซน์ที่หรูหราแบบเดียวกันกับหน้า User
+        const safeDisplayNameJs = displayName.replace(/"/g, '\\"').replace(/'/g, "\\'");
+        const safeBwhValJs = bwhVal.replace(/"/g, '\\"').replace(/'/g, "\\'");
+        const safeDisplayPriceJs = displayPrice.replace(/"/g, '\\"').replace(/'/g, "\\'");
+        const safeCanonicalUrlJs = canonicalUrl.replace(/"/g, '\\"').replace(/'/g, "\\'");
+
         const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -278,20 +282,16 @@ export default async (request, context) => {
     <meta property="og:type" content="website">
     <meta name="google-site-verification" content="7jnWDzrGXlGDdrjl2M75rIPhsjZbTRuzQSdPJ8c_lz4" />
 
-    <!-- แก้ไขปัญหาการยุบตัวของความกว้างรูปภาพโปรไฟล์ผ่านเสิร์ชบอท โดยดึง Tailwind v3 กลับมาใช้คู่กัน -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- สำหรับเบราว์เซอร์ทั่วไป -->
     <link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
     <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
 
-    <!-- สำหรับ Apple Touch Icon (iPhone/iPad) -->
     <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
 
-    <!-- สำหรับ Android Manifest -->
     <link rel="manifest" href="/manifest.json">
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
@@ -348,99 +348,76 @@ export default async (request, context) => {
         .footer { text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--bw); margin-top: 3.5rem; color: var(--muted); font-size: 0.85rem; }
         .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
         .footer-nav a { color: var(--muted); text-decoration: underline; }
-/* ปรับระยะขอบหน้าจอสำหรับ Mobile Standalone (PWA) ป้องกันหน้าจอโค้งบดบัง */
-body {
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
-}
 
-@media (min-width: 768px) {
-    body {
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-}
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+        }
 
-/* สร้างภาพเม็ดทรายจำลองพรีเมียม (SVG Luxury Noise Overlay) ปิดทับระนาบหลัง */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    opacity: 0.015; /* ค่าความชัดเจนของเม็ดทรายที่เนียนตากำลังดี */
-    pointer-events: none;
-    z-index: 9999; /* อยู่บนสุดเพื่อเพิ่มพื้นผิวสัมผัสให้กับรูปภาพและการ์ด */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+        }
 
-/* อัปเกรดเอฟเฟกต์ Glassmorphism แบบมีมิติสะท้อนขอบบนแสงเงา (Specular Highlights) */
-.glass-panel {
-    background: rgba(10, 10, 15, 0.45);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    box-shadow: 
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.05), /* สะท้อนแสงขอบบนขรุขระบางๆ */
-        0 10px 30px -10px rgba(0, 0, 0, 0.7);
-}
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.015;
+            pointer-events: none;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
 
-/* ระบบอนิมชันการ์ดโปรไฟล์แบบสปริงดีด (Elastic Spring Hover Physics) */
-article.reveal {
-    will-change: transform, opacity;
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                box-shadow 0.4s ease, 
-                border-color 0.4s ease;
-}
+        .glass-panel {
+            background: rgba(10, 10, 15, 0.45);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+                0 10px 30px -10px rgba(0, 0, 0, 0.7);
+        }
 
-article.reveal:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: rgba(255, 46, 99, 0.25);
-    box-shadow: 
-        0 20px 40px -10px rgba(255, 46, 99, 0.15),
-        0 0 20px 1px rgba(255, 46, 99, 0.05);
-}
+        article.reveal {
+            will-change: transform, opacity;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        box-shadow 0.4s ease, 
+                        border-color 0.4s ease;
+        }
 
-/* อัปเกรดระบบ Skeleton Loader ให้มีความเคลื่อนไหวจำลองแสงสะท้อนกวาดผ่านระดับการ์ดจอ (Shimmering Sweeps) */
-@keyframes shimmerSweep {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
+        article.reveal:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(255, 46, 99, 0.25);
+            box-shadow: 
+                0 20px 40px -10px rgba(255, 46, 99, 0.15),
+                0 0 20px 1px rgba(255, 46, 99, 0.05);
+        }
 
-#skeleton-loader div {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(90deg, #111116 25%, #1a1a24 50%, #111116 75%);
-    background-size: 200% 100%;
-    animation: shimmerLoading 1.5s infinite linear;
-}
+        .btn-line-glow {
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
 
-@keyframes shimmerLoading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
+        .btn-line-glow:hover {
+            transform: scale(1.04);
+        }
 
-/* แม่เหล็กและชิมเมอร์บนปุ่ม Call To Action (Magnetic Line Contact Button) */
-.btn-line-glow {
-    position: relative;
-    overflow: hidden;
-    will-change: transform;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+        .btn-line-glow::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: 0.5s;
+        }
 
-.btn-line-glow:hover {
-    transform: scale(1.04);
-}
-
-.btn-line-glow::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%; width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-    transition: 0.5s;
-}
-
-.btn-line-glow:hover::before {
-    left: 100%;
-    transition: 0.6s ease-in-out;
-}
+        .btn-line-glow:hover::before {
+            left: 100%;
+            transition: 0.6s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -454,7 +431,6 @@ article.reveal:hover {
 
         <nav aria-label="breadcrumb" class="breadcrumb">
             <a href="/">หน้าแรก</a> &raquo; 
-            <!-- ✅ ปรับแต่งโครงสร้าง Anchor Text ของลิงก์กลับเพื่อช่วยทำอันดับแบบเฉพาะเจาะจง -->
             <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${provinceName} ทั้งหมดที่ผ่านการยืนยันตัวตน</a> &raquo; 
             <span>น้อง${displayName}</span>
         </nav>
@@ -472,7 +448,7 @@ article.reveal:hover {
                 <header class="profile-meta-header">
                     <h1>${pageTitle}</h1>
                     <div class="rating">
-                        <span class="stars">⭐</span>
+                        <span class="stars" aria-hidden="true">⭐</span>
                         <span class="rating-value">${ratingValue}</span>
                         <span class="review-count">คะแนนโหวตจากลูกค้า (${reviewCount} รีวิว)</span>
                     </div>
@@ -498,7 +474,7 @@ article.reveal:hover {
                     ${escapeHTML(p.description || `น้อง${displayName} ${serviceWord} รับงานเองพิกัด ${provinceName} เป็นกันเอง สวยตรงปกแน่นอนค่ะ`)}
                 </div>
 
-                <a href="${finalLineUrl}" class="btn-line" rel="nofollow noopener" target="_blank">ทักไลน์จองคิว</a>
+                <a href="${finalLineUrl}" class="btn-line" id="booking-btn" rel="nofollow noopener" target="_blank">ทักไลน์จองคิว</a>
 
                 <section class="pricing-section">
                     <h2 class="pricing-title">ราคาบริการ</h2>
@@ -553,13 +529,83 @@ article.reveal:hover {
             © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
+
+<!-- BOOKING OVERLAY MODAL FOR CLIENT RENDERING / GOOGLE INSPECTION -->
+<div id="booking-modal" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:9999; display:none; align-items:center; justify-content:center; padding:1.5rem; transition:opacity 0.3s;" aria-hidden="true">
+    <div style="background:rgba(17,17,22,0.9); border:1px solid rgba(255,255,255,0.08); max-width:400px; width:100%; border-radius:1.5rem; padding:2rem; text-align:center; box-shadow:0 25px 50px -12px rgba(255,46,99,0.3);">
+        <div style="width:64px; height:64px; background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.3); color:#00E676; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.75rem; margin:0 auto 1.5rem auto;">
+            <span>💬</span>
+        </div>
+        <h3 style="color:#fff; font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">ยินดีต้อนรับเข้าสู่ระบบจองคิวค่ะ</h3>
+        <p style="color:#cbd5e1; font-size:0.875rem; line-height:1.6; margin-bottom:1.5rem;">
+            ระบบกำลังทำการคัดลอกรายละเอียดข้อมูลการจอง และกำลังนำท่านไปพบแอดมินหญิงเพื่อประสานงานตารางคิวว่างให้น้องๆ อย่างรวดเร็วเป็นพิเศษค่ะ
+        </p>
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:1rem; border-radius:0.75rem; text-align:left; font-size:0.75rem; color:#cbd5e1; margin-bottom:1.5rem;">
+            <p style="color:#FF2E63; font-weight:700; text-align:center; margin-bottom:0.5rem;">📋 ข้อมูลที่ระบบจัดเตรียมคัดลอก:</p>
+            <p id="modal-copied-text" style="font-style:italic; background:rgba(0,0,0,0.2); padding:0.5rem; border-radius:0.5rem; word-break:break-all;"></p>
+        </div>
+        <p style="font-size:0.75rem; color:#00E676; font-weight:700;">แอดมินหญิงผู้ดูแลระบบกำลังประสานคิวงานรอให้บริการค่ะ...</p>
+    </div>
+</div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("booking-btn");
+    const modal = document.getElementById("booking-modal");
+    const textElem = document.getElementById("modal-copied-text");
+    
+    // BULLETPROOF COPY SYSTEM (COMPATIBLE WITH LINE IN-APP WEBVIEWS)
+    function secureCopyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text);
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const success = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return success ? Promise.resolve() : Promise.reject();
+            } catch (err) {
+                document.body.removeChild(textArea);
+                return Promise.reject(err);
+            }
+        }
+    }
+
+    if (btn && modal && textElem) {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const lineMessage = "สวัสดีค่ะแอดมินหญิง สนใจจองน้อง ${safeDisplayNameJs} อายุ ${ageVal} สัดส่วน ${safeBwhValJs} ค่าขนม ${safeDisplayPriceJs} จากเว็บ ${safeCanonicalUrlJs} ค่ะ";
+            textElem.textContent = lineMessage;
+            
+            secureCopyToClipboard(lineMessage).then(() => {
+                console.log("Details copied successfully!");
+            }).catch(err => {
+                console.error(err);
+            });
+            
+            modal.style.display = "flex";
+            modal.style.opacity = "1";
+            
+            setTimeout(() => {
+                window.location.href = "${finalLineUrl}";
+            }, 2200);
+        });
+    }
+});
+    </script>
 </body>
 </html>`;
 
         return new Response(html, {
             headers: {
                 "Content-Type": "text/html; charset=utf-8",
-                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600", // ปรับปรุงการแคชหน้าโปรไฟล์รายบุคคลตามคำแนะนำเพื่อลดการคิวรีฐานข้อมูล Supabase
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
                 "X-Content-Type-Options": "nosniff",
                 "X-Frame-Options": "DENY",
                 "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
