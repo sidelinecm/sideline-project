@@ -187,12 +187,13 @@ const optimizeImg = (domain, path, width = 182, height = 242) => {
     if (!path) return getFullUrl(domain, "/images/default.webp");
     if (path.includes("res.cloudinary.com")) {
         if (path.includes("/upload/")) {
-            return path.replace("/upload/", `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`);
+            return path.replace("/upload/", `/upload/c_scale,w_${width},q_auto,f_auto/`);
         }
         return path;
     }
     if (path.startsWith("http")) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
+    // ใช้รูปแบบเดียวกับ main.js แน่นอน 100% 👇
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
 const escapeHTML = (str) => {
@@ -326,7 +327,7 @@ export default async (request, context) => {
         try {
             [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
                 supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
-                supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, measurements")
+                supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, stats")
                     .eq("provinceKey", provinceKey).eq("active", true)
                     .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
                 supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
@@ -508,7 +509,7 @@ export default async (request, context) => {
                 const isFeaturedValue = p.isfeatured ? "true" : "false";
                 const availabilityValue = isAvailable ? "online" : "offline";
 
-                const escapedMeasurements = escapeHTML(p.measurements || "");
+const escapedMeasurements = escapeHTML(p.stats || "");
                 const fullProfileUrl = `${dynamicDomain}/sideline/${p.slug || p.id}`;
 
                 return `
@@ -1286,8 +1287,8 @@ window.triggerBooking = (name, bwh, rate, location, profileUrl) => {
     }, 10);
 
     setTimeout(() => {
-        window.location.href = "${CONFIG.SOCIAL_LINKS.line}";
-    }, 2200);
+    window.location.href = "${CONFIG.SOCIAL_LINKS.line}";
+}, 2200);
 };
     </script>
 </body>

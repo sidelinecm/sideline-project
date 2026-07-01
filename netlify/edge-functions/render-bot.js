@@ -1,5 +1,3 @@
-
-
 /**
  * [ SYSTEM BOT RENDERING CORE ]
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE BOT RENDERER
@@ -43,11 +41,11 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
 const optimizeImg = (path, width = 600, height = 800) => {
     if (!path) return `/images/default.webp`;
     if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill/`);
+        return path.replace('/upload/', `/upload/c_scale,w_${width},q_auto,f_auto/`);
     }
     return path.startsWith('http') 
         ? path 
-        : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
+        : `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`;
 };
 
 const generateSrcSet = (path) => {
@@ -82,7 +80,7 @@ export default async (request, context) => {
         
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, stats, height, weight, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -106,8 +104,7 @@ export default async (request, context) => {
             related = relatedData || [];
         }
 
-      // แล้ววางทับด้วยคำสั่งล้างคำนำหน้าชุดนี้:
-const displayName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, "");
+        const displayName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, "");
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
         
@@ -128,12 +125,9 @@ const displayName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)
         }
 
         const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-        const heightVal = getDeterministicValue(158, 168, slug, 2);
-        const weightVal = getDeterministicValue(44, 52, slug, 3);
-        const breastVal = getDeterministicValue(32, 36, slug, 4);
-        const waistVal = getDeterministicValue(23, 26, slug, 5);
-        const hipVal = getDeterministicValue(33, 37, slug, 6);
-        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+        const heightVal = p.height || getDeterministicValue(158, 168, slug, 2);
+        const weightVal = p.weight || getDeterministicValue(44, 52, slug, 3);
+        const bwhVal = p.stats || `${getDeterministicValue(32, 36, slug, 4)}-${getDeterministicValue(23, 26, slug, 5)}-${getDeterministicValue(33, 37, slug, 6)}`;
 
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
@@ -476,6 +470,15 @@ const displayName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)
                 </div>
 
                 <a href="${finalLineUrl}" class="btn-line" id="booking-btn" rel="nofollow noopener" target="_blank">ทักไลน์จองคิว</a>
+
+                <section class="pricing-section">
+                    <h2 class="pricing-title">ราคาบริการ</h2>
+                    <div class="pricing-grid">
+                        <div class="pricing-item"><div>1 ชม.</div><strong>${rawRate}</strong></div>
+                        <div class="pricing-item"><div>2 ชม.</div><strong>${Math.floor(rawRate * 1.8)}</strong></div>
+                        <div class="pricing-item"><div>ค้างคืน</div><strong>${Math.floor(rawRate * 4.5)}</strong></div>
+                    </div>
+                </section>
 
                 <section class="pricing-section">
                     <h2 class="pricing-title">ราคาบริการ</h2>
