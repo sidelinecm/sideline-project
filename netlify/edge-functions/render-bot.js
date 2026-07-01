@@ -106,7 +106,8 @@ export default async (request, context) => {
             related = relatedData || [];
         }
 
-        const displayName = p.name || 'สาวสวย';
+      // แล้ววางทับด้วยคำสั่งล้างคำนำหน้าชุดนี้:
+const displayName = (p.name || 'สาวสวย').replace(/^(น้อง\s?)/, "");
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
         
@@ -577,26 +578,27 @@ export default async (request, context) => {
         }
     }
 
-    if (btn && modal && textElem) {
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            const lineMessage = "สวัสดีค่ะแอดมินหญิง สนใจจองน้อง ${safeDisplayNameJs} อายุ ${ageVal} สัดส่วน ${safeBwhValJs} ค่าขนม ${safeDisplayPriceJs} จากเว็บ ${safeCanonicalUrlJs} ค่ะ";
-            textElem.textContent = lineMessage;
-            
-            secureCopyToClipboard(lineMessage).then(() => {
-                console.log("Details copied successfully!");
-            }).catch(err => {
-                console.error(err);
-            });
-            
-            modal.style.display = "flex";
-            modal.style.opacity = "1";
-            
-            setTimeout(() => {
-                window.location.href = "${finalLineUrl}";
-            }, 2200);
+    // ค้นหาช่วงตรวจจับการคลิก (EventListener) ท้ายไฟล์ render-bot.js และวางทับด้วยบล็อกที่ถอดเครื่องหมาย Backslash (\) ออกแล้วดังนี้:
+if (btn && modal && textElem) {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const lineMessage = "สวัสดีค่ะแอดมินหญิง สนใจจองน้อง ${safeDisplayNameJs} อายุ ${ageVal} สัดส่วน ${safeBwhValJs} ค่าขนม ${safeDisplayPriceJs} จากเว็บ ${safeCanonicalUrlJs} ค่ะ";
+        textElem.textContent = lineMessage;
+        
+        secureCopyToClipboard(lineMessage).then(() => {
+            console.log("Details copied successfully!");
+        }).catch(err => {
+            console.error(err);
         });
-    }
+        
+        modal.style.display = "flex";
+        modal.style.opacity = "1";
+        
+        setTimeout(() => {
+            window.location.href = "${finalLineUrl}";
+        }, 2200);
+    });
+}
 });
     </script>
 </body>
