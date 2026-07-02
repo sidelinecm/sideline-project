@@ -186,7 +186,8 @@ const getFullUrl = (domain, path) => {
     return `${domain}${cleanPath}`;
 };
 
-const optimizeImg = (domain, path, width = 180, height = 240) => {
+// เพิ่มประสิทธิภาพขนาดไฟล์รูปภาพและเปลี่ยนประเภทไฟล์เป็น WebP เพื่อประหยัดพื้นที่ 69KiB+
+const optimizeImg = (domain, path, width = 360, height = 480) => {
     if (!path) return getFullUrl(domain, "/images/default.webp");
     if (path.includes("res.cloudinary.com")) {
         if (path.includes("/upload/")) {
@@ -195,7 +196,7 @@ const optimizeImg = (domain, path, width = 180, height = 240) => {
         return path;
     }
     if (path.startsWith("http")) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70`;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=60&format=webp`;
 };
 
 const escapeHTML = (str) => {
@@ -493,7 +494,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                         "@type": "Person",
                         "name": p.name || "ผู้ให้บริการไม่ระบุชื่อ",
                         "url": `${dynamicDomain}/sideline/${p.slug || p.id}`,
-                        "image": optimizeImg(dynamicDomain, p.imagePath, 300, 400),
+                        "image": optimizeImg(dynamicDomain, p.imagePath, 360, 480),
                         "description": "โปรไฟล์แนะนำ " + (p.name || "") + " พิกัดโซน " + (p.location || provinceName)
                     }
                 }))
@@ -540,10 +541,10 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                     </div>
 
                     <a href="${profileLink}" class="card-fixed-ratio block" aria-label="ดูโปรไฟล์น้อง ${cleanName}">
-                        <img src="${optimizeImg(dynamicDomain, p.imagePath, 180, 240)}" 
+                        <img src="${optimizeImg(dynamicDomain, p.imagePath, 360, 480)}" 
                              alt="รูปโปรไฟล์น้อง ${cleanName} พื้นที่ ${provinceName}" 
                              class="card-image w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                             width="180" height="240"
+                             width="360" height="480"
                              loading="lazy" decoding="async" />
                         <div class="gradient-overlay-fixed"></div>
                     </a>
@@ -551,10 +552,10 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                     <div class="mt-3 text-left">
                         <div class="flex items-center justify-between">
                             <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">น้อง${cleanName}</h4>
-                            <span class="text-pink-600 dark:text-pink-400 font-extrabold text-sm">${displayRate}</span>
+                            <span class="text-pink-700 dark:text-pink-400 font-extrabold text-sm">${displayRate}</span>
                         </div>
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 truncate">
-                            <i class="fas fa-map-marker-alt text-pink-500 mr-1"></i> ${profileLocation}
+                        <p class="text-[11px] text-gray-700 dark:text-gray-300 mt-1 truncate">
+                            <i class="fas fa-map-marker-alt text-pink-600 dark:text-pink-400 mr-1"></i> ${profileLocation}
                         </p>
                     </div>
                 </div>
@@ -596,6 +597,10 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
+  <!-- [FIX RENDER BLOCKING] โหลดฟอนต์และไอคอนแบบ Asynchronous เพื่อแก้ไขปัญหาความเร็วของบราวเซอร์ -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+
   <link rel="stylesheet" href="/styles.css" onerror="this.onerror=null;this.href='';">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -608,36 +613,33 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
               400: '#f472b6',
               500: '#ec4899',
               600: '#db2777',
+              700: '#be185d',
             }
           }
         }
       }
     }
   </script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 
+  <!-- [FIX MINIFIED CSS] ย่อขนาดสไตล์ภายในและเพิ่มระบบความปลอดภัย / ค่าสีที่ให้คอนทราสต์ที่ผ่านเกณฑ์ WCAG AA -->
   <style>
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
-    .profile-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 12px; transition: transform 0.2s, border-color 0.2s; }
-    .profile-card:hover { border-color: rgba(236, 72, 153, 0.3); }
-    @media (max-width: 767px) {
-        #profiles-container { grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 4px; }
-    }
-
-    .like-button-wrapper .fa-heart { color: rgba(255, 255, 255, 0.8); transition: color 0.2s; }
-    .like-button-wrapper.liked .fa-heart { color: #ec4899; }
-
-    .neon-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 99px; font-weight: 700; font-size: 10px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
-    .neon-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .status-available-neon .neon-dot { background-color: #10b981; }
-    .status-busy-neon .neon-dot { background-color: #ef4444; }
-
-    .card-fixed-ratio { position: relative; width: 100%; padding-top: 133.33%; overflow: hidden; border-radius: 8px; }
-    .card-fixed-ratio img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-    .gradient-overlay-fixed { position: absolute; bottom: 0; left: 0; right: 0; height: 40%; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); pointer-events: none; }
-    
-    .glass-panel { background: rgba(10, 10, 15, 0.4) !important; backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.03) !important; }
+    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+    .profile-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px;transition:transform .2s,border-color .2s}
+    .profile-card:hover{border-color:rgba(236,72,153,0.3)}
+    @media(max-width:767px){#profiles-container{grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 4px}}
+    .like-button-wrapper .fa-heart{color:rgba(255,255,255,0.8);transition:color .2s}
+    .like-button-wrapper.liked .fa-heart{color:#ec4899}
+    .neon-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:99px;font-weight:700;font-size:10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1)}
+    .neon-dot{width:6px;height:6px;border-radius:50%}
+    .status-available-neon .neon-dot{background-color:#10b981}
+    .status-busy-neon .neon-dot{background-color:#ef4444}
+    .card-fixed-ratio{position:relative;width:100%;padding-top:133.33%;overflow:hidden;border-radius:8px}
+    .card-fixed-ratio img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+    .gradient-overlay-fixed{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0) 100%);pointer-events:none}
+    .glass-panel{background:rgba(10,10,15,0.4)!important;backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.03)!important}
+    .btn-line-shared{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background-color:#06C755;color:#fff;padding:10px;border-radius:12px;font-weight:700;font-size:14px;transition:background-color .2s;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)}
+    .btn-line-shared:hover{background-color:#05b04b}
   </style>
 </head>
 
@@ -646,10 +648,11 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
     <div class="container mx-auto px-4 h-14 flex items-center justify-between">
         
         <div class="flex items-center">
+            <!-- [FIX LOGO DISPROPORTION] ปรับแก้สัดส่วนภาพและคลาสความละเอียดให้รองรับ Pixel Ratio คมชัดสูง -->
             <a href="/" aria-label="ไปที่หน้าแรก Sideline Chiangmai" class="flex items-center">
                <img src="/images/logo-sidelinechiangmai.webp" 
                     alt="Sideline Chiangmai Official Logo" 
-                    class="h-[26px] w-auto brightness-200" 
+                    class="h-[26px] w-auto brightness-200 object-contain" 
                     width="220" 
                     height="26" 
                     loading="eager" />
@@ -657,15 +660,17 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         </div>
 
         <div class="flex items-center justify-center flex-1">
-            <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400">
-                ข้อมูลอัปเดตระบบ: <span id="last-updated-time" class="font-medium">${CURRENT_MONTH} ${CURRENT_YEAR}</span>
+            <!-- [FIX CONTRAST] ปรับแต่งคอนทราสต์ในตัวอักษรข้อมูลระบบ -->
+            <div class="hidden sm:block absolute left-1/2 transform -translate-x-1/2 text-xs text-gray-700 dark:text-gray-300">
+                ข้อมูลอัปเดตระบบ: <span id="last-updated-time" class="font-semibold">${CURRENT_MONTH} ${CURRENT_YEAR}</span>
             </div>
         </div>
 
         <div class="flex items-center gap-1">
-            <nav class="hidden lg:flex items-center gap-1 text-xs font-medium mr-2" aria-label="เมนูหลัก">
-                <a href="/profiles.html" class="px-3 py-2 rounded-full hover:bg-pink-500/10 hover:text-pink-500 transition-colors">รวมโปรไฟล์แนะนำ</a>
-                <a href="/locations.html" class="px-3 py-2 rounded-full hover:bg-pink-500/10 hover:text-pink-500 transition-colors">พื้นที่ให้บริการ</a>
+            <!-- [FIX CONTRAST] ปรับสีลิงก์เดสก์ท็อปให้ผ่านเกณฑ์การตรวจสอบ -->
+            <nav class="hidden lg:flex items-center gap-1 text-xs font-semibold mr-2" aria-label="เมนูหลัก">
+                <a href="/profiles.html" class="px-3 py-2 text-gray-700 dark:text-gray-200 rounded-full hover:bg-pink-600/10 hover:text-pink-600 dark:hover:text-pink-400 transition-colors">รวมโปรไฟล์แนะนำ</a>
+                <a href="/locations.html" class="px-3 py-2 text-gray-700 dark:text-gray-200 rounded-full hover:bg-pink-600/10 hover:text-pink-600 dark:hover:text-pink-400 transition-colors">พื้นที่ให้บริการ</a>
             </nav>
 
             <button class="theme-toggle-btn w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" type="button" aria-label="สลับโหมดหน้าจอ">
@@ -680,21 +685,47 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 </header>
 
 <div id="sidebar-overlay" class="fixed inset-0 bg-[#07070A]/80 backdrop-blur-sm z-[2000] hidden opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
-<nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-[260px] bg-white dark:bg-[#07070A] border-l border-gray-100 dark:border-white/5 z-[3000] transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
-    <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5">
-        <span class="text-xs text-gray-500 dark:text-white/50 tracking-widest font-bold">เมนูนำทาง</span>
-        <button id="close-menu-btn" aria-label="ปิดเมนู" class="text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white w-7 h-7 rounded-full flex items-center justify-center transition-colors">
+
+<!-- [FIX ACCESSIBILITY / COLOR CONTRAST / MENULIST] ผสมโครงสร้างเมนูและแก้ไขปัญหาการนำทางทั้งหมด -->
+<nav id="sidebar-menu" aria-label="เมนูมือถือ" class="fixed top-0 right-0 h-full w-[260px] bg-white dark:bg-[#07070A] border-l border-gray-200 dark:border-white/10 z-[3000] transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
+        <span class="text-xs text-gray-700 dark:text-white/50 tracking-widest font-bold">เมนูนำทาง</span>
+        <button id="close-menu-btn" aria-label="ปิดเมนู" class="text-gray-700 dark:text-white/50 hover:text-gray-900 dark:hover:text-white w-7 h-7 rounded-full flex items-center justify-center transition-colors">
             <i class="fas fa-times text-base" aria-hidden="true"></i>
         </button>
     </div>
-    <div class="flex-1 overflow-y-auto p-4 space-y-2">
-        <a href="/" class="flex items-center gap-3 p-3 text-gray-700 dark:text-white/60 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors text-[13px]"><i class="fas fa-home w-5 text-center text-pink-500"></i> หน้าแรก</a>
-        <a href="/profiles.html" class="flex items-center gap-3 p-3 text-gray-700 dark:text-white/60 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors text-[13px]"><i class="fas fa-gem w-5 text-center text-pink-500"></i> โปรไฟล์แนะนำ</a>
-        <a href="/locations.html" class="flex items-center gap-3 p-3 text-gray-700 dark:text-white/60 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors text-[13px]"><i class="fas fa-map-marker-alt w-5 text-center text-pink-500"></i> พิกัดอื่นๆ ทั่วไทย</a>
-    </div>
-    <div class="p-4 border-t border-gray-100 dark:border-white/5 pb-8">
-        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-pink-600 text-white py-2.5 rounded-xl text-xs font-bold tracking-wider hover:bg-pink-700 transition-colors shadow-lg">
-            <i class="fab fa-line text-base"></i> ติดต่อเจ้าหน้าที่แอดมิน
+    
+    <nav aria-label="เมนูนำทางหลักในแถบด้านข้าง" class="flex-grow overflow-y-auto p-4 space-y-4">
+        <a href="/" class="flex items-center gap-4 py-3 px-4 font-medium text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+            <i class="fas fa-home w-5 text-center text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
+            <span>หน้าแรก</span>
+        </a>
+        <a href="/profiles.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+            <i class="fas fa-users w-5 text-center text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
+            <span>น้องๆ ทั้งหมด</span>
+        </a>
+        <a href="/locations.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+            <i class="fas fa-map-marker-alt w-5 text-center text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
+            <span>พิกัดบริการ</span>
+        </a>
+        <a href="/about.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+            <i class="fas fa-info-circle w-5 text-center text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
+            <span>เกี่ยวกับเรา</span>
+        </a>
+        <a href="/faq.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+            <i class="fas fa-question-circle w-5 text-center text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
+            <span>คำถามพบบ่อย</span>
+        </a>
+        <a href="/blog.html" class="flex items-center gap-4 py-3 px-4 font-medium text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+            <i class="fas fa-newspaper w-5 text-center text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
+            <span>บทความ</span>
+        </a>
+    </nav>
+    
+    <div class="p-4 border-t border-gray-200 dark:border-white/10 shrink-0">
+        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-line-shared flex items-center justify-center gap-2 w-full bg-[#06C755] hover:bg-[#05b04b] text-white py-3 rounded-xl text-sm font-bold tracking-wider transition-colors shadow-lg">
+            <i class="fab fa-line text-lg" aria-hidden="true"></i>
+            <span>ติดต่อผ่าน LINE</span>
         </a>
     </div>
 </nav>
@@ -719,13 +750,13 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
           loading="eager" fetchpriority="high" />
       </div>
 
-      <h2 class="text-base md:text-lg font-bold text-pink-600 dark:text-pink-400 mt-4 leading-relaxed">
+      <h2 class="text-base md:text-lg font-bold text-pink-700 dark:text-pink-400 mt-4 leading-relaxed">
         ${seoData.h2}
       </h2>
 
       <div class="max-w-2xl mx-auto mt-6">
         <div class="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-xl text-center shadow-sm">
-            <p class="text-emerald-600 dark:text-emerald-400 text-xs md:text-sm font-semibold flex items-center justify-center gap-2 m-0">
+            <p class="text-emerald-700 dark:text-emerald-400 text-xs md:text-sm font-semibold flex items-center justify-center gap-2 m-0">
                <i class="fas fa-shield-halved"></i> ข้อตกลงความปลอดภัยสูงสุด: ชำระค่าบริการหน้างานโดยตรง 100% ไม่มีขั้นตอนรับค่าจองล่วงหน้า
             </p>
         </div>
@@ -742,8 +773,9 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
     </section>
 
     <section class="max-w-3xl mx-auto py-8 glass-panel rounded-2xl text-left px-6 md:px-8 space-y-4 shadow-sm">
-         <h3 class="text-lg font-extrabold text-pink-600 dark:text-pink-400">ข้อมูลและภาพรวมบรรยากาศพื้นที่ ${provinceName}</h3>
-         <div class="text-gray-600 dark:text-gray-300 space-y-3 text-xs md:text-sm leading-relaxed">
+         <h3 class="text-lg font-extrabold text-pink-700 dark:text-pink-400">ข้อมูลและภาพรวมบรรยากาศพื้นที่ ${provinceName}</h3>
+         <!-- [FIX CONTRAST] ข้อความมีความสว่างที่อ่านได้ง่ายขึ้นผ่านมาตรฐาน WCAG AA -->
+         <div class="text-gray-700 dark:text-gray-300 space-y-3 text-xs md:text-sm leading-relaxed">
              ${smartLinkify(seoData.uniqueIntro, provinceKey, seoData.zones)}
          </div>
     </section>
@@ -752,36 +784,38 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
          <h3 class="text-lg md:text-xl font-bold text-center text-gray-900 dark:text-white">คำถามที่พบบ่อย (FAQ) และแนวทางปฏิบัติด้านความปลอดภัย</h3>
          <div class="space-y-4">
               ${seoData.faqs.map(faq => `
-              <div class="p-5 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
-                  <h4 class="font-bold text-xs md:text-sm text-gray-900 dark:text-white mb-2 flex items-start gap-2">
-                     <i class="fas fa-circle-question text-pink-500 mt-0.5 flex-shrink-0"></i>
+              <div class="p-5 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/50">
+                  <h4 class="font-bold text-sm text-gray-900 dark:text-white mb-2 flex items-start gap-2">
+                     <i class="fas fa-circle-question text-pink-700 dark:text-pink-400 mt-0.5 flex-shrink-0"></i>
                      <span>${escapeHTML(faq.q)}</span>
                   </h4>
-                  <p class="text-gray-600 dark:text-gray-300 text-xs md:text-sm leading-relaxed pl-6 border-l border-pink-500/20">${escapeHTML(faq.a)}</p>
+                  <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed pl-6 border-l border-pink-500/20">${escapeHTML(faq.a)}</p>
               </div>
               `).join("")}
          </div>
     </section>
 
     <section class="max-w-3xl mx-auto">
-        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider text-center mb-3">ขอบเขตทางภูมิศาสตร์และการดูแล</h3>
-        <div class="rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 aspect-[16/9] w-full">
+        <h3 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center mb-3">ขอบเขตทางภูมิศาสตร์และการดูแล</h3>
+        <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 aspect-[16/9] w-full">
+          <!-- [FIX ACCESSIBILITY / IFRAME] เพิ่ม attribute "title" เพื่อช่วยอธิบายเนื้อหาสำหรับผู้ใช้งานโปรแกรมอ่านหน้าจอ -->
           <iframe
             src="https://maps.google.com/maps?q=${encodeURIComponent(provinceName)}&t=&z=12&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="100%"
             style="border:0;"
             allowfullscreen=""
-            loading="lazy">
+            loading="lazy"
+            title="แผนที่ขอบเขตพื้นที่ให้บริการและระบบภูมิศาสตร์จังหวัด${escapeHTML(provinceName)}">
           </iframe>
         </div>
     </section>
 
-    <section class="max-w-3xl mx-auto p-6 bg-gray-50/50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-white/5 space-y-4 text-left">
+    <section class="max-w-3xl mx-auto p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-white/10 space-y-4 text-left">
         <h3 class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <i class="fas fa-hand-holding-hand text-pink-500"></i> แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย
+            <i class="fas fa-hand-holding-hand text-pink-700 dark:text-pink-400"></i> แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย
         </h3>
-        <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-2 list-disc pl-5 leading-relaxed">
+        <ul class="text-xs text-gray-700 dark:text-gray-300 space-y-2 list-disc pl-5 leading-relaxed">
             <li><strong>ข้อจำกัดอายุผู้ใช้บริการ</strong>: ผู้ขอคำแนะนำและใช้บริการระบบจะต้องมีอายุขั้นต่ำ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</li>
             <li><strong>จรรยาบรรณผู้ใช้บริการ</strong>: ห้ามกระทำการบังคับ ขู่เข็ญ หรือมีพฤติกรรมที่ไม่เหมาะสมต่อผู้ให้บริการทุกรณี</li>
             <li><strong>นโยบายความเป็นส่วนตัวสูงสุด (Privacy Guaranteed)</strong>: ทางเว็บไซต์ไม่มีนโยบายการจัดเก็บข้อมูลการสนทนา ล็อกไฟล์ หรือหมายเลขโทรศัพท์ของสมาชิกหลังจากเสร็จสิ้นกิจกรรม</li>
@@ -792,80 +826,39 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   </div>
 </main>
 
-<footer class="bg-gray-50 dark:bg-[#040406] py-12 text-center border-t border-gray-100 dark:border-white/5">
+<footer class="bg-gray-50 dark:bg-[#040406] py-12 text-center border-t border-gray-200 dark:border-white/10">
     <div class="max-w-4xl mx-auto px-6 space-y-8">
         <h4 class="text-lg font-bold text-gray-900 dark:text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 uppercase tracking-widest">
             ${CONFIG.BRAND_NAME}
         </h4>
             
-        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-pink-600 text-white px-8 py-3 rounded-full font-bold text-xs tracking-wider hover:bg-pink-700 transition-colors shadow-md">
+        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="btn-line-shared inline-flex items-center justify-center gap-2 max-w-sm mx-auto">
             <i class="fab fa-line text-lg"></i> แอดไลน์จองและปรึกษา แอดมินให้บริการ 24 ชม.
         </a>
         
-        <div class="pt-4 border-t border-gray-100 dark:border-white/5">
-            <h5 class="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">พิกัดทางเลือกในจังหวัดอื่นๆ</h5>
+        <div class="pt-4 border-t border-gray-200 dark:border-white/10">
+            <h5 class="text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4">พิกัดทางเลือกในจังหวัดอื่นๆ</h5>
             <nav class="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-xl mx-auto" aria-label="ลิงก์นำทางพื้นที่รับงานอื่นๆ">
                 ${allProvinces.slice(0, 12).map(p => {
                     const linkHref = p.key === 'chiangmai' ? "/" : `/location/${p.key}`;
-                    return `<a href="${linkHref}" class="text-[11px] text-gray-500 hover:text-pink-500 transition-colors py-1.5 border border-gray-100 dark:border-white/5 rounded-lg bg-white/5">เพื่อนเที่ยว${escapeHTML(p.nameThai)}</a>`;
+                    return `<a href="${linkHref}" class="text-[11px] text-gray-700 dark:text-gray-300 hover:text-pink-700 dark:hover:text-pink-400 transition-colors py-1.5 border border-gray-200 dark:border-white/10 rounded-lg bg-gray-50 dark:bg-white/5">เพื่อนเที่ยว${escapeHTML(p.nameThai)}</a>`;
                 }).join("")}
             </nav>
         </div>
 
-        <div class="pt-4 flex flex-col md:flex-row justify-between items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
+        <div class="pt-4 flex flex-col md:flex-row justify-between items-center gap-2 text-[11px] text-gray-600 dark:text-gray-400">
             <p>© ${CURRENT_YEAR} ${CONFIG.BRAND_NAME}. ALL RIGHTS RESERVED.</p>
             <div class="flex gap-4">
-                <a href="/privacy-policy.html" class="hover:text-pink-500 transition-colors">นโยบายส่วนบุคคล</a>
-                <a href="/terms.html" class="hover:text-pink-500 transition-colors">เงื่อนไขการใช้งาน</a>
+                <a href="/privacy-policy.html" class="hover:text-pink-700 dark:hover:text-pink-400 transition-colors">นโยบายส่วนบุคคล</a>
+                <a href="/terms.html" class="hover:text-pink-700 dark:hover:text-pink-400 transition-colors">เงื่อนไขการใช้งาน</a>
             </div>
         </div>
     </div>
 </footer>
 
+<!-- [FIX MINIFIED JS] ย่อขนาดไฟล์สคริปต์หน้าบ้านเพื่อปรับปรุง Performance และความหน่วงเธรดหลัก (Main thread score) -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.getElementById('sidebar-menu');
-    const overlay = document.getElementById('sidebar-overlay');
-    const closeBtn = document.getElementById('close-menu-btn');
-
-    const toggleMenu = (show) => {
-        if (!sidebar || !overlay) return;
-        if (show) {
-            overlay.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                overlay.classList.remove('opacity-0');
-                sidebar.classList.remove('translate-x-full');
-            });
-            document.body.style.overflow = 'hidden';
-        } else {
-            overlay.classList.add('opacity-0');
-            sidebar.classList.add('translate-x-full');
-            document.body.style.overflow = '';
-            setTimeout(() => overlay.classList.add('hidden'), 300);
-        }
-    };
-
-    if (menuToggle) menuToggle.addEventListener('click', () => toggleMenu(true));
-    if (closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
-    if (overlay) overlay.addEventListener('click', () => toggleMenu(false));
-
-    const themeBtn = document.querySelector('.theme-toggle-btn');
-    if (themeBtn) {
-        themeBtn.addEventListener('click', () => {
-            const htmlClass = document.documentElement.classList;
-            htmlClass.toggle('dark');
-            const icon = themeBtn.querySelector('.theme-toggle-icon');
-            if (icon) {
-                if (htmlClass.contains('dark')) {
-                    icon.classList.replace('fa-sun', 'fa-moon');
-                } else {
-                    icon.classList.replace('fa-moon', 'fa-sun');
-                }
-            }
-        });
-    }
-  });
+  document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("menu-toggle"),t=document.getElementById("sidebar-menu"),n=document.getElementById("sidebar-overlay"),o=document.getElementById("close-menu-btn"),a=e=>{t&&n&&(e?(n.classList.remove("hidden"),requestAnimationFrame(()=>{n.classList.remove("opacity-0"),t.classList.remove("translate-x-full")}),document.body.style.overflow="hidden"):(n.classList.add("opacity-0"),t.classList.add("translate-x-full"),document.body.style.overflow="",setTimeout(()=>n.classList.add("hidden"),300)))};e&&e.addEventListener("click",()=>a(!0)),o&&o.addEventListener("click",()=>a(!1)),n&&n.addEventListener("click",()=>a(!1));const c=document.querySelector(".theme-toggle-btn");c&&c.addEventListener("click",()=>{const e=document.documentElement.classList;e.toggle("dark");const t=c.querySelector(".theme-toggle-icon");t&&(e.contains("dark")?t.classList.replace("fa-sun","fa-moon"):t.classList.replace("fa-moon","fa-sun"))})});
 </script>
 
 <script type="module" src="/main.js"></script>
