@@ -800,42 +800,40 @@ const htmlTemplate = `<!DOCTYPE html>
   </div>
 </nav>
 
-<main class="pt-20 pb-12 bg-white dark:bg-[#07070a] text-gray-900 dark:text-gray-100">
-  <div class="container mx-auto px-4 max-w-6xl space-y-12">
-    <section class="relative overflow-hidden rounded-[28px] border border-gray-200/80 dark:border-white/10 bg-gradient-to-b from-white to-gray-50 dark:from-white/[0.03] dark:to-white/[0.015] shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
-      <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.12),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(168,85,247,0.10),transparent_28%)]"></div>
-      <div class="relative px-5 py-10 md:px-10 md:py-14 text-center space-y-6">
-        <div class="inline-flex items-center gap-2 rounded-full border border-pink-500/20 bg-pink-500/8 px-4 py-2 text-[11px] md:text-xs font-semibold tracking-[0.24em] uppercase text-pink-700 dark:text-pink-300">
-          <span class="h-2 w-2 rounded-full bg-pink-500"></span>
-          ${escapeHTML(provinceName)} Update
-        </div>
+<main class="pt-20 pb-10">
+  <div class="container mx-auto px-4 space-y-16">
 
-        <div class="mx-auto max-w-4xl space-y-4">
-          <h1 id="hero-h1" class="text-3xl sm:text-4xl md:text-5xl font-black leading-[1.05] tracking-[-0.03em] text-gray-900 dark:text-white">
-            ${escapeHTML(h1Text)}
-          </h1>
-          <p class="mx-auto max-w-2xl text-sm sm:text-base md:text-lg leading-7 text-gray-600 dark:text-gray-300">
-            ${escapeHTML(h2Text)}
-          </p>
-        </div>
+    <section class="text-center space-y-4" aria-labelledby="hero-h1">
+      <h1 id="hero-h1" class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight">
+        ไซด์ไลน์${provinceName} ฟิวแฟน เด็กเอ็น รับงาน${provinceName} ตรงปก
+      </h1>
 
-        <div class="mx-auto grid max-w-3xl gap-3 sm:grid-cols-3">
-          <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] px-4 py-4 text-left backdrop-blur">
-            <div class="text-[11px] uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">พื้นที่บริการ</div>
-            <div class="mt-1 text-sm font-bold text-gray-900 dark:text-white">${escapeHTML(provinceName)}</div>
-          </div>
-          <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] px-4 py-4 text-left backdrop-blur">
-            <div class="text-[11px] uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">โซนแนะนำ</div>
-            <div class="mt-1 text-sm font-bold text-gray-900 dark:text-white">${escapeHTML(zoneText || "พื้นที่ใกล้เคียง")}</div>
-          </div>
-          <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] px-4 py-4 text-left backdrop-blur">
-            <div class="text-[11px] uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">อัปเดตล่าสุด</div>
-            <div class="mt-1 text-sm font-bold text-gray-900 dark:text-white">${escapeHTML(CURRENTMONTH)} ${CURRENTYEAR}</div>
-          </div>
-        </div>
+      <a href="/" aria-label="หน้าแรก" 
+         class="block mx-auto rounded-2xl overflow-hidden shadow-lg max-w-3xl focus:outline-none focus:ring-4 focus:ring-pink-400 transition-all duration-300">
+        <img 
+          src="/images/hero-sidelinechiangmai-1200.webp"
+          srcset="/images/hero-sidelinechiangmai-600.webp 600w, 
+                  /images/hero-sidelinechiangmai-800.webp 800w, 
+                  /images/hero-sidelinechiangmai-1200.webp 1200w"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+          alt="ภาพน้องๆสาวๆ รับงานฟิวแฟน ไซด์ไลน์${provinceName} ตรงปก 100% ไม่ต้องมัดจำ"
+          width="1200" height="800"
+          class="w-full h-auto rounded-2xl object-cover aspect-[3/2] transition-transform duration-500 hover:scale-[1.02]"
+          loading="eager" decoding="async" fetchpriority="high" />
+      </a>
 
-        <div class="mx-auto max-w-4xl overflow-hidden rounded-[24px] border border-gray-200 dark:border-white/10 bg-black/5 dark:bg-white/[0.03] shadow-lg">
-          <img src="${firstImage}" alt="ภาพแนะนำพื้นที่ ${escapeHTML(provinceName)}" width="1200" height="630" class="h-auto w-full object-cover aspect-[16/9]" loading="eager" fetchpriority="high" />
+      <h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mt-6">
+        บริการไซด์ไลน์${provinceName}ระดับพรีเมียม คัดเกรดเพื่อคุณ
+      </h2>
+      <p class="mt-2 text-lg text-pink-600 dark:text-pink-400 font-medium">
+        ยินดีให้บริการค่ะ
+      </p>
+
+      <div class="container mx-auto px-4 mt-8">
+        <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 p-4 rounded-2xl text-center shadow-sm">
+            <h3 class="text-green-500 text-base font-bold flex items-center justify-center gap-2">
+               <i class="fas fa-shield-halved"></i> เจอตัวจริง จ่ายหน้างาน 100% (ไม่มีการเรียกเก็บเงินมัดจำล่วงหน้า)
+            </h3>
         </div>
       </div>
     </section>
@@ -1001,8 +999,7 @@ document.addEventListener('DOMContentLoaded', function() {
 return new Response(htmlTemplate, { 
     headers: { 
         "Content-Type": "text/html; charset=utf-8", 
-        // ปรับ s-maxage=10 (วินาที) และ stale-while-revalidate=604800 (7 วัน)
-        // ช่วยให้ข้อมูลโปรไฟล์ใหม่อัปเดตได้ไวขึ้นใน 10 วินาที และเก็บแคชเดิมเพื่อเซฟการยิงฐานข้อมูลเมื่อไม่มีข้อมูลใหม่
+่
         "Cache-Control": "public, max-age=0, s-maxage=10, stale-while-revalidate=604800, must-revalidate",
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY"
