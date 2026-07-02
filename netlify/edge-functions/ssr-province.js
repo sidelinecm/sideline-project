@@ -360,12 +360,13 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             return Response.redirect(new URL(`/location/${provinceValue}`, url.origin).toString(), 301);
         }
 
+                // 4. DATABASE INITIALIZATION & DATA FETCHING
         let supabase;
         try {
             supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         } catch (envError) {
-            console.error("Supabase config error:", envError.message);
-            return buildErrorPage(500, "Configuration Error", "ระบบเชื่อมต่อฐานข้อมูลล้มเหลว กรุณาติดต่อผู้ดูแลระบบ");
+            console.error("Environment Variable Error:", envError.message);
+            return buildErrorPage(500, "Configuration Error", "Server configuration is incomplete. Please contact administrator.", [], dynamicDomain);
         }
 
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
@@ -374,27 +375,21 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
             supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability")
                 .eq("provinceKey", provinceKey).eq("active", true)
-                .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(60),
+                .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
             supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
         ]);
 
+        // 5. FAIL-FAST 404 PREVENTION
         const provinceData = provinceRes.data;
         if (!provinceData) {
-            return buildErrorPage(404, "404 - ไม่พบหน้าเว็บ", `ไม่พบพิกัดจังหวัด "${provinceKey}" ที่คุณกำลังค้นหาในระบบ`);
+            const allProvinces = allProvincesRes.data || [];
+            return buildErrorPage(404, "404 ไม่พบพิกัดที่ต้องการ", `ขออภัยค่ะ ข้อมูลพิกัด "${provinceKey}" ไม่พบในระบบ หรืออาจถูกลบไปแล้ว`, allProvinces, dynamicDomain);
         }
 
         const safeProfiles = profilesRes.data || [];
         const allProvinces = allProvincesRes.data || [];
         const provinceName = provinceData.nameThai;
-const getSeoData = (key) => {
-    return PROVINCE_SEO_DATA[key] || {
-        h1: "บริการเพื่อนเที่ยวและดูแลแบบพรีเมียม",
-        h2: "ยินดีต้อนรับสู่บริการคุณภาพระดับพรีเมียม",
-        desc: "รายละเอียดการให้บริการที่ปลอดภัยและได้มาตรฐาน"
-    };
-};
-
-const seoData = getSeoData(normalizedSeoKey);
+        const seoData = PROVINCE_SEO_DATA[normalizedSeoKey] || PROVINCE_SEO_DATA.default;
         
         const now = new Date();
         const CURRENT_MONTH = now.toLocaleString("th-TH", { month: "short" });
@@ -407,14 +402,12 @@ const seoData = getSeoData(normalizedSeoKey);
             ? optimizeImg(dynamicDomain, safeProfiles[0].imagePath, 1200, 630) 
             : `${dynamicDomain}/images/hero-sidelinechiangmai-1200.webp`;
 
-        const title = `${seoData.h1 || 'บริการเพื่อนเที่ยว'} | ${provinceName} อัปเดตล่าสุด ${CURRENT_MONTH} ${CURRENT_YEAR}`;
-        const description = `ค้นหา${seoData.h1} ${seoData.h2} ยืนยันข้อมูลประวัติโปรไฟล์ปลอดภัยชำระเงินหน้างานปราศจากความเสี่ยงโอนมัดจำล่วงหน้า`;
+        const title = "ไซด์ไลน์" + provinceName + " รับงาน" + provinceName + " พรีเมียม (" + CURRENT_MONTH + " " + CURRENT_YEAR + ") | ตรงปก ปลอดภัย 100%";
+        const description = "รวมโปรไฟล์ ตัวท็อป! ไซด์ไลน์" + provinceName + " รับงานเอนเตอร์เทน เพื่อนเที่ยวระดับ VIP " + safeProfiles.length + " คน โซน " + seoData.zones.slice(0, 3).join(', ') + " ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด";
         const cleanDescription = stripHTML(description);
         
-        const deterministicRating = safeProfiles.length > 0 ? (4.6 + (safeProfiles.length % 4) / 10).toFixed(1) : "4.7";
-        const deterministicReviews = safeProfiles.length > 0 ? 30 + (safeProfiles.length * 3) : 15;
-
-
+        const deterministicRating = safeProfiles.length > 0 ? (4.5 + (safeProfiles.length % 5) / 10).toFixed(1) : "4.5";
+        const deterministicReviews = safeProfiles.length > 0 ? 50 + (safeProfiles.length * 2) : 10;
         const schemaGraph = [
             {
                 "@type": "Organization",
