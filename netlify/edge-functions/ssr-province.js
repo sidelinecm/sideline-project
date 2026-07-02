@@ -188,17 +188,17 @@ const getFullUrl = (domain, path) => {
     return `${domain}${cleanPath}`;
 };
 
-// [OPTIMIZED FOR SPEED] ปรับปรุงขนาดภาพและความละเอียดเพื่อเซฟ Bandwidth ของผู้ใช้งานมือถือให้ผ่านเกณฑ์ PageSpeed
+// เพิ่มประสิทธิภาพขนาดไฟล์รูปภาพและเปลี่ยนประเภทไฟล์เป็น WebP เพื่อประหยัดพื้นที่ 69KiB+
 const optimizeImg = (domain, path, width = 360, height = 480) => {
     if (!path) return getFullUrl(domain, "/images/default.webp");
     if (path.includes("res.cloudinary.com")) {
         if (path.includes("/upload/")) {
-            return path.replace("/upload/", `/upload/f_auto,q_auto,w_${width},h_${height},c_fill,g_face/`);
+            return path.replace("/upload/", `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`);
         }
         return path;
     }
     if (path.startsWith("http")) return path;
-    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=50&format=webp`;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=60&format=webp`;
 };
 
 const escapeHTML = (str) => {
@@ -257,10 +257,10 @@ function buildErrorPage(statusCode, title, message) {
     <style>
         body { background: #0b0f19; font-family: system-ui, -apple-system, sans-serif; color: white; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
         .box { max-width: 450px; padding: 40px 24px; border-radius: 20px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .code { font-size: 64px; font-weight: 800; color: #ec4899; margin-bottom: 12px; }
+        .code { font-size: 64px; font-weight: 800; color: #db2777; margin-bottom: 12px; }
         .title { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
         .msg { color: #9ca3af; margin-bottom: 28px; font-size: 14px; line-height: 1.6; }
-        .btn { display: inline-block; padding: 12px 36px; background: #ec4899; color: white; border-radius: 9999px; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+        .btn { display: inline-block; padding: 12px 36px; background: #db2777; color: white; border-radius: 9999px; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
         .btn:hover { opacity: 0.9; }
     </style>
 </head>
