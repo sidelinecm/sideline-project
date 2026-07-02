@@ -386,7 +386,15 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const safeProfiles = profilesRes.data || [];
         const allProvinces = allProvincesRes.data || [];
         const provinceName = provinceData.nameThai;
-        const seoData = PROVINCE_SEO_DATA[normalizedSeoKey] || PROVINCE_SEO_DATA.default;
+const getSeoData = (key) => {
+    return PROVINCE_SEO_DATA[key] || {
+        h1: "บริการเพื่อนเที่ยวและดูแลแบบพรีเมียม",
+        h2: "ยินดีต้อนรับสู่บริการคุณภาพระดับพรีเมียม",
+        desc: "รายละเอียดการให้บริการที่ปลอดภัยและได้มาตรฐาน"
+    };
+};
+
+const seoData = getSeoData(normalizedSeoKey);
         
         const now = new Date();
         const CURRENT_MONTH = now.toLocaleString("th-TH", { month: "short" });
@@ -399,14 +407,14 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             ? optimizeImg(dynamicDomain, safeProfiles[0].imagePath, 1200, 630) 
             : `${dynamicDomain}/images/hero-sidelinechiangmai-1200.webp`;
 
-        const title = `${seoData.h1} | ${provinceName} อัปเดตล่าสุด ${CURRENT_MONTH} ${CURRENT_YEAR}`;
+        const title = `${seoData.h1 || 'บริการเพื่อนเที่ยว'} | ${provinceName} อัปเดตล่าสุด ${CURRENT_MONTH} ${CURRENT_YEAR}`;
         const description = `ค้นหา${seoData.h1} ${seoData.h2} ยืนยันข้อมูลประวัติโปรไฟล์ปลอดภัยชำระเงินหน้างานปราศจากความเสี่ยงโอนมัดจำล่วงหน้า`;
         const cleanDescription = stripHTML(description);
         
         const deterministicRating = safeProfiles.length > 0 ? (4.6 + (safeProfiles.length % 4) / 10).toFixed(1) : "4.7";
         const deterministicReviews = safeProfiles.length > 0 ? 30 + (safeProfiles.length * 3) : 15;
 
-        // Structured Data Schema.org (JSON-LD) - อัปเกรดความถูกต้องและนำ containsPlace ออกเพื่อขจัด Rich Result Warning
+
         const schemaGraph = [
             {
                 "@type": "Organization",
@@ -429,7 +437,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             {
                 "@type": ["LocalBusiness", "EntertainmentBusiness"],
                 "@id": `${provinceUrl}/#localbusiness`,
-                "name": seoData.h1,
+                "name": "ไซด์ไลน์" + provinceName + " บริการรับงานและเด็กเอ็นเตอร์เทนระดับพรีเมียม",
                 "image": firstImage,
                 "telephone": CONFIG.PHONE,
                 "url": provinceUrl,
@@ -444,18 +452,18 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                     {
                         "@type": "AdministrativeArea",
                         "name": provinceName
-                    },
-                    ...seoData.zones.map(z => ({
-                        "@type": "AdministrativeArea",
-                        "name": "โซน" + z
-                    }))
+                    }
                 ],
+                "containsPlace": seoData.zones.map(z => ({
+                    "@type": "Place",
+                    "name": "โซน" + z
+                })),
                 "aggregateRating": safeProfiles.length > 0 ? {
                     "@type": "AggregateRating",
                     "ratingValue": deterministicRating,
                     "reviewCount": String(deterministicReviews)
                 } : undefined,
-                "priceRange": "฿฿"
+                "priceRange": "฿฿฿"
             },
             {
                 "@type": "CollectionPage",
@@ -470,19 +478,28 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             {
                 "@type": "ItemList",
                 "@id": `${provinceUrl}/#itemlist`,
-                "name": "รายชื่อผู้ดูแลและเพื่อนเที่ยว " + provinceName,
+                "name": "รายชื่อน้องๆ ไซด์ไลน์ " + provinceName,
                 "numberOfItems": safeProfiles.length,
                 "itemListElement": safeProfiles.map((p, i) => ({
                     "@type": "ListItem",
                     "position": i + 1,
                     "item": {
                         "@type": "Person",
-                        "name": p.name || "ผู้ให้บริการไม่ระบุชื่อ",
+                        "name": p.name || "ไม่ระบุชื่อ",
                         "url": `${dynamicDomain}/sideline/${p.slug || p.id}`,
-                        "image": optimizeImg(dynamicDomain, p.imagePath, 360, 480),
-                        "description": "โปรไฟล์แนะนำ " + (p.name || "") + " พิกัดโซน " + (p.location || provinceName)
+                        "image": optimizeImg(dynamicDomain, p.imagePath, 300, 400),
+                        "description": "โปรไฟล์น้อง" + (p.name || "") + " รับงานโซน " + (p.location || provinceName)
                     }
                 }))
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": `${provinceUrl}/#breadcrumb`,
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain },
+                    { "@type": "ListItem", "position": 2, "name": "รวมโปรไฟล์", "item": `${dynamicDomain}/profiles.html` },
+                    { "@type": "ListItem", "position": 3, "name": "ไซด์ไลน์" + provinceName, "item": provinceUrl }
+                ]
             }
         ];
 
@@ -500,58 +517,64 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-// [SECTION: FULLY REFACTORED HTML GENERATION]
+        // ✅ DYNAMIC CARD HTML 
+        const cardsHTML = safeProfiles
+            .map((p) => {
+                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
+                const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
+                const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
+                const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+                const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
+                const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
+                
+                const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
 
-// 1. สร้าง Cards HTML ด้วยการปรับลำดับ Heading จาก h4 เป็น h5 เพื่อให้โครงสร้าง Semantic ถูกต้อง
-const cardsHTML = safeProfiles
-    .map((p) => {
-        const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
-        const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
-        const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-        const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-        const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
-        const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
-        const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
+                return `
+                <div class="profile-card relative group flex flex-col justify-between" data-id="${p.id}" data-slug="${p.slug || p.id}">
+                    <div class="absolute top-3 left-3 z-20">
+                        <span class="neon-badge ${statusClass}">
+                            <span class="neon-dot"></span>
+                            <span>${statusText}</span>
+                        </span>
+                    </div>
+                    
+                    <div class="absolute top-3 right-3 z-20">
+                        <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10" aria-label="ถูกใจโปรไฟล์น้อง ${cleanName}">
+                            <i class="fa-solid fa-heart text-sm"></i>
+                        </button>
+                    </div>
 
-        return `
-        <div class="profile-card relative group flex flex-col justify-between" data-id="${p.id}" data-slug="${p.slug || p.id}">
-            <div class="absolute top-3 left-3 z-20">
-                <span class="neon-badge ${statusClass}">
-                    <span class="neon-dot"></span>
-                    <span>${statusText}</span>
-                </span>
-            </div>
-            
-            <div class="absolute top-3 right-3 z-20">
-                <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10" aria-label="ถูกใจโปรไฟล์น้อง ${cleanName}">
-                    <i class="fa-solid fa-heart text-sm"></i>
-                </button>
-            </div>
+                    <a href="${profileLink}" class="card-fixed-ratio block" aria-label="ดูโปรไฟล์น้อง ${cleanName}">
+                        <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
+                             alt="รูปโปรไฟล์น้อง ${cleanName} รับงาน ${provinceName}" 
+                             class="card-image"
+                             width="300" height="400"
+                             loading="lazy" decoding="async" />
+                        <div class="gradient-overlay-fixed"></div>
+                    </a>
 
-            <a href="${profileLink}" class="card-fixed-ratio block" aria-label="ดูโปรไฟล์น้อง ${cleanName}">
-                <img src="${optimizeImg(dynamicDomain, p.imagePath, 360, 480)}" 
-                     alt="รูปโปรไฟล์น้อง ${cleanName} พื้นที่ ${provinceName}" 
-                     class="card-image w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                     width="360" height="480"
-                     loading="lazy" decoding="async" />
-                <div class="gradient-overlay-fixed"></div>
-            </a>
-
-            <div class="mt-3 text-left">
-                <div class="flex items-center justify-between">
-                    <h5 class="text-sm font-bold text-gray-900 dark:text-white truncate">น้อง${cleanName}</h5>
-                    <span class="text-pink-700 dark:text-pink-400 font-extrabold text-sm">${displayRate}</span>
+                    <div class="mt-4 text-left">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-lg font-bold text-gray-900 dark:text-white truncate">น้อง${cleanName}</h4>
+                            <span class="text-pink-600 dark:text-pink-400 font-extrabold text-base">${displayRate}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                            <i class="fas fa-map-marker-alt text-pink-500 mr-1"></i> ${profileLocation}
+                        </p>
+                    </div>
                 </div>
-                <p class="text-[11px] text-gray-700 dark:text-gray-300 mt-1 truncate">
-                    <i class="fas fa-map-marker-alt text-pink-600 dark:text-pink-400 mr-1"></i> ${profileLocation}
-                </p>
-            </div>
-        </div>
-        `;
-    })
-    .join("");
+                `;
+            })
+            .join("");
 
+        const termsAndConditions = [
+            { t: "การจองคิวน้องๆ ส่วนตัว", d: "เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน" + escapeHTML(provinceName) + " สมาชิกจองได้ครั้งละ 1 คิว เพื่อรักษามาตรฐานการบริการ" },
+            { t: "ความปลอดภัย 100% ไร้มัดจำ", d: "ชำระเงินหน้างานเมื่อเจอตัวน้องจริงเท่านั้น! หมดปัญหาการโดนหลอกโอนมัดจำ" },
+            { t: "การตรวจสอบโปรไฟล์เข้มงวด", d: "รับประกันความตรงปก ไม่ตรงปกยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ" },
+            { t: "ข้อมูลลับระดับสูงสุด", d: "ข้อมูลการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
+        ];
 
+        // ✅ RECONCILED INDEX HTML TEMPLATE
         const htmlTemplate = `<!DOCTYPE html> 
 <html lang="th" class="scroll-smooth antialiased dark:bg-gray-900 dark:text-gray-100 dark">
 <head>
@@ -562,7 +585,7 @@ const cardsHTML = safeProfiles
 
   <title>${title}</title>
   <meta name="description" content="${cleanDescription}"/>
-  <meta name="keywords" content="${seoData.lsi.join(', ')}, ${provinceName}">
+  <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ฟิวแฟน, ตรงปก, ไม่มีโอนมัดจำ">
 
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" id="canonical-link" href="${provinceUrl}">
@@ -576,43 +599,129 @@ const cardsHTML = safeProfiles
   <meta property="og:image" content="${firstImage}">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:title" content="ไซด์ไลน์${provinceName} รับงาน${provinceName} ฟิวแฟน | ไม่มัดจำ จ่ายหน้างาน">
   <meta name="twitter:description" content="${cleanDescription}">
   <meta name="twitter:image" content="${firstImage}">
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
 
+  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://hgzbgpbmymoiwjpaypvl.supabase.co">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-  <!-- [FIX RENDER BLOCKING] โหลดฟอนต์และไอคอนแบบ Asynchronous เพื่อแก้ไขปัญหาความเร็วของบราวเซอร์ -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="modulepreload" href="/main.js">
 
   <link rel="stylesheet" href="/styles.css" onerror="this.onerror=null;this.href='';">
-    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pink: {
+              400: '#f472b6',
+              500: '#ec4899',
+              600: '#db2777',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
+
+  <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+
   <style>
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
-    .profile-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px;transition:transform .2s,border-color .2s}
-    .profile-card:hover{border-color:rgba(236,72,153,0.3)}
-    @media(max-width:767px){#profiles-container{grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 4px}}
-    .like-button-wrapper .fa-heart{color:rgba(255,255,255,0.8);transition:color .2s}
-    .like-button-wrapper.liked .fa-heart{color:#ec4899}
-    .neon-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:99px;font-weight:700;font-size:10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1)}
-    .neon-dot{width:6px;height:6px;border-radius:50%}
-    .status-available-neon .neon-dot{background-color:#10b981}
-    .status-busy-neon .neon-dot{background-color:#ef4444}
-    .card-fixed-ratio{position:relative;width:100%;padding-top:133.33%;overflow:hidden;border-radius:8px}
-    .card-fixed-ratio img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
-    .gradient-overlay-fixed{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0) 100%);pointer-events:none}
-    .glass-panel{background:rgba(10,10,15,0.4)!important;backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.03)!important}
+    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
+    section { padding: 20px; text-align: center; }
+    .profile-image img { image-orientation: none; }
+    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
+    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
+    @media (max-width: 767px) {
+        #profiles-container { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
+        .profile-card { padding: 10px; border-radius: 12px; }
+    }
+
+    /* --- CSS ปุ่มไลค์ --- */
+    .like-button-wrapper .fa-heart {
+        text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+        color: rgba(255, 255, 255, 0.8);
+        transition: all 0.2s ease-in-out;
+    }
+    .like-button-wrapper:hover .fa-heart {
+        transform: scale(1.15);
+        color: rgba(255, 255, 255, 1);
+    }
+    .like-button-wrapper.liked .fa-heart {
+        color: #ec4899;
+    }
+    .like-button-wrapper.liked:hover .fa-heart {
+        color: #f472b6;
+    }
+    @keyframes heart-beat-animation {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    .like-button-wrapper.liked .fa-heart {
+        animation: heart-beat-animation 0.3s ease-in-out;
+    }
+
+    /* --- Neon Status Badge --- */
+    .neon-badge {
+        display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; font-family: 'Prompt', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.5px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.15); z-index: 20;
+    }
+    .neon-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; z-index: 1; }
+    .neon-dot::before {
+        content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    }
+    .neon-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; z-index: 1; }
+    .status-available-neon .neon-dot { background-color: #00E676; box-shadow: 0 0 8px #00E676; }
+    .status-busy-neon .neon-dot { background-color: #FF2E63; box-shadow: 0 0 8px #FF2E63; }
+
+    /* --- Card Fixed Ratio --- */
+    .card-fixed-ratio {
+        position: relative;
+        width: 100%;
+        padding-top: 133.33%; /* 3:4 Aspect Ratio */
+        overflow: hidden;
+        border-radius: 12px;
+    }
+    .card-fixed-ratio img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .gradient-overlay-fixed {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+        pointer-events: none;
+    }
     
-    /* [CONTRAST COMPLIANT] อัปเกรดสีปุ่มแอดไลน์หลักเป็น #058235 และ Hover เป็น #046f2d (อัตราส่วนความสว่างกับข้อความสีขาวเท่ากับ 4.95:1 ผ่านเกณฑ์มาตรฐาน WCAG AA) */
-    .btn-line-shared{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background-color:#058235;color:#ffffff;padding:10px;border-radius:12px;font-weight:700;font-size:14px;transition:background-color .2s;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)}
-    .btn-line-shared:hover{background-color:#046f2d}
+    .glass-panel {
+        background: rgba(10, 10, 15, 0.45) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    }
   </style>
-  <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}::-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.left-0{left:0px}.left-1\/2{left:50%}.left-3{left:0.75rem}.right-0{right:0px}.right-3{right:0.75rem}.top-0{top:0px}.top-3{top:0.75rem}.z-20{z-index:20}.z-40{z-index:40}.z-\[2000\]{z-index:2000}.z-\[2420\]{z-index:2420}.m-0{margin:0px}.mx-auto{margin-left:auto;margin-right:auto}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mr-1{margin-right:0.25rem}.mr-2{margin-right:0.5rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.aspect-\[16\/9\]{aspect-ratio:16/9}.aspect-\[3\/2\]{aspect-ratio:3/2}.h-14{height:3.5rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-\[26px\]{height:26px}.h-auto{height:auto}.h-full{height:100%}.w-5{width:1.25rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-\[260px\]{width:260px}.w-auto{width:auto}.w-full{width:100%}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.max-w-4xl{max-width:56rem}.max-w-6xl{max-width:72rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-full{--tw-translate-x:100%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.list-disc{list-style-type:disc}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-4{gap:1rem}.space-y-12 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(3rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(3rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.scroll-smooth{scroll-behavior:smooth}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-l-4{border-left-width:4px}.border-t{border-top-width:1px}.border-emerald-500\/20{border-color:rgb(16 185 129 / 0.2)}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-pink-500{--tw-border-opacity:1;border-color:rgb(236 72 153 / var(--tw-border-opacity, 1))}.border-pink-500\/20{border-color:rgb(236 72 153 / 0.2)}.border-transparent{border-color:transparent}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.bg-\[\#058235\]{--tw-bg-opacity:1;background-color:rgb(5 130 53 / var(--tw-bg-opacity, 1))}.bg-\[\#07070A\]\/80{background-color:rgb(7 7 10 / 0.8)}.bg-black\/40{background-color:rgb(0 0 0 / 0.4)}.bg-emerald-500\/5{background-color:rgb(16 185 129 / 0.05)}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/80{background-color:rgb(255 255 255 / 0.8)}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-pink-500{--tw-gradient-from:#ec4899 var(--tw-gradient-from-position);--tw-gradient-to:rgb(236 72 153 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-yellow-500{--tw-gradient-to:#eab308 var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.object-contain{object-fit:contain}.object-cover{object-fit:cover}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-10{padding-bottom:2.5rem}.pl-3{padding-left:0.75rem}.pl-5{padding-left:1.25rem}.pl-6{padding-left:1.5rem}.pt-20{padding-top:5rem}.pt-4{padding-top:1rem}.text-left{text-align:left}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity, 1))}.text-pink-600{--tw-text-opacity:1;color:rgb(219 39 119 / var(--tw-text-opacity, 1))}.text-pink-700{--tw-text-opacity:1;color:rgb(190 24 93 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased{-webkit-font-smoothing:grayscale}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.brightness-200{--tw-brightness:brightness(2);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-242{transition-duration:242ms}.hover\:bg-\[\#046f2d\]:hover{--tw-bg-opacity:1;background-color:rgb(4 111 45 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.hover\:bg-pink-600\/10:hover{background-color:rgb(219 39 119 / 0.1)}.hover\:text-gray-900:hover{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity, 1))}.hover\:text-pink-600:hover{--tw-text-opacity:1;color:rgb(219 39 119 / var(--tw-text-opacity, 1))}.hover\:text-pink-700:hover{--tw-text-opacity:1;color:rgb(190 24 93 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.group:hover .group-hover\:scale-105{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.dark\:border-gray-700\/50:is(.dark *){border-color:rgb(55 65 81 / 0.5)}.dark\:border-white\/10:is(.dark *){border-color:rgb(255 255 255 / 0.1)}.dark\:border-white\/5:is(.dark *){border-color:rgb(255 255 255 / 0.05)}.dark\:bg-\[\#040406\]:is(.dark *){--tw-bg-opacity:1;background-color:rgb(4 4 6 / var(--tw-bg-opacity, 1))}.dark\:bg-\[\#07070A\]:is(.dark *){--tw-bg-opacity:1;background-color:rgb(7 7 10 / var(--tw-bg-opacity, 1))}.dark\:bg-\[\#07070a\]:is(.dark *){--tw-bg-opacity:1;background-color:rgb(7 7 10 / var(--tw-bg-opacity, 1))}.dark\:bg-\[\#07070a\]\/80:is(.dark *){background-color:rgb(7 7 10 / 0.8)}.dark\:bg-emerald-500\/10:is(.dark *){background-color:rgb(16 185 129 / 0.1)}.dark\:bg-gray-800\/40:is(.dark *){background-color:rgb(31 41 55 / 0.4)}.dark\:bg-gray-900:is(.dark *){--tw-bg-opacity:1;background-color:rgb(17 24 39 / var(--tw-bg-opacity, 1))}.dark\:bg-gray-900\/50:is(.dark *){background-color:rgb(17 24 39 / 0.5)}.dark\:bg-white\/5:is(.dark *){background-color:rgb(255 255 255 / 0.05)}.dark\:text-emerald-322:is(.dark *){--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.dark\:text-gray-100:is(.dark *){--tw-text-opacity:1;color:rgb(243 244 246 / var(--tw-text-opacity, 1))}.dark\:text-gray-200:is(.dark *){--tw-text-opacity:1;color:rgb(229 231 235 / var(--tw-text-opacity, 1))}.dark\:text-gray-242:is(.dark *){--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.dark\:text-gray-322:is(.dark *){--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.dark\:text-pink-322:is(.dark *){--tw-text-opacity:1;color:rgb(244 114 182 / var(--tw-text-opacity, 1))}.dark\:text-transparent:is(.dark *){color:transparent}.dark\:text-white:is(.dark *){--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.dark\:text-white\/50:is(.dark *){color:rgb(255 255 255 / 0.5)}.dark\:hover\:bg-gray-800:hover:is(.dark *){--tw-bg-opacity:1;background-color:rgb(31 41 55 / var(--tw-bg-opacity, 1))}.dark\:hover\:bg-white\/5:hover:is(.dark *){background-color:rgb(255 255 255 / 0.05)}.dark\:hover\:text-pink-322:hover:is(.dark *){--tw-text-opacity:1;color:rgb(244 114 182 / var(--tw-text-opacity, 1))}.dark\:hover\:text-white:hover:is(.dark *){--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:block{display:block}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}@media (min-width: 768px){.md\:flex-row{flex-direction:row}.md\:px-8{padding-left:2rem;padding-right:2rem}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 1024px){.lg\:flex{display:flex}.lg\:hidden{display:none}.lg\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}@media (min-width: 1280px){.xl\:grid-cols-5{grid-template-columns:repeat(5, minmax(0, 1fr))}}</style>
 </head>
 
 <body class="antialiased bg-white dark:bg-[#07070a] text-gray-900 dark:text-gray-100" data-page="home">
