@@ -1,57 +1,81 @@
-robots.txt ไม่ถูกต้อง พบข้อผิดพลาด 12 รายการ
+# =================================================
+# ROBOTS.TXT FOR SIDELINE THAILAND
+# Optimized for Googlebot & SEO Privacy
+# =================================================
 
-หากไฟล์ robots.txt มีรูปแบบไม่ถูกต้อง Crawler อาจไม่เข้าใจวิธีที่คุณต้องการให้ Crawl หรือจัดทำดัชนีเว็บไซต์ ดูข้อมูลเพิ่มเติมเกี่ยวกับ robots.txt
+# Global rules for all search engines
+User-agent: *
 
-Line #
+# Block backend and user-specific pages
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /administrator/
+Disallow: /login/
+Disallow: /register/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /my-account/
+Disallow: /search/
+Disallow: /api/
 
-Content
+# Prevent common marketing and tracking URL parameters from being crawled
+# Note: not all crawlers honor parameter-based rules, but this reduces duplicate crawls.
+Disallow: /*?*utm_*
+Disallow: /*?*fbclid*
+Disallow: /*?*gclid*
+Disallow: /*?*gclsrc*
+Disallow: /*?*affiliate*
+Disallow: /*?*ref*
 
-Error
+# Allow static assets (ensure resources like CSS/JS/images can be crawled)
+Allow: /wp-admin/admin-ajax.php
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
 
-1
+# ========================================================
+# Block specific known competitive-analysis bots
+# ========================================================
 
-=================================================Syntax not understood
+User-agent: AhrefsBot
+Disallow: /
 
-3
+User-agent: MJ12bot
+Disallow: /
 
-ROBOTS.TXT FOR SIDELINE THAILANDSyntax not understood
+User-agent: SemrushBot
+Disallow: /
 
-5
+User-agent: SemrushBot-SA
+Disallow: /
 
-Optimized for Googlebot & SEO PrivacySyntax not understood
+User-agent: DotBot
+Disallow: /
 
-7
+User-agent: Rogerbot
+Disallow: /
 
-=================================================Syntax not understood
+User-agent: Mozlila
+Disallow: /
 
-11
+User-agent: MegaIndex.ru
+Disallow: /
 
-Block backend and user-specific pagesSyntax not understood
+User-agent: BLEXBot
+Disallow: /
 
-20
+User-agent: Serpstatbot
+Disallow: /
 
-Prevent common marketing and tracking URL parameters from being crawledSyntax not understood
+User-agent: UptimeRobot
+Disallow: /
 
-22
-
-Note: not all crawlers honor parameter-based rules, but this reduces duplicate crawls.Unknown directive
-
-29
-
-Allow static assets (ensure resources like CSS/JS/images can be crawled)Syntax not understood
-
-34
-
-Block specific known competitive-analysis botsSyntax not understood
-
-57
-
-========================================================Syntax not understood
-
-59
-
-SITEMAP LOCATIONSyntax not understood
-
-61
-
-========================================================Syntax not understood
+# ========================================================
+# SITEMAP LOCATION
+# ========================================================
+Sitemap: https://sidelinechiangmai.netlify.app/sitemap_index.xml
+Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml
