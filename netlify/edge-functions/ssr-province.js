@@ -423,7 +423,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const deterministicRating = safeProfiles.length > 0 ? (4.6 + (safeProfiles.length % 4) / 10).toFixed(1) : "4.7";
         const deterministicReviews = safeProfiles.length > 0 ? 30 + (safeProfiles.length * 3) : 15;
 
-        // Structured Data Schema.org (JSON-LD)
+        // Structured Data Schema.org (JSON-LD) - อัปเกรดความถูกต้องและนำ containsPlace ออกเพื่อขจัด Rich Result Warning
         const schemaGraph = [
             {
                 "@type": "Organization",
@@ -573,30 +573,25 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#db2777">
 
-  <!-- แทรกข้อมูลโครงสร้าง Schema.org (JSON-LD) ตรงนี้เพื่อให้ Google นำไปแสดงผลริชมีเดียครับ -->
-  <script type="application/ld+json">
-    \${JSON.stringify(schemaData)}
-  </script>
-
-  <title>\${title}</title>
-  <meta name="description" content="\${cleanDescription}"/>
-  <meta name="keywords" content="\${seoData.lsi.join(', ')}, \${provinceName}">
+  <title>${title}</title>
+  <meta name="description" content="${cleanDescription}"/>
+  <meta name="keywords" content="${seoData.lsi.join(', ')}, ${provinceName}">
 
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" id="canonical-link" href="\${provinceUrl}">
+  <link rel="canonical" id="canonical-link" href="${provinceUrl}">
 
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="Sideline Chiangmai">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="\${title}">
-  <meta property="og:description" content="\${cleanDescription}">
-  <meta property="og:url" content="\${provinceUrl}">
-  <meta property="og:image" content="\${firstImage}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${cleanDescription}">
+  <meta property="og:url" content="${provinceUrl}">
+  <meta property="og:image" content="${firstImage}">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="\${title}">
-  <meta name="twitter:description" content="\${cleanDescription}">
-  <meta name="twitter:image" content="\${firstImage}">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${cleanDescription}">
+  <meta name="twitter:image" content="${firstImage}">
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -604,12 +599,11 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-  <!-- [FIX RENDER BLOCKING] ปรับสไตล์การโหลด CSS ภายนอกไม่ให้ขัดขวางการวาดภาพหน้าจอครั้งแรก (FCP) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <!-- [FIX RENDER BLOCKING] โหลดฟอนต์และไอคอนแบบ Asynchronous เพื่อแก้ไขปัญหาความเร็วของบราวเซอร์ -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
   <link rel="stylesheet" href="/styles.css" onerror="this.onerror=null;this.href='';">
-  
-  <!-- [PERFORMANCE SOLVED] รวม CSS ที่สกัดมาพร้อมใช้งานแบบ Static (ลบสคริปต์ cdn.tailwindcss.com ออกถาวร) ปรับสีปุ่ม LINE เป็นโทน #058235 เพื่อผ่านการตรวจสอบ WCAG AA -->
   <style>
     body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
     .profile-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px;transition:transform .2s,border-color .2s}
