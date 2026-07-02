@@ -571,25 +571,30 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#db2777">
 
-  <title>${title}</title>
-  <meta name="description" content="${cleanDescription}"/>
-  <meta name="keywords" content="${seoData.lsi.join(', ')}, ${provinceName}">
+  <!-- แทรกข้อมูลโครงสร้าง Schema.org (JSON-LD) ตรงนี้เพื่อให้ Google นำไปแสดงผลริชมีเดียครับ -->
+  <script type="application/ld+json">
+    \${JSON.stringify(schemaData)}
+  </script>
+
+  <title>\${title}</title>
+  <meta name="description" content="\${cleanDescription}"/>
+  <meta name="keywords" content="\${seoData.lsi.join(', ')}, \${provinceName}">
 
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" id="canonical-link" href="${provinceUrl}">
+  <link rel="canonical" id="canonical-link" href="\${provinceUrl}">
 
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="Sideline Chiangmai">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="${title}">
-  <meta property="og:description" content="${cleanDescription}">
-  <meta property="og:url" content="${provinceUrl}">
-  <meta property="og:image" content="${firstImage}">
+  <meta property="og:title" content="\${title}">
+  <meta property="og:description" content="\${cleanDescription}">
+  <meta property="og:url" content="\${provinceUrl}">
+  <meta property="og:image" content="\${firstImage}">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
-  <meta name="twitter:description" content="${cleanDescription}">
-  <meta name="twitter:image" content="${firstImage}">
+  <meta name="twitter:title" content="\${title}">
+  <meta name="twitter:description" content="\${cleanDescription}">
+  <meta name="twitter:image" content="\${firstImage}">
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
