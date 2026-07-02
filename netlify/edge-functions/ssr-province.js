@@ -1,5 +1,3 @@
---- START OF FILE ssr-province.js ---
-
 /**
  * [ SYSTEM CORE - REFACTORED & FULLY AUDITED ]
  * Project: Nexus Entity Framework - ULTIMATE PROVINCE MOTOR
