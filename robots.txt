@@ -1,64 +1,57 @@
-=================================================
+robots.txt ไม่ถูกต้อง พบข้อผิดพลาด 12 รายการ
 
-ROBOTS.TXT FOR SIDELINE THAILAND
+หากไฟล์ robots.txt มีรูปแบบไม่ถูกต้อง Crawler อาจไม่เข้าใจวิธีที่คุณต้องการให้ Crawl หรือจัดทำดัชนีเว็บไซต์ ดูข้อมูลเพิ่มเติมเกี่ยวกับ robots.txt
 
-Optimized for Googlebot & SEO Privacy
+Line #
 
-=================================================
+Content
 
-User-agent: *
+Error
 
-Block backend and user-specific pages
+1
 
-Disallow: /admin/
-Disallow: /login/
-Disallow: /register/
-Disallow: /me/
-Disallow: /settings/
-Disallow: /search
+=================================================Syntax not understood
 
-Prevent common marketing and tracking URL parameters from being crawled
+3
 
-Note: not all crawlers honor parameter-based rules, but this reduces duplicate crawls.
+ROBOTS.TXT FOR SIDELINE THAILANDSyntax not understood
 
-Disallow: /*?utm_source=
-Disallow: /*?fbclid=
-Disallow: /*?gclid=
-Disallow: /*?_kx=
+5
 
-Allow static assets (ensure resources like CSS/JS/images can be crawled)
+Optimized for Googlebot & SEO PrivacySyntax not understood
 
-Allow: /assets/
-Allow: /assets/*
+7
 
-Block specific known competitive-analysis bots
+=================================================Syntax not understood
 
-User-agent: AhrefsBot
-Disallow: /
+11
 
-User-agent: SemrushBot
-Disallow: /
+Block backend and user-specific pagesSyntax not understood
 
-User-agent: DotBot
-Disallow: /
+20
 
-User-agent: Rogerbot
-Disallow: /
+Prevent common marketing and tracking URL parameters from being crawledSyntax not understood
 
-User-agent: MJ12bot
-Disallow: /
+22
 
-User-agent: MegaIndex.ru
-Disallow: /
+Note: not all crawlers honor parameter-based rules, but this reduces duplicate crawls.Unknown directive
 
-User-agent: BLEXBot
-Disallow: /
+29
 
-========================================================
+Allow static assets (ensure resources like CSS/JS/images can be crawled)Syntax not understood
 
-SITEMAP LOCATION
+34
 
-========================================================
+Block specific known competitive-analysis botsSyntax not understood
 
-Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml
+57
 
+========================================================Syntax not understood
+
+59
+
+SITEMAP LOCATIONSyntax not understood
+
+61
+
+========================================================Syntax not understood
