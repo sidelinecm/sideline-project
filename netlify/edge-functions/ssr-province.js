@@ -8,10 +8,11 @@ const CONFIG = {
     get SUPABASE_KEY() {
         try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
     },
+    // โดเมนหลักสำหรับการประมวลผลเชิงระบบ
     ALLOWED_DOMAINS: ["sidelinechiangmai.netlify.app", "localhost", "127.0.0.1"],
     BRAND_NAME: "SIDELINE CHIANGMAI",
     TWITTER: "@sidelinechiangmai",
-    DESCRIPTION: "แหล่งข้อมูลเพื่อนเที่ยวและผู้ดูแลทริปพรีเมียม ผ่านการยืนยันตัวตน มีระบบความปลอดภัยด้วยการชำระเงินหน้างาน ปราศจากการโอนมัดจำก่อนพบตัวจริง",
+    DESCRIPTION: "แหล่งรวมน้องๆสาวๆ รับงานไซด์ไลน์ ฟิวแฟนเด็กเอ็นที่บริการ ระดับVIP ที่ตรวจสอบแล้วว่าตรงปกทั่วประเทศไทย รับประกันปลอดภัย ตรงปกฟิวแฟน100% บริการประทับใจ ไม่มีโอนมัดจำก่อนเจอตัวจริง📌",
     PHONE: "091-7895644",
     SOCIAL_LINKS: {
         line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -997,11 +998,25 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html>`;
 
-return new Response(htmlTemplate, {
-  headers: {
-    "Content-Type": "text/html; charset=utf-8",
-    "Cache-Control": "public, max-age=0, s-maxage=10, stale-while-revalidate=604800, must-revalidate",
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY"
-  }
+return new Response(htmlTemplate, { 
+    headers: { 
+        "Content-Type": "text/html; charset=utf-8", 
+        // ปรับ s-maxage=10 (วินาที) และ stale-while-revalidate=604800 (7 วัน)
+        // ช่วยให้ข้อมูลโปรไฟล์ใหม่อัปเดตได้ไวขึ้นใน 10 วินาที และเก็บแคชเดิมเพื่อเซฟการยิงฐานข้อมูลเมื่อไม่มีข้อมูลใหม่
+        "Cache-Control": "public, max-age=0, s-maxage=10, stale-while-revalidate=604800, must-revalidate",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY"
+    } 
 });
+
+} catch (error) {
+    console.error("SSR Fatal Error:", error);
+    return buildErrorPage(500, "500 - SYSTEM ERROR", "ขออภัยค่ะ เกิดข้อผิดพลาดชั่วคราวในการประมวลผลบนเซิร์ฟเวอร์");
+}
+};
+
+
+export const config = {
+    path: ["/", "/location/*", "/robots.txt", "/sitemap.xml"],
+    cache: "manual"
+};
