@@ -229,32 +229,41 @@ function verifyHostname(request) {
 }
 
 function buildErrorPage(statusCode, title, message, allProvinces = [], domain = "") {
-    return new Response(
-        `<!DOCTYPE html>
-<html lang="th">
+return new Response(
+    `<!DOCTYPE html>
+<html lang="th" class="dark">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>${statusCode} - ${escapeHTML(title)}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: linear-gradient(135deg, #07070A 0%, #111116 100%); font-family: system-ui, -apple-system, sans-serif; color: white; margin: 0; }
-        .flex-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; }
-        .text-center { text-align: center; max-width: 440px; }
-        .status-code { font-size: 72px; font-weight: 800; color: #FF2E63; margin-bottom: 16px; }
-        .title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-        .msg { color: #a1a1aa; margin-bottom: 32px; font-size: 14px; line-height: 1.6; }
-        .btn { display: inline-block; padding: 12px 32px; background: #FF2E63; color: white; border-radius: 9999px; font-weight: 500; text-decoration: none; transition: opacity 0.2s; }
-        .btn:hover { opacity: 0.9; }
+        body { background: #07070A; color: #fff; font-family: 'Prompt', sans-serif; }
+        .glass-panel { 
+            background: rgba(20, 20, 25, 0.6); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 24px; 
+        }
+        .text-gradient {
+            background: linear-gradient(to bottom, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
     </style>
 </head>
-<body>
-    <div class="flex-container">
-        <div class="text-center">
-            <div class="status-code">${statusCode}</div>
-            <h1 class="title">${escapeHTML(title)}</h1>
-            <p class="msg">${escapeHTML(message)}</p>
-            <a href="/" class="btn">กลับสู่หน้าหลัก</a>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="glass-panel w-full max-w-md p-10 text-center shadow-2xl">
+        <div class="text-6xl font-black text-pink-600 mb-6 drop-shadow-[0_0_15px_rgba(219,39,119,0.5)]">
+            ${statusCode}
         </div>
+        <h1 class="text-2xl font-bold text-white mb-3">${escapeHTML(title)}</h1>
+        <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+            ${escapeHTML(message)}
+        </p>
+        <a href="/" class="inline-block px-8 py-3 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-semibold rounded-full transition-all shadow-lg shadow-pink-600/20">
+            กลับหน้าหลัก
+        </a>
     </div>
 </body>
 </html>`,
@@ -498,62 +507,56 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-        // ✅ DYNAMIC CARD HTML 
-        const cardsHTML = safeProfiles
-            .map((p) => {
-                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
-                const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
-                const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-                const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-                const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
-                const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
-                
-                const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
+// ✅ DYNAMIC CARD HTML (เวอร์ชันปรับปรุงให้เข้ากับดีไซน์ใหม่)
+const cardsHTML = safeProfiles
+    .map((p) => {
+        const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
+        const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
+        const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
+        
+        // เช็คสถานะการรับงาน
+        const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+        const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
+        const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
+        const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
 
-                return `
-                <div class="profile-card relative group flex flex-col justify-between" data-id="${p.id}" data-slug="${p.slug || p.id}">
-                    <div class="absolute top-3 left-3 z-20">
-                        <span class="neon-badge ${statusClass}">
-                            <span class="neon-dot"></span>
-                            <span>${statusText}</span>
-                        </span>
-                    </div>
-                    
-                    <div class="absolute top-3 right-3 z-20">
-                        <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10" aria-label="ถูกใจโปรไฟล์น้อง ${cleanName}">
-                            <i class="fa-solid fa-heart text-sm"></i>
-                        </button>
-                    </div>
+        return `
+        <div class="profile-card relative group flex flex-col justify-between overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-pink-500/20" data-id="${p.id}">
+            
+            <div class="absolute top-3 left-3 z-20">
+                <span class="neon-badge ${statusClass} bg-black/40 backdrop-blur-md border border-white/10">
+                    <span class="neon-dot"></span>
+                    <span class="text-[10px] font-bold text-white">${statusText}</span>
+                </span>
+            </div>
 
-                    <a href="${profileLink}" class="card-fixed-ratio block" aria-label="ดูโปรไฟล์น้อง ${cleanName}">
-                        <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
-                             alt="รูปโปรไฟล์น้อง ${cleanName} รับงาน ${provinceName}" 
-                             class="card-image"
-                             width="300" height="400"
-                             loading="lazy" decoding="async" />
-                        <div class="gradient-overlay-fixed"></div>
-                    </a>
+            <div class="absolute top-3 right-3 z-20">
+                <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 hover:bg-pink-500 transition-colors" aria-label="ถูกใจน้อง ${cleanName}">
+                    <i class="fa-solid fa-heart text-xs text-white"></i>
+                </button>
+            </div>
 
-                    <div class="mt-4 text-left">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-lg font-bold text-gray-900 dark:text-white truncate">น้อง${cleanName}</h4>
-                            <span class="text-pink-600 dark:text-pink-400 font-extrabold text-base">${displayRate}</span>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                            <i class="fas fa-map-marker-alt text-pink-500 mr-1"></i> ${profileLocation}
-                        </p>
-                    </div>
+            <a href="${profileLink}" class="card-fixed-ratio block relative" aria-label="ดูโปรไฟล์น้อง ${cleanName}">
+                <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
+                     alt="น้อง${cleanName} รับงาน${provinceName}" 
+                     class="card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                     loading="lazy" decoding="async" />
+                <div class="gradient-overlay-fixed absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+            </a>
+
+            <div class="p-4 bg-gray-900 border-t border-white/5">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-base font-bold text-white truncate pr-2">น้อง${cleanName}</h4>
+                    <span class="text-pink-500 font-extrabold text-sm whitespace-nowrap">${displayRate}</span>
                 </div>
-                `;
-            })
-            .join("");
-
-        const termsAndConditions = [
-            { t: "การจองคิวน้องๆ ส่วนตัว", d: "เพื่อความเป็นส่วนตัวสูงสุดในการเรียกน้องๆ โซน" + escapeHTML(provinceName) + " สมาชิกจองได้ครั้งละ 1 คิว เพื่อรักษามาตรฐานการบริการ" },
-            { t: "ความปลอดภัย 100% ไร้มัดจำ", d: "ชำระเงินหน้างานเมื่อเจอตัวน้องจริงเท่านั้น! หมดปัญหาการโดนหลอกโอนมัดจำ" },
-            { t: "การตรวจสอบโปรไฟล์เข้มงวด", d: "รับประกันความตรงปก ไม่ตรงปกยกเลิกหน้างานได้ทันทีโดยไม่มีค่าใช้จ่ายใดๆ" },
-            { t: "ข้อมูลลับระดับสูงสุด", d: "ข้อมูลการนัดหมายและการสนทนาจะถูกลบและเก็บเป็นความลับสุดยอด (Zero-Log Policy)" }
-        ];
+                <p class="text-[11px] text-gray-400 flex items-center">
+                    <i class="fas fa-map-marker-alt text-pink-500 mr-1"></i> ${profileLocation}
+                </p>
+            </div>
+        </div>
+        `;
+    })
+    .join("");
 
         // ✅ RECONCILED INDEX HTML TEMPLATE
         const htmlTemplate = `<!DOCTYPE html> 
