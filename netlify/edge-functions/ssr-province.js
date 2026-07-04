@@ -378,6 +378,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const description = `รวมโปรไฟล์ไซด์ไลน์${provinceName} ฟิวแฟน เด็กเอ็นที่บริการระดับพรีเมียม ${safeProfiles.length} คน โซน ${seoData.zones.slice(0, 3).join(', ')} ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด`;
         const cleanDescription = stripHTML(description);
 
+                // Structured Data Schema.org (JSON-LD) - อัปเกรดความถูกต้องและนำ containsPlace ออกเพื่อขจัด Rich Result Warning
         const schemaGraph = [
             {
                 "@type": "Organization",
@@ -396,10 +397,80 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 "name": CONFIG.BRAND_NAME,
                 "publisher": { "@id": `${dynamicDomain}/#organization` },
                 "potentialAction": { "@type": "SearchAction", "target": `${dynamicDomain}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
+            },
+            {
+                "@type": ["LocalBusiness", "EntertainmentBusiness"],
+                "@id": `${provinceUrl}/#localbusiness`,
+                "name": seoData.h1,
+                "image": firstImage,
+                "telephone": CONFIG.PHONE,
+                "url": provinceUrl,
+                "description": cleanDescription,
+                "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
+                "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": seoData.geo ? seoData.geo.lat : 13.7563,
+                    "longitude": seoData.geo ? seoData.geo.lng : 100.5018
+                },
+                "areaServed": [
+                    {
+                        "@type": "AdministrativeArea",
+                        "name": provinceName
+                    },
+                    ...seoData.zones.map(z => ({
+                        "@type": "AdministrativeArea",
+                        "name": "โซน" + z
+                    }))
+                ],
+                "aggregateRating": safeProfiles.length > 0 ? {
+                    "@type": "AggregateRating",
+                    "ratingValue": deterministicRating,
+                    "reviewCount": String(deterministicReviews)
+                } : undefined,
+                "priceRange": "฿฿"
+            },
+            {
+                "@type": "CollectionPage",
+                "@id": `${provinceUrl}/#webpage`,
+                "url": provinceUrl,
+                "name": title,
+                "description": cleanDescription,
+                "isPartOf": { "@id": `${dynamicDomain}/#website` },
+                "about": { "@id": `${provinceUrl}/#localbusiness` },
+                "mainEntity": { "@id": `${provinceUrl}/#itemlist` }
+            },
+            {
+                "@type": "ItemList",
+                "@id": `${provinceUrl}/#itemlist`,
+                "name": "รายชื่อผู้ดูแลและเพื่อนเที่ยว " + provinceName,
+                "numberOfItems": safeProfiles.length,
+                "itemListElement": safeProfiles.map((p, i) => ({
+                    "@type": "ListItem",
+                    "position": i + 1,
+                    "item": {
+                        "@type": "Person",
+                        "name": p.name || "ผู้ให้บริการไม่ระบุชื่อ",
+                        "url": `${dynamicDomain}/sideline/${p.slug || p.id}`,
+                        "image": optimizeImg(dynamicDomain, p.imagePath, 360, 480),
+                        "description": "โปรไฟล์แนะนำ " + (p.name || "") + " พิกัดโซน " + (p.location || provinceName)
+                    }
+                }))
             }
         ];
-        const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
 
+        if (seoData.faqs) {
+            schemaGraph.push({
+                "@type": "FAQPage",
+                "@id": `${provinceUrl}/#faq`,
+                "mainEntity": seoData.faqs.map(faq => ({
+                    "@type": "Question",
+                    "name": stripHTML(faq.q),
+                    "acceptedAnswer": { "@type": "Answer", "text": stripHTML(faq.a) }
+                }))
+            });
+        }
+
+        const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
         // 💎 Dynamic Premium Carbon Dark Cards with Gold Accents
         const cardsHTML = safeProfiles
             .map((p) => {
