@@ -1471,7 +1471,7 @@ function renderProfiles(profiles, isSearching) {
 }
 
 // =================================================================
-// ✅ CREATE PROFILE CARD (FIXED & OPTIMIZED FOR S-TIER VISUALS)
+// ✅ CREATE PROFILE CARD (FIXED & OPTIMIZED FOR S-TIER ULTRA-COMPACT VISUALS)
 // =================================================================
 function createProfileCard(p, index = 20) {
     // 1. สร้าง Container หลัก
@@ -1482,7 +1482,7 @@ function createProfileCard(p, index = 20) {
     const cardInner = document.createElement('div');
     cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1';
     
-    // ป้องกันบั๊กดีไซน์ด้วยการบังคับความสูงของสัดส่วน 3:4 และการจัดวางรูปแบบสัมพัทธ์
+    // บังคับสัดส่วน 3:4 และจัดวางรูปแบบมินิมอลเพื่อภาพโปรไฟล์เด่นชัด ไม่โดนข้อความบดบัง
     cardInner.style.cssText = "aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 16px;";
     
     cardInner.setAttribute('data-profile-id', p.id); 
@@ -1506,62 +1506,62 @@ function createProfileCard(p, index = 20) {
     const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
     const likeCount = p.likes || 0;
 
-    // 3. รวม HTML ทั้งหมดให้เป็นรูปแบบลอยทับเหนือภาพเพื่อความสวยงามสูงสุดและไม่หลุดขอบจอ
     cardInner.innerHTML = `
         <!-- Layer 0: Skeleton Loader & Image -->
         <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0" style="border-radius: 16px;"></div>
         <img src="${imgSrc}" 
              alt="น้อง${p.name} - ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'}"
-             class="card-image w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
-             style="filter: brightness(0.85); border-radius: 16px;"
+             class="card-image absolute inset-0 w-full h-full object-cover transition-opacity duration-700 opacity-0 z-0"
+             style="filter: brightness(0.9); border-radius: 16px;"
              loading="${index < 4 ? 'eager' : 'lazy'}"
              width="300" height="400"
              onload="this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();"
              onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0');">
              
-        <!-- Layer 1: Badges (มุมซ้ายบน) -->
-        <div class="absolute top-3 left-3 z-30 pointer-events-none">
-            <span class="neon-badge ${statusClass === 'status-available' ? 'status-available-neon' : 'status-busy-neon'} bg-black/50 backdrop-blur-md border border-white/10 text-[10px] font-bold px-2.5 py-1 rounded-full text-white flex items-center gap-1.5">
-                <span class="neon-dot"></span>
+        <!-- Layer 1: Badge สถานะรับงานขนาดกะทัดรัด (มุมซ้ายบน) -->
+        <div class="absolute top-2.5 left-2.5 z-30 pointer-events-none">
+            <span class="neon-badge ${statusClass === 'status-available' ? 'status-available-neon' : 'status-busy-neon'} bg-black/50 backdrop-blur-md border border-white/10 text-[9px] font-bold px-2 py-0.5 rounded-full text-white flex items-center gap-1">
+                <span class="neon-dot inline-block w-1.5 h-1.5 rounded-full" style="background-color: ${statusClass === 'status-available' ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${statusClass === 'status-available' ? '#00E676' : '#FF2E63'};"></span>
                 <span>${p.availability || 'สอบถาม'}</span>
             </span>
         </div>
 
+        <!-- Badge แนะนำสีแอมเบอร์ (มุมซ้ายบน ถัดจากสถานะ) -->
         ${p.isfeatured ? `
-        <div class="absolute top-3.5 left-24 z-30 pointer-events-none">
-            <span class="featured-badge bg-yellow-400 text-black text-[10px] font-black px-2.5 py-1 rounded-full shadow-md"><i class="fas fa-star mr-1"></i>แนะนำ</span>
+        <div class="absolute top-2.5 left-24 z-30 pointer-events-none">
+            <span class="bg-yellow-400 text-black text-[9px] font-black px-2 py-0.5 rounded-full shadow-md"><i class="fas fa-star mr-0.5"></i>แนะนำ</span>
         </div>
         ` : ''}
 
-        <!-- Layer 2: Link หลักคลุมการ์ดทั้งหมดเพื่อกดเปิดป๊อปอัป (Lightbox) -->
+        <!-- ปุ่มหัวใจไลค์ขนาดมินิมอล (มุมขวาบน - Z-Index สูงสุด) -->
+        <div class="absolute top-2.5 right-2.5 z-30 pointer-events-auto">
+            <button type="button" class="like-button-wrapper w-7 h-7 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-all" data-action="like" data-id="${p.id}">
+                <i class="fa-solid fa-heart text-[10px] text-white"></i>
+            </button>
+        </div>
+
+        <!-- Layer 2: Link หลักคลุมการ์ด -->
         <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
 
-        <!-- Layer 3: เงาดำไล่เฉดสีด้านหลังเพื่อขับตัวหนังสือให้ลอยเด่นชัดเจนอ่านง่าย -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent z-10 pointer-events-none" style="border-radius: 16px;"></div>
+        <!-- Layer 3: เงาดำไล่เฉดมินิมอลเฉพาะขอบล่างสุดป้องกันกลืนพื้นหลัง -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent z-10 pointer-events-none" style="border-radius: 16px;"></div>
 
-        <!-- Layer 4: ข้อความรายละเอียดลอยทับด้านล่างของการ์ด (พิกัดและราคาแสดงผลครบถ้วน) -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 z-20 flex flex-col gap-0.5 pointer-events-none text-left">
+        <!-- Layer 4: ข้อมูลรายละเอียดมินิมอลแบบบางเฉียบ 2 แถวลอยเหนือรูปภาพด้านล่าง (ไม่บดบังรูป) -->
+        <div class="absolute bottom-0 left-0 right-0 p-3 z-20 flex flex-col gap-1 pointer-events-none text-left">
+            <!-- แถวที่ 1: ชื่อ และ ราคา -->
             <div class="flex items-center justify-between">
-                <h3 id="profile-name-${p.id}" class="text-base font-extrabold text-white truncate pr-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.85);">${p.displayName}</h3>
-                <span class="text-[#D97706] font-black text-sm whitespace-nowrap" style="text-shadow: 0 2px 4px rgba(0,0,0,0.85);">${p.displayPrice}</span>
+                <h3 id="profile-name-${p.id}" class="text-[13px] sm:text-sm font-extrabold text-white truncate pr-1" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">${p.displayName}</h3>
+                <span class="text-[#D97706] font-black text-[12px] sm:text-xs whitespace-nowrap" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">${p.displayPrice}</span>
             </div>
             
-            <div class="flex items-center justify-between mt-0.5">
-                <p class="text-[11px] text-white/80 flex items-center" style="text-shadow: 0 1px 3px rgba(0,0,0,0.85);">
-                    <i class="fas fa-map-marker-alt mr-1.5 text-[#D97706]"></i> ${p.location || p.provinceNameThai || 'เชียงใหม่'}
-                </p>
-                
-                <!-- Layer 5: ปุ่มหัวใจและยอดไลค์ (Z-Index สูงสุดพร้อมสิทธิ์การกดแยกส่วน) -->
-                <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors pointer-events-auto z-30"
-                     data-action="like" 
-                     data-id="${p.id}"
-                     role="button" 
-                     tabindex="0"
-                     aria-pressed="${isLikedClass ? 'true' : 'false'}"
-                     aria-label="ถูกใจโปรไฟล์น้อง${p.name}">
-                    <i class="fas fa-heart text-base transition-transform duration-200 group-hover/like:scale-110" style="text-shadow: 0 1px 4px rgba(0,0,0,0.65);"></i>
-                    <span class="like-count text-xs font-bold" style="text-shadow: 0 1px 3px rgba(0,0,0,0.85);">${likeCount}</span>
-                </div>
+            <!-- แถวที่ 2: พิกัด และ วันอัปเดตล่าสุด (รวมในแถวเดียวแบบมินิมอลระดับโปร) -->
+            <div class="flex items-center justify-between text-[10px] text-zinc-300">
+                <span class="truncate" style="text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                    <i class="fas fa-map-marker-alt text-[#D97706] mr-1"></i> ${p.location || p.provinceNameThai || 'เชียงใหม่'}
+                </span>
+                <span class="whitespace-nowrap opacity-85" style="text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                    <i class="far fa-clock mr-0.5"></i> ${formatDate(p.lastUpdated || p.created_at)}
+                </span>
             </div>
         </div>
     `;
