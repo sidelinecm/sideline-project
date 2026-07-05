@@ -4,7 +4,7 @@
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE GOLD-CARBONE NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, S-Tier Spacing, Typography & Complete Social Integration
- * Fixes Applied: Hydrated SSR Profile Count, Injected Google Image Sitemap Schema, Aligned Supabase Key
+ * Fixes Applied: Resolved Syntax Map Crash, Hydrated Dynamic Count, Aligned Bot/Client Search Coordinates
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -155,12 +155,6 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-const getDynamicIntro = (provinceName) => `
-    <p><strong>ไซด์ไลน์${provinceName}</strong> คือ บริการเพื่อนเที่ยวนางแบบ และผู้ช่วยส่วนตัวระดับพรีเมียมในพื้นที่จังหวัด${provinceName} ที่เน้นการดูแลแบบอบอุ่นเป็นส่วนตัว ปลอดภัยสูงสุดด้วยขั้นตอนนัดเจอตัวจริงค่อยชำระค่าขนมหน้างานโดยไม่มีการโอนมัดจำล่วงหน้าทุกกรณี</p>
-    <p>ผู้ให้บริการพร้อมอำนวยความสะดวกสแตนด์บายในทำเลสำคัญรอบย่านธุรกิจ คาเฟ่ชื่อดัง และโรงแรมชั้นนำใน <strong>ตัวเมือง${provinceName} และพิกัดใกล้เคียง</strong> เพื่อให้การนัดหมายร่วมมื้ออาหารหรือนำเที่ยวราบรื่นและคล่องตัวที่สุด</p>
-    <p>มั่นใจได้ในมาตรฐานความปลอดภัย ตรวจสอบความถูกต้องของโปรไฟล์และข้อมูลใบหน้าเพื่อรับประกันความตรงปกเคียงข้างวันพักผ่อนของคุณ</p>
-`;
-
 Object.keys(PROVINCE_SEO_DATA).forEach(key => {
     if (key !== "default") {
         PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
@@ -268,6 +262,9 @@ function buildErrorPage(statusCode, title, message) {
         }
     );
 }
+
+const lastUpdatedMonth = "กรกฎาคม";
+const lastUpdatedYear = "2026";
 
 export default async (request, context) => {
     if (!verifyHostname(request)) {
@@ -493,9 +490,12 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
                 const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
 
+
                 return `
-                <div class="province-card profile-card relative group flex flex-col justify-between overflow-hidden rounded-[24px] border border-white/[0.05] bg-white/[0.02] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#D97706]/40 hover:shadow-2xl hover:shadow-[#D97706]/10" 
+                <div class="province-card profile-card profile-card-new relative group flex flex-col justify-between overflow-hidden rounded-[24px] border border-white/[0.05] bg-white/[0.02] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#D97706]/40 hover:shadow-2xl hover:shadow-[#D97706]/10" 
                      data-id="${p.id}"
+                     data-profile-id="${p.id}"
+                     data-profile-slug="${p.slug}"
                      data-name="น้อง${cleanName}"
                      data-region="${profileLocation}"
                      data-desc="">
@@ -508,18 +508,21 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                     </div>
 
                     <div class="absolute top-3.5 right-3.5 z-20">
-                        <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors">
+                        <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
                             <i class="fa-solid fa-heart text-xs text-white"></i>
                         </button>
                     </div>
 
-                    <a href="${profileLink}" class="card-fixed-ratio block relative">
+                    <!-- เพิ่มคลาส card-link เพื่อเป็นสะพานเชื่อมให้กลไกการคลิกเปิด Lightbox ของ main.js ทำงานทันที -->
+                    <a href="${profileLink}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+
+                    <div class="card-fixed-ratio block relative">
                         <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
                              alt="น้อง${cleanName} รับงาน${provinceName}" 
                              class="card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                              loading="lazy" decoding="async" />
                         <div class="gradient-overlay-fixed absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
-                    </a>
+                    </div>
 
                     <div class="p-4 bg-[#0d0d12] border-t border-white/[0.05]">
                         <div class="flex items-center justify-between mb-2">
@@ -814,14 +817,18 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
       <p class="mx-auto max-w-xl text-sm leading-relaxed text-white/60">คัดเกรดตรงปก ชำระเงินหน้างานเท่านั้น</p>
     </div>
 
-    <!-- Live Search Bar -->
+    <!-- Live Search Bar (แบบแก้ไขเพื่อผูกเชื่อมโยงกับ main.js อย่างสมบูรณ์) -->
     <div class="mx-auto mb-6 max-w-xl">
       <div class="group relative">
         <div class="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-brand/40 to-brand/20 opacity-0 blur-sm transition-opacity duration-300 group-focus-within:opacity-100"></div>
         <div class="relative flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 backdrop-blur-md transition-colors duration-300 focus-within:border-brand/60 focus-within:bg-white/[0.06]">
           <svg class="h-5 w-5 shrink-0 text-white/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" id="searchInput" placeholder="พิมพ์ชื่อเล่น หรือโซนพื้นที่บริการที่ต้องการ..." class="w-full bg-transparent text-sm text-foreground placeholder:text-white/50 focus:outline-none sm:text-base" />
-          <button type="button" id="clearSearch" class="hidden h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white">
+          
+          <!-- [จุดที่ 1 แก้ไข] เปลี่ยนจาก id="searchInput" เป็น id="search-keyword" เพื่อให้ตรงกับโครงสร้างของ main.js -->
+          <input type="text" id="search-keyword" placeholder="พิมพ์ชื่อเล่น หรือโซนพื้นที่บริการที่ต้องการ..." class="w-full bg-transparent text-sm text-foreground placeholder:text-white/50 focus:outline-none sm:text-base" />
+          
+          <!-- [จุดที่ 2 แก้ไข] เปลี่ยนจาก id="clearSearch" เป็น id="clear-search-btn" เพื่อให้ตรงกับโครงสร้างของ main.js -->
+          <button type="button" id="clear-search-btn" class="hidden h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white">
             <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
         </div>
@@ -1091,22 +1098,27 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         });
     }
 
-    // Client Search Filter
-    var searchInput = document.getElementById('searchInput');
-    var clearSearch = document.getElementById('clearSearch');
+    // Client Search Filter (แก้ไขสอดคล้องกับ ID และคลาสที่เชื่อมโยงกับ main.js)
+    var searchInput = document.getElementById('search-keyword'); // เปลี่ยนเป็น ID หลัก
+    var clearSearch = document.getElementById('clear-search-btn'); // เปลี่ยนเป็น ID หลัก
     var regionTabs = document.getElementById('regionTabs');
-    var cards = Array.prototype.slice.call(document.querySelectorAll('.province-card'));
     var resultCount = document.getElementById('resultCount');
     var emptyState = document.getElementById('emptyState');
     var cardsGrid = document.getElementById('profiles-container');
+
+    // ฟังก์ชันช่วยสแกนหาการ์ดที่ใช้งานอยู่จริง
+    function getActiveCards() {
+      return Array.prototype.slice.call(document.querySelectorAll('.province-card, .profile-card-new'));
+    }
 
     var activeRegion = 'ทั้งหมด';
 
     function applyFilter() {
       var q = (searchInput.value || '').trim().toLowerCase();
       var visible = 0;
+      var currentCards = getActiveCards();
 
-      cards.forEach(function (card) {
+      currentCards.forEach(function (card) {
         var name = (card.dataset.name || '').toLowerCase();
         var region = (card.dataset.region || '').toLowerCase();
         var desc = (card.dataset.desc || '').toLowerCase();
@@ -1191,4 +1203,3 @@ export const config = {
     path: ["/", "/location/*", "/robots.txt", "/sitemap.xml"],
     cache: "manual"
 };
-
