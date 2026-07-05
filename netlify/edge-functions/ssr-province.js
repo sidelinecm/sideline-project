@@ -4,7 +4,7 @@
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE GOLD-CARBONE NOIR
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, S-Tier Spacing, Typography & Complete Social Integration
- * Fixes Applied: Flawless Spacing, Complete 7-Social Grid, Zero Pink Elements, No Duplicate FAQs
+ * Fixes Applied: Hydrated SSR Profile Count, Injected Google Image Sitemap Schema, Aligned Supabase Key
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -300,14 +300,14 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
             const [provincesRes, profilesRes] = await Promise.all([
                 supabase.from("provinces").select("key"),
-                supabase.from("profiles").select("slug, lastUpdated").eq("active", true)
+                supabase.from("profiles").select("slug, lastUpdated, name, imagePath").eq("active", true)
             ]);
 
             const provinces = provincesRes.data || [];
             const profiles = profilesRes.data || [];
 
             let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-            xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+            xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
             xml += `  <url>\n    <loc>${dynamicDomain}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
 
             provinces.forEach(p => {
@@ -318,7 +318,13 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
             profiles.forEach(p => {
                 const lastMod = p.lastUpdated ? new Date(p.lastUpdated).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-                xml += `  <url>\n    <loc>${dynamicDomain}/sideline/${encodeURIComponent(p.slug)}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+                const cleanLoc = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug)}`;
+                let imageTag = '';
+                if (p.imagePath) {
+                    const imgUrl = optimizeImg(dynamicDomain, p.imagePath, 1200, 630).replace(/&/g, '&amp;');
+                    imageTag = `\n    <image:image>\n      <image:loc>${imgUrl}</image:loc>\n      <image:title>${escapeHTML(p.name || 'Profile Image')}</image:title>\n    </image:image>`;
+                }
+                xml += `  <url>\n    <loc>${cleanLoc}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>${imageTag}\n  </url>\n`;
             });
 
             xml += `</urlset>`;
@@ -369,7 +375,8 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const seoData = PROVINCE_SEO_DATA[normalizedSeoKey] || PROVINCE_SEO_DATA.default;
         
         const now = new Date();
-        const CURRENT_MONTH = now.toLocaleString("th-TH", { month: "short" });
+        const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        const CURRENT_MONTH = thaiMonths[now.getMonth()];
         const CURRENT_YEAR = now.getFullYear();
         const provinceUrl = provinceKey === 'chiangmai' ? dynamicDomain : `${dynamicDomain}/location/${provinceKey}`;
         const firstImage = safeProfiles.length > 0 ? optimizeImg(dynamicDomain, safeProfiles[0].imagePath, 1200, 630) : `${dynamicDomain}/images/hero-sidelinechiangmai-1200.webp`;
@@ -479,7 +486,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const cardsHTML = safeProfiles
             .map((p) => {
                 const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
-                const profileLocation = escapeHTML(p.location || provinceName || "ไม่ระบุโซน");
+                const profileLocation = escapeHTML(p.location || provinceName);
                 const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
                 const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
                 const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
@@ -704,7 +711,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             <i class="fas fa-times text-base"></i>
         </button>
     </div>
-        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+        <div class="flex-grow overflow-y-auto p-4 space-y-2">
             <a href="/" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-home w-5 text-center text-[#FF2E63]"></i> หน้าแรก</a>
             <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-[500] bg-white/5 border border-white/10 rounded-lg text-[14px]"><i class="fas fa-gem w-5 text-center text-[#FF2E63]"></i> น้องๆ VIP</a>
             <a href="/locations.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-map-marker-alt w-5 text-center text-[#FF2E63]"></i> พิกัดบริการ</a>
@@ -831,7 +838,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
     <div class="mb-5 flex items-center justify-center gap-2 text-sm text-white/50">
       <svg class="h-4 w-4 text-brand" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 18.5 8.5 21l-4-2v-13l4-2 7 4 4-2v6.5"/><circle cx="18" cy="15" r="3"/><path d="m22 19-1.5-1.5"/></svg>
-      <span>พบพิกัดน้องๆ สแตนด์บายพร้อมบริการ <span id="resultCount" class="font-bold text-white">0</span> คน</span>
+      <span>พบพิกัดน้องๆ สแตนด์บายพร้อมบริการ <span id="resultCount" class="font-bold text-white">${safeProfiles.length}</span> คน</span>
     </div>
 
     <!-- Dynamic Profiles Grid -->
@@ -1184,3 +1191,4 @@ export const config = {
     path: ["/", "/location/*", "/robots.txt", "/sitemap.xml"],
     cache: "manual"
 };
+
