@@ -1051,8 +1051,7 @@
       </div>
     </div>
   </div>
-
-  <script type="module" src="/main.js"></script>
+<script type="module" src="/main.js"></script>
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -1088,30 +1087,5 @@
           if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
           sidebarOverlay.addEventListener("click", closeMenu);
       }
-
-      // --- 2. ระบบโหลดแผนที่ Google Maps แบบประหยัดพลังงาน ---
-      const mapIframe = document.getElementById("google-map");
-      const placeholder = document.getElementById("map-placeholder");
-      if (mapIframe && 'IntersectionObserver' in window) {
-        const mapObserver = new IntersectionObserver((entries, observer) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              mapIframe.src = mapIframe.dataset.src;
-              mapIframe.onload = () => {
-                if (placeholder) placeholder.style.opacity = '0';
-                setTimeout(() => placeholder && placeholder.remove(), 500);
-              };
-              observer.unobserve(entry.target);
-            }
-          });
-        }, { rootMargin: "200px" });
-        mapObserver.observe(mapIframe);
-      } else if (mapIframe) {
-        mapIframe.src = mapIframe.dataset.src;
-        if (placeholder) placeholder.remove();
-      }
   });
   </script>
-
-</body>
-</html>
