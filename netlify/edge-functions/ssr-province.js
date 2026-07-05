@@ -187,19 +187,6 @@ const escapeHTML = (str) => {
     })[tag] || tag);
 };
 
-// ✅ [เพิ่มฟังก์ชันด่วน] สำหรับฟอร์แมตวันเวลาระบบความเสถียรบน Edge Function
-const formatDateSSR = (dateString) => {
-    if (!dateString) return 'เมื่อครู่นี้';
-    try {
-        const date = new Date(dateString);
-        const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-        const day = date.getDate();
-        const month = thaiMonths[date.getMonth()];
-        const year = (date.getFullYear() + 543).toString().slice(-2);
-        return `${day} ${month} ${year}`;
-    } catch { return 'เมื่อครู่นี้'; }
-};
-
 const stripHTML = (str) => {
     if (!str) return "";
     return str.replace(/<[^>]*>?/gm, '');
@@ -495,7 +482,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         // 💎 Dynamic Premium Carbon Dark Cards with Gold Accents
         const cardsHTML = safeProfiles
             .map((p) => {
-                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
+                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
                 const profileLocation = escapeHTML(p.location || provinceName);
                 const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
                 const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
@@ -523,48 +510,40 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                          class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 z-0"
                          loading="lazy" decoding="async" />
 
-                    <!-- เงาดำไล่เฉดมินิมอลเฉพาะขอบล่างสุดป้องกันกลืนพื้นหลัง -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent z-10 pointer-events-none"></div>
+                    <!-- เงาดำไล่เฉดเพื่อขับให้ข้อความด้านล่างคมชัดอ่านง่าย -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent z-10 pointer-events-none"></div>
 
-                    <!-- ป้ายสถานะรับงานมุมซ้ายบนขนาดมินิมอล -->
-                    <div class="absolute top-2.5 left-2.5 z-30">
-                        <span class="neon-badge ${statusClass} bg-black/50 backdrop-blur-md border border-white/10 text-[9px] font-bold px-2 py-0.5 rounded-full text-white flex items-center gap-1">
-                            <span class="neon-dot inline-block w-1.5 h-1.5 rounded-full" style="background-color: ${statusClass === 'status-available-neon' ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${statusClass === 'status-available-neon' ? '#00E676' : '#FF2E63'};"></span>
-                            <span>${statusText}</span>
+                    <!-- ป้ายสถานะรับงานมุมซ้ายบน -->
+                    <div class="absolute top-3.5 left-3.5 z-20">
+                        <span class="neon-badge ${statusClass} bg-black/50 backdrop-blur-md border border-white/10">
+                            <span class="neon-dot"></span>
+                            <span class="text-[10px] font-bold text-white">${statusText}</span>
                         </span>
                     </div>
 
-                    <!-- ปุ่มหัวใจมุมขวาบนขนาดมินิมอล -->
-                    <div class="absolute top-2.5 right-2.5 z-30">
-                        <button type="button" class="like-button-wrapper w-7 h-7 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
-                            <i class="fa-solid fa-heart text-[10px] text-white"></i>
+                    <!-- ปุ่มหัวใจมุมขวาบน -->
+                    <div class="absolute top-3.5 right-3.5 z-20">
+                        <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
+                            <i class="fa-solid fa-heart text-xs text-white"></i>
                         </button>
                     </div>
 
-                    <!-- ข้อความรายละเอียดลอยอยู่ด้านล่างของการ์ดแบบบางเฉียบไม่บดบังใบหน้าน้อง ๆ -->
-                    <div class="absolute bottom-0 left-0 right-0 p-3 z-20 flex flex-col gap-1 pointer-events-none text-left">
-                        <!-- แถวที่ 1: ชื่อ และ ราคา -->
+                    <!-- ข้อความรายละเอียดลอยอยู่ด้านล่างของการ์ด (หมดปัญหาตัวหนังสือหลุดขอบ) -->
+                    <div class="absolute bottom-0 left-0 right-0 p-4 z-20 flex flex-col gap-0.5 pointer-events-none text-left">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-[13px] sm:text-sm font-extrabold text-white truncate pr-1" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${cleanName}</h4>
-                            <span class="text-[#D97706] font-black text-[12px] sm:text-xs whitespace-nowrap" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
+                            <h4 class="text-base font-extrabold text-white truncate pr-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${cleanName}</h4>
+                            <span class="text-[#D97706] font-black text-sm whitespace-nowrap" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${displayRate}</span>
                         </div>
-                        
-                        <!-- แถวที่ 2: พิกัด และ วันอัปเดตล่าสุด (รวมแถวคู่ขนานสวยงามที่สุด) -->
-                        <div class="flex items-center justify-between text-[10px] text-zinc-300">
-                            <span class="truncate" style="text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-                                <i class="fas fa-map-marker-alt text-[#D97706] mr-1"></i> ${profileLocation}
-                            </span>
-                            <span class="whitespace-nowrap opacity-85" style="text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-                                <i class="far fa-clock mr-0.5"></i> ${formatDateSSR(p.lastUpdated || p.created_at)}
-                            </span>
-                        </div>
+                        <p class="text-[11px] text-white/80 flex items-center" style="text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+                            <i class="fas fa-map-marker-alt text-[#D97706] mr-1.5"></i> ${profileLocation}
+                        </p>
                     </div>
                 </div>
                 `;
             })
             .join("");
 
-        // ดึงพิกัดรายละเอียดเนื้อหาหลักมาใช้
+
         const seoIntroContent = seoData.uniqueIntro || getDynamicIntro(provinceName);
 
         const htmlTemplate = `<!DOCTYPE html> 
@@ -1207,29 +1186,25 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   });
 </script>
 <script type="module" src="/main.js"></script>
+</body>
+</html>`;
 
+return new Response(htmlTemplate, { 
+    headers: { 
+        "Content-Type": "text/html; charset=utf-8", 
+        "Cache-Control": "public, max-age=0, s-maxage=10, stale-while-revalidate=604800, must-revalidate",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY"
+    } 
+});
 
-        <div id="global-loader-overlay" style="position: fixed; inset: 0px; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; background-color: rgb(7, 7, 10); transition: opacity 0.4s; pointer-events: none; opacity: 0;" class="dark:bg-[#07070a]">
-            
-            <div style="position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
-                <!-- วงแหวนประระดับความพรีเมียมสีทอง -->
-                <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px dashed rgba(212, 175, 55, 0.15);" class="anim-spin-slow-loader"></div>
-                <div style="position: absolute; inset: 6px; border-radius: 9999px; border: 2.5px solid transparent; border-top-color: #D4AF37; border-right-color: #FCF6BA;" class="anim-spin-slow-loader"></div>
-                
-                <!-- จุดเรืองแสงหัวใจแอมเบอร์พัลส์ตรงกลาง -->
-                <div style="position: relative; z-index: 10; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #FF2E63 0%, #FF8E53 100%); box-shadow: 0 10px 30px -5px rgba(255, 46, 99, 0.5);" class="anim-pulse-loader">
-                    <i class="fas fa-heart" style="font-size: 18px; color: #ffffff;"></i>
-                </div>
-            </div>
-            
-            <div style="text-align: center;">
-                <!-- ข้อความสถานะการโหลดพรีเมียม -->
-                <h3 class="anim-blink-loader" style="font-size: 14px; font-weight: 700; color: #D4AF37; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">
-                    กำลังตรวจสอบโปรไฟล์ตรงปก...
-                </h3>
-                <p style="font-size: 10px; color: #6b7280; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;">
-                    SIDELINE CHIANGMAI PREMIUM SELECTION
-                </p>
-            </div>
-        </div>
-    <div style="position: fixed; bottom: 0px; right: 0px; width: 60px; height: 60px; z-index: 99999; cursor: pointer; background: transparent; touch-action: manipulation;"></div></body></html>
+} catch (error) {
+    console.error("SSR Fatal Error:", error);
+    return buildErrorPage(500, "500 - SYSTEM ERROR", "ขออภัยค่ะ เกิดข้อผิดพลาดชั่วคราวในการประมวลผลบนเซิร์ฟเวอร์");
+}
+};
+
+export const config = {
+    path: ["/", "/location/*", "/robots.txt", "/sitemap.xml"],
+    cache: "manual"
+};
