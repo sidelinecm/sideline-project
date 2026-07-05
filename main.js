@@ -1471,7 +1471,7 @@ function renderProfiles(profiles, isSearching) {
 }
 
 // =================================================================
-// ✅ CREATE PROFILE CARD (FIXED & OPTIMIZED)
+// ✅ CREATE PROFILE CARD (FIXED & OPTIMIZED FOR S-TIER VISUALS)
 // =================================================================
 function createProfileCard(p, index = 20) {
     // 1. สร้าง Container หลัก
@@ -1481,6 +1481,9 @@ function createProfileCard(p, index = 20) {
     // 2. สร้าง Card Inner (กรอบการ์ด)
     const cardInner = document.createElement('div');
     cardInner.className = 'profile-card-new group relative overflow-hidden rounded-2xl shadow-lg bg-gray-200 dark:bg-gray-800 cursor-pointer transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1';
+    
+    // ป้องกันบั๊กดีไซน์ด้วยการบังคับความสูงของสัดส่วน 3:4 และการจัดวางรูปแบบสัมพัทธ์
+    cardInner.style.cssText = "aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 16px;";
     
     cardInner.setAttribute('data-profile-id', p.id); 
     cardInner.setAttribute('data-profile-slug', p.slug);
@@ -1503,58 +1506,61 @@ function createProfileCard(p, index = 20) {
     const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
     const likeCount = p.likes || 0;
 
-    // 3. 🟢 รวม HTML ทั้งหมดไว้ในตัวแปรเดียว (แก้ปัญหาประกาศตัวแปรซ้ำ)
+    // 3. รวม HTML ทั้งหมดให้เป็นรูปแบบลอยทับเหนือภาพเพื่อความสวยงามสูงสุดและไม่หลุดขอบจอ
     cardInner.innerHTML = `
         <!-- Layer 0: Skeleton Loader & Image -->
-        <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0"></div>
+        <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0" style="border-radius: 16px;"></div>
         <img src="${imgSrc}" 
              alt="น้อง${p.name} - ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'}"
              class="card-image w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
+             style="filter: brightness(0.85); border-radius: 16px;"
              loading="${index < 4 ? 'eager' : 'lazy'}"
              width="300" height="400"
              onload="this.classList.remove('opacity-0'); if(this.previousElementSibling) this.previousElementSibling.remove();"
              onerror="this.src='/images/placeholder-profile.webp'; this.classList.remove('opacity-0');">
              
-        <!-- Layer 1: Badges (มุมขวาบน) -->
-        <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20 pointer-events-none">
-            <span class="availability-badge ${statusClass} shadow-md backdrop-blur-md bg-white/10 border border-white/20 text-[10px] font-bold px-2 py-1 rounded-full text-white">
-                ${p.availability || 'สอบถาม'}
+        <!-- Layer 1: Badges (มุมซ้ายบน) -->
+        <div class="absolute top-3 left-3 z-30 pointer-events-none">
+            <span class="neon-badge ${statusClass === 'status-available' ? 'status-available-neon' : 'status-busy-neon'} bg-black/50 backdrop-blur-md border border-white/10 text-[10px] font-bold px-2.5 py-1 rounded-full text-white flex items-center gap-1.5">
+                <span class="neon-dot"></span>
+                <span>${p.availability || 'สอบถาม'}</span>
             </span>
-            ${p.isfeatured ? '<span class="featured-badge bg-yellow-400 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm"><i class="fas fa-star mr-1"></i>แนะนำ</span>' : ''}
         </div>
 
-        <!-- Layer 2: Link หลักคลุมการ์ด (อยู่ใต้ปุ่มหัวใจ) -->
-        <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-10" aria-labelledby="profile-name-${p.id}" tabindex="-1"></a>
+        ${p.isfeatured ? `
+        <div class="absolute top-3.5 left-24 z-30 pointer-events-none">
+            <span class="featured-badge bg-yellow-400 text-black text-[10px] font-black px-2.5 py-1 rounded-full shadow-md"><i class="fas fa-star mr-1"></i>แนะนำ</span>
+        </div>
+        ` : ''}
 
-        <!-- Layer 3: Overlay & Content -->
-        <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-3 flex flex-col justify-between pointer-events-none" 
-             style="z-index: 20;">
+        <!-- Layer 2: Link หลักคลุมการ์ดทั้งหมดเพื่อกดเปิดป๊อปอัป (Lightbox) -->
+        <a href="/sideline/${p.slug}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
+
+        <!-- Layer 3: เงาดำไล่เฉดสีด้านหลังเพื่อขับตัวหนังสือให้ลอยเด่นชัดเจนอ่านง่าย -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent z-10 pointer-events-none" style="border-radius: 16px;"></div>
+
+        <!-- Layer 4: ข้อความรายละเอียดลอยทับด้านล่างของการ์ด (พิกัดและราคาแสดงผลครบถ้วน) -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 z-20 flex flex-col gap-0.5 pointer-events-none text-left">
+            <div class="flex items-center justify-between">
+                <h3 id="profile-name-${p.id}" class="text-base font-extrabold text-white truncate pr-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.85);">${p.displayName}</h3>
+                <span class="text-[#D97706] font-black text-sm whitespace-nowrap" style="text-shadow: 0 2px 4px rgba(0,0,0,0.85);">${p.displayPrice}</span>
+            </div>
             
-            <div class="card-header mt-8"></div>
-            
-            <div class="card-footer-content pointer-events-auto">
-                <h3 id="profile-name-${p.id}" class="text-lg font-bold text-white drop-shadow-md leading-tight truncate pr-2">${p.name}</h3>
-                <p class="text-xs text-gray-300 flex items-center mt-0.5 mb-2">
-                    <i class="fas fa-map-marker-alt mr-1 text-pink-500"></i> ${p.provinceNameThai || 'เชียงใหม่'}
+            <div class="flex items-center justify-between mt-0.5">
+                <p class="text-[11px] text-white/80 flex items-center" style="text-shadow: 0 1px 3px rgba(0,0,0,0.85);">
+                    <i class="fas fa-map-marker-alt mr-1.5 text-[#D97706]"></i> ${p.location || p.provinceNameThai || 'เชียงใหม่'}
                 </p>
-
-<div class="date-stamp text-[10px] text-gray-400 flex items-center gap-1">
-    <i class="far fa-clock text-[9px]"></i> 
-    <span>อัปเดต: ${formatDate(p.created_at)}</span>
-</div>
-                    
-                    <!-- Layer 4: ปุ่มหัวใจ (Z-Index สูงสุด เพื่อให้กดติดแน่นอน) -->
-                    <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors"
-                         style="pointer-events: auto !important; z-index: 50 !important; position: relative;"
-                         data-action="like" 
-                         data-id="${p.id}"
-                         role="button" 
-                         tabindex="0"
-                         aria-pressed="${isLikedClass ? 'true' : 'false'}"
-                         aria-label="ถูกใจโปรไฟล์ ${p.name}">
-                        <i class="fas fa-heart text-lg transition-transform duration-200 group-hover/like:scale-110"></i>
-                        <span class="like-count text-sm font-bold">${likeCount}</span>
-                    </div>
+                
+                <!-- Layer 5: ปุ่มหัวใจและยอดไลค์ (Z-Index สูงสุดพร้อมสิทธิ์การกดแยกส่วน) -->
+                <div class="like-button-wrapper relative flex items-center gap-1.5 text-white cursor-pointer group/like ${isLikedClass} hover:text-pink-400 transition-colors pointer-events-auto z-30"
+                     data-action="like" 
+                     data-id="${p.id}"
+                     role="button" 
+                     tabindex="0"
+                     aria-pressed="${isLikedClass ? 'true' : 'false'}"
+                     aria-label="ถูกใจโปรไฟล์น้อง${p.name}">
+                    <i class="fas fa-heart text-base transition-transform duration-200 group-hover/like:scale-110" style="text-shadow: 0 1px 4px rgba(0,0,0,0.65);"></i>
+                    <span class="like-count text-xs font-bold" style="text-shadow: 0 1px 3px rgba(0,0,0,0.85);">${likeCount}</span>
                 </div>
             </div>
         </div>
@@ -1565,42 +1571,34 @@ function createProfileCard(p, index = 20) {
 }
 
 // =================================================================
-// ✅ [ฉบับแก้ไขสมบูรณ์] - fetchSingleProfile (ไร้ alert() + Debug Friendly)
+// ✅ FETCH SINGLE PROFILE (SAFE PROTOCOL & DEBUG FRIENDLY)
 // =================================================================
 async function fetchSingleProfile(slug) {
     if (!supabase) {
-        console.error("❌ Supabase Error: ไม่สามารถติดต่อฐานข้อมูลได้");
+        console.error("❌ Supabase Error: ไม่สามารถติดต่อฐานข้อมูลเพื่อดึงข้อมูลโปรไฟล์เดี่ยวได้");
         return null;
     }
-    
-    // ไม่มีการใช้ alert() เพื่อไม่ให้กวนใจผู้ใช้
-    // console.log("🔍 ระบบกำลังหาข้อมูลโปรไฟล์สำหรับ slug: " + slug);
 
     try {
-        // 1. ลองหาโปรไฟล์ด้วย Slug ตรงตัวก่อน
+        // 1. ตรวจสอบค้นหาผ่าน Slug ตัวหลักเป็นอันดับแรก
         let { data, error } = await supabase
             .from('profiles')
-            .select('*, provinces(key, nameThai)') // ดึงข้อมูลจังหวัดมาด้วย
+            .select('*, provinces(key, nameThai)')
             .eq('slug', slug)
-            .maybeSingle(); // คาดหวังผลลัพธ์เดียว
+            .maybeSingle();
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 = ไม่พบข้อมูล
+        if (error && error.code !== 'PGRST116') { // คัดกรองรหัสไม่พบข้อมูลทั่วไปออกเพื่อความคลีนใน Console
             console.error('❌ Supabase Fetch by Slug Failed:', error.message);
-            // ถ้าเป็น error จริงจัง ให้แสดง error ใน console
         }
         
         if (data) {
-            // console.log("✅ พบโปรไฟล์ด้วย Slug:", data.name);
             return processProfileData(data);
         }
 
-        // 2. ถ้าไม่พบด้วย Slug ตรงตัว ให้ลองแกะ ID จากท้าย URL
+        // 2. หากไม่พบด้วย Slug ตรงตัว ให้ทดสอบลอก ID ท้ายข้อความเพื่อความปลอดภัยในการเข้าถึง
         const parts = slug.split('-');
-        const potentialId = parts[parts.length - 1]; // ค่าสุดท้ายของ slug (อาจเป็น ID)
-        
-        // console.log("⚠️ ไม่พบโปรไฟล์ด้วย Slug ตรงตัว ลองแกะ ID จาก: " + potentialId);
+        const potentialId = parts[parts.length - 1];
 
-        // ตรวจสอบว่าเป็นตัวเลขหรือไม่ และไม่ให้เป็นค่าว่าง
         if (potentialId && !isNaN(potentialId) && potentialId.trim() !== '') {
             const profileId = parseInt(potentialId);
 
@@ -1608,27 +1606,23 @@ async function fetchSingleProfile(slug) {
                 .from('profiles')
                 .select('*, provinces(key, nameThai)')
                 .eq('id', profileId)
-                .maybeSingle(); // คาดหวังผลลัพธ์เดียว
+                .maybeSingle();
 
             if (byIdError && byIdError.code !== 'PGRST116') {
                 console.error('❌ Supabase Fetch by ID Failed:', byIdError.message);
             }
 
             if (byIdData) {
-                // console.log("✅ พบโปรไฟล์ด้วย ID:", byIdData.name);
                 return processProfileData(byIdData);
             } else {
-                console.warn("❌ ไม่พบโปรไฟล์ในฐานข้อมูลด้วย ID:", profileId);
+                console.warn("❌ ไม่พบข้อมูลโปรไฟล์ในระบบด้วย ID ID:", profileId);
             }
-        } else {
-            console.warn("❌ รูปแบบ URL slug ไม่ถูกต้อง หรือไม่สามารถหา ID ที่ถูกต้องได้");
         }
         
-        // ถ้าไม่พบโปรไฟล์ไม่ว่าจะด้วยวิธีใด ให้คืนค่า null
         return null;
 
     } catch (err) {
-        console.error("❌ เกิดข้อผิดพลาดร้ายแรงขณะดึงโปรไฟล์:", err.message, err);
+        console.error("❌ เกิดข้อผิดพลาดร้ายแรงขณะระบบดึงโปรไฟล์:", err.message, err);
         return null;
     }
 }
