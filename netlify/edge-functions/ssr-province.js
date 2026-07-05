@@ -479,17 +479,16 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
         
-        // 💎 Dynamic Premium Carbon Dark Cards with Gold Accents
+
         const cardsHTML = safeProfiles
             .map((p) => {
-                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
+                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
                 const profileLocation = escapeHTML(p.location || provinceName);
                 const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
                 const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
                 const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
                 const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
                 const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
-
 
                 return `
                 <div class="province-card profile-card profile-card-new relative group overflow-hidden rounded-[24px] border border-white/[0.05] bg-white/[0.02] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#D97706]/40 hover:shadow-2xl hover:shadow-[#D97706]/10" 
@@ -510,33 +509,41 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                          class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 z-0"
                          loading="lazy" decoding="async" />
 
-                    <!-- เงาดำไล่เฉดเพื่อขับให้ข้อความด้านล่างคมชัดอ่านง่าย -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent z-10 pointer-events-none"></div>
+                    <!-- เงาดำไล่เฉดมินิมอลเฉพาะขอบล่างสุดป้องกันกลืนพื้นหลัง -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent z-10 pointer-events-none"></div>
 
-                    <!-- ป้ายสถานะรับงานมุมซ้ายบน -->
-                    <div class="absolute top-3.5 left-3.5 z-20">
-                        <span class="neon-badge ${statusClass} bg-black/50 backdrop-blur-md border border-white/10">
-                            <span class="neon-dot"></span>
-                            <span class="text-[10px] font-bold text-white">${statusText}</span>
+                    <!-- ป้ายสถานะรับงานมุมซ้ายบนขนาดมินิมอล -->
+                    <div class="absolute top-2.5 left-2.5 z-30">
+                        <span class="neon-badge ${statusClass} bg-black/50 backdrop-blur-md border border-white/10 text-[9px] font-bold px-2 py-0.5 rounded-full text-white flex items-center gap-1">
+                            <span class="neon-dot inline-block w-1.5 h-1.5 rounded-full" style="background-color: ${statusClass === 'status-available-neon' ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${statusClass === 'status-available-neon' ? '#00E676' : '#FF2E63'};"></span>
+                            <span>${statusText}</span>
                         </span>
                     </div>
 
-                    <!-- ปุ่มหัวใจมุมขวาบน -->
-                    <div class="absolute top-3.5 right-3.5 z-20">
-                        <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
-                            <i class="fa-solid fa-heart text-xs text-white"></i>
+                    <!-- ปุ่มหัวใจมุมขวาบนขนาดมินิมอล -->
+                    <div class="absolute top-2.5 right-2.5 z-30">
+                        <button type="button" class="like-button-wrapper w-7 h-7 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
+                            <i class="fa-solid fa-heart text-[10px] text-white"></i>
                         </button>
                     </div>
 
-                    <!-- ข้อความรายละเอียดลอยอยู่ด้านล่างของการ์ด (หมดปัญหาตัวหนังสือหลุดขอบ) -->
-                    <div class="absolute bottom-0 left-0 right-0 p-4 z-20 flex flex-col gap-0.5 pointer-events-none text-left">
+                    <!-- ข้อความรายละเอียดลอยอยู่ด้านล่างของการ์ดแบบบางเฉียบไม่บดบังใบหน้าน้อง ๆ -->
+                    <div class="absolute bottom-0 left-0 right-0 p-3 z-20 flex flex-col gap-1 pointer-events-none text-left">
+                        <!-- แถวที่ 1: ชื่อ และ ราคา -->
                         <div class="flex items-center justify-between">
-                            <h4 class="text-base font-extrabold text-white truncate pr-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${cleanName}</h4>
-                            <span class="text-[#D97706] font-black text-sm whitespace-nowrap" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${displayRate}</span>
+                            <h4 class="text-[13px] sm:text-sm font-extrabold text-white truncate pr-1" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${cleanName}</h4>
+                            <span class="text-[#D97706] font-black text-[12px] sm:text-xs whitespace-nowrap" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
                         </div>
-                        <p class="text-[11px] text-white/80 flex items-center" style="text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
-                            <i class="fas fa-map-marker-alt text-[#D97706] mr-1.5"></i> ${profileLocation}
-                        </p>
+                        
+                        <!-- แถวที่ 2: พิกัด และ วันอัปเดตล่าสุด (รวมแถวคู่ขนานสวยงามที่สุด) -->
+                        <div class="flex items-center justify-between text-[10px] text-zinc-300">
+                            <span class="truncate" style="text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                                <i class="fas fa-map-marker-alt text-[#D97706] mr-1"></i> ${profileLocation}
+                            </span>
+                            <span class="whitespace-nowrap opacity-85" style="text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                                <i class="far fa-clock mr-0.5"></i> ${formatDateSSR(p.lastUpdated || p.created_at)}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 `;
