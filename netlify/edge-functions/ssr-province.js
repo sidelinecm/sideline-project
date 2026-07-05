@@ -187,6 +187,19 @@ const escapeHTML = (str) => {
     })[tag] || tag);
 };
 
+// ✅ [เพิ่มฟังก์ชันด่วน] สำหรับฟอร์แมตวันเวลาระบบความเสถียรบน Edge Function
+const formatDateSSR = (dateString) => {
+    if (!dateString) return 'เมื่อครู่นี้';
+    try {
+        const date = new Date(dateString);
+        const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        const day = date.getDate();
+        const month = thaiMonths[date.getMonth()];
+        const year = (date.getFullYear() + 543).toString().slice(-2);
+        return `${day} ${month} ${year}`;
+    } catch { return 'เมื่อครู่นี้'; }
+};
+
 const stripHTML = (str) => {
     if (!str) return "";
     return str.replace(/<[^>]*>?/gm, '');
@@ -479,7 +492,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
         
-
+        // 💎 Dynamic Premium Carbon Dark Cards with Gold Accents
         const cardsHTML = safeProfiles
             .map((p) => {
                 const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
@@ -489,6 +502,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
                 const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
                 const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
+
 
                 return `
                 <div class="province-card profile-card profile-card-new relative group overflow-hidden rounded-[24px] border border-white/[0.05] bg-white/[0.02] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#D97706]/40 hover:shadow-2xl hover:shadow-[#D97706]/10" 
@@ -550,7 +564,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             })
             .join("");
 
-
+        // ดึงพิกัดรายละเอียดเนื้อหาหลักมาใช้
         const seoIntroContent = seoData.uniqueIntro || getDynamicIntro(provinceName);
 
         const htmlTemplate = `<!DOCTYPE html> 
@@ -1193,25 +1207,29 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   });
 </script>
 <script type="module" src="/main.js"></script>
-</body>
-</html>`;
 
-return new Response(htmlTemplate, { 
-    headers: { 
-        "Content-Type": "text/html; charset=utf-8", 
-        "Cache-Control": "public, max-age=0, s-maxage=10, stale-while-revalidate=604800, must-revalidate",
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY"
-    } 
-});
 
-} catch (error) {
-    console.error("SSR Fatal Error:", error);
-    return buildErrorPage(500, "500 - SYSTEM ERROR", "ขออภัยค่ะ เกิดข้อผิดพลาดชั่วคราวในการประมวลผลบนเซิร์ฟเวอร์");
-}
-};
-
-export const config = {
-    path: ["/", "/location/*", "/robots.txt", "/sitemap.xml"],
-    cache: "manual"
-};
+        <div id="global-loader-overlay" style="position: fixed; inset: 0px; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; background-color: rgb(7, 7, 10); transition: opacity 0.4s; pointer-events: none; opacity: 0;" class="dark:bg-[#07070a]">
+            
+            <div style="position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <!-- วงแหวนประระดับความพรีเมียมสีทอง -->
+                <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px dashed rgba(212, 175, 55, 0.15);" class="anim-spin-slow-loader"></div>
+                <div style="position: absolute; inset: 6px; border-radius: 9999px; border: 2.5px solid transparent; border-top-color: #D4AF37; border-right-color: #FCF6BA;" class="anim-spin-slow-loader"></div>
+                
+                <!-- จุดเรืองแสงหัวใจแอมเบอร์พัลส์ตรงกลาง -->
+                <div style="position: relative; z-index: 10; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #FF2E63 0%, #FF8E53 100%); box-shadow: 0 10px 30px -5px rgba(255, 46, 99, 0.5);" class="anim-pulse-loader">
+                    <i class="fas fa-heart" style="font-size: 18px; color: #ffffff;"></i>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <!-- ข้อความสถานะการโหลดพรีเมียม -->
+                <h3 class="anim-blink-loader" style="font-size: 14px; font-weight: 700; color: #D4AF37; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">
+                    กำลังตรวจสอบโปรไฟล์ตรงปก...
+                </h3>
+                <p style="font-size: 10px; color: #6b7280; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;">
+                    SIDELINE CHIANGMAI PREMIUM SELECTION
+                </p>
+            </div>
+        </div>
+    <div style="position: fixed; bottom: 0px; right: 0px; width: 60px; height: 60px; z-index: 99999; cursor: pointer; background: transparent; touch-action: manipulation;"></div></body></html>
