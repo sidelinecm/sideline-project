@@ -492,14 +492,28 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
 
                 return `
-                <div class="province-card profile-card profile-card-new relative group flex flex-col justify-between overflow-hidden rounded-[24px] border border-white/[0.05] bg-white/[0.02] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#D97706]/40 hover:shadow-2xl hover:shadow-[#D97706]/10" 
+                <div class="province-card profile-card profile-card-new relative group overflow-hidden rounded-[24px] border border-white/[0.05] bg-white/[0.02] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#D97706]/40 hover:shadow-2xl hover:shadow-[#D97706]/10" 
                      data-id="${p.id}"
                      data-profile-id="${p.id}"
                      data-profile-slug="${p.slug}"
                      data-name="น้อง${cleanName}"
                      data-region="${profileLocation}"
-                     data-desc="">
+                     data-desc=""
+                     style="aspect-ratio: 3/4; width: 100%; position: relative;">
                     
+                    <!-- ลิงก์ครอบคลุมพื้นที่การ์ดทั้งหมดเพื่อใช้กดเปิด Lightbox -->
+                    <a href="${profileLink}" class="card-link absolute inset-0 z-20" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+
+                    <!-- รูปภาพแสดงผลเต็มใบหลังสุด -->
+                    <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
+                         alt="น้อง${cleanName} รับงาน${provinceName}" 
+                         class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 z-0"
+                         loading="lazy" decoding="async" />
+
+                    <!-- เงาดำไล่เฉดเพื่อขับให้ข้อความด้านล่างคมชัดอ่านง่าย -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent z-10 pointer-events-none"></div>
+
+                    <!-- ป้ายสถานะรับงานมุมซ้ายบน -->
                     <div class="absolute top-3.5 left-3.5 z-20">
                         <span class="neon-badge ${statusClass} bg-black/50 backdrop-blur-md border border-white/10">
                             <span class="neon-dot"></span>
@@ -507,29 +521,20 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                         </span>
                     </div>
 
+                    <!-- ปุ่มหัวใจมุมขวาบน -->
                     <div class="absolute top-3.5 right-3.5 z-20">
                         <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
                             <i class="fa-solid fa-heart text-xs text-white"></i>
                         </button>
                     </div>
 
-                    <!-- เพิ่มคลาส card-link เพื่อเป็นสะพานเชื่อมให้กลไกการคลิกเปิด Lightbox ของ main.js ทำงานทันที -->
-                    <a href="${profileLink}" class="card-link absolute inset-0 z-10" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
-
-                    <div class="card-fixed-ratio block relative">
-                        <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
-                             alt="น้อง${cleanName} รับงาน${provinceName}" 
-                             class="card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                             loading="lazy" decoding="async" />
-                        <div class="gradient-overlay-fixed absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
-                    </div>
-
-                    <div class="p-4 bg-[#0d0d12] border-t border-white/[0.05]">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="text-base font-extrabold text-white truncate pr-2">น้อง${cleanName}</h4>
-                            <span class="text-[#D97706] font-black text-sm whitespace-nowrap">${displayRate}</span>
+                    <!-- ข้อความรายละเอียดลอยอยู่ด้านล่างของการ์ด (หมดปัญหาตัวหนังสือหลุดขอบ) -->
+                    <div class="absolute bottom-0 left-0 right-0 p-4 z-20 flex flex-col gap-0.5 pointer-events-none text-left">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-base font-extrabold text-white truncate pr-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${cleanName}</h4>
+                            <span class="text-[#D97706] font-black text-sm whitespace-nowrap" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${displayRate}</span>
                         </div>
-                        <p class="text-[11px] text-white/50 flex items-center">
+                        <p class="text-[11px] text-white/80 flex items-center" style="text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
                             <i class="fas fa-map-marker-alt text-[#D97706] mr-1.5"></i> ${profileLocation}
                         </p>
                     </div>
@@ -538,7 +543,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             })
             .join("");
 
-        // ดึงพิกัดรายละเอียดเนื้อหาหลักมาใช้
+
         const seoIntroContent = seoData.uniqueIntro || getDynamicIntro(provinceName);
 
         const htmlTemplate = `<!DOCTYPE html> 
