@@ -1,3 +1,5 @@
+
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
@@ -1185,7 +1187,7 @@ function applyUltimateFilters(updateUrl = true) {
         state.currentFilters = query;
         state.filteredProfiles = filtered;
 
-        console.log(`🔍 กรองเสร็จสิ้น: ${filtered.length} โปรไฟล์`, query);
+        console.log(`🔍 กรองเสสิ้น: ${filtered.length} โปรไฟล์`, query);
 
     } catch (error) {
         console.error('❌ เกิดข้อผิดพลาดใน applyUltimateFilters:', error);
@@ -1511,7 +1513,7 @@ function createProfileCard(p, index = 20) {
         <div class="skeleton-loader absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse z-0" style="border-radius: 16px;"></div>
         <img src="${imgSrc}" 
              alt="น้อง${p.name} - ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'}"
-             class="card-image absolute inset-0 w-full h-full object-cover transition-opacity duration-700 opacity-0 z-0"
+             class="card-image absolute inset-0 w-full h-full object-cover transition-opacity duration-700 opacity-0 absolute inset-0 z-0"
              style="filter: brightness(0.9); border-radius: 16px;"
              loading="${index < 4 ? 'eager' : 'lazy'}"
              width="300" height="400"
@@ -2768,3 +2770,4 @@ if (timeEl) timeEl.innerText = thaiDate;
 
 
 })();
+
