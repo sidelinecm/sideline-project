@@ -1,299 +1,109 @@
-<!doctype html>
-<html lang=th class="scroll-smooth light">
+<!DOCTYPE html> 
+<html lang="th" class="scroll-smooth antialiased dark bg-[#050508]">
 <head>
-  <meta charset=UTF-8>
-  <meta http-equiv=X-UA-Compatible content="IE=edge">
-  <meta name=viewport content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#D97706">
+  <title>เกี่ยวกับเราและมาตรฐานการตรวจสอบประวัติ | Sideline Chiangmai</title>
+  <meta name="description" content="ทำความรู้จักกับทีมงาน Sideline Chiangmai เรียนรู้ระบบการคัดกรองและยืนยันตัวตน 3 ขั้นตอนอย่างโปร่งใส เพื่อความปลอดภัยสูงสุดของคุณ"/>
+  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/about.html">
   
-  <title>เกี่ยวกับเรา - SidelineCM | ศูนย์รวมไซด์ไลน์เชียงใหม่ระดับพรีเมียม</title>
-<meta name="description" content="ทำความรู้จักกับ SidelineChiangmai (SidelineCM) เราคือใคร? พันธกิจของเราคืออะไร? อ่านเรื่องราวและคำมั่นสัญญาในการมอบประสบการณ์ฟีลแฟนที่ปลอดภัยและตรงปก">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="https://sidelinechiangmai.netlify.app/about">
-  
- <meta name=theme-color content=#FFFFFF media="(prefers-color-scheme: light)">
-  <meta name=theme-color content=#111827 media="(prefers-color-scheme: dark)">
-  <link rel=icon href=/images/favicon.ico sizes=any>
-  <link rel=icon href=/images/favicon.svg type=image/svg+xml>
-  <link rel=apple-touch-icon href=/images/apple-touch-icon.png>
-  <link rel=manifest href=/manifest.webmanifest>
-
-  
-  <link rel=preconnect href=https://hgzbgpbmymoiwjpaypvl.supabase.co crossorigin>
-  <link rel=preconnect href=https://cdnjs.cloudflare.com crossorigin>
-
-  
-  <link rel=preload href=/styles.css as=style onload='this.onload=null,this.rel="stylesheet"'>
-  <noscript>
-    <link rel=stylesheet href=/styles.css>
-  </noscript>
-
-  
-  <link rel=preload href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'>
-  <noscript>
-    <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css>
-  </noscript>
-
-  
-  <link rel=preload href=/fonts/prompt-v11-latin_thai-regular.woff2 as=font type=font/woff2 crossorigin>
-  <link rel=preload href=/fonts/prompt-v11-latin_thai-700.woff2 as=font type=font/woff2 crossorigin>
-
-  
-  <link rel=modulepreload href=/main.js>
-
-    <!-- Inline Critical CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Prompt', 'sans-serif'] },
+          colors: { brand: '#D97706', background: '#050508', foreground: '#f4f4f5' }
+        }
+      }
+    }
+  </script>
   <style>
-    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
-    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
-    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
-    section { padding: 20px; text-align: center; }
-    .profile-image img { image-orientation: none; }
-    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
-    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
-    @media (max-width: 767px) {
-        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
-        .profile-card { padding: 10px; border-radius: 12px; }
+    .glass-panel {
+      background: linear-gradient(135deg, rgba(14, 14, 22, 0.82) 0%, rgba(6, 6, 10, 0.96) 100%) !important;
+      backdrop-filter: blur(28px) saturate(220%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.09) !important;
     }
   </style>
-  <script type=application/ld+json>
-  {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    "name": "เกี่ยวกับเรา - SidelineCM",
-    "url": "https://sidelinechiangmai.netlify.app/about.html",
-    "mainEntity": {
-      "@type": "Organization",
-      "name": "SidelineChiangmai",
-      "url": "https://sidelinechiangmai.netlify.app/",
-      "logo": "https://sidelinechiangmai.netlify.app/images/logo-sideline-chiangmai.webp",
-      "description": "SidelineCM คือศูนย์รวมบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง เรามุ่งมั่นมอบประสบการณ์ฟีลแฟนที่น่าประทับใจ การันตีตรงปก ปลอดภัย และไม่ต้องโอนมัดจำ"
-    }
-  }
-  </script>
-
 </head>
+<body class="min-h-screen bg-[#050508] text-[#f4f4f5] font-sans antialiased pt-24 pb-16">
 
-<body class=antialiased data-page=about>
-
-
-<header id=page-header class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
-    <div class="container mx-auto px-4 h-18 flex items-center justify-between">
-        <a href=/ aria-label="SidelineChiangmai หน้าแรก">
- <img src=/images/logo-sideline-chiangmai-128.webp srcset="/images/logo-sideline-chiangmai-64.webp 64w, /images/logo-sideline-chiangmai-128.webp 128w, /images/logo-sideline-chiangmai-256.webp 256w, /images/logo-sideline-chiangmai-512.webp 512w" sizes="(max-width: 320px) 200px, 256px" alt="โลโก้ Sideline Chiangmai" width=256 height=30 class="h-[30px] w-auto" loading=eager fetchpriority=high>
-</a>
-        <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label=เมนูหลัก>
-            <a href=profiles.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
-            <a href=locations.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
-            <a href=about.html class="px-4 py-2 rounded-full bg-accent text-primary font-semibold">เกี่ยวกับเรา</a>
-            <a href=faq.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
-            <a href=blog.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
-        </nav>
-        <div class="flex items-center gap-2">
-            <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label=เปลี่ยนโหมดสี><i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden=true></i></button>
-            <button id=menu-toggle class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label=เปิดเมนู aria-haspopup=true aria-controls=sidebar><i class="fas fa-bars text-xl" aria-hidden=true></i></button>
-        </div>
-    </div>
-</header>
-
-<div id=menu-backdrop class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden=true></div>
-
-
-<div id=sidebar class="fixed top-0 right-0 w-64 sm:w-72 h-dvh bg-card text-foreground border-l border-border shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" role=dialog aria-labelledby=sidebar-nav-heading aria-hidden=true tabindex=-1>
-     
-    <div class="flex justify-between items-center p-4 border-b border-border shrink-0">
-        <h3 id=sidebar-nav-heading class="text-lg font-bold text-secondary">เมนู</h3>
-        <button id=close-sidebar-btn class=btn-close-premium aria-label=ปิดเมนู>
-            <svg xmlns=http://www.w3.org/2000/svg width=1em height=1em viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round aria-hidden=true>
-                <line x1=18 y1=6 x2=6 y2=18></line>
-                <line x1=6 y1=6 x2=18 y2=18></line>
-            </svg>
-        </button>
-    </div>
-
-    <nav aria-label=เมนูนำทางหลักในแถบด้านข้าง class="flex-grow overflow-y-auto p-4 space-y-4">
-        <a href=/ class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-home w-5 text-center text-muted-foreground" aria-hidden=true></i><span>หน้าแรก</span></a>
-        <a href=profiles.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-users w-5 text-center text-muted-foreground" aria-hidden=true></i><span>น้องๆ ทั้งหมด</span></a>
-        <a href=locations.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-map-marker-alt w-5 text-center text-muted-foreground" aria-hidden=true></i><span>พิกัดบริการ</span></a>
-        <a href=about.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-info-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>เกี่ยวกับเรา</span></a>
-        <a href=faq.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-question-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>คำถามพบบ่อย</span></a>
-        <a href=blog.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-newspaper w-5 text-center text-muted-foreground" aria-hidden=true></i><span>บทความ</span></a>
+  <!-- HEADER -->
+  <header class="fixed top-0 left-0 w-full z-40 border-b border-white/[0.05] bg-[#050508]/75 backdrop-blur-xl h-16 flex items-center justify-between px-6">
+    <a href="/" class="flex items-center gap-3">
+       <span class="text-base sm:text-lg font-black text-white">ไลน์<span class="text-brand">เชียงใหม่</span></span>
+    </a>
+    <nav class="flex gap-4 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+        <a href="/" class="hover:text-white transition-colors">หน้าแรก</a>
+        <a href="/about.html" class="text-brand">เกี่ยวกับเรา</a>
+        <a href="/faq.html" class="hover:text-white transition-colors">ถามตอบ</a>
     </nav>
+  </header>
 
-    <div class="p-4 border-t border-border shrink-0">
-        <a href=https://line.me/ti/p/_faNcjQ3xx target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-line text-lg" aria-hidden=true></i><span>ติดต่อผ่าน LINE</span></a>
+  <!-- MAIN CONTENT -->
+  <main class="container mx-auto px-4 max-w-4xl space-y-12">
+    <section class="text-center space-y-4">
+      <span class="inline-flex items-center gap-2 rounded-full border border-brand/35 bg-brand/5 px-5 py-2 text-xs font-bold text-brand">
+        EXPERIENCE & TRUSTWORTHINESS
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-black text-white">
+        เกี่ยวกับเราและมาตรฐานการคัดกรองข้อมูล
+      </h1>
+      <p class="text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+        เราคือแพลตฟอร์มผู้ให้บริการรวบรวมข้อมูลเพื่อนเที่ยวและเด็กเอ็นเตอร์เทนในจังหวัดเชียงใหม่ที่มุ่งเน้นความเป็นส่วนตัว ปลอดภัย และเน้นย้ำความโปร่งใสเป็นอันดับ 1
+      </p>
+    </section>
+
+    <!-- CONTENT CARD 1: WHO WE ARE -->
+    <div class="glass-panel p-8 rounded-3xl space-y-4">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <i class="fas fa-users text-brand"></i> ทีมงานเบื้องหลังของเรา
+      </h2>
+      <p class="text-sm text-zinc-300 leading-relaxed">
+        ทีมงาน <strong>Sideline Chiangmai</strong> ก่อตั้งขึ้นโดยกลุ่มคนในพื้นที่จังหวัดเชียงใหม่ที่เข้าใจปัญหาของระบบประกาศงานแบบเก่า ซึ่งมักจะพบปัญหาการหลอกลวงโอนเงินมัดจำล่วงหน้าและการใช้รูปภาพที่ไม่ตรงกับตัวจริง (รูปไม่ตรงปก) เราจึงจัดตั้งระบบตรวจสอบและคัดกรองโปรไฟล์ที่เป็นมาตรฐานขึ้นมา เพื่อให้ผู้ใช้บริการมั่นใจได้ว่าจะไม่เกิดความผิดหวังเมื่อนัดพบน้อง ๆ
+      </p>
     </div>
-</div>
 
-
-<main id=main-content class=pt-20>
-    <div class="container mx-auto px-4 py-12 md:py-16 space-y-16 md:space-y-24">
-        
-        
-        <section aria-labelledby=about-heading class=text-center>
-            <div class="max-w-3xl mx-auto">
-                <span class="text-base font-semibold text-primary uppercase tracking-wider">เรื่องราวของเรา</span>
-                <h1 id=about-heading class="text-3xl md:text-4xl lg:text-5xl font-extrabold my-3 text-foreground">
-                    มากกว่าบริการ คือประสบการณ์ <span class=text-secondary>ที่น่าจดจำ</span>
-                </h1>
-                <p class="text-base md:text-lg text-muted-foreground leading-relaxed">
-                    ยินดีต้อนรับสู่ SidelineChiangmai (SidelineCM) เราคือแพลตฟอร์มที่ก่อตั้งขึ้นจากความเข้าใจอย่างลึกซึ้งว่า ประสบการณ์ฟีลแฟนที่ยอดเยี่ยมนั้นเริ่มต้นจากความไว้วางใจและความน่าเชื่อถือ เราจึงทุ่มเทเพื่อเป็นศูนย์กลางของบริการไซด์ไลน์ระดับพรีเมียมในเชียงใหม่และจังหวัดใกล้เคียง ที่ซึ่งความปลอดภัย ความเป็นส่วนตัว และความพึงพอใจของคุณคือสิ่งที่เราให้ความสำคัญสูงสุด
-                </p>
-            </div>
-        </section>
-
-        
-        <section aria-labelledby=mission-heading>
-            <div class="text-center mb-12">
-                <h2 id=mission-heading class="text-2xl md:text-3xl font-bold text-foreground">พันธกิจ 3 ประการของเรา</h2>
-                <p class="mt-2 text-muted-foreground max-w-2xl mx-auto">นี่คือคำมั่นสัญญาที่เรายึดถือในการให้บริการทุกระดับ</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center" data-animate-on-scroll>
-                
-                <div class="bg-card p-8 rounded-2xl border border-border shadow-sm">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-                        <i class="fas fa-check-circle fa-2x" aria-hidden=true></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-foreground mb-2">การันตีตรงปก 100%</h3>
-                    <p class="text-muted-foreground text-sm">เรามีกระบวนการคัดกรองและยืนยันตัวตนของน้องๆ ทุกคนอย่างเข้มงวด มั่นใจได้ว่ารูปภาพและข้อมูลในโปรไฟล์ตรงกับความเป็นจริง เพื่อขจัดความผิดหวังและสร้างความไว้วางใจตั้งแต่แรกพบ</p>
-                </div>
-                
-                <div class="bg-card p-8 rounded-2xl border border-border shadow-sm">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary/10 text-secondary mb-4">
-                        <i class="fas fa-shield-alt fa-2x" aria-hidden=true></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-foreground mb-2">ปลอดภัย ไร้กังวล</h3>
-                    <p class="text-muted-foreground text-sm">นโยบาย "ไม่ต้องโอนมัดจำ" ของเราถูกสร้างขึ้นเพื่อปกป้องคุณจากการหลอกลวง 100% คุณสามารถชำระค่าบริการโดยตรงที่หน้างาน พร้อมทั้งระบบการติดต่อผ่าน LINE ที่รักษาความเป็นส่วนตัวของคุณอย่างสูงสุด</p>
-                </div>
-                
-                <div class="bg-card p-8 rounded-2xl border border-border shadow-sm">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/10 text-green-500 mb-4">
-                        <i class="fas fa-heart fa-2x" aria-hidden=true></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-foreground mb-2">ประสบการณ์ฟีลแฟน</h3>
-                    <p class="text-muted-foreground text-sm">เราคัดสรรเฉพาะน้องๆ ที่มีใจบริการและเข้าใจความหมายของ "ฟีลแฟน" อย่างแท้จริง เพื่อให้ทุกการนัดหมายของคุณไม่ใช่แค่การบริการ แต่คือช่วงเวลาที่น่าประทับใจและผ่อนคลาย</p>
-                </div>
-            </div>
-        </section>
-
-        
-        <section aria-labelledby=cta-heading class="section-content-wrapper p-8 md:p-12 text-center" data-animate-on-scroll>
-             <div class="max-w-2xl mx-auto">
-                <h2 id=cta-heading class="text-2xl md:text-3xl font-bold text-foreground">พร้อมสัมผัสประสบการณ์ที่ดีที่สุดแล้วหรือยัง?</h2>
-                <p class="mt-3 mb-8 text-muted-foreground leading-relaxed">
-                    เราเชื่อว่าคุณสมควรได้รับสิ่งที่ดีที่สุด เริ่มต้นการค้นหาความสุขและความประทับใจครั้งใหม่ของคุณกับเราได้แล้ววันนี้
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href=profiles.html class="inline-block bg-primary text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity">
-                        <i class="fas fa-users mr-2" aria-hidden=true></i> ดูโปรไฟล์น้องๆ ทั้งหมด
-                    </a>
-                    <a href=faq.html class="inline-block bg-card border border-border text-foreground font-bold py-3 px-8 rounded-full hover:bg-accent transition-colors">
-                        <i class="fas fa-question-circle mr-2" aria-hidden=true></i> อ่านคำถามที่พบบ่อย
-                    </a>
-                </div>
-             </div>
-        </section>
-
+    <!-- CONTENT CARD 2: VETTING PROCESS (E-E-A-T PROOF) -->
+    <div class="glass-panel p-8 rounded-3xl space-y-6">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <i class="fas fa-shield-alt text-brand"></i> มาตรฐานการยืนยันตัวตน 3 ชั้น (Verified System)
+      </h2>
+      <p class="text-sm text-zinc-300">
+        เราไม่ได้นำรูปภาพจากช่องทางสาธารณะมาลงประกาศโฆษณาโดยไม่ตรวจสอบ แต่ผู้ให้บริการทุกรายที่จะได้ป้ายกำกับ "ตรวจสอบแล้ว (Verified)" บนระบบของเรา ต้องผ่านขั้นตอนการคัดกรองอย่างเคร่งครัดดังนี้:
+      </p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+        <div class="space-y-2 border-l-2 border-brand/40 pl-4">
+          <h3 class="font-bold text-white text-sm">1. ตรวจสอบบัตรและหน้าจริง</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">น้อง ๆ ต้องถ่ายรูปเซลฟี่สดถือบัตรประจำตัวประชาชน (โดยอนุญาตให้ปิดบังเลขบัตรเพื่อความเป็นส่วนตัว) เพื่อตรวจสอบใบหน้าจริงเปรียบเทียบกับภาพที่ส่งมาลงระบบ</p>
+        </div>
+        <div class="space-y-2 border-l-2 border-brand/40 pl-4">
+          <h3 class="font-bold text-white text-sm">2. ตรวจสอบคลิปวิดีโอ</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">ส่งวิดีโอแนะนำตัวความยาวไม่ต่ำกว่า 10 วินาทีแบบไม่แต่งฟิลเตอร์ เพื่อเป็นหลักฐานยืนยันรูปร่าง สัดส่วน และนัยน์ตาจริงว่าตรงตามรูปภาพ 100%</p>
+        </div>
+        <div class="space-y-2 border-l-2 border-brand/40 pl-4">
+          <h3 class="font-bold text-white text-sm">3. ยืนยันพิกัดการทำงาน</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">ตรวจสอบความเคลื่อนไหวและตำแหน่งพิกัดจริงในโซนเชียงใหม่ เช่น ย่านนิมมาน ช้างเผือก หรือเจ็ดยอด ป้องกันสแปมและการระบุข้อมูลเท็จนอกพื้นที่</p>
+        </div>
+      </div>
     </div>
-</main>
 
-<footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16 font-sans">
-    <div class="container mx-auto">
-        
-        <!-- ส่วน Grid หลัก 4 คอลัมน์ -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center md:text-left mb-12">
-            
-            <!-- 1. แบรนด์และคำบรรยาย (เน้น Keyword หลัก) -->
-            <div class="lg:col-span-1">
-                <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4 transition-transform hover:scale-105">
-                    <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai บริการจัดหาเพื่อนเที่ยว" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
-                </a>
-                <p class="leading-relaxed text-sm text-muted-foreground">
-                    <strong>SidelineChiangmai</strong> แพลตฟอร์มอันดับ 1 รวมน้องๆ ไซด์ไลน์ รับงานเชียงใหม่ และทั่วประเทศ คัดกรองตัวจริง การันตีตรงปก 100% ปลอดภัยสูง ไม่ต้องโอนมัดจำ จ่ายหน้างานได้เลย
-                </p>
-            </div>
-
-            <!-- 2. เมนูลัด (Site Structure) -->
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">เมนูหลัก</h3>
-                <nav aria-label="ลิงก์ด่วนท้ายเว็บ">
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="/" class="hover:text-primary transition-colors">🏠 หน้าแรก</a></li>
-                        <li><a href="/profiles.html" class="hover:text-primary transition-colors">👯 น้องๆ ทั้งหมด</a></li>
-                        <li><a href="/locations.html" class="hover:text-primary transition-colors">📍 พิกัดรับงาน</a></li>
-                        <li><a href="/blog.html" class="hover:text-primary transition-colors">📖 บทความน่ารู้</a></li>
-                        <li><a href="/faq.html" class="hover:text-primary transition-colors">❓ คำถามพบบ่อย</a></li>
-                        <li><a href="/about.html" class="hover:text-primary transition-colors">ℹ️ เกี่ยวกับเรา</a></li>
-                        <li><a href="/contact.html" class="hover:text-primary transition-colors">📞 ติดต่อเรา</a></li>
-                    </ul>
-                </nav>
-            </div>
-
-            <!-- 3. พื้นที่ยอดนิยม (Dynamic Links จาก Supabase) -->
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">พื้นที่ให้บริการยอดฮิต</h3>
-                <!-- 👇 กล่องนี้จะถูกเติมลิงก์โดย main.js อัตโนมัติ -->
-                <ul id="popular-locations-footer" class="space-y-2 text-sm">
-                    <li><span class="text-muted-foreground/50 animate-pulse">กำลังโหลดรายชื่อจังหวัด...</span></li>
-                </ul>
-            </div>
-
-            <!-- 4. ช่องทางติดต่อ (Social & CTA) -->
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อสอบถาม (24 ชม.)</h3>
-                <address class="not-italic space-y-3 text-sm mb-6">
-                    <p>สนใจจองคิว หรือสอบถามข้อมูลเพิ่มเติม แอดไลน์ได้เลยครับ</p>
-                    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="inline-flex items-center gap-2 group font-bold text-green-600 bg-green-50/50 px-4 py-2 rounded-xl hover:bg-green-100 transition-all shadow-sm w-full md:w-auto justify-center md:justify-start">
-                        <i class="fab fa-line text-2xl" aria-hidden="true"></i>
-                        <span>แอดไลน์จองคิว</span>
-                    </a>
-                </address>
-
-                <h4 class="font-semibold text-foreground mb-3 text-sm">ติดตามข่าวสาร</h4>
-                <div class="flex justify-center md:justify-start gap-4 text-xl">
-                    <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" aria-label="TikTok" class="hover:text-[#ff0050] transition-colors"><i class="fab fa-tiktok"></i></a>
-                    <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener nofollow" aria-label="Twitter" class="hover:text-[#1da1f2] transition-colors"><i class="fab fa-twitter"></i></a>
-                    <a href="https://instagram.com/sidelinechiangmai" target="_blank" rel="noopener nofollow" aria-label="Instagram" class="hover:text-[#e1306c] transition-colors"><i class="fab fa-instagram"></i></a>
-                    <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" aria-label="Linktree" class="hover:text-[#43e660] transition-colors"><i class="fas fa-tree"></i></a>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- SEO Content Zone (ส่วนเสริมพลัง SEO แบบเนียนๆ) -->
-        <div class="border-t border-border pt-8 pb-8">
-            <div class="prose dark:prose-invert max-w-none text-xs text-muted-foreground text-center md:text-left">
-                <h4 class="font-bold text-foreground mb-2">ทำไมต้อง SidelineChiangmai?</h4>
-                <p class="leading-relaxed mb-2">
-                    เราคือศูนย์รวม <strong>ไซด์ไลน์เชียงใหม่</strong> และจังหวัดท่องเที่ยวชั้นนำ แหล่งรวมสาวสวย เด็กเอ็น ฟิวแฟน ที่ผ่านการตรวจสอบตัวตนแล้ว การันตี <strong>ไซด์ไลน์ตรงปก</strong> ไม่จกตา
-                    ให้บริการครอบคลุมพื้นที่ <em>เชียงใหม่, เชียงราย, ลำพูน, ขอนแก่น, ภูเก็ต, กรุงเทพ</em> และอีกมากมาย
-                </p>
-                <p class="leading-relaxed">
-                    มั่นใจในความปลอดภัยด้วยระบบ <strong>ไม่ต้องโอนมัดจำ</strong> จ่ายเงินหน้างาน 100% เหมาะสำหรับท่านที่กำลังมองหาเพื่อนเที่ยว เพื่อนทานข้าว หรือคนรู้ใจชั่วคราว
-                    อัปเดตโปรไฟล์น้องใหม่ทุกวัน คัดเกรดพรีเมียม เพื่อประสบการณ์ที่ดีที่สุดของคุณ
-                </p>
-            </div>
-        </div>
-
-        <!-- Copyright & Terms -->
-        <div class="border-t border-border pt-6 text-center text-xs text-muted-foreground/60">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-2">
-                <p>Copyright © <span id="currentYearDynamic">2025</span> SidelineChiangmai. All Rights Reserved.</p>
-                <div class="flex gap-4">
-                    <a href="/privacy-policy.html" class="hover:text-foreground transition-colors">นโยบายความเป็นส่วนตัว</a>
-                    <a href="/terms-of-service.html" class="hover:text-foreground transition-colors">ข้อตกลงการใช้งาน</a>
-                </div>
-            </div>
-            <p class="mt-2 opacity-70">เว็บไซต์นี้จัดทำขึ้นเพื่อความบันเทิงสำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
-        </div>
+    <!-- CONTENT CARD 3: ZERO DEPOSIT POLICY -->
+    <div class="glass-panel p-8 rounded-3xl border border-emerald-500/10 space-y-4">
+      <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+        <i class="fas fa-check-circle text-emerald-500"></i> นโยบายการชำระเงินที่ปลอดภัยที่สุด
+      </h2>
+      <p class="text-sm text-zinc-300 leading-relaxed">
+        เนื่องจากกลุ่มมิจฉาชีพมักสร้างบัญชีปลอมขึ้นมาเพื่อล่อลวงผู้ใช้บริการให้โอนเงินมัดจำล่วงหน้าแล้วปิดบัญชีหนี แพลตฟอร์มของเราจึงมี **กฎเหล็กที่ห้ามละเมิด** คือ ห้ามโอนเงินค่าบริการล่วงหน้าทุกกรณีโดยเด็ดขาด ผู้ใช้บริการจะชำระค่าบริการโดยตรงต่อน้องเมื่อพบตัวจริงหน้างานเรียบร้อยแล้วเท่านั้น เพื่อความปลอดภัยทางการเงินสูงสุดของคุณ
+      </p>
     </div>
-</footer>
-
-<script type=module src=/main.js></script>
-
-<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
+  </main>
 </body>
 </html>
-
-
-
-
-
