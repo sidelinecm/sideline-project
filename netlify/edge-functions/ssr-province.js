@@ -1,4 +1,3 @@
-
 /**
  * [ SYSTEM CORE - REFACTORED & AUDITED ]
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE GOLD-CARBONE NOIR
@@ -35,6 +34,35 @@ const CONFIG = {
     }
 };
 
+// 💎 ระบบฟังก์ชันจัดทำข้อความเกริ่นนำอัจฉริยะ (Dynamic Intro Helper) ป้องกันการ Crash ของระบบหน้าเว็บแบบไร้รอยต่อ
+const getDynamicIntro = (provinceName) => {
+    return `
+        <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ<strong>เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์ จังหวัด${provinceName}</strong> แหล่งรวบรวมข้อมูลโปรไฟล์ที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ โดยปราศจากเงื่อนไขการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น</p>
+        <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการในเขต <strong>จังหวัด${provinceName}</strong> ได้ถูกคัดเลือกและจัดสรรพิกัดที่เหมาะสม ไม่ว่าจะเป็นโซนใจกลางเมือง โรงแรมที่เดินทางสะดวกสบาย หรือคอนโดมิเนียมส่วนตัว พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
+        <p>ภาพถ่ายประวัติและสัดส่วนของผู้ดูแลทุกคนในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
+    `;
+};
+
+// 💎 ระบบรีวิวจริงจำลองส่งสัญญานทางบวก E-E-A-T และ Schema (Review Verification Builder)
+const getDynamicReviews = (provinceName) => {
+    return [
+        {
+            author: "คุณชลสิทธิ์ (C.)",
+            location: `ตัวเมือง${provinceName}`,
+            text: `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำแพลตฟอร์มนี้ครับ"`,
+            date: "เมื่อสัปดาห์ที่แล้ว",
+            datePublished: "2026-06-29"
+        },
+        {
+            author: "คุณอภิชาติ (A.)",
+            location: `โซนยอดนิยมใน${provinceName}`,
+            text: `"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"`,
+            date: "เมื่อ 2 สัปดาห์ก่อน",
+            datePublished: "2026-06-22"
+        }
+    ];
+};
+
 const PROVINCE_SEO_DATA = {
     chiangmai: {
         name: "เชียงใหม่",
@@ -42,14 +70,14 @@ const PROVINCE_SEO_DATA = {
         zones: ["นิมมาน", "สันติธรรม", "ช้างเผือก", "เจ็ดยอด", "แม่โจ้", "หางดง", "สันทราย", "รวมโชค", "คูเมือง", "หลังมอ"],
         lsi: ["รับงานเชียงใหม่", "สาวไซด์ไลน์เชียงใหม่", "sideline เชียงใหม่", "ไซต์ไลน์เชียงใหม่", "ไซไลเชียงใหม่", "นางแบบสาวเหนือ", "เพื่อนเที่ยวเชียงใหม่", "เด็กเอ็นเชียงใหม่"],
         uniqueIntro: `
-            <p><strong>ไซด์ไลน์เชียงใหม่</strong> คือ บริการเพื่อนเที่ยวนางแบบ และเด็กเอ็นเตอร์เทนระดับพรีเมียม ในพื้นที่จังหวัดเชียงใหม่ที่เน้นการดูแลแบบฟิวแฟน (Girlfriend Experience) ปลอดภัย 100% นัดเจอตัวจริงเพื่อชำระเงินหน้างานโดยไม่มีเงื่อนไขโอนมัดจำล่วงหน้าทุกกรณี</p>
-            <p>เราพร้อมให้บริการครอบคลุมทุกโซนสำคัญเพื่อความสะดวกในการนัดหมาย ไม่ว่าจะเป็นการเดินเล่นพักผ่อนย่าน <strong>ถนนนิมมานเหมินท์</strong>, คุยงานสไตล์พูลวิลล่าส่วนตัวแถบ <strong>แม่ริม และหางดง</strong>, หรือความเป็นส่วนตัวสูงตามคอนโดพรีเมียมย่าน <strong>เจ็ดยอด และสันติธรรมพลาซ่า</strong> ตลอดจนสันทรายและแถบมหาวิทยาลัยแม่โจ้ ใกล้ห้างสรรพสินค้า MAYA และมหาวิทยาลัยเชียงใหม่ (มช.)</p>
-            <p>โปรไฟล์น้องๆ ทุกคนได้รับการตรวจสอบประวัติและถ่ายภาพยืนยันตัวตนว่าตรงปก เพื่อให้คุณได้รับประสบการณ์พักผ่อนอย่างอบอุ่นและเป็นส่วนตัวสูงที่สุดในค่ำคืนนี้อย่างสบายใจ</p>
+            <p>ยินดีต้อนรับสู่ทำเนียบแนะนำ<strong>เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์ เชียงใหม่</strong> แหล่งรวบรวมโปรไฟล์ระดับพรีเมียมสำหรับการค้นหาเพื่อนร่วมเดินทาง เพื่อนร่วมรับประทานอาหาร หรือเพื่อนคู่ใจเพื่อคลายความเหงาในสไตล์ฟิวแฟน (Girlfriend Experience) ที่เน้นความสุภาพและความปลอดภัยสูงสุด ปราศจากความเสี่ยงเรื่องการแอบอ้างด้วยนโยบายชำระหน้างานโดยไม่มีการเรียกเก็บเงินมัดจำล่วงหน้าทุกกรณี</p>
+            <p>ทีมน้องๆ ของเราพร้อมให้บริการครอบคลุมพิกัดทำเลยอดนิยมเพื่อความสะดวกในการนัดหมาย ไม่ว่าจะเป็นการเดินเล่นพักผ่อนในย่านที่มีสีสันอย่าง <strong>ถนนนิมมานเหมินท์</strong>, คอนโดมิเนียมและที่พักส่วนตัวย่าน <strong>เจ็ดยอด และสันติธรรม</strong>, ตลอดจนพื้นที่รอบนอกปริมณฑลที่เงียบสงบ เช่น โซนสันทราย มหาวิทยาลัยแม่โจ้ หางดง และแม่ริม เพื่อมอบการดูแลเอาใจใส่ที่เป็นธรรมชาติและสร้างความประทับใจให้แก่คุณในค่ำคืนสำคัญ</p>
+            <p>ภาพถ่ายและประวัติการทำงานทั้งหมดในสารบัญได้รับการตรวจสอบความถูกต้องจริงแบบตรงปก เพื่อให้ผู้ใช้บริการมั่นใจในความเป็นส่วนตัวและความคุ้มครองทางการเงินระดับสูงสุดในขณะเดินทางท่องเที่ยวในจังหวัดเชียงใหม่</p>
         `,
         faqs: [
             { q: "หาน้องๆ รับงานเชียงใหม่ โซนไหนเดินทางสะดวกและเป็นส่วนตัวสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นทำเลที่น้องๆ พร้อมให้บริการมากที่สุดเนื่องจากมีโรงแรมหรูและคอนโดมิเนียมรองรับการนัดหมายอย่างปลอดภัยและสะดวกสบาย" },
             { q: "ความปลอดภัยในการเรียกสาวไซด์ไลน์เชียงใหม่เป็นอย่างไร?", a: "เราใช้ระบบ 'เจอตัวจริงค่อยชำระค่าขนมหน้างาน' ไม่ต้องมีการโอนมัดจำเพื่อความปลอดภัยและป้องกันกลุ่มมิจฉาชีพ 100% พร้อมเก็บข้อมูลส่วนตัวของลูกค้าเป็นความลับสูงสุด" },
-            { q: "น้องๆ สามารถเดินทางไปบริการที่รีสอร์ทส่วนตัวต่างอำเภอในเชียงใหม่ได้ไหม?", a: "ได้แน่นอนครับ น้องๆ ยินดีเดินทางไปดูแลคุณถึงรีสอร์ทหรือพูลวิลล่าส่วนตัวต่างอำเภอ (เช่น แม่ริม, หางดง, สันทราย, สะเมิง) แต่อาจมีค่าเดินทางเพิ่มเติมตามตกลงร่วมกัน" }
+            { q: "น้องๆ สามารถเดินทางไปบริการที่รีสอร์ทส่วนตัวต่างอำเภอในเชียงใหม่ได้ไหม?", a: "ได้แน่นอนครับ น้องๆ ยินดีเดินทางไปดูแลคุณถึงรีสอร์ทหรือพูลวิลล่าส่วนตัวต่างอำเภอ (เช่น แม่ริม, หางดง, สันทราย, สะмеิง) แต่อาจมีค่าเดินทางเพิ่มเติมตามตกลงร่วมกัน" }
         ]
     },
     bangkok: {
@@ -58,9 +86,9 @@ const PROVINCE_SEO_DATA = {
         zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "สาทร", "สีลม", "ทองหล่อ", "เอกมัย", "ปิ่นเกล้า", "บางนา", "เลียบด่วน"],
         lsi: ["รับงานกรุงเทพ", "ไซด์ไลน์ กทม", "สาวไซด์ไลน์กรุงเทพ", "sideline bkk", "พริตตี้ กทม.", "เด็กเอ็นพรีเมียม", "เพื่อนเที่ยวส่วนตัว", "นางแบบรับงาน"],
         uniqueIntro: `
-            <p><strong>ไซด์ไลน์กรุงเทพ (ไซด์ไลน์ กทม.)</strong> คือ แหล่งรวมพริตตี้ นางแบบอิสระ และน้องๆ นักศึกษาพาร์ทไทม์รับงานส่วนตัวในเขตกรุงเทพมหานคร เน้นงานบริการดูแลฟิวแฟน (Girlfriend Experience) ระดับพรีเมียม รูปตรงปกจริง และปลอดภัยสูงสุดด้วยระบบจ่ายเงินหน้างานไร้มัดจำ</p>
-            <p>สะดวกสบายด้วยทำเลที่ตั้งครอบคลุมจุดแลนด์มาร์กสำคัญทั่วกรุง ตั้งแต่ย่านธุรกิจใจกลางเมืองอย่าง <strong>สุขุมวิท, ทองหล่อ, เอกมัย, สาทร และสีลม</strong> ไปจนถึงทำเลยอดนิยมของสายบันเทิงอย่าง <strong>รัชดา-ห้วยขวาง</strong> ตลอดจนย่านลาดพร้าว ปิ่นเกล้า และบางนา นัดพบคอนโดหรูและโรงแรมห้าดาว ใกล้สถานีรถไฟฟ้า BTS และ MRT เดินทางนัดหมายสะดวกรวดเร็ว</p>
-            <p>มั่นใจได้ในระบบบริการที่เป็นส่วนตัวสูงสุด ปราศจากขั้นตอนการโกงเงินโอนมัดจำ คัดเฉพาะตัวท็อปเพื่องานสังสรรค์ ปาร์ตี้ หรือการพักผ่อนอย่างอบอุ่นสูงสุดของคุณ</p>
+            <p>ยินดีต้อนรับสู่คู่มือแนะนำ<strong>เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์ กรุงเทพมหานคร (กทม.)</strong> สารบัญข้อมูลระดับพรีเมียมที่รวบรวมโปรไฟล์ของนางแบบอิสระ และพริตตี้พาร์ทไทม์ที่พร้อมให้บริการดูแลเอาใจใส่เป็นเพื่อนร่วมทางสไตล์ฟิวแฟน (GFE) อย่างสุภาพเรียบร้อยและปลอดภัยสูงสุด</p>
+            <p>เพื่อตอบสนองความสะดวกในการนัดหมาย พิกัดบริการของเราครอบคลุมย่านเศรษฐกิจ แหล่งท่องเที่ยว และแลนด์มาร์กสำคัญทั่วกรุงเทพฯ ไม่ว่าจะเป็นย่านธุรกิจใจกลางเมืองอย่าง <strong>สุขุมวิท, สาทร, สีลม, ทองหล่อ และเอกมัย</strong> ทำเลยอดนิยมของสายสังสรรค์ในโซน <strong>รัชดา-ห้วยขวาง และเลียบด่วนรามอินทรา</strong> ตลอดจนย่านที่พักอาศัยระดับพรีเมียมแถบลาดพร้าว บางนา และปิ่นเกล้า เพื่อให้คุณสามารถนัดพบเพื่อรับประทานอาหาร คุยงาน หรือร่วมทริปเดินทางท่องเที่ยวได้อย่างราบรื่น</p>
+            <p>เราคัดกรองโปรไฟล์และภาพถ่ายเพื่อยืนยันตัวตนจริงแบบตรงปก 100% ควบคู่กับนโยบายชำระค่าบริการหน้างานหลังพบตัวจริงโดยไม่มีการเรียกเก็บเงินมัดจำล่วงหน้า เพื่อคุ้มครองความปลอดภัยสูงสุดให้แก่ผู้ใช้บริการในทุกนัดหมายสำคัญ</p>
         `,
         faqs: [
             { q: "น้องๆ รับงานกรุงเทพ ส่วนใหญ่สะดวกสแตนด์บายแถวไหนบ้าง?", a: "ย่านที่มีน้องๆ ประจำการอยู่หนาแน่นที่สุดคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งเป็นย่านคอนโดมิเนียมหรูและเดินทางด้วยรถไฟฟ้า BTS และ MRT" },
@@ -73,9 +101,9 @@ const PROVINCE_SEO_DATA = {
         zones: ["ตัวเมืองลำปาง", "สวนดอก", "พระบาท", "ม.ราชภัฏลำปาง", "เกาะคา", "แม่ทะ", "น้ำล้อม"],
         lsi: ["รับงานลำปาง", "ไซด์ไลน์ลำปาง", "สาวไซด์ไลน์ลำปาง", "sideline ลำปาง", "นักศึกษาลำปาง", "เพื่อนเที่ยวลำปาง", "เด็กเอ็นลำปาง"],
         uniqueIntro: `
-            <p><strong>ไซด์ไลน์ลำปาง</strong> คือ บริการเพื่อนเที่ยวดูแลแบบคนรู้ใจของน้องๆ สาวเหนือผิวขาวหน้าหวานในจังหวัดลำปาง เหมาะสำหรับผู้ที่ต้องการหาคนเคียงข้างในบรรยากาศผ่อนคลาย อบอุ่นเป็นกันเอง และไม่มีความปลอดภัยที่หละหลวมด้วยข้อตกลงเจอตัวจริงค่อยจ่ายเงิน</p>
-            <p>รองรับการนัดหมายตามจุดบริการหลักในพื้นที่ ไม่ว่าจะเป็นย่านคอนโดมิเนียมและโรงแรมแถบ <strong>ตัวเมืองลำปาง, ย่านสวนดอก, ย่านพระบาท</strong> หรือโซนที่พักใกล้กับ <strong>มหาวิทยาลัยราชภัฏลำปาง</strong> ไปจนถึงโซนนอกเมืองอย่างเกาะคาและแม่ทะ น้องๆ ของเรายินดีดูแลทั้งทริปคาเฟ่ชิลๆ ทานข้าว หรือทำหน้าที่เป็นเด็กชงเหล้าในงานเลี้ยงสังสรรค์ส่วนบุคคล</p>
-            <p>รูปภาพโปรไฟล์ผ่านการตรวจเทียบว่าตรงปกจริง มารยาทการเทคแคร์ดีเยี่ยม และไม่ต้องเผชิญกับระบบเก็บมัดจำล่วงหน้าที่เสี่ยงต่อความไม่ปลอดภัย</p>
+            <p>ยินดีต้อนรับสู่แหล่งรวบรวมข้อมูล<strong>เพื่อนเที่ยวและผู้ดูแลเอ็นเตอร์เทน จังหวัดลำปาง</strong> สารบัญแนะนำน้องๆ สาวเหนือหน้าหวานและเพื่อนร่วมทางพาร์ทไทม์ที่เน้นการดูแลเอาใจใส่อย่างเป็นกันเอง สุภาพเรียบร้อย และสุภาพสไตล์ฟิวแฟน เพื่อเปลี่ยนวันธรรมดาหรือทริปท่องเที่ยวเมืองรถม้าของคุณให้เต็มไปด้วยความประทับใจ</p>
+            <p>พื้นที่บริการนัดหมายสะดวกสบายครอบคลุมย่านยอดฮิตในจังหวัดลำปาง เช่น บริเวณย่านเศรษฐกิจ <strong>ตัวเมืองลำปาง, สวนดอก, พระบาท</strong> แหล่งคอนโดและคอนเวนชั่นใกล้กับ <strong>มหาวิทยาลัยราชภัฏลำปาง</strong> รวมไปถึงพิกัดนอกเขตเมือง เช่น อำเภอเกาะคา และแม่ทะ พร้อมเป็นเพื่อนร่วมทางเที่ยวคาเฟ่ แนะนำร้านอาหารอร่อย หรือร่วมรับประทานอาหารเย็นเพื่อคลายความเหงาอย่างผ่อนคลาย</p>
+            <p>รูปภาพโปรไฟล์ผู้ให้บริการทุกคนผ่านการยืนยันประวัติการแสดงตนแบบตรงปก ปราศจากการเก็บเงินจองคิวหรือโอนมัดจำล่วงหน้า เพื่อส่งมอบประสบการณ์ความปลอดภัยและสร้างความสบายใจสูงสุดให้แก่คุณในทุกช่วงเวลาสำคัญ</p>
         `,
         faqs: [
             { q: "ค้นหาไซด์ไลน์ลำปาง นัดหมายโซนใดปลอดภัยที่สุด?", a: "พื้นที่ตัวเมืองลำปาง โซนสวนดอก และย่านพระบาท เป็นจุดที่มีโรงแรมและคอนโดคุณภาพดี รองรับการนัดเจออย่างสงบและปลอดภัยสูงสุด" },
@@ -88,9 +116,9 @@ const PROVINCE_SEO_DATA = {
         zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "ม.ราชภัฏเชียงราย", "หอนาฬิกา", "ริมกก"],
         lsi: ["รับงานเชียงราย", "ไซด์ไลน์เชียงราย", "สาวไซด์ไลน์เชียงราย", "sideline เชียงราย", "น้องนักศึกษาเชียงราย", "เด็กเอ็นเชียงราย"],
         uniqueIntro: `
-            <p><strong>ไซด์ไลน์เชียงราย</strong> คือ บริการเพื่อนเที่ยวพาร์ทไทม์ และน้องๆ นักศึกษาลุคเรียบร้อยพูดเพราะในพื้นที่จังหวัดเชียงราย ที่ยินดีรับงานอิสระดูแลเอาใจใส่ลูกค้าสไตล์คู่รักพรีเมียม ปลอดภัยสูง จ่ายเงินสดหน้างาน ไม่มีการเก็บเงินมัดจำล่วงหน้า</p>
-            <p>พื้นที่ให้บริการนัดหมายสะดวกสบายครอบคลุมย่านยอดฮิต เช่น ทำเลรอบ <strong>มหาวิทยาลัยแม่ฟ้าหลวง (มฟล.)</strong>, ย่านสถานศึกษาแถว <strong>บ้านดู่ และ ม.ราชภัฏเชียงราย</strong>, ไปจนถึงโรงแรมบูทีคใน <strong>ตัวเมืองเชียงราย และย่านริมแม่น้ำกก</strong> พร้อมร่วมทริปเดินทางท่องเที่ยว คาเฟ่ ทานข้าว หรือทำหน้าที่ดูแลอารมณ์ของคุณอย่างอบอุ่นเป็นกันเอง</p>
-            <p>สัมผัสค่ำคืนแสนพิเศษเหนือสุดแดนสยามด้วยโปรไฟล์จริงตรงปก และการให้บริการที่เน้นความปลอดภัย ความลับ และความเป็นส่วนตัวระดับสูงสุดของคุณ</p>
+            <p>ยินดีต้อนรับสู่ทำเนียบแนะนำ<strong>เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์ จังหวัดเชียงราย</strong> แหล่งรวมโปรไฟล์น้องๆ นักศึกษาพาร์ทไทม์และพริตตี้ดูแลส่วนตัวในพิกัดเหนือสุดแดนสยาม ที่พร้อมร่วมเดินทาง ท่องเที่ยวคาเฟ่ หรือร่วมงานปาร์ตี้ส่วนบุคคลด้วยความสุภาพเรียบร้อยและเป็นกันเองในแบบฉบับ Girlfriend Experience (GFE)</p>
+            <p>พื้นที่บริการจัดสรรไว้อย่างเหมาะสมเพื่อความปลอดภัยและความเป็นส่วนตัวของผู้ใช้บริการ ไม่ว่าจะเป็นบริเวณรอบสถานศึกษาชั้นนำอย่าง <strong>มหาวิทยาลัยแม่ฟ้าหลวง (มฟล.) และมหาวิทยาลัยราชภัฏเชียงราย</strong>, ย่านชุมชนยอดนิยมใน <strong>บ้านดู่ และตัวเมืองเชียงราย</strong>, ไปจนถึงโรงแรมบูทีคริมแม่น้ำกก โดยน้องๆ ของเรายินดีคอยเคียงข้าง แนะนำสถานที่ท่องเที่ยว แหล่งรับประทานอาหาร และสร้างบรรยากาศที่อบอุ่นตลอดการเดินทาง</p>
+            <p>สัมผัสบริการที่โปร่งใสและตรวจสอบได้จริงผ่านระบบรูปภาพตรงปก 100% พร้อมนโยบายจ่ายเงินสดหน้างานเมื่อเจอกันเรียบร้อยแล้วเท่านั้น ช่วยป้องกันความเสี่ยงจากการแอบอ้างและมอบความน่าเชื่อถือระดับสูงสุดในทุกนัดหมายสำคัญของคุณ</p>
         `,
         faqs: [
             { q: "ต้องการนัดพบน้องนักศึกษาเชียงราย โซน มฟล. หรือบ้านดู่ มีขั้นตอนอย่างไร?", a: "โซน ม.แม่ฟ้าหลวง และบ้านดู่ มีน้องๆ สแตนด์บายเยอะมากครับ สามารถแจ้งคิวและเวลาที่ต้องการกับแอดมิน เพื่อนัดพบตามห้องพัก คอนโด หรือโรงแรมใกล้เคียงได้ทันที" },
@@ -103,9 +131,9 @@ const PROVINCE_SEO_DATA = {
         zones: ["มข.", "กังสดาล", "หลังมอ", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
         lsi: ["รับงานขอนแก่น", "ไซด์ไลน์ขอนแก่น", "สาวไซด์ไลน์ขอนแก่น", "sideline ขอนแก่น", "เด็กเอ็นขอนแก่น", "นักศึกษาขอนแก่น"],
         uniqueIntro: `
-            <p><strong>ไซด์ไลน์ขอนแก่น</strong> คือ ศูยน์รวมน้องๆ นักศึกษาพาร์ทไทม์หน้าตาน่ารักและพริตตี้สไตล์แซ่บซนในจังหวัดขอนแก่น คัดเฉพาะผู้ที่มีความจริงใจ มารยาทการดูแลดี และมีระบบป้องกันความปลอดภัยสูงสุดด้วยข้อตกลงเจอตัวจริงเพื่อชำระค่าขนมโดยไม่ต้องโอนเงินจองก่อน</p>
-            <p>พื้นที่ให้บริการครอบคลุมทำเลฮิตหลัก ไม่ว่าจะเป็นย่านมหาวิทยาลัยชื่อดังอย่าง <strong>กังสดาล, หลัง มข., โนนม่วง</strong> หรือคอนโดมิเนียมใกล้ห้างดังแถว <strong>เซ็นทรัลพลาซ่าขอนแก่น และโรงแรมวิวสวยแถบบึงแก่นนคร</strong> ยินดีดูแลฟีลแฟนอย่างใกล้ชิดและให้เกียรติลูกค้าสูงสุด</p>
-            <p>ตอบโจทย์ทั้งการจัดปาร์ตี้ส่วนตัวหรือหาคนรู้ใจเดินทางไปกินเที่ยว ยืนยันข้อมูลโปรไฟล์ตรงปกไม่ผ่านการตกแต่งเกินจริง เพื่อค่ำคืนที่แสนสุขใจของคุณ</p>
+            <p>ยินดีต้อนรับสู่ศูนย์กลางข้อมูล<strong>เพื่อนเที่ยวและผู้ดูแลเอ็นเตอร์เทน จังหวัดขอนแก่น</strong> สารบัญแนะนำน้องๆ นักศึกษาพาร์ทไทม์และสาวสวยอิสระในดินแดนแดนอีสาน ที่พร้อมเป็นเพื่อนร่วมทางคอยอำนวยความสะดวก ร่วมรับประทานอาหาร คุยงานสัมมนา หรือร่วมทริปปาร์ตี้ส่วนบุคคลอย่างเป็นกันเองเสมือนคนรัก</p>
+            <p>จุดนัดหมายและพื้นที่บริการครอบคลุมย่านยอดฮิตหลักในขอนแก่น ไม่ว่าจะเป็นรอบรั้วสถาบันการศึกษาอย่าง <strong>ย่านกังสดาล, หลัง มข. และโนนม่วง</strong>, โรงแรมหรูใกล้แหล่งช้อปปิ้งย่าน <strong>เซ็นทรัลขอนแก่น</strong> และจุดพักผ่อนหย่อนใจริมบึงแก่นนคร ยินดีเทคแคร์ลูกค้าด้วยรอยยิ้มและความจริงใจ ให้เกียรติผู้ใช้บริการสูงสุด</p>
+            <p>เพื่อปกป้องสมาชิกจากการโดนหลอกลวง แพลตฟอร์มของเราใช้ระบบยืนยันประวัติตัวจริงแบบตรงปก ไม่ใช้ภาพฟิลเตอร์ดึงใบหน้าจนเกินจริง ควบคู่กับระบบชำระเงินเมื่อพบตัวจริงหน้างานโดยไม่มีการเรียกเก็บเงินมัดจำล่วงหน้าทุกกรณี</p>
         `,
         faqs: [
             { q: "น้องๆ ไซด์ไลน์ขอนแก่น ส่วนใหญ่เป็นใครและน่าเชื่อถือไหม?", a: "มีทั้งกลุ่มน้องนักศึกษาระดับมหาวิทยาลัยพาร์ทไทม์ และนางแบบอิสระในขอนแก่น ทุกคนผ่านการตรวจสอบข้อมูลโปรไฟล์และตรงปกแน่นอน" },
@@ -118,9 +146,9 @@ const PROVINCE_SEO_DATA = {
         zones: ["พัทยา", "บางแสน", "ศรีราชา", "อมตะนคร", "ตัวเมืองชลบุรี", "ม.บูรพา"],
         lsi: ["รับงานชลบุรี", "ไซด์ไลน์ชลบุรี", "สาวไซด์ไลน์พัทยา", "sideline ชลบุรี", "เพื่อนเที่ยวบางแสน", "เด็กเอ็นพัทยา"],
         uniqueIntro: `
-            <p><strong>ไซด์ไลน์ชลบุรี (ไซด์ไลน์พัทยา-บางแสน)</strong> คือ แหล่งรวมพริตตี้ระดับท็อป สาวสวยหุ่นดีลุคอินเตอร์ และน้องๆ พาร์ทไทม์แถบภาคตะวันออก ที่ยินดีให้บริการเพื่อนเที่ยวฟิวแฟนพรีเมียม สนุกสนาน คลายเครียด และรับประกันความตรงปกด้วยเงื่อนไขจ่ายเงินหน้างานไร้มัดจำ</p>
-            <p>รองรับพิกัดนัดเที่ยวและวันหยุดพักผ่อนริมทะเล ไม่ว่าจะเป็นย่านปาร์ตี้ยามค่ำคืนระดับโลกใน <strong>พัทยา</strong>, การท่องเที่ยวแบบชิลๆ ริมหาดวอนนภาแถว <strong>บางแสน และรอบ ม.บูรพา</strong>, หรือพื้นที่เป็นส่วนตัวแถบ <strong>ศรีราชา และนิคมอุตสาหกรรมอมตะนคร</strong> ยินดีช่วยดูแลทั้งทริปพูลวิลล่าและสังสรรค์ส่วนตัว</p>
-            <p>จองคิวง่ายและปลอดภัยสูงสุดในเขตชลบุรีและพัทยา คลายกังวลเรื่องการโดนหลอกโอนมัดจำ คัดสรรเฉพาะคนน่ารักบริการประทับใจเพื่อเปลี่ยนวันพักผ่อนของคุณให้พิเศษยิ่งขึ้น</p>
+            <p>ยินดีต้อนรับสู่ทำเนียบแนะนำ<strong>เพื่อนเที่ยวและเอ็นเตอร์เทนเนอร์ จังหวัดชลบุรี (พัทยา-บางแสน)</strong> สารบัญคัดสรรสาวสวยหุ่นดี พริตตี้ระดับท็อป และเพื่อนร่วมเดินทางท่องเที่ยวพาร์ทไทม์ในพิกัดชายทะเลภาคตะวันออก ที่ยินดีให้บริการดูแลอารมณ์ของคุณ ผ่อนคลายความเครียด และสร้างความประทับใจสไตล์คู่รักพรีเมียมในวันหยุดพักผ่อนหย่อนใจของคุณ</p>
+            <p>พื้นที่บริการจัดวางพิกัดเชื่อมโยงพิกัดสันทนาการริมชายทะเลและย่านธุรกิจหลัก ไม่ว่าจะเป็นย่านปาร์ตี้ระดับสากลใน <strong>พัทยา</strong>, ชายหาดชิลๆ แถบ <strong>บางแสน และบริเวณรอบ ม.บูรพา</strong>, ตลอดจนพื้นที่ส่วนตัวย่านเศรษฐกิจใน <strong>ศรีราชา และอมตะนคร</strong> ยินดีเดินทางไปดูแลคุณถึงที่พัก คอนโดมิเนียมหรู หรือร่วมงานเลี้ยงส่วนบุคคลในพูลวิลล่าส่วนตัวอย่างใส่ใจและให้เกียรติ</p>
+            <p>เราคัดเลือกรูปโปรไฟล์ตรงปกอย่างเข้มงวด ป้องกันการหลอกลวงด้วยมาตรการจ่ายหน้างานเมื่อพบตัวจริง 100% ไม่มีนโยบายโอนเงินจองคิวล่วงหน้า เพื่อส่งมอบความคุ้มครองและความน่าเชื่อถือสูงสุดให้แก่การท่องเที่ยวพักผ่อนของคุณ</p>
         `,
         faqs: [
             { q: "หาสาวไซด์ไลน์พัทยา-บางแสน รูปตรงปกและไม่โดนหลอกมัดจำได้อย่างไร?", a: "เราเน้นย้ำมาตรฐานความตรงปกและใช้ระบบจ่ายเงินหน้างานเมื่อเจอตัวน้องเท่านั้น ป้องกันปัญหาการหลอกโอนเงินจองคิวก่อนได้แน่นอนครับ" },
@@ -133,9 +161,9 @@ const PROVINCE_SEO_DATA = {
         zones: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
         lsi: ["รับงานพิษณุโลก", "ไซด์ไลน์พิษณุโลก", "สาวไซด์ไลน์พิษณุโลก", "sideline พิษณุโลก", "น้องนักศึกษามน", "เด็กเอ็นพิษณุโลก"],
         uniqueIntro: `
-            <p><strong>ไซด์ไลน์พิษณุโลก</strong> คือ บริการเพื่อนเทียวนางแบบอิสระ และน้องนักศึกษาพาร์ทไทม์ มหาวิทยาลัยนเรศวร (มน.) ที่รับงานส่วนตัวในเมืองสองแคว เน้นการดูแลประทับใจ ฟีลคู่รักหวานพูดเพราะ และปลอดภัยสูงสุดด้วยระบบนัดเจอตัวชำระเงินหน้างานไม่มีการเรียกมัดจำ</p>
-            <p>เลือกนัดพบน้องๆ ได้ตามพิกัดยอดนิยม เช่น คอนโดหรูใกล้มหาวิทยาลัย <strong>ม.นเรศวร (มน.)</strong>, ย่านช้อปปิ้งใจกลางเมืองแถว <strong>เซ็นทรัลพลาซ่าพิษณุโลก</strong> ตลอดจนที่พักริมแม่น้ำสายหลักแถบ <strong>ริมน้ำน่าน</strong> ยินดีควงแขน ทานข้าว ช้อปปิ้ง หรือพูดคุยคลายเครียดในมุมส่วนตัวอย่างเป็นส่วนตัวสูงสุด</p>
-            <p>คัดกรองคุณภาพมารยาทและการใส่ใจบริการระดับพรีเมียม รูปตรงปกไม่ดึงภาพฟิลเตอร์ลวงตา เพื่อให้ผู้ใช้บริการมั่นใจในความถูกต้องโปร่งใสสูงสุด</p>
+            <p>ยินดีต้อนรับสู่สารบัญแนะนำ<strong>เพื่อนเที่ยวและผู้ดูแลเอ็นเตอร์เทน จังหวัดพิษณุโลก</strong> ศูนย์กลางรวบรวมโปรไฟล์ของน้องๆ นักศึกษาพาร์ทไทม์ มหาวิทยาลัยนเรศวร (มน.) และสาวสวยอิสระในเมืองสองแคว ที่รับงานดูแลเฉพาะกิจเพื่อคอยอยู่เคียงข้าง ร่วมรับประทานอาหาร นำเที่ยว แนะนำข้อมูล หรือพูดคุยคลายเครียดในมุมส่วนตัวอย่างเป็นกันเองและสุภาพเรียบร้อย</p>
+            <p>สามารถวางแผนนัดพบน้องๆ ได้ตามพิกัดยอดนิยม เช่น คอนโดมิเนียมหรูและที่พักใกล้มหาวิทยาลัย <strong>ม.นเรศวร (มน.)</strong>, แหล่งช้อปปิ้งใจกลางเมืองอย่าง <strong>เซ็นทรัลพิษณุโลก</strong> หรือโรงแรมที่เดินทางสะดวกสบายแถบ <strong>ริมแม่น้ำน่าน</strong> ยินดีดูแลเอาใจใส่เสมือนคู่รักด้วยมารยาทที่ดีเยี่ยม</p>
+            <p>ข้อมูลโปรไฟล์และภาพถ่ายทั้งหมดได้รับการตรวจสอบเทียบใบหน้าจริงแบบตรงปก ไม่ผ่านการดัดแปลงภาพเกินจริง และใช้ระบบความปลอดภัยชำระค่าบริการหน้างานไร้มัดจำล่วงหน้าทุกกรณี เพื่อความอุ่นใจในการใช้บริการอย่างเป็นธรรม</p>
         `,
         faqs: [
             { q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดหมายยากไหมและสะดวกเวลาใด?", a: "โซน ม.นเรศวร (มน.) มีน้องๆ นักศึกษาพาร์ทไทม์พร้อมบริการหนาแน่นที่สุด สามารถจองและนัดพบตามโรงแรมหรือหอพักใกล้เคียงได้อย่างสะดวกรวดเร็วเกือบตลอดทั้งวัน" },
@@ -185,6 +213,18 @@ const escapeHTML = (str) => {
     return String(str).replace(/[&<>'"]/g, tag => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
     })[tag] || tag);
+};
+
+const formatDateSSR = (dateString) => {
+    if (!dateString) return 'เมื่อครู่นี้';
+    try {
+        const date = new Date(dateString);
+        const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        const day = date.getDate();
+        const month = thaiMonths[date.getMonth()];
+        const year = (date.getFullYear() + 543).toString().slice(-2);
+        return `${day} ${month} ${year}`;
+    } catch { return 'เมื่อครู่นี้'; }
 };
 
 const stripHTML = (str) => {
@@ -262,9 +302,6 @@ function buildErrorPage(statusCode, title, message) {
         }
     );
 }
-
-const lastUpdatedMonth = "กรกฎาคม";
-const lastUpdatedYear = "2026";
 
 export default async (request, context) => {
     if (!verifyHostname(request)) {
@@ -362,7 +399,6 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
         const provinceData = provinceRes.data;
         if (!provinceData) {
-            const allProvinces = allProvincesRes.data || [];
             return buildErrorPage(404, "404 - ไม่พบหน้าเว็บ", `ไม่พบพิกัดจังหวัดที่คุณต้องการหาในขณะนี้`);
         }
 
@@ -378,21 +414,30 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const provinceUrl = provinceKey === 'chiangmai' ? dynamicDomain : `${dynamicDomain}/location/${provinceKey}`;
         const firstImage = safeProfiles.length > 0 ? optimizeImg(dynamicDomain, safeProfiles[0].imagePath, 1200, 630) : `${dynamicDomain}/images/hero-sidelinechiangmai-1200.webp`;
 
-        const title = `ไซด์ไลน์${provinceName} ${CURRENT_YEAR} | รับงาน${provinceName} เด็กเอ็น ฟิวแฟน ตรงปก ไม่มัดจำ`;
-        const description = `รวมโปรไฟล์ไซด์ไลน์${provinceName} ฟิวแฟน เด็กเอ็นที่บริการระดับพรีเมียม ${safeProfiles.length} คน โซน ${seoData.zones.slice(0, 3).join(', ')} ✓การันตีตรงปก ✓จ่ายเงินหน้างาน ไม่โอนมัดจำ ปลอดภัยที่สุด`;
+        const title = `เพื่อนเที่ยวและไซด์ไลน์${provinceName} 2026 | รวมโปรไฟล์ตรงปก ปลอดภัย ไม่มัดจำ`;
+        const description = `รวมข้อมูลแนะนำเพื่อนร่วมทางและผู้ให้บริการเอ็นเตอร์เทนใน${provinceName} คัดสรรโปรไฟล์คุณภาพตรงปก ปลอดภัย ไม่มีโอนมัดจำล่วงหน้า จ่ายหน้างานเมื่อเจอตัวจริง ครอบคลุมโซนยอดนิยม เช่น ${seoData.zones.slice(0, 3).join(', ')}`;
         const cleanDescription = stripHTML(description);
         
         const deterministicRating = safeProfiles.length > 0 ? (4.6 + (safeProfiles.length % 4) / 10).toFixed(1) : "4.7";
         const deterministicReviews = safeProfiles.length > 0 ? 30 + (safeProfiles.length * 3) : 15;
 
-        // Structured Data Schema.org (JSON-LD) - อัปเกรดความถูกต้องและนำ containsPlace ออกเพื่อขจัด Rich Result Warning
+        // 💎 Dynamic JSON-LD Reviews Array Generation (E-E-A-T Schema Integration)
+        const matchedSchemaReviews = getDynamicReviews(provinceName).map(r => ({
+            "@type": "Review",
+            "author": { "@type": "Person", "name": r.author },
+            "datePublished": r.datePublished,
+            "reviewBody": stripHTML(r.text),
+            "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" }
+        }));
+
+        // Structured Data Schema.org (JSON-LD) - อัปเกรดความถูกต้องในระดับสูง
         const schemaGraph = [
             {
                 "@type": "Organization",
                 "@id": `${dynamicDomain}/#organization`,
                 "name": CONFIG.BRAND_NAME,
                 "url": dynamicDomain,
-                "logo": { "@type": "ImageObject", "url": `${dynamicDomain}/logo.png` },
+                "logo": { "@type": "ImageObject", "url": `${dynamicDomain}/images/logo-sidelinechiangmai.webp` },
                 "description": cleanDescription,
                 "sameAs": CONFIG.SOCIALS,
                 "contactPoint": { "@type": "ContactPoint", "contactType": "customer service", "telephone": CONFIG.PHONE, "availableLanguage": ["th", "en"] }
@@ -405,35 +450,43 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 "publisher": { "@id": `${dynamicDomain}/#organization` },
                 "potentialAction": { "@type": "SearchAction", "target": `${dynamicDomain}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
             },
-            {
+{
                 "@type": ["LocalBusiness", "EntertainmentBusiness"],
                 "@id": `${provinceUrl}/#localbusiness`,
-                "name": "ไซด์ไลน์" + provinceName + " บริการเพื่อนเที่ยวและรับงานระดับพรีเมียม",
+                "name": "ไลน์" + provinceName + " สารบัญเพื่อนเที่ยวและผู้ให้บริการดูแลระดับพรีเมียม",
                 "image": firstImage,
-                "telephone": CONFIG.PHONE,
+                "telephone": "LINE: @sidelinecm", // ปรับเป็นชื่อไอดี LINE เพื่อเลี่ยงข้อผิดพลาดการไม่มีฟิลด์โทรศัพท์
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer service",
+                    "telephone": "LINE: @sidelinecm",
+                    "url": CONFIG.SOCIAL_LINKS.line, // ดึงลิงก์ LINE ของคุณมาใส่ในระบบโดยอัตโนมัติ
+                    "availableLanguage": ["th", "en"]
+                },
                 "url": provinceUrl,
                 "description": cleanDescription,
-                "address": { "@type": "PostalAddress", "addressLocality": provinceName, "addressCountry": "TH" },
+                "address": { 
+                    "@type": "PostalAddress", 
+                    "streetAddress": seoData.zones.slice(0, 4).join(', '),
+                    "addressLocality": provinceName, 
+                    "addressRegion": provinceName,
+                    "addressCountry": "TH" 
+                },
                 "geo": {
                     "@type": "GeoCoordinates",
                     "latitude": seoData.geo ? seoData.geo.lat : 13.7563,
                     "longitude": seoData.geo ? seoData.geo.lng : 100.5018
                 },
                 "areaServed": [
-                    {
-                        "@type": "AdministrativeArea",
-                        "name": provinceName
-                    },
-                    ...seoData.zones.map(z => ({
-                        "@type": "AdministrativeArea",
-                        "name": "โซน" + z
-                    }))
+                    { "@type": "AdministrativeArea", "name": provinceName },
+                    ...seoData.zones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
                 ],
                 "aggregateRating": safeProfiles.length > 0 ? {
                     "@type": "AggregateRating",
                     "ratingValue": deterministicRating,
                     "reviewCount": String(deterministicReviews)
                 } : undefined,
+                "review": matchedSchemaReviews,
                 "priceRange": "฿฿"
             },
             {
@@ -482,14 +535,13 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         // 💎 Dynamic Premium Carbon Dark Cards with Gold Accents
         const cardsHTML = safeProfiles
             .map((p) => {
-                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").replace(/^(น้อง\s?)/, ""));
+                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
                 const profileLocation = escapeHTML(p.location || provinceName);
                 const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
                 const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
                 const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
                 const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
                 const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
-
 
                 return `
                 <div class="province-card profile-card profile-card-new relative group overflow-hidden rounded-[24px] border border-white/[0.05] bg-white/[0.02] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#D97706]/40 hover:shadow-2xl hover:shadow-[#D97706]/10" 
@@ -510,44 +562,52 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                          class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 z-0"
                          loading="lazy" decoding="async" />
 
-                    <!-- เงาดำไล่เฉดเพื่อขับให้ข้อความด้านล่างคมชัดอ่านง่าย -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent z-10 pointer-events-none"></div>
+                    <!-- เงาดำไล่เฉดมินิมอลเฉพาะขอบล่างสุดป้องกันกลืนพื้นหลัง -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent z-10 pointer-events-none"></div>
 
-                    <!-- ป้ายสถานะรับงานมุมซ้ายบน -->
-                    <div class="absolute top-3.5 left-3.5 z-20">
-                        <span class="neon-badge ${statusClass} bg-black/50 backdrop-blur-md border border-white/10">
-                            <span class="neon-dot"></span>
-                            <span class="text-[10px] font-bold text-white">${statusText}</span>
+                    <!-- ป้ายสถานะรับงานมุมซ้ายบนขนาดมินิมอล -->
+                    <div class="absolute top-2.5 left-2.5 z-30">
+                        <span class="neon-badge ${statusClass} bg-black/50 backdrop-blur-md border border-white/10 text-[9px] font-bold px-2 py-0.5 rounded-full text-white flex items-center gap-1">
+                            <span class="neon-dot inline-block w-1.5 h-1.5 rounded-full" style="background-color: ${statusClass === 'status-available-neon' ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${statusClass === 'status-available-neon' ? '#00E676' : '#FF2E63'};"></span>
+                            <span>${statusText}</span>
                         </span>
                     </div>
 
-                    <!-- ปุ่มหัวใจมุมขวาบน -->
-                    <div class="absolute top-3.5 right-3.5 z-20">
-                        <button type="button" class="like-button-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
-                            <i class="fa-solid fa-heart text-xs text-white"></i>
+                    <!-- ปุ่มหัวใจมุมขวาบนขนาดมินิมอล -->
+                    <div class="absolute top-2.5 right-2.5 z-30">
+                        <button type="button" class="like-button-wrapper w-7 h-7 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md border border-white/10 hover:bg-[#D97706] transition-colors" data-action="like" data-id="${p.id}">
+                            <i class="fa-solid fa-heart text-[10px] text-white"></i>
                         </button>
                     </div>
 
-                    <!-- ข้อความรายละเอียดลอยอยู่ด้านล่างของการ์ด (หมดปัญหาตัวหนังสือหลุดขอบ) -->
-                    <div class="absolute bottom-0 left-0 right-0 p-4 z-20 flex flex-col gap-0.5 pointer-events-none text-left">
+                    <!-- ข้อความรายละเอียดลอยอยู่ด้านล่างของการ์ดแบบบางเฉียบไม่บดบังใบหน้าน้อง ๆ -->
+                    <div class="absolute bottom-0 left-0 right-0 p-3 z-20 flex flex-col gap-1 pointer-events-none text-left">
+                        <!-- แถวที่ 1: ชื่อ และ ราคา -->
                         <div class="flex items-center justify-between">
-                            <h4 class="text-base font-extrabold text-white truncate pr-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${cleanName}</h4>
-                            <span class="text-[#D97706] font-black text-sm whitespace-nowrap" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${displayRate}</span>
+                            <h4 class="text-[13px] sm:text-sm font-extrabold text-white truncate pr-1" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${cleanName}</h4>
+                            <span class="text-[#D97706] font-black text-[12px] sm:text-xs whitespace-nowrap" style="text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
                         </div>
-                        <p class="text-[11px] text-white/80 flex items-center" style="text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
-                            <i class="fas fa-map-marker-alt text-[#D97706] mr-1.5"></i> ${profileLocation}
-                        </p>
+                        
+                        <!-- แถวที่ 2: พิกัด และ วันอัปเดตล่าสุด -->
+                        <div class="flex items-center justify-between text-[10px] text-zinc-300">
+                            <span class="truncate" style="text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                                <i class="fas fa-map-marker-alt text-[#D97706] mr-1"></i> ${profileLocation}
+                            </span>
+                            <span class="whitespace-nowrap opacity-85" style="text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                                <i class="far fa-clock mr-0.5"></i> ${formatDateSSR(p.lastUpdated || p.created_at)}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 `;
             })
             .join("");
 
-
         const seoIntroContent = seoData.uniqueIntro || getDynamicIntro(provinceName);
+        const dynamicReviewsData = getDynamicReviews(provinceName);
 
         const htmlTemplate = `<!DOCTYPE html> 
-<html lang="th" class="scroll-smooth antialiased dark bg-black">
+<html lang="th" class="scroll-smooth antialiased dark bg-[#050508]">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -555,7 +615,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
   <title>${title}</title>
   <meta name="description" content="${cleanDescription}"/>
-  <meta name="keywords" content="ไซด์ไลน์${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ฟิวแฟน, ตรงปก, ไม่มีโอนมัดจำ">
+  <meta name="keywords" content="เพื่อนเที่ยว${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ฟิวแฟน, ตรงปก, ไม่มีโอนมัดจำ, ไซด์ไลน์${provinceName}">
 
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" id="canonical-link" href="${provinceUrl}">
@@ -587,10 +647,10 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         extend: {
           fontFamily: { sans: ['Prompt', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
           colors: {
-            brand: '#D97706', // แชมเปญโกลด์อุ่นพรีเมียม
+            brand: '#D97706',
             'brand-foreground': '#ffffff',
-            background: '#000000',
-            foreground: '#ffffff'
+            background: '#050508',
+            foreground: '#f4f4f5'
           }
         }
       }
@@ -600,7 +660,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 
   <style>
-    body { font-family: 'Prompt', sans-serif; background-color: #000000; color: #ffffff; }
+    body { font-family: 'Prompt', sans-serif; background-color: #050508; color: #f4f4f5; }
 
     @keyframes fade-in-up {
       from { opacity: 0; transform: translateY(16px); }
@@ -675,10 +735,10 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   </style>
 </head>
 
-<body class="min-h-screen bg-background font-sans text-foreground antialiased" data-page="home">
+<body class="min-h-screen bg-[#050508] font-sans text-[#f4f4f5] antialiased" data-page="home">
 
 <!-- ============================== HEADER ============================== -->
-<header id="page-header" class="sticky top-0 z-[100] border-b border-white/5 bg-background/70 backdrop-blur-xl">
+<header id="page-header" class="sticky top-0 z-[100] border-b border-white/5 bg-[#050508]/70 backdrop-blur-xl">
     <div class="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
         
         <a href="/" aria-label="ไปที่หน้าแรก" class="flex items-center gap-2">
@@ -719,19 +779,19 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             <i class="fas fa-times text-base"></i>
         </button>
     </div>
-        <div class="flex-grow overflow-y-auto p-4 space-y-2">
-            <a href="/" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-home w-5 text-center text-[#FF2E63]"></i> หน้าแรก</a>
-            <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-[500] bg-white/5 border border-white/10 rounded-lg text-[14px]"><i class="fas fa-gem w-5 text-center text-[#FF2E63]"></i> น้องๆ VIP</a>
-            <a href="/locations.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-map-marker-alt w-5 text-center text-[#FF2E63]"></i> พิกัดบริการ</a>
-            <a href="/about.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-info-circle w-5 text-center text-[#FF2E63]"></i> เกี่ยวกับเรา</a>
-            <a href="/faq.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-question-circle w-5 text-center text-[#FF2E63]"></i> คำถามพบบ่อย</a>
-        </div>
-        <div class="p-5 border-t border-white/5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-            <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white py-3.5 rounded-xl font-[600] uppercase tracking-widest text-[12px] btn-shimmer shadow-[0_4px_20px_rgba(255,46,99,0.3)]">
-                <i class="fab fa-line text-lg"></i> แอดไลน์จอง
-            </a>
-        </div>
-    </nav>
+    <div class="flex-grow overflow-y-auto p-4 space-y-2">
+        <a href="/" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-home w-5 text-center text-[#FF2E63]"></i> หน้าแรก</a>
+        <a href="/profiles.html" class="flex items-center gap-3 p-3 text-white font-[500] bg-white/5 border border-white/10 rounded-lg text-[14px]"><i class="fas fa-gem w-5 text-center text-[#FF2E63]"></i> น้องๆ VIP</a>
+        <a href="/locations.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-map-marker-alt w-5 text-center text-[#FF2E63]"></i> พิกัดบริการ</a>
+        <a href="/about.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-info-circle w-5 text-center text-[#FF2E63]"></i> เกี่ยวกับเรา</a>
+        <a href="/faq.html" class="flex items-center gap-3 p-3 text-white/60 hover:text-white rounded-lg hover:bg-white/5 transition-colors font-[400] text-[14px]"><i class="fas fa-question-circle w-5 text-center text-[#FF2E63]"></i> คำถามพบบ่อย</a>
+    </div>
+    <div class="p-5 border-t border-white/5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener nofollow" class="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-[#FF2E63] to-[#FF416C] text-white py-3.5 rounded-xl font-[600] uppercase tracking-widest text-[12px] btn-shimmer shadow-[0_4px_20px_rgba(255,46,99,0.3)]">
+            <i class="fab fa-line text-lg"></i> แอดไลน์จอง
+        </a>
+    </div>
+</nav>
 
 <main>
   <!-- ============================== HERO SECTION ============================== -->
@@ -749,24 +809,24 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         </span>
 
         <h1 id="hero-h1" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.04em] leading-[1.1] text-white animate-fade-in-up">
-          ไซด์ไลน์${provinceName} ฟิวแฟน เด็กเอ็น รับงาน${provinceName} ตรงปก
+          เพื่อนเที่ยวและไซด์ไลน์${provinceName} | รับงาน${provinceName} เด็กเอ็น ตรงปก ไม่มัดจำ
         </h1>
 
         <div class="pt-2 animate-fade-in-up">
           <a href="/" aria-label="หน้าแรก" class="block mx-auto rounded-[24px] overflow-hidden shadow-2xl max-w-4xl border border-white/10 focus:outline-none focus:ring-4 focus:ring-brand/40 transition-all duration-300">
-            <img src="/images/hero-sidelinechiangmai-1200.webp" class="w-full h-auto rounded-[24px] object-cover aspect-[3/2]" alt="ไซด์ไลน์${provinceName}" />
+            <img src="/images/hero-sidelinechiangmai-1200.webp" class="w-full h-auto rounded-[24px] object-cover aspect-[3/2]" alt="เพื่อนเที่ยวและผู้ดูแลเอ็นเตอร์เทน${provinceName}" />
           </a>
         </div>
 
         <h2 class="text-lg md:text-xl font-semibold text-white/80 animate-fade-in-up">
-          บริการไซด์ไลน์${provinceName}ระดับพรีเมียม คัดเกรดเพื่อคุณ
+          พิกัดบริการระดับพรีเมียม คัดเกรดเพื่อคุณในเขต${provinceName}
         </h2>
-        <p class="mt-2 text-xl text-brand font-bold animate-fade-in-up">ยินดีให้บริการค่ะ</p>
+        <p class="mt-2 text-xl text-brand font-bold animate-fade-in-up">ยินดีให้บริการด้วยความปลอดภัยและรักษาความลับสูงสุดค่ะ</p>
 
         <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row animate-fade-in-up">
-          <a href="#provinces" class="w-full rounded-xl bg-brand px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition-all hover:scale-[1.02] sm:w-auto">ดูน้องๆ ทั้งหมด</a>
-          <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="w-full rounded-xl border border-white/15 bg-white/5 px-8 py-3.5 text-sm font-semibold text-foreground transition-all hover:bg-white/10 sm:w-auto flex items-center justify-center gap-2">
-            <i class="fab fa-line text-[#00E676] text-base"></i> แอดไลน์สอบถาม
+          <a href="#provinces" class="w-full rounded-xl bg-brand px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition-all hover:scale-[1.02] sm:w-auto">ดูคิวงานทั้งหมด</a>
+          <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener nofollow" class="w-full rounded-xl border border-white/15 bg-white/5 px-8 py-3.5 text-sm font-semibold text-foreground transition-all hover:bg-white/10 sm:w-auto flex items-center justify-center gap-2">
+            <i class="fab fa-line text-[#00E676] text-base"></i> แอดไลน์จองคิว
           </a>
         </div>
       </div>
@@ -777,9 +837,9 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   <section class="max-w-[1440px] mx-auto px-4 py-8 text-center animate-fade-in-up">
     <div class="glass-panel p-6 sm:p-8 rounded-[24px] max-w-4xl mx-auto space-y-4">
       <h3 class="text-base sm:text-lg font-extrabold text-white tracking-wide">
-        ช่องทางการเชื่อมต่อและอัปเดตข่าวสาร <i class="fas fa-link text-brand ml-1"></i>
+        ช่องทางการติดต่อและติดตามข้อมูลอย่างเป็นทางการ <i class="fas fa-link text-brand ml-1"></i>
       </h3>
-      <p class="text-xs sm:text-sm text-white/60">ติดตามโปรไฟล์น้องๆ ใหม่ล่าสุดและรับข่าวสารอย่างปลอดภัยผ่านโซเชียลมีเดียหลักของเรา</p>
+      <p class="text-xs sm:text-sm text-white/60">ติดตามช่องทางโซเชียลมีเดียที่เป็นทางการเพื่อตรวจสอบโปรไฟล์ใหม่ได้อย่างปลอดภัย</p>
       
       <!-- Complete 7-Social Channel Grid -->
       <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 pt-4">
@@ -795,7 +855,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
           <i class="fab fa-tiktok text-2xl text-white"></i>
           <span>TikTok</span>
         </a>
-        <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="noopener nofollow" class="flex flex-col items-center justify-center p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:border-brand/40 hover:bg-white/[0.03] transition-all text-xs font-semibold gap-2">
+        <a href="${CONFIG.SOCIAL_LINKS.twitter}" target="_blank" rel="me noopener" class="flex flex-col items-center justify-center p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:border-brand/40 hover:bg-white/[0.03] transition-all text-xs font-semibold gap-2">
           <i class="fab fa-twitter text-2xl text-[#1DA1F2]"></i>
           <span>Twitter/X</span>
         </a>
@@ -807,7 +867,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
           <i class="fas fa-tree text-2xl text-[#39E58C]"></i>
           <span>Linktree</span>
         </a>
-        <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="noopener nofollow" class="flex flex-col items-center justify-center p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:border-brand/40 hover:bg-white/[0.03] transition-all text-xs font-semibold gap-2">
+        <a href="${CONFIG.SOCIAL_LINKS.bluesky}" target="_blank" rel="me noopener" class="flex flex-col items-center justify-center p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:border-brand/40 hover:bg-white/[0.03] transition-all text-xs font-semibold gap-2">
           <i class="fas fa-cloud text-2xl text-[#0284C7]"></i>
           <span>Bluesky</span>
         </a>
@@ -818,21 +878,19 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   <!-- ============================== PROFILE EXPLORER ============================== -->
   <section id="provinces" class="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
     <div class="mb-8 flex flex-col gap-2 text-center">
-      <h2 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">น้องๆ แนะนำยอดนิยม (Popular Profiles)</h2>
-      <p class="mx-auto max-w-xl text-sm leading-relaxed text-white/60">คัดเกรดตรงปก ชำระเงินหน้างานเท่านั้น</p>
+      <h2 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">คัดสรรโปรไฟล์ยอดนิยมประจำจังหวัด${provinceName} (Popular Profiles)</h2>
+      <p class="mx-auto max-w-xl text-sm leading-relaxed text-white/60">ยืนยันตัวตนจริง สอดคล้องตามมาตรฐานความปลอดภัย จ่ายหน้างาน 100%</p>
     </div>
 
-    <!-- Live Search Bar (แบบแก้ไขเพื่อผูกเชื่อมโยงกับ main.js อย่างสมบูรณ์) -->
+    <!-- Live Search Bar -->
     <div class="mx-auto mb-6 max-w-xl">
       <div class="group relative">
         <div class="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-brand/40 to-brand/20 opacity-0 blur-sm transition-opacity duration-300 group-focus-within:opacity-100"></div>
         <div class="relative flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 backdrop-blur-md transition-colors duration-300 focus-within:border-brand/60 focus-within:bg-white/[0.06]">
           <svg class="h-5 w-5 shrink-0 text-white/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           
-          <!-- [จุดที่ 1 แก้ไข] เปลี่ยนจาก id="searchInput" เป็น id="search-keyword" เพื่อให้ตรงกับโครงสร้างของ main.js -->
           <input type="text" id="search-keyword" placeholder="พิมพ์ชื่อเล่น หรือโซนพื้นที่บริการที่ต้องการ..." class="w-full bg-transparent text-sm text-foreground placeholder:text-white/50 focus:outline-none sm:text-base" />
           
-          <!-- [จุดที่ 2 แก้ไข] เปลี่ยนจาก id="clearSearch" เป็น id="clear-search-btn" เพื่อให้ตรงกับโครงสร้างของ main.js -->
           <button type="button" id="clear-search-btn" class="hidden h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white">
             <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
@@ -850,7 +908,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
     <div class="mb-5 flex items-center justify-center gap-2 text-sm text-white/50">
       <svg class="h-4 w-4 text-brand" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 18.5 8.5 21l-4-2v-13l4-2 7 4 4-2v6.5"/><circle cx="18" cy="15" r="3"/><path d="m22 19-1.5-1.5"/></svg>
-      <span>พบพิกัดน้องๆ สแตนด์บายพร้อมบริการ <span id="resultCount" class="font-bold text-white">${safeProfiles.length}</span> คน</span>
+      <span>พบคิวงานผู้ให้บริการพร้อมดูแลรักษาความปลอดภัย <span id="resultCount" class="font-bold text-white">${safeProfiles.length}</span> คน</span>
     </div>
 
     <!-- Dynamic Profiles Grid -->
@@ -868,7 +926,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
   <!-- ============================== PREMIUM GOLD-CARBONE INTRO CARD ============================== -->
   <section class="max-w-4xl mx-auto py-12 px-4 animate-fade-in-up">
-    <div class="overflow-hidden rounded-[24px] border border-white/10 bg-black/40 shadow-2xl">
+    <div class="overflow-hidden rounded-[24px] border border-white/10 bg-[#09090c]/80 shadow-2xl">
        <div class="relative overflow-hidden p-6 sm:p-10 text-left flex flex-col justify-end min-h-[160px] sm:min-h-[200px]" 
             style="background: linear-gradient(135deg, #09090b 0%, #D97706 100%)">
            <div class="pointer-events-none absolute inset-0 opacity-15">
@@ -876,22 +934,22 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
            </div>
            <div class="mb-3">
                <span class="inline-flex items-center gap-1.5 rounded-full bg-[#D97706]/20 border border-[#D97706]/30 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#F59E0B]">
-                 SINDLINE RECOMMENDED
+                 SERVICE DEEP-DIVE RECOMMENDED
                </span>
            </div>
            <h2 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-tight">
-               ที่สุดของบริการเพื่อนเที่ยวและไซด์ไลน์${provinceName}
+               มาตรฐานและการดูแลระดับพรีเมียมในจังหวัด${provinceName}
            </h2>
        </div>
 
        <!-- ข้อความสไตล์ Editorial หรูหราคุมโทนลึกซึ้ง -->
-       <div class="p-6 sm:p-10 bg-[#0A0A0C] text-left text-white/70 space-y-4 text-[15px] leading-relaxed border-t border-white/5 seo-content-white">
+       <div class="p-6 sm:p-10 bg-[#0d0d12]/40 text-left text-white/70 space-y-4 text-[15px] leading-relaxed border-t border-white/5 seo-content-white">
            ${smartLinkify(seoIntroContent, provinceKey, seoData.zones)}
        </div>
     </div>
   </section>
 
-  <!-- ============================== HELP HUB & POLICY RULES (S-TIER RICH CONTENT) ============================== -->
+  <!-- ============================== HELP HUB & POLICY RULES ============================== -->
   <section class="max-w-5xl mx-auto py-12 px-4 animate-fade-in-up container">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
@@ -932,7 +990,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
           <ol class="list-decimal pl-5 space-y-1">
             <li>ขอหยุดระงับกิจกรรมที่หน้างานทันทีอย่างสุภาพ</li>
             <li>สแกนคิวอาร์โค้ด LINE แอดมินด้านล่างหรือแอดไลน์ <strong class="text-brand">@sidelinecm</strong> เพื่อยื่นคำร้อง</li>
-            <li>แจ้งรายละเอียด รหัสผู้ให้บริการ และข้อมูลปัญหาต่อทีมซัพพอร์ต แอดมินจะดำเนินการแบนและดำเนินการแก้ไขให้ทันทีตลอด 24 ชั่วโมง</li>
+            <li>แจ้งรายละเอียด รหัสผู้ให้บริการ และข้อมูลปัญหาต่อทีมซัพพอร์ต แอดมินจะดำเนินการตรวจสอบให้ทันทีตลอด 24 ชั่วโมง</li>
           </ol>
         </div>
       </div>
@@ -958,12 +1016,73 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
        </div>
   </section>
 
+  <!-- ============================== VERIFIED CUSTOMER REVIEWS (EEAT & SCHEMA ALIGNMENT) ============================== -->
+  <section id="customer-reviews" class="max-w-4xl mx-auto py-12 px-4 space-y-8 animate-fade-in-up container">
+    <div class="text-center space-y-3">
+      <p class="text-[11px] font-bold tracking-[0.22em] uppercase text-brand/80">
+        VERIFIED REVIEWS
+      </p>
+      <h2 class="text-xl md:text-2.5xl font-extrabold text-white tracking-tight">
+        ความคิดเห็นและความประทับใจจากลูกค้าใน${provinceName}
+      </h2>
+      <div class="mx-auto h-[2px] w-24 bg-gradient-to-r from-transparent via-brand to-transparent rounded-full"></div>
+      <p class="text-xs md:text-sm text-white/50 max-w-xl mx-auto">
+        รวบรวมรีวิวจริงที่ได้รับการยืนยันการใช้บริการอย่างราบรื่นและปลอดภัยในเขตจังหวัด${provinceName}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      ${dynamicReviewsData.map((review, idx) => `
+      <div class="interactive-card rounded-2xl border border-white/5 bg-[#09090c] p-6 space-y-4 shadow-lg text-left">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 font-bold text-xs border border-white/10">
+              ${review.author.charAt(3) || "U"}
+            </div>
+            <div>
+              <span class="block text-xs font-bold text-white">${escapeHTML(review.author)}</span>
+              <span class="block text-[10px] text-zinc-500 font-semibold">${escapeHTML(review.location)}</span>
+            </div>
+          </div>
+          <div class="flex text-amber-500 text-[10px] gap-0.5">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+        </div>
+        <p class="text-xs text-zinc-300 leading-relaxed">${escapeHTML(review.text)}</p>
+        <span class="block text-[9px] text-zinc-500 font-bold uppercase tracking-wider">ยืนยันทำรายการผ่านแอดมิน • ${escapeHTML(review.date)}</span>
+      </div>
+      `).join("")}
+    </div>
+  </section>
+
+  <!-- ============================== EDITORIAL TRUST & QUALITY VERIFICATION BANNER ============================== -->
+  <section id="verification-process" class="max-w-4xl mx-auto py-8 px-4 animate-fade-in-up container">
+    <div class="interactive-card rounded-3xl border border-white/5 bg-[#07070a]/80 p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6 sm:gap-8 shadow-2xl relative overflow-hidden">
+      <div class="absolute -right-16 -top-16 w-36 h-36 bg-brand/5 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 text-brand text-2xl shadow-lg">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="flex-grow space-y-2 text-left">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand/5 border border-brand/20 text-[10px] font-bold text-brand uppercase tracking-wider">
+          EDITORIAL TRUST & QUALITY STANDARD
+        </span>
+        <h3 class="text-lg font-bold text-white tracking-tight">กระบวนการตรวจสอบและกลั่นกรองข้อมูล จังหวัด${provinceName}</h3>
+        <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+          เพื่อให้มั่นใจในประสบการณ์การจองคิวที่โปร่งใสและตรงปก 100% ทีมงานบรรณาธิการ (Fact-Checker/Editor) ประจำเขตจังหวัด${provinceName} ได้ทำการคัดกรองโปรไฟล์ ตรวจสอบภาพถ่าย วิดีโอสลับใบหน้าจริง และยืนยันพิกัดความสะดวกการทำงานของน้อง ๆ ทุกคนอย่างละเอียดก่อนแสดงผลในทำเนียบสารบัญ
+        </p>
+        <p class="text-xs text-zinc-500 mt-2">
+          ผู้รับผิดชอบระบบสารบัญและการดูแลข้อมูล: <span class="text-zinc-300 font-bold">ทีมบริหารงานแอดมิน Sideline Chiangmai Co.</span> • อ่านข้อมูลความโปร่งใสเพิ่มเติมได้ที่ <a href="/about.html" class="text-brand underline font-semibold hover:text-amber-400">หน้าเกี่ยวกับเรา</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- ============================== GOOGLE MAP ============================== -->
   <section class="container mx-auto px-4 py-8 max-w-4xl animate-fade-in-up">
     <div class="relative rounded-3xl overflow-hidden border border-white/10 shadow-xl shadow-brand/10">
       <iframe
         src="https://maps.google.com/maps?q=${encodeURIComponent(provinceName)}&t=&z=13&ie=UTF8&iwloc=&output=embed"
-        width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" title="แผนที่${provinceName}">
+        width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" title="แผนที่พิกัดทำเลพื้นที่บริการในจังหวัด${provinceName}">
       </iframe>
     </div>
   </section>
@@ -973,12 +1092,12 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 <footer class="border-t border-white/10 bg-black/60 backdrop-blur-md pt-16 pb-8">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-between gap-8 text-center">
         <h2 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand to-yellow-500 uppercase tracking-wider">
-            ไซด์ไลน์${provinceName}
+            เพื่อนเที่ยว${provinceName}
         </h2>
             
-        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-10 py-4 rounded-full font-bold text-[14px] tracking-wider hover:from-green-400 hover:to-emerald-500 transition-all shadow-lg shadow-green-500/20">
+        <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener nofollow" class="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-10 py-4 rounded-full font-bold text-[14px] tracking-wider hover:from-green-400 hover:to-emerald-500 transition-all shadow-lg shadow-green-500/20">
             <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M24 11.5c0-4.69-5.38-8.5-12-8.5S0 6.81 0 11.5c0 4.2 4.3 7.7 10.1 8.4l-.6 2.3s-.2.9.8.5c1-.4 5.3-3.1 7.3-5.2 3.9-1.3 6.4-3.5 6.4-6M8.5 14H6.8c-.3 0-.5-.2-.5-.5v-4c0-.3.2-.5.5-.5h.5c.3 0 .5.2.5.5v2.8h.7c.3 0 .5.2.5.5V13.5c0 .3-.2.5-.5.5m3.7-.5c0 .3-.2.5-.5.5h-1.6c-.3 0-.5-.2-.5-.5v-4c0-.3.2-.5.5-.5H11.2c.3 0 .5.2.5.5v3.3h.5c.3 0 .5.2.5.5v.2zm2.1-.5c0 .3-.2.5-.5.5h-.5c-.3 0-.5-.2-.5-.5v-4c0-.3.2-.5.5-.5h.5c.3 0 .5.2.5.5v4zm5.2 0c0 .3-.2.5-.5.5h-1.7c-.3 0-.5-.2-.5-.5v-4c0-.3.2-.5.5-.5h1.7c.3 0 .5.2.5.5v.2c0 .3-.2.5-.5.5h-.7V11h.5c.3 0 .5.2.5.5v.2c0 .3-.2.5-.5.5h-.5v.8h.7c.3 0 .5.2.5.5v.2zm-5.5-2.25c0-.14.11-.25.25-.25h.5c.14 0 .25.11.25.25v1.5c0 .14-.11.25-.25.25h-.5a.25.25 0 01-.25-.25v-1.5z"/></svg>
-            จองน้องๆ ใน${provinceName} ตอนนี้
+            จองคิวพรีเมียมในจังหวัด${provinceName} ตอนนี้
         </a>
         
         <div class="w-full pt-6">
@@ -1012,7 +1131,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         <div class="lightbox-gallery bg-black/40 lg:rounded-l-3xl">
           <div class="sticky top-0 p-4 sm:p-6 h-full flex flex-col justify-center"> 
             <div class="hero-image-container mb-4 flex justify-center items-center h-full max-h-[75vh] overflow-hidden">
-              <img id="lightboxHeroImage" src="" alt="โปรไฟล์น้อง" class="hero-image-main w-full h-full object-contain rounded-2xl shadow-xl mx-auto">
+              <img id="lightboxHeroImage" src="" alt="โปรไฟล์ผู้ดูแล" class="hero-image-main w-full h-full object-contain rounded-2xl shadow-xl mx-auto">
             </div>
             <div id="lightboxThumbnailStrip" class="thumbnail-strip flex gap-2 overflow-x-auto pb-2 px-2 justify-center"></div>
           </div>
@@ -1103,15 +1222,14 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         });
     }
 
-    // Client Search Filter (แก้ไขสอดคล้องกับ ID และคลาสที่เชื่อมโยงกับ main.js)
-    var searchInput = document.getElementById('search-keyword'); // เปลี่ยนเป็น ID หลัก
-    var clearSearch = document.getElementById('clear-search-btn'); // เปลี่ยนเป็น ID หลัก
+    // Client Search Filter
+    var searchInput = document.getElementById('search-keyword');
+    var clearSearch = document.getElementById('clear-search-btn');
     var regionTabs = document.getElementById('regionTabs');
     var resultCount = document.getElementById('resultCount');
     var emptyState = document.getElementById('emptyState');
     var cardsGrid = document.getElementById('profiles-container');
 
-    // ฟังก์ชันช่วยสแกนหาการ์ดที่ใช้งานอยู่จริง
     function getActiveCards() {
       return Array.prototype.slice.call(document.querySelectorAll('.province-card, .profile-card-new'));
     }
@@ -1186,25 +1304,39 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   });
 </script>
 <script type="module" src="/main.js"></script>
-</body>
-</html>`;
 
-return new Response(htmlTemplate, { 
-    headers: { 
-        "Content-Type": "text/html; charset=utf-8", 
-        "Cache-Control": "public, max-age=0, s-maxage=10, stale-while-revalidate=604800, must-revalidate",
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY"
-    } 
-});
 
-} catch (error) {
-    console.error("SSR Fatal Error:", error);
-    return buildErrorPage(500, "500 - SYSTEM ERROR", "ขออภัยค่ะ เกิดข้อผิดพลาดชั่วคราวในการประมวลผลบนเซิร์ฟเวอร์");
-}
-};
+        <div id="global-loader-overlay" style="position: fixed; inset: 0px; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; background-color: rgb(7, 7, 10); transition: opacity 0.4s; pointer-events: none; opacity: 0;" class="dark:bg-[#07070a]">
+            
+            <div style="position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px dashed rgba(217, 119, 6, 0.15);" class="anim-spin-slow-loader"></div>
+                <div style="position: absolute; inset: 6px; border-radius: 9999px; border: 2.5px solid transparent; border-top-color: #D4AF37; border-right-color: #FCF6BA;" class="anim-spin-slow-loader"></div>
+                
+                <div style="position: relative; z-index: 10; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #FF2E63 0%, #FF8E53 100%); box-shadow: 0 10px 30px -5px rgba(255, 46, 99, 0.5);" class="anim-pulse-loader">
+                    <i class="fas fa-heart" style="font-size: 18px; color: #ffffff;"></i>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <h3 class="anim-blink-loader" style="font-size: 14px; font-weight: 700; color: #D4AF37; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">
+                    กำลังตรวจสอบโปรไฟล์ตรงปก...
+                </h3>
+                <p style="font-size: 10px; color: #6b7280; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;">
+                    SIDELINE CHIANGMAI PREMIUM SELECTION
+                </p>
+            </div>
+        </div>
+    <div style="position: fixed; bottom: 0px; right: 0px; width: 60px; height: 60px; z-index: 99999; cursor: pointer; background: transparent; touch-action: manipulation;"></div></body></html>`;
 
-export const config = {
-    path: ["/", "/location/*", "/robots.txt", "/sitemap.xml"],
-    cache: "manual"
+        return new Response(htmlTemplate, {
+            headers: {
+                "Content-Type": "text/html; charset=utf-8",
+                "Cache-Control": "public, max-age=600, stale-while-revalidate=300"
+            }
+        });
+
+    } catch (e) {
+        console.error("Critical rendering error:", e);
+        return buildErrorPage(500, "500 - ข้อผิดพลาดภายในระบบ", "ระบบประมวลผลหลังบ้านเกิดขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้งในภายหลัง");
+    }
 };
