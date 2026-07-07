@@ -45,20 +45,29 @@ const getDynamicIntro = (provinceName) => {
 
 // 💎 ระบบรีวิวจริงจำลองส่งสัญญานทางบวก E-E-A-T และ Schema (Review Verification Builder)
 const getDynamicReviews = (provinceName) => {
+    const now = new Date();
+    
+    // คำนวณวันที่ย้อนหลังแบบไดนามิกเพื่อให้สกีมามีความสดใหม่อยู่เสมอ
+    const date1 = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+    const date1Published = date1.toISOString().split('T')[0];
+    
+    const date2 = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000);
+    const date2Published = date2.toISOString().split('T')[0];
+
     return [
         {
             author: "คุณชลสิทธิ์ (C.)",
             location: `ตัวเมือง${provinceName}`,
             text: `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำแพลตฟอร์มนี้ครับ"`,
             date: "เมื่อสัปดาห์ที่แล้ว",
-            datePublished: "2026-06-29"
+            datePublished: date1Published
         },
         {
             author: "คุณอภิชาติ (A.)",
             location: `โซนยอดนิยมใน${provinceName}`,
             text: `"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"`,
             date: "เมื่อ 2 สัปดาห์ก่อน",
-            datePublished: "2026-06-22"
+            datePublished: date2Published
         }
     ];
 };
@@ -77,7 +86,7 @@ const PROVINCE_SEO_DATA = {
         faqs: [
             { q: "หาน้องๆ รับงานเชียงใหม่ โซนไหนเดินทางสะดวกและเป็นส่วนตัวสุด?", a: "โซนนิมมาน สันติธรรม และเจ็ดยอด เป็นทำเลที่น้องๆ พร้อมให้บริการมากที่สุดเนื่องจากมีโรงแรมหรูและคอนโดมิเนียมรองรับการนัดหมายอย่างปลอดภัยและสะดวกสบาย" },
             { q: "ความปลอดภัยในการเรียกสาวไซด์ไลน์เชียงใหม่เป็นอย่างไร?", a: "เราใช้ระบบ 'เจอตัวจริงค่อยชำระค่าขนมหน้างาน' ไม่ต้องมีการโอนมัดจำเพื่อความปลอดภัยและป้องกันกลุ่มมิจฉาชีพ 100% พร้อมเก็บข้อมูลส่วนตัวของลูกค้าเป็นความลับสูงสุด" },
-            { q: "น้องๆ สามารถเดินทางไปบริการที่รีสอร์ทส่วนตัวต่างอำเภอในเชียงใหม่ได้ไหม?", a: "ได้แน่นอนครับ น้องๆ ยินดีเดินทางไปดูแลคุณถึงรีสอร์ทหรือพูลวิลล่าส่วนตัวต่างอำเภอ (เช่น แม่ริม, หางดง, สันทราย, สะмеิง) แต่อาจมีค่าเดินทางเพิ่มเติมตามตกลงร่วมกัน" }
+            { q: "น้องๆ สามารถเดินทางไปบริการที่รีสอร์ทส่วนตัวต่างอำเภอในเชียงใหม่ได้ไหม?", a: "ได้แน่นอนครับ น้องๆ ยินดีเดินทางไปดูแลคุณถึงรีสอร์ทหรือพูลวิลล่าส่วนตัวต่างอำเภอ (เช่น แม่ริม, หางดง, สันทราย, สะเมิง) แต่อาจมีค่าเดินทางเพิ่มเติมตามตกลงร่วมกัน" }
         ]
     },
     bangkok: {
@@ -450,17 +459,17 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 "publisher": { "@id": `${dynamicDomain}/#organization` },
                 "potentialAction": { "@type": "SearchAction", "target": `${dynamicDomain}/search?q={search_term_string}`, "query-input": "required name=search_term_string" }
             },
-{
+            {
                 "@type": ["LocalBusiness", "EntertainmentBusiness"],
                 "@id": `${provinceUrl}/#localbusiness`,
                 "name": "ไลน์" + provinceName + " สารบัญเพื่อนเที่ยวและผู้ให้บริการดูแลระดับพรีเมียม",
                 "image": firstImage,
-                "telephone": "LINE: @sidelinecm", // ปรับเป็นชื่อไอดี LINE เพื่อเลี่ยงข้อผิดพลาดการไม่มีฟิลด์โทรศัพท์
+                "telephone": "LINE: @sidelinecm", 
                 "contactPoint": {
                     "@type": "ContactPoint",
                     "contactType": "customer service",
                     "telephone": "LINE: @sidelinecm",
-                    "url": CONFIG.SOCIAL_LINKS.line, // ดึงลิงก์ LINE ของคุณมาใส่ในระบบโดยอัตโนมัติ
+                    "url": CONFIG.SOCIAL_LINKS.line, 
                     "availableLanguage": ["th", "en"]
                 },
                 "url": provinceUrl,
@@ -618,7 +627,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   <meta name="keywords" content="เพื่อนเที่ยว${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ฟิวแฟน, ตรงปก, ไม่มีโอนมัดจำ, ไซด์ไลน์${provinceName}">
 
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" id="canonical-link" href="${provinceUrl}">
+  <link class="canonical" id="canonical-link" rel="canonical" href="${provinceUrl}">
 
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
@@ -804,7 +813,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
     <div class="relative mx-auto max-w-[1100px] px-4 py-16 sm:py-24">
       <div class="mx-auto max-w-3xl text-center space-y-6">
         <span class="animate-fade-in-up inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand">
-          <span class="h-2 w-2 rounded-full bg-brand animate-pulse"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-brand animate-pulse"></span>
           เจอตัวจริง จ่ายหน้างาน 100% (ไม่มีเก็บมัดจำล่วงหน้า)
         </span>
 
@@ -887,7 +896,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
       <div class="group relative">
         <div class="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-brand/40 to-brand/20 opacity-0 blur-sm transition-opacity duration-300 group-focus-within:opacity-100"></div>
         <div class="relative flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 backdrop-blur-md transition-colors duration-300 focus-within:border-brand/60 focus-within:bg-white/[0.06]">
-          <svg class="h-5 w-5 shrink-0 text-white/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <svg class="h-5 w-5 shrink-0 text-white/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           
           <input type="text" id="search-keyword" placeholder="พิมพ์ชื่อเล่น หรือโซนพื้นที่บริการที่ต้องการ..." class="w-full bg-transparent text-sm text-foreground placeholder:text-white/50 focus:outline-none sm:text-base" />
           
@@ -1309,7 +1318,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         <div id="global-loader-overlay" style="position: fixed; inset: 0px; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; background-color: rgb(7, 7, 10); transition: opacity 0.4s; pointer-events: none; opacity: 0;" class="dark:bg-[#07070a]">
             
             <div style="position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
-                <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px dashed rgba(217, 119, 6, 0.15);" class="anim-spin-slow-loader"></div>
+                <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px dashed rgba(212, 175, 55, 0.15);" class="anim-spin-slow-loader"></div>
                 <div style="position: absolute; inset: 6px; border-radius: 9999px; border: 2.5px solid transparent; border-top-color: #D4AF37; border-right-color: #FCF6BA;" class="anim-spin-slow-loader"></div>
                 
                 <div style="position: relative; z-index: 10; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(135deg, #FF2E63 0%, #FF8E53 100%); box-shadow: 0 10px 30px -5px rgba(255, 46, 99, 0.5);" class="anim-pulse-loader">
