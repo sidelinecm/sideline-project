@@ -618,17 +618,19 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const htmlTemplate = `<!DOCTYPE html> 
 <html lang="th" class="scroll-smooth antialiased dark bg-[#050508]">
 <head>
+  <!-- 1. Technical Meta Tags (ต้องอยู่บนสุดเพื่อให้เบราว์เซอร์รับรู้ชุดอักขระและขนาดจอทันที) -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#D97706">
 
+  <!-- 2. SEO & Social Meta Tags (สำคัญมากต่อการเก็บข้อมูลของ Search Engine และการแสดงผลเมื่อแชร์ลิงก์) -->
   <title>${title}</title>
   <meta name="description" content="${cleanDescription}"/>
   <meta name="keywords" content="เพื่อนเที่ยว${provinceName}, รับงาน${provinceName}, เด็กเอ็น${provinceName}, ฟิวแฟน, ตรงปก, ไม่มีโอนมัดจำ, ไซด์ไลน์${provinceName}">
-
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <link class="canonical" id="canonical-link" rel="canonical" href="${provinceUrl}">
+  <link rel="canonical" id="canonical-link" href="${provinceUrl}">
 
+  <!-- Open Graph / Facebook / Line Dynamic Metadata -->
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
   <meta property="og:type" content="website">
@@ -637,17 +639,25 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
   <meta property="og:url" content="${provinceUrl}">
   <meta property="og:image" content="${firstImage}">
 
+  <!-- 3. Preconnect & DNS-Prefetch (เปิดการเชื่อมต่อกับเซิร์ฟเวอร์ภายนอกล่วงหน้าเพื่อลดความหน่วง) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+
+  <!-- 4. PWA, Shortcut Icons & Favicons -->
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- 5. Fonts (ดึงฟอนต์มาทำงานก่อนเพื่อให้ข้อความพร้อมแสดงผลทันที) -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="/styles.css" onerror="this.onerror=null;this.href='';">
+  <!-- 6. FontAwesome Icons (สไตล์ไอคอนจากภายนอก) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -665,83 +675,341 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
       }
     }
   </script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 
+  <!-- ==========================================================================
+     UNIFIED ELITE 3D GLASSMORPHIC CSS (Vanilla Pure CSS - บราวเซอร์เปิดอ่านได้ทันที)
+     ========================================================================== -->
   <style>
-    body { font-family: 'Prompt', sans-serif; background-color: #050508; color: #f4f4f5; }
+    :root {
+      --primary: 38 92% 50%;       /* Gold / Amber (#D97706) */
+      --primary-glow: 38 95% 65%;
+      --secondary: 45 100% 50%;     /* Orange / Gold (#F59E0B) */
+      --secondary-glow: 45 100% 70%;
+      --background: 240 15% 4%;     /* Pure Deep Dark (#050508) */
+      --foreground: 220 20% 95%;
+      --card: 240 12% 8%;           /* Dark Glass Core Tint (#0D0D12) */
+      --border: 240 12% 16%;
+      --radius: 1.5rem;
+    }
+
+    body { 
+      font-family: 'Prompt', sans-serif; 
+      background-color: #050508; 
+      color: #f4f4f5; 
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 200%; height: 200%;
+      z-index: -2;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    h1, h2, h3, h4 {
+      letter-spacing: -0.015em;
+      line-height: 1.35;
+    }
+    p {
+      line-height: 1.85 !important;
+      letter-spacing: 0.015em;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050508; }
+    ::-webkit-scrollbar-thumb { background: rgba(217, 119, 6, 0.35); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(217, 119, 6, 0.65); }
 
     @keyframes fade-in-up {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     @keyframes aurora-drift {
-      0%,100% { transform: translate3d(0,0,0) scale(1); opacity: .45; }
-      50%     { transform: translate3d(4%,-6%,0) scale(1.15); opacity: .7; }
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.2; }
+      50%      { transform: translate3d(3%, -4%, 0) scale(1.08); opacity: 0.45; }
     }
-    @keyframes glow-pulse { 0%,100% { opacity: .4; } 50% { opacity: .8; } }
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes shine-sweep {
+      0% { left: -150%; }
+      100% { left: 150%; }
+    }
+    @keyframes pulse-led-green {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 10px #00E676, 0 0 20px rgba(0,230,118,0.4); opacity: 0.85; }
+      50% { transform: scale(1.2); box-shadow: 0 0 22px #00E676, 0 0 35px rgba(0,230,118,0.85); opacity: 1; }
+    }
+    @keyframes pulse-led-red {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 10px #FF2E63, 0 0 20px rgba(255,46,99,0.4); opacity: 0.85; }
+      50% { transform: scale(1.2); box-shadow: 0 0 22px #FF2E63, 0 0 35px rgba(255,46,99,0.85); opacity: 1; }
+    }
+    @keyframes button-gravity-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4), 0 15px 35px -5px rgba(16, 185, 129, 0.35); }
+      70% { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0), 0 15px 35px -5px rgba(16, 185, 129, 0.35); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 15px 35px -5px rgba(16, 185, 129, 0.35); }
+    }
+    @keyframes auto-shine-sweep {
+      0% { left: -150%; }
+      25%, 100% { left: 150%; }
+    }
 
-    .animate-fade-in-up { animation: fade-in-up .6s cubic-bezier(.22,1,.36,1) both; }
-    .animate-aurora     { animation: aurora-drift 14s ease-in-out infinite; }
-    .animate-glow-pulse { animation: glow-pulse 3.5s ease-in-out infinite; }
+    .animate-fade-in-up { animation: fade-in-up .8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .animate-aurora     { animation: aurora-drift 22s ease-in-out infinite; }
 
-    .card-sheen {
-      background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.1) 50%, transparent 75%);
-      background-size: 200% 100%;
-      animation: shimmer 2.5s linear infinite;
-    }
-    .line-clamp-2 {
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
-    }
+    /* --- Premium Acrylic-Glass Panel --- */
     .glass-panel {
-      background: rgba(255, 255, 255, 0.02) !important;
-      backdrop-filter: blur(24px) !important;
-      -webkit-backdrop-filter: blur(24px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      background: linear-gradient(135deg, rgba(14, 14, 22, 0.82) 0%, rgba(6, 6, 10, 0.96) 100%) !important;
+      backdrop-filter: blur(28px) saturate(220%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(220%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.09) !important;
+      box-shadow: 
+        0 40px 70px -15px rgba(0, 0, 0, 0.98),
+        inset 0 1.5px 0.5px rgba(255, 255, 255, 0.16), /* สะท้อนขอบบนเลียนแบบงานแก้วคริสตัล */
+        inset 0 -1.5px 1px rgba(0, 0, 0, 0.6) !important;
     }
-    .like-button-wrapper .fa-heart {
-        text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-        color: rgba(255, 255, 255, 0.8);
-        transition: all 0.2s ease-in-out;
+    
+    /* --- 3D Specular Glass Hero Billboard --- */
+    .hero-billboard-3d {
+      position: relative;
+      border-radius: 32px !important;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 
+        0 40px 80px -15px rgba(0, 0, 0, 0.98), 
+        0 0 40px rgba(217, 119, 6, 0.12),
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.25) !important;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
-    .like-button-wrapper:hover .fa-heart {
-        transform: scale(1.15);
-        color: rgba(255, 255, 255, 1);
+    .hero-billboard-3d::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -150%;
+      width: 45%; height: 100%;
+      background: linear-gradient(
+        90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.12) 50%, 
+        rgba(255,255,255,0) 100%
+      );
+      transform: skewX(-25deg);
+      pointer-events: none;
+      animation: auto-shine-sweep 7s infinite ease-in-out;
+      z-index: 15;
     }
-    .like-button-wrapper.liked .fa-heart { color: #D97706; }
+    
+    /* Animation Blob for Service Section */
+    @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
+    .animate-blob { animation: blob 7s infinite; }
+    .animation-delay-2000 { animation-delay: 2s; }
+    
+    #featured-profiles {
+      position: relative;
+      z-index: 20; 
+      clear: both; 
+    }
 
+    .social-media-section {
+      position: relative;
+      z-index: 5;
+      overflow: hidden; 
+    }
+
+    /* --- 3D Interactive Card --- */
+    .interactive-card {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      will-change: transform, box-shadow, border-color;
+    }
+    .interactive-card:hover {
+      transform: translateY(-6px) scale(1.015) rotateX(1deg) rotateY(1deg);
+      border-color: rgba(217, 119, 6, 0.45) !important;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.005) 100%) !important;
+      box-shadow: 
+        0 50px 90px -20px rgba(0, 0, 0, 0.99), 
+        0 0 35px rgba(217, 119, 6, 0.12),
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.22) !important;
+    }
+
+    .interactive-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -160%;
+      width: 60%; height: 100%;
+      background: linear-gradient(
+        90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.12) 50%, 
+        rgba(255,255,255,0) 100%
+      );
+      transform: skewX(-25deg);
+      pointer-events: none;
+    }
+    .interactive-card:hover::before {
+      animation: shine-sweep 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* --- แคปซูลโปร่งแสงสะท้อนขอบ (3D Specular Capsule Glass) --- */
+    .capsule-3d-glass {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.8),
+        inset 0 1px 1px rgba(255, 255, 255, 0.12) !important; /* สะท้อนเงาขอบแก้วด้านบน */
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .capsule-3d-glass:hover {
+      transform: translateY(-3px) scale(1.02);
+      border-color: rgba(217, 119, 6, 0.3) !important;
+      box-shadow: 
+        0 15px 30px -5px rgba(0, 0, 0, 0.9), 
+        0 0 15px rgba(217, 119, 6, 0.1) !important;
+    }
+
+    /* --- LED Badges --- */
     .neon-badge {
-        display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; font-weight: 700; font-size: 11px; backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.12);
+        display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 99px; font-weight: 700; font-size: 11px; backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.14);
     }
-    .neon-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .status-available-neon .neon-dot { background-color: #00E676; box-shadow: 0 0 8px #00E676; }
-    .status-busy-neon .neon-dot { background-color: #FF2E63; box-shadow: 0 0 8px #FF2E63; }
+    .neon-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .status-available-neon .neon-dot { animation: pulse-led-green 2.5s infinite ease-in-out; }
+    .status-busy-neon .neon-dot { animation: pulse-led-red 2.5s infinite ease-in-out; }
 
-    .card-fixed-ratio {
-        position: relative;
-        width: 100%;
-        padding-top: 133.33%;
-        overflow: hidden;
-        border-radius: 16px;
+    /* --- Liquid-Gloss Green Button --- */
+    .btn-liquid-green {
+      background: linear-gradient(180deg, #10B981 0%, #036b44 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.26) !important;
+      box-shadow: 0 16px 32px -6px rgba(16, 185, 129, 0.42), 
+                  inset 0 1.5px 2.5px rgba(255, 255, 255, 0.45), 
+                  inset 0 -3.5px 7px rgba(0, 0, 0, 0.35) !important;
+      transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      animation: button-gravity-pulse 2.8s infinite;
     }
-    .card-fixed-ratio img {
+    .btn-liquid-green:hover {
+      transform: translateY(-3px) scale(1.03);
+      background: linear-gradient(180deg, #34D399 0%, #047857 100%) !important;
+      box-shadow: 0 22px 40px -8px rgba(16, 185, 129, 0.5), 
+                  inset 0 1.5px 3.5px rgba(255, 255, 255, 0.55), 
+                  inset 0 -3.5px 7px rgba(0, 0, 0, 0.35) !important;
+    }
+    .btn-liquid-green:active {
+      transform: translateY(1.8px) scale(0.96);
+      box-shadow: 0 5px 14px -2px rgba(16, 185, 129, 0.3), 
+                  inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* --- Embossed Glass Logo --- */
+    .logo-embossed {
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.28) !important;
+      box-shadow: 
+        0 9px 18px rgba(217, 119, 6, 0.45),
+        inset 0 1.8px 2.5px rgba(255, 255, 255, 0.55),
+        inset 0 -2.5px 5px rgba(0, 0, 0, 0.38) !important;
+    }
+
+    /* --- Profile Card Custom Layout 3:4 --- */
+    .card-fixed-ratio {
+        position: relative; width: 100%; padding-top: 133.33%; overflow: hidden; border-radius: 20px;
+        background-color: #0c0c0e;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 
+          0 10px 30px -5px rgba(0,0,0,0.8),
+          inset 0 1px 1px rgba(255,255,255,0.08) !important;
+        transform: translateZ(0);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-fixed-ratio img.card-image {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+        object-position: top center; z-index: 1; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-fixed-ratio:hover {
+        border-color: rgba(217, 119, 6, 0.3) !important;
+        box-shadow: 
+          0 20px 40px -10px rgba(0, 0, 0, 0.95),
+          inset 0 1px 1.5px rgba(255, 255, 255, 0.12) !important;
+    }
+    .card-fixed-ratio:hover img.card-image {
+        transform: scale(1.05);
     }
     .gradient-overlay-fixed {
         position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
-        background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
-        pointer-events: none;
+        background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%);
+        pointer-events: none; z-index: 10;
     }
+
+    /* --- Search Recessed Pocket --- */
+    .recessed-pocket {
+      background: rgba(3, 3, 5, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.75) !important;
+    }
+
+    /* --- Chroma Specular Highlights --- */
+    .text-gradient-luxury {
+      background: linear-gradient(135deg, #FF2E63 10%, #FF8E53 60%, #FFF9E6 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      filter: drop-shadow(0 2px 10px rgba(255, 46, 99, 0.2));
+    }
+    
     .seo-content-white a {
-        color: #D97706 !important; font-weight: 700; text-decoration: underline; text-underline-offset: 3px;
+        color: #D97706 !important; font-weight: 700; text-decoration: underline; text-underline-offset: 4px;
     }
     .seo-content-white a:hover { color: #f59e0b !important; }
     .seo-content-white span.highlight, .seo-content-white strong {
         color: #D97706 !important; font-weight: 800;
     }
+
+    .availability-badge, .status-badge, .featured-badge {
+      font-size: 0.68rem !important;
+      padding: 0.25rem 0.65rem !important;
+      font-weight: 700 !important;
+      border-radius: 9999px !important;
+      letter-spacing: 0.03em !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+    }
+    .status-available { background: linear-gradient(135deg, #10B981, #059669) !important; }
+    .status-busy { background: linear-gradient(135deg, #f97316, #d97706) !important; }
+    .status-inquire { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+    .featured-badge { background: linear-gradient(135deg, #D97706, #B45309) !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+
+    /* --- Fixed Skeleton Vanilla CSS --- */
+    .skeleton-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1rem;
+      background-color: #121217;
+      height: 400px;
+      min-height: 300px;
+      width: 100%;
+    }
+    .skeleton-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.02) 20%, rgba(255, 255, 255, 0.05) 60%, transparent);
+      animation: loading 1.6s infinite;
+    }
+    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   </style>
+
+  <!-- 8. Custom External Stylesheet (โหลดหลังจาก Tailwind CDN เพื่อไม่ให้ Utility ของ Tailwind ไปทับสไตล์คัสตอมของเรา) -->
+  <link rel="stylesheet" href="/styles.css" />
+
+  <!-- 9. Structured Data (JSON-LD สำหรับทำ Rich Snippet บน Google) -->
+  <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+
+  <!-- 10. Critical Inline Styles (เก็บสไตล์หลักจำเพาะบางส่วนที่มีพฤติกรรมแบบไดนามิกหรือจำเป็นเร่งด่วน) -->
+
+
 </head>
 
 <body class="min-h-screen bg-[#050508] font-sans text-[#f4f4f5] antialiased" data-page="home">
