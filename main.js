@@ -2363,89 +2363,100 @@ ${xmlContent}
     }
 
     async function initFooterLinks() {
-        const footerContainer = document.getElementById('popular-locations-footer');
-        if (!footerContainer) return;
+    const footerContainer = document.getElementById('popular-locations-footer');
+    if (!footerContainer) return;
 
-        let provincesList = [];
+    let provincesList = [];
 
-        if (state.provincesMap && state.provincesMap.size > 0) {
-            state.provincesMap.forEach((name, key) => {
-                provincesList.push({ key: key, name: name });
-            });
-        } else if (window.supabase) {
-            try {
-                const { data } = await window.supabase.from('provinces').select('*');
-                if (data) {
-                    provincesList = data.map(p => ({
-                        key: p.key || p.slug || p.id,
-                        name: p.nameThai || p.name_thai || p.name
-                    })).filter(p => p.key && p.name);
-                }
-            } catch (e) { console.warn("Footer load failed", e); }
-        }
-
-        provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
-
-        const loadingPulse = footerContainer.querySelector('.animate-pulse');
-        if (loadingPulse) {
-            loadingPulse.parentElement.remove();
-        }
-
-        const displayLimit = 20; 
-        let addedCount = footerContainer.querySelectorAll('li').length;
-
-        provincesList.forEach(p => {
-            const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
-            
-            if (!exists && addedCount < displayLimit) {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <a href="/location/${p.key}" 
-                       title="รับงาน${p.name} | Sideline Chiangmai" 
-                       style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;"
-                       onmouseenter="this.style.color='var(--primary-purple)'"
-                       onmouseleave="this.style.color='var(--text-gray)'">
-                       ไซด์ไลน์${p.name}
-                    </a>`;
-                footerContainer.appendChild(li);
-                addedCount++;
-            }
+    // ดึงข้อมูลจังหวัด
+    if (state.provincesMap && state.provincesMap.size > 0) {
+        state.provincesMap.forEach((name, key) => {
+            provincesList.push({ key: key, name: name });
         });
+    } else if (window.supabase) {
+        try {
+            const { data } = await window.supabase.from('provinces').select('*');
+            if (data) {
+                provincesList = data.map(p => ({
+                    key: p.key || p.slug || p.id,
+                    name: p.nameThai || p.name_thai || p.name
+                })).filter(p => p.key && p.name);
+            }
+        } catch (e) { 
+            console.warn("Footer load failed", e); 
+        }
+    }
 
-        if (provincesList.length > addedCount && !footerContainer.querySelector('.view-all-link')) {
-            const viewAll = document.createElement('li');
-            viewAll.className = 'view-all-link';
-            viewAll.innerHTML = `
-                <a href="/profiles.html" 
-                   style="color: var(--primary-purple); font-weight: 700; text-decoration: underline; margin-top: 8px; display: inline-block;">
-                   ดูจังหวัดอื่นๆ ทั้งหมด (${provincesList.length})
+    // เรียงตามอักษรภาษาไทย
+    provincesList.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+    // นำตัว Loading ออก
+    const loadingPulse = footerContainer.querySelector('.animate-pulse');
+    if (loadingPulse) {
+        loadingPulse.parentElement.remove();
+    }
+
+    const displayLimit = 20; 
+    let addedCount = footerContainer.querySelectorAll('li').length;
+
+    // เปลี่ยนมาใช้ลูป for...of เพื่อสั่ง break ได้ ช่วยประหยัดทรัพยากร
+    for (const p of provincesList) {
+        if (addedCount >= displayLimit) break; // ถ้าครบจำนวนที่ต้องการแล้ว ให้หยุดลูปทันที
+
+        const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
+        
+        if (!exists) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <a href="/location/${p.key}" 
+                   title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${p.name}" 
+                   style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;"
+                   onmouseenter="this.style.color='var(--primary-purple)'"
+                   onmouseleave="this.style.color='var(--text-gray)'">
+                   ไซด์ไลน์${p.name}
                 </a>`;
-            footerContainer.appendChild(viewAll);
+            footerContainer.appendChild(li);
+            addedCount++;
         }
     }
-    
-    const now = new Date();
-    const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
-    const timeEl = document.getElementById('last-updated-time');
-    if (timeEl) timeEl.innerText = thaiDate;
-    
-    if ('serviceWorker' in navigator) {
-        const registerServiceWorker = () => {
-            navigator.serviceWorker.register('/sw.js')
-                .then((registration) => {
-                    console.log('⚡ PWA: Service Worker ทำงานร่วมกับระบบสำเร็จ บนขอบเขต:', registration.scope);
-                })
-                .catch((error) => {
-                    console.error('❌ PWA: การลงทะเบียน Service Worker ขัดข้อง:', error);
-                });
-        };
 
-        if (document.readyState === 'complete') {
-            registerServiceWorker();
-        } else {
-            window.addEventListener('load', registerServiceWorker);
-        }
+    // สร้างลิงก์ "ดูทั้งหมด" ถ้ามีจำนวนเหลือ
+    if (provincesList.length > addedCount && !footerContainer.querySelector('.view-all-link')) {
+        const viewAll = document.createElement('li');
+        viewAll.className = 'view-all-link';
+        viewAll.innerHTML = `
+            <a href="/profiles.html" 
+               style="color: var(--primary-purple); font-weight: 700; text-decoration: underline; margin-top: 8px; display: inline-block;">
+               ดูจังหวัดอื่นๆ ทั้งหมด (${provincesList.length})
+            </a>`;
+        footerContainer.appendChild(viewAll);
     }
+}
+
+// อัปเดตวันที่เวอร์ชันไทย
+const now = new Date();
+const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+const timeEl = document.getElementById('last-updated-time');
+if (timeEl) timeEl.innerText = thaiDate;
+
+// ลงทะเบียน Service Worker เมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+if ('serviceWorker' in navigator) {
+    const registerServiceWorker = () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('⚡ PWA: Service Worker ทำงานสำเร็จ บนขอบเขต:', registration.scope);
+            })
+            .catch((error) => {
+                console.error('❌ PWA: การลงทะเบียน Service Worker ขัดข้อง:', error);
+            });
+    };
+
+    if (document.readyState === 'complete') {
+        registerServiceWorker();
+    } else {
+        window.addEventListener('load', registerServiceWorker);
+    }
+}
 
 })();
 
