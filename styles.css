@@ -17,7 +17,7 @@
 }
 
 /* ==============================================================================
-   2. GLOBAL VARIABLES & STYLES
+   2. GLOBAL VARIABLES & THEMES SUPPORT
    ============================================================================== */
 :root {
   --primary-purple: #5A2CBE;
@@ -28,6 +28,18 @@
   --text-muted: #71717A;
   --border-light: rgba(255, 255, 255, 0.05);
   --emerald-accent: #10B981;
+  --body-bg: #000000;
+}
+
+/* ระบบปรับสีตัวแปรเมื่อสลับไปโหมดสว่าง (Light Theme Support) */
+html.light {
+  --pure-black: #FFFFFF;
+  --pure-white: #09090B;
+  --secondary-dark: #F4F4F5;
+  --text-gray: #27272A;
+  --text-muted: #71717A;
+  --border-light: rgba(9, 9, 11, 0.08);
+  --body-bg: #F9FAFB;
 }
 
 * {
@@ -36,12 +48,17 @@
   padding: 0;
 }
 
+html {
+  scrollbar-gutter: stable; /* ป้องกันโครงสร้างขยับเขยื้อนเมื่อทำการล็อกแถบเลื่อนแนวตั้ง */
+}
+
 html, body {
-  background-color: var(--pure-black) !important;
-  color: #F4F4F5;
-  font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif !important;
+  background-color: var(--body-bg) !important;
+  color: var(--text-gray);
+  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif !important; /* จัดฟอนต์ที่ดาวน์โหลดจริงมาไว้เป็นอันดับแรก */
   overflow-x: hidden;
   scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -64,7 +81,7 @@ html, body {
 #page-header {
   position: fixed;
   top: 0; 
-  left: 16px;       /* ใช้ระยะห่างซ้าย-ขวาแทนการระบุ width และ margin เพื่อป้องกันแถบเบี้ยวขวา */
+  left: 16px;       
   right: 16px;
   z-index: 1000;
   margin-top: 16px;
@@ -97,7 +114,7 @@ html, body {
 /* ============================== 🔮 NEW FROSTED WHITE PREMIUM DRAWER (40% WIDTH) ============================== */
 #sidebar-menu {
   position: fixed;
-  top: 0;           /* ปรับเปลี่ยนจาก inset-y มาใช้มาตรฐาน CSS เพื่อเสถียรภาพการแสดงผลบนอุปกรณ์พกพา */
+  top: 0;           
   bottom: 0;
   right: 0;
   width: 40% !important;
@@ -272,13 +289,11 @@ html, body {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background-color: rgba(255, 255, 255, 0.03) !important;
-  color: var(--text-gray) !important;
+  border: 1px solid var(--border-light);
+  background-color: rgba(255, 255, 255, 0.02);
+  color: var(--text-gray);
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
 .circle-btn-el:hover {
@@ -428,6 +443,12 @@ html, body {
   transform: translateY(-4px);
   border-color: rgba(147, 51, 234, 0.5) !important;
   box-shadow: 0 20px 50px rgba(90, 44, 190, 0.15), 0 0 15px rgba(90, 44, 190, 0.05) !important;
+}
+
+/* บังคับแก้ไขระบบการเรนเดอร์ของการ์ดภาพให้มีรูปทรงสมดุลและห้ามมี Padding */
+.profile-card-new.interactive-card {
+  padding: 0 !important; 
+  border-radius: 20px !important;
 }
 
 /* ==============================================================================
