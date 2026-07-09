@@ -1,3 +1,4 @@
+
 <!DOCTYPE html> 
 <html lang="th" class="dark-theme">
 <head>
@@ -28,7 +29,8 @@
 <link rel="shortcut icon" href="/icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<!-- ปรับลิงก์ Apple Touch Icon ให้ระบุขนาดที่ได้มาตรฐาน 180x180 เพื่อแก้ไข Lighthouse Error -->
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest">
 
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
@@ -1004,17 +1006,28 @@
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
-      // 1. ระบบแก้ไขลำดับหัวข้อ (Heading Hierarchy Patch) สำหรับเนื้อหาที่โหลดแบบไดนามิก (เช่น ชื่อโปรไฟล์ 'ใบส้ม' ที่มักถูกเรนเดอร์เป็น h4)
-      const headingFixer = new MutationObserver((mutations) => {
+      // 1. ระบบแก้ไขลำดับหัวข้อ และแก้ไข ARIA Attribute สำหรับดาวเรตติ้งที่โหลดแบบไดนามิกแบบอัตโนมัติ
+      const domObserver = new MutationObserver((mutations) => {
+          // แก้ไขเรื่อง Tag Heading ของหัวข้อโปรไฟล์
           document.querySelectorAll('#featured-profiles-container h4, #profiles-display-area h4').forEach(h4 => {
               const h3 = document.createElement('h3');
-              // คัดลอก attribute ทั้งหมดเพื่อคงรูปแบบ css และการทำงานเดิมไว้
               Array.from(h4.attributes).forEach(attr => h3.setAttribute(attr.name, attr.value));
               h3.innerHTML = h4.innerHTML;
               h4.parentNode.replaceChild(h3, h4);
           });
+
+          // ปรับปรุงแก้ไขปัญหา: "Elements must only use permitted ARIA attributes"
+          // โดยการเพิ่ม attribute role="img" บน tag ที่ถูกฝัง aria-label โดยอัตโนมัติ
+          document.querySelectorAll('.stars[aria-label]:not([role])').forEach(el => {
+              el.setAttribute('role', 'img');
+          });
       });
-      headingFixer.observe(document.body, { childList: true, subtree: true });
+      domObserver.observe(document.body, { childList: true, subtree: true });
+
+      // บังคับใช้กับโครงสร้าง static ที่สร้างสำเร็จแล้วเมื่อเริ่มโหลดหน้าเว็บทันที
+      document.querySelectorAll('.stars[aria-label]:not([role])').forEach(el => {
+          el.setAttribute('role', 'img');
+      });
 
       // 2. ระบบควบคุมเปิด-ปิดสไลด์เมนูมือถือแบบ Custom CSS
       const menuToggle = document.getElementById("menu-toggle");
