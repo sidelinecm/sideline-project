@@ -217,7 +217,15 @@ const smartLinkify = (text, provinceKey, zones) => {
 
 function verifyHostname(request) {
     const host = request.headers.get("host") || "";
-    return CONFIG.ALLOWED_DOMAINS.some(allowed => host.includes(allowed)) || host.endsWith(".netlify.app");
+    
+    // 🛡️ ป้องกันระบบล่มด้วยการดักจับหากไม่มีตัวแปร ALLOWED_DOMAINS ใน CONFIG
+    const allowed = CONFIG.ALLOWED_DOMAINS || [
+        "sidelinechiangmai.netlify.app",
+        "gmai.netlify.app",
+        "localhost"
+    ];
+    
+    return allowed.some(domain => host.includes(domain)) || host.endsWith(".netlify.app");
 }
 
 function buildErrorPage(statusCode, title, message) {
