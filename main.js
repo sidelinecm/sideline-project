@@ -7,6 +7,10 @@ import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.mjs';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// เพิ่ม 2 บรรทัดด้านล่างนี้ใต้คำสั่ง registerPlugin
+window.gsap = gsap;
+window.ScrollTrigger = ScrollTrigger;
+
 (function () {
     'use strict';
 
@@ -786,7 +790,8 @@ gsap.registerPlugin(ScrollTrigger);
                     </div>
                     <div style="flex: 1; min-width: 0; text-align: left;">
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                            <h4 style="font-size: 13px; font-weight: 800; color: #FFFFFF; margin: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.name}</h4>
+
+<div style="font-size: 13px; font-weight: 800; color: #FFFFFF; margin: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.name}</div>
                             ${item.age ? `<span style="font-size: 9px; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: var(--text-gray); font-weight: 700;">${item.age} ปี</span>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
@@ -1306,7 +1311,7 @@ gsap.registerPlugin(ScrollTrigger);
                 </button>
             </div>
 
-            <a href="/sideline/${p.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 20;" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
+            <a href="/sideline/${p.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
 
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.4) 45%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
 
@@ -1422,7 +1427,7 @@ gsap.registerPlugin(ScrollTrigger);
         };
 
         if (animate && window.gsap) {
-            gsap.to(dom.lightbox, { opacity: 0, pointerEvents: 'none', duration: 0.2 });
+gsap.to(dom.lightbox, { opacity: 0, pointerEvents: 'none', duration: 0.2 });
             gsap.to(dom.lightboxWrapper, { 
                 scale: 0.95, opacity: 0, duration: 0.2, 
                 onComplete: () => {
@@ -1647,7 +1652,7 @@ gsap.registerPlugin(ScrollTrigger);
                         <div style="width: 56px; height: 50px; background: rgba(6, 199, 85, 0.1); color: #06C755; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
                             <i class="fas fa-check"></i>
                         </div>
-                        <h3 style="color: #ffffff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">คัดลอกชื่อเรียบร้อย!</h3>
+                        <div style="color: #ffffff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">คัดลอกชื่อเรียบร้อย!</div>
                         <p style="color: var(--text-gray); font-size: 13px; margin-bottom: 24px; line-height: 1.5;">ระบบจำชื่อสำหรับวางลงในช่องค้นหาไลน์ได้ทันทีครับ</p>
                         <a href="${finalLineUrl}" id="real-line-btn" style="display: block; width: 100%; background: #06C755; color: white; padding: 14px; border-radius: 100px; font-weight: bold; text-decoration: none; font-size: 14px; box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2);">เปิด LINE บนมือถือ</a>
                         <button id="close-popup" style="margin-top: 16px; background: transparent; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; font-weight: 700;">ปิดหน้าต่าง</button>
@@ -2359,27 +2364,26 @@ ${xmlContent}
     const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
     const timeEl = document.getElementById('last-updated-time');
     if (timeEl) timeEl.innerText = thaiDate;
-// ==============================================================================
-// ⚡ [เวอร์ชัน S-Tier] สคริปต์ลงทะเบียน PWA Service Worker (ลดความเสี่ยงข้าม Event 'load')
-// ==============================================================================
-if ('serviceWorker' in navigator) {
-    const registerServiceWorker = () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-                console.log('⚡ PWA: Service Worker ทำงานร่วมกับระบบสำเร็จ บนขอบเขต:', registration.scope);
-            })
-            .catch((error) => {
-                console.error('❌ PWA: การลงทะเบียน Service Worker ขัดข้อง:', error);
-            });
-    };
+    
+    // ==============================================================================
+    // ⚡ [เวอร์ชัน S-Tier] สคริปต์ลงทะเบียน PWA Service Worker (ลดความเสี่ยงข้าม Event 'load')
+    // ==============================================================================
+    if ('serviceWorker' in navigator) {
+        const registerServiceWorker = () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('⚡ PWA: Service Worker ทำงานร่วมกับระบบสำเร็จ บนขอบเขต:', registration.scope);
+                })
+                .catch((error) => {
+                    console.error('❌ PWA: การลงทะเบียน Service Worker ขัดข้อง:', error);
+                });
+        };
 
-    // เช็คหากหน้าเว็บเรนเดอร์เนื้อหาครบหมดแล้ว ให้ทำการลงทะเบียนทันทีโดยไม่ต้องรอ
-    if (document.readyState === 'complete') {
-        registerServiceWorker();
-    } else {
-        window.addEventListener('load', registerServiceWorker);
+        if (document.readyState === 'complete') {
+            registerServiceWorker();
+        } else {
+            window.addEventListener('load', registerServiceWorker);
+        }
     }
-}
 
 })();
-
