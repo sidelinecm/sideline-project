@@ -46,9 +46,9 @@
 # ==============================================================================
 # 3. Optimized Edge Functions Mapping (Consolidated Edge Routing)
 # ==============================================================================
-# ชี้เป้าหมายให้ ssr-province ทำหน้าที่สร้างและพ่น Sitemap เพื่อลดไฟล์สคริปต์ส่วนเกิน
+# ชี้เป้าหมายให้ Edge Function ชื่อ sitemap (ไฟล์ sitemap.js) ทำหน้าที่สร้างพ่นข้อมูล XML
 [[edge_functions]]
-  function = "ssr-province"
+  function = "sitemap"
   path = "/sitemap.xml"
 
 # ชี้เป้าหมายให้ ssr-province เป็นตัวส่งข้อมูลการกรองสปายบอทของ robots.txt
