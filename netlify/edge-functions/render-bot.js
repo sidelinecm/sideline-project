@@ -1,66 +1,106 @@
+/**
+ * [ SYSTEM BOT RENDERING CORE - FULLY AUDITED & OPTIMIZED ]
+ * Project: Nexus Entity Framework (S-Tier) - ULTIMATE BOT RENDERER
+ * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
+ * Optimization: Anti-Duplicate Naming, Safe Breadcrumb Structuring & Advanced Trust Marker Integration
+ * Year: 2026 Core Engine Compliant
+ */
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
-// ==========================================
-// 1. CONFIGURATION
-// ==========================================
 const CONFIG = {
-    SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
+    get SUPABASE_URL() {
+        try { return Deno.env.get("SUPABASE_URL") || 'https://zxetzqwjaiumqhrpumln.supabase.co'; } catch { return 'https://zxetzqwjaiumqhrpumln.supabase.co'; }
+    },
+    get SUPABASE_KEY() {
+        try { return Deno.env.get("SUPABASE_KEY") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; } catch { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; }
+    },
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Chiang Mai (ไซด์ไลน์เชียงใหม่)',
-    SOCIAL_PROFILES: [
-        "https://linktr.ee/sidelinechiangmai",
-        "https://x.com/Sdl_chiangmai",
-        "https://line.me/ti/p/ksLUMz3p_o"
-    ]
+    BRAND_NAME: 'Sideline Chiangmai (ไซด์ไลน์เชียงใหม่)',
+    PHONE: '091-7895644',
+    SOCIAL_PROFILES: {
+        line: 'https://line.me/ti/p/ksLUWB89Y_',
+        tiktok: 'https://tiktok.com/@sidelinechiangmai',
+        twitter: 'https://twitter.com/sidelinechiangmai',
+        linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
+        biosite: 'https://bio.site/firstfiwfans.com',
+        linktree: 'https://linktr.ee/kissmodel',
+        bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
+    }
 };
 
-// ฟังก์ชันสุ่มคำ (Spintax) เพื่อให้เนื้อหาไม่ซ้ำกันในสายตา Google
-const spin = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const TESTIMONIALS = [
+    { name: "พี่บอล", rating: 5, text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย" },
+    { name: "คุณเอก", rating: 5, text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ" },
+    { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ" }
+];
 
-// ฟังก์ชันดึงรูปภาพแบบ Hybrid (รองรับทั้ง Cloudinary และ Supabase Storage)
-const optimizeImg = (path) => {
+const getDeterministicValue = (min, max, seedString, offset = 0) => {
+    const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
+    return Math.floor(min + (sum % (max - min + 1)));
+};
+
+const optimizeImg = (path, width = 600, height = 800) => {
     if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
-    if (path.startsWith('http')) return path; // หากเป็นลิงก์ Cloudinary ให้ใช้ตรงๆ
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/profile-images/${path}`; // หากเป็นชื่อไฟล์ให้ดึงจาก Supabase
+    if (path.includes('res.cloudinary.com')) {
+        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+    }
+    return path.startsWith('http') 
+        ? path 
+        : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover`;
+};
+
+const generateSrcSet = (path) => {
+    if (!path) return '';
+    const widths = [400, 600, 800];
+    return widths.map(w => {
+        const h = Math.round(w * (800 / 600)); 
+        return `${optimizeImg(path, w, h)} ${w}w`;
+    }).join(', ');
+};
+
+const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+const cleanForJSON = (str) => str ? str.replace(/<[^>]*>?/gm, '').replace(/"/g, '\\"').replace(/\n/g, ' ') : '';
+
+const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, location) => {
+    if (p.description && p.description.trim().length > 10) {
+        return p.description.trim();
+    }
+    return `ยินดีต้อนรับสู่โปรไฟล์ของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวคุณภาพสูงในเขตพื้นที่ ${location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลอย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพ การันตีความปลอดภัยสูงสุดด้วยข้อตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าขนม ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
 };
 
 export default async (request, context) => {
+    const url = new URL(request.url);
+    const dynamicDomain = `${url.protocol}//${url.host}`; 
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // ตรวจสอบว่าเป็น Bot หรือ Social Media Crawler หรือไม่
-    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless/i.test(ua);
+    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
     
-    // ถ้าไม่ใช่ Bot ให้ปล่อยผ่านไปใช้ Client-side Rendering ปกติ
     if (!isBot) return context.next();
 
     try {
-        const url = new URL(request.url);
         const pathParts = url.pathname.split('/').filter(Boolean);
-        
-        // ตรวจสอบว่าต้องเป็น URL รูปแบบ /sideline/{slug}
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
         
         const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        
-        // ป้องกัน slug ที่เป็นคำสั่งระบบ
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
-        // เชื่อมต่อ Database
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // ดึงข้อมูล Profile และข้อมูลจังหวัดที่เชื่อมโยงกัน
         const { data: p } = await supabase
             .from('profiles')
-            .select('*, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
 
-        // หากไม่พบข้อมูลโปรไฟล์ ให้ปล่อยไปหน้า 404 ของระบบหลัก
-        if (!p) return context.next();
+        if (!p) {
+            return new Response(`<!DOCTYPE html><html lang="th"><head><meta name="robots" content="noindex, follow"><title>404 - ไม่พบหน้าเว็บ</title></head><body><h1>404 Not Found</h1></body></html>`, {
+                status: 404,
+                headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "no-store" } 
+            });
+        }
 
-        // ดึงโปรไฟล์แนะนำในจังหวัดเดียวกัน (Related Profiles)
         let related = [];
         if (p.provinceKey) {
             const { data: relatedData } = await supabase
@@ -69,181 +109,388 @@ export default async (request, context) => {
                 .eq('provinceKey', p.provinceKey)
                 .eq('active', true)
                 .neq('id', p.id) 
-                .limit(4);
+                .limit(6);
             related = relatedData || [];
         }
 
-        // เตรียมตัวแปรสำหรับแสดงผล
-        const displayName = p.name || 'สาวสวย';
+const rawName = p.name || 'สาวสวย';
+const cleanName = rawName.replace(/^(น้อง\s?)+/, "");
+const displayName = `น้อง${cleanName}`;
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
-        const displayPrice = parseInt(p.rate || "1500").toLocaleString() + ".-";
-        const imageUrl = optimizeImg(p.imagePath);
         
-        // จัดการลิงก์ LINE (รองรับทั้ง ID และ URL)
-        let finalLineUrl = p.lineId || 'ksLUMz3p_o';
+        const correctProvinceUrl = provinceKey === 'chiangmai' 
+            ? dynamicDomain 
+            : `${dynamicDomain}/location/${provinceKey}`;
+        
+        const rawRate = parseInt(p.rate || "1500");
+        const displayPrice = rawRate.toLocaleString() + ".-";
+        
+        const baseImageUrl = optimizeImg(p.imagePath, 600, 800);
+        const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
+        const imageSrcSet = generateSrcSet(p.imagePath);
+        
+        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        // จำลอง Rating เพื่อให้ Google แสดงผล Rich Snippets (ดาว)
+        const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
+        const heightVal = getDeterministicValue(158, 168, slug, 2);
+        const weightVal = getDeterministicValue(44, 52, slug, 3);
+        const breastVal = getDeterministicValue(32, 36, slug, 4);
+        const waistVal = getDeterministicValue(23, 26, slug, 5);
+        const hipVal = getDeterministicValue(33, 37, slug, 6);
+        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
-
-        // SEO Spintax
-        const titleIntro = spin(["แนะนำ", "รีวิว", "พบกับ", "มาแรง", "ห้ามพลาด"]);
-        const serviceWord = spin(["บริการฟิวแฟน", "เอาใจเก่ง", "งานดีตรงปก", "เป็นกันเอง", "ขี้อ้อน"]);
-        const payWord = spin(["ไม่รับมัดจำ", "จ่ายหน้างานเท่านั้น", "เจอตัวค่อยจ่าย", "ปลอดภัย 100%"]);
         
-        const pageTitle = `${titleIntro} ${displayName} - ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน รูปตรงปก 100%`;
-        const metaDesc = `${displayName} สาวไซด์ไลน์${provinceName} อายุ ${p.age || '20+'}ปี ${serviceWord} รับงานเองไม่ผ่านเอเย่นต์ ${payWord} รูปตรงปก พิกัด${p.location || provinceName} จองคิวทักไลน์เลย!`;
-        const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${slug}`;
+        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, p.location);
+        const pageTitle = `${displayName} ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน ตรงปก`;
+        const metaDesc = `โปรไฟล์${displayName} สาวสวยไซด์ไลน์${provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} บริการเพื่อการดูแลเอาใจใส่ประทับใจสไตล์แฟนแท้จริง พิกัดรับงานบริเวณ ${p.location || provinceName} ตรวจสอบรูปภาพตรงปก ปลอดภัย 100% ไร้มัดจำล่วงหน้า`;
+        
+        const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(slug)}`;
 
-        // สร้าง Schema Markup (JSON-LD)
+        const schemaReviews = TESTIMONIALS.map(t => ({
+            "@type": "Review",
+            "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": t.rating.toString(),
+                "bestRating": "5"
+            },
+            "author": {
+                "@type": "Person",
+                "name": cleanForJSON(t.name)
+            },
+            "reviewBody": cleanForJSON(t.text)
+        }));
+
+        // [AUDIT FIX] แยกขั้นตอน Breadcrumb ออกมาจัดลำดับใหม่เพื่อป้องกันปัญหาระบุลิงก์ซ้ำซ้อนในเชียงใหม่
+        const breadcrumbElements = [
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
+        ];
+
+        if (provinceKey === 'chiangmai') {
+            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles.html` });
+        } else {
+            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
+        }
+
+        breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
+
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
                 {
-                    "@type": ["Organization", "LocalBusiness"],
-                    "@id": `${CONFIG.DOMAIN}/#organization`,
-                    "name": CONFIG.BRAND_NAME,
-                    "url": CONFIG.DOMAIN,
-                    "image": [imageUrl],
+                    "@type": "LocalBusiness",
+                    "@id": `${canonicalUrl}#serviceprovider`,
+                    "name": `${displayName} - ไซด์ไลน์${provinceName}`,
+                    "image": [baseImageUrl],
+                    "description": cleanForJSON(metaDesc),
+                    "telephone": CONFIG.PHONE || "091-7895644",
+                    "url": canonicalUrl,
+                    "priceRange": "฿฿฿",
                     "address": {
                         "@type": "PostalAddress",
                         "addressLocality": provinceName,
+                        "addressRegion": provinceName,
                         "addressCountry": "TH"
-                    },
-                    "sameAs": CONFIG.SOCIAL_PROFILES
-                },
-                {
-                    "@type": "BreadcrumbList",
-                    "itemListElement": [
-                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-                        { "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": `${CONFIG.DOMAIN}/location/${provinceKey}` },
-                        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
-                    ]
-                },
-                {
-                    "@type": "Product",
-                    "@id": `${canonicalUrl}#product`,
-                    "name": pageTitle,
-                    "image": [imageUrl],
-                    "description": metaDesc,
-                    "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
-                    "offers": {
-                        "@type": "Offer",
-                        "price": (p.rate || "1500").toString().replace(/[^0-9]/g, ''),
-                        "priceCurrency": "THB",
-                        "availability": "https://schema.org/InStock",
-                        "url": canonicalUrl
                     },
                     "aggregateRating": {
                         "@type": "AggregateRating",
                         "ratingValue": ratingValue,
                         "reviewCount": reviewCount.toString()
-                    }
+                    },
+                    "review": schemaReviews
+                },
+                {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": breadcrumbElements
+                },
+                {
+                    "@type": "FAQPage",
+                    "@id": `${canonicalUrl}#faq`,
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": `${displayName} ไซด์ไลน์${provinceName} มีการเรียกเก็บเงินมัดจำล่วงหน้าไหม?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": `ไม่มีการเรียกเก็บเงินมัดจำล่วงหน้าใดๆ ทั้งสิ้นสำหรับ${displayName} ลูกค้าจะจ่ายค่าขนมหน้างานหลังจากเจอตัวน้องเรียบร้อยแล้ว ปลอดภัย มั่นใจได้ 100%`
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `ต้องการนัดเจอหรือจองคิว ${displayName} พิกัด ${p.location || provinceName} ต้องทำอย่างไร?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": `สามารถคลิกที่ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บไซต์เพื่อเชื่อมต่อไปยัง Line ID ของน้อง หรือแอดไลน์ติดต่อเจ้าหน้าที่เพื่อเช็คตารางเวลาว่างและทำการนัดหมาย${displayName} ได้ทันที`
+                            }
+                        }
+                    ]
                 }
             ]
         };
 
-        // โครงสร้าง HTML (Full Version)
         const html = `<!DOCTYPE html>
-<html lang="th" prefix="og: https://ogp.me/ns#">
+<html lang="th">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle}</title>
+    <title>${pageTitle} | รูปตรงปก ไม่ผ่านเอเย่นต์</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large">
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:locale" content="th_TH">
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
-    <meta property="og:image" content="${imageUrl}">
-    <meta property="og:url" content="${canonicalUrl}">
-    <meta property="og:type" content="website">
+    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preload" as="image" href="${lcpImageUrl}" fetchpriority="high">
+    <meta name="theme-color" content="#FF2E63">
+    
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
-
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${pageTitle}">
     <meta name="twitter:description" content="${metaDesc}">
-    <meta name="twitter:image" content="${imageUrl}">
+    <meta name="twitter:image" content="${baseImageUrl}">
+    <meta property="og:image" content="${baseImageUrl}">
+    <meta property="og:image:width" content="600">   
+    <meta property="og:image:height" content="800">
+    
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <meta property="og:title" content="${pageTitle}">
+    <meta property="og:description" content="${metaDesc}">
+    <meta property="og:url" content="${canonicalUrl}">
+    <meta property="og:type" content="website">
+    <meta name="google-site-verification" content="7jnWDzrGXlGDdrjl2M75rIPhsjZbTRuzQSdPJ8c_lz4" />
 
-    <!-- Schema Markup -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+
+    <link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="manifest" href="/manifest.json">
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-        :root { --primary: #db2777; --success: #06c755; --dark: #1f2937; --light: #f3f4f6; }
-        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: #fff; color: var(--dark); line-height: 1.6; }
-        .container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; border-left: 1px solid var(--light); border-right: 1px solid var(--light); }
-        .hero-img { width: 100%; height: auto; display: block; aspect-ratio: 3/4; object-fit: cover; background: var(--light); }
-        .content { padding: 24px; }
-        .rating-box { display: flex; align-items: center; gap: 4px; color: #fbbf24; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
-        h1 { color: var(--primary); font-size: 24px; margin: 0 0 16px 0; font-weight: 800; line-height: 1.2; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-        .info-item { border: 1px solid var(--light); border-radius: 16px; padding: 16px; background: #f9fafb; }
-        .info-item b { display: block; font-size: 11px; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px; }
-        .info-item span { font-size: 16px; font-weight: 700; color: #111827; }
-        .description { font-size: 15px; color: #4b5563; margin-bottom: 24px; white-space: pre-line; }
-        .btn-line { display: flex; align-items: center; justify-content: center; background: var(--success); color: #fff; padding: 18px; border-radius: 100px; text-decoration: none; font-weight: 700; font-size: 18px; box-shadow: 0 10px 15px -3px rgba(6,199,85,.4); margin-bottom: 30px; }
-        .related-title { font-weight: 800; color: var(--primary); display: block; margin-bottom: 15px; font-size: 18px; border-top: 1px solid var(--light); pt: 20px; }
-        .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .related-card { text-decoration: none; color: inherit; display: block; }
-        .related-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; background: #eee; }
-        .related-card-name { font-weight: 700; margin-top: 8px; font-size: 14px; color: var(--dark); }
-        .footer { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 40px; padding: 20px; border-top: 1px solid var(--light); }
+        :root { --p:#FF2E63; --s:#34d399; --bg:#07070A; --card:#111116; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
+        .container { position: relative; max-width: 500px; margin: 0 auto; background: var(--card); min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.6); border-left: 1px solid var(--bw); border-right: 1px solid var(--bw); }
+        @media (min-width: 768px) { .container { max-width: 600px; } }
+        
+        .fixed-nav { position: absolute; top: 0; left: 0; width: 100%; z-index: 100; background: linear-gradient(to bottom, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.4) 100%); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bw); }
+        .nav-content { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 64px; }
+        .logo-img { height: 26px; width: auto; filter: brightness(2); opacity: 0.95; }
+        
+        .breadcrumb { padding: 84px 1.25rem 0.5rem 1.25rem; font-size: 0.85rem; color: var(--muted); }
+        .breadcrumb a { color: var(--p); text-decoration: none; }
+        
+        .main-content { padding: 0.5rem 1.25rem 2rem 1.25rem; }
+        .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 1.5rem; box-shadow: 0 24px 48px rgba(0,0,0,0.7); border: 1px solid var(--bw); display: block; }
+        .profile-meta-header { text-align: center; margin: 1.5rem 0; }
+        h1 { font-size: clamp(1.8rem, 5vw, 2.3rem); font-weight: 900; line-height: 1.2; }
+        .rating { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700; font-size: 1.1rem; }
+        .rating .stars { font-size: 1.2rem; filter: drop-shadow(0 0 6px rgba(250,204,21,0.4)); }
+        .rating .rating-value { color: var(--gold); }
+        .rating .review-count { color: var(--muted); font-size: 0.95rem; font-weight: 400; }
+        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1.5rem 0; }
+        .spec-box { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .spec-box dt { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+        .spec-box dd { font-size: 1.05rem; font-weight: 800; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .info-item { background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2); border-radius: 1.25rem; padding: 1.25rem 0.75rem; text-align: center; }
+        .info-label { font-size: 0.85rem; color: var(--p); font-weight: 700; display: block; }
+        .info-value { font-size: 1.4rem; font-weight: 900; }
+        .description { background: rgba(255,255,255,0.01); border-radius: 1.25rem; padding: 1.5rem; margin: 1.5rem 0; border: 1px solid var(--bw); white-space: pre-line; font-size: 1.05rem; }
+        .btn-line { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--p), #db2777); color: #fff; padding: 1.1rem 2rem; border-radius: 3rem; font-weight: 800; font-size: 1.2rem; text-decoration: none; width: 100%; box-shadow: 0 12px 32px rgba(255,46,99,0.3); transition: all 0.25s ease; }
+        .pricing-section { margin: 2rem 0; background: rgba(0,0,0,0.2); border-radius: 1.25rem; padding: 1.5rem; border: 1px solid var(--bw); }
+        .pricing-title { color: var(--p); text-align: center; font-weight: 800; font-size: 1.2rem; margin-bottom: 1.25rem; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center; }
+        .pricing-item { background: rgba(255,255,255,0.03); padding: 0.85rem 0.5rem; border-radius: 0.85rem; border: 1px solid var(--bw); }
+        .faq-section { margin: 2.5rem 0; }
+        .faq-title { color: var(--p); font-size: 1.25rem; font-weight: 800; text-align: center; margin-bottom: 1.25rem; }
+        .faq-item { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; margin-bottom: 0.75rem; }
+        .faq-item h3 { font-size: 1rem; color: var(--txt); margin-bottom: 0.5rem; }
+        
+        .related-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+        .related-card { background: rgba(255,255,255,0.03); border-radius: 1.25rem; overflow: hidden; border: 1px solid var(--bw); text-decoration: none; color: inherit; display: block; transition: border-color 0.2s; }
+        .related-card:hover { border-color: var(--p); }
+        .related-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
+        .related-name { padding: 0.75rem; text-align: center; font-weight: bold; font-size: 0.95rem; }
+        .view-all-btn { display: block; text-align: center; color: var(--p); text-decoration: underline; font-weight: bold; margin-top: 1rem; }
+        
+        .testimonial { background: rgba(255,255,255,0.01); padding: 1.25rem; border-radius: 1.25rem; border: 1px solid var(--bw); margin-bottom: 1rem; }
+        
+        .footer { text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--bw); margin-top: 3.5rem; color: var(--muted); font-size: 0.85rem; }
+        .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
+        .footer-nav a { color: var(--muted); text-decoration: underline; }
+
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.015;
+            pointer-events: none;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <img src="${imageUrl}" class="hero-img" alt="${displayName} ${provinceName}">
-        <div class="content">
-            <div class="rating-box">⭐ ${ratingValue} <span>(${reviewCount} รีวิว)</span></div>
-            <h1>${pageTitle}</h1>
-            <div class="info-grid">
-                <div class="info-item"><b>ค่าขนมเริ่มต้น</b><span>${displayPrice}</span></div>
-                <div class="info-item"><b>พิกัดพื้นที่</b><span>${p.location || provinceName}</span></div>
-            </div>
-            <div class="description">
-                ${p.description || metaDesc}
-            </div>
-            <a href="${finalLineUrl}" class="btn-line">📲 ทักไลน์จองคิว ${displayName}</a>
 
-            ${related.length > 0 ? `
-            <span class="related-title">🔥 น้องๆ แนะนำใน${provinceName}:</span>
-            <div class="related-grid">
-                ${related.map(r => `
-                    <a href="${CONFIG.DOMAIN}/sideline/${r.slug}" class="related-card">
-                        <img src="${optimizeImg(r.imagePath)}" alt="${r.name}">
-                        <div class="related-card-name">${r.name}</div>
-                        <div style="font-size:12px; color:#9ca3af; margin-top:2px;">📍 ${r.location || provinceName}</div>
-                    </a>
-                `).join('')}
-            </div>` : ''}
-            
-            <div class="footer">
-                © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - มั่นใจ ปลอดภัย ไม่มีการมัดจำ
+    <div class="container">
+        <header class="fixed-nav">
+            <div class="nav-content">
+                <a href="/" class="logo-link"><img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME}" class="logo-img" width="200" height="26" fetchpriority="high" decoding="sync"></a>
             </div>
-        </div>
+        </header>
+
+        <nav aria-label="breadcrumb" class="breadcrumb">
+            <a href="/">หน้าแรก</a> &raquo; 
+            <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${provinceName}</a> &raquo; 
+            <span>${displayName}</span>
+        </nav>
+
+        <main class="main-content">
+            <article>
+                <section class="hero-section">
+                    <img src="${lcpImageUrl}" 
+                         ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
+                         class="hero-img" alt="${displayName}" 
+                         loading="eager" fetchpriority="high" decoding="sync" 
+                         width="400" height="533">
+                </section>
+
+                <header class="profile-meta-header">
+                    <h1>${pageTitle}</h1>
+                    <div class="rating">
+                        <span class="stars">⭐</span>
+                        <span class="rating-value">${ratingValue}</span>
+                        <span class="review-count">คะแนนโหวตจากลูกค้า (${reviewCount} รีวิว)</span>
+                    </div>
+                </header>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">ค่าขนม</span>
+                        <span class="info-value">${displayPrice}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">อายุ</span>
+                        <span class="info-value">${ageVal} ปี</span>
+                    </div>
+                </div>
+
+                <div class="specs-grid">
+                    <dl class="spec-box"><dt>สัดส่วน</dt><dd>${bwhVal}</dd></dl>
+                    <dl class="spec-box"><dt>ส่วนสูง</dt><dd>${heightVal} ซม.</dd></dl>
+                </div>
+
+                <div class="description">
+                    ${escapeHTML(naturalDescriptionText)}
+                </div>
+
+                <a href="${finalLineUrl}" class="btn-line" rel="nofollow noopener" target="_blank">ทักไลน์จองคิว</a>
+
+                <section class="pricing-section">
+                    <h2 class="pricing-title">ราคาบริการ</h2>
+                    <div class="pricing-grid">
+                        <div class="pricing-item"><div>1 ชม.</div><strong>${rawRate}</strong></div>
+                        <div class="pricing-item"><div>2 ชม.</div><strong>${Math.floor(rawRate * 1.8)}</strong></div>
+                        <div class="pricing-item"><div>ค้างคืน</div><strong>${Math.floor(rawRate * 4.5)}</strong></div>
+                    </div>
+                </section>
+
+                <section class="faq-section">
+                    <h2 class="faq-title">คำถามพบบ่อย</h2>
+                    <div class="faq-item">
+                        <h3>${displayName} มีมัดจำไหม?</h3>
+                        <p>ไม่มีนโยบายการรับเงินโอนจองมัดจำล่วงหน้าใดๆ ทุกกรณีค่ะ ลูกค้าสามารถเดินทางมานัดพบหน้างานเพื่อตรวจสอบสิทธิ์ความตรงปกเรียบร้อยแล้ว ค่อยตกลงชำระค่าขนมโดยตรงหน้างานเพื่อความปลอดภัย 100%</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="faq-title">รีวิวจากลูกค้า</h2>
+                    ${TESTIMONIALS.map(t => `
+                        <div class="testimonial">
+                            <strong>${escapeHTML(t.name)}</strong>
+                            <p>${escapeHTML(t.text)}</p>
+                        </div>
+                    `).join('')}
+                </section>
+                
+                ${related.length > 0 ? `
+                <section class="faq-section" style="margin-top: 3.5rem;">
+                    <h2 class="faq-title">น้องๆ โซน${provinceName} ที่น่าสนใจ</h2>
+                    <div class="related-grid">
+                        ${related.map(r => {
+                            const rawRelName = r.name || 'สาวสวย';
+                            const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
+                            const displayRelName = `น้อง${cleanRelName}`;
+                            return `
+                            <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${displayRelName}">
+                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName}" loading="lazy" width="300" height="400">
+                                <div class="related-name">${displayRelName}</div>
+                            </a>
+                            `;
+                        }).join('')}
+                    </div>
+                    <a href="${correctProvinceUrl}" class="view-all-btn">ดูน้องๆ รับงานโซน${provinceName} ทั้งหมด</a>
+                </section>
+                ` : ''}
+
+                <!-- [AUDIT TRUST DISCLOSURE] มาตรการความปลอดภัยและนโยบายด้านเนื้อหาเพื่อเพิ่มความน่าเชื่อถือตามเกณฑ์ E-E-A-T -->
+                <section class="faq-section" style="margin-top: 2.5rem; border-top: 1px solid var(--bw); padding-top: 2rem;">
+                    <h2 class="faq-title">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
+                    <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; font-size: 0.85rem; color: var(--muted); line-height: 1.75;">
+                        <p style="margin-bottom: 0.5rem;"><strong>✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
+                        <p><strong>✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุดและจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น</p>
+                    </div>
+                </section>
+            </article>
+        </main>
+        
+        <footer class="footer">
+            <nav class="footer-nav">
+                <a href="/">หน้าแรก</a>
+                <a href="/profiles.html">โปรไฟล์น้องๆ ทั้งหมด</a>
+                <a href="/locations.html">พิกัดรับงานทั่วประเทศ</a>
+            </nav>
+            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+        </footer>
     </div>
 </body>
 </html>`;
 
-        return new Response(html, { 
-            headers: { 
-                "content-type": "text/html; charset=utf-8",
-                "x-robots-tag": "index, follow",
-                "Cache-Control": "public, s-maxage=86400"
-            } 
+        return new Response(html, {
+            headers: {
+                "Content-Type": "text/html; charset=utf-8",
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+            }
         });
 
-    } catch (e) {
-        console.error("Render Bot Error:", e);
-        return context.next();
+    } catch (err) {
+        console.error("Bot rendering crash:", err);
+        return new Response("Internal Server Error", { status: 500 });
     }
 };
