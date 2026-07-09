@@ -1,5 +1,4 @@
 
-
 /**
  * [ SYSTEM CORE - REFACTORED & AUDITED ]
  * Project: Nexus Entity Framework (S-Tier) - ULTIMATE PURE CSS EDITION (NO TAILWIND)
@@ -218,7 +217,7 @@ const smartLinkify = (text, provinceKey, zones) => {
 function verifyHostname(request) {
     const host = request.headers.get("host") || "";
     
-    // 🛡️ ป้องกันระบบล่มด้วยการดักจับหากไม่มีตัวแปร ALLOWED_DOMAINS ใน CONFIG
+    // 🛡️ ป้องกันระบบพังหากไม่มี ALLOWED_DOMAINS ใน CONFIG
     const allowed = CONFIG.ALLOWED_DOMAINS || [
         "sidelinechiangmai.netlify.app",
         "gmai.netlify.app",
@@ -358,9 +357,10 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         let supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
+        // ➕ [ดึงฟิลด์เพิ่ม] ดึงฟิลด์ description เพื่อให้ Lightbox เรียกใช้ได้แบบสดใหม่ไม่ต้อง Query อีกรอบ
         const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
             supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
-            supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability")
+            supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, description")
                 .eq("provinceKey", provinceKey).eq("active", true)
                 .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
             supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
@@ -523,7 +523,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                      data-name="น้อง${cleanName}"
                      data-region="${profileLocation}"
                      data-desc=""
-                     style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 24px; overflow: hidden; padding:0;">
+                     style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 24px; overflow: hidden; padding:0; cursor: pointer;">
                     
                     <a href="${profileLink}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
 
@@ -1317,6 +1317,11 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
       width: 100%;
       height: 100%;
     }
+
+    /* 🛡️ เพิ่มลำดับเลเยอร์ให้ถูกต้องหลังเอา Tailwind ออกอย่างสมบูรณ์ */
+    .z-10 { z-index: 10 !important; }
+    .z-20 { z-index: 20 !important; }
+    .z-30 { z-index: 30 !important; }
   </style>
 
   <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
@@ -1892,16 +1897,22 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             <div id="lightboxTags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
             
             <div style="border-top: 1px solid var(--border-light); padding-top: 16px;">
-              <div id="lightboxDetailsCompact"></div>
+              <div id="lightboxDetailsCompact" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
               <div id="lightboxDateAdded" style="display: none; font-size: 12px; color: var(--text-muted); margin-top: 12px;"></div>
             </div>
 
-            <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid var(--border-light); padding-top: 16px;">
+            <div id="lightboxDescriptionContainer" style="border-top: 1px solid var(--border-light); padding-top: 16px;">
               <h4 style="color: white; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; margin-top: 0;">
                 <i class="fas fa-info-circle" style="color: var(--primary-purple);" aria-hidden="true"></i>
                 <span>รายละเอียดเพิ่มเติม</span>
               </h4>
               <div id="lightboxDescriptionContent" style="font-size: 13px; color: var(--text-gray); line-height: 1.6; white-space: pre-wrap;"></div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-light); padding-top: 16px; margin-top: auto;">
+              <a id="lightboxFullProfileLink" href="#" class="btn-primary-webyst" style="width: 100%; text-align: center; justify-content: center; text-decoration: none;" aria-label="ดูโปรไฟล์เต็ม">
+                ดูรายละเอียดเต็ม & แอดไลน์จองคิว
+              </a>
             </div>
           </div>
 
@@ -1910,7 +1921,21 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
     </div>
   </div>
 
-  <script type="module" src="/main.js"></script>
+  <!-- 📊 [ฝังข้อมูลโปรไฟล์] ส่งข้อมูลโปรไฟล์จากฐานข้อมูล Supabase มายังระบบควบคุมฝั่งเบราว์เซอร์โดยตรง -->
+  <script>
+    window.profilesData = ${JSON.stringify(safeProfiles.map(p => ({
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        age: p.age,
+        imagePath: p.imagePath,
+        location: p.location,
+        rate: p.rate,
+        availability: p.availability,
+        lastUpdated: p.lastUpdated,
+        description: p.description || ""
+    })))};
+  </script>
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -1966,6 +1991,129 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         mapIframe.src = mapIframe.dataset.src;
         if (placeholder) placeholder.remove();
       }
+
+      // ============================== 🔮 NEW ULTIMATE LIGHTBOX LOGIC ==============================
+      const profiles = window.profilesData || [];
+      const lightbox = document.getElementById("lightbox");
+      const closeBtn = document.getElementById("closeLightboxBtn");
+
+      // สมการจำลองคุณลักษณะส่วนตัวแบบคำนวณคงที่ (ตรงตามโครงสร้างของ Bot Renderer 100%)
+      const getDeterministicValue = (min, max, seedString, offset = 0) => {
+          const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
+          return Math.floor(min + (sum % (max - min + 1)));
+      };
+
+      function optimizeImgUrl(path, width = 320, height = 420) {
+          if (!path) return "/images/default.webp";
+          if (path.startsWith("http")) return path;
+          return "${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/" + path + "?width=" + width + "&height=" + height + "&resize=cover&quality=65&format=webp";
+      }
+
+      const openLightbox = (profileId) => {
+          const p = profiles.find(item => String(item.id) === String(profileId));
+          if (!p) return;
+
+          const cleanName = (p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, "");
+          document.getElementById('lightbox-profile-name-main').textContent = "น้อง" + cleanName;
+
+          const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+          const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
+          const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
+
+          document.getElementById('lightbox-availability-badge-wrapper').innerHTML = 
+              '<span class="neon-badge ' + statusClass + '">' +
+                  '<span class="neon-dot"></span>' +
+                  '<span>' + statusText + '</span>' +
+              '</span>';
+
+          document.getElementById('lightboxQuote').textContent = "ดูแลใส่ใจสไตล์ฟิวแฟนตรงปก ปลอดภัยสูงสุด 100%";
+
+          // ดึงภาพหลัก
+          const heroImg = document.getElementById('lightboxHeroImage');
+          heroImg.src = optimizeImgUrl(p.imagePath, 450, 600);
+          heroImg.alt = "น้อง" + cleanName + " สารบัญตรงปก";
+
+          // คำนวณคุณสมบัติทางกายภาพ
+          const slug = p.slug || String(p.id);
+          const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
+          const heightVal = getDeterministicValue(158, 168, slug, 2);
+          const weightVal = getDeterministicValue(44, 52, slug, 3);
+          const breastVal = getDeterministicValue(32, 36, slug, 4);
+          const waistVal = getDeterministicValue(23, 26, slug, 5);
+          const hipVal = getDeterministicValue(33, 37, slug, 6);
+          const bwhVal = breastVal + "-" + waistVal + "-" + hipVal;
+          const displayRate = p.rate ? parseInt(p.rate).toLocaleString() + " ฿" : "สอบถาม";
+
+          // วาดตารางข้อมูล compact
+          document.getElementById('lightboxDetailsCompact').innerHTML = 
+              '<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between;">' +
+                  '<span style="font-size: 11px; color: var(--text-gray);">ค่าขนม</span>' +
+                  '<span style="font-size: 13px; font-weight: 800; color: #C084FC;">' + displayRate + '</span>' +
+              '</div>' +
+              '<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between;">' +
+                  '<span style="font-size: 11px; color: var(--text-gray);">อายุ</span>' +
+                  '<span style="font-size: 13px; font-weight: 800; color: white;">' + ageVal + ' ปี</span>' +
+              '</div>' +
+              '<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between;">' +
+                  '<span style="font-size: 11px; color: var(--text-gray);">สัดส่วน</span>' +
+                  '<span style="font-size: 13px; font-weight: 800; color: white;">' + bwhVal + '</span>' +
+              '</div>' +
+              '<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between;">' +
+                  '<span style="font-size: 11px; color: var(--text-gray);">พิกัด</span>' +
+                  '<span style="font-size: 13px; font-weight: 800; color: white; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px;">' + (p.location || "${provinceName}") + '</span>' +
+              '</div>';
+
+          // ข้อมูลบรรยายเพิ่มเติม
+          const finalDesc = p.description || ("น้อง" + cleanName + " พรีเมียมเพื่อนเที่ยวเพื่อนคุย อัธยาศัยดี มีมารยาทและดูแลใส่ใจเป็นกันเองอย่างเป็นธรรมชาติ รับรองความตรงปก ปลอดภัยสูงสุดไร้มัดจำจ่ายหน้างาน 100% ค่ะ");
+          document.getElementById('lightboxDescriptionContent').textContent = finalDesc;
+
+          // เชื่อมลิงก์รายละเอียดเดี่ยว
+          document.getElementById('lightboxFullProfileLink').href = "/sideline/" + encodeURIComponent(slug);
+
+          // แท็กพิเศษ
+          document.getElementById('lightboxTags').innerHTML = 
+              '<span style="background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); color: #C084FC; font-size: 10px; padding: 4px 10px; border-radius: 100px;">#เพื่อนเที่ยว</span>' +
+              '<span style="background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); color: #C084FC; font-size: 10px; padding: 4px 10px; border-radius: 100px;">#ฟิวแฟน</span>' +
+              '<span style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10B981; font-size: 10px; padding: 4px 10px; border-radius: 100px;">#ตรงปก</span>' +
+              '<span style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10B981; font-size: 10px; padding: 4px 10px; border-radius: 100px;">#ไม่มัดจำ</span>';
+
+          lightbox.classList.add("active");
+          document.body.style.overflow = "hidden";
+      };
+
+      const closeLightbox = () => {
+          lightbox.classList.remove("active");
+          document.body.style.overflow = "";
+      };
+
+      if (closeBtn) closeBtn.addEventListener("click", closeLightbox);
+
+      // ดักจับการปิดเมื่อคลิกข้างนอกหน้าต่างหลัก
+      lightbox.addEventListener("click", (e) => {
+          if (e.target === lightbox) {
+              closeLightbox();
+          }
+      });
+
+      // ดักจับปุ่ม Esc บนแป้นพิมพ์เพื่อปิดหน้าต่าง
+      document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && lightbox.classList.contains("active")) {
+              closeLightbox();
+          }
+      });
+
+      // ดักจับเหตุการณ์การกดที่การ์ดโปรไฟล์เพื่อแสดงผล Lightbox แทนที่จะเด้งไปหน้าอื่นทันที
+      document.querySelectorAll(".province-card").forEach(card => {
+          card.addEventListener("click", (e) => {
+              // ยกเว้นปุ่มหัวใจ (Favorite) ปล่อยให้ระบบชื่นชอบจัดการตนเองตามปกติ
+              if (e.target.closest('[data-action="like"]')) {
+                  return;
+              }
+              e.preventDefault();
+              const profileId = card.getAttribute("data-profile-id");
+              openLightbox(profileId);
+          });
+      });
   });
   </script>
 </body>
