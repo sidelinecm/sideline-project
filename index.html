@@ -16,22 +16,21 @@
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="Sideline Chiangmai">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="ไซด์ไลน์เชียงใหม่ 2026 | เด็กเอ็น ฟิวแฟน รับงานเชียงใหม่">
+  <meta property="og:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ตรงปก100% ไม่มีมัดจำ">
   <meta property="og:description" content="แหล่งรวมสาวสวยไซด์ไลน์เชียงใหม่ คัดเกรดพรีเมียม ฟิวแฟน ตรงปก จ่ายหน้างาน ปลอดภัย 100%">
   <meta property="og:url" content="https://sidelinechiangmai.netlify.app/">
-  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/social-preview.webp">
+  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="ไซด์ไลน์เชียงใหม่ รับงานเชียงใหม่ ฟิวแฟน | ไม่มัดจำ จ่ายหน้างาน">
   <meta name="twitter:description" content="รับงานฟิวแฟน เชียงใหม่ สาวสวย ตรงปก ไม่ต้องโอนก่อน จ่ายหน้างาน">
-  <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/social-preview.webp">
+  <meta name="twitter:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
 
-<link rel="shortcut icon" href="/icons/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-<!-- ปรับลิงก์ Apple Touch Icon ให้ระบุขนาดที่ได้มาตรฐาน 180x180 เพื่อแก้ไข Lighthouse Error -->
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-<link rel="manifest" href="/manifest.webmanifest">
+  <link rel="shortcut icon" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
 
   <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin>
   <link rel="dns-prefetch" href="https://hgzbgpbmymoiwjpaypvl.supabase.co">
@@ -39,6 +38,7 @@
 
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="modulepreload" href="/main.js">
 
   <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="/styles.css"></noscript>
@@ -227,7 +227,7 @@
           <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-hidden="true">
             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
           </div>
-          <span style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">เรตติ้งระดับ 5 ดาว</span>
+>
           <span class="rating-text">5/5 Verified Profiles</span>
         </div>
 
@@ -1007,82 +1007,130 @@
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
-      // 1. ระบบแก้ไขลำดับหัวข้อ และแก้ไข ARIA Attribute สำหรับดาวเรตติ้งที่โหลดแบบไดนามิกแบบอัตโนมัติ
-      const domObserver = new MutationObserver((mutations) => {
-          // แก้ไขเรื่อง Tag Heading ของหัวข้อโปรไฟล์
-          document.querySelectorAll('#featured-profiles-container h4, #profiles-display-area h4').forEach(h4 => {
-              const h3 = document.createElement('h3');
-              Array.from(h4.attributes).forEach(attr => h3.setAttribute(attr.name, attr.value));
-              h3.innerHTML = h4.innerHTML;
-              h4.parentNode.replaceChild(h3, h4);
-          });
+    // 1. ระบบแก้ไขลำดับหัวข้อ และ ARIA (ปรับปรุงให้ Performance ดีขึ้น)
+    const fixAccessibility = (container) => {
+        const target = container || document;
+        
+        // แก้ไข h4 เป็น h3
+        target.querySelectorAll('#featured-profiles-container h4, #profiles-display-area h4').forEach(h4 => {
+            const h3 = document.createElement('h3');
+            Array.from(h4.attributes).forEach(attr => h3.setAttribute(attr.name, attr.value));
+            h3.innerHTML = h4.innerHTML;
+            h4.parentNode.replaceChild(h3, h4);
+        });
 
-          // ปรับปรุงแก้ไขปัญหา: "Elements must only use permitted ARIA attributes"
-          // โดยการเพิ่ม attribute role="img" บน tag ที่ถูกฝัง aria-label โดยอัตโนมัติ
-          document.querySelectorAll('.stars[aria-label]:not([role])').forEach(el => {
-              el.setAttribute('role', 'img');
-          });
-      });
-      domObserver.observe(document.body, { childList: true, subtree: true });
+        // เพิ่ม role="img" สำหรับดาว
+        target.querySelectorAll('.stars[aria-label]:not([role])').forEach(el => {
+            el.setAttribute('role', 'img');
+        });
+    };
 
-      // บังคับใช้กับโครงสร้าง static ที่สร้างสำเร็จแล้วเมื่อเริ่มโหลดหน้าเว็บทันที
-      document.querySelectorAll('.stars[aria-label]:not([role])').forEach(el => {
-          el.setAttribute('role', 'img');
-      });
+    // รันครั้งแรกทันที
+    fixAccessibility();
 
-      // 2. ระบบควบคุมเปิด-ปิดสไลด์เมนูมือถือแบบ Custom CSS
-      const menuToggle = document.getElementById("menu-toggle");
-      const closeMenuBtn = document.getElementById("close-menu-btn");
-      const sidebarMenu = document.getElementById("sidebar-menu");
-      const sidebarOverlay = document.getElementById("sidebar-overlay");
+    // ใช้ MutationObserver อย่างระมัดระวัง
+    const domObserver = new MutationObserver((mutations) => {
+        let shouldRun = false;
+        mutations.forEach(mutation => {
+            if (mutation.addedNodes.length > 0) shouldRun = true;
+        });
+        
+        if (shouldRun) {
+            // ใช้ debounce หรือทำงานเฉพาะจุดที่เปลี่ยนเพื่อประหยัด CPU
+            fixAccessibility();
+        }
+    });
+    
+    domObserver.observe(document.body, { childList: true, subtree: true });
 
-      if (menuToggle && sidebarMenu && sidebarOverlay) {
-          const openMenu = () => {
-              sidebarMenu.classList.add("active");
-              sidebarOverlay.style.display = "block";
-              setTimeout(() => { sidebarOverlay.style.opacity = "1"; }, 50);
-              document.body.style.overflow = "hidden"; 
-          };
+    // 2. ระบบ Mobile Menu (เพิ่มการตรวจสอบ Error)
+    const menuToggle = document.getElementById("menu-toggle");
+    const closeMenuBtn = document.getElementById("close-menu-btn");
+    const sidebarMenu = document.getElementById("sidebar-menu");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
 
-          const closeMenu = () => {
-              sidebarMenu.classList.remove("active");
-              sidebarOverlay.style.opacity = "0";
-              document.body.style.overflow = ""; 
-              setTimeout(() => { sidebarOverlay.style.display = "none"; }, 300);
-          };
+    if (menuToggle && sidebarMenu && sidebarOverlay) {
+        const openMenu = () => {
+            sidebarMenu.classList.add("active");
+            sidebarOverlay.style.display = "block";
+            // ใช้ requestAnimationFrame แทน setTimeout เพื่อความเนียนของ Animation
+            requestAnimationFrame(() => {
+                sidebarOverlay.style.opacity = "1";
+            });
+            document.body.style.overflow = "hidden"; 
+        };
 
-          menuToggle.addEventListener("click", openMenu);
-          if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
-          sidebarOverlay.addEventListener("click", closeMenu);
+        const closeMenu = () => {
+            sidebarMenu.classList.remove("active");
+            sidebarOverlay.style.opacity = "0";
+            document.body.style.overflow = ""; 
+            setTimeout(() => { 
+                if (sidebarOverlay.style.opacity === "0") {
+                    sidebarOverlay.style.display = "none";
+                }
+            }, 300);
+        };
 
-          const menuLinks = sidebarMenu.querySelectorAll(".sidebar-links-wrapper a, div a");
-          menuLinks.forEach(link => {
-              link.addEventListener("click", closeMenu);
-          });
-      }
+        menuToggle.addEventListener("click", openMenu);
+        if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
+        sidebarOverlay.addEventListener("click", closeMenu);
 
-      // 3. ระบบโหลดแผนที่ Google Maps แบบประหยัดพลังงาน
-      const mapIframe = document.getElementById("google-map");
-      const placeholder = document.getElementById("map-placeholder");
-      if (mapIframe && 'IntersectionObserver' in window) {
-        const mapObserver = new IntersectionObserver((entries, observer) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              mapIframe.src = mapIframe.dataset.src;
-              mapIframe.onload = () => {
-                if (placeholder) placeholder.style.opacity = '0';
-                setTimeout(() => placeholder && placeholder.remove(), 500);
-              };
-              observer.unobserve(entry.target);
+        // ปิดเมนูเมื่อคลิกลิงก์ภายใน
+        sidebarMenu.querySelectorAll("a").forEach(link => {
+            link.addEventListener("click", closeMenu);
+        });
+    }
+
+    // 3. Google Maps Lazy Loading
+    const mapIframe = document.getElementById("google-map");
+    const placeholder = document.getElementById("map-placeholder");
+    
+    if (mapIframe) {
+        if ('IntersectionObserver' in window) {
+            const mapObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (mapIframe.dataset.src) {
+                            mapIframe.src = mapIframe.dataset.src;
+                        }
+                        mapIframe.onload = () => {
+                            if (placeholder) {
+                                placeholder.style.opacity = '0';
+                                setTimeout(() => placeholder.remove(), 500);
+                            }
+                        };
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: "200px" });
+            mapObserver.observe(mapIframe);
+        } else {
+            // Fallback สำหรับ Browser เก่า
+            mapIframe.src = mapIframe.dataset.src;
+            if (placeholder) placeholder.remove();
+        }
+    }
+});
+
+// 4. Service Worker Registration
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        const registerSW = async () => {
+            try {
+                await navigator.serviceWorker.register("/sw.js");
+            } catch (err) {
+                // ใช้ debug เพื่อไม่ให้รกหน้า Console ของ User ทั่วไป
+                console.debug("SW registration skipped");
             }
-          });
-        }, { rootMargin: "200px" });
-        mapObserver.observe(mapIframe);
-      } else if (mapIframe) {
-        mapIframe.src = mapIframe.dataset.src;
-        if (placeholder) placeholder.remove();
-      }
-  });
+        };
+
+        if ("requestIdleCallback" in window) {
+            requestIdleCallback(registerSW);
+        } else {
+            setTimeout(registerSW, 1500);
+        }
+    });
+}
   </script>
 
 </body>
