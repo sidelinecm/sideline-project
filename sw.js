@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sideline-chiangmai-v11';
+const CACHE_NAME = 'sideline-chiangmai-v01';
 const ASSETS = [
   '/',
   '/index.html',
