@@ -488,53 +488,67 @@ window.ScrollTrigger = ScrollTrigger;
     }
 
     function processProfileData(p) {
-        if (!p) return null;
+    if (!p) return null;
 
-        const displayName = getCleanName(p.name); 
-        const rawGallery = Array.isArray(p.galleryPaths) ? p.galleryPaths : [];
-        const allImagePaths = [p.imagePath, ...rawGallery].filter(Boolean);
-        const uniquePaths = [...new Set(allImagePaths)];
+    const displayName = getCleanName(p.name); 
+    const rawGallery = Array.isArray(p.galleryPaths) ? p.galleryPaths : [];
+    const allImagePaths = [p.imagePath, ...rawGallery].filter(Boolean);
+    const uniquePaths = [...new Set(allImagePaths)];
 
-        let imageObjects = uniquePaths.map(path => {
-            return { 
-                src: getOptimizedClientImage(path, 400),  
-                fullSrc: getOptimizedClientImage(path, 800) 
-            };
-        });
-
-        if (imageObjects.length === 0) {
-            imageObjects.push({ 
-                src: CONFIG.DEFAULT_OG_IMAGE, 
-                fullSrc: CONFIG.DEFAULT_OG_IMAGE 
-            });
-        }
-
-        const provinceName = state.provincesMap.get(p.provinceKey) || p.provinceThai || 'ไม่ระบุ';
-        const numericPrice = Number(String(p.rate).replace(/\D/g, '')) || 0;
-        const formattedPrice = numericPrice > 0 ? numericPrice.toLocaleString() : 'สอบถาม';
-
-        const universalSearchString = `
-            ${displayName} ${p.id} ${provinceName} 
-            ${Array.isArray(p.styleTags) ? p.styleTags.join(' ') : ''} 
-            ${p.description || ''} ${p.location || ''} 
-            ${p.stats || ''} ${p.skinTone || ''}
-        `.toLowerCase().replace(/\s+/g, ' ').trim();
-
+    let imageObjects = uniquePaths.map(path => {
         return { 
-            ...p, 
-            displayName,
-            images: imageObjects, 
-            provinceNameThai: provinceName,
-            displayPrice: formattedPrice, 
-            _price: numericPrice,         
-            searchString: universalSearchString,
-            safeHeight: (p.height && p.height.trim()) ? p.height : '-',
-            safeWeight: (p.weight && p.weight.trim()) ? p.weight : '-',
-            safeStats: (p.stats && p.stats.trim()) ? p.stats : '-',
-            safeSkin: (p.skinTone && p.skinTone.trim()) ? p.skinTone : '-',
-            safeAge: (p.age && p.age.trim()) ? p.age : '-'
+            src: getOptimizedClientImage(path, 400),  
+            fullSrc: getOptimizedClientImage(path, 800) 
         };
+    });
+
+    if (imageObjects.length === 0) {
+        imageObjects.push({ 
+            src: CONFIG.DEFAULT_OG_IMAGE, 
+            fullSrc: CONFIG.DEFAULT_OG_IMAGE 
+        });
     }
+
+    const provinceName = state.provincesMap.get(p.provinceKey) || p.provinceThai || 'ไม่ระบุ';
+    const numericPrice = Number(String(p.rate).replace(/\D/g, '')) || 0;
+    const formattedPrice = numericPrice > 0 ? numericPrice.toLocaleString() : 'สอบถาม';
+
+    // รวมสัดส่วน หน้าอก-เอว-สะโพก ให้เป็นฟอร์แมตสวยงาม (เช่น 34C-24-35)
+    let bwhFormat = '-';
+    if (p.bust && p.waist && p.hips) {
+        const cup = p.cup_size ? p.cup_size.toUpperCase() : '';
+        bwhFormat = `${p.bust}${cup}-${p.waist}-${p.hips}`;
+    } else if (p.stats) {
+        bwhFormat = p.stats; // กรณีข้อมูลเก่ายังเป็นแบบก้อนเดียว
+    }
+
+    // สร้างข้อความสำหรับการสืบค้นเสิร์ชให้แม่นยำขึ้น
+    const universalSearchString = `
+        ${displayName} ${p.id} ${provinceName} 
+        ${Array.isArray(p.styleTags) ? p.styleTags.join(' ') : ''} 
+        ${p.description || ''} ${p.location || ''} 
+        ${bwhFormat} ${p.skin_tone || ''}
+    `.toLowerCase().replace(/\s+/g, ' ').trim();
+
+    return { 
+        ...p, 
+        displayName,
+        images: imageObjects, 
+        provinceNameThai: provinceName,
+        displayPrice: formattedPrice, 
+        _price: numericPrice,         
+        searchString: universalSearchString,
+        
+        // ตัวแปรข้อมูลจริงที่ดึงจากฐานข้อมูล
+        safeHeight: p.height || '-',
+        safeWeight: p.weight || '-',
+        safeStats: bwhFormat,
+        safeSkin: p.skin_tone || '-',
+        safeAge: p.age || '-',
+        isVerified: p.verified === true, // เช็กว่ายืนยันตัวตนจริงหรือไม่
+        hasVideo: p.has_video === true
+    };
+}
 
     function populateProvinceDropdown() {
         if (!dom.provinceSelect) return;
@@ -1442,233 +1456,288 @@ gsap.to(dom.lightbox, { opacity: 0, pointerEvents: 'none', duration: 0.2 });
     }
 
     function populateLightboxData(p) {
-        if (!p) {
-            console.error("populateLightboxData called with invalid profile data.");
-            closeLightbox();
-            return;
-        }
+    if (!p) {
+        console.error("populateLightboxData called with invalid profile data.");
+        closeLightbox();
+        return;
+    }
 
-        const els = {
-            name: document.getElementById('lightbox-profile-name-main'),
-            hero: document.getElementById('lightboxHeroImage'),
-            thumbs: document.getElementById('lightboxThumbnailStrip'),
-            quote: document.getElementById('lightboxQuote'),
-            tags: document.getElementById('lightboxTags'),
-            avail: document.getElementById('lightbox-availability-badge-wrapper'),
-            detailsContainer: document.getElementById('lightboxDetailsCompact'),
-            descContainer: document.getElementById('lightboxDescriptionContainer'),
-            descContent: document.getElementById('lightboxDescriptionContent'),
-            lineBtnContainer: document.querySelector('.lightbox-details')
-        };
+    const els = {
+        name: document.getElementById('lightbox-profile-name-main'),
+        hero: document.getElementById('lightboxHeroImage'),
+        thumbs: document.getElementById('lightboxThumbnailStrip'),
+        quote: document.getElementById('lightboxQuote'),
+        tags: document.getElementById('lightboxTags'),
+        avail: document.getElementById('lightbox-availability-badge-wrapper'),
+        detailsContainer: document.getElementById('lightboxDetailsCompact'),
+        descContainer: document.getElementById('lightboxDescriptionContainer'),
+        descContent: document.getElementById('lightboxDescriptionContent'),
+        lineBtnContainer: document.querySelector('.lightbox-details')
+    };
 
-        if (els.name) {
-            els.name.textContent = p.name || 'ไม่ระบุชื่อ';
-            els.name.style.color = ""; 
-            els.name.className = "text-gradient-main";
-        }
-        if (els.quote) {
-            const hasQuote = p.quote && p.quote.trim() !== '';
-            els.quote.textContent = hasQuote ? `"${p.quote}"` : '';
-            els.quote.style.display = hasQuote ? 'block' : 'none';
-            els.quote.style.color = "var(--text-gray)";
+    // 1. แสดงชื่อพร้อม Verified Badge สีทองเหลืองอร่ามแบบมี Glow Effect (หากผ่านการยืนยันแล้วจริง)
+    if (els.name) {
+        const cleanName = (p.displayName || p.name || 'ไม่ระบุชื่อ').trim();
+        const isVerified = p.verified === true || p.isVerified === true;
+        
+        const verifiedIcon = isVerified 
+            ? `<i class="fas fa-check-circle" style="color: #FBBF24; font-size: 20px; margin-left: 8px; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));" title="ตัวจริงตรงปก ผ่านการยืนยันตัวตนแล้ว"></i>` 
+            : '';
+            
+        els.name.innerHTML = `
+            <span class="text-gradient-main" style="display: inline-flex; align-items: center;">
+                ${cleanName}${verifiedIcon}
+            </span>
+        `;
+    }
+
+    // 2. คำคม/สโลแกนประจำตัวของน้อง
+    if (els.quote) {
+        const quoteText = (p.quote && p.quote.trim() !== '') ? p.quote : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
+        els.quote.textContent = `"${quoteText}"`;
+        els.quote.style.display = 'block';
+        els.quote.style.color = "var(--text-gray)";
+    }
+    
+    // 3. ป้ายกำกับสถานะการทำงาน (พร้อมจุดไฟกระพริบตามสีสถานะแบบพรีเมียม)
+    if (els.avail) {
+        let statusClass = 'status-inquire-neon';
+        let dotColor = '#9CA3AF'; // สีเทาสำหรับสถานะไม่ระบุ
+        let text = p.availability || 'สอบถาม';
+        
+        if (text.includes('ว่าง') || text.includes('รับงาน')) {
+            statusClass = 'status-available-neon';
+            dotColor = '#00E676'; // สีเขียวสว่าง
+        } else if (text.includes('ไม่ว่าง') || text.includes('พัก') || text.includes('ติดจอง')) {
+            statusClass = 'status-busy-neon';
+            dotColor = '#FF2E63'; // สีแดงนีออน
         }
         
-        if (els.avail) {
-            let statusClass = 'status-inquire';
-            let icon = '<i class="fas fa-question-circle"></i>';
-            let text = p.availability || 'สอบถาม';
-            
-            if (text.includes('ว่าง') || text.includes('รับงาน')) {
-                statusClass = 'status-available';
-                icon = '<i class="fas fa-check-circle" style="color: #00E676;"></i>';
-            } else if (text.includes('ไม่ว่าง')) {
-                statusClass = 'status-busy';
-                icon = '<i class="fas fa-times-circle" style="color: #FF2E63;"></i>';
-            }
-            
-            els.avail.innerHTML = `
-                <div style="padding: 6px 16px; border-radius: 50px; font-weight: 700; font-size: 11px; text-transform: uppercase; background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: inline-flex; align-items: center; gap: 6px; color: white;">
-                    ${icon} <span>${text}</span>
-                </div>`;
-        }
+        els.avail.innerHTML = `
+            <span class="neon-badge ${statusClass}" style="background-color: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                <span class="neon-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ${dotColor}; box-shadow: 0 0 10px ${dotColor};"></span>
+                <span>${text}</span>
+            </span>`;
+    }
 
-        if (els.hero) {
-            els.hero.src = p.images?.[0]?.src || '/images/placeholder-profile.webp';
-            els.hero.alt = `น้อง${p.displayName} สาวรับงาน${p.provinceNameThai || 'เชียงใหม่'} ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน`;
-            els.hero.style.filter = "brightness(0.9)"; 
-        }
-        
-        if (els.thumbs) {
-            els.thumbs.innerHTML = '';
-            const hasGallery = p.images && p.images.length > 1;
-            if (hasGallery) {
-                const fragment = document.createDocumentFragment();
-                p.images.forEach((img, i) => {
-                    const thumb = document.createElement('img');
-                    thumb.className = `thumbnail ${i === 0 ? 'active' : ''}`;
-                    thumb.src = img.src;
-                    thumb.alt = `รูปอัลบั้มของน้อง${p.displayName}`;
-                    thumb.style.cssText = "width: 50px; height: 50px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s;";
-                    
-                    if (i === 0) thumb.style.borderColor = "var(--primary-purple)";
-                    
-                    thumb.onclick = () => {
-                        if (els.hero) els.hero.src = img.src;
-                        Array.from(els.thumbs.children).forEach(c => c.style.borderColor = "transparent");
-                        thumb.style.borderColor = "var(--primary-purple)";
-                    };
-                    fragment.appendChild(thumb);
-                });
-                els.thumbs.appendChild(fragment);
-                els.thumbs.style.display = 'flex';
-                els.thumbs.style.gap = '8px';
-                els.thumbs.style.justifyContent = 'center';
-                els.thumbs.style.padding = '10px 0';
-            } else {
-                els.thumbs.style.display = 'none';
-            }
-        }
-
-        if (els.tags) {
-            els.tags.innerHTML = '';
-            if (Array.isArray(p.styleTags) && p.styleTags.length > 0) {
-                p.styleTags.forEach(t => {
-                    if (t && t.trim()) {
-                        const span = document.createElement('span');
-                        span.style.cssText = "background: rgba(90, 44, 190, 0.08); color: #fff; padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 700; border: 1px solid rgba(147, 51, 234, 0.25);";
-                        span.textContent = t.trim();
-                        els.tags.appendChild(span);
-                    }
-                });
-                els.tags.style.display = 'flex';
-                els.tags.style.flexWrap = 'wrap';
-                els.tags.style.gap = '8px';
-            } else {
-                els.tags.style.display = 'none';
-            }
-        }
-
-        if (els.detailsContainer) {
-            const provinceName = state.provincesMap.get(p.provinceKey) || '';
-            const fullLocation = [provinceName, p.location].filter(Boolean).join(' ').trim();
-            const formattedDate = formatDate(p.lastUpdated || p.created_at);
-
-            let detailsHTML = `
-                <div style="background: rgba(255, 255, 255, 0.02); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; text-align: center;">
-                        <div style="background: rgba(255,255,255,0.03); padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
-                            <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">อายุ</div>
-                            <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 4px;">${p.age || '-'}</div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
-                            <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">สัดส่วน</div>
-                            <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 4px;">${p.stats || '-'}</div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
-                            <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">สูง/หนัก</div>
-                            <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 4px;">${p.height || '-'}/${p.weight || '-'}</div>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px;">
-                            <span style="color: var(--text-gray); font-size: 13px;"><i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 8px;"></i>พิกัด</span>
-                            <span style="color: #fff; font-weight: 700; font-size: 13px;">${fullLocation}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px;">
-                            <span style="color: var(--text-gray); font-size: 13px;"><i class="fas fa-tag" style="color: #C084FC; margin-right: 8px;"></i>เรทราคา</span>
-                            <span style="color: white; font-weight: 800; font-size: 15px;">${p.rate || 'สอบถาม'}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                            <span style="color: var(--text-gray);"><i class="fas fa-clock" style="color: #C084FC; margin-right: 8px;"></i>อัปเดตล่าสุด</span>
-                            <span style="color: #eee; font-weight: 600;">${formattedDate}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            els.detailsContainer.innerHTML = detailsHTML;
-        }
-
-        if (els.descContainer && els.descContent) {
-            if (p.description) {
-                els.descContent.style.cssText = "color: var(--text-gray); font-size: 14px; line-height: 1.6; background: rgba(255,255,255,0.01); padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);";
-                els.descContent.innerHTML = p.description.replace(/\n/g, '<br>');
-                els.descContainer.style.display = 'block';
-            } else {
-                els.descContainer.style.display = 'none';
-            }
-        }
-
-        const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
-        if (oldWrapper) oldWrapper.remove();
-        
-        if (p.lineId && els.lineBtnContainer) {
-            const wrapper = document.createElement('div');
-            wrapper.id = 'line-btn-sticky-wrapper';
-            wrapper.style.cssText = `
-                position: sticky;
-                bottom: 20px;
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                z-index: 50;
-                pointer-events: none;
-                margin-top: 24px;
-            `;
-
-            const autoMessage = `สนใจน้อง ${p.name} เห็นจากเว็บ Sideline Chiangmai ครับ`;
-            let finalLineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/~${p.lineId}`;
-
-            const link = document.createElement('a');
-            link.style.cssText = `
-                pointer-events: auto;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                background: #06C755;
-                color: white;
-                padding: 14px 36px;
-                border-radius: 100px;
-                font-size: 15px;
-                font-weight: 800;
-                text-decoration: none;
-                box-shadow: 0 10px 25px -5px rgba(6, 199, 85, 0.5);
-                transition: transform 0.2s, box-shadow 0.2s;
-            `;
-            
-            link.innerHTML = `<i class="fab fa-line" style="font-size: 22px;"></i> <span>แอดไลน์ ${p.name}</span>`;
-
-            link.onmousedown = () => link.style.transform = "scale(0.96)";
-            link.onmouseup = () => link.style.transform = "scale(1)";
-            
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (navigator.clipboard) navigator.clipboard.writeText(autoMessage);
+    // 4. รูปภาพหน้าปกหลัก
+    if (els.hero) {
+        els.hero.src = p.images?.[0]?.src || '/images/placeholder-profile.webp';
+        els.hero.alt = `น้อง${p.displayName || p.name} สารบัญไซด์ไลน์และเพื่อนเที่ยวตรงปก`;
+        els.hero.style.filter = "brightness(0.9)"; 
+    }
+    
+    // 5. แกลเลอรีรูปภาพเพิ่มเติมขนาดจิ๋ว (Thumbnails)
+    if (els.thumbs) {
+        els.thumbs.innerHTML = '';
+        const hasGallery = p.images && p.images.length > 1;
+        if (hasGallery) {
+            const fragment = document.createDocumentFragment();
+            p.images.forEach((img, i) => {
+                const thumb = document.createElement('img');
+                thumb.className = `thumbnail ${i === 0 ? 'active' : ''}`;
+                thumb.src = img.src;
+                thumb.alt = `รูปอัลบั้มเพิ่มเติมของน้อง${p.displayName}`;
+                thumb.style.cssText = "width: 52px; height: 52px; border-radius: 12px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.25s;";
                 
-                const modal = document.createElement('div');
-                modal.style.cssText = "position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;";
-                modal.innerHTML = `
-                    <div style="background: #121214; border: 1px solid rgba(255,255,255,0.05); width: 90%; max-width: 320px; border-radius: 24px; padding: 32px 20px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
-                        <div style="width: 56px; height: 50px; background: rgba(6, 199, 85, 0.1); color: #06C755; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div style="color: #ffffff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">คัดลอกชื่อเรียบร้อย!</div>
-                        <p style="color: var(--text-gray); font-size: 13px; margin-bottom: 24px; line-height: 1.5;">ระบบจำชื่อสำหรับวางลงในช่องค้นหาไลน์ได้ทันทีครับ</p>
-                        <a href="${finalLineUrl}" id="real-line-btn" style="display: block; width: 100%; background: #06C755; color: white; padding: 14px; border-radius: 100px; font-weight: bold; text-decoration: none; font-size: 14px; box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2);">เปิด LINE บนมือถือ</a>
-                        <button id="close-popup" style="margin-top: 16px; background: transparent; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; font-weight: 700;">ปิดหน้าต่าง</button>
-                    </div>
-                `;
-                document.body.appendChild(modal);
+                if (i === 0) thumb.style.borderColor = "var(--primary-purple)";
                 
-                modal.querySelector('#real-line-btn').onclick = () => setTimeout(() => modal.remove(), 1000);
-                modal.querySelector('#close-popup').onclick = () => modal.remove();
-                modal.onclick = (ev) => { if(ev.target === modal) modal.remove(); };
+                thumb.onclick = () => {
+                    if (els.hero) els.hero.src = img.src;
+                    Array.from(els.thumbs.children).forEach(c => c.style.borderColor = "transparent");
+                    thumb.style.borderColor = "var(--primary-purple)";
+                };
+                fragment.appendChild(thumb);
             });
-
-            wrapper.appendChild(link);
-            els.lineBtnContainer.appendChild(wrapper);
+            els.thumbs.appendChild(fragment);
+            els.thumbs.style.display = 'flex';
+            els.thumbs.style.gap = '8px';
+            els.thumbs.style.justifyContent = 'center';
+            els.thumbs.style.padding = '12px 0';
+        } else {
+            els.thumbs.style.display = 'none';
         }
     }
+
+    // 6. แท็กคีย์เวิร์ดสไตล์การทำงานของน้อง
+    if (els.tags) {
+        els.tags.innerHTML = '';
+        const finalTags = Array.isArray(p.styleTags) ? [...p.styleTags] : [];
+        
+        // เติมแท็กอัจฉริยะแบบไดนามิกเพื่อเสริมแรงดึงดูด
+        if (p.verified && !finalTags.includes('ตรงปก 100%')) finalTags.unshift('ตรงปก 100%');
+        if (!finalTags.includes('ไม่มีมัดจำ')) finalTags.push('ไม่มีมัดจำ');
+
+        const fragment = document.createDocumentFragment();
+        finalTags.forEach(t => {
+            if (t && t.trim()) {
+                const span = document.createElement('span');
+                span.style.cssText = "background: rgba(147, 51, 234, 0.08); color: #fff; padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 700; border: 1px solid rgba(147, 51, 234, 0.25);";
+                span.textContent = t.trim();
+                fragment.appendChild(span);
+            }
+        });
+        els.tags.appendChild(fragment);
+        els.tags.style.display = 'flex';
+        els.tags.style.flexWrap = 'wrap';
+        els.tags.style.gap = '8px';
+    }
+
+    // 7. บล็อกรายละเอียดข้อมูลสถิติสเปกร่างกายและทำเล (Compact Details Grid)
+    if (els.detailsContainer) {
+        const provinceName = state.provincesMap.get(p.provinceKey) || p.provinceThai || 'เชียงใหม่';
+        const fullLocation = [provinceName, p.location].filter(Boolean).join(' - ').trim();
+        const formattedDate = formatDate(p.lastUpdated || p.created_at);
+
+        // จัดฟอร์แมตสัดส่วนอก-เอว-สะโพกให้เป็นระเบียบ
+        let displayStats = p.stats || '-';
+        if (p.bust && p.waist && p.hips) {
+            const cup = p.cup_size ? p.cup_size.toUpperCase() : '';
+            displayStats = `${p.bust}${cup}-${p.waist}-${p.hips}`;
+        }
+
+        const skinValue = p.skin_tone || p.skinTone || 'ขาวอมชมพู';
+        const hasVideoFile = p.has_video === true || p.hasVideo === true;
+
+        let detailsHTML = `
+            <div style="background: rgba(255, 255, 255, 0.02); border-radius: 24px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+                <!-- แถว 3 บล็อกสเกลสเปกหลัก -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; text-align: center;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 14px 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);">
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; tracking: 0.05em;">อายุ</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 4px;">${p.age ? `${p.age} ปี` : '-'}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 14px 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);">
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; tracking: 0.05em;">สัดส่วน</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 4px;">${displayStats}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 14px 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);">
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; tracking: 0.05em;">สูง/หนัก</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 4px;">${p.height || '-'}/${p.weight || '-'}</div>
+                    </div>
+                </div>
+
+                <!-- ลิสต์ชี้แจงรายสเปกรายข้อ -->
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px;">
+                        <span style="color: var(--text-gray); font-size: 13px;"><i class="fas fa-palette" style="color: #C084FC; margin-right: 8px;"></i> สีผิว</span>
+                        <span style="color: #fff; font-weight: 700; font-size: 13px;">ผิว${skinValue}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px;">
+                        <span style="color: var(--text-gray); font-size: 13px;"><i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 8px;"></i> พื้นที่รับงาน</span>
+                        <span style="color: #fff; font-weight: 700; font-size: 13px;">${fullLocation}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px;">
+                        <span style="color: var(--text-gray); font-size: 13px;"><i class="fas fa-tag" style="color: #C084FC; margin-right: 8px;"></i> เรทค่าขนม</span>
+                        <span style="color: #10B981; font-weight: 900; font-size: 15px;">${p.displayPrice || p.rate || 'สอบถาม'}</span>
+                    </div>
+                    <!-- บล็อกแสดงสถานะวิดีโอแนะนำตัวจริง (สู้คู่แข่ง) -->
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px;">
+                        <span style="color: var(--text-gray); font-size: 13px;"><i class="fas fa-video" style="color: #C084FC; margin-right: 8px;"></i> ยืนยันคลิปเคลื่อนไหว</span>
+                        <span style="color: ${hasVideoFile ? '#00E676' : 'var(--text-muted)'}; font-weight: 700; font-size: 13px;">
+                            ${hasVideoFile 
+                                ? '<i class="fas fa-check-circle" style="margin-right: 4px;"></i>มีวิดีโอยืนยันตรงปก' 
+                                : 'ไม่มีวิดีโอ'}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                        <span style="color: var(--text-muted);"><i class="fas fa-history" style="color: #C084FC; margin-right: 8px;"></i> ความเคลื่อนไหวล่าสุด</span>
+                        <span style="color: var(--text-gray); font-weight: 600;">อัปเดตเมื่อ ${formattedDate}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        els.detailsContainer.innerHTML = detailsHTML;
+    }
+
+    // 8. กล่องข้อความอธิบายความในใจ / จุดเด่นเพิ่มเติม
+    if (els.descContainer && els.descContent) {
+        if (p.description && p.description.trim() !== '') {
+            els.descContent.style.cssText = "color: var(--text-gray); font-size: 13px; line-height: 1.7; background: rgba(255,255,255,0.01); padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03); white-space: pre-wrap;";
+            els.descContent.innerHTML = p.description.replace(/\n/g, '<br>');
+            els.descContainer.style.display = 'block';
+        } else {
+            // หากระบบไม่มีคำบรรยาย ให้สร้างประโยคพรีเมียมให้ผู้ใช้ทันที
+            els.descContent.style.cssText = "color: var(--text-gray); font-size: 13px; line-height: 1.7; background: rgba(255,255,255,0.01); padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);";
+            els.descContent.innerHTML = `น้อง${p.displayName || p.name} เพื่อนร่วมทางและเอนเตอร์เทนระดับ VIP พิกัดย่าน${p.location || provinceName} ดูแลสุภาพเรียบร้อย เอาใจใส่เก่งเป็นธรรมชาติ ไม่เร่งเวลา และยืนยันตัวตนผ่านวิดีโอเรียบร้อยแล้วค่ะ`;
+            els.descContainer.style.display = 'block';
+        }
+    }
+
+    // 9. ปุ่มแอดไลน์ลอยตัว (Sticky LINE Calling Button) ปลอดภัยไร้มัดจำ
+    const oldWrapper = document.getElementById('line-btn-sticky-wrapper');
+    if (oldWrapper) oldWrapper.remove();
+    
+    if (p.lineId && els.lineBtnContainer) {
+        const wrapper = document.createElement('div');
+        wrapper.id = 'line-btn-sticky-wrapper';
+        wrapper.style.cssText = `
+            position: sticky;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: none;
+            margin-top: 24px;
+        `;
+
+        const autoMessage = `สนใจน้อง ${p.name} เห็นจากเว็บ Sideline Chiangmai ครับ`;
+        let finalLineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/~${p.lineId}`;
+
+        const link = document.createElement('a');
+        link.style.cssText = `
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #06C755;
+            color: white;
+            padding: 14px 36px;
+            border-radius: 100px;
+            font-size: 15px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 10px 25px -5px rgba(6, 199, 85, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            max-width: 320px;
+        `;
+        
+        link.innerHTML = `<i class="fab fa-line" style="font-size: 22px;"></i> <span>แอดไลน์น้อง ${p.name}</span>`;
+
+        link.onmousedown = () => link.style.transform = "scale(0.96)";
+        link.onmouseup = () => link.style.transform = "scale(1)";
+        
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (navigator.clipboard) navigator.clipboard.writeText(autoMessage);
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = "position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;";
+            modal.innerHTML = `
+                <div style="background: #121214; border: 1px solid rgba(255,255,255,0.05); width: 90%; max-width: 320px; border-radius: 24px; padding: 32px 20px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+                    <div style="width: 56px; height: 50px; background: rgba(6, 199, 85, 0.1); color: #06C755; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div style="color: #ffffff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">คัดลอกข้อความทักน้อง!</div>
+                    <p style="color: var(--text-gray); font-size: 13px; margin-bottom: 24px; line-height: 1.5;">ระบบช่วยเก็บข้อความแนะนำตัวไว้ในความจำมือถือของคุณเรียบร้อย สามารถเปิดหน้าต่างแอปพลิเคชัน LINE เพื่อคุยตกลงคิวได้โดยตรงทันที</p>
+                    <a href="${finalLineUrl}" id="real-line-btn" target="_blank" rel="noopener nofollow" style="display: block; width: 100%; background: #06C755; color: white; padding: 14px; border-radius: 100px; font-weight: bold; text-decoration: none; font-size: 14px; box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2); text-align: center;">เปิดแอป LINE เลย</a>
+                    <button id="close-popup" style="margin-top: 16px; background: transparent; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; font-weight: 700;">ยกเลิกและปิดหน้าต่าง</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            modal.querySelector('#real-line-btn').onclick = () => setTimeout(() => modal.remove(), 1000);
+            modal.querySelector('#close-popup').onclick = () => modal.remove();
+            modal.onclick = (ev) => { if(ev.target === modal) modal.remove(); };
+        });
+
+        wrapper.appendChild(link);
+        els.lineBtnContainer.appendChild(wrapper);
+    }
+}
 
     const SEO_POOL = {
         styles:[
@@ -1703,91 +1772,119 @@ gsap.to(dom.lightbox, { opacity: 0, pointerEvents: 'none', duration: 0.2 });
     }
 
     function updateAdvancedMeta(profile = null, pageData = null) {
-        if (isFirstLoad) {
-            console.log("SEO: First load detected. Using SSR Metadata.");
-            isFirstLoad = false;
-            return; 
-        }
-
-        const currentPath = window.location.pathname.toLowerCase();
-        const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html';
-
-        clearAllDynamicSchemas();
-
-        const YEAR_TH = new Date().getFullYear() + 543;
-        const thaiMonths =["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-        const d = new Date();
-        const CURRENT_DATE = `${d.getDate()} ${thaiMonths[d.getMonth()]} ${YEAR_TH}`;
-
-        if (profile) {
-            const displayName = getCleanName(profile.name);
-            const province = profile.provinceNameThai || 'เชียงใหม่';
-            const priceInfo = profile.rate ? `ราคา ${profile.rate}` : 'สอบถามราคา';
-            const workArea = profile.location ? `${profile.location}, ${province}` : province;
-            const profileUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`;
-            const provinceUrl = `${CONFIG.SITE_URL}/location/${profile.provinceKey || 'chiangmai'}`;
-            
-            let statsParts =[];
-            if (profile.stats) statsParts.push(`สัดส่วน ${profile.stats}`);
-            if (profile.age) statsParts.push(`อายุ ${profile.age}`);
-            const detailsSnippet = statsParts.join('. '); 
-
-            const t = SEO_POOL.pick('trust');
-            const g = SEO_POOL.pick('guarantee');
-
-            const finalTitle = `${displayName} รับงานไซด์ไลน์${province} | ${g} ${t} (${YEAR_TH})`;
-            const finalDesc = `โปรไฟล์ ${displayName} สำหรับรับงานไซด์ไลน์ในพื้นที่ ${workArea}. ${priceInfo}. ${detailsSnippet}. ${g} และ ${t} 100%. ปลอดภัย จ่ายเงินหน้างาน. (อัปเดต ${CURRENT_DATE})`;
-
-            document.title = finalTitle;
-            updateMeta('description', finalDesc);
-            updateMeta('keywords', `${displayName}, ไซด์ไลน์${province}, รับงาน${province}`);
-            updateLink('canonical', profileUrl);
-            
-            updateOpenGraphMeta(profile, finalTitle, finalDesc, 'profile');
-            
-            injectSchema(generatePersonSchema(profile, finalDesc, province), 'schema-jsonld-person');
-            injectSchema(generateBreadcrumbSchema([
-                { name: "หน้าแรก", url: CONFIG.SITE_URL },
-                { name: `ไซด์ไลน์${province}`, url: provinceUrl },
-                { name: displayName, url: profileUrl }
-            ]), 'schema-jsonld-breadcrumb');
-        }
-
-        else if (pageData) {
-            const province = pageData.provinceName || 'เชียงใหม่';
-            const pageUrl = pageData.canonicalUrl || window.location.href;
-            const pageTitle = `ไซด์ไลน์${province} รับงานเอง ตรงปก (${YEAR_TH})`;
-            const pageDesc = `รวมน้องๆ ไซด์ไลน์${province} รับงานเอง พิกัด${province}. อัปเดตล่าสุด ${CURRENT_DATE}. ปลอดภัย ไม่มัดจำ.`;
-
-            document.title = pageTitle;
-            updateMeta('description', pageDesc);
-            updateLink('canonical', pageUrl);
-            updateOpenGraphMeta(null, pageTitle, pageDesc, 'website');
-            
-            injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
-            injectSchema(generateBreadcrumbSchema([
-                { name: "หน้าแรก", url: CONFIG.SITE_URL },
-                { name: `ไซด์ไลน์${province}`, url: pageUrl }
-            ]), 'schema-jsonld-breadcrumb');
-        } 
-        
-        else if (isRoot) {
-            const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานไม่มัดจำ ฟิวแฟนตรงปก (${YEAR_TH})`;
-            const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมไซด์ไลน์เชียงใหม่ และจังหวัดอื่นๆ ทั่วประเทศ. รับงานเอง ไม่ผ่านเอเย่นต์ ไม่ต้องโอนมัดจำ ปลอดภัย 100%`;
-
-            document.title = GLOBAL_TITLE;
-            updateMeta('description', GLOBAL_DESC);
-            updateLink('canonical', CONFIG.SITE_URL);
-            updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
-            
-            injectSchema(generateWebsiteSchema(), 'schema-jsonld-website');
-            injectSchema(generateOrganizationSchema(), 'schema-jsonld-org');
-            injectSchema(generateFAQPageSchema([
-                { question: "ต้องโอนมัดจำไหม?", answer: "ไม่ต้องค่ะ แพลตฟอร์มเราให้จ่ายเงินสดหน้างาน 100% เพื่อความปลอดภัย" },
-                { question: "การันตีตรงปกไหม?", answer: "เรารับประกันตัวจริงตรงรูป 100% ถ้านัดเจอแล้วไม่ตรงปก สามารถยกเลิกได้ทันทีไม่มีค่าใช้จ่าย" }
-            ]), 'schema-jsonld-faq');
-        }
+    if (isFirstLoad) {
+        console.log("SEO: First load detected. Using SSR Metadata.");
+        isFirstLoad = false;
+        return; 
     }
+
+    const currentPath = window.location.pathname.toLowerCase();
+    const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html';
+
+    // เคลียร์ค่าโครงสร้างข้อมูล Schema เก่าออกก่อนป้องกันการซ้ำซ้อน
+    clearAllDynamicSchemas();
+
+    const YEAR_TH = new Date().getFullYear() + 543;
+    const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const d = new Date();
+    const CURRENT_DATE = `${d.getDate()} ${thaiMonths[d.getMonth()]} ${YEAR_TH}`;
+
+    // ==========================================
+    // กรณีที่ 1: หน้าโปรไฟล์รายบุคคล (Single Profile Page)
+    // ==========================================
+    if (profile) {
+        const displayName = getCleanName(profile.name);
+        const province = profile.provinceNameThai || 'เชียงใหม่';
+        const priceInfo = profile.rate ? `ราคา ${profile.rate}` : 'สอบถามราคา';
+        const workArea = profile.location ? `${profile.location}, ${province}` : province;
+        const profileUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`;
+        const provinceUrl = `${CONFIG.SITE_URL}/location/${profile.provinceKey || 'chiangmai'}`;
+        
+        // ดึงค่าสถิติจริง (รองรับทั้งระบบเดิม และระบบโครงสร้างใหม่ที่ไม่มีค่าขีด)
+        const statsVal = profile.safeStats || profile.stats;
+        const ageVal = profile.safeAge || profile.age;
+        
+        let statsParts = [];
+        if (statsVal && statsVal !== '-') {
+            statsParts.push(`สัดส่วน ${statsVal}`);
+        }
+        if (ageVal && ageVal !== '-') {
+            statsParts.push(`อายุ ${ageVal} ปี`);
+        }
+        const detailsSnippet = statsParts.length > 0 ? statsParts.join('. ') : 'ข้อมูลสเปกยืนยันตัวตนแล้ว'; 
+
+        // ป้องกันสคริปต์หยุดทำงานหากระบบเรียกใช้ SEO_POOL ไม่ทัน
+        const t = (SEO_POOL && typeof SEO_POOL.pick === 'function') ? SEO_POOL.pick('trust') : 'ไม่ต้องโอนก่อน';
+        const g = (SEO_POOL && typeof SEO_POOL.pick === 'function') ? SEO_POOL.pick('guarantee') : 'ตัวจริงตรงรูป 100%';
+
+        const finalTitle = `${displayName} รับงานไซด์ไลน์${province} | ${g} ${t} (${YEAR_TH})`;
+        const finalDesc = `โปรไฟล์ ${displayName} สำหรับรับงานไซด์ไลน์ในพื้นที่ ${workArea}. ${priceInfo}. ${detailsSnippet}. ${g} และ ${t} 100%. ปลอดภัย จ่ายเงินหน้างาน. (อัปเดต ${CURRENT_DATE})`;
+
+        document.title = finalTitle;
+        updateMeta('description', finalDesc);
+        updateMeta('keywords', `${displayName}, ไซด์ไลน์${province}, รับงาน${province}, เพื่อนเที่ยว${province}`);
+        updateLink('canonical', profileUrl);
+        
+        updateOpenGraphMeta(profile, finalTitle, finalDesc, 'profile');
+        
+        // ส่งโครงสร้างข้อมูล Schema ล่าสุดให้ Google
+        injectSchema(generatePersonSchema(profile, finalDesc, province), 'schema-jsonld-person');
+        injectSchema(generateBreadcrumbSchema([
+            { name: "หน้าแรก", url: CONFIG.SITE_URL },
+            { name: `ไซด์ไลน์${province}`, url: provinceUrl },
+            { name: displayName, url: profileUrl }
+        ]), 'schema-jsonld-breadcrumb');
+    }
+
+    // ==========================================
+    // กรณีที่ 2: หน้าสืบค้นแยกตามพิกัดจังหวัด (Location/Province Page)
+    // ==========================================
+    else if (pageData) {
+        const province = pageData.provinceName || 'เชียงใหม่';
+        const pageUrl = pageData.canonicalUrl || window.location.href;
+        const pageTitle = `ไซด์ไลน์${province} รับงานเอง ตรงปกไม่มัดจำ (${YEAR_TH})`;
+        const pageDesc = `รวมน้องๆ เพื่อนเที่ยวไซด์ไลน์${province} รับงานเอง พิกัด${province}. อัปเดตล่าสุดวันต่อวัน ${CURRENT_DATE}. ปลอดภัย จ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ.`;
+
+        document.title = pageTitle;
+        updateMeta('description', pageDesc);
+        updateMeta('keywords', `ไซด์ไลน์${province}, รับงาน${province}, เด็กเอ็น${province}, เพื่อนเที่ยว${province}`);
+        updateLink('canonical', pageUrl);
+        updateOpenGraphMeta(null, pageTitle, pageDesc, 'website');
+        
+        injectSchema(generateListingSchema(pageData), 'schema-jsonld-list');
+        injectSchema(generateBreadcrumbSchema([
+            { name: "หน้าแรก", url: CONFIG.SITE_URL },
+            { name: `ไซด์ไลน์${province}`, url: pageUrl }
+        ]), 'schema-jsonld-breadcrumb');
+    } 
+    
+    // ==========================================
+    // กรณีที่ 3: หน้าแรกของเว็บไซต์ (Home / Root Page)
+    // ==========================================
+    else if (isRoot) {
+        const GLOBAL_TITLE = `ไซด์ไลน์เชียงใหม่ รับงานไม่มัดจำ ฟิวแฟนตรงปก (${YEAR_TH})`;
+        const GLOBAL_DESC = `เว็บไซต์อันดับ 1 รวมพิกัดเพื่อนเที่ยวและไซด์ไลน์เชียงใหม่ รับงานเอง สไตล์ดูแลฟิวแฟนตรงปก 100% ไม่ผ่านเอเย่นต์ ไม่ต้องโอนมัดจำ ปลอดภัยสูงสุด`;
+
+        document.title = GLOBAL_TITLE;
+        updateMeta('description', GLOBAL_DESC);
+        updateMeta('keywords', `ไซด์ไลน์เชียงใหม่, รับงานเชียงใหม่, เพื่อนเที่ยวเชียงใหม่, ฟิวแฟนเชียงใหม่, ไม่มัดจำ`);
+        updateLink('canonical', CONFIG.SITE_URL);
+        updateOpenGraphMeta(null, GLOBAL_TITLE, GLOBAL_DESC, 'website');
+        
+        injectSchema(generateWebsiteSchema(), 'schema-jsonld-website');
+        injectSchema(generateOrganizationSchema(), 'schema-jsonld-org');
+        injectSchema(generateFAQPageSchema([
+            { 
+              question: "หาเพื่อนเที่ยวหรือไซด์ไลน์เชียงใหม่ ต้องโอนมัดจำล่วงหน้าไหม?", 
+              answer: "ไม่มีการโอนเงินจองคิวหรือมัดจำล่วงหน้าทุกกรณีค่ะ แพลตฟอร์มของเราเน้นความปลอดภัยสูงสุด สมาชิกชำระค่าบริการหน้างานหลังเจอตัวน้องและยืนยันตัวตนเรียบร้อยแล้วเท่านั้น" 
+            },
+            { 
+              question: "ถ้านัดเจอแล้วพบว่าข้อมูลไม่ตรงปก สามารถยกเลิกได้ไหม?", 
+              answer: "สามารถยกเลิกงานได้ทันทีโดยไม่มีค่าปรับหรือค่าใช้จ่ายใด ๆ ทั้งสิ้นค่ะ เนื่องจากโปรไฟล์ทั้งหมดผ่านระบบคัดกรองรูปภาพตรงปก 100%" 
+            }
+        ]), 'schema-jsonld-faq');
+    }
+}
 
     function updateOpenGraphMeta(profile, title, description, type) {
         updateMeta('og:title', title);
