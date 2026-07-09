@@ -1,119 +1,784 @@
 <!DOCTYPE html> 
-<html lang="th" class="scroll-smooth antialiased dark bg-[#050508]">
+<html lang="th" class="dark-theme">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#D97706">
-  <title>คำถามที่พบบ่อย (FAQ) และความปลอดภัยการใช้งาน | Sideline Chiangmai</title>
-  <meta name="description" content="รวบรวมทุกคำตอบเกี่ยวกับขั้นตอนการใช้บริการ การจองคิว วิธีการชำระเงิน และระบบการป้องกันเพื่อความปลอดภัยอย่างละเอียด"/>
-  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/faq.html">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Prompt', 'sans-serif'] },
-          colors: { brand: '#D97706', background: '#050508', foreground: '#f4f4f5' }
-        }
-      }
-    }
-  </script>
-  <style>
-    .glass-panel {
-      background: linear-gradient(135deg, rgba(14, 14, 22, 0.82) 0%, rgba(6, 6, 10, 0.96) 100%) !important;
-      backdrop-filter: blur(28px) saturate(220%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.09) !important;
-    }
-  </style>
-  
-  <!-- GOOGLE FAQ SCHEME FOR EXTRA SEO TRUST -->
+  <meta name="theme-color" content="#5A2CBE">
+
+  <!-- ============================== PRIMARY SEO (HIGH CTR SPEC) ============================== -->
+  <title>คำถามพบบ่อยและวิธีการจองคิวสาวไซด์ไลน์ | Sideline Chiangmai</title>
+  <meta name="description" content="ตอบคำถามพบบ่อยเกี่ยวกับระบบค้นหาสาวรับงานเชียงใหม่ เพื่อนเที่ยวไซด์ไลน์ฟิวแฟน ขั้นตอนตรวจสอบรูปตรงปก ปลอดภัย การชำระเงินหน้างาน และข้อตกลงในการใช้งาน" />
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" id="canonical-link" href="https://sidelinechiangmai.netlify.app/faq.html">
+
+  <!-- ============================== OPEN GRAPH (SOCIAL SHARING) ============================== -->
+  <meta property="og:locale" content="th_TH">
+  <meta property="og:site_name" content="Sideline Chiangmai Directory">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="คำถามพบบ่อยและวิธีการจองคิวสาวไซด์ไลน์ | Sideline Chiangmai">
+  <meta property="og:description" content="รวมทุกข้อสงสัยเกี่ยวกับระบบตรวจสอบตัวตน ประสบการณ์ฟิวแฟน ข้อกำหนดอายุผู้จอง นโยบายไร้มัดจำล่วงหน้า และวิธีการนัดหมายน้อง ๆ อย่างปลอดภัย">
+  <meta property="og:url" content="https://sidelinechiangmai.netlify.app/faq.html">
+  <meta property="og:image" content="https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp">
+
+  <!-- Performance & Preconnects -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- ============================== ⚡ STRUCTURED DATA SCHEMAS (JSON-LD) ============================== -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [{
-      "@type": "Question",
-      "name": "ทำไมบริการนี้จึงไม่มีการเรียกเก็บเงินมัดจำล่วงหน้า?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "เพื่อป้องกันความเสี่ยงจากการตกเป็นเหยื่อมิจฉาชีพที่นำภาพผู้อื่นมาสวมรอย ระบบของเราจึงไม่อนุญาตให้ผู้ให้บริการเรียกเก็บเงินจองคิวหรือมัดจำใดๆ ทั้งสิ้น ลูกค้าชำระเงินค่าบริการหลังพบน้องเรียบร้อยแล้วเท่านั้น"
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "การจองคิวน้องๆ สาวรับงานเชียงใหม่ เพื่อนเที่ยวฟิวแฟน ต้องโอนเงินมัดจำก่อนหรือไม่?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ไม่มีนโยบายโอนเงินจองคิวหรือเก็บค่าสมัครสมาชิกใดๆ ทั้งสิ้นก่อนพบตัวจริง ลูกค้าจะชำระค่าขนมโดยตรงแก่น้องตัวจริงหน้างานเมื่อพบกันเรียบร้อยแล้วเท่านั้น ปลอดภัยต่อการถูกมิจฉาชีพหลอกลวงแน่นอน 100%"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "รูปภาพและประวัติของผู้ดูแลบนเว็บไซต์ตรงปกและเชื่อถือได้แค่ไหน?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ผู้ลงข้อมูลโปรไฟล์ทุกคนต้องส่งคลิปวิดีโอยืนยันใบหน้าแบบเรียลไทม์ควบคู่กับรูปถ่ายหลัก เพื่อผ่านระบบสกรีน (Verified System) ของทางแอดมิน เพื่อความมั่นใจว่าข้อมูลสรีระสัดส่วนและพิกัดความถูกต้องตรงปกมากที่สุด"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "มีข้อกำหนดหรือระเบียบบังคับแก่ผู้เรียกนัดหมายอย่างไรบ้าง?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ผู้ใช้งานสารบัญและส่งคำจองคิวเพื่อเดินทางร่วมกิจกรรมทานข้าว ท่องเที่ยว คลายเหงาสไตล์ฟิวแฟน จะต้องมีอายุครบ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น และต้องละเว้นการทำกิจกรรมที่ขัดต่อกฎหมาย ข่มขู่ หรือการละเมิดสิทธิ์ในพื้นที่ส่วนตัวของผู้ดูแล"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "หากพบตัวจริงของน้องที่หน้างานแล้วไม่พึงพอใจหรือไม่ตรงปก สามารถปฏิเสธได้หรือไม่?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "หากเจอน้องตัวจริงแล้วพบว่าโปรไฟล์ผิดแผกไปจากข้อตกลงหรือไม่ตรงตามรูปภาพ สมาชิกมีสิทธิ์ที่จะปฏิเสธและขอยกเลิกงานทันทีอย่างสุภาพ ณ จุดนัดหมาย โดยจะไม่มีค่าปรับหรือข้อกำหนดหักเงินใดๆ ย้อนหลังครับ"
+        }
       }
-    }, {
-      "@type": "Question",
-      "name": "หากพบผู้ให้บริการที่ไม่ตรงปกหรือไม่ตรงตามข้อมูลที่ระบุ ควรทำอย่างไร?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "หากลูกค้าตรวจสอบหน้างานแล้วพบว่าผู้ให้บริการไม่ตรงปกอย่างชัดเจน สามารถปฏิเสธการรับงานและขอยกเลิกนัดได้ทันทีโดยไม่ต้องเสียค่าบริการใด ๆ และกรุณาแจ้งแอดมินเพื่อทำการระงับและลบโปรไฟล์นั้นออกจากระบบทันทีเพื่อรักษาคุณภาพสารบัญ"
-      }
-    }, {
-      "@type": "Question",
-      "name": "ค่าเดินทางนอกสถานที่มีเกณฑ์การคำนวณอย่างไร?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "ในกรณีที่เรียกใช้งานนอกสถานที่ที่ห่างจากพิกัดทำงานหลักของน้อง จะมีการประเมินและชำระค่าเดินทางจริงไป-กลับตามระยะทางจริง โดยชำระเฉพาะค่าเดินทางก่อนเพื่อป้องกันกรณีหลอกนัดและปกป้องความปลอดภัยของน้อง ๆ"
-      }
-    }]
+    ]
   }
   </script>
-</head>
-<body class="min-h-screen bg-[#050508] text-[#f4f4f5] font-sans antialiased pt-24 pb-16">
 
-  <!-- HEADER -->
-  <header class="fixed top-0 left-0 w-full z-40 border-b border-white/[0.05] bg-[#050508]/75 backdrop-blur-xl h-16 flex items-center justify-between px-6">
-    <a href="/" class="flex items-center gap-3">
-       <span class="text-base sm:text-lg font-black text-white">ไลน์<span class="text-brand">เชียงใหม่</span></span>
-    </a>
-    <nav class="flex gap-4 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-        <a href="/" class="hover:text-white transition-colors">หน้าแรก</a>
-        <a href="/about.html" class="hover:text-white transition-colors">เกี่ยวกับเรา</a>
-        <a href="/faq.html" class="text-brand">ถามตอบ</a>
-    </nav>
+  <!-- ============================== COMPLETE PURE CUSTOM CSS ============================== -->
+  <style>
+    :root {
+      --primary-purple: #5A2CBE;
+      --secondary-dark: #09090B;
+      --pure-black: #000000;
+      --pure-white: #FFFFFF;
+      --text-gray: #D4D4D8;
+      --text-muted: #71717A;
+      --border-light: rgba(255, 255, 255, 0.05);
+      --emerald-accent: #10B981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--pure-black) !important;
+      color: #F4F4F5;
+      font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif !important;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .space-y-24 > * + * {
+      margin-top: 96px;
+    }
+
+    /* ============================== 🔮 NEW FROSTED PURPLE GLASS NAV BAR ============================== */
+    #page-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      margin: 16px;
+      height: 64px;
+      background: rgba(13, 8, 30, 0.65) !important;
+      backdrop-filter: blur(18px) !important;
+      -webkit-backdrop-filter: blur(18px) !important;
+      border-radius: 16px;
+      padding: 0 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(147, 51, 234, 0.25) !important;
+      width: calc(100% - 32px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #page-header.scrolled {
+      background: rgba(13, 8, 30, 0.85) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(147, 51, 234, 0.4) !important;
+    }
+
+    /* ============================== 🔮 NEW FROSTED WHITE PREMIUM DRAWER (40% WIDTH) ============================== */
+    #sidebar-menu {
+      position: fixed;
+      inset-y: 0;
+      right: 0;
+      width: 40% !important;
+      min-width: 280px;
+      height: 100vh !important;
+      height: 100dvh !important; 
+      background: rgba(255, 255, 255, 0.98) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-left: 1px solid rgba(229, 231, 235, 0.8) !important;
+      box-shadow: -15px 0 50px rgba(0, 0, 0, 0.15) !important;
+      z-index: 3000;
+      transform: translate3d(100%, 0, 0);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    #sidebar-menu.active {
+      transform: translate3d(0, 0, 0);
+    }
+
+    .sidebar-header-div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      border-bottom: 1px solid rgba(229, 231, 235, 0.8) !important;
+      background-color: rgba(249, 250, 251, 0.9) !important;
+    }
+
+    .sidebar-header-div span {
+      font-size: 11px;
+      font-weight: 800;
+      color: #9CA3AF;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-close-btn {
+      background: none;
+      border: none;
+      color: var(--pure-black) !important;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: background-color 0.2s;
+    }
+
+    .sidebar-close-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-links-wrapper {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+
+    .sidebar-links-wrapper a {
+      display: block;
+      padding: 18px 24px;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--pure-black) !important;
+      text-decoration: none;
+      text-align: center;
+      border-bottom: 1px solid rgba(243, 244, 246, 0.8) !important;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-links-wrapper a:hover {
+      background-color: rgba(0, 0, 0, 0.02) !important;
+      color: var(--primary-purple) !important;
+    }
+
+    .header-logo-container a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--pure-white) !important;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .logo-box-el {
+      display: flex;
+      height: 36px;
+      width: 36px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background-color: var(--primary-purple) !important;
+      color: var(--pure-white) !important;
+    }
+
+    .header-status-badge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-gray) !important;
+      background-color: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      padding: 6px 16px;
+      border-radius: 100px;
+    }
+
+    @media (min-width: 640px) {
+      .header-status-badge { display: inline-flex; }
+    }
+
+    .status-dot-el {
+      width: 6px;
+      height: 6px;
+      background-color: var(--emerald-accent);
+      border-radius: 50%;
+      animation: pulse-dot-el 1.5s infinite;
+    }
+
+    @keyframes pulse-dot-el {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .desktop-nav {
+      display: none;
+      gap: 8px;
+    }
+
+    @media (min-width: 1024px) {
+      .desktop-nav { display: flex; }
+    }
+
+    .desktop-nav a {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-gray) !important;
+      padding: 8px 14px;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .desktop-nav a:hover {
+      background-color: rgba(90, 44, 190, 0.15) !important;
+      color: var(--pure-white) !important;
+    }
+
+    .circle-btn-el {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background-color: rgba(255, 255, 255, 0.03) !important;
+      color: var(--text-gray) !important;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .circle-btn-el:hover {
+      background-color: rgba(90, 44, 190, 0.2) !important;
+      border-color: rgba(90, 44, 190, 0.4) !important;
+      color: var(--pure-white) !important;
+    }
+
+    /* --- Hero & Content layouts --- */
+    .hero-section {
+      text-align: center;
+      padding: 120px 20px 40px 20px;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.04em !important;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-title { font-size: 56px; }
+    }
+
+    /* --- Specular Glass panels --- */
+    .glass-panel, .interactive-card {
+      position: relative;
+      overflow: hidden;
+      background: rgba(14, 9, 30, 0.6) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(147, 51, 234, 0.25) !important;
+      border-radius: 24px !important;
+      padding: 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .glass-panel::before, .interactive-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%; height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.06), transparent);
+      transform: skewX(-25deg);
+      transition: 0.75s ease;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .glass-panel:hover::before, .interactive-card:hover::before {
+      left: 150%;
+    }
+
+    .glass-panel:hover, .interactive-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(147, 51, 234, 0.5) !important;
+      box-shadow: 0 20px 50px rgba(90, 44, 190, 0.15), 0 0 15px rgba(90, 44, 190, 0.05) !important;
+    }
+
+    .text-gradient-main {
+      background: linear-gradient(135deg, #FFFFFF 30%, #E4E4E7 60%, #5A2CBE 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-sub {
+      background: linear-gradient(135deg, #FFFFFF 40%, #C084FC 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-ticker-div {
+      background-color: #5A2CBE;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 14px 0;
+    }
+
+    .ticker-text-wrapper {
+      display: inline-block;
+      animation: loop-menu-ticker 12s linear infinite;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+    }
+
+    @keyframes loop-menu-ticker {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-33.33%, 0, 0); }
+    }
+
+    @keyframes ambientBreathing {
+      0% { transform: translate(0, 0) scale(1); opacity: 0.15; filter: blur(55px); }
+      33% { transform: translate(30px, -40px) scale(1.1); opacity: 0.22; filter: blur(45px); }
+      66% { transform: translate(-20px, 20px) scale(0.95); opacity: 0.18; filter: blur(60px); }
+      100% { transform: translate(0, 0) scale(1); opacity: 0.15; filter: blur(55px); }
+    }
+
+    .bg-glow-overlap {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(90, 44, 190, 0.15) 0%, rgba(34, 13, 82, 0) 70%);
+      filter: blur(55px);
+      pointer-events: none;
+      z-index: 0;
+      animation: ambientBreathing 18s ease-in-out infinite;
+    }
+
+    .footer-grid-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    @media (min-width: 768px) {
+      .footer-grid-layout {
+        grid-template-columns: 2fr 1fr 1.5fr 1.5fr;
+      }
+    }
+    .footer-bottom-row {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    @media (min-width: 768px) {
+      .footer-bottom-row {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    /* Accordion Custom Layout */
+    .faq-item-div {
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 0;
+    }
+    .faq-item-div:last-child {
+      border-bottom: none;
+    }
+    .faq-trigger-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      font-family: inherit;
+    }
+    .faq-trigger-btn:hover {
+      color: #C084FC;
+    }
+    .faq-panel-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      color: var(--text-gray);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .faq-panel-content.active {
+      max-height: 500px; /* ขยายเนื้อหาได้อย่างอิสระเมื่อเปิดใช้งาน */
+    }
+    .faq-chevron {
+      transition: transform 0.3s;
+    }
+    .faq-chevron.rotate {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================== HEADER ============================== -->
+  <header id="page-header" role="banner">
+    <div class="header-logo-container">
+        <a href="/" aria-label="ไปที่หน้าแรก Sideline Chiangmai">
+           <span class="logo-box-el">
+             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><title>โลโก้ ไซด์ไลน์เชียงใหม่</title><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+           </span>
+           <span style="font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.02em;">ไลน์<span style="color: #C084FC">เชียงใหม่</span></span>
+        </a>
+    </div>
+
+    <div class="header-status-badge">
+        <span class="status-dot-el" aria-hidden="true"></span>
+        <span style="font-weight: 700; color: var(--text-gray);">อัปเดตระบบ: วันนี้ (กรกฎาคม 2026)</span>
+    </div>
+
+    <div class="nav-controls">
+        <nav class="desktop-nav" aria-label="เมนูหลัก">
+            <a href="/profiles.html" style="color: var(--text-gray) !important;">รวมโปรไฟล์แนะนำ</a>
+            <a href="/locations.html" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
+        </nav>
+
+        <button type="button" aria-label="สลับภาษา" class="circle-btn-el" style="color: var(--text-gray) !important;">TH</button>
+        <button class="theme-toggle-btn circle-btn-el" type="button" aria-label="เปลี่ยนโหมดแสง" style="color: var(--text-gray) !important;">
+            <i class="fas fa-sun" aria-hidden="true"></i>
+        </button>
+        <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทาง" style="color: var(--text-gray) !important;">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
   </header>
 
-  <!-- MAIN FAQ CONTENT -->
-  <main class="container mx-auto px-4 max-w-3xl space-y-8">
-    <div class="text-center space-y-2">
-      <h1 class="text-2xl sm:text-3xl font-black text-white">คำถามที่พบบ่อยและระบบความปลอดภัย</h1>
-      <p class="text-xs sm:text-sm text-zinc-400">ตอบทุกข้อสงสัยเกี่ยวกับขั้นตอนการใช้บริการอย่างละเอียดและโปร่งใสเพื่อความเข้าใจที่ตรงกัน</p>
+  <!-- SIDEBAR MENU (40% WIDTH) -->
+  <nav id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+    <div class="sidebar-header-div">
+      <span>Navigation</span>
+      <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn">
+        <i class="fas fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+    
+    <div class="sidebar-links-wrapper">
+      <a href="/">หน้าแรก</a>
+      <a href="/profiles.html">น้องๆ VIP แนะนำ</a>
+      <a href="/locations.html">พื้นที่บริการ</a>
+      <a href="/about.html">เกี่ยวกับเรา</a>
+      <a href="/faq.html">คำถามพบบ่อย</a>
+      <a href="/blog.html">บทความ</a>
     </div>
 
-    <div class="space-y-4">
-      <!-- FAQ ITEM 1 -->
-      <div class="glass-panel p-6 rounded-2xl space-y-2">
-        <h3 class="font-bold text-brand text-sm sm:text-base flex gap-2">
-          <span class="text-white">Q:</span> ทำไมบริการนี้จึงไม่มีการเรียกเก็บเงินมัดจำล่วงหน้า?
-        </h3>
-        <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed border-l border-brand/20 pl-4">
-          เพื่อป้องกันความเสี่ยงจากการตกเป็นเหยื่อมิจฉาชีพที่นำภาพผู้อื่นมาสวมรอย ระบบของเราจึงไม่อนุญาตให้ผู้ให้บริการเรียกเก็บเงินจองคิวหรือเงินมัดจำใดๆ ทั้งสิ้นโดยเด็ดขาด ลูกค้าจะจ่ายเงินค่าบริการหลักเฉพาะตอนที่พบตัวจริงหน้างานเรียบร้อยแล้วเท่านั้น
-        </p>
+    <div class="menu-ticker-div" aria-hidden="true">
+      <div class="ticker-text-wrapper">
+        จองคิวน้องๆ แอดไลน์ @SIDELINECM • เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่มัดจำ •
       </div>
+    </div>
 
-      <!-- FAQ ITEM 2 -->
-      <div class="glass-panel p-6 rounded-2xl space-y-2">
-        <h3 class="font-bold text-brand text-sm sm:text-base flex gap-2">
-          <span class="text-white">Q:</span> หากพบผู้ให้บริการไม่ตรงปกหรือไม่ตรงตามข้อมูลที่ระบุ ควรทำอย่างไร?
-        </h3>
-        <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed border-l border-brand/20 pl-4">
-          หากลูกค้าตรวจสอบหน้างานแล้วพบว่าผู้ให้บริการไม่ตรงปกอย่างชัดเจน หรือมีกิริยาที่ต่างไปจากที่ระบุในข้อตกลง สามารถปฏิเสธการรับงานและขอยกเลิกนัดได้ทันทีโดยไม่ต้องเสียค่าใช้จ่ายใด ๆ และกรุณาแจ้งเข้ามาที่ช่องทางไลน์แอดมินเพื่อทำการตรวจสอบและระงับโปรไฟล์นั้นออกจากระบบทันทีเพื่อรักษาคุณภาพสารบัญโปรไฟล์ตรงปกของเราครับ
-        </p>
-      </div>
+    <div style="padding: 24px; background: #FFFFFF !important; border-top: 1px solid rgba(229, 231, 235, 0.8) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
+      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
+         style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755 !important; color: #FFFFFF !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.25);"
+         onmouseenter="this.style.backgroundColor='#05b04c'"
+         onmouseleave="this.style.backgroundColor='#06C755'">
+        <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
+      </a>
+    </div>
+  </nav>
 
-      <!-- FAQ ITEM 3 -->
-      <div class="glass-panel p-6 rounded-2xl space-y-2">
-        <h3 class="font-bold text-brand text-sm sm:text-base flex gap-2">
-          <span class="text-white">Q:</span> ค่าเดินทางนอกสถานที่มีเกณฑ์การคำนวณและชำระอย่างไร?
-        </h3>
-        <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed border-l border-brand/20 pl-4">
-          ในกรณีที่ลูกค้าต้องการให้น้องเดินทางไปหานอกพิกัดทำงานหลัก (นอกสถานที่) จะมีการคิดค่าเดินทางไป-กลับตามระยะทางจริง ซึ่งส่วนนี้ลูกค้าจำเป็นต้องชำระเฉพาะ "ค่าเดินทางไป-กลับ" ก่อนล่วงหน้าตามที่น้องประเมินเพื่อป้องกันการนัดหลอกและเพื่อความปลอดภัยของตัวน้องเอง ส่วนค่าบริการชั่วโมงทำงานหลักทั้งหมดจ่ายหน้างานเมื่อเจอตัวตามปกติครับ [4]
+  <div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
+
+  <!-- ============================== MAIN CONTENT ============================== -->
+  <main id="main-content" style="padding-top: 96px; padding-bottom: 64px; position: relative; overflow: hidden;">
+    <div class="bg-glow-overlap" style="top: -50px; right: -50px;" aria-hidden="true"></div>
+    <div class="bg-glow-overlap" style="bottom: 5%; left: -100px;" aria-hidden="true"></div>
+
+    <div class="container space-y-24">
+      
+      <!-- FAQ HERO HEADER -->
+      <section class="hero-section">
+        <h1 class="hero-title text-gradient-main">คำถามที่พบบ่อย (FAQs)</h1>
+        <p style="font-size: 16px; color: var(--text-gray); max-width: 650px; margin: 0 auto; line-height: 1.7;">
+          รวบรวมคำถามที่สมาชิกและบุคคลทั่วไปมักจะสอบถามแอดมินบ่อยที่สุด เกี่ยวกับนโยบาย มาตรฐานความปลอดภัย และขั้นตอนการนัดหมายน้อง ๆ เพื่อนร่วมทริปอย่างละเอียด
         </p>
-      </div>
+      </section>
+
+      <!-- ACCORDIONS WRAPPER PANEL -->
+      <section class="glass-panel" style="max-width: 850px; margin: 0 auto;">
+         <h2 class="text-gradient-sub" style="font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 32px;">ตอบปัญหาข้อสงสัยเพื่อความมั่นใจ 100%</h2>
+
+         <div style="display: flex; flex-direction: column;">
+            
+            <!-- ITEM 1 -->
+            <div class="faq-item-div">
+               <button class="faq-trigger-btn" type="button" aria-expanded="false">
+                  <span>Q1: การจองคิวน้องๆ เพื่อนเที่ยว หรือสาวไซด์ไลน์ ต้องโอนค่ามัดจำล่วงหน้าก่อนไหม?</span>
+                  <span class="faq-chevron"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+               </button>
+               <div class="faq-panel-content">
+                  <div style="padding: 12px 0 20px 0;">
+                     <strong style="color: var(--emerald-accent);">ตอบเด็ดขาด: ไม่มีนโยบายโอนเงินจองคิวล่วงหน้า 100% ครับ</strong> ทางแพลตฟอร์มและผู้ดูแลทุกคนในระบบใช้นโยบายความโปร่งใส ชำระค่าบริการเฉพาะตอนที่เจอน้องตัวจริงตรงตามรูปปกหน้างานเรียบร้อยแล้วเท่านั้น เพื่อกำจัดและป้องกันปัญหามิจฉาชีพแฝงตัวหลอกโอนเงินล่วงหน้าให้หมดไปอย่างถาวร
+                  </div>
+               </div>
+            </div>
+
+            <!-- ITEM 2 -->
+            <div class="faq-item-div">
+               <button class="faq-trigger-btn" type="button" aria-expanded="false">
+                  <span>Q2: ทางเว็บไซต์มีวิธีการยืนยันสกรีนรูปภาพอย่างไรให้มั่นใจว่าน้องตรงปก?</span>
+                  <span class="faq-chevron"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+               </button>
+               <div class="faq-panel-content">
+                  <div style="padding: 12px 0 20px 0;">
+                     ผู้ให้บริการเอนเตอร์เทนส่วนตัวและน้อง ๆ ทุกคนที่ต้องการลงสารบัญประชาสัมพันธ์ จำต้องส่งคลิปวิดีโอยืนยันสัดส่วนและภาพถ่ายคู่ใบหน้าแบบไม่ผ่านฟิลเตอร์บิดเบือนเข้ามายืนยันประวัติต่อทีมแอดมินเพื่อตรวจสอบใบหน้าจริง เพื่อตัดปัญหาภาพสวมรอยหรือรูปเก่าไม่ตรงยุคสมัย
+                  </div>
+               </div>
+            </div>
+
+            <!-- ITEM 3 -->
+            <div class="faq-item-div">
+               <button class="faq-trigger-btn" type="button" aria-expanded="false">
+                  <span>Q3: การกำหนดอายุขั้นต่ำของผู้ใช้งานและระเบียบในการทานข้าวร่วมทริปเป็นอย่างไร?</span>
+                  <span class="faq-chevron"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+               </button>
+               <div class="faq-panel-content">
+                  <div style="padding: 12px 0 20px 0;">
+                     เพื่อให้สอดคล้องต่อมาตรฐานจริยธรรมของสังคม ผู้ใช้บริการจองคิว ตลอดจนผู้เข้ามาอ่านข้อมูลทุกคน **จำต้องมีอายุไม่ต่ำกว่า 20 ปีบริบูรณ์เท่านั้น** โดยขอความร่วมมืองดการทำกิจกรรมใด ๆ ที่ละเมิดกฎหมาย ศีลธรรม หรือพกพาอาวุธและสารเสพติดทุกชนิดร่วมกิจกรรม
+                  </div>
+               </div>
+            </div>
+
+            <!-- ITEM 4 -->
+            <div class="faq-item-div">
+               <button class="faq-trigger-btn" type="button" aria-expanded="false">
+                  <span>Q4: หากพบตัวจริงแล้วน้องมีพฤติกรรมไม่เหมาะสมหรือไม่ตรงปก สามารถยกเลิกได้ไหม?</span>
+                  <span class="faq-chevron"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+               </button>
+               <div class="faq-panel-content">
+                  <div style="padding: 12px 0 20px 0;">
+                     หากเจอน้องตัวจริงแล้วพบปัญหา เช่น การแต่งกายไม่สะอาดเรียบร้อย หรือหน้าตาไม่ตรงปก สมาชิกมีสิทธิ์และควรร้องขอยกเลิกงานทันทีอย่างสุภาพ โดยจะไม่มีค่าปรับหรือการหักค่าบริการย้อนหลังใด ๆ ทั้งสิ้น และกรุณาแจ้งรายงานข้อมูลดังกล่าวมาที่ LINE ของแอดมินเพื่อที่ทีมงานจะได้ดำเนินการตรวจสอบประวัติผู้ลงประกาศต่อไป
+                  </div>
+               </div>
+            </div>
+
+            <!-- ITEM 5 -->
+            <div class="faq-item-div">
+               <button class="faq-trigger-btn" type="button" aria-expanded="false">
+                  <span>Q5: การจองคิวนอกเขตอำเภอเมืองเชียงใหม่หรือต่างจังหวัดมีขั้นตอนอย่างไร?</span>
+                  <span class="faq-chevron"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+               </button>
+               <div class="faq-panel-content">
+                  <div style="padding: 12px 0 20px 0;">
+                     น้อง ๆ ส่วนใหญ่ประจำการในเขตอำเภอเมือง (ย่านนิมมาน, สันติธรรม, เจ็ดยอด, ช้างเผือก) หากคุณต้องการให้น้องไปเทคแคร์นอกเขต เช่น แม่ริม, สะเมิง, หางดง หรือรีสอร์ทส่วนตัว สามารถนัดหมายตกลงเรื่องค่าเดินทางเพิ่มเติมตามระยะทางจริงได้ในแชทคุยรอบจัดส่งครับ
+                  </div>
+               </div>
+            </div>
+
+         </div>
+      </section>
+
     </div>
   </main>
+
+  <!-- ============================== FOOTER ============================== -->
+  <footer style="border-top: 1px solid rgba(147, 51, 234, 0.15); background: rgba(14, 9, 30, 0.45); backdrop-filter: blur(16px); padding: 64px 0 32px 0;" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid-layout">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <span style="font-size: 18px; font-weight: 800; color: #FFFFFF; tracking-tight: -0.02em; display: block;">
+            ไลน์<span style="color: var(--primary-purple);">เชียงใหม่</span>
+          </span>
+          <p style="font-size: 12px; line-height: 1.7; color: var(--text-gray); max-width: 320px; margin: 0;">
+            <strong>Sideline Chiangmai</strong> แพลตฟอร์มเพื่อนเที่ยวและผู้ดูแลระดับพรีเมียมอันดับ 1 ในเชียงใหม่ มุ่งเน้นรูปถ่ายตรงปก ยืนยันพิกัดบริการปลอดภัย 100% ไม่มีมัดจำ
+          </p>
+        </div>
+
+        <nav aria-label="ลิงก์ส่วนท้ายเว็บ">
+          <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin-bottom: 16px;">เมนูหลัก</h3>
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+            <li><a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a></li>
+            <li><a href="/about.html" style="color: var(--text-gray); text-decoration: none;">เกี่ยวกับเรา</a></li>
+            <li><a href="/faq.html" style="color: var(--text-gray); text-decoration: none;">คำถามที่พบบ่อย</a></li>
+          </ul>
+        </nav>
+
+        <nav aria-label="พื้นที่บริการยอดนิยมย่านหลักในเชียงใหม่">
+          <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin-bottom: 16px;">พื้นที่บริการยอดนิยม</h3>
+          <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">
+             <li><a href="/locations.html?area=nimman" style="color: var(--text-gray); text-decoration: none;">ถนนนิมมานเหมินท์</a></li>
+             <li><a href="/locations.html?area=jedyod" style="color: var(--text-gray); text-decoration: none;">ย่านเจ็ดยอด</a></li>
+             <li><a href="/locations.html?area=santitham" style="color: var(--text-gray); text-decoration: none;">ย่านสันติธรรม</a></li>
+             <li><a href="/locations.html?area=changphueak" style="color: var(--text-gray); text-decoration: none;">ย่านช้างเผือก</a></li>
+          </ul>
+        </nav>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin: 0;">ติดต่อเรา</h3>
+          <p style="font-size: 12px; color: var(--text-gray); margin: 0;">เจ้าหน้าที่สแตนบายดูแล 24 ชม.</p>
+          <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
+             style="display: flex; align-items: center; justify-content: center; gap: 8px; background-color: var(--emerald-accent) !important; color: var(--pure-black) !important; padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transition: background-color 0.2s;" 
+             onmouseenter="this.style.backgroundColor='#059669'" 
+             onmouseleave="this.style.backgroundColor='var(--emerald-accent)'">
+            <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-bottom-row">
+        <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">© 2026 Sideline Chiangmai. All Rights Reserved.</p>
+        <p style="font-size: 9px; color: var(--text-muted); opacity: 0.6; margin: 0; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">Designed with AI Zoe • Premium SEO Edition 2026</p>
+        <div style="display: flex; gap: 24px;">
+          <a href="/privacy-policy.html" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600;">Privacy Policy</a>
+          <a href="/terms-of-service.html" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600;">Terms & Conditions</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+      // 1. ระบบควบคุมสไลด์เมนูมือถือ
+      const menuToggle = document.getElementById("menu-toggle");
+      const closeMenuBtn = document.getElementById("close-menu-btn");
+      const sidebarMenu = document.getElementById("sidebar-menu");
+      const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+      if (menuToggle && sidebarMenu && sidebarOverlay) {
+          const openMenu = () => {
+              sidebarMenu.classList.add("active");
+              sidebarOverlay.style.display = "block";
+              setTimeout(() => { sidebarOverlay.style.opacity = "1"; }, 50);
+              document.body.style.overflow = "hidden"; 
+          };
+
+          const closeMenu = () => {
+              sidebarMenu.classList.remove("active");
+              sidebarOverlay.style.opacity = "0";
+              document.body.style.overflow = ""; 
+              setTimeout(() => { sidebarOverlay.style.display = "none"; }, 300);
+          };
+
+          menuToggle.addEventListener("click", openMenu);
+          if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
+          sidebarOverlay.addEventListener("click", closeMenu);
+      }
+
+      // 2. ระบบหีบเพลงสวิทช์เปิด-ปิดคำถาม (Accordion Toggle)
+      const triggers = document.querySelectorAll(".faq-trigger-btn");
+      triggers.forEach(trigger => {
+         trigger.addEventListener("click", () => {
+            const content = trigger.nextElementSibling;
+            const chevron = trigger.querySelector(".faq-chevron");
+            const expanded = trigger.getAttribute("aria-expanded") === "true";
+
+            // ปิดตัวอื่นที่เปิดอยู่ (เพื่อความเป็นระเบียบเรียบร้อย)
+            triggers.forEach(otherTrigger => {
+               if (otherTrigger !== trigger) {
+                  otherTrigger.setAttribute("aria-expanded", "false");
+                  otherTrigger.nextElementSibling.classList.remove("active");
+                  otherTrigger.querySelector(".faq-chevron").classList.remove("rotate");
+               }
+            });
+
+            // สลับสถานะของตัวที่กด
+            trigger.setAttribute("aria-expanded", !expanded);
+            content.classList.toggle("active");
+            chevron.classList.toggle("rotate");
+         });
+      });
+  });
+  </script>
 </body>
 </html>

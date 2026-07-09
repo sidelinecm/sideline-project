@@ -1,18 +1,18 @@
-# ==========================================
-# 1. Build Settings
-# ==========================================
+# ==============================================================================
+# 1. Build Settings & Platform Target
+# ==============================================================================
 [build]
   publish = "."
-  # edge functions ใน netlify ต้องอยู่ในโฟลเดอร์ netlify/edge-functions โดยอัตโนมัติ
-  # บรรทัด functions ด้านล่างคือ serverless functions ธรรมดา (ทิ้งไว้ได้ไม่เป็นไรครับ)
+  # ตำแหน่งเก็บฟังก์ชันประมวลผลเซิร์ฟเวอร์เลสทั่วไป
   functions = "netlify/functions"
 
 [build.processing]
   skip_processing = false
 
-# ==========================================
-# 2. Security & SEO Headers
-# ==========================================
+# ==============================================================================
+# 2. S-Tier Security & Specular Core Web Vitals Headers
+# ==============================================================================
+# กฎควบคุมความปลอดภัยหลักของเว็บไซต์สำหรับทุกพาร์ททางเข้า
 [[headers]]
   for = "/*"
   [headers.values]
@@ -22,35 +22,60 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    # การตั้ง Cache ให้ Google เข้ามาอ่านข้อมูลใหม่ได้บ่อยขึ้น
+    # การันตีหน้าเว็บคีย์เวิร์ดมีการสื่อสารแบบสดใหม่เสมอ แต่ลดแรงกดโหลดด้วย stale-while-revalidate
     Cache-Control = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400"
 
-# ==========================================
-# 3. Edge Functions
-# ==========================================
+# ⚡ [เพิ่มใหม่] เร่งความเร็วการโหลดไฟล์ดีไซน์ (CSS) ตลอดปีเพื่อคะแนนสปีดที่ดีที่สุด
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ⚡ [เพิ่มใหม่] เร่งความเร็วการโหลดสคริปต์หลัก (JS)
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ⚡ [เพิ่มใหม่] เร่งความเร็วการดึงรูปภาพพื้นหลังและไอคอนภายในระบบ
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ==============================================================================
+# 3. Optimized Edge Functions Mapping (Consolidated Edge Routing)
+# ==============================================================================
+# ชี้เป้าหมายให้ ssr-province ทำหน้าที่สร้างและพ่น Sitemap เพื่อลดไฟล์สคริปต์ส่วนเกิน
 [[edge_functions]]
-  function = "sitemap"
+  function = "ssr-province"
   path = "/sitemap.xml"
 
+# ชี้เป้าหมายให้ ssr-province เป็นตัวส่งข้อมูลการกรองสปายบอทของ robots.txt
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/robots.txt"
+
+# จัดหน้าแสดงผลเฉพาะของตัวบอทแสกนหน้าโปรไฟล์น้อง ๆ เดี่ยว
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
-# ✅ ให้ ssr-province ดักจับหน้า /location/* ทั้งหมด
+# ให้ ssr-province ดักจับหน้าภูมิภาค /location/* ทั้งหมดเพื่อส่งข้อมูล Dynamic
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
 
-# ✅ ให้ ssr-province ดักจับหน้าแรก (Root) ด้วย เพื่อให้เรนเดอร์เชียงใหม่
+# ให้ ssr-province ดักจับพาร์ทหน้าแรกสุด (/) เพื่อจัดส่งสารบัญจังหวัดเชียงใหม่ทันทีแบบ Zero-Delay
 [[edge_functions]]
   function = "ssr-province"
   path = "/"
 
-# ==========================================
-# 4. SEO Redirects & Rewrites
-# ==========================================
+# ==============================================================================
+# 4. SEO Redirects & Rewrites Matrix
+# ==============================================================================
 
-# 4.1 URL Normalization (จัดการ Query Parameter ให้เป็น Clean URL)
+# 4.1 URL Normalization: เคลียร์พารามิเตอร์ขยะให้เป็นพาร์ทไดเรกทอรีที่ Google ชื่นชอบ
 [[redirects]]
   query = {province = ":p"}
   from = "/location/*"
@@ -59,7 +84,7 @@
   force = true
 
 # 4.2 SPA Fallback (ต้องอยู่ล่างสุดเสมอ)
-# ดักจับหน้าที่หาไม่เจอให้วิ่งไปที่ index.html
+# ดักจับลิงก์ฝั่งไคลเอนต์กรณีหาไฟล์หน้าเว็บไม่เจอ เพื่อป้องกันการเกิดหน้าว่าง 404
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -1,91 +1,106 @@
-<!doctype html>
-<html lang="th" class="light">
+<!DOCTYPE html>
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>คุณกำลังออฟไลน์ - ไซด์ไลน์เชียงใหม่ | รับงาน Sideline ฟิวแฟน ตรงปก 100% ไม่มีมัดจำ</title>
-<meta name="description" content="Sideline Chiangmai ศูนย์รวมน้องๆสาวๆ รับงานไซด์ไลน์ เด็กเอ็น ฟิวแฟน ตรงปก100% ที่เยอะที่สุด ปลอดภัย ไม่ต้องโอนก่อน อัปเดตโปร์ไฟล์ใหม่ทุกอาทิตย์">
-    <meta name=robots content="index, follow">
-  <link rel="manifest" href="manifest.webmanifest" /> 
-  <meta name="theme-color" content="#FFFFFF" />
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827" />
-  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/offline" />
-
-  <!-- 1. Preconnect -->
-  <link rel="preconnect" href="https://hgzbgpbmymoiwjpaypvl.supabase.co" crossorigin />
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-
-  <!-- 2. Preload web fonts -->
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin />
-
-  <!-- 3. Preload CSS non-blocking -->
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/styles.css" /></noscript>
-
-  <!-- 4. Preload Font Awesome -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
-
-  <!-- Critical inline CSS -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>คุณกำลังออฟไลน์อยู่ | Sideline Chiangmai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
-    :root { --primary: #db2777; --background: #fff; --foreground: #1f2937; --muted-foreground: #6b7280; }
-    html.dark { --primary: #f9a8d4; --background: #111827; --foreground: #f3f4f6; --muted-foreground: #9ca3af; }
-    html { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.5; }
-    body { margin: 0; color: var(--foreground); background-color: var(--background); display: flex; min-height: 100vh; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
-    .container { max-width: 28rem; }
-    h1 { font-size: 1.875rem; line-height: 2.25rem; font-weight: 800; color: var(--primary); margin: 1.5rem 0 0.5rem; }
-    p { margin: 0 0 1.5rem; color: var(--muted-foreground); }
-    .retry-button { display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--primary); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 9999px; text-decoration: none; transition: opacity 0.2s; }
-    .retry-button:hover { opacity: 0.9; }
-    .icon { font-size: 3rem; color: var(--primary); opacity: 0.5; margin-bottom: 1rem; }
-    .icon svg { display: inline-block; width: 1em; height: 1em; }
-    img { display: block; margin: 0 auto; }
+    :root {
+      --primary-purple: #5A2CBE;
+      --pure-black: #000000;
+      --text-gray: #D4D4D8;
+    }
+    body {
+      background-color: var(--pure-black);
+      color: #FFFFFF;
+      font-family: 'Prompt', sans-serif;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .offline-card {
+      max-width: 450px;
+      width: 100%;
+      background: rgba(14, 9, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(147, 51, 234, 0.25);
+      border-radius: 24px;
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    }
+    .icon-box {
+      width: 80px;
+      height: 80px;
+      background-color: rgba(90, 44, 190, 0.1);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      color: var(--primary-purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 24px auto;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0 0 12px 0;
+      background: linear-gradient(135deg, #FFFFFF 30%, #C084FC 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p {
+      color: var(--text-gray);
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 24px 0;
+    }
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #FFFFFF;
+      color: var(--pure-black);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 28px;
+      border-radius: 100px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .retry-btn:hover {
+      transform: translateY(-2px);
+    }
   </style>
 </head>
-<body class="antialiased">
-  <main>
-    <div class="container">
-      <a href="/" aria-label="กลับสู่หน้าแรก">
-        <img src="images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiangmai" style="height: 30px; width: auto;">
-      </a>
-
-      <div class="icon" aria-hidden="true">
-        <!-- Wifi icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor">
-          <path d="M544.2 240.3C580.4 276.5 608 328.6 608 384c0 55.4-27.6 107.5-63.8 143.7C507.9 564 449.1 576 384 576s-123.9-12-160.2-48.3C187.6 491.5 160 439.4 160 384c0-55.4 27.6-107.5 63.8-143.7C259.9 204 318.7 192 384 192s123.9 12 160.2 48.3zM384 128c-9.5 0-19.1 1.1-28.5 3.2-12.4 2.8-24.3-6.1-27.1-18.5s6.1-24.3 18.5-27.1C359.8 81.1 371.8 80 384 80c97.2 0 185.2 39.4 249.2 103.4s103.4 152 103.4 249.2c0 12.2-1.1 24.2-3.2 36.1-2.8 12.4-14.7 20.4-27.1 17.6s-20.4-14.7-17.6-27.1c1.9-10.9 2.9-21.9 2.9-33.1 0-82.3-33.5-156.9-88-211.4S466.3 128 384 128zM32 384c0-9.5 1.1-19.1 3.2-28.5 2.8-12.4-6.1-24.3-18.5-27.1S-7.6 339.5-4.8 351.9C-1.1 364.2 0 374.1 0 384c0 97.2 39.4 185.2 103.4 249.2S254.8 744 352 744c12.2 0 24.2-1.1 36.1-3.2 12.4-2.8 20.4-14.7 17.6-27.1s-14.7-20.4-27.1-17.6c-10.9 1.9-21.9 2.9-33.1 2.9-82.3 0-156.9-33.5-211.4-88S32 466.3 32 384z"/>
-        </svg>
-      </div>
-
-      <h1>โอ๊ะ! คุณกำลังออฟไลน์</h1>
-      <p>ดูเหมือนว่าการเชื่อมต่ออินเทอร์เน็ตของคุณมีปัญหาในขณะนี้ ไม่ต้องกังวล เนื้อหาที่คุณเคยเข้าชมอาจยังคงใช้งานได้</p>
-      <a href="javascript:window.location.reload()" class="retry-button" aria-label="ลองอีกครั้ง">
-        <!-- Refresh icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" style="width:1em; height:1em;">
-          <path d="M463.5 224H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"/>
-        </svg>
-        <span>ลองอีกครั้ง</span>
-      </a>
+<body>
+  <div class="offline-card">
+    <div class="icon-box">
+      <i class="fas fa-wifi-slash"></i>
     </div>
-  </main>
-
-<script type="module" src="/main.js"></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.body.classList.add('loaded');
-  });
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => navigator.serviceWorker.register('/sw.js'));
-      } else {
-        setTimeout(() => navigator.serviceWorker.register('/sw.js'), 1500);
-      }
-    });
-  }
-</script>
+    <h1>การเชื่อมต่ออินเทอร์เน็ตขาดหาย</h1>
+    <p>ไม่สามารถโหลดหน้าเว็บได้เนื่องจากโทรศัพท์ของคุณไม่ได้เชื่อมต่ออินเทอร์เน็ตในขณะนี้ โปรไฟล์และแคชโครงสร้างบางส่วนที่เคยเปิดดูแล้วยังคงใช้งานได้ตามปกติครับ</p>
+    <button onclick="window.location.reload()" class="retry-btn">
+      <i class="fas fa-sync-alt"></i> ลองใหม่อีกครั้ง
+    </button>
+  </div>
 </body>
 </html>

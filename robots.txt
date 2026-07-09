@@ -1,25 +1,21 @@
-# =================================================
-# ROBOTS.TXT FOR SIDELINE THAILAND
-# Optimized for Googlebot & SEO Privacy
-# =================================================
+# =========================================================
+# ROBOTS.TXT FOR SIDELINE CHIANGMAI
+# Optimized for Googlebot, EEAT Trust & Competitor Block
+# =========================================================
 
-# Global rules for all search engines
+# กฎควบคุมโปรแกรมค้นหาของระบบสากลทั้งหมด
 User-agent: *
 
-# Block backend and user-specific pages
+# บล็อกพื้นที่ความลับหลังบ้านและทางเข้าควบคุมระบบ
 Disallow: /wp-admin/
 Disallow: /wp-login.php
 Disallow: /administrator/
 Disallow: /login/
 Disallow: /register/
-Disallow: /cart/
-Disallow: /checkout/
-Disallow: /my-account/
 Disallow: /search/
 Disallow: /api/
 
-# Prevent common marketing and tracking URL parameters from being crawled
-# Note: not all crawlers honor parameter-based rules, but this reduces duplicate crawls.
+# บล็อกพารามิเตอร์โฆษณาเพื่อลดการเข้าถึงข้อมูลซ้ำซ้อน (Duplicate Crawls)
 Disallow: /*?*utm_*
 Disallow: /*?*fbclid*
 Disallow: /*?*gclid*
@@ -27,20 +23,18 @@ Disallow: /*?*gclsrc*
 Disallow: /*?*affiliate*
 Disallow: /*?*ref*
 
-# Allow static assets (ensure resources like CSS/JS/images can be crawled)
-Allow: /wp-admin/admin-ajax.php
+# อนุญาตให้แสกนไฟล์เลย์เอาต์และการทำงานเพื่อให้ประเมินสปีดได้คะแนนเต็ม
 Allow: /*.js$
 Allow: /*.css$
 Allow: /*.png$
 Allow: /*.jpg$
 Allow: /*.jpeg$
-Allow: /*.gif$
+Allow: /*.webp$
 Allow: /*.svg$
 
 # ========================================================
-# Block specific known competitive-analysis bots
+# สกัดกั้นสปายบอทคู่แข่ง (สกัดการแอบแสกนช่องโหว่และคีย์เวิร์ด)
 # ========================================================
-
 User-agent: AhrefsBot
 Disallow: /
 
@@ -75,7 +69,6 @@ User-agent: UptimeRobot
 Disallow: /
 
 # ========================================================
-# SITEMAP LOCATION
+# ลิงก์แผนผังเว็บไซต์อย่างเป็นทางการ (Sitemap Destination)
 # ========================================================
-Sitemap: https://sidelinechiangmai.netlify.app/sitemap_index.xml
 Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml
