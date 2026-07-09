@@ -1,15 +1,19 @@
+// netlify/edge-functions/sitemap.js
+
 /**
  * [ SYSTEM SITEMAP ENGINE ]
  * Project: Nexus Entity Framework (S-Tier) - DYNAMIC SITEMAP GENERATOR
  * Authority: Dynamic Domain Extraction, Strict XML Formatting & Image Indexing
  * Optimization: ISO Time Parsing Safe-guard, Automated Chiang Mai Redirect Skipping
+ * Security: Canonical Fallback Override & Case-Sensitive Province Matching
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
+    CANONICAL_DOMAIN: 'https://sidelinechiangmai.netlify.app' // ป้องกันระบบพ่นโดเมน Staging ของ Netlify
 };
 
 // ฟังก์ชันป้องกันตัวอักษรพิเศษใน XML
@@ -40,8 +44,12 @@ const safeGetIsoDate = (dateStr, fallbackToday) => {
 export default async (request, context) => {
     try {
         const url = new URL(request.url);
-        // สกัดโดเมนจริงปัจจุบัน ณ รันไทม์ เพื่อหลีกเลี่ยงข้อหาโดนลงโทษเมื่อนำไปรันบน Custom Domain
-        const dynamicDomain = `${url.protocol}//${url.host}`; 
+        
+        // 🔒 SECURITY FIX: สกัดโดเมนจริง แต่หากตรวจพบว่าเป็นโดเมนสำรอง/เทส ให้บังคับถอยกลับไปใช้โดเมนหลักทันทีป้องกัน Google ลงโทษเนื้อหาซ้ำซ้อน
+        let dynamicDomain = `${url.protocol}//${url.host}`; 
+        if (dynamicDomain.includes('netlify.app') && !dynamicDomain.includes('sidelinechiangmai.netlify.app')) {
+            dynamicDomain = CONFIG.CANONICAL_DOMAIN;
+        }
         
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
@@ -74,7 +82,7 @@ export default async (request, context) => {
 </url>`;
 
         // 2. หน้า Static Pages ที่มีจริงในระบบเมนูและฟุตเตอร์
-        const staticPages = ['profiles.html', 'locations.html', 'about.html', 'faq.html', 'terms.html', 'privacy-policy.html'];
+        const staticPages = ['profiles.html', 'locations.html', 'about.html', 'faq.html', 'terms-of-service.html', 'privacy-policy.html'];
         staticPages.forEach(page => {
             xml += `
 <url>
@@ -88,10 +96,12 @@ export default async (request, context) => {
         // 3. หน้าพิกัดจังหวัดอื่นๆ (ข้ามเชียงใหม่เพื่อตัดปัญหาระบบประมวลผล Redirect)
         if (provinces) {
             provinces.forEach(p => {
-                if (p.key && p.key.toLowerCase() !== 'chiangmai') {
+                if (p.key && p.key.toLowerCase().trim() !== 'chiangmai') {
+                    // 🔒 STABILITY FIX: ยกเลิกการสั่ง .toLowerCase() บนคีย์หลักเพื่อรักษาระดับ Case-Sensitive ให้สอดคล้องกับฐานข้อมูลและค่า Select Option ใน main.js
+                    const originalKey = p.key.trim();
                     xml += `
 <url>
-  <loc>${dynamicDomain}/location/${encodeURIComponent(p.key.toLowerCase().trim())}</loc>
+  <loc>${dynamicDomain}/location/${encodeURIComponent(originalKey)}</loc>
   <lastmod>${today}</lastmod>
   <changefreq>daily</changefreq>
   <priority>0.9</priority>
