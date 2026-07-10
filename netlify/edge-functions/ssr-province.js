@@ -31,7 +31,7 @@ const CONFIG = {
     }
 };
 
-const PROVICE_CUSTOM_METADATA = {
+const PROVINCE_CUSTOM_METADATA = {
     "bangkok": {
         title: "สาวรับงานกรุงเทพ ไซด์ไลน์ กทม เพื่อนเที่ยวฟิวแฟนตรงปก 2026 | จ่ายหน้างาน ไม่มัดจำ",
         desc: "รวมพิกัดสาวรับงานกรุงเทพ ไซด์ไลน์ กทม และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีเก็บมัดจำล่วงหน้า ครอบคลุมพิกัดสุขุมวิท รัชดา ลาดพร้าว"
@@ -357,15 +357,14 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         let supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
-        // ➕ [ดึงฟิลด์เพิ่ม] ดึงฟิลด์ description เพื่อให้ Lightbox เรียกใช้ได้แบบสดใหม่ไม่ต้อง Query อีกรอบ
-const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
-    supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
-    supabase.from("profiles")
-        .select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, hasVideo, verified") // ดึงมาให้ครบ!
-        .eq("provinceKey", provinceKey).eq("active", true)
-        .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
-    supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
-]);
+        const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
+            supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
+            supabase.from("profiles")
+                .select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified")
+                .eq("provinceKey", provinceKey).eq("active", true)
+                .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
+            supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+        ]);
 
         const provinceData = provinceRes.data;
         if (!provinceData) {
@@ -376,7 +375,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
         const allProvinces = allProvincesRes.data || [];
         const provinceName = provinceData.nameThai;
         
-        const customMeta = PROVICE_CUSTOM_METADATA[normalizedSeoKey] || null;
+        const customMeta = PROVINCE_CUSTOM_METADATA[normalizedSeoKey] || null;
         const seoData = PROVINCE_SEO_DATA[normalizedSeoKey] || PROVINCE_SEO_DATA.default;
         
         const now = new Date();
@@ -459,7 +458,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
                     "ratingValue": deterministicRating,
                     "reviewCount": String(deterministicReviews)
                 } : undefined,
-                "review": matchedSchemaReviews,
+                "review": safeProfiles.length > 0 ? matchedSchemaReviews : undefined,
                 "priceRange": "฿฿"
             },
             {
@@ -1319,7 +1318,6 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
       height: 100%;
     }
 
-    /* 🛡️ เพิ่มลำดับเลเยอร์ให้ถูกต้องหลังเอา Tailwind ออกอย่างสมบูรณ์ */
     .z-10 { z-index: 10 !important; }
     .z-20 { z-index: 20 !important; }
     .z-30 { z-index: 30 !important; }
@@ -1550,7 +1548,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
         <figure id="map-container" style="width: 100%; aspect-ratio: 16/9; position: relative; background-color: rgba(0,0,0,0.4); border-top: 1px solid var(--border-light); margin: 0;">
           <div id="map-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background-color: #09090c; color: var(--text-muted); transition: opacity 0.5s;">
             <i class="fas fa-map-marked-alt animate-pulse" style="font-size: 30px; color: var(--primary-purple);" aria-hidden="true"></i>
-            <span style="font-size: 10px; uppercase: true; letter-spacing: 0.15em; font-weight: 700;">กำลังโหลดแผนที่อัจฉริยะ Google Maps...</span>
+            <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em;">กำลังโหลดแผนที่อัจฉริยะ Google Maps...</span>
           </div>
           <iframe
             id="google-map"
@@ -1589,7 +1587,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
                
                <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10;">
                    <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; tracking: 0.15em;">ไลน์${provinceName}</span>
-                   <span style="padding: 4px 12px; font-size: 9px; font-weight: 800; color: var(--primary-purple); border: 1px solid rgba(90, 44, 190, 0.3); rounded: 100px; background-color: rgba(90, 44, 190, 0.05); text-transform: uppercase;">
+                   <span style="padding: 4px 12px; font-size: 9px; font-weight: 800; color: var(--primary-purple); border: 1px solid rgba(90, 44, 190, 0.3); border-radius: 100px; background-color: rgba(90, 44, 190, 0.05); text-transform: uppercase;">
                      RECOMMENDED SERVICE
                    </span>
                </div>
@@ -1632,7 +1630,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
               <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 33%; background: linear-gradient(to left, rgba(90, 44, 190, 0.1), transparent); pointer-events: none;"></div>
               <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10;">
                 <span style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">ไลน์${provinceName}</span>
-                <span style="padding: 2px 10px; font-size: 9px; font-weight: 800; color: var(--primary-purple); border: 1px solid rgba(90, 44, 190, 0.3); rounded: 4px; background-color: rgba(90, 44, 190, 0.05);">RULE 01</span>
+                <span style="padding: 2px 10px; font-size: 9px; font-weight: 800; color: var(--primary-purple); border: 1px solid rgba(90, 44, 190, 0.3); border-radius: 4px; background-color: rgba(90, 44, 190, 0.05);">RULE 01</span>
               </div>
               <div style="position: relative; z-index: 10;">
                 <span style="font-size: 28px; font-weight: 800; color: white; opacity: 0.95;">01</span>
@@ -1652,7 +1650,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
               <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 33%; background: linear-gradient(to left, rgba(255,255,255,0.02), transparent); pointer-events: none;"></div>
               <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10;">
                 <span style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">ไลน์${provinceName}</span>
-                <span style="padding: 2px 10px; font-size: 9px; font-weight: 800; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); rounded: 4px; background-color: rgba(255,255,255,0.02);">RULE 02</span>
+                <span style="padding: 2px 10px; font-size: 9px; font-weight: 800; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; background-color: rgba(255,255,255,0.02);">RULE 02</span>
               </div>
               <div style="position: relative; z-index: 10;">
                 <span style="font-size: 28px; font-weight: 800; color: white; opacity: 0.95;">02</span>
@@ -1672,7 +1670,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
               <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 33%; background: linear-gradient(to left, rgba(255,255,255,0.02), transparent); pointer-events: none;"></div>
               <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10;">
                 <span style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">ไลน์${provinceName}</span>
-                <span style="padding: 2px 10px; font-size: 9px; font-weight: 800; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); rounded: 4px; background-color: rgba(255,255,255,0.02);">RULE 03</span>
+                <span style="padding: 2px 10px; font-size: 9px; font-weight: 800; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; background-color: rgba(255,255,255,0.02);">RULE 03</span>
               </div>
               <div style="position: relative; z-index: 10;">
                 <span style="font-size: 28px; font-weight: 800; color: white; opacity: 0.95;">03</span>
@@ -1855,7 +1853,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
 
       <!-- แถวลิขสิทธิ์ด้านล่างสุด -->
       <div class="footer-bottom-row">
-        <p style="font-size: 10px; uppercase: true; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">© ${CURRENT_YEAR} Sideline Chiangmai. All Rights Reserved.</p>
+        <p style="font-size: 10px; letter-spacing: 0.15em; color: var(--text-muted); margin: 0; text-transform: uppercase;">© ${CURRENT_YEAR} Sideline Chiangmai. All Rights Reserved.</p>
         
         <p style="font-size: 9px; color: var(--text-muted); opacity: 0.6; margin: 0; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">Designed with AI Zoe • Premium SEO Edition 2026</p>
         
@@ -2009,7 +2007,6 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
       const lightbox = document.getElementById("lightbox");
       const closeBtn = document.getElementById("closeLightboxBtn");
 
-      // สมการจำลองคุณลักษณะส่วนตัวแบบคำนวณคงที่ (ตรงตามโครงสร้างของ Bot Renderer 100%)
       const getDeterministicValue = (min, max, seedString, offset = 0) => {
           const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
           return Math.floor(min + (sum % (max - min + 1)));
@@ -2040,23 +2037,27 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
 
           document.getElementById('lightboxQuote').textContent = "ดูแลใส่ใจสไตล์ฟิวแฟนตรงปก ปลอดภัยสูงสุด 100%";
 
-          // ดึงภาพหลัก
           const heroImg = document.getElementById('lightboxHeroImage');
           heroImg.src = optimizeImgUrl(p.imagePath, 450, 600);
           heroImg.alt = "น้อง" + cleanName + " สารบัญตรงปก";
 
-          // คำนวณคุณสมบัติทางกายภาพ
           const slug = p.slug || String(p.id);
+          
+          // ดึงค่าสเปกจริงจาก Database มาแสดง หากไม่มีให้ดึงค่าคงที่ (Deterministic) มาแทนที่
           const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-          const heightVal = getDeterministicValue(158, 168, slug, 2);
-          const weightVal = getDeterministicValue(44, 52, slug, 3);
-          const breastVal = getDeterministicValue(32, 36, slug, 4);
-          const waistVal = getDeterministicValue(23, 26, slug, 5);
-          const hipVal = getDeterministicValue(33, 37, slug, 6);
-          const bwhVal = breastVal + "-" + waistVal + "-" + hipVal;
+          const heightVal = p.height || getDeterministicValue(158, 168, slug, 2);
+          const weightVal = p.weight || getDeterministicValue(44, 52, slug, 3);
+          
+          let bwhVal = p.stats;
+          if (!bwhVal) {
+              const breastVal = p.bust || getDeterministicValue(32, 36, slug, 4);
+              const waistVal = p.waist || getDeterministicValue(23, 26, slug, 5);
+              const hipVal = p.hips || getDeterministicValue(33, 37, slug, 6);
+              const cupVal = p.cup_size ? p.cup_size.toUpperCase() : '';
+              bwhVal = breastVal + cupVal + "-" + waistVal + "-" + hipVal;
+          }
           const displayRate = p.rate ? parseInt(p.rate).toLocaleString() + " ฿" : "สอบถาม";
 
-          // วาดตารางข้อมูล compact
           document.getElementById('lightboxDetailsCompact').innerHTML = 
               '<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between;">' +
                   '<span style="font-size: 11px; color: var(--text-gray);">ค่าขนม</span>' +
@@ -2075,14 +2076,11 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
                   '<span style="font-size: 13px; font-weight: 800; color: white; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px;">' + (p.location || "${provinceName}") + '</span>' +
               '</div>';
 
-          // ข้อมูลบรรยายเพิ่มเติม
           const finalDesc = p.description || ("น้อง" + cleanName + " พรีเมียมเพื่อนเที่ยวเพื่อนคุย อัธยาศัยดี มีมารยาทและดูแลใส่ใจเป็นกันเองอย่างเป็นธรรมชาติ รับรองความตรงปก ปลอดภัยสูงสุดไร้มัดจำจ่ายหน้างาน 100% ค่ะ");
           document.getElementById('lightboxDescriptionContent').textContent = finalDesc;
 
-          // เชื่อมลิงก์รายละเอียดเดี่ยว
           document.getElementById('lightboxFullProfileLink').href = "/sideline/" + encodeURIComponent(slug);
 
-          // แท็กพิเศษ
           document.getElementById('lightboxTags').innerHTML = 
               '<span style="background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); color: #C084FC; font-size: 10px; padding: 4px 10px; border-radius: 100px;">#เพื่อนเที่ยว</span>' +
               '<span style="background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); color: #C084FC; font-size: 10px; padding: 4px 10px; border-radius: 100px;">#ฟิวแฟน</span>' +
@@ -2100,24 +2098,24 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
 
       if (closeBtn) closeBtn.addEventListener("click", closeLightbox);
 
-      // ดักจับการปิดเมื่อคลิกข้างนอกหน้าต่างหลัก
       lightbox.addEventListener("click", (e) => {
           if (e.target === lightbox) {
               closeLightbox();
           }
       });
 
-      // ดักจับปุ่ม Esc บนแป้นพิมพ์เพื่อปิดหน้าต่าง
       document.addEventListener("keydown", (e) => {
           if (e.key === "Escape" && lightbox.classList.contains("active")) {
               closeLightbox();
           }
       });
 
-      // ดักจับเหตุการณ์การกดที่การ์ดโปรไฟล์เพื่อแสดงผล Lightbox แทนที่จะเด้งไปหน้าอื่นทันที
       document.querySelectorAll(".province-card").forEach(card => {
           card.addEventListener("click", (e) => {
-              // ยกเว้นปุ่มหัวใจ (Favorite) ปล่อยให้ระบบชื่นชอบจัดการตนเองตามปกติ
+              // 🛡️ หากตัวแอปพลิเคชันหลัก (main.js) ทำงานเสร็จสมบูรณ์แล้ว ให้ยกเว้นการเปิดแบบซ้อนทับ และส่งต่อสิทธิ์การเปิด Lightbox ไปที่สคริปต์หลักแทน
+              if (window.supabase) {
+                  return;
+              }
               if (e.target.closest('[data-action="like"]')) {
                   return;
               }
