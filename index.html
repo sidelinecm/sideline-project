@@ -1,4 +1,3 @@
-
 <!DOCTYPE html> 
 <html lang="th" class="dark-theme">
 <head>
@@ -41,7 +40,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="modulepreload" href="/main.js">
 
-<link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css">
 
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
@@ -50,7 +49,7 @@
 
   <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" imagesrcset="/images/hero-sidelinechiangmai-1200.webp 1200w" imagesizes="1200px" fetchpriority="high">
 
-  <!-- ============================== ⚡ STRUCTURED DATA SCHEMAS (JSON-LD) ============================== -->
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -172,11 +171,11 @@
     </div>
   </header>
 
-  <!-- SIDEBAR MENU (Webyst White Drawer) -->
-  <nav id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+<!-- แก้ไขเป็นแท็ก aside ที่ถูกต้องตามมาตรฐาน: -->
+<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
     <div class="sidebar-header-div">
-      <span>Navigation</span>
-      <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn">
+      <span style="color: #A1A1AA !important;">Navigation</span>
+      <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>
     </div>
@@ -196,7 +195,7 @@
       </div>
     </div>
 
-<div style="padding: 24px; background: #FFFFFF !important; border-top: 1px solid rgba(229, 231, 235, 0.8) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
+    <div style="padding: 24px; background: #FFFFFF !important; border-top: 1px solid rgba(229, 231, 235, 0.8) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
          style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755 !important; color: #121214 !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.25); transition: background-color 0.2s;"
          onmouseenter="this.style.backgroundColor='#05b04c'"
@@ -204,105 +203,101 @@
         <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
       </a>
     </div>
-  </nav>
+  </aside>
 
   <div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
 
-  <!-- ============================== MAIN CONTENT ============================== -->
-  <main id="main-content" style="padding-top: 96px; padding-bottom: 64px; position: relative; overflow: hidden;">
-    
-    <!-- Ambient Glow Effects -->
-    <div class="bg-glow-overlap" style="top: -50px; right: -50px;" aria-hidden="true"></div>
-    <div class="bg-glow-overlap" style="top: 35%; left: -100px;" aria-hidden="true"></div>
-    <div class="bg-glow-overlap" style="bottom: 5%; right: -50px;" aria-hidden="true"></div>
 
-    <div class="container space-y-24">
 
-      <!-- HERO SECTION (H1 & Brand Intro) -->
-      <section class="hero-section" aria-labelledby="hero-h1">
-        
-        <!-- Clutch Rating Style Pill (Webyst Look) -->
-        <div class="clutch-pill">
-          <span class="white-badge">HOT 2026</span>
-          <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-hidden="true">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-          </div>
->
-          <span class="rating-text">5/5 Verified Profiles</span>
+<!-- ============================== MAIN CONTENT (HTML ที่แก้บั๊กรูปแล้ว) ============================== -->
+<main id="main-content" style="padding-top: 96px; padding-bottom: 64px; position: relative; overflow: hidden;">
+  
+  <!-- Ambient Glow Effects -->
+  <div class="bg-glow-overlap" style="top: -50px; right: -50px;" aria-hidden="true"></div>
+  <div class="bg-glow-overlap" style="top: 35%; left: -100px;" aria-hidden="true"></div>
+  <div class="bg-glow-overlap" style="bottom: 5%; right: -50px;" aria-hidden="true"></div>
+
+  <div class="container space-y-24">
+
+    <!-- HERO SECTION (H1 & Brand Intro) -->
+    <section class="hero-section" aria-labelledby="hero-h1">
+      
+      <!-- Clutch Rating Style Pill -->
+      <div class="clutch-pill">
+        <span class="white-badge" style="background-color: #7C3AED; color: white; padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800;">HOT 2026</span>
+        <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-hidden="true">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
         </div>
+        <span class="rating-text" style="color: white; font-size: 11px; font-weight: 700;">5/5 Verified Profiles</span>
+      </div>
 
-<h1 id="hero-h1" class="hero-title text-gradient-main">
-    ไซด์ไลน์เชียงใหม่ <br>
-    <span class="text-gradient-sub">เพื่อนเที่ยวฟิวแฟน ตรงปก 100%</span>
-</h1>
+      <h1 id="hero-h1" class="hero-title text-gradient-main">
+          สาวรับงานเชียงใหม่ <br>
+          <span class="text-gradient-sub" style="font-size: clamp(20px, 4vw, 32px);">ไซด์ไลน์และเพื่อนเที่ยวฟิวแฟน100%</span>
+      </h1>
+      
+      <!-- Webyst Styled Specular Billboard Image Container (แก้บั๊กช่องว่างในแท็กแล้ว) -->
+      <div class="billboard-container">
+        <img src="/images/hero-sidelinechiangmai-1200.webp" alt="เพื่อนเที่ยวเชียงใหม่ สาวรับงานเชียงใหม่ ไซด์ไลน์พรีเมียมตรงปก 100% สไตล์ฟิวแฟน ไม่มัดจำ ย่านนิมมาน เจ็ดยอด สันติธรรม" width="768" height="480" loading="eager">
+        <div class="billboard-overlay"></div>
+      </div>
 
-        <p class="hero-subtitle-p">
-          ศูนย์รวมข้อมูลแนะนำ <strong>สาวรับงานเชียงใหม่</strong>, <strong>เพื่อนเที่ยวเชียงใหม่</strong> และผู้ดูแลระดับพรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก ปลอดภัยสูงสุดด้วยนโยบาย<strong>ไม่โอนมัดจำล่วงหน้า 100%</strong> จ่ายหน้างานเมื่อเจอตัวจริง ครอบคลุมพิกัดยอดนิยม นิมมาน เจ็ดยอด สันติธรรม และตัวเมืองเชียงใหม่
+      <p class="hero-subtitle-p">
+        ศูนย์รวมข้อมูลแนะนำ <strong>สาวรับงานเชียงใหม่</strong>, <strong>เพื่อนเที่ยวเชียงใหม่</strong> และผู้ดูแลระดับพรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก ปลอดภัยสูงสุดด้วยนโยบาย<strong>ไม่โอนมัดจำล่วงหน้า 100%</strong> จ่ายหน้างานเมื่อเจอตัวจริง ครอบคลุมพิกัดยอดนิยม นิมมาน เจ็ดยอด สันติธรรม และตัวเมืองเชียงใหม่
+      </p>
+
+      <!-- CTA Trigger Style Webyst -->
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ เพื่อนเที่ยวเชียงใหม่">
+          Book an intro call (แอดไลน์จองคิว)
+        </a>
+        <p class="cta-subtext" style="font-size: 11px; color: #CBD5E1;" aria-live="polite">
+          สแตนบายคุมคิวดูแลระบบและคัดสรรโปรไฟล์ตรงปกตลอด 24 ชั่วโมง
         </p>
+      </div>
 
-        <!-- CTA Trigger Style Webyst -->
-        <div>
-          <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ เพื่อนเที่ยวเชียงใหม่">
-            Book an intro call (แอดไลน์จองคิว)
+      <!-- แคปซูลความปลอดภัย -->
+      <div class="safe-capsules-grid">
+          <a href="/about.html" class="safe-capsule-item">
+              <span class="indicator-dot indicator-red" aria-hidden="true"></span>
+              <span class="capsule-text">ไม่มีโอนมัดจำก่อน</span>
           </a>
-          <p class="cta-subtext" style="font-size: 11px; color: #CBD5E1; margin-top: 12px;" aria-live="polite">
-            สแตนบายคุมคิวดูแลระบบและคัดสรรโปรไฟล์ตรงปกตลอด 24 ชั่วโมง
-          </p>
-        </div>
+          <a href="/faq.html" class="safe-capsule-item">
+              <span class="indicator-dot indicator-red" aria-hidden="true"></span>
+              <span class="capsule-text">ไม่มีค่าสมัครสมาชิก</span>
+          </a>
+          <a href="/about.html" class="safe-capsule-item">
+              <span class="indicator-dot indicator-green" aria-hidden="true"></span>
+              <span class="capsule-text" style="color: #00E676;">จ่ายหน้างาน 100%</span>
+          </a>
+      </div>
+    </section>
 
-        <!-- Webyst Styled Specular Billboard Image Container -->
-        <div class="billboard-container">
-          <img 
-            src="/images/hero-sidelinechiangmai-1200.webp"
-            alt="เพื่อนเที่ยวเชียงใหม่ สาวรับงานเชียงใหม่ ไซด์ไลน์พรีเมียมตรงปก 100% สไตล์ฟิวแฟน ไม่มัดจำ ย่านนิมมาน เจ็ดยอด สันติธรรม"
-            width="768"
-            height="480"
-            loading="eager" />
-          <div class="billboard-overlay"></div>
-        </div>
-
-        <!-- แคปซูลความปลอดภัย -->
-        <div class="safe-capsules-grid">
-            <a href="/about.html" class="safe-capsule-item">
-                <span class="indicator-dot indicator-red" aria-hidden="true"></span>
-                <span class="capsule-text">ไม่มีโอนมัดจำก่อน</span>
-            </a>
-            <a href="/faq.html" class="safe-capsule-item">
-                <span class="indicator-dot indicator-red" aria-hidden="true"></span>
-                <span class="capsule-text">ไม่มีค่าสมัครสมาชิก</span>
-            </a>
-<!-- แคปซูลตัวที่ 3 -->
-<a href="/about.html" class="safe-capsule-item">
-    <span class="indicator-dot indicator-green" aria-hidden="true"></span>
-    <span class="capsule-text" style="color: #00E676;">จ่ายหน้างาน 100%</span>
-</a>
-        </div>
-      </section>
-
-      <!-- ============================== 🔮 TRUSTED SOCIAL NETWORKS (FROSTED LOGO STYLE) ============================== -->
+      <!-- ============================== TRUSTED SOCIAL NETWORKS (FROSTED LOGO STYLE) ============================== -->
       <section style="text-align: center; margin: 0 auto; max-width: 850px; padding: 0 16px;" aria-label="ช่องทางสื่อสารภายนอก">
-        <p style="font-size: 13px; color: var(--text-gray); line-height: 1.6; margin-bottom: 28px; font-weight: 600; opacity: 0.85; max-width: 620px; margin-left: auto; margin-right: auto; text-transform: uppercase; letter-spacing: 0.05em;">
+        <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px; font-weight: 700; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em;">
           ช่องทางติดตามข่าวสารอย่างเป็นทางการและอัปเดตสถิติตรึงพิกัดสำหรับสมาชิก
         </p>
         
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px 44px; opacity: 0.55; transition: opacity 0.3s;">
-          <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" style="display: flex; align-items: center; gap: 8px; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.55'">
-            <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> LINE OFFICIAL
+        <!-- Frosted Cards Grid for Social Links -->
+        <div class="social-links-grid-wrapper">
+          <a class="social-link-card-item" href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow">
+            <i class="fab fa-line" style="font-size: 16px; color: #06C755;" aria-hidden="true"></i> LINE OFFICIAL
           </a>
-          <a href="https://bsky.app/profile/sidelinechiangmai.bsky.social" target="_blank" rel="me noopener" style="display: flex; align-items: center; gap: 8px; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.55'">
-            <i class="fas fa-cloud" style="font-size: 15px;" aria-hidden="true"></i> BLUESKY
+          <a class="social-link-card-item" href="https://bsky.app/profile/sidelinechiangmai.bsky.social" target="_blank" rel="me noopener">
+            <i class="fas fa-cloud" style="font-size: 14px; color: #0284C7;" aria-hidden="true"></i> BLUESKY
           </a>
-          <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" style="display: flex; align-items: center; gap: 8px; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.55'">
-            <i class="fab fa-tiktok" style="font-size: 15px;" aria-hidden="true"></i> TIKTOK
+          <a class="social-link-card-item" href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow">
+            <i class="fab fa-tiktok" style="font-size: 14px;" aria-hidden="true"></i> TIKTOK
           </a>
-          <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="me noopener" style="display: flex; align-items: center; gap: 8px; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.55'">
-            <i class="fab fa-twitter" style="font-size: 15px;" aria-hidden="true"></i> TWITTER / X
+          <a class="social-link-card-item" href="https://twitter.com/sidelinechiangmai" target="_blank" rel="me noopener">
+            <i class="fab fa-twitter" style="font-size: 14px; color: #1D9BF0;" aria-hidden="true"></i> TWITTER / X
           </a>
-          <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow" style="display: flex; align-items: center; gap: 8px; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.55'">
-            <i class="fas fa-globe" style="font-size: 15px;" aria-hidden="true"></i> BIO.SITE
+          <a class="social-link-card-item" href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow">
+            <i class="fas fa-globe" style="font-size: 14px; color: var(--primary-purple);" aria-hidden="true"></i> BIO.SITE
           </a>
-          <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" style="display: flex; align-items: center; gap: 8px; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.55'">
-            <i class="fas fa-tree" style="font-size: 15px;" aria-hidden="true"></i> LINKTREE
+          <a class="social-link-card-item" href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow">
+            <i class="fas fa-tree" style="font-size: 14px; color: #10B981;" aria-hidden="true"></i> LINKTREE
           </a>
         </div>
 
@@ -712,7 +707,7 @@
                           <span class="text-gradient-sub">จองคิวเพื่อนเที่ยวหรือน้องไซด์ไลน์ในตัวเมืองเชียงใหม่ โซนไหนสะดวกและเป็นส่วนตัวที่สุด?</span>
                         </h3>
                         <div style="padding-left: 34px; color: var(--text-gray); font-size: 12px; line-height: 1.6; border-left: 2px solid rgba(90, 44, 190, 0.2); padding-top: 8px;">
-                          พื้นที่ถนนนิมมานเหมินท์, สันติธรรม ช้างเผือก และรอบหอพักหรือคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดที่ผู้ดูแลส่วนใหญ่พำนักอยู่จริง สมาชิกจึงสามารถส่งขอนัดหมาย ลิสต์ร้านอาหาร หรือชวนน้องๆ นัดเจอเพื่อเริ่มต้นเดินทางร่วมกันได้อย่างรวดเร็วและเป็นส่วนตัวสูง
+                          พื้นที่ถนนนิมมานเหมินท์, สันติธรรม ช้างเผือก และรอบหอพักหรือคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดที่ผู้ดูแลส่วนผู้หญิงและเพื่อนเที่ยวส่วนใหญ่อยู่จริง จึงสามารถส่งคำนัดหมายได้อย่างรวดเร็ว
                         </div>
                     </div>
                 </div>
@@ -740,7 +735,7 @@
                           <span class="text-gradient-sub">กระบวนการยืนยันประวัติ (Live Verified) ป้องกันการนำรูปคนอื่นมาสวมรอยอย่างไร?</span>
                         </h3>
                         <div style="padding-left: 34px; color: var(--text-gray); font-size: 12px; line-height: 1.6; border-left: 2px solid rgba(90, 44, 190, 0.2); padding-top: 8px;">
-                          ผู้ลงประกาศโปรไฟล์และผู้ให้บริการเอนเตอร์เทนทุกคน จะต้องส่งวิดีโอยืนยันตนแบบเรียลไทม์ พร้อมแสดงหลักฐานสัดส่วนพิกัดรับงานตรงต่อแอดมิน เพื่อตรวจสอบความสอดคล้องของรูปโปรไฟล์อย่างรอบคอบ เพื่อความสบายใจสูงสุดของลูกค้าสมาชิกทุกท่าน
+                          ผู้ลงประกาศโปรไฟล์และผู้ให้บริการทุกคน จะต้องส่งวิดีโอยืนยันตนแบบเรียลไทม์ พร้อมแสดงหลักฐานสัดส่วนพิกัดรับงานตรงต่อแอดมิน เพื่อความสบายใจสูงสุดของลูกค้าสมาชิกทุกท่าน
                         </div>
                     </div>
                 </div>
@@ -949,10 +944,10 @@
 
   <!-- ============================== LIGHTBOX DETAILS ============================== -->
   <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main">
-    <div id="lightbox-content-wrapper-el" style="background-color: var(--secondary-dark); border: 1px solid var(--border-light); border-radius: 24px; max-width: 900px; width: 100%; overflow: hidden; position: relative;">
+    <div id="lightbox-content-wrapper-el">
       
       <!-- ปุ่มปิดหน้าจอ -->
-      <button id="closeLightboxBtn" style="position: absolute; top: 16px; right: 16px; z-index: 30; width: 40px; height: 40px; background-color: rgba(255,255,255,0.1); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;" aria-label="ปิดรายละเอียดหน้าต่างโปรไฟล์">
+      <button id="closeLightboxBtn" style="position: absolute; top: 16px; right: 16px; z-index: 30; width: 40px; height: 40px; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;" aria-label="ปิดรายละเอียดหน้าต่างโปรไฟล์">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>
 
@@ -962,36 +957,37 @@
         <div class="lightbox-grid-layout">
           
           <!-- ฝั่งซ้าย: แกลเลอรีรูปภาพ -->
-          <div style="background-color: rgba(0,0,0,0.4); padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
-            <div style="width: 100%; max-height: 65vh; aspect-ratio: 3/4; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 16px;">
-              <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 4'%3E%3C/svg%3E" alt="แกลเลอรีรูปภาพน้องๆ เพื่อนเที่ยวไซด์ไลน์เชียงใหม่ตัวจริงตรงปก" style="width: 100%; height: 100%; object-fit: contain; border-radius: 16px;">
+          <div style="background-color: rgba(0,0,0,0.3); padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; border-right: 1px solid rgba(255,255,255,0.03);">
+            <div style="width: 100%; max-height: 55vh; aspect-ratio: 3/4; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+              <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 4'%3E%3C/svg%3E" alt="แกลเลอรีรูปภาพน้องๆ เพื่อนเที่ยวไซด์ไลน์เชียงใหม่ตัวจริงตรงปก" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
             </div>
             <div id="lightboxThumbnailStrip" style="display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; margin-top: 16px; justify-content: center; width: 100%;"></div>
           </div>
 
           <!-- ฝั่งขวา: รายละเอียดข้อความสถิติ -->
-          <div class="lightbox-details" style="padding: 32px; display: flex; flex-direction: column; gap: 24px;">
-            <header style="display: flex; flex-direction: column; gap: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
-                <h3 id="lightbox-profile-name-main" class="text-gradient-main" style="font-size: 32px; font-weight: 800; margin: 0;">ชื่อโปรไฟล์</h3>
+          <div class="lightbox-details">
+            <header style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                <h3 id="lightbox-profile-name-main" class="text-gradient-main" style="font-size: 28px; font-weight: 800; margin: 0; line-height: 1.2;">ชื่อโปรไฟล์</h3>
                 <div id="lightbox-availability-badge-wrapper" style="flex-shrink: 0;"></div>
               </div>
-              <p id="lightboxQuote" style="font-size: 14px; color: var(--text-gray); font-style: italic; margin: 0;"></p>
             </header>
+            
+            <div id="lightboxQuote" class="lightbox-quote-card">คำโปรยประจำตัว</div>
             
             <div id="lightboxTags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
             
-            <div style="border-top: 1px solid var(--border-light); padding-top: 16px;">
+            <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
               <div id="lightboxDetailsCompact"></div>
-              <div id="lightboxDateAdded" style="display: none; font-size: 12px; color: #94A3B8; margin-top: 12px;"></div>
+              <div id="lightboxDateAdded" style="display: none; font-size: 11px; color: #94A3B8; margin-top: 12px;"></div>
             </div>
 
-            <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid var(--border-light); padding-top: 16px;">
-              <div style="color: white; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; margin-top: 0;">
+            <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
+              <div style="color: white; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">
                 <i class="fas fa-info-circle" style="color: var(--primary-purple);" aria-hidden="true"></i>
                 <span>รายละเอียดเพิ่มเติม</span>
               </div>
-              <div id="lightboxDescriptionContent" style="font-size: 13px; color: var(--text-gray); line-height: 1.6; white-space: pre-wrap;"></div>
+              <div id="lightboxDescriptionContent" style="font-size: 12.5px; color: var(--text-gray); line-height: 1.6; white-space: pre-wrap;"></div>
             </div>
           </div>
 
@@ -1000,7 +996,7 @@
     </div>
   </div>
 
-<!-- เชื่อมโยงระบบดึงข้อมูล Javascript ของระบบหลัก -->
+  <!-- เชื่อมโยงระบบดึงข้อมูล Javascript ของระบบหลัก -->
   <script type="module" src="/main.js"></script>
 
   <script>
@@ -1009,7 +1005,6 @@
     const fixAccessibility = (container) => {
         const target = container || document;
         
-        // แก้ไข h4 เป็น h3
         target.querySelectorAll('#featured-profiles-container h4, #profiles-display-area h4').forEach(h4 => {
             const h3 = document.createElement('h3');
             Array.from(h4.attributes).forEach(attr => h3.setAttribute(attr.name, attr.value));
@@ -1017,16 +1012,13 @@
             h4.parentNode.replaceChild(h3, h4);
         });
 
-        // เพิ่ม role="img" สำหรับดาว
         target.querySelectorAll('.stars[aria-label]:not([role])').forEach(el => {
             el.setAttribute('role', 'img');
         });
     };
 
-    // รันครั้งแรกทันที
     fixAccessibility();
 
-    // ใช้ MutationObserver อย่างระมัดระวัง
     const domObserver = new MutationObserver((mutations) => {
         let shouldRun = false;
         mutations.forEach(mutation => {
@@ -1034,14 +1026,13 @@
         });
         
         if (shouldRun) {
-            // ใช้ debounce หรือทำงานเฉพาะจุดที่เปลี่ยนเพื่อประหยัด CPU
             fixAccessibility();
         }
     });
     
     domObserver.observe(document.body, { childList: true, subtree: true });
 
-    // 2. ระบบ Mobile Menu (เพิ่มการตรวจสอบ Error)
+    // 2. ระบบ Mobile Menu
     const menuToggle = document.getElementById("menu-toggle");
     const closeMenuBtn = document.getElementById("close-menu-btn");
     const sidebarMenu = document.getElementById("sidebar-menu");
@@ -1051,7 +1042,6 @@
         const openMenu = () => {
             sidebarMenu.classList.add("active");
             sidebarOverlay.style.display = "block";
-            // ใช้ requestAnimationFrame แทน setTimeout เพื่อความเนียนของ Animation
             requestAnimationFrame(() => {
                 sidebarOverlay.style.opacity = "1";
             });
@@ -1073,7 +1063,6 @@
         if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
         sidebarOverlay.addEventListener("click", closeMenu);
 
-        // ปิดเมนูเมื่อคลิกลิงก์ภายใน
         sidebarMenu.querySelectorAll("a").forEach(link => {
             link.addEventListener("click", closeMenu);
         });
@@ -1103,22 +1092,19 @@
             }, { rootMargin: "200px" });
             mapObserver.observe(mapIframe);
         } else {
-            // Fallback สำหรับ Browser เก่า
             mapIframe.src = mapIframe.dataset.src;
             if (placeholder) placeholder.remove();
         }
     }
 });
 
-// 4. Service Worker Registration
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         const registerSW = async () => {
             try {
                 await navigator.serviceWorker.register("/sw.js");
             } catch (err) {
-                // ใช้ debug เพื่อไม่ให้รกหน้า Console ของ User ทั่วไป
-                console.debug("SW registration skipped");
+                console.debug("Service Worker registration skipped");
             }
         };
 
@@ -1133,3 +1119,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+

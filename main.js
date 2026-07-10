@@ -77,7 +77,7 @@ window.ScrollTrigger = ScrollTrigger;
         initHeaderScrollEffect();
         initGlobalClickListener();
         updateActiveNavLinks();
-        initLightboxEvents();
+        initLightboxEvents(); // ตัวฟังก์ชันถูกประกาศโครงสร้างไว้ด้านล่างแล้วเพื่อไม่ให้เกิดข้อผิดพลาด
 
         await handleRouting();
         await handleDataLoading();
@@ -202,110 +202,147 @@ window.ScrollTrigger = ScrollTrigger;
     
     let isLikeProcessing = false;
 
-    function initGlobalClickListener() {
-        console.log("👂 Global Click Listener is now active.");
-        
-        document.body.addEventListener('click', (event) => {
-            const target = event.target;
+/**
+ * 1. ระบบดักจับการคลิกทั่วทั้งเว็บ (Global Event Delegation)
+ * ปรับปรุงประสิทธิภาพการเข้าถึง (A11y) และการจัดเก็บข้อมูลสถานะปุ่มที่คลิกล่าสุด
+ */
+function initGlobalClickListener() {
+    console.log("👂 Global Click Listener is now active.");
+    
+    document.body.addEventListener('click', (event) => {
+        const target = event.target;
 
-            const likeButton = target.closest('[data-action="like"]');
-            if (likeButton) {
-                event.preventDefault(); 
-                event.stopPropagation(); 
-                
-                const profileId = likeButton.dataset.id;
-                if (profileId && typeof window.handleLikeClick === 'function') {
-                    window.handleLikeClick(likeButton, profileId);
-                }
-                return; 
-            }
-
-            const cardLink = target.closest('a.card-link');
-            if (cardLink) {
-                event.preventDefault(); 
-                
-                const card = cardLink.closest('.profile-card-new');
-                const slug = card ? card.getAttribute('data-profile-slug') : null;
-                
-                if (slug) {
-                    state.lastFocusedElement = card; 
-                    history.pushState(null, '', `/sideline/${slug}`); 
-                    handleRouting(); 
-                }
-                return;
-            }
+        // 1. ตรวจสอบการกดปุ่ม ถูกใจ (Like Button)
+        const likeButton = target.closest('[data-action="like"]');
+        if (likeButton) {
+            event.preventDefault(); 
+            event.stopPropagation(); 
             
-            const closeButton = target.closest('#closeLightboxBtn');
-            const lightboxBackdrop = target.closest('#lightbox');
-            if (closeButton || (lightboxBackdrop && event.target === lightboxBackdrop)) {
-                 history.pushState(null, '', '/'); 
-                 handleRouting(); 
+            const profileId = likeButton.dataset.id;
+            if (profileId && typeof window.handleLikeClick === 'function') {
+                window.handleLikeClick(likeButton, profileId);
             }
-        });
+            return; 
+        }
 
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && state.currentProfileSlug) {
-                history.pushState(null, '', '/');
-                handleRouting();
+        // 2. ตรวจสอบการกดลิงก์การ์ดโปรไฟล์ (Profile Card Navigation)
+        const cardLink = target.closest('a.card-link');
+        if (cardLink) {
+            event.preventDefault(); 
+            
+            const card = cardLink.closest('.profile-card-new');
+            const slug = card ? card.getAttribute('data-profile-slug') : null;
+            
+            if (slug) {
+                // บันทึกตำแหน่งปุ่มล่าสุดที่กด เพื่อใช้คืนค่า Focus หลังจากปิด Lightbox (A11y standard)
+                state.lastFocusedElement = cardLink; 
+                history.pushState(null, '', `/sideline/${slug}`); 
+                handleRouting(); 
             }
-        });
+            return;
+        }
+        
+        // 3. ตรวจสอบการปิดหน้าต่างรายละเอียด (Close Lightbox Backdrop/Button)
+        const closeButton = target.closest('#closeLightboxBtn');
+        const lightboxBackdrop = target.closest('#lightbox');
+        if (closeButton || (lightboxBackdrop && event.target === lightboxBackdrop)) {
+             history.pushState(null, '', '/'); 
+             handleRouting(); 
+             
+             // คืนค่า Focus ไปยังการ์ดใบเดิมเพื่อรองรับโปรแกรมอ่านหน้าจอ (Screen Reader)
+             if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
+                 state.lastFocusedElement.focus();
+             }
+        }
+    });
+
+    // ตรวจสอบการกดปุ่มลัดคีย์บอร์ด (Keyboard Navigation)
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && state.currentProfileSlug) {
+            history.pushState(null, '', '/');
+            handleRouting();
+            
+            if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
+                state.lastFocusedElement.focus();
+            }
+        }
+    });
+}
+
+/**
+ * 2. ระบบการจัดการเมื่อกดปุ่มถูกใจ (Like Handler)
+ * ปรับปรุงการหน่วงเวลา (Throttling) และแยกหน้าที่การระบายสีไอคอนไปให้ CSS จัดการ
+ */
+window.handleLikeClick = async function(likeButton, profileId) {
+    // ป้องกันการกดย้ำรัว ๆ (Throttling)
+    if (isLikeProcessing) return; 
+    isLikeProcessing = true; 
+    
+    console.log(`👍 Processing like for profile ID: ${profileId}`);
+
+    // สลับคลาส (CSS จะทำหน้าที่ระบายสีแดง #FF2E63 ผ่านคลาส .liked โดยอัตโนมัติ)
+    const isLiked = likeButton.classList.toggle('liked');
+    const icon = likeButton.querySelector('i');
+    
+    // สร้างแอนิเมชันขยายตัวตอนคลิกเท่านั้น ไม่ผูกขาดสีของไอคอนไว้ใน JS
+    if (icon) {
+        if (isLiked) {
+            icon.style.transform = "scale(1.3)";
+            setTimeout(() => icon.style.transform = "scale(1)", 200);
+        } else {
+            icon.style.transform = "scale(0.9)";
+            setTimeout(() => icon.style.transform = "scale(1)", 200);
+        }
+    }
+    
+    // อัปเดตตัวเลขแสดงยอดถูกใจ (ถ้ามีโครงสร้างยอดไลก์แสดงอยู่บนการ์ดหรือป๊อปอัพ)
+    const countSpan = likeButton.querySelector('.like-count');
+    if (countSpan) {
+        const currentLikes = parseInt(countSpan.textContent.replace(/,/g, '') || '0', 10);
+        const newLikes = isLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+        countSpan.textContent = newLikes.toLocaleString();
     }
 
-    window.handleLikeClick = async function(likeButton, profileId) {
-        if (isLikeProcessing) return; 
-        isLikeProcessing = true; 
-        
-        console.log(`👍 Processing like for profile ID: ${profileId}`);
+    // อัปเดตสถานะลงใน LocalStorage ของเบราว์เซอร์
+    const storageKey = (window.CONFIG && window.CONFIG.KEYS && window.CONFIG.KEYS.LIKED_PROFILES) 
+        ? window.CONFIG.KEYS.LIKED_PROFILES 
+        : 'liked_profiles';
 
-        const isLiked = likeButton.classList.toggle('liked');
-        const icon = likeButton.querySelector('i');
-        
-        if (icon) {
-            icon.style.color = isLiked ? '#FF2E63' : '#FFFFFF';
-            if (isLiked) {
-                icon.style.transform = "scale(1.4)";
-                setTimeout(() => icon.style.transform = "scale(1)", 200);
-            }
+    try {
+        const likedProfiles = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        if (isLiked) {
+            likedProfiles[profileId] = true;
+        } else {
+            delete likedProfiles[profileId];
         }
-        
-        const countSpan = likeButton.querySelector('.like-count');
-        if (countSpan) {
-            let currentLikes = parseInt(countSpan.textContent.replace(/,/g, '') || '0');
-            countSpan.textContent = isLiked ? (currentLikes + 1).toLocaleString() : Math.max(0, currentLikes - 1).toLocaleString();
-        }
+        localStorage.setItem(storageKey, JSON.stringify(likedProfiles));
+    } catch (e) {
+        console.warn("⚠️ Local storage update failed:", e);
+    }
 
+    // อัปเดตฐานข้อมูลภายนอก (Supabase) ด้วยโครงสร้างตรวจสอบความผิดพลาด (Try-Catch)
+    if (window.supabase) {
         try {
-            const likedProfiles = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || '{}');
-            if (isLiked) {
-                likedProfiles[profileId] = true;
+            const rpcName = isLiked ? 'increment_likes' : 'decrement_likes';
+            const { error } = await window.supabase.rpc(rpcName, { 
+                profile_id_to_update: profileId 
+            });
+
+            if (error) {
+                console.error(`❌ Supabase update failed (${rpcName}):`, error.message);
             } else {
-                delete likedProfiles[profileId];
+                console.log(`✅ Database updated successfully via ${rpcName}`);
             }
-            localStorage.setItem(CONFIG.KEYS.LIKED_PROFILES, JSON.stringify(likedProfiles));
-        } catch (e) {
-            console.error("Local storage error:", e);
+        } catch (err) {
+            console.error("🔌 Network/Database connection error:", err);
         }
-
-        if (window.supabase) {
-            try {
-                const rpcName = isLiked ? 'increment_likes' : 'decrement_likes';
-                
-                const { error } = await window.supabase.rpc(rpcName, { 
-                    profile_id_to_update: profileId 
-                });
-
-                if (error) {
-                    console.error('❌ Supabase update failed:', error.message);
-                } else {
-                    console.log(`✅ DB Updated: ${rpcName} success`);
-                }
-            } catch (err) {
-                console.error("Connection error:", err);
-            }
-        }
-        
-        setTimeout(() => { isLikeProcessing = false; }, 1000);
-    };
+    }
+    
+    // หน่วงเวลา 300ms สำหรับการคลิกใหม่ (เป็นเวลามาตรฐานเพื่อรองรับการดับเบิ้ลคลิกของมนุษย์ที่เป็นธรรมชาติ ไม่นานเกินไปจนรู้สึกหน่วง)
+    setTimeout(() => { 
+        isLikeProcessing = false; 
+    }, 300);
+};
     
     function cacheDOMElements() {
         dom.body = document.body;
@@ -1318,12 +1355,12 @@ function createProfileCard(p, index = 20) {
             <span style="background-color: #5A2CBE; color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
         </div>
         ` : ''}
-
-        <div style="position: absolute; top: 12px; right: 12px; z-index: 30; pointer-events: auto;">
-            <button type="button" class="circle-btn-el ${isLikedClass}" style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;" data-action="like" data-id="${p.id}" aria-label="เพิ่มลงในรายการโปรด">
-                <i class="fa-solid fa-heart" style="font-size: 11px; transition: color 0.2s, transform 0.2s; color: ${isLikedClass ? '#FF2E63' : '#FFFFFF'};"></i>
-            </button>
-        </div>
+<div style="position: absolute; top: 12px; right: 12px; z-index: 30; pointer-events: auto;">
+    <button type="button" class="profile-card-like-btn ${isLikedClass}" data-action="like" data-id="${p.id}" aria-label="เพิ่มลงในรายการโปรด">
+        <i class="fa-solid fa-heart"></i>
+    </button>
+</div>
+        
 
         <a href="/sideline/${p.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
 
@@ -1431,17 +1468,21 @@ function populateLightboxData(p) {
     // ล้างและใส่ข้อมูลพื้นฐาน
     document.getElementById('lightbox-profile-name-main').innerHTML = `
         <span class="text-gradient-main">น้อง${cleanName}</span>
-        ${p.verified ? '<i class="fas fa-check-circle" style="color: #FBBF24; margin-left: 8px;"></i>' : ''}
+        ${p.isVerified ? '<i class="fas fa-check-circle" style="color: #FBBF24; margin-left: 8px;"></i>' : ''}
     `;
 
     document.getElementById('lightbox-availability-badge-wrapper').innerHTML = `
-        <span class="neon-badge" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 100px; display: flex; align-items: center; gap: 8px;">
+        <span class="neon-badge" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 5px 12px; border-radius: 100px; display: flex; align-items: center; gap: 8px;">
             <span style="width: 8px; height: 8px; border-radius: 50%; background: ${dotColor}; box-shadow: 0 0 8px ${dotColor};"></span>
             <span style="color: white; font-size: 11px; font-weight: 700;">${statusText}</span>
         </span>
     `;
 
-    document.getElementById('lightboxQuote').textContent = p.quote || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
+    // จัดการคำโปรย (Quote)
+    const quoteBox = document.getElementById('lightboxQuote');
+    if (quoteBox) {
+        quoteBox.textContent = p.quote || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
+    }
 
     // จัดการรูปภาพหลัก
     const heroImg = document.getElementById('lightboxHeroImage');
@@ -1455,12 +1496,18 @@ function populateLightboxData(p) {
         p.images.forEach((img, idx) => {
             const thumb = document.createElement('img');
             thumb.src = img.src;
-            thumb.style.cssText = "width: 50px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; opacity: 0.7;";
-            if (idx === 0) thumb.style.borderColor = "#5A2CBE", thumb.style.opacity = "1";
+            thumb.style.cssText = "width: 50px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; opacity: 0.7; transition: all 0.2s;";
+            if (idx === 0) {
+                thumb.style.borderColor = "var(--primary-purple)";
+                thumb.style.opacity = "1";
+            }
             thumb.onclick = () => {
                 heroImg.src = img.src;
-                Array.from(thumbStrip.children).forEach(t => (t.style.borderColor = "transparent", t.style.opacity = "0.7"));
-                thumb.style.borderColor = "#5A2CBE";
+                Array.from(thumbStrip.children).forEach(t => {
+                    t.style.borderColor = "transparent";
+                    t.style.opacity = "0.7";
+                });
+                thumb.style.borderColor = "var(--primary-purple)";
                 thumb.style.opacity = "1";
             };
             thumbStrip.appendChild(thumb);
@@ -1476,48 +1523,48 @@ function populateLightboxData(p) {
     const tags = Array.isArray(p.styleTags) ? p.styleTags : [];
     tags.forEach(tag => {
         const span = document.createElement('span');
-        span.style.cssText = "background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); color: #C084FC; font-size: 10px; padding: 4px 12px; border-radius: 100px; font-weight: 700;";
+        span.style.cssText = "background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #C084FC; font-size: 10px; padding: 4px 12px; border-radius: 100px; font-weight: 700;";
         span.textContent = tag.startsWith('#') ? tag : `#${tag}`;
         tagsContainer.appendChild(span);
     });
 
-    // --- ส่วนแสดงผลข้อมูลสถิติจริง (Stats, Height, Weight, Age) ---
+    // --- ส่วนแสดงผลข้อมูลสถิติจริง (Micro-Bento Stats Grid) ---
     const detailsContainer = document.getElementById('lightboxDetailsCompact');
     detailsContainer.innerHTML = `
-        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
-                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px;">
-                    <div style="font-size: 10px; color: #71717A;">อายุ</div>
-                    <div style="font-size: 15px; font-weight: 800; color: white;">${p.age || '-'} ปี</div>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="lightbox-bento-stats">
+                <div class="bento-stat-box">
+                    <div class="stat-label">อายุ</div>
+                    <div class="stat-value">${p.age || p.safeAge || '-'} ปี</div>
                 </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px;">
-                    <div style="font-size: 10px; color: #71717A;">สัดส่วน</div>
-                    <div style="font-size: 15px; font-weight: 800; color: white;">${p.stats || p.safeStats || '-'}</div>
+                <div class="bento-stat-box">
+                    <div class="stat-label">สัดส่วน</div>
+                    <div class="stat-value">${p.stats || p.safeStats || '-'}</div>
                 </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px;">
-                    <div style="font-size: 10px; color: #71717A;">สูง/หนัก</div>
-                    <div style="font-size: 15px; font-weight: 800; color: white;">${p.height || '-'}/${p.weight || '-'}</div>
+                <div class="bento-stat-box">
+                    <div class="stat-label">ส่วนสูง/น้ำหนัก</div>
+                    <div class="stat-value">${p.height || p.safeHeight || '-'}/${p.weight || p.safeWeight || '-'}</div>
                 </div>
             </div>
             
-            <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                    <span style="color: #D4D4D8;"><i class="fas fa-tag" style="margin-right: 8px; color: #C084FC;"></i> ค่าขนม</span>
-                    <span style="color: #10B981; font-weight: 800;">${p.rate || 'สอบถาม'}</span>
+            <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                    <span style="color: #A1A1AA;"><i class="fas fa-tag" style="margin-right: 8px; color: var(--primary-purple); width: 16px; text-align: center;"></i> ค่าขนม</span>
+                    <span style="color: #10B981; font-weight: 800; font-size: 14px;">${p.rate || 'สอบถาม'}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                    <span style="color: #D4D4D8;"><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: #C084FC;"></i> พิกัด</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                    <span style="color: #A1A1AA;"><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--primary-purple); width: 16px; text-align: center;"></i> พิกัดงาน</span>
                     <span style="color: white; font-weight: 600;">${p.location || 'เชียงใหม่'}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                    <span style="color: #D4D4D8;"><i class="fas fa-palette" style="margin-right: 8px; color: #C084FC;"></i> สีผิว</span>
-                    <span style="color: white; font-weight: 600;">${p.skinTone || p.skin_tone || '-'}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                    <span style="color: #A1A1AA;"><i class="fas fa-palette" style="margin-right: 8px; color: var(--primary-purple); width: 16px; text-align: center;"></i> สีผิว</span>
+                    <span style="color: white; font-weight: 600;">${p.skinTone || p.skin_tone || p.safeSkin || '-'}</span>
                 </div>
             </div>
         </div>
     `;
 
-    // รายละเอียดข้อความ (Description)
+    // รายละเอียดข้อความเพิ่มเติม (Description)
     const descContainer = document.getElementById('lightboxDescriptionContainer');
     const descContent = document.getElementById('lightboxDescriptionContent');
     if (p.description && p.description.trim() !== '') {
@@ -1528,7 +1575,7 @@ function populateLightboxData(p) {
         descContainer.style.display = 'block';
     }
 
-    // ปุ่ม LINE (ลบของเก่าสร้างใหม่เพื่อให้ข้อมูล Update)
+    // ปุ่ม LINE สำหรับการจองคิว
     const lineWrapper = document.getElementById('line-btn-sticky-wrapper');
     if (lineWrapper) lineWrapper.remove();
 
@@ -1536,19 +1583,24 @@ function populateLightboxData(p) {
         const detailsPanel = document.querySelector('.lightbox-details');
         const newBtnWrapper = document.createElement('div');
         newBtnWrapper.id = 'line-btn-sticky-wrapper';
-        newBtnWrapper.style.cssText = "margin-top: 20px; position: sticky; bottom: 0; padding-bottom: 10px; background: none;";
+        newBtnWrapper.style.cssText = "margin-top: 12px; position: sticky; bottom: 0; padding-top: 10px; background: none; width: 100%;";
         
         const lineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/~${p.lineId}`;
         
         newBtnWrapper.innerHTML = `
             <a href="${lineUrl}" target="_blank" rel="noopener nofollow" 
-               style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #06C755; color: white; padding: 16px; border-radius: 100px; font-weight: 800; text-decoration: none; box-shadow: 0 10px 20px rgba(6,199,85,0.3); transition: transform 0.2s;">
-               <i class="fab fa-line" style="font-size: 24px;"></i> แอดไลน์จองคิวน้อง${cleanName}
+               style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #06C755; color: white; padding: 14px; border-radius: 100px; font-weight: 800; font-size: 13.5px; text-decoration: none; box-shadow: 0 8px 20px rgba(6,199,85,0.25); transition: all 0.2s;">
+               <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์จองคิวน้อง${cleanName}
             </a>
         `;
         detailsPanel.appendChild(newBtnWrapper);
     }
 }
+
+    // ฟังก์ชันความเข้ากันได้ ป้องกันปัญหา ReferenceError กรณีโค้ดพยายามเรียกหาการจองคิวของ Lightbox
+    function initLightboxEvents() {
+        console.log("ℹ️ Lightbox events bound cleanly to global listener.");
+    }
 
     const SEO_POOL = {
         styles:[
