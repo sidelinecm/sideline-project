@@ -358,13 +358,14 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
         // ➕ [ดึงฟิลด์เพิ่ม] ดึงฟิลด์ description เพื่อให้ Lightbox เรียกใช้ได้แบบสดใหม่ไม่ต้อง Query อีกรอบ
-        const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
-            supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
-            supabase.from("profiles").select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, description")
-                .eq("provinceKey", provinceKey).eq("active", true)
-                .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
-            supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
-        ]);
+const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
+    supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
+    supabase.from("profiles")
+        .select("id, slug, name, age, imagePath, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, hasVideo, verified") // ดึงมาให้ครบ!
+        .eq("provinceKey", provinceKey).eq("active", true)
+        .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
+    supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+]);
 
         const provinceData = provinceRes.data;
         if (!provinceData) {
@@ -1921,18 +1922,29 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
     </div>
   </div>
 
-  <!-- 📊 [ฝังข้อมูลโปรไฟล์] ส่งข้อมูลโปรไฟล์จากฐานข้อมูล Supabase มายังระบบควบคุมฝั่งเบราว์เซอร์โดยตรง -->
+<!-- 📊 [ฝังข้อมูลโปรไฟล์] ส่งข้อมูลโปรไฟล์จากฐานข้อมูล Supabase มายังระบบควบคุมฝั่งเบราว์เซอร์โดยตรง -->
   <script>
-    window.profilesData = ${JSON.stringify(safeProfiles.map(p => ({
+  window.profilesData = ${JSON.stringify(safeProfiles.map(p => ({
         id: p.id,
         slug: p.slug,
         name: p.name,
         age: p.age,
+        height: p.height || "",     
+        weight: p.weight || "",     
+        stats: p.stats || "",       
+        skinTone: p.skinTone || p.skin_tone || "", 
+        bust: p.bust || "",         
+        waist: p.waist || "",       
+        hips: p.hips || "",         
+        cup_size: p.cup_size || "", 
         imagePath: p.imagePath,
         location: p.location,
         rate: p.rate,
         availability: p.availability,
         lastUpdated: p.lastUpdated,
+        isfeatured: p.isfeatured,
+        verified: p.verified || p.isVerified,
+        hasVideo: p.has_video || p.hasVideo, 
         description: p.description || ""
     })))};
   </script>
