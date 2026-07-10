@@ -1602,23 +1602,13 @@ function populateLightboxData(p) {
         console.log("ℹ️ Lightbox events bound cleanly to global listener.");
     }
 
-    const SEO_POOL = {
-        styles:[
-            "ฟิวแฟนแท้ๆ", "งานเนี๊ยบดูแลดี", "สายหวานคุยสนุก", 
-            "เอาใจเก่งสุดๆ", "สไตล์นางแบบ", "น่ารักขี้อ้อน", 
-            "งานเอนเตอร์เทน", "คุยเก่งไม่เดดแอร์"
-        ],
-        trust:[
-            "ไม่ต้องโอนก่อน", "ไม่มีมัดจำล่วงหน้า", "ไม่โอนจอง", 
-            "จ่ายหน้างาน 100%", "นัดเจอจ่ายสด", "ปลอดภัยไร้กังวล"
-        ],
-        guarantee:[
-            "ตัวจริงตรงรูป 100%", "รูปปัจจุบันไม่จกตา", "การันตีความสวย", 
-            "ตรงปกไม่ผิดหวัง", "คัดงานคุณภาพ", "รับประกันความตรงปก"
-        ],
-        pick: function(group) {
-            return this[group][Math.floor(Math.random() * this[group].length)];
-        }
+    // กำหนดค่า Meta มาตรฐานของหน้าแรกเพื่อใช้ในการกู้คืนค่ากลับมา (Restoration)
+    const ORIGINAL_HOME_META = {
+        title: "ไซด์ไลน์เชียงใหม่ เพื่อนเที่ยวตรงปก 2026 | สาวรับงานเชียงใหม่ ไม่มัดจำ",
+        description: "รวมไซด์ไลน์เชียงใหม่ สาวรับงานเชียงใหม่ เพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า ครอบคลุมนิมมาน เจ็ดยอด สันติธรรม",
+        keywords: "สาวรับงานเชียงใหม่, ไซด์ไลน์เชียงใหม่, เพื่อนเที่ยวเชียงใหม่, รับงานเชียงใหม่, สาวรับงานเชียงใหม่ ไม่มัดจำ",
+        canonical: "https://sidelinechiangmai.netlify.app/",
+        ogImage: "https://sidelinechiangmai.netlify.app/images/sidelinechiangmai-social-preview.webp"
     };
 
     let isFirstLoad = true;
@@ -1643,17 +1633,45 @@ function populateLightboxData(p) {
                              currentPath.endsWith('.htm') || 
                              staticPages.some(p => currentPath === p || currentPath.startsWith(p + '/'));
 
-        if (isRoot || isStaticPage) {
-            console.log("🛡️ SEO Protection: Home or static page detected. Preserving original HTML head intact.");
+        // 1. ถ้าเป็นหน้าโครงสร้างสแตติกทั่วไป (ที่ไม่ใช่หน้าแรกหลัก) จะไม่มีการแก้ไข Meta
+        if (isStaticPage) {
             return;
         }
 
+        // 2. สำหรับการโหลดหน้าเว็บครั้งแรกสุด (First Load) ไม่ว่าจะหน้าไหน 
+        // ระบบจะคงค่าดั้งเดิมจากเซิร์ฟเวอร์เอาไว้ (SSR HTML) เพื่อป้องกัน Layout Shift/Flicker
         if (isFirstLoad) {
-            console.log("SEO: First load detected. Using SSR Metadata.");
             isFirstLoad = false;
-            return; 
+            console.log("SEO: First load detected. Preserving server-rendered metadata.");
+            return;
         }
 
+        // 3. หากผู้ใช้งานวนกลับมาที่หน้าแรกหลัก (Homepage) ให้สั่งรีเซ็ตค่ากลับเป็นค่าดั้งเดิมของเชียงใหม่ทันที
+        if (isRoot) {
+            console.log("🛡️ SEO Restoration: Restoring original home page metadata.");
+            document.title = ORIGINAL_HOME_META.title;
+            updateMeta('description', ORIGINAL_HOME_META.description);
+            updateMeta('keywords', ORIGINAL_HOME_META.keywords);
+            updateLink('canonical', ORIGINAL_HOME_META.canonical);
+            
+            // กู้คืน Open Graph / Facebook Tags ของหน้าหลัก
+            updateMeta('og:title', ORIGINAL_HOME_META.title);
+            updateMeta('og:description', ORIGINAL_HOME_META.description);
+            updateMeta('og:url', ORIGINAL_HOME_META.canonical);
+            updateMeta('og:type', 'website');
+            updateMeta('og:image', ORIGINAL_HOME_META.ogImage);
+            updateMeta('og:image:secure_url', ORIGINAL_HOME_META.ogImage);
+            
+            // กู้คืน Twitter Tags ของหน้าหลัก
+            updateMeta('twitter:title', ORIGINAL_HOME_META.title);
+            updateMeta('twitter:description', ORIGINAL_HOME_META.description);
+            updateMeta('twitter:image', ORIGINAL_HOME_META.ogImage);
+
+            clearAllDynamicSchemas();
+            return;
+        }
+
+        // 4. หากไม่ได้อยู่หน้าแรก (เช่น หน้าคัดกรองจังหวัด หรือหน้าโปรไฟล์น้องๆ) ให้เปลี่ยนตามข้อมูลไดนามิก
         clearAllDynamicSchemas();
 
         const YEAR_TH = new Date().getFullYear() + 543;
