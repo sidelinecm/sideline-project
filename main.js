@@ -77,7 +77,7 @@ window.ScrollTrigger = ScrollTrigger;
         initHeaderScrollEffect();
         initGlobalClickListener();
         updateActiveNavLinks();
-        initLightboxEvents(); // ตัวฟังก์ชันถูกประกาศโครงสร้างไว้ด้านล่างแล้วเพื่อไม่ให้เกิดข้อผิดพลาด
+        initLightboxEvents(); 
 
         await handleRouting();
         await handleDataLoading();
@@ -182,7 +182,7 @@ window.ScrollTrigger = ScrollTrigger;
             dom.profilesDisplayArea.classList.remove('hidden');
             dom.profilesDisplayArea.innerHTML = `
                 <div style="text-align: center; padding: 48px 16px; color: #EF4444; max-width: 500px; margin: 48px auto; background-color: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 24px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 40px; margin-bottom: 16px; color: var(--primary-purple);"></i>
+                    <i class="fas fa-exclamation-triangle" style="font-size: 40px; margin-bottom: 16px; color: var(--primary-purple);</i>
                     <h3 style="font-size: 18px; font-weight: 800; color: white; margin: 0;">ระบบเชื่อมต่อขัดข้องชั่วคราว</h3>
                     <p style="margin-top: 12px; color: var(--text-gray); font-size: 13px; line-height: 1.6;">ไม่สามารถดึงข้อมูลโปรไฟล์ได้ในขณะนี้ กรุณาตรวจสอบสัญญาณเครือข่ายมือถือหรืออินเทอร์เน็ตของคุณใหม่อีกครั้งครับ</p>
                     <button onclick="window.location.reload()" 
@@ -202,17 +202,12 @@ window.ScrollTrigger = ScrollTrigger;
     
     let isLikeProcessing = false;
 
-/**
- * 1. ระบบดักจับการคลิกทั่วทั้งเว็บ (Global Event Delegation)
- * ปรับปรุงประสิทธิภาพการเข้าถึง (A11y) และการจัดเก็บข้อมูลสถานะปุ่มที่คลิกล่าสุด
- */
 function initGlobalClickListener() {
     console.log("👂 Global Click Listener is now active.");
     
     document.body.addEventListener('click', (event) => {
         const target = event.target;
 
-        // 1. ตรวจสอบการกดปุ่ม ถูกใจ (Like Button)
         const likeButton = target.closest('[data-action="like"]');
         if (likeButton) {
             event.preventDefault(); 
@@ -225,7 +220,6 @@ function initGlobalClickListener() {
             return; 
         }
 
-        // 2. ตรวจสอบการกดลิงก์การ์ดโปรไฟล์ (Profile Card Navigation)
         const cardLink = target.closest('a.card-link');
         if (cardLink) {
             event.preventDefault(); 
@@ -234,7 +228,6 @@ function initGlobalClickListener() {
             const slug = card ? card.getAttribute('data-profile-slug') : null;
             
             if (slug) {
-                // บันทึกตำแหน่งปุ่มล่าสุดที่กด เพื่อใช้คืนค่า Focus หลังจากปิด Lightbox (A11y standard)
                 state.lastFocusedElement = cardLink; 
                 history.pushState(null, '', `/sideline/${slug}`); 
                 handleRouting(); 
@@ -242,21 +235,18 @@ function initGlobalClickListener() {
             return;
         }
         
-        // 3. ตรวจสอบการปิดหน้าต่างรายละเอียด (Close Lightbox Backdrop/Button)
         const closeButton = target.closest('#closeLightboxBtn');
         const lightboxBackdrop = target.closest('#lightbox');
         if (closeButton || (lightboxBackdrop && event.target === lightboxBackdrop)) {
              history.pushState(null, '', '/'); 
              handleRouting(); 
              
-             // คืนค่า Focus ไปยังการ์ดใบเดิมเพื่อรองรับโปรแกรมอ่านหน้าจอ (Screen Reader)
              if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
                  state.lastFocusedElement.focus();
              }
         }
     });
 
-    // ตรวจสอบการกดปุ่มลัดคีย์บอร์ด (Keyboard Navigation)
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && state.currentProfileSlug) {
             history.pushState(null, '', '/');
@@ -269,22 +259,15 @@ function initGlobalClickListener() {
     });
 }
 
-/**
- * 2. ระบบการจัดการเมื่อกดปุ่มถูกใจ (Like Handler)
- * ปรับปรุงการหน่วงเวลา (Throttling) และแยกหน้าที่การระบายสีไอคอนไปให้ CSS จัดการ
- */
 window.handleLikeClick = async function(likeButton, profileId) {
-    // ป้องกันการกดย้ำรัว ๆ (Throttling)
     if (isLikeProcessing) return; 
     isLikeProcessing = true; 
     
     console.log(`👍 Processing like for profile ID: ${profileId}`);
 
-    // สลับคลาส (CSS จะทำหน้าที่ระบายสีแดง #FF2E63 ผ่านคลาส .liked โดยอัตโนมัติ)
     const isLiked = likeButton.classList.toggle('liked');
     const icon = likeButton.querySelector('i');
     
-    // สร้างแอนิเมชันขยายตัวตอนคลิกเท่านั้น ไม่ผูกขาดสีของไอคอนไว้ใน JS
     if (icon) {
         if (isLiked) {
             icon.style.transform = "scale(1.3)";
@@ -295,7 +278,6 @@ window.handleLikeClick = async function(likeButton, profileId) {
         }
     }
     
-    // อัปเดตตัวเลขแสดงยอดถูกใจ (ถ้ามีโครงสร้างยอดไลก์แสดงอยู่บนการ์ดหรือป๊อปอัพ)
     const countSpan = likeButton.querySelector('.like-count');
     if (countSpan) {
         const currentLikes = parseInt(countSpan.textContent.replace(/,/g, '') || '0', 10);
@@ -303,7 +285,6 @@ window.handleLikeClick = async function(likeButton, profileId) {
         countSpan.textContent = newLikes.toLocaleString();
     }
 
-    // อัปเดตสถานะลงใน LocalStorage ของเบราว์เซอร์
     const storageKey = (window.CONFIG && window.CONFIG.KEYS && window.CONFIG.KEYS.LIKED_PROFILES) 
         ? window.CONFIG.KEYS.LIKED_PROFILES 
         : 'liked_profiles';
@@ -320,7 +301,6 @@ window.handleLikeClick = async function(likeButton, profileId) {
         console.warn("⚠️ Local storage update failed:", e);
     }
 
-    // อัปเดตฐานข้อมูลภายนอก (Supabase) ด้วยโครงสร้างตรวจสอบความผิดพลาด (Try-Catch)
     if (window.supabase) {
         try {
             const rpcName = isLiked ? 'increment_likes' : 'decrement_likes';
@@ -338,7 +318,6 @@ window.handleLikeClick = async function(likeButton, profileId) {
         }
     }
     
-    // หน่วงเวลา 300ms สำหรับการคลิกใหม่ (เป็นเวลามาตรฐานเพื่อรองรับการดับเบิ้ลคลิกของมนุษย์ที่เป็นธรรมชาติ ไม่นานเกินไปจนรู้สึกหน่วง)
     setTimeout(() => { 
         isLikeProcessing = false; 
     }, 300);
@@ -368,49 +347,53 @@ window.handleLikeClick = async function(likeButton, profileId) {
     }
 
     async function handleDataLoading() {
-    if (state.isFetching) return;
+        if (state.isFetching) return;
 
-    // 1. เพิ่มโค้ดดักจับตรงนี้: ถ้าหลังบ้านฝังข้อมูล profilesData มาในตัวแปรเรียบร้อยแล้ว ให้ดึงไปประมวลผลต่อทันที
-    if (window.profilesData && window.profilesData.length > 0) {
-        console.log("⚡ [Hydration] ใช้ข้อมูลโปรไฟล์จาก SSR เรียบร้อยแล้ว (ประหยัดคำสั่งดึง API!)");
-        
-        state.allProfiles = window.profilesData.map(p => processProfileData(p)).filter(Boolean);
-        
-        // เปิดใช้งานระบบค้นหาและ Filter ทันที
-        initSearchAndFilters();
-        await handleRouting(true);
-        initRealtimeSubscription();
-        
-        hideLoadingState();
-        return; // ออกจากการทำงานทันที ไม่ต้องเรียก Supabase ใหม่
-    }
+        // 1. ตรรกะ Hydration: ป้องกันการทำงานเรนเดอร์ซ้ำซ้อน ดึงตัวแปร profilesData มาเริ่มทำงานต่อทันที
+        if (window.profilesData && window.profilesData.length > 0) {
+            console.log("⚡ [Hydration] โหลดสเปกรายชื่อโปรไฟล์สำเร็จจาก SSR!");
+            state.allProfiles = window.profilesData.map(p => processProfileData(p)).filter(Boolean);
+            
+            initSearchAndFilters();
+            await handleRouting(true);
+            initRealtimeSubscription();
+            
+            hideLoadingState();
+            return; 
+        }
 
-    // 2. ถ้าหากไม่มีข้อมูลประวัติฝังอยู่ในหน้าเว็บ (เช่น หน้าเพจแบบ Static หรือเข้าจากเส้นทางอื่น) ค่อยเรียกหา API ตัวจริง
-    showLoadingState(); 
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    try {
-        while (retryCount < maxRetries) {
-            try {
-                const success = await fetchDataDelta();
-                if (success) {
-                    initSearchAndFilters();
-                    await handleRouting(true);
-                    initRealtimeSubscription();
-                    return; 
-                }
-            } catch (error) {
-                retryCount++;
-                if (retryCount < maxRetries) {
-                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        // 2. ตรรกะ Fallback: ยิงเชื่อมต่อข้อมูลกรณีไม่พบตัวแปรฝังมา
+        showLoadingState(); 
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        try {
+            while (retryCount < maxRetries) {
+                try {
+                    const success = await fetchDataDelta();
+                    if (success) {
+                        initSearchAndFilters();
+                        await handleRouting(true);
+                        initRealtimeSubscription();
+                        
+                        if(dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
+                        if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
+                        
+                        return; 
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${retryCount + 1} failed:`, error);
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                    }
                 }
             }
+            showErrorState("ไม่สามารถโหลดข้อมูลได้หลังจากลองใหม่หลายครั้ง");
+        } finally {
+            hideLoadingState(); 
         }
-    } finally {
-        hideLoadingState(); 
     }
-}
 
     async function fetchDataDelta() {
         if (state.isFetching) return false;
@@ -2341,6 +2324,24 @@ const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short
 const timeEl = document.getElementById('last-updated-time');
 if (timeEl) timeEl.innerText = thaiDate;
 
+// ลงทะเบียน Service Worker เมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+if ('serviceWorker' in navigator) {
+    const registerServiceWorker = () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('⚡ PWA: Service Worker ทำงานสำเร็จ บนขอบเขต:', registration.scope);
+            })
+            .catch((error) => {
+                console.error('❌ PWA: การลงทะเบียน Service Worker ขัดข้อง:', error);
+            });
+    };
+
+    if (document.readyState === 'complete') {
+        registerServiceWorker();
+    } else {
+        window.addEventListener('load', registerServiceWorker);
+    }
+}
 
 })();
 
