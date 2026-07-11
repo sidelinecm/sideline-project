@@ -696,32 +696,33 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         html = replaceGlobal(html, "{{PROVINCE_REVIEWS_HTML}}", provinceReviewsHTML);
         html = replaceGlobal(html, "{{PROVINCE_FAQS_HTML}}", provinceFAQsHTML);
         
-        // 📊 [ฝังข้อมูลโปรไฟล์] ส่งข้อมูลโปรไฟล์จากฐานข้อมูล Supabase มายังระบบควบคุมฝั่งเบราว์เซอร์โดยตรง เพื่อทำ Client-Side Hydration แบบไม่มีบั๊ก
-        html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
-            id: p.id,
-            slug: p.slug,
-            name: p.name,
-            age: p.age,
-            height: p.height || "",     
-            weight: p.weight || "",     
-            stats: p.stats || "",       
-            skinTone: p.skinTone || p.skin_tone || "", 
-            bust: p.bust || "",         
-            waist: p.waist || "",       
-            hips: p.hips || "",         
-            cup_size: p.cup_size || "", 
-            imagePath: p.imagePath,
-            galleryPaths: p.galleryPaths || p.gallery_paths || [],
-            provinceKey: p.provinceKey,
-            location: p.location,
-            rate: p.rate,
-            availability: p.availability,
-            lastUpdated: p.lastUpdated,
-            isfeatured: p.isfeatured,
-            verified: p.verified || p.isVerified,
-            hasVideo: p.has_video || p.hasVideo, 
-            description: p.description || ""
-        }))));
+// ====== แก้จุดที่ 3: แทนที่การแปลงไฟล์ JSON ในไฟล์ ssr-province.js ======
+html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    age: p.age,
+    height: p.height || "",     
+    weight: p.weight || "",     
+    stats: p.stats || "",       
+    skinTone: p.skinTone || p.skin_tone || "", 
+    bust: p.bust || "",         
+    waist: p.waist || "",       
+    hips: p.hips || "",         
+    cup_size: p.cup_size || "", 
+    imagePath: p.imagePath,
+    galleryPaths: p.galleryPaths || p.gallery_paths || [],
+    provinceKey: p.provinceKey,
+    provinceThai: provinceName, // 🚨 [จุดแก้ที่ 3]: ส่งชื่อภาษาไทยของจังหวัดคู่ประวัติแนบไปกับ JSON ป้องกันปัญหาไม่ระบุพิกัดบนเบราว์เซอร์
+    location: p.location,
+    rate: p.rate,
+    availability: p.availability,
+    lastUpdated: p.lastUpdated,
+    isfeatured: p.isfeatured,
+    verified: p.verified || p.isVerified,
+    hasVideo: p.has_video || p.hasVideo, 
+    description: p.description || ""
+}))));
 
         return new Response(html, {
             headers: {
