@@ -368,39 +368,49 @@ window.handleLikeClick = async function(likeButton, profileId) {
     }
 
     async function handleDataLoading() {
-        if (state.isFetching) return;
+    if (state.isFetching) return;
 
-        showLoadingState(); 
-        let retryCount = 0;
-        const maxRetries = 3;
+    // 1. เพิ่มโค้ดดักจับตรงนี้: ถ้าหลังบ้านฝังข้อมูล profilesData มาในตัวแปรเรียบร้อยแล้ว ให้ดึงไปประมวลผลต่อทันที
+    if (window.profilesData && window.profilesData.length > 0) {
+        console.log("⚡ [Hydration] ใช้ข้อมูลโปรไฟล์จาก SSR เรียบร้อยแล้ว (ประหยัดคำสั่งดึง API!)");
         
-        try {
-            while (retryCount < maxRetries) {
-                try {
-                    const success = await fetchDataDelta();
-                    if (success) {
-                        initSearchAndFilters();
-                        await handleRouting(true);
-                        initRealtimeSubscription();
-                        
-                        if(dom.fetchErrorMessage) dom.fetchErrorMessage.classList.add('hidden');
-                        if(dom.profilesDisplayArea) dom.profilesDisplayArea.classList.remove('hidden');
-                        
-                        return; 
-                    }
-                } catch (error) {
-                    console.error(`Attempt ${retryCount + 1} failed:`, error);
-                    retryCount++;
-                    if (retryCount < maxRetries) {
-                        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-                    }
+        state.allProfiles = window.profilesData.map(p => processProfileData(p)).filter(Boolean);
+        
+        // เปิดใช้งานระบบค้นหาและ Filter ทันที
+        initSearchAndFilters();
+        await handleRouting(true);
+        initRealtimeSubscription();
+        
+        hideLoadingState();
+        return; // ออกจากการทำงานทันที ไม่ต้องเรียก Supabase ใหม่
+    }
+
+    // 2. ถ้าหากไม่มีข้อมูลประวัติฝังอยู่ในหน้าเว็บ (เช่น หน้าเพจแบบ Static หรือเข้าจากเส้นทางอื่น) ค่อยเรียกหา API ตัวจริง
+    showLoadingState(); 
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    try {
+        while (retryCount < maxRetries) {
+            try {
+                const success = await fetchDataDelta();
+                if (success) {
+                    initSearchAndFilters();
+                    await handleRouting(true);
+                    initRealtimeSubscription();
+                    return; 
+                }
+            } catch (error) {
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
                 }
             }
-            showErrorState("ไม่สามารถโหลดข้อมูลได้หลังจากลองใหม่หลายครั้ง");
-        } finally {
-            hideLoadingState(); 
         }
+    } finally {
+        hideLoadingState(); 
     }
+}
 
     async function fetchDataDelta() {
         if (state.isFetching) return false;
@@ -2331,24 +2341,6 @@ const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short
 const timeEl = document.getElementById('last-updated-time');
 if (timeEl) timeEl.innerText = thaiDate;
 
-// ลงทะเบียน Service Worker เมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
-if ('serviceWorker' in navigator) {
-    const registerServiceWorker = () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-                console.log('⚡ PWA: Service Worker ทำงานสำเร็จ บนขอบเขต:', registration.scope);
-            })
-            .catch((error) => {
-                console.error('❌ PWA: การลงทะเบียน Service Worker ขัดข้อง:', error);
-            });
-    };
-
-    if (document.readyState === 'complete') {
-        registerServiceWorker();
-    } else {
-        window.addEventListener('load', registerServiceWorker);
-    }
-}
 
 })();
 
