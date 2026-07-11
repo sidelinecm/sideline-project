@@ -1,22 +1,9 @@
-/**
- * [ SYSTEM CORE - NEXUS ENTITY FRAMEWORK (S-TIER) ]
- * Mastermind: wawai | Nexus Mastermind
- * Authority: Search Engine Dominance, S-Tier Spacing, Typography & Complete Social Integration
- * Fixes Applied: Resolved Identifier Redeclaration SyntaxError, Dynamic Placeholders Replacement
- */
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const CONFIG = {
-    get SUPABASE_URL() {
-        try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
-    },
-    get SUPABASE_KEY() {
-        try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
-    },
-    get MAPS_SHARE_URL() {
-        return "https://share.google/THArcPBibRkBAiSOd";
-    },
+    get SUPABASE_URL() { try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; } },
+    get SUPABASE_KEY() { try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } },
+    get MAPS_SHARE_URL() { return "https://share.google/THArcPBibRkBAiSOd"; },
     BRAND_NAME: "Sideline Chiangmai Directory",
     SOCIAL_LINKS: {
         line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -41,80 +28,21 @@ const PROVINCE_CUSTOM_METADATA = {
 };
 
 const PROVINCE_SEO_DATA = {
-    bangkok: {
-        name: "กรุงเทพ",
-        geo: { lat: 13.7563, lng: 100.5018 },
-        zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "สาทร", "สีลม", "ทองหล่อ", "เอกมัย", "ปิ่นเกล้า", "บางนา", "เลียบด่วน"],
-        faqs: [
-            { q: "น้องๆ สาวรับงานกรุงเทพ ส่วนใหญ่สะดวกสแตนด์บายแถวไหนบ้าง?", a: "ย่านที่มีน้องๆ ประจำการอยู่หนาแน่นที่สุดคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งเป็นย่านคอนโดมิเนียมหรูและเดินทางด้วยรถไฟฟ้า BTS และ MRT" },
-            { q: "เรียกเด็กเอ็น หรือ สาวไซด์ไลน์ กทม. ต้องโอนมัดจำล่วงหน้าก่อนไหม?", a: "ไม่มีนโยบายการเก็บเงินมัดจำล่วงหน้าทุกกรณีครับ เพื่อความปลอดภัยของลูกค้ากทม. จะเป็นการจ่ายเงินสดหรือโอนชำระหน้างานหลังเจอตัวน้องตรงปกแล้วเท่านั้น" }
-        ]
-    },
-    lampang: {
-        name: "ลำปาง",
-        geo: { lat: 18.2913, lng: 99.4922 },
-        zones: ["ตัวเมืองลำปาง", "สวนดอก", "พระบาท", "ม.ราชภัฏลำปาง", "เกาะคา", "แม่ทะ", "น้ำล้อม"],
-        faqs: [
-            { q: "ค้นหาไซด์ไลน์ลำปาง นัดหมายโซนใดปลอดภัยที่สุด?", a: "พื้นที่ตัวเมืองลำปาง โซนสวนดอก และย่านพระบาท เป็นจุดที่มีโรงแรมและคอนโดคุณภาพดี รองรับการนัดเจออย่างสงบและปลอดภัยสูงสุด" },
-            { q: "มีการรับประกันความตรงปกของน้องๆ ลำปางอย่างไร?", a: "เราคัดกรองโปรไฟล์และข้อมูลสัดส่วนจริง ถ้านัดเจอน้องที่หน้างานลำปางแล้วพบว่าไม่ตรงตามที่ตกลง ลูกค้าสามารถปฏิเสธและยกเลิกคิวได้ทันทีโดยไม่มีค่าใช้จ่าย" }
-        ]
-    },
-    chiangrai: {
-        name: "เชียงราย",
-        geo: { lat: 19.9071, lng: 99.8325 },
-        zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "ม.ราชภัฏเชียงราย", "หอนาฬิกา", "ริมกก"],
-        faqs: [
-            { q: "ต้องการนัดพบน้องนักศึกษาเชียงราย โซน มฟล. หรือบ้านดู่ มีขั้นตอนอย่างไร?", a: "โซน ม.แม่ฟ้าหลวง และบ้านดู่ มีน้องๆ สแตนด์บายเยอะมากครับ สามารถแจ้งคิวและเวลาที่ต้องการกับแอดมิน เพื่อนัดพบตามห้องพัก คอนโด หรือโรงแรมใกล้เคียงได้ทันที" },
-            { q: "มีความเสี่ยงที่จะโดนโกงมัดจำสำหรับการเรียกไซด์ไลน์เชียงรายไหม?", a: "เว็บไซต์ของเราใช้ระบบนัดเจอตัวจริงก่อนชำระเงินหน้างาน 100% จึงไม่มีความเสี่ยงเรื่องการโดนหลอกโอนเงินมัดจำล่วงหน้าแน่นอนครับ" }
-        ]
-    },
-    khonkaen: {
-        name: "ขอนแก่น",
-        geo: { lat: 16.4322, lng: 102.8236 },
-        zones: ["มข.", "กังสดาล", "หลังมอ", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
-        faqs: [
-            { q: "น้องๆ ไซด์ไลน์ขอนแก่น ส่วนใหญ่เป็นใครและน่าเชื่อถือไหม?", a: "มีทั้งกลุ่มน้องนักศึกษาระดับมหาวิทยาลัยพาร์ทไทม์ และนางแบบอิสระในขอนแก่น ทุกคนผ่านการตรวจสอบข้อมูลโปรไฟล์และตรงปกแน่นอน" },
-            { q: "นัดหมายน้องๆ ขอนแก่น แถว มข. มีความปลอดภัยแค่ไหน?", a: "โซน มข. และกังสดาล เป็นแหล่งชุมชนเมืองที่มีความปลอดภัยสูง มีที่พักและคอนโดมิเนียมจำนวนมาก รองรับการนัดเจอที่สะดวกรวดเร็วและรักษาความลับสูงสุด" }
-        ]
-    },
-    chonburi: {
-        name: "ชลบุรี",
-        geo: { lat: 13.3611, lng: 100.9847 },
-        zones: ["พัทยา", "บางแสน", "ศรีราชา", "อมตะนคร", "ตัวเมืองชลบุรี", "ม.บูรพา"],
-        faqs: [
-            { q: "หาสาวไซด์ไลน์พัทยา-บางแสน รูปตรงปกและไม่โดนหลอกมัดจำได้อย่างไร?", a: "เราเน้นย้ำมาตรฐานความตรงปกและใช้ระบบจ่ายเงินหน้างานเมื่อเจอตัวน้องเท่านั้น ป้องกันปัญหาการหลอกโอนเงินจองคิวก่อนได้แน่นอนครับ" },
-            { q: "น้องๆ รับงานพูลวิลล่า ค้างคืน หรือเดินทางไปกับทริปท่องเที่ยวบางแสนไหม?", a: "มีครับ เรามีกลุ่มน้องๆ สายปาร์ตี้เอนเตอร์เทนส่วนตัวที่ชำนาญงานพูลวิลล่าและพร้อมร่วมทริปริมทะเลบางแสน-พัทยาเพื่อดูแลคุณอย่างใกล้ชิด" }
-        ]
-    },
-    phitsanulok: {
-        name: "พิษณุโลก",
-        geo: { lat: 16.8219, lng: 100.2659 },
-        zones: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
-        faqs: [
-            { q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดหมายยากไหมและสะดวกเวลาใด?", a: "โซน ม.นเรศวร (มน.) มีน้องๆ นักศึกษาพาร์ทไทม์พร้อมบริการหนาแน่นที่สุด สามารถจองและนัดพบตามโรงแรมหรือหอพักใกล้เคียงได้อย่างสะดวกรวดเร็วเกือบตลอดทั้งวัน" },
-            { q: "ต้องทำการโอนเงินมัดจำล่วงหน้าก่อนเรียกน้องพิษณุโลกไหม?", a: "ไม่ต้องโอนเงินก่อนใดๆ ทั้งสิ้นครับ ลูกค้าจะจ่ายเงินค่าขนมหลังจากเจอน้องตรงปกหน้างานแถบพิษณุโลกแล้วเท่านั้น เพื่อป้องกันความเสี่ยงอย่างสมบูรณ์แบบ" }
-        ]
-    },
-    chiangmai: {
-        name: "เชียงใหม่",
-        geo: { lat: 18.8140717, lng: 98.972096 },
-        zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก"],
-        faqs: [
-            { q: "จองคิวเพื่อนเที่ยวหรือน้องไซด์ไลน์ในตัวเมืองเชียงใหม่ โซนไหนสะดวกและเป็นส่วนตัวที่สุด?", a: "พื้นที่ถนนนิมมานเหมินท์, สันติธรรม ช้างเผือก และรอบหอพักหรือคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดที่ผู้ดูแลส่วนใหญ่พำนักอยู่จริง สมาชิกจึงสามารถส่งขอนัดหมาย ลิสต์ร้านอาหาร หรือชวนน้องๆ นัดเจอเพื่อเริ่มต้นเดินทางร่วมกันได้อย่างรวดเร็วและเป็นส่วนตัวสูง" },
-            { q: "ระบบรับประกันความปลอดภัยและการชำระค่าบริการมีความโปร่งใสอย่างไร?", a: "ทางแพลตฟอร์มใช้นโยบาย “เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน” ซึ่งเป็นมาตรการป้องกันความเสียหายทางการเงินและคุ้มครองผู้ใช้งานจากการแอบอ้างโดยมิจฉาชีพได้ 100% พร้อมทั้งมีนโยบายเก็บรักษาข้อมูลความประสงค์ส่วนตัวนัดหมายของท่านไว้ภายใต้โครงสร้างที่เป็นความลับสูงสุด" },
-            { q: "กระบวนการยืนยันประวัติ (Live Verified) ป้องกันการนำรูปคนอื่นมาสวมรอยอย่างไร?", a: "ผู้ลงประกาศโปรไฟล์และผู้ให้บริการเอนเตอร์เทนทุกคน จะต้องส่งวิดีโอยืนยันตนแบบเรียลไทม์ พร้อมแสดงหลักฐานสัดส่วนพิกัดรับงานตรงต่อแอดมิน เพื่อตรวจสอบความสอดคล้องของรูปโปรไฟล์อย่างรอบคอบ เพื่อความสบายใจสูงสุดของลูกค้าสมาชิกทุกท่าน" }
-        ]
-    },
-    default: {
-        name: "จังหวัดอื่นๆ",
-        geo: { lat: 13.7563, lng: 100.5018 },
-        zones: ["ตัวเมือง", "พื้นที่ใกล้เคียง"],
-        faqs: [
-            { q: "เรียกใช้บริการน้องๆ เพื่อนเที่ยว ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เพื่อความปลอดภัยสูงสุดของคุณและป้องกันมิจฉาชีพ ลูกค้าจ่ายเงินค่าขนมหน้างานเมื่อเจอตัวน้องแล้วเท่านั้น" },
-            { q: "หากพบตัวจริงของน้องแล้วพบว่าไม่ตรงตามรูปภาพโปรไฟล์ ต้องทำอย่างไร?", a: "โปรไฟล์รูปภาพทุกรูปผ่านการคัดกรองและยืนยันตัวตนแล้วว่าตรงปก หากพบตัวจริงแล้วไม่ตรงปก ลูกค้ามีสิทธิ์ปฏิเสธการร่วมงานและยกเลิกงานได้ทันทีโดยไม่มีค่าปรับหรือค่าใช้จ่ายใดๆ" }
-        ]
-    }
+    bangkok: { name: "กรุงเทพ", geo: { lat: 13.7563, lng: 100.5018 }, zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "สาทร", "สีลม", "ทองหล่อ", "เอกมัย", "ปิ่นเกล้า", "บางนา", "เลียบด่วน"], faqs: [{ q: "น้องๆ สาวรับงานกรุงเทพ ส่วนใหญ่สะดวกสแตนด์บายแถวไหนบ้าง?", a: "ย่านที่มีน้องๆ ประจำการอยู่หนาแน่นที่สุดคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งเป็นย่านคอนโดมิเนียมหรูและเดินทางด้วยรถไฟฟ้า BTS และ MRT" }, { q: "เรียกเด็กเอ็น หรือ สาวไซด์ไลน์ กทม. ต้องโอนมัดจำล่วงหน้าก่อนไหม?", a: "ไม่มีนโยบายการเก็บเงินมัดจำล่วงหน้าทุกกรณีครับ เพื่อความปลอดภัยของลูกค้ากทม. จะเป็นการจ่ายเงินสดหรือโอนชำระหน้างานหลังเจอตัวน้องตรงปกแล้วเท่านั้น" }] },
+    lampang: { name: "ลำปาง", geo: { lat: 18.2913, lng: 99.4922 }, zones: ["ตัวเมืองลำปาง", "สวนดอก", "พระบาท", "ม.ราชภัฏลำปาง", "เกาะคา", "แม่ทะ", "น้ำล้อม"], faqs: [{ q: "ค้นหาไซด์ไลน์ลำปาง นัดหมายโซนใดปลอดภัยที่สุด?", a: "พื้นที่ตัวเมืองลำปาง โซนสวนดอก และย่านพระบาท เป็นจุดที่มีโรงแรมและคอนโดคุณภาพดี รองรับการนัดเจออย่างสงบและปลอดภัยสูงสุด" }, { q: "มีการรับประกันความตรงปกของน้องๆ ลำปางอย่างไร?", a: "เราคัดกรองโปรไฟล์และข้อมูลสัดส่วนจริง ถ้านัดเจอน้องที่หน้างานลำปางแล้วพบว่าไม่ตรงตามที่ตกลง ลูกค้าสามารถปฏิเสธและยกเลิกคิวได้ทันทีโดยไม่มีค่าใช้จ่าย" }] },
+    chiangrai: { name: "เชียงราย", geo: { lat: 19.9071, lng: 99.8325 }, zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "ม.ราชภัฏเชียงราย", "หอนาฬิกา", "ริมกก"], faqs: [{ q: "ต้องการนัดพบน้องนักศึกษาเชียงราย โซน มฟล. หรือบ้านดู่ มีขั้นตอนอย่างไร?", a: "โซน ม.แม่ฟ้าหลวง และบ้านดู่ มีน้องๆ สแตนด์บายเยอะมากครับ สามารถแจ้งคิวและเวลาที่ต้องการกับแอดมิน เพื่อนัดพบตามห้องพัก คอนโด หรือโรงแรมใกล้เคียงได้ทันที" }, { q: "มีความเสี่ยงที่จะโดนโกงมัดจำสำหรับการเรียกไซด์ไลน์เชียงรายไหม?", a: "เว็บไซต์ของเราใช้ระบบนัดเจอตัวจริงก่อนชำระเงินหน้างาน 100% จึงไม่มีความเสี่ยงเรื่องการโดนหลอกโอนเงินมัดจำล่วงหน้าแน่นอนครับ" }] },
+    khonkaen: { name: "ขอนแก่น", geo: { lat: 16.4322, lng: 102.8236 }, zones: ["มข.", "กังสดาล", "หลังมอ", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"], faqs: [{ q: "น้องๆ ไซด์ไลน์ขอนแก่น ส่วนใหญ่เป็นใครและน่าเชื่อถือไหม?", a: "มีทั้งกลุ่มน้องนักศึกษาระดับมหาวิทยาลัยพาร์ทไทม์ และนางแบบอิสระในขอนแก่น ทุกคนผ่านการตรวจสอบข้อมูลโปรไฟล์และตรงปกแน่นอน" }, { q: "นัดหมายน้องๆ ขอนแก่น แถว มข. มีความปลอดภัยแค่ไหน?", a: "โซน มข. และกังสดาล เป็นแหล่งชุมชนเมืองที่มีความปลอดภัยสูง มีที่พักและคอนโดมิเนียมจำนวนมาก รองรับการนัดเจอที่สะดวกรวดเร็วและรักษาความลับสูงสุด" }] },
+    chonburi: { name: "ชลบุรี", geo: { lat: 13.3611, lng: 100.9847 }, zones: ["พัทยา", "บางแสน", "ศรีราชา", "อมตะนคร", "ตัวเมืองชลบุรี", "ม.บูรพา"], faqs: [{ q: "หาสาวไซด์ไลน์พัทยา-บางแสน รูปตรงปกและไม่โดนหลอกมัดจำได้อย่างไร?", a: "เราเน้นย้ำมาตรฐานความตรงปกและใช้ระบบจ่ายเงินหน้างานเมื่อเจอตัวน้องเท่านั้น ป้องกันปัญหาการหลอกโอนเงินจองคิวก่อนได้แน่นอนครับ" }, { q: "น้องๆ รับงานพูลวิลล่า ค้างคืน หรือเดินทางไปกับทริปท่องเที่ยวบางแสนไหม?", a: "มีครับ เรามีกลุ่มน้องๆ สายปาร์ตี้เอนเตอร์เทนส่วนตัวที่ชำนาญงานพูลวิลล่าและพร้อมร่วมทริปริมทะเลบางแสน-พัทยาเพื่อดูแลคุณอย่างใกล้ชิด" }] },
+    phitsanulok: { name: "พิษณุโลก", geo: { lat: 16.8219, lng: 100.2659 }, zones: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"], faqs: [{ q: "หาไซด์ไลน์พิษณุโลก แถว มน. นัดหมายยากไหมและสะดวกเวลาใด?", a: "โซน ม.นเรศวร (มน.) มีน้องๆ นักศึกษาพาร์ทไทม์พร้อมบริการหนาแน่นที่สุด สามารถจองและนัดพบตามโรงแรมหรือหอพักใกล้เคียงได้อย่างสะดวกรวดเร็วเกือบตลอดทั้งวัน" }, { q: "ต้องทำการโอนเงินมัดจำล่วงหน้าก่อนเรียกน้องพิษณุโลกไหม?", a: "ไม่ต้องโอนเงินก่อนใดๆ ทั้งสิ้นครับ ลูกค้าจะจ่ายเงินค่าขนมหลังจากเจอน้องตรงปกหน้างานแถบพิษณุโลกแล้วเท่านั้น เพื่อป้องกันความเสี่ยงอย่างสมบูรณ์แบบ" }] },
+    chiangmai: { name: "เชียงใหม่", geo: { lat: 18.8140717, lng: 98.972096 }, zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก"], faqs: [{ q: "จองคิวเพื่อนเที่ยวหรือน้องไซด์ไลน์ในตัวเมืองเชียงใหม่ โซนไหนสะดวกและเป็นส่วนตัวที่สุด?", a: "พื้นที่ถนนนิมมานเหมินท์, สันติธรรม ช้างเผือก และรอบหอพักหรือคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดที่ผู้ดูแลส่วนใหญ่พำนักอยู่จริง สมาชิกจึงสามารถส่งขอนัดหมาย ลิสต์ร้านอาหาร หรือชวนน้องๆ นัดเจอเพื่อเริ่มต้นเดินทางร่วมกันได้อย่างรวดเร็วและเป็นส่วนตัวสูง" }, { q: "ระบบรับประกันความปลอดภัยและการชำระค่าบริการมีความโปร่งใสอย่างไร?", a: "ทางแพลตฟอร์มใช้นโยบาย “เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน” ซึ่งเป็นมาตรการป้องกันความเสียหายทางการเงินและคุ้มครองผู้ใช้งานจากการแอบอ้างโดยมิจฉาชีพได้ 100% พร้อมทั้งมีนโยบายเก็บรักษาข้อมูลความประสงค์ส่วนตัวนัดหมายของท่านไว้ภายใต้โครงสร้างที่เป็นความลับสูงสุด" }, { q: "กระบวนการยืนยันประวัติ (Live Verified) ป้องกันการนำรูปคนอื่นมาสวมรอยอย่างไร?", a: "ผู้ลงประกาศโปรไฟล์และผู้ให้บริการเอนเตอร์เทนทุกคน จะต้องส่งวิดีโอยืนยันตนแบบเรียลไทม์ พร้อมแสดงหลักฐานสัดส่วนพิกัดรับงานตรงต่อแอดมิน เพื่อตรวจสอบความสอดคล้องของรูปโปรไฟล์อย่างรอบคอบ เพื่อความสบายใจสูงสุดของลูกค้าสมาชิกทุกท่าน" }] },
+    default: { name: "จังหวัดอื่นๆ", geo: { lat: 13.7563, lng: 100.5018 }, zones: ["ตัวเมือง", "พื้นที่ใกล้เคียง"], faqs: [{ q: "เรียกใช้บริการน้องๆ เพื่อนเที่ยว ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เพื่อความปลอดภัยสูงสุดของคุณและป้องกันมิจฉาชีพ ลูกค้าจ่ายเงินค่าขนมหน้างานเมื่อเจอตัวน้องแล้วเท่านั้น" }, { q: "หากพบตัวจริงของน้องแล้วพบว่าไม่ตรงตามรูปภาพโปรไฟล์ ต้องทำอย่างไร?", a: "โปรไฟล์รูปภาพทุกรูปผ่านการคัดกรองและยืนยันตัวตนแล้วว่าตรงปก หากพบตัวจริงแล้วไม่ตรงปก ลูกค้ามีสิทธิ์ปฏิเสธการร่วมงานและยกเลิกงานได้ทันทีโดยไม่มีค่าปรับหรือค่าใช้จ่ายใดๆ" }] }
 };
+
+Object.keys(PROVINCE_SEO_DATA).forEach(key => {
+    if (key !== "default") {
+        PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
+    }
+});
 
 const getDynamicIntro = (provinceName) => {
     return `
@@ -128,22 +56,9 @@ const getDynamicReviews = (provinceName) => {
     const now = new Date();
     const date1 = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const date2 = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
     return [
-        {
-            author: "คุณชลสิทธิ์ (C.)",
-            location: `ตัวเมือง${provinceName}`,
-            text: `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ"`,
-            date: "เมื่อสัปดาห์ที่แล้ว",
-            datePublished: date1
-        },
-        {
-            author: "คุณอภิชาติ (A.)",
-            location: `โซนยอดนิยมใน${provinceName}`,
-            text: `"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"`,
-            date: "เมื่อ 2 สัปดาห์ก่อน",
-            datePublished: date2
-        }
+        { author: "คุณชลสิทธิ์ (C.)", location: `ตัวเมือง${provinceName}`, text: `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ"`, date: "เมื่อสัปดาห์ที่แล้ว", datePublished: date1 },
+        { author: "คุณอภิชาติ (A.)", location: `โซนยอดนิยมใน${provinceName}`, text: `"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"`, date: "เมื่อ 2 สัปดาห์ก่อน", datePublished: date2 }
     ];
 };
 
@@ -157,9 +72,7 @@ const getFullUrl = (domain, path) => {
 const optimizeImg = (domain, path, width = 320, height = 420) => {
     if (!path) return getFullUrl(domain, "/images/default.webp");
     if (path.includes("res.cloudinary.com")) {
-        if (path.includes("/upload/")) {
-            return path.replace("/upload/", `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`);
-        }
+        if (path.includes("/upload/")) { return path.replace("/upload/", `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`); }
         return path;
     }
     if (path.startsWith("http")) return path;
@@ -168,9 +81,7 @@ const optimizeImg = (domain, path, width = 320, height = 420) => {
 
 const escapeHTML = (str) => {
     if (!str) return "";
-    return String(str).replace(/[&<>'"]/g, tag => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-    })[tag] || tag);
+    return String(str).replace(/[&<>'"]/g, tag => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[tag] || tag);
 };
 
 const formatDateSSR = (dateString) => {
@@ -193,39 +104,25 @@ const stripHTML = (str) => {
 const smartLinkify = (text, provinceKey, zones) => {
     if (!text) return "";
     let linkedText = text;
-    
     if (zones && zones.length > 0) {
         zones.slice(0, 3).forEach(zone => {
             const regex = new RegExp(`(${zone})(?![^<>]*>)`, 'g'); 
-            linkedText = linkedText.replace(
-                regex,
-                `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`
-            );
+            linkedText = linkedText.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
         });
     }
-
     const keywords = ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน", "ฟิวแฟน", "สาวรับงาน"];
     keywords.forEach(kw => {
         const regex = new RegExp(`(${kw})(?![^<>]*>)`, 'g'); 
-        linkedText = linkedText.replace(
-            regex,
-            `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`
-        );
+        linkedText = linkedText.replace(regex, `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`);
     });
-
     return linkedText;
 };
 
-const replaceGlobal = (str, find, replace) => {
-    return str.split(find).join(replace);
-};
+const replaceGlobal = (str, find, replace) => { return str.split(find).join(replace); };
 
 function verifyHostname(request) {
     const host = request.headers.get("host") || "";
-    const allowed = [
-        "sidelinechiangmai.netlify.app",
-        "localhost"
-    ];
+    const allowed = ["sidelinechiangmai.netlify.app", "localhost"];
     return allowed.some(domain => host.includes(domain)) || host.endsWith(".netlify.app");
 }
 
@@ -256,17 +153,10 @@ function buildErrorPage(statusCode, title, message) {
     </div>
 </body>
 </html>`,
-        {
-            status: statusCode,
-            headers: {
-                "Content-Type": "text/html; charset=utf-8",
-                "Cache-Control": "public, max-age=60"
-            }
-        }
+        { status: statusCode, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=60" } }
     );
 }
 
-// 🛡️ ปรับปรุงความถูกต้องโครงสร้างฟังก์ชัน: ประกาศฟังก์ชันไว้ส่วนบนสุดของสคริปต์เพียงรอบเดียวเท่านั้นเพื่อป้องกัน SyntaxError ตัวแปรชนกันตอนตรวจเช็กในเซิร์ฟเวอร์
 function customMetaTitle(provinceName, customMeta) {
     if (customMeta && customMeta.title) return customMeta.title;
     return `ไซด์ไลน์${provinceName} เพื่อนเที่ยวตรงปก 2026 | สาวรับงาน${provinceName} ไม่มัดจำ`;
@@ -282,7 +172,7 @@ const generateSSRCardHTML = (p, provinceName, domain) => {
     const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
     const profileLocation = escapeHTML(p.location || provinceName);
     const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-    const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+    const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
     const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
     const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
     const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
@@ -360,7 +250,6 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
     const zone1 = zones && zones.length > 0 ? zones[0] : "ตัวเมือง";
     const zone2 = zones && zones.length > 1 ? zones[1] : "ย่านดัง";
     const zone3 = zones && zones.length > 2 ? zones[2] : "แหล่งท่องเที่ยว";
-
     return `
     <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -372,7 +261,7 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
             </div>
           </div>
           <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
           </div>
         </div>
         <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
@@ -380,7 +269,6 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
         </p>
         <span style="display: block; font-size: 9px; color: #94A3B8; font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • 2 วันที่ผ่านมา</span>
     </div>
-
     <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 12px;">
@@ -391,7 +279,7 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
             </div>
           </div>
           <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
           </div>
         </div>
         <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
@@ -399,7 +287,6 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
         </p>
         <span style="display: block; font-size: 9px; color: #94A3B8; font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • 1 สัปดาห์ที่ผ่านมา</span>
     </div>
-
     <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 12px;">
@@ -410,7 +297,7 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
             </div>
           </div>
           <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
           </div>
         </div>
         <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
@@ -424,7 +311,6 @@ const generatePersonSchema = (p, provinceName, profileUrl, domain) => {
     const priceNumeric = (p.rate || "0").toString().replace(/\D/g, '');
     const cleanName = (p.name || '').replace(/^น้อง/, '').trim();
     const imageUrl = optimizeImg(domain, p.imagePath, 1200, 630);
-
     return {
         "@context": "https://schema.org",
         "@type": "Person",
@@ -653,7 +539,6 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
             {
                 "@type": "CollectionPage",
                 "@id": `${provinceUrl}/#webpage`,
-                "url": provinceUrl,
                 "name": title,
                 "description": cleanDescription,
                 "isPartOf": { "@id": `${dynamicDomain}/#website` },
@@ -740,7 +625,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
                     <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <h4 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</h4>
+                            <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</h3>
                             <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
                         </div>
                         
