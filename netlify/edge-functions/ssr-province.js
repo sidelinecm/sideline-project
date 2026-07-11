@@ -1,9 +1,8 @@
 /**
- * [ SYSTEM CORE - REFACTORED & AUDITED ]
- * Project: Nexus Entity Framework (S-Tier) - ULTIMATE PURE CSS EDITION (NO TAILWIND)
+ * [ SYSTEM CORE - NEXUS ENTITY FRAMEWORK (S-TIER) ]
  * Mastermind: wawai | Nexus Mastermind
  * Authority: Search Engine Dominance, S-Tier Spacing, Typography & Complete Social Integration
- * Fixes Applied: Completely Stripped Tailwind CSS CDN, Unify Designs with Pure Specular Glass CSS
+ * Fixes Applied: Resolved Identifier Redeclaration SyntaxError, Dynamic Placeholders Replacement
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -39,37 +38,6 @@ const PROVINCE_CUSTOM_METADATA = {
         title: "สาวรับงานชลบุรี ไซด์ไลน์พัทยา บางแสน เพื่อนเที่ยวฟิวแฟน 2026 | จ่ายหน้างาน ไม่มัดจำ",
         desc: "สารบัญสาวรับงานชลบุรี เพื่อนเที่ยวพัทยา และน้องๆ ไซด์ไลน์บางแสน พรีเมียมดูแลใส่ใจสไตล์ฟิวแฟน ปลอดภัยสูงสุดชำระค่าบริการหน้างานเมื่อเจอตัวจริง ปราศจากการโอนจองล่วงหน้า"
     }
-};
-
-const getDynamicIntro = (provinceName) => {
-    return `
-        <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ โดยปราศจากเงื่อนไขการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น</p>
-        <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการ in ${provinceName} ได้ถูกคัดเลือกและจัดสรรพิกัดที่เหมาะสม ไม่ว่าจะเป็นโซนใจกลางเมือง โรงแรมที่เดินทางสะดวกสบาย หรือคอนโดมิเนียมส่วนตัว พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
-        <p>ภาพถ่ายประวัติและสัดส่วนของสาวๆ ในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
-    `;
-};
-
-const getDynamicReviews = (provinceName) => {
-    const now = new Date();
-    const date1 = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const date2 = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    return [
-        {
-            author: "คุณชลสิทธิ์ (C.)",
-            location: `ตัวเมือง${provinceName}`,
-            text: `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ"`,
-            date: "เมื่อสัปดาห์ที่แล้ว",
-            datePublished: date1
-        },
-        {
-            author: "คุณอภิชาติ (A.)",
-            location: `โซนยอดนิยมใน${provinceName}`,
-            text: `"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"`,
-            date: "เมื่อ 2 สัปดาห์ก่อน",
-            datePublished: date2
-        }
-    ];
 };
 
 const PROVINCE_SEO_DATA = {
@@ -148,11 +116,36 @@ const PROVINCE_SEO_DATA = {
     }
 };
 
-Object.keys(PROVINCE_SEO_DATA).forEach(key => {
-    if (key !== "default") {
-        PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
-    }
-});
+const getDynamicIntro = (provinceName) => {
+    return `
+        <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ โดยปราศจากเงื่อนไขการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น</p>
+        <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการ in ${provinceName} ได้ถูกคัดเลือกและจัดสรรพิกัดที่เหมาะสม ไม่ว่าจะเป็นโซนใจกลางเมือง โรงแรมที่เดินทางสะดวกสบาย หรือคอนโดมิเนียมส่วนตัว พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
+        <p>ภาพถ่ายประวัติและสัดส่วนของสาวๆ ในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
+    `;
+};
+
+const getDynamicReviews = (provinceName) => {
+    const now = new Date();
+    const date1 = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const date2 = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    return [
+        {
+            author: "คุณชลสิทธิ์ (C.)",
+            location: `ตัวเมือง${provinceName}`,
+            text: `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ"`,
+            date: "เมื่อสัปดาห์ที่แล้ว",
+            datePublished: date1
+        },
+        {
+            author: "คุณอภิชาติ (A.)",
+            location: `โซนยอดนิยมใน${provinceName}`,
+            text: `"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"`,
+            date: "เมื่อ 2 สัปดาห์ก่อน",
+            datePublished: date2
+        }
+    ];
+};
 
 const getFullUrl = (domain, path) => {
     if (!path) return `${domain}/images/default.webp`;
@@ -273,6 +266,7 @@ function buildErrorPage(statusCode, title, message) {
     );
 }
 
+// 🛡️ ปรับปรุงความถูกต้องโครงสร้างฟังก์ชัน: ประกาศฟังก์ชันไว้ส่วนบนสุดของสคริปต์เพียงรอบเดียวเท่านั้นเพื่อป้องกัน SyntaxError ตัวแปรชนกันตอนตรวจเช็กในเซิร์ฟเวอร์
 function customMetaTitle(provinceName, customMeta) {
     if (customMeta && customMeta.title) return customMeta.title;
     return `ไซด์ไลน์${provinceName} เพื่อนเที่ยวตรงปก 2026 | สาวรับงาน${provinceName} ไม่มัดจำ`;
@@ -378,7 +372,7 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
             </div>
           </div>
           <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
           </div>
         </div>
         <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
@@ -397,7 +391,7 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
             </div>
           </div>
           <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
           </div>
         </div>
         <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
@@ -416,7 +410,7 @@ const generateDynamicReviewsHTML = (provinceName, zones) => {
             </div>
           </div>
           <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
           </div>
         </div>
         <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
@@ -551,7 +545,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         let supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
-        // 🛡️ ปรับปรุงความถูกต้องของการดึงฟิลด์ (PostgREST select): ดึง 'provinceKey' และ 'galleryPaths' มาประมวลผลระบบแกลเลอรีรูปภาพและ Hydration หน้าพิกัด
+        // 🛡️ ปรับปรุงความถูกต้องฟิลด์: ดึง 'provinceKey' และ 'galleryPaths' มาพ่นข้อมูลประวัติแกลเลอรีรูปภาพและ Hydration ระบบจังหวัด
         const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
             supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
             supabase.from("profiles")
@@ -704,7 +698,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
                 const profileLocation = escapeHTML(p.location || provinceName);
                 const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-                const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+                const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
                 const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
                 const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
                 const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
@@ -804,7 +798,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         const provinceFAQsHTML = generateDynamicFAQsHTML(seoData.faqs);
         const formattedZonesText = seoData.zones.slice(0, 4).join(", ");
 
-        // ตรรกะสวมรอยเขียนทับ Placeholders ลงบนแม่แบบ index.html ดั้งเดิมเพื่อเรนเดอร์เนื้อหาเป็นภาษาไทย
+        // ตรรกะสวมรอยเขียนทับ Placeholders ลงบนแม่แบบ index.html ดั้งเดิม
         html = replaceGlobal(html, "{{SEO_TITLE}}", title);
         html = replaceGlobal(html, "{{SEO_DESCRIPTION}}", cleanDescription);
         html = replaceGlobal(html, "{{SEO_CANONICAL}}", seoCanonical);
@@ -817,7 +811,7 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         html = replaceGlobal(html, "{{PROVINCE_REVIEWS_HTML}}", provinceReviewsHTML);
         html = replaceGlobal(html, "{{PROVINCE_FAQS_HTML}}", provinceFAQsHTML);
         
-        // 🛡️ ปรับปรุงความถูกต้องโครงสร้างฟิลด์: ส่งออก 'provinceKey' และ 'galleryPaths' เพื่อส่งมอบข้อมูลสัดส่วนแกลเลอรีรูปภาพและระบบสืบค้นพิกัดหน้าพิกัดจังหวัด
+        // 📊 [ฝังข้อมูลโปรไฟล์] ส่งข้อมูลโปรไฟล์จากฐานข้อมูล Supabase มายังระบบควบคุมฝั่งเบราว์เซอร์โดยตรง เพื่อทำ Client-Side Hydration แบบไม่มีบั๊ก
         html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
             id: p.id,
             slug: p.slug,
@@ -856,15 +850,3 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         return buildErrorPage(500, "500 - ข้อผิดพลาดภายในระบบ", "ระบบประมวลผลหลังบ้านเกิดขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้งในภายหลัง");
     }
 };
-
-// ฟังก์ชันจำแนกและระบุ Meta SEO
-function customMetaTitle(provinceName, customMeta) {
-    if (customMeta && customMeta.title) return customMeta.title;
-    return `ไซด์ไลน์${provinceName} เพื่อนเที่ยวตรงปก 2026 | สาวรับงาน${provinceName} ไม่มัดจำ`;
-}
-
-function customMetaDesc(provinceName, seoData, customMeta) {
-    if (customMeta && customMeta.desc) return customMeta.desc;
-    const zonesText = seoData.zones && seoData.zones.length > 0 ? ` ครอบคลุมพิกัด ${seoData.zones.slice(0, 4).join(', ')}` : "";
-    return `รวมไซด์ไลน์${provinceName} สาวรับงาน${provinceName} เพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า${zonesText}`;
-}
