@@ -251,12 +251,40 @@ function initGlobalClickListener() {
         }
 
         // ==========================================
-        // 🟢 4. เพิ่มส่วนนี้: ดักจับการคลิกคำค้นหาแนะนำ (Suggestions) ป้องกันเว็บโดนบล็อก (CSP)
+        // 🟢 4. ดักจับการคลิกคำค้นหาแนะนำ (Dynamic & Recent Searches Suggestions)
         // ==========================================
+        
+        // ตรรกะแบบ A: ดักจับคลิกผลการค้นหาแนะนำที่ระบบสร้างขึ้นตอนคุณพิมพ์ (Dynamic Suggestions)
+        const sugClick = target.closest('.suggestion-item[data-action="suggestion"]');
+        if (sugClick) {
+            event.preventDefault();
+            const slug = sugClick.dataset.slug;
+            const isProfile = sugClick.dataset.isProfile === "true";
+            
+            if (typeof window.selectSuggestion === 'function') {
+                window.selectSuggestion(slug, isProfile);
+            }
+            return; // จบการทำงาน
+        }
+
+        // ตรรกะแบบ B: ดักจับคลิกจากประวัติ "ค้นหาล่าสุด" เพื่อเลี่ยงและป้องกัน CSP บล็อกการรัน Inline Script
         const suggestionItem = target.closest('[onclick^="window.selectSuggestion"]');
         if (suggestionItem) {
-            // ป้องกันเบราว์เซอร์ทำงานผิดพลาดซ้ำซ้อนจาก Inline Script
-            event.preventDefault();
+            event.preventDefault(); // บล็อก Inline เก่าไม่ให้ทำงานล้มเหลว
+            
+            try {
+                // ทำการดึงคำค้นหาและค่า Boolean จากแอตทริบิวต์ onclick มาประมวลผลอย่างปลอดภัย
+                const onclickAttr = suggestionItem.getAttribute('onclick');
+                const match = onclickAttr.match(/window\.selectSuggestion\('([^']*)',\s*(true|false)\)/);
+                if (match && typeof window.selectSuggestion === 'function') {
+                    const term = match[1];
+                    const isProfile = match[2] === 'true';
+                    window.selectSuggestion(term, isProfile);
+                }
+            } catch (e) {
+                console.warn("⚠️ Suggestion parsing failed", e);
+            }
+            return; // จบการทำงาน
         }
         // ==========================================
 
@@ -367,9 +395,31 @@ window.handleLikeClick = async function(likeButton, profileId) {
         // 1. ตรรกะ Hydration: ป้องกันการทำงานเรนเดอร์ซ้ำซ้อน ดึงตัวแปร profilesData มาเริ่มทำงานต่อทันที
         if (window.profilesData && window.profilesData.length > 0) {
             console.log("⚡ [Hydration] โหลดสเปกรายชื่อโปรไฟล์สำเร็จจาก SSR!");
+            
+            // 🚨 แก้ไขจุดบกพร่อง: ดึงข้อมูลแผนที่จังหวัด (Provinces Map) จาก Cache มาเตรียมพร้อมใช้งาน
+            const hasCachedProvinces = localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES);
+            if (hasCachedProvinces) {
+                const cachedProv = JSON.parse(hasCachedProvinces);
+                state.provincesMap.clear();
+                cachedProv.forEach(p => state.provincesMap.set(p.key.toString(), p.name));
+            } else {
+                // กรณีเป็นผู้ใช้ใหม่ไม่มี Cache ในเครื่อง ให้ดึงเฉพาะข้อมูลจังหวัดมาเตรียมไว้
+                try {
+                    const { data } = await supabase.from('provinces').select('*');
+                    if (data) {
+                        data.forEach(p => {
+                            const k = p.key || p.slug || p.id;
+                            const n = p.nameThai || p.name;
+                            if (k && n) state.provincesMap.set(k.toString(), n);
+                        });
+                    }
+                } catch (e) { console.warn("Fallback provinces fetch failed", e); }
+            }
+
             state.allProfiles = window.profilesData.map(p => processProfileData(p)).filter(Boolean);
             
             initSearchAndFilters();
+            populateProvinceDropdown(); // 🚨 แก้ไขจุดบกพร่อง: สั่งอัปเดตรายชื่อจังหวัดใน Dropdown ตัวเลือกทันที
             await handleRouting(true);
             initRealtimeSubscription();
             
