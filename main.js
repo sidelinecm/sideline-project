@@ -208,6 +208,7 @@ function initGlobalClickListener() {
     document.body.addEventListener('click', (event) => {
         const target = event.target;
 
+        // 1. ดักจับคลิกปุ่มหัวใจ (Like)
         const likeButton = target.closest('[data-action="like"]');
         if (likeButton) {
             event.preventDefault(); 
@@ -220,6 +221,7 @@ function initGlobalClickListener() {
             return; 
         }
 
+        // 2. ดักจับคลิกการ์ดโปรไฟล์
         const cardLink = target.closest('a.card-link');
         if (cardLink) {
             event.preventDefault(); 
@@ -235,6 +237,7 @@ function initGlobalClickListener() {
             return;
         }
         
+        // 3. ดักจับคลิกปุ่มปิด Lightbox หรือคลิกพื้นหลังสีดำ
         const closeButton = target.closest('#closeLightboxBtn');
         const lightboxBackdrop = target.closest('#lightbox');
         if (closeButton || (lightboxBackdrop && event.target === lightboxBackdrop)) {
@@ -244,9 +247,22 @@ function initGlobalClickListener() {
              if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
                  state.lastFocusedElement.focus();
              }
+             return; // หยุดการทำงานส่วนอื่น
         }
+
+        // ==========================================
+        // 🟢 4. เพิ่มส่วนนี้: ดักจับการคลิกคำค้นหาแนะนำ (Suggestions) ป้องกันเว็บโดนบล็อก (CSP)
+        // ==========================================
+        const suggestionItem = target.closest('[onclick^="window.selectSuggestion"]');
+        if (suggestionItem) {
+            // ป้องกันเบราว์เซอร์ทำงานผิดพลาดซ้ำซ้อนจาก Inline Script
+            event.preventDefault();
+        }
+        // ==========================================
+
     });
 
+    // ดักจับการกดปุ่ม ESC บนคีย์บอร์ด
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && state.currentProfileSlug) {
             history.pushState(null, '', '/');
@@ -258,7 +274,6 @@ function initGlobalClickListener() {
         }
     });
 }
-
 window.handleLikeClick = async function(likeButton, profileId) {
     if (isLikeProcessing) return; 
     isLikeProcessing = true; 
@@ -495,14 +510,95 @@ window.handleLikeClick = async function(likeButton, profileId) {
     }
 
     function initRealtimeSubscription() {
+        // 1. ตรวจสอบความพร้อมของ Supabase
+        if (!window.supabase) return;
+
+        // 2. ล้างการเชื่อมต่อเก่าเพื่อป้องกัน Memory Leak
         if (state.realtimeSubscription) {
             try {
-                supabase.removeChannel(state.realtimeSubscription);
-            } catch (e) { }
+                window.supabase.removeChannel(state.realtimeSubscription);
+            } catch (e) { console.warn('Realtime cleanup error:', e); }
             state.realtimeSubscription = null;
         }
-        state.cleanupFunctions = state.cleanupFunctions || [];
-        console.log('zzz Realtime disabled. Using Smart Cache Strategy.');
+
+        console.log('📡 [Realtime] ระบบอัปเดตอัจฉริยะกำลังทำงาน...');
+
+        // 3. สร้างการเชื่อมต่อแบบครอบคลุม (Listen to ALL events: INSERT, UPDATE, DELETE)
+        const channel = window.supabase.channel('public:profiles_realtime_sync')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'profiles' },
+                (payload) => {
+                    const { eventType, new: newData, old: oldData } = payload;
+                    let hasChanges = false;
+
+                    // --- กรณีมีการแก้ไขข้อมูล (UPDATE) ---
+                    if (eventType === 'UPDATE') {
+                        // ใช้ String() เพื่อป้องกันปัญหา ID เป็นตัวเลขบ้าง ข้อความบ้าง
+                        const index = state.allProfiles.findIndex(p => String(p.id) === String(newData.id));
+                        
+                        if (index !== -1) {
+                            console.log('🔄 [Realtime] อัปเดตข้อมูล:', newData.name);
+                            const processed = processProfileData(newData);
+                            state.allProfiles[index] = { ...state.allProfiles[index], ...processed };
+                            hasChanges = true;
+                        }
+                    } 
+                    
+                    // --- กรณีมีการเพิ่มโปรไฟล์ใหม่ (INSERT) ---
+                    else if (eventType === 'INSERT') {
+                        if (newData.active) { // เพิ่มเฉพาะโปรไฟล์ที่ตั้งค่าให้โชว์ (active)
+                            console.log('✨ [Realtime] พบโปรไฟล์ใหม่:', newData.name);
+                            state.allProfiles.unshift(processProfileData(newData));
+                            hasChanges = true;
+                        }
+                    } 
+                    
+                    // --- กรณีมีการลบโปรไฟล์ (DELETE) ---
+                    else if (eventType === 'DELETE') {
+                        console.log('🗑️ [Realtime] ลบโปรไฟล์ ID:', oldData.id);
+                        state.allProfiles = state.allProfiles.filter(p => String(p.id) !== String(oldData.id));
+                        hasChanges = true;
+                    }
+
+                    // 4. หากมีการเปลี่ยนแปลง ให้ทำการ Sync ข้อมูลใหม่ทั้งหมด
+                    if (hasChanges) {
+                        // อัปเดต Local Cache
+                        try {
+                            localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(state.allProfiles));
+                        } catch(e) { console.warn('Cache update failed:', e); }
+
+                        // อัปเดต Search Index (Fuse.js) ให้รู้จักข้อมูลใหม่
+                        if (fuseEngine && typeof fuseEngine.setCollection === 'function') {
+                            fuseEngine.setCollection(state.allProfiles);
+                        }
+
+                        // สั่งให้หน้าเว็บเรนเดอร์ใหม่ทันที (โดยไม่เปลี่ยนตำแหน่งการเลื่อนหน้าจอ)
+                        if (typeof applyUltimateFilters === 'function') {
+                            applyUltimateFilters(false);
+                        }
+                    }
+                }
+            )
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('✅ [Realtime] เชื่อมต่อฐานข้อมูลสดเรียบร้อย!');
+                }
+                if (status === 'CHANNEL_ERROR') {
+                    console.error('❌ [Realtime] การเชื่อมต่อขัดข้อง');
+                }
+            });
+
+        state.realtimeSubscription = channel;
+
+        // 5. ลงทะเบียนฟังก์ชัน Cleanup เมื่อปิดหน้าเว็บ
+        if (state.cleanupFunctions) {
+            state.cleanupFunctions.push(() => {
+                if (state.realtimeSubscription) {
+                    window.supabase.removeChannel(state.realtimeSubscription);
+                }
+            });
+        }
     }
 
     function getOptimizedClientImage(path, width = 400) {
@@ -751,6 +847,13 @@ window.handleLikeClick = async function(likeButton, profileId) {
             if (dom.sortSelect) dom.sortSelect.value = 'featured';
 
             if (clearBtn) clearBtn.classList.add('hidden');
+
+            // เคลียร์ปุ่ม Tab ให้กลับไปสถานะ "ทั้งหมด"
+            const regionTabs = document.querySelectorAll('.region-tab');
+            regionTabs.forEach(t => t.classList.remove('active'));
+            const allTab = document.querySelector('.region-tab[data-region="ทั้งหมด"]');
+            if (allTab) allTab.classList.add('active');
+
             history.pushState(null, '', '/');
             applyUltimateFilters(true);
         });
@@ -761,6 +864,34 @@ window.handleLikeClick = async function(likeButton, profileId) {
             if(suggestionsBox) suggestionsBox.classList.add('hidden');
             if (dom.searchInput) dom.searchInput.blur();
         });
+
+        // ==========================================
+        // 🟢 ระบบจัดการปุ่ม Tab (ภาคเหนือ / กรุงเทพฯ / ทั้งหมด)
+        // ==========================================
+        const regionTabs = document.querySelectorAll('.region-tab');
+        if (regionTabs.length > 0) {
+            regionTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    // 1. เปลี่ยนสีปุ่มที่ถูกกดให้เป็น Active
+                    regionTabs.forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    // 2. นำคำจากปุ่มไปใส่ในช่องค้นหา (ถ้าเป็น "ทั้งหมด" ให้เคลียร์ช่องค้นหา)
+                    const region = e.target.dataset.region;
+                    if (dom.searchInput) {
+                        dom.searchInput.value = (region === 'ทั้งหมด') ? '' : region;
+                        // โชว์/ซ่อน ปุ่ม (X) ล้างข้อความในช่องค้นหา
+                        if (clearBtn) clearBtn.classList.toggle('hidden', !dom.searchInput.value);
+                    }
+                    
+                    // 3. ปิดกล่อง Suggestion (ถ้าเปิดอยู่)
+                    if (suggestionsBox) suggestionsBox.classList.add('hidden');
+
+                    // 4. สั่งรันระบบตัวกรองเพื่อค้นหาโปรไฟล์ทันที
+                    applyUltimateFilters(true);
+                });
+            });
+        }
     }
 
     function saveCache(key, data) {
@@ -816,17 +947,19 @@ window.handleLikeClick = async function(likeButton, profileId) {
             const provinceName = state.provincesMap.get(item.provinceKey) || '';
             const isAvailable = item.availability?.includes('ว่าง') || item.availability?.includes('รับงาน');
             const imgSrc = item.images && item.images[0] ? item.images[0].src : '/images/placeholder.webp';
+            
+            // 🟢 เปลี่ยนมาใช้ data-action และ data-slug (ลบ onclick/onmouseenter/onmouseleave ออก)
             html += `
                 <div class="suggestion-item" 
-                     style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background-color 0.2s;"
-                     onclick="window.selectSuggestion('${item.slug.replace(/'/g, "\\'")}', true)"
-                     onmouseenter="this.style.backgroundColor='rgba(147, 51, 234, 0.08)'"
-                     onmouseleave="this.style.backgroundColor='transparent'">
-                    <div style="position: relative; width: 40px; height: 40px; shrink: 0;">
+                     data-action="suggestion"
+                     data-slug="${item.slug}"
+                     data-is-profile="true"
+                     style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background-color 0.2s;">
+                    <div style="position: relative; width: 40px; height: 40px; shrink: 0; pointer-events: none;">
                         <img src="${imgSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);" alt="รูปแนะคีย์เสิร์ช">
                         <span style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background-color: ${isAvailable ? '#00E676' : '#9CA3AF'}; border: 2px solid #121214; border-radius: 50%;"></span>
                     </div>
-                    <div style="flex: 1; min-width: 0; text-align: left;">
+                    <div style="flex: 1; min-width: 0; text-align: left; pointer-events: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                             <div style="font-size: 13px; font-weight: 800; color: #FFFFFF; margin: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.name}</div>
                             ${item.age ? `<span style="font-size: 9px; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: var(--text-gray); font-weight: 700;">${item.age} ปี</span>` : ''}
@@ -837,7 +970,7 @@ window.handleLikeClick = async function(likeButton, profileId) {
                             </span>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 10px;"></i>
+                    <i class="fas fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 10px; pointer-events: none;"></i>
                 </div>
             `;
         });
@@ -1479,7 +1612,7 @@ function populateLightboxData(p) {
 
     // จัดการรูปภาพหลัก
     const heroImg = document.getElementById('lightboxHeroImage');
-    const mainImg = (p.images && p.images.length > 0) ? p.images[0].src : (p.imagePath || '/images/placeholder-profile.webp');
+    const mainImg = p?.images?.[0]?.src || p?.imagePath || '/images/placeholder-profile.webp';
     heroImg.src = mainImg;
 
     // จัดการ Gallery (ถ้ามีหลายรูป)

@@ -771,40 +771,10 @@
   <!-- เชื่อมโยงระบบดึงข้อมูล Javascript ของระบบหลัก -->
   <script type="module" src="/main.js"></script>
 
-  <script>
+<script>
   document.addEventListener("DOMContentLoaded", () => {
-    // 1. ระบบแก้ไขลำดับหัวข้อ และ ARIA (ปรับปรุงให้ Performance ดีขึ้น)
-    const fixAccessibility = (container) => {
-        const target = container || document;
-        
-        target.querySelectorAll('#featured-profiles-container h4, #profiles-display-area h4').forEach(h4 => {
-            const h3 = document.createElement('h3');
-            Array.from(h4.attributes).forEach(attr => h3.setAttribute(attr.name, attr.value));
-            h3.innerHTML = h4.innerHTML;
-            h4.parentNode.replaceChild(h3, h4);
-        });
-
-        target.querySelectorAll('.stars[aria-label]:not([role])').forEach(el => {
-            el.setAttribute('role', 'img');
-        });
-    };
-
-    fixAccessibility();
-
-    const domObserver = new MutationObserver((mutations) => {
-        let shouldRun = false;
-        mutations.forEach(mutation => {
-            if (mutation.addedNodes.length > 0) shouldRun = true;
-        });
-        
-        if (shouldRun) {
-            fixAccessibility();
-        }
-    });
     
-    domObserver.observe(document.body, { childList: true, subtree: true });
-
-    // 2. ระบบ Mobile Menu
+    // 1. ระบบ Mobile Menu
     const menuToggle = document.getElementById("menu-toggle");
     const closeMenuBtn = document.getElementById("close-menu-btn");
     const sidebarMenu = document.getElementById("sidebar-menu");
@@ -840,7 +810,7 @@
         });
     }
 
-    // 3. Google Maps Lazy Loading
+    // 2. Google Maps Lazy Loading
     const mapIframe = document.getElementById("google-map");
     const placeholder = document.getElementById("map-placeholder");
     
@@ -891,4 +861,3 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
-
