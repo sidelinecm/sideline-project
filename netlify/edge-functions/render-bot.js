@@ -36,7 +36,8 @@ const TESTIMONIALS = [
 ];
 
 const getDeterministicValue = (min, max, seedString, offset = 0) => {
-    const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
+    const safeSeed = seedString || 'default';
+    const sum = safeSeed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
     return Math.floor(min + (sum % (max - min + 1)));
 };
 
