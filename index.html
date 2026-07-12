@@ -58,14 +58,15 @@
 
 <body>
 
-  <!-- ============================== HEADER (Webyst Frosted Purple Glass Nav) ============================== -->
+<!-- ============================== HEADER (Webyst Frosted Purple Glass Nav) ============================== -->
   <header id="page-header" role="banner">
     <div class="header-logo-container">
-        <a href="/" aria-label="ไปที่หน้าแรก Sideline Chiangmai">
+        <a href="/" aria-label="ไปที่หน้าแรก Sideline {{PROVINCE_NAME}}">
            <span class="logo-box-el">
-             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><title>โลโก้ ไซด์ไลน์เชียงใหม่</title><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><title>โลโก้ ไซด์ไลน์{{PROVINCE_NAME}}</title><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
            </span>
-           <span style="font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.02em;">ไลน์<span style="color: #C084FC">เชียงใหม่</span></span>
+           <!-- รองรับระบบ Multi-Province ผ่าน Edge Function -->
+           <span style="font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.02em;">ไลน์<span style="color: #C084FC">{{PROVINCE_NAME}}</span></span>
         </a>
     </div>
 
@@ -76,8 +77,9 @@
 
     <div class="nav-controls">
         <nav class="desktop-nav" aria-label="เมนูหลัก">
-            <a href="/profiles.html" style="color: var(--text-gray) !important;">รวมโปรไฟล์แนะนำ</a>
-            <a href="/locations.html" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
+            <!-- ปรับเป็นลิงก์แบบคลีน (Clean URLs) เพื่อความสอดคล้องกับหน้าพิกัดจังหวัด -->
+            <a href="/profiles" style="color: var(--text-gray) !important;">รวมโปรไฟล์แนะนำ</a>
+            <a href="/locations" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
         </nav>
 
         <button type="button" aria-label="สลับภาษาเป็นภาษาไทย" class="circle-btn-el" style="color: var(--text-gray) !important;">TH</button>
@@ -90,7 +92,8 @@
     </div>
   </header>
 
-<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+  <!-- ============================== MOBILE SIDEBAR MENU (Dark Glass Style) ============================== -->
+  <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
     <div class="sidebar-header-div">
       <span style="color: #A1A1AA !important;">Navigation</span>
       <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
@@ -100,22 +103,24 @@
     
     <div class="sidebar-links-wrapper">
       <a href="/">หน้าแรก</a>
-      <a href="/profiles.html">น้องๆ VIP แนะนำ</a>
-      <a href="/locations.html">พื้นที่บริการ</a>
-      <a href="/about.html">เกี่ยวกับเรา</a>
-      <a href="/faq.html">คำถามพบบ่อย</a>
-      <a href="/blog.html">บทความ</a>
+      <a href="/profiles">น้องๆ VIP แนะนำ</a>
+      <a href="/locations">พื้นที่บริการ</a>
+      <a href="/about">เกี่ยวกับเรา</a>
+      <a href="/faq">คำถามพบบ่อย</a>
+      <a href="/blog">บทความ</a>
     </div>
 
-    <div class="menu-ticker-div" aria-hidden="true" style="border-top: 1px solid rgba(229, 231, 235, 0.8) !important; border-bottom: 1px solid rgba(229, 231, 235, 0.8) !important;">
-      <div class="ticker-text-wrapper">
-        จองคิวน้องๆ แอดไลน์ @sidelinechiangmai• เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่มัดจำ • จองคิวน้องๆ แอดไลน์ @sidelinechiangmai• เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่มัดจำ •
+    <!-- ปรับเส้นขอบให้เป็นเส้นบางโปร่งแสงเพื่อความกลมกลืนในโหมดมืด -->
+    <div class="menu-ticker-div" aria-hidden="true" style="border-top: 1px solid rgba(255, 255, 255, 0.08) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; background: rgba(0, 0, 0, 0.455);">
+      <div class="ticker-text-wrapper" style="font-size: 11px; color: var(--text-gray);">
+        จองคิวน้องๆ แอดไลน์ @sidelinecm • เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่มัดจำ • จองคิวน้องๆ แอดไลน์ @sidelinecm • เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่มัดจำ •
       </div>
     </div>
 
-    <div style="padding: 24px; background: #FFFFFF !important; border-top: 1px solid rgba(229, 231, 235, 0.8) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
+    <!-- แก้ไขปัญหาแถบสีขาว โดยปรับเป็นพื้นหลังเข้มและขอบสีบางโปร่งแสงเข้ากับธีมหลัก -->
+    <div style="padding: 24px; background: rgba(9, 9, 12, 0.95) !important; border-top: 1px solid rgba(255, 255, 255, 0.08) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-         style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755 !important; color: #121214 !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.25); transition: background-color 0.2s;"
+         style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755 !important; color: #FFFFFF !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.25); transition: background-color 0.2s;"
          onmouseenter="this.style.backgroundColor='#05b04c'"
          onmouseleave="this.style.backgroundColor='#06C755'">
         <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
@@ -123,6 +128,7 @@
     </div>
   </aside>
 
+  <!-- Overlay สำหรับเปิดปิด Sidebar เมนูมือถือ -->
   <div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
 
 <!-- ============================== MAIN CONTENT ============================== -->
@@ -172,21 +178,20 @@
         </p>
       </div>
 
-      <!-- แคปซูลความปลอดภัย -->
-      <div class="safe-capsules-grid">
-          <a href="/about.html" class="safe-capsule-item">
-              <span class="indicator-dot indicator-red" aria-hidden="true"></span>
-              <span class="capsule-text">ไม่มีโอนมัดจำก่อน</span>
-          </a>
-          <a href="/faq.html" class="safe-capsule-item">
-              <span class="indicator-dot indicator-red" aria-hidden="true"></span>
-              <span class="capsule-text">ไม่มีค่าสมัครสมาชิก</span>
-          </a>
-          <a href="/about.html" class="safe-capsule-item">
-              <span class="indicator-dot indicator-green" aria-hidden="true"></span>
-              <span class="capsule-text" style="color: #00E676;">จ่ายหน้างาน 100%</span>
-          </a>
-      </div>
+<div class="safe-capsules-grid">
+    <a href="/about" class="safe-capsule-item">
+        <span class="indicator-dot indicator-red" aria-hidden="true"></span>
+        <span class="capsule-text">ไม่มีโอนมัดจำก่อน</span>
+    </a>
+    <a href="/faq" class="safe-capsule-item">
+        <span class="indicator-dot indicator-red" aria-hidden="true"></span>
+        <span class="capsule-text">ไม่มีค่าสมัครสมาชิก</span>
+    </a>
+    <a href="/about" class="safe-capsule-item">
+        <span class="indicator-dot indicator-green" aria-hidden="true"></span>
+        <span class="capsule-text" style="color: #00E676;">จ่ายหน้างาน 100%</span>
+    </a>
+</div>
     </section>
 
       <!-- ============================== TRUSTED SOCIAL NETWORKS ============================== -->
@@ -613,7 +618,7 @@
               เพื่อส่งมอบความปลอดภัยและการได้รับบริการเพื่อนเที่ยวพรีเมียมที่ดีที่สุดแก่ผู้รับชม แพลตฟอร์มสารบัญอย่างเป็นทางการของเราจึงมีมาตรการตรวจสอบคัดกรองโปรไฟล์อย่างรัดกุม โดยทีมบรรณาธิการ (Fact-Checker/Editor) ในพื้นที่{{PROVINCE_NAME}} จะทำหน้าที่พิสูจน์ยืนยันรูปภาพ ตัวจริงประวัติ และระบุเขตทำเลรับงานให้แน่ชัดก่อนแสดงผลในสารบัญเสมอ เพื่อป้องกันการฉ้อโกง 100%
             </p>
             <p style="font-size: 11px; color: #94A3B8; margin-top: 8px;">
-              ผู้รับผิดชอบระบบและเจ้าหน้าที่ดูแลข้อมูล: <span style="color: #CBD5E1; font-weight: 700;">ทีมบริหารงานแอดมิน Sideline Chiangmai Co.</span> • อ่านข้อมูลความโปร่งใสเพิ่มเติมได้ที่ <a href="/about.html" style="color: var(--primary-purple); text-decoration: underline; font-weight: 600;">หน้าเกี่ยวกับเรา</a>
+              ผู้รับผิดชอบระบบและเจ้าหน้าที่ดูแลข้อมูล: <span style="color: #CBD5E1; font-weight: 700;">ทีมบริหารงานแอดมิน Sideline Chiangmai Co. • อ่านข้อมูลความโปร่งใสเพิ่มเติมได้ที่ <a href="/about" style="color: var(--primary-purple); text-decoration: underline; font-weight: 600;">หน้าเกี่ยวกับเรา</a>
             </p>
           </div>
         </div>
@@ -656,13 +661,13 @@
           </p>
         </div>
 
-        <!-- คอลัมน์ 2: เมนูหลัก -->
+<!-- คอลัมน์ 2: เมนูหลัก -->
         <nav aria-label="ลิงก์ส่วนท้ายเว็บ">
           <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin-bottom: 16px;">เมนูหลัก</h3>
           <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
             <li><a href="/" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-gray)'">หน้าแรก</a></li>
-            <li><a href="/about.html" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-gray)'">เกี่ยวกับเรา</a></li>
-            <li><a href="/faq.html" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-gray)'">คำถามที่พบบ่อย</a></li>
+            <li><a href="/about" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-gray)'">เกี่ยวกับเรา</a></li>
+            <li><a href="/faq" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-gray)'">คำถามที่พบบ่อย</a></li>
           </ul>
         </nav>
 
@@ -688,15 +693,17 @@
 
       </div>
 
-      <!-- แถวลิขสิทธิ์ด้านล่างสุด -->
+<!-- แถวลิขสิทธิ์ด้านล่างสุด -->
       <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;">
-        <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">© <span id="currentYearDynamic">2026</span> Sideline Chiangmai. All Rights Reserved.</p>
+        <!-- ปรับชื่อแบรนด์เป็นไดนามิกสอดคล้องกับจังหวัดที่เข้าใช้งาน -->
+        <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">© <span id="currentYearDynamic">2026</span> Sideline {{PROVINCE_NAME}}. All Rights Reserved.</p>
         
         <p style="font-size: 9px; color: var(--text-muted); opacity: 0.6; margin: 0; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">Designed with AI Zoe • Premium SEO Edition 2026</p>
         
         <div style="display: flex; gap: 24px;">
-          <a href="/privacy-policy.html" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Privacy Policy</a>
-          <a href="/terms-of-service.html" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Terms & Conditions</a>
+          <!-- ปรับระบบลิงก์ข้อกำหนดและนโยบายความลับให้เป็น Clean URLs -->
+          <a href="/privacy-policy" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Privacy Policy</a>
+          <a href="/terms-of-service" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Terms & Conditions</a>
         </div>
       </div>
 

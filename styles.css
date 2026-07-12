@@ -632,6 +632,7 @@ html.light .search-input-field, html.light .search-select-field {
   font-weight: 600;
 }
 
+/* คอนเทนเนอร์ปุ่มกดโซเชียลมีเดียแบบ Responsive */
 .social-links-grid-wrapper {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -652,26 +653,30 @@ html.light .search-input-field, html.light .search-select-field {
   }
 }
 
+/* สไตล์ปุ่มลิงก์โซเชียลโปร่งแสงแบบ Premium */
 .social-link-card-item {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 100px !important; /* ปรับให้ปุ่มโค้งมนสวยงาม */
   font-size: 11px;
   font-weight: 700;
   color: #FFFFFF !important;
-  text-decoration: none;
+  text-decoration: none !important;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .social-link-card-item:hover {
-  background: rgba(124, 58, 237, 0.08);
-  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(124, 58, 237, 0.12) !important;
+  border-color: rgba(124, 58, 237, 0.4) !important;
   transform: translateY(-2px);
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.2);
 }
 
 /* ==============================================================================
