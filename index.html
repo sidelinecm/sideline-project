@@ -1,4 +1,3 @@
-
 <!DOCTYPE html> 
 <html lang="th" class="dark-theme">
 <head>
@@ -65,7 +64,6 @@
            <span class="logo-box-el">
              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><title>โลโก้ ไซด์ไลน์{{PROVINCE_NAME}}</title><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
            </span>
-           <!-- รองรับระบบ Multi-Province ผ่าน Edge Function -->
            <span style="font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.02em;">ไลน์<span style="color: #C084FC">{{PROVINCE_NAME}}</span></span>
         </a>
     </div>
@@ -77,7 +75,6 @@
 
     <div class="nav-controls">
         <nav class="desktop-nav" aria-label="เมนูหลัก">
-            <!-- ปรับเป็นลิงก์แบบคลีน (Clean URLs) เพื่อความสอดคล้องกับหน้าพิกัดจังหวัด -->
             <a href="/profiles" style="color: var(--text-gray) !important;">รวมโปรไฟล์แนะนำ</a>
             <a href="/locations" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
         </nav>
@@ -110,14 +107,12 @@
       <a href="/blog">บทความ</a>
     </div>
 
-    <!-- ปรับเส้นขอบให้เป็นเส้นบางโปร่งแสงเพื่อความกลมกลืนในโหมดมืด -->
     <div class="menu-ticker-div" aria-hidden="true" style="border-top: 1px solid rgba(255, 255, 255, 0.08) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; background: rgba(0, 0, 0, 0.455);">
       <div class="ticker-text-wrapper" style="font-size: 11px; color: var(--text-gray);">
         จองคิวน้องๆ แอดไลน์ @sidelinecm • เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่มัดจำ • จองคิวน้องๆ แอดไลน์ @sidelinecm • เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่มัดจำ •
       </div>
     </div>
 
-    <!-- แก้ไขปัญหาแถบสีขาว โดยปรับเป็นพื้นหลังเข้มและขอบสีบางโปร่งแสงเข้ากับธีมหลัก -->
     <div style="padding: 24px; background: rgba(9, 9, 12, 0.95) !important; border-top: 1px solid rgba(255, 255, 255, 0.08) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
          style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755 !important; color: #FFFFFF !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.25); transition: background-color 0.2s;"
@@ -580,27 +575,71 @@
            </div>
       </section>
 
-      <!-- ============================== VERIFIED CUSTOMER REVIEWS (EEAT & SCHEMA COMPLIANCE) ============================== -->
-      <section id="customer-reviews" style="text-align: center; position: relative;" aria-labelledby="reviews-main-heading">
-        <div class="bg-glow-overlap" style="bottom: 0%; right: 5%; width: 400px; height: 400px;" aria-hidden="true"></div>
-        
-        <div class="section-spacing-container">
-          <p style="font-size: 11px; font-weight: 800; tracking: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px; position: relative; z-index: 10;">
-            VERIFIED USER FEEDBACK
-          </p>
-          <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 22px; font-weight: 800; tracking-tight: -0.02em; position: relative; z-index: 10;">
-            ความประทับใจและความคิดเห็นจากผู้ใช้บริการจริง
-          </h2>
-          <div style="height: 2px; width: 96px; background: linear-gradient(to right, transparent, var(--primary-purple), transparent); margin: 12px auto; border-radius: 100px; position: relative; z-index: 10;" aria-hidden="true"></div>
-          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; position: relative; z-index: 10;">
-            รีวิวจริงที่ได้รับการยืนยันการใช้บริการผ่านการจองคิว เพื่อส่งเสริมความโปร่งใสและสร้างความมั่นใจสูงสุด
-          </p>
-        </div>
+<!-- ============================== VERIFIED CUSTOMER REVIEWS (EEAT & SCHEMA COMPLIANCE) ============================== -->
+<section id="customer-reviews" style="text-align: center; position: relative;" aria-labelledby="reviews-main-heading">
+  <div class="bg-glow-overlap" style="bottom: 0%; right: 5%; width: 400px; height: 400px;" aria-hidden="true"></div>
+  
+  <div class="section-spacing-container">
+    <p style="font-size: 11px; font-weight: 800; tracking: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
+      VERIFIED USER FEEDBACK & COMMENTS
+    </p>
+    <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 22px; font-weight: 800; tracking-tight: -0.02em;">
+      ความประทับใจและความคิดเห็นจากผู้ใช้บริการจริง
+    </h2>
+    <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-top: 8px;">
+      ระบบรวบรวมรีวิวแบบโปร่งใส ปราศจากการปรุงแต่ง เพื่อเป็นประโยชน์ในการประกอบการตัดสินใจของสมาชิก
+    </p>
+  </div>
 
-        <div style="display: grid; grid-template-columns: 1fr; gap: 24px; text-align: left; margin-top: 32px; position: relative; z-index: 10;" class="bento-grid-3">
-          {{PROVINCE_REVIEWS_HTML}}
-        </div>
-      </section>
+  <!-- ตะแกรงแสดงความคิดเห็นแบบเรียลไทม์ (UGC Grid) -->
+  <div id="reviews-container-grid" style="display: grid; grid-template-columns: 1fr; gap: 24px; text-align: left; margin-top: 32px;" class="bento-grid-3">
+    {{PROVINCE_REVIEWS_HTML}}
+  </div>
+
+  <!-- 🚨 [จุดอัปเกรดข้อที่ 2] ฟอร์มส่งความคิดเห็นสดของยูสเซอร์หน้าเว็บ (UGC frosted Glass Form) -->
+  <div class="interactive-card" style="max-width: 600px; margin: 48px auto 0 auto; padding: 32px; text-align: left; border: 1px solid rgba(147, 51, 234, 0.25);">
+      <h3 class="text-gradient-sub" style="font-size: 16px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-edit" style="color: var(--primary-purple);"></i> ร่วมแบ่งปันประสบการณ์ตรงของคุณ
+      </h3>
+      <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px;">
+          ความคิดเห็นที่ผ่านการคัดกรองจะถูกส่งสัญญานไปเป็น Structured Data เพื่อการจัดอันดับบนหน้าแรกของ Google
+      </p>
+
+      <form id="review-form" style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <label for="review-author" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน (ใช้นามสมมติได้)</label>
+                  <input type="text" id="review-author" required placeholder="ตัวอย่าง: คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <label for="review-location" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอน้อง</label>
+                  <input type="text" id="review-location" placeholder="ตัวอย่าง: ตัวเมืองเชียงใหม่" style="background: #121214; border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
+              </div>
+          </div>
+
+          <!-- การให้ดาว -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจการบริการ</span>
+              <div class="star-rating-input-container" style="display: flex; gap: 6px; color: #71717A; font-size: 18px; cursor: pointer;">
+                  <i class="fas fa-star star-rating-input-item active" data-value="1"></i>
+                  <i class="fas fa-star star-rating-input-item active" data-value="2"></i>
+                  <i class="fas fa-star star-rating-input-item active" data-value="3"></i>
+                  <i class="fas fa-star star-rating-input-item active" data-value="4"></i>
+                  <i class="fas fa-star star-rating-input-item active" data-value="5"></i>
+              </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="review-text" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน/เทคแคร์ของน้อง</label>
+              <textarea id="review-text" rows="4" required placeholder="เช่น น้องสุภาพเรียบร้อย เทคแคร์ประทับใจสไตล์ฟิวแฟน ตัวจริงตรงตามปกและประทับใจมาก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px; line-height: 1.6; resize: none;"></textarea>
+          </div>
+
+          <button type="submit" style="background: var(--primary-purple); color: white; padding: 14px; border: none; border-radius: 100px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center;">
+              ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ
+          </button>
+      </form>
+  </div>
+</section>
 
       <!-- ============================== EDITORIAL PROCESS & EEAT VERIFICATION SYSTEM ============================== -->
       <section id="verification-process" style="max-width: 850px; margin: 0 auto;" aria-labelledby="verification-heading">
@@ -695,13 +734,11 @@
 
 <!-- แถวลิขสิทธิ์ด้านล่างสุด -->
       <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;">
-        <!-- ปรับชื่อแบรนด์เป็นไดนามิกสอดคล้องกับจังหวัดที่เข้าใช้งาน -->
         <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">© <span id="currentYearDynamic">2026</span> Sideline {{PROVINCE_NAME}}. All Rights Reserved.</p>
         
         <p style="font-size: 9px; color: var(--text-muted); opacity: 0.6; margin: 0; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">Designed with AI Zoe • Premium SEO Edition 2026</p>
         
         <div style="display: flex; gap: 24px;">
-          <!-- ปรับระบบลิงก์ข้อกำหนดและนโยบายความลับให้เป็น Clean URLs -->
           <a href="/privacy-policy" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Privacy Policy</a>
           <a href="/terms-of-service" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Terms & Conditions</a>
         </div>
@@ -859,6 +896,7 @@ if ("serviceWorker" in navigator) {
     });
 }
   </script>
+
 
 </body>
 </html>

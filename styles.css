@@ -892,3 +892,47 @@ html.light .tabs-container {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* 🚨 [จุดอัปเกรดป้ายนีออนความน่าเชื่อถือสูง] */
+.verification-badge-neon {
+  animation: verification-glow-pulse 3s infinite ease-in-out;
+}
+
+@keyframes verification-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.45);
+    border-color: rgba(245, 158, 11, 0.6);
+  }
+}
+
+/* 🚨 สไตล์สำหรับแอปพลิเคชันแบบฟอร์มเลือกดาว (Star Rating Interactions) */
+.star-rating-input-item {
+  transition: color 0.2s, transform 0.2s;
+}
+
+.star-rating-input-item.active {
+  color: #FBBF24 !important;
+}
+
+.star-rating-input-item:hover {
+  transform: scale(1.2);
+}
+
+.user-submitted-review {
+  animation: slide-in-review-anim 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-in-review-anim {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
