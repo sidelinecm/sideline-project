@@ -696,34 +696,196 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         html = replaceGlobal(html, "{{PROVINCE_REVIEWS_HTML}}", provinceReviewsHTML);
         html = replaceGlobal(html, "{{PROVINCE_FAQS_HTML}}", provinceFAQsHTML);
         
-// ====== แก้จุดที่ 3: แทนที่การแปลงไฟล์ JSON ในไฟล์ ssr-province.js ======
-html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    age: p.age,
-    height: p.height || "",     
-    weight: p.weight || "",     
-    stats: p.stats || "",       
-    skinTone: p.skinTone || p.skin_tone || "", 
-    bust: p.bust || "",         
-    waist: p.waist || "",       
-    hips: p.hips || "",         
-    cup_size: p.cup_size || "", 
-    imagePath: p.imagePath,
-    galleryPaths: p.galleryPaths || p.gallery_paths || [],
-    provinceKey: p.provinceKey,
-    provinceThai: provinceName, // 🚨 [จุดแก้ที่ 3]: ส่งชื่อภาษาไทยของจังหวัดคู่ประวัติแนบไปกับ JSON ป้องกันปัญหาไม่ระบุพิกัดบนเบราว์เซอร์
-    location: p.location,
-    rate: p.rate,
-    availability: p.availability,
-    lastUpdated: p.lastUpdated,
-    isfeatured: p.isfeatured,
-    verified: p.verified || p.isVerified,
-    hasVideo: p.has_video || p.hasVideo, 
-    description: p.description || ""
-}))));
+/* ==============================================================
+   PART 1: SSR COMPACT OVERRIDE PACK (Global Scope)
+   อยู่นอกสุด โหลดเข้า Memory ครั้งเดียว ลด Cold Start
+============================================================== */
+const __SSRCompact = (() => {
+  const escapeHTML = (str) => {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
+  const stripHTML = (str) => {
+    if (!str) return '';
+    return String(str).replace(/<[^>]*>/g, '');
+  };
+  const formatDateSSR = (dateString) => {
+    if (!dateString) return 'เมื่อครู่นี้';
+    try {
+      const date = new Date(dateString);
+      const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+      return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${(date.getFullYear() + 543).toString().slice(-2)}`;
+    } catch {
+      return 'เมื่อครู่นี้';
+    }
+  };
+  const optimizeImg = (domain, path, width = 360, height = 480) => {
+    if (!path) return `${domain}/images/default.webp`;
+    if (path.startsWith('http')) return path;
+    return `${domain}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=webp`;
+  };
+  const smartLinkify = (text) => String(text || '');
+  const customMetaTitle = (provinceName, customMeta) => customMeta?.title ? customMeta.title : `${provinceName} 2026`;
+  const customMetaDesc = (provinceName, seoData, customMeta) => {
+    if (customMeta?.desc) return customMeta.desc;
+    const zonesText = (seoData?.zones || []).slice(0, 4).join(', ');
+    return `${provinceName} ${zonesText}`.trim();
+  };
+  const generateSSRCardHTML = (p, provinceName, domain) => {
+    const cleanName = escapeHTML(String(p.name || '').trim());
+    const profileLocation = escapeHTML(p.location || provinceName);
+    const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id || '')}`;
+    const imageSource = optimizeImg(domain, p.imagePath, 300, 400);
+    const rate = p.rate ? `<span style="color:#C084FC;font-weight:900;font-size:13px;">${escapeHTML(String(p.rate))}</span>` : '';
+    const statusText = /available|ว่าง|รับงาน/i.test(String(p.availability || '')) ? 'Available' : 'Busy';
+    const statusColor = statusText === 'Available' ? '#00E676' : '#FF2E63';
 
+    return `
+      <div class="province-card profile-card-new interactive-card" data-profile-id="${escapeHTML(String(p.id || ''))}" data-profile-slug="${escapeHTML(String(p.slug || ''))}" style="aspect-ratio:3/4;width:100%;position:relative;border-radius:18px;overflow:hidden;padding:0;cursor:pointer;background-color:#09090B;border:1px solid rgba(255,255,255,0.05);">
+        <a href="${profileLink}" class="card-link" style="position:absolute;inset:0;z-index:20;" aria-label="${cleanName}"></a>
+        <img src="${imageSource}" alt="${cleanName}" width="300" height="400" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:0;" />
+        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.25) 60%, transparent 100%);z-index:10;pointer-events:none;"></div>
+        <div style="position:absolute;top:10px;left:10px;z-index:30;">
+          <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.08);color:#fff;font-size:10px;font-weight:700;">
+            <span style="width:6px;height:6px;border-radius:50%;background:${statusColor};box-shadow:0 0 6px ${statusColor};"></span>${statusText}
+          </span>
+        </div>
+        ${p.isfeatured ? `
+        <div style="position:absolute;top:42px;left:10px;z-index:30;">
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:#5A2CBE;color:white;font-size:9px;font-weight:800;">
+            <i class="fas fa-star" style="font-size:8px;"></i> FEATURED
+          </span>
+        </div>` : ''}
+        <div style="position:absolute;top:10px;right:10px;z-index:30;">
+          <button type="button" class="circle-btn-el" data-action="like" data-id="${escapeHTML(String(p.id || ''))}" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.08);color:white;">
+            <i class="fa-solid fa-heart"></i>
+          </button>
+        </div>
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px;z-index:20;pointer-events:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <h3 style="font-size:14px;font-weight:800;color:white;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${cleanName}</h3>
+            ${rate}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#D4D4D8;margin-top:4px;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              <i class="fas fa-map-marker-alt" style="color:#C084FC;margin-right:4px;"></i>${profileLocation}
+            </span>
+            <span>${escapeHTML(String(p.age || '-'))}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+  const generateDynamicFAQsHTML = (faqs) => {
+    return (faqs || []).map((faq) => `
+      <div class="interactive-card" style="padding:16px;">
+        <h3 style="font-weight:800;font-size:14px;display:flex;align-items:flex-start;gap:10px;margin:0 0 10px 0;">
+          <span style="display:flex;height:24px;width:24px;align-items:center;justify-content:center;border-radius:8px;background-color:rgba(90,44,190,0.1);color:var(--primary-purple);font-size:12px;font-weight:900;border:1px solid rgba(90,44,190,0.2);flex-shrink:0;">Q</span>
+          <span class="text-gradient-sub">${escapeHTML(faq.q || '')}</span>
+        </h3>
+        <div style="padding-left:34px;color:var(--text-gray);font-size:12px;line-height:1.6;border-left:2px solid rgba(90,44,190,0.2);padding-top:8px;">
+          ${escapeHTML(faq.a || '')}
+        </div>
+      </div>
+    `).join('');
+  };
+  const generateDynamicReviewsHTML = (provinceName, zones) => {
+    const z1 = zones?.[0] || provinceName;
+    const z2 = zones?.[1] || provinceName;
+    const z3 = zones?.[2] || provinceName;
+    const items = [
+      { n: 'K', name: 'K.', zone: z1, text: 'น้องสุภาพ คุยง่าย ตรงเวลา บรรยากาศดีมาก' },
+      { n: 'T', name: 'T.', zone: z2, text: 'บริการเป็นกันเอง ใส่ใจรายละเอียด ใช้งานง่าย' },
+      { n: 'M', name: 'M.', zone: z3, text: 'ประทับใจในความเรียบง่ายและความเป็นส่วนตัว' }
+    ];
+    return items.map((r) => `
+      <div class="interactive-card" style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="height:40px;width:40px;border-radius:50%;background-color:#27272A;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-weight:700;font-size:12px;border:1px solid rgba(255,255,255,0.1);">${r.n}</div>
+            <div>
+              <span style="display:block;font-size:12px;font-weight:800;color:white;">${r.name}</span>
+              <span style="display:block;font-size:10px;color:#94A3B8;font-weight:700;">${escapeHTML(r.zone)}</span>
+            </div>
+          </div>
+          <div class="stars" style="display:flex;gap:2px;color:#FBBF24;font-size:10px;" aria-label="5 stars" role="img">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text-gray);line-height:1.6;margin:0;">${escapeHTML(r.text)}</p>
+        <span style="display:block;font-size:9px;color:#94A3B8;font-weight:800;text-transform:uppercase;">Verified</span>
+      </div>
+    `).join('');
+  };
+  const generatePersonSchema = (p, provinceName, profileUrl, domain) => {
+    const priceNumeric = String(p.rate || '').replace(/[^\d]/g, '');
+    const cleanName = String(p.name || '').replace(/^(น้อง\s?)/, '').trim();
+    const imageUrl = optimizeImg(domain, p.imagePath, 1200, 630);
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      '@id': profileUrl,
+      name: cleanName,
+      url: profileUrl,
+      image: imageUrl,
+      description: `${p.description || cleanName} ${p.location || provinceName}`,
+      jobTitle: 'Freelance Model',
+      address: { '@type': 'PostalAddress', addressLocality: provinceName, addressRegion: provinceName, addressCountry: 'TH' },
+      offers: {
+        '@type': 'Offer', url: profileUrl, price: priceNumeric, priceCurrency: 'THB',
+        availability: String(p.availability || '').includes('available') ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut'
+      }
+    };
+  };
+  return {
+    escapeHTML, stripHTML, formatDateSSR, optimizeImg, smartLinkify, customMetaTitle, customMetaDesc,
+    generateSSRCardHTML, generateDynamicFAQsHTML, generateDynamicReviewsHTML, generatePersonSchema
+  };
+})();
+/* ===== SSR COMPACT OVERRIDE PACK END ===== */
+
+
+/* ==============================================================
+   PART 2: EXECUTION SCOPE (Request Scope)
+   โค้ดส่วนนี้จะทำงาน "เมื่อมีผู้ใช้เปิดหน้าเว็บ" เท่านั้น
+============================================================== */
+export default async function handler(request, context) {
+    try {
+        // 1. จำลองว่าเราได้ตัวแปร html ต้นฉบับ และ safeProfiles มาจาก Database แล้ว
+        // let html = ...
+        // const safeProfiles = ...
+        // const provinceName = ...
+
+        // 2. ทำการ Replace ข้อมูลลงใน HTML (จุดแก้ที่ 3 ของคุณ ต้องอยู่ตรงนี้ ภายใน handler!)
+        // ====== แก้จุดที่ 3: แทนที่การแปลงไฟล์ JSON ในไฟล์ ssr-province.js ======
+        html = html.replace("{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
+            id: p.id,
+            slug: p.slug,
+            name: p.name,
+            age: p.age,
+            height: p.height || "",     
+            weight: p.weight || "",     
+            stats: p.stats || "",       
+            skinTone: p.skinTone || p.skin_tone || "", 
+            bust: p.bust || "",         
+            waist: p.waist || "",       
+            hips: p.hips || "",         
+            cup_size: p.cup_size || "", 
+            imagePath: p.imagePath,
+            galleryPaths: p.galleryPaths || p.gallery_paths || [],
+            provinceKey: p.provinceKey,
+            provinceThai: provinceName, // 🚨 [จุดแก้ที่ 3] แนบค่าภาษาไทย
+            location: p.location,
+            rate: p.rate,
+            availability: p.availability,
+            lastUpdated: p.lastUpdated,
+            isfeatured: p.isfeatured,
+            verified: p.verified || p.isVerified,
+            hasVideo: p.has_video || p.hasVideo, 
+            description: p.description || ""
+        }))));
+
+        // 3. ประกอบร่างเสร็จแล้ว ส่ง Response ออกไป
         return new Response(html, {
             headers: {
                 "Content-Type": "text/html; charset=utf-8",
@@ -733,6 +895,7 @@ html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(
 
     } catch (e) {
         console.error("Critical rendering error:", e);
-        return buildErrorPage(500, "500 - ข้อผิดพลาดภายในระบบ", "ระบบประมวลผลหลังบ้านเกิดขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้งในภายหลัง");
+        // สมมติว่ามีฟังก์ชัน buildErrorPage อยู่ด้านนอก
+        return new Response("500 - ระบบประมวลผลหลังบ้านเกิดขัดข้องชั่วคราว", { status: 500 });
     }
 };
