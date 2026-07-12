@@ -48,7 +48,7 @@ const getDynamicIntro = (provinceName) => {
     return `
         <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ โดยปราศจากเงื่อนไขการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น</p>
         <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการ in ${provinceName} ได้ถูกคัดเลือกและจัดสรรพิกัดที่เหมาะสม ไม่ว่าจะเป็นโซนใจกลางเมือง โรงแรมที่เดินทางสะดวกสบาย หรือคอนโดมิเนียมส่วนตัว พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
-        <p>ภาพถ่ายประวัติและสัดส่วนของสาวๆ ในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
+        <p>ภาพถ่ายประวัติและสัดส่วน of สาวๆ ในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
     `;
 };
 
@@ -168,66 +168,77 @@ function customMetaDesc(provinceName, seoData, customMeta) {
     return `รวมไซด์ไลน์${provinceName} สาวรับงาน${provinceName} เพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า${zonesText}`;
 }
 
-const generateSSRCardHTML = (p, provinceName, domain) => {
+const generateSSRCardHTML = (p, provinceName, domain, currentProvinceKey) => {
     const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
     const profileLocation = escapeHTML(p.location || provinceName);
     const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
     const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
     const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
     const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
-    const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
+    const displayRate = p.rate || "สอบถาม";
     const imageSource = optimizeImg(domain, p.imagePath, 300, 400);
 
+    // ตรรกะเงื่อนไขหลัก: แสดงป้าย "แนะนำ" เฉพาะบนหน้าเชียงใหม่ (หน้าหลัก) เท่านั้น
+    const showFeaturedBadge = p.isfeatured && currentProvinceKey === "chiangmai";
+
     return `
-    <div class="profile-card-new-container">
-      <div class="profile-card-new interactive-card" 
-           data-profile-id="${p.id}"
-           data-profile-slug="${p.slug}"
-           style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 20px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.4); cursor: pointer;">
-          
-          <img src="${imageSource}" 
-               alt="น้อง${cleanName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
-               width="300"
-               height="400"
-               style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.85); transition: opacity 0.7s; opacity: 1; z-index: 0; border-radius: 20px;" />
-               
-          <div style="position: absolute; top: 12px; left: 12px; z-index: 30; pointer-events: none;">
-              <span class="neon-badge ${isAvailable ? 'status-available-neon' : 'status-busy-neon'}" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; color: white; display: flex; align-items: center; gap: 6px;">
-                  <span class="neon-dot" style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: ${isAvailable ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${isAvailable ? '#00E676' : '#FF2E63'};"></span>
-                  <span>${p.availability || 'สอบถาม'}</span>
-              </span>
-          </div>
+    <div class="province-card profile-card-new interactive-card" 
+         data-id="${p.id}"
+         data-profile-id="${p.id}"
+         data-profile-slug="${p.slug}"
+         data-name="น้อง${cleanName}"
+         data-region="${profileLocation}"
+         data-desc=""
+         style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 24px; overflow: hidden; padding:0; cursor: pointer;"
+         role="listitem">
+        
+        <a href="${profileLink}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
 
-          ${p.isfeatured ? `
-          <div style="position: absolute; top: 40px; left: 12px; z-index: 30; pointer-events: none;">
-              <span style="background-color: #5A2CBE; color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
-          </div>
-          ` : ''}
+        <img src="${imageSource}" 
+             alt="น้อง${cleanName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
+             width="300"
+             height="400"
+             style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; position: absolute; inset: 0; z-index: 0;"
+             loading="lazy" decoding="async" />
 
-          <div style="position: absolute; top: 12px; right: 12px; z-index: 30; pointer-events: auto;">
-              <button type="button" class="profile-card-like-btn" data-action="like" data-id="${p.id}" aria-label="เพิ่มลงในรายการโปรด">
-                  <i class="fa-solid fa-heart"></i>
-              </button>
-          </div>
-          
-          <a href="${profileLink}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); z-index: 10; pointer-events: none;"></div>
 
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.4) 45%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
+        <div style="position: absolute; top: 12px; left: 12px; z-index: 30;">
+            <span class="neon-badge ${statusClass}">
+                <span class="neon-dot" style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: ${isAvailable ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${isAvailable ? '#00E676' : '#FF2E63'};"></span>
+                <span>${p.availability || 'สอบถาม'}</span>
+            </span>
+        </div>
 
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 6px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
-                  <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">น้อง${cleanName}</h3>
-                  <span style="color: #C084FC; font-weight: 900; font-size: 14px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">${p.rate || 'สอบถาม'}</span>
-              </div>
-              
-              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%;">
-                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex: 1; min-width: 0;">
-                      <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
-                  </span>
-              </div>
-          </div>
-      </div>
-    </div>`;
+        ${showFeaturedBadge ? `
+        <div style="position: absolute; top: 40px; left: 12px; z-index: 30; pointer-events: none;">
+            <span style="background-color: #5A2CBE; color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
+        </div>
+        ` : ''}
+
+        <div style="position: absolute; top: 12px; right: 12px; z-index: 30;">
+            <button type="button" class="circle-btn-el" data-action="like" data-id="${p.id}" style="width: 32px; height: 32px; border-radius: 50%;" aria-label="เพิ่มลงในรายการโปรด">
+                <i class="fa-solid fa-heart"></i>
+            </button>
+        </div>
+
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</h3>
+                <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray);">
+                <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
+                </span>
+                <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); white-space: nowrap;">
+                    <i class="far fa-clock" style="margin-right: 2px;"></i> ${formatDateSSR(p.lastUpdated || p.created_at)}
+                </span>
+            </div>
+        </div>
+    </div>
+    `;
 };
 
 const generateDynamicFAQsHTML = (faqs) => {
@@ -431,13 +442,23 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         let supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
-        // 🛡️ ปรับปรุงความถูกต้องฟิลด์: ดึง 'provinceKey' และ 'galleryPaths' มาพ่นข้อมูลประวัติแกลเลอรีรูปภาพและ Hydration ระบบจังหวัด
+        // 🛡️ ปรับปรุงความถูกต้องฟิลด์ให้ตรงตาม Supabase Schema ของคุณ (ใช้ skinTone, lineId แแบบ camelCase)
+        let profilesQuery = supabase.from("profiles")
+            .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skinTone, lineId")
+            .eq("provinceKey", provinceKey)
+            .eq("active", true)
+            .limit(80);
+
+        // 🚨 ตรรกะเงื่อนไขการเรียงลำดับ: หน้าต่างจังหวัดจะไม่เอาโปรไฟล์แนะนำ (isfeatured) ขึ้นก่อน
+        if (provinceKey === "chiangmai") {
+            profilesQuery = profilesQuery.order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false });
+        } else {
+            profilesQuery = profilesQuery.order("lastUpdated", { ascending: false });
+        }
+
         const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
             supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
-            supabase.from("profiles")
-                .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified")
-                .eq("provinceKey", provinceKey).eq("active", true)
-                .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
+            profilesQuery,
             supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
         ]);
 
@@ -550,9 +571,9 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 "@id": `${provinceUrl}/#itemlist`,
                 "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว${provinceName}`,
                 "numberOfItems": safeProfiles.length,
-                "itemListElement": safeProfiles.map((p, i) => ({
+                "itemListElement": safeProfiles.map((p, index) => ({
                     "@type": "ListItem",
-                    "position": i + 1,
+                    "position": index + 1,
                     "item": {
                         "@type": "Person",
                         "name": p.name || "ผู้ให้บริการ",
@@ -578,69 +599,9 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
         
+        // 🚨 เรียกใช้งาน generateSSRCardHTML โดยตรงเพื่อความถูกต้อง เป็นระบบระเบียบ ปราศจากโค้ดซ้ำซ้อน
         const cardsHTML = safeProfiles
-            .map((p) => {
-                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
-                const profileLocation = escapeHTML(p.location || provinceName);
-                const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-                const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-                const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
-                const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
-                const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
-
-                return `
-                <div class="province-card profile-card-new interactive-card" 
-                     data-id="${p.id}"
-                     data-profile-id="${p.id}"
-                     data-profile-slug="${p.slug}"
-                     data-name="น้อง${cleanName}"
-                     data-region="${profileLocation}"
-                     data-desc=""
-                     style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 24px; overflow: hidden; padding:0; cursor: pointer;"
-                     role="listitem">
-                    
-                    <a href="${profileLink}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
-
-                    <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
-                         alt="น้อง${cleanName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
-                         width="300"
-                         height="400"
-                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; position: absolute; inset: 0; z-index: 0;"
-                         loading="lazy" decoding="async" />
-
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); z-index: 10; pointer-events: none;"></div>
-
-                    <div style="position: absolute; top: 12px; left: 12px; z-index: 30;">
-                        <span class="neon-badge ${statusClass}">
-                            <span class="neon-dot"></span>
-                            <span>${statusText}</span>
-                        </span>
-                    </div>
-
-                    <div style="position: absolute; top: 12px; right: 12px; z-index: 30;">
-                        <button type="button" class="circle-btn-el" data-action="like" data-id="${p.id}" style="width: 32px; height: 32px; border-radius: 50%;" aria-label="เพิ่มลงในรายการโปรด">
-                            <i class="fa-solid fa-heart"></i>
-                        </button>
-                    </div>
-
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</h3>
-                            <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray);">
-                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
-                            </span>
-                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); white-space: nowrap;">
-                                <i class="far fa-clock" style="margin-right: 2px;"></i> ${formatDateSSR(p.lastUpdated || p.created_at)}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                `;
-            })
+            .map((p) => generateSSRCardHTML(p, provinceName, dynamicDomain, provinceKey))
             .join("");
 
         const seoIntroContent = seoData.uniqueIntro || getDynamicIntro(provinceName);
@@ -696,33 +657,27 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         html = replaceGlobal(html, "{{PROVINCE_REVIEWS_HTML}}", provinceReviewsHTML);
         html = replaceGlobal(html, "{{PROVINCE_FAQS_HTML}}", provinceFAQsHTML);
         
-// ====== แก้จุดที่ 3: แทนที่การแปลงไฟล์ JSON ในไฟล์ ssr-province.js ======
-html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    age: p.age,
-    height: p.height || "",     
-    weight: p.weight || "",     
-    stats: p.stats || "",       
-    skinTone: p.skinTone || p.skin_tone || "", 
-    bust: p.bust || "",         
-    waist: p.waist || "",       
-    hips: p.hips || "",         
-    cup_size: p.cup_size || "", 
-    imagePath: p.imagePath,
-    galleryPaths: p.galleryPaths || p.gallery_paths || [],
-    provinceKey: p.provinceKey,
-    provinceThai: provinceName, // 🚨 [จุดแก้ที่ 3]: ส่งชื่อภาษาไทยของจังหวัดคู่ประวัติแนบไปกับ JSON ป้องกันปัญหาไม่ระบุพิกัดบนเบราว์เซอร์
-    location: p.location,
-    rate: p.rate,
-    availability: p.availability,
-    lastUpdated: p.lastUpdated,
-    isfeatured: p.isfeatured,
-    verified: p.verified || p.isVerified,
-    hasVideo: p.has_video || p.hasVideo, 
-    description: p.description || ""
-}))));
+        // ส่งต่อข้อมูลแบบครบถ้วนไปยัง window.profilesData ฝั่งหน้าบ้าน (ใช้ตัวแปร camelCase สอดคล้องตามโครงสร้าง DB จริง)
+        html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
+            id: p.id,
+            slug: p.slug,
+            name: p.name,
+            age: p.age,
+            height: p.height || "",     
+            weight: p.weight || "",     
+            stats: p.stats || "",       
+            skinTone: p.skinTone || "", 
+            imagePath: p.imagePath,
+            galleryPaths: p.galleryPaths || [],
+            provinceKey: p.provinceKey,
+            provinceThai: provinceName, 
+            location: p.location,
+            rate: p.rate,
+            availability: p.availability,
+            lastUpdated: p.lastUpdated,
+            isfeatured: p.isfeatured,
+            lineId: p.lineId || ""
+        }))));
 
         return new Response(html, {
             headers: {
