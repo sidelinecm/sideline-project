@@ -2436,24 +2436,64 @@ ${xmlContent}
     const footerContainer = document.getElementById('popular-locations-footer');
     if (!footerContainer) return;
 
+    // การตั้งค่า Smart Cache
+    const CACHE_KEY = 'smart_cache_provinces';
+    const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // กำหนดอายุ Cache ไว้ที่ 24 ชั่วโมง
+    
     let provincesList = [];
+    let shouldUpdateCache = false;
 
-    // ดึงข้อมูลจังหวัด
-    if (state.provincesMap && state.provincesMap.size > 0) {
-        state.provincesMap.forEach((name, key) => {
+    // ลำดับ 1: ดึงจาก Memory (window.state)
+    if (window.state?.provincesMap && window.state.provincesMap.size > 0) {
+        window.state.provincesMap.forEach((name, key) => {
             provincesList.push({ key: key, name: name });
         });
-    } else if (window.supabase) {
+    } else {
+        // ลำดับ 2: ดึงจาก Smart Cache (LocalStorage)
         try {
-            const { data } = await window.supabase.from('provinces').select('*');
-            if (data) {
-                provincesList = data.map(p => ({
-                    key: p.key || p.slug || p.id,
-                    name: p.nameThai || p.name_thai || p.name
-                })).filter(p => p.key && p.name);
+            const cachedString = localStorage.getItem(CACHE_KEY);
+            if (cachedString) {
+                const cachedData = JSON.parse(cachedString);
+                const now = new Date().getTime();
+                
+                // ตรวจสอบว่า Cache ยังไม่หมดอายุ และมีข้อมูลอยู่จริง
+                if (cachedData.timestamp && (now - cachedData.timestamp < CACHE_TTL_MS) && Array.isArray(cachedData.data)) {
+                    provincesList = cachedData.data;
+                    console.log('⚡ Loaded provinces from Smart Cache');
+                }
             }
-        } catch (e) { 
-            console.warn("Footer load failed", e); 
+        } catch (error) {
+            console.warn("Smart Cache read failed, proceeding to network fetch:", error);
+        }
+
+        // ลำดับ 3: ดึงจาก Supabase (Network Fetch) กรณีไม่มี Cache หรือหมดอายุ
+        if (provincesList.length === 0 && window.supabase) {
+            try {
+                const { data } = await window.supabase.from('provinces').select('*');
+                if (data) {
+                    provincesList = data.map(p => ({
+                        key: p.key || p.slug || p.id,
+                        name: p.nameThai || p.name_thai || p.name
+                    })).filter(p => p.key && p.name);
+                    
+                    shouldUpdateCache = true; // ตั้งค่า Flag เพื่อบอกให้บันทึก Cache ใหม่
+                }
+            } catch (e) { 
+                console.warn("Supabase fetch failed", e); 
+            }
+        }
+    }
+
+    // เขียนข้อมูลลง Smart Cache ถ้ามีการดึงข้อมูลใหม่จาก Supabase
+    if (shouldUpdateCache && provincesList.length > 0) {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+                timestamp: new Date().getTime(),
+                data: provincesList
+            }));
+            console.log('💾 Smart Cache for provinces updated');
+        } catch (error) {
+            console.warn("Smart Cache write failed (Quota exceeded?):", error);
         }
     }
 
@@ -2467,15 +2507,21 @@ ${xmlContent}
     }
 
     const displayLimit = 20; 
-    let addedCount = footerContainer.querySelectorAll('li').length;
+    let addedCount = footerContainer.querySelectorAll('li:not(.view-all-link)').length;
 
-    // เปลี่ยนมาใช้ลูป for...of เพื่อสั่ง break ได้ ช่วยประหยัดทรัพยากร
+    // สร้าง Set เพื่อเช็คความซ้ำซ้อนแบบ O(1)
+    const existingKeys = new Set(
+        Array.from(footerContainer.querySelectorAll('a[href*="/location/"]'))
+             .map(a => a.getAttribute('href').split('/').pop())
+    );
+
+    // ใช้ DocumentFragment เพื่อลดการเกิด DOM Reflow / Repaint
+    const fragment = document.createDocumentFragment();
+
     for (const p of provincesList) {
-        if (addedCount >= displayLimit) break; // ถ้าครบจำนวนที่ต้องการแล้ว ให้หยุดลูปทันที
+        if (addedCount >= displayLimit) break;
 
-        const exists = footerContainer.querySelector(`a[href*="/location/${p.key}"]`);
-        
-        if (!exists) {
+        if (!existingKeys.has(p.key)) {
             const li = document.createElement('li');
             li.innerHTML = `
                 <a href="/location/${p.key}" 
@@ -2485,8 +2531,9 @@ ${xmlContent}
                    onmouseleave="this.style.color='var(--text-gray)'">
                    ไซด์ไลน์${p.name}
                 </a>`;
-            footerContainer.appendChild(li);
+            fragment.appendChild(li);
             addedCount++;
+            existingKeys.add(p.key);
         }
     }
 
@@ -2499,17 +2546,431 @@ ${xmlContent}
                style="color: var(--primary-purple); font-weight: 700; text-decoration: underline; margin-top: 8px; display: inline-block;">
                ดูจังหวัดอื่นๆ ทั้งหมด (${provincesList.length})
             </a>`;
-        footerContainer.appendChild(viewAll);
+        fragment.appendChild(viewAll);
     }
+
+    // นำ Fragment ใส่ DOM ในครั้งเดียว
+    footerContainer.appendChild(fragment);
 }
 
-// อัปเดตวันที่เวอร์ชันไทย
-const now = new Date();
-const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
-const timeEl = document.getElementById('last-updated-time');
-if (timeEl) timeEl.innerText = thaiDate;
+/* ==============================================================
+   โซนที่ 1: COMPACT OVERRIDE PACK (ฟังก์ชันระดับ Global)
+   ต้องรันก่อนเสมอ เพื่อให้ UI และ Event ต่างๆ เรียกใช้ได้ทันที
+============================================================== */
+(function () {
+  'use strict';
 
-// ลงทะเบียน Service Worker เมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+  const __compactText = {
+    empty: 'ไม่พบข้อมูล',
+    loading: 'กำลังโหลด...',
+    noResult: 'ไม่พบผลลัพธ์ที่ตรงกับเงื่อนไข',
+    error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'
+  };
+
+  window.getCleanName = function (rawName) {
+    if (!rawName || typeof rawName !== 'string') return '';
+    let name = rawName.trim().replace(/^(น้อง\s?)/, '');
+    if (!name) return '';
+    name = name.toLowerCase();
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    return `น้อง${name}`;
+  };
+
+  window.formatDate = function (dateString) {
+    if (!dateString) return 'ไม่ระบุ';
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+      if (diffInSeconds < 60) return 'เมื่อครู่นี้';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} นาทีที่แล้ว`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} ชม.ที่แล้ว`;
+      if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} วันที่แล้ว`;
+      const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+      return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${(date.getFullYear() + 543).toString().slice(-2)}`;
+    } catch {
+      return 'ไม่ระบุ';
+    }
+  };
+
+  window.saveRecentSearch = function (term) {
+    if (!term || !term.trim()) return;
+    try {
+      const key = 'recent_searches';
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      const filtered = arr.filter(t => String(t).toLowerCase() !== String(term).toLowerCase());
+      filtered.unshift(term.trim());
+      localStorage.setItem(key, JSON.stringify(filtered.slice(0, 10)));
+    } catch {}
+  };
+
+  window.showErrorState = function (error) {
+    console.error('Compact patch error:', error);
+    const area = document.getElementById('profiles-display-area');
+    const loading = document.getElementById('loading-profiles-placeholder');
+    const fetchError = document.getElementById('fetch-error-message');
+    const noResults = document.getElementById('no-results-message');
+    const featured = document.getElementById('featured-profiles');
+    const loadMore = document.getElementById('load-more-container');
+
+    if (loading) loading.classList.add('hidden');
+    if (featured) featured.classList.add('hidden');
+    if (loadMore) loadMore.style.display = 'none';
+    if (fetchError) fetchError.classList.add('hidden');
+    if (noResults) noResults.classList.add('hidden');
+
+    if (area) {
+      area.classList.remove('hidden');
+      area.innerHTML = `
+        <div style="text-align:center;padding:32px 16px;max-width:520px;margin:0 auto;border:1px solid rgba(239,68,68,0.14);background:rgba(127,29,29,0.08);border-radius:20px;color:#FCA5A5;">
+          <div style="font-size:34px;line-height:1;margin-bottom:12px;">!</div>
+          <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;">${__compactText.error}</div>
+          <div style="font-size:12px;line-height:1.6;color:#D4D4D8;">โปรดลองรีเฟรชหน้าเว็บ หรือรอสักครู่แล้วเปิดใหม่อีกครั้ง</div>
+        </div>
+      `;
+    }
+  };
+
+  window.processProfileData = function (p) {
+    if (!p) return null;
+    const displayName = window.getCleanName ? window.getCleanName(p.name) : (p.name || '');
+    const rawGallery = Array.isArray(p.galleryPaths) ? p.galleryPaths : [];
+    const imagePaths = [p.imagePath, ...rawGallery].filter(Boolean);
+    const uniquePaths = [...new Set(imagePaths)];
+    const images = uniquePaths.map(path => ({
+      src: path,
+      fullSrc: path
+    }));
+    const firstImage = images[0]?.src || '/images/sidelinechiangmai-social-preview.webp';
+    const provinceName = p.provinceThai || p.provinceNameThai || p.provinceKey || '';
+    const numericPrice = Number(String(p.rate || '').replace(/[^\d]/g, '')) || 0;
+    const displayPrice = numericPrice > 0 ? numericPrice.toLocaleString() : '';
+    const searchString = [
+      displayName,
+      p.slug,
+      provinceName,
+      p.location,
+      p.description,
+      p.availability,
+      p.stats,
+      p.skinTone || p.skintone,
+      p.age
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    return {
+      ...p,
+      displayName,
+      images,
+      firstImage,
+      provinceNameThai: provinceName,
+      displayPrice,
+      price: numericPrice,
+      searchString,
+      safeAge: p.age || '-',
+      safeHeight: p.height || '-',
+      safeWeight: p.weight || '-',
+      isVerified: p.verified === true,
+      hasVideo: p.hasVideo || p.hasvideo === true
+    };
+  };
+
+  window.renderProfileCardCompact = function (profile) {
+    if (!profile) return '';
+    const name = escapeHtml(profile.displayName || profile.name || '');
+    const location = escapeHtml(profile.location || profile.provinceNameThai || '');
+    const img = profile.images?.[0]?.src || profile.firstImage || '/images/sidelinechiangmai-social-preview.webp';
+    const slug = encodeURIComponent(profile.slug || '');
+    const statusText = /available|ว่าง|พร้อม|รับงาน/i.test(String(profile.availability || '')) ? 'Available' : 'Busy';
+    const statusClass = statusText === 'Available' ? 'status-available-neon' : 'status-busy-neon';
+    const rate = profile.displayPrice ? `<span>${profile.displayPrice}</span>` : '';
+
+    return `
+      <div class="profile-card-new-container">
+        <div class="profile-card-new interactive-card" data-profile-id="${profile.id || ''}" data-profile-slug="${slug}" style="aspect-ratio:3/4;width:100%;position:relative;border-radius:18px;overflow:hidden;background-color:#09090B;border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 18px rgba(0,0,0,0.35);cursor:pointer;">
+          <img src="${img}" alt="${name}" width="300" height="400" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.86);z-index:0;" />
+          <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.42) 45%, transparent 80%);z-index:10;pointer-events:none;"></div>
+
+          <div style="position:absolute;top:10px;left:10px;z-index:30;">
+            <span class="neon-badge ${statusClass}" style="background-color:rgba(0,0,0,0.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);font-size:10px;font-weight:700;padding:4px 10px;border-radius:999px;color:white;display:flex;align-items:center;gap:6px;">
+              <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${statusText === 'Available' ? '#00E676' : '#FF2E63'};box-shadow:0 0 6px ${statusText === 'Available' ? '#00E676' : '#FF2E63'};"></span>
+              ${statusText}
+            </span>
+          </div>
+
+          ${profile.isfeatured ? `
+          <div style="position:absolute;top:42px;left:10px;z-index:30;">
+            <span style="background-color:#5A2CBE;color:white;font-size:9px;font-weight:800;padding:4px 10px;border-radius:999px;box-shadow:0 4px 10px rgba(90,44,190,0.3);display:flex;align-items:center;gap:4px;">
+              <i class="fas fa-star" style="font-size:8px;"></i> FEATURED
+            </span>
+          </div>` : ''}
+
+          <div style="position:absolute;top:10px;right:10px;z-index:30;">
+            <button type="button" class="profile-card-like-btn" data-action="like" data-id="${profile.id || ''}" aria-label="Like profile" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.1);color:white;display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+          </div>
+
+          <a href="/sideline/${slug}" class="card-link" style="position:absolute;inset:0;z-index:25;" aria-label="${name}"></a>
+
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:14px;z-index:20;text-align:left;pointer-events:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
+              <h3 style="font-size:14px;font-weight:800;color:white;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 2px 4px rgba(0,0,0,0.8);flex:1;min-width:0;">${name}</h3>
+              ${rate}
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#D4D4D8;gap:8px;">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.8);flex:1;min-width:0;">
+                <i class="fas fa-map-marker-alt" style="color:#C084FC;margin-right:4px;"></i>${location}
+              </span>
+              <span style="text-shadow:0 1px 2px rgba(0,0,0,0.8);white-space:nowrap;">${profile.safeAge || '-'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  window.renderProfiles = function (profiles, append = false) {
+    const area = document.getElementById('profiles-display-area');
+    if (!area) return;
+    const list = Array.isArray(profiles) ? profiles : [];
+    const html = list.map(window.renderProfileCardCompact).join('');
+
+    if (!append) area.innerHTML = '';
+    area.classList.remove('hidden');
+
+    const grid = document.createElement('div');
+    grid.className = 'profiles-grid-row';
+    grid.innerHTML = html || `
+      <div style="grid-column:1/-1;text-align:center;padding:28px 16px;color:#A1A1AA;">
+        <div style="font-size:14px;font-weight:700;">${__compactText.noResult}</div>
+      </div>
+    `;
+    area.appendChild(grid);
+  };
+
+  window.updateUltimateSuggestions = function (val) {
+    const box = document.getElementById('search-suggestions');
+    if (!box) return;
+    const q = String(val || '').trim();
+
+    if (!q) {
+      const recents = JSON.parse(localStorage.getItem('recent_searches') || '[]');
+      if (!recents.length) {
+        box.classList.add('hidden');
+        return;
+      }
+      box.innerHTML = `
+        <div style="background:#121214;border:1px solid rgba(147,51,234,0.25);border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+          <div style="padding:10px 16px;background:#09090B;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;">Recent searches</span>
+          </div>
+          ${recents.slice(0,5).map(term => `
+            <div class="suggestion-item" data-action="suggestion" data-slug="${String(term).replace(/"/g,'&quot;')}" data-is-profile="false" style="padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.03);">
+              <span style="font-size:13px;color:#fff;font-weight:600;">${escapeHtml(term)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      box.classList.remove('hidden');
+      return;
+    }
+
+    const items = (window.state?.allProfiles || []).slice(0, 8).filter(p => {
+      const s = String(p.searchString || '').toLowerCase();
+      return s.includes(q.toLowerCase());
+    }).slice(0, 5);
+
+    if (!items.length) {
+      box.classList.add('hidden');
+      return;
+    }
+
+    box.innerHTML = `
+      <div style="background:#121214;border:1px solid rgba(147,51,234,0.25);border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+        <div style="padding:10px 16px;background:#09090B;border-bottom:1px solid rgba(255,255,255,0.05);">
+          <span style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;">Results</span>
+        </div>
+        ${items.map(item => `
+          <div class="suggestion-item" data-action="suggestion" data-slug="${item.slug}" data-is-profile="true" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.03);">
+            <div style="width:40px;height:40px;flex:0 0 40px;overflow:hidden;border-radius:50%;border:1px solid rgba(255,255,255,0.08);">
+              <img src="${item.images?.[0]?.src || '/images/sidelinechiangmai-social-preview.webp'}" alt="" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+            <div style="flex:1;min-width:0;text-align:left;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <span style="font-size:13px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(item.displayName || item.name || '')}</span>
+                <span style="font-size:9px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;color:var(--text-gray);font-weight:700;">${escapeHtml(String(item.safeAge || '-'))}</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-gray);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                <i class="fas fa-map-marker-alt" style="font-size:9px;color:var(--primary-purple);margin-right:4px;"></i>${escapeHtml(item.provinceNameThai || '')}
+              </div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:rgba(255,255,255,0.15);font-size:10px;"></i>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    box.classList.remove('hidden');
+  };
+
+  window.showRecentSearches = function () {
+    window.updateUltimateSuggestions('');
+  };
+
+  window.applyUltimateFilters = function (preserveScroll = false) {
+    const input = document.getElementById('search-keyword');
+    const province = document.getElementById('search-province');
+    const availability = document.getElementById('search-availability');
+    const featured = document.getElementById('search-featured');
+    const sort = document.getElementById('sort-select');
+    const area = document.getElementById('profiles-display-area');
+    const resultCount = document.getElementById('result-count');
+    const noResults = document.getElementById('no-results-message');
+
+    let data = Array.isArray(window.state?.allProfiles) ? [...window.state.allProfiles] : [];
+    const q = String(input?.value || '').trim().toLowerCase();
+    const pv = String(province?.value || '').trim().toLowerCase();
+    const av = String(availability?.value || '').trim().toLowerCase();
+    const ft = String(featured?.value || '').trim().toLowerCase();
+
+    if (q) data = data.filter(p => String(p.searchString || '').toLowerCase().includes(q));
+    if (pv) data = data.filter(p => String(p.provinceKey || '').toLowerCase() === pv);
+    if (av) {
+      data = data.filter(p => {
+        const s = String(p.availability || '').toLowerCase();
+        return av === 'available' ? /available|ว่าง|รับงาน/.test(s) : /notavailable|busy|ไม่ว่าง|ปิด/.test(s);
+      });
+    }
+    if (ft) data = data.filter(p => String(Boolean(p.isfeatured)) === ft);
+
+    switch (String(sort?.value || 'featured')) {
+      case 'nameasc':
+        data.sort((a, b) => String(a.displayName || a.name || '').localeCompare(String(b.displayName || b.name || ''), 'th'));
+        break;
+      case 'namedesc':
+        data.sort((a, b) => String(b.displayName || b.name || '').localeCompare(String(a.displayName || a.name || ''), 'th'));
+        break;
+      case 'rating':
+        data.sort((a, b) => (Number(b.rate) || 0) - (Number(a.rate) || 0));
+        break;
+      default:
+        data.sort((a, b) => Number(Boolean(b.isfeatured)) - Number(Boolean(a.isfeatured)));
+    }
+
+    if (resultCount) resultCount.textContent = `${data.length}`;
+    if (area) {
+      area.innerHTML = '';
+      window.renderProfiles(data, false);
+    }
+
+    if (noResults) {
+      noResults.style.display = data.length ? 'none' : 'block';
+      noResults.textContent = data.length ? '' : __compactText.noResult;
+    }
+
+    if (!preserveScroll) {
+      const top = document.getElementById('search-section');
+      if (top) top.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  window.openLightbox = function (profile) {
+    const lb = document.getElementById('lightbox');
+    const title = document.getElementById('lightbox-profile-name-main');
+    const hero = document.getElementById('lightboxHeroImage');
+    const strip = document.getElementById('lightboxThumbnailStrip');
+    const tags = document.getElementById('lightboxTags');
+    const quote = document.getElementById('lightboxQuote');
+    const details = document.getElementById('lightboxDetailsCompact');
+    const descWrap = document.getElementById('lightboxDescriptionContainer');
+    const descContent = document.getElementById('lightboxDescriptionContent');
+
+    if (!lb || !profile) return;
+
+    title && (title.textContent = profile.displayName || profile.name || '');
+    if (hero) hero.src = profile.images?.[0]?.fullSrc || profile.images?.[0]?.src || profile.firstImage || '/images/sidelinechiangmai-social-preview.webp';
+
+    if (strip) {
+      strip.innerHTML = (profile.images || []).slice(0, 6).map(img => `
+        <button type="button" style="width:52px;height:72px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:none;padding:0;flex:0 0 auto;">
+          <img src="${img.src}" alt="" style="width:100%;height:100%;object-fit:cover;" />
+        </button>
+      `).join('');
+    }
+
+    if (tags) {
+      tags.innerHTML = [
+        profile.provinceNameThai,
+        profile.safeAge !== '-' ? `${profile.safeAge} ปี` : '',
+        profile.safeHeight !== '-' ? `${profile.safeHeight} cm` : '',
+        profile.safeWeight !== '-' ? `${profile.safeWeight} kg` : ''
+      ].filter(Boolean).map(t => `<span style="padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);font-size:11px;color:#E5E7EB;">${escapeHtml(String(t))}</span>`).join('');
+    }
+
+    if (quote) quote.innerHTML = `<div style="font-size:12px;color:var(--text-gray);line-height:1.6;">${escapeHtml(profile.description || 'Compact profile detail')}</div>`;
+    if (details) {
+      details.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+          <div style="padding:12px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:12px;color:#D4D4D8;">Province<br><strong style="color:#fff;">${escapeHtml(profile.provinceNameThai || '')}</strong></div>
+          <div style="padding:12px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:12px;color:#D4D4D8;">Status<br><strong style="color:#fff;">${escapeHtml(profile.availability || '')}</strong></div>
+        </div>
+      `;
+    }
+
+    if (descWrap && descContent) {
+      if (profile.description) {
+        descWrap.style.display = 'block';
+        descContent.textContent = profile.description;
+      } else {
+        descWrap.style.display = 'none';
+      }
+    }
+
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+})();
+
+
+/* ==============================================================
+   โซนที่ 2: HYDRATION & DOM INITIALIZATION
+   รันเมื่อหน้าเว็บโหลดเสร็จ เชื่อมต่อข้อมูล SSR เข้ากับระบบค้นหา
+============================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    // 2.1 เชื่อมต่อข้อมูล JSON จาก Edge Function เข้าสู่ State (หัวใจของระบบ Filter/Search)
+    window.state = window.state || {};
+    
+    // สมมติว่าใน HTML ดั้งเดิมของคุณ (หลัง Edge Function ทำงาน) มีสคริปต์ประกาศตัวแปรระดับ Global ไว้
+    // เช่น: <script> const PROFILES_DATA_FROM_SSR = {{PROFILES_JSON}}; </script>
+    // ดึงข้อมูลเหล่านั้นเข้ากระบวนการ processProfileData
+    if (typeof PROFILES_DATA_FROM_SSR !== 'undefined' && Array.isArray(PROFILES_DATA_FROM_SSR)) {
+        window.state.allProfiles = PROFILES_DATA_FROM_SSR.map(window.processProfileData);
+    } else {
+        // Fallback เผื่อใช้ตัวแปรชื่ออื่น หรือให้ดึงจาก DOM แทน
+        console.warn('SSR Data not found natively, client search might be empty.');
+        window.state.allProfiles = []; 
+    }
+
+    // 2.2 อัปเดตวันที่เวอร์ชันไทย
+    const now = new Date();
+    const thaiDate = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    const timeEl = document.getElementById('last-updated-time');
+    if (timeEl) timeEl.innerText = thaiDate;
+});
+
+
+/* ==============================================================
+   โซนที่ 3: PWA SERVICE WORKER
+   แยกออกมาต่างหากเพื่อความคลีน ให้ทำงานหลังจากองค์ประกอบหลักเสร็จแล้ว
+============================================================== */
 if ('serviceWorker' in navigator) {
     const registerServiceWorker = () => {
         navigator.serviceWorker.register('/sw.js')
@@ -2527,6 +2988,3 @@ if ('serviceWorker' in navigator) {
         window.addEventListener('load', registerServiceWorker);
     }
 }
-
-})();
-
