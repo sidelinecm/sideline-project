@@ -278,7 +278,7 @@
     </div>
 </footer>
   <!-- เชื่อมโยงระบบดึงข้อมูล Javascript ของระบบหลัก (เรียกผ่านโมดูลระบบใหม่เพื่อรันแอปพลิเคชันเสถียร) -->
-  <script type="module" src="/app.js"></script>
+  <script type="module" src="/main.js"></script>
 
 
 <script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
