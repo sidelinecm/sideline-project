@@ -892,25 +892,312 @@ html.light .tabs-container {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-/* ล็อกและปรับสีกล่องข้อความความปลอดภัยให้เป็นสีขาวสว่างตัดกับพื้นหลังมืด */
+
+/* 🚨 [จุดอัปเกรดป้ายนีออนความน่าเชื่อถือสูง] */
+.verification-badge-neon {
+  animation: verification-glow-pulse 3s infinite ease-in-out;
+}
+
+@keyframes verification-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.45);
+    border-color: rgba(245, 158, 11, 0.6);
+  }
+}
+
+/* 🚨 สไตล์สำหรับแอปพลิเคชันแบบฟอร์มเลือกดาว (Star Rating Interactions) */
+.star-rating-input-item {
+  transition: color 0.2s, transform 0.2s;
+}
+
+.star-rating-input-item.active {
+  color: #FBBF24 !important;
+}
+
+.star-rating-input-item:hover {
+  transform: scale(1.2);
+}
+
+.user-submitted-review {
+  animation: slide-in-review-anim 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-in-review-anim {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==============================================================================
+   12. APP-SHELL DESIGN ENGINE (ADDITIONAL UPGRADES 2026)
+   ============================================================================== */
+:root {
+  --app-purple-neon: #7C3AED;
+  --app-purple-glow: rgba(124, 58, 237, 0.15);
+  --app-dark-glass: rgba(13, 8, 30, 0.7);
+}
+
+body {
+  background-color: #060411 !important;
+  font-family: 'Prompt', sans-serif;
+}
+
+#page-header {
+  background: var(--app-dark-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(147, 51, 234, 0.25) !important;
+  height: 72px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.65) !important;
+}
+
+.billboard-container {
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.75);
+  overflow: hidden;
+  margin: 24px auto !important;
+}
+
+.safe-capsules-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
 .safe-capsule-item {
-  color: #FFFFFF !important;
-  text-decoration: none !important;
-  transition: background-color 0.2s, border-color 0.2s;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  padding: 10px 20px !important;
+  border-radius: 100px !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.safe-capsule-item .capsule-text {
-  color: #FFFFFF !important; /* ปรับเป็นสีขาวสว่าง */
-  font-size: 13px !important; /* ปรับขนาดเพิ่มขึ้นจากเดิมให้อ่านง่ายขึ้นบนมือถือ */
-  font-weight: 700 !important;
+.safe-capsule-item:hover {
+  background: rgba(124, 58, 237, 0.12) !important;
+  border-color: var(--app-purple-neon) !important;
+  transform: translateY(-2px);
 }
 
-.purple-contrast-label {
+.glass-panel {
+  border-radius: 28px !important;
+  border: 1px solid rgba(147, 51, 234, 0.15) !important;
+  background: rgba(13, 8, 30, 0.45) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+}
+
+#search-section {
+  border-radius: 24px !important;
+  border: 1px solid rgba(124, 58, 237, 0.2) !important;
+  background: linear-gradient(135deg, rgba(13, 8, 30, 0.8), rgba(9, 9, 12, 0.95)) !important;
+}
+
+.search-input-field, .search-select-field {
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background-color: #0c081d !important;
+  transition: all 0.25s ease !important;
+}
+
+.search-input-field:focus, .search-select-field:focus {
+  border-color: var(--app-purple-neon) !important;
+  box-shadow: 0 0 15px var(--app-purple-glow) !important;
+}
+
+.bento-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 20px !important;
+}
+
+.interactive-card {
+  border-radius: 24px !important;
+  background: rgba(13, 8, 30, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.interactive-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(147, 51, 234, 0.3) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+#review-form input, #review-form textarea {
+  background: #090615 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.25s ease;
+}
+
+#review-form input:focus, #review-form textarea:focus {
+  border-color: var(--app-purple-neon) !important;
+  box-shadow: 0 0 12px var(--app-purple-glow) !important;
+}
+
+/* 🟢 เทคนิคย่อส่วนพรางตาคำบรรยายเนื้อหา SEO ยาวๆ (SEO Content Drawer) */
+.seo-content-container {
+  position: relative;
+  transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.seo-content-container.collapsed {
+  max-height: 180px;
+  overflow: hidden;
+}
+.seo-fade-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(to top, #060411 15%, transparent 100%);
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.seo-content-container:not(.collapsed) .seo-fade-overlay {
+  opacity: 0;
+}
+.btn-read-more {
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  color: #C084FC;
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+.btn-read-more:hover {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: #7C3AED;
+}
+
+/* 🟢 เทคนิคบีบย่อกล่องกฎระเบียบ 5 ข้อ ให้เป็น Accordion (Rules Accordion) */
+.rule-item {
+  background: rgba(13, 8, 30, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.rule-item:hover {
+  border-color: rgba(124, 58, 237, 0.25);
+}
+.rule-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  cursor: pointer;
+  color: white;
+  text-align: left;
+}
+.rule-number {
+  font-size: 14px;
+  font-weight: 800;
+  color: #C084FC;
+  margin-right: 16px;
+}
+.rule-title {
+  flex-grow: 1;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.rule-icon {
+  font-size: 12px;
+  color: #94A3B8;
+  transition: transform 0.3s;
+}
+.rule-content {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 24px;
+  transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s;
+}
+.rule-item:not(.collapsed) .rule-content {
+  max-height: 250px;
+  padding-bottom: 20px;
+}
+.rule-item:not(.collapsed) .rule-icon {
+  transform: rotate(180deg);
+  color: #C084FC;
+}
+
+/* แถบควบคุมลอยตัวด้านล่างแอป (Floating Bottom App Navigation) */
+.floating-app-dock {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 480px;
+  height: 64px;
+  background: rgba(13, 8, 30, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(147, 51, 234, 0.35);
+  border-radius: 100px;
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #94A3B8;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.dock-item i {
+  font-size: 18px;
+}
+
+.dock-item.active, .dock-item:hover {
   color: #C084FC !important;
 }
 
-/* ปรับปรุงสีของลิงก์ข้อความที่เป็นสีม่วงใน Footer เพื่อให้มีค่า Contrast ผ่านเกณฑ์ */
-a[style*="color: var(--primary-purple)"] {
-  color: #C084FC !important;
-  text-decoration: underline !important;
+.dock-item-line {
+  background: #06C755;
+  color: white !important;
+  padding: 8px 16px;
+  border-radius: 100px;
+  flex-direction: row !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+}
+
+@media (max-width: 768px) {
+  .floating-app-dock {
+    display: flex;
+  }
+  main {
+    padding-bottom: 100px !important;
+  }
 }
