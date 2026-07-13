@@ -254,6 +254,7 @@ function customMetaDesc(provinceName, seoData, customMeta) {
     return `รวมไซด์ไลน์${provinceName} สาวรับงาน${provinceName} เพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า${zonesText}`;
 }
 
+// โค้ดสำหรับ generateSSRCardHTML ใน ssr-province.js
 const generateSSRCardHTML = (p, provinceName, domain) => {
     const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
     const profileLocation = escapeHTML(p.location || provinceName);
@@ -319,23 +320,25 @@ const generateSSRCardHTML = (p, provinceName, domain) => {
           
           <a href="${profileLink}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
 
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.4) 45%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
+          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.5) 40%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
 
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 6px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
                   <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">น้อง${cleanName}${ageDisplay}</h3>
-                  <span style="color: #C084FC; font-weight: 900; font-size: 14px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">${p.rate || 'สอบถาม'}</span>
               </div>
               
-              <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #A1A1AA; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-                  <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: #E4E4E7;">${escapeHTML(statsDisplay)}</span>
-                  <span style="background-color: rgba(147, 51, 234, 0.15); color: #C084FC; padding: 2px 6px; border-radius: 4px;">หญิง</span>
-                  ${skinText !== '-' ? `<span style="color: #8E9196; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;">${escapeHTML(skinText)}</span>` : ''}
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: #D4D4D8; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex-wrap: wrap;">
+                  <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; color: #FFFFFF;">${escapeHTML(statsDisplay)}</span>
+                  <span style="background-color: rgba(147, 51, 234, 0.2); color: #C084FC; padding: 1px 6px; border-radius: 4px; font-size: 9px;">หญิง</span>
+                  ${skinText !== '-' ? `<span style="color: #A1A1AA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75px;">${escapeHTML(skinText)}</span>` : ''}
               </div>
 
-              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px; margin-top: 2px;">
                   <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex: 1; min-width: 0;">
                       <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
+                  </span>
+                  <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">
+                      ${p.rate || 'สอบถาม'}
                   </span>
               </div>
           </div>
@@ -702,7 +705,7 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
                 const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
                 const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
 
-                // 🟢 แปลงและเตรียมค่าคุณสมบัติเฉพาะสำหรับการแสดงผลเชิงลึกทางด้านเทคนิคบนเซิร์ฟเวอร์
+                // 🟢 อัปเกรดตัวแปรสำหรับการเรนเดอร์ระดับคีย์การ์ดบนเซิร์ฟเวอร์
                 const ageText = p.age || '';
                 const ageDisplay = (ageText && ageText !== '-') ? ` (${escapeHTML(ageText)})` : '';
                 
@@ -740,7 +743,6 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
 
                     <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); z-index: 10; pointer-events: none;"></div>
 
-                    <!-- 🟢 ปรับเปลี่ยนบล็อก Badge ลอยตัวแนวตั้งให้ครบถ้วนทุกสถานะของโปรไฟล์ -->
                     <div style="position: absolute; top: 12px; left: 12px; z-index: 30; display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
                         <span class="neon-badge ${statusClass}">
                             <span class="neon-dot"></span>
@@ -763,25 +765,24 @@ const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
                         </button>
                     </div>
 
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 4px;">
+                        <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
                             <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">น้อง${cleanName}${ageDisplay}</h3>
-                            <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
+                        </div>
+
+                        <!-- 🟢 สเปกน้องระดับพรีเมียมบนการ์ดหน้ารวม -->
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: #D4D4D8; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex-wrap: wrap;">
+                            <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; color: #FFFFFF;">${escapeHTML(statsDisplay)}</span>
+                            <span style="background-color: rgba(147, 51, 234, 0.2); color: #C084FC; padding: 1px 6px; border-radius: 4px; font-size: 9px;">หญิง</span>
+                            ${skinText !== '-' ? `<span style="color: #A1A1AA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75px;">${escapeHTML(skinText)}</span>` : ''}
                         </div>
                         
-                        <!-- 🟢 แสดงผลข้อมูลสัดส่วน-เพศ-สีผิว บนเซิร์ฟเวอร์เพื่อให้ Google Bot เก็บข้อมูลทำดัชนีได้ -->
-                        <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #A1A1AA; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); margin-bottom: 6px;">
-                            <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: #E4E4E7;">${escapeHTML(statsDisplay)}</span>
-                            <span style="background-color: rgba(147, 51, 234, 0.15); color: #C084FC; padding: 2px 6px; border-radius: 4px;">หญิง</span>
-                            ${skinText !== '-' ? `<span style="color: #8E9196; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;">${escapeHTML(skinText)}</span>` : ''}
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">
-                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">
+                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;">
                                 <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
                             </span>
-                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); white-space: nowrap;">
-                                <i class="far fa-clock" style="margin-right: 2px;"></i> ${formatDateSSR(p.lastUpdated || p.created_at)}
+                            <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">
+                                ${p.rate || 'สอบถาม'}
                             </span>
                         </div>
                     </div>
