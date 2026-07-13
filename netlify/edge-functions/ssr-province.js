@@ -264,6 +264,21 @@ const generateSSRCardHTML = (p, provinceName, domain) => {
     const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
     const imageSource = optimizeImg(domain, p.imagePath, 300, 400);
 
+    const ageText = p.age || '';
+    const ageDisplay = (ageText && ageText !== '-') ? ` (${escapeHTML(ageText)})` : '';
+    
+    let statsDisplay = '-';
+    if (p.bust && p.waist && p.hips) {
+        const cup = p.cup_size ? p.cup_size.toUpperCase() : '';
+        statsDisplay = `${p.bust}${cup}-${p.waist}-${p.hips}`;
+    } else if (p.stats) {
+        statsDisplay = p.stats;
+    }
+    
+    const skinText = p.skin_tone || p.skinTone || '-';
+    const isVerified = p.verified === true;
+    const hasVideo = p.has_video === true;
+
     return `
     <div class="profile-card-new-container">
       <div class="profile-card-new interactive-card" 
@@ -277,18 +292,24 @@ const generateSSRCardHTML = (p, provinceName, domain) => {
                height="400"
                style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.85); transition: opacity 0.7s; opacity: 1; z-index: 0; border-radius: 20px;" />
                
-          <div style="position: absolute; top: 12px; left: 12px; z-index: 30; pointer-events: none;">
+          <div style="position: absolute; top: 12px; left: 12px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
               <span class="neon-badge ${isAvailable ? 'status-available-neon' : 'status-busy-neon'}" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; color: white; display: flex; align-items: center; gap: 6px;">
                   <span class="neon-dot" style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: ${isAvailable ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${isAvailable ? '#00E676' : '#FF2E63'};"></span>
                   <span>${p.availability || 'สอบถาม'}</span>
               </span>
-          </div>
 
-          ${p.isfeatured ? `
-          <div style="position: absolute; top: 40px; left: 12px; z-index: 30; pointer-events: none;">
-              <span style="background-color: #5A2CBE; color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
+              ${p.isfeatured ? `
+              <span style="background-color: #5A2CBE; border: 1px solid rgba(147, 51, 234, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
+              ` : ''}
+
+              ${hasVideo ? `
+              <span style="background-color: #FF2E63; border: 1px solid rgba(255, 46, 99, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video" style="font-size: 8px;"></i>วิดีโอ</span>
+              ` : ''}
+
+              ${isVerified ? `
+              <span style="background-color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.4); color: #000000; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-check-circle" style="font-size: 8px;"></i>ยืนยันแล้ว</span>
+              ` : ''}
           </div>
-          ` : ''}
 
           <div style="position: absolute; top: 12px; right: 12px; z-index: 30; pointer-events: auto;">
               <button type="button" class="profile-card-like-btn" data-action="like" data-id="${p.id}" aria-label="เพิ่มลงในรายการโปรด">
@@ -302,11 +323,17 @@ const generateSSRCardHTML = (p, provinceName, domain) => {
 
           <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 6px;">
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
-                  <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">น้อง${cleanName}</h3>
+                  <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">น้อง${cleanName}${ageDisplay}</h3>
                   <span style="color: #C084FC; font-weight: 900; font-size: 14px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">${p.rate || 'สอบถาม'}</span>
               </div>
               
-              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #A1A1AA; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                  <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: #E4E4E7;">${escapeHTML(statsDisplay)}</span>
+                  <span style="background-color: rgba(147, 51, 234, 0.15); color: #C084FC; padding: 2px 6px; border-radius: 4px;">หญิง</span>
+                  ${skinText !== '-' ? `<span style="color: #8E9196; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;">${escapeHTML(skinText)}</span>` : ''}
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px;">
                   <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex: 1; min-width: 0;">
                       <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
                   </span>
@@ -517,15 +544,16 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         let supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
-        // 🛡️ ปรับปรุงความถูกต้องฟิลด์: ดึง 'provinceKey' และ 'galleryPaths' มาพ่นข้อมูลประวัติแกลเลอรีรูปภาพและ Hydration ระบบจังหวัด
-        const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
-            supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
-            supabase.from("profiles")
-                .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified")
-                .eq("provinceKey", provinceKey).eq("active", true)
-                .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
-            supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
-        ]);
+// ค้นหาโค้ดส่วนนี้และอัปเดตให้มี line_id, quote, style_tags
+const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
+    supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
+    supabase.from("profiles")
+        // 🟢 ตรวจสอบให้มั่นใจว่ามี line_id, quote, style_tags อยู่ในรายการเลือกด้านล่างนี้
+        .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, quote, style_tags")
+        .eq("provinceKey", provinceKey).eq("active", true)
+        .order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
+    supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+]);
 
         const provinceData = provinceRes.data;
         if (!provinceData) {
@@ -674,6 +702,22 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
                 const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
 
+                // 🟢 แปลงและเตรียมค่าคุณสมบัติเฉพาะสำหรับการแสดงผลเชิงลึกทางด้านเทคนิคบนเซิร์ฟเวอร์
+                const ageText = p.age || '';
+                const ageDisplay = (ageText && ageText !== '-') ? ` (${escapeHTML(ageText)})` : '';
+                
+                let statsDisplay = '-';
+                if (p.bust && p.waist && p.hips) {
+                    const cup = p.cup_size ? p.cup_size.toUpperCase() : '';
+                    statsDisplay = `${p.bust}${cup}-${p.waist}-${p.hips}`;
+                } else if (p.stats) {
+                    statsDisplay = p.stats;
+                }
+                
+                const skinText = p.skin_tone || p.skinTone || '-';
+                const isVerified = p.verified === true;
+                const hasVideo = p.has_video === true;
+
                 return `
                 <div class="province-card profile-card-new interactive-card" 
                      data-id="${p.id}"
@@ -696,11 +740,21 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
                     <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); z-index: 10; pointer-events: none;"></div>
 
-                    <div style="position: absolute; top: 12px; left: 12px; z-index: 30;">
+                    <!-- 🟢 ปรับเปลี่ยนบล็อก Badge ลอยตัวแนวตั้งให้ครบถ้วนทุกสถานะของโปรไฟล์ -->
+                    <div style="position: absolute; top: 12px; left: 12px; z-index: 30; display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
                         <span class="neon-badge ${statusClass}">
                             <span class="neon-dot"></span>
                             <span>${statusText}</span>
                         </span>
+                        ${p.isfeatured ? `
+                        <span style="background-color: #5A2CBE; border: 1px solid rgba(147, 51, 234, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
+                        ` : ''}
+                        ${hasVideo ? `
+                        <span style="background-color: #FF2E63; border: 1px solid rgba(255, 46, 99, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video" style="font-size: 8px;"></i>วิดีโอ</span>
+                        ` : ''}
+                        ${isVerified ? `
+                        <span style="background-color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.4); color: #000000; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-check-circle" style="font-size: 8px;"></i>ยืนยันแล้ว</span>
+                        ` : ''}
                     </div>
 
                     <div style="position: absolute; top: 12px; right: 12px; z-index: 30;">
@@ -711,11 +765,18 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
 
                     <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</h3>
+                            <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">น้อง${cleanName}${ageDisplay}</h3>
                             <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray);">
+                        <!-- 🟢 แสดงผลข้อมูลสัดส่วน-เพศ-สีผิว บนเซิร์ฟเวอร์เพื่อให้ Google Bot เก็บข้อมูลทำดัชนีได้ -->
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #A1A1AA; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); margin-bottom: 6px;">
+                            <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: #E4E4E7;">${escapeHTML(statsDisplay)}</span>
+                            <span style="background-color: rgba(147, 51, 234, 0.15); color: #C084FC; padding: 2px 6px; border-radius: 4px;">หญิง</span>
+                            ${skinText !== '-' ? `<span style="color: #8E9196; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;">${escapeHTML(skinText)}</span>` : ''}
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">
                             <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
                             </span>
@@ -782,33 +843,40 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         html = replaceGlobal(html, "{{PROVINCE_REVIEWS_HTML}}", provinceReviewsHTML);
         html = replaceGlobal(html, "{{PROVINCE_FAQS_HTML}}", provinceFAQsHTML);
         
-        // ====== แก้จุดที่ 3: แทนที่การแปลงไฟล์ JSON ในไฟล์ ssr-province.js ======
-        html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
-            id: p.id,
-            slug: p.slug,
-            name: p.name,
-            age: p.age,
-            height: p.height || "",     
-            weight: p.weight || "",     
-            stats: p.stats || "",       
-            skinTone: p.skinTone || p.skin_tone || "", 
-            bust: p.bust || "",         
-            waist: p.waist || "",       
-            hips: p.hips || "",         
-            cup_size: p.cup_size || "", 
-            imagePath: p.imagePath,
-            galleryPaths: p.galleryPaths || p.gallery_paths || [],
-            provinceKey: p.provinceKey,
-            provinceThai: provinceName, // 🚨 [จุดแก้ที่ 3]: ส่งชื่อภาษาไทยของจังหวัดคู่ประวัติแนบไปกับ JSON ป้องกันปัญหาไม่ระบุพิกัดบนเบราว์เซอร์
-            location: p.location,
-            rate: p.rate,
-            availability: p.availability,
-            lastUpdated: p.lastUpdated,
-            isfeatured: p.isfeatured,
-            verified: p.verified || p.isVerified,
-            hasVideo: p.has_video || p.hasVideo, 
-            description: p.description || ""
-        }))));
+// โค้ดที่ต้องอัปเดตใน ssr-province.js (จุดแปลงค่าเป็น JSON)
+html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    age: p.age,
+    height: p.height || "",     
+    weight: p.weight || "",     
+    stats: p.stats || "",       
+    skinTone: p.skin_tone || p.skinTone || "", // 🟢 ส่งทั้งสองรูปแบบเพื่อป้องกันความเสียหายของตัวแปร
+    skin_tone: p.skin_tone || p.skinTone || "", // 🟢 ฝั่ง Client-side ใน main.js ใช้คีย์นี้
+    bust: p.bust || "",         
+    waist: p.waist || "",       
+    hips: p.hips || "",         
+    cup_size: p.cup_size || "", 
+    imagePath: p.imagePath,
+    galleryPaths: p.galleryPaths || p.gallery_paths || [],
+    provinceKey: p.provinceKey,
+    provinceThai: provinceName, 
+    location: p.location,
+    rate: p.rate,
+    availability: p.availability,
+    lastUpdated: p.lastUpdated,
+    isfeatured: p.isfeatured,
+    verified: p.verified || p.isVerified,
+    hasVideo: p.has_video || p.hasVideo || false, // 🟢 แก้ปัญหาวิดีโอไม่แสดงผลบนเบราว์เซอร์
+    has_video: p.has_video || p.hasVideo || false, // 🟢 ฝั่ง Client-side ค้นหาคีย์นี้ในกระบวนการ Map
+    description: p.description || "",
+    lineId: p.line_id || p.lineId || "", // 🟢 ป้องกันปุ่ม LINE จองคิวหายเมื่อคลิกจากหน้ารวมหลัก
+    line_id: p.line_id || p.lineId || "",
+    quote: p.quote || "", // 🟢 ป้องกันคำโปรยหน้ารายละเอียดหาย
+    styleTags: p.style_tags || p.styleTags || [], // 🟢 ส่งสไตล์แท็กเพื่อใช้จัดป้ายกลุ่มในหน้าต่างข้อมูล
+    style_tags: p.style_tags || p.styleTags || []
+}))));
 
         // ====== แทรกแถบควบคุมลอยตัวและ CSS ก่อนการปิด Tag body ======
         html = replaceGlobal(html, "</body>", `${FLOATING_DOCK_HTML}\n</body>`);
