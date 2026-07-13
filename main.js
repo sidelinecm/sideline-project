@@ -1466,7 +1466,7 @@ recents.forEach(term => {
     }
 
 /**
- * 1. ฟังก์ชันสร้างการ์ดโปรไฟล์หน้าแรก (Upgraded Version)
+ * 1. ฟังก์ชันสร้างการ์ดโปรไฟล์หน้าแรก (Upgraded & Layout Hotfixed)
  */
 function createProfileCard(p, index = 20) {
     const cardContainer = document.createElement('div');
@@ -1502,9 +1502,9 @@ function createProfileCard(p, index = 20) {
 
     const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
     const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
-    const altText = `น้อง${p.displayName || p.name} สาวรับงาน${p.provinceNameThai || 'เชียงใหม่'} ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน`;
 
-    // 🟢 ประมวลผลข้อมูลคุณสมบัติเชิงลึกเพื่อแสดงผลบนหน้าการ์ดหลัก
+    const cleanName = p.displayName ? p.displayName.replace(/^(น้อง\s?)+/, '') : p.name;
+    const altText = `น้อง${cleanName} สาวรับงาน${p.provinceNameThai || 'เชียงใหม่'} ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน`;
     const ageText = p.safeAge || p.age || '';
     const ageDisplay = (ageText && ageText !== '-') ? ` (${ageText})` : '';
     const statsDisplay = p.safeStats || p.stats || '-';
@@ -1523,7 +1523,6 @@ function createProfileCard(p, index = 20) {
              onload="this.style.opacity = '1'; if(this.previousElementSibling) this.previousElementSibling.remove();"
              onerror="this.onerror=null; this.src='/images/placeholder-profile.webp'; this.style.opacity = '1';">
              
-        <!-- 🟢 แถบรวม Badge สถานะแบบซ้อนแนวตั้งทางมุมซ้ายบน -->
         <div style="position: absolute; top: 12px; left: 12px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
             <span class="neon-badge ${statusClass === 'status-available' ? 'status-available-neon' : 'status-busy-neon'}" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; color: white; display: flex; align-items: center; gap: 6px;">
                 <span class="neon-dot" style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: ${statusClass === 'status-available' ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${statusClass === 'status-available' ? '#00E676' : '#FF2E63'};"></span>
@@ -1551,27 +1550,30 @@ function createProfileCard(p, index = 20) {
         
         <a href="/sideline/${p.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
 
-        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.4) 45%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
+        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.5) 40%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
 
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
+        <!-- 🟢 ปรับเปลี่ยนการจัดระเบียบข้อมูลใหม่ทั้งหมดให้ไม่มีการเบียดเสียดกัน -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 4px;">
+            
+            <!-- แถวที่ 1: ชื่อโปรไฟล์ และอายุ (กินพื้นที่แนวนอนเต็ม 100% ชื่อจะไม่ถูกตัดจุดอีกต่อไป) -->
+            <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
                 <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">น้อง${cleanName}${ageDisplay}</h3>
-                <span style="color: #C084FC; font-weight: 900; font-size: 14px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">${p.rate || 'สอบถาม'}</span>
             </div>
             
-            <!-- 🟢 แถบสถิติด้านล่างชื่อโปรไฟล์: แสดงผลสัดส่วน, เพศสภาพ, และสีผิวอย่างเหมาะสมและครบถ้วน -->
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #A1A1AA; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-                <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: #E4E4E7;">${statsDisplay}</span>
-                <span style="background-color: rgba(147, 51, 234, 0.15); color: #C084FC; padding: 2px 6px; border-radius: 4px;">หญิง</span>
-                ${skinText !== '-' ? `<span style="color: #8E9196; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;">${skinText}</span>` : ''}
+            <!-- แถวที่ 2: ข้อมูลสถิติสัดส่วน และเพศสภาพ (ใช้ CSS แบบเม็ดยาที่มีสีและพื้นหลังชัดเจน) -->
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: #D4D4D8; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex-wrap: wrap;">
+                <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; color: #FFFFFF;">${statsDisplay}</span>
+                <span style="background-color: rgba(147, 51, 234, 0.2); color: #C084FC; padding: 1px 6px; border-radius: 4px; font-size: 9px;">หญิง</span>
+                ${skinText !== '-' ? `<span style="color: #A1A1AA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75px;">${skinText}</span>` : ''}
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px;">
+            <!-- แถวที่ 3: พิกัดสถานที่ และระดับค่าขนม (จัดแผ่ขยายแชร์พื้นที่แบบ Justify-Between) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px; margin-top: 2px;">
                 <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex: 1; min-width: 0;">
                     <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${p.location || 'เชียงใหม่'}
                 </span>
-                <span style="white-space: nowrap; opacity: 0.85; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex-shrink: 0;">
-                    <i class="far fa-clock" style="margin-right: 2px;"></i> ${p.lastUpdated ? new Date(p.lastUpdated).toLocaleDateString('th-TH') : 'ล่าสุด'}
+                <span style="color: #00E676; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">
+                    ${p.rate || 'สอบถาม'}
                 </span>
             </div>
         </div>
