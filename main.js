@@ -1465,12 +1465,8 @@ recents.forEach(term => {
         }
     }
 
-    /* ==========================================================================
-   SECTION: PROFILE CARD & LIGHTBOX SYSTEM (COMPLETE VERSION)
-   ========================================================================== */
-
 /**
- * 1. ฟังก์ชันสร้างการ์ดโปรไฟล์หน้าแรก
+ * 1. ฟังก์ชันสร้างการ์ดโปรไฟล์หน้าแรก (Upgraded Version)
  */
 function createProfileCard(p, index = 20) {
     const cardContainer = document.createElement('div');
@@ -1494,10 +1490,8 @@ function createProfileCard(p, index = 20) {
     cardInner.setAttribute('data-profile-id', p.id); 
     cardInner.setAttribute('data-profile-slug', p.slug);
     
-    // ดึงรูปภาพแรกจากอาร์เรย์ images หรือใช้ Placeholder
     const imgSrc = (p.images && p.images.length > 0) ? p.images[0].src : '/images/placeholder-profile.webp';
 
-    // ตรวจสอบสถานะการรับงาน
     let statusClass = 'status-inquire';
     const availability = (p.availability || '').toLowerCase();
     if (availability.includes('ว่าง') || availability.includes('รับงาน')) {
@@ -1510,6 +1504,14 @@ function createProfileCard(p, index = 20) {
     const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
     const altText = `น้อง${p.displayName || p.name} สาวรับงาน${p.provinceNameThai || 'เชียงใหม่'} ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน`;
 
+    // 🟢 ประมวลผลข้อมูลคุณสมบัติเชิงลึกเพื่อแสดงผลบนหน้าการ์ดหลัก
+    const ageText = p.safeAge || p.age || '';
+    const ageDisplay = (ageText && ageText !== '-') ? ` (${ageText})` : '';
+    const statsDisplay = p.safeStats || p.stats || '-';
+    const skinText = p.safeSkin || p.skin_tone || p.skinTone || '-';
+    const isVerified = p.verified || p.isVerified;
+    const hasVideo = p.has_video || p.hasVideo;
+
     cardInner.innerHTML = `
         <div class="skeleton-loader" style="position: absolute; inset: 0; background-color: #121214; z-index: 0; border-radius: 20px;"></div>
         <img src="${imgSrc}" 
@@ -1521,36 +1523,50 @@ function createProfileCard(p, index = 20) {
              onload="this.style.opacity = '1'; if(this.previousElementSibling) this.previousElementSibling.remove();"
              onerror="this.onerror=null; this.src='/images/placeholder-profile.webp'; this.style.opacity = '1';">
              
-        <div style="position: absolute; top: 12px; left: 12px; z-index: 30; pointer-events: none;">
+        <!-- 🟢 แถบรวม Badge สถานะแบบซ้อนแนวตั้งทางมุมซ้ายบน -->
+        <div style="position: absolute; top: 12px; left: 12px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
             <span class="neon-badge ${statusClass === 'status-available' ? 'status-available-neon' : 'status-busy-neon'}" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; color: white; display: flex; align-items: center; gap: 6px;">
                 <span class="neon-dot" style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: ${statusClass === 'status-available' ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 6px ${statusClass === 'status-available' ? '#00E676' : '#FF2E63'};"></span>
                 <span>${p.availability || 'สอบถาม'}</span>
             </span>
+            
+            ${p.isfeatured ? `
+            <span style="background-color: #5A2CBE; border: 1px solid rgba(147, 51, 234, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
+            ` : ''}
+
+            ${hasVideo ? `
+            <span style="background-color: #FF2E63; border: 1px solid rgba(255, 46, 99, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video" style="font-size: 8px;"></i>วิดีโอ</span>
+            ` : ''}
+
+            ${isVerified ? `
+            <span style="background-color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.4); color: #000000; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-check-circle" style="font-size: 8px;"></i>ยืนยันแล้ว</span>
+            ` : ''}
         </div>
 
-        ${p.isfeatured ? `
-        <div style="position: absolute; top: 40px; left: 12px; z-index: 30; pointer-events: none;">
-            <span style="background-color: #5A2CBE; color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
+        <div style="position: absolute; top: 12px; right: 12px; z-index: 30; pointer-events: auto;">
+            <button type="button" class="profile-card-like-btn ${isLikedClass}" data-action="like" data-id="${p.id}" aria-label="เพิ่มลงในรายการโปรด">
+                <i class="fa-solid fa-heart"></i>
+            </button>
         </div>
-        ` : ''}
-<div style="position: absolute; top: 12px; right: 12px; z-index: 30; pointer-events: auto;">
-    <button type="button" class="profile-card-like-btn ${isLikedClass}" data-action="like" data-id="${p.id}" aria-label="เพิ่มลงในรายการโปรด">
-        <i class="fa-solid fa-heart"></i>
-    </button>
-</div>
         
-
         <a href="/sideline/${p.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
 
         <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.4) 45%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
 
         <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
-                <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">${p.displayName || p.name}</h3>
+                <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">น้อง${cleanName}${ageDisplay}</h3>
                 <span style="color: #C084FC; font-weight: 900; font-size: 14px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">${p.rate || 'สอบถาม'}</span>
             </div>
             
-            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%;">
+            <!-- 🟢 แถบสถิติด้านล่างชื่อโปรไฟล์: แสดงผลสัดส่วน, เพศสภาพ, และสีผิวอย่างเหมาะสมและครบถ้วน -->
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #A1A1AA; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: #E4E4E7;">${statsDisplay}</span>
+                <span style="background-color: rgba(147, 51, 234, 0.15); color: #C084FC; padding: 2px 6px; border-radius: 4px;">หญิง</span>
+                ${skinText !== '-' ? `<span style="color: #8E9196; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;">${skinText}</span>` : ''}
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; gap: 8px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px;">
                 <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex: 1; min-width: 0;">
                     <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${p.location || 'เชียงใหม่'}
                 </span>
