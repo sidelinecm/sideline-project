@@ -48,7 +48,7 @@ const getDynamicIntro = (provinceName) => {
     return `
         <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ โดยปราศจากเงื่อนไขการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น</p>
         <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการ in ${provinceName} ได้ถูกคัดเลือกและจัดสรรพิกัดที่เหมาะสม ไม่ว่าจะเป็นโซนใจกลางเมือง โรงแรมที่เดินทางสะดวกสบาย หรือคอนโดมิเนียมส่วนตัว พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
-        <p>ภาพถ่ายประวัติและสัดส่วนของสาวๆ ในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
+        <p>ภาพถ่ายประวัติและสัดส่วน of สาวๆ ในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
     `;
 };
 
@@ -70,7 +70,7 @@ const getFullUrl = (domain, path) => {
 };
 
 const optimizeImg = (domain, path, width = 320, height = 420) => {
-    if (!path) return getFullUrl(domain, "/images/default.webp");
+    if (!path) return `${domain}/images/default.webp`;
     if (path.includes("res.cloudinary.com")) {
         if (path.includes("/upload/")) { return path.replace("/upload/", `/upload/f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face/`); }
         return path;
@@ -120,6 +120,92 @@ const smartLinkify = (text, provinceKey, zones) => {
 
 const replaceGlobal = (str, find, replace) => { return str.split(find).join(replace); };
 
+// ============================== FLOATING APP DOCK SETUP ==============================
+const FLOATING_DOCK_HTML = `
+<style>
+/* แถบควบคุมลอยตัวด้านล่างแอป (Floating Bottom App Navigation) */
+.floating-app-dock {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 480px;
+  height: 64px;
+  background: rgba(13, 8, 30, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(147, 51, 234, 0.35);
+  border-radius: 100px;
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #94A3B8;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.dock-item i {
+  font-size: 18px;
+}
+
+.dock-item.active, .dock-item:hover {
+  color: #C084FC !important;
+}
+
+.dock-item-line {
+  background: #06C755;
+  color: white !important;
+  padding: 8px 16px;
+  border-radius: 100px;
+  flex-direction: row !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+}
+
+@media (max-width: 768px) {
+  .floating-app-dock {
+    display: flex;
+  }
+  main {
+    padding-bottom: 100px !important;
+  }
+}
+</style>
+
+<!-- ============================== FLOATING APP DOCK (Mobile Navigation Hub) ============================== -->
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <a href="/" class="dock-item active">
+    <i class="fas fa-home"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <a href="#search-section" class="dock-item">
+    <i class="fas fa-search"></i>
+    <span>ตัวกรอง</span>
+  </a>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-user-friends"></i>
+    <span>รวมน้องๆ</span>
+  </a>
+  <a href="${CONFIG.SOCIAL_LINKS.line}" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
+    <i class="fab fa-line"></i>
+    <span>จองคิว</span>
+  </a>
+</nav>
+`;
+
 function verifyHostname(request) {
     const host = request.headers.get("host") || "";
     const allowed = ["sidelinechiangmai.netlify.app", "localhost"];
@@ -142,6 +228,66 @@ function buildErrorPage(statusCode, title, message) {
         .card { max-width: 400px; width:100%; border: 1px solid rgba(255,255,255,0.08); background: rgba(14,9,30,0.6); padding: 40px; border-radius: 24px; text-align:center; backdrop-filter: blur(20px); }
         .code { font-size: 72px; font-weight:800; color: #5A2CBE; margin-bottom: 24px; }
         .back-btn { display: inline-block; background-color: #ffffff; color: #000000; padding: 14px 28px; border-radius: 100px; text-decoration:none; font-weight: 700; margin-top: 24px; }
+/* แถบควบคุมลอยตัวด้านล่างแอป (Floating Bottom App Navigation) */
+.floating-app-dock {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 480px;
+  height: 64px;
+  background: rgba(13, 8, 30, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(147, 51, 234, 0.35);
+  border-radius: 100px;
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #94A3B8;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.dock-item i {
+  font-size: 18px;
+}
+
+.dock-item.active, .dock-item:hover {
+  color: #C084FC !important;
+}
+
+.dock-item-line {
+  background: #06C755;
+  color: white !important;
+  padding: 8px 16px;
+  border-radius: 100px;
+  flex-direction: row !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+}
+
+@media (max-width: 768px) {
+  .floating-app-dock {
+    display: flex;
+  }
+  main {
+    padding-bottom: 100px !important;
+  }
+}
     </style>
 </head>
 <body>
@@ -246,98 +392,6 @@ const generateDynamicFAQsHTML = (faqs) => {
     `).join("");
 };
 
-const generateDynamicReviewsHTML = (provinceName, zones) => {
-    const zone1 = zones && zones.length > 0 ? zones[0] : "ตัวเมือง";
-    const zone2 = zones && zones.length > 1 ? zones[1] : "ย่านดัง";
-    const zone3 = zones && zones.length > 2 ? zones[2] : "แหล่งท่องเที่ยว";
-    return `
-    <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="height: 40px; width: 40px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">K</div>
-            <div>
-              <span style="display: block; font-size: 12px; font-weight: 800; color: white;">คุณเกริกพล (K.)</span>
-              <span style="display: block; font-size: 10px; color: #94A3B8; font-weight: 700;">นัดเจอย่าน ${zone1}</span>
-            </div>
-          </div>
-          <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-          </div>
-        </div>
-        <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
-          "น้องตรงปกมากครับ นัดเจอกันที่ร้านกาแฟย่าน${zone1} คุยเก่ง อัธยาศัยดี มีความเป็นสุภาพสตรี ไม่มีมัดจำล่วงหน้าทำให้รู้สึกปลอดภัยและสบายใจมาก แนะนำเลยครับสำหรับคนที่ต้องการเพื่อนร่วมเดินทาง"
-        </p>
-        <span style="display: block; font-size: 9px; color: #94A3B8; font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • 2 วันที่ผ่านมา</span>
-    </div>
-    <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="height: 40px; width: 40px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">T</div>
-            <div>
-              <span style="display: block; font-size: 12px; font-weight: 800; color: white;">คุณธนพัทธ์ (T.)</span>
-              <span style="display: block; font-size: 10px; color: #94A3B8; font-weight: 700;">นัดเจอย่าน ${zone2}</span>
-            </div>
-          </div>
-          <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-          </div>
-        </div>
-        <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
-          "ชอบระบบความปลอดภัยของที่นี่มากครับ มีแอดมินคอยเช็กพิกัด คุมคิวให้ตลอด ไม่ต้องโอนจองก่อน เจอตัวแล้วค่อยจ่ายจริง น้องดูแลใส่ใจดีมากเหมือนแฟนเลยครับ คลายเหงาได้ดีเยี่ยม"
-        </p>
-        <span style="display: block; font-size: 9px; color: #94A3B8; font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • 1 สัปดาห์ที่ผ่านมา</span>
-    </div>
-    <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="height: 40px; width: 40px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">M</div>
-            <div>
-              <span style="display: block; font-size: 12px; font-weight: 800; color: white;">คุณมงคล (M.)</span>
-              <span style="display: block; font-size: 10px; color: #94A3B8; font-weight: 700;">นัดเจอย่าน ${zone3}</span>
-            </div>
-          </div>
-          <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="5 ดาว" role="img">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-          </div>
-        </div>
-        <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
-          "น้องพูดจาสุภาพ น่ารัก ตัวจริงเหมือนในรูปโปรไฟล์เลยครับ ร่วมรับประทานอาหารเย็นด้วยกันอย่างเป็นกันเอง ระบบ Verified ของเว็บนี้ช่วยสกรีนได้ดีจริงๆ ไม่มีเสียความรู้สึกแน่นอนครับ"
-        </p>
-        <span style="display: block; font-size: 9px; color: #94A3B8; font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • 2 วันที่ผ่านมา</span>
-    </div>`;
-};
-
-const generatePersonSchema = (p, provinceName, profileUrl, domain) => {
-    const priceNumeric = (p.rate || "0").toString().replace(/\D/g, '');
-    const cleanName = (p.name || '').replace(/^น้อง/, '').trim();
-    const imageUrl = optimizeImg(domain, p.imagePath, 1200, 630);
-    return {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "@id": profileUrl,
-        "name": `น้อง${cleanName}`,
-        "url": profileUrl,
-        "image": imageUrl,
-        "description": p.description || `โปรไฟล์แนะนำน้อง${cleanName} สาวรับงานพิกัด ${p.location || provinceName} ตรงปก`,
-        "jobTitle": "Freelance Model",
-        "gender": "Female",
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": provinceName,
-            "addressRegion": provinceName,
-            "addressCountry": "TH"
-        },
-        "offers": {
-            "@type": "Offer",
-            "url": profileUrl,
-            "price": priceNumeric,
-            "priceCurrency": "THB",
-            "availability": p.availability?.includes('ไม่ว่าง') ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-            "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำ"
-        }
-    };
-};
-
 export default async (request, context) => {
     if (!verifyHostname(request)) {
         return new Response("403 Forbidden - Access Denied", { status: 403 });
@@ -431,7 +485,6 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         let supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         const normalizedSeoKey = provinceKey.replace(/-/g, '');
 
-        // 🛡️ ปรับปรุงความถูกต้องฟิลด์: ดึง 'provinceKey' และ 'galleryPaths' มาพ่นข้อมูลประวัติแกลเลอรีรูปภาพและ Hydration ระบบจังหวัด
         const [provinceRes, profilesRes, allProvincesRes] = await Promise.all([
             supabase.from("provinces").select("id, nameThai, key").eq("key", provinceKey).maybeSingle(),
             supabase.from("profiles")
@@ -577,76 +630,12 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         }
 
         const schemaData = { "@context": "https://schema.org", "@graph": schemaGraph };
-        
-        const cardsHTML = safeProfiles
-            .map((p) => {
-                const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, ""));
-                const profileLocation = escapeHTML(p.location || provinceName);
-                const profileLink = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-                const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-                const statusClass = isAvailable ? "status-available-neon" : "status-busy-neon";
-                const statusText = isAvailable ? "รับงาน" : "ไม่ว่าง/พัก";
-                const displayRate = p.rate ? `${parseInt(p.rate).toLocaleString()} ฿` : "สอบถาม";
-
-                return `
-                <div class="province-card profile-card-new interactive-card" 
-                     data-id="${p.id}"
-                     data-profile-id="${p.id}"
-                     data-profile-slug="${p.slug}"
-                     data-name="น้อง${cleanName}"
-                     data-region="${profileLocation}"
-                     data-desc=""
-                     style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 24px; overflow: hidden; padding:0; cursor: pointer;"
-                     role="listitem">
-                    
-                    <a href="${profileLink}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
-
-                    <img src="${optimizeImg(dynamicDomain, p.imagePath, 300, 400)}" 
-                         alt="น้อง${cleanName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
-                         width="300"
-                         height="400"
-                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; position: absolute; inset: 0; z-index: 0;"
-                         loading="lazy" decoding="async" />
-
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); z-index: 10; pointer-events: none;"></div>
-
-                    <div style="position: absolute; top: 12px; left: 12px; z-index: 30;">
-                        <span class="neon-badge ${statusClass}">
-                            <span class="neon-dot"></span>
-                            <span>${statusText}</span>
-                        </span>
-                    </div>
-
-                    <div style="position: absolute; top: 12px; right: 12px; z-index: 30;">
-                        <button type="button" class="circle-btn-el" data-action="like" data-id="${p.id}" style="width: 32px; height: 32px; border-radius: 50%;" aria-label="เพิ่มลงในรายการโปรด">
-                            <i class="fa-solid fa-heart"></i>
-                        </button>
-                    </div>
-
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</h3>
-                            <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8);">${displayRate}</span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray);">
-                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${profileLocation}
-                            </span>
-                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); white-space: nowrap;">
-                                <i class="far fa-clock" style="margin-right: 2px;"></i> ${formatDateSSR(p.lastUpdated || p.created_at)}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                `;
-            })
-            .join("");
+        const cardsHTML = safeProfiles.map(p => generateSSRCardHTML(p, provinceName, dynamicDomain)).join("");
 
         const seoIntroContent = seoData.uniqueIntro || getDynamicIntro(provinceName);
         const dynamicReviewsData = getDynamicReviews(provinceName);
 
-        // ดึงไฟล์ index.html ที่เป็นดีไซน์และโครงสร้างหลักของระบบขึ้นมาสแกนค่า Placeholders
+        // ดึงไฟล์ index.html ขึ้นมาเป็นฐานระบบหลัก
         let response;
         if (url.pathname === "/" || url.pathname === "/index.html") {
             response = await context.next();
@@ -656,9 +645,8 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
         let html = await response.text();
 
         const seoCanonical = provinceKey === "chiangmai" ? dynamicDomain + "/" : `${dynamicDomain}/location/${provinceKey}`;
-        const seoImage = safeProfiles.length > 0 ? optimizeImg(dynamicDomain, safeProfiles[0].imagePath, 1200, 630) : CONFIG.DEFAULT_IMAGE;
+        const seoImage = safeProfiles.length > 0 ? optimizeImg(dynamicDomain, safeProfiles[0].imagePath, 1200, 630) : `${dynamicDomain}/images/hero-sidelinechiangmai-1200.webp`;
 
-        // ประกอบชุดข้อความ พิกัด โซน และรีวิวที่ดึงขึ้นมาแยกตามจังหวัด
         const provinceSEOContentHTML = smartLinkify(seoIntroContent, provinceKey, seoData.zones);
         const provinceReviewsHTML = dynamicReviewsData.map((review) => `
             <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
@@ -680,49 +668,57 @@ Sitemap: ${dynamicDomain}/sitemap.xml`,
                 <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${escapeHTML(review.date)}</span>
             </div>
         `).join("");
+
         const provinceFAQsHTML = generateDynamicFAQsHTML(seoData.faqs);
         const formattedZonesText = seoData.zones.slice(0, 4).join(", ");
 
-        // ตรรกะสวมรอยเขียนทับ Placeholders ลงบนแม่แบบ index.html ดั้งเดิม
-        html = replaceGlobal(html, "{{SEO_TITLE}}", title);
-        html = replaceGlobal(html, "{{SEO_DESCRIPTION}}", cleanDescription);
-        html = replaceGlobal(html, "{{SEO_CANONICAL}}", seoCanonical);
-        html = replaceGlobal(html, "{{SEO_IMAGE}}", seoImage);
-        html = replaceGlobal(html, "{{SCHEMA_JSON}}", JSON.stringify(schemaData));
-        html = replaceGlobal(html, "{{PROFILES_CARDS_HTML}}", cardsHTML);
-        html = replaceGlobal(html, "{{PROVINCE_NAME}}", provinceName);
-        html = replaceGlobal(html, "{{PROVINCE_ZONES}}", formattedZonesText);
-        html = replaceGlobal(html, "{{PROVINCE_SEO_CONTENT}}", provinceSEOContentHTML);
-        html = replaceGlobal(html, "{{PROVINCE_REVIEWS_HTML}}", provinceReviewsHTML);
-        html = replaceGlobal(html, "{{PROVINCE_FAQS_HTML}}", provinceFAQsHTML);
+        // 🚨 [จุดสำคัญมาก] ทำการจับคู่แทนที่ Placeholders ให้ตรงกับสัญญลักษณ์ใน index.html
+        html = replaceGlobal(html, "SEOTITLE", title);
+        html = replaceGlobal(html, "SEODESCRIPTION", cleanDescription);
+        html = replaceGlobal(html, "SEOCANONICAL", seoCanonical);
+        html = replaceGlobal(html, "SEOIMAGE", seoImage);
+        html = replaceGlobal(html, "SCHEMAJSON", JSON.stringify(schemaData));
+        html = replaceGlobal(html, "PROFILESCARDSHTML", cardsHTML);
         
-// ====== แก้จุดที่ 3: แทนที่การแปลงไฟล์ JSON ในไฟล์ ssr-province.js ======
-html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(p => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    age: p.age,
-    height: p.height || "",     
-    weight: p.weight || "",     
-    stats: p.stats || "",       
-    skinTone: p.skinTone || p.skin_tone || "", 
-    bust: p.bust || "",         
-    waist: p.waist || "",       
-    hips: p.hips || "",         
-    cup_size: p.cup_size || "", 
-    imagePath: p.imagePath,
-    galleryPaths: p.galleryPaths || p.gallery_paths || [],
-    provinceKey: p.provinceKey,
-    provinceThai: provinceName, // 🚨 [จุดแก้ที่ 3]: ส่งชื่อภาษาไทยของจังหวัดคู่ประวัติแนบไปกับ JSON ป้องกันปัญหาไม่ระบุพิกัดบนเบราว์เซอร์
-    location: p.location,
-    rate: p.rate,
-    availability: p.availability,
-    lastUpdated: p.lastUpdated,
-    isfeatured: p.isfeatured,
-    verified: p.verified || p.isVerified,
-    hasVideo: p.has_video || p.hasVideo, 
-    description: p.description || ""
-}))));
+        // ทดแทนชุดข้อมูลจังหวัดเป็นลำดับถัดมาเพื่อความถูกต้อง
+        html = replaceGlobal(html, "PROVINCESEOCONTENT", provinceSEOContentHTML);
+        html = replaceGlobal(html, "PROVINCEREVIEWSHTML", provinceReviewsHTML);
+        html = replaceGlobal(html, "PROVINCEFAQSHTML", provinceFAQsHTML);
+        html = replaceGlobal(html, "PROVINCEZONES", formattedZonesText);
+        html = replaceGlobal(html, "PROVINCENAME", provinceName);
+
+        // แทรกแถบควบคุมลอยตัว (Floating App Dock) และ CSS ก่อนการปิด Tag body ของหน้าเว็บหลัก
+        html = replaceGlobal(html, "</body>", `${FLOATING_DOCK_HTML}\n</body>`);
+
+        // 🛡️ แนบสเปกข้อมูลสำหรับการทำ Client-Side Hydration
+        const profileHydrationData = safeProfiles.map(p => ({
+            id: p.id,
+            slug: p.slug,
+            name: p.name,
+            age: p.age,
+            height: p.height || "",     
+            weight: p.weight || "",     
+            stats: p.stats || "",       
+            skinTone: p.skin_tone || p.skinTone || "", 
+            bust: p.bust || "",         
+            waist: p.waist || "",       
+            hips: p.hips || "",         
+            cup_size: p.cup_size || "", 
+            imagePath: p.imagePath,
+            galleryPaths: p.galleryPaths || p.gallery_paths || [],
+            provinceKey: p.provinceKey,
+            provinceThai: provinceName,
+            location: p.location,
+            rate: p.rate,
+            availability: p.availability,
+            lastUpdated: p.lastUpdated,
+            isfeatured: p.isfeatured,
+            verified: p.verified || p.isVerified,
+            hasVideo: p.has_video || p.hasVideo, 
+            description: p.description || ""
+        }));
+
+        html = replaceGlobal(html, "PROFILESJSON", JSON.stringify(profileHydrationData));
 
         return new Response(html, {
             headers: {
@@ -733,6 +729,6 @@ html = replaceGlobal(html, "{{PROFILES_JSON}}", JSON.stringify(safeProfiles.map(
 
     } catch (e) {
         console.error("Critical rendering error:", e);
-        return buildErrorPage(500, "500 - ข้อผิดพลาดภายในระบบ", "ระบบประมวลผลหลังบ้านเกิดขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้งในภายหลัง");
+        return buildErrorPage(500, "500 - ระบบขัดข้อง", "ระบบประมวลผลหลังบ้านเกิดขัดข้องชั่วคราว");
     }
 };
