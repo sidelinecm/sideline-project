@@ -1201,3 +1201,118 @@ body {
     padding-bottom: 100px !important;
   }
 }
+
+.card-specs-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  flex-wrap: wrap;
+}
+
+.spec-stats {
+  font-family: monospace;
+  letter-spacing: 0.05em;
+  background-color: rgba(255,255,255,0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--pure-white);
+}
+
+.spec-gender {
+  background-color: rgba(147, 51, 234, 0.2);
+  color: #C084FC;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+}
+
+.spec-skin {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80px;
+}
+
+/* แถวด้านล่างสุดของการ์ด */
+.card-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+  gap: 8px;
+  width: 100%;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 8px; /* จัดช่องไฟด้านบนของราคางาน */
+  margin-top: 2px;
+}
+
+.footer-location-el {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  flex: 1;
+  min-width: 0;
+}
+
+.footer-location-el i {
+  color: var(--accent-gold);
+  margin-right: 4px;
+}
+
+/* 🟢 ดันขนาดค่าขนม (ราคา) ให้ตัวโต หนา คมชัด */
+.footer-price-el {
+  color: var(--accent-gold);
+  font-weight: 900;
+  font-size: 15.5px;
+  text-shadow: 0 1.5px 3px rgba(0,0,0,0.9);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ป้าย Tag ต่างๆ บนตัวการ์ด */
+.badge-featured {
+  background-color: #5A2CBE;
+  border: 1px solid rgba(147, 51, 234, 0.4);
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 100px;
+  box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-video {
+  background-color: #FF2E63;
+  border: 1px solid rgba(255, 46, 99, 0.4);
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-verified {
+  background-color: #FBBF24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: #000000;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
