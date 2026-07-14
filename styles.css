@@ -25,7 +25,7 @@
   --pure-black: #000000;
   --pure-white: #FFFFFF;
   --text-gray: #D4D4D8;
-  --text-muted: #71717A;
+  --text-muted: #8E8E93; /* ปรับเพิ่มความสว่างจากเดิมเล็กน้อยในโหมดมืดเพื่อให้ผ่านเกณฑ์ */
   --border-light: rgba(255, 255, 255, 0.05);
   --emerald-accent: #10B981;
   --body-bg: #000000;
@@ -39,6 +39,15 @@
   --glass-border: rgba(147, 51, 234, 0.25);
   --glass-shadow: rgba(0, 0, 0, 0.6);
   --glass-glow: rgba(90, 44, 190, 0.15);
+
+  /* ตัวแปรใหม่เพิ่มความปลอดภัยความเข้มของสีตามมาตรฐาน (WCAG AA) */
+  --success-text: #00E676;
+  --social-bg: rgba(255, 255, 255, 0.03);
+  --social-border: rgba(255, 255, 255, 0.08);
+  --social-text: #FFFFFF;
+  --circle-btn-bg: rgba(255, 255, 255, 0.02);
+  --circle-btn-border: rgba(255, 255, 255, 0.08);
+  --line-green-accessible: #048537; /* สีเขียวเวอร์ชันคอนทราสต์สูงสำหรับข้อความสีขาว */
 }
 
 html.light {
@@ -46,7 +55,7 @@ html.light {
   --pure-white: #09090B;
   --secondary-dark: #F4F4F5;
   --text-gray: #27272A;
-  --text-muted: #71717A;
+  --text-muted: #52525B; /* สีเทาเข้มขึ้นที่สอดคล้องระดับความปลอดภัยบนพื้นหลังสว่าง */
   --border-light: rgba(9, 9, 11, 0.08);
   --body-bg: #F9FAFB;
   
@@ -59,6 +68,15 @@ html.light {
   --glass-border: rgba(9, 9, 11, 0.08);
   --glass-shadow: rgba(0, 0, 0, 0.04);
   --glass-glow: rgba(90, 44, 190, 0.03);
+
+  /* สลับโครงสร้างตัวแปรเพื่อไม่ให้ปุ่มสีหรือตัวหนังสือล่องหนในโหมดสว่าง */
+  --success-text: #047857; /* เปลี่ยนเป็นสีเขียวมรกตเข้มสำหรับพื้นหลังสว่าง */
+  --social-bg: rgba(9, 9, 11, 0.03);
+  --social-border: rgba(9, 9, 11, 0.08);
+  --social-text: #09090B;
+  --circle-btn-bg: rgba(9, 9, 11, 0.03);
+  --circle-btn-border: rgba(9, 9, 11, 0.15);
+  --line-green-accessible: #03722e;
 }
 
 * {
@@ -142,9 +160,9 @@ html, body {
   align-items: center !important;
   justify-content: center !important;
   border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  background-color: rgba(255, 255, 255, 0.02) !important;
-  color: #A1A1AA !important;
+  border: 1px solid var(--circle-btn-border) !important;
+  background-color: var(--circle-btn-bg) !important;
+  color: var(--text-gray) !important;
   cursor: pointer !important;
   font-size: 11px !important;
   font-weight: 700 !important;
@@ -653,19 +671,19 @@ html.light .search-input-field, html.light .search-select-field {
   }
 }
 
-/* สไตล์ปุ่มลิงก์โซเชียลโปร่งแสงแบบ Premium */
+/* สไตล์ปุ่มลิงก์โซเชียลโปร่งแสงแบบ Premium - แก้ไขปัญหาบั๊กสีล่องหนในโหมดสว่าง */
 .social-link-card-item {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: var(--social-bg) !important;
+  border: 1px solid var(--social-border) !important;
   padding: 12px;
-  border-radius: 100px !important; /* ปรับให้ปุ่มโค้งมนสวยงาม */
+  border-radius: 100px !important;
   font-size: 11px;
   font-weight: 700;
-  color: #FFFFFF !important;
+  color: var(--social-text) !important;
   text-decoration: none !important;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -675,36 +693,29 @@ html.light .search-input-field, html.light .search-select-field {
   background: rgba(124, 58, 237, 0.12) !important;
   border-color: rgba(124, 58, 237, 0.4) !important;
   transform: translateY(-2px);
-  color: #FFFFFF !important;
+  color: var(--primary-purple) !important;
   box-shadow: 0 6px 16px rgba(124, 58, 237, 0.2);
 }
 
 /* ==============================================================================
    10. 🔮 LIGHTBOX WINDOWS & WRAPPER
    ============================================================================== */
-/* ==============================================================================
-   10. 🔮 LIGHTBOX WINDOWS & WRAPPER
-   ============================================================================== */
 #lightbox {
   position: fixed;
   inset: 0;
-  z-index: 5000; /* 📌 คงค่า 5000 ไว้ตามเดิมเพื่อให้หัวข้อเว็บ (9999) แสดงทับด้านบนได้ถูกต้อง */
+  z-index: 5000;
   display: none;
   align-items: center;
   justify-content: center;
-  
-  /* 📌 กำหนดระยะขอบบนเป็น 84px เพื่อดันรูปภาพลงมาด้านล่างแถบหัวเว็บหลัก (72px) บนมือถือ */
   padding: 84px 16px 16px 16px; 
-  
   background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  overflow-y: auto; /* ป้องกันหน้าจอขนาดสั้นแล้วเนื้อหาล้นจมด้านล่าง */
+  overflow-y: auto;
 }
 
 @media (min-width: 1024px) {
   #lightbox {
-    /* 📌 กำหนดระยะขอบบนเป็น 96px เพื่อดันรูปภาพลงมาหลบแถบหัวเว็บหลัก (80px) บนหน้าจอเดสก์ท็อป */
     padding: 96px 24px 24px 24px; 
   }
 }
@@ -786,7 +797,7 @@ html.light .search-input-field, html.light .search-select-field {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: #06C755 !important;
+  background: var(--line-green-accessible) !important; /* เปลี่ยนมาใช้ตัวแปรที่มีระดับความคอนทราสต์ดีขึ้น */
   color: white !important;
   padding: 16px;
   border-radius: 100px;
@@ -800,7 +811,7 @@ html.light .search-input-field, html.light .search-select-field {
 #line-btn-sticky-wrapper a:hover {
   transform: translateY(-2px);
   box-shadow: 0 15px 30px rgba(6, 199, 85, 0.5);
-  background: #05b04c !important;
+  background: #03722e !important;
 }
 
 /* ==============================================================================
@@ -1038,12 +1049,20 @@ body {
 #review-form input, #review-form textarea {
   background: #090615 !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-gray);
   transition: all 0.25s ease;
 }
 
 #review-form input:focus, #review-form textarea:focus {
   border-color: var(--app-purple-neon) !important;
   box-shadow: 0 0 12px var(--app-purple-glow) !important;
+}
+
+/* ปรับปรุงการสลับสีฟิลด์ฟอร์มในโหมดสว่างเพื่อเพิ่มอัตราการเข้าถึงข้อมูล */
+html.light #review-form input, html.light #review-form textarea {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(9, 9, 11, 0.15) !important;
+  color: #09090B !important;
 }
 
 /* 🟢 เทคนิคย่อส่วนพรางตาคำบรรยายเนื้อหา SEO ยาวๆ (SEO Content Drawer) */
@@ -1061,7 +1080,7 @@ body {
   left: 0;
   right: 0;
   height: 90px;
-  background: linear-gradient(to top, #060411 15%, transparent 100%);
+  background: linear-gradient(to top, var(--body-bg) 15%, transparent 100%);
   pointer-events: none;
   transition: opacity 0.3s;
 }
@@ -1184,7 +1203,7 @@ body {
 }
 
 .dock-item-line {
-  background: #06C755;
+  background: var(--line-green-accessible); /* ปรับสีตรงนี้ให้เป็นตามมาตรฐานคอนทราสต์ */
   color: white !important;
   padding: 8px 16px;
   border-radius: 100px;
@@ -1248,7 +1267,7 @@ body {
   gap: 8px;
   width: 100%;
   border-top: 1px solid rgba(255,255,255,0.05);
-  padding-top: 8px; /* จัดช่องไฟด้านบนของราคางาน */
+  padding-top: 8px; 
   margin-top: 2px;
 }
 
