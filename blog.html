@@ -1,79 +1,72 @@
 <!doctype html>
-<html lang=th class="scroll-smooth light">
+<html lang="th" class="dark-theme">
 <head>
-  <meta charset=UTF-8>
-  <meta http-equiv=X-UA-Compatible content="IE=edge">
-  <meta name=viewport content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5A2CBE">
   
   <title>บทความและเคล็ดลับ - คัมภีร์เที่ยวเชียงใหม่สไตล์ฟีลแฟน | SidelineCM</title>
-<meta name="description" content="ติดตามบทความและข่าวสารล่าสุดจาก SidelineChiangmai อ่านเคล็ดลับความปลอดภัย, คู่มือเที่ยวกินดื่ม, และเรื่องราวน่าสนใจเกี่ยวกับไลฟ์สไตล์ในเชียงใหม่">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="https://sidelinechiangmai.netlify.app/blog">
- <meta name=theme-color content=#FFFFFF media="(prefers-color-scheme: light)">
-  <meta name=theme-color content=#111827 media="(prefers-color-scheme: dark)">
-  <link rel=icon href=/images/favicon.ico sizes=any>
-  <link rel=icon href=/images/favicon.svg type=image/svg+xml>
-  <link rel=apple-touch-icon href=/images/apple-touch-icon.png>
-  <link rel=manifest href=/manifest.webmanifest>
+  <meta name="description" content="ติดตามบทความและข่าวสารล่าสุดจาก SidelineChiangmai อ่านเคล็ดลับความปลอดภัย, คู่มือเที่ยวกินดื่ม, และเรื่องราวน่าสนใจเกี่ยวกับไลฟ์สไตล์ในเชียงใหม่">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://sidelinechiangmai.netlify.app/blog">
 
-  
-  <link rel=preconnect href=https://hgzbgpbmymoiwjpaypvl.supabase.co crossorigin>
-  <link rel=preconnect href=https://cdnjs.cloudflare.com crossorigin>
+  <link rel="shortcut icon" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
 
-  
-  <link rel=preload href=/styles.css as=style onload='this.onload=null,this.rel="stylesheet"'>
-  <noscript>
-    <link rel=stylesheet href=/styles.css>
-  </noscript>
-  <!-- Inline Critical CSS -->
+  <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="modulepreload" href="/main.js">
+  <link rel="stylesheet" href="/styles.css">
+
   <style>
-    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
-    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
-    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
-    section { padding: 20px; text-align: center; }
-    .profile-image img { image-orientation: none; }
-    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
-    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
-    @media (max-width: 767px) {
-        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
-        .profile-card { padding: 10px; border-radius: 12px; }
+    body {
+      margin: 0;
+      font-family: 'Prompt', sans-serif;
+      background-color: #09090C !important;
+      color: #F4F4F5 !important;
+      min-height: 100vh;
+    }
+    .floating-app-dock {
+      background-color: #09090C !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    .dock-item {
+      color: #E4E4E7 !important;
+    }
+    .dock-item.active {
+      color: #C084FC !important;
+    }
+    .dock-item-line {
+      color: #06C755 !important;
+    }
+    .safe-capsule-item {
+      background-color: #18181B !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .capsule-text {
+      color: #F4F4F5 !important;
     }
   </style>
-  
-  <link rel=preload href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'>
+
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
-    <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   </noscript>
 
-  
-  <link rel=preload href=/fonts/prompt-v11-latin_thai-regular.woff2 as=font type=font/woff2 crossorigin>
-  <link rel=preload href=/fonts/prompt-v11-latin_thai-700.woff2 as=font type=font/woff2 crossorigin>
-
-  
-  <link rel=modulepreload href=/main.js>
-  
- 
-  <!-- Inline Critical CSS -->
-  <style>
-    body { margin: 0; font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0D0D0D, #4B0082); color: #fff; min-height: 100vh; }
-    h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #FFFFFF, #FF69B4, #8A2BE2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 20px 0; padding: 0 10px; text-align: center; animation: shimmer 3s infinite; background-size: 200% auto; }
-    @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
-    section { padding: 20px; text-align: center; }
-    .profile-image img { image-orientation: none; }
-    button, a.button { background: linear-gradient(135deg, #8A2BE2, #FF69B4); color: #fff; padding: 12px 24px; border: none; border-radius: 50px; transition: all 0.3s ease; text-decoration: none; display:inline-block; cursor: pointer; }
-    .profile-card { background: linear-gradient(135deg, #222, #444); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 25px rgba(255,105,180,0.5); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
-    @media (max-width: 767px) {
-        #featured-grid, #loading-profiles-placeholder { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 8px; }
-        .profile-card { padding: 10px; border-radius: 12px; }
-    }
-  </style>
-  
-  <script type=application/ld+json>
+  <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "บทความ - SidelineChiangmai",
-    "url": "https://sidelinechiangmai.netlify.app/blog.html",
+    "url": "https://sidelinechiangmai.netlify.app/blog",
     "description": "ติดตามบทความและข่าวสารล่าสุดจาก SidelineChiangmai",
     "publisher": {
       "@type": "Organization",
@@ -110,220 +103,231 @@
     ]
   }
   </script>
-
-  
 </head>
 
-<body class=antialiased data-page=blog>
+<body class="antialiased">
 
+<!-- FLOATING APP DOCK (Mobile Navigation Hub) -->
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <a href="/" class="dock-item">
+    <i class="fas fa-home"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <a href="/#search-section" class="dock-item">
+    <i class="fas fa-search"></i>
+    <span>ตัวกรอง</span>
+  </a>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-user-friends"></i>
+    <span>รวมน้องๆ</span>
+  </a>
+  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
+    <i class="fab fa-line"></i>
+    <span>จองคิว</span>
+  </a>
+</nav>
 
-<header id=page-header class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
-    <div class="container mx-auto px-4 h-18 flex items-center justify-between">
-        <a href=/ aria-label="SidelineChiangmai หน้าแรก">
-  <img src=/images/logo-sideline-chiangmai-128.webp srcset="/images/logo-sideline-chiangmai-64.webp 64w, /images/logo-sideline-chiangmai-128.webp 128w, /images/logo-sideline-chiangmai-256.webp 256w, /images/logo-sideline-chiangmai-512.webp 512w" sizes="(max-width: 320px) 200px, 256px" alt="โลโก้ Sideline Chiangmai" width=256 height=30 class="h-[30px] w-auto" loading=eager fetchpriority=high>
-</a>
-        <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label=เมนูหลัก>
-            <a href=profiles.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
-            <a href=locations.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
-            <a href=about.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
-            <a href=faq.html class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
-            <a href=blog.html class="px-4 py-2 rounded-full bg-accent text-primary font-semibold">บทความ</a>
-        </nav>
-        <div class="flex items-center gap-2">
-            <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label=เปลี่ยนโหมดสี><i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden=true></i></button>
-            <button id=menu-toggle class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label=เปิดเมนู aria-haspopup=true aria-controls=sidebar><i class="fas fa-bars text-xl" aria-hidden=true></i></button>
-        </div>
-    </div>
+<!-- HEADER -->
+<header id="page-header" role="banner">
+  <div class="header-logo-container">
+      <a href="/" aria-label="ไปที่หน้าแรก Sideline เชียงใหม่">
+         <span class="logo-box-el">
+           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><title>โลโก้ ไซด์ไลน์เชียงใหม่</title><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+         </span>
+         <span style="font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.02em;">ไลน์<span style="color: #C084FC">เชียงใหม่</span></span>
+      </a>
+  </div>
+
+  <div class="header-status-badge">
+      <span class="status-dot-el" aria-hidden="true"></span>
+      <span style="font-weight: 700; color: var(--text-gray);">อัปเดตระบบ: <span id="last-updated-time">วันนี้ (กรกฎาคม 2026)</span></span>
+  </div>
+
+  <div class="nav-controls">
+      <nav class="desktop-nav" aria-label="เมนูหลัก">
+          <a href="/profiles" style="color: var(--text-gray) !important;">รวมโปรไฟล์แนะนำ</a>
+          <a href="/locations" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
+      </nav>
+      <button type="button" aria-label="สลับภาษาเป็นภาษาไทย" class="circle-btn-el" style="color: var(--text-gray) !important;">TH</button>
+      <button class="theme-toggle-btn circle-btn-el" type="button" aria-label="เปลี่ยนโหมดแสงสว่าง" style="color: var(--text-gray) !important;">
+          <i class="fas fa-sun" aria-hidden="true"></i>
+      </button>
+      <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทางเสริมสำหรับมือถือ" style="color: var(--text-gray) !important;">
+          <i class="fas fa-bars" aria-hidden="true"></i>
+      </button>
+  </div>
 </header>
 
+<!-- MOBILE SIDEBAR MENU -->
+<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+  <div class="sidebar-header-div">
+    <span style="color: #A1A1AA !important;">Navigation</span>
+    <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
+      <i class="fas fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
+  
+  <div class="sidebar-links-wrapper">
+    <a href="/">หน้าแรก</a>
+    <a href="/profiles">น้องๆ VIP แนะนำ</a>
+    <a href="/locations">พื้นที่บริการ</a>
+    <a href="/about">เกี่ยวกับเรา</a>
+    <a href="/faq">คำถามพบบ่อย</a>
+    <a href="/blog" class="active">บทความ</a>
+  </div>
 
-<div id=menu-backdrop class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden=true></div>
+  <div style="padding: 24px; background: rgba(9, 9, 12, 0.95) !important; border-top: 1px solid rgba(255, 255, 255, 0.08) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
+    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
+       style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755 !important; color: #FFFFFF !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; font-size: 13px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.25);">
+      <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
+    </a>
+  </div>
+</aside>
 
+<div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
 
-<div id=sidebar class="fixed top-0 right-0 w-64 sm:w-72 h-dvh bg-card text-foreground border-l border-border shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" role=dialog aria-labelledby=sidebar-nav-heading aria-hidden=true tabindex=-1>
-     
-    <div class="flex justify-between items-center p-4 border-b border-border shrink-0">
-        <h3 id=sidebar-nav-heading class="text-lg font-bold text-secondary">เมนู</h3>
-        <button id=close-sidebar-btn class=btn-close-premium aria-label=ปิดเมนู>
-            <svg xmlns=http://www.w3.org/2000/svg width=1em height=1em viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round aria-hidden=true>
-                <line x1=18 y1=6 x2=6 y2=18></line>
-                <line x1=6 y1=6 x2=18 y2=18></line>
-            </svg>
-        </button>
-    </div>
+<!-- MAIN CONTENT -->
+<main id="main-content" style="padding-top: 96px; padding-bottom: 64px; position: relative; overflow: hidden;">
+  <div class="bg-glow-overlap" style="top: -50px; right: -50px;" aria-hidden="true"></div>
+  <div class="bg-glow-overlap" style="top: 35%; left: -100px;" aria-hidden="true"></div>
 
-    <nav aria-label=เมนูนำทางหลักในแถบด้านข้าง class="flex-grow overflow-y-auto p-4 space-y-4">
-        <a href=/ class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-home w-5 text-center text-muted-foreground" aria-hidden=true></i><span>หน้าแรก</span></a>
-        <a href=profiles.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-users w-5 text-center text-muted-foreground" aria-hidden=true></i><span>น้องๆ ทั้งหมด</span></a>
-        <a href=locations.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-map-marker-alt w-5 text-center text-muted-foreground" aria-hidden=true></i><span>พิกัดบริการ</span></a>
-        <a href=about.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-info-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>เกี่ยวกับเรา</span></a>
-        <a href=faq.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-question-circle w-5 text-center text-muted-foreground" aria-hidden=true></i><span>คำถามพบบ่อย</span></a>
-        <a href=blog.html class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-newspaper w-5 text-center text-muted-foreground" aria-hidden=true></i><span>บทความ</span></a>
-    </nav>
+  <div class="container space-y-24">
+    <section aria-labelledby="blog-heading" class="hero-section">
+      <div class="clutch-pill" style="margin: 0 auto 16px auto; width: max-content;">
+        <span class="white-badge" style="background-color: #7C3AED; color: white; padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800;">BLOG</span>
+        <span class="rating-text" style="color: white; font-size: 11px; font-weight: 700;">บทความและคู่มือ</span>
+      </div>
 
-    <div class="p-4 border-t border-border shrink-0">
-        <a href=https://line.me/ti/p/_faNcjQ3xx target=_blank rel="noopener nofollow" class=btn-line-shared><i class="fab fa-line text-lg" aria-hidden=true></i><span>ติดต่อผ่าน LINE</span></a>
-    </div>
-</div>
-<main id=main-content class=pt-20>
-    <div class="container mx-auto px-4 py-12 md:py-16">
-        <section aria-labelledby=blog-heading>
-            <div class="section-header-card text-center mb-12">
-                <div class=card-content>
-                    <h1 id=blog-heading class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 text-primary">บทความและเคล็ดลับจาก SidelineCM</h1>
-                    <p class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">แหล่งรวมความรู้และแรงบันดาลใจ เพื่อยกระดับประสบการณ์ฟีลแฟนของคุณให้พิเศษยิ่งขึ้น</p>
-                </div>
-            </div>
+      <h1 id="blog-heading" class="hero-title text-gradient-main" style="text-align: center; margin-bottom: 16px;">
+        บทความและเคล็ดลับจาก SidelineCM
+      </h1>
+      <p class="hero-subtitle-p text-center-wrapper" style="max-width: 600px; margin: 0 auto; text-align: center; color: var(--text-gray);">
+        แหล่งรวมความรู้และแรงบันดาลใจ เพื่อยกระดับประสบการณ์ฟีลแฟนของคุณให้ปลอดภัยและพิเศษยิ่งขึ้น
+      </p>
 
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-animate-on-scroll>
-                
-                
-                <article class="blog-card group">
-                    <a href=blog/safety-tips.html aria-label="อ่านบทความ: 5 เคล็ดลับความปลอดภัย เมื่อใช้บริการไซด์ไลน์ครั้งแรก">
-                        <img src=/images/blog/safety-tips.webp alt="ภาพประกอบบทความ 5 เคล็ดลับความปลอดภัยเมื่อใช้บริการไซด์ไลน์" class=blog-card-img loading=lazy width=800 height=450>
-                        <div class=p-6>
-                            <span class="blog-card-category mb-2">เคล็ดลับความปลอดภัย</span>
-                            <h2 class="text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2">5 เคล็ดลับความปลอดภัย เมื่อใช้บริการไซด์ไลน์ครั้งแรก</h2>
-                            <p class="text-muted-foreground text-sm leading-relaxed">สร้างความมั่นใจและความปลอดภัยสูงสุดในการนัดหมายครั้งแรกของคุณ อ่าน 5 เคล็ดลับสำคัญที่ควรรู้ก่อนใช้บริการ...</p>
-                        </div>
-                    </a>
-                </article>
-
-                
-                <article class="blog-card group">
-                    <a href=blog/nimman-feel-fan-guide.html aria-label="อ่านบทความ: คู่มือเที่ยวนิมมานฉบับฟีลแฟน">
-                        <img src=/images/blog/nimman-guide.webp alt=ภาพประกอบบทความเที่ยวนิมมานสำหรับคู่รัก class=blog-card-img loading=lazy width=800 height=450>
-                        <div class=p-6>
-                            <span class="blog-card-category mb-2">ไลฟ์สไตล์และท่องเที่ยว</span>
-                            <h2 class="text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2">คู่มือเที่ยวนิมมานฉบับฟีลแฟน: ร้านอาหาร บาร์ลับ ที่ต้องไปเดท</h2>
-                            <p class="text-muted-foreground text-sm leading-relaxed">ยกระดับประสบการณ์เดทของคุณในย่านสุดชิคของเชียงใหม่ เรารวบรวมร้านอาหารบรรยากาศดีและบาร์ลับที่เหมาะกับการสร้างความประทับใจ...</p>
-                        </div>
-                    </a>
-                </article>
-
-                
-                <article class="blog-card group">
-                     <a href=blog/what-is-trong-pok.html aria-label="อ่านบทความ: ตรงปกคืออะไร? ทำความเข้าใจการการันตีของ SidelineCM">
-                        <img src=/images/blog/guarantee-concept.webp alt=ภาพประกอบบทความเกี่ยวกับการการันตีตรงปก class=blog-card-img loading=lazy width=800 height=450>
-                        <div class=p-6>
-                            <span class="blog-card-category mb-2">เกี่ยวกับบริการ</span>
-                            <h2 class="text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2">ตรงปกคืออะไร? ทำความเข้าใจการการันตีของ SidelineCM</h2>
-                            <p class="text-muted-foreground text-sm leading-relaxed">ไขข้อสงสัยเกี่ยวกับคำว่า 'ตรงปก' และนโยบายการันตีของเราที่ทำให้คุณมั่นใจได้ 100% ว่าจะได้พบกับน้องที่ตรงกับโปรไฟล์...</p>
-                        </div>
-                    </a>
-                </article>
-            </div>
-            
-            <div class="text-center mt-16 text-muted-foreground" data-animate-on-scroll>
-                <i class="fas fa-pencil-alt fa-2x mb-3" aria-hidden=true></i>
-                <p>เรากำลังเตรียมบทความที่น่าสนใจเพิ่มเติมอีกมากมาย โปรดติดตามเร็วๆ นี้!</p>
-            </div>
-        </section>
-    </div>
-</main>
- <footer class="bg-card text-muted-foreground pt-16 pb-8 px-4 border-t border-border mt-16 font-sans">
-    <div class="container mx-auto">
+      <!-- Grid บทความ (ใช้โครงสร้างแบบ Bento Card ของ index.html) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 48px; position: relative; z-index: 10;">
         
-        <!-- ส่วน Grid หลัก 4 คอลัมน์ -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center md:text-left mb-12">
-            
-            <!-- 1. แบรนด์และคำบรรยาย (เน้น Keyword หลัก) -->
-            <div class="lg:col-span-1">
-                <a href="/" aria-label="หน้าแรก Sideline Chiang Mai" class="inline-block mb-4 transition-transform hover:scale-105">
-                    <img src="/images/logo-sideline-chiangmai.webp" alt="โลโก้ Sideline Chiang Mai บริการจัดหาเพื่อนเที่ยว" class="h-[30px] w-auto mx-auto md:mx-0" width="245" height="30" loading="lazy" decoding="async">
-                </a>
-                <p class="leading-relaxed text-sm text-muted-foreground">
-                    <strong>SidelineChiangmai</strong> แพลตฟอร์มอันดับ 1 รวมน้องๆ ไซด์ไลน์ รับงานเชียงใหม่ และทั่วประเทศ คัดกรองตัวจริง การันตีตรงปก 100% ปลอดภัยสูง ไม่ต้องโอนมัดจำ จ่ายหน้างานได้เลย
-                </p>
+        <!-- บทความ 1 -->
+        <article class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); background: rgba(18, 18, 24, 0.45); border-radius: 16px;">
+          <a href="blog/safety-tips.html" aria-label="อ่านบทความ: 5 เคล็ดลับความปลอดภัย เมื่อใช้บริการไซด์ไลน์ครั้งแรก" style="text-decoration: none; color: inherit; display: block;">
+            <div style="aspect-ratio: 16/9; overflow: hidden; background-color: #121214;">
+              <img src="/images/blog/safety-tips.webp" alt="5 เคล็ดลับความปลอดภัย" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">
             </div>
-
-            <!-- 2. เมนูลัด (Site Structure) -->
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">เมนูหลัก</h3>
-                <nav aria-label="ลิงก์ด่วนท้ายเว็บ">
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="/" class="hover:text-primary transition-colors">🏠 หน้าแรก</a></li>
-                        <li><a href="/profiles.html" class="hover:text-primary transition-colors">👯 น้องๆ ทั้งหมด</a></li>
-                        <li><a href="/locations.html" class="hover:text-primary transition-colors">📍 พิกัดรับงาน</a></li>
-                        <li><a href="/blog.html" class="hover:text-primary transition-colors">📖 บทความน่ารู้</a></li>
-                        <li><a href="/faq.html" class="hover:text-primary transition-colors">❓ คำถามพบบ่อย</a></li>
-                        <li><a href="/about.html" class="hover:text-primary transition-colors">ℹ️ เกี่ยวกับเรา</a></li>
-                        <li><a href="/contact.html" class="hover:text-primary transition-colors">📞 ติดต่อเรา</a></li>
-                    </ul>
-                </nav>
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-size: 11px; font-weight: 800; color: #C084FC; text-transform: uppercase; tracking: 0.1em;">เคล็ดลับความปลอดภัย</span>
+              <h2 style="font-size: 18px; font-weight: 800; color: #FFFFFF; line-height: 1.4; margin: 4px 0;">5 เคล็ดลับความปลอดภัย เมื่อใช้บริการไซด์ไลน์ครั้งแรก</h2>
+              <p style="font-size: 13px; color: var(--text-gray); line-height: 1.6;">สร้างความมั่นใจและความปลอดภัยสูงสุดในการนัดหมายครั้งแรกของคุณ อ่าน 5 เคล็ดลับสำคัญที่ควรรู้ก่อนใช้บริการ...</p>
             </div>
+          </a>
+        </article>
 
-            <!-- 3. พื้นที่ยอดนิยม (Dynamic Links จาก Supabase) -->
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">พื้นที่ให้บริการยอดฮิต</h3>
-                <!-- 👇 กล่องนี้จะถูกเติมลิงก์โดย main.js อัตโนมัติ -->
-                <ul id="popular-locations-footer" class="space-y-2 text-sm">
-                    <li><span class="text-muted-foreground/50 animate-pulse">กำลังโหลดรายชื่อจังหวัด...</span></li>
-                </ul>
+        <!-- บทความ 2 -->
+        <article class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); background: rgba(18, 18, 24, 0.45); border-radius: 16px;">
+          <a href="blog/nimman-feel-fan-guide.html" aria-label="อ่านบทความ: คู่มือเที่ยวนิมมานฉบับฟีลแฟน" style="text-decoration: none; color: inherit; display: block;">
+            <div style="aspect-ratio: 16/9; overflow: hidden; background-color: #121214;">
+              <img src="/images/blog/nimman-guide.webp" alt="คู่มือเที่ยวนิมมานฉบับฟีลแฟน" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">
             </div>
-
-            <!-- 4. ช่องทางติดต่อ (Social & CTA) -->
-            <div>
-                <h3 class="font-semibold text-foreground mb-4 tracking-tight">ติดต่อสอบถาม (24 ชม.)</h3>
-                <address class="not-italic space-y-3 text-sm mb-6">
-                    <p>สนใจจองคิว หรือสอบถามข้อมูลเพิ่มเติม แอดไลน์ได้เลยครับ</p>
-                    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="inline-flex items-center gap-2 group font-bold text-green-600 bg-green-50/50 px-4 py-2 rounded-xl hover:bg-green-100 transition-all shadow-sm w-full md:w-auto justify-center md:justify-start">
-                        <i class="fab fa-line text-2xl" aria-hidden="true"></i>
-                        <span>แอดไลน์จองคิว</span>
-                    </a>
-                </address>
-
-                <h4 class="font-semibold text-foreground mb-3 text-sm">ติดตามข่าวสาร</h4>
-                <div class="flex justify-center md:justify-start gap-4 text-xl">
-                    <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" aria-label="TikTok" class="hover:text-[#ff0050] transition-colors"><i class="fab fa-tiktok"></i></a>
-                    <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener nofollow" aria-label="Twitter" class="hover:text-[#1da1f2] transition-colors"><i class="fab fa-twitter"></i></a>
-                    <a href="https://instagram.com/sidelinechiangmai" target="_blank" rel="noopener nofollow" aria-label="Instagram" class="hover:text-[#e1306c] transition-colors"><i class="fab fa-instagram"></i></a>
-                    <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" aria-label="Linktree" class="hover:text-[#43e660] transition-colors"><i class="fas fa-tree"></i></a>
-                </div>
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-size: 11px; font-weight: 800; color: #C084FC; text-transform: uppercase; tracking: 0.1em;">ไลฟ์สไตล์และท่องเที่ยว</span>
+              <h2 style="font-size: 18px; font-weight: 800; color: #FFFFFF; line-height: 1.4; margin: 4px 0;">คู่มือเที่ยวนิมมานฉบับฟีลแฟน: ร้านอาหาร บาร์ลับ ที่ต้องไปเดท</h2>
+              <p style="font-size: 13px; color: var(--text-gray); line-height: 1.6;">ยกระดับประสบการณ์เดทของคุณในย่านสุดชิคของเชียงใหม่ เรารวบรวมร้านอาหารบรรยากาศดีและบาร์ลับที่เหมาะกับการสร้างความประทับใจ...</p>
             </div>
+          </a>
+        </article>
 
-        </div>
-
-        <!-- SEO Content Zone (ส่วนเสริมพลัง SEO แบบเนียนๆ) -->
-        <div class="border-t border-border pt-8 pb-8">
-            <div class="prose dark:prose-invert max-w-none text-xs text-muted-foreground text-center md:text-left">
-                <h4 class="font-bold text-foreground mb-2">ทำไมต้อง SidelineChiangmai?</h4>
-                <p class="leading-relaxed mb-2">
-                    เราคือศูนย์รวม <strong>ไซด์ไลน์เชียงใหม่</strong> และจังหวัดท่องเที่ยวชั้นนำ แหล่งรวมสาวสวย เด็กเอ็น ฟิวแฟน ที่ผ่านการตรวจสอบตัวตนแล้ว การันตี <strong>ไซด์ไลน์ตรงปก</strong> ไม่จกตา
-                    ให้บริการครอบคลุมพื้นที่ <em>เชียงใหม่, เชียงราย, ลำพูน, ขอนแก่น, ภูเก็ต, กรุงเทพ</em> และอีกมากมาย
-                </p>
-                <p class="leading-relaxed">
-                    มั่นใจในความปลอดภัยด้วยระบบ <strong>ไม่ต้องโอนมัดจำ</strong> จ่ายเงินหน้างาน 100% เหมาะสำหรับท่านที่กำลังมองหาเพื่อนเที่ยว เพื่อนทานข้าว หรือคนรู้ใจชั่วคราว
-                    อัปเดตโปรไฟล์น้องใหม่ทุกวัน คัดเกรดพรีเมียม เพื่อประสบการณ์ที่ดีที่สุดของคุณ
-                </p>
+        <!-- บทความ 3 -->
+        <article class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); background: rgba(18, 18, 24, 0.45); border-radius: 16px;">
+          <a href="blog/what-is-trong-pok.html" aria-label="อ่านบทความ: ตรงปกคืออะไร?" style="text-decoration: none; color: inherit; display: block;">
+            <div style="aspect-ratio: 16/9; overflow: hidden; background-color: #121214;">
+              <img src="/images/blog/guarantee-concept.webp" alt="ตรงปกคืออะไร" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">
             </div>
-        </div>
-
-        <!-- Copyright & Terms -->
-        <div class="border-t border-border pt-6 text-center text-xs text-muted-foreground/60">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-2">
-                <p>Copyright © <span id="currentYearDynamic">2025</span> SidelineChiangmai. All Rights Reserved.</p>
-                <div class="flex gap-4">
-                    <a href="/privacy-policy.html" class="hover:text-foreground transition-colors">นโยบายความเป็นส่วนตัว</a>
-                    <a href="/terms-of-service.html" class="hover:text-foreground transition-colors">ข้อตกลงการใช้งาน</a>
-                </div>
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-size: 11px; font-weight: 800; color: #C084FC; text-transform: uppercase; tracking: 0.1em;">เกี่ยวกับบริการ</span>
+              <h2 style="font-size: 18px; font-weight: 800; color: #FFFFFF; line-height: 1.4; margin: 4px 0;">ตรงปกคืออะไร? ทำความเข้าใจการการันตีของ SidelineCM</h2>
+              <p style="font-size: 13px; color: var(--text-gray); line-height: 1.6;">ไขข้อสงสัยเกี่ยวกับคำว่า 'ตรงปก' และนโยบายการันตีของเราที่ทำให้คุณมั่นใจได้สูงสุดว่าจะได้พบกับน้องที่ตรงกับโปรไฟล์...</p>
             </div>
-            <p class="mt-2 opacity-70">เว็บไซต์นี้จัดทำขึ้นเพื่อความบันเทิงสำหรับผู้ที่มีอายุ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
-        </div>
+          </a>
+        </article>
+      </div>
+
+      <div style="text-align: center; margin-top: 48px; color: var(--text-gray); font-size: 13px; position: relative; z-index: 10;">
+        <i class="fas fa-pencil-alt" style="font-size: 24px; color: var(--primary-purple); margin-bottom: 8px;" aria-hidden="true"></i>
+        <p>เรากำลังเตรียมบทความที่น่าสนใจเพิ่มเติมเพื่อทยอยแสดงผลเร็วๆ นี้</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer style="border-top: 1px solid rgba(147, 51, 234, 0.15); background: rgba(14, 9, 30, 0.45); backdrop-filter: blur(16px); padding: 64px 0 32px 0;" role="contentinfo">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 32px; margin-bottom: 48px;" class="bento-grid-3">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <span style="font-size: 18px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; display: block;">
+          ไลน์<span style="color: var(--primary-purple);">เชียงใหม่</span>
+        </span>
+        <p style="font-size: 12px; line-height: 1.7; color: var(--text-gray); max-width: 320px; margin: 0;">
+          <strong>Sideline Chiangmai</strong> แพลตฟอร์มเพื่อนเที่ยวและผู้ดูแลระดับพรีเมียมอันดับ 1 ในเชียงใหม่ มุ่งเน้นรูปถ่ายตรงปก ยืนยันพิกัดบริการปลอดภัย 100% ไม่มีมัดจำ
+        </p>
+      </div>
+
+      <nav aria-label="ลิงก์ส่วนท้ายเว็บ">
+        <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin-bottom: 16px;">เมนูหลัก</h3>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+          <li><a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a></li>
+          <li><a href="/profiles" style="color: var(--text-gray); text-decoration: none;">รวมโปรไฟล์แนะนำ</a></li>
+          <li><a href="/about" style="color: var(--text-gray); text-decoration: none;">เกี่ยวกับเรา</a></li>
+          <li><a href="/faq" style="color: var(--text-gray); text-decoration: none;">คำถามที่พบบ่อย</a></li>
+        </ul>
+      </nav>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin: 0;">ติดต่อเรา</h3>
+        <p style="font-size: 12px; color: var(--text-gray); margin: 0;">เจ้าหน้าที่สแตนบายดูแล 24 ชม.</p>
+        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
+           style="display: flex; align-items: center; justify-content: center; gap: 8px; background-color: var(--emerald-accent) !important; color: var(--pure-black) !important; padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+          <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
+        </a>
+      </div>
     </div>
+
+    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;">
+      <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">© <span id="currentYearDynamic">2026</span> Sideline Chiangmai. All Rights Reserved.</p>
+      <div style="display: flex; gap: 24px;">
+        <a href="/privacy-policy" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600;">Privacy Policy</a>
+        <a href="/terms-of-service" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600;">Terms & Conditions</a>
+      </div>
+    </div>
+  </div>
 </footer>
-  <!-- เชื่อมโยงระบบดึงข้อมูล Javascript ของระบบหลัก (เรียกผ่านโมดูลระบบใหม่เพื่อรันแอปพลิเคชันเสถียร) -->
-  <script type="module" src="/mainjs"></script>
 
+<script type="module" src="/main.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const menuToggle = document.getElementById("menu-toggle");
+    const closeMenuBtn = document.getElementById("close-menu-btn");
+    const sidebarMenu = document.getElementById("sidebar-menu");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
 
-<script>document.addEventListener("DOMContentLoaded",()=>{document.body.classList.add("loaded")}),"serviceWorker"in navigator&&window.addEventListener("load",()=>{"requestIdleCallback"in window?requestIdleCallback(()=>navigator.serviceWorker.register("/sw.js")):setTimeout(()=>navigator.serviceWorker.register("/sw.js"),1500)})</script>
+    if (menuToggle && sidebarMenu && sidebarOverlay) {
+        const openMenu = () => {
+            sidebarMenu.classList.add("active");
+            sidebarOverlay.style.display = "block";
+            requestAnimationFrame(() => { sidebarOverlay.style.opacity = "1"; });
+            document.body.style.overflow = "hidden"; 
+        };
+        const closeMenu = () => {
+            sidebarMenu.classList.remove("active");
+            sidebarOverlay.style.opacity = "0";
+            document.body.style.overflow = ""; 
+            setTimeout(() => { if (sidebarOverlay.style.opacity === "0") sidebarOverlay.style.display = "none"; }, 300);
+        };
+        menuToggle.addEventListener("click", openMenu);
+        if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
+        sidebarOverlay.addEventListener("click", closeMenu);
+    }
+  });
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
