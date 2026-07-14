@@ -168,7 +168,7 @@ const FLOATING_DOCK_HTML = `
 }
 
 .dock-item-line {
-  background: #06C755;
+  background: #05963E; /* ปรับระดับสีให้ผ่านเกณฑ์ความต่างสีขั้นต่ำของระบบตรวจสอบ */
   color: white !important;
   padding: 8px 16px;
   border-radius: 100px;
