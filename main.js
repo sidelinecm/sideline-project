@@ -694,7 +694,7 @@ window.ScrollTrigger = ScrollTrigger;
 
         let imageObjects = uniquePaths.map(path => {
             return { 
-                src: getOptimizedClientImage(path, 400),  
+                src: getOptimizedClientImage(path, 300),  // ลดขนาดภาพลงให้สอดคล้องกับขนาดโครงสร้างหน้าจอ 281x375
                 fullSrc: getOptimizedClientImage(path, 800) 
             };
         });
@@ -1763,9 +1763,9 @@ window.ScrollTrigger = ScrollTrigger;
             
             const lineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/~${p.lineId}`;
             
-            newBtnWrapper.innerHTML = `
+newBtnWrapper.innerHTML = `
                 <a href="${lineUrl}" target="_blank" rel="noopener nofollow" 
-                   style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #06C755; color: white; padding: 14px; border-radius: 100px; font-weight: 800; font-size: 13.5px; text-decoration: none; box-shadow: 0 8px 20px rgba(6,199,85,0.25); transition: all 0.2s;">
+                   style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #05963E; color: white; padding: 14px; border-radius: 100px; font-weight: 800; font-size: 13.5px; text-decoration: none; box-shadow: 0 8px 20px rgba(5,150,62,0.25); transition: all 0.2s;">
                    <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์จองคิวน้อง${cleanName}
                 </a>
             `;
