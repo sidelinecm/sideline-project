@@ -1642,136 +1642,104 @@ window.ScrollTrigger = ScrollTrigger;
     }
 
     function populateLightboxData(p) {
-        if (!p) return;
+    if (!p) return;
 
-        const cleanName = (p.displayName || p.name || 'ไม่ระบุชื่อ').trim();
-        const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-        const statusText = p.availability || 'สอบถาม';
-        const dotColor = isAvailable ? '#00E676' : '#FF2E63';
+    const cleanName = (p.displayName || p.name || 'ไม่ระบุชื่อ').trim();
+    const isAvailable = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+    const statusText = p.availability || 'สอบถาม';
+    const dotColor = isAvailable ? '#00E676' : '#FF2E63';
 
-        document.getElementById('lightbox-profile-name-main').innerHTML = `
-            <span class="text-gradient-main">น้อง${cleanName}</span>
-            ${p.isVerified ? '<i class="fas fa-check-circle" style="color: #FBBF24; margin-left: 8px;"></i>' : ''}
-        `;
+    // 1. Header Name & Verification
+    document.getElementById('lightbox-profile-name-main').innerHTML = `
+        <span class="text-gradient-main" style="font-size: 24px; font-weight: 800;">น้อง${cleanName}</span>
+        ${p.isVerified ? '<i class="fas fa-check-circle" style="color: #FBBF24; margin-left: 8px; font-size: 18px;"></i>' : ''}
+    `;
 
-        document.getElementById('lightbox-availability-badge-wrapper').innerHTML = `
-            <span class="neon-badge" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 5px 12px; border-radius: 100px; display: flex; align-items: center; gap: 8px;">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: ${dotColor}; box-shadow: 0 0 8px ${dotColor};"></span>
-                <span style="color: white; font-size: 11px; font-weight: 700;">${statusText}</span>
-            </span>
-        `;
+    // 2. Status Badge
+    document.getElementById('lightbox-availability-badge-wrapper').innerHTML = `
+        <span style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 100px; display: inline-flex; align-items: center; gap: 8px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${dotColor}; box-shadow: 0 0 10px ${dotColor};"></span>
+            <span style="color: white; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">${statusText}</span>
+        </span>
+    `;
 
-        const quoteBox = document.getElementById('lightboxQuote');
-        if (quoteBox) {
-            quoteBox.textContent = p.quote || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
-        }
+    // 3. Hero Image
+    const heroImg = document.getElementById('lightboxHeroImage');
+    heroImg.src = p?.images?.[0]?.src || p?.imagePath || '/images/placeholder-profile.webp';
 
-        const heroImg = document.getElementById('lightboxHeroImage');
-        const mainImg = p?.images?.[0]?.src || p?.imagePath || '/images/placeholder-profile.webp';
-        heroImg.src = mainImg;
-
-        const thumbStrip = document.getElementById('lightboxThumbnailStrip');
-        thumbStrip.innerHTML = '';
-        if (p.images && p.images.length > 1) {
-            p.images.forEach((img, idx) => {
-                const thumb = document.createElement('img');
-                thumb.src = img.src;
-                thumb.style.cssText = "width: 50px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; opacity: 0.7; transition: all 0.2s;";
-                if (idx === 0) {
-                    thumb.style.borderColor = "var(--primary-purple)";
-                    thumb.style.opacity = "1";
-                }
-                thumb.onclick = () => {
-                    heroImg.src = img.src;
-                    Array.from(thumbStrip.children).forEach(t => {
-                        t.style.borderColor = "transparent";
-                        t.style.opacity = "0.7";
-                    });
-                    thumb.style.borderColor = "var(--primary-purple)";
-                    thumb.style.opacity = "1";
-                };
-                thumbStrip.appendChild(thumb);
-            });
-            thumbStrip.style.display = 'flex';
-        } else {
-            thumbStrip.style.display = 'none';
-        }
-
-        const tagsContainer = document.getElementById('lightboxTags');
-        tagsContainer.innerHTML = '';
-        const tags = Array.isArray(p.styleTags) ? p.styleTags : [];
-        tags.forEach(tag => {
-            const span = document.createElement('span');
-            span.style.cssText = "background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: #C084FC; font-size: 10px; padding: 4px 12px; border-radius: 100px; font-weight: 700;";
-            span.textContent = tag.startsWith('#') ? tag : `#${tag}`;
-            tagsContainer.appendChild(span);
+    // 4. Thumbnails
+    const thumbStrip = document.getElementById('lightboxThumbnailStrip');
+    thumbStrip.innerHTML = '';
+    if (p.images && p.images.length > 1) {
+        p.images.forEach((img, idx) => {
+            const thumb = document.createElement('img');
+            thumb.src = img.src;
+            thumb.style.cssText = "width: 60px; height: 70px; object-fit: cover; border-radius: 12px; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: all 0.3s;";
+            if (idx === 0) { thumb.style.borderColor = "var(--primary-purple)"; thumb.style.opacity = "1"; }
+            thumb.onclick = () => {
+                heroImg.src = img.src;
+                Array.from(thumbStrip.children).forEach(t => { t.style.borderColor = "transparent"; t.style.opacity = "0.5"; });
+                thumb.style.borderColor = "var(--primary-purple)"; thumb.style.opacity = "1";
+            };
+            thumbStrip.appendChild(thumb);
         });
-
-        const detailsContainer = document.getElementById('lightboxDetailsCompact');
-        detailsContainer.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div class="lightbox-bento-stats">
-                    <div class="bento-stat-box">
-                        <div class="stat-label">อายุ</div>
-                        <div class="stat-value">${p.age || p.safeAge || '-'} ปี</div>
-                    </div>
-                    <div class="bento-stat-box">
-                        <div class="stat-label">สัดส่วน</div>
-                        <div class="stat-value">${p.stats || p.safeStats || '-'}</div>
-                    </div>
-                    <div class="bento-stat-box">
-                        <div class="stat-label">ส่วนสูง/น้ำหนัก</div>
-                        <div class="stat-value">${p.height || p.safeHeight || '-'}/${p.weight || p.safeWeight || '-'}</div>
-                    </div>
-                </div>
-                
-                <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                        <span style="color: #A1A1AA;"><i class="fas fa-tag" style="margin-right: 8px; color: var(--primary-purple); width: 16px; text-align: center;"></i> ค่าขนม</span>
-                        <span style="color: #10B981; font-weight: 800; font-size: 14px;">${p.rate || 'สอบถาม'}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                        <span style="color: #A1A1AA;"><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--primary-purple); width: 16px; text-align: center;"></i> พิกัดงาน</span>
-                        <span style="color: white; font-weight: 600;">${p.location || 'เชียงใหม่'}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                        <span style="color: #A1A1AA;"><i class="fas fa-palette" style="margin-right: 8px; color: var(--primary-purple); width: 16px; text-align: center;"></i> สีผิว</span>
-                        <span style="color: white; font-weight: 600;">${p.skinTone || p.skin_tone || p.safeSkin || '-'}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        const descContainer = document.getElementById('lightboxDescriptionContainer');
-        const descContent = document.getElementById('lightboxDescriptionContent');
-        if (p.description && p.description.trim() !== '') {
-            descContent.innerHTML = p.description.replace(/\n/g, '<br>');
-            descContainer.style.display = 'block';
-        } else {
-            descContent.textContent = `น้อง${cleanName} ยืนยันตัวตนตรงปก พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน${p.location || 'เชียงใหม่'} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
-            descContainer.style.display = 'block';
-        }
-
-        const lineWrapper = document.getElementById('line-btn-sticky-wrapper');
-        if (lineWrapper) lineWrapper.remove();
-
-        if (p.lineId) {
-            const detailsPanel = document.querySelector('.lightbox-details');
-            const newBtnWrapper = document.createElement('div');
-            newBtnWrapper.id = 'line-btn-sticky-wrapper';
-            newBtnWrapper.style.cssText = "margin-top: 12px; position: sticky; bottom: 0; padding-top: 10px; background: none; width: 100%;";
-            
-            const lineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/~${p.lineId}`;
-            
-newBtnWrapper.innerHTML = `
-                <a href="${lineUrl}" target="_blank" rel="noopener nofollow" 
-                   style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #05963E; color: white; padding: 14px; border-radius: 100px; font-weight: 800; font-size: 13.5px; text-decoration: none; box-shadow: 0 8px 20px rgba(5,150,62,0.25); transition: all 0.2s;">
-                   <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์จองคิวน้อง${cleanName}
-                </a>
-            `;
-            detailsPanel.appendChild(newBtnWrapper);
-        }
+        thumbStrip.style.display = 'flex';
+    } else {
+        thumbStrip.style.display = 'none';
     }
+
+    // 5. Quote
+    const quoteBox = document.getElementById('lightboxQuote');
+    if (quoteBox) quoteBox.textContent = p.quote || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
+
+    // 6. Tags
+    const tagsContainer = document.getElementById('lightboxTags');
+    tagsContainer.innerHTML = '';
+    (Array.isArray(p.styleTags) ? p.styleTags : []).forEach(tag => {
+        const span = document.createElement('span');
+        span.style.cssText = "background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); color: #D8B4FE; font-size: 10px; padding: 4px 12px; border-radius: 100px; font-weight: 600;";
+        span.textContent = tag.startsWith('#') ? tag : `#${tag}`;
+        tagsContainer.appendChild(span);
+    });
+
+    // 7. Bento Stats
+    document.getElementById('lightboxDetailsCompact').innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; text-align: center;"><div style="font-size: 9px; color: #71717A;">อายุ</div><div style="font-weight: 700;">${p.age || p.safeAge || '-'} ปี</div></div>
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; text-align: center;"><div style="font-size: 9px; color: #71717A;">สัดส่วน</div><div style="font-weight: 700;">${p.stats || p.safeStats || '-'}</div></div>
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; text-align: center;"><div style="font-size: 9px; color: #71717A;">ส่วนสูง</div><div style="font-weight: 700;">${p.height || p.safeHeight || '-'}</div></div>
+        </div>
+        <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between;"><span style="color: #A1A1AA;">ค่าขนม</span><span style="color: #10B981; font-weight: 800;">${p.rate || 'สอบถาม'}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #A1A1AA;">พิกัดงาน</span><span style="color: white; font-weight: 600;">${p.location || 'เชียงใหม่'}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #A1A1AA;">สีผิว</span><span style="color: white; font-weight: 600;">${p.skinTone || p.skin_tone || p.safeSkin || '-'}</span></div>
+        </div>
+    `;
+
+    // 8. Description
+    const descContainer = document.getElementById('lightboxDescriptionContainer');
+    const descContent = document.getElementById('lightboxDescriptionContent');
+    descContent.innerHTML = (p.description || `น้อง${cleanName} ยืนยันตัวตนตรงปก พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน${p.location || 'เชียงใหม่'} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`).replace(/\n/g, '<br>');
+    descContainer.style.display = 'block';
+
+    // 9. Sticky Line Button
+    const detailsPanel = document.querySelector('.lightbox-details');
+    const existingBtn = document.getElementById('line-btn-sticky-wrapper');
+    if (existingBtn) existingBtn.remove();
+    
+    if (p.lineId) {
+        const lineUrl = p.lineId.startsWith('http') ? p.lineId : `https://line.me/ti/p/~${p.lineId}`;
+        const newBtnWrapper = document.createElement('div');
+        newBtnWrapper.id = 'line-btn-sticky-wrapper';
+        newBtnWrapper.style.cssText = "margin-top: 20px; position: sticky; bottom: 0;";
+        newBtnWrapper.innerHTML = `
+            <a href="${lineUrl}" target="_blank" rel="noopener nofollow" style="display: flex; align-items: center; justify-content: center; gap: 12px; background: #06C755; color: white; padding: 16px; border-radius: 100px; font-weight: 800; text-decoration: none; box-shadow: 0 10px 25px rgba(6,199,85,0.3); transition: transform 0.2s;">
+                <i class="fab fa-line" style="font-size: 22px;"></i> แอดไลน์จองคิวน้อง${cleanName}
+            </a>
+        `;
+        detailsPanel.appendChild(newBtnWrapper);
+    }
+}
 
     function initLightboxEvents() {
         console.log("ℹ️ Lightbox events bound cleanly to global listener.");
