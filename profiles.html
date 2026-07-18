@@ -669,61 +669,62 @@
   <script type="module" src="/main.js"></script>
 
 
-      <script>
-      document.addEventListener("DOMContentLoaded", () => {
-          // 1. ระบบควบคุมเปิด-ปิดสไลด์เมนูมือถือแบบ Custom CSS
-          const menuToggle = document.getElementById("menu-toggle");
-          const closeMenuBtn = document.getElementById("close-menu-btn");
-          const sidebarMenu = document.getElementById("sidebar-menu");
-          const sidebarOverlay = document.getElementById("sidebar-overlay");
-
-          if (menuToggle && sidebarMenu && sidebarOverlay) {
-              const openMenu = () => {
-                  sidebarMenu.classList.add("active");
-                  sidebarOverlay.style.display = "block";
-                  setTimeout(() => { sidebarOverlay.style.opacity = "1"; }, 50);
-                  document.body.style.overflow = "hidden"; 
-              };
-
-              const closeMenu = () => {
-                  sidebarMenu.classList.remove("active");
-                  sidebarOverlay.style.opacity = "0";
-                  document.body.style.overflow = ""; 
-                  setTimeout(() => { sidebarOverlay.style.display = "none"; }, 300);
-              };
-
-              menuToggle.addEventListener("click", openMenu);
-              if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
-              sidebarOverlay.addEventListener("click", closeMenu);
-
-              const menuLinks = sidebarMenu.querySelectorAll(".sidebar-links-wrapper a, div a");
-              menuLinks.forEach(link => {
-                  link.addEventListener("click", closeMenu);
-              });
-          }
-
-          // 2. ระบบโหลดแผนที่ Google Maps แบบประหยัดพลังงาน
-          const mapIframe = document.getElementById("google-map");
-          const placeholder = document.getElementById("map-placeholder");
-          if (mapIframe && 'IntersectionObserver' in window) {
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. Google Maps Lazy Loading
+    const mapIframe = document.getElementById("google-map");
+    const placeholder = document.getElementById("map-placeholder");
+    
+    if (mapIframe) {
+        if ('IntersectionObserver' in window) {
             const mapObserver = new IntersectionObserver((entries, observer) => {
-              entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                  mapIframe.src = mapIframe.dataset.src;
-                  mapIframe.onload = () => {
-                    if (placeholder) placeholder.style.opacity = '0';
-                    setTimeout(() => placeholder && placeholder.remove(), 500);
-                  };
-                  observer.unobserve(entry.target);
-                }
-              });
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (mapIframe.dataset.src) {
+                            mapIframe.src = mapIframe.dataset.src;
+                        }
+                        mapIframe.onload = () => {
+                            if (placeholder) {
+                                placeholder.style.opacity = '0';
+                                setTimeout(() => placeholder.remove(), 500);
+                            }
+                        };
+                        observer.unobserve(entry.target);
+                    }
+                });
             }, { rootMargin: "200px" });
             mapObserver.observe(mapIframe);
-          } else if (mapIframe) {
+        } else {
             mapIframe.src = mapIframe.dataset.src;
             if (placeholder) placeholder.remove();
-          }
-      });
-      </script>
+        }
+    }
+
+    // 2. ระบบย่อข้อความเชิงลึก SEO (ปรับปรุงระบบสไลด์ขยายเนื้อหาให้เรียบเนียนที่สุด)
+    const seoDrawerBtn = document.getElementById("toggle-seo-drawer-btn");
+    const seoDrawerWrapper = document.getElementById("seo-drawer-wrapper");
+    if (seoDrawerBtn && seoDrawerWrapper) {
+        // กำหนดค่าความสูงเริ่มต้นสำหรับการแสดงผลย่อหน้า
+        seoDrawerWrapper.style.maxHeight = "180px";
+
+        seoDrawerBtn.addEventListener("click", () => {
+            const isCollapsed = seoDrawerWrapper.classList.toggle("collapsed");
+            if (isCollapsed) {
+                // พับเก็บกลับไปที่ 180px
+                seoDrawerWrapper.style.maxHeight = "180px";
+                seoDrawerBtn.querySelector("span").textContent = "ดูข้อมูลพื้นที่บริการทั้งหมด";
+                seoDrawerBtn.querySelector("i").className = "fas fa-chevron-down";
+                seoDrawerWrapper.scrollIntoView({ behavior: "smooth" });
+            } else {
+                // ขยายออกเต็มที่โดยอิงตามความสูงของเนื้อหาจริงโดยรอบ (scrollHeight)
+                seoDrawerWrapper.style.maxHeight = seoDrawerWrapper.scrollHeight + "px";
+                seoDrawerBtn.querySelector("span").textContent = "ย่อเนื้อหาข้อความ";
+                seoDrawerBtn.querySelector("i").className = "fas fa-chevron-up";
+            }
+        });
+    }
+  });
+</script>
     </body>
     </html>

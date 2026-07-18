@@ -47,6 +47,7 @@
   }
   </script>
 
+
   <!-- ============================== COMPLETE PURE CUSTOM CSS ============================== -->
   <style>
     :root {
@@ -306,7 +307,7 @@
       color: var(--pure-white) !important;
     }
 
-    /* --- Page Hero & Content Spacing --- */
+    /* --- Hero & Content layouts --- */
     .hero-section {
       text-align: center;
       padding: 120px 20px 40px 20px;
@@ -326,7 +327,7 @@
       .hero-title { font-size: 56px; }
     }
 
-    /* --- Interactive Glass Panels --- */
+    /* --- Specular Glass panels --- */
     .glass-panel, .interactive-card {
       position: relative;
       overflow: hidden;
@@ -335,7 +336,7 @@
       -webkit-backdrop-filter: blur(16px) !important;
       border: 1px solid rgba(147, 51, 234, 0.25) !important;
       border-radius: 24px !important;
-      padding: 32px;
+      padding: 24px;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
@@ -360,17 +361,6 @@
       transform: translateY(-4px);
       border-color: rgba(147, 51, 234, 0.5) !important;
       box-shadow: 0 20px 50px rgba(90, 44, 190, 0.15), 0 0 15px rgba(90, 44, 190, 0.05) !important;
-    }
-
-    /* --- Bento Layout --- */
-    .bento-grid-3 {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-    }
-
-    @media (min-width: 768px) {
-      .bento-grid-3 { grid-template-columns: repeat(3, 1fr); }
     }
 
     .text-gradient-main {
@@ -449,6 +439,50 @@
         justify-content: space-between;
         align-items: center;
       }
+    }
+
+    /* Accordion Custom Layout */
+    .faq-item-div {
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 0;
+    }
+    .faq-item-div:last-child {
+      border-bottom: none;
+    }
+    .faq-trigger-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      font-family: inherit;
+    }
+    .faq-trigger-btn:hover {
+      color: #C084FC;
+    }
+    .faq-panel-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      color: var(--text-gray);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .faq-panel-content.active {
+      max-height: 500px; /* ขยายเนื้อหาได้อย่างอิสระเมื่อเปิดใช้งาน */
+    }
+    .faq-chevron {
+      transition: transform 0.3s;
+    }
+    .faq-chevron.rotate {
+      transform: rotate(180deg);
     }
   </style>
 </head>
@@ -645,33 +679,62 @@
   </footer>
 <script type=module src=/main.js></script>
 
-  <script>
+ <script>
   document.addEventListener("DOMContentLoaded", () => {
-      const menuToggle = document.getElementById("menu-toggle");
-      const closeMenuBtn = document.getElementById("close-menu-btn");
-      const sidebarMenu = document.getElementById("sidebar-menu");
-      const sidebarOverlay = document.getElementById("sidebar-overlay");
+    
+    // 1. Google Maps Lazy Loading
+    const mapIframe = document.getElementById("google-map");
+    const placeholder = document.getElementById("map-placeholder");
+    
+    if (mapIframe) {
+        if ('IntersectionObserver' in window) {
+            const mapObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (mapIframe.dataset.src) {
+                            mapIframe.src = mapIframe.dataset.src;
+                        }
+                        mapIframe.onload = () => {
+                            if (placeholder) {
+                                placeholder.style.opacity = '0';
+                                setTimeout(() => placeholder.remove(), 500);
+                            }
+                        };
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: "200px" });
+            mapObserver.observe(mapIframe);
+        } else {
+            mapIframe.src = mapIframe.dataset.src;
+            if (placeholder) placeholder.remove();
+        }
+    }
 
-      if (menuToggle && sidebarMenu && sidebarOverlay) {
-          const openMenu = () => {
-              sidebarMenu.classList.add("active");
-              sidebarOverlay.style.display = "block";
-              setTimeout(() => { sidebarOverlay.style.opacity = "1"; }, 50);
-              document.body.style.overflow = "hidden"; 
-          };
+    // 2. ระบบย่อข้อความเชิงลึก SEO (ปรับปรุงระบบสไลด์ขยายเนื้อหาให้เรียบเนียนที่สุด)
+    const seoDrawerBtn = document.getElementById("toggle-seo-drawer-btn");
+    const seoDrawerWrapper = document.getElementById("seo-drawer-wrapper");
+    if (seoDrawerBtn && seoDrawerWrapper) {
+        // กำหนดค่าความสูงเริ่มต้นสำหรับการแสดงผลย่อหน้า
+        seoDrawerWrapper.style.maxHeight = "180px";
 
-          const closeMenu = () => {
-              sidebarMenu.classList.remove("active");
-              sidebarOverlay.style.opacity = "0";
-              document.body.style.overflow = ""; 
-              setTimeout(() => { sidebarOverlay.style.display = "none"; }, 300);
-          };
-
-          menuToggle.addEventListener("click", openMenu);
-          if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenu);
-          sidebarOverlay.addEventListener("click", closeMenu);
-      }
+        seoDrawerBtn.addEventListener("click", () => {
+            const isCollapsed = seoDrawerWrapper.classList.toggle("collapsed");
+            if (isCollapsed) {
+                // พับเก็บกลับไปที่ 180px
+                seoDrawerWrapper.style.maxHeight = "180px";
+                seoDrawerBtn.querySelector("span").textContent = "ดูข้อมูลพื้นที่บริการทั้งหมด";
+                seoDrawerBtn.querySelector("i").className = "fas fa-chevron-down";
+                seoDrawerWrapper.scrollIntoView({ behavior: "smooth" });
+            } else {
+                // ขยายออกเต็มที่โดยอิงตามความสูงของเนื้อหาจริงโดยรอบ (scrollHeight)
+                seoDrawerWrapper.style.maxHeight = seoDrawerWrapper.scrollHeight + "px";
+                seoDrawerBtn.querySelector("span").textContent = "ย่อเนื้อหาข้อความ";
+                seoDrawerBtn.querySelector("i").className = "fas fa-chevron-up";
+            }
+        });
+    }
   });
-  </script>
+</script>
 </body>
 </html>
