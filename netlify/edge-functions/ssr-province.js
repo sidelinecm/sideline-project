@@ -552,7 +552,7 @@ export default async (req, context) => {
         ? CONFIG.MAPS_SHARE_URL 
         : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + provinceThaiName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // 🟢 2. ปรับแต่งและจัดเรียงโครงสร้าง Schema JSON-LD (Dynamic @graph) ให้ตอบโจทย์ E-E-A-T
+// 🟢 2. ปรับแต่งและจัดเรียงโครงสร้าง Schema JSON-LD (Dynamic @graph) ให้ตอบโจทย์ E-E-A-T อย่างสมบูรณ์และไร้ข้อผิดพลาด
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -627,10 +627,10 @@ export default async (req, context) => {
         ],
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": finalRatingValue,
-          "reviewCount": String(finalReviewCount),
-          "bestRating": "5",
-          "worstRating": "1"
+          "ratingValue": Number(finalRatingValue),
+          "reviewCount": Number(finalReviewCount),
+          "bestRating": 5,
+          "worstRating": 1
         },
         "review": finalReviews.map(r => ({
           "@type": "Review",
@@ -639,9 +639,9 @@ export default async (req, context) => {
           "reviewBody": stripHTML(r.text),
           "reviewRating": {
             "@type": "Rating",
-            "ratingValue": String(r.rating),
-            "bestRating": "5",
-            "worstRating": "1"
+            "ratingValue": Number(r.rating),
+            "bestRating": 5,
+            "worstRating": 1
           }
         }))
       });
