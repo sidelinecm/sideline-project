@@ -66,6 +66,61 @@
     .capsule-text {
       color: #F4F4F5 !important; /* ปรับระดับสีตัวอักษรให้อัตราส่วนคอนทราสต์อยู่ในเกณฑ์ที่เหมาะสม */
     }
+
+    /* 🟢 ปรับตั้งระบบจำลองปิดหีบเพลง (Accordion SEO Crawlability) โดยไม่ทำลาย DOM */
+    .rule-item {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background-color: rgba(255, 255, 255, 0.01);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    .rule-item:not(.collapsed) {
+      background-color: rgba(147, 51, 234, 0.03);
+      border-color: rgba(147, 51, 234, 0.2);
+    }
+    .rule-trigger {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      color: #FFFFFF;
+      outline: none;
+      text-align: left;
+    }
+    .rule-content {
+      max-height: 1000px;
+      opacity: 1;
+      padding: 0 20px 20px 20px;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.4s ease;
+    }
+    .rule-item.collapsed .rule-content {
+      max-height: 0 !important;
+      opacity: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      pointer-events: none;
+    }
+    .rule-icon {
+      transition: transform 0.3s ease;
+    }
+    .rule-item:not(.collapsed) .rule-icon {
+      transform: rotate(180deg);
+      color: #C084FC;
+    }
+
+    /* สไตล์สำหรับการกรอกดาวอย่างเป็นธรรมชาติ */
+    .star-rating-input-item {
+      color: #71717A;
+      transition: color 0.15s ease;
+    }
+    .star-rating-input-item.active {
+      color: #FBBF24 !important;
+    }
   </style>
 
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -203,18 +258,20 @@
         <!-- 🟢 ใช้การแสดงผล Responsive Image ผ่านคำสั่ง srcset เพื่อให้เบราว์เซอร์ดาวน์โหลดไฟล์ขนาดเล็กบนมือถือโดยอัตโนมัติ -->
         <img src="/images/hero-sidelinechiangmai-1200.webp" 
              srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w"
-             sizes="(max-width: 768px) 100vw, 768px"
+             sizes="(max-width: 768px) 100vw, (min-width: 769px) 1200px"
              alt="เพื่อนเที่ยว{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก 100% สไตล์ฟิวแฟน ไม่มัดจำ" 
-             width="768" 
-             height="480" 
+             width="1200" 
+             height="630" 
+             style="width: 100%; height: auto; aspect-ratio: 1200/630; object-fit: cover;"
              fetchpriority="high" 
              loading="eager">
         <div class="billboard-overlay"></div>
       </div>
 
+      <!-- 🟢 ปรับเปลี่ยนชื่อหัวข้อหลักเป็น Keyword-rich แบบมีคีย์เวิร์ด + USP + 2026 -->
       <h1 id="hero-h1" class="hero-title text-gradient-main">
-          สาวรับงาน{{PROVINCE_NAME}} <br>
-          <span class="text-gradient-sub" style="font-size: clamp(20px, 4vw, 32px);">ไซด์ไลน์และเพื่อนเที่ยวฟิวแฟน100%</span>
+          สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์เพื่อนเที่ยวฟิวแฟนตรงปก <br>
+          <span class="text-gradient-sub" style="font-size: clamp(18px, 3.5vw, 28px); display: block; margin-top: 8px;">ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% (อัปเดตล่าสุด 2026)</span>
       </h1>
       
       <p class="hero-subtitle-p">
@@ -436,14 +493,14 @@
           </p>
         </div>
 
-        <!-- 🟢 ยุบรวมกติกาข้อความยาวเหยียดทั้ง 5 ข้อ ให้กลายเป็นหีบเพลงสอดสไลด์แบบสมมาตร สะอาดสะอ้าน -->
+        <!-- 🟢 ปรับเปลี่ยนตัวหนังสือหัวข้อใน Accordion ให้เป็นหัวข้อแท็ก H3 ย่อยสำหรับการสแกนโครงสร้างหน้าเว็บ (SEO Crawlability) -->
         <div class="rules-accordion" style="display: flex; flex-direction: column; gap: 12px; max-width: 768px; margin: 32px auto 0 auto; text-align: left; position: relative; z-index: 10;">
           
           <!-- ข้อที่ 1 -->
           <div class="rule-item collapsed">
             <button type="button" class="rule-trigger">
               <span class="rule-number">01</span>
-              <span class="rule-title">กติกาข้อที่ 1: ชำระค่าบริการหน้างาน 100% ไม่มีมัดจำ</span>
+              <h3 class="rule-title" style="font-size: 13.5px; font-weight: 700; margin: 0; display: inline-block;">กติกาข้อที่ 1: ชำระค่าบริการหน้างาน 100% ไม่มีมัดจำ</h3>
               <i class="fas fa-chevron-down rule-icon"></i>
             </button>
             <div class="rule-content">
@@ -457,7 +514,7 @@
           <div class="rule-item collapsed">
             <button type="button" class="rule-trigger">
               <span class="rule-number">02</span>
-              <span class="rule-title">กติกาข้อที่ 2: งดกิจกรรมที่ขัดต่อข้อกฎหมายศีลธรรม</span>
+              <h3 class="rule-title" style="font-size: 13.5px; font-weight: 700; margin: 0; display: inline-block;">กติกาข้อที่ 2: งดกิจกรรมที่ขัดต่อข้อกฎหมายศีลธรรม</h3>
               <i class="fas fa-chevron-down rule-icon"></i>
             </button>
             <div class="rule-content">
@@ -471,7 +528,7 @@
           <div class="rule-item collapsed">
             <button type="button" class="rule-trigger">
               <span class="rule-number">03</span>
-              <span class="rule-title">กติกาข้อที่ 3: ผู้ใช้งานบริการเอนเตอร์เทนต้องอายุ 20+ ขึ้นไป</span>
+              <h3 class="rule-title" style="font-size: 13.5px; font-weight: 700; margin: 0; display: inline-block;">กติกาข้อที่ 3: ผู้ใช้งานบริการเอนเตอร์เทนต้องอายุ 20+ ขึ้นไป</h3>
               <i class="fas fa-chevron-down rule-icon"></i>
             </button>
             <div class="rule-content">
@@ -485,7 +542,7 @@
           <div class="rule-item collapsed">
             <button type="button" class="rule-trigger">
               <span class="rule-number">04</span>
-              <span class="rule-title">กติกาข้อที่ 4: ตารางเวลาปฏิบัติงานจริง</span>
+              <h3 class="rule-title" style="font-size: 13.5px; font-weight: 700; margin: 0; display: inline-block;">กติกาข้อที่ 4: ตารางเวลาปฏิบัติงานจริง</h3>
               <i class="fas fa-chevron-down rule-icon"></i>
             </button>
             <div class="rule-content">
@@ -499,7 +556,7 @@
           <div class="rule-item collapsed">
             <button type="button" class="rule-trigger">
               <span class="rule-number">05</span>
-              <span class="rule-title">กติกาข้อที่ 5: เกณฑ์สำหรับการเดินทางออกนอกเขตพื้นที่หลัก</span>
+              <h3 class="rule-title" style="font-size: 13.5px; font-weight: 700; margin: 0; display: inline-block;">กติกาข้อที่ 5: เกณฑ์สำหรับการเดินทางออกนอกเขตพื้นที่หลัก</h3>
               <i class="fas fa-chevron-down rule-icon"></i>
             </button>
             <div class="rule-content" style="padding-bottom: 24px;">
@@ -560,33 +617,37 @@
           ความคิดเห็นที่ผ่านการคัดกรองจะถูกส่งสัญญานไปเป็น Structured Data เพื่อการจัดอันดับบนหน้าแรกของ Google
       </p>
 
+      <!-- 🟢 ปรับเปลี่ยน ID / Name และโครงสร้างฟิลด์ให้รองรับการ Serialize ส่งต่อไปยังระบบฐานข้อมูล Supabase -->
       <form id="review-form" style="display: flex; flex-direction: column; gap: 16px;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <div style="display: flex; flex-direction: column; gap: 6px;">
                   <label for="review-author" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน (ใช้นามสมมติได้)</label>
-                  <input type="text" id="review-author" required placeholder="ตัวอย่าง: คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
+                  <input type="text" id="review-author" name="author" required placeholder="ตัวอย่าง: คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
               </div>
               <div style="display: flex; flex-direction: column; gap: 6px;">
                   <label for="review-location" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอน้อง</label>
-                  <input type="text" id="review-location" placeholder="ตัวอย่าง: ตัวเมืองเชียงใหม่" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
+                  <input type="text" id="review-location" name="location" placeholder="ตัวอย่าง: ตัวเมือง{{PROVINCE_NAME}}" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
               </div>
           </div>
 
-          <!-- การให้ดาว -->
+          <!-- การให้ดาว (Star Rating) -->
           <div style="display: flex; flex-direction: column; gap: 6px;">
               <span style="font-size: 11px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจการบริการ</span>
-              <div class="star-rating-input-container" style="display: flex; gap: 6px; color: #71717A; font-size: 18px; cursor: pointer;">
+              <div class="star-rating-input-container" style="display: flex; gap: 6px; color: #71717A; font-size: 18px; cursor: pointer;" aria-label="กรุณาคลิกเลือกคะแนนความพึงพอใจของคุณ">
                   <i class="fas fa-star star-rating-input-item active" data-value="1"></i>
                   <i class="fas fa-star star-rating-input-item active" data-value="2"></i>
                   <i class="fas fa-star star-rating-input-item active" data-value="3"></i>
                   <i class="fas fa-star star-rating-input-item active" data-value="4"></i>
                   <i class="fas fa-star star-rating-input-item active" data-value="5"></i>
               </div>
+              <!-- Hidden input สำหรับเก็บค่า Rating เพื่อเตรียมเชื่อมต่อ Supabase Payload -->
+              <input type="hidden" id="review-rating-value" name="rating" value="5">
+              <input type="hidden" id="review-province-key" name="province_key" value="{{PROVINCE_NAME}}">
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px;">
               <label for="review-text" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน/เทคแคร์ของน้อง</label>
-              <textarea id="review-text" rows="4" required placeholder="เช่น น้องสุภาพเรียบร้อย เทคแคร์ประทับใจสไตล์ฟิวแฟน ตัวจริงตรงตามปกและประทับใจมาก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px; line-height: 1.6; resize: none;"></textarea>
+              <textarea id="review-text" name="review_text" rows="4" required placeholder="เช่น น้องสุภาพเรียบร้อย เทคแคร์ประทับใจสไตล์ฟิวแฟน ตัวจริงตรงตามปกและประทับใจมาก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px; line-height: 1.6; resize: none;"></textarea>
           </div>
 
           <button type="submit" style="background: var(--primary-purple); color: white; padding: 14px; border: none; border-radius: 100px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center;">
@@ -918,7 +979,7 @@
         }
     }
 
-// 🟢 3. ระบบย่อข้อความเชิงลึก SEO (ปรับปรุงระบบสไลด์ขยายเนื้อหาให้เรียบเนียนที่สุด)
+    // 3. ระบบย่อข้อความเชิงลึก SEO (ปรับปรุงระบบสไลด์ขยายเนื้อหาให้เรียบเนียนที่สุด)
     const seoDrawerBtn = document.getElementById("toggle-seo-drawer-btn");
     const seoDrawerWrapper = document.getElementById("seo-drawer-wrapper");
     if (seoDrawerBtn && seoDrawerWrapper) {
@@ -958,6 +1019,29 @@
             });
         }
     });
+
+    // 🟢 5. ระบบเลือกคะแนนดาวแบบมีปฏิสัมพันธ์ (Star Rating Input UX)
+    const starRatingContainer = document.querySelector(".star-rating-input-container");
+    const hiddenRatingInput = document.getElementById("review-rating-value");
+    if (starRatingContainer && hiddenRatingInput) {
+        const stars = starRatingContainer.querySelectorAll(".star-rating-input-item");
+        stars.forEach(star => {
+            star.addEventListener("click", () => {
+                const value = parseInt(star.getAttribute("data-value"));
+                hiddenRatingInput.value = value;
+                
+                // สลับปรับสไตล์เพื่อแสดงผลดาวจริงตามการเลือกใช้งานของผู้ใช้
+                stars.forEach(s => {
+                    const starVal = parseInt(s.getAttribute("data-value"));
+                    if (starVal <= value) {
+                        s.classList.add("active");
+                    } else {
+                        s.classList.remove("active");
+                    }
+                });
+            });
+        });
+    }
 });
 </script>
 
