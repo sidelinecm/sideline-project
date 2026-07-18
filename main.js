@@ -124,14 +124,28 @@ window.ScrollTrigger = ScrollTrigger;
         });
     }
 
-    // ฟังก์ชันแผนสำรองกวาดล้างตัวแปรค้างบนหน้าจอ
+
     function clearRawPlaceholdersFallback() {
         const activeProvinceKey = (dom.provinceSelect && dom.provinceSelect.value) 
             || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) 
             || "chiangmai";
         const provinceName = state.provincesMap.get(activeProvinceKey) || "เชียงใหม่";
 
-        // ค้นหาและแทนที่แบบปลอดภัย ไม่รบกวน Event Listener ของสคริปต์
+        // 🟢 เสริมวัคซีนคุ้มกันภัย: ล้างค่าตัวแปรโมเดลโมเดล JSON ดิบใน HEAD ป้องกัน Search Console แจ้งเตือนถาวร
+        const dynamicSchemaEl = document.getElementById('dynamic-schema');
+        if (dynamicSchemaEl && dynamicSchemaEl.textContent.includes('{{SCHEMA_JSON}}')) {
+            console.warn("⚠️ Found raw schema placeholder. Injecting clean default website schema.");
+            const defaultWebsiteSchema = {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "url": CONFIG.SITE_URL,
+                "name": "Sideline Chiangmai",
+                "description": "ศูนย์รวมน้องๆ ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ไม่มัดจำ"
+            };
+            dynamicSchemaEl.textContent = JSON.stringify(defaultWebsiteSchema);
+        }
+
+
         function walkAndReplace(node) {
             if (node.nodeType === Node.TEXT_NODE) {
                 if (node.nodeValue.includes('{{PROVINCE_NAME}}')) {
