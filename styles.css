@@ -11,3 +11,13 @@
     z-index: 50;
     box-shadow: 0 -15px 20px -10px rgba(18, 18, 20, 0.9);
 }
+/* บังคับเปลี่ยนสีตัวอักษรของปุ่ม Line ให้เป็นสีขาวชัดเจน */
+.dock-item-line {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+/* เพิ่มเติม: ถ้ามี span ข้างในที่สีเพี้ยน ให้แก้ด้วย */
+.dock-item-line span {
+    color: #FFFFFF !important;
+}
