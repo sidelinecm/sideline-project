@@ -125,30 +125,48 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 
 // 🛠️ อัปเกรดฟังก์ชันจัดทำคำโปรย SEO อย่างลึกซึ้ง มีประโยชน์ และสอดคล้องตามมาตรฐาน E-E-A-T
 const getDynamicIntro = (provinceName, zones) => {
-  const zoneSnippet = zones && zones.length > 0 
-    ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${zones.slice(0, 4).join(", โซน")}` 
+  let processedZones = zones ? [...zones] : [];
+  
+  // 🟢 ตรวจสอบหากพิกัดเป็นเชียงใหม่ ให้ทำการเปลี่ยนข้อความ "นิมมาน" ในชุดโซนให้เป็นลิงก์เชื่อมต่อภายในทันที
+  if (provinceName === "เชียงใหม่" && processedZones.includes("นิมมาน")) {
+    processedZones = processedZones.map(zone => 
+      zone === "นิมมาน" 
+        ? `<a href="/nimman" class="text-[#C084FC] hover:underline font-bold transition-colors">นิมมาน</a>`
+        : zone
+    );
+  }
+
+  const zoneSnippet = processedZones && processedZones.length > 0 
+    ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${processedZones.slice(0, 4).join(", โซน")}` 
     : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
+
   return `
     <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
     <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการในพื้นที่ ${provinceName} น้อง ๆ ในระบบของเรากระจายตัวอยู่ในจุดที่เหมาะสม${zoneSnippet} ไม่ว่าจะเป็นโรงแรมชั้นนำ คอนโดมิเนียมส่วนตัว หรือพิกัดยอดนิยม เดินทางสะดวกสบายและมีความปลอดภัยสูง พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
-    <p>รูปภาพและข้อมูลรายละเอียดสัดส่วนของน้อง ๆ ได้รับการคัดกรองและตรวจสอบยืนยันตัวตน (Verified System) อย่างรอบคอบ เพื่อให้สมาชิกมั่นใจได้ว่าข้อมูลถูกต้อง ตรงตามปก และได้รับประสบการณ์การใช้บริการที่ปลอดภัยและมีความสุขที่สุดในค่ำคืนนี้</p>
+    <p>รูปภาพและข้อมูลรายละเอียดสัดส่วน of น้อง ๆ ได้รับการคัดกรองและตรวจสอบยืนยันตัวตน (Verified System) อย่างรอบคอบ เพื่อให้สมาชิกมั่นใจได้ว่าข้อมูลถูกต้อง ตรงตามปก และได้รับประสบการณ์การใช้บริการที่ปลอดภัยและมีความสุขที่สุดในค่ำคืนนี้</p>
   `;
 };
 
 const getDynamicReviews = provinceName => {
   const t = new Date();
+  const isChiangMai = provinceName === "เชียงใหม่";
+
   return [
     {
       author: "คุณชลสิทธิ์ (C.)",
-      location: `ตัวเมือง${provinceName}`,
-      text: `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ"`,
+      location: isChiangMai ? "ย่านนิมมาน เชียงใหม่" : `ตัวเมือง${provinceName}`,
+      text: isChiangMai 
+        ? `"นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ แถวนิมมาน"`
+        : `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ"`,
       date: "เมื่อสัปดาห์ที่แล้ว",
       datePublished: new Date(t.getTime() - 691200000).toISOString().split("T")[0]
     },
     {
       author: "คุณอภิชาติ (A.)",
-      location: `โซนยอดนิยมใน${provinceName}`,
-      text: '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
+      location: isChiangMai ? "โซนยอดนิยม นิมมาน เชียงใหม่" : `โซนยอดนิยมใน${provinceName}`,
+      text: isChiangMai
+        ? '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง นัดเจอแถวนิมมานตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"'
+        : '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
       date: "เมื่อ 2 สัปดาห์ก่อน",
       datePublished: new Date(t.getTime() - 1296000000).toISOString().split("T")[0]
     }
@@ -848,7 +866,7 @@ export default async (req, context) => {
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
 
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
+rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_DESCRIPTION}}", strippedDesc);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
@@ -860,6 +878,9 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml); // แทนค่าตรงสู่ Footer
+    
+    // 🛠️ แทนที่ลิงก์แผนที่ Google Maps แบบไดนามิกแยกตามจังหวัดที่ผู้ใช้เลือกดูจริง
+    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_JSON}}", JSON.stringify(profileList.map(p => ({
       id: p.id,

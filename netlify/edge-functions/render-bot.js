@@ -88,9 +88,10 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
+        // 🛠️ แก้ไข: ปรับปรุงคำสั่งดึงข้อมูลให้ Select คอลัมน์ที่จำเป็นให้ครบถ้วนเพื่อป้องกันตัวแปรเป็น undefined
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, line_id, verified, availability, stats, height, weight, isfeatured, skin_tone, bust, waist, hips, cup_size, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -132,18 +133,31 @@ export default async (request, context) => {
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
-        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
+        // 🛠️ แก้ไข: รองรับคอลัมน์ line_id ทั้งรูปแบบ snake_case และ camelCase
+        const rawLineId = p.line_id || p.lineId || 'ksLUWB89Y_';
+        let finalLineUrl = rawLineId;
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-        const heightVal = getDeterministicValue(158, 168, slug, 2);
-        const weightVal = getDeterministicValue(44, 52, slug, 3);
-        const breastVal = getDeterministicValue(32, 36, slug, 4);
-        const waistVal = getDeterministicValue(23, 26, slug, 5);
-        const hipVal = getDeterministicValue(33, 37, slug, 6);
-        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+        // 🛠️ แก้ไข: ปรับระบบประมวลผล Fallbacks ของสถิติต่างๆ ให้อ่านจากฐานข้อมูลจริงก่อนสุ่มแบบ Deterministic
+        const ageVal = (p.age && p.age !== '-') ? p.age : getDeterministicValue(20, 26, slug, 1);
+        const heightVal = (p.height && p.height !== '-') ? p.height : getDeterministicValue(158, 168, slug, 2);
+        const weightVal = (p.weight && p.weight !== '-') ? p.weight : getDeterministicValue(44, 52, slug, 3);
+        
+        let bwhVal = p.stats;
+        if ((!bwhVal || bwhVal === '-') && p.bust && p.waist && p.hips) {
+            const cup = p.cup_size ? p.cup_size.toUpperCase() : "";
+            bwhVal = `${p.bust}${cup}-${p.waist}-${p.hips}`;
+        }
+        if (!bwhVal || bwhVal === '-') {
+            const breastVal = getDeterministicValue(32, 36, slug, 4);
+            const waistVal = getDeterministicValue(23, 26, slug, 5);
+            const hipVal = getDeterministicValue(33, 37, slug, 6);
+            bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+        }
+
+        const isVerified = p.verified === true;
 
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
