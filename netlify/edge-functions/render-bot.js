@@ -88,10 +88,9 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // 🛠️ ตรวจสอบแก้ไขคำสั่งดึงข้อมูล SQL: เพิ่ม line_id เข้ามาเพื่อแก้ไขข้อมูลตกหล่นบนระบบตรวจสอบของ Bot
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, line_id, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -114,6 +113,7 @@ export default async (request, context) => {
                 .limit(6);
             related = relatedData || [];
         }
+
         const rawName = p.name || 'สาวสวย';
         let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
         const displayName = `น้อง${cleanName}`;
@@ -132,8 +132,7 @@ export default async (request, context) => {
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
-        // 🛠️ อัปเดตคีย์การดึงข้อมูลติดต่อจาก line_id ของโปรไฟล์เป้าหมายอย่างถูกต้อง
-        let finalLineUrl = p.line_id || 'ksLUWB89Y_';
+        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
