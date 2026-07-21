@@ -278,7 +278,7 @@
         <!-- 🟢 ใช้การแสดงผล Responsive Image ผ่านคำสั่ง srcset เพื่อให้เบราว์เซอร์ดาวน์โหลดไฟล์ขนาดเล็กบนมือถือโดยอัตโนมัติ -->
         <img src="/images/hero-sidelinechiangmai-1200.webp" 
              srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w"
-             sizes="(max-width: 768px) 100vw, (min-width: 769px) 1200px"
+             sizes="(max-width: 768px) 100vw, 1200px"
              alt="เพื่อนเที่ยว{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก 100% สไตล์ฟิวแฟน ไม่มัดจำ" 
              width="1200" 
              height="630" 
@@ -330,8 +330,9 @@
         
         <div class="section-spacing-container text-center-wrapper" style="position: relative; z-index: 10;">
             <div class="badge-wrapper"><span class="work-badge-webyst">POPULAR</span></div>
+            <!-- 🛠️ ปรับปรุงแท็ก <h2> ให้มีโครงสร้างคีย์เวิร์ดเด่นชัดและสอดคล้องตามลำดับความสำคัญของโครงสร้างแท็กหัวข้อ -->
             <h2 id="featured-heading" class="text-gradient-main" style="font-size: 28px; font-weight: 800; margin-top: 8px; margin-bottom: 8px;">
-              หาเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}} ตรงปก 100%
+              แนะนำเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}} ยอดนิยมและตรงปก
             </h2>
             <p style="font-size: 14px; color: var(--text-gray); line-height: 1.6;">
               คัดเกรดเฉพาะน้องๆ แนะนำและผู้ดูแลระดับ VIP ยืนยันตัวตนจริง จ่ายหน้างานปลอดภัยสูงสุด
@@ -352,8 +353,9 @@
         <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); text-align: center; margin-bottom: 8px;">
           ระบบตัวกรองอัจฉริยะ
         </p>
+        <!-- 🛠️ ปรับแท็ก <h2> ของส่วนคัดกรองให้ระบุคีย์เวิร์ดพื้นที่เจาะจง -->
         <h2 id="search-form-heading" class="text-gradient-sub" style="font-size: 15px; font-weight: 800; text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.1em;">
-            ค้นหาโปรไฟล์ไซด์ไลน์ เพื่อนร่วมทาง และพิกัดรับงาน
+            ค้นหาโปรไฟล์ไซด์ไลน์{{PROVINCE_NAME}} และพิกัดนัดพบ
         </h2>
         <p style="font-size: 11px; color: var(--text-gray); text-align: center; margin-bottom: 24px;">
             เลือกพิกัดจังหวัด คีย์เวิร์ดสไตล์ หรือเลือกเฉพาะผลงานยอดนิยมที่ได้รับการรับรองประวัติ
@@ -510,8 +512,9 @@
           <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
             SAFE-PLAY FRAMEWORK
           </p>
+          <!-- 🛠️ ปรับปรุงหัวข้อเพื่อกระจายความหนาแน่นของคีย์เวิร์ดพื้นที่ให้สอดคล้องกันทั่วทั้งหน้า -->
           <h2 id="rules-title" class="text-gradient-main" style="font-size: 22px; font-weight: 800;">
-            ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์
+            ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}
           </h2>
           <div style="height: 2px; width: 96px; background: linear-gradient(to right, transparent, var(--primary-purple), transparent); margin: 12px auto; border-radius: 100px;" aria-hidden="true"></div>
           <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
@@ -598,7 +601,7 @@
             <div id="rule-panel-5" class="rule-content" role="region" aria-labelledby="rule-btn-5" style="padding-bottom: 24px;">
               <span style="display: inline-flex; align-items: center; width: max-content; gap: 4px; padding: 2px 8px; border-radius: 100px; background-color: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.4); font-size: 9px; font-weight: 700; color: #F59E0B; letter-spacing: 0.05em; margin-top: 12px; margin-bottom: 8px;">เฉพาะกรณีออกนอกโซนรับงานหลัก</span>
               <p style="margin: 0; font-size: 12.5px; color: var(--text-gray); line-height: 1.6;">
-                ในกรณีที่สมาชิกต้องการนัดหมายนอกโซนพิกัดบริการหลัก และประสงค์จะให้ผู้ดูแลเดินทางไปพบนอกทำเลปกติ ในกรณีนี้น้องๆ จำเป็นต้องขอคิดเฉพาะ <strong>"อัตราค่าเดินทางไป-กลับ ตามระยะทางจริง" เท่านั้น</strong> เพื่อเป็นหลักประกันความเสี่ยงในการเดินทางและป้องกันกรณีเบี้ยวนัดหมายกระทันหัน
+                In กรณีที่สมาชิกต้องการนัดหมายนอกโซนพิกัดบริการหลัก และประสงค์จะให้ผู้ดูแลเดินทางไปพบนอกทำเลปกติ ในกรณีนี้น้องๆ จำเป็นต้องขอคิดเฉพาะ <strong>"อัตราค่าเดินทางไป-กลับ ตามระยะทางจริง" เท่านั้น</strong> เพื่อเป็นหลักประกันความเสี่ยงในการเดินทางและป้องกันกรณีเบี้ยวนัดหมายกระทันหัน
               </p>
               <p style="font-size: 11px; color: #F59E0B; font-weight: 600; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 12px;">
                 ⚠️ สรุปกติกาการคุ้มครอง: การทำรายการชำระส่วนนี้จะถูกจำกัดเฉพาะค่าเดินทางของน้องๆ เท่านั้น ส่วนค่าบริการหลักของโปรไฟล์ทั้งหมด จะเป็นการชำระหน้างานเมื่อเจอตัวจริงตามนโยบายมาตรฐานของทางเว็บครับ
@@ -616,8 +619,9 @@
            <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); text-align: center; position: relative; z-index: 10;">
                คำถามยอดฮิตจากลูกค้า
            </p>
+           <!-- 🛠️ ปรับหัวข้อ FAQ ให้มีความลื่นไหลและมีคีย์เวิร์ดภูมิภาคสอดคล้องกัน -->
            <h2 id="faq-main-heading" class="text-gradient-main" style="font-size: 22px; font-weight: 800; text-align: center; letter-spacing: -0.02em; position: relative; z-index: 10;">
-               ตอบคำถามพบบ่อยเกี่ยวกับการหาไซด์ไลน์{{PROVINCE_NAME}}
+               คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}
            </h2>
 
            <div style="display: flex; flex-direction: column; gap: 24px; margin-top: 16px; position: relative; z-index: 10;">
@@ -633,8 +637,9 @@
     <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
       VERIFIED USER FEEDBACK & COMMENTS
     </p>
+    <!-- 🛠️ ปรับหัวข้อรีวิวระบุพิกัดอย่างมีนัยยะสำคัญเพื่อส่งผลดีต่อ Local SEO -->
     <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em;">
-      ความประทับใจและความคิดเห็นจากผู้ใช้บริการจริง
+      รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน{{PROVINCE_NAME}}
     </h2>
     <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-top: 8px;">
       ระบบรวบรวมรีวิวแบบโปร่งใส ปราศจากการปรุงแต่ง เพื่อเป็นประโยชน์ในการประกอบการตัดสินใจของสมาชิก
@@ -760,7 +765,7 @@
             </p>
           </div>
           <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer"
-             style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background-color: var(--emerald-accent); color: var(--pure-black); font-size: 11px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
+             style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background-color: var(--emerald-accent); color: var(--pure-black) !important; font-size: 11px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
             แอดไลน์แอดมิน
           </a>
         </div>
@@ -774,6 +779,7 @@
           <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
             แผนที่ & การติดต่อ
           </p>
+          <!-- 🛠️ ปรับหัวข้อเพื่อกระจายความหนาแน่นของคีย์เวิร์ดพื้นที่ให้สอดคล้องกันทั่วทั้งหน้า -->
           <h2 id="map-title" class="text-gradient-main" style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">
             เช็กพิกัดแผนที่รับงาน ไซด์ไลน์และเพื่อนร่วมทาง{{PROVINCE_NAME}}
           </h2>

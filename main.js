@@ -469,16 +469,22 @@ window.ScrollTrigger = ScrollTrigger;
                     try {
                         const cachedProv = JSON.parse(hasCachedProvinces);
                         state.provincesMap.clear();
-                        cachedProv.forEach(p => state.provincesMap.set(p.key.toString(), p.name));
+                        if (Array.isArray(cachedProv)) {
+                            cachedProv.forEach(p => {
+                                if (p && p.key && p.name) {
+                                    state.provincesMap.set(p.key.toString(), p.name);
+                                }
+                            });
+                        }
                     } catch (jsonErr) {
                         console.warn("⚠️ Local cached provinces parsing failed, resetting cache.", jsonErr);
                         localStorage.removeItem(CONFIG.KEYS.CACHE_PROVINCES);
                     }
                 }
                 
-                if (state.provincesMap.size === 0) {
+                if (state.provincesMap.size === 0 && window.supabase) {
                     try {
-                        const { data } = await supabase.from('provinces').select('*');
+                        const { data } = await window.supabase.from('provinces').select('*');
                         if (data) {
                             data.forEach(p => {
                                 const k = p.key || p.slug || p.id;
@@ -506,7 +512,7 @@ window.ScrollTrigger = ScrollTrigger;
                 populateProvinceDropdown(); 
                 await handleRouting(true);
 
-                // 🛠️ แก้ไขตรงนี้: เรียกใช้ Realtime Subscription เฉพาะเมื่อเปิด CONFIG.ENABLE_REALTIME เป็น True เท่านั้น
+                // เรียกใช้ Realtime Subscription เฉพาะเมื่อเปิด CONFIG.ENABLE_REALTIME เป็น True เท่านั้น
                 if (CONFIG.ENABLE_REALTIME) {
                     initRealtimeSubscription();
                 }
@@ -533,7 +539,7 @@ window.ScrollTrigger = ScrollTrigger;
                         initSearchAndFilters();
                         await handleRouting(true);
 
-                        // 🛠️ แก้ไขตรงนี้: ควบคุมระบบอัปเดตสดแบบปลอดภัย
+                        // ควบคุมระบบอัปเดตสดแบบปลอดภัย
                         if (CONFIG.ENABLE_REALTIME) {
                             initRealtimeSubscription();
                         }
@@ -1507,8 +1513,12 @@ window.ScrollTrigger = ScrollTrigger;
         const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
         const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
 
-        const cleanName = p.displayName ? p.displayName.replace(/^(น้อง\s?)+/, '') : p.name;
-        const altText = `น้อง${cleanName} สาวรับงาน${p.provinceNameThai || 'เชียงใหม่'} ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน`;
+        // 🛠️ ล้างชื่อซ้ำซ้อนให้มีคำนำหน้า "น้อง" เพียงหนึ่งเดียวเสมอ และเขียนระบุคีย์เวิร์ดพื้นที่ในรูปภาพหลักให้ครบถ้วน
+        const rawName = p.displayName || p.name || 'สาวสวย';
+        let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
+        const displayName = `น้อง${cleanName}`;
+        const altText = `${displayName} สาวรับงาน${p.provinceNameThai || 'เชียงใหม่'} ไซด์ไลน์${p.provinceNameThai || 'เชียงใหม่'} ฟิวแฟน`;
+
         const ageText = p.safeAge || p.age || '';
         const ageDisplay = (ageText && ageText !== '-') ? ` (${ageText})` : '';
         const statsDisplay = p.safeStats || p.stats || '-';
@@ -1552,13 +1562,13 @@ window.ScrollTrigger = ScrollTrigger;
                 </button>
             </div>
             
-            <a href="/sideline/${p.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${p.name}"></a>
+            <a href="/sideline/${p.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${displayName}"></a>
 
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.5) 40%, transparent 80%); z-index: 10; pointer-events: none; border-radius: 20px;"></div>
 
             <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
-                    <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">น้อง${cleanName}${ageDisplay}</h3>
+                    <h3 id="profile-name-${p.id}" style="font-size: 14px; font-weight: 800; color: white; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); flex: 1; min-width: 0;">${displayName}${ageDisplay}</h3>
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: #D4D4D8; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex-wrap: wrap;">
