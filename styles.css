@@ -2,14 +2,16 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  /* 🛠️ ปรับเป็น block เพื่อบังคับให้รอฟอนต์ Prompt ที่ preload ไว้ แสดงผลทันทีโดยหน้าจอไม่กระตุกขยับตัวภายหลัง (ขจัด CLS) */
+  font-display: block;
   src: url(/fonts/prompt-v11-latin_thai-regular.woff2) format('woff2');
 }
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  /* 🛠️ ปรับเป็น block เพื่อบังคับให้รอฟอนต์ Prompt ที่ preload ไว้ แสดงผลทันทีโดยหน้าจอไม่กระตุกขยับตัวภายหลัง (ขจัด CLS) */
+  font-display: block;
   src: url(/fonts/prompt-v11-latin_thai-700.woff2) format('woff2');
 }
 :root {
@@ -62,6 +64,156 @@ html.light {
   --circle-btn-border: rgba(9, 9, 11, 0.15);
   --line-green-accessible: #03722e;
 }
+
+/* ============================== INTEGRATED CUSTOM STYLE OVERRIDES ============================== */
+:root, .dark-theme {
+  --primary-purple: #C084FC !important; 
+  --text-gray: #E4E4E7 !important; 
+  --text-muted: #A1A1AA !important;
+  --border-light: rgba(255, 255, 255, 0.1) !important;
+  --emerald-accent: #11783B !important; 
+  --pure-black: #09090C !important;
+}
+
+/* 🛠️ แก้ไขปัญหาขนาดฟอนต์ของลิงก์และปุ่มกดเพื่อป้องกัน Bot ตรวจจับเป็น Small text / Hidden links */
+.dock-item span {
+  font-size: 12px !important;
+}
+.capsule-text {
+  font-size: 13px !important;
+  color: #F4F4F5 !important;
+}
+.social-link-card-item {
+  font-size: 13px !important;
+}
+.cta-subtext {
+  font-size: 12px !important;
+  color: #CBD5E1 !important;
+}
+
+/* 🛠️ ปรับปรุงความสว่างและการตัดสีของปุ่ม Line จองคิว */
+nav.floating-app-dock a.dock-item.dock-item-line,
+nav.floating-app-dock a.dock-item.dock-item-line span,
+nav.floating-app-dock a.dock-item.dock-item-line i,
+.floating-app-dock .dock-item-line {
+  background-color: #11783B !important; 
+  color: #FFFFFF !important; 
+}
+
+/* 🛠️ จำกัดขอบเขตความสูงขั้นต่ำเริ่มต้นของพอร์ตโฟลิโอ ป้องกันการยุบตัวของหน้าจอ (CLS) */
+#profiles-display-area {
+  min-height: 580px; 
+}
+@media (min-width: 768px) {
+  #profiles-display-area {
+    min-height: 1100px; 
+  }
+}
+
+/* 🛠️ จองพื้นที่ความกว้างล่วงหน้าสำหรับไอคอนฟอนต์ */
+.fas, .fab, .far {
+  display: inline-block;
+  width: 1.25em;
+  text-align: center;
+}
+
+.floating-app-dock {
+  background-color: #09090C !important; 
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.dock-item {
+  color: #E4E4E7 !important; 
+}
+.dock-item.active {
+  color: #C084FC !important;
+}
+.safe-capsule-item {
+  background-color: #18181B !important; 
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 🟢 ปรับปรุงระบบกล่องข้อตกลงแบบพับได้ (Accordion) */
+.rule-item {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.01);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.rule-item:not(.collapsed) {
+  background-color: rgba(147, 51, 234, 0.03);
+  border-color: rgba(147, 51, 234, 0.2);
+}
+.rule-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: #FFFFFF;
+  outline: none;
+  text-align: left;
+}
+.rule-content {
+  max-height: 1000px;
+  opacity: 1;
+  padding: 0 20px 20px 20px;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.4s ease;
+}
+.rule-item.collapsed .rule-content {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  pointer-events: none;
+}
+.rule-icon {
+  transition: transform 0.3s ease;
+}
+.rule-item:not(.collapsed) .rule-icon {
+  transform: rotate(180deg);
+  color: #C084FC;
+}
+
+.star-rating-input-item {
+  color: #71717A;
+  transition: color 0.15s ease;
+}
+.star-rating-input-item.active {
+  color: #FBBF24 !important;
+}
+
+.seo-content-container.collapsed {
+  max-height: 180px !important;
+  overflow: hidden !important;
+}
+
+.region-tab.active {
+  background-color: #C084FC !important;
+  color: #09090C !important;
+  font-weight: 800 !important;
+}
+
+/* 🛠️ จองพื้นที่สัดส่วนรูปภาพ 3:4 ป้องกัน Layout Shift (CLS) สำหรับแกลเลอรีรูปภาพและผลการค้นหา */
+.profiles-grid-row img,
+#profiles-display-area img,
+#featured-profiles-container img {
+  aspect-ratio: 3/4 !important;
+  object-fit: cover !important;
+  width: 100% !important;
+  height: auto !important;
+  background-color: #121214 !important; /* เป็นสีพื้นหลังสแตนบายระหว่างดาวน์โหลดภาพ */
+}
+
+/* ปรับแต่งการย่อขยายแท็บสีม่วงอ่อนให้แสดงผลสีที่คอนทราสต์ชัดเจน */
+.text-\[\#C084FC\] {
+  color: #C084FC !important;
+}
+
+/* ============================== BASE & GLOBAL SYSTEM STYLES ============================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -134,7 +286,7 @@ html, body {
   background-color: var(--circle-btn-bg) !important;
   color: var(--text-gray) !important;
   cursor: pointer !important;
-  font-size: 12px !important; /* เพิ่มขนาดเพื่อการเข้าถึงบนมือถือ */
+  font-size: 12px !important;
   font-weight: 700 !important;
   padding: 0 !important;
   flex-shrink: 0 !important;
@@ -168,7 +320,7 @@ html, body {
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
-    font-size: 11px !important; /* ปรับขนาดให้อ่านง่าย */
+    font-size: 11px !important;
     text-transform: uppercase !important;
     letter-spacing: 0.1em !important;
     color: #A1A1AA !important;
@@ -184,7 +336,7 @@ html, body {
     margin-right: 8px;
   }
   .desktop-nav a {
-    font-size: 13px !important; /* ปรับขนาดให้อ่านง่ายขึ้น */
+    font-size: 13px !important;
     font-weight: 700 !important;
     color: #A1A1AA !important;
     text-decoration: none !important;
@@ -309,7 +461,7 @@ html, body {
   transition: all 0.3s cubic-bezier(.16, 1, .3, 1);
 }
 .safe-capsule-item:hover {
-  background-color: rgb(124 58( 237 / .05));
+  background-color: rgb(124 58 ( 237 / .05));
   border-color: rgb(124 58 237 / .3);
   transform: translateY(-2px);
 }
@@ -343,7 +495,7 @@ html, body {
   animation: loop-marquee 35s linear infinite;
 }
 .marquee-track span {
-  font-size: 12px; /* เลี่ยงฟอนต์ 11px เพื่อความเข้ากันได้ของการแสดงผล */
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: .15em;
@@ -459,7 +611,7 @@ html.light .search-input-field, html.light .search-select-field {
   border-color: rgb(255 255 255 / .25);
 }
 .profile-card-like-btn i {
-  font-size: 12px; /* เพิ่มขึ้นจาก 11px เพื่อการนำไปใช้ได้ดีบนอุปกรณ์จอพกพา */
+  font-size: 12px;
   color: #FFF;
   transition: color 0.2s, transform 0.2s;
 }
@@ -497,7 +649,8 @@ html.light .search-input-field, html.light .search-select-field {
   position: relative;
   width: 100%;
   max-width: 768px;
-  aspect-ratio: 16/10;
+  /* 🛠️ บังคับจองสัดส่วนพื้นที่แบนด์วิดท์รูปแบนเนอร์จริง ป้องกัน Layout Shift ตัวแบนเนอร์ด้านบน */
+  aspect-ratio: 1200/630 !important;
   border-radius: 24px;
   overflow: hidden;
   border: 1px solid rgb(147 51 234 / .25);
@@ -550,7 +703,7 @@ html.light .search-input-field, html.light .search-select-field {
   background: linear-gradient(135deg, #7C3AED 0%, var(--primary-purple) 100%);
 }
 .cta-subtext {
-  font-size: 12px !important; /* ปรับเพื่อป้องกันปัญหาการตรวจจับเป็นข้อความขนาดเล็กของเครื่องมือทดสอบ */
+  font-size: 12px !important;
   color: var(--text-muted);
   margin-top: 8px;
   font-weight: 600;
@@ -581,8 +734,7 @@ html.light .search-input-field, html.light .search-select-field {
   border: 1px solid var(--social-border) !important;
   padding: 12px;
   border-radius: 100px !important;
-  font-size: 13px !important; /* ปรับเพิ่มขนาดให้อุปกรณ์มือถืออ่านลิงก์ได้ง่าย ไม่โดนระบุเป็น small/hidden link */
-  font-weight: 700;
+  font-size: 13px !important;
   color: var(--social-text) !important;
   text-decoration: none !important;
   transition: all 0.2s ease;
@@ -1010,7 +1162,7 @@ html.light #review-form input, html.light #review-form textarea {
   align-items: center;
   color: #94A3B8;
   text-decoration: none;
-  font-size: 12px !important; /* ปรับขนาดตัวหนังสือลิงก์พกพา ป้องกันบอทตรวจเจอปัญหาขนาดตัวอักษรเล็ก */
+  font-size: 12px !important;
   font-weight: 700;
   gap: 4px;
   transition: all 0.2s;
@@ -1028,7 +1180,7 @@ html.light #review-form input, html.light #review-form textarea {
   border-radius: 100px;
   flex-direction: row !important;
   gap: 6px !important;
-  font-size: 13px !important; /* ปรับขนาดเพื่อการนำทางที่ชัดเจนบนโทรศัพท์มือถือ */
+  font-size: 13px !important;
 }
 @media (max-width: 768px) {
   .floating-app-dock {
@@ -1042,7 +1194,7 @@ html.light #review-form input, html.light #review-form textarea {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11.5px; /* ปรับสัดส่วนขึ้นเพื่อเพิ่มความพร้อมใช้งาน */
+  font-size: 11.5px;
   color: var(--text-secondary);
   font-weight: 700;
   text-shadow: 0 1px 2px rgb(0 0 0 / .8);
@@ -1061,7 +1213,7 @@ html.light #review-form input, html.light #review-form textarea {
   color: #C084FC;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 11px; /* เพิ่มขนาดเพื่อเลี่ยงการติดธงวิเคราะห์เรื่องอักษรเล็ก */
+  font-size: 11px;
 }
 .spec-skin {
   color: var(--text-muted);
@@ -1074,7 +1226,7 @@ html.light #review-form input, html.light #review-form textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px; /* เพิ่มขึ้นจาก 11px เพื่อตอบโจทย์คะแนนการเข้าถึง (Accessibility) */
+  font-size: 12px;
   color: var(--text-secondary);
   gap: 8px;
   width: 100%;
@@ -1106,7 +1258,7 @@ html.light #review-form input, html.light #review-form textarea {
   background-color: #5A2CBE;
   border: 1px solid rgb(147 51 234 / .4);
   color: #fff;
-  font-size: 11px; /* ปรับเพื่อเพิ่มมิติความพร้อมใช้งานบนโมบายล์เลย์เอาต์ */
+  font-size: 11px;
   font-weight: 800;
   padding: 4px 10px;
   border-radius: 100px;
@@ -1155,8 +1307,4 @@ html.light #review-form input, html.light #review-form textarea {
 }
 .dock-item-line span {
   color: #FFFFFF !important;
-}
-/* รองรับคลาสสีตัวอักษรเดิมที่เขียนใน HTML */
-.text-\[\#C084FC\] {
-  color: #C084FC !important;
 }
