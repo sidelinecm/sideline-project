@@ -173,6 +173,22 @@
       color: #09090C !important;
       font-weight: 800 !important;
     }
+
+    /* 🛠️ จองพื้นที่สัดส่วนรูปภาพ 3:4 ป้องกัน Layout Shift (CLS) สำหรับแกลเลอรีรูปภาพและผลการค้นหา */
+    .profiles-grid-row img,
+    #profiles-display-area img,
+    #featured-profiles-container img {
+      aspect-ratio: 3/4 !important;
+      object-fit: cover !important;
+      width: 100% !important;
+      height: auto !important;
+      background-color: #121214 !important; /* เป็นสีพื้นหลังสแตนบายระหว่างดาวน์โหลดภาพ */
+    }
+
+    /* ปรับแต่งการย่อขยายแท็บสีม่วงอ่อนให้แสดงผลสีที่คอนทราสต์ชัดเจน */
+    .text-\[\#C084FC\] {
+      color: #C084FC !important;
+    }
   </style>
 
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -461,8 +477,8 @@
         </div>
       </div>
 
-      <!-- LOADER PLACEHOLDER -->
-      <div id="loading-profiles-placeholder" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 24px;" aria-hidden="true">
+      <!-- LOADER PLACEHOLDER (ปรับเปลี่ยน class ให้สอดคล้องกันเพื่อป้องกัน CLS ของคอลัมน์ตอนโหลดข้อมูลเสร็จ) -->
+      <div id="loading-profiles-placeholder" class="profiles-grid-row" style="margin-top: 24px;" aria-hidden="true">
         <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
         <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
         <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
@@ -788,8 +804,9 @@
               หากท่านพบการเรียกเก็บเงินมัดจำล่วงหน้าเต็มจำนวนหรือค่าธรรมเนียมใดๆ โดยอ้างอิงชื่อแบรนด์ของเรา กรุณาเก็บข้อมูลและบันทึกหลักฐานการแชทติดต่อทีมงานผ่าน LINE Official ทันที เพื่อให้เจ้าหน้าที่เร่งตรวจสอบและคุ้มครองความปลอดภัยแก่สมาชิกอย่างทันท่วงทีค่ะ
             </p>
           </div>
+          <!-- 🛠️ แก้ไขปัญหา contrast เพื่อความปลอดภัยทางสายตา (เปลี่ยนสีข้อความของปุ่มเป็นสีขาวให้อ่านง่ายยิ่งขึ้น) -->
           <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer"
-             style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background-color: var(--emerald-accent); color: var(--pure-black) !important; font-size: 11px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
+             style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background-color: var(--emerald-accent); color: #FFFFFF !important; font-size: 11px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
             แอดไลน์แอดมิน
           </a>
         </div>
@@ -889,8 +906,9 @@
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin: 0;">ติดต่อเรา</h3>
           <p style="font-size: 12px; color: var(--text-gray); margin: 0;">เจ้าหน้าที่สแตนบายดูแล 24 ชม.</p>
+          <!-- 🛠️ แก้ไขอัตราส่วน contrast เพื่อความปลอดภัย (เปลี่ยนสีข้อความของปุ่มไลน์จากสีดำเป็นสีขาวเด่นชัด) -->
           <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-             style="display: flex; align-items: center; justify-content: center; gap: 8px; background-color: var(--emerald-accent) !important; color: var(--pure-black) !important; padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transition: background-color 0.2s;" 
+             style="display: flex; align-items: center; justify-content: center; gap: 8px; background-color: var(--emerald-accent) !important; color: #FFFFFF !important; padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transition: background-color 0.2s;" 
              onmouseenter="this.style.backgroundColor='#0B6A30'" 
              onmouseleave="this.style.backgroundColor='var(--emerald-accent)'">
             <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
@@ -1022,6 +1040,18 @@
             }
         });
     }
+
+    // 3. 🛠️ แก้ไขเชิงรับป้องกันปัญหา Links must have discernible text จากลิงก์เปล่าที่อาจตกหล่นมาจากข้อมูลหลังบ้าน
+    document.querySelectorAll('a').forEach(link => {
+        if (!link.textContent.trim() && !link.getAttribute('aria-label') && !link.querySelector('img, i, svg')) {
+            const href = link.getAttribute('href') || '';
+            if (href.includes('nimman')) {
+                link.textContent = 'ย่านนิมมาน';
+            } else {
+                link.textContent = 'อ่านข้อมูลเพิ่มเติม';
+            }
+        }
+    });
   });
 </script>
 
