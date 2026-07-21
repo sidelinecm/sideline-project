@@ -386,6 +386,15 @@ export default async (req, context) => {
   const url = new URL(req.url),
     hostUrl = `${url.protocol}//${url.host}`;
 
+  // 🛡️ ป้องกัน Infinite Loop จากการ fetch ภายในระบบ Edge SSR ด้วยการดักกรอง Custom Header
+  if (req.headers.get("x-ssr-bypass") === "true") {
+    try {
+      return await context.next();
+    } catch {
+      return new Response("Bypass fetch failed", { status: 500 });
+    }
+  }
+
   if ([".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2"].some(ext => url.pathname.toLowerCase().endsWith(ext))) {
     try {
       return await context.next();
@@ -548,14 +557,12 @@ export default async (req, context) => {
       finalRatingValue = finalReviews.length > 0 
         ? (finalReviews.reduce((sum, rev) => sum + rev.rating, 0) / finalReviews.length).toFixed(1) 
         : (profileList.length > 0 ? (4.6 + profileList.length % 4 / 10).toFixed(1) : "4.8"),
-      finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 18),
+      finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 18);
       
-      // 🟢 2. เรียกแผนที่โครงสร้าง Standard แบบ Keyless เพื่อลดค่าใช้จ่ายและตัดปัญหา API Key บล็อกบนเบราว์เซอร์
-      mapEmbedUrl = "chiangmai" === s 
-        ? CONFIG.MAPS_SHARE_URL 
-        : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + provinceThaiName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    // 🛠️ แก้ไขอย่างละเอียด: เปลี่ยนให้พิกัดเชียงใหม่สร้างแผนที่แบบ Embed ได้ถูกต้อง ป้องกันอาการขึ้นหน้าจอสีเทาว่างเปล่า
+    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + provinceThaiName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-// 🟢 2. ปรับแต่งและจัดเรียงโครงสร้าง Schema JSON-LD (Dynamic @graph) ให้ตอบโจทย์ E-E-A-T อย่างสมบูรณ์และไร้ข้อผิดพลาด
+    // 🟢 2. ปรับแต่งและจัดเรียงโครงสร้าง Schema JSON-LD (Dynamic @graph) ให้ตอบโจทย์ E-E-A-T อย่างสมบูรณ์และไร้ข้อผิดพลาด
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -793,8 +800,8 @@ export default async (req, context) => {
                 `;
     }).join("");
 
-  // 🛠️ อัปเกรดกระบวนการจัดทำคำโปรย SEO อย่างลึกซึ้งและมีความเฉพาะเจาะจงของพื้นที่
-  const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
+    // 🛠️ อัปเกรดกระบวนการจัดทำคำโปรย SEO อย่างลึกซึ้งและมีความเฉพาะเจาะจงของพื้นที่
+    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
 
     // ดึงค่ารีวิวที่ได้ประมวลผลความปลอดภัยเรียบร้อยแล้วไปเรนเดอร์ลงใน HTML
     const reviewsHtml = finalReviews.map(r => `
@@ -821,23 +828,22 @@ export default async (req, context) => {
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs),
       matchedZones = seoData.zones.slice(0, 4).join(", ");
 
-    let mainTemplate;
-    if ("/" === url.pathname || "/index.html" === url.pathname) {
-      mainTemplate = await context.next();
-    } else {
-      mainTemplate = await fetch(new URL("/index.html", url.origin));
-    }
-
+    // 🛠️ แก้ไขอย่างละเอียด: ปิดการใช้ context.next() บนหน้าแรก (/) เพื่อให้ได้คะแนน SSR และดัชนีข้อมูลเต็มร้อย
+    // ใช้ Header "x-ssr-bypass" เพื่อส่งสัญญาณให้เรียกหา CDN ต้นฉบับได้อย่างปลอดภัย ไร้ความเสี่ยงวนลูป Infinite Loop
+    const templateUrl = new URL("/index.html", url.origin);
+    const mainTemplate = await fetch(templateUrl, {
+      headers: { "x-ssr-bypass": "true" }
+    });
     let rawHtml = await mainTemplate.text();
 
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones);
 
-    // 🛠️ ย้ายระบบสร้างลิงก์พิกัดพื้นที่ให้บริการยอดนิยม (Footers Link) จากฝั่งเบราว์เซอร์มาเรนเดอร์ในขั้นตอน SSR
+    // 🛠️ แก้ไขอย่างละเอียด: ย้ายพิกัดภูมิภาคยอดนิยมมาเรนเดอร์เป็นแท็ก <li> ลิงก์ตรงฝั่งเซิร์ฟเวอร์ทันที
     const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       const key = p.key || p.slug || p.id;
       const name = p.nameThai || p.name;
       if (key === "chiangmai") {
-        return `<li><a href="/" title="ดูรายชื่อไซด์ไลน์ในจังหวัด เชียงใหม่" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">ไซด์ไลน์เชียงใหม่</a></li>`;
+        return `<li><a href="/" title="ดูรายชื่อไซด์ไลน์ในจังหวัด เชียงใหม่" style="color: var(--primary-purple); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" class="active" aria-current="page">ไซด์ไลน์เชียงใหม่</a></li>`;
       }
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
@@ -853,7 +859,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml); // ทำการแทนค่าลิงก์ภายในตรงสู่ Footer
+    rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml); // แทนค่าตรงสู่ Footer
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_JSON}}", JSON.stringify(profileList.map(p => ({
       id: p.id,
