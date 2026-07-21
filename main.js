@@ -16,7 +16,7 @@ window.ScrollTrigger = ScrollTrigger;
         SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
         SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
         STORAGE_BUCKET: 'profile-images',
-        ENABLE_REALTIME: false, // 🛠️ แก้ไขปัญหาที่ 3: ปิด Realtime WebSocket เป็น False ป้องกันอาการลูปเชื่อมต่อล้มเหลวจน Console Error
+        ENABLE_REALTIME: false, 
         KEYS: {
             LAST_PROVINCE: 'sidelinecm_last_province',
             CACHE_PROFILES: 'cachedProfiles_v2',   
@@ -66,7 +66,6 @@ window.ScrollTrigger = ScrollTrigger;
     let supabase;
     let fuseEngine;
 
-    // ตัวช่วยจัดการแบ่งเธรดการประมวลผลโค้ดที่ไม่ได้มีความจำเป็นเร่งด่วน (INP / TBT Optimization)
     function runDeferredTask(fn, delay = 0) {
         if ('requestIdleCallback' in window) {
             requestIdleCallback(() => fn());
@@ -85,18 +84,16 @@ window.ScrollTrigger = ScrollTrigger;
         initThemeToggle();
         initMobileMenu();
         initGlobalClickListener();
-        initAccordion(); // 🛠️ แก้ไขปัญหาที่ 1 & 4: ดึงคำสั่งควบคุม Accordion สลับเปลี่ยน aria-expanded มารันที่นี่แบบรวมศูนย์
-        initStarRating(); // 🛠️ แก้ไขปัญหาที่ 1 & 4: ดึงคำสั่งตั้งระดับคะแนนดาวมารันที่นี่แบบรวมศูนย์แทนการเขียนซ้ำใน index.html
+        initAccordion(); 
+        initStarRating(); 
         updateActiveNavLinks();
         initLightboxEvents(); 
 
         await handleRouting();
         await handleDataLoading();
         
-        // เรียกใช้งานระบบกวาดล้างตัวแปรแผนสำรอง (Fallback)
         clearRawPlaceholdersFallback();
          
-        // ปรับหน่วงระบบและไลบรารีเสริมเพื่อให้ประมวลผล FCP ของหน้าจอเสร็จสมบูรณ์ก่อน
         runDeferredTask(() => {
             initHeaderScrollEffect();
             initMarqueeEffect();
@@ -512,7 +509,6 @@ window.ScrollTrigger = ScrollTrigger;
                 populateProvinceDropdown(); 
                 await handleRouting(true);
 
-                // เรียกใช้ Realtime Subscription เฉพาะเมื่อเปิด CONFIG.ENABLE_REALTIME เป็น True เท่านั้น
                 if (CONFIG.ENABLE_REALTIME) {
                     initRealtimeSubscription();
                 }
@@ -539,7 +535,6 @@ window.ScrollTrigger = ScrollTrigger;
                         initSearchAndFilters();
                         await handleRouting(true);
 
-                        // ควบคุมระบบอัปเดตสดแบบปลอดภัย
                         if (CONFIG.ENABLE_REALTIME) {
                             initRealtimeSubscription();
                         }
@@ -663,7 +658,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
 
     function initRealtimeSubscription() {
-        // 🛠️ แก้ไขตรงนี้: หาก CONFIG ปิดการเชื่อมต่อแบบ Realtime ให้ยกเลิกการเปิด WebSocket ทั้งหมด
         if (!CONFIG.ENABLE_REALTIME || !window.supabase) return;
 
         if (state.realtimeSubscription) {
@@ -991,7 +985,6 @@ window.ScrollTrigger = ScrollTrigger;
         }
     }
 
-    // ปรับเปลี่ยนโครงสร้าง saveCache และการเขียนหน่วยความจำใน localStorage แบบหน่วงแบ่งจังหวะ (Microtask caching)
     function saveCache(key, data) {
         runDeferredTask(() => {
             try {
@@ -1015,15 +1008,15 @@ window.ScrollTrigger = ScrollTrigger;
     }
     
     function updateUrlFromFilters(query) {
-    const currentPath = window.location.pathname;
-    let targetPath = '/';
-    if (query.province && query.province !== 'all' && query.province !== 'chiangmai') {
-        targetPath = `/location/${query.province}`;
+        const currentPath = window.location.pathname;
+        let targetPath = '/';
+        if (query.province && query.province !== 'all' && query.province !== 'chiangmai') {
+            targetPath = `/location/${query.province}`;
+        }
+        if (currentPath !== targetPath) {
+            history.pushState(null, '', targetPath);
+        }
     }
-    if (currentPath !== targetPath) {
-        history.pushState(null, '', targetPath);
-    }
-}
 
     function updateUltimateSuggestions(val) {
         const box = document.getElementById('search-suggestions');
@@ -1355,7 +1348,6 @@ window.ScrollTrigger = ScrollTrigger;
 
         if (activeKey && state.provincesMap.has(activeKey) && activeKey !== 'all') {
             const name = state.provincesMap.get(activeKey);
-            // 🛠️ แก้ไขตรงนี้: แก้ไขปัญหา contrast ต่ำของ var(--primary-purple) โดยบังคับใช้รหัสสีม่วงสว่าง #C084FC โดยตรง
             headerText = `📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${name}</span>`;
         } else if (dom.searchInput?.value) {
             headerText = `🔍 ผลการค้นหา "${dom.searchInput.value}"`;
@@ -1399,9 +1391,6 @@ window.ScrollTrigger = ScrollTrigger;
             </div>
             <div class="profile-grid profiles-grid-row"></div>
         `;
-
-        const gridContainer = wrapper.querySelector('.profile-grid');
-        renderCardsIncrementally(gridContainer, profiles, renderId);
         return wrapper;
     }
 
@@ -1442,6 +1431,11 @@ window.ScrollTrigger = ScrollTrigger;
                 provinceSection.style.opacity = '1';
                 provinceSection.style.transform = 'translateY(0)';
             });
+
+            // 🛠️ แก้ไขปัญหาคอขวดด้านประสิทธิภาพของ TBT & INP บนอุปกรณ์โมบายล์:
+            // เรียกประมวลผลการจัดเรียงการ์ดรายจังหวัดเป็นลำดับและรอผลสำเร็จ (Sequential) เพื่อให้เบราว์เซอร์มีจังหวะ Paint ตัวแปรอย่างเป็นลำดับ
+            const gridContainer = provinceSection.querySelector('.profile-grid');
+            await renderCardsIncrementally(gridContainer, groups[key], renderId);
 
             await yieldToMain();
         }
@@ -1524,7 +1518,6 @@ window.ScrollTrigger = ScrollTrigger;
         const likedProfiles = JSON.parse(localStorage.getItem('liked_profiles') || '{}');
         const isLikedClass = likedProfiles[p.id] ? 'liked' : '';
 
-        // 🛠️ ล้างชื่อซ้ำซ้อนให้มีคำนำหน้า "น้อง" เพียงหนึ่งเดียวเสมอ และเขียนระบุคีย์เวิร์ดพื้นที่ในรูปภาพหลักให้ครบถ้วน
         const rawName = p.displayName || p.name || 'สาวสวย';
         let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
         const displayName = `น้อง${cleanName}`;
@@ -1661,7 +1654,6 @@ window.ScrollTrigger = ScrollTrigger;
     function populateLightboxData(p) {
         if (!p) return;
 
-        // ตัดคำว่า "น้อง" ทับซ้อนทิ้งทั้งหมด ไม่ว่าจะซ้อนกี่รอบ (เช่น น้องน้องไตเติ้ล -> ไตเติ้ล)
         const cleanName = (p.displayName || p.name || 'ไม่ระบุชื่อ')
             .trim()
             .replace(/^(น้อง\s?)+/g, '');
@@ -1670,7 +1662,6 @@ window.ScrollTrigger = ScrollTrigger;
         const statusText = p.availability || 'สอบถาม';
         const dotColor = isAvailable ? '#00E676' : '#FF2E63';
 
-        // 1. Header Name & Verification (เมื่อต่อคำว่า "น้อง" ด้านหน้า จะมีเพียงตัวเดียวเสมอ)
         const nameHeaderEl = document.getElementById('lightbox-profile-name-main');
         if (nameHeaderEl) {
             nameHeaderEl.innerHTML = `
@@ -1679,7 +1670,6 @@ window.ScrollTrigger = ScrollTrigger;
             `;
         }
 
-        // 2. Status Badge
         const badgeEl = document.getElementById('lightbox-availability-badge-wrapper');
         if (badgeEl) {
             badgeEl.innerHTML = `
@@ -1690,13 +1680,11 @@ window.ScrollTrigger = ScrollTrigger;
             `;
         }
 
-        // 3. Hero Image
         const heroImg = document.getElementById('lightboxHeroImage');
         if (heroImg) {
             heroImg.src = p?.images?.[0]?.src || p?.imagePath || '/images/placeholder-profile.webp';
         }
 
-        // 4. Thumbnails
         const thumbStrip = document.getElementById('lightboxThumbnailStrip');
         if (thumbStrip) {
             thumbStrip.innerHTML = '';
@@ -1726,13 +1714,11 @@ window.ScrollTrigger = ScrollTrigger;
             }
         }
 
-        // 5. Quote
         const quoteBox = document.getElementById('lightboxQuote');
         if (quoteBox) {
             quoteBox.textContent = p.quote || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
         }
 
-        // 6. Tags
         const tagsContainer = document.getElementById('lightboxTags');
         if (tagsContainer) {
             tagsContainer.innerHTML = '';
@@ -1744,7 +1730,6 @@ window.ScrollTrigger = ScrollTrigger;
             });
         }
 
-        // 7. Bento Stats
         const compactDetailsEl = document.getElementById('lightboxDetailsCompact');
         if (compactDetailsEl) {
             compactDetailsEl.innerHTML = `
@@ -1761,7 +1746,6 @@ window.ScrollTrigger = ScrollTrigger;
             `;
         }
 
-        // 8. Description
         const descContainer = document.getElementById('lightboxDescriptionContainer');
         const descContent = document.getElementById('lightboxDescriptionContent');
         if (descContent) {
@@ -1771,7 +1755,6 @@ window.ScrollTrigger = ScrollTrigger;
             descContainer.style.display = 'block';
         }
 
-        // 9. Sticky Line Button
         const detailsPanel = document.querySelector('.lightbox-details');
         if (detailsPanel) {
             const existingBtn = document.getElementById('line-btn-sticky-wrapper');
@@ -1782,7 +1765,6 @@ window.ScrollTrigger = ScrollTrigger;
                 const newBtnWrapper = document.createElement('div');
                 newBtnWrapper.id = 'line-btn-sticky-wrapper';
                 
-                // ปรับความสูง bottom และการ padding หนีจากเมนู Floating Dock 64px ของระบบพกพาให้สวยงามขึ้น
                 newBtnWrapper.style.cssText = `
                     margin-top: 20px; 
                     position: sticky; 
@@ -1815,7 +1797,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     let isFirstLoad = true;
 
-    // ล้างและควบคุม schema เก่าเพื่อป้องกันการซ้อนทับ
     function clearAllDynamicSchemas() {
         const schemaIds = [
             'dynamic-schema', 'schema-jsonld-person', 'schema-jsonld-list', 'schema-jsonld-faq', 
@@ -1827,7 +1808,6 @@ window.ScrollTrigger = ScrollTrigger;
         });
     }
 
-    // ปรับแต่งโครงสร้าง Dynamic Meta และ Schema Client-side สอดรับตามมาตรฐานหลักเกณฑ์ SSR
     function updateAdvancedMeta(profile = null, pageData = null) {
         const currentPath = window.location.pathname.toLowerCase();
         const isRoot = currentPath === '/' || currentPath === '' || currentPath === '/index.html' || currentPath === '/index';
@@ -1879,7 +1859,6 @@ window.ScrollTrigger = ScrollTrigger;
         if (profile) {
             const displayName = getCleanName(profile.name);
             const province = profile.provinceNameThai || 'เชียงใหม่';
-            const priceInfo = profile.rate ? `ราคา ${profile.rate}` : 'สอบถามราคา';
             const workArea = profile.location ? `${profile.location}, ${province}` : province;
             const profileUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`;
             const provinceUrl = `${CONFIG.SITE_URL}/location/${profile.provinceKey || 'chiangmai'}`;
@@ -1894,12 +1873,7 @@ window.ScrollTrigger = ScrollTrigger;
             if (ageVal && ageVal !== '-') {
                 statsParts.push(`อายุ ${ageVal} ปี`);
             }
-            const detailsSnippet = statsParts.length > 0 ? statsParts.join('. ') : 'ข้อมูลสเปกยืนยันตัวตนแล้ว'; 
 
-            const t = (SEO_POOL && typeof SEO_POOL.pick === 'function') ? SEO_POOL.pick('trust') : 'ไม่ต้องโอนก่อน';
-            const g = (SEO_POOL && typeof SEO_POOL.pick === 'function') ? SEO_POOL.pick('guarantees') : 'ตัวจริงตรงรูป 100%';
-
-            // ปรับแต่งหัวข้อและคำบรรยายเฉพาะเจาะจงให้มีสัดส่วน CTR สูงขึ้น
             const finalTitle = `น้อง${displayName.replace(/^น้อง/, '')}${profile.age ? ` (${profile.age} ปี)` : ""} ไซด์ไลน์${province} เพื่อนเที่ยวตรงปก | จ่ายหน้างาน ไม่มัดจำ`;
             const finalDesc = `รายละเอียดโปรไฟล์น้อง${displayName.replace(/^น้อง/, '')} สาวรับงานไซด์ไลน์พิกัดย่าน ${workArea} ตรงปก 100% ค่าขนม ${profile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า (อัปเดต ${CURRENT_DATE})`;
 
@@ -1910,7 +1884,6 @@ window.ScrollTrigger = ScrollTrigger;
             
             updateOpenGraphMeta(profile, finalTitle, finalDesc, 'profile');
             
-            // สร้าง Person Schema ใหม่เฉพาะของโปรไฟล์
             injectSchema({
                 "@context": "https://schema.org",
                 "@type": "Person",
@@ -1991,60 +1964,6 @@ window.ScrollTrigger = ScrollTrigger;
         updateMeta('twitter:image', imageUrl);
     }
 
-    function generatePersonSchema(p, descriptionOverride, provinceName) {
-        if (!p) return null;
-        const priceNumeric = (p.rate || "0").toString().replace(/\D/g, '');
-        let cleanName = (p.name || '').replace(/^น้อง/, '').trim();
-        const profileUrl = `${CONFIG.SITE_URL}/sideline/${p.slug}`;
-        const imageUrl = (p.images && p.images[0]) ? p.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
-
-        return {
-            "@context": "https://schema.org",
-            "@type": "Person",
-            "@id": profileUrl,
-            "name": `น้อง${cleanName}`,
-            "url": profileUrl,
-            "image": imageUrl,
-            "description": descriptionOverride || p.description || "",
-            "jobTitle": "Freelance Model",
-            "gender": "Female",
-            "address": {
-                "@type": "PostalAddress",
-                "addressLocality": provinceName || "Chiang Mai",
-                "addressRegion": "Thailand",
-                "addressCountry": "TH"
-            },
-            "offers": {
-                "@type": "Offer",
-                "url": profileUrl,
-                "price": priceNumeric,
-                "priceCurrency": "THB",
-                "availability": p.availability?.includes('ไม่ว่าง') ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-                "description": "ชำระเงินหน้างานเท่านั้น ไม่มีมัดจำ"
-            },
-            "additionalProperty":[
-                { "@type": "PropertyValue", "name": "Age", "value": p.age || "-" },
-                { "@type": "PropertyValue", "name": "Stats", "value": p.stats || "-" },
-                { "@type": "PropertyValue", "name": "Height", "value": p.height || "-" },
-                { "@type": "PropertyValue", "name": "SkinTone", "value": p.skinTone || "-" },
-                { "@type": "PropertyValue", "name": "Province", "value": provinceName }
-            ]
-        };
-    }
-
-    function generateFAQPageSchema(faqData) {
-        if (!faqData || faqData.length === 0) return null;
-        return {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": faqData.map(item => ({
-                "@type": "Question",
-                "name": item.question,
-                "acceptedAnswer": { "@type": "Answer", "text": item.answer }
-            }))
-        };
-    }
-
     function generateBreadcrumbSchema(items) {
         if (!items || items.length === 0) return null;
         return {
@@ -2077,36 +1996,6 @@ window.ScrollTrigger = ScrollTrigger;
                     "image": (p.images && p.images.length > 0) ? p.images[0].src : CONFIG.DEFAULT_OG_IMAGE
                 }
             }))
-        };
-    }
-
-    function generateWebsiteSchema() {
-        return {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "url": CONFIG.SITE_URL,
-            "name": "Sideline Chiangmai",
-            "description": "ศูนย์รวมน้องๆ ไซด์ไลน์ ฟิวแฟน ตรงปก 100% ไม่มัดจำ",
-            "potentialAction": {
-                "@type": "SearchAction",
-                "target": `${CONFIG.SITE_URL}/?q={search_term_string}`,
-                "query-input": "required name=search_term_string"
-            }
-        };
-    }
-
-    function generateOrganizationSchema() {
-        return {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Sideline Chiangmai",
-            "url": CONFIG.SITE_URL,
-            "logo": `${CONFIG.SITE_URL}/images/sidelinechiangmai-social-preview.webp`,
-            "contactPoint": {
-                "@type": "ContactPoint",
-                "contactType": "customer service",
-                "description": "มีแอดมินดูแลฟรีตลอดเวลาทำการ"
-            }
         };
     }
 
@@ -2144,21 +2033,6 @@ window.ScrollTrigger = ScrollTrigger;
             document.head.appendChild(el); 
         }
         el.setAttribute('href', href);
-    }
-
-    function updateResultCount(count, total, isFiltering) {
-        if (!dom.resultCount) return;
-        const formattedCount = count.toLocaleString();
-        if (count > 0) {
-            dom.resultCount.innerHTML = `✅ พบ <span class="font-bold" style="color: var(--primary-purple);">${formattedCount}</span> โปรไฟล์ที่ตรงตามเงื่อนไข`;
-            dom.resultCount.classList.remove('hidden', 'no-results');
-            dom.resultCount.style.display = 'block';
-        } else {
-            dom.resultCount.innerHTML = '❌ ไม่พบโปรไฟล์ตามเงื่อนไข';
-            dom.resultCount.classList.add('no-results');
-            dom.resultCount.classList.remove('hidden');
-            dom.resultCount.style.display = 'block';
-        }
     }
 
     function initHeaderScrollEffect() {
@@ -2291,7 +2165,6 @@ window.ScrollTrigger = ScrollTrigger;
         });
     }
 
-    // 🛠️ แก้ไขตรงนี้: เพิ่มฟังก์ชันควบคุม Accordion คอร์เซ็ตปุ่ม aria-expanded แก้ไขปัญหา ARIA และ SEO
     function initAccordion() {
         const ruleItems = document.querySelectorAll(".rule-item");
         ruleItems.forEach(item => {
@@ -2319,7 +2192,6 @@ window.ScrollTrigger = ScrollTrigger;
         });
     }
 
-    // 🛠️ แก้ไขตรงนี้: เพิ่มฟังก์ชันเลือกดาวรีวิวแบบเป็นระเบียบ ปิดการซ้ำซ้อนของคำสั่ง
     function initStarRating() {
         const starRatingContainer = document.querySelector(".star-rating-input-container");
         const hiddenRatingInput = document.getElementById("review-rating-value");

@@ -39,69 +39,77 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
   
-  <!-- ปรับเปลี่ยนลิงก์ Preload และ Script เพื่อให้ดึงผ่านสถาปัตยกรรมระบบโมดูลใหม่อย่างถูกต้อง -->
   <link rel="modulepreload" href="/main.js">
-
   <link rel="stylesheet" href="/styles.css">
 
-<!-- 🟢 เพิ่มเติมเพื่อแก้ปัญหา Contrast Ratio ต่ำขององค์ประกอบพื้นหลังลอยตัว และ ป้ายกำกับข้อมูล -->
   <style>
     :root, .dark-theme {
-      --primary-purple: #C084FC !important; /* ปรับระดับสีตัวอักษรสีม่วงหลักให้อัตราส่วนคอนทราสต์ผ่านเกณฑ์ความต่างระดับสากล */
-      --text-gray: #E4E4E7 !important; /* ปรับระดับสีข้อความทั่วไปให้อ่านง่ายยิ่งขึ้นบนพื้นหลังมืด */
+      --primary-purple: #C084FC !important; 
+      --text-gray: #E4E4E7 !important; 
       --text-muted: #A1A1AA !important;
       --border-light: rgba(255, 255, 255, 0.1) !important;
-      --emerald-accent: #11783B !important; /* เพิ่มสีเขียวพรีเมียมที่สอดคล้องตามมาตรฐานการเข้าถึง */
+      --emerald-accent: #11783B !important; 
       --pure-black: #09090C !important;
     }
 
-    /* 🛠️ แก้ไขปัญหาความสว่างและการตัดสีของปุ่ม Line จองคิว ในระบบควบคุมลอยตัว */
+    /* 🛠️ แก้ไขปัญหาขนาดฟอนต์ของลิงก์และปุ่มกดเพื่อป้องกัน Bot ตรวจจับเป็น Small text / Hidden links */
+    .dock-item span {
+      font-size: 12px !important; /* ขยับจาก 11px ขึ้นมาให้พ้นเกณฑ์แจ้งเตือน */
+    }
+    .capsule-text {
+      font-size: 13px !important;
+      color: #F4F4F5 !important;
+    }
+    .social-link-card-item {
+      font-size: 13px !important;
+    }
+    .cta-subtext {
+      font-size: 12px !important;
+      color: #CBD5E1 !important;
+    }
+
+    /* 🛠️ ปรับปรุงความสว่างและการตัดสีของปุ่ม Line จองคิว */
     nav.floating-app-dock a.dock-item.dock-item-line,
     nav.floating-app-dock a.dock-item.dock-item-line span,
     nav.floating-app-dock a.dock-item.dock-item-line i,
     .floating-app-dock .dock-item-line {
-      background-color: #11783B !important; /* เปลี่ยนเฉดสีเขียวให้เข้มตามมาตรฐาน WCAG AA */
-      color: #FFFFFF !important; /* บังคับตัวอักษรเป็นสีขาวเด่นชัด */
+      background-color: #11783B !important; 
+      color: #FFFFFF !important; 
     }
 
-    /* 🛠️ ปรับสเปซจำลองความสูงขั้นต่ำเพื่อป้องกันหน้าจอเลื่อนยุบตัวสะสม (CLS) */
+    /* 🛠️ จำกัดขอบเขตความสูงขั้นต่ำเริ่มต้นของพอร์ตโฟลิโอ ป้องกันการยุบตัวของหน้าจอ (CLS) */
     #profiles-display-area {
-      min-height: 580px; /* สำหรับอุปกรณ์พกพาระดับมือถือ */
+      min-height: 580px; 
     }
     @media (min-width: 768px) {
       #profiles-display-area {
-        min-height: 1100px; /* สำหรับหน้าจอคอมพิวเตอร์เดสก์ท็อป */
+        min-height: 1100px; 
       }
     }
 
-    /* 🛠️ จัดการอาการขยับตัว (CLS) จากไอคอนฟอนต์ด้วยการจองเนื้อหาความกว้างเริ่มต้น */
+    /* 🛠️ จองพื้นที่ความกว้างล่วงหน้าสำหรับไอคอนฟอนต์ */
     .fas, .fab, .far {
       display: inline-block;
       width: 1.25em;
       text-align: center;
     }
 
-
-
     .floating-app-dock {
-      background-color: #09090C !important; /* กำหนดสีพื้นหลังทึบเพื่อให้ระบบตรวจสอบความแตกต่างของสีได้อย่างถูกต้อง */
+      background-color: #09090C !important; 
       border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
     .dock-item {
-      color: #E4E4E7 !important; /* ปรับข้อความไอคอนเมนูให้อ่านได้ชัดเจนขึ้น */
+      color: #E4E4E7 !important; 
     }
     .dock-item.active {
       color: #C084FC !important;
     }
     .safe-capsule-item {
-      background-color: #18181B !important; /* กำหนดสีกล่องทึบเพื่อตัดกับข้อความสีอ่อน */
+      background-color: #18181B !important; 
       border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
-    .capsule-text {
-      color: #F4F4F5 !important; /* ปรับระดับสีตัวอักษรให้อัตราส่วนคอนทราสต์อยู่ในเกณฑ์ที่เหมาะสม */
-    }
 
-    /* 🟢 ปรับตั้งระบบจำลองปิดหีบเพลง (Accordion SEO Crawlability) โดยไม่ทำลาย DOM */
+    /* 🟢 ปรับปรุงระบบกล่องข้อตกลงแบบพับได้ (Accordion) */
     .rule-item {
       border: 1px solid rgba(255, 255, 255, 0.05);
       background-color: rgba(255, 255, 255, 0.01);
@@ -147,7 +155,6 @@
       color: #C084FC;
     }
 
-    /* สไตล์สำหรับการกรอกดาวอย่างเป็นธรรมชาติ */
     .star-rating-input-item {
       color: #71717A;
       transition: color 0.15s ease;
@@ -156,13 +163,11 @@
       color: #FBBF24 !important;
     }
 
-    /* 🛠️ แก้ไขหน้าจอสั่นไหว (CLS): บล็อกความสูงขั้นต่ำเริ่มต้นของ SEO Content ตัวเมือง */
     .seo-content-container.collapsed {
       max-height: 180px !important;
       overflow: hidden !important;
     }
 
-    /* 🛠️ แก้ไขระดับ Contrast ของแท็บภูมิภาคเมื่อทำงานคัดกรอง */
     .region-tab.active {
       background-color: #C084FC !important;
       color: #09090C !important;
@@ -175,12 +180,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   </noscript>
 
-  <!-- ปรับปรุง Preload ให้เบราว์เซอร์เลือกขนาดภาพแบนเนอร์ที่เหมาะสมตามอุปกรณ์จริง เพื่อประหยัดแบนด์วิดท์บนหน้าจอมือถือ -->
   <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" 
         imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w" 
         imagesizes="(max-width: 768px) 100vw, 1200px" fetchpriority="high">
 
-  <!-- ============================== DYNAMIC STRUCTURED DATA ============================== -->
   <script type="application/ld+json" id="dynamic-schema">
   {{SCHEMA_JSON}}
   </script>
@@ -281,7 +284,6 @@
 <!-- ============================== MAIN CONTENT ============================== -->
 <main id="main-content" style="padding-top: 96px; padding-bottom: 64px; position: relative; overflow: hidden;">
   
-  <!-- Ambient Glow Effects -->
   <div class="bg-glow-overlap" style="top: -50px; right: -50px;" aria-hidden="true"></div>
   <div class="bg-glow-overlap" style="top: 35%; left: -100px;" aria-hidden="true"></div>
   <div class="bg-glow-overlap" style="bottom: 5%; right: -50px;" aria-hidden="true"></div>
@@ -291,7 +293,6 @@
     <!-- HERO SECTION (H1 & Brand Intro) -->
     <section class="hero-section" aria-labelledby="hero-h1">
       
-      <!-- Clutch Rating Style Pill -->
       <div class="clutch-pill">
         <span class="white-badge" style="background-color: #7C3AED; color: white; padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800;">HOT 2026</span>
         <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-hidden="true">
@@ -300,13 +301,13 @@
         <span class="rating-text" style="color: white; font-size: 11px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
-      <!-- Webyst Styled Specular Billboard Image Container -->
       <div class="billboard-container">
-        <!-- 🟢 ใช้การแสดงผล Responsive Image ผ่านคำสั่ง srcset เพื่อให้เบราว์เซอร์ดาวน์โหลดไฟล์ขนาดเล็กบนมือถือโดยอัตโนมัติ -->
+        <!-- 🟢 ใส่แอตทริบิวต์ Title เพิ่มเติม และเรียกภาพผ่าน srcset เพื่อประหยัดแบนด์วิดท์บนมือถือ -->
         <img src="/images/hero-sidelinechiangmai-1200.webp" 
              srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w"
              sizes="(max-width: 768px) 100vw, 1200px"
              alt="เพื่อนเที่ยว{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก 100% สไตล์ฟิวแฟน ไม่มัดจำ" 
+             title="ภาพแนะนำเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก"
              width="1200" 
              height="630" 
              style="width: 100%; height: auto; aspect-ratio: 1200/630; object-fit: cover;"
@@ -315,40 +316,41 @@
         <div class="billboard-overlay"></div>
       </div>
 
-      <!-- ปรับเปลี่ยนชื่อหัวข้อหลักเป็น Keyword-rich แบบมีคีย์เวิร์ด + USP + 2026 -->
-      <h1 id="hero-h1" class="hero-title text-gradient-main">
-          สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์เพื่อนเที่ยวฟิวแฟนตรงปก <br>
-          <span class="text-gradient-sub" style="font-size: clamp(18px, 3.5vw, 28px); display: block; margin-top: 8px;">ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% (อัปเดตล่าสุด 2026)</span>
+      <!-- 🛠️ ปรับแยกเนื้อหาระดับรองออกนอก H1 เพื่อลดความยาวของ H1 ให้อยู่ในมาตรฐาน (น้อยกว่า 70 ตัวอักษร) -->
+      <h1 id="hero-h1" class="hero-title text-gradient-main" style="margin-bottom: 8px;">
+          สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์เพื่อนเที่ยวฟิวแฟนตรงปก
       </h1>
+      <p class="text-gradient-sub" style="font-size: clamp(18px, 3.2vw, 24px); display: block; margin-top: 8px; font-weight: 700; text-align: center; line-height: 1.4;">
+          ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ 100% (อัปเดตล่าสุด 2026)
+      </p>
       
       <p class="hero-subtitle-p">
         ศูนย์รวมข้อมูลแนะนำ <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> และผู้ดูแลระดับพรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก ปลอดภัยสูงสุดด้วยนโยบาย<strong>ไม่โอนมัดจำล่วงหน้า 100%</strong> จ่ายหน้างานเมื่อเจอตัวจริง ครอบคลุมพิกัด <a href="/nimman" class="text-[#C084FC] hover:underline font-bold">นิมมาน</a>, เจ็ดยอด, สันติธรรม, ช้างเผือก
       </p>
 
-      <!-- CTA Trigger Style Webyst -->
       <div style="display: flex; flex-direction: column; align-items: center;">
         <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ">
           Book an intro call (แอดไลน์จองคิว)
         </a>
-        <p class="cta-subtext" style="font-size: 11px; color: #CBD5E1;" aria-live="polite">
+        <p class="cta-subtext" aria-live="polite">
           สแตนบายคุมคิวดูแลระบบและคัดสรรโปรไฟล์ตรงปกตลอด 24 ชั่วโมง
         </p>
       </div>
 
-<div class="safe-capsules-grid">
-    <a href="/about" class="safe-capsule-item">
-        <span class="indicator-dot indicator-red" aria-hidden="true"></span>
-        <span class="capsule-text">ไม่มีโอนมัดจำก่อน</span>
-    </a>
-    <a href="/faq" class="safe-capsule-item">
-        <span class="indicator-dot indicator-red" aria-hidden="true"></span>
-        <span class="capsule-text">ไม่มีค่าสมัครสมาชิก</span>
-    </a>
-    <a href="/about" class="safe-capsule-item">
-        <span class="indicator-dot indicator-green" aria-hidden="true"></span>
-        <span class="capsule-text" style="color: #00E676;">จ่ายหน้างาน 100%</span>
-    </a>
-</div>
+      <div class="safe-capsules-grid">
+          <a href="/about" class="safe-capsule-item">
+              <span class="indicator-dot indicator-red" aria-hidden="true"></span>
+              <span class="capsule-text">ไม่มีโอนมัดจำก่อน</span>
+          </a>
+          <a href="/faq" class="safe-capsule-item">
+              <span class="indicator-dot indicator-red" aria-hidden="true"></span>
+              <span class="capsule-text">ไม่มีค่าสมัครสมาชิก</span>
+          </a>
+          <a href="/about" class="safe-capsule-item">
+              <span class="indicator-dot indicator-green" aria-hidden="true"></span>
+              <span class="capsule-text" style="color: #00E676;">จ่ายหน้างาน 100%</span>
+          </a>
+      </div>
     </section>
 
       <!-- ============================== FEATURED PROFILES GRID ============================== -->
@@ -357,7 +359,6 @@
         
         <div class="section-spacing-container text-center-wrapper" style="position: relative; z-index: 10;">
             <div class="badge-wrapper"><span class="work-badge-webyst">POPULAR</span></div>
-            <!-- 🛠️ ปรับปรุงแท็ก <h2> ให้มีโครงสร้างคีย์เวิร์ดเด่นชัดและสอดคล้องตามลำดับความสำคัญของโครงสร้างแท็กหัวข้อ -->
             <h2 id="featured-heading" class="text-gradient-main" style="font-size: 28px; font-weight: 800; margin-top: 8px; margin-bottom: 8px;">
               แนะนำเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}} ยอดนิยมและตรงปก
             </h2>
@@ -380,7 +381,6 @@
         <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); text-align: center; margin-bottom: 8px;">
           ระบบตัวกรองอัจฉริยะ
         </p>
-        <!-- 🛠️ ปรับแท็ก <h2> ของส่วนคัดกรองให้ระบุคีย์เวิร์ดพื้นที่เจาะจง -->
         <h2 id="search-form-heading" class="text-gradient-sub" style="font-size: 15px; font-weight: 800; text-align: center; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.1em;">
             ค้นหาโปรไฟล์ไซด์ไลน์{{PROVINCE_NAME}} และพิกัดนัดพบ
         </h2>
@@ -460,7 +460,6 @@
       </div>
 
       <!-- LOADER PLACEHOLDER -->
-      <!-- 🛠️ เพิ่มชุดการ์ด Skeleton จำลองพื้นที่จอง Layout ไว้ล่วงหน้า ลดอัตราหน้าจอเลื่อนขยับสะสม (CLS) บนมือถือ -->
       <div id="loading-profiles-placeholder" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 24px;" aria-hidden="true">
         <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
         <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
@@ -487,7 +486,6 @@
       </div>
 
 
-      
       <!-- ============================== PREMIUM GOLD-CARBON CONTENT BLOCK ============================== -->
       <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 64px; position: relative;" aria-label="ข้อมูลเชิงลึก">
         <div class="bg-glow-overlap" style="top: 20%; left: 30%; width: 400px; height: 400px;" aria-hidden="true"></div>
@@ -515,7 +513,6 @@
                </h2>
            </div>
 
-           <!-- ซ่อนเนื้อหา SEO ไว้ภายใต้กล่องสไลด์ขยายเพื่อความสวยงามและการประเมินหน้าเว็บที่ดีขึ้น -->
            <div class="seo-content-container collapsed" id="seo-drawer-wrapper" style="position: relative;">
                <div class="seo-content-white" style="padding: 32px; text-align: left; color: var(--text-gray); font-size: 13px; line-height: 1.7; display: flex; flex-direction: column; gap: 24px; position: relative; z-index: 10;">
                    {{PROVINCE_SEO_CONTENT}}
@@ -531,7 +528,8 @@
         </div>
       </section>
 
-<section style="text-align: center; position: relative;" aria-labelledby="rules-title">
+      <!-- ============================== SAFE-PLAY FRAMEWORK ============================== -->
+      <section style="text-align: center; position: relative;" aria-labelledby="rules-title">
         <div class="bg-glow-overlap" style="top: -50px; left: -50px; width: 400px; height: 400px;" aria-hidden="true"></div>
         <div class="bg-glow-overlap" style="bottom: -50px; right: -50px; width: 400px; height: 400px;" aria-hidden="true"></div>
         
@@ -539,7 +537,6 @@
           <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
             SAFE-PLAY FRAMEWORK
           </p>
-          <!-- 🛠️ ปรับปรุงหัวข้อเพื่อกระจายความหนาแน่นของคีย์เวิร์ดพื้นที่ให้สอดคล้องกันทั่วทั้งหน้า -->
           <h2 id="rules-title" class="text-gradient-main" style="font-size: 22px; font-weight: 800;">
             ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}
           </h2>
@@ -549,7 +546,6 @@
           </p>
         </div>
 
-        <!-- ปรับเปลี่ยนตัวหนังสือหัวข้อใน Accordion และใช้ไวยากรณ์โครงสร้าง Heading + Button ที่รองรับ Accessibility และ SEO อย่างดีที่สุด -->
         <div class="rules-accordion" style="display: flex; flex-direction: column; gap: 12px; max-width: 768px; margin: 32px auto 0 auto; text-align: left; position: relative; z-index: 10;">
           
           <!-- ข้อที่ 1 -->
@@ -628,7 +624,7 @@
             <div id="rule-panel-5" class="rule-content" role="region" aria-labelledby="rule-btn-5" style="padding-bottom: 24px;">
               <span style="display: inline-flex; align-items: center; width: max-content; gap: 4px; padding: 2px 8px; border-radius: 100px; background-color: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.4); font-size: 9px; font-weight: 700; color: #F59E0B; letter-spacing: 0.05em; margin-top: 12px; margin-bottom: 8px;">เฉพาะกรณีออกนอกโซนรับงานหลัก</span>
               <p style="margin: 0; font-size: 12.5px; color: var(--text-gray); line-height: 1.6;">
-                In กรณีที่สมาชิกต้องการนัดหมายนอกโซนพิกัดบริการหลัก และประสงค์จะให้ผู้ดูแลเดินทางไปพบนอกทำเลปกติ ในกรณีนี้น้องๆ จำเป็นต้องขอคิดเฉพาะ <strong>"อัตราค่าเดินทางไป-กลับ ตามระยะทางจริง" เท่านั้น</strong> เพื่อเป็นหลักประกันความเสี่ยงในการเดินทางและป้องกันกรณีเบี้ยวนัดหมายกระทันหัน
+                ในกรณีที่สมาชิกต้องการนัดหมายนอกโซนพิกัดบริการหลัก และประสงค์จะให้ผู้ดูแลเดินทางไปพบนอกทำเลปกติ ในกรณีนี้น้องๆ จำเป็นต้องขอคิดเฉพาะ <strong>"อัตราค่าเดินทางไป-กลับ ตามระยะทางจริง" เท่านั้น</strong> เพื่อเป็นหลักประกันความเสี่ยงในการเดินทางและป้องกันกรณีเบี้ยวนัดหมายกระทันหัน
               </p>
               <p style="font-size: 11px; color: #F59E0B; font-weight: 600; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 12px;">
                 ⚠️ สรุปกติกาการคุ้มครอง: การทำรายการชำระส่วนนี้จะถูกจำกัดเฉพาะค่าเดินทางของน้องๆ เท่านั้น ส่วนค่าบริการหลักของโปรไฟล์ทั้งหมด จะเป็นการชำระหน้างานเมื่อเจอตัวจริงตามนโยบายมาตรฐานของทางเว็บครับ
@@ -646,7 +642,6 @@
            <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); text-align: center; position: relative; z-index: 10;">
                คำถามยอดฮิตจากลูกค้า
            </p>
-           <!-- 🛠️ ปรับหัวข้อ FAQ ให้มีความลื่นไหลและมีคีย์เวิร์ดภูมิภาคสอดคล้องกัน -->
            <h2 id="faq-main-heading" class="text-gradient-main" style="font-size: 22px; font-weight: 800; text-align: center; letter-spacing: -0.02em; position: relative; z-index: 10;">
                คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}
            </h2>
@@ -656,74 +651,70 @@
            </div>
       </section>
 
-<!-- ============================== VERIFIED CUSTOMER REVIEWS (EEAT & SCHEMA COMPLIANCE) ============================== -->
-<section id="customer-reviews" style="text-align: center; position: relative;" aria-labelledby="reviews-main-heading">
-  <div class="bg-glow-overlap" style="bottom: 0%; right: 5%; width: 400px; height: 400px;" aria-hidden="true"></div>
-  
-  <div class="section-spacing-container">
-    <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
-      VERIFIED USER FEEDBACK & COMMENTS
-    </p>
-    <!-- 🛠️ ปรับหัวข้อรีวิวระบุพิกัดอย่างมีนัยยะสำคัญเพื่อส่งผลดีต่อ Local SEO -->
-    <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em;">
-      รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน{{PROVINCE_NAME}}
-    </h2>
-    <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-top: 8px;">
-      ระบบรวบรวมรีวิวแบบโปร่งใส ปราศจากการปรุงแต่ง เพื่อเป็นประโยชน์ในการประกอบการตัดสินใจของสมาชิก
-    </p>
-  </div>
+      <!-- ============================== VERIFIED CUSTOMER REVIEWS ============================== -->
+      <section id="customer-reviews" style="text-align: center; position: relative;" aria-labelledby="reviews-main-heading">
+        <div class="bg-glow-overlap" style="bottom: 0%; right: 5%; width: 400px; height: 400px;" aria-hidden="true"></div>
+        
+        <div class="section-spacing-container">
+          <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
+            VERIFIED USER FEEDBACK & COMMENTS
+          </p>
+          <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em;">
+            รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน{{PROVINCE_NAME}}
+          </h2>
+          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-top: 8px;">
+            ระบบรวบรวมรีวิวแบบโปร่งใส ปราศจากการปรุงแต่ง เพื่อเป็นประโยชน์ในการประกอบการตัดสินใจของสมาชิก
+          </p>
+        </div>
 
-  <div id="reviews-container-grid" style="display: grid; grid-template-columns: 1fr; gap: 24px; text-align: left; margin-top: 32px;" class="bento-grid-3">
-    {{PROVINCE_REVIEWS_HTML}}
-  </div>
+        <div id="reviews-container-grid" style="display: grid; grid-template-columns: 1fr; gap: 24px; text-align: left; margin-top: 32px;" class="bento-grid-3">
+          {{PROVINCE_REVIEWS_HTML}}
+        </div>
 
-  <div class="interactive-card" style="max-width: 600px; margin: 48px auto 0 auto; padding: 32px; text-align: left; border: 1px solid rgba(147, 51, 234, 0.25);">
-      <h3 class="text-gradient-sub" style="font-size: 16px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-edit" style="color: var(--primary-purple);"></i> ร่วมแบ่งปันประสบการณ์ตรงของคุณ
-      </h3>
-      <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px;">
-          ความคิดเห็นที่ผ่านการคัดกรองจะถูกส่งสัญญานไปเป็น Structured Data เพื่อการจัดอันดับบนหน้าแรกของ Google
-      </p>
+        <div class="interactive-card" style="max-width: 600px; margin: 48px auto 0 auto; padding: 32px; text-align: left; border: 1px solid rgba(147, 51, 234, 0.25);">
+            <h3 class="text-gradient-sub" style="font-size: 16px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-edit" style="color: var(--primary-purple);"></i> ร่วมแบ่งปันประสบการณ์ตรงของคุณ
+            </h3>
+            <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px;">
+                ความคิดเห็นที่ผ่านการคัดกรองจะถูกส่งสัญญานไปเป็น Structured Data เพื่อการจัดอันดับบนหน้าแรกของ Google
+            </p>
 
-      <!-- ปรับเปลี่ยน ID / Name และโครงสร้างฟิลด์ให้รองรับการ Serialize ส่งต่อไปยังระบบฐานข้อมูล Supabase -->
-      <form id="review-form" style="display: flex; flex-direction: column; gap: 16px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <label for="review-author" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน (ใช้นามสมมติได้)</label>
-                  <input type="text" id="review-author" name="author" required placeholder="ตัวอย่าง: คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <label for="review-location" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอน้อง</label>
-                  <input type="text" id="review-location" name="location" placeholder="ตัวอย่าง: ตัวเมือง{{PROVINCE_NAME}}" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
-              </div>
-          </div>
+            <form id="review-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label for="review-author" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน (ใช้นามสมมติได้)</label>
+                        <input type="text" id="review-author" name="author" required placeholder="ตัวอย่าง: คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label for="review-location" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอน้อง</label>
+                        <input type="text" id="review-location" name="location" placeholder="ตัวอย่าง: ตัวเมือง{{PROVINCE_NAME}}" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px;">
+                    </div>
+                </div>
 
-          <!-- การให้ดาว (Star Rating) ที่สมบูรณ์แบบทั้งการเข้าถึง (Accessibility) และสไตล์เชิงโต้ตอบ -->
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-              <span id="star-rating-label" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจการบริการ</span>
-              <div class="star-rating-input-container" role="group" aria-labelledby="star-rating-label" style="display: flex; gap: 6px; color: #71717A; font-size: 18px; cursor: pointer;">
-                  <i class="fas fa-star star-rating-input-item active" data-value="1" aria-hidden="true"></i>
-                  <i class="fas fa-star star-rating-input-item active" data-value="2" aria-hidden="true"></i>
-                  <i class="fas fa-star star-rating-input-item active" data-value="3" aria-hidden="true"></i>
-                  <i class="fas fa-star star-rating-input-item active" data-value="4" aria-hidden="true"></i>
-                  <i class="fas fa-star star-rating-input-item active" data-value="5" aria-hidden="true"></i>
-              </div>
-              <!-- Hidden input สำหรับเก็บค่า Rating เพื่อเตรียมเชื่อมต่อ Supabase Payload -->
-              <input type="hidden" id="review-rating-value" name="rating" value="5">
-              <input type="hidden" id="review-province-key" name="province_key" value="{{PROVINCE_NAME}}">
-          </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <span id="star-rating-label" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจการบริการ</span>
+                    <div class="star-rating-input-container" role="group" aria-labelledby="star-rating-label" style="display: flex; gap: 6px; color: #71717A; font-size: 18px; cursor: pointer;">
+                        <i class="fas fa-star star-rating-input-item active" data-value="1" aria-hidden="true"></i>
+                        <i class="fas fa-star star-rating-input-item active" data-value="2" aria-hidden="true"></i>
+                        <i class="fas fa-star star-rating-input-item active" data-value="3" aria-hidden="true"></i>
+                        <i class="fas fa-star star-rating-input-item active" data-value="4" aria-hidden="true"></i>
+                        <i class="fas fa-star star-rating-input-item active" data-value="5" aria-hidden="true"></i>
+                    </div>
+                    <input type="hidden" id="review-rating-value" name="rating" value="5">
+                    <input type="hidden" id="review-province-key" name="province_key" value="{{PROVINCE_NAME}}">
+                </div>
 
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-              <label for="review-text" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน/เทคแคร์ของน้อง</label>
-              <textarea id="review-text" name="review_text" rows="4" required placeholder="เช่น น้องสุภาพเรียบร้อย เทคแคร์ประทับใจสไตล์ฟิวแฟน ตัวจริงตรงตามปกและประทับใจมาก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px; line-height: 1.6; resize: none;"></textarea>
-          </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="review-text" style="font-size: 11px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน/เทคแคร์ของน้อง</label>
+                    <textarea id="review-text" name="review_text" rows="4" required placeholder="เช่น น้องสุภาพเรียบร้อย เทคแคร์ประทับใจสไตล์ฟิวแฟน ตัวจริงตรงตามปกและประทับใจมาก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; color: white; outline: none; font-size: 13px; line-height: 1.6; resize: none;"></textarea>
+                </div>
 
-          <button type="submit" style="background: var(--primary-purple); color: white; padding: 14px; border: none; border-radius: 100px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center;">
-              ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ
-          </button>
-      </form>
-  </div>
-</section>
+                <button type="submit" style="background: var(--primary-purple); color: white; padding: 14px; border: none; border-radius: 100px; font-weight: 800; font-size: 13px; cursor: pointer; text-align: center;">
+                    ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ
+                </button>
+            </form>
+        </div>
+      </section>
 
       <!-- ============================== EDITORIAL PROCESS & EEAT VERIFICATION SYSTEM ============================== -->
       <section id="verification-process" style="max-width: 850px; margin: 0 auto;" aria-labelledby="verification-heading">
@@ -757,14 +748,8 @@
           <a class="social-link-card-item" href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow">
             <i class="fab fa-line" style="font-size: 16px; color: #06C755;" aria-hidden="true"></i> LINE OFFICIAL
           </a>
-          <a class="social-link-card-item" href="https://bsky.app/profile/sidelinechiangmai.bsky.social" target="_blank" rel="me noopener">
-            <i class="fas fa-cloud" style="font-size: 14px; color: #0284C7;" aria-hidden="true"></i> BLUESKY
-          </a>
           <a class="social-link-card-item" href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow">
             <i class="fab fa-tiktok" style="font-size: 14px;" aria-hidden="true"></i> TIKTOK
-          </a>
-          <a class="social-link-card-item" href="https://twitter.com/sidelinechiangmai" target="_blank" rel="me noopener">
-            <i class="fab fa-twitter" style="font-size: 14px; color: #1D9BF0;" aria-hidden="true"></i> TWITTER / X
           </a>
           <a class="social-link-card-item" href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow">
             <i class="fas fa-globe" style="font-size: 14px; color: var(--primary-purple);" aria-hidden="true"></i> BIO.SITE
@@ -772,6 +757,16 @@
           <a class="social-link-card-item" href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow">
             <i class="fas fa-tree" style="font-size: 14px; color: #10B981;" aria-hidden="true"></i> LINKTREE
           </a>
+          
+          <!-- 🛠️ ซ่อนลิงก์ภายนอกที่ยังไม่พร้อมใช้งานชั่วคราวเพื่อป้องกันสแกนเนอร์รายงานรหัสความผิดพลาด 4xx (Broken Link 404) -->
+          <!-- 
+          <a class="social-link-card-item" href="https://bsky.app/profile/sidelinechiangmai.bsky.social" target="_blank" rel="me noopener">
+            <i class="fas fa-cloud" style="font-size: 14px; color: #0284C7;" aria-hidden="true"></i> BLUESKY
+          </a>
+          <a class="social-link-card-item" href="https://twitter.com/sidelinechiangmai" target="_blank" rel="me noopener">
+            <i class="fab fa-twitter" style="font-size: 14px; color: #1D9BF0;" aria-hidden="true"></i> TWITTER / X
+          </a>
+          -->
         </div>
 
         <p style="font-size: 11px; font-weight: 700; color: #D97706; background-color: rgba(146, 64, 14, 0.1); max-width: 450px; margin: 32px auto 0 auto; padding: 12px; border-radius: 12px; border: 1px solid rgba(146, 64, 14, 0.15); display: flex; align-items: center; justify-content: center; gap: 8px;" role="alert">
@@ -798,7 +793,7 @@
         </div>
       </section>
 
-      <!-- ============================== MAP & HOLOGRAPHIC INFORMATION SECTION ============================== -->
+      <!-- ============================== MAP & INFORMATION SECTION ============================== -->
       <section id="map-section" class="glass-panel" style="max-width: 850px; margin: 0 auto; overflow: hidden; padding: 0; position: relative;" aria-labelledby="map-title">
         <div class="bg-glow-overlap" style="bottom: -50px; right: -50px; width: 300px; height: 300px;" aria-hidden="true"></div>
         
@@ -806,7 +801,6 @@
           <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 8px;">
             แผนที่ & การติดต่อ
           </p>
-          <!-- 🛠️ ปรับหัวข้อเพื่อกระจายความหนาแน่นของคีย์เวิร์ดพื้นที่ให้สอดคล้องกันทั่วทั้งหน้า -->
           <h2 id="map-title" class="text-gradient-main" style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">
             เช็กพิกัดแผนที่รับงาน ไซด์ไลน์และเพื่อนร่วมทาง{{PROVINCE_NAME}}
           </h2>
@@ -833,10 +827,10 @@
             <i class="fas fa-map-marked-alt animate-pulse" style="font-size: 30px; color: var(--primary-purple);" aria-hidden="true"></i>
             <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700;">กำลังโหลดแผนที่อัจฉริยะ Google Maps...</span>
           </div>
-<iframe
-  id="google-map"
-  data-src="{{MAP_EMBED_URL}}"
-  title="แผนที่ขอบเขตบริการ สาวรับงาน{{PROVINCE_NAME}} เพื่อนเที่ยวไซด์ไลน์ฟิวแฟน"
+          <iframe
+            id="google-map"
+            data-src="{{MAP_EMBED_URL}}"
+            title="แผนที่ขอบเขตบริการ สาวรับงาน{{PROVINCE_NAME}} เพื่อนเที่ยวไซด์ไลน์ฟิวแฟน"
             style="border:0; width:100%; height:100%;"
             allowfullscreen=""
             loading="lazy"
@@ -881,13 +875,11 @@
           </ul>
         </nav>
 
-<!-- คอลัมน์ 3: ระบบสร้างลิงก์พิกัดยอดนิยม -->
+        <!-- คอลัมน์ 3: ระบบสร้างลิงก์พิกัดยอดนิยม -->
         <nav aria-label="พื้นที่บริการยอดนิยมย่านหลักในเชียงใหม่">
           <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin-bottom: 16px;">พื้นที่บริการยอดนิยม</h3>
           <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">
-             <!-- 🟢 ย้ายมาวางตรงนี้เพื่อให้เป็นลูกของ <ul> อย่างถูกต้องตามหลักไวยากรณ์เว็บสากล -->
              <li><a href="/nimman" title="เพื่อนเที่ยวย่านนิมมาน เชียงใหม่" style="color: var(--text-gray); text-decoration: none; font-weight: 600;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">เพื่อนเที่ยวนิมมาน</a></li>
-             <!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->
           </ul>
         </nav>
 
@@ -905,40 +897,35 @@
 
       </div>
 
-<!-- แถวลิขสิทธิ์ด้านล่างสุด (เวอร์ชันอัปเกรดเครดิตเทคโนโลยีสมบูรณ์) -->
-<div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;">
-  <!-- ชื่อลิขสิทธิ์และสัญลักษณ์ปี -->
-  <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">
-    © <span id="currentYearDynamic">2026</span> Sideline {{PROVINCE_NAME}}. All Rights Reserved.
-  </p>
-  
-  <p style="font-size: 9px; color: var(--text-muted); margin: 0; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
-    Built with Gemini & Supabase • Premium SEO Edition 2026
-  </p>
-  
-  <!-- ลิงก์นโยบายความเป็นส่วนตัวและข้อตกลง -->
-  <div style="display: flex; gap: 24px;">
-    <a href="/privacy-policy" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Privacy Policy</a>
-    <a href="/terms-of-service" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Terms & Conditions</a>
-  </div>
-</div>
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;">
+        <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin: 0;">
+          © <span id="currentYearDynamic">2026</span> Sideline {{PROVINCE_NAME}}. All Rights Reserved.
+        </p>
+        
+        <p style="font-size: 9px; color: var(--text-muted); margin: 0; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+          Built with Gemini & Supabase • Premium SEO Edition 2026
+        </p>
+        
+        <div style="display: flex; gap: 24px;">
+          <a href="/privacy-policy" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Privacy Policy</a>
+          <a href="/terms-of-service" style="font-size: 10px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; font-weight: 600; transition: color 0.2s;" onmouseenter="this.style.color='var(--primary-purple)'" onmouseleave="this.style.color='var(--text-muted)'">Terms & Conditions</a>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <!-- ============================== LIGHTBOX DETAILS ============================== -->
   <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main">
     <div id="lightbox-content-wrapper-el">
       
-      <!-- ปุ่มปิดหน้าจอ -->
       <button id="closeLightboxBtn" style="position: absolute; top: 16px; right: 16px; z-index: 30; width: 40px; height: 40px; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;" aria-label="ปิดรายละเอียดหน้าต่างโปรไฟล์">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>
 
-      <!-- พื้นที่เลื่อนเนื้อหาภายในกล่องป๊อปอัพ -->
       <div style="overflow-y: auto; max-height: 90vh;">
         
         <div class="lightbox-grid-layout">
           
-          <!-- ฝั่งซ้าย: แกลเลอรีรูปภาพ -->
           <div style="background-color: rgba(0,0,0,0.3); padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; border-right: 1px solid rgba(255,255,255,0.03);">
             <div style="width: 100%; max-height: 55vh; aspect-ratio: 3/4; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
               <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 4'%3E%3C/svg%3E" alt="แกลเลอรีรูปภาพน้องๆ เพื่อนเที่ยวไซด์ไลน์เชียงใหม่ตัวจริงตรงปก" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
@@ -946,7 +933,6 @@
             <div id="lightboxThumbnailStrip" style="display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; margin-top: 16px; justify-content: center; width: 100%;"></div>
           </div>
 
-          <!-- ฝั่งขวา: รายละเอียดข้อความสถิติ -->
           <div class="lightbox-details">
             <header style="display: flex; flex-direction: column; gap: 10px;">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
@@ -956,7 +942,6 @@
             </header>
             
             <div id="lightboxQuote" class="lightbox-quote-card">คำโปรยประจำตัว</div>
-            
             <div id="lightboxTags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
             
             <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
@@ -978,12 +963,10 @@
     </div>
   </div>
 
-  <!-- [ฝังข้อมูลโปรไฟล์] ส่งข้อมูลโปรไฟล์จากฐานข้อมูล Supabase มายังระบบควบคุมฝั่งเบราว์เซอร์โดยตรง -->
   <script id="ssr-profiles-data">
   window.profilesData = {{PROFILES_JSON}};
   </script>
 
-  <!-- เชื่อมโยงระบบดึงข้อมูล Javascript ของระบบหลัก (เรียกผ่านโมดูลระบบใหม่เพื่อรันแอปพลิเคชันเสถียร) -->
   <script type="module" src="/main.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -1017,23 +1000,20 @@
         }
     }
 
-    // 2. ระบบย่อข้อความเชิงลึก SEO (ปรับปรุงระบบสไลด์ขยายเนื้อหาให้เรียบเนียนที่สุด)
+    // 2. ระบบย่อข้อความเชิงลึก SEO
     const seoDrawerBtn = document.getElementById("toggle-seo-drawer-btn");
     const seoDrawerWrapper = document.getElementById("seo-drawer-wrapper");
     if (seoDrawerBtn && seoDrawerWrapper) {
-        // กำหนดค่าความสูงเริ่มต้นสำหรับการแสดงผลย่อหน้า
         seoDrawerWrapper.style.maxHeight = "180px";
 
         seoDrawerBtn.addEventListener("click", () => {
             const isCollapsed = seoDrawerWrapper.classList.toggle("collapsed");
             if (isCollapsed) {
-                // พับเก็บกลับไปที่ 180px
                 seoDrawerWrapper.style.maxHeight = "180px";
                 seoDrawerBtn.querySelector("span").textContent = "ดูข้อมูลพื้นที่บริการทั้งหมด";
                 seoDrawerBtn.querySelector("i").className = "fas fa-chevron-down";
                 seoDrawerWrapper.scrollIntoView({ behavior: "smooth" });
             } else {
-                // ขยายออกเต็มที่โดยอิงตามความสูงของเนื้อหาจริงโดยรอบ (scrollHeight)
                 seoDrawerWrapper.style.maxHeight = seoDrawerWrapper.scrollHeight + "px";
                 seoDrawerBtn.querySelector("span").textContent = "ย่อเนื้อหาข้อความ";
                 seoDrawerBtn.querySelector("i").className = "fas fa-chevron-up";
