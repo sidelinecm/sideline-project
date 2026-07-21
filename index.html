@@ -51,7 +51,37 @@
       --text-gray: #E4E4E7 !important; /* ปรับระดับสีข้อความทั่วไปให้อ่านง่ายยิ่งขึ้นบนพื้นหลังมืด */
       --text-muted: #A1A1AA !important;
       --border-light: rgba(255, 255, 255, 0.1) !important;
+      --emerald-accent: #11783B !important; /* เพิ่มสีเขียวพรีเมียมที่สอดคล้องตามมาตรฐานการเข้าถึง */
+      --pure-black: #09090C !important;
     }
+
+    /* 🛠️ แก้ไขปัญหาความสว่างและการตัดสีของปุ่ม Line จองคิว ในระบบควบคุมลอยตัว */
+    nav.floating-app-dock a.dock-item.dock-item-line,
+    nav.floating-app-dock a.dock-item.dock-item-line span,
+    nav.floating-app-dock a.dock-item.dock-item-line i,
+    .floating-app-dock .dock-item-line {
+      background-color: #11783B !important; /* เปลี่ยนเฉดสีเขียวให้เข้มตามมาตรฐาน WCAG AA */
+      color: #FFFFFF !important; /* บังคับตัวอักษรเป็นสีขาวเด่นชัด */
+    }
+
+    /* 🛠️ ปรับสเปซจำลองความสูงขั้นต่ำเพื่อป้องกันหน้าจอเลื่อนยุบตัวสะสม (CLS) */
+    #profiles-display-area {
+      min-height: 580px; /* สำหรับอุปกรณ์พกพาระดับมือถือ */
+    }
+    @media (min-width: 768px) {
+      #profiles-display-area {
+        min-height: 1100px; /* สำหรับหน้าจอคอมพิวเตอร์เดสก์ท็อป */
+      }
+    }
+
+    /* 🛠️ จัดการอาการขยับตัว (CLS) จากไอคอนฟอนต์ด้วยการจองเนื้อหาความกว้างเริ่มต้น */
+    .fas, .fab, .far {
+      display: inline-block;
+      width: 1.25em;
+      text-align: center;
+    }
+
+
 
     .floating-app-dock {
       background-color: #09090C !important; /* กำหนดสีพื้นหลังทึบเพื่อให้ระบบตรวจสอบความแตกต่างของสีได้อย่างถูกต้อง */
@@ -62,9 +92,6 @@
     }
     .dock-item.active {
       color: #C084FC !important;
-    }
-    .dock-item-line {
-      color: #22C55E !important; /* 🛠️ แก้ไขสีปุ่ม LINE: ปรับเฉดสว่างสากลเพื่อตัดกับพื้นหลังสีดำของเมนูลอยตัวอย่างชัดเจน */
     }
     .safe-capsule-item {
       background-color: #18181B !important; /* กำหนดสีกล่องทึบเพื่อตัดกับข้อความสีอ่อน */
@@ -240,9 +267,9 @@
 
     <div style="padding: 24px; background: rgba(9, 9, 12, 0.95) !important; border-top: 1px solid rgba(255, 255, 255, 0.08) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-         style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755 !important; color: #FFFFFF !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.25); transition: background-color 0.2s;"
-         onmouseenter="this.style.backgroundColor='#05b04c'"
-         onmouseleave="this.style.backgroundColor='#06C755'">
+         style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(17, 120, 59, 0.25); transition: background-color 0.2s;"
+         onmouseenter="this.style.backgroundColor='#0B6A30'"
+         onmouseleave="this.style.backgroundColor='#11783B'">
         <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
       </a>
     </div>
@@ -714,7 +741,7 @@
               เพื่อส่งมอบความปลอดภัยและการได้รับบริการเพื่อนเที่ยวพรีเมียมที่ดีที่สุดแก่ผู้รับชม แพลตฟอร์มสารบัญอย่างเป็นทางการของเราจึงมีมาตรการตรวจสอบคัดกรองโปรไฟล์อย่างรัดกุม โดยทีมบรรณาธิการ (Fact-Checker/Editor) ในพื้นที่{{PROVINCE_NAME}} จะทำหน้าที่พิสูจน์ยืนยันรูปภาพ ตัวจริงประวัติ และระบุเขตทำเลรับงานให้แน่ชัดก่อนแสดงผลในสารบัญเสมอ เพื่อป้องกันการฉ้อโกง 100%
             </p>
             <p style="font-size: 11px; color: #94A3B8; margin-top: 8px;">
-              ผู้รับผิดชอบระบบและเจ้าหน้าที่ดูแลข้อมูล: <span style="color: #CBD5E1; font-weight: 700;">ทีมบริหารงานแอดมิน Sideline Chiangmai Co. • อ่านข้อมูลความโปร่งใสเพิ่มเติมได้ที่ <a href="/about" style="color: var(--primary-purple); text-decoration: underline; font-weight: 600;">หน้าเกี่ยวกับเรา</a></span>
+              ผู้รับผิดชอบระบบ and เจ้าหน้าที่ดูแลข้อมูล: <span style="color: #CBD5E1; font-weight: 700;">ทีมบริหารงานแอดมิน Sideline Chiangmai Co. • อ่านข้อมูลความโปร่งใสเพิ่มเติมได้ที่ <a href="/about" style="color: var(--primary-purple); text-decoration: underline; font-weight: 600;">หน้าเกี่ยวกับเรา</a></span>
             </p>
           </div>
         </div>
@@ -868,7 +895,7 @@
           <p style="font-size: 12px; color: var(--text-gray); margin: 0;">เจ้าหน้าที่สแตนบายดูแล 24 ชม.</p>
           <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
              style="display: flex; align-items: center; justify-content: center; gap: 8px; background-color: var(--emerald-accent) !important; color: var(--pure-black) !important; padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transition: background-color 0.2s;" 
-             onmouseenter="this.style.backgroundColor='#059669'" 
+             onmouseenter="this.style.backgroundColor='#0B6A30'" 
              onmouseleave="this.style.backgroundColor='var(--emerald-accent)'">
             <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
           </a>
