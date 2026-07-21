@@ -1013,6 +1013,17 @@ window.ScrollTrigger = ScrollTrigger;
             }
         }, 1500);
     }
+    
+    function updateUrlFromFilters(query) {
+    const currentPath = window.location.pathname;
+    let targetPath = '/';
+    if (query.province && query.province !== 'all' && query.province !== 'chiangmai') {
+        targetPath = `/location/${query.province}`;
+    }
+    if (currentPath !== targetPath) {
+        history.pushState(null, '', targetPath);
+    }
+}
 
     function updateUltimateSuggestions(val) {
         const box = document.getElementById('search-suggestions');

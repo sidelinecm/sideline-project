@@ -322,7 +322,7 @@
       </h1>
       
       <p class="hero-subtitle-p">
-        ศูนย์รวมข้อมูลแนะนำ <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> และผู้ดูแลระดับพรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก ปลอดภัยสูงสุดด้วยนโยบาย<strong>ไม่โอนมัดจำล่วงหน้า 100%</strong> จ่ายหน้างานเมื่อเจอตัวจริง ครอบคลุมพิกัดยอดนิยม
+        ศูนย์รวมข้อมูลแนะนำ <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> และผู้ดูแลระดับพรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก ปลอดภัยสูงสุดด้วยนโยบาย<strong>ไม่โอนมัดจำล่วงหน้า 100%</strong> จ่ายหน้างานเมื่อเจอตัวจริง ครอบคลุมพิกัด <a href="/nimman" class="text-[#C084FC] hover:underline font-bold">นิมมาน</a>, เจ็ดยอด, สันติธรรม, ช้างเผือก
       </p>
 
       <!-- CTA Trigger Style Webyst -->
@@ -833,10 +833,10 @@
             <i class="fas fa-map-marked-alt animate-pulse" style="font-size: 30px; color: var(--primary-purple);" aria-hidden="true"></i>
             <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700;">กำลังโหลดแผนที่อัจฉริยะ Google Maps...</span>
           </div>
-          <iframe
-            id="google-map"
-            data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3776.67812!2d98.972096!3d18.8140717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTjCsDQ4JzUwLjciTiA5OMKwNTgnMTkuNSJF!5e0!3m2!1sth!2sth!4v123456789"
-            title="แผนที่ขอบเขตบริการ สาวรับงานเชียงใหม่ เพื่อนเที่ยวไซด์ไลน์ฟิวแฟน"
+<iframe
+  id="google-map"
+  data-src="{{MAP_EMBED_URL}}"
+  title="แผนที่ขอบเขตบริการ สาวรับงาน{{PROVINCE_NAME}} เพื่อนเที่ยวไซด์ไลน์ฟิวแฟน"
             style="border:0; width:100%; height:100%;"
             allowfullscreen=""
             loading="lazy"
@@ -881,10 +881,12 @@
           </ul>
         </nav>
 
-        <!-- คอลัมน์ 3: ระบบสร้างลิงก์พิกัดยอดนิยม -->
+<!-- คอลัมน์ 3: ระบบสร้างลิงก์พิกัดยอดนิยม -->
         <nav aria-label="พื้นที่บริการยอดนิยมย่านหลักในเชียงใหม่">
           <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin-bottom: 16px;">พื้นที่บริการยอดนิยม</h3>
           <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">
+             <!-- 🟢 ย้ายมาวางตรงนี้เพื่อให้เป็นลูกของ <ul> อย่างถูกต้องตามหลักไวยากรณ์เว็บสากล -->
+             <li><a href="/nimman" title="เพื่อนเที่ยวย่านนิมมาน เชียงใหม่" style="color: var(--text-gray); text-decoration: none; font-weight: 600;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">เพื่อนเที่ยวนิมมาน</a></li>
              <!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->
           </ul>
         </nav>
