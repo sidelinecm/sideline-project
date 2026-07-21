@@ -1156,3 +1156,7 @@ html.light #review-form input, html.light #review-form textarea {
 .dock-item-line span {
   color: #FFFFFF !important;
 }
+/* รองรับคลาสสีตัวอักษรเดิมที่เขียนใน HTML */
+.text-\[\#C084FC\] {
+  color: #C084FC !important;
+}
