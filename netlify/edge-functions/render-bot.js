@@ -88,10 +88,9 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // 🛠️ แก้ไข: ลบพารามิเตอร์การ Join ตารางเชิงสัมพันธ์ 'provinces(...)' ออก เพื่อป้องกันการดึงข้อมูลล้มเหลวกรณีระบบคีย์นอกไม่ได้ผูกไว้
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, line_id, verified, availability, stats, height, weight, isfeatured, skin_tone, bust, waist, hips, cup_size')
+            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -101,23 +100,6 @@ export default async (request, context) => {
                 status: 404,
                 headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "no-store" } 
             });
-        }
-
-        // 🛠️ แก้ไขเพิ่มเติม: แยกมาเขียนคิวรีดึงข้อมูลจังหวัดแยกกันอย่างเป็นอิสระ เพื่อความปลอดภัยสูงสุดในการประมวลผลข้อมูล
-        let provinceName = p.location || 'เชียงใหม่';
-        let provinceKey = p.provinceKey || 'chiangmai';
-        
-        if (p.provinceKey) {
-            const { data: provData } = await supabase
-                .from('provinces')
-                .select('nameThai, key')
-                .eq('key', p.provinceKey)
-                .maybeSingle();
-            
-            if (provData) {
-                provinceName = provData.nameThai || provinceName;
-                provinceKey = provData.key || provinceKey;
-            }
         }
 
         let related = [];
@@ -136,6 +118,9 @@ export default async (request, context) => {
         let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
         const displayName = `น้อง${cleanName}`;
         
+        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
+        const provinceKey = p.provinces?.key || 'chiangmai';
+        
         const correctProvinceUrl = provinceKey === 'chiangmai' 
             ? dynamicDomain 
             : `${dynamicDomain}/location/${provinceKey}`;
@@ -147,29 +132,18 @@ export default async (request, context) => {
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
-        const rawLineId = p.line_id || p.lineId || 'ksLUWB89Y_';
-        let finalLineUrl = rawLineId;
+        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        const ageVal = (p.age && p.age !== '-') ? p.age : getDeterministicValue(20, 26, slug, 1);
-        const heightVal = (p.height && p.height !== '-') ? p.height : getDeterministicValue(158, 168, slug, 2);
-        const weightVal = (p.weight && p.weight !== '-') ? p.weight : getDeterministicValue(44, 52, slug, 3);
-        
-        let bwhVal = p.stats;
-        if ((!bwhVal || bwhVal === '-') && p.bust && p.waist && p.hips) {
-            const cup = p.cup_size ? p.cup_size.toUpperCase() : "";
-            bwhVal = `${p.bust}${cup}-${p.waist}-${p.hips}`;
-        }
-        if (!bwhVal || bwhVal === '-') {
-            const breastVal = getDeterministicValue(32, 36, slug, 4);
-            const waistVal = getDeterministicValue(23, 26, slug, 5);
-            const hipVal = getDeterministicValue(33, 37, slug, 6);
-            bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
-        }
-
-        const isVerified = p.verified === true;
+        const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
+        const heightVal = getDeterministicValue(158, 168, slug, 2);
+        const weightVal = getDeterministicValue(44, 52, slug, 3);
+        const breastVal = getDeterministicValue(32, 36, slug, 4);
+        const waistVal = getDeterministicValue(23, 26, slug, 5);
+        const hipVal = getDeterministicValue(33, 37, slug, 6);
+        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
 
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
@@ -482,6 +456,7 @@ export default async (request, context) => {
                 </section>
                 ` : ''}
 
+                <!-- [AUDIT TRUST DISCLOSURE] มาตรการความปลอดภัยและนโยบายด้านเนื้อหาเพื่อเพิ่มความน่าเชื่อถือตามเกณฑ์ E-E-A-T -->
                 <section class="faq-section" style="margin-top: 2.5rem; border-top: 1px solid var(--bw); padding-top: 2rem;">
                     <h2 class="faq-title">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
                     <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; font-size: 0.85rem; color: var(--muted); line-height: 1.75;">
