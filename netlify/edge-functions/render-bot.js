@@ -1,6 +1,6 @@
 /**
- * [ SYSTEM BOT RENDERING CORE - FULLY AUDITED & OPTIMIZED ]
- * Project: Nexus Entity Framework (S-Tier) - ULTIMATE BOT RENDERER
+ * [ SYSTEM BOT RENDERING CORE - PROD-READY OPTIMIZED ]
+ * Project: Nexus Entity Framework - Serverless Crawler Handler
  * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
  * Optimization: Anti-Duplicate Naming, Safe Breadcrumb Structuring & Advanced Trust Marker Integration
  * Year: 2026 Core Engine Compliant
@@ -16,7 +16,7 @@ const CONFIG = {
         try { return Deno.env.get("SUPABASE_KEY") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; } catch { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; }
     },
     DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Chiangmai (ไซด์ไลน์เชียงใหม่)',
+    BRAND_NAME: 'Sideline Chiangmai Directory',
     PHONE: '091-7895644',
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
@@ -36,8 +36,7 @@ const TESTIMONIALS = [
 ];
 
 const getDeterministicValue = (min, max, seedString, offset = 0) => {
-    const safeSeed = seedString || 'default';
-    const sum = safeSeed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
+    const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
     return Math.floor(min + (sum % (max - min + 1)));
 };
 
@@ -67,7 +66,8 @@ const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, loc
     if (p.description && p.description.trim().length > 10) {
         return p.description.trim();
     }
-    return `ยินดีต้อนรับสู่โปรไฟล์ของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวคุณภาพสูงในเขตพื้นที่ ${location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลอย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพ การันตีความปลอดภัยสูงสุดด้วยข้อตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าขนม ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
+    const localizedZone = location ? `ย่าน${location}` : `โซนต่าง ๆ ในจังหวัด${provinceName}`;
+    return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
 };
 
 export default async (request, context) => {
@@ -114,9 +114,10 @@ export default async (request, context) => {
             related = relatedData || [];
         }
 
-const rawName = p.name || 'สาวสวย';
-const cleanName = rawName.replace(/^(น้อง\s?)+/, "");
-const displayName = `น้อง${cleanName}`;
+        const rawName = p.name || 'สาวสวย';
+        let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
+        const displayName = `น้อง${cleanName}`;
+        
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
         
@@ -149,8 +150,8 @@ const displayName = `น้อง${cleanName}`;
         const reviewCount = 150 + (charCodeSum % 100);
         
         const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, p.location);
-        const pageTitle = `${displayName} ไซด์ไลน์${provinceName} รับงานเอง ฟิวแฟน ตรงปก`;
-        const metaDesc = `โปรไฟล์${displayName} สาวสวยไซด์ไลน์${provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} บริการเพื่อการดูแลเอาใจใส่ประทับใจสไตล์แฟนแท้จริง พิกัดรับงานบริเวณ ${p.location || provinceName} ตรวจสอบรูปภาพตรงปก ปลอดภัย 100% ไร้มัดจำล่วงหน้า`;
+        const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
+        const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
         
         const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(slug)}`;
 
@@ -168,7 +169,6 @@ const displayName = `น้อง${cleanName}`;
             "reviewBody": cleanForJSON(t.text)
         }));
 
-        // [AUDIT FIX] แยกขั้นตอน Breadcrumb ออกมาจัดลำดับใหม่เพื่อป้องกันปัญหาระบุลิงก์ซ้ำซ้อนในเชียงใหม่
         const breadcrumbElements = [
             { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
         ];
@@ -185,14 +185,14 @@ const displayName = `น้อง${cleanName}`;
             "@context": "https://schema.org/",
             "@graph": [
                 {
-                    "@type": "LocalBusiness",
+                    "@type": ["LocalBusiness", "EntertainmentBusiness"],
                     "@id": `${canonicalUrl}#serviceprovider`,
                     "name": `${displayName} - ไซด์ไลน์${provinceName}`,
                     "image": [baseImageUrl],
                     "description": cleanForJSON(metaDesc),
                     "telephone": CONFIG.PHONE || "091-7895644",
                     "url": canonicalUrl,
-                    "priceRange": "฿฿฿",
+                    "priceRange": "฿฿",
                     "address": {
                         "@type": "PostalAddress",
                         "addressLocality": provinceName,
@@ -216,18 +216,18 @@ const displayName = `น้อง${cleanName}`;
                     "mainEntity": [
                         {
                             "@type": "Question",
-                            "name": `${displayName} ไซด์ไลน์${provinceName} มีการเรียกเก็บเงินมัดจำล่วงหน้าไหม?`,
+                            "name": `${displayName} ไซด์ไลน์${provinceName} มีความปลอดภัยและการชำระเงินอย่างไร?`,
                             "acceptedAnswer": {
                                 "@type": "Answer",
-                                "text": `ไม่มีการเรียกเก็บเงินมัดจำล่วงหน้าใดๆ ทั้งสิ้นสำหรับ${displayName} ลูกค้าจะจ่ายค่าขนมหน้างานหลังจากเจอตัวน้องเรียบร้อยแล้ว ปลอดภัย มั่นใจได้ 100%`
+                                "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ เพื่อความคุ้มครองและความสบายใจสูงสุดของลูกค้า`
                             }
                         },
                         {
                             "@type": "Question",
-                            "name": `ต้องการนัดเจอหรือจองคิว ${displayName} พิกัด ${p.location || provinceName} ต้องทำอย่างไร?`,
+                            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${p.location || provinceName} ได้ที่ช่องทางใด?`,
                             "acceptedAnswer": {
                                 "@type": "Answer",
-                                "text": `สามารถคลิกที่ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บไซต์เพื่อเชื่อมต่อไปยัง Line ID ของน้อง หรือแอดไลน์ติดต่อเจ้าหน้าที่เพื่อเช็คตารางเวลาว่างและทำการนัดหมาย${displayName} ได้ทันที`
+                                "text": `สามารถดำเนินการคลิกแอดไลน์ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บ เพื่อดำเนินการขอตรวจสอบคิวงาน สแตนด์บายตารางงาน และจองคิวรับบริการเพื่อความสะดวกและรวดเร็วที่สุดผ่านไลน์แอดมินเจ้าหน้าที่อย่างเป็นทางการ`
                             }
                         }
                     ]
@@ -240,7 +240,7 @@ const displayName = `น้อง${cleanName}`;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} | รูปตรงปก ไม่ผ่านเอเย่นต์</title>
+    <title>${pageTitle} | สารบัญตรวจสอบประวัติตรงปก</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large">
@@ -373,7 +373,7 @@ const displayName = `น้อง${cleanName}`;
                 <section class="hero-section">
                     <img src="${lcpImageUrl}" 
                          ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
-                         class="hero-img" alt="${displayName}" 
+                         class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
                          loading="eager" fetchpriority="high" decoding="sync" 
                          width="400" height="533">
                 </section>
@@ -446,7 +446,7 @@ const displayName = `น้อง${cleanName}`;
                             const displayRelName = `น้อง${cleanRelName}`;
                             return `
                             <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${displayRelName}">
-                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName}" loading="lazy" width="300" height="400">
+                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
                                 <div class="related-name">${displayRelName}</div>
                             </a>
                             `;

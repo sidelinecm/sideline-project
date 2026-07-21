@@ -123,11 +123,17 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   }
 });
 
-const getDynamicIntro = provinceName => `
-    <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ โดยปราศจากเงื่อนไขการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้น</p>
-    <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการ in ${provinceName} ได้ถูกคัดเลือกและจัดสรรพิกัดที่เหมาะสม ไม่ว่าจะเป็นโซนใจกลางเมือง โรงแรมที่เดินทางสะดวกสบาย หรือคอนโดมิเนียมส่วนตัว พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
-    <p>ภาพถ่ายประวัติและสัดส่วน of สาวๆ ในสารบัญได้รับการคัดกรองตัวตน (Verified System) เพื่อให้มั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก และมอบประสบการณ์อันเป็นส่วนตัวและปลอดภัยสูงสุดในค่ำคืนนี้</p>
-`;
+// 🛠️ อัปเกรดฟังก์ชันจัดทำคำโปรย SEO อย่างลึกซึ้ง มีประโยชน์ และสอดคล้องตามมาตรฐาน E-E-A-T
+const getDynamicIntro = (provinceName, zones) => {
+  const zoneSnippet = zones && zones.length > 0 
+    ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${zones.slice(0, 4).join(", โซน")}` 
+    : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
+  return `
+    <p>ยินดีต้อนรับสู่แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
+    <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการในพื้นที่ ${provinceName} น้อง ๆ ในระบบของเรากระจายตัวอยู่ในจุดที่เหมาะสม${zoneSnippet} ไม่ว่าจะเป็นโรงแรมชั้นนำ คอนโดมิเนียมส่วนตัว หรือพิกัดยอดนิยม เดินทางสะดวกสบายและมีความปลอดภัยสูง พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
+    <p>รูปภาพและข้อมูลรายละเอียดสัดส่วนของน้อง ๆ ได้รับการคัดกรองและตรวจสอบยืนยันตัวตน (Verified System) อย่างรอบคอบ เพื่อให้สมาชิกมั่นใจได้ว่าข้อมูลถูกต้อง ตรงตามปก และได้รับประสบการณ์การใช้บริการที่ปลอดภัยและมีความสุขที่สุดในค่ำคืนนี้</p>
+  `;
+};
 
 const getDynamicReviews = provinceName => {
   const t = new Date();
@@ -155,7 +161,6 @@ const getFullUrl = (hostUrl, path) => {
   return `${hostUrl}${path.startsWith("/") ? path : `/${path}`}`;
 };
 
-// 🟢 4. พัฒนาฟังก์ชันแปรสภาพรูปภาพแบบคมชัด และย่อขนาดแบนด์วิดท์อย่างคุ้มค่า (.avif / .webp)
 const optimizeImg = (hostUrl, path, width = 320, height = 420) => {
   if (!path) return getFullUrl(hostUrl, "/images/default.webp");
   
@@ -168,7 +173,6 @@ const optimizeImg = (hostUrl, path, width = 320, height = 420) => {
   
   if (path.startsWith("http")) return path;
   
-  // เรียกประมวลภาพ Supabase ผ่านการสลับฟอร์แมต AVIF ประสิทธิภาพความหนาแน่นสูง
   return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=75&format=avif`;
 };
 
@@ -359,7 +363,6 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
   };
 };
 
-// 🟢 1. ประกาศตัวสร้าง HTML สำหรับ FAQ ให้ดึงข้อมูลมาแสดงได้อย่างถูกต้องและสมบูรณ์
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs) return "";
   return faqs.map(item => `
@@ -702,7 +705,7 @@ export default async (req, context) => {
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
     const cardsHtml = profileList.map(p => {
-      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/, "")),
+      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")), // 🛠️ ป้องกันการเกิดคำนำหน้า "น้อง" ซ้ำซ้อนแบบ Case-insensitive
         pLoc = escapeHTML(p.location || provinceThaiName),
         pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`,
         isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw)),
@@ -790,7 +793,8 @@ export default async (req, context) => {
                 `;
     }).join("");
 
-    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName);
+  // 🛠️ อัปเกรดกระบวนการจัดทำคำโปรย SEO อย่างลึกซึ้งและมีความเฉพาะเจาะจงของพื้นที่
+  const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
 
     // ดึงค่ารีวิวที่ได้ประมวลผลความปลอดภัยเรียบร้อยแล้วไปเรนเดอร์ลงใน HTML
     const reviewsHtml = finalReviews.map(r => `
@@ -828,6 +832,16 @@ export default async (req, context) => {
 
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones);
 
+    // 🛠️ ย้ายระบบสร้างลิงก์พิกัดพื้นที่ให้บริการยอดนิยม (Footers Link) จากฝั่งเบราว์เซอร์มาเรนเดอร์ในขั้นตอน SSR
+    const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
+      const key = p.key || p.slug || p.id;
+      const name = p.nameThai || p.name;
+      if (key === "chiangmai") {
+        return `<li><a href="/" title="ดูรายชื่อไซด์ไลน์ในจังหวัด เชียงใหม่" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">ไซด์ไลน์เชียงใหม่</a></li>`;
+      }
+      return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">ไซด์ไลน์${name}</a></li>`;
+    }).join("") : "";
+
     rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_DESCRIPTION}}", strippedDesc);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
@@ -839,6 +853,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
+    rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml); // ทำการแทนค่าลิงก์ภายในตรงสู่ Footer
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_JSON}}", JSON.stringify(profileList.map(p => ({
       id: p.id,
