@@ -29,11 +29,30 @@ const CONFIG = {
     }
 };
 
-const TESTIMONIALS = [
+// ปรับปรุง: เพิ่ม Review Pool ชุดใหญ่ เพื่อสุ่มเลือกมาแสดงผลแบบไม่ซ้ำซ้อน ป้องกันปัญหา SEO Duplicate Content
+const REVIEW_POOL = [
     { name: "พี่บอล", rating: 5, text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย" },
     { name: "คุณเอก", rating: 5, text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ" },
-    { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ" }
+    { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ" },
+    { name: "คุณกอล์ฟ", rating: 5, text: "คุยง่ายเป็นกันเองมากครับ น้องน่ารักสไตล์ผู้ดี แนะนำเลยคนนี้ไม่ผิดหวัง" },
+    { name: "พี่ยอด", rating: 5, text: "ตรงเวลาดีครับ สุภาพเรียบร้อย นิสัยดีตรงตามรูปภาพในโปรไฟล์เลย" },
+    { name: "คุณเป้", rating: 5, text: "งานดีคุ้มราคามากครับ คุยเก่งเอาใจเก่ง ฟีลแฟนสุดใจเลยครับคนนี้" },
+    { name: "พี่แม็กซ์", rating: 5, text: "น้องคุยสนุก ตลก น่ารักเป็นกันเอง ดูแลดีตั้งแต่เริ่มจนจบเลยครับ" },
+    { name: "คุณต้น", rating: 5, text: "บริการประทับใจมาก สุภาพเรียบร้อย ไม่มีเร่งงานเลย แนะนำเลยครับ" },
+    { name: "พี่แบงค์", rating: 5, text: "น้องหุ่นดี ผิวพรรณดีมาก ตรงปกไม่จกตา คุยไลน์นัดแนะก็ง่าย" },
+    { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
 ];
+
+// ปรับปรุง: ฟังก์ชันเลือกรีวิวแบบคงที่ตาม ID หรือ Slug (Deterministic) เพื่อไม่ให้หน้าเว็บเดิมเปลี่ยนเนื้อหาทุกครั้งที่โหลด
+const getDeterministicReviews = (slug, count = 3) => {
+    const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const selected = [];
+    for (let i = 0; i < count; i++) {
+        const index = (charCodeSum + i * 3) % REVIEW_POOL.length;
+        selected.push(REVIEW_POOL[index]);
+    }
+    return selected;
+};
 
 const getDeterministicValue = (min, max, seedString, offset = 0) => {
     const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
@@ -60,13 +79,24 @@ const generateSrcSet = (path) => {
 };
 
 const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
-const cleanForJSON = (str) => str ? str.replace(/<[^>]*>?/gm, '').replace(/"/g, '\\"').replace(/\n/g, ' ') : '';
 
-const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, location) => {
+// ปรับปรุง: หน้าที่หลักของฟังก์ชันนี้คือการลบ HTML Tags ออกเท่านั้น ส่วนการ Escaping เครื่องหมายคำพูดปล่อยให้ JSON.stringify จัดการอย่างถูกต้อง
+const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
+
+// ปรับปรุง: ตัวต่อข้อความพิกัดสถานที่ให้เป็นธรรมชาติและระบุจังหวัดชัดเจน
+const getLocalizedZone = (location, provinceName) => {
+    if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
+    const cleanLoc = location.trim();
+    if (cleanLoc.includes(provinceName)) {
+        return `ย่าน${cleanLoc}`;
+    }
+    return `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
+};
+
+const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, localizedZone) => {
     if (p.description && p.description.trim().length > 10) {
         return p.description.trim();
     }
-    const localizedZone = location ? `ย่าน${location}` : `โซนต่าง ๆ ในจังหวัด${provinceName}`;
     return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
 };
 
@@ -88,9 +118,10 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
+        // ปรับปรุง: เพิ่ม 'lineId' เข้าไปในการคิวรีข้อมูลโปรไฟล์จากระบบฐานข้อมูล
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -125,13 +156,16 @@ export default async (request, context) => {
             ? dynamicDomain 
             : `${dynamicDomain}/location/${provinceKey}`;
         
-        const rawRate = parseInt(p.rate || "1500");
+        // ปรับปรุง: คลีนเครื่องหมายจุลภาคและตัวอักษรอื่นออกก่อนแปลงประเภทข้อมูล ป้องกันปัญหาราคาแสดงผลผิดพลาด (เช่น 1.- หรือ 4)
+        const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
+        const rawRate = parseInt(cleanedRate, 10) || 1500;
         const displayPrice = rawRate.toLocaleString() + ".-";
         
         const baseImageUrl = optimizeImg(p.imagePath, 600, 800);
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
+        // ดึง Line ID จริงจากฐานข้อมูลมาแสดงผล หากไม่พบค่อยใช้ Line ID กลางของแบรนด์
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
@@ -149,13 +183,18 @@ export default async (request, context) => {
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
         
-        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, p.location);
+        // ปรับปรุง: การต่อข้อมูลตำแหน่งย่านและจังหวัดให้ดูสละสลวยยิ่งขึ้น
+        const localizedZone = getLocalizedZone(p.location, provinceName);
+        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
+        
         const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
         const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
         
         const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(slug)}`;
 
-        const schemaReviews = TESTIMONIALS.map(t => ({
+        // ปรับปรุง: ดึงข้อมูลรีวิวแบบ Dynamic จาก Review Pool ไม่ซ้ำกันในแต่ละหน้าโปรไฟล์ เพื่อ SEO คุณภาพสูง
+        const dynamicReviews = getDeterministicReviews(slug, 3);
+        const schemaReviews = dynamicReviews.map(t => ({
             "@type": "Review",
             "reviewRating": {
                 "@type": "Rating",
@@ -164,9 +203,9 @@ export default async (request, context) => {
             },
             "author": {
                 "@type": "Person",
-                "name": cleanForJSON(t.name)
+                "name": stripHTML(t.name)
             },
-            "reviewBody": cleanForJSON(t.text)
+            "reviewBody": stripHTML(t.text)
         }));
 
         const breadcrumbElements = [
@@ -181,6 +220,7 @@ export default async (request, context) => {
 
         breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
 
+        // ปรับปรุง: การสร้าง Schema ปราศจากการ Escaping ซ้อนกัน ตัวคิวรีอักขระพิเศษถูกจัดการอย่างถูกต้องโดย JSON.stringify
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -189,7 +229,7 @@ export default async (request, context) => {
                     "@id": `${canonicalUrl}#serviceprovider`,
                     "name": `${displayName} - ไซด์ไลน์${provinceName}`,
                     "image": [baseImageUrl],
-                    "description": cleanForJSON(metaDesc),
+                    "description": stripHTML(metaDesc),
                     "telephone": CONFIG.PHONE || "091-7895644",
                     "url": canonicalUrl,
                     "priceRange": "฿฿",
@@ -412,9 +452,9 @@ export default async (request, context) => {
                 <section class="pricing-section">
                     <h2 class="pricing-title">ราคาบริการ</h2>
                     <div class="pricing-grid">
-                        <div class="pricing-item"><div>1 ชม.</div><strong>${rawRate}</strong></div>
-                        <div class="pricing-item"><div>2 ชม.</div><strong>${Math.floor(rawRate * 1.8)}</strong></div>
-                        <div class="pricing-item"><div>ค้างคืน</div><strong>${Math.floor(rawRate * 4.5)}</strong></div>
+                        <div class="pricing-item"><div>1 ชม.</div><strong>${rawRate.toLocaleString()}</strong></div>
+                        <div class="pricing-item"><div>2 ชม.</div><strong>${Math.floor(rawRate * 1.8).toLocaleString()}</strong></div>
+                        <div class="pricing-item"><div>ค้างคืน</div><strong>${Math.floor(rawRate * 4.5).toLocaleString()}</strong></div>
                     </div>
                 </section>
 
@@ -428,7 +468,7 @@ export default async (request, context) => {
 
                 <section>
                     <h2 class="faq-title">รีวิวจากลูกค้า</h2>
-                    ${TESTIMONIALS.map(t => `
+                    ${dynamicReviews.map(t => `
                         <div class="testimonial">
                             <strong>${escapeHTML(t.name)}</strong>
                             <p>${escapeHTML(t.text)}</p>
