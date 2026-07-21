@@ -88,7 +88,6 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // 🛠️ แก้ไข: ปรับปรุงคำสั่งดึงข้อมูลให้ Select คอลัมน์ที่จำเป็นให้ครบถ้วนเพื่อป้องกันตัวแปรเป็น undefined
         const { data: p } = await supabase
             .from('profiles')
             .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, line_id, verified, availability, stats, height, weight, isfeatured, skin_tone, bust, waist, hips, cup_size, provinces(nameThai, key)')
@@ -133,14 +132,12 @@ export default async (request, context) => {
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
-        // 🛠️ แก้ไข: รองรับคอลัมน์ line_id ทั้งรูปแบบ snake_case และ camelCase
         const rawLineId = p.line_id || p.lineId || 'ksLUWB89Y_';
         let finalLineUrl = rawLineId;
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        // 🛠️ แก้ไข: ปรับระบบประมวลผล Fallbacks ของสถิติต่างๆ ให้อ่านจากฐานข้อมูลจริงก่อนสุ่มแบบ Deterministic
         const ageVal = (p.age && p.age !== '-') ? p.age : getDeterministicValue(20, 26, slug, 1);
         const heightVal = (p.height && p.height !== '-') ? p.height : getDeterministicValue(158, 168, slug, 2);
         const weightVal = (p.weight && p.weight !== '-') ? p.weight : getDeterministicValue(44, 52, slug, 3);
@@ -470,7 +467,6 @@ export default async (request, context) => {
                 </section>
                 ` : ''}
 
-                <!-- [AUDIT TRUST DISCLOSURE] มาตรการความปลอดภัยและนโยบายด้านเนื้อหาเพื่อเพิ่มความน่าเชื่อถือตามเกณฑ์ E-E-A-T -->
                 <section class="faq-section" style="margin-top: 2.5rem; border-top: 1px solid var(--bw); padding-top: 2rem;">
                     <h2 class="faq-title">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
                     <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; font-size: 0.85rem; color: var(--muted); line-height: 1.75;">

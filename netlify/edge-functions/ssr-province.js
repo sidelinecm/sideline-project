@@ -123,11 +123,9 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   }
 });
 
-// 🛠️ อัปเกรดฟังก์ชันจัดทำคำโปรย SEO อย่างลึกซึ้ง มีประโยชน์ และสอดคล้องตามมาตรฐาน E-E-A-T
 const getDynamicIntro = (provinceName, zones) => {
   let processedZones = zones ? [...zones] : [];
   
-  // 🟢 ตรวจสอบหากพิกัดเป็นเชียงใหม่ ให้ทำการเปลี่ยนข้อความ "นิมมาน" ในชุดโซนให้เป็นลิงก์เชื่อมต่อภายในทันที
   if (provinceName === "เชียงใหม่" && processedZones.includes("นิมมาน")) {
     processedZones = processedZones.map(zone => 
       zone === "นิมมาน" 
@@ -257,7 +255,7 @@ const FLOATING_DOCK_HTML = `
   align-items: center;
   color: #94A3B8;
   text-decoration: none;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   gap: 4px;
   transition: all 0.2s;
@@ -275,7 +273,7 @@ const FLOATING_DOCK_HTML = `
   border-radius: 100px;
   flex-direction: row !important;
   gap: 6px !important;
-  font-size: 11px !important;
+  font-size: 13px !important;
 }
 @media (max-width: 768px) {
   .floating-app-dock {
@@ -404,7 +402,19 @@ export default async (req, context) => {
   const url = new URL(req.url),
     hostUrl = `${url.protocol}//${url.host}`;
 
-  // 🛡️ ป้องกัน Infinite Loop จากการ fetch ภายในระบบ Edge SSR ด้วยการดักกรอง Custom Header
+  // 🛠️ 1. ดักจับและประมวลผลการเข้าใช้งาน /index.html เพื่อป้องกันการเกิด Redirect Loop และรักษาหน้า Canonical หลัก
+  if (url.pathname === "/index.html") {
+    if (req.headers.get("x-ssr-bypass") === "true") {
+      try {
+        return await context.next();
+      } catch {
+        return new Response("Bypass fetch failed", { status: 500 });
+      }
+    }
+    // หากเข้าใช้งาน /index.html โดยตรง ให้ส่งรหัส 301 Redirect กลับหน้าแรกตามเกณฑ์ Accessible index page
+    return Response.redirect(new URL("/", url.origin).toString(), 301);
+  }
+
   if (req.headers.get("x-ssr-bypass") === "true") {
     try {
       return await context.next();
@@ -523,7 +533,6 @@ export default async (req, context) => {
       mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null),
       metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/hero-sidelinechiangmai-1200.webp`;
 
-    // 🟢 1. ดึงข้อมูลรีวิวจริงที่เปิดใช้งานจากฐานข้อมูล
     let dbReviews = [];
     try {
       const { data: reviewsData } = await e.from("reviews")
@@ -577,10 +586,8 @@ export default async (req, context) => {
         : (profileList.length > 0 ? (4.6 + profileList.length % 4 / 10).toFixed(1) : "4.8"),
       finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 18);
       
-    // 🛠️ แก้ไขอย่างละเอียด: เปลี่ยนให้พิกัดเชียงใหม่สร้างแผนที่แบบ Embed ได้ถูกต้อง ป้องกันอาการขึ้นหน้าจอสีเทาว่างเปล่า
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + provinceThaiName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // 🟢 2. ปรับแต่งและจัดเรียงโครงสร้าง Schema JSON-LD (Dynamic @graph) ให้ตอบโจทย์ E-E-A-T อย่างสมบูรณ์และไร้ข้อผิดพลาด
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -730,7 +737,7 @@ export default async (req, context) => {
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
     const cardsHtml = profileList.map(p => {
-      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")), // 🛠️ ป้องกันการเกิดคำนำหน้า "น้อง" ซ้ำซ้อนแบบ Case-insensitive
+      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")),
         pLoc = escapeHTML(p.location || provinceThaiName),
         pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`,
         isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw)),
@@ -818,10 +825,8 @@ export default async (req, context) => {
                 `;
     }).join("");
 
-    // 🛠️ อัปเกรดกระบวนการจัดทำคำโปรย SEO อย่างลึกซึ้งและมีความเฉพาะเจาะจงของพื้นที่
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
 
-    // ดึงค่ารีวิวที่ได้ประมวลผลความปลอดภัยเรียบร้อยแล้วไปเรนเดอร์ลงใน HTML
     const reviewsHtml = finalReviews.map(r => `
             <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -846,8 +851,6 @@ export default async (req, context) => {
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs),
       matchedZones = seoData.zones.slice(0, 4).join(", ");
 
-    // 🛠️ แก้ไขอย่างละเอียด: ปิดการใช้ context.next() บนหน้าแรก (/) เพื่อให้ได้คะแนน SSR และดัชนีข้อมูลเต็มร้อย
-    // ใช้ Header "x-ssr-bypass" เพื่อส่งสัญญาณให้เรียกหา CDN ต้นฉบับได้อย่างปลอดภัย ไร้ความเสี่ยงวนลูป Infinite Loop
     const templateUrl = new URL("/index.html", url.origin);
     const mainTemplate = await fetch(templateUrl, {
       headers: { "x-ssr-bypass": "true" }
@@ -856,7 +859,6 @@ export default async (req, context) => {
 
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones);
 
-    // 🛠️ แก้ไขอย่างละเอียด: ย้ายพิกัดภูมิภาคยอดนิยมมาเรนเดอร์เป็นแท็ก <li> ลิงก์ตรงฝั่งเซิร์ฟเวอร์ทันที
     const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       const key = p.key || p.slug || p.id;
       const name = p.nameThai || p.name;
@@ -866,7 +868,7 @@ export default async (req, context) => {
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
 
-rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_DESCRIPTION}}", strippedDesc);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
@@ -877,9 +879,7 @@ rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml); // แทนค่าตรงสู่ Footer
-    
-    // 🛠️ แทนที่ลิงก์แผนที่ Google Maps แบบไดนามิกแยกตามจังหวัดที่ผู้ใช้เลือกดูจริง
+    rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_JSON}}", JSON.stringify(profileList.map(p => ({
@@ -918,7 +918,6 @@ rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
 
     rawHtml = replaceGlobal(rawHtml, "</body>", `${FLOATING_DOCK_HTML}\n</body>`);
 
-    // 🟢 3. ปรับแก้ Netlify Edge caching ให้ทำงานสอดรับกับนโยบายถนอมทรัพยากร CDN
     return new Response(rawHtml, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
