@@ -1308,3 +1308,70 @@ html.light #review-form input, html.light #review-form textarea {
 .dock-item-line span {
   color: #FFFFFF !important;
 }
+
+/* ============================== IMPROVED SPACIOUS MOBILE LAYOUT ============================== */
+@media (max-width: 768px) {
+  
+  /* 1. ย่อความสูง Floating Dock ให้เพรียวลง ไม่บังจอ */
+  .floating-app-dock {
+    height: 54px !important;
+    bottom: 12px !important;
+    padding: 0 12px !important;
+  }
+  .dock-item i {
+    font-size: 15px !important;
+  }
+  .dock-item span {
+    font-size: 10px !important;
+  }
+  .dock-item-line {
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+  }
+
+  /* 2. ปรับการ์ดรูปโปรไฟล์ให้โปร่ง สบายตา */
+  .profiles-grid-row {
+    gap: 12px !important; /* ลดระยะห่างระหว่างการ์ด */
+    padding: 0 12px !important;
+  }
+  
+  /* ปรับขนาดตัวหนังสือภายในกล่องการ์ดให้กระชับ ไม่ดันกันแน่น */
+  .profile-card-new h3 {
+    font-size: 13px !important;
+  }
+  .profile-card-new .card-specs-row, 
+  .profile-card-new [style*="font-size: 10px"] {
+    font-size: 9.5px !important;
+  }
+  
+  /* ย่อขนาดป้าย Badge บนรูปไม่ให้บดบังใบหน้า */
+  .neon-badge, 
+  .badge-featured, 
+  .badge-verified, 
+  .badge-video {
+    font-size: 8.5px !important;
+    padding: 2px 7px !important;
+  }
+
+  /* 3. ปรับ Lightbox Pop-up ให้มีพื้นที่อ่านเยอะขึ้น */
+  #lightbox {
+    padding: 70px 12px 20px 12px !important;
+  }
+  .lightbox-details {
+    padding: 16px !important;
+    max-height: 65vh !important; /* ขยายพื้นที่อ่านประวัติ */
+  }
+  #line-btn-sticky-wrapper {
+    padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* 4. เพิ่มระยะเว้นว่าง (Whitespace) ในแต่ส่วนให้ดูไม่ติดกันเกินไป */
+  .glass-panel {
+    padding: 24px 16px !important;
+    border-radius: 20px !important;
+  }
+  .hero-section {
+    padding: 16px 0 !important;
+    gap: 16px !important;
+  }
+}
