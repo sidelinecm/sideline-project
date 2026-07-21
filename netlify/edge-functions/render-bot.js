@@ -88,9 +88,10 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
+        // 🛠️ แก้ไข: ลบพารามิเตอร์การ Join ตารางเชิงสัมพันธ์ 'provinces(...)' ออก เพื่อป้องกันการดึงข้อมูลล้มเหลวกรณีระบบคีย์นอกไม่ได้ผูกไว้
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, line_id, verified, availability, stats, height, weight, isfeatured, skin_tone, bust, waist, hips, cup_size, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, line_id, verified, availability, stats, height, weight, isfeatured, skin_tone, bust, waist, hips, cup_size')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -100,6 +101,23 @@ export default async (request, context) => {
                 status: 404,
                 headers: { "content-type": "text/html; charset=utf-8", "Cache-Control": "no-store" } 
             });
+        }
+
+        // 🛠️ แก้ไขเพิ่มเติม: แยกมาเขียนคิวรีดึงข้อมูลจังหวัดแยกกันอย่างเป็นอิสระ เพื่อความปลอดภัยสูงสุดในการประมวลผลข้อมูล
+        let provinceName = p.location || 'เชียงใหม่';
+        let provinceKey = p.provinceKey || 'chiangmai';
+        
+        if (p.provinceKey) {
+            const { data: provData } = await supabase
+                .from('provinces')
+                .select('nameThai, key')
+                .eq('key', p.provinceKey)
+                .maybeSingle();
+            
+            if (provData) {
+                provinceName = provData.nameThai || provinceName;
+                provinceKey = provData.key || provinceKey;
+            }
         }
 
         let related = [];
@@ -117,9 +135,6 @@ export default async (request, context) => {
         const rawName = p.name || 'สาวสวย';
         let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
         const displayName = `น้อง${cleanName}`;
-        
-        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
         
         const correctProvinceUrl = provinceKey === 'chiangmai' 
             ? dynamicDomain 
