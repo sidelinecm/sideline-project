@@ -477,16 +477,18 @@
         </div>
       </div>
 
-      <!-- LOADER PLACEHOLDER (ปรับเปลี่ยน class ให้สอดคล้องกันเพื่อป้องกัน CLS ของคอลัมน์ตอนโหลดข้อมูลเสร็จ) -->
-      <div id="loading-profiles-placeholder" class="profiles-grid-row" style="margin-top: 24px;" aria-hidden="true">
-        <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
-        <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
-        <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
-        <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
-      </div>
-
       <!-- PROFILES DISPLAY AREA -->
-      <div id="profiles-display-area" style="margin-top: 32px;" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยวเชียงใหม่"></div>
+      <div id="profiles-display-area" style="margin-top: 32px; position: relative;" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยวเชียงใหม่">
+        
+        <!-- LOADER PLACEHOLDER (ย้ายเข้ามาอยู่ด้านในกล่องหลัก เพื่อป้องกันไม่ให้โครงสร้าง Layout ภายนอกขยับตัวเมื่อโหลดข้อมูลเสร็จสิ้น) -->
+        <div id="loading-profiles-placeholder" class="profiles-grid-row" aria-hidden="true">
+          <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
+          <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
+          <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
+          <div style="aspect-ratio: 3/4; background: #121214; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);"></div>
+        </div>
+
+      </div>
 
       <div id="load-more-container" style="display: none; text-align: center; margin-top: 24px;">
         <button id="load-more-btn" style="background-color: var(--primary-purple); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: transform 0.2s;">
@@ -804,7 +806,7 @@
               หากท่านพบการเรียกเก็บเงินมัดจำล่วงหน้าเต็มจำนวนหรือค่าธรรมเนียมใดๆ โดยอ้างอิงชื่อแบรนด์ของเรา กรุณาเก็บข้อมูลและบันทึกหลักฐานการแชทติดต่อทีมงานผ่าน LINE Official ทันที เพื่อให้เจ้าหน้าที่เร่งตรวจสอบและคุ้มครองความปลอดภัยแก่สมาชิกอย่างทันท่วงทีค่ะ
             </p>
           </div>
-          <!-- 🛠️ แก้ไขปัญหา contrast เพื่อความปลอดภัยทางสายตา (เปลี่ยนสีข้อความของปุ่มเป็นสีขาวให้อ่านง่ายยิ่งขึ้น) -->
+          <!-- 🛠️ แก้ไขปัญหา contrast เพื่อความปลอดภัยทางสายตา (เปลี่ยนสีข้อความของปุ่มเป็นสีขาวให้อ่านง่ายและผ่านเกณฑ์) -->
           <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener noreferrer"
              style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background-color: var(--emerald-accent); color: #FFFFFF !important; font-size: 11px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
             แอดไลน์แอดมิน
