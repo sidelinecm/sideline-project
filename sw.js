@@ -5,11 +5,11 @@ if (workbox) {
   // 1. CONFIGURATION
   // ⚠️ เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการอัปเดตไฟล์ เพื่อให้เครื่องลูกค้าโหลดใหม่
   // -----------------------------------------------------------
-  const CACHE_VERSION = 'v-2026-02-02-303'; 
+  const CACHE_VERSION = 'v-2026-02-02-304'; 
   const OFFLINE_PAGE = '/offline.html';
 
   workbox.core.setCacheNameDetails({
-    prefix: 'sideline-cm',
+    prefix: 'first-model-hub',
     suffix: CACHE_VERSION,
     precache: 'precache',
     runtime: 'runtime'
@@ -20,7 +20,7 @@ if (workbox) {
   // -----------------------------------------------------------
   self.addEventListener('install', (event) => {
     event.waitUntil(
-      caches.open(`sideline-cm-precache-${CACHE_VERSION}`).then((cache) => {
+      caches.open(`first-model-hub-precache-${CACHE_VERSION}`).then((cache) => {
         // พยายาม Cache หน้า Offline ถ้ามี ถ้าไม่มีให้ข้ามไป
         return cache.add(OFFLINE_PAGE).catch(err => console.log('Offline page not found, skipping.'));
       })
@@ -49,23 +49,20 @@ if (workbox) {
   // -----------------------------------------------------------
 
   // ✅ A.1 HTML Pages (หน้าเว็บ) - ใช้ NetworkFirst 
-  // แก้ปัญหา: กดเปลี่ยนหน้าแล้วไม่ไป หรือข้อมูลไม่อัปเดต
-  // หลักการ: โหลดจาก Server ก่อน ถ้าเน็ตหลุดค่อยเอา Cache มาโชว์
   workbox.routing.registerRoute(
     ({ request }) => request.destination === 'document',
     new workbox.strategies.NetworkFirst({
       cacheName: `pages-cache-${CACHE_VERSION}`,
-      networkTimeoutSeconds: 3, // รอโหลด 3 วินาที ถ้าช้ากว่านี้ให้ใช้ Cache
+      networkTimeoutSeconds: 3,
       plugins: [
         new workbox.expiration.ExpirationPlugin({
-          maxEntries: 50, // เก็บประวัติหน้าเว็บแค่ 50 หน้าล่าสุด
+          maxEntries: 50,
         }),
       ],
     })
   );
 
   // ✅ A.2 ไฟล์ Static (CSS, JS, Worker) - ใช้ StaleWhileRevalidate
-  // หลักการ: เอาของเก่ามาโชว์ก่อนให้เว็บเร็ว แล้วแอบโหลดของใหม่มาเก็บไว้ใช้ครั้งหน้า
   workbox.routing.registerRoute(
     ({ request }) => 
       request.destination === 'style' || 
@@ -119,5 +116,5 @@ if (workbox) {
     return Response.error();
   });
 
-  console.log(`[SW] Sideline Chiangmai Service Worker ${CACHE_VERSION} is active!`);
+  console.log(`[SW] First Model Hub Service Worker ${CACHE_VERSION} is active!`);
 }

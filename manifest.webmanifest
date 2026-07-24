@@ -1,14 +1,14 @@
 {
-  "name": "Sideline Chiangmai | ไซด์ไลน์เชียงใหม่ รับงานฟิวแฟน",
-  "short_name": "SidelineCM",
+  "name": "First Model Hub | ศูนย์รวมโปรไฟล์เพื่อนเที่ยวและผู้ดูแลระดับพรีเมียม",
+  "short_name": "FirstModelHub",
   "id": "/",
   "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#db2777",
-  "description": "ศูนย์รวมโปรไฟล์น้องๆ SidelineCM รับงานฟีลแฟนในเชียงใหม่ การันตีตรงปก ไม่ต้องโอนมัดจำ",
+  "background_color": "#09090c",
+  "theme_color": "#5A2CBE",
+  "description": "ศูนย์รวมโปรไฟล์เพื่อนเที่ยวและผู้ดูแลระดับพรีเมียม First Model Hub การันตีตรงปก 100% ปลอดภัย ไม่ต้องโอนมัดจำ",
   "lang": "th-TH",
   "categories": ["social", "lifestyle", "entertainment"],
   "icons": [
@@ -31,9 +31,9 @@
   ],
   "shortcuts": [
     {
-      "name": "ดูน้องๆ ทั้งหมด",
-      "short_name": "น้องๆ",
-      "url": "/profiles.html?utm_source=pwa_shortcut",
+      "name": "ดูโปรไฟล์ทั้งหมด",
+      "short_name": "โปรไฟล์",
+      "url": "/profiles?utm_source=pwa_shortcut",
       "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
