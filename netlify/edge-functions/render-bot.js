@@ -1,8 +1,7 @@
 /**
  * [ SYSTEM BOT RENDERING CORE - PROD-READY OPTIMIZED ]
- * Project: Nexus Entity Framework - Serverless Crawler Handler
+ * Project: First Model Hub - Serverless Crawler Handler
  * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
- * Optimization: Anti-Duplicate Naming, Safe Breadcrumb Structuring & Advanced Trust Marker Integration
  * Year: 2026 Core Engine Compliant
  */
 
@@ -16,14 +15,14 @@ const CONFIG = {
         try { return Deno.env.get("SUPABASE_KEY") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; } catch { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; }
     },
     DOMAIN: 'https://firstmodelhub.com',
-    BRAND_NAME: 'First Model Hub Directory',
-    PHONE: '091-7895644',
+    BRAND_NAME: 'First Model Hub',
+    DEFAULT_TELEPHONE: 'LINE: @firstmodelhub', // ✅ อัปเดตให้สอดคล้องกับนโยบาย
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@firstmodelhub',
         twitter: 'https://twitter.com/firstmodelhub',
         linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
-        biosite: 'https://bio.site/firstfiwfans.com',
+        biosite: 'https://bio.site/firstmodelhub', // ✅ อัปเดต Bio.site
         linktree: 'https://linktr.ee/firstmodelhub',
         bluesky: 'https://bsky.app/profile/firstmodelhub.bsky.social'
     }
@@ -58,7 +57,7 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
 };
 
 const optimizeImg = (path, width = 600, height = 800) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/default.webp`;
+    if (!path) return `${CONFIG.DOMAIN}/images/apple-touch-icon.png`;
     if (path.includes('res.cloudinary.com')) {
         return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
     }
@@ -220,7 +219,7 @@ export default async (request, context) => {
                     "name": `${displayName} - ไซด์ไลน์${provinceName}`,
                     "image": [baseImageUrl],
                     "description": stripHTML(metaDesc),
-                    "telephone": CONFIG.PHONE || "091-7895644",
+                    "telephone": CONFIG.DEFAULT_TELEPHONE,
                     "url": canonicalUrl,
                     "priceRange": "฿฿",
                     "address": {
@@ -294,17 +293,12 @@ export default async (request, context) => {
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
-    <meta name="google-site-verification" content="7jnWDzrGXlGDdrjl2M75rIPhsjZbTRuzQSdPJ8c_lz4" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
 
-    <link rel="icon" type="image/png" sizes="72x72" href="/icons/icon-72x72.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96x96.png">
-    <link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128x128.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
-    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
@@ -316,7 +310,7 @@ export default async (request, context) => {
         
         .fixed-nav { position: absolute; top: 0; left: 0; width: 100%; z-index: 100; background: linear-gradient(to bottom, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.4) 100%); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bw); }
         .nav-content { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 64px; }
-        .logo-img { height: 26px; width: auto; filter: brightness(2); opacity: 0.95; }
+        .logo-text { font-size: 18px; font-weight: 800; color: #FFFFFF; text-decoration: none; }
         
         .breadcrumb { padding: 84px 1.25rem 0.5rem 1.25rem; font-size: 0.85rem; color: var(--muted); }
         .breadcrumb a { color: var(--p); text-decoration: none; }
@@ -371,16 +365,6 @@ export default async (request, context) => {
                 padding-bottom: env(safe-area-inset-bottom, 0px);
             }
         }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.015;
-            pointer-events: none;
-            z-index: 9999;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
     </style>
 </head>
 <body>
@@ -388,7 +372,7 @@ export default async (request, context) => {
     <div class="container">
         <header class="fixed-nav">
             <div class="nav-content">
-                <a href="/" class="logo-link"><img src="/images/logo-sidelinechiangmai.webp" alt="${CONFIG.BRAND_NAME}" class="logo-img" width="200" height="26" fetchpriority="high" decoding="sync"></a>
+                <a href="/" class="logo-text">First Model <span style="color: #C084FC;">Hub</span></a>
             </div>
         </header>
 
@@ -486,7 +470,6 @@ export default async (request, context) => {
                 </section>
                 ` : ''}
 
-                <!-- [AUDIT TRUST DISCLOSURE] มาตรการความปลอดภัยและนโยบายด้านเนื้อหาเพื่อเพิ่มความน่าเชื่อถือตามเกณฑ์ E-E-A-T -->
                 <section class="faq-section" style="margin-top: 2.5rem; border-top: 1px solid var(--bw); padding-top: 2rem;">
                     <h2 class="faq-title">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
                     <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; font-size: 0.85rem; color: var(--muted); line-height: 1.75;">

@@ -2,7 +2,7 @@
 
 /**
  * [ SYSTEM SITEMAP ENGINE ]
- * Project: Nexus Entity Framework (S-Tier) - DYNAMIC SITEMAP GENERATOR
+ * Project: First Model Hub - DYNAMIC SITEMAP GENERATOR
  * Authority: Dynamic Domain Extraction, Strict XML Formatting & Image Indexing
  * Optimization: ISO Time Parsing Safe-guard, Automated Chiang Mai Redirect Skipping
  * Security: Canonical Fallback Override & Case-Sensitive Province Matching
@@ -13,7 +13,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
-    CANONICAL_DOMAIN: 'https://firstmodelhub.com' // 🔒 อัปเดตเป็นโดเมนหลักใหม่ป้องกันคะแนน SEO ทับซ้อน
+    CANONICAL_DOMAIN: 'https://firstmodelhub.com' // 🔒 โดเมนหลัก First Model Hub
 };
 
 // ฟังก์ชันป้องกันตัวอักษรพิเศษใน XML
@@ -31,7 +31,7 @@ const escapeXml = (unsafe) => {
     });
 };
 
-// ฟังก์ชันดึงและจัดรูปแบบเวลาอย่างปลอดภัย ป้องกัน RangeError ล้มเหลวทั้งระบบ
+// ฟังก์ชันดึงและจัดรูปแบบเวลาอย่างปลอดภัย
 const safeGetIsoDate = (dateStr, fallbackToday) => {
     if (!dateStr) return fallbackToday;
     try {
