@@ -18,15 +18,15 @@ const CONFIG = {
   get MAPS_SHARE_URL() {
     return "https://share.google/THArcPBibRkBAiSOd"
   },
-  BRAND_NAME: "Sideline Chiangmai Directory",
+  BRAND_NAME: "First Model Hub",
   SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
-    tiktok: "https://tiktok.com/@sidelinecm",
-    twitter: "https://twitter.com/sidelinechiangmai",
+    tiktok: "https://tiktok.com/@firstmodelhub",
+    twitter: "https://twitter.com/firstmodelhub",
     linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
     biosite: "https://bio.site/firstfiwfans.com",
-    linktree: "https://linktr.ee/kissmodel",
-    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+    linktree: "https://linktr.ee/firstmodelhub",
+    bluesky: "https://bsky.app/profile/firstmodelhub.bsky.social"
   }
 };
 
@@ -306,7 +306,7 @@ const FLOATING_DOCK_HTML = `
 
 function verifyHostname(req) {
   const host = req.headers.get("host") || "";
-  return ["sidelinechiangmai.netlify.app", "localhost"].some(h => host.includes(h)) || host.endsWith(".netlify.app");
+  return ["firstmodelhub.com", "sidelinechiangmai.netlify.app", "localhost"].some(h => host.includes(h)) || host.endsWith(".netlify.app");
 }
 
 function buildErrorPage(code, title, message) {
@@ -402,7 +402,6 @@ export default async (req, context) => {
   const url = new URL(req.url),
     hostUrl = `${url.protocol}//${url.host}`;
 
-  // 🛠️ 1. ดักจับและประมวลผลการเข้าใช้งาน /index.html เพื่อป้องกันการเกิด Redirect Loop และรักษาหน้า Canonical หลัก
   if (url.pathname === "/index.html") {
     if (req.headers.get("x-ssr-bypass") === "true") {
       try {
@@ -411,7 +410,6 @@ export default async (req, context) => {
         return new Response("Bypass fetch failed", { status: 500 });
       }
     }
-    // หากเข้าใช้งาน /index.html โดยตรง ให้ส่งรหัส 301 Redirect กลับหน้าแรกตามเกณฑ์ Accessible index page
     return Response.redirect(new URL("/", url.origin).toString(), 301);
   }
 
@@ -603,7 +601,7 @@ export default async (req, context) => {
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer service",
-          "telephone": "LINE: @sidelinecm",
+          "telephone": "LINE: @firstmodelhub",
           "availableLanguage": ["th", "en"]
         }
       },
@@ -639,7 +637,7 @@ export default async (req, context) => {
         "@id": `${canonUrl}/#localbusiness`,
         "name": `สาวรับงาน${provinceThaiName} ไลน์${provinceThaiName} สารบัญเพื่อนเที่ยวระดับพรีเมียม`,
         "image": metaImgUrl,
-        "telephone": "LINE: @sidelinecm",
+        "telephone": "LINE: @firstmodelhub",
         "priceRange": "฿฿",
         "url": canonUrl,
         "description": strippedDesc,

@@ -15,21 +15,20 @@ const CONFIG = {
     get SUPABASE_KEY() {
         try { return Deno.env.get("SUPABASE_KEY") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; } catch { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; }
     },
-    DOMAIN: 'https://sidelinechiangmai.netlify.app',
-    BRAND_NAME: 'Sideline Chiangmai Directory',
+    DOMAIN: 'https://firstmodelhub.com',
+    BRAND_NAME: 'First Model Hub Directory',
     PHONE: '091-7895644',
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
-        tiktok: 'https://tiktok.com/@sidelinechiangmai',
-        twitter: 'https://twitter.com/sidelinechiangmai',
+        tiktok: 'https://tiktok.com/@firstmodelhub',
+        twitter: 'https://twitter.com/firstmodelhub',
         linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
         biosite: 'https://bio.site/firstfiwfans.com',
-        linktree: 'https://linktr.ee/kissmodel',
-        bluesky: 'https://bsky.app/profile/sidelinechiangmai.bsky.social'
+        linktree: 'https://linktr.ee/firstmodelhub',
+        bluesky: 'https://bsky.app/profile/firstmodelhub.bsky.social'
     }
 };
 
-// ปรับปรุง: เพิ่ม Review Pool ชุดใหญ่ เพื่อสุ่มเลือกมาแสดงผลแบบไม่ซ้ำซ้อน ป้องกันปัญหา SEO Duplicate Content
 const REVIEW_POOL = [
     { name: "พี่บอล", rating: 5, text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย" },
     { name: "คุณเอก", rating: 5, text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ" },
@@ -43,7 +42,6 @@ const REVIEW_POOL = [
     { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
 ];
 
-// ปรับปรุง: ฟังก์ชันเลือกรีวิวแบบคงที่ตาม ID หรือ Slug (Deterministic) เพื่อไม่ให้หน้าเว็บเดิมเปลี่ยนเนื้อหาทุกครั้งที่โหลด
 const getDeterministicReviews = (slug, count = 3) => {
     const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const selected = [];
@@ -80,10 +78,8 @@ const generateSrcSet = (path) => {
 
 const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
 
-// ปรับปรุง: หน้าที่หลักของฟังก์ชันนี้คือการลบ HTML Tags ออกเท่านั้น ส่วนการ Escaping เครื่องหมายคำพูดปล่อยให้ JSON.stringify จัดการอย่างถูกต้อง
 const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
 
-// ปรับปรุง: ตัวต่อข้อความพิกัดสถานที่ให้เป็นธรรมชาติและระบุจังหวัดชัดเจน
 const getLocalizedZone = (location, provinceName) => {
     if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
     const cleanLoc = location.trim();
@@ -118,7 +114,6 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // ปรับปรุง: เพิ่ม 'lineId' เข้าไปในการคิวรีข้อมูลโปรไฟล์จากระบบฐานข้อมูล
         const { data: p } = await supabase
             .from('profiles')
             .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)')
@@ -156,7 +151,6 @@ export default async (request, context) => {
             ? dynamicDomain 
             : `${dynamicDomain}/location/${provinceKey}`;
         
-        // ปรับปรุง: คลีนเครื่องหมายจุลภาคและตัวอักษรอื่นออกก่อนแปลงประเภทข้อมูล ป้องกันปัญหาราคาแสดงผลผิดพลาด (เช่น 1.- หรือ 4)
         const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
         const rawRate = parseInt(cleanedRate, 10) || 1500;
         const displayPrice = rawRate.toLocaleString() + ".-";
@@ -165,7 +159,6 @@ export default async (request, context) => {
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
-        // ดึง Line ID จริงจากฐานข้อมูลมาแสดงผล หากไม่พบค่อยใช้ Line ID กลางของแบรนด์
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
@@ -183,7 +176,6 @@ export default async (request, context) => {
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
         
-        // ปรับปรุง: การต่อข้อมูลตำแหน่งย่านและจังหวัดให้ดูสละสลวยยิ่งขึ้น
         const localizedZone = getLocalizedZone(p.location, provinceName);
         const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
         
@@ -192,7 +184,6 @@ export default async (request, context) => {
         
         const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(slug)}`;
 
-        // ปรับปรุง: ดึงข้อมูลรีวิวแบบ Dynamic จาก Review Pool ไม่ซ้ำกันในแต่ละหน้าโปรไฟล์ เพื่อ SEO คุณภาพสูง
         const dynamicReviews = getDeterministicReviews(slug, 3);
         const schemaReviews = dynamicReviews.map(t => ({
             "@type": "Review",
@@ -213,14 +204,13 @@ export default async (request, context) => {
         ];
 
         if (provinceKey === 'chiangmai') {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles.html` });
+            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
         } else {
             breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
         }
 
         breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
 
-        // ปรับปรุง: การสร้าง Schema ปราศจากการ Escaping ซ้อนกัน ตัวคิวรีอักขระพิเศษถูกจัดการอย่างถูกต้องโดย JSON.stringify
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -511,8 +501,8 @@ export default async (request, context) => {
         <footer class="footer">
             <nav class="footer-nav">
                 <a href="/">หน้าแรก</a>
-                <a href="/profiles.html">โปรไฟล์น้องๆ ทั้งหมด</a>
-                <a href="/locations.html">พิกัดรับงานทั่วประเทศ</a>
+                <a href="/profiles">โปรไฟล์น้องๆ ทั้งหมด</a>
+                <a href="/locations">พิกัดรับงานทั่วประเทศ</a>
             </nav>
             © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>

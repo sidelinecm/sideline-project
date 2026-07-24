@@ -13,7 +13,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
-    CANONICAL_DOMAIN: 'https://sidelinechiangmai.netlify.app' // ป้องกันระบบพ่นโดเมน Staging ของ Netlify
+    CANONICAL_DOMAIN: 'https://firstmodelhub.com' // 🔒 อัปเดตเป็นโดเมนหลักใหม่ป้องกันคะแนน SEO ทับซ้อน
 };
 
 // ฟังก์ชันป้องกันตัวอักษรพิเศษใน XML
@@ -45,9 +45,9 @@ export default async (request, context) => {
     try {
         const url = new URL(request.url);
         
-        // 🔒 SECURITY FIX: สกัดโดเมนจริง แต่หากตรวจพบว่าเป็นโดเมนสำรอง/เทส ให้บังคับถอยกลับไปใช้โดเมนหลักทันทีป้องกัน Google ลงโทษเนื้อหาซ้ำซ้อน
+        // 🔒 SECURITY FIX: บังคับใช้โดเมนหลัก firstmodelhub.com เว้นแต่ทดสอบในเครื่อง (localhost)
         let dynamicDomain = `${url.protocol}//${url.host}`; 
-        if (dynamicDomain.includes('netlify.app') && !dynamicDomain.includes('sidelinechiangmai.netlify.app')) {
+        if (!dynamicDomain.includes('firstmodelhub.com') && !dynamicDomain.includes('localhost')) {
             dynamicDomain = CONFIG.CANONICAL_DOMAIN;
         }
         
@@ -81,8 +81,8 @@ export default async (request, context) => {
   <priority>1.0</priority>
 </url>`;
 
-        // 2. หน้า Static Pages ที่มีจริงในระบบเมนูและฟุตเตอร์
-        const staticPages = ['profiles.html', 'locations.html', 'about.html', 'faq.html', 'terms-of-service.html', 'privacy-policy.html'];
+        // 2. หน้า Static Pages หลักในระบบ
+        const staticPages = ['profiles', 'locations', 'about', 'faq', 'terms-of-service', 'privacy-policy'];
         staticPages.forEach(page => {
             xml += `
 <url>
@@ -97,7 +97,6 @@ export default async (request, context) => {
         if (provinces) {
             provinces.forEach(p => {
                 if (p.key && p.key.toLowerCase().trim() !== 'chiangmai') {
-                    // 🔒 STABILITY FIX: ยกเลิกการสั่ง .toLowerCase() บนคีย์หลักเพื่อรักษาระดับ Case-Sensitive ให้สอดคล้องกับฐานข้อมูลและค่า Select Option ใน main.js
                     const originalKey = p.key.trim();
                     xml += `
 <url>
