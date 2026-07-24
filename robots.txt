@@ -1,12 +1,7 @@
-# name=robots.txt
+# ==============================================================================
 # ROBOTS.TXT for First Model Hub (https://firstmodelhub.com)
-# - Allow major search engines to crawl public pages
-# - Block internal/admin/api endpoints
-# - Do NOT permanently block SEO tools (Ahrefs, Semrush) — allow them unless you have a specific reason
-# - Sitemap is provided (dynamic /sitemap.xml via edge function)
-#
-# If you later want to restrict third-party crawlers, do so carefully:
-# robots.txt is a request, not an access control mechanism. Use authentication/rate-limiting for real protection.
+# Optimized for Googlebot, Bingbot & Search Engines
+# ==============================================================================
 
 User-agent: *
 # Block admin/internal endpoints
@@ -30,18 +25,17 @@ Disallow: /*?*gclsrc*
 Disallow: /*?*affiliate*
 Disallow: /*?*ref*
 
-# Allow static resources (important for rendering and Core Web Vitals)
-Allow: /*.js$
-Allow: /*.css$
-Allow: /*.png$
-Allow: /*.jpg$
-Allow: /*.jpeg$
-Allow: /*.webp$
-Allow: /*.svg$
-Allow: /*.woff2$
-Allow: /*.woff$
-
-# Optionally restrict or monitor aggressive scrapers via server-side rules (rate-limit, block IPs) instead of robots.txt.
+# Allow static resources for rendering & Core Web Vitals
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.webp
+Allow: /*.svg
+Allow: /*.woff2
+Allow: /*.woff
+Allow: /llms.txt
 
 # Sitemap location (served dynamically)
 Sitemap: https://firstmodelhub.com/sitemap.xml
