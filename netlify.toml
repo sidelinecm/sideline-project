@@ -1,18 +1,25 @@
+# name=netlify.toml
 # ==============================================================================
-# 1. Build Settings & Platform Target
+# Netlify configuration for First Model Hub
+# - Security-first headers (CSP, HSTS, X-Frame, etc.)
+# - Long-term caching for static assets
+# - Edge function mapping (sitemap, ssr-province, render-bot)
+# - Redirects for canonical domain migration + SPA fallbacks
 # ==============================================================================
 [build]
   publish = "."
-  # ตำแหน่งเก็บฟังก์ชันประมวลผลเซิร์ฟเวอร์เลสทั่วไป
   functions = "netlify/functions"
 
 [build.processing]
   skip_processing = false
 
 # ==============================================================================
-# 2. S-Tier Security & Specular Core Web Vitals Headers
+# 1. GLOBAL SECURITY & PERFORMANCE HEADERS
+# Notes:
+# - Content-Security-Policy (CSP) below is restrictive by default.
+# - Add additional trusted domains to script-src/style-src/img-src/connect-src as needed.
+# - Replace placeholder domains if you add other CDNs or analytics.
 # ==============================================================================
-# กฎควบคุมความปลอดภัยหลักของเว็บไซต์สำหรับทุกพาร์ททางเข้า
 [[headers]]
   for = "/*"
   [headers.values]
@@ -21,74 +28,75 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    # ปรับปรุงประสิทธิภาพ TTFB: การันตีหน้าเว็บมีการสื่อสารแบบสดใหม่เสมอ แต่ลดแรงกดโหลดด้วย stale-while-revalidate
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    # Cache-Control for HTML: short-lived, allow CDN/stale-while-revalidate for performance
     Cache-Control = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400"
+    # Content-Security-Policy (example): adjust if you use additional external services
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https://zxetzqwjaiumqhrpumln.supabase.co https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://zxetzqwjaiumqhrpumln.supabase.co https://api.mapbox.com;"
 
-# ⚡ เร่งความเร็วการโหลดไฟล์ดีไซน์ (CSS) ตลอดปีเพื่อคะแนนสปีดที่ดีที่สุด
+# Long cache for static assets to maximize speed (immutable)
 [[headers]]
   for = "/*.css"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# ⚡ เร่งความเร็วการโหลดสคริปต์หลัก (JS)
 [[headers]]
   for = "/*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# ⚡ เร่งความเร็วการดึงรูปภาพพื้นหลังและไอคอนภายในระบบ
 [[headers]]
   for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # ==============================================================================
-# 3. Optimized Edge Functions Mapping (Consolidated Edge Routing)
+# 2. EDGE FUNCTIONS (keep mapping per project structure)
+# - sitemap: generates dynamic sitemap.xml using Supabase (reads env vars)
+# - ssr-province: SSR for root /location/* /index.html and robots.txt
+# - render-bot: SSR optimized for bots on /sideline/* profiles
 # ==============================================================================
-# ชี้เป้าหมายให้ Edge Function ชื่อ sitemap (ไฟล์ sitemap.js) ทำหน้าที่สร้างพ่นข้อมูล XML
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
-# ชี้เป้าหมายให้ ssr-province เป็นตัวส่งข้อมูลการกรองสปายบอทของ robots.txt
 [[edge_functions]]
   function = "ssr-province"
   path = "/robots.txt"
 
-# จัดหน้าแสดงผลเฉพาะของตัวบอทแสกนหน้าโปรไฟล์น้อง ๆ เดี่ยว
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
-# ให้ ssr-province ดักจับหน้าภูมิภาค /location/* ทั้งหมดเพื่อส่งข้อมูล Dynamic
 [[edge_functions]]
   function = "ssr-province"
   path = "/location/*"
 
-# ให้ ssr-province ดักจับพาร์ทหน้าแรกสุด (/) เพื่อจัดส่งสารบัญหลักทันทีแบบ Zero-Delay
 [[edge_functions]]
   function = "ssr-province"
   path = "/"
 
-# ⚡ กำหนดเส้นทางให้ ssr-province ดักจับการเข้าใช้งานหน้า /index.html 
-# เพื่อคุมการข้ามการดาวน์โหลดเทมเพลต และทำการ Redirect อย่างปลอดภัยผ่าน Edge Function หลังบ้าน
 [[edge_functions]]
   function = "ssr-province"
   path = "/index.html"
 
 # ==============================================================================
-# 4. SEO Redirects & Rewrites Matrix
+# 3. REDIRECTS & REWRITES (SEO-friendly canonicalization + SPA fallbacks)
+# - force redirects to enforce canonical domain
+# - SPA routes map to index.html with 200 to allow client-side routing
+# NOTE: Ensure DNS/CNAME is set for firstmodelhub.com before enabling force redirects.
 # ==============================================================================
-
-# 🛠️ 4.1 URL Canonicalization: บังคับเปลี่ยนเส้นทางจาก www ไปยัง non-www บนโดเมนใหม่
 [[redirects]]
   from = "https://www.firstmodelhub.com/*"
   to = "https://firstmodelhub.com/:splat"
   status = 301
   force = true
 
-# 🛠️ 4.2 SEO Domain Migration: ย้ายทราฟฟิกและคะแนน SEO จากโดเมน Netlify เดิมไปยังโดเมนใหม่ 100%
 [[redirects]]
   from = "https://sidelinechiangmai.netlify.app/*"
   to = "https://firstmodelhub.com/:splat"
@@ -101,18 +109,15 @@
   status = 301
   force = true
 
-# 4.3 URL Normalization: เคลียร์พารามิเตอร์ขยะให้เป็นพาร์ทไดเรกทอรีที่ Google ชื่นชอบ
+# Normalize location query param -> clean path (if you send /location?province=xxx)
 [[redirects]]
-  query = {province = ":p"}
+  query = { province = ":p" }
   from = "/location/*"
   to = "/location/:p"
   status = 301
   force = true
 
-# 🛠️ 4.4 เจาะจงเส้นทางเฉพาะของระบบแอปพลิเคชัน (SPA Fallback แบบปลอดภัย)
-# การดักจับเส้นทางทีละพาร์ทจะช่วยป้องกันไม่ให้บอทรายงานปัญหาหน้า 404 ตอบกลับสถานะเป็น 200 OK 
-
-# ⚡ ดักจับพาร์ทหน้าโปรไฟล์ย่อยไปยังหน้า index.html เพื่อความราบรื่นในการเข้าถึงแบบลอยตัว (Lightbox)
+# SPA fallbacks: serve index.html so client-side routing works and bots get full HTML via edge functions
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"

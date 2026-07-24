@@ -1,12 +1,15 @@
-# =========================================================
-# ROBOTS.TXT FOR FIRST MODEL HUB
-# Optimized for Googlebot, EEAT Trust & Competitor Block
-# =========================================================
+# name=robots.txt
+# ROBOTS.TXT for First Model Hub (https://firstmodelhub.com)
+# - Allow major search engines to crawl public pages
+# - Block internal/admin/api endpoints
+# - Do NOT permanently block SEO tools (Ahrefs, Semrush) — allow them unless you have a specific reason
+# - Sitemap is provided (dynamic /sitemap.xml via edge function)
+#
+# If you later want to restrict third-party crawlers, do so carefully:
+# robots.txt is a request, not an access control mechanism. Use authentication/rate-limiting for real protection.
 
-# กฎควบคุมโปรแกรมค้นหาของระบบสากลทั้งหมด
 User-agent: *
-
-# บล็อกพื้นที่ความลับหลังบ้านและทางเข้าควบคุมระบบ
+# Block admin/internal endpoints
 Disallow: /wp-admin/
 Disallow: /wp-login.php
 Disallow: /administrator/
@@ -14,8 +17,12 @@ Disallow: /login/
 Disallow: /register/
 Disallow: /search/
 Disallow: /api/
+Disallow: /netlify/
+Disallow: /.git/
+Disallow: /__sapper__/
+Disallow: /functions/
 
-# บล็อกพารามิเตอร์โฆษณาเพื่อลดการเข้าถึงข้อมูลซ้ำซ้อน (Duplicate Crawls)
+# Reduce crawl duplication from tracking parameters
 Disallow: /*?*utm_*
 Disallow: /*?*fbclid*
 Disallow: /*?*gclid*
@@ -23,7 +30,7 @@ Disallow: /*?*gclsrc*
 Disallow: /*?*affiliate*
 Disallow: /*?*ref*
 
-# อนุญาตให้แสกนไฟล์เลย์เอาต์และการทำงานเพื่อให้ประเมินสปีดได้คะแนนเต็ม
+# Allow static resources (important for rendering and Core Web Vitals)
 Allow: /*.js$
 Allow: /*.css$
 Allow: /*.png$
@@ -31,44 +38,10 @@ Allow: /*.jpg$
 Allow: /*.jpeg$
 Allow: /*.webp$
 Allow: /*.svg$
+Allow: /*.woff2$
+Allow: /*.woff$
 
-# ========================================================
-# สกัดกั้นสปายบอทคู่แข่ง (สกัดการแอบแสกนช่องโหว่และคีย์เวิร์ด)
-# ========================================================
-User-agent: AhrefsBot
-Disallow: /
+# Optionally restrict or monitor aggressive scrapers via server-side rules (rate-limit, block IPs) instead of robots.txt.
 
-User-agent: MJ12bot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
-
-User-agent: SemrushBot-SA
-Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-User-agent: Rogerbot
-Disallow: /
-
-User-agent: Mozlila
-Disallow: /
-
-User-agent: MegaIndex.ru
-Disallow: /
-
-User-agent: BLEXBot
-Disallow: /
-
-User-agent: Serpstatbot
-Disallow: /
-
-User-agent: UptimeRobot
-Disallow: /
-
-# ========================================================
-# ลิงก์แผนผังเว็บไซต์อย่างเป็นทางการ (Sitemap Destination)
-# ========================================================
+# Sitemap location (served dynamically)
 Sitemap: https://firstmodelhub.com/sitemap.xml
