@@ -1,5 +1,5 @@
 # =========================================================
-# ROBOTS.TXT FOR SIDELINE CHIANGMAI
+# ROBOTS.TXT FOR FIRST MODEL HUB
 # Optimized for Googlebot, EEAT Trust & Competitor Block
 # =========================================================
 
@@ -71,4 +71,4 @@ Disallow: /
 # ========================================================
 # ลิงก์แผนผังเว็บไซต์อย่างเป็นทางการ (Sitemap Destination)
 # ========================================================
-Sitemap: https://sidelinechiangmai.netlify.app/sitemap.xml
+Sitemap: https://firstmodelhub.com/sitemap.xml

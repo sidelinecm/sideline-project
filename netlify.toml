@@ -66,12 +66,12 @@
   function = "ssr-province"
   path = "/location/*"
 
-# ให้ ssr-province ดักจับพาร์ทหน้าแรกสุด (/) เพื่อจัดส่งสารบัญจังหวัดเชียงใหม่ทันทีแบบ Zero-Delay
+# ให้ ssr-province ดักจับพาร์ทหน้าแรกสุด (/) เพื่อจัดส่งสารบัญหลักทันทีแบบ Zero-Delay
 [[edge_functions]]
   function = "ssr-province"
   path = "/"
 
-# ⚡ [เพิ่มใหม่] กำหนดเส้นทางให้ ssr-province ดักจับการเข้าใช้งานหน้า /index.html 
+# ⚡ กำหนดเส้นทางให้ ssr-province ดักจับการเข้าใช้งานหน้า /index.html 
 # เพื่อคุมการข้ามการดาวน์โหลดเทมเพลต และทำการ Redirect อย่างปลอดภัยผ่าน Edge Function หลังบ้าน
 [[edge_functions]]
   function = "ssr-province"
@@ -81,16 +81,25 @@
 # 4. SEO Redirects & Rewrites Matrix
 # ==============================================================================
 
-# 🛠️ 4.1 URL Canonicalization: บังคับเปลี่ยนเส้นทางจาก www ไปยัง non-www ป้องกันคะแนน SEO ทับซ้อน
+# 🛠️ 4.1 URL Canonicalization: บังคับเปลี่ยนเส้นทางจาก www ไปยัง non-www บนโดเมนใหม่
 [[redirects]]
-  from = "https://www.sidelinechiangmai.netlify.app/*"
-  to = "https://sidelinechiangmai.netlify.app/:splat"
+  from = "https://www.firstmodelhub.com/*"
+  to = "https://firstmodelhub.com/:splat"
   status = 301
   force = true
 
-# 🛠️ 4.2 [นำออกแล้ว] ลบกฎบังคับ Redirect ของหน้า /index.html แบบเดิมออก 
-# เพื่อป้องกันระบบเซิร์ฟเวอร์ตีกลับแบบเปลี่ยนเส้นทางวนลูป (301 Redirect Loop) 
-# โดยได้ย้ายฟังก์ชันนี้ไปทำงานแบบไดนามิกแบบปลอดภัยข้างในไฟล์ ssr-province.js เรียบร้อยแล้วครับ
+# 🛠️ 4.2 SEO Domain Migration: ย้ายทราฟฟิกและคะแนน SEO จากโดเมน Netlify เดิมไปยังโดเมนใหม่ 100%
+[[redirects]]
+  from = "https://sidelinechiangmai.netlify.app/*"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.sidelinechiangmai.netlify.app/*"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
 
 # 4.3 URL Normalization: เคลียร์พารามิเตอร์ขยะให้เป็นพาร์ทไดเรกทอรีที่ Google ชื่นชอบ
 [[redirects]]
@@ -103,7 +112,7 @@
 # 🛠️ 4.4 เจาะจงเส้นทางเฉพาะของระบบแอปพลิเคชัน (SPA Fallback แบบปลอดภัย)
 # การดักจับเส้นทางทีละพาร์ทจะช่วยป้องกันไม่ให้บอทรายงานปัญหาหน้า 404 ตอบกลับสถานะเป็น 200 OK 
 
-# ⚡ [เพิ่มใหม่] ดักจับพาร์ทหน้าโปรไฟล์ย่อยน้อง ๆ ไปยังหน้า index.html เพื่อความราบรื่นในการเข้าถึงแบบลอยตัว (Lightbox) ของผู้ใช้ที่เป็นมนุษย์
+# ⚡ ดักจับพาร์ทหน้าโปรไฟล์ย่อยไปยังหน้า index.html เพื่อความราบรื่นในการเข้าถึงแบบลอยตัว (Lightbox)
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"
