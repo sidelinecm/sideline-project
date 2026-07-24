@@ -1375,3 +1375,76 @@ html.light #review-form input, html.light #review-form textarea {
     gap: 16px !important;
   }
 }
+
+    #main-content {
+      padding-top: 84px !important;
+      padding-bottom: 96px !important;
+    }
+
+    .hero-section {
+      text-align: center;
+      padding: 8px 12px 16px 12px !important;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .safe-capsules-grid {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 6px 10px !important;
+      margin-top: 16px !important;
+      width: 100% !important;
+    }
+
+    .safe-capsule-item {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      padding: 6px 14px !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      border-radius: 100px !important;
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      text-decoration: none !important;
+      color: #E4E4E7 !important;
+      white-space: nowrap !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .safe-capsule-item:hover {
+      border-color: rgba(192, 132, 252, 0.4) !important;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary-webyst {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 12px 28px !important;
+      font-size: 13px !important;
+      font-weight: 800 !important;
+      border-radius: 100px !important;
+      background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%) !important;
+      color: #FFFFFF !important;
+      text-decoration: none !important;
+      box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .btn-primary-webyst:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 12px 25px rgba(124, 58, 237, 0.5) !important;
+    }
+
+    .cta-subtext {
+      font-size: 10.5px !important;
+      color: var(--text-muted) !important;
+      margin-top: 8px !important;
+      text-align: center !important;
+    }
