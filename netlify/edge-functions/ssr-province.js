@@ -355,7 +355,7 @@ const FLOATING_DOCK_HTML = `
 `;
 
 // ==============================================================================
-// 4. MAIN EDGE REQUEST HANDLER
+// 4. MAIN EDGE REQUEST HANDLER (NATIONAL & MULTI-LOCATION SSR MASTER)
 // ==============================================================================
 export default async (req, context) => {
   if (!verifyHostname(req)) {
@@ -364,6 +364,7 @@ export default async (req, context) => {
 
   const url = new URL(req.url);
 
+  // 301 Redirect โดเมนเก่าและ www ไปที่โดเมนหลัก
   if (url.host.includes("sidelinechiangmai.netlify.app")) {
     return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}${url.pathname}${url.search}`, 301);
   }
@@ -374,6 +375,7 @@ export default async (req, context) => {
 
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
 
+  // จัดการบายพาส /index.html
   if (url.pathname === "/index.html") {
     if (req.headers.get("x-ssr-bypass") === "true") {
       try {
@@ -393,6 +395,7 @@ export default async (req, context) => {
     }
   }
 
+  // ปล่อยผ่านไฟล์ Static Assets (CSS, JS, รูปภาพ, ฟอนต์)
   if ([".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2"].some(ext => url.pathname.toLowerCase().endsWith(ext))) {
     try {
       return await context.next();
@@ -401,44 +404,47 @@ export default async (req, context) => {
     }
   }
 
+  // ============================== ROUTE PARSING ==============================
   const paths = url.pathname.split("/").filter(Boolean);
-  let s = "chiangmai", o = "";
+  let provinceSlug = "", profileSlug = "", isNationalHome = false;
 
-  if (paths.length > 0) {
-    if ("location" === paths[0] && paths[1]) {
-      try {
-        s = decodeURIComponent(paths[1]).toLowerCase();
-      } catch {
-        s = paths[1].toLowerCase();
-      }
-    } else if ("sideline" === paths[0] && paths[1]) {
-      o = decodeURIComponent(paths[1]);
-    } else {
-      const lastSegment = paths[paths.length - 1] || "chiangmai";
-      try {
-        s = decodeURIComponent(lastSegment).toLowerCase();
-      } catch {
-        s = lastSegment.toLowerCase();
-      }
+  if (paths.length === 0 || url.pathname === "/") {
+    // 🟢 หน้าหลัก (firstmodelhub.com/) ➔ ตั้งค่าเป็น "ศูนย์รวมระดับประเทศ (ทั่วไทย)"
+    isNationalHome = true;
+    provinceSlug = "national";
+  } else if ("location" === paths[0] && paths[1]) {
+    try {
+      provinceSlug = decodeURIComponent(paths[1]).toLowerCase();
+    } catch {
+      provinceSlug = paths[1].toLowerCase();
+    }
+  } else if ("sideline" === paths[0] && paths[1]) {
+    profileSlug = decodeURIComponent(paths[1]);
+  } else {
+    const lastSegment = paths[paths.length - 1] || "";
+    try {
+      provinceSlug = decodeURIComponent(lastSegment).toLowerCase();
+    } catch {
+      provinceSlug = lastSegment.toLowerCase();
     }
   }
 
-  if ("location" === paths[0] && ("chiangmai" === s || "chiang_mai" === s)) {
-    return Response.redirect(`${hostUrl}/`, 301);
-  }
+  // 🟢 [FIXED] เอาการ Redirect /location/chiangmai ออก เพื่อให้เชียงใหม่มีหน้า Landing Page แยกเดี่ยวของตัวเอง
 
+  // ============================== ROBOTS.TXT ==============================
   if ("/robots.txt" === url.pathname) {
     return new Response(`User-agent: *\nAllow: /\nDisallow: /search\nDisallow: /admin\n\nSitemap: ${hostUrl}/sitemap.xml`, { 
       headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" } 
     });
   }
 
+  // ============================== SITEMAP.XML GENERATOR ==============================
   if ("/sitemap.xml" === url.pathname) {
     try {
-      const e = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY),
+      const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY),
         [provRes, profRes] = await Promise.all([
-          e.from("provinces").select("key"),
-          e.from("profiles").select("slug, lastUpdated, name, imagePath").eq("active", true)
+          supabase.from("provinces").select("key"),
+          supabase.from("profiles").select("slug, lastUpdated, name, imagePath").eq("active", true)
         ]),
         provList = provRes.data || [],
         profList = profRes.data || [];
@@ -447,8 +453,9 @@ export default async (req, context) => {
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
       xml += `  <url>\n    <loc>${hostUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
 
+      // 🟢 [FIXED] เพิ่มทุกจังหวัดลงใน Sitemap รวมทั้ง Chiang Mai
       provList.forEach(p => {
-        if ("chiangmai" !== p.key && "chiang_mai" !== p.key) {
+        if (p.key) {
           xml += `  <url>\n    <loc>${hostUrl}/location/${p.key}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
         }
       });
@@ -471,54 +478,83 @@ export default async (req, context) => {
     }
   }
 
+  // ============================== MAIN SSR RENDER LOGIC ==============================
   try {
-    let e = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY),
-      matchedProfile = null;
+    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+    let matchedProfile = null;
 
-    if (o) {
-      const { data: profileData } = await e.from("profiles").select("provinceKey, name, rate, location, age, imagePath, description, availability").eq("slug", o).eq("active", true).maybeSingle();
+    // กรณีเข้าดูหน้าโปรไฟล์ย่อย /sideline/:slug
+    if (profileSlug) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("provinceKey, name, rate, location, age, imagePath, description, availability, quote, slogan")
+        .eq("slug", profileSlug)
+        .eq("active", true)
+        .maybeSingle();
+
       if (profileData) {
         matchedProfile = profileData;
-        s = profileData.provinceKey || "chiangmai";
+        provinceSlug = profileData.provinceKey || "chiangmai";
       } else {
-        s = "chiangmai";
+        provinceSlug = "chiangmai";
       }
-    } else if ("/" === url.pathname) {
-      s = "chiangmai";
     }
 
-    const provinceParam = s.replace(/-/g, ""),
-      [provSingleRes, profListRes, provListRes] = await Promise.all([
-        e.from("provinces").select("id, nameThai, key").eq("key", s).maybeSingle(),
-        e.from("profiles").select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, quote, style_tags").eq("provinceKey", s).eq("active", true).order("isfeatured", { ascending: false }).order("lastUpdated", { ascending: false }).limit(80),
-        e.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
-      ]),
-      provinceData = provSingleRes.data;
+    const provinceParam = provinceSlug.replace(/-/g, "");
+    
+    // 🟢 [DYNAMIC QUERY] สลับคำสั่งดึงข้อมูลระหว่าง "หน้าหลักทั่วไทย" กับ "หน้าจังหวัดย่อย"
+    let profileQuery = supabase
+      .from("profiles")
+      .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, quote, style_tags, slogan")
+      .eq("active", true)
+      .order("isfeatured", { ascending: false })
+      .order("lastUpdated", { ascending: false })
+      .limit(80);
 
-    if (!provinceData) return buildErrorPage(404, "404 - ไม่พบหน้าเว็บ", "ไม่พบพิกัดจังหวัดที่คุณต้องการหาในขณะนี้");
+    // ถ้าเป็นหน้าจังหวัดย่อย ให้ล็อกเฉพาะจังหวัดนั้น
+    if (!isNationalHome && provinceSlug !== "national") {
+      profileQuery = profileQuery.eq("provinceKey", provinceSlug);
+    }
 
-    const profileList = profListRes.data || [],
-      provinceThaiName = provinceData.nameThai,
-      customMeta = PROVINCE_CUSTOM_METADATA[provinceParam] || null,
-      seoData = PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default,
-      canonUrl = "chiangmai" === s ? hostUrl : `${hostUrl}/location/${s}`,
-      mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null),
-      metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
+    const [provSingleRes, profListRes, provListRes] = await Promise.all([
+      isNationalHome 
+        ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
+        : supabase.from("provinces").select("id, nameThai, key").eq("key", provinceSlug).maybeSingle(),
+      profileQuery,
+      supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+    ]);
 
+    const provinceData = provSingleRes.data;
+    if (!provinceData && !isNationalHome) {
+      return buildErrorPage(404, "404 - ไม่พบหน้าเว็บ", "ไม่พบพิกัดจังหวัดที่คุณต้องการหาในขณะนี้");
+    }
+
+    const profileList = profListRes.data || [];
+    const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
+    const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
+    const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
+    const canonUrl = isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`;
+    
+    const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
+    const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
+
+    // ดึงรีวิวจาก DB
     let dbReviews = [];
     try {
-      const { data: reviewsData } = await e.from("reviews")
+      let reviewQuery = supabase.from("reviews")
         .select("id, created_at, author_name, location_detail, rating_score, review_body, province_key")
-        .eq("province_key", s)
         .eq("active_status", true)
         .order("created_at", { ascending: false })
         .limit(8);
 
-      if (reviewsData && reviewsData.length > 0) {
-        dbReviews = reviewsData;
+      if (!isNationalHome) {
+        reviewQuery = reviewQuery.eq("province_key", provinceSlug);
       }
+
+      const { data: reviewsData } = await reviewQuery;
+      if (reviewsData && reviewsData.length > 0) dbReviews = reviewsData;
     } catch (err) {
-      console.warn("Reviews table check failed, standard offline fallbacks applied.", err);
+      console.warn("Reviews query fallback applied.", err);
     }
 
     let finalReviews = [];
@@ -532,35 +568,34 @@ export default async (req, context) => {
         datePublished: r.created_at ? new Date(r.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]
       }));
     } else {
-      const dynamicList = getDynamicReviews(provinceThaiName);
-      finalReviews = dynamicList.map(r => ({
-        author: r.author,
-        location: r.location,
-        text: r.text,
-        rating: 5,
-        date: r.date,
-        datePublished: r.datePublished
-      }));
+      finalReviews = getDynamicReviews(provinceThaiName);
     }
 
-    let pageTitle = customMetaTitle(provinceThaiName, customMeta),
+    // 🟢 [TITLE & DESCRIPTION SWITCHER] แยกข้อความระดับประเทศ และระดับจังหวัดออกจากกัน
+    let pageTitle = "", pageDesc = "";
+
+    if (isNationalHome) {
+      pageTitle = "ไซด์ไลน์ สาวรับงาน ฟิวแฟน เด็กเอ็น เพื่อนเที่ยวพรีเมียม ทั่วไทย | First Model Hub";
+      pageDesc = "ศูนย์รวมไซด์ไลน์ สาวรับงาน ฟิวแฟน และเด็กเอ็นพรีเมียมทั่วประเทศ คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมกรุงเทพฯ เชียงใหม่ ภูเก็ต ขอนแก่น";
+    } else {
+      pageTitle = customMetaTitle(provinceThaiName, customMeta);
       pageDesc = customMetaDesc(provinceThaiName, seoData, customMeta);
+    }
 
     if (matchedProfile) {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
-      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` (${matchedProfile.age} ปี)` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
+      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` ${matchedProfile.age}` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
       pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${matchedProfile.location || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
-    const strippedDesc = stripHTML(pageDesc),
-      finalRatingValue = finalReviews.length > 0 
-        ? (finalReviews.reduce((sum, rev) => sum + rev.rating, 0) / finalReviews.length).toFixed(1) 
-        : (profileList.length > 0 ? (4.6 + profileList.length % 4 / 10).toFixed(1) : "4.8"),
-      finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 18);
-      
-    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + provinceThaiName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    const strippedDesc = stripHTML(pageDesc);
+    const finalRatingValue = finalReviews.length > 0 
+      ? (finalReviews.reduce((sum, rev) => sum + rev.rating, 0) / finalReviews.length).toFixed(1) 
+      : "4.9";
+    const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
+    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // ⚡ Structured Data (Schema.org JSON-LD)
+    // ============================== STRUCTURED DATA GRAPH (SCHEMA.ORG) ==============================
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -568,10 +603,7 @@ export default async (req, context) => {
         "name": CONFIG.BRAND_NAME,
         "legalName": CONFIG.BRAND_LEGAL_NAME,
         "url": hostUrl,
-        "logo": {
-          "@type": "ImageObject",
-          "url": `${hostUrl}/images/apple-touch-icon.png` // ✅ อัปเดตโลโก้หลัก
-        },
+        "logo": { "@type": "ImageObject", "url": `${hostUrl}/images/apple-touch-icon.png` },
         "description": strippedDesc,
         "sameAs": Object.values(CONFIG.SOCIAL_LINKS),
         "contactPoint": {
@@ -595,15 +627,15 @@ export default async (req, context) => {
       }
     ];
 
-    if (o && matchedProfile) {
-      const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(o)}`;
+    if (profileSlug && matchedProfile) {
+      const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       schemaGraph.push(generatePersonSchema(matchedProfile, provinceThaiName, profileUrl, hostUrl));
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${profileUrl}/#breadcrumb`,
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl },
-          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": "chiangmai" === s ? hostUrl : `${hostUrl}/location/${s}` },
+          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": canonUrl },
           { "@type": "ListItem", "position": 3, "name": `น้อง${(matchedProfile.name || "").replace(/^น้อง/, "").trim()}`, "item": profileUrl }
         ]
       });
@@ -611,7 +643,7 @@ export default async (req, context) => {
       schemaGraph.push({
         "@type": ["LocalBusiness", "EntertainmentBusiness"],
         "@id": `${canonUrl}/#localbusiness`,
-        "name": `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
+        "name": isNationalHome ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` : `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
         "image": metaImgUrl,
         "telephone": CONFIG.DEFAULT_TELEPHONE,
         "priceRange": "฿฿",
@@ -646,12 +678,7 @@ export default async (req, context) => {
           "author": { "@type": "Person", "name": r.author },
           "datePublished": r.datePublished,
           "reviewBody": stripHTML(r.text),
-          "reviewRating": {
-            "@type": "Rating",
-            "ratingValue": Number(r.rating),
-            "bestRating": 5,
-            "worstRating": 1
-          }
+          "reviewRating": { "@type": "Rating", "ratingValue": Number(r.rating), "bestRating": 5, "worstRating": 1 }
         }))
       });
 
@@ -688,149 +715,139 @@ export default async (req, context) => {
         "@id": `${canonUrl}/#breadcrumb`,
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl },
-          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": canonUrl }
+          ...(!isNationalHome ? [{ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": canonUrl }] : [])
         ]
       });
     }
 
-    if (seoData.faqs && !o) {
+    if (seoData.faqs && !profileSlug) {
       schemaGraph.push({
         "@type": "FAQPage",
         "@id": `${canonUrl}/#faq`,
         "mainEntity": seoData.faqs.map(faq => ({
           "@type": "Question",
           "name": stripHTML(faq.q),
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": stripHTML(faq.a)
-          }
+          "acceptedAnswer": { "@type": "Answer", "text": stripHTML(faq.a) }
         }))
       });
     }
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // HTML Generation for Cards
-    const cardsHtml = profileList.map(p => {
+    // ============================== PROFILE CARDS HTML GENERATOR (LUXURY STYLE) ==============================
+    const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")),
         pLoc = escapeHTML(p.location || provinceThaiName),
         pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`,
         isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw)),
-        badgeClass = isAvail ? "status-available-neon" : "status-busy-neon",
-        statusText = isAvail ? "รับงาน" : "ไม่ว่าง/พัก",
+        statusText = isAvail ? "รับงาน" : "สอบถามคิว",
+        statusDotColor = isAvail ? "#00E676" : "#FF2E63",
         pAge = p.age || "",
-        ageDisplay = pAge && "-" !== pAge ? ` (${escapeHTML(pAge)})` : "";
+        ageDisplay = pAge && "-" !== pAge ? ` ${escapeHTML(pAge)}` : "",
+        quoteText = escapeHTML(p.quote || p.slogan || "ดูแลเทคแคร์น่ารัก สไตล์ฟิวแฟน");
 
-      let pStats = "-";
-      if (p.bust && p.waist && p.hips) {
-        const cup = p.cup_size ? p.cup_size.toUpperCase() : "";
-        pStats = `${p.bust}${cup}-${p.waist}-${p.hips}`;
-      } else if (p.stats) {
-        pStats = p.stats;
-      }
+      const seoAlt = `น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
 
-      const pSkin = p.skin_tone || p.skinTone || "-",
-        isVer = p.verified === true,
-        hasVid = p.has_video === true;
+      // 🟢 [ป้ายซ้อนแนวตั้งซ้ายบน: บน = แนะนำ, ล่าง = รับงาน]
+      const featuredBadge = p.isfeatured ? `
+        <span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
+            <span style="letter-spacing: 0.02em;">แนะนำ</span>
+        </span>` : "";
+
+      const statusBadge = `
+        <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
+            <span style="letter-spacing: 0.02em;">${statusText}</span>
+        </span>`;
+
+      // 🟢 [ป้ายยืนยันตัวตนขวาบน]
+      const verifiedBadge = (p.verified || p.isVerified) ? `
+        <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
+        </span>` : "";
 
       return `
-                <div class="province-card profile-card-new interactive-card"
-                     data-id="${p.id}"
-                     data-profile-id="${p.id}"
-                     data-profile-slug="${p.slug}"
-                     data-name="น้อง${pName}"
-                     data-region="${pLoc}"
-                     data-desc=""
-                     style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 24px; overflow: hidden; padding:0; cursor: pointer;"
-                     role="listitem">
-                    
-                    <a href="${pUrl}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+        <div class="profile-card-new-container">
+          <div class="profile-card-new interactive-card"
+               data-id="${p.id}"
+               data-profile-id="${p.id}"
+               data-profile-slug="${p.slug}"
+               style="aspect-ratio: 4/5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding:0; cursor: pointer; background: #09090B; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4);"
+               role="listitem">
+              
+              <a href="${pUrl}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
 
-                    <img src="${optimizeImg(hostUrl, p.imagePath, 360, 480)}" 
-                         alt="น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟน" 
-                         width="360"
-                         height="480"
-                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; position: absolute; inset: 0; z-index: 0;"
-                         loading="lazy" decoding="async" />
+              <img src="${optimizeImg(hostUrl, p.imagePath, 360, 480)}" 
+                   alt="${seoAlt}" 
+                   title="${seoAlt}"
+                   width="360"
+                   height="480"
+                   style="width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.5s ease; position: absolute; inset: 0; z-index: 0; border-radius: 16px;"
+                   loading="${index < 4 ? "eager" : "lazy"}" decoding="async" />
 
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); z-index: 10; pointer-events: none;"></div>
+              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
-                    <div style="position: absolute; top: 12px; left: 12px; z-index: 30; display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
-                        <span class="neon-badge ${badgeClass}">
-                            <span class="neon-dot"></span>
-                            <span>${statusText}</span>
-                        </span>
-                        ${p.isfeatured ? `
-                        <span style="background-color: #5A2CBE; border: 1px solid rgba(147, 51, 234, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; box-shadow: 0 4px 10px rgba(90, 44, 190, 0.3); display: flex; align-items: center; gap: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i>แนะนำ</span>
-                        ` : ""}
-                        ${hasVid ? `
-                        <span style="background-color: #FF2E63; border: 1px solid rgba(255, 46, 99, 0.4); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video" style="font-size: 8px;"></i>วิดีโอ</span>
-                        ` : ""}
-                        ${isVer ? `
-                        <span style="background-color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.4); color: #000000; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-check-circle" style="font-size: 8px;"></i>ยืนยันแล้ว</span>
-                        ` : ""}
-                    </div>
+              <!-- ซ้ายบน: แนวตั้ง (แนะนำ บน / รับงาน ล่าง) -->
+              <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
+                  ${featuredBadge}
+                  ${statusBadge}
+              </div>
 
-                    <div style="position: absolute; top: 12px; right: 12px; z-index: 30;">
-                        <button type="button" class="circle-btn-el" data-action="like" data-id="${p.id}" style="width: 32px; height: 32px; border-radius: 50%;" aria-label="เพิ่มลงในรายการโปรด">
-                            <i class="fa-solid fa-heart"></i>
-                        </button>
-                    </div>
+              <!-- ขวาบน: ป้ายยืนยันตัวตน -->
+              <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+                  ${verifiedBadge}
+              </div>
 
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 4px;">
-                        <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
-                            <h3 style="font-size: 16px; font-weight: 800; color: white; margin: 0; text-shadow: 0 1.5px 3px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">น้อง${pName}${ageDisplay}</h3>
-                        </div>
+              <!-- ข้อมูลล่างสุด: ชื่อ อายุ คีย์เวิร์ด พิกัด ราคา -->
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
+                  <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">น้อง${pName}${ageDisplay}</h3>
+                  
+                  ${quoteText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${quoteText}</p>` : ''}
 
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: #D4D4D8; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); flex-wrap: wrap;">
-                            <span style="font-family: monospace; letter-spacing: 0.05em; background-color: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; color: #FFFFFF;">${escapeHTML(pStats)}</span>
-                            <span style="background-color: rgba(147, 51, 234, 0.2); color: #C084FC; padding: 1px 6px; border-radius: 4px; font-size: 9px;">หญิง</span>
-                            ${"-" !== pSkin ? `<span style="color: #A1A1AA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75px;">${escapeHTML(pSkin)}</span>` : ""}
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-gray); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">
-                            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;">
-                                <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 4px;"></i> ${pLoc}
-                            </span>
-                            <span style="color: #C084FC; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.9); flex-shrink: 0; white-space: nowrap;">
-                                ${p.rate || "สอบถาม"}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                `;
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                          <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
+                      </span>
+                      <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+                          ${p.rate ? (isNaN(p.rate) ? p.rate : Number(p.rate).toLocaleString() + '.-') : "สอบถาม"}
+                      </span>
+                  </div>
+              </div>
+          </div>
+        </div>
+      `;
     }).join("");
 
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
 
     const reviewsHtml = finalReviews.map(r => `
-            <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="height: 40px; width: 40px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML((r.author || "K").charAt(0).toUpperCase())}</div>
-                    <div>
-                      <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${escapeHTML(r.author)}</span>
-                      <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${escapeHTML(r.location)}</span>
-                    </div>
-                  </div>
-                  <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="${r.rating} ดาว" role="img">
-                    ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};" aria-hidden="true"></i>`).join("")}
-                  </div>
-                </div>
-                <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
-                  ${escapeHTML(r.text)}
-                </p>
-                <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
+      <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="height: 40px; width: 40px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML((r.author || "K").charAt(0).toUpperCase())}</div>
+              <div>
+                <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${escapeHTML(r.author)}</span>
+                <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${escapeHTML(r.location)}</span>
+              </div>
             </div>
-        `).join("");
+            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="${r.rating} ดาว" role="img">
+              ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};" aria-hidden="true"></i>`).join("")}
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
+            ${escapeHTML(r.text)}
+          </p>
+          <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
+      </div>
+    `).join("");
 
-    const faqsHtml = generateDynamicFAQsHTML(seoData.faqs),
-      matchedZones = seoData.zones.slice(0, 4).join(", ");
+    const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
+    const matchedZones = seoData.zones.slice(0, 4).join(", ");
 
+    // ดึง index.html มาแทนที่ป้าย
     const templateUrl = new URL("/index.html", url.origin);
-    const mainTemplate = await fetch(templateUrl, {
-      headers: { "x-ssr-bypass": "true" }
-    });
+    const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
     let rawHtml = await mainTemplate.text();
 
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones);
@@ -838,19 +855,20 @@ export default async (req, context) => {
     const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       const key = p.key || p.slug || p.id;
       const name = p.nameThai || p.name;
-      if (key === "chiangmai") {
-        return `<li><a href="/" title="ดูรายชื่อไซด์ไลน์ในจังหวัด เชียงใหม่" style="color: var(--primary-purple); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" class="active" aria-current="page">ไซด์ไลน์เชียงใหม่</a></li>`;
-      }
-      return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: var(--text-gray); text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'">ไซด์ไลน์${name}</a></li>`;
+      const isActive = key === provinceSlug;
+      return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
 
+    // 🟢 [REPLACE PLACEHOLDERS] แทนที่ข้อความทั้งหมดลงในเทมเพลต HTML
     rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_DESCRIPTION}}", strippedDesc);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson));
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
@@ -858,6 +876,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
+    // ฉีด JSON สดของโปรไฟล์เข้า window.profilesData เพื่อทำ Instant Hydration
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_JSON}}", JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -887,7 +906,8 @@ export default async (req, context) => {
       description: p.description || "",
       lineId: p.line_id || p.lineId || "",
       line_id: p.line_id || p.lineId || "",
-      quote: p.quote || "",
+      quote: p.quote || p.slogan || "",
+      slogan: p.slogan || p.quote || "",
       styleTags: p.style_tags || p.styleTags || [],
       style_tags: p.style_tags || p.styleTags || []
     }))));
