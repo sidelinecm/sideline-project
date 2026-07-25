@@ -1008,3 +1008,66 @@ nav.floating-app-dock a.dock-item.dock-item-line i,
   z-index: 0;
   animation: ambientBreathing 18s ease-in-out infinite;
 }
+/* แถบ Dock ด้านล่าง */
+.floating-app-dock {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 480px;
+  height: 60px;
+  background: rgba(18, 18, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* ปุ่มทั่วไป (หน้าแรก, ตัวกรอง, รวมน้องๆ) */
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1; /* แบ่งพื้นที่เท่ากัน */
+  min-width: 0; /* ป้องกัน Flexbox บีบจนล้น */
+  color: #A1A1AA;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap; /* 🟢 ป้องกันข้อความตัดลงมา 2 บรรทัด */
+  gap: 3px;
+}
+
+.dock-item i {
+  font-size: 15px;
+}
+
+.dock-item.active {
+  color: #C084FC;
+}
+
+/* ปุ่มจองคิวสีม่วง (ไฮไลท์) */
+.dock-item-line {
+  flex: 1.4; /* ให้กว้างกว่าปุ่มอื่นนิดหน่อย แต่ไม่บีบปุ่มอื่น */
+  background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%);
+  color: #FFFFFF !important;
+  border-radius: 100px;
+  height: 44px;
+  flex-direction: row; /* จัดไอคอนกับข้อความให้อยู่บรรทัดเดียวกัน */
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.dock-item-line i {
+  font-size: 16px;
+}
