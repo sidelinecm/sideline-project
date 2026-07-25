@@ -220,6 +220,7 @@ const getDynamicIntro = (provinceName, zones) => {
   `;
 };
 
+// 🟢 โค้ดใหม่ (หลังแก้):
 const getDynamicReviews = provinceName => {
   const t = new Date();
   const isChiangMai = provinceName === "เชียงใหม่";
@@ -231,6 +232,7 @@ const getDynamicReviews = provinceName => {
       text: isChiangMai 
         ? `"นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ แถวนิมมาน"`
         : `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ"`,
+      rating: 5, // 👈 เพิ่มจุดนี้
       date: "เมื่อสัปดาห์ที่แล้ว",
       datePublished: new Date(t.getTime() - 691200000).toISOString().split("T")[0]
     },
@@ -240,6 +242,7 @@ const getDynamicReviews = provinceName => {
       text: isChiangMai
         ? '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง นัดเจอแถวนิมมานตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"'
         : '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
+      rating: 5, // 👈 เพิ่มจุดนี้
       date: "เมื่อ 2 สัปดาห์ก่อน",
       datePublished: new Date(t.getTime() - 1296000000).toISOString().split("T")[0]
     }
@@ -502,16 +505,17 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "");
     
-    // 🟢 [DYNAMIC QUERY] สลับคำสั่งดึงข้อมูลระหว่าง "หน้าหลักทั่วไทย" กับ "หน้าจังหวัดย่อย"
+
+
     let profileQuery = supabase
       .from("profiles")
       .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, quote, style_tags, slogan")
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("lastUpdated", { ascending: false })
-      .limit(80);
+      .limit(16); // 👈 ปรับเหลือ 16 การ์ดแรกในหน้าแรก จะลด DOM จาก 3,300 เหลือไม่เกิน 800 ชิ้นทันที!
 
-    // ถ้าเป็นหน้าจังหวัดย่อย ให้ล็อกเฉพาะจังหวัดนั้น
+
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.eq("provinceKey", provinceSlug);
     }
@@ -558,12 +562,12 @@ export default async (req, context) => {
     }
 
     let finalReviews = [];
-    if (dbReviews.length > 0) {
+    if (dbReviews && dbReviews.length > 0) {
       finalReviews = dbReviews.map(r => ({
         author: r.author_name || "คุณผู้ใช้บริการ",
         location: r.location_detail || `ตัวเมือง${provinceThaiName}`,
         text: r.review_body || "ดูแลประทับใจดีสไตล์ฟิวแฟน ตรงปกปลอดภัย แนะนำครับ",
-        rating: Number(r.rating_score) || 5,
+        rating: Number(r.rating_score) && !isNaN(Number(r.rating_score)) ? Math.min(5, Math.max(1, Number(r.rating_score))) : 5,
         date: formatDateSSR(r.created_at),
         datePublished: r.created_at ? new Date(r.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]
       }));
@@ -589,9 +593,10 @@ export default async (req, context) => {
     }
 
     const strippedDesc = stripHTML(pageDesc);
-    const finalRatingValue = finalReviews.length > 0 
-      ? (finalReviews.reduce((sum, rev) => sum + rev.rating, 0) / finalReviews.length).toFixed(1) 
-      : "4.9";
+    const calculatedAvg = finalReviews.length > 0 
+      ? (finalReviews.reduce((sum, rev) => sum + (Number(rev.rating) || 5), 0) / finalReviews.length) 
+      : 5;
+    const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
@@ -668,17 +673,22 @@ export default async (req, context) => {
         ],
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": Number(finalRatingValue),
-          "reviewCount": Number(finalReviewCount),
+          "ratingValue": Number(finalRatingValue) || 4.9,
+          "reviewCount": Number(finalReviewCount) || 5,
           "bestRating": 5,
           "worstRating": 1
         },
         "review": finalReviews.map(r => ({
           "@type": "Review",
-          "author": { "@type": "Person", "name": r.author },
-          "datePublished": r.datePublished,
-          "reviewBody": stripHTML(r.text),
-          "reviewRating": { "@type": "Rating", "ratingValue": Number(r.rating), "bestRating": 5, "worstRating": 1 }
+          "author": { "@type": "Person", "name": r.author || "คุณผู้ใช้บริการ" },
+          "datePublished": r.datePublished || new Date().toISOString().split("T")[0],
+          "reviewBody": stripHTML(r.text || "บริการประทับใจดีสไตล์ฟิวแฟน"),
+          "reviewRating": { 
+            "@type": "Rating", 
+            "ratingValue": Number(r.rating) && !isNaN(Number(r.rating)) ? Number(r.rating) : 5, 
+            "bestRating": 5, 
+            "worstRating": 1 
+          }
         }))
       });
 
