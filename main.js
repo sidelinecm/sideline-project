@@ -1303,7 +1303,7 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       cleanPath === "/profiles" || 
       cleanPath.endsWith("/profiles.html");
 
-    // 🟢 3. รายชื่อหน้า Static แท้ๆ (ถอด /profiles ออกแล้ว)
+    // 🟢 3. รายชื่อหน้า Static แท้ๆ (ถอด /profiles ออกเรียบร้อย)
     const staticPages = [
       "/blog", "/about", "/faq", "/locations", 
       "/contact", "/terms-of-service", "/privacy-policy", "/policy"
@@ -1353,7 +1353,8 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       STATE.currentProfileSlug = null;
       closeLightboxModal(false);
 
-      if (DOM.provinceSelect) DOM.provinceSelect.value = "all";
+      // ✅ แก้ไขบั๊กจุดสำคัญ: เปลี่ยนจาก "all" เป็น "" (ค่าว่าง) เพื่อเลือกตัวเลือก "เลือกจังหวัด (ทั้งหมด)"
+      if (DOM.provinceSelect) DOM.provinceSelect.value = "";
 
       applyUltimateFilters(false);
 

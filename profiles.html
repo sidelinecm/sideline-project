@@ -200,9 +200,8 @@
         </div>
       </section>
 
-      <!-- ============================== FEATURED / ALL PROFILES SECTION ============================== -->
-      <section id="featured-profiles" class="glass-panel" style="padding: 28px 0; overflow: hidden; position: relative;">
-        <div class="bg-glow-overlap" style="top: 15%; left: 5%; width: 350px; height: 350px;" aria-hidden="true"></div>
+
+<div id="featured-profiles-container" class="profiles-grid-row" role="region" aria-live="polite" aria-labelledby="featured-heading"></div>
         
         <div class="section-spacing-container text-center-wrapper" style="position: relative; z-index: 10; padding: 0 12px; margin-bottom: 20px;">
             <div class="badge-wrapper" style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
@@ -463,14 +462,64 @@
 
   <script type="module" src="/main.js"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Protection from Image Dragging and Context Menu
-      document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('contextmenu', e => e.preventDefault());
-        img.addEventListener('dragstart', e => e.preventDefault());
-      });
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Google Maps Lazy Loading
+    const mapIframe = document.getElementById("google-map");
+    const placeholder = document.getElementById("map-placeholder");
+    
+    if (mapIframe) {
+        if ('IntersectionObserver' in window) {
+            const mapObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (mapIframe.dataset.src) {
+                            mapIframe.src = mapIframe.dataset.src;
+                        }
+                        mapIframe.onload = () => {
+                            if (placeholder) {
+                                placeholder.style.opacity = '0';
+                                setTimeout(() => placeholder.remove(), 500);
+                            }
+                        };
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: "200px" });
+            mapObserver.observe(mapIframe);
+        } else {
+            mapIframe.src = mapIframe.dataset.src;
+            if (placeholder) placeholder.remove();
+        }
+    }
+
+    // SEO Drawer Toggle
+    const seoDrawerBtn = document.getElementById("toggle-seo-drawer-btn");
+    const seoDrawerWrapper = document.getElementById("seo-drawer-wrapper");
+    if (seoDrawerBtn && seoDrawerWrapper) {
+        seoDrawerWrapper.style.maxHeight = "180px";
+
+        seoDrawerBtn.addEventListener("click", () => {
+            const isCollapsed = seoDrawerWrapper.classList.toggle("collapsed");
+            if (isCollapsed) {
+                seoDrawerWrapper.style.maxHeight = "180px";
+                seoDrawerBtn.querySelector("span").textContent = "ดูข้อมูลพื้นที่บริการทั้งหมด";
+                seoDrawerBtn.querySelector("i").className = "fas fa-chevron-down";
+                seoDrawerWrapper.scrollIntoView({ behavior: "smooth" });
+            } else {
+                seoDrawerWrapper.style.maxHeight = seoDrawerWrapper.scrollHeight + "px";
+                seoDrawerBtn.querySelector("span").textContent = "ย่อเนื้อหาข้อความ";
+                seoDrawerBtn.querySelector("i").className = "fas fa-chevron-up";
+            }
+        });
+    }
+
+    // Protection from Image Dragging and Context Menu
+    document.querySelectorAll('img').forEach(img => {
+      img.addEventListener('contextmenu', e => e.preventDefault());
+      img.addEventListener('dragstart', e => e.preventDefault());
     });
-  </script>
+  });
+</script>
 </body>
 </html>
