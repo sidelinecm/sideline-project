@@ -1283,13 +1283,14 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
   async function handleRouteNavigation(isInitial = false) {
     let path = window.location.pathname.toLowerCase();
     
-    // ตัด Trailing Slash ด้านหลังออก
+    // ตัด Trailing Slash ด้านหลังออก (ถ้ามี)
     if (path.length > 1 && path.endsWith("/")) {
       path = path.slice(0, -1);
     }
 
-    // 🟢 [FIXED] ตรวจสอบว่าเป็นหน้า index/home หรือไม่ (รวมกรณีเปิดไฟล์ index.html บน Localhost/Download)
     const cleanPath = path.replace(/\/+$/, "");
+
+    // 🟢 1. ตรวจสอบว่าเป็นหน้า index/home หรือไม่
     const isIndexPage = 
       cleanPath === "" || 
       cleanPath === "/" || 
@@ -1297,18 +1298,23 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       cleanPath.endsWith("/index.htm") || 
       cleanPath.includes("index.html");
 
-    // รายชื่อหน้า Static แท้ๆ ที่ต้องการสั่งซ่อนการ์ดโปรไฟล์
+    // 🟢 2. ตรวจสอบว่าเป็นหน้า /profiles หรือ /profiles.html หรือไม่
+    const isProfilesPage = 
+      cleanPath === "/profiles" || 
+      cleanPath.endsWith("/profiles.html");
+
+    // 🟢 3. รายชื่อหน้า Static แท้ๆ (ถอด /profiles ออกแล้ว)
     const staticPages = [
-      "/blog", "/about", "/faq", "/profiles", "/locations", 
+      "/blog", "/about", "/faq", "/locations", 
       "/contact", "/terms-of-service", "/privacy-policy", "/policy"
     ];
 
-    const isStaticPage = !isIndexPage && (
-      (cleanPath.endsWith(".html") || cleanPath.endsWith(".htm")) && !cleanPath.includes("index.html") ||
+    const isStaticPage = !isIndexPage && !isProfilesPage && (
+      ((cleanPath.endsWith(".html") || cleanPath.endsWith(".htm")) && !cleanPath.includes("index.html") && !cleanPath.includes("profiles.html")) ||
       staticPages.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))
     );
 
-    // 🔴 ข้ามการทำงานและซ่อนการ์ดโปรไฟล์เฉพาะหน้า Static จริงๆ เท่านั้น
+    // 🔴 4. ข้ามการทำงานและซ่อนการ์ดโปรไฟล์เฉพาะหน้า Static จริงๆ เท่านั้น
     if (isStaticPage) {
       console.log(`🛑 ตรวจพบหน้า Static (${path}) ข้ามการทำงาน Router SPA`);
       closeLightboxModal(false);
@@ -1317,11 +1323,11 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       return;
     }
 
-    // 🟢 แสดงโซนโปรไฟล์และโซนแนะนำสำหรับหน้าหลัก/หน้าจังหวัด
+    // 🟢 5. แสดงโซนโปรไฟล์และโซนแนะนำสำหรับหน้าหลัก/หน้าจังหวัด/หน้ารวมโปรไฟล์
     DOM.profilesDisplayArea?.classList.remove("hidden");
     DOM.featuredSection?.classList.remove("hidden");
 
-    // 1. Router สำหรับหน้าโปรไฟล์ย่อย /sideline/:slug หรือ /profile/:slug
+    // 🔵 6. Router สำหรับหน้าโปรไฟล์ย่อย /sideline/:slug หรือ /profile/:slug
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
     if (profileMatch) {
       const slug = decodeURIComponent(profileMatch[1]);
@@ -1342,7 +1348,21 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       return;
     }
 
-    // 2. Router สำหรับหน้าจังหวัด /location/:slug หรือ /province/:slug
+    // 🔵 7. Router สำหรับหน้ารวมโปรไฟล์ทั้งหมด /profiles หรือ /profiles.html
+    if (isProfilesPage) {
+      STATE.currentProfileSlug = null;
+      closeLightboxModal(false);
+
+      if (DOM.provinceSelect) DOM.provinceSelect.value = "all";
+
+      applyUltimateFilters(false);
+
+      const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
+      replaceDomPlaceholders("ทั่วไทย", activeCount);
+      return;
+    }
+
+    // 🔵 8. Router สำหรับหน้าจังหวัด /location/:slug หรือ /province/:slug
     const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
     if (locationMatch) {
       const provinceSlug = decodeURIComponent(locationMatch[1]);
@@ -1368,7 +1388,7 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       return;
     }
 
-    // 3. Router สำหรับหน้าแรก / หรือ index.html
+    // 🔵 9. Router สำหรับหน้าแรก / หรือ index.html
     STATE.currentProfileSlug = null;
     closeLightboxModal(false);
 
