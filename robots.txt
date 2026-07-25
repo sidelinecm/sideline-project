@@ -28,11 +28,12 @@ Disallow: /*?*ref*
 # Allow static resources for rendering & Core Web Vitals
 Allow: /*.js
 Allow: /*.css
+Allow: /*.ico
 Allow: /*.png
 Allow: /*.jpg
-Allow: /*.jpeg
 Allow: /*.webp
 Allow: /*.svg
+Allow: /*.jpeg
 Allow: /*.woff2
 Allow: /*.woff
 Allow: /llms.txt

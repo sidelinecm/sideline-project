@@ -1257,13 +1257,12 @@ window.ScrollTrigger = ScrollTrigger;
 
 function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50) {
   try {
-    // 🟢 หยอดตัวเลขจำนวนโปรไฟล์ลงในป้ายของโซนโปรไฟล์โดยเฉพาะ
     const liveCountEl = document.getElementById("live-profile-count");
     if (liveCountEl) {
       liveCountEl.textContent = profileCount;
     }
 
-    // แปลงข้อความป้าย {{...}} ในจุดอื่นๆ บน DOM
+    // 1. สแกนเปลี่ยนข้อความบน HTML Text Nodes
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
     let node;
     while ((node = walker.nextNode())) {
@@ -1274,6 +1273,12 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
           .replace(/\{\{PROVINCE_ZONES\}\}/g, "นิมมาน, เจ็ดยอด, สันติธรรม, ช้างเผือกและโซนใกล้เคียง");
       }
     }
+
+    // 2. สแกนเปลี่ยน Attributes ที่ตกค้าง
+    document.querySelectorAll('a[href*="{{"], img[alt*="{{"]').forEach(el => {
+      if (el.href) el.href = el.href.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
+      if (el.alt) el.alt = el.alt.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
+    });
   } catch (e) {
     console.warn("⚠️ Replace placeholders error:", e);
   }
@@ -1822,13 +1827,27 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
     updateActiveNavLinks();
     hideGlobalLoader();
 
-    // 🟢 [ลงทะเบียน PWA Service Worker เพื่อแก้ปัญหา Lighthouse]
+    // 🟢 ตรวจสอบไฟล์ sw.js ก่อนลงทะเบียน PWA Service Worker (แก้ไขให้ทำงานชัวร์ 100%)
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('✅ [PWA] Service Worker ลงทะเบียนสำเร็จแล้ว! Scope:', reg.scope))
-          .catch(err => console.error('❌ [PWA] ลงทะเบียน Service Worker ล้มเหลว:', err));
-      });
+      const registerSW = () => {
+        fetch('/sw.js', { method: 'HEAD' })
+          .then(response => {
+            if (response.ok) { // เช็กว่ามีไฟล์ sw.js จริง (Status 200 OK)
+              return navigator.serviceWorker.register('/sw.js');
+            }
+          })
+          .then(reg => {
+            if (reg) console.log('✅ [PWA] Service Worker สำเร็จ:', reg.scope);
+          })
+          .catch(() => {});
+      };
+
+      // ถ้าหน้าเว็บโหลดเสร็จแล้วให้รันทันที ถ้ายังไม่เสร็จให้รอ 'load'
+      if (document.readyState === 'complete') {
+        registerSW();
+      } else {
+        window.addEventListener('load', registerSW);
+      }
     }
 
     // Listen to Browser Back/Forward Buttons
