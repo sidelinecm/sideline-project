@@ -143,7 +143,7 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 });
 
 // ==============================================================================
-// 3. ADVANCED HD IMAGE OPTIMIZATION ENGINE (Retina 2x + AI Smart Face Crop)
+// 3. ADVANCED HD IMAGE OPTIMIZATION ENGINE
 // ==============================================================================
 function verifyHostname(req) {
   const host = (req.headers.get("host") || "").toLowerCase();
@@ -154,8 +154,8 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 เทคนิคขั้นสูง: โหลดภาพ 2x Retina (720x960) พร้อม AI ล็อคใบหน้ากึ่งกลาง และฉีด Auto-Sharpen เพิ่มความกริบ
-const optimizeImg = (hostUrl, path, width = 720, height = 960) => {
+// โหลดภาพสัดส่วน 4:5 (600x750) เน้นโฟกัสใบหน้า
+const optimizeImg = (hostUrl, path, width = 600, height = 750) => {
   if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
   
   if (path.includes("res.cloudinary.com")) {
@@ -683,7 +683,7 @@ export default async (req, context) => {
             "@type": "Person",
             "name": p.name || "ผู้ให้บริการ",
             "url": `${hostUrl}/sideline/${p.slug || p.id}`,
-            "image": optimizeImg(hostUrl, p.imagePath, 720, 960),
+            "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
             "description": `โปรไฟล์แนะนำน้อง${p.name || ""} สาวรับงานพิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัยไม่มีมัดจำ`
           }
         }))
@@ -713,42 +713,54 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-// ============================== PROFILE CARDS GENERATOR (With Features 2, 3, 4, 5) ==============================
+    // ============================== PROFILE CARDS GENERATOR (EXACT CLIENT-SIDE MATCH) ==============================
     const cardsHtml = profileList.map((p, index) => {
-      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")),
-        pLoc = escapeHTML(p.location || "ในตัวเมือง"),
-        pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`,
-        isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw)),
-        statusText = isAvail ? (p.availability || "รับงาน") : "สอบถามคิว",
-        statusDotColor = isAvail ? "#00E676" : "#FF2E63",
-        pAge = p.age && p.age !== "-" ? `${escapeHTML(p.age)}` : "",
-        quoteText = escapeHTML(p.quote || p.slogan || "ฟีลแฟน ตรงปก");
-
-      const seoAlt = `น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
+      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
+      const pLoc = escapeHTML(p.location || provinceThaiName);
+      const pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
       
-      // 🟢 ข้อ 4: ดึงภาพคมชัดระดับ 2x HD Retina (720x960)
-      const imgUrl = optimizeImg(hostUrl, p.imagePath, 720, 960);
+      // สถานะพร้อมรับงาน
+      const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+      const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
+      const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
+      const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
+      
+      const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
+      const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
 
-      // ป้ายซ้ายบน: ⭐ แนะนำ / 🟢 รับงาน
-      const featuredBadge = `
-        <span style="background: rgba(124, 58, 237, 0.9); border: 1px solid rgba(192, 132, 252, 0.6); color: #FFFFFF; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
-            <i class="fas fa-star" style="font-size: 7.5px; color: #FBBF24;"></i>
-            <span>แนะนำ</span>
-        </span>`;
+      // 🟢 1. ป้ายแนะนำ (ไอคอนจิ๋ว ชัดเจน)
+      const featuredBadge = p.isfeatured
+        ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
+            <span style="letter-spacing: 0.02em;">แนะนำ</span>
+           </span>`
+        : "";
 
+      // 🟢 2. ป้ายสถานะรับงาน (ไอคอนจุดเรืองแสง)
       const statusBadge = `
-        <span style="background: rgba(15, 15, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.18); color: #FFFFFF; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
-            <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 5px ${statusDotColor}; flex-shrink: 0;" class="${isAvail ? 'status-dot-pulse' : ''}"></span>
-            <span>${statusText}</span>
-        </span>`;
+        <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
+            <span style="letter-spacing: 0.02em;">${statusText}</span>
+        </span>
+      `;
 
-      // 🟢 ข้อ 2: ป้ายมีคลิปวิดีโอ (Video Badge พร้อม Pulse Glow)
+      // 🟢 3. ป้ายคลิปวิดีโอ
       const hasVideo = p.has_video || p.hasVideo || false;
-      const videoBadge = hasVideo ? `
-        <span class="video-badge-glow" style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.7); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: inline-flex; align-items: center; gap: 3.5px; box-shadow: 0 0 8px rgba(255, 46, 99, 0.4);">
-            <i class="fas fa-play-circle" style="font-size: 8px; color: #FF2E63;"></i> มีคลิป
-        </span>` : "";
+      const videoBadge = hasVideo
+        ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
+           </span>`
+        : "";
 
+      // 🟢 4. ป้ายยืนยันตัวตน (ชิดขวาบน)
+      const isVerified = p.verified || p.isVerified || false;
+      const verifiedBadge = isVerified
+        ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
+           </span>`
+        : "";
+
+      // ฟอร์แมตราคา
       let rateDisplay = "1,500.-";
       if (p.rate) {
         if (!isNaN(p.rate)) {
@@ -759,61 +771,57 @@ export default async (req, context) => {
         }
       }
 
+      const sloganText = escapeHTML(p.slogan || p.quote || "");
+
       return `
         <div class="profile-card-new-container">
           <div class="profile-card-new interactive-card"
-               data-id="${p.id}"
                data-profile-id="${p.id}"
-               data-profile-slug="${p.slug}"
-               style="aspect-ratio: 3 / 4; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; background: #0b0918; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 6px 20px rgba(0,0,0,0.45);"
+               data-profile-slug="${escapeHTML(p.slug || p.id)}"
+               style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;"
                role="listitem">
               
-              <!-- 🟢 ข้อ 3 & 4: รูปโปรไฟล์คมชัดระดับ HD เร่งสีและคมด้วย GPU + Smooth Zoom -->
+              <!-- รูปภาพทรงสูง 4/5 โฟกัสช่วงบน/ใบหน้า -->
               <img src="${imgUrl}" 
-                   alt="${seoAlt}" 
-                   title="${seoAlt}"
-                   width="360"
-                   height="480"
-                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: contrast(1.03) saturate(1.06) brightness(0.98); transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), filter 0.35s ease; z-index: 0; border-radius: 16px; image-rendering: -webkit-optimize-contrast; will-change: transform;"
-                   loading="${index < 4 ? "eager" : "lazy"}" decoding="async" />
+                   alt="${seoAltText}"
+                   title="${seoAltText}"
+                   width="300"
+                   height="400"
+                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
+                   loading="${index < 4 ? "eager" : "lazy"}"
+                   decoding="async"
+                   onerror="this.onerror=null; this.src='/images/placeholder-profile.webp';" />
+                   
+              <!-- เงาดำบางๆ เฉพาะขอบล่างสุด -->
+              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
-              <!-- Overlay เงาไล่ระดับด้านล่าง -->
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(9, 8, 20, 0.95) 0%, rgba(9, 8, 20, 0.55) 28%, transparent 58%); z-index: 10; pointer-events: none;"></div>
-
-              <!-- มุมซ้ายบน: ป้ายแนะนำ / สถานะ / ป้ายมีคลิป -->
-              <div style="position: absolute; top: 7px; left: 7px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+              <!-- 🟢 ซ้ายบน: เรียงซ้อนแนวตั้ง (บน: แนะนำ / ล่าง: รับงาน) คมชัด ไอคอนจิ๋ว -->
+              <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
                   ${featuredBadge}
                   ${statusBadge}
                   ${videoBadge}
               </div>
 
-              <!-- 🟢 ข้อ 5: ปุ่มหัวใจบันทึกรูปที่ชอบ (Quick Favorite Button) -->
-              <div style="position: absolute; top: 7px; right: 7px; z-index: 35;">
-                  <button class="fav-btn" 
-                          data-id="${p.id}" 
-                          onclick="event.preventDefault(); event.stopPropagation(); this.classList.toggle('active');" 
-                          aria-label="บันทึกน้อง${pName}"
-                          style="background: rgba(10, 8, 20, 0.65); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-                      <i class="far fa-heart" style="font-size: 11px; color: #FFFFFF; transition: transform 0.2s ease;"></i>
-                  </button>
+              <!-- 🟢 ขวาบน: ป้ายยืนยันตัวตน (ชิดขอบขวาบน) -->
+              <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+                  ${verifiedBadge}
               </div>
+              
+              <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${pName}"></a>
 
-              <!-- ลิงก์คลิกครอบการ์ดทั้งหมด -->
-              <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
-
-              <!-- ข้อมูลด้านล่างสุด (ชื่อ สโลแกน พิกัด ราคา) -->
-              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 10px 10px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 2px;">
-                  <h3 style="font-size: 14px; font-weight: 800; color: #ffffff; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
-                    น้อง${pName}${pAge ? ` ${pAge}` : ''}
+              <!-- ข้อมูลล่างสุด (ขยับลงชิดขอบล่าง + บีบช่องไฟแน่นแคบ) -->
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
+                  <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+                    ${pName}${ageDisplay}
                   </h3>
                   
-                  ${quoteText ? `<p style="font-size: 10.5px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${quoteText}</p>` : ''}
+                  ${sloganText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${sloganText}</p>` : ''}
                   
-                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #E4E4E7; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 3px;">
-                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; color: #D4D4D8; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
-                          <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 3px;"></i>${pLoc}
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                          <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
                       </span>
-                      <span style="color: #00E676; font-weight: 900; font-size: 13px; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+                      <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
                           ${rateDisplay}
                       </span>
                   </div>
@@ -920,39 +928,14 @@ export default async (req, context) => {
         box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35) !important;
       }
 
-      /* 2. ไฟกระพริบออนไลน์ (Live Pulse Effect) */
-      @keyframes statusPulse {
-        0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
-        70% { box-shadow: 0 0 0 5px rgba(0, 230, 118, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
-      }
-      .status-dot-pulse {
-        animation: statusPulse 1.8s infinite;
-      }
-
-      /* 3. ข้อ 3: ซูมรูปภาพสมูทเมื่อแตะ/โฮเวอร์ (Smooth 60fps Zoom Effect) */
+      /* 2. ซูมรูปภาพสมูทเมื่อแตะ/โฮเวอร์ */
       .profile-card-new:hover img,
       .profile-card-new:active img {
-        transform: scale(1.06) !important;
-        filter: contrast(1.05) saturate(1.08) brightness(1.02) !important;
+        transform: scale(1.05) !important;
+        filter: brightness(1) !important;
       }
 
-      /* 4. ข้อ 5: เอฟเฟกต์ปุ่มหัวใจกดเลือกชอบ (Heart Fav Button Active) */
-      .fav-btn:active {
-        transform: scale(0.85) !important;
-      }
-      .fav-btn.active {
-        background: rgba(255, 46, 99, 0.88) !important;
-        border-color: rgba(255, 46, 99, 1) !important;
-      }
-      .fav-btn.active i {
-        font-family: "Font Awesome 5 Free" !important;
-        font-weight: 900 !important;
-        color: #FFFFFF !important;
-        transform: scale(1.18);
-      }
-
-      /* 5. จัดระยะห่างคอนเทนต์หลักประหยัดพื้นที่ */
+      /* 3. จัดระยะห่างคอนเทนต์หลัก */
       section, .hero-section, .trust-section, .intro-section {
         padding-top: 6px !important;
         padding-bottom: 6px !important;
@@ -975,7 +958,7 @@ export default async (req, context) => {
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
       }
 
-      /* 6. Grid 2 คอลัมน์ สมบูรณ์แบบสำหรับมือถือ */
+      /* 4. Grid 2 คอลัมน์ อัตราส่วน 4:5 สำหรับมือถือและเดสก์ท็อป */
       .profiles-grid, #profiles-container, .profiles-container {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
@@ -992,10 +975,11 @@ export default async (req, context) => {
       }
 
       .profile-card-new {
-        aspect-ratio: 3 / 4 !important;
+        aspect-ratio: 4 / 5 !important;
         border-radius: 16px !important;
         overflow: hidden !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background-color: #09090B !important;
       }
     </style>
     `;
