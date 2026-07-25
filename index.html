@@ -61,67 +61,7 @@
   <link rel="preload" href="/images/hero-sidelinechiangmai-1200.webp" as="image" 
         imagesrcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w" 
         imagesizes="(max-width: 768px) 100vw, 1200px" fetchpriority="high">
-        
-        <script src="https://browser.sentry-cdn.com/7.100.0/bundle.min.js" crossorigin="anonymous"></script>
-<script>
-  if (window.Sentry) {
-    Sentry.init({ dsn: "YOUR_SENTRY_DSN_HERE" });
-  }
-</script>
 
-  <!-- ============================== ADVANCED MEDIA PROTECTION & BADGES STYLES ============================== -->
-  <style>
-    /* ล็อกการดูดรูปภาพ / ลากรูป / คลิกขวาเซฟรูปภาพ */
-    img, .interactive-card img, .billboard-container img {
-      user-select: none !important;
-      -webkit-user-select: none !important;
-      -webkit-user-drag: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
-    }
-    
-    /* Dynamic Media Badges บนการ์ดโปรไฟล์ */
-    .badge-video-neon {
-      background: rgba(124, 58, 237, 0.85) !important;
-      color: #FFFFFF !important;
-      font-size: 9px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 100px;
-      border: 1px solid rgba(192, 132, 252, 0.5);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .badge-new-neon {
-      background: rgba(16, 185, 129, 0.85) !important;
-      color: #FFFFFF !important;
-      font-size: 9px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 100px;
-      border: 1px solid rgba(52, 211, 153, 0.5);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .profile-card-slogan-text {
-      font-size: 11px;
-      color: #C084FC;
-      font-weight: 600;
-      line-height: 1.3;
-      margin: 2px 0 4px 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  </style>
 
   <!-- ============================== SCHEMA.ORG STRUCTURED DATA GRAPH ============================== -->
   <script type="application/ld+json" id="dynamic-schema">
@@ -174,7 +114,7 @@
 
     <div class="header-status-badge">
         <span class="status-dot-el" aria-hidden="true"></span>
-        <span style="font-weight: 700; color: var(--text-gray);">ระบบพร้อมทำงาน: <span id="last-updated-time">อัปเดต {{PROFILE_COUNT}}+ น้องๆ ล่าสุดวันนี้</span></span>
+        <span style="font-weight: 700; color: var(--text-gray);">ระบบพร้อมทำงาน: <span id="last-updated-time">อัปเดตน้องๆ ล่าสุดวันนี้</span></span>
     </div>
 
     <div class="nav-controls">
@@ -193,10 +133,10 @@
     </div>
   </header>
 
-  <!-- ============================== MOBILE SIDEBAR MENU ============================== -->
+  <!-- ============================== MOBILE SIDEBAR MENU (45% SLEEK DRAWER) ============================== -->
   <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
     <div class="sidebar-header-div">
-      <span style="color: #A1A1AA !important;">Navigation Menu</span>
+      <span style="color: #A1A1AA !important;">Navigation</span>
       <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>
@@ -204,23 +144,17 @@
     
     <div class="sidebar-links-wrapper">
       <a href="/">หน้าแรก</a>
-      <a href="/profiles">น้องๆ VIP แนะนำ ({{PROFILE_COUNT}}+)</a>
-      <a href="/locations">พื้นที่บริการทั่วประเทศ</a>
-      <a href="/about">เกี่ยวกับเรา & ความปลอดภัย</a>
+      <a href="/profiles">น้องๆ VIP แนะนำ</a>
+      <a href="/locations">พื้นที่บริการทั่วไทย</a>
+      <a href="/about">เกี่ยวกับเรา & ปลอดภัย</a>
       <a href="/faq">คำถามพบบ่อย</a>
       <a href="/blog">บทความแนะนำ</a>
     </div>
 
-    <div class="menu-ticker-div" aria-hidden="true" style="border-top: 1px solid rgba(255, 255, 255, 0.08) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; background: rgba(0, 0, 0, 0.455);">
-      <div class="ticker-text-wrapper" style="font-size: 11px; color: var(--text-gray);">
-        จองคิวน้องๆ แอดไลน์ @firstmodelhub • เจอตัวจริงจ่ายหน้างาน 100% • ปลอดภัย ไม่โอนมัดจำ •
-      </div>
-    </div>
-
-    <div style="padding: 24px; background: rgba(9, 9, 12, 0.95) !important; border-top: 1px solid rgba(255, 255, 255, 0.08) !important; padding-bottom: calc(24px + env(safe-area-inset-bottom));">
+    <div>
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-         style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 16px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(17, 120, 59, 0.25); transition: background-color 0.2s;">
-        <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิวทันที
+         style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 10px 0; border-radius: 8px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 10.5px; box-shadow: 0 4px 15px rgba(17, 120, 59, 0.25);">
+        <i class="fab fa-line" style="font-size: 14px;" aria-hidden="true"></i> แอดไลน์จองคิว
       </a>
     </div>
   </aside>
@@ -236,7 +170,7 @@
 
   <div class="container space-y-24">
 
-    <!-- HERO SECTION (OPTIMIZED FOR HIGH CTR & DIRECTORY INTENT) -->
+    <!-- HERO SECTION (CLEAN & HIGH-IMPACT HEADLINE) -->
     <section class="hero-section" aria-labelledby="hero-h1">
       
       <div class="clutch-pill" style="margin: 0 auto 12px auto; width: max-content; display: flex; align-items: center; gap: 6px; background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3); padding: 4px 12px; border-radius: 100px;">
@@ -244,14 +178,14 @@
         <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-hidden="true">
           <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
         </div>
-        <span class="rating-text" style="color: white; font-size: 11px; font-weight: 700;">รวม {{PROFILE_COUNT}}+ โปรไฟล์ตรงปก</span>
+        <span class="rating-text" style="color: white; font-size: 11px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
       <div class="billboard-container" style="max-height: 280px; border-radius: 20px; overflow: hidden; margin-bottom: 16px; position: relative;">
         <img src="/images/hero-sidelinechiangmai-1200.webp" 
              srcset="/images/hero-sidelinechiangmai-600.webp 600w, /images/hero-sidelinechiangmai-1200.webp 1200w"
              sizes="(max-width: 768px) 100vw, 1200px"
-             alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก {{PROFILE_COUNT}}+ โปรไฟล์ ไม่โอนมัดจำ" 
+             alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก ไม่โอนมัดจำ" 
              title="ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} พรีเมียมตรงปก 100%"
              width="1200" 
              height="630" 
@@ -261,10 +195,12 @@
         <div class="billboard-overlay"></div>
       </div>
 
-      <h1 id="hero-h1" class="hero-title text-gradient-main" style="font-size: clamp(22px, 4.5vw, 38px); margin-bottom: 6px; line-height: 1.25;">
-          รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}}+ โปรไฟล์)
+      <!-- 🟢 H1 สะอาดตา ตัดคำสมดุล 2 บรรทัด (ถอดวงเล็บตัวเลขออกแล้ว) -->
+      <h1 id="hero-h1" class="hero-title text-gradient-main" style="font-size: clamp(22px, 5.5vw, 38px); font-weight: 900; line-height: 1.35; letter-spacing: -0.02em; text-align: center; margin: 0 auto 8px auto; max-width: 800px; text-wrap: balance;">
+          รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}}<br style="display: block;">
+          <span style="color: #FFFFFF; font-weight: 800;">สาวรับงานฟิวแฟนตรงปก 100%</span>
       </h1>
-      <p class="text-gradient-sub" style="font-size: clamp(14px, 2.8vw, 20px); display: block; margin-top: 4px; font-weight: 700; text-align: center; line-height: 1.4;">
+      <p class="text-gradient-sub" style="font-size: clamp(13px, 2.8vw, 18px); display: block; margin-top: 4px; font-weight: 700; text-align: center; line-height: 1.4; color: #A1A1AA;">
           ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
       </p>
       
@@ -298,17 +234,33 @@
       </div>
     </section>
 
-      <!-- ============================== FEATURED PROFILES GRID ============================== -->
-      <section id="featured-profiles" class="glass-panel" style="padding: 36px 0; overflow: hidden; position: relative;">
+    <!-- ============================== FEATURED PROFILES GRID (LUXURY TYPOGRAPHY REDESIGN) ============================== -->
+      <section id="featured-profiles" class="glass-panel" style="padding: 28px 0; overflow: hidden; position: relative;">
         <div class="bg-glow-overlap" style="top: 15%; left: 5%; width: 350px; height: 350px;" aria-hidden="true"></div>
         
-        <div class="section-spacing-container text-center-wrapper" style="position: relative; z-index: 10;">
-            <div class="badge-wrapper"><span class="work-badge-webyst">POPULAR SELECTION</span></div>
-            <h2 id="featured-heading" class="text-gradient-main" style="font-size: 24px; font-weight: 800; margin-top: 8px; margin-bottom: 8px;">
-              แนะนำเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}} ยอดนิยมและตรงปก 100%
+        <div class="section-spacing-container text-center-wrapper" style="position: relative; z-index: 10; padding: 0 12px; margin-bottom: 20px;">
+            
+            <!-- 🟢 1. ป้ายพิลล์ นีออนกระจกใส เรียงคู่กันสมดุล หรูหรา สะดุดตา -->
+            <div class="badge-wrapper" style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                <span style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-size: 10px; font-weight: 800; padding: 4px 12px; border-radius: 100px; letter-spacing: 0.08em; text-transform: uppercase; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);">
+                  POPULAR SELECTION
+                </span>
+                <span id="profile-count-pill" style="background: rgba(0, 230, 118, 0.12); border: 1px solid rgba(0, 230, 118, 0.35); color: #00E676; font-size: 10.5px; font-weight: 800; padding: 3.5px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #00E676; box-shadow: 0 0 8px #00E676;"></span>
+                  <span>พบ <strong id="live-profile-count" style="font-weight: 900; font-size: 12px;">72</strong> โปรไฟล์พร้อมรับงาน</span>
+                </span>
+            </div>
+
+            <!-- 🟢 2. หัวข้อ H2 สีสว่างนีออน ตัดคำสมบูรณ์ 2 บรรทัดพอดีเป๊ะ -->
+            <h2 id="featured-heading" style="font-size: clamp(20px, 5.2vw, 30px); font-weight: 900; line-height: 1.38; letter-spacing: -0.01em; color: #FFFFFF; text-align: center; margin: 0 auto 10px auto; max-width: 650px; text-wrap: balance;">
+              แนะนำเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}<br style="display: block;">
+              <span style="background: linear-gradient(135deg, #F3E8FF 0%, #C084FC 50%, #A855F7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-shadow: 0 0 30px rgba(192, 132, 252, 0.3);">ยอดนิยม และตรงปก 100%</span>
             </h2>
-            <p style="font-size: 13px; color: var(--text-gray); line-height: 1.6;">
-              คัดเกรดเฉพาะน้องๆ ยืนยันตัวตนแล้วในโซน {{PROVINCE_NAME}} การันตีเจอตัวจริง ชำระเงินหน้างานปลอดภัยสูงสุด
+
+            <!-- 🟢 3. รายละเอียดด้านล่าง บังคับไม่ให้ตัดคำพะรุงพะรัง อ่านง่ายสบายตา -->
+            <p style="font-size: 12.5px; color: #9CA3AF; line-height: 1.65; max-width: 520px; margin: 0 auto; text-align: center; text-wrap: pretty;">
+              คัดเกรดเฉพาะน้องๆ ยืนยันตัวตนแล้วในโซน {{PROVINCE_NAME}}<br style="display: block;">
+              การันตีเจอตัวจริง ชำระเงินหน้างาน ปลอดภัยสูงสุด
             </p>
         </div>
         
@@ -872,7 +824,7 @@
   </div>
 
   <script id="ssr-profiles-data">
-  window.profilesData = {{PROFILES_JSON}};
+    window.profilesData = [];
   </script>
 
   <script type="module" src="/main.js"></script>
