@@ -386,11 +386,12 @@ export default async (req, context) => {
     }
   }
 
-  // ============================== ROUTE PARSING ==============================
+// ============================== ROUTE PARSING ==============================
   const paths = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "", profileSlug = "", isNationalHome = false;
 
-  if (paths.length === 0 || url.pathname === "/") {
+  // 🟢 ต้องมี || url.pathname === "/profiles" || url.pathname === "/profiles.html" บรรทัดนี้ครับ
+  if (paths.length === 0 || url.pathname === "/" || url.pathname === "/profiles" || url.pathname === "/profiles.html") {
     isNationalHome = true;
     provinceSlug = "national";
   } else if ("location" === paths[0] && paths[1]) {
