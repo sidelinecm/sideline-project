@@ -273,6 +273,87 @@ function buildErrorPage(code, title, message) {
         .card { max-width: 420px; width:100%; border: 1px solid rgba(255,255,255,0.08); background: rgba(14,9,30,0.75); padding: 40px 24px; border-radius: 24px; text-align:center; backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         .code { font-size: 64px; font-weight:800; color: #C084FC; margin-bottom: 12px; line-height:1; }
         .back-btn { display: inline-block; background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%); color: #ffffff; padding: 14px 32px; border-radius: 100px; text-decoration:none; font-weight: 800; font-size: 14px; margin-top: 24px; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3); }
+        /* ============================== FULL-BLEED MOBILE GRID (ขยายรูปใหญ่ชิดขอบจอ) ============================== */
+@media (max-width: 640px) {
+  /* 🟢 1. ขยายพื้นที่คอนเทนเนอร์ชิดขอบจอมากขึ้น (ลดขอบข้างดำๆ ที่บีบรูปอยู่) */
+  .container, 
+  .glass-panel, 
+  .section-content-wrapper, 
+  #featured-profiles, 
+  #profiles-display-area {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 🟢 2. บีบช่องว่างระหว่างการ์ดซ้าย-ขวาให้แคบลงเหลือ 8px (ดันรูปให้ใหญ่ขึ้นทันที) */
+  .profiles-grid-row, 
+  .profile-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important; /* ช่องว่างแคบลง = รูปใหญ่ขึ้น */
+  }
+
+  /* 🟢 3. ขยายการ์ดให้เต็มพื้นที่คอลัมน์ */
+  .profile-card-new-container,
+  .profile-card-new {
+    width: 100% !important;
+    border-radius: 16px !important; /* ปรับมุมโค้งให้กระชับเข้ากับจอ */
+  }
+}
+/* ============================== SLEEK 45% MOBILE SIDEBAR MENU ============================== */
+/* 🟢 1. กำหนดความกว้างเมนูให้เลื่อนออกมาแค่ 45% ของหน้าจอ */
+#sidebar-menu {
+  width: 45vw !important;
+  max-width: 45% !important;
+  background: rgba(12, 10, 20, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.8) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 🟢 2. จัดระเบียบตัวหนังสือและปุ่มในเมนู 45% ให้พอดีกะทัดรัด ไม่ล้นขอบ */
+@media (max-width: 640px) {
+  /* หัวข้อ Navigation ด้านบน */
+  .sidebar-header-div {
+    padding: 14px 10px !important;
+  }
+  .sidebar-header-div span {
+    font-size: 9.5px !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* รายการลิงก์เมนู */
+  .sidebar-links-wrapper a {
+    padding: 12px 10px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* ข้อความวิ่ง Ticker */
+  .menu-ticker-div {
+    display: none !important; /* ซ่อนแถบข้อความวิ่งบนความกว้าง 45% เพื่อให้คลีนกระชับ */
+  }
+
+  /* ปุ่มแอดไลน์ล่างสุด */
+  #sidebar-menu div:last-child {
+    padding: 12px 10px !important;
+  }
+  #sidebar-menu a[href*="line.me"] {
+    padding: 10px 6px !important;
+    font-size: 10px !important;
+    border-radius: 8px !important;
+    gap: 4px !important;
+  }
+  #sidebar-menu a[href*="line.me"] i {
+    font-size: 14px !important;
+  }
+}
     </style>
 </head>
 <body>
@@ -934,7 +1015,7 @@ export default async (req, context) => {
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-        "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https://zxetzqwjaiumqhrpumln.supabase.co https://api.mapbox.com;"
+        "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https:;"
       }
     });
 

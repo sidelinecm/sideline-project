@@ -503,7 +503,7 @@ export default async (request, context) => {
                 "Referrer-Policy": "strict-origin-when-cross-origin",
                 "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
                 "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-                "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https://zxetzqwjaiumqhrpumln.supabase.co https://api.mapbox.com;"
+                "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https:;"
             }
         });
 
