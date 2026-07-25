@@ -28,14 +28,14 @@ const CONFIG = {
     tiktok: "https://tiktok.com/@firstmodelhub",
     twitter: "https://twitter.com/firstmodelhub",
     linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280",
-    biosite: "https://bio.site/firstmodelhub", // ✅ อัปเดตลิงก์ Bio.site ใหม่
+    biosite: "https://bio.site/firstmodelhub",
     linktree: "https://linktr.ee/firstmodelhub",
     bluesky: "https://bsky.app/profile/firstmodelhub.bsky.social"
   }
 };
 
 // ==============================================================================
-// 2. DYNAMIC SEO DATA ARCHITECTURE (OPTIMIZED FOR "รับงาน" KEYWORDS & UDON THANI)
+// 2. DYNAMIC SEO DATA ARCHITECTURE
 // ==============================================================================
 const PROVINCE_CUSTOM_METADATA = {
   chiangmai: {
@@ -150,10 +150,11 @@ function verifyHostname(req) {
   return ["firstmodelhub.com", "sidelinechiangmai.netlify.app", "localhost"].some(h => host.includes(h)) || host.endsWith(".netlify.app");
 }
 
-const escapeHTML = str => str ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) : "";
-const stripHTML = str => str ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
+const escapeHTML = str => (str !== null && str !== undefined) ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) : "";
+const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
+// 🟢 อัตราส่วนหลักของรูปโปรไฟล์คือ 360x480 (Ratio 3:4)
 const optimizeImg = (hostUrl, path, width = 360, height = 480) => {
   if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
   
@@ -220,7 +221,6 @@ const getDynamicIntro = (provinceName, zones) => {
   `;
 };
 
-// 🟢 โค้ดใหม่ (หลังแก้):
 const getDynamicReviews = provinceName => {
   const t = new Date();
   const isChiangMai = provinceName === "เชียงใหม่";
@@ -232,7 +232,7 @@ const getDynamicReviews = provinceName => {
       text: isChiangMai 
         ? `"นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ แถวนิมมาน"`
         : `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ"`,
-      rating: 5, // 👈 เพิ่มจุดนี้
+      rating: 5,
       date: "เมื่อสัปดาห์ที่แล้ว",
       datePublished: new Date(t.getTime() - 691200000).toISOString().split("T")[0]
     },
@@ -242,7 +242,7 @@ const getDynamicReviews = provinceName => {
       text: isChiangMai
         ? '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง นัดเจอแถวนิมมานตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"'
         : '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
-      rating: 5, // 👈 เพิ่มจุดนี้
+      rating: 5,
       date: "เมื่อ 2 สัปดาห์ก่อน",
       datePublished: new Date(t.getTime() - 1296000000).toISOString().split("T")[0]
     }
@@ -250,12 +250,12 @@ const getDynamicReviews = provinceName => {
 };
 
 function customMetaTitle(province, customMeta) {
-  return customMeta && customMeta.title ? customMeta.title : `สาวรับงาน${province} ไซด์ไลน์${province} เพื่อนเที่ยวตรงปก 2026 | First Model Hub`;
+  return customMeta && customMeta.title ? customMeta.title : `รับงาน${province} ไซด์ไลน์${province} สาวรับงานฟิวแฟนตรงปก 2026 | First Model Hub`;
 }
 
 function customMetaDesc(province, seo, customMeta) {
   if (customMeta && customMeta.desc) return customMeta.desc;
-  return `รวมไซด์ไลน์${province} สาวรับงาน${province} เพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้าบน First Model Hub${seo.zones && seo.zones.length > 0 ? ` ครอบคลุมพิกัด ${seo.zones.slice(0, 4).join(", ")}` : ""}`;
+  return `ศูนย์รวมสาวรับงาน${province} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100% ครอบคลุมพิกัด ${seo.zones && seo.zones.length > 0 ? seo.zones.slice(0, 4).join(", ") : province}`;
 }
 
 function buildErrorPage(code, title, message) {
@@ -273,87 +273,6 @@ function buildErrorPage(code, title, message) {
         .card { max-width: 420px; width:100%; border: 1px solid rgba(255,255,255,0.08); background: rgba(14,9,30,0.75); padding: 40px 24px; border-radius: 24px; text-align:center; backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         .code { font-size: 64px; font-weight:800; color: #C084FC; margin-bottom: 12px; line-height:1; }
         .back-btn { display: inline-block; background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%); color: #ffffff; padding: 14px 32px; border-radius: 100px; text-decoration:none; font-weight: 800; font-size: 14px; margin-top: 24px; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3); }
-        /* ============================== FULL-BLEED MOBILE GRID (ขยายรูปใหญ่ชิดขอบจอ) ============================== */
-@media (max-width: 640px) {
-  /* 🟢 1. ขยายพื้นที่คอนเทนเนอร์ชิดขอบจอมากขึ้น (ลดขอบข้างดำๆ ที่บีบรูปอยู่) */
-  .container, 
-  .glass-panel, 
-  .section-content-wrapper, 
-  #featured-profiles, 
-  #profiles-display-area {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  /* 🟢 2. บีบช่องว่างระหว่างการ์ดซ้าย-ขวาให้แคบลงเหลือ 8px (ดันรูปให้ใหญ่ขึ้นทันที) */
-  .profiles-grid-row, 
-  .profile-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important; /* ช่องว่างแคบลง = รูปใหญ่ขึ้น */
-  }
-
-  /* 🟢 3. ขยายการ์ดให้เต็มพื้นที่คอลัมน์ */
-  .profile-card-new-container,
-  .profile-card-new {
-    width: 100% !important;
-    border-radius: 16px !important; /* ปรับมุมโค้งให้กระชับเข้ากับจอ */
-  }
-}
-/* ============================== SLEEK 45% MOBILE SIDEBAR MENU ============================== */
-/* 🟢 1. กำหนดความกว้างเมนูให้เลื่อนออกมาแค่ 45% ของหน้าจอ */
-#sidebar-menu {
-  width: 45vw !important;
-  max-width: 45% !important;
-  background: rgba(12, 10, 20, 0.96) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.8) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* 🟢 2. จัดระเบียบตัวหนังสือและปุ่มในเมนู 45% ให้พอดีกะทัดรัด ไม่ล้นขอบ */
-@media (max-width: 640px) {
-  /* หัวข้อ Navigation ด้านบน */
-  .sidebar-header-div {
-    padding: 14px 10px !important;
-  }
-  .sidebar-header-div span {
-    font-size: 9.5px !important;
-    letter-spacing: 0.05em !important;
-  }
-
-  /* รายการลิงก์เมนู */
-  .sidebar-links-wrapper a {
-    padding: 12px 10px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  /* ข้อความวิ่ง Ticker */
-  .menu-ticker-div {
-    display: none !important; /* ซ่อนแถบข้อความวิ่งบนความกว้าง 45% เพื่อให้คลีนกระชับ */
-  }
-
-  /* ปุ่มแอดไลน์ล่างสุด */
-  #sidebar-menu div:last-child {
-    padding: 12px 10px !important;
-  }
-  #sidebar-menu a[href*="line.me"] {
-    padding: 10px 6px !important;
-    font-size: 10px !important;
-    border-radius: 8px !important;
-    gap: 4px !important;
-  }
-  #sidebar-menu a[href*="line.me"] i {
-    font-size: 14px !important;
-  }
-}
     </style>
 </head>
 <body>
@@ -417,27 +336,6 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
-const FLOATING_DOCK_HTML = `
-<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-  <a href="/" class="dock-item active">
-    <i class="fas fa-home" aria-hidden="true"></i>
-    <span>หน้าแรก</span>
-  </a>
-  <a href="#search-section" class="dock-item">
-    <i class="fas fa-search" aria-hidden="true"></i>
-    <span>ตัวกรอง</span>
-  </a>
-  <a href="/profiles" class="dock-item">
-    <i class="fas fa-user-friends" aria-hidden="true"></i>
-    <span>รวมน้องๆ</span>
-  </a>
-  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
-    <i class="fab fa-line" aria-hidden="true"></i>
-    <span>จองคิว</span>
-  </a>
-</nav>
-`;
-
 // ==============================================================================
 // 4. MAIN EDGE REQUEST HANDLER (NATIONAL & MULTI-LOCATION SSR MASTER)
 // ==============================================================================
@@ -479,7 +377,7 @@ export default async (req, context) => {
     }
   }
 
-  // ปล่อยผ่านไฟล์ Static Assets (CSS, JS, รูปภาพ, ฟอนต์)
+  // ปล่อยผ่านไฟล์ Static Assets
   if ([".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2"].some(ext => url.pathname.toLowerCase().endsWith(ext))) {
     try {
       return await context.next();
@@ -493,7 +391,6 @@ export default async (req, context) => {
   let provinceSlug = "", profileSlug = "", isNationalHome = false;
 
   if (paths.length === 0 || url.pathname === "/") {
-    // 🟢 หน้าหลัก (firstmodelhub.com/) ➔ ตั้งค่าเป็น "ศูนย์รวมระดับประเทศ (ทั่วไทย)"
     isNationalHome = true;
     provinceSlug = "national";
   } else if ("location" === paths[0] && paths[1]) {
@@ -512,8 +409,6 @@ export default async (req, context) => {
       provinceSlug = lastSegment.toLowerCase();
     }
   }
-
-  // 🟢 [FIXED] เอาการ Redirect /location/chiangmai ออก เพื่อให้เชียงใหม่มีหน้า Landing Page แยกเดี่ยวของตัวเอง
 
   // ============================== ROBOTS.TXT ==============================
   if ("/robots.txt" === url.pathname) {
@@ -537,7 +432,6 @@ export default async (req, context) => {
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
       xml += `  <url>\n    <loc>${hostUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
 
-      // 🟢 [FIXED] เพิ่มทุกจังหวัดลงใน Sitemap รวมทั้ง Chiang Mai
       provList.forEach(p => {
         if (p.key) {
           xml += `  <url>\n    <loc>${hostUrl}/location/${p.key}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
@@ -567,7 +461,6 @@ export default async (req, context) => {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let matchedProfile = null;
 
-    // กรณีเข้าดูหน้าโปรไฟล์ย่อย /sideline/:slug
     if (profileSlug) {
       const { data: profileData } = await supabase
         .from("profiles")
@@ -585,8 +478,6 @@ export default async (req, context) => {
     }
 
     const provinceParam = provinceSlug.replace(/-/g, "");
-    
-
 
     let profileQuery = supabase
       .from("profiles")
@@ -594,8 +485,7 @@ export default async (req, context) => {
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("lastUpdated", { ascending: false })
-      .limit(16); // 👈 ปรับเหลือ 16 การ์ดแรกในหน้าแรก จะลด DOM จาก 3,300 เหลือไม่เกิน 800 ชิ้นทันที!
-
+      .limit(16);
 
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.eq("provinceKey", provinceSlug);
@@ -618,7 +508,11 @@ export default async (req, context) => {
     const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
     const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
     const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
-    const canonUrl = isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`;
+
+    // 🟢 Fix 1: คำนวณ Canonical URL ให้ถูกต้องตามการเป็นหน้าโปรไฟล์รายบุคคล
+    const canonUrl = matchedProfile 
+      ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
+      : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
     
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
@@ -656,12 +550,11 @@ export default async (req, context) => {
       finalReviews = getDynamicReviews(provinceThaiName);
     }
 
-    // 🟢 [TITLE & DESCRIPTION SWITCHER] แยกข้อความระดับประเทศ และระดับจังหวัดออกจากกัน
     let pageTitle = "", pageDesc = "";
 
     if (isNationalHome) {
-      pageTitle = "ไซด์ไลน์ สาวรับงาน ฟิวแฟน เด็กเอ็น เพื่อนเที่ยวพรีเมียม ทั่วไทย | First Model Hub";
-      pageDesc = "ศูนย์รวมไซด์ไลน์ สาวรับงาน ฟิวแฟน และเด็กเอ็นพรีเมียมทั่วประเทศ คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมกรุงเทพฯ เชียงใหม่ ภูเก็ต ขอนแก่น";
+      pageTitle = "รับงาน ไซด์ไลน์ สาวรับงาน ฟิวแฟน เพื่อนเที่ยวตรงปก 2026 | First Model Hub";
+      pageDesc = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟน และเพื่อนเที่ยวพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมกรุงเทพฯ เชียงใหม่ อุดรธานี ชลบุรี";
     } else {
       pageTitle = customMetaTitle(provinceThaiName, customMeta);
       pageDesc = customMetaDesc(provinceThaiName, seoData, customMeta);
@@ -721,7 +614,7 @@ export default async (req, context) => {
         "@id": `${profileUrl}/#breadcrumb`,
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl },
-          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": canonUrl },
+          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": `${hostUrl}/location/${provinceSlug}` },
           { "@type": "ListItem", "position": 3, "name": `น้อง${(matchedProfile.name || "").replace(/^น้อง/, "").trim()}`, "item": profileUrl }
         ]
       });
@@ -825,38 +718,49 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== PROFILE CARDS HTML GENERATOR (LUXURY STYLE) ==============================
+    // ============================== PROFILE CARDS HTML GENERATOR (3:4 ASPECT RATIO & LUXURY STYLE) ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")),
         pLoc = escapeHTML(p.location || provinceThaiName),
         pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`,
         isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw)),
-        statusText = isAvail ? "รับงาน" : "สอบถามคิว",
+        statusText = isAvail ? "พร้อมรับงาน" : "สอบถามคิว",
         statusDotColor = isAvail ? "#00E676" : "#FF2E63",
-        pAge = p.age || "",
-        ageDisplay = pAge && "-" !== pAge ? ` ${escapeHTML(pAge)}` : "",
+        pAge = p.age && p.age !== "-" ? `${escapeHTML(p.age)} ปี` : "",
+        pStats = p.stats ? escapeHTML(p.stats) : (p.height && p.weight ? `${p.height}/${p.weight}` : ""),
+        pBust = (p.bust || p.cup_size) ? `อก ${escapeHTML(p.bust || '')}${escapeHTML(p.cup_size || '')}` : "",
         quoteText = escapeHTML(p.quote || p.slogan || "ดูแลเทคแคร์น่ารัก สไตล์ฟิวแฟน");
 
       const seoAlt = `น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
+      const imgUrl = optimizeImg(hostUrl, p.imagePath, 360, 480);
 
-      // 🟢 [ป้ายซ้อนแนวตั้งซ้ายบน: บน = แนะนำ, ล่าง = รับงาน]
+      // Badges
       const featuredBadge = p.isfeatured ? `
-        <span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
-            <span style="letter-spacing: 0.02em;">แนะนำ</span>
+        <span style="background: rgba(124, 58, 237, 0.9); border: 1px solid rgba(192, 132, 252, 0.6); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-star" style="font-size: 7px; color: #FBBF24;"></i>
+            <span>VIP</span>
         </span>` : "";
 
       const statusBadge = `
-        <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <span style="background: rgba(9, 9, 11, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
             <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
-            <span style="letter-spacing: 0.02em;">${statusText}</span>
+            <span>${statusText}</span>
         </span>`;
 
-      // 🟢 [ป้ายยืนยันตัวตนขวาบน]
       const verifiedBadge = (p.verified || p.isVerified) ? `
-        <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
+        <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.6); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-check-circle" style="font-size: 8px; color: #00E676;"></i> ตรงปก
         </span>` : "";
+
+      const videoBadge = (p.has_video || p.hasVideo) ? `
+        <span style="background: rgba(239, 68, 68, 0.3); border: 1px solid rgba(248, 113, 113, 0.6); color: #F87171; font-size: 8.5px; font-weight: 800; padding: 2px 6px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px;">
+            <i class="fas fa-play" style="font-size: 7px;"></i> คลิป
+        </span>` : "";
+
+      let rateDisplay = "สอบถาม";
+      if (p.rate) {
+        rateDisplay = isNaN(p.rate) ? escapeHTML(p.rate) : `${Number(p.rate).toLocaleString()}.-`;
+      }
 
       return `
         <div class="profile-card-new-container">
@@ -864,44 +768,57 @@ export default async (req, context) => {
                data-id="${p.id}"
                data-profile-id="${p.id}"
                data-profile-slug="${p.slug}"
-               style="aspect-ratio: 4/5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding:0; cursor: pointer; background: #09090B; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4);"
+               style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding:0; cursor: pointer; background: #09090B; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4);"
                role="listitem">
               
               <a href="${pUrl}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
 
-              <img src="${optimizeImg(hostUrl, p.imagePath, 360, 480)}" 
+              <img src="${imgUrl}" 
                    alt="${seoAlt}" 
                    title="${seoAlt}"
                    width="360"
                    height="480"
-                   style="width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.5s ease; position: absolute; inset: 0; z-index: 0; border-radius: 16px;"
+                   style="width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: brightness(0.95); transition: transform 0.4s ease; position: absolute; inset: 0; z-index: 0; border-radius: 16px;"
                    loading="${index < 4 ? "eager" : "lazy"}" decoding="async" />
 
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
+              <!-- Overlay Shadow Gradient -->
+              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(9, 9, 12, 0.95) 0%, rgba(9, 9, 12, 0.35) 35%, transparent 65%); z-index: 10; pointer-events: none;"></div>
 
-              <!-- ซ้ายบน: แนวตั้ง (แนะนำ บน / รับงาน ล่าง) -->
-              <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
+              <!-- Top Left Badges -->
+              <div style="position: absolute; top: 8px; left: 8px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
                   ${featuredBadge}
                   ${statusBadge}
               </div>
 
-              <!-- ขวาบน: ป้ายยืนยันตัวตน -->
-              <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+              <!-- Top Right Badges -->
+              <div style="position: absolute; top: 8px; right: 8px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
                   ${verifiedBadge}
+                  ${videoBadge}
               </div>
 
-              <!-- ข้อมูลล่างสุด: ชื่อ อายุ คีย์เวิร์ด พิกัด ราคา -->
-              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
-                  <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">น้อง${pName}${ageDisplay}</h3>
+              <!-- Bottom Details Area -->
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 10px 10px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 2px;">
+                  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 4px;">
+                    <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+                      น้อง${pName}
+                    </h3>
+                    ${pAge ? `<span style="font-size: 10px; font-weight: 700; color: #A1A1AA; flex-shrink: 0;">${pAge}</span>` : ''}
+                  </div>
                   
                   ${quoteText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${quoteText}</p>` : ''}
 
-                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+                  ${(pStats || pBust) ? `
+                  <div style="display: flex; gap: 6px; font-size: 9px; color: #E4E4E7; font-weight: 600; margin-top: 1px;">
+                    ${pStats ? `<span><i class="fas fa-ruler-vertical" style="color: #9333EA; font-size: 8px;"></i> ${pStats}</span>` : ''}
+                    ${pBust ? `<span><i class="fas fa-heart" style="color: #EC4899; font-size: 8px;"></i> ${pBust}</span>` : ''}
+                  </div>` : ''}
+
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 3px;">
                       <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
                           <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
                       </span>
-                      <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
-                          ${p.rate ? (isNaN(p.rate) ? p.rate : Number(p.rate).toLocaleString() + '.-') : "สอบถาม"}
+                      <span style="color: #00E676; font-weight: 900; font-size: 12.5px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+                          ${rateDisplay}
                       </span>
                   </div>
               </div>
@@ -936,7 +853,7 @@ export default async (req, context) => {
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const matchedZones = seoData.zones.slice(0, 4).join(", ");
 
-    // ดึง index.html มาแทนที่ป้าย
+    // ดึง index.html มาแทนที่ Placeholders
     const templateUrl = new URL("/index.html", url.origin);
     const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
     let rawHtml = await mainTemplate.text();
@@ -950,13 +867,25 @@ export default async (req, context) => {
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
 
-    // 🟢 [REPLACE PLACEHOLDERS] แทนที่ข้อความทั้งหมดลงในเทมเพลต HTML
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_TITLE}}", pageTitle);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_DESCRIPTION}}", strippedDesc);
+    // ============================== REPLACING PLACEHOLDERS ==============================
+    // 1. แทนที่ Title และ Meta Description ใน <head>
+    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
+    rawHtml = rawHtml.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
+
+    // 🟢 Fix 2: แทนที่ Open Graph และ Twitter Cards ให้แสดงผลสวยงามเมื่อแชร์รายบุคคล
+    rawHtml = rawHtml.replace(/<meta property="og:title" content=".*?"/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}"`);
+    rawHtml = rawHtml.replace(/<meta property="og:description" content=".*?"/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}"`);
+    rawHtml = rawHtml.replace(/<meta name="twitter:title" content=".*?"/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}"`);
+    rawHtml = rawHtml.replace(/<meta name="twitter:description" content=".*?"/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}"`);
+
+    // 2. แทนที่แท็ก Placeholders ต่างๆ
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson));
+    
+    // 🟢 Fix 3: ป้องกัน Script Injection ใน Schema JSON
+    rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
+    
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
@@ -964,11 +893,24 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    rawHtml = replaceGlobal(rawHtml, "<!-- รายชื่อจังหวัดสวมรอยอัตโนมัติประจำระบบ Edge -->", popularLocationsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // ฉีด JSON สดของโปรไฟล์เข้า window.profilesData เพื่อทำ Instant Hydration
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_JSON}}", JSON.stringify(profileList.map(p => ({
+    // 3. แทนที่รายชื่อจังหวัดยอดนิยมใน Footer ตรงๆ
+    if (popularLocationsHtml) {
+      rawHtml = rawHtml.replace(
+        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
+        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
+      );
+    }
+
+    // 4. ปรับตัวเลขจำนวนน้องในป้ายแนะนำความนิยม (Live Profile Count)
+    rawHtml = rawHtml.replace(
+      /<strong id="live-profile-count"[^>]*>.*?<\/strong>/i, 
+      `<strong id="live-profile-count" style="font-weight: 900; font-size: 12px;">${profileList.length}</strong>`
+    );
+
+    // 🟢 Fix 3: ฉีด Instant Hydration สู่ window.profilesData ป้องกัน XSS
+    const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -1001,9 +943,9 @@ export default async (req, context) => {
       slogan: p.slogan || p.quote || "",
       styleTags: p.style_tags || p.styleTags || [],
       style_tags: p.style_tags || p.styleTags || []
-    }))));
+    }))).replace(/</g, '\\u003c');
 
-    rawHtml = replaceGlobal(rawHtml, "</body>", `${FLOATING_DOCK_HTML}\n</body>`);
+    rawHtml = replaceGlobal(rawHtml, "window.profilesData = [];", `window.profilesData = ${hydratedProfilesData};`);
 
     return new Response(rawHtml, {
       headers: {
