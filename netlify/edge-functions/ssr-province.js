@@ -143,7 +143,7 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 });
 
 // ==============================================================================
-// 3. UTILITY & IMAGE PERFORMANCE OPTIMIZATION FUNCTIONS
+// 3. ADVANCED HD IMAGE OPTIMIZATION ENGINE (Retina 2x + AI Smart Face Crop)
 // ==============================================================================
 function verifyHostname(req) {
   const host = (req.headers.get("host") || "").toLowerCase();
@@ -154,20 +154,20 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 อัตราส่วนหลักของรูปโปรไฟล์คือ 360x480 (Ratio 3:4)
-const optimizeImg = (hostUrl, path, width = 360, height = 480) => {
+// 🟢 เทคนิคขั้นสูง: โหลดภาพ 2x Retina (720x960) พร้อม AI ล็อคใบหน้ากึ่งกลาง และฉีด Auto-Sharpen เพิ่มความกริบ
+const optimizeImg = (hostUrl, path, width = 720, height = 960) => {
   if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
   
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
-      return path.replace("/upload/", `/upload/f_auto,q_auto:good,w_${width},h_${height},c_fill,g_face/`);
+      return path.replace("/upload/", `/upload/f_auto,q_auto:good,e_sharpen:50,w_${width},h_${height},c_fill,g_face/`);
     }
     return path;
   }
   
   if (path.startsWith("http")) return path;
   
-  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=80&format=avif`;
+  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=85&format=avif`;
 };
 
 const formatDateSSR = dateStr => {
@@ -322,13 +322,13 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs) return "";
   return faqs.map(item => `
-        <div class="interactive-card" style="padding: 20px;">
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <h3 style="font-weight: 800; font-size: 14px; display: flex; align-items: start; gap: 10px;">
-                  <span style="display: flex; height: 24px; width: 24px; align-items: center; justify-content: center; border-radius: 8px; background-color: rgba(90, 44, 190, 0.15); color: #C084FC; font-size: 12px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); shrink: 0;">Q</span>
-                  <span class="text-gradient-sub">${escapeHTML(item.q)}</span>
+        <div class="interactive-card" style="padding: 16px 20px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <h3 style="font-weight: 800; font-size: 13.5px; display: flex; align-items: start; gap: 10px; margin: 0;">
+                  <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 11px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
+                  <span class="text-gradient-sub" style="line-height: 1.4;">${escapeHTML(item.q)}</span>
                 </h3>
-                <div style="padding-left: 34px; color: var(--text-gray); font-size: 12px; line-height: 1.6; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 8px;">
+                <div style="padding-left: 32px; color: var(--text-gray); font-size: 12px; line-height: 1.5; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
                   ${escapeHTML(item.a)}
                 </div>
             </div>
@@ -346,7 +346,6 @@ export default async (req, context) => {
 
   const url = new URL(req.url);
 
-  // 301 Redirect โดเมนเก่าและ www ไปที่โดเมนหลัก
   if (url.host.includes("sidelinechiangmai.netlify.app")) {
     return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}${url.pathname}${url.search}`, 301);
   }
@@ -357,7 +356,6 @@ export default async (req, context) => {
 
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
 
-  // จัดการบายพาส /index.html
   if (url.pathname === "/index.html") {
     if (req.headers.get("x-ssr-bypass") === "true") {
       try {
@@ -377,7 +375,6 @@ export default async (req, context) => {
     }
   }
 
-  // ปล่อยผ่านไฟล์ Static Assets
   if ([".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2"].some(ext => url.pathname.toLowerCase().endsWith(ext))) {
     try {
       return await context.next();
@@ -386,11 +383,10 @@ export default async (req, context) => {
     }
   }
 
-// ============================== ROUTE PARSING ==============================
+  // ============================== ROUTE PARSING ==============================
   const paths = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "", profileSlug = "", isNationalHome = false;
 
-  // 🟢 ต้องมี || url.pathname === "/profiles" || url.pathname === "/profiles.html" บรรทัดนี้ครับ
   if (paths.length === 0 || url.pathname === "/" || url.pathname === "/profiles" || url.pathname === "/profiles.html") {
     isNationalHome = true;
     provinceSlug = "national";
@@ -510,7 +506,6 @@ export default async (req, context) => {
     const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
     const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
 
-    // 🟢 Fix 1: คำนวณ Canonical URL ให้ถูกต้องตามการเป็นหน้าโปรไฟล์รายบุคคล
     const canonUrl = matchedProfile 
       ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
       : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
@@ -518,7 +513,6 @@ export default async (req, context) => {
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
 
-    // ดึงรีวิวจาก DB
     let dbReviews = [];
     try {
       let reviewQuery = supabase.from("reviews")
@@ -575,7 +569,7 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // ============================== STRUCTURED DATA GRAPH (SCHEMA.ORG) ==============================
+    // ============================== STRUCTURED DATA GRAPH ==============================
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -689,7 +683,7 @@ export default async (req, context) => {
             "@type": "Person",
             "name": p.name || "ผู้ให้บริการ",
             "url": `${hostUrl}/sideline/${p.slug || p.id}`,
-            "image": optimizeImg(hostUrl, p.imagePath, 360, 480),
+            "image": optimizeImg(hostUrl, p.imagePath, 720, 960),
             "description": `โปรไฟล์แนะนำน้อง${p.name || ""} สาวรับงานพิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัยไม่มีมัดจำ`
           }
         }))
@@ -719,47 +713,50 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-// ============================== PROFILE CARDS HTML GENERATOR (Sleek 4:5 Ratio & Clean Style - 100% Main.js Sync) ==============================
+// ============================== PROFILE CARDS GENERATOR (With Features 2, 3, 4, 5) ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")),
-        pLoc = escapeHTML(p.location || provinceThaiName),
+        pLoc = escapeHTML(p.location || "ในตัวเมือง"),
         pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`,
         isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw)),
         statusText = isAvail ? (p.availability || "รับงาน") : "สอบถามคิว",
         statusDotColor = isAvail ? "#00E676" : "#FF2E63",
         pAge = p.age && p.age !== "-" ? `${escapeHTML(p.age)}` : "",
-        quoteText = escapeHTML(p.quote || p.slogan || "ดูแลเทคแคร์น่ารัก สไตล์ฟิวแฟน");
+        quoteText = escapeHTML(p.quote || p.slogan || "ฟีลแฟน ตรงปก");
 
       const seoAlt = `น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
-      const imgUrl = optimizeImg(hostUrl, p.imagePath, 360, 480);
+      
+      // 🟢 ข้อ 4: ดึงภาพคมชัดระดับ 2x HD Retina (720x960)
+      const imgUrl = optimizeImg(hostUrl, p.imagePath, 720, 960);
 
-      // Top Left Stacked Badges
-      const featuredBadge = p.isfeatured ? `
-        <span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
-            <span style="letter-spacing: 0.02em;">แนะนำ</span>
-        </span>` : "";
-
-      const statusBadge = `
-        <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
-            <span style="letter-spacing: 0.02em;">${statusText}</span>
+      // ป้ายซ้ายบน: ⭐ แนะนำ / 🟢 รับงาน
+      const featuredBadge = `
+        <span style="background: rgba(124, 58, 237, 0.9); border: 1px solid rgba(192, 132, 252, 0.6); color: #FFFFFF; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
+            <i class="fas fa-star" style="font-size: 7.5px; color: #FBBF24;"></i>
+            <span>แนะนำ</span>
         </span>`;
 
-      const videoBadge = (p.has_video || p.hasVideo) ? `
-        <span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
+      const statusBadge = `
+        <span style="background: rgba(15, 15, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.18); color: #FFFFFF; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
+            <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 5px ${statusDotColor}; flex-shrink: 0;" class="${isAvail ? 'status-dot-pulse' : ''}"></span>
+            <span>${statusText}</span>
+        </span>`;
+
+      // 🟢 ข้อ 2: ป้ายมีคลิปวิดีโอ (Video Badge พร้อม Pulse Glow)
+      const hasVideo = p.has_video || p.hasVideo || false;
+      const videoBadge = hasVideo ? `
+        <span class="video-badge-glow" style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.7); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: inline-flex; align-items: center; gap: 3.5px; box-shadow: 0 0 8px rgba(255, 46, 99, 0.4);">
+            <i class="fas fa-play-circle" style="font-size: 8px; color: #FF2E63;"></i> มีคลิป
         </span>` : "";
 
-      // Top Right Badge
-      const verifiedBadge = (p.verified || p.isVerified) ? `
-        <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
-        </span>` : "";
-
-      let rateDisplay = "สอบถาม";
+      let rateDisplay = "1,500.-";
       if (p.rate) {
-        rateDisplay = isNaN(p.rate) ? escapeHTML(p.rate) : `${Number(p.rate).toLocaleString()}.-`;
+        if (!isNaN(p.rate)) {
+          rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
+        } else {
+          const cleanRate = escapeHTML(p.rate).trim();
+          rateDisplay = cleanRate.endsWith(".-") ? cleanRate : `${cleanRate}.-`;
+        }
       }
 
       return `
@@ -768,49 +765,55 @@ export default async (req, context) => {
                data-id="${p.id}"
                data-profile-id="${p.id}"
                data-profile-slug="${p.slug}"
-               style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; background: #09090B; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4);"
+               style="aspect-ratio: 3 / 4; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; background: #0b0918; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 6px 20px rgba(0,0,0,0.45);"
                role="listitem">
               
-              <!-- รูปภาพโปรไฟล์สัดส่วน 4:5 เน้นใบหน้าและลำตัวช่วงบน -->
+              <!-- 🟢 ข้อ 3 & 4: รูปโปรไฟล์คมชัดระดับ HD เร่งสีและคมด้วย GPU + Smooth Zoom -->
               <img src="${imgUrl}" 
                    alt="${seoAlt}" 
                    title="${seoAlt}"
                    width="360"
-                   height="450"
-                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease; z-index: 0; border-radius: 16px;"
+                   height="480"
+                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: contrast(1.03) saturate(1.06) brightness(0.98); transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), filter 0.35s ease; z-index: 0; border-radius: 16px; image-rendering: -webkit-optimize-contrast; will-change: transform;"
                    loading="${index < 4 ? "eager" : "lazy"}" decoding="async" />
 
-              <!-- Overlay Shadow Gradient ด้านล่าง -->
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
+              <!-- Overlay เงาไล่ระดับด้านล่าง -->
+              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(9, 8, 20, 0.95) 0%, rgba(9, 8, 20, 0.55) 28%, transparent 58%); z-index: 10; pointer-events: none;"></div>
 
-              <!-- มุมซ้ายบน: ป้ายแนะนำ / สถานะ / คลิป เรียงแนวตั้ง -->
-              <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
+              <!-- มุมซ้ายบน: ป้ายแนะนำ / สถานะ / ป้ายมีคลิป -->
+              <div style="position: absolute; top: 7px; left: 7px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
                   ${featuredBadge}
                   ${statusBadge}
                   ${videoBadge}
               </div>
 
-              <!-- มุมขวาบน: ป้ายยืนยันตัวตน -->
-              <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
-                  ${verifiedBadge}
+              <!-- 🟢 ข้อ 5: ปุ่มหัวใจบันทึกรูปที่ชอบ (Quick Favorite Button) -->
+              <div style="position: absolute; top: 7px; right: 7px; z-index: 35;">
+                  <button class="fav-btn" 
+                          data-id="${p.id}" 
+                          onclick="event.preventDefault(); event.stopPropagation(); this.classList.toggle('active');" 
+                          aria-label="บันทึกน้อง${pName}"
+                          style="background: rgba(10, 8, 20, 0.65); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+                      <i class="far fa-heart" style="font-size: 11px; color: #FFFFFF; transition: transform 0.2s ease;"></i>
+                  </button>
               </div>
 
               <!-- ลิงก์คลิกครอบการ์ดทั้งหมด -->
               <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
 
-              <!-- ข้อมูลด้านล่างสุด (ชิดขอบ คลีน เรียบหรู) -->
-              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
-                  <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+              <!-- ข้อมูลด้านล่างสุด (ชื่อ สโลแกน พิกัด ราคา) -->
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 10px 10px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 2px;">
+                  <h3 style="font-size: 14px; font-weight: 800; color: #ffffff; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
                     น้อง${pName}${pAge ? ` ${pAge}` : ''}
                   </h3>
                   
-                  ${quoteText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${quoteText}</p>` : ''}
+                  ${quoteText ? `<p style="font-size: 10.5px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${quoteText}</p>` : ''}
                   
-                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
-                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
-                          <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #E4E4E7; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 3px;">
+                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; color: #D4D4D8; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                          <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 3px;"></i>${pLoc}
                       </span>
-                      <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+                      <span style="color: #00E676; font-weight: 900; font-size: 13px; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
                           ${rateDisplay}
                       </span>
                   </div>
@@ -823,20 +826,20 @@ export default async (req, context) => {
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
 
     const reviewsHtml = finalReviews.map(r => `
-      <div class="interactive-card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+      <div class="interactive-card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="height: 40px; width: 40px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML((r.author || "K").charAt(0).toUpperCase())}</div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML((r.author || "K").charAt(0).toUpperCase())}</div>
               <div>
                 <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${escapeHTML(r.author)}</span>
                 <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${escapeHTML(r.location)}</span>
               </div>
             </div>
-            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;" aria-label="${r.rating} ดาว" role="img">
+            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 9.5px;" aria-label="${r.rating} ดาว" role="img">
               ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};" aria-hidden="true"></i>`).join("")}
             </div>
           </div>
-          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.6;">
+          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.5; margin: 0;">
             ${escapeHTML(r.text)}
           </p>
           <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
@@ -846,7 +849,6 @@ export default async (req, context) => {
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const matchedZones = seoData.zones.slice(0, 4).join(", ");
 
-    // ดึง index.html มาแทนที่ Placeholders
     const templateUrl = new URL("/index.html", url.origin);
     const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
     let rawHtml = await mainTemplate.text();
@@ -861,22 +863,18 @@ export default async (req, context) => {
     }).join("") : "";
 
     // ============================== REPLACING PLACEHOLDERS ==============================
-    // 1. แทนที่ Title และ Meta Description ใน <head>
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
 
-    // 🟢 Fix 2: แทนที่ Open Graph และ Twitter Cards ให้แสดงผลสวยงามเมื่อแชร์รายบุคคล
     rawHtml = rawHtml.replace(/<meta property="og:title" content=".*?"/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}"`);
     rawHtml = rawHtml.replace(/<meta property="og:description" content=".*?"/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}"`);
     rawHtml = rawHtml.replace(/<meta name="twitter:title" content=".*?"/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}"`);
     rawHtml = rawHtml.replace(/<meta name="twitter:description" content=".*?"/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}"`);
 
-    // 2. แทนที่แท็ก Placeholders ต่างๆ
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    // 🟢 Fix 3: ป้องกัน Script Injection ใน Schema JSON
     rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
@@ -888,7 +886,6 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // 3. แทนที่รายชื่อจังหวัดยอดนิยมใน Footer ตรงๆ
     if (popularLocationsHtml) {
       rawHtml = rawHtml.replace(
         /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
@@ -896,13 +893,115 @@ export default async (req, context) => {
       );
     }
 
-    // 4. ปรับตัวเลขจำนวนน้องในป้ายแนะนำความนิยม (Live Profile Count)
     rawHtml = rawHtml.replace(
       /<strong id="live-profile-count"[^>]*>.*?<\/strong>/i, 
       `<strong id="live-profile-count" style="font-weight: 900; font-size: 12px;">${profileList.length}</strong>`
     );
 
-    // 🟢 Fix 3: ฉีด Instant Hydration สู่ window.profilesData ป้องกัน XSS
+    // ============================== COMPACT UI & ADVANCED IMAGE CSS ==============================
+    const UI_FIX_CSS = `
+    <style id="ui-compact-fix">
+      /* 1. ปุ่มแอดไลน์ขนาดเรียวเล็กลง */
+      .line-cta-btn, a[href*="line.me"], [class*="line-btn"], .btn-line-cta {
+        max-width: 330px !important;
+        width: 92% !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 16px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        border-radius: 9999px !important;
+        margin: 8px auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+        box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35) !important;
+      }
+
+      /* 2. ไฟกระพริบออนไลน์ (Live Pulse Effect) */
+      @keyframes statusPulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+        70% { box-shadow: 0 0 0 5px rgba(0, 230, 118, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+      }
+      .status-dot-pulse {
+        animation: statusPulse 1.8s infinite;
+      }
+
+      /* 3. ข้อ 3: ซูมรูปภาพสมูทเมื่อแตะ/โฮเวอร์ (Smooth 60fps Zoom Effect) */
+      .profile-card-new:hover img,
+      .profile-card-new:active img {
+        transform: scale(1.06) !important;
+        filter: contrast(1.05) saturate(1.08) brightness(1.02) !important;
+      }
+
+      /* 4. ข้อ 5: เอฟเฟกต์ปุ่มหัวใจกดเลือกชอบ (Heart Fav Button Active) */
+      .fav-btn:active {
+        transform: scale(0.85) !important;
+      }
+      .fav-btn.active {
+        background: rgba(255, 46, 99, 0.88) !important;
+        border-color: rgba(255, 46, 99, 1) !important;
+      }
+      .fav-btn.active i {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+        color: #FFFFFF !important;
+        transform: scale(1.18);
+      }
+
+      /* 5. จัดระยะห่างคอนเทนต์หลักประหยัดพื้นที่ */
+      section, .hero-section, .trust-section, .intro-section {
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+        margin-bottom: 8px !important;
+      }
+
+      .trust-badges-container, .tags-wrapper {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        margin: 6px 0 !important;
+      }
+
+      .tag-pill, .badge-pill {
+        font-size: 10.5px !important;
+        padding: 3.5px 10px !important;
+        border-radius: 9999px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      }
+
+      /* 6. Grid 2 คอลัมน์ สมบูรณ์แบบสำหรับมือถือ */
+      .profiles-grid, #profiles-container, .profiles-container {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 0 8px !important;
+        max-width: 600px !important;
+        margin: 0 auto !important;
+      }
+
+      .profile-card-new-container {
+        width: 100% !important;
+        content-visibility: auto;
+        contain-intrinsic-size: 1px 240px;
+      }
+
+      .profile-card-new {
+        aspect-ratio: 3 / 4 !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+    </style>
+    `;
+
+    rawHtml = rawHtml.replace("</head>", `${UI_FIX_CSS}</head>`);
+
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
