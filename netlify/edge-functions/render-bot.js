@@ -494,17 +494,15 @@ export default async (request, context) => {
 </html>`;
 
         return new Response(html, {
-            headers: {
-                "Content-Type": "text/html; charset=utf-8",
-                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
-                "X-Content-Type-Options": "nosniff",
-                "X-Frame-Options": "DENY",
-                "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
-            }
-        });
-
-    } catch (err) {
-        console.error("Bot rendering crash:", err);
-        return new Response("Internal Server Error", { status: 500 });
+    headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https://zxetzqwjaiumqhrpumln.supabase.co https://api.mapbox.com;"
     }
-};
+});
