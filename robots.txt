@@ -37,5 +37,5 @@ Allow: /*.woff2
 Allow: /*.woff
 Allow: /llms.txt
 
-# Sitemap location (served dynamically)
+# Sitemap location
 Sitemap: https://firstmodelhub.com/sitemap.xml
