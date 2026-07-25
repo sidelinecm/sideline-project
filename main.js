@@ -608,18 +608,20 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      if (activeFilters.province && activeFilters.province !== "all") {
+      if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") {
         localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, activeFilters.province);
       }
 
-      // 🔴 [STRICT LOCATION FILTER] ล็อกกรองน้องเฉพาะจังหวัด ห้ามมีข้ามโซน
+      // 🔴 กรองน้องเฉพาะจังหวัด ห้ามมีข้ามโซน
       let results = [...STATE.allProfiles];
 
       const urlPath = window.location.pathname.toLowerCase();
       const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
       const urlProvinceKey = locMatch ? decodeURIComponent(locMatch[1]) : null;
 
-      const targetProvinceKey = urlProvinceKey || (activeFilters.province !== "all" ? activeFilters.province : null);
+      const targetProvinceKey = (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") 
+        ? activeFilters.province 
+        : urlProvinceKey;
 
       if (targetProvinceKey) {
         results = results.filter(p => (p.provinceKey || p.province_slug || p.province) === targetProvinceKey);
@@ -672,7 +674,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       });
 
-      // 🔴 อัปเดตตัวเลขจำนวนโปรไฟล์สด (Count Intent)
+      // 🔴 อัปเดตตัวเลขจำนวนโปรไฟล์สด
       if (DOM.resultCount) {
         const count = results.length;
         let countText = "";
@@ -688,11 +690,12 @@ window.ScrollTrigger = ScrollTrigger;
         DOM.resultCount.style.display = "block";
       }
 
-      renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all") || activeFilters.avail !== "all" || activeFilters.featured);
+      renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") || activeFilters.avail !== "all" || activeFilters.featured);
 
+      // 🟢 [แก้ไขจุดนี้] อัปเดต URL ตามจังหวัดที่เลือกทันที (รวมถึงเชียงใหม่)
       if (updateUrlHistory) {
         let newPath = "/";
-        if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "chiangmai") {
+        if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") {
           newPath = `/location/${activeFilters.province}`;
         }
         if (window.location.pathname !== newPath) {
