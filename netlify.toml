@@ -114,3 +114,9 @@
   from = "/sideline/*"
   to = "/index.html"
   status = 200
+  
+  # เพิ่มต่อท้ายล่างสุดของ netlify.toml (กันพลาดกรณี Edge Function ขัดข้อง)
+[[redirects]]
+  from = "/location/*"
+  to = "/index.html"
+  status = 200
