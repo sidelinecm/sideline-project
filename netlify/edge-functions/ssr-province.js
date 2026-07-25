@@ -718,43 +718,42 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== PROFILE CARDS HTML GENERATOR (3:4 ASPECT RATIO & LUXURY STYLE) ==============================
+// ============================== PROFILE CARDS HTML GENERATOR (Sleek 4:5 Ratio & Clean Style - 100% Main.js Sync) ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, "")),
         pLoc = escapeHTML(p.location || provinceThaiName),
         pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`,
         isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw)),
-        statusText = isAvail ? "พร้อมรับงาน" : "สอบถามคิว",
+        statusText = isAvail ? (p.availability || "รับงาน") : "สอบถามคิว",
         statusDotColor = isAvail ? "#00E676" : "#FF2E63",
-        pAge = p.age && p.age !== "-" ? `${escapeHTML(p.age)} ปี` : "",
-        pStats = p.stats ? escapeHTML(p.stats) : (p.height && p.weight ? `${p.height}/${p.weight}` : ""),
-        pBust = (p.bust || p.cup_size) ? `อก ${escapeHTML(p.bust || '')}${escapeHTML(p.cup_size || '')}` : "",
+        pAge = p.age && p.age !== "-" ? `${escapeHTML(p.age)}` : "",
         quoteText = escapeHTML(p.quote || p.slogan || "ดูแลเทคแคร์น่ารัก สไตล์ฟิวแฟน");
 
       const seoAlt = `น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
       const imgUrl = optimizeImg(hostUrl, p.imagePath, 360, 480);
 
-      // Badges
+      // Top Left Stacked Badges
       const featuredBadge = p.isfeatured ? `
-        <span style="background: rgba(124, 58, 237, 0.9); border: 1px solid rgba(192, 132, 252, 0.6); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-star" style="font-size: 7px; color: #FBBF24;"></i>
-            <span>VIP</span>
+        <span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
+            <span style="letter-spacing: 0.02em;">แนะนำ</span>
         </span>` : "";
 
       const statusBadge = `
-        <span style="background: rgba(9, 9, 11, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
             <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
-            <span>${statusText}</span>
+            <span style="letter-spacing: 0.02em;">${statusText}</span>
         </span>`;
 
-      const verifiedBadge = (p.verified || p.isVerified) ? `
-        <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.6); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-check-circle" style="font-size: 8px; color: #00E676;"></i> ตรงปก
+      const videoBadge = (p.has_video || p.hasVideo) ? `
+        <span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
         </span>` : "";
 
-      const videoBadge = (p.has_video || p.hasVideo) ? `
-        <span style="background: rgba(239, 68, 68, 0.3); border: 1px solid rgba(248, 113, 113, 0.6); color: #F87171; font-size: 8.5px; font-weight: 800; padding: 2px 6px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px;">
-            <i class="fas fa-play" style="font-size: 7px;"></i> คลิป
+      // Top Right Badge
+      const verifiedBadge = (p.verified || p.isVerified) ? `
+        <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
         </span>` : "";
 
       let rateDisplay = "สอบถาม";
@@ -768,56 +767,49 @@ export default async (req, context) => {
                data-id="${p.id}"
                data-profile-id="${p.id}"
                data-profile-slug="${p.slug}"
-               style="aspect-ratio: 3/4; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding:0; cursor: pointer; background: #09090B; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4);"
+               style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; background: #09090B; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4);"
                role="listitem">
               
-              <a href="${pUrl}" class="card-link absolute-fill z-20" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
-
+              <!-- รูปภาพโปรไฟล์สัดส่วน 4:5 เน้นใบหน้าและลำตัวช่วงบน -->
               <img src="${imgUrl}" 
                    alt="${seoAlt}" 
                    title="${seoAlt}"
                    width="360"
-                   height="480"
-                   style="width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: brightness(0.95); transition: transform 0.4s ease; position: absolute; inset: 0; z-index: 0; border-radius: 16px;"
+                   height="450"
+                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease; z-index: 0; border-radius: 16px;"
                    loading="${index < 4 ? "eager" : "lazy"}" decoding="async" />
 
-              <!-- Overlay Shadow Gradient -->
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(9, 9, 12, 0.95) 0%, rgba(9, 9, 12, 0.35) 35%, transparent 65%); z-index: 10; pointer-events: none;"></div>
+              <!-- Overlay Shadow Gradient ด้านล่าง -->
+              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
-              <!-- Top Left Badges -->
-              <div style="position: absolute; top: 8px; left: 8px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+              <!-- มุมซ้ายบน: ป้ายแนะนำ / สถานะ / คลิป เรียงแนวตั้ง -->
+              <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
                   ${featuredBadge}
                   ${statusBadge}
-              </div>
-
-              <!-- Top Right Badges -->
-              <div style="position: absolute; top: 8px; right: 8px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
-                  ${verifiedBadge}
                   ${videoBadge}
               </div>
 
-              <!-- Bottom Details Area -->
-              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 10px 10px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 2px;">
-                  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 4px;">
-                    <h3 style="font-size: 14px; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
-                      น้อง${pName}
-                    </h3>
-                    ${pAge ? `<span style="font-size: 10px; font-weight: 700; color: #A1A1AA; flex-shrink: 0;">${pAge}</span>` : ''}
-                  </div>
+              <!-- มุมขวาบน: ป้ายยืนยันตัวตน -->
+              <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+                  ${verifiedBadge}
+              </div>
+
+              <!-- ลิงก์คลิกครอบการ์ดทั้งหมด -->
+              <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+
+              <!-- ข้อมูลด้านล่างสุด (ชิดขอบ คลีน เรียบหรู) -->
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
+                  <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+                    น้อง${pName}${pAge ? ` ${pAge}` : ''}
+                  </h3>
                   
                   ${quoteText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${quoteText}</p>` : ''}
-
-                  ${(pStats || pBust) ? `
-                  <div style="display: flex; gap: 6px; font-size: 9px; color: #E4E4E7; font-weight: 600; margin-top: 1px;">
-                    ${pStats ? `<span><i class="fas fa-ruler-vertical" style="color: #9333EA; font-size: 8px;"></i> ${pStats}</span>` : ''}
-                    ${pBust ? `<span><i class="fas fa-heart" style="color: #EC4899; font-size: 8px;"></i> ${pBust}</span>` : ''}
-                  </div>` : ''}
-
-                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 3px;">
+                  
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
                       <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
                           <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
                       </span>
-                      <span style="color: #00E676; font-weight: 900; font-size: 12.5px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+                      <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
                           ${rateDisplay}
                       </span>
                   </div>
