@@ -1795,11 +1795,20 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       });
     })();
 
-    // Initial Execution & Route Hydration
+// Initial Execution & Route Hydration
     await fetchProfilesData();
     await handleRouteNavigation(true);
     updateActiveNavLinks();
     hideGlobalLoader();
+
+    // 🟢 [ลงทะเบียน PWA Service Worker เพื่อแก้ปัญหา Lighthouse]
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('✅ [PWA] Service Worker ลงทะเบียนสำเร็จแล้ว! Scope:', reg.scope))
+          .catch(err => console.error('❌ [PWA] ลงทะเบียน Service Worker ล้มเหลว:', err));
+      });
+    }
 
     // Listen to Browser Back/Forward Buttons
     window.addEventListener("popstate", async () => {
