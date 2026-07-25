@@ -958,15 +958,15 @@ export default async (req, context) => {
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
       }
 
-      /* 4. Grid 2 คอลัมน์ อัตราส่วน 4:5 สำหรับมือถือและเดสก์ท็อป */
-      .profiles-grid, #profiles-container, .profiles-container {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        padding: 0 8px !important;
-        max-width: 600px !important;
-        margin: 0 auto !important;
-      }
+/* 🟢 แนะนำให้แก้ใน ssr-province.js เป็นแบบนี้ */
+.profiles-grid, #profiles-container, .profiles-container, .profiles-grid-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  padding: 0 8px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
 
       .profile-card-new-container {
         width: 100% !important;
