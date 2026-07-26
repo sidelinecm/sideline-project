@@ -182,7 +182,7 @@ const formatDateSSR = dateStr => {
   }
 };
 
-// 🟢 [FIXED #1] ปรับปรุงsmartLinkify ให้สร้าง Internal Link ตรงตาม provinceSlug จริง
+// 🟢 [แก้ไขแล้ว] smartLinkify
 const smartLinkify = (text, provinceSlug, zones) => {
   if (!text) return "";
   let res = text;
@@ -191,7 +191,8 @@ const smartLinkify = (text, provinceSlug, zones) => {
   if (zones && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
       const regex = new RegExp(`(${zone})(?![^<>]*>)`, "g");
-      res = res.replace(regex, `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
+      const labelText = escapeHTML(`ดูข้อมูลพื้นที่ ${zone} ทั้งหมด`);
+      res = res.replace(regex, `<a href="${targetUrl}" aria-label="${labelText}" title="${labelText}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
   ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน", "ฟิวแฟน", "สาวรับงาน"].forEach(keyword => {
@@ -201,16 +202,19 @@ const smartLinkify = (text, provinceSlug, zones) => {
   return res;
 };
 
+// 🟢 [แก้ไขแล้ว] getDynamicIntro
 const getDynamicIntro = (provinceName, provinceSlug, zones) => {
   let processedZones = zones ? [...zones] : [];
   const locationUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : `/locations`;
 
   if (processedZones.length > 0) {
-    processedZones = processedZones.map((zone, idx) => 
-      idx === 0 
-        ? `<a href="${locationUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">${zone}</a>`
-        : zone
-    );
+    processedZones = processedZones.map((zone, idx) => {
+      if (idx === 0) {
+        const linkLabel = escapeHTML(`ดูรายการสาวรับงานโซน ${zone} ${provinceName}`);
+        return `<a href="${locationUrl}" aria-label="${linkLabel}" title="${linkLabel}" class="text-[#C084FC] hover:underline font-bold transition-colors">${zone}</a>`;
+      }
+      return zone;
+    });
   }
 
   const zoneSnippet = processedZones && processedZones.length > 0 
@@ -687,129 +691,154 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== PROFILE CARDS GENERATOR ==============================
-    const cardsHtml = profileList.map((p, index) => {
-      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
-      const pLoc = escapeHTML(p.location || provinceThaiName);
-      const pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-      
-      const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-      const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
-      const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
-      const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
-      
-      const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
-      const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
+// ============================== PROFILE CARDS GENERATOR ==============================
+const cardsHtml = profileList.map((p, index) => {
+  // Helper ป้องกัน escapeHTML พังเมื่อเจอ null / undefined / number
+  const safeEscape = (val) => escapeHTML(val != null ? String(val) : "");
 
-      const featuredBadge = p.isfeatured
-        ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
-            <span style="letter-spacing: 0.02em;">แนะนำ</span>
-           </span>`
-        : "";
+  const pName = safeEscape((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
+  const pLoc = safeEscape(p.location || provinceThaiName);
+  const safeId = safeEscape(p.id);
+  const safeSlug = safeEscape(p.slug || p.id);
+  const pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
+  
+  // ป้องกัน crash หาก availability ไม่ใช่ string
+  const availStr = String(p.availability || "").toLowerCase();
+  const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => availStr.includes(kw));
+  const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
+  const statusText = p.availability ? safeEscape(p.availability) : (isAvailable ? "รับงาน" : "สอบถามคิว");
+  const ageDisplay = p.age && p.age !== "-" ? ` ${safeEscape(p.age)}` : "";
+  
+  const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
+  const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
 
-      const statusBadge = `
-        <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
-            <span style="letter-spacing: 0.02em;">${statusText}</span>
-        </span>
-      `;
+  const featuredBadge = p.isfeatured
+    ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
+        <span style="letter-spacing: 0.02em;">แนะนำ</span>
+       </span>`
+    : "";
 
-      const hasVideo = p.has_video || p.hasVideo || false;
-      const videoBadge = hasVideo
-        ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
-           </span>`
-        : "";
+  const statusBadge = `
+    <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
+        <span style="letter-spacing: 0.02em;">${statusText}</span>
+    </span>
+  `;
 
-      const isVerified = p.verified || p.isVerified || false;
-      const verifiedBadge = isVerified
-        ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
-           </span>`
-        : "";
+  const hasVideo = p.has_video || p.hasVideo || false;
+  const videoBadge = hasVideo
+    ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
+       </span>`
+    : "";
 
-      let rateDisplay = "1,500.-";
-      if (p.rate) {
-        if (!isNaN(p.rate)) rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
-        else rateDisplay = escapeHTML(p.rate).trim();
-      }
+  const isVerified = p.verified || p.isVerified || false;
+  const verifiedBadge = isVerified
+    ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
+       </span>`
+    : "";
 
-      const sloganText = escapeHTML(p.slogan || p.quote || "");
+  // แก้ไข Logic การตรวจเช็คราคา
+  let rateDisplay = "1,500.-";
+  if (p.rate !== undefined && p.rate !== null && String(p.rate).trim() !== "") {
+    const numRate = Number(p.rate);
+    if (!isNaN(numRate) && numRate > 0) {
+      rateDisplay = `${numRate.toLocaleString()}.-`;
+    } else {
+      rateDisplay = safeEscape(p.rate).trim();
+    }
+  }
 
-      return `
-        <div class="profile-card-new-container">
-          <div class="profile-card-new interactive-card"
-               data-profile-id="${p.id}"
-               data-profile-slug="${escapeHTML(p.slug || p.id)}"
-               style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;"
-               role="listitem">
+  const sloganRaw = (p.slogan || p.quote || "").trim();
+  const sloganText = safeEscape(sloganRaw);
+
+  return `
+    <div class="profile-card-new-container">
+      <div class="profile-card-new interactive-card"
+           data-profile-id="${safeId}"
+           data-profile-slug="${safeSlug}"
+           style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;"
+           role="listitem">
+          
+          <img src="${imgUrl}" 
+               alt="${seoAltText}"
+               title="${seoAltText}"
+               width="300"
+               height="400"
+               style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
+               loading="${index < 4 ? "eager" : "lazy"}"
+               decoding="async"
+               onerror="this.onerror=null; this.src='/images/placeholder-profile.webp';" />
+               
+          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
+
+          <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
+              ${featuredBadge}
+              ${statusBadge}
+              ${videoBadge}
+          </div>
+
+          <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+              ${verifiedBadge}
+          </div>
+          
+          <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${pName}"></a>
+
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
+              <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+                ${pName}${ageDisplay}
+              </h3>
               
-              <img src="${imgUrl}" 
-                   alt="${seoAltText}"
-                   title="${seoAltText}"
-                   width="300"
-                   height="400"
-                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
-                   loading="${index < 4 ? "eager" : "lazy"}"
-                   decoding="async"
-                   onerror="this.onerror=null; this.src='/images/placeholder-profile.webp';" />
-                   
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
-
-              <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
-                  ${featuredBadge}
-                  ${statusBadge}
-                  ${videoBadge}
-              </div>
-
-              <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
-                  ${verifiedBadge}
-              </div>
+              ${sloganText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${sloganText}</p>` : ''}
               
-              <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${pName}"></a>
-
-              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
-                  <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
-                    ${pName}${ageDisplay}
-                  </h3>
-                  
-                  ${sloganText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${sloganText}</p>` : ''}
-                  
-                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
-                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
-                          <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
-                      </span>
-                      <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
-                          ${rateDisplay}
-                      </span>
-                  </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                      <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
+                  </span>
+                  <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+                      ${rateDisplay}
+                  </span>
               </div>
+          </div>
+      </div>
+    </div>
+  `;
+}).join("");
+
+// ============================== REVIEWS GENERATOR ==============================
+const reviewsHtml = (finalReviews || []).map(r => {
+  const safeEscape = (val) => escapeHTML(val != null ? String(val) : "");
+  const author = safeEscape(r.author || "ลูกค้าทั่วไป");
+  const initial = (r.author || "K").trim().charAt(0).toUpperCase() || "K";
+  const location = safeEscape(r.location || provinceThaiName);
+  const text = safeEscape(r.text || "");
+  const date = safeEscape(r.date || "");
+  const rating = Math.min(5, Math.max(0, parseInt(r.rating, 10) || 5));
+
+  return `
+    <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${initial}</div>
+            <div>
+              <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${author}</span>
+              <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${location}</span>
+            </div>
+          </div>
+          <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 9.5px;" aria-label="${rating} ดาว" role="img">
+            ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < rating ? "#FBBF24" : "#71717A"};" aria-hidden="true"></i>`).join("")}
           </div>
         </div>
-      `;
-    }).join("");
+        <p style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; margin: 0;">
+          ${text}
+        </p>
+        <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${date}</span>
+    </div>
+  `;
+}).join("");
 
-    const reviewsHtml = finalReviews.map(r => `
-      <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML((r.author || "K").charAt(0).toUpperCase())}</div>
-              <div>
-                <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${escapeHTML(r.author)}</span>
-                <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${escapeHTML(r.location)}</span>
-              </div>
-            </div>
-            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 9.5px;" aria-label="${r.rating} ดาว" role="img">
-              ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};" aria-hidden="true"></i>`).join("")}
-            </div>
-          </div>
-          <p style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; margin: 0;">
-            ${escapeHTML(r.text)}
-          </p>
-          <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
-      </div>
-    `).join("");
 
 // ==============================================================================
     // HIGH-PERFORMANCE SSR ENGINE (EDGE CACHED & SAFE DOM INJECTION)
@@ -820,13 +849,14 @@ export default async (req, context) => {
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, provinceSlug, seoData.zones);
     const seoIntroContent = smartLinkify(introTemplate, provinceSlug, seoData.zones);
 
-    // สร้างรายการพื้นที่บริการส่วนส่วนล่าง (Popular Locations Footer)
-    const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
-      const key = p.key || p.slug || p.id;
-      const name = p.nameThai || p.name;
-      const isActive = key === provinceSlug;
-      return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
-    }).join("") : "";
+// ปรับแก้ภายใน popularLocationsHtml
+const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
+  const key = p.key || p.slug || p.id;
+  const name = p.nameThai || p.name;
+  const isActive = key === provinceSlug;
+  const linkLabel = escapeHTML(`ดูรายชื่อสาวรับงานและไซด์ไลน์ในจังหวัด ${name}`);
+  return `<li><a href="/location/${key}" aria-label="${linkLabel}" title="${linkLabel}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
+}).join("") : "";
 
     // ⚡ 1. ดึงข้อมูล Template พร้อมระบบ Edge In-Memory Caching (ลดละเวลาดึงไฟล์ซ้ำ)
     let rawHtml = null;
