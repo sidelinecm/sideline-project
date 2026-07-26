@@ -231,90 +231,113 @@ html, body {
 }
 
 /* ==============================================================================
-   5. MOBILE SIDEBAR MENU
+   5. MOBILE SIDEBAR MENU (OPTIMIZED & LUXURY DARK NEON)
    ============================================================================== */
 #sidebar-menu {
   position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
-  width: 45vw !important;
-  max-width: 45% !important;
+  /* 🟢 แก้ไข: ปรับความกว้างให้พอดีมือถือ (กว้าง 280px หรือไม่เกิน 80% ของหน้าจอ) */
+  width: 280px !important;
+  max-width: 80vw !important;
   height: 100vh;
   height: 100dvh;
-  background: rgba(12, 10, 20, 0.96) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.8) !important;
+  background: rgba(12, 10, 20, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-left: 1px solid rgba(192, 132, 252, 0.25) !important; /* ขอบม่วงเรืองแสง */
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(124, 58, 237, 0.15) !important;
   z-index: 9999 !important;
+  
+  /* 🟢 แก้ไข: ซ่อนเนียน 100% ป้องกันการกดโดนแถบซ่อน หรือข้อความหลุด */
   transform: translate3d(100%, 0, 0);
-  transition: transform 0.4s cubic-bezier(.16, 1, .3, 1) !important;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(.16, 1, .3, 1), visibility 0.35s !important;
+  
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 }
+
 #sidebar-menu.active {
   transform: translate3d(0, 0, 0) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
+
 @media (min-width: 1024px) {
   #sidebar-menu {
-    width: 360px !important;
-    max-width: 360px !important;
+    width: 320px !important;
+    max-width: 320px !important;
   }
 }
+
+/* Header แถบบนสุดของ Sidebar */
 .sidebar-header-div {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgba(24, 24, 27, 0.9);
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(24, 24, 27, 0.8);
 }
 .sidebar-header-div span {
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 800;
-  color: #71717A;
-  letter-spacing: .08em;
+  color: #A1A1AA;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 .sidebar-close-btn {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #FFFFFF !important;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
+.sidebar-close-btn:active {
+  transform: scale(0.9);
+  background: rgba(239, 68, 68, 0.2);
+  color: #F87171 !important;
+}
+
+/* รายการลิงก์เมนู Sidebar */
 .sidebar-links-wrapper {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 12px 0;
+  -webkit-overflow-scrolling: touch;
 }
 .sidebar-links-wrapper a {
-  display: block;
-  padding: 12px 10px;
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  /* 🟢 แก้ไข: เพิ่ม Touch Target เป็น 48px ตามมาตรฐาน Google */
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 13.5px; /* ตัวหนังสือใหญ่ชัดเจน อ่านง่าย */
   font-weight: 700;
-  color: #FFFFFF !important;
+  color: #F4F4F5 !important;
   text-decoration: none;
-  text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.sidebar-links-wrapper a:hover {
-  background-color: rgba(124, 58, 237, 0.12);
+.sidebar-links-wrapper a:hover,
+.sidebar-links-wrapper a:active {
+  background-color: rgba(124, 58, 237, 0.18);
   color: #C084FC !important;
+  padding-left: 26px; /* เอฟเฟกต์เลื่อนขวาเล็กน้อยเมื่อกด */
 }
-
 /* ==============================================================================
    6. HERO SECTION, BILLBOARD & HORIZONTAL SAFE CAPSULES
    ============================================================================== */
