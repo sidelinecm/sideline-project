@@ -183,7 +183,7 @@ window.ScrollTrigger = ScrollTrigger;
     if (loadMoreContainer) loadMoreContainer.classList.add("hidden");
   }
 
-  // ============================== DATA SANITIZATION & MAPPER ==============================
+// ============================== DATA SANITIZATION & MAPPER ==============================
   function processProfileObject(raw) {
     if (!raw) return null;
 
@@ -201,8 +201,13 @@ window.ScrollTrigger = ScrollTrigger;
       images.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
     }
 
-    const provKey = (raw.provinceKey || raw.province_slug || raw.province || "chiangmai").toString();
+    // 🟢 1. แปลงคีย์เชียงใหม่ให้เป็นมาตรฐานเดียวกัน (ถูกต้องครับ)
+    let provKey = (raw.provinceKey || raw.province_slug || raw.province || "chiangmai").toString().toLowerCase();
+    if (provKey === "chiang_mai") provKey = "chiangmai";
+
+    // 🟢 2. ดึงชื่อจังหวัดภาษาไทย (อย่าลืมบรรทัดนี้ครับ)
     const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || "เชียงใหม่";
+
     const numericRate = Number(String(raw.rate || raw.price || 0).replace(/\D/g, "")) || 0;
     const displayPrice = numericRate > 0 ? `${numericRate.toLocaleString()}.-` : (raw.rate || "สอบถาม");
 
