@@ -183,18 +183,22 @@
         <span style="color: white; font-size: 10.5px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
-      <div class="billboard-container">
-        <img src="/images/hero-firstmodelhub-1200.webp" 
-             srcset="/images/hero-firstmodelhub-600.webp 600w, /images/hero-firstmodelhub-1200.webp 1200w"
-             sizes="(max-width: 768px) 100vw, 1200px"
-             alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก ไม่โอนมัดจำ" 
-             title="ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} พรีเมียมตรงปก 100%"
-             width="1200" 
-             height="630" 
-             style="width: 100%; height: auto; aspect-ratio: 1200/630; object-fit: cover;"
-             fetchpriority="high" 
-             loading="eager">
-      </div>
+<div class="billboard-container">
+  <picture>
+    <!-- จอมือถือ (กว้างไม่เกิน 768px): บังคับโหลดรูปขนาด 600px -->
+    <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp">
+    
+    <!-- จอคอมพิวเตอร์/แท็บเล็ต: โหลดรูปขนาด 800px (พอดีกับความกว้างแสดงผลจริง 766px) -->
+    <img src="/images/hero-firstmodelhub-800.webp" 
+         alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก ไม่โอนมัดจำ" 
+         title="ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} พรีเมียมตรงปก 100%"
+         width="766" 
+         height="431" 
+         style="width: 100%; height: auto; aspect-ratio: 766/431; object-fit: cover;"
+         fetchpriority="high" 
+         loading="eager">
+  </picture>
+</div>
 
       <h1 id="hero-h1" class="hero-title text-gradient-main" style="text-align: center; margin: 0 auto 4px auto; text-wrap: balance;">
           รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}}<br>

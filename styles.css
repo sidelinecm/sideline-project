@@ -838,3 +838,20 @@ img {
   user-select: none !important;
   -webkit-user-drag: none !important;
 }
+/* แก้ปัญหาข้อ 3: ปรับสีม่วงสว่างขึ้นให้อ่านง่าย */
+a.highlight, 
+[class*="text-[#C084FC]"] {
+  color: #E9D5FF !important;
+}
+
+/* แก้ปัญหาข้อ 4: ขยายปุ่มเมนู "หน้าแรก", "เกี่ยวกับเรา" ให้สูง 48px กดง่ายบนมือถือ */
+header a, 
+nav a, 
+a[href="/"], 
+a[href="/about"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 48px !important; /* ความสูงขั้นต่ำ 48px ตามมาตรฐาน Google */
+  padding: 8px 12px !important; /* เพิ่มพื้นที่สัมผัสรอบๆ ตัวอักษร */
+  margin: 0 4px !important;    /* เว้นระยะห่างไม่ให้ปุ่มติดกันเกินไป */
+}
