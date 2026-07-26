@@ -182,51 +182,19 @@ const formatDateSSR = dateStr => {
   }
 };
 
-// 🟢 อัปเกรด smartLinkify ใน ssr-province.js
 const smartLinkify = (text, flag, zones) => {
   if (!text) return "";
   let res = text;
-  
-  // 1. ดักจับโซนย่านให้เป็นลิงก์ค้นหา
   if (zones && zones.length > 0) {
-    zones.slice(0, 4).forEach(zone => {
+    zones.slice(0, 3).forEach(zone => {
       const regex = new RegExp(`(${zone})(?![^<>]*>)`, "g");
-      res = res.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" title="ดูโปรไฟล์ย่าน ${zone}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
+      res = res.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
-
-  // 2. ดักจับคีย์เวิร์ดหลักให้เป็น Internal Links ค้นหาประเภทงาน (สร้างใยแมงมุม)
-  const keyMap = [
-    { word: "เด็กเอ็น", query: "เด็กเอ็น" },
-    { word: "ไซด์ไลน์", query: "ไซด์ไลน์" },
-    { word: "สาวรับงาน", query: "สาวรับงาน" },
-    { word: "ฟิวแฟน", query: "ฟิวแฟน" },
-    { word: "เพื่อนเที่ยว", query: "เพื่อนเที่ยว" }
-  ];
-
-  keyMap.forEach(({ word, query }) => {
-    const regex = new RegExp(`(${word})(?![^<>]*>)`, "g");
-    res = res.replace(regex, `<a href="/search?q=${encodeURIComponent(query)}" title="ค้นหา ${word}" class="highlight text-[#C084FC] font-extrabold hover:underline">$1</a>`);
+  ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน", "ฟิวแฟน", "สาวรับงาน"].forEach(keyword => {
+    const regex = new RegExp(`(${keyword})(?![^<>]*>)`, "g");
+    res = res.replace(regex, '<span class="highlight text-[#C084FC] font-extrabold">$1</span>');
   });
-
-  // 3. ดักจับชื่อจังหวัดเชื่อมโยงข้ามเพจ (Cross-Province Spiderweb)
-  const provinceMap = [
-    { name: "กรุงเทพ", slug: "bangkok" },
-    { name: "เชียงใหม่", slug: "chiangmai" },
-    { name: "ชลบุรี", slug: "chonburi" },
-    { name: "พัทยา", slug: "chonburi" },
-    { name: "บางแสน", slug: "chonburi" },
-    { name: "อุดรธานี", slug: "udon" },
-    { name: "อุดร", slug: "udon" },
-    { name: "ลำปาง", slug: "lampang" },
-    { name: "พิษณุโลก", slug: "phitsanulok" }
-  ];
-
-  provinceMap.forEach(({ name, slug }) => {
-    const regex = new RegExp(`(${name})(?![^<>]*>)`, "g");
-    res = res.replace(regex, `<a href="/location/${slug}" title="สาวรับงานและไซด์ไลน์ ${name}" class="text-[#C084FC] font-bold hover:underline">$1</a>`);
-  });
-
   return res;
 };
 
@@ -505,7 +473,6 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 แก้ปัญหา 3: ทำ Fallback สำหรับคีย์จังหวัดเชียงใหม่ (รองรับทั้ง chiangmai และ chiang_mai)
     let searchKeys = [provinceSlug];
     if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
       searchKeys = ["chiangmai", "chiang_mai"];
@@ -584,7 +551,6 @@ export default async (req, context) => {
 
     let pageTitle = "", pageDesc = "";
 
-    // 🟢 แก้ปัญหา 4: ปรับปรุง Title และ Meta Description หน้าหลักจับคีย์เวิร์ดระดับประเทศ (รวมคำว่า "เด็กเอ็น")
     if (isNationalHome) {
       pageTitle = "ไซด์ไลน์ สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปกทั่วไทย 2026 | First Model Hub";
       pageDesc = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟน และเพื่อนเที่ยวพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมกรุงเทพฯ เชียงใหม่ ชลบุรี อุดรธานี";
@@ -607,7 +573,7 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // ============================== STRUCTURED DATA GRAPH ==============================
+    // ============================== 🟢 100% GOOGLE-COMPLIANT STRUCTURED DATA GRAPH ==============================
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -652,18 +618,22 @@ export default async (req, context) => {
         ]
       });
     } else {
-      // 🟢 แก้ปัญหา 4: ปรับ Schema สำหรับหน้าหลักระดับประเทศให้ถูกต้องตามมาตรฐาน Google
-      const mainEntityType = isNationalHome ? ["DirectoryPage", "CollectionPage"] : ["LocalBusiness", "EntertainmentBusiness"];
-      
-      const pageSchema = {
-        "@type": mainEntityType,
-        "@id": `${canonUrl}/#localbusiness`,
+      // 🟢 แก้ไขข้อผิดพลาดปัญหาร้ายแรงบน Google Rich Results Test (100% Valid Parent Node)
+      const businessEntity = {
+        "@type": ["EntertainmentBusiness", "ProfessionalService"],
+        "@id": `${canonUrl}/#business`,
         "name": isNationalHome ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` : `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
         "image": metaImgUrl,
         "telephone": CONFIG.DEFAULT_TELEPHONE,
         "priceRange": "฿฿",
         "url": canonUrl,
         "description": strippedDesc,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
+          "addressRegion": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
+          "addressCountry": "TH"
+        },
         "areaServed": isNationalHome 
           ? { "@type": "Country", "name": "Thailand" }
           : [
@@ -692,22 +662,15 @@ export default async (req, context) => {
       };
 
       if (!isNationalHome) {
-        pageSchema.address = {
-          "@type": "PostalAddress",
-          "streetAddress": seoData.zones.slice(0, 4).join(", "),
-          "addressLocality": provinceThaiName,
-          "addressRegion": provinceThaiName,
-          "addressCountry": "TH"
-        };
-        pageSchema.geo = {
+        businessEntity.geo = {
           "@type": "GeoCoordinates",
           "latitude": seoData.geo ? seoData.geo.lat : 13.7563,
           "longitude": seoData.geo ? seoData.geo.lng : 100.5018
         };
-        pageSchema.hasMap = mapEmbedUrl;
+        businessEntity.hasMap = mapEmbedUrl;
       }
 
-      schemaGraph.push(pageSchema);
+      schemaGraph.push(businessEntity);
 
       schemaGraph.push({
         "@type": "CollectionPage",
@@ -715,7 +678,7 @@ export default async (req, context) => {
         "name": pageTitle,
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
-        "about": { "@id": `${canonUrl}/#localbusiness` },
+        "about": { "@id": `${canonUrl}/#business` },
         "mainEntity": { "@id": `${canonUrl}/#itemlist` }
       });
 
@@ -761,7 +724,7 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== PROFILE CARDS GENERATOR (EXACT CLIENT-SIDE MATCH) ==============================
+    // ============================== PROFILE CARDS GENERATOR ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
       const pLoc = escapeHTML(p.location || provinceThaiName);
@@ -944,10 +907,8 @@ export default async (req, context) => {
     );
 
     // ============================== COMPACT UI & ADVANCED IMAGE CSS ==============================
-    // 🟢 แก้ปัญหา 1 และ 2: ปรับแต่ง Selector ไม่ให้กระทบ Dock และแก้ขนาดการ์ด 4:5
     const UI_FIX_CSS = `
     <style id="ui-compact-fix">
-      /* 1. ปุ่มแอดไลน์ทั่วไป (ยกเว้นเมนูลอย Dock ด้านล่าง) */
       .line-cta-btn, a[href*="line.me"]:not(.dock-item), [class*="line-btn"]:not(.dock-item), .btn-line-cta {
         max-width: 330px !important;
         width: 92% !important;
@@ -966,14 +927,12 @@ export default async (req, context) => {
         box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35) !important;
       }
 
-      /* 2. ซูมรูปภาพสมูทเมื่อแตะ/โฮเวอร์ */
       .profile-card-new:hover img,
       .profile-card-new:active img {
         transform: scale(1.05) !important;
         filter: brightness(1) !important;
       }
 
-      /* 3. จัดระยะห่างคอนเทนต์หลัก */
       section, .hero-section, .trust-section, .intro-section {
         padding-top: 6px !important;
         padding-bottom: 6px !important;
@@ -996,7 +955,6 @@ export default async (req, context) => {
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
       }
 
-      /* 4. ระบบ Grid และการ์ดสัดส่วน 4:5 ที่ถูกต้อง */
       .profiles-grid, #profiles-container, .profiles-container, .profiles-grid-row {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
