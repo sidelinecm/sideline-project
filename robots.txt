@@ -4,13 +4,13 @@
 # ==============================================================================
 
 User-agent: *
-# Block admin/internal endpoints
+# Block admin/internal endpoints & internal search
 Disallow: /wp-admin/
 Disallow: /wp-login.php
 Disallow: /administrator/
 Disallow: /login/
 Disallow: /register/
-Disallow: /search/
+Disallow: /search
 Disallow: /api/
 Disallow: /netlify/
 Disallow: /.git/

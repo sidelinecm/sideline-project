@@ -9,7 +9,7 @@
   skip_processing = false
 
 # ==============================================================================
-# 1. GLOBAL SECURITY & PERFORMANCE HEADERS (ปลดล็อก CSP ให้รองรับ esm.sh & jsdelivr)
+# 1. GLOBAL SECURITY & PERFORMANCE HEADERS
 # ==============================================================================
 [[headers]]
   for = "/*"
@@ -23,17 +23,18 @@
     Cache-Control = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400"
     Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com;"
 
-# Long cache for static assets
+# Short cache for main JS/CSS to ensure instant code updates for users
 [[headers]]
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
+# Long cache for media images & fonts
 [[headers]]
   for = "/images/*"
   [headers.values]
@@ -45,7 +46,7 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 # ==============================================================================
-# 2. EDGE FUNCTIONS
+# 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
 [[edge_functions]]
   function = "sitemap"
@@ -76,7 +77,20 @@
   to = "/profiles.html"
   status = 200
 
-# 301 Direct Redirects ไปยังโดเมนหลัก firstmodelhub.com
+# 🎯 301 Direct Redirects ส่งพลัง SEO เชียงใหม่จากโดเมนเดิม เข้าหน้า /location/chiangmai 100%
+[[redirects]]
+  from = "https://sidelinechiangmai.netlify.app/"
+  to = "https://firstmodelhub.com/location/chiangmai"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.sidelinechiangmai.netlify.app/"
+  to = "https://firstmodelhub.com/location/chiangmai"
+  status = 301
+  force = true
+
+# 301 Redirects สำหรับโดเมนอื่นๆ และ Subpaths
 [[redirects]]
   from = "https://www.firstmodelhub.com/*"
   to = "https://firstmodelhub.com/:splat"
@@ -95,12 +109,6 @@
   status = 301
   force = true
 
-[[redirects]]
-  from = "https://www.sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
-  status = 301
-  force = true
-
 # Normalize location query param -> clean path
 [[redirects]]
   query = { province = ":p" }
@@ -109,13 +117,12 @@
   status = 301
   force = true
 
-# Dynamic Profile fallback
+# Dynamic Profile & Location Fallback
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"
   status = 200
-  
-  # เพิ่มต่อท้ายล่างสุดของ netlify.toml (กันพลาดกรณี Edge Function ขัดข้อง)
+
 [[redirects]]
   from = "/location/*"
   to = "/index.html"
