@@ -5,7 +5,6 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  /* 🛠️ ปรับเป็น block เพื่อบังคับให้รอฟอนต์ Prompt ที่ preload ไว้ แสดงผลทันทีโดยหน้าจอไม่กระตุกขยับตัวภายหลัง (ขจัด CLS) */
   font-display: block;
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
@@ -13,7 +12,6 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  /* 🛠️ ปรับเป็น block เพื่อบังคับให้รอฟอนต์ Prompt ที่ preload ไว้ แสดงผลทันทีโดยหน้าจอไม่กระตุกขยับตัวภายหลัง (ขจัด CLS) */
   font-display: block;
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
@@ -31,12 +29,12 @@
   --border-light: rgba(255, 255, 255, 0.1) !important;
   --emerald-accent: #11783B !important; 
   --body-bg: #060411;
-  --nav-bg: rgba(13, 8, 30, 0.75);
+  --nav-bg: rgba(13, 8, 30, 0.85);
   --nav-blur: blur(20px);
   --nav-border: rgba(147, 51, 234, 0.25);
   --nav-shadow: rgba(0, 0, 0, 0.5);
   --glass-bg: rgba(13, 8, 30, 0.45);
-  --glass-border: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.05);
   --glass-shadow: rgba(0, 0, 0, 0.6);
   --glass-glow: rgba(124, 58, 237, 0.15);
   --success-text: #00E676;
@@ -48,7 +46,6 @@
   --line-green-accessible: #11783B;
   --app-purple-neon: #7C3AED;
   --app-purple-glow: rgba(124, 58, 237, 0.15);
-  --app-dark-glass: rgba(13, 8, 30, 0.7);
 }
 
 html.light {
@@ -59,7 +56,7 @@ html.light {
   --text-muted: #52525B !important;
   --border-light: rgba(9, 9, 11, 0.08) !important;
   --body-bg: #F9FAFB !important;
-  --nav-bg: rgba(244, 244, 245, 0.8) !important;
+  --nav-bg: rgba(244, 244, 245, 0.85) !important;
   --nav-border: rgba(9, 9, 11, 0.1) !important;
   --nav-shadow: rgba(0, 0, 0, 0.05) !important;
   --glass-bg: rgba(255, 255, 255, 0.75) !important;
@@ -110,21 +107,20 @@ html, body {
   text-align: center;
 }
 
-/* 🛠️ แก้ไขปัญหาขนาดฟอนต์เพื่อป้องกัน Bot ตรวจจับเป็น Small text / Hidden links */
 .dock-item span {
   font-size: 11px !important;
 }
 .capsule-text {
-  font-size: 13px !important;
+  font-size: 11px !important;
   color: #F4F4F5 !important;
 }
 .social-link-card-item {
-  font-size: 13px !important;
+  font-size: 11px !important;
 }
 .cta-subtext {
   font-size: 11px !important;
   color: #CBD5E1 !important;
-  margin-top: 8px !important;
+  margin-top: 6px !important;
   text-align: center !important;
 }
 
@@ -149,7 +145,6 @@ html, body {
   border-radius: 16px !important;
   border: 1px solid var(--nav-border) !important;
   box-shadow: 0 10px 30px var(--nav-shadow) !important;
-  margin-top: 0 !important;
 }
 .header-status-badge {
   display: none !important;
@@ -236,7 +231,7 @@ html, body {
 }
 
 /* ==============================================================================
-   5. SLEEK 45% MOBILE SIDEBAR MENU
+   5. MOBILE SIDEBAR MENU
    ============================================================================== */
 #sidebar-menu {
   position: fixed;
@@ -295,10 +290,6 @@ html, body {
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  transition: background-color 0.2s;
-}
-.sidebar-close-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
 }
 .sidebar-links-wrapper {
   flex-grow: 1;
@@ -325,11 +316,11 @@ html, body {
 }
 
 /* ==============================================================================
-   6. HERO SECTION, BILLBOARD & SAFE CAPSULES
+   6. HERO SECTION, BILLBOARD & HORIZONTAL SAFE CAPSULES
    ============================================================================== */
 #main-content {
-  padding-top: 84px !important;
-  padding-bottom: 96px !important;
+  padding-top: 85px !important; /* เว้นหลบ Fixed Header ด้านบน */
+  padding-bottom: 110px !important; /* เว้นหลบ Floating Bottom Dock ด้านล่าง */
 }
 .hero-section {
   text-align: center;
@@ -338,69 +329,71 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 16px 12px;
+  gap: 10px;
+  padding: 8px 12px;
   max-width: 850px;
   margin: 0 auto;
 }
 .clutch-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-light);
-  padding: 6px 14px;
+  padding: 4px 12px;
   border-radius: 100px;
   backdrop-filter: blur(12px);
-  margin-bottom: 4px;
 }
 .hero-title {
-  font-size: clamp(26px, 5vw, 42px);
-  font-weight: 800;
-  line-height: 1.25;
+  font-size: clamp(20px, 4.5vw, 36px);
+  font-weight: 900;
+  line-height: 1.3;
   letter-spacing: -.02em;
 }
-
-/* 🛠️ บังคับจองสัดส่วนพื้นที่แบนด์วิดท์รูปแบนเนอร์จริง ป้องกัน Layout Shift (CLS) */
 .billboard-container {
   position: relative;
   width: 100%;
   max-width: 768px;
   aspect-ratio: 1200 / 630 !important;
-  border-radius: 24px !important;
+  max-height: 220px !important;
+  border-radius: 16px !important;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.75), 0 0 40px rgba(90, 44, 190, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   background-color: #09090C;
-  margin: 16px auto !important;
+  margin: 8px auto !important;
 }
 .billboard-container img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
   display: block;
-  transition: transform 0.5s ease;
-}
-.billboard-container:hover img {
-  transform: scale(1.03);
 }
 
+/* ป้ายความปลอดภัย 3 ป้ายเรียบหรูบรรทัดเดียว (Horizontal Scroll Row) */
 .safe-capsules-grid {
   display: flex !important;
   flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
   align-items: center !important;
-  gap: 6px 10px !important;
-  margin-top: 16px !important;
+  gap: 6px !important;
+  margin-top: 6px !important;
   width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 0 !important;
+}
+.safe-capsules-grid::-webkit-scrollbar {
+  display: none;
 }
 .safe-capsule-item {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-  padding: 6px 14px !important;
-  font-size: 11px !important;
+  padding: 4px 10px !important;
+  font-size: 10.5px !important;
   font-weight: 700 !important;
   border-radius: 100px !important;
   background: rgba(255, 255, 255, 0.03) !important;
@@ -408,49 +401,38 @@ html, body {
   text-decoration: none !important;
   color: #E4E4E7 !important;
   white-space: nowrap !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
 }
-.safe-capsule-item:hover {
-  background: rgba(124, 58, 237, 0.12) !important;
-  border-color: var(--app-purple-neon) !important;
-  transform: translateY(-1px);
-}
-
 .btn-primary-webyst {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 12px 28px !important;
-  font-size: 13px !important;
+  padding: 10px 22px !important;
+  font-size: 12.5px !important;
   font-weight: 800 !important;
   border-radius: 100px !important;
   background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%) !important;
   color: #FFFFFF !important;
   text-decoration: none !important;
-  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35) !important;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
-.btn-primary-webyst:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 12px 25px rgba(124, 58, 237, 0.5) !important;
 }
 
 /* ==============================================================================
-   7. SEARCH SECTION & INPUTS
+   7. COMPACT MODERN SMART FILTER SYSTEM (SLEEK APP DASHBOARD)
    ============================================================================== */
 #search-section {
-  border-radius: 24px !important;
-  border: 1px solid rgba(124, 58, 237, 0.2) !important;
-  background: linear-gradient(135deg, rgba(13, 8, 30, 0.8), rgba(9, 9, 12, 0.95)) !important;
-  padding: 20px 16px;
-  margin: 24px 0;
+  border-radius: 20px !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+  background: linear-gradient(135deg, rgba(13, 8, 30, 0.85), rgba(9, 9, 12, 0.95)) !important;
+  padding: 14px 12px !important;
+  margin: 12px auto !important;
+  max-width: 850px;
 }
 .search-inputs-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 @media (min-width: 640px) {
   .search-inputs-row {
@@ -467,41 +449,27 @@ html, body {
   background-color: #0c081d !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   color: #FFF;
-  padding: 12px 16px;
-  font-size: 13px;
-  border-radius: 14px !important;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 12px !important;
   outline: none;
-  transition: all 0.25s ease !important;
-}
-html.light .search-input-field, html.light .search-select-field {
-  background-color: #FFF !important;
-  color: #09090B !important;
-  border-color: rgba(9, 9, 11, 0.15) !important;
+  height: 38px !important;
 }
 .search-select-field {
   appearance: none;
   cursor: pointer;
 }
 .search-input-field:focus, .search-select-field:focus {
-  border-color: var(--app-purple-neon) !important;
-  box-shadow: 0 0 15px var(--app-purple-glow) !important;
+  border-color: var(--primary-purple) !important;
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.2) !important;
 }
 
 /* ==============================================================================
-   8. ULTRA-SHARP 4:5 PROFILE GRID ENGINE (CRITICAL RENDERING SYSTEM)
+   8. ULTRA-SHARP 4:5 PROFILE GRID ENGINE & LIVE COUNT BADGE
    ============================================================================== */
-
-/* 🟢 ล็อกพื้นที่ความสูงขั้นต่ำเริ่มต้นเพื่อป้องกันการยุบตัวของพอร์ตโฟลิโอ (CLS) */
 #profiles-display-area {
-  min-height: 580px; 
+  min-height: 450px;
 }
-@media (min-width: 768px) {
-  #profiles-display-area {
-    min-height: 1100px; 
-  }
-}
-
-/* 🟢 คลาสระบบ Grid แสดงผล 2 คอลัมน์บนมือถือ และ 3-4 คอลัมน์บนจอใหญ่ */
 .profiles-grid,
 .profiles-grid-row,
 .profile-grid,
@@ -511,12 +479,11 @@ html.light .search-input-field, html.light .search-select-field {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
   gap: 10px !important;
-  padding: 0 6px !important;
+  padding: 0 4px !important;
   width: 100% !important;
   max-width: 1100px !important;
   margin: 0 auto !important;
 }
-
 @media (min-width: 768px) {
   .profiles-grid,
   .profiles-grid-row,
@@ -529,7 +496,6 @@ html.light .search-input-field, html.light .search-select-field {
     padding: 0 16px !important;
   }
 }
-
 @media (min-width: 1024px) {
   .profiles-grid,
   .profiles-grid-row,
@@ -541,14 +507,9 @@ html.light .search-input-field, html.light .search-select-field {
     gap: 20px !important;
   }
 }
-
 .profile-card-new-container {
   width: 100% !important;
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 240px;
 }
-
-/* 🟢 การ์ดโปรไฟล์หลัก: ล็อกอัตราส่วน 4/5 มิติการแสดงผลสมบูรณ์แบบ */
 .profile-card-new {
   aspect-ratio: 4 / 5 !important;
   width: 100% !important;
@@ -559,16 +520,12 @@ html.light .search-input-field, html.light .search-select-field {
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
   cursor: pointer !important;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease !important;
+  transition: transform 0.35s ease, border-color 0.35s ease !important;
 }
-
 .profile-card-new:hover {
   transform: translateY(-4px) !important;
   border-color: rgba(192, 132, 252, 0.35) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65) !important;
 }
-
-/* 🟢 รูปภาพโปรไฟล์ภายในการ์ด 4/5 */
 .profile-card-new img {
   position: absolute !important;
   inset: 0 !important;
@@ -578,170 +535,149 @@ html.light .search-input-field, html.light .search-select-field {
   object-fit: cover !important;
   object-position: top center !important;
   filter: brightness(0.96) !important;
-  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), filter 0.35s ease !important;
   z-index: 0 !important;
   border-radius: 16px !important;
-  background-color: #09090B !important;
 }
 
-.profile-card-new:hover img,
-.profile-card-new:active img {
-  transform: scale(1.05) !important;
-  filter: brightness(1) !important;
+/* ป้ายจำนวนโปรไฟล์สดเรืองแสงที่ฝังในหัวข้อจังหวัด */
+.live-count-chip {
+  background: rgba(0, 230, 118, 0.12) !important;
+  border: 1px solid rgba(0, 230, 118, 0.35) !important;
+  color: #00E676 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 100px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-left: 8px !important;
+  vertical-align: middle !important;
 }
-
-/* 🟢 ปุ่มหัวใจบันทึกโปรไฟล์ที่ชอบ (Favorite Button) */
-.fav-btn {
-  transition: all 0.2s ease !important;
-}
-.fav-btn:active {
-  transform: scale(0.85) !important;
-}
-.fav-btn.active {
-  background: rgba(255, 46, 99, 0.88) !important;
-  border-color: rgba(255, 46, 99, 1) !important;
-}
-.fav-btn.active i {
-  font-weight: 900 !important;
-  color: #FFFFFF !important;
-}
-
-/* 🟢 ไฟกระพริบออนไลน์ (Live Status Pulse Effect) */
-@keyframes statusPulse {
-  0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
-  70% { box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
-}
-.status-dot-pulse {
-  animation: statusPulse 1.8s infinite;
-}
-
-/* 🟢 ป้องกันการคลิกขวา ลากรูป หรือเซฟรูปภาพโปรไฟล์ */
-img, 
-.profile-card-new img, 
-.interactive-card img,
-.lightbox-grid-layout img {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -webkit-user-drag: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  pointer-events: auto;
+.pulse-dot-el {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background-color: #00E676 !important;
+  box-shadow: 0 0 8px #00E676 !important;
 }
 
 /* ==============================================================================
-   9. LIGHTBOX POP-UP MODAL SYSTEM
+   9. LIGHTBOX POP-UP MODAL SYSTEM (SPACIOUS & FULL-BLEED HD DISPLAY)
    ============================================================================== */
 #lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 5000;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
   display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 70px 12px 20px 12px;
-  background-color: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  overflow-y: auto;
-}
-@media (min-width: 1024px) {
-  #lightbox {
-    padding: 96px 24px 24px 24px;
-  }
-}
-#lightbox-content-wrapper-el {
-  position: relative;
-  width: 100%;
-  max-width: 850px;
-  background: #09090C;
-  border-radius: 24px;
-  border: 1px solid rgba(147, 51, 234, 0.25);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 50px rgba(90, 44, 190, 0.1);
-  overflow: hidden;
-  margin: auto;
-}
-.lightbox-grid-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
-}
-@media (min-width: 768px) {
-  .lightbox-grid-layout {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.lightbox-details {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background: linear-gradient(135deg, rgba(14, 9, 30, 0.6) 0%, rgba(9, 9, 12, 0.95) 100%);
-  overflow-y: auto;
-  max-height: 65vh;
-}
-@media (min-width: 768px) {
-  .lightbox-details {
-    max-height: 75vh;
-    padding: 32px;
-  }
-}
-.lightbox-bento-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-.bento-stat-box {
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 14px !important;
-  padding: 12px 6px !important;
-  text-align: center;
-  transition: transform 0.2s, border-color 0.2s;
-}
-.bento-stat-box:hover {
-  transform: translateY(-2px);
-  border-color: rgba(147, 51, 234, 0.3) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 45px 8px 12px 8px !important; /* ปรับ Padding รอบนอกให้โปร่ง โล่ง สบายตา */
+  background-color: rgba(0, 0, 0, 0.90) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  overflow-y: auto !important;
 }
 
-/* Sticky Line CTA inside Lightbox */
-#line-btn-sticky-wrapper {
-  position: sticky;
-  bottom: -1px;
-  background: #121214;
-  padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0px)) 0;
-  z-index: 50;
-  width: 100%;
-  box-shadow: 0 -15px 20px -10px rgba(18, 18, 20, 0.9);
+#lightbox-content-wrapper-el {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 850px !important;
+  max-height: 90vh !important;
+  background: #09090C !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important; /* ปรับขอบให้เรียวบางเรืองแสง ปลดล็อกความอึดอัด */
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(124, 58, 237, 0.15) !important;
+  overflow: hidden !important;
+  margin: auto !important;
 }
-#line-btn-sticky-wrapper a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: var(--line-green-accessible) !important;
-  color: white !important;
-  padding: 14px;
-  border-radius: 100px;
-  font-weight: 800;
-  font-size: 13.5px;
-  text-decoration: none;
-  box-shadow: 0 10px 25px rgba(6, 199, 85, 0.35);
-  transition: all 0.3s cubic-bezier(.16, 1, .3, 1) !important;
+
+/* ปรับปรุงเลย์เอาต์ตะแกรงใน Lightbox ให้โปร่ง เป็นสัดส่วน */
+.lightbox-grid-layout {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
 }
-#line-btn-sticky-wrapper a:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(6, 199, 85, 0.5);
-  background: #03722e !important;
+
+@media (min-width: 768px) {
+  .lightbox-grid-layout {
+    grid-template-columns: 1.1fr 1fr !important;
+  }
+}
+
+/* ลบ Padding บีบขอบรูปออก 100% เพื่อให้รูปขยายกว้างเต็มตา */
+.lightbox-image-column {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #000000 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.lightbox-hero-container {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 52vh !important; /* สเกลความสูงรูปภาพให้พอดี ไม่ดันรายละเอียดอื่นลงไปจมขอบล่าง */
+  aspect-ratio: 4 / 5 !important;
+  overflow: hidden !important;
+  position: relative !important;
+  border-radius: 0 !important;
+}
+
+@media (min-width: 768px) {
+  .lightbox-hero-container {
+    max-height: 75vh !important;
+  }
+}
+
+#lightboxHeroImage {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+  filter: brightness(0.98) !important;
+  border-radius: 0 !important;
+}
+
+#lightboxThumbnailStrip {
+  display: flex !important;
+  gap: 6px !important;
+  overflow-x: auto !important;
+  padding: 8px 10px !important;
+  margin: 0 !important;
+  justify-content: center !important;
+  width: 100% !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* โซนรายละเอียดน้องๆ โปร่ง โล่ง อ่านง่าย ไม่โดนบีบ */
+.lightbox-details {
+  padding: 16px 16px 28px 16px !important; /* เพิ่ม Padding ด้านล่างป้องกันข้อความตกขอบ */
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important; /* เพิ่มระยะช่องไฟให้อ่านง่ายขึ้น */
+  background: linear-gradient(135deg, rgba(14, 9, 30, 0.85) 0%, rgba(9, 9, 12, 0.98) 100%) !important;
+  overflow-y: auto !important;
+  max-height: 48vh !important;
+}
+
+@media (min-width: 768px) {
+  .lightbox-details {
+    max-height: 80vh !important;
+    padding: 24px !important;
+  }
 }
 
 /* ==============================================================================
-   10. FLOATING APP DOCK (MOBILE BOTTOM NAVIGATION) - FIXED & PERFECTED
+   10. FLOATING APP DOCK (MOBILE BOTTOM NAVIGATION)
    ============================================================================== */
 .floating-app-dock {
-  display: none; /* ซ่อนเป็นค่าเริ่มต้นสำหรับจอคอมพิวเตอร์ (Desktop) */
+  display: none;
 }
-
 @media (max-width: 768px) {
   .floating-app-dock {
     display: flex !important;
@@ -764,35 +700,28 @@ img,
     padding: 4px 8px !important;
     box-sizing: border-box !important;
   }
-
-  /* ปุ่มทั่วไป: หน้าแรก, ตัวกรอง, รวมน้องๆ */
   .dock-item {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    flex: 1 1 0% !important; /* กระจายพื้นที่เท่ากันพอดี */
+    flex: 1 1 0% !important;
     min-width: 0 !important;
     color: #A1A1AA !important;
     text-decoration: none !important;
     font-size: 10px !important;
     font-weight: 700 !important;
-    white-space: nowrap !important; /* ป้องกันข้อความตัดลงบรรทัดใหม่ */
+    white-space: nowrap !important;
     gap: 2px !important;
   }
-
   .dock-item i {
     font-size: 15px !important;
   }
-
-  .dock-item.active, 
-  .dock-item:hover {
+  .dock-item.active, .dock-item:hover {
     color: #C084FC !important;
   }
-
-  /* ปุ่ม LINE จองคิวทรงแคปซูลไฮไลท์ */
   nav.floating-app-dock a.dock-item.dock-item-line {
-    flex: 1.2 1 0% !important; /* ปรับขนาดปุ่มจองคิวให้พอดี ไม่เบียดไอคอนอื่น */
+    flex: 1.2 1 0% !important;
     background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important;
     color: #FFFFFF !important;
     border-radius: 100px !important;
@@ -804,14 +733,8 @@ img,
     font-weight: 800 !important;
     box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3) !important;
     padding: 0 12px !important;
-    margin-left: 2px !important;
   }
-
-  nav.floating-app-dock a.dock-item.dock-item-line i {
-    font-size: 16px !important;
-    color: #FFFFFF !important;
-  }
-
+  nav.floating-app-dock a.dock-item.dock-item-line i,
   nav.floating-app-dock a.dock-item.dock-item-line span {
     color: #FFFFFF !important;
     font-size: 11px !important;
@@ -819,213 +742,99 @@ img,
   }
 }
 
+/* Exclude Dock Button from General LINE CTA Styling */
+.line-cta-btn, a[href*="line.me"]:not(.dock-item), [class*="line-btn"]:not(.dock-item) {
+  max-width: 330px !important;
+  width: 92% !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+  margin: 8px auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+}
+
 /* ==============================================================================
-   11. ACCORDION / RULES & SEO CONTENT SYSTEM
+   11. COMPACT LOWER SECTIONS & FOOTER (SEO, RULES, FAQ, REVIEWS, MAPS)
    ============================================================================== */
 .glass-panel {
-  border-radius: 20px !important;
+  border-radius: 16px !important;
   border: 1px solid rgba(147, 51, 234, 0.15) !important;
   background: rgba(13, 8, 30, 0.45) !important;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
-  padding: 20px 16px !important;
+  padding: 16px 12px !important;
 }
+
+/* Safe-Play Accordion Compact */
 .rule-item {
   border: 1px solid rgba(255, 255, 255, 0.05);
   background-color: rgba(13, 8, 30, 0.45);
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
-  margin-bottom: 8px;
-}
-.rule-item:not(.collapsed) {
-  background-color: rgba(147, 51, 234, 0.04);
-  border-color: rgba(147, 51, 234, 0.25);
+  margin-bottom: 6px;
 }
 .rule-trigger {
   width: 100%;
   background: none;
   border: none;
-  padding: 16px 20px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   color: #FFFFFF;
-  outline: none;
   text-align: left;
 }
-.rule-content {
-  max-height: 1000px;
-  opacity: 1;
-  padding: 0 20px 20px 20px;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.4s ease;
-}
-.rule-item.collapsed .rule-content {
-  max-height: 0 !important;
-  opacity: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  pointer-events: none;
-}
-.rule-icon {
-  transition: transform 0.3s ease;
-}
-.rule-item:not(.collapsed) .rule-icon {
-  transform: rotate(180deg);
-  color: #C084FC;
-}
 
-.seo-content-container {
-  position: relative;
-  transition: max-height 0.5s cubic-bezier(.16, 1, .3, 1);
-}
+/* SEO Content Drawer */
 .seo-content-container.collapsed {
-  max-height: 180px !important;
+  max-height: 140px !important;
   overflow: hidden !important;
 }
-.seo-fade-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 90px;
-  background: linear-gradient(to top, var(--body-bg) 15%, transparent 100%);
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-.seo-content-container:not(.collapsed) .seo-fade-overlay {
-  opacity: 0;
-}
-.btn-read-more {
-  background: rgba(124, 58, 237, 0.08);
-  border: 1px solid rgba(124, 58, 237, 0.25);
-  color: #C084FC;
-  padding: 10px 24px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.25s ease;
-}
-.btn-read-more:hover {
-  background: rgba(124, 58, 237, 0.2);
-  border-color: #7C3AED;
-}
 
-/* ==============================================================================
-   12. REVIEWS & STAR RATING SYSTEM
-   ============================================================================== */
-.star-rating-input-item {
-  color: #71717A;
-  transition: color 0.2s, transform 0.2s;
-  cursor: pointer;
+/* Single Line Social Chips */
+.social-links-grid-wrapper {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  padding: 4px 0 !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
-.star-rating-input-item.active {
-  color: #FBBF24 !important;
+.social-links-grid-wrapper::-webkit-scrollbar {
+  display: none;
 }
-.star-rating-input-item:hover {
-  transform: scale(1.2);
-}
-#review-form input, #review-form textarea {
-  background: #090615 !important;
+.social-link-card-item {
+  padding: 6px 14px !important;
+  font-size: 11px !important;
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: var(--text-gray);
-  border-radius: 12px;
-  padding: 12px 16px;
-  transition: all 0.25s ease;
-}
-#review-form input:focus, #review-form textarea:focus {
-  border-color: var(--app-purple-neon) !important;
-  box-shadow: 0 0 12px var(--app-purple-glow) !important;
-}
-.user-submitted-review {
-  animation: slide-in-review-anim 0.5s cubic-bezier(.16, 1, .3, 1) forwards;
-}
-@keyframes slide-in-review-anim {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
-/* ==============================================================================
-   13. TOAST NOTIFICATIONS & UTILITIES
-   ============================================================================== */
-#toast-container {
-  position: fixed;
-  bottom: 75px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 90%;
-  max-width: 400px;
-  pointer-events: none;
+/* Google Maps Max Height Limit */
+#map-container {
+  max-height: 180px !important;
 }
 
-.text-gradient-main {
-  background: linear-gradient(135deg, #FFFFFF 30%, #E4E4E7 60%, #5A2CBE 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.text-gradient-sub {
-  background: linear-gradient(135deg, #FFFFFF 40%, #C084FC 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.text-gradient-emerald {
-  background: linear-gradient(135deg, #A7F3D0 0%, #10B981 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.text-\[\#C084FC\] {
-  color: #C084FC !important;
+/* Footer Padding Bottom Offset for Dock */
+footer {
+  padding-bottom: 110px !important;
 }
 
-.region-tab {
-  background: none;
-  border: none;
-  padding: 8px 18px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-gray);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.region-tab.active {
-  background-color: #C084FC !important;
-  color: #09090C !important;
-  font-weight: 800 !important;
-}
-
-.skeleton-loader {
-  background: linear-gradient(90deg, #121214 25%, #1a1a1e 50%, #121214 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading-anim 1.5s infinite;
-}
-@keyframes skeleton-loading-anim {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-@keyframes ambientBreathing {
-  0% { transform: translate(0, 0) scale(1); opacity: .15; filter: blur(55px); }
-  33% { transform: translate(30px, -40px) scale(1.1); opacity: .22; filter: blur(45px); }
-  66% { transform: translate(-20px, 20px) scale(.95); opacity: .18; filter: blur(60px); }
-  100% { transform: translate(0, 0) scale(1); opacity: .15; filter: blur(55px); }
-}
-.bg-glow-overlap {
-  position: absolute;
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(90, 44, 190, 0.15) 0%, transparent 70%);
-  filter: blur(55px);
-  pointer-events: none;
-  z-index: 0;
-  animation: ambientBreathing 18s ease-in-out infinite;
+/* Protection against image dragging */
+img {
+  user-select: none !important;
+  -webkit-user-drag: none !important;
 }

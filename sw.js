@@ -3,9 +3,9 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.1.0/workbox
 if (workbox) {
   // -----------------------------------------------------------
   // 1. CONFIGURATION
-  // ⚠️ เปลี่ยนเลขเวอร์ชันทุกครั้งที่มีการอัปเดตไฟล์ เพื่อให้เครื่องลูกค้าโหลดใหม่
+  // 🟢 อัปเกรดเลขเวอร์ชันแคชใหม่เพื่อบังคับให้เครื่องลูกค้าล้างไฟล์จำเก่าทิ้ง
   // -----------------------------------------------------------
-  const CACHE_VERSION = 'v-2026-02-02-04'; 
+  const CACHE_VERSION = 'v-2026-07-26-v4'; 
   const OFFLINE_PAGE = '/offline.html';
 
   workbox.core.setCacheNameDetails({
@@ -16,7 +16,7 @@ if (workbox) {
   });
 
   // -----------------------------------------------------------
-  // 2. INSTALLATION (บันทึกหน้า Offline)
+  // 2. INSTALLATION & ACTIVATION (บังคับอัปเดตและลบแคชเก่าทันที)
   // -----------------------------------------------------------
   self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -29,7 +29,7 @@ if (workbox) {
   });
 
   self.addEventListener('activate', (event) => {
-    // ล้าง Cache เก่าทิ้งเมื่อมีการเปลี่ยนเวอร์ชัน
+    // ล้าง Cache เก่าทิ้งทั้งหมดเมื่อมีการเปลี่ยนเวอร์ชัน
     event.waitUntil(
       caches.keys().then((keys) =>
         Promise.all(
@@ -62,14 +62,21 @@ if (workbox) {
     })
   );
 
-  // ✅ A.2 ไฟล์ Static (CSS, JS, Worker) - ใช้ StaleWhileRevalidate
+  // 🟢 A.2 ไฟล์ Static (CSS, JS, Worker) - เปลี่ยนเป็น NetworkFirst
+  // เพื่อการันตีว่าลูกค้าจะได้รับไฟล์ดีไซน์และสไตล์ใหม่ล่าสุดทันทีตั้งแต่ครั้งแรกที่เข้าเว็บ
   workbox.routing.registerRoute(
     ({ request }) => 
       request.destination === 'style' || 
       request.destination === 'script' || 
       request.destination === 'worker',
-    new workbox.strategies.StaleWhileRevalidate({
-      cacheName: `static-resources-${CACHE_VERSION}`
+    new workbox.strategies.NetworkFirst({
+      cacheName: `static-resources-${CACHE_VERSION}`,
+      networkTimeoutSeconds: 3,
+      plugins: [
+        new workbox.expiration.ExpirationPlugin({
+          maxEntries: 50,
+        }),
+      ],
     })
   );
 
