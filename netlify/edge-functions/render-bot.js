@@ -91,17 +91,46 @@ export default async (request, context) => {
         const pathParts = url.pathname.split('/').filter(Boolean);
         if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
         
-        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
+        const rawSlug = pathParts[pathParts.length - 1];
+        if (['province', 'category', 'search', 'app'].includes(rawSlug)) return context.next();
+
+        // 🟢 1. สกัดและสร้างรูปแบบ Slug ภาษาไทยทุกเวอร์ชัน (กันปัญหา %E0... กับ ตัวหนังสือไทย)
+        let decodedSlug = rawSlug;
+        try {
+            decodedSlug = decodeURIComponent(rawSlug);
+        } catch {
+            decodedSlug = rawSlug;
+        }
+
+        const searchSlugs = [...new Set([
+            rawSlug,
+            decodedSlug,
+            rawSlug.toLowerCase(),
+            decodedSlug.toLowerCase(),
+            encodeURIComponent(decodedSlug)
+        ])];
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        const { data: p } = await supabase
+        // 🟢 2. ค้นหาใน Supabase ด้วย .in() ครอบคลุมรูปแบบภาษาไทยทั้งหมด
+        let { data: p } = await supabase
             .from('profiles')
             .select('id, slug, name, imagePath, location, rate, age, height, weight, stats, bust, waist, hips, description, provinceKey, lineId, provinces(nameThai, key)')
-            .eq('slug', slug)
+            .in('slug', searchSlugs)
             .eq('active', true)
+            .limit(1)
             .maybeSingle();
+
+        // 🟢 3. ถ้ายังไม่เจอ และ slug เป็นตัวเลข ให้ค้นหาจาก ID สำรอง
+        if (!p && /^\d+$/.test(decodedSlug)) {
+            const { data: byId } = await supabase
+                .from('profiles')
+                .select('id, slug, name, imagePath, location, rate, age, height, weight, stats, bust, waist, hips, description, provinceKey, lineId, provinces(nameThai, key)')
+                .eq('id', parseInt(decodedSlug, 10))
+                .eq('active', true)
+                .maybeSingle();
+            p = byId;
+        }
 
         if (!p) {
             return new Response(`<!DOCTYPE html><html lang="th"><head><meta name="robots" content="noindex, follow"><title>404 - ไม่พบหน้าเว็บ</title></head><body><h1>404 Not Found</h1></body></html>`, {
@@ -144,22 +173,22 @@ export default async (request, context) => {
             finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
         }
 
-        const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-        const heightVal = p.height || getDeterministicValue(158, 168, slug, 2);
+        const ageVal = p.age || getDeterministicValue(20, 26, decodedSlug, 1);
+        const heightVal = p.height || getDeterministicValue(158, 168, decodedSlug, 2);
         
         let bwhVal = p.stats;
         if (!bwhVal) {
             if (p.bust && p.waist && p.hips) {
                 bwhVal = `${p.bust}-${p.waist}-${p.hips}`;
             } else {
-                const breastVal = getDeterministicValue(32, 36, slug, 4);
-                const waistVal = getDeterministicValue(23, 26, slug, 5);
-                const hipVal = getDeterministicValue(33, 37, slug, 6);
+                const breastVal = getDeterministicValue(32, 36, decodedSlug, 4);
+                const waistVal = getDeterministicValue(23, 26, decodedSlug, 5);
+                const hipVal = getDeterministicValue(33, 37, decodedSlug, 6);
                 bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
             }
         }
 
-        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const charCodeSum = decodedSlug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
         
@@ -170,9 +199,9 @@ export default async (request, context) => {
         const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
         const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
         
-        const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(slug)}`;
+        const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug || decodedSlug)}`;
 
-        const dynamicReviews = getDeterministicReviews(slug, 3);
+        const dynamicReviews = getDeterministicReviews(decodedSlug, 3);
         const schemaReviews = dynamicReviews.map(t => ({
             "@type": "Review",
             "reviewRating": {
