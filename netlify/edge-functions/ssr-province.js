@@ -182,19 +182,18 @@ const formatDateSSR = dateStr => {
   }
 };
 
-// 🟢 ระบบลิงก์ใยแมงมุม (Spiderweb Linkify)
 const smartLinkify = (text, flag, zones) => {
   if (!text) return "";
   let res = text;
   if (zones && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
       const regex = new RegExp(`(${zone})(?![^<>]*>)`, "g");
-      res = res.replace(regex, `<a href="/search?q=${encodeURIComponent(zone)}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
+      res = res.replace(regex, `<a href="/location/chiangmai" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
   ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน", "ฟิวแฟน", "สาวรับงาน"].forEach(keyword => {
     const regex = new RegExp(`(${keyword})(?![^<>]*>)`, "g");
-    res = res.replace(regex, `<a href="/search?q=${encodeURIComponent(keyword)}" class="highlight text-[#C084FC] font-extrabold hover:underline">$1</a>`);
+    res = res.replace(regex, `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`);
   });
   return res;
 };
@@ -204,7 +203,7 @@ const getDynamicIntro = (provinceName, zones) => {
   if (provinceName === "เชียงใหม่" && processedZones.includes("นิมมาน")) {
     processedZones = processedZones.map(zone => 
       zone === "นิมมาน" 
-        ? `<a href="/nimman" class="text-[#C084FC] hover:underline font-bold transition-colors">นิมมาน</a>`
+        ? `<a href="/location/chiangmai" class="text-[#C084FC] hover:underline font-bold transition-colors">นิมมาน</a>`
         : zone
     );
   }
@@ -318,7 +317,6 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
   };
 };
 
-// 🟢 ตัวเรนเดอร์ FAQ ไดนามิก
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs) return "";
   return faqs.map(item => `
@@ -340,33 +338,29 @@ const generateDynamicFAQsHTML = faqs => {
 // 4. MAIN EDGE REQUEST HANDLER (NATIONAL & MULTI-LOCATION SSR MASTER)
 // ==============================================================================
 export default async (req, context) => {
+  // 🟢 1. ตรวจสอบความปลอดภัย Hostname
   if (!verifyHostname(req)) {
     return new Response("403 Forbidden - Access Denied", { status: 403 });
   }
 
   const url = new URL(req.url);
-
-  if (url.host.includes("sidelinechiangmai.netlify.app")) {
-    return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}${url.pathname}${url.search}`, 301);
-  }
-
-  if (url.host.startsWith("www.firstmodelhub.com")) {
-    return Response.redirect(`${CONFIG.PRIMARY_DOMAIN}${url.pathname}${url.search}`, 301);
-  }
-
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
+  const hostName = url.hostname.toLowerCase();
 
-  if (url.pathname === "/index.html") {
-    if (req.headers.get("x-ssr-bypass") === "true") {
-      try {
-        return await context.next();
-      } catch {
-        return new Response("Bypass fetch failed", { status: 500 });
-      }
+  // 🟢 2. โอนพลัง SEO 100% จากโดเมนเชียงใหม่เดิม เข้าหน้า /location/chiangmai โดยตรง
+  if (hostName.includes("sidelinechiangmai.netlify.app")) {
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      return Response.redirect(`${hostUrl}/location/chiangmai`, 301);
     }
-    return Response.redirect(`${hostUrl}/`, 301);
+    return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
   }
 
+  // 🟢 3. จัดการ 301 Redirect สำหรับ www. และ Netlify Subdomains อื่นๆ เข้าโดเมนหลัก
+  if (hostName.startsWith("www.firstmodelhub.com") || hostName.includes("firstmodelhub.netlify.app")) {
+    return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
+  }
+
+  // 🟢 4. บายพาส Internal Request (เมื่อ Edge Server เรียกดึงไฟล์ index.html ตัวจริงมาทำ SSR)
   if (req.headers.get("x-ssr-bypass") === "true") {
     try {
       return await context.next();
@@ -375,12 +369,35 @@ export default async (req, context) => {
     }
   }
 
-  if ([".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2"].some(ext => url.pathname.toLowerCase().endsWith(ext))) {
+  // 🟢 5. บายพาส Static Assets (รูปภาพ, JS, CSS, ฟอนต์) ให้ Netlify CDN เสิร์ฟไฟล์ได้ทันที
+  const staticExtensions = [
+    ".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".avif", ".svg", 
+    ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2", ".ttf"
+  ];
+  if (staticExtensions.some(ext => url.pathname.toLowerCase().endsWith(ext))) {
     try {
       return await context.next();
     } catch {
-      return;
+      return await context.next();
     }
+  }
+
+  // 🟢 6. บายพาสหน้า Static ปกติของเว็บ ไม่ให้วิ่งเข้ากระบวนการค้นหาจังหวัด
+  const staticPages = [
+    "/about", "/faq", "/blog", "/contact", 
+    "/terms-of-service", "/privacy-policy", "/policy", "/locations"
+  ];
+  if (staticPages.some(page => url.pathname === page || url.pathname.startsWith(page + "/"))) {
+    try {
+      return await context.next();
+    } catch {
+      return await context.next();
+    }
+  }
+
+  // 🟢 7. Normalize URL: เปลี่ยน /index.html ให้เป็น / (ป้องกันปัญหา Duplicate Content)
+  if (url.pathname === "/index.html") {
+    return Response.redirect(`${hostUrl}/`, 301);
   }
 
   // ============================== ROUTE PARSING ==============================
@@ -407,52 +424,6 @@ export default async (req, context) => {
     }
   }
 
-  // ============================== ROBOTS.TXT ==============================
-  if ("/robots.txt" === url.pathname) {
-    return new Response(`User-agent: *\nAllow: /\nDisallow: /search\nDisallow: /admin\n\nSitemap: ${hostUrl}/sitemap.xml`, { 
-      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" } 
-    });
-  }
-
-  // ============================== SITEMAP.XML GENERATOR ==============================
-  if ("/sitemap.xml" === url.pathname) {
-    try {
-      const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY),
-        [provRes, profRes] = await Promise.all([
-          supabase.from("provinces").select("key"),
-          supabase.from("profiles").select("slug, lastUpdated, name, imagePath").eq("active", true)
-        ]),
-        provList = provRes.data || [],
-        profList = profRes.data || [];
-
-      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
-      xml += `  <url>\n    <loc>${hostUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
-
-      provList.forEach(p => {
-        if (p.key) {
-          xml += `  <url>\n    <loc>${hostUrl}/location/${p.key}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
-        }
-      });
-
-      profList.forEach(p => {
-        const lastMod = p.lastUpdated ? new Date(p.lastUpdated).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-          profileLoc = `${hostUrl}/sideline/${encodeURIComponent(p.slug)}`;
-        let imgXml = "";
-        if (p.imagePath) {
-          imgXml = `\n    <image:image>\n      <image:loc>${optimizeImg(hostUrl, p.imagePath, 1200, 630).replace(/&/g, "&amp;")}</image:loc>\n      <image:title>${escapeHTML(p.name || "Profile Image")}</image:title>\n    </image:image>`;
-        }
-        xml += `  <url>\n    <loc>${profileLoc}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>${imgXml}\n  </url>\n`;
-      });
-
-      xml += "</urlset>";
-      return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=3600, stale-while-revalidate=1800" } });
-    } catch (e) {
-      console.error("Sitemap generation error:", e);
-      return new Response(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>${hostUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n</urlset>`, { headers: { "Content-Type": "application/xml; charset=utf-8" } });
-    }
-  }
-
   // ============================== MAIN SSR RENDER LOGIC ==============================
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -470,11 +441,10 @@ export default async (req, context) => {
         matchedProfile = profileData;
         provinceSlug = profileData.provinceKey || "chiangmai";
       } else {
-        provinceSlug = "chiangmai";
+        return buildErrorPage(404, "404 - ไม่พบโปรไฟล์ที่ต้องการ", "โปรไฟล์น้องๆ รายนี้อาจถูกปิดการใช้งาน หรือระงับบริการชั่วคราวครับ");
       }
     }
 
-    // 🟢 Multi-key fallback (chiangmai & chiang_mai)
     let searchKeys = [provinceSlug];
     if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
       searchKeys = ["chiangmai", "chiang_mai"];
@@ -519,7 +489,6 @@ export default async (req, context) => {
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
 
-    // 🟢 ดึงข้อมูลรีวิวสดจากตาราง reviews ใน Supabase
     let dbReviews = [];
     try {
       let reviewQuery = supabase.from("reviews")
@@ -576,7 +545,7 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // ============================== 🟢 100% GOOGLE-COMPLIANT STRUCTURED DATA GRAPH ==============================
+    // ============================== STRUCTURED DATA GRAPH ==============================
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -717,7 +686,7 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== 🟢 PROFILE CARDS GENERATOR (FULL BADGES) ==============================
+    // ============================== PROFILE CARDS GENERATOR ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
       const pLoc = escapeHTML(p.location || provinceThaiName);
@@ -731,7 +700,6 @@ export default async (req, context) => {
       const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
       const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
 
-      // 🟢 1. ป้ายแนะนำ
       const featuredBadge = p.isfeatured
         ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
             <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
@@ -739,7 +707,6 @@ export default async (req, context) => {
            </span>`
         : "";
 
-      // 🟢 2. ป้ายสถานะรับงาน
       const statusBadge = `
         <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
             <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
@@ -747,7 +714,6 @@ export default async (req, context) => {
         </span>
       `;
 
-      // 🟢 3. ป้ายคลิปวิดีโอ
       const hasVideo = p.has_video || p.hasVideo || false;
       const videoBadge = hasVideo
         ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
@@ -755,7 +721,6 @@ export default async (req, context) => {
            </span>`
         : "";
 
-      // 🟢 4. ป้ายยืนยันตัวตน
       const isVerified = p.verified || p.isVerified || false;
       const verifiedBadge = isVerified
         ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
@@ -824,7 +789,6 @@ export default async (req, context) => {
       `;
     }).join("");
 
-    // 🟢 สร้าง HTML การ์ดรีวิวไดนามิก
     const reviewsHtml = finalReviews.map(r => `
       <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -858,7 +822,7 @@ export default async (req, context) => {
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
 
-    // ดึง Template index.html
+    // ดึง Template index.html ตัวจริงมาเติมข้อมูล
     const templateUrl = new URL("/index.html", url.origin);
     const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
     let rawHtml = await mainTemplate.text();
@@ -894,7 +858,6 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 ซ่อนส่วน POPULAR SELECTION ในหน้าจังหวัดอัตโนมัติเพื่อป้องกัน "พบ 0 โปรไฟล์"
     if (!isNationalHome) {
       rawHtml = rawHtml.replace(
         /<section id="featured-profiles"[\s\S]*?<\/section>/i,
@@ -902,7 +865,6 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 ฝังป้ายจำนวนโปรไฟล์สด (Live Count Badge) ไว้ที่หัวข้อจังหวัดตรงๆ
     const liveCountChipHtml = `
       <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
@@ -920,7 +882,6 @@ export default async (req, context) => {
       `<div id="profiles-display-area" style="margin-top: 16px; position: relative;">${liveCountChipHtml}`
     );
 
-    // 🟢 ส่งข้อมูลสเปกน้องๆ ครบ 100% สำหรับการแสดงผลหน้าต่าง Lightbox Modal ฝั่ง Client
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,

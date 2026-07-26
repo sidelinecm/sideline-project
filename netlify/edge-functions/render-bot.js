@@ -16,13 +16,13 @@ const CONFIG = {
     },
     DOMAIN: 'https://firstmodelhub.com',
     BRAND_NAME: 'First Model Hub',
-    DEFAULT_TELEPHONE: 'LINE: @firstmodelhub', // ✅ อัปเดตให้สอดคล้องกับนโยบาย
+    DEFAULT_TELEPHONE: 'LINE: @firstmodelhub',
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@firstmodelhub',
         twitter: 'https://twitter.com/firstmodelhub',
         linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
-        biosite: 'https://bio.site/firstmodelhub', // ✅ อัปเดต Bio.site
+        biosite: 'https://bio.site/firstmodelhub',
         linktree: 'https://linktr.ee/firstmodelhub',
         bluesky: 'https://bsky.app/profile/firstmodelhub.bsky.social'
     }
@@ -75,25 +75,8 @@ const generateSrcSet = (path) => {
     }).join(', ');
 };
 
-const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
-
-const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
-
-const getLocalizedZone = (location, provinceName) => {
-    if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
-    const cleanLoc = location.trim();
-    if (cleanLoc.includes(provinceName)) {
-        return `ย่าน${cleanLoc}`;
-    }
-    return `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
-};
-
-const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, localizedZone) => {
-    if (p.description && p.description.trim().length > 10) {
-        return p.description.trim();
-    }
-    return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
-};
+const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, '').trim() : '';
 
 export default async (request, context) => {
     const url = new URL(request.url);
@@ -115,7 +98,7 @@ export default async (request, context) => {
         
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, height, weight, stats, bust, waist, hips, description, provinceKey, lineId, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -144,11 +127,9 @@ export default async (request, context) => {
         const displayName = `น้อง${cleanName}`;
         
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
+        const provinceKey = p.provinces?.key || p.provinceKey || 'chiangmai';
         
-        const correctProvinceUrl = provinceKey === 'chiangmai' 
-            ? dynamicDomain 
-            : `${dynamicDomain}/location/${provinceKey}`;
+        const correctProvinceUrl = `${dynamicDomain}/location/${provinceKey}`;
         
         const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
         const rawRate = parseInt(cleanedRate, 10) || 1500;
@@ -164,19 +145,27 @@ export default async (request, context) => {
         }
 
         const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-        const heightVal = getDeterministicValue(158, 168, slug, 2);
-        const weightVal = getDeterministicValue(44, 52, slug, 3);
-        const breastVal = getDeterministicValue(32, 36, slug, 4);
-        const waistVal = getDeterministicValue(23, 26, slug, 5);
-        const hipVal = getDeterministicValue(33, 37, slug, 6);
-        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+        const heightVal = p.height || getDeterministicValue(158, 168, slug, 2);
+        
+        let bwhVal = p.stats;
+        if (!bwhVal) {
+            if (p.bust && p.waist && p.hips) {
+                bwhVal = `${p.bust}-${p.waist}-${p.hips}`;
+            } else {
+                const breastVal = getDeterministicValue(32, 36, slug, 4);
+                const waistVal = getDeterministicValue(23, 26, slug, 5);
+                const hipVal = getDeterministicValue(33, 37, slug, 6);
+                bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+            }
+        }
 
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
         const reviewCount = 150 + (charCodeSum % 100);
         
-        const localizedZone = getLocalizedZone(p.location, provinceName);
-        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
+        const naturalDescriptionText = p.description && p.description.trim().length > 10 
+            ? p.description.trim()
+            : `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวระดับพรีเมียมในย่าน ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} สูง ${heightVal} ซม. สุภาพเรียบร้อย ดูแลดีสไตล์ฟิวแฟน ปลอดภัยไม่โอนมัดจำล่วงหน้า จ่ายหน้างานตรงกับน้องเมื่อเจอตัวจริงเท่านั้น`;
         
         const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
         const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
@@ -199,16 +188,10 @@ export default async (request, context) => {
         }));
 
         const breadcrumbElements = [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain },
+            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceName}`, "item": correctProvinceUrl },
+            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
         ];
-
-        if (provinceKey === 'chiangmai') {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
-        } else {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
-        }
-
-        breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
 
         const schemaData = {
             "@context": "https://schema.org/",
@@ -250,14 +233,6 @@ export default async (request, context) => {
                                 "@type": "Answer",
                                 "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ เพื่อความคุ้มครองและความสบายใจสูงสุดของลูกค้า`
                             }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${p.location || provinceName} ได้ที่ช่องทางใด?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": `สามารถดำเนินการคลิกแอดไลน์ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บ เพื่อดำเนินการขอตรวจสอบคิวงาน สแตนด์บายตารางงาน และจองคิวรับบริการเพื่อความสะดวกและรวดเร็วที่สุดผ่านไลน์แอดมินเจ้าหน้าที่อย่างเป็นทางการ`
-                            }
                         }
                     ]
                 }
@@ -284,211 +259,80 @@ export default async (request, context) => {
     <meta name="twitter:description" content="${metaDesc}">
     <meta name="twitter:image" content="${baseImageUrl}">
     <meta property="og:image" content="${baseImageUrl}">
-    <meta property="og:image:width" content="600">   
-    <meta property="og:image:height" content="800">
     
     <link rel="shortcut icon" href="/images/favicon.ico">
-    
     <meta property="og:title" content="${pageTitle}">
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
-
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
-    
-    <style>
-        :root { --p:#FF2E63; --s:#34d399; --bg:#07070A; --card:#111116; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
-        .container { position: relative; max-width: 500px; margin: 0 auto; background: var(--card); min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.6); border-left: 1px solid var(--bw); border-right: 1px solid var(--bw); }
-        @media (min-width: 768px) { .container { max-width: 600px; } }
-        
-        .fixed-nav { position: absolute; top: 0; left: 0; width: 100%; z-index: 100; background: linear-gradient(to bottom, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.4) 100%); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bw); }
-        .nav-content { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 64px; }
-        .logo-text { font-size: 18px; font-weight: 800; color: #FFFFFF; text-decoration: none; }
-        
-        .breadcrumb { padding: 84px 1.25rem 0.5rem 1.25rem; font-size: 0.85rem; color: var(--muted); }
-        .breadcrumb a { color: var(--p); text-decoration: none; }
-        
-        .main-content { padding: 0.5rem 1.25rem 2rem 1.25rem; }
-        .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 1.5rem; box-shadow: 0 24px 48px rgba(0,0,0,0.7); border: 1px solid var(--bw); display: block; }
-        .profile-meta-header { text-align: center; margin: 1.5rem 0; }
-        h1 { font-size: clamp(1.8rem, 5vw, 2.3rem); font-weight: 900; line-height: 1.2; }
-        .rating { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700; font-size: 1.1rem; }
-        .rating .stars { font-size: 1.2rem; filter: drop-shadow(0 0 6px rgba(250,204,21,0.4)); }
-        .rating .rating-value { color: var(--gold); }
-        .rating .review-count { color: var(--muted); font-size: 0.95rem; font-weight: 400; }
-        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1.5rem 0; }
-        .spec-box { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .spec-box dt { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
-        .spec-box dd { font-size: 1.05rem; font-weight: 800; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
-        .info-item { background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2); border-radius: 1.25rem; padding: 1.25rem 0.75rem; text-align: center; }
-        .info-label { font-size: 0.85rem; color: var(--p); font-weight: 700; display: block; }
-        .info-value { font-size: 1.4rem; font-weight: 900; }
-        .description { background: rgba(255,255,255,0.01); border-radius: 1.25rem; padding: 1.5rem; margin: 1.5rem 0; border: 1px solid var(--bw); white-space: pre-line; font-size: 1.05rem; }
-        .btn-line { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--p), #db2777); color: #fff; padding: 1.1rem 2rem; border-radius: 3rem; font-weight: 800; font-size: 1.2rem; text-decoration: none; width: 100%; box-shadow: 0 12px 32px rgba(255,46,99,0.3); transition: all 0.25s ease; }
-        .pricing-section { margin: 2rem 0; background: rgba(0,0,0,0.2); border-radius: 1.25rem; padding: 1.5rem; border: 1px solid var(--bw); }
-        .pricing-title { color: var(--p); text-align: center; font-weight: 800; font-size: 1.2rem; margin-bottom: 1.25rem; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center; }
-        .pricing-item { background: rgba(255,255,255,0.03); padding: 0.85rem 0.5rem; border-radius: 0.85rem; border: 1px solid var(--bw); }
-        .faq-section { margin: 2.5rem 0; }
-        .faq-title { color: var(--p); font-size: 1.25rem; font-weight: 800; text-align: center; margin-bottom: 1.25rem; }
-        .faq-item { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; margin-bottom: 0.75rem; }
-        .faq-item h3 { font-size: 1rem; color: var(--txt); margin-bottom: 0.5rem; }
-        
-        .related-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
-        .related-card { background: rgba(255,255,255,0.03); border-radius: 1.25rem; overflow: hidden; border: 1px solid var(--bw); text-decoration: none; color: inherit; display: block; transition: border-color 0.2s; }
-        .related-card:hover { border-color: var(--p); }
-        .related-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
-        .related-name { padding: 0.75rem; text-align: center; font-weight: bold; font-size: 0.95rem; }
-        .view-all-btn { display: block; text-align: center; color: var(--p); text-decoration: underline; font-weight: bold; margin-top: 1rem; }
-        
-        .testimonial { background: rgba(255,255,255,0.01); padding: 1.25rem; border-radius: 1.25rem; border: 1px solid var(--bw); margin-bottom: 1rem; }
-        
-        .footer { text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--bw); margin-top: 3.5rem; color: var(--muted); font-size: 0.85rem; }
-        .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
-        .footer-nav a { color: var(--muted); text-decoration: underline; }
-
-        body {
-            padding-top: env(safe-area-inset-top, 0px);
-            padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
-        }
-
-        @media (min-width: 768px) {
-            body {
-                padding-bottom: env(safe-area-inset-bottom, 0px);
-            }
-        }
-    </style>
 </head>
-<body>
-
-    <div class="container">
-        <header class="fixed-nav">
-            <div class="nav-content">
-                <a href="/" class="logo-text">First Model <span style="color: #C084FC;">Hub</span></a>
-            </div>
+<body class="bg-gray-950 text-white font-sans">
+    <div class="max-w-md mx-auto min-h-screen bg-gray-900 border-x border-gray-800 pb-20">
+        <header class="p-4 border-b border-gray-800 bg-gray-950/80 backdrop-blur sticky top-0 z-50">
+            <a href="/" class="text-lg font-black text-white">First Model <span class="text-purple-400">Hub</span></a>
         </header>
 
-        <nav aria-label="breadcrumb" class="breadcrumb">
-            <a href="/">หน้าแรก</a> &raquo; 
-            <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${provinceName}</a> &raquo; 
-            <span>${displayName}</span>
+        <nav aria-label="breadcrumb" class="p-4 text-xs text-gray-400 flex items-center gap-1 flex-wrap">
+            <a href="/" class="text-purple-400 hover:underline">หน้าแรก</a> &raquo; 
+            <a href="${correctProvinceUrl}" class="text-purple-400 hover:underline">สาวรับงาน${provinceName}</a> &raquo; 
+            <span class="text-gray-200">${displayName}</span>
         </nav>
 
-        <main class="main-content">
-            <article>
-                <section class="hero-section">
-                    <img src="${lcpImageUrl}" 
-                         ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
-                         class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
-                         loading="eager" fetchpriority="high" decoding="sync" 
-                         width="400" height="533">
-                </section>
-
-                <header class="profile-meta-header">
-                    <h1>${pageTitle}</h1>
-                    <div class="rating">
-                        <span class="stars">⭐</span>
-                        <span class="rating-value">${ratingValue}</span>
-                        <span class="review-count">คะแนนโหวตจากลูกค้า (${reviewCount} รีวิว)</span>
-                    </div>
-                </header>
-
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">ค่าขนม</span>
-                        <span class="info-value">${displayPrice}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">อายุ</span>
-                        <span class="info-value">${ageVal} ปี</span>
-                    </div>
+        <main class="p-4 space-y-6">
+            <section class="text-center">
+                <img src="${lcpImageUrl}" 
+                     ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
+                     class="w-full aspect-[3/4] object-cover rounded-2xl shadow-2xl border border-gray-800 mx-auto" 
+                     alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
+                     loading="eager" fetchpriority="high" width="400" height="533">
+                <h1 class="text-2xl font-black mt-4">${pageTitle}</h1>
+                <div class="flex items-center justify-center gap-2 mt-2 text-yellow-400 font-bold text-sm">
+                    <span>⭐ ${ratingValue}</span>
+                    <span class="text-gray-400 font-normal">(${reviewCount} รีวิว)</span>
                 </div>
+            </section>
 
-                <div class="specs-grid">
-                    <dl class="spec-box"><dt>สัดส่วน</dt><dd>${bwhVal}</dd></dl>
-                    <dl class="spec-box"><dt>ส่วนสูง</dt><dd>${heightVal} ซม.</dd></dl>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-purple-950/40 border border-purple-500/20 p-3 rounded-xl text-center">
+                    <span class="text-xs text-purple-300 font-bold block">ค่าขนม</span>
+                    <span class="text-xl font-black text-green-400">${displayPrice}</span>
                 </div>
-
-                <div class="description">
-                    ${escapeHTML(naturalDescriptionText)}
+                <div class="bg-purple-950/40 border border-purple-500/20 p-3 rounded-xl text-center">
+                    <span class="text-xs text-purple-300 font-bold block">อายุ</span>
+                    <span class="text-xl font-black text-white">${ageVal} ปี</span>
                 </div>
+            </div>
 
-                <a href="${finalLineUrl}" class="btn-line" rel="nofollow noopener" target="_blank">ทักไลน์จองคิว</a>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-gray-800/40 p-3 rounded-lg border border-gray-800 flex justify-between"><span class="text-gray-400">สัดส่วน</span><strong>${bwhVal}</strong></div>
+                <div class="bg-gray-800/40 p-3 rounded-lg border border-gray-800 flex justify-between"><span class="text-gray-400">ส่วนสูง</span><strong>${heightVal} ซม.</strong></div>
+            </div>
 
-                <section class="pricing-section">
-                    <h2 class="pricing-title">ราคาบริการ</h2>
-                    <div class="pricing-grid">
-                        <div class="pricing-item"><div>1 ชม.</div><strong>${rawRate.toLocaleString()}</strong></div>
-                        <div class="pricing-item"><div>2 ชม.</div><strong>${Math.floor(rawRate * 1.8).toLocaleString()}</strong></div>
-                        <div class="pricing-item"><div>ค้างคืน</div><strong>${Math.floor(rawRate * 4.5).toLocaleString()}</strong></div>
-                    </div>
-                </section>
+            <div class="bg-gray-800/20 p-4 rounded-xl border border-gray-800 text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+                ${escapeHTML(naturalDescriptionText)}
+            </div>
 
-                <section class="faq-section">
-                    <h2 class="faq-title">คำถามพบบ่อย</h2>
-                    <div class="faq-item">
-                        <h3>${displayName} มีมัดจำไหม?</h3>
-                        <p>ไม่มีนโยบายการรับเงินโอนจองมัดจำล่วงหน้าใดๆ ทุกกรณีค่ะ ลูกค้าสามารถเดินทางมานัดพบหน้างานเพื่อตรวจสอบสิทธิ์ความตรงปกเรียบร้อยแล้ว ค่อยตกลงชำระค่าขนมโดยตรงหน้างานเพื่อความปลอดภัย 100%</p>
-                    </div>
-                </section>
+            <a href="${finalLineUrl}" class="block w-full py-3 text-center bg-green-600 hover:bg-green-500 text-white font-black text-lg rounded-full shadow-lg transition" rel="nofollow noopener" target="_blank">
+                💬 ทักไลน์จองคิว${displayName}
+            </a>
 
-                <section>
-                    <h2 class="faq-title">รีวิวจากลูกค้า</h2>
+            <section class="border-t border-gray-800 pt-4">
+                <h2 class="text-lg font-bold mb-3 text-purple-400">รีวิวจากผู้ใช้บริการ</h2>
+                <div class="space-y-3">
                     ${dynamicReviews.map(t => `
-                        <div class="testimonial">
-                            <strong>${escapeHTML(t.name)}</strong>
-                            <p>${escapeHTML(t.text)}</p>
+                        <div class="bg-gray-800/30 p-3 rounded-xl border border-gray-800 text-xs">
+                            <strong class="text-white block mb-1">${escapeHTML(t.name)}</strong>
+                            <p class="text-gray-300">${escapeHTML(t.text)}</p>
                         </div>
                     `).join('')}
-                </section>
-                
-                ${related.length > 0 ? `
-                <section class="faq-section" style="margin-top: 3.5rem;">
-                    <h2 class="faq-title">น้องๆ โซน${provinceName} ที่น่าสนใจ</h2>
-                    <div class="related-grid">
-                        ${related.map(r => {
-                            const rawRelName = r.name || 'สาวสวย';
-                            const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
-                            const displayRelName = `น้อง${cleanRelName}`;
-                            return `
-                            <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${displayRelName}">
-                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
-                                <div class="related-name">${displayRelName}</div>
-                            </a>
-                            `;
-                        }).join('')}
-                    </div>
-                    <a href="${correctProvinceUrl}" class="view-all-btn">ดูน้องๆ รับงานโซน${provinceName} ทั้งหมด</a>
-                </section>
-                ` : ''}
-
-                <section class="faq-section" style="margin-top: 2.5rem; border-top: 1px solid var(--bw); padding-top: 2rem;">
-                    <h2 class="faq-title">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
-                    <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; font-size: 0.85rem; color: var(--muted); line-height: 1.75;">
-                        <p style="margin-bottom: 0.5rem;"><strong>✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
-                        <p style="margin-bottom: 0.5rem;"><strong>✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
-                        <p><strong>✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุดและจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น</p>
-                    </div>
-                </section>
-            </article>
+                </div>
+            </section>
         </main>
-        
-        <footer class="footer">
-            <nav class="footer-nav">
-                <a href="/">หน้าแรก</a>
-                <a href="/profiles">โปรไฟล์น้องๆ ทั้งหมด</a>
-                <a href="/locations">พิกัดรับงานทั่วประเทศ</a>
-            </nav>
-            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
-        </footer>
     </div>
 </body>
 </html>`;
@@ -499,11 +343,7 @@ export default async (request, context) => {
                 "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
                 "X-Content-Type-Options": "nosniff",
                 "X-Frame-Options": "DENY",
-                "X-XSS-Protection": "1; mode=block",
-                "Referrer-Policy": "strict-origin-when-cross-origin",
-                "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-                "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-                "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https:;"
+                "X-XSS-Protection": "1; mode=block"
             }
         });
 

@@ -1,4 +1,4 @@
-// netlify/edge-functions/sitemap.js
+
 
 /**
  * [ SYSTEM SITEMAP ENGINE ]
@@ -13,10 +13,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
 const CONFIG = {
     SUPABASE_URL: 'https://zxetzqwjaiumqhrpumln.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4',
-    CANONICAL_DOMAIN: 'https://firstmodelhub.com' // 🔒 โดเมนหลัก First Model Hub
+    CANONICAL_DOMAIN: 'https://firstmodelhub.com'
 };
 
-// ฟังก์ชันป้องกันตัวอักษรพิเศษใน XML
 const escapeXml = (unsafe) => {
     if (!unsafe || typeof unsafe !== 'string') return '';
     return unsafe.replace(/[<>&'"]/g, (c) => {
@@ -31,7 +30,6 @@ const escapeXml = (unsafe) => {
     });
 };
 
-// ฟังก์ชันดึงและจัดรูปแบบเวลาอย่างปลอดภัย
 const safeGetIsoDate = (dateStr, fallbackToday) => {
     if (!dateStr) return fallbackToday;
     try {
@@ -44,8 +42,6 @@ const safeGetIsoDate = (dateStr, fallbackToday) => {
 export default async (request, context) => {
     try {
         const url = new URL(request.url);
-        
-        // 🔒 SECURITY FIX: บังคับใช้โดเมนหลัก firstmodelhub.com เว้นแต่ทดสอบในเครื่อง (localhost)
         let dynamicDomain = `${url.protocol}//${url.host}`; 
         if (!dynamicDomain.includes('firstmodelhub.com') && !dynamicDomain.includes('localhost')) {
             dynamicDomain = CONFIG.CANONICAL_DOMAIN;
@@ -53,7 +49,6 @@ export default async (request, context) => {
         
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        // ดึงข้อมูลโปรไฟล์และจังหวัด
         const [{ data: profiles }, { data: provinces }] = await Promise.all([
             supabase
                 .from('profiles')
@@ -72,7 +67,7 @@ export default async (request, context) => {
 
         const today = new Date().toISOString();
 
-        // 1. หน้าแรก (รับหน้าที่เป็นหน้าหลักเชียงใหม่ไปในตัวเพื่อป้องกัน Redirect Loop)
+        // 1. หน้าแรกระดับประเทศ
         xml += `
 <url>
   <loc>${dynamicDomain}/</loc>
@@ -81,7 +76,7 @@ export default async (request, context) => {
   <priority>1.0</priority>
 </url>`;
 
-        // 2. หน้า Static Pages หลักในระบบ
+        // 2. หน้า Static Pages หลัก
         const staticPages = ['profiles', 'locations', 'about', 'faq', 'terms-of-service', 'privacy-policy'];
         staticPages.forEach(page => {
             xml += `
@@ -93,10 +88,10 @@ export default async (request, context) => {
 </url>`;
         });
 
-        // 3. หน้าพิกัดจังหวัดอื่นๆ (ข้ามเชียงใหม่เพื่อตัดปัญหาระบบประมวลผล Redirect)
+        // 3. หน้าพิกัดทุกจังหวัด (รวมถึง chiangmai ด้วย)
         if (provinces) {
             provinces.forEach(p => {
-                if (p.key && p.key.toLowerCase().trim() !== 'chiangmai') {
+                if (p.key) {
                     const originalKey = p.key.trim();
                     xml += `
 <url>
@@ -109,7 +104,7 @@ export default async (request, context) => {
             });
         }
 
-        // 4. หน้าประวัติส่วนตัวนางแบบรายคนพร้อมโครงสร้างสแตนดาร์ดภาพค้นหา
+        // 4. หน้าโปรไฟล์ส่วนตัวน้องๆ
         if (profiles) {
             profiles.forEach(p => {
                 if (p.slug) {
