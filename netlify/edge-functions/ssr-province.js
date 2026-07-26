@@ -811,11 +811,16 @@ export default async (req, context) => {
       </div>
     `).join("");
 
+// ==============================================================================
+    // HIGH-PERFORMANCE SSR ENGINE (EDGE CACHED & SAFE DOM INJECTION)
+    // ==============================================================================
+    
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const matchedZones = seoData.zones.slice(0, 4).join(", ");
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, provinceSlug, seoData.zones);
     const seoIntroContent = smartLinkify(introTemplate, provinceSlug, seoData.zones);
 
+    // สร้างรายการพื้นที่บริการส่วนส่วนล่าง (Popular Locations Footer)
     const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       const key = p.key || p.slug || p.id;
       const name = p.nameThai || p.name;
@@ -823,49 +828,23 @@ export default async (req, context) => {
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
 
-    // ดึง Template index.html ตัวจริงมาเติมข้อมูล
-    const templateUrl = new URL("/index.html", url.origin);
-    const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
-    let rawHtml = await mainTemplate.text();
-
-    // ============================== REPLACING PLACEHOLDERS ==============================
-    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = rawHtml.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
-
-    rawHtml = rawHtml.replace(/<meta property="og:title" content=".*?"/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}"`);
-    rawHtml = rawHtml.replace(/<meta property="og:description" content=".*?"/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}"`);
-    rawHtml = rawHtml.replace(/<meta name="twitter:title" content=".*?"/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}"`);
-    rawHtml = rawHtml.replace(/<meta name="twitter:description" content=".*?"/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}"`);
-
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    
-    rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
-    
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-
-    if (popularLocationsHtml) {
-      rawHtml = rawHtml.replace(
-        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
-        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
-      );
+    // ⚡ 1. ดึงข้อมูล Template พร้อมระบบ Edge In-Memory Caching (ลดละเวลาดึงไฟล์ซ้ำ)
+    let rawHtml = null;
+    if (globalThis.INDEX_TEMPLATE_CACHE) {
+      rawHtml = globalThis.INDEX_TEMPLATE_CACHE;
+    } else {
+      const templateUrl = new URL("/index.html", url.origin);
+      const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
+      rawHtml = await mainTemplate.text();
+      globalThis.INDEX_TEMPLATE_CACHE = rawHtml; // บันทึกลง Edge Cache สำหรับ Request ถัดไป
     }
 
-    if (!isNationalHome) {
-      rawHtml = rawHtml.replace(
-        /<section id="featured-profiles"[\s\S]*?<\/section>/i,
-        `<section id="featured-profiles" class="hidden" style="display:none !important;"></section>`
-      );
-    }
+    // 🛡️ 2. Failsafe: แก้ไข Relative Link ของ CSS/JS อัตโนมัติ ป้องกัน 404 ในซับโฟลเดอร์ /location/
+    rawHtml = rawHtml
+      .replace(/href="styles\.css"/g, 'href="/styles.css"')
+      .replace(/src="main\.js"/g, 'src="/main.js"');
 
+    // 🟢 3. สร้าง HTML ส่วนแสดงรายการโปรไฟล์น้องๆ สำหรับหน้าจังหวัด
     const liveCountChipHtml = `
       <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
@@ -878,7 +857,6 @@ export default async (req, context) => {
       </div>
     `;
 
-    // 🟢 [FIXED #2] ฝั่ง SSR นำการ์ดโปรไฟล์มาใส่ไว้ใน #profiles-display-area โดยตรงสำหรับหน้าจังหวัด
     const fullProfilesDisplayHtml = `
       <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceThaiName}">
         ${liveCountChipHtml}
@@ -888,11 +866,65 @@ export default async (req, context) => {
       </div>
     `;
 
-    rawHtml = rawHtml.replace(
-      /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
-      fullProfilesDisplayHtml
-    );
+    // 🎯 4. แทนที่ #profiles-display-area อย่างปลอดภัย 100% (ไม่ลบส่วนประกอบอื่นในหน้าเว็บ)
+    if (rawHtml.includes('id="loading-profiles-placeholder"')) {
+      rawHtml = rawHtml.replace(
+        /<div id="loading-profiles-placeholder"[\s\S]*?<\/div>\s*<\/div>/i,
+        `${liveCountChipHtml}\n<div class="profiles-grid-row" role="list">${cardsHtml}</div>`
+      );
+    } else {
+      rawHtml = rawHtml.replace(
+        /<div id="profiles-display-area"[\s\S]*?<\/div>\s*<!-- ============================== COMPACT SEO/i,
+        `${fullProfilesDisplayHtml}\n\n<!-- ============================== COMPACT SEO`
+      );
+    }
 
+    // 🏷️ 5. แทนที่ Meta Tags ด้านบนอย่างปลอดภัย
+    rawHtml = rawHtml
+      .replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`)
+      .replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`)
+      .replace(/<meta property="og:title" content=".*?"/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}"`)
+      .replace(/<meta property="og:description" content=".*?"/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}"`)
+      .replace(/<meta name="twitter:title" content=".*?"/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}"`)
+      .replace(/<meta name="twitter:description" content=".*?"/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}"`);
+
+    // 🚀 6. รวบรวมข้อมูลลง Dictionary เพื่อแทนที่ Placeholders ทั้งหมดในครั้งเดียว (Fast Dictionary Pass)
+    const templateReplacements = {
+      "{{SEO_CANONICAL}}": canonUrl,
+      "{{SEO_CANONICAL_EN}}": `${canonUrl}/en`,
+      "{{SEO_IMAGE}}": metaImgUrl,
+      "{{SCHEMA_JSON}}": JSON.stringify(schemaJson).replace(/</g, '\\u003c'),
+      "{{PROFILES_CARDS_HTML}}": cardsHtml,
+      "{{PROVINCE_NAME}}": provinceThaiName,
+      "{{PROFILE_COUNT}}": profileList.length || 50,
+      "{{PROVINCE_ZONES}}": matchedZones,
+      "{{PROVINCE_SEO_CONTENT}}": seoIntroContent,
+      "{{PROVINCE_REVIEWS_HTML}}": reviewsHtml,
+      "{{PROVINCE_FAQS_HTML}}": faqsHtml,
+      "{{MAP_EMBED_URL}}": mapEmbedUrl
+    };
+
+    for (const [placeholder, value] of Object.entries(templateReplacements)) {
+      rawHtml = rawHtml.split(placeholder).join(value);
+    }
+
+    // ซ่อน Featured Profiles หากเป็นหน้าเฉพาะจังหวัด
+    if (!isNationalHome) {
+      rawHtml = rawHtml.replace(
+        /<section id="featured-profiles"[\s\S]*?<\/section>/i,
+        `<section id="featured-profiles" class="hidden" style="display:none !important;"></section>`
+      );
+    }
+
+    // อัปเดตเมนู Footer รายชื่อจังหวัด
+    if (popularLocationsHtml) {
+      rawHtml = rawHtml.replace(
+        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
+        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
+      );
+    }
+
+    // 💧 7. Hydrate ข้อมูลเข้า window.profilesData ฝั่ง Client เพื่อการโต้ตอบรวดเร็วโดยไม่ต้องยิงดึงข้อมูลใหม่
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -928,8 +960,9 @@ export default async (req, context) => {
       style_tags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
-    rawHtml = replaceGlobal(rawHtml, "window.profilesData = [];", `window.profilesData = ${hydratedProfilesData};`);
+    rawHtml = rawHtml.split("window.profilesData = [];").join(`window.profilesData = ${hydratedProfilesData};`);
 
+    // 📤 8. ตอบกลับด้วย Response ความเร็วสูงพร้อมระบบ Caching และการรักษาความปลอดภัยระดับองค์กร
     return new Response(rawHtml, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
