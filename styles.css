@@ -855,3 +855,80 @@ a[href="/about"] {
   padding: 8px 12px !important; /* เพิ่มพื้นที่สัมผัสรอบๆ ตัวอักษร */
   margin: 0 4px !important;    /* เว้นระยะห่างไม่ให้ปุ่มติดกันเกินไป */
 }
+
+    body { font-family: 'Prompt', sans-serif; background-color: #09090C; }
+
+    /* 🟢 เอฟเฟกต์หัวข้อ H1-H4 เรืองแสงขอบสีชมพูเข้มแบบในรูปภาพ */
+    h1, h2, h3, h4, .glow-heading-spark {
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      text-shadow: 
+        0 0 4px #FF2E93,
+        0 0 12px #FF2E93,
+        0 0 25px rgba(255, 46, 147, 0.8),
+        0 0 40px rgba(124, 58, 237, 0.45);
+    }
+
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes aurora-drift {
+      0%,100% { transform: translate3d(0,0,0) scale(1); opacity: .6; }
+      50%     { transform: translate3d(4%,-6%,0) scale(1.15); opacity: .8; }
+    }
+    @keyframes glow-pulse { 0%,100% { opacity: .45; } 50% { opacity: .85; } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    .animate-fade-in-up { animation: fade-in-up .6s cubic-bezier(.22,1,.36,1) both; }
+    .animate-aurora     { animation: aurora-drift 14s ease-in-out infinite; }
+    .animate-glow-pulse { animation: glow-pulse 3.5s ease-in-out infinite; }
+
+    .card-sheen {
+      background: linear-gradient(110deg, transparent 25%, rgba(255, 46, 147, 0.25) 50%, transparent 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2.5s linear infinite;
+    }
+    
+    /* 🟢 โครงสร้างส่วนที่แสดงข้อมูลพื้นที่บริการ (Collapsible Drawer) */
+    #seo-drawer-wrapper {
+      max-height: 180px;
+      overflow: hidden;
+      transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #seo-drawer-wrapper.collapsed .seo-fade-overlay {
+      background: linear-gradient(to top, #09090C 0%, transparent 100%);
+      opacity: 1;
+    }
+    #seo-drawer-wrapper:not(.collapsed) .seo-fade-overlay {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* 🟢 รูปแบบข้อตกลงและเงื่อนไข (Rules Accordion) */
+    .rule-item {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+    .rule-item:not(.collapsed) {
+      border-color: rgba(255, 46, 147, 0.4);
+      background: rgba(255, 46, 147, 0.04);
+      box-shadow: 0 0 20px rgba(255, 46, 147, 0.15);
+    }
+    .rule-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease-out, padding 0.35s ease-out;
+    }
+    .rule-item:not(.collapsed) .rule-content {
+      max-height: 400px;
+    }
+
+    /* ปรับแต่ง Contrast แถบลอยตัวด้านล่างบนอุปกรณ์มือถือ */
+    .floating-app-dock {
+      background-color: #09090C !important;
+      border: 1px solid rgba(255, 46, 147, 0.3) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 46, 147, 0.2) !important;
+    }
