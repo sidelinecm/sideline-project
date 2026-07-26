@@ -143,7 +143,7 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 });
 
 // ==============================================================================
-// 3. ADVANCED HD IMAGE OPTIMIZATION ENGINE
+// 3. ADVANCED HD IMAGE OPTIMIZATION ENGINE & HELPERS
 // ==============================================================================
 function verifyHostname(req) {
   const host = (req.headers.get("host") || "").toLowerCase();
@@ -182,6 +182,7 @@ const formatDateSSR = dateStr => {
   }
 };
 
+// 🟢 ระบบลิงก์ใยแมงมุม (Spiderweb Linkify)
 const smartLinkify = (text, flag, zones) => {
   if (!text) return "";
   let res = text;
@@ -193,14 +194,13 @@ const smartLinkify = (text, flag, zones) => {
   }
   ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน", "ฟิวแฟน", "สาวรับงาน"].forEach(keyword => {
     const regex = new RegExp(`(${keyword})(?![^<>]*>)`, "g");
-    res = res.replace(regex, '<span class="highlight text-[#C084FC] font-extrabold">$1</span>');
+    res = res.replace(regex, `<a href="/search?q=${encodeURIComponent(keyword)}" class="highlight text-[#C084FC] font-extrabold hover:underline">$1</a>`);
   });
   return res;
 };
 
 const getDynamicIntro = (provinceName, zones) => {
   let processedZones = zones ? [...zones] : [];
-  
   if (provinceName === "เชียงใหม่" && processedZones.includes("นิมมาน")) {
     processedZones = processedZones.map(zone => 
       zone === "นิมมาน" 
@@ -318,6 +318,7 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
   };
 };
 
+// 🟢 ตัวเรนเดอร์ FAQ ไดนามิก
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs) return "";
   return faqs.map(item => `
@@ -473,6 +474,7 @@ export default async (req, context) => {
       }
     }
 
+    // 🟢 Multi-key fallback (chiangmai & chiang_mai)
     let searchKeys = [provinceSlug];
     if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
       searchKeys = ["chiangmai", "chiang_mai"];
@@ -517,6 +519,7 @@ export default async (req, context) => {
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
 
+    // 🟢 ดึงข้อมูลรีวิวสดจากตาราง reviews ใน Supabase
     let dbReviews = [];
     try {
       let reviewQuery = supabase.from("reviews")
@@ -574,6 +577,48 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
     // ============================== 🟢 100% GOOGLE-COMPLIANT STRUCTURED DATA GRAPH ==============================
+    const businessEntity = {
+      "@type": ["EntertainmentBusiness", "ProfessionalService"],
+      "@id": `${canonUrl}/#business`,
+      "name": isNationalHome ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` : `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
+      "image": metaImgUrl,
+      "telephone": CONFIG.DEFAULT_TELEPHONE,
+      "priceRange": "฿฿",
+      "url": canonUrl,
+      "description": strippedDesc,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
+        "addressRegion": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
+        "addressCountry": "TH"
+      },
+      "areaServed": isNationalHome 
+        ? { "@type": "Country", "name": "Thailand" }
+        : [
+            { "@type": "AdministrativeArea", "name": provinceThaiName },
+            ...seoData.zones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
+          ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": Number(finalRatingValue) || 4.9,
+        "reviewCount": Number(finalReviewCount) || 5,
+        "bestRating": 5,
+        "worstRating": 1
+      },
+      "review": finalReviews.map(r => ({
+        "@type": "Review",
+        "author": { "@type": "Person", "name": r.author || "คุณผู้ใช้บริการ" },
+        "datePublished": r.datePublished || new Date().toISOString().split("T")[0],
+        "reviewBody": stripHTML(r.text || "บริการประทับใจดีสไตล์ฟิวแฟน"),
+        "reviewRating": { 
+          "@type": "Rating", 
+          "ratingValue": Number(r.rating) && !isNaN(Number(r.rating)) ? Number(r.rating) : 5, 
+          "bestRating": 5, 
+          "worstRating": 1 
+        }
+      }))
+    };
+
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -618,58 +663,6 @@ export default async (req, context) => {
         ]
       });
     } else {
-      // 🟢 แก้ไขข้อผิดพลาดปัญหาร้ายแรงบน Google Rich Results Test (100% Valid Parent Node)
-      const businessEntity = {
-        "@type": ["EntertainmentBusiness", "ProfessionalService"],
-        "@id": `${canonUrl}/#business`,
-        "name": isNationalHome ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` : `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
-        "image": metaImgUrl,
-        "telephone": CONFIG.DEFAULT_TELEPHONE,
-        "priceRange": "฿฿",
-        "url": canonUrl,
-        "description": strippedDesc,
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
-          "addressRegion": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
-          "addressCountry": "TH"
-        },
-        "areaServed": isNationalHome 
-          ? { "@type": "Country", "name": "Thailand" }
-          : [
-              { "@type": "AdministrativeArea", "name": provinceThaiName },
-              ...seoData.zones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
-            ],
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": Number(finalRatingValue) || 4.9,
-          "reviewCount": Number(finalReviewCount) || 5,
-          "bestRating": 5,
-          "worstRating": 1
-        },
-        "review": finalReviews.map(r => ({
-          "@type": "Review",
-          "author": { "@type": "Person", "name": r.author || "คุณผู้ใช้บริการ" },
-          "datePublished": r.datePublished || new Date().toISOString().split("T")[0],
-          "reviewBody": stripHTML(r.text || "บริการประทับใจดีสไตล์ฟิวแฟน"),
-          "reviewRating": { 
-            "@type": "Rating", 
-            "ratingValue": Number(r.rating) && !isNaN(Number(r.rating)) ? Number(r.rating) : 5, 
-            "bestRating": 5, 
-            "worstRating": 1 
-          }
-        }))
-      };
-
-      if (!isNationalHome) {
-        businessEntity.geo = {
-          "@type": "GeoCoordinates",
-          "latitude": seoData.geo ? seoData.geo.lat : 13.7563,
-          "longitude": seoData.geo ? seoData.geo.lng : 100.5018
-        };
-        businessEntity.hasMap = mapEmbedUrl;
-      }
-
       schemaGraph.push(businessEntity);
 
       schemaGraph.push({
@@ -724,7 +717,7 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== PROFILE CARDS GENERATOR ==============================
+    // ============================== 🟢 PROFILE CARDS GENERATOR (FULL BADGES) ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
       const pLoc = escapeHTML(p.location || provinceThaiName);
@@ -738,6 +731,7 @@ export default async (req, context) => {
       const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
       const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
 
+      // 🟢 1. ป้ายแนะนำ
       const featuredBadge = p.isfeatured
         ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
             <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
@@ -745,6 +739,7 @@ export default async (req, context) => {
            </span>`
         : "";
 
+      // 🟢 2. ป้ายสถานะรับงาน
       const statusBadge = `
         <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
             <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
@@ -752,6 +747,7 @@ export default async (req, context) => {
         </span>
       `;
 
+      // 🟢 3. ป้ายคลิปวิดีโอ
       const hasVideo = p.has_video || p.hasVideo || false;
       const videoBadge = hasVideo
         ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
@@ -759,6 +755,7 @@ export default async (req, context) => {
            </span>`
         : "";
 
+      // 🟢 4. ป้ายยืนยันตัวตน
       const isVerified = p.verified || p.isVerified || false;
       const verifiedBadge = isVerified
         ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
@@ -768,12 +765,8 @@ export default async (req, context) => {
 
       let rateDisplay = "1,500.-";
       if (p.rate) {
-        if (!isNaN(p.rate)) {
-          rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
-        } else {
-          const cleanRate = escapeHTML(p.rate).trim();
-          rateDisplay = cleanRate.endsWith(".-") ? cleanRate : `${cleanRate}.-`;
-        }
+        if (!isNaN(p.rate)) rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
+        else rateDisplay = escapeHTML(p.rate).trim();
       }
 
       const sloganText = escapeHTML(p.slogan || p.quote || "");
@@ -831,10 +824,9 @@ export default async (req, context) => {
       `;
     }).join("");
 
-    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
-
+    // 🟢 สร้าง HTML การ์ดรีวิวไดนามิก
     const reviewsHtml = finalReviews.map(r => `
-      <div class="interactive-card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+      <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML((r.author || "K").charAt(0).toUpperCase())}</div>
@@ -847,7 +839,7 @@ export default async (req, context) => {
               ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};" aria-hidden="true"></i>`).join("")}
             </div>
           </div>
-          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.5; margin: 0;">
+          <p style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; margin: 0;">
             ${escapeHTML(r.text)}
           </p>
           <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
@@ -856,11 +848,7 @@ export default async (req, context) => {
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const matchedZones = seoData.zones.slice(0, 4).join(", ");
-
-    const templateUrl = new URL("/index.html", url.origin);
-    const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
-    let rawHtml = await mainTemplate.text();
-
+    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones);
 
     const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
@@ -869,6 +857,11 @@ export default async (req, context) => {
       const isActive = key === provinceSlug;
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
+
+    // ดึง Template index.html
+    const templateUrl = new URL("/index.html", url.origin);
+    const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
+    let rawHtml = await mainTemplate.text();
 
     // ============================== REPLACING PLACEHOLDERS ==============================
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
@@ -901,85 +894,33 @@ export default async (req, context) => {
       );
     }
 
-    rawHtml = rawHtml.replace(
-      /<strong id="live-profile-count"[^>]*>.*?<\/strong>/i, 
-      `<strong id="live-profile-count" style="font-weight: 900; font-size: 12px;">${profileList.length}</strong>`
-    );
+    // 🟢 ซ่อนส่วน POPULAR SELECTION ในหน้าจังหวัดอัตโนมัติเพื่อป้องกัน "พบ 0 โปรไฟล์"
+    if (!isNationalHome) {
+      rawHtml = rawHtml.replace(
+        /<section id="featured-profiles"[\s\S]*?<\/section>/i,
+        `<section id="featured-profiles" class="hidden" style="display:none !important;"></section>`
+      );
+    }
 
-    // ============================== COMPACT UI & ADVANCED IMAGE CSS ==============================
-    const UI_FIX_CSS = `
-    <style id="ui-compact-fix">
-      .line-cta-btn, a[href*="line.me"]:not(.dock-item), [class*="line-btn"]:not(.dock-item), .btn-line-cta {
-        max-width: 330px !important;
-        width: 92% !important;
-        height: 40px !important;
-        min-height: 40px !important;
-        padding: 0 16px !important;
-        font-size: 12.5px !important;
-        font-weight: 700 !important;
-        border-radius: 9999px !important;
-        margin: 8px auto !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 8px !important;
-        background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
-        box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35) !important;
-      }
-
-      .profile-card-new:hover img,
-      .profile-card-new:active img {
-        transform: scale(1.05) !important;
-        filter: brightness(1) !important;
-      }
-
-      section, .hero-section, .trust-section, .intro-section {
-        padding-top: 6px !important;
-        padding-bottom: 6px !important;
-        margin-bottom: 8px !important;
-      }
-
-      .trust-badges-container, .tags-wrapper {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 6px !important;
-        margin: 6px 0 !important;
-      }
-
-      .tag-pill, .badge-pill {
-        font-size: 10.5px !important;
-        padding: 3.5px 10px !important;
-        border-radius: 9999px !important;
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      }
-
-      .profiles-grid, #profiles-container, .profiles-container, .profiles-grid-row {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        padding: 0 8px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-      }
-
-      .profile-card-new-container {
-        width: 100% !important;
-      }
-
-      .profile-card-new {
-        aspect-ratio: 4 / 5 !important;
-        border-radius: 16px !important;
-        overflow: hidden !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        background-color: #09090B !important;
-      }
-    </style>
+    // 🟢 ฝังป้ายจำนวนโปรไฟล์สด (Live Count Badge) ไว้ที่หัวข้อจังหวัดตรงๆ
+    const liveCountChipHtml = `
+      <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
+              📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
+              <span class="live-count-chip">
+                <span class="pulse-dot-el"></span>
+                <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
+              </span>
+          </h2>
+      </div>
     `;
 
-    rawHtml = rawHtml.replace("</head>", `${UI_FIX_CSS}</head>`);
+    rawHtml = rawHtml.replace(
+      /<div id="profiles-display-area"[^>]*>/i,
+      `<div id="profiles-display-area" style="margin-top: 16px; position: relative;">${liveCountChipHtml}`
+    );
 
+    // 🟢 ส่งข้อมูลสเปกน้องๆ ครบ 100% สำหรับการแสดงผลหน้าต่าง Lightbox Modal ฝั่ง Client
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
