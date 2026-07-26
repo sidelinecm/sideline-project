@@ -182,13 +182,16 @@ const formatDateSSR = dateStr => {
   }
 };
 
-const smartLinkify = (text, flag, zones) => {
+// 🟢 [FIXED #1] ปรับปรุงsmartLinkify ให้สร้าง Internal Link ตรงตาม provinceSlug จริง
+const smartLinkify = (text, provinceSlug, zones) => {
   if (!text) return "";
   let res = text;
+  const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : `/locations`;
+
   if (zones && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
       const regex = new RegExp(`(${zone})(?![^<>]*>)`, "g");
-      res = res.replace(regex, `<a href="/location/chiangmai" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
+      res = res.replace(regex, `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
   ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน", "ฟิวแฟน", "สาวรับงาน"].forEach(keyword => {
@@ -198,12 +201,14 @@ const smartLinkify = (text, flag, zones) => {
   return res;
 };
 
-const getDynamicIntro = (provinceName, zones) => {
+const getDynamicIntro = (provinceName, provinceSlug, zones) => {
   let processedZones = zones ? [...zones] : [];
-  if (provinceName === "เชียงใหม่" && processedZones.includes("นิมมาน")) {
-    processedZones = processedZones.map(zone => 
-      zone === "นิมมาน" 
-        ? `<a href="/location/chiangmai" class="text-[#C084FC] hover:underline font-bold transition-colors">นิมมาน</a>`
+  const locationUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : `/locations`;
+
+  if (processedZones.length > 0) {
+    processedZones = processedZones.map((zone, idx) => 
+      idx === 0 
+        ? `<a href="${locationUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">${zone}</a>`
         : zone
     );
   }
@@ -338,7 +343,6 @@ const generateDynamicFAQsHTML = faqs => {
 // 4. MAIN EDGE REQUEST HANDLER (NATIONAL & MULTI-LOCATION SSR MASTER)
 // ==============================================================================
 export default async (req, context) => {
-  // 🟢 1. ตรวจสอบความปลอดภัย Hostname
   if (!verifyHostname(req)) {
     return new Response("403 Forbidden - Access Denied", { status: 403 });
   }
@@ -347,7 +351,6 @@ export default async (req, context) => {
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
   const hostName = url.hostname.toLowerCase();
 
-  // 🟢 2. โอนพลัง SEO 100% จากโดเมนเชียงใหม่เดิม เข้าหน้า /location/chiangmai โดยตรง
   if (hostName.includes("sidelinechiangmai.netlify.app")) {
     if (url.pathname === "/" || url.pathname === "/index.html") {
       return Response.redirect(`${hostUrl}/location/chiangmai`, 301);
@@ -355,12 +358,10 @@ export default async (req, context) => {
     return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
   }
 
-  // 🟢 3. จัดการ 301 Redirect สำหรับ www. และ Netlify Subdomains อื่นๆ เข้าโดเมนหลัก
   if (hostName.startsWith("www.firstmodelhub.com") || hostName.includes("firstmodelhub.netlify.app")) {
     return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
   }
 
-  // 🟢 4. บายพาส Internal Request (เมื่อ Edge Server เรียกดึงไฟล์ index.html ตัวจริงมาทำ SSR)
   if (req.headers.get("x-ssr-bypass") === "true") {
     try {
       return await context.next();
@@ -369,7 +370,6 @@ export default async (req, context) => {
     }
   }
 
-  // 🟢 5. บายพาส Static Assets (รูปภาพ, JS, CSS, ฟอนต์) ให้ Netlify CDN เสิร์ฟไฟล์ได้ทันที
   const staticExtensions = [
     ".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".avif", ".svg", 
     ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2", ".ttf"
@@ -382,7 +382,6 @@ export default async (req, context) => {
     }
   }
 
-  // 🟢 6. บายพาสหน้า Static ปกติของเว็บ ไม่ให้วิ่งเข้ากระบวนการค้นหาจังหวัด
   const staticPages = [
     "/about", "/faq", "/blog", "/contact", 
     "/terms-of-service", "/privacy-policy", "/policy", "/locations"
@@ -395,7 +394,6 @@ export default async (req, context) => {
     }
   }
 
-  // 🟢 7. Normalize URL: เปลี่ยน /index.html ให้เป็น / (ป้องกันปัญหา Duplicate Content)
   if (url.pathname === "/index.html") {
     return Response.redirect(`${hostUrl}/`, 301);
   }
@@ -545,6 +543,9 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
+    // 🟢 [FIXED #3] คำนวณจำนวนการ์ดโปรไฟล์จริงให้ตรงเป๊ะใน Schema
+    const totalItemsCount = profileList.length;
+
     // ============================== STRUCTURED DATA GRAPH ==============================
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
@@ -648,14 +649,14 @@ export default async (req, context) => {
         "@type": "ItemList",
         "@id": `${canonUrl}/#itemlist`,
         "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว${provinceThaiName}`,
-        "numberOfItems": profileList.length,
+        "numberOfItems": totalItemsCount,
         "itemListElement": profileList.map((p, index) => ({
           "@type": "ListItem",
           "position": index + 1,
           "item": {
             "@type": "Person",
-            "name": p.name || "ผู้ให้บริการ",
-            "url": `${hostUrl}/sideline/${p.slug || p.id}`,
+            "name": `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}`,
+            "url": `${hostUrl}/sideline/${encodeURIComponent(p.slug || p.id)}`,
             "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
             "description": `โปรไฟล์แนะนำน้อง${p.name || ""} สาวรับงานพิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัยไม่มีมัดจำ`
           }
@@ -812,8 +813,8 @@ export default async (req, context) => {
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const matchedZones = seoData.zones.slice(0, 4).join(", ");
-    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
-    const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones);
+    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, provinceSlug, seoData.zones);
+    const seoIntroContent = smartLinkify(introTemplate, provinceSlug, seoData.zones);
 
     const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       const key = p.key || p.slug || p.id;
@@ -877,9 +878,19 @@ export default async (req, context) => {
       </div>
     `;
 
+    // 🟢 [FIXED #2] ฝั่ง SSR นำการ์ดโปรไฟล์มาใส่ไว้ใน #profiles-display-area โดยตรงสำหรับหน้าจังหวัด
+    const fullProfilesDisplayHtml = `
+      <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceThaiName}">
+        ${liveCountChipHtml}
+        <div class="profiles-grid-row" role="list">
+          ${cardsHtml}
+        </div>
+      </div>
+    `;
+
     rawHtml = rawHtml.replace(
-      /<div id="profiles-display-area"[^>]*>/i,
-      `<div id="profiles-display-area" style="margin-top: 16px; position: relative;">${liveCountChipHtml}`
+      /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
+      fullProfilesDisplayHtml
     );
 
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
