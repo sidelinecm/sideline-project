@@ -827,6 +827,15 @@ export default async (req, context) => {
     const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
     let rawHtml = await mainTemplate.text();
 
+    // ============================== FIX ASSET PATHS & BASE URL (CRITICAL FIX) ==============================
+    // 🟢 1. Inject <base href="/"> เพื่อป้องกันไม่ให้ Relative Path หลุดเวลาอยู่บน Sub-Route ย่อย
+    if (!/<base\s+/i.test(rawHtml)) {
+      rawHtml = rawHtml.replace(/<head>/i, `<head>\n    <base href="/" />`);
+    }
+
+    // 🟢 2. แปลง Relative Path ของ CSS, JS, Images ให้เป็น Absolute Path จาก Root (/)
+    rawHtml = rawHtml.replace(/(href|src)=["'](?!http|\/\/|\/|data:|blob:|#)([^"']+)["']/gi, '$1="/$2"');
+
     // ============================== REPLACING PLACEHOLDERS ==============================
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
@@ -917,7 +926,12 @@ export default async (req, context) => {
       style_tags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
-    rawHtml = replaceGlobal(rawHtml, "window.profilesData = [];", `window.profilesData = ${hydratedProfilesData};`);
+    // 🟢 ปรับปรุง Regex การแทนที่ window.profilesData ให้ยืดหยุ่น ยิงตรงแน่นอน
+    if (/window\.profilesData\s*=/i.test(rawHtml)) {
+      rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[\s*\];?/i, `window.profilesData = ${hydratedProfilesData};`);
+    } else {
+      rawHtml = rawHtml.replace(/<\/head>/i, `<script>window.profilesData = ${hydratedProfilesData};</script>\n</head>`);
+    }
 
     return new Response(rawHtml, {
       headers: {
@@ -929,7 +943,8 @@ export default async (req, context) => {
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-        "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https:;"
+        // 🟢 ปรับ CSP ให้รองรับ FontAwesome, Google Fonts, Tailwind และ Inline Styles อย่างสมบูรณ์
+        "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; font-src 'self' https: data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https: wss:; frame-src 'self' https:;"
       }
     });
 
