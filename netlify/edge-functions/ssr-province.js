@@ -1,8 +1,19 @@
-
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { createClient } from "npm:@supabase/supabase-js@2.42.0";
 
 // ==============================================================================
-// 1. GLOBAL SYSTEM CONFIGURATION & AUTHORITY METADATA
+// 1. HIGH-SPEED IN-MEMORY ISOLATE CACHE (SUPERCHARGED PERFORMANCE)
+// ==============================================================================
+const PAGE_CACHE = new Map();
+const PAGE_CACHE_TTL_MS = 10 * 60 * 1000; // แคชผลลัพธ์การเรนเดอร์ใน Edge Memory นาน 10 นาที
+let TEMPLATE_HTML_CACHE = null; // แคชโครงสร้างไฟล์ index.html แม่แบบไว้ในหน่วยความจำ
+
+// Pre-compiled Regular Expressions (ลดภาระการสร้าง Regex ใหม่ทุก Request)
+const STRIP_HTML_REGEX = /<[^>]*>?/gm;
+const KEYWORDS_REGEX = /(เด็กเอ็น|ไซด์ไลน์|พรีเมียม|ฟีลแฟน|รับงาน|ฟิวแฟน|สาวรับงาน)(?![^<>]*>)/g;
+const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf)$/i;
+
+// ==============================================================================
+// 2. GLOBAL SYSTEM CONFIGURATION & AUTHORITY METADATA
 // ==============================================================================
 const CONFIG = {
   get SUPABASE_URL() {
@@ -36,7 +47,7 @@ const CONFIG = {
 };
 
 // ==============================================================================
-// 2. DYNAMIC SEO DATA ARCHITECTURE
+// 3. DYNAMIC SEO DATA ARCHITECTURE
 // ==============================================================================
 const PROVINCE_CUSTOM_METADATA = {
   chiangmai: {
@@ -144,7 +155,7 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 });
 
 // ==============================================================================
-// 3. ADVANCED HD IMAGE OPTIMIZATION ENGINE & HELPERS
+// 4. UTILITIES & OPTIMIZED HELPERS
 // ==============================================================================
 function verifyHostname(req) {
   const host = (req.headers.get("host") || "").toLowerCase();
@@ -152,7 +163,7 @@ function verifyHostname(req) {
 }
 
 const escapeHTML = str => (str !== null && str !== undefined) ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) : "";
-const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
+const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(STRIP_HTML_REGEX, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
 const optimizeImg = (hostUrl, path, width = 600, height = 750) => {
@@ -192,11 +203,7 @@ const smartLinkify = (text, flag, zones) => {
       res = res.replace(regex, `<a href="/location/chiangmai" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
-  ["เด็กเอ็น", "ไซด์ไลน์", "พรีเมียม", "ฟีลแฟน", "รับงาน", "ฟิวแฟน", "สาวรับงาน"].forEach(keyword => {
-    const regex = new RegExp(`(${keyword})(?![^<>]*>)`, "g");
-    res = res.replace(regex, `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`);
-  });
-  return res;
+  return res.replace(KEYWORDS_REGEX, `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`);
 };
 
 const getDynamicIntro = (provinceName, zones) => {
@@ -336,7 +343,7 @@ const generateDynamicFAQsHTML = faqs => {
 };
 
 // ==============================================================================
-// 4. MAIN EDGE REQUEST HANDLER (NATIONAL & MULTI-LOCATION SSR MASTER)
+// 5. MAIN EDGE REQUEST HANDLER (NATIONAL & MULTI-LOCATION SSR MASTER)
 // ==============================================================================
 export default async (req, context) => {
   // 🟢 1. ตรวจสอบความปลอดภัย Hostname
@@ -361,7 +368,7 @@ export default async (req, context) => {
     return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
   }
 
-  // 🟢 4. บายพาส Internal Request (เมื่อ Edge Server เรียกดึงไฟล์ index.html ตัวจริงมาทำ SSR)
+  // 🟢 4. บายพาส Internal Request
   if (req.headers.get("x-ssr-bypass") === "true") {
     try {
       return await context.next();
@@ -371,11 +378,7 @@ export default async (req, context) => {
   }
 
   // 🟢 5. บายพาส Static Assets (รูปภาพ, JS, CSS, ฟอนต์) ให้ Netlify CDN เสิร์ฟไฟล์ได้ทันที
-  const staticExtensions = [
-    ".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".avif", ".svg", 
-    ".ico", ".json", ".webmanifest", ".map", ".woff", ".woff2", ".ttf"
-  ];
-  if (staticExtensions.some(ext => url.pathname.toLowerCase().endsWith(ext))) {
+  if (STATIC_EXT_REGEX.test(url.pathname)) {
     try {
       return await context.next();
     } catch {
@@ -383,7 +386,7 @@ export default async (req, context) => {
     }
   }
 
-  // 🟢 6. บายพาสหน้า Static ปกติของเว็บ ไม่ให้วิ่งเข้ากระบวนการค้นหาจังหวัด
+  // 🟢 6. บายพาสหน้า Static ปกติของเว็บ
   const staticPages = [
     "/about", "/faq", "/blog", "/contact", 
     "/terms-of-service", "/privacy-policy", "/policy", "/locations"
@@ -396,9 +399,18 @@ export default async (req, context) => {
     }
   }
 
-  // 🟢 7. Normalize URL: เปลี่ยน /index.html ให้เป็น / (ป้องกันปัญหา Duplicate Content)
+  // 🟢 7. Normalize URL: เปลี่ยน /index.html ให้เป็น /
   if (url.pathname === "/index.html") {
     return Response.redirect(`${hostUrl}/`, 301);
+  }
+
+  // ⚡ 8. ISOLATE IN-MEMORY CACHE CHECK (ตอบกลับรวดเร็วระดับ 5-15ms หากเคยเรนเดอร์แล้ว)
+  const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
+  const cachedItem = PAGE_CACHE.get(cacheKey);
+  if (cachedItem && (Date.now() - cachedItem.timestamp < PAGE_CACHE_TTL_MS)) {
+    return new Response(cachedItem.html, {
+      headers: cachedItem.headers
+    });
   }
 
   // ============================== ROUTE PARSING ==============================
@@ -465,12 +477,24 @@ export default async (req, context) => {
       profileQuery = profileQuery.in("provinceKey", searchKeys);
     }
 
-    const [provSingleRes, profListRes, provListRes] = await Promise.all([
+    let reviewQuery = supabase.from("reviews")
+      .select("id, created_at, author_name, location_detail, rating_score, review_body, province_key")
+      .eq("active_status", true)
+      .order("created_at", { ascending: false })
+      .limit(8);
+
+    if (!isNationalHome) {
+      reviewQuery = reviewQuery.in("province_key", searchKeys);
+    }
+
+    // ⚡ BATCH PARALLEL DB QUERIES (ดึงทั้งจังหวัด, โปรไฟล์, และรีวิว พร้อมกันในรอบเดียว)
+    const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all([
       isNationalHome 
         ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
         : supabase.from("provinces").select("id, nameThai, key").in("key", searchKeys).limit(1).maybeSingle(),
       profileQuery,
-      supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true })
+      supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true }),
+      reviewQuery.catch(() => ({ data: [] }))
     ]);
 
     const provinceData = provSingleRes.data;
@@ -490,24 +514,7 @@ export default async (req, context) => {
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
 
-    let dbReviews = [];
-    try {
-      let reviewQuery = supabase.from("reviews")
-        .select("id, created_at, author_name, location_detail, rating_score, review_body, province_key")
-        .eq("active_status", true)
-        .order("created_at", { ascending: false })
-        .limit(8);
-
-      if (!isNationalHome) {
-        reviewQuery = reviewQuery.in("province_key", searchKeys);
-      }
-
-      const { data: reviewsData } = await reviewQuery;
-      if (reviewsData && reviewsData.length > 0) dbReviews = reviewsData;
-    } catch (err) {
-      console.warn("Reviews query fallback applied.", err);
-    }
-
+    const dbReviews = reviewsRes?.data || [];
     let finalReviews = [];
     if (dbReviews && dbReviews.length > 0) {
       finalReviews = dbReviews.map(r => ({
@@ -535,7 +542,7 @@ export default async (req, context) => {
     if (matchedProfile) {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
       pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` ${matchedProfile.age}` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
-      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${matchedProfile.location || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
+      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${matchedProfile.location || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
     const strippedDesc = stripHTML(pageDesc);
@@ -824,18 +831,22 @@ export default async (req, context) => {
     }).join("") : "";
 
     // ==============================================================================
-    // 🟢 FETCH TEMPLATE INDEX.HTML & REPLACE PLACEHOLDERS (CRITICAL BUG-FREE ORDER)
+    // ⚡ OPTIMIZED TEMPLATE FETCHING (ใช้ MEMORY CACHE ไฟล์ INDEX.HTML)
     // ==============================================================================
-    const templateUrl = new URL("/index.html", url.origin);
-    const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
-    let rawHtml = await mainTemplate.text();
+    let rawHtml = TEMPLATE_HTML_CACHE;
+    if (!rawHtml) {
+      const templateUrl = new URL("/index.html", url.origin);
+      const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
+      rawHtml = await mainTemplate.text();
+      TEMPLATE_HTML_CACHE = rawHtml; // จำไว้ในหน่วยความจำ
+    }
 
-    // 1. Inject <base href="/"> ป้องกัน Path หลุด
+    // 1. Inject <base href="/">
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    // 2. REPLACING PLACEHOLDERS FIRST (ทำก่อนเปลี่ยน Asset Path เพื่อป้องกันการเกิด Bug /https://)
+    // 2. REPLACING PLACEHOLDERS
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
 
@@ -859,7 +870,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // 3. FIX RELATIVE ASSET PATHS (ทำทีหลัง และเพิ่มการยกเว้น https://, http://, //, {{ เพื่อป้องกัน /https://)
+    // 3. FIX RELATIVE ASSET PATHS
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
     // 4. Dynamic Elements Replacements
@@ -935,19 +946,23 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `<script>window.profilesData = ${hydratedProfilesData};</script>\n</head>`);
     }
 
-    return new Response(rawHtml, {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=1800, stale-while-revalidate=900",
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
-        "X-XSS-Protection": "1; mode=block",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-        "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; font-src 'self' https: data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https: wss:; frame-src 'self' https:;"
-      }
-    });
+    // ⚡ HEADERS SETUP (คลีนระบบความปลอดภัย และเซ็ต Edge CDN Cache)
+    const responseHeaders = {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+      "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' https: 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com; font-src 'self' https: data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.google-analytics.com; frame-src 'self' https:;"
+    };
+
+    // บันทึกลงใน Isolate Memory Cache สำหรับ Request ถัดไป
+    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: Date.now() });
+
+    return new Response(rawHtml, { headers: responseHeaders });
 
   } catch (err) {
     console.error("Critical rendering error:", err);
