@@ -487,14 +487,13 @@ export default async (req, context) => {
       reviewQuery = reviewQuery.in("province_key", searchKeys);
     }
 
-    // ⚡ BATCH PARALLEL DB QUERIES (ดึงทั้งจังหวัด, โปรไฟล์, และรีวิว พร้อมกันในรอบเดียว)
-    const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all([
+const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all([
       isNationalHome 
         ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
         : supabase.from("provinces").select("id, nameThai, key").in("key", searchKeys).limit(1).maybeSingle(),
       profileQuery,
       supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true }),
-      reviewQuery.catch(() => ({ data: [] }))
+      Promise.resolve(reviewQuery).catch(() => ({ data: [] })) // <--- แก้เป็นแบบนี้ครับ
     ]);
 
     const provinceData = provSingleRes.data;
