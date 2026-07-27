@@ -28,6 +28,8 @@
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%">
   <meta property="og:url" content="{{SEO_CANONICAL}}">
   <meta property="og:image" content="{{SEO_IMAGE}}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} ฟิวแฟนตรงปก 100%">
@@ -52,7 +54,9 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
   
   <link rel="modulepreload" href="/main.js">
-  <link rel="stylesheet" href="styles.css">
+  
+  <!-- ✅ แก้ไข: ใส่ / นำหน้าเพื่อป้องกัน CSS หลุดใน Path ย่อย -->
+  <link rel="stylesheet" href="/styles.css">
 
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
@@ -667,7 +671,7 @@
     window.profilesData = [];
   </script>
 
-  <script type="module" src="main.js"></script>
+  <script type="module" src="/main.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
