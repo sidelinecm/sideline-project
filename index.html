@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#5A2CBE">
 
-  <!-- ============================== PRIMARY SEO (HIGH CTR & DIRECTORY INTENT) ============================== -->
+  <!-- ============================== PRIMARY SEO ============================== -->
   <title>รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก (อัปเดต {{PROFILE_COUNT}}+ โปรไฟล์ 2026) | First Model Hub</title>
   <meta name="description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} กว่า {{PROFILE_COUNT}}+ โปรไฟล์ ไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด {{PROVINCE_ZONES}}" />
   <meta name="keywords" content="รับงาน{{PROVINCE_NAME}}, สาวรับงาน{{PROVINCE_NAME}}, ไซด์ไลน์{{PROVINCE_NAME}}, เพื่อนเที่ยว{{PROVINCE_NAME}}, ฟิวแฟน{{PROVINCE_NAME}}, เด็กเอ็น{{PROVINCE_NAME}}, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน, {{PROVINCE_NAME}} escorts, {{PROVINCE_NAME}} companions" />
@@ -14,14 +14,13 @@
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
   <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
 
-  <!-- ============================== MULTILINGUAL SEO (HREFLANG FOR TOURISTS) ============================== -->
+  <!-- ============================== MULTILINGUAL SEO ============================== -->
   <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
-  <link rel="alternate" hreflang="en" href="{{SEO_CANONICAL_EN}}" />
+  <!-- 🛑 ลบบรรทัด hreflang="en" ออกชั่วคราวเพื่อแก้ปัญหา 404 /en -->
   <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
   <!-- ============================== OPEN GRAPH & TWITTER CARDS ============================== -->
   <meta property="og:locale" content="th_TH">
-  <meta property="og:locale:alternate" content="en_US">
   <meta property="og:site_name" content="First Model Hub">
   <meta property="og:type" content="website">
   <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}}+ โปรไฟล์)">
@@ -36,11 +35,11 @@
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ">
   <meta name="twitter:image" content="{{SEO_IMAGE}}">
 
-  <!-- ICONS & MANIFEST (FIXED FOR GOOGLE SEARCH) -->
+  <!-- ICONS & MANIFEST (ต้องแน่ใจว่าอัปโหลดไฟล์จริงไว้ใน /images/ แล้ว) -->
   <link rel="shortcut icon" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48x48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon-192x192.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
@@ -50,12 +49,11 @@
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
+  <!-- ⚠️ ตรวจสอบว่ามีไฟล์ /fonts/ จริงหรือไม่ หากไม่มีให้ลบ 2 บรรทัดนี้ออก -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin>
   
   <link rel="modulepreload" href="/main.js">
-  
-  <!-- ✅ แก้ไข: ใส่ / นำหน้าเพื่อป้องกัน CSS หลุดใน Path ย่อย -->
   <link rel="stylesheet" href="/styles.css">
 
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -63,6 +61,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   </noscript>
 
+  <!-- ⚠️ ตรวจสอบว่ามีไฟล์ hero-firstmodelhub-...webp จริงใน /images/ หรือไม่ -->
   <link rel="preload" href="/images/hero-firstmodelhub-1200.webp" as="image" 
         imagesrcset="/images/hero-firstmodelhub-600.webp 600w, /images/hero-firstmodelhub-1200.webp 1200w" 
         imagesizes="(max-width: 768px) 100vw, 1200px" fetchpriority="high">
