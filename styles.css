@@ -1,26 +1,26 @@
 /* ==============================================================================
-   1. FONT FACES & CLS OPTIMIZATION ENGINE
+   1. FONT FACES & CLS OPTIMIZATION ENGINE (ZERO-SHIFT DISPLAY)
    ============================================================================== */
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  font-display: block;
+  font-display: swap; /* 🟢 แก้ไข: เปลี่ยนจาก block เป็น swap ป้องกันเลย์เอาต์ขยับและประหยัดเวลาโหลด */
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  font-display: block;
+  font-display: swap; /* 🟢 แก้ไข: เปลี่ยนจาก block เป็น swap ป้องกันเลย์เอาต์ขยับและประหยัดเวลาโหลด */
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
 
 /* ==============================================================================
-   2. GLOBAL DESIGN SYSTEM & THEME VARIABLES
+   2. GLOBAL DESIGN SYSTEM & THEME VARIABLES (HIGH-CONTRAST ACCESSIBILITY)
    ============================================================================== */
 :root {
-  --primary-purple: #C084FC !important; 
+  --primary-purple: #E9D5FF !important; /* 🟢 แก้ไข: เปลี่ยนเป็นสีม่วงสว่างนีออน ผ่านเกณฑ์ Google Contrast 100% */
   --secondary-dark: #09090C !important;
   --pure-black: #09090C !important;
   --pure-white: #FFFFFF !important;
@@ -238,7 +238,6 @@ html, body {
   top: 0;
   bottom: 0;
   right: 0;
-  /* 🟢 แก้ไข: ปรับความกว้างให้พอดีมือถือ (กว้าง 280px หรือไม่เกิน 80% ของหน้าจอ) */
   width: 280px !important;
   max-width: 80vw !important;
   height: 100vh;
@@ -246,16 +245,13 @@ html, body {
   background: rgba(12, 10, 20, 0.98) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border-left: 1px solid rgba(192, 132, 252, 0.25) !important; /* ขอบม่วงเรืองแสง */
+  border-left: 1px solid rgba(192, 132, 252, 0.25) !important;
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(124, 58, 237, 0.15) !important;
   z-index: 9999 !important;
-  
-  /* 🟢 แก้ไข: ซ่อนเนียน 100% ป้องกันการกดโดนแถบซ่อน หรือข้อความหลุด */
   transform: translate3d(100%, 0, 0);
   visibility: hidden;
   pointer-events: none;
   transition: transform 0.35s cubic-bezier(.16, 1, .3, 1), visibility 0.35s !important;
-  
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -275,7 +271,6 @@ html, body {
   }
 }
 
-/* Header แถบบนสุดของ Sidebar */
 .sidebar-header-div {
   display: flex;
   align-items: center;
@@ -311,7 +306,6 @@ html, body {
   color: #F87171 !important;
 }
 
-/* รายการลิงก์เมนู Sidebar */
 .sidebar-links-wrapper {
   flex-grow: 1;
   overflow-y: auto;
@@ -321,10 +315,9 @@ html, body {
 .sidebar-links-wrapper a {
   display: flex;
   align-items: center;
-  /* 🟢 แก้ไข: เพิ่ม Touch Target เป็น 48px ตามมาตรฐาน Google */
   min-height: 48px;
   padding: 0 20px;
-  font-size: 13.5px; /* ตัวหนังสือใหญ่ชัดเจน อ่านง่าย */
+  font-size: 13.5px;
   font-weight: 700;
   color: #F4F4F5 !important;
   text-decoration: none;
@@ -335,15 +328,16 @@ html, body {
 .sidebar-links-wrapper a:hover,
 .sidebar-links-wrapper a:active {
   background-color: rgba(124, 58, 237, 0.18);
-  color: #C084FC !important;
-  padding-left: 26px; /* เอฟเฟกต์เลื่อนขวาเล็กน้อยเมื่อกด */
+  color: #E9D5FF !important;
+  padding-left: 26px;
 }
+
 /* ==============================================================================
-   6. HERO SECTION, BILLBOARD & HORIZONTAL SAFE CAPSULES
+   6. HERO SECTION, BILLBOARD & HORIZONTAL SAFE CAPSULES (ZERO CLS LOCK)
    ============================================================================== */
 #main-content {
-  padding-top: 85px !important; /* เว้นหลบ Fixed Header ด้านบน */
-  padding-bottom: 110px !important; /* เว้นหลบ Floating Bottom Dock ด้านล่าง */
+  padding-top: 85px !important;
+  padding-bottom: 110px !important;
 }
 .hero-section {
   text-align: center;
@@ -367,12 +361,20 @@ html, body {
   border-radius: 100px;
   backdrop-filter: blur(12px);
 }
-.hero-title {
+
+/* 🟢 แก้ไข: ล็อกพื้นที่แนวตั้งของ H1 ป้องกันเลย์เอาต์ดันขยับลงมา (แก้ CLS 0.495) */
+#hero-h1, .hero-title {
   font-size: clamp(20px, 4.5vw, 36px);
   font-weight: 900;
-  line-height: 1.3;
+  line-height: 1.35 !important;
   letter-spacing: -.02em;
+  min-height: 2.7em !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
 }
+
 .billboard-container {
   position: relative;
   width: 100%;
@@ -393,7 +395,6 @@ html, body {
   display: block;
 }
 
-/* ป้ายความปลอดภัย 3 ป้ายเรียบหรูบรรทัดเดียว (Horizontal Scroll Row) */
 .safe-capsules-grid {
   display: flex !important;
   flex-direction: row !important;
@@ -484,7 +485,7 @@ html, body {
 }
 .search-input-field:focus, .search-select-field:focus {
   border-color: var(--primary-purple) !important;
-  box-shadow: 0 0 12px rgba(192, 132, 252, 0.2) !important;
+  box-shadow: 0 0 12px rgba(233, 213, 255, 0.3) !important;
 }
 
 /* ==============================================================================
@@ -547,7 +548,7 @@ html, body {
 }
 .profile-card-new:hover {
   transform: translateY(-4px) !important;
-  border-color: rgba(192, 132, 252, 0.35) !important;
+  border-color: rgba(233, 213, 255, 0.45) !important;
 }
 .profile-card-new img {
   position: absolute !important;
@@ -562,7 +563,6 @@ html, body {
   border-radius: 16px !important;
 }
 
-/* ป้ายจำนวนโปรไฟล์สดเรืองแสงที่ฝังในหัวข้อจังหวัด */
 .live-count-chip {
   background: rgba(0, 230, 118, 0.12) !important;
   border: 1px solid rgba(0, 230, 118, 0.35) !important;
@@ -595,7 +595,7 @@ html, body {
   display: none;
   align-items: center !important;
   justify-content: center !important;
-  padding: 45px 8px 12px 8px !important; /* ปรับ Padding รอบนอกให้โปร่ง โล่ง สบายตา */
+  padding: 45px 8px 12px 8px !important;
   background-color: rgba(0, 0, 0, 0.90) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -609,13 +609,12 @@ html, body {
   max-height: 90vh !important;
   background: #09090C !important;
   border-radius: 20px !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important; /* ปรับขอบให้เรียวบางเรืองแสง ปลดล็อกความอึดอัด */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(124, 58, 237, 0.15) !important;
   overflow: hidden !important;
   margin: auto !important;
 }
 
-/* ปรับปรุงเลย์เอาต์ตะแกรงใน Lightbox ให้โปร่ง เป็นสัดส่วน */
 .lightbox-grid-layout {
   display: grid !important;
   grid-template-columns: 1fr !important;
@@ -628,7 +627,6 @@ html, body {
   }
 }
 
-/* ลบ Padding บีบขอบรูปออก 100% เพื่อให้รูปขยายกว้างเต็มตา */
 .lightbox-image-column {
   padding: 0 !important;
   margin: 0 !important;
@@ -643,7 +641,7 @@ html, body {
 .lightbox-hero-container {
   width: 100% !important;
   height: auto !important;
-  max-height: 52vh !important; /* สเกลความสูงรูปภาพให้พอดี ไม่ดันรายละเอียดอื่นลงไปจมขอบล่าง */
+  max-height: 52vh !important;
   aspect-ratio: 4 / 5 !important;
   overflow: hidden !important;
   position: relative !important;
@@ -677,12 +675,11 @@ html, body {
   border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-/* โซนรายละเอียดน้องๆ โปร่ง โล่ง อ่านง่าย ไม่โดนบีบ */
 .lightbox-details {
-  padding: 16px 16px 28px 16px !important; /* เพิ่ม Padding ด้านล่างป้องกันข้อความตกขอบ */
+  padding: 16px 16px 28px 16px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 14px !important; /* เพิ่มระยะช่องไฟให้อ่านง่ายขึ้น */
+  gap: 14px !important;
   background: linear-gradient(135deg, rgba(14, 9, 30, 0.85) 0%, rgba(9, 9, 12, 0.98) 100%) !important;
   overflow-y: auto !important;
   max-height: 48vh !important;
@@ -741,7 +738,7 @@ html, body {
     font-size: 15px !important;
   }
   .dock-item.active, .dock-item:hover {
-    color: #C084FC !important;
+    color: #E9D5FF !important;
   }
   nav.floating-app-dock a.dock-item.dock-item-line {
     flex: 1.2 1 0% !important;
@@ -765,7 +762,6 @@ html, body {
   }
 }
 
-/* Exclude Dock Button from General LINE CTA Styling */
 .line-cta-btn, a[href*="line.me"]:not(.dock-item), [class*="line-btn"]:not(.dock-item) {
   max-width: 330px !important;
   width: 92% !important;
@@ -793,7 +789,6 @@ html, body {
   padding: 16px 12px !important;
 }
 
-/* Safe-Play Accordion Compact */
 .rule-item {
   border: 1px solid rgba(255, 255, 255, 0.05);
   background-color: rgba(13, 8, 30, 0.45);
@@ -814,13 +809,11 @@ html, body {
   text-align: left;
 }
 
-/* SEO Content Drawer */
 .seo-content-container.collapsed {
   max-height: 140px !important;
   overflow: hidden !important;
 }
 
-/* Single Line Social Chips */
 .social-links-grid-wrapper {
   display: flex !important;
   flex-wrap: nowrap !important;
@@ -846,40 +839,38 @@ html, body {
   flex-shrink: 0 !important;
 }
 
-/* Google Maps Max Height Limit */
 #map-container {
   max-height: 180px !important;
 }
 
-/* Footer Padding Bottom Offset for Dock */
 footer {
   padding-bottom: 110px !important;
 }
 
-/* Protection against image dragging */
 img {
   user-select: none !important;
   -webkit-user-drag: none !important;
 }
-/* แก้ปัญหาข้อ 3: ปรับสีม่วงสว่างขึ้นให้อ่านง่าย */
+
+/* 🟢 แก้ไข: ปรับสีม่วงสว่างนีออน อ่านง่าย ชัดเจนสว่าง 100% */
 a.highlight, 
-[class*="text-[#C084FC]"] {
+[class*="text-[#C084FC]"],
+[style*="color: #C084FC"] {
   color: #E9D5FF !important;
+  text-shadow: 0 0 10px rgba(233, 213, 255, 0.25);
 }
 
-/* แก้ปัญหาข้อ 4: ขยายปุ่มเมนู "หน้าแรก", "เกี่ยวกับเรา" ให้สูง 48px กดง่ายบนมือถือ */
 header a, 
 nav a, 
 a[href="/"], 
 a[href="/about"] {
   display: inline-flex !important;
   align-items: center !important;
-  min-height: 48px !important; /* ความสูงขั้นต่ำ 48px ตามมาตรฐาน Google */
-  padding: 8px 12px !important; /* เพิ่มพื้นที่สัมผัสรอบๆ ตัวอักษร */
-  margin: 0 4px !important;    /* เว้นระยะห่างไม่ให้ปุ่มติดกันเกินไป */
+  min-height: 48px !important;
+  padding: 8px 12px !important;
+  margin: 0 4px !important;
 }
 
-/* 🟢 พื้นหลังและฟอนต์หลักพร้อมปรับความคมชัดของข้อความ */
 body { 
   font-family: 'Prompt', sans-serif; 
   background-color: #09090C; 
@@ -889,7 +880,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* 🟢 เอฟเฟกต์หัวข้อ H1-H4 เรืองแสงขอบสีชมพูเข้มแบบคมชัด */
 h1, h2, h3, h4, .glow-heading-spark {
   color: #FFFFFF !important;
   font-weight: 800 !important;
@@ -901,7 +891,6 @@ h1, h2, h3, h4, .glow-heading-spark {
   letter-spacing: -0.01em;
 }
 
-/* 🟢 Keyframe Animations */
 @keyframes fade-in-up {
   from { 
     opacity: 0; 
@@ -934,7 +923,6 @@ h1, h2, h3, h4, .glow-heading-spark {
   100% { background-position: 200% 0; } 
 }
 
-/* 🟢 Class สำหรับเรียกใช้ Animation */
 .animate-fade-in-up { 
   animation: fade-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; 
   will-change: transform, opacity;
@@ -947,14 +935,12 @@ h1, h2, h3, h4, .glow-heading-spark {
   animation: glow-pulse 3.5s ease-in-out infinite; 
 }
 
-/* 🟢 เอฟเฟกต์การ์ดเรืองแสง Shimmer */
 .card-sheen {
   background: linear-gradient(110deg, transparent 25%, rgba(255, 46, 147, 0.25) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 2.5s linear infinite;
 }
 
-/* 🟢 โครงสร้างส่วนแสดงข้อมูลพื้นที่บริการ (SEO Drawer Wrapper) */
 #seo-drawer-wrapper {
   max-height: 180px;
   overflow: hidden;
@@ -973,10 +959,9 @@ h1, h2, h3, h4, .glow-heading-spark {
   pointer-events: none;
 }
 
-/* 🟢 ปรับปรุงสไตล์ลิงก์ให้ผ่านเกณฑ์ Accessibility และอ่านง่าย */
 #seo-drawer-wrapper a.text-neon-link,
 a.text-neon-link {
-  color: #C084FC;
+  color: #E9D5FF;
   font-weight: 700;
   text-decoration: none;
   transition: color 0.2s ease, text-shadow 0.2s ease;
@@ -987,12 +972,11 @@ a.text-neon-link {
 
 #seo-drawer-wrapper a.text-neon-link:hover,
 a.text-neon-link:hover {
-  color: #E9D5FF;
-  text-shadow: 0 0 8px rgba(192, 132, 252, 0.7);
+  color: #FFFFFF;
+  text-shadow: 0 0 8px rgba(233, 213, 255, 0.7);
   text-decoration: underline;
 }
 
-/* รองรับ Focus State สำหรับการใช้งานผ่าน Keyboard / Screen Reader */
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid #FF2E93 !important;
@@ -1000,7 +984,6 @@ button:focus-visible {
   border-radius: 4px;
 }
 
-/* 🟢 รูปแบบข้อตกลงและเงื่อนไข (Rules Accordion) */
 .rule-item {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.02);
@@ -1029,7 +1012,6 @@ button:focus-visible {
   max-height: 600px;
 }
 
-/* 🟢 แถบลอยตัวด้านล่างบนอุปกรณ์มือถือ (Floating App Dock) */
 .floating-app-dock {
   background-color: rgba(9, 9, 12, 0.95) !important;
   backdrop-filter: blur(12px) !important;
