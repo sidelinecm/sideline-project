@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2.42.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 // ==============================================================================
 // 1. HIGH-SPEED IN-MEMORY ISOLATE CACHE (SUPERCHARGED PERFORMANCE)
