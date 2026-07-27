@@ -822,134 +822,128 @@ export default async (req, context) => {
       return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
     }).join("") : "";
 
-    // ดึง Template index.html ตัวจริงมาเติมข้อมูล
-    const templateUrl = new URL("/index.html", url.origin);
-    const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
-    let rawHtml = await mainTemplate.text();
+// ดึง Template index.html ตัวจริงมาเติมข้อมูล
+const templateUrl = new URL("/index.html", url.origin);
+const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
+let rawHtml = await mainTemplate.text();
 
-    // ============================== FIX ASSET PATHS & BASE URL (CRITICAL FIX) ==============================
-    // 🟢 1. Inject <base href="/"> เพื่อป้องกันไม่ให้ Relative Path หลุดเวลาอยู่บน Sub-Route ย่อย
-    if (!/<base\s+/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<head>/i, `<head>\n    <base href="/" />`);
-    }
+// ============================== FIX ASSET PATHS & BASE URL (CRITICAL FIX) ==============================
+// 🟢 1. Inject <base href="/"> เพื่อป้องกันไม่ให้ Relative Path หลุดเวลาอยู่บน Sub-Route ย่อย
+if (!/<base\s+/i.test(rawHtml)) {
+  rawHtml = rawHtml.replace(/<head>/i, `<head>\n    <base href="/" />`);
+}
 
-    // 🟢 2. แปลง Relative Path ของ CSS, JS, Images ให้เป็น Absolute Path จาก Root (/)
-    rawHtml = rawHtml.replace(/(href|src)=["'](?!http|\/\/|\/|data:|blob:|#)([^"']+)["']/gi, '$1="/$2"');
+// 🟢 2. แปลง Relative Path ของ CSS, JS, Images ให้เป็น Absolute Path จาก Root (/)
+rawHtml = rawHtml.replace(/(href|src)=["'](?!http|\/\/|\/|data:|blob:|#)([^"']+)["']/gi, '$1="/$2"');
 
-    // ============================== REPLACING PLACEHOLDERS ==============================
-    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = rawHtml.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
+// ============================== REPLACING PLACEHOLDERS ==============================
+rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
+rawHtml = rawHtml.replace(/<meta name="description" content=".*?" \/>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
 
-    rawHtml = rawHtml.replace(/<meta property="og:title" content=".*?"/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}"`);
-    rawHtml = rawHtml.replace(/<meta property="og:description" content=".*?"/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}"`);
-    rawHtml = rawHtml.replace(/<meta name="twitter:title" content=".*?"/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}"`);
-    rawHtml = rawHtml.replace(/<meta name="twitter:description" content=".*?"/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}"`);
+rawHtml = rawHtml.replace(/<meta property="og:title" content=".*?"/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}"`);
+rawHtml = rawHtml.replace(/<meta property="og:description" content=".*?"/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}"`);
+rawHtml = rawHtml.replace(/<meta name="twitter:title" content=".*?"/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}"`);
+rawHtml = rawHtml.replace(/<meta name="twitter:description" content=".*?"/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}"`);
 
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    
-    rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
-    
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
+rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
-    if (popularLocationsHtml) {
-      rawHtml = rawHtml.replace(
-        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
-        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
-      );
-    }
+rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
 
-    if (!isNationalHome) {
-      rawHtml = rawHtml.replace(
-        /<section id="featured-profiles"[\s\S]*?<\/section>/i,
-        `<section id="featured-profiles" class="hidden" style="display:none !important;"></section>`
-      );
-    }
+rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
+rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
+rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
+rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
+rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
+rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
+rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
+rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    const liveCountChipHtml = `
-      <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
-              📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
-              <span class="live-count-chip">
-                <span class="pulse-dot-el"></span>
-                <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
-              </span>
-          </h2>
-      </div>
-    `;
+if (popularLocationsHtml) {
+  rawHtml = rawHtml.replace(
+    /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
+    `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
+  );
+}
 
-    rawHtml = rawHtml.replace(
-      /<div id="profiles-display-area"[^>]*>/i,
-      `<div id="profiles-display-area" style="margin-top: 16px; position: relative;">${liveCountChipHtml}`
-    );
+if (!isNationalHome) {
+  rawHtml = rawHtml.replace(
+    /<section id="featured-profiles"[\s\S]*?<\/section>/i,
+    `<section id="featured-profiles" class="hidden" style="display:none !important;"></section>`
+  );
+}
 
-    const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
-      id: p.id,
-      slug: p.slug,
-      name: p.name,
-      age: p.age,
-      height: p.height || "",
-      weight: p.weight || "",
-      stats: p.stats || "",
-      skinTone: p.skin_tone || p.skinTone || "",
-      skin_tone: p.skin_tone || p.skinTone || "",
-      bust: p.bust || "",
-      waist: p.waist || "",
-      hips: p.hips || "",
-      cup_size: p.cup_size || "",
-      imagePath: p.imagePath,
-      galleryPaths: p.galleryPaths || p.gallery_paths || [],
-      provinceKey: p.provinceKey,
-      provinceThai: provinceThaiName,
-      location: p.location,
-      rate: p.rate,
-      availability: p.availability,
-      lastUpdated: p.lastUpdated,
-      isfeatured: p.isfeatured,
-      verified: p.verified || p.isVerified,
-      hasVideo: p.has_video || p.hasVideo || false,
-      has_video: p.has_video || p.hasVideo || false,
-      description: p.description || "",
-      lineId: p.line_id || p.lineId || "",
-      line_id: p.line_id || p.lineId || "",
-      quote: p.quote || p.slogan || "",
-      slogan: p.slogan || p.quote || "",
-      styleTags: p.style_tags || p.styleTags || [],
-      style_tags: p.style_tags || p.styleTags || []
-    }))).replace(/</g, '\\u003c');
+const liveCountChipHtml = `
+  <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+      <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
+          📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
+          <span class="live-count-chip">
+            <span class="pulse-dot-el"></span>
+            <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
+          </span>
+      </h2>
+  </div>
+`;
 
-    // 🟢 ปรับปรุง Regex การแทนที่ window.profilesData ให้ยืดหยุ่น ยิงตรงแน่นอน
-    if (/window\.profilesData\s*=/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[\s*\];?/i, `window.profilesData = ${hydratedProfilesData};`);
-    } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `<script>window.profilesData = ${hydratedProfilesData};</script>\n</head>`);
-    }
+rawHtml = rawHtml.replace(
+  /<div id="profiles-display-area"[^>]*>/i,
+  `<div id="profiles-display-area" style="margin-top: 16px; position: relative;">${liveCountChipHtml}`
+);
 
-    return new Response(rawHtml, {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=1800, stale-while-revalidate=900",
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
-        "X-XSS-Protection": "1; mode=block",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-        // 🟢 ปรับ CSP ให้รองรับ FontAwesome, Google Fonts, Tailwind และ Inline Styles อย่างสมบูรณ์
-        "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; font-src 'self' https: data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https: wss:; frame-src 'self' https:;"
-      }
-    });
+const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
+  id: p.id,
+  slug: p.slug,
+  name: p.name,
+  age: p.age,
+  height: p.height || "",
+  weight: p.weight || "",
+  stats: p.stats || "",
+  skinTone: p.skin_tone || p.skinTone || "",
+  skin_tone: p.skin_tone || p.skinTone || "",
+  bust: p.bust || "",
+  waist: p.waist || "",
+  hips: p.hips || "",
+  cup_size: p.cup_size || "",
+  imagePath: p.imagePath,
+  galleryPaths: p.galleryPaths || p.gallery_paths || [],
+  provinceKey: p.provinceKey,
+  provinceThai: provinceThaiName,
+  location: p.location,
+  rate: p.rate,
+  availability: p.availability,
+  lastUpdated: p.lastUpdated,
+  isfeatured: p.isfeatured,
+  verified: p.verified || p.isVerified,
+  hasVideo: p.has_video || p.hasVideo || false,
+  has_video: p.has_video || p.hasVideo || false,
+  description: p.description || "",
+  lineId: p.line_id || p.lineId || "",
+  line_id: p.line_id || p.lineId || "",
+  quote: p.quote || p.slogan || "",
+  slogan: p.slogan || p.quote || "",
+  styleTags: p.style_tags || p.styleTags || [],
+  style_tags: p.style_tags || p.styleTags || []
+}))).replace(/</g, '\\u003c');
 
-  } catch (err) {
-    console.error("Critical rendering error:", err);
-    return buildErrorPage(500, "500 - ข้อผิดพลาดภายในระบบ", "ระบบประมวลผลหลังบ้านเกิดขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้งในภายหลัง");
+// 🟢 ปรับปรุง Regex การแทนที่ window.profilesData ให้ยืดหยุ่น ยิงตรงแน่นอน
+if (/window\.profilesData\s*=/i.test(rawHtml)) {
+  rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[\s*\];?/i, `window.profilesData = ${hydratedProfilesData};`);
+} else {
+  rawHtml = rawHtml.replace(/<\/head>/i, `<script>window.profilesData = ${hydratedProfilesData};</script>\n</head>`);
+}
+
+return new Response(rawHtml, {
+  headers: {
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "public, max-age=1800, stale-while-revalidate=900",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+    // 🟢 ปรับ CSP ให้รองรับ FontAwesome, Google Fonts, Tailwind และ Inline Styles อย่างสมบูรณ์
+    "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; font-src 'self' https: data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https: wss:; frame-src 'self' https:;"
   }
-};
+});
