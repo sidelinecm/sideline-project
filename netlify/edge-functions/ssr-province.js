@@ -47,35 +47,35 @@ const CONFIG = {
 };
 
 // ==============================================================================
-// 3. DYNAMIC SEO DATA ARCHITECTURE
+// 3. DYNAMIC SEO DATA ARCHITECTURE (HIGH-CTR & NO KEYWORD STUFFING)
 // ==============================================================================
 const PROVINCE_CUSTOM_METADATA = {
   chiangmai: {
-    title: "รับงานเชียงใหม่ สาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ ฟิวแฟนตรงปก 2026 | First Model Hub",
-    desc: "ศูนย์รวมสาวรับงานเชียงใหม่ รับงานเชียงใหม่ และไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัดนิมมาน เจ็ดยอด สันติธรรม"
+    title: "ไซด์ไลน์เชียงใหม่ - รับงานเชียงใหม่ [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
+    desc: "ศูนย์รวมสาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก 100% มีระบบยืนยันตัวตน ตรวจสอบคิวสด นัดเจอจ่ายหน้างาน ไม่มัดจำ ครอบคลุมพิกัดนิมมาน เจ็ดยอด สันติธรรม"
   },
   chiangrai: {
-    title: "รับงานเชียงราย สาวรับงานเชียงราย ไซด์ไลน์เชียงราย ฟิวแฟนตรงปก 2026 | First Model Hub",
+    title: "ไซด์ไลน์เชียงราย - รับงานเชียงราย [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
     desc: "ศูนย์รวมสาวรับงานเชียงราย รับงานเชียงราย และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำล่วงหน้า ครอบคลุมตัวเมือง บ้านดู่ มฟล."
   },
   udon: {
-    title: "รับงานอุดร สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 2026 | First Model Hub",
+    title: "ไซด์ไลน์อุดรธานี - รับงานอุดร [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
     desc: "สารบัญสาวรับงานอุดร รับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า ครอบคลุมตัวเมืองอุดร UD Town"
   },
   lampang: {
-    title: "รับงานลำปาง สาวรับงานลำปาง ไซด์ไลน์ลำปาง ฟิวแฟนตรงปก 2026 | First Model Hub",
+    title: "ไซด์ไลน์ลำปาง - รับงานลำปาง [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
     desc: "ศูนย์รวมสาวรับงานลำปาง รับงานลำปาง และเพื่อนเที่ยวพรีเมียม ปลอดภัยชำระเงินหน้างานเมื่อเจอตัวจริง ปราศจากการโอนมัดจำล่วงหน้า ครอบคลุมตัวเมืองลำปาง สวนดอก"
   },
   phitsanulok: {
-    title: "รับงานพิษณุโลก สาวรับงานพิษณุโลก ไซด์ไลน์พิษณุโลก 2026 | First Model Hub",
+    title: "ไซด์ไลน์พิษณุโลก - รับงานพิษณุโลก [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
     desc: "ศูนย์รวมสาวรับงานพิษณุโลก รับงาน มน. และเพื่อนเที่ยวสไตล์ฟิวแฟน ปลอดภัย จ่ายหน้างาน 100% ไม่โอนมัดจำล่วงหน้า ครอบคลุมตัวเมืองพิษณุโลก"
   },
   bangkok: {
-    title: "รับงานกรุงเทพ สาวรับงาน กทม ไซด์ไลน์กรุงเทพ ฟิวแฟนตรงปก 2026 | First Model Hub",
+    title: "ไซด์ไลน์กรุงเทพ - รับงาน กทม [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
     desc: "ศูนย์รวมสาวรับงานกรุงเทพ รับงาน กทม และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า ครอบคลุมสุขุมวิท รัชดา ลาดพร้าว เอกมัย"
   },
   chonburi: {
-    title: "รับงานชลบุรี รับงานพัทยา สาวรับงานบางแสน ไซด์ไลน์พัทยา 2026 | First Model Hub",
+    title: "ไซด์ไลน์พัทยา - รับงานชลบุรี บางแสน [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
     desc: "สารบัญสาวรับงานชลบุรี รับงานพัทยา และเพื่อนเที่ยวบางแสน พรีเมียมดูแลใส่ใจสไตล์ฟิวแฟน ปลอดภัยสูงสุดชำระค่าบริการหน้างานเมื่อเจอตัวจริง"
   }
 };
@@ -256,7 +256,7 @@ const getDynamicReviews = provinceName => {
 };
 
 function customMetaTitle(province, customMeta) {
-  return customMeta && customMeta.title ? customMeta.title : `รับงาน${province} ไซด์ไลน์${province} สาวรับงานฟิวแฟนตรงปก 2026 | First Model Hub`;
+  return customMeta && customMeta.title ? customMeta.title : `ไซด์ไลน์${province} - รับงาน${province} [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub`;
 }
 
 function customMetaDesc(province, seo, customMeta) {
@@ -487,13 +487,13 @@ export default async (req, context) => {
       reviewQuery = reviewQuery.in("province_key", searchKeys);
     }
 
-const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all([
+    const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all([
       isNationalHome 
         ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
         : supabase.from("provinces").select("id, nameThai, key").in("key", searchKeys).limit(1).maybeSingle(),
       profileQuery,
       supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true }),
-      Promise.resolve(reviewQuery).catch(() => ({ data: [] })) // <--- แก้เป็นแบบนี้ครับ
+      Promise.resolve(reviewQuery).catch(() => ({ data: [] }))
     ]);
 
     const provinceData = provSingleRes.data;
@@ -540,8 +540,8 @@ const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all(
 
     if (matchedProfile) {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
-      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` ${matchedProfile.age}` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
-      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${matchedProfile.location || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
+      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} ไซด์ไลน์${provinceThaiName} รับงาน${provinceThaiName} ตรงปก 100% | First Model Hub`;
+      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${matchedProfile.location || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
     const strippedDesc = stripHTML(pageDesc);
@@ -551,6 +551,31 @@ const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all(
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+
+    // ==============================================================================
+    // 🔥 GOOGLE RICH SNIPPET DATA BOX GENERATOR (เพิ่มประสิทธิภาพดึงข้อมูลขึ้นอันดับ 1)
+    // ==============================================================================
+    const snippetItemsText = profileList.slice(0, 6).map(p => {
+      const pName = (p.name || "").replace(/^น้อง/, "").trim();
+      const pAge = p.age ? `อายุ ${p.age}` : "วัยรุ่น";
+      const pLoc = p.location || provinceThaiName;
+      const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(k => (p.availability || "").toLowerCase().includes(k));
+      const pStatus = isAvail ? "พร้อมรับงานสดวันนี้" : "สอบถามคิว";
+      return `น้อง${pName} (${pAge}) • พิกัด: ${pLoc} • สถานะ: ${pStatus} (ตรงปก 100% ไม่มัดจำ)`;
+    }).join(" | ");
+
+    const googleSnippetDataHtml = `
+      <!-- GOOGLE SEARCH BOT SNIPPET EXTRACTION BOX -->
+      <div class="google-snippet-data-box" style="background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #00E676; box-shadow: 0 0 8px #00E676; display: inline-block;"></span>
+          <strong style="font-size: 12.5px; color: #FFFFFF;">รายชื่อสาวรับงาน ไซด์ไลน์${provinceThaiName} พร้อมรับงานล่าสุด [อัปเดตวันนี้]:</strong>
+        </div>
+        <p style="font-size: 11.5px; color: #D4D4D8; margin: 0; line-height: 1.6;">
+          ${escapeHTML(snippetItemsText || "ศูนย์รวมสาวรับงานไซด์ไลน์พรีเมียม ปลอดภัย นัดเจอจ่ายหน้างาน ไม่มัดจำ 100%")}
+        </p>
+      </div>
+    `;
 
     // ============================== STRUCTURED DATA GRAPH ==============================
     const businessEntity = {
@@ -868,6 +893,7 @@ const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all(
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{GOOGLE_SNIPPET_BOX}}", googleSnippetDataHtml);
 
     // 3. FIX RELATIVE ASSET PATHS
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
