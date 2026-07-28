@@ -168,89 +168,69 @@
 
   <div class="container space-y-24">
 
-<!-- ============================== HERO SECTION (PREMIUM SPLIT LAYOUT) ============================== -->
-<section class="hero-section" aria-labelledby="hero-h1">
-  <div class="hero-container">
-    
-    <!-- ฝั่งซ้าย: ข้อความ ปุ่ม และความน่าเชื่อถือ -->
-    <div class="hero-content">
+    <!-- HERO SECTION (COMPACT & HIGH IMPACT) -->
+    <section class="hero-section" aria-labelledby="hero-h1">
       
-      <!-- Badge การันตี -->
       <div class="clutch-pill">
-        <span class="badge-verified">VERIFIED 2026</span>
-        <div class="stars" aria-hidden="true">
+        <span style="background-color: #7C3AED; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800;">VERIFIED 2026</span>
+        <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 9px;" aria-hidden="true">
           <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
         </div>
-        <span class="badge-text">5/5 Verified Profiles</span>
+        <span style="color: white; font-size: 10.5px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
-      <!-- หัวข้อหลัก -->
-      <h1 id="hero-h1" class="hero-title text-gradient-main">
-        รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}}<br>
-        <span class="highlight-text">สาวรับงานฟิวแฟนตรงปก 100%</span>
+    <!-- 🟢 ปรับแก้ไขใน index.html -->
+<picture>
+  <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp">
+  <source media="(min-width: 769px)" srcset="/images/hero-firstmodelhub-1200.webp">
+  <img src="/images/hero-firstmodelhub-1200.webp" 
+       alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก ไม่โอนมัดจำ" 
+       title="ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} พรีเมียมตรงปก 100%"
+       width="1200" 
+       height="675" 
+       style="width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover;"
+       fetchpriority="high" 
+       loading="eager">
+</picture>
+
+      <h1 id="hero-h1" class="hero-title text-gradient-main" style="text-align: center; margin: 0 auto 4px auto; text-wrap: balance;">
+          รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}}<br>
+          <span style="color: #FFFFFF; font-weight: 800;">สาวรับงานฟิวแฟนตรงปก 100%</span>
       </h1>
-      
-      <p class="text-gradient-sub">
-        <i class="fas fa-shield-alt" style="color: #00E676; margin-right: 4px;"></i>
-        ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
+      <p class="text-gradient-sub" style="font-size: 12px; font-weight: 700; text-align: center; color: #A1A1AA;">
+          ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
       </p>
       
-      <p class="hero-subtitle-p">
-        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน{{PROVINCE_NAME}}</strong>, <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย <strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด 
+      <p class="hero-subtitle-p" style="font-size: 11.5px; line-height: 1.5; margin: 4px 0 10px 0; text-align: center; color: #D4D4D8;">
+        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน{{PROVINCE_NAME}}</strong>, <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด 
         <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong> และโซนใกล้เคียงทั้งหมด
       </p>
 
-      <!-- ปุ่มแอดไลน์ CTA -->
-      <div class="hero-cta-group">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
         <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ ใน{{PROVINCE_NAME}}">
-          <i class="fab fa-line" aria-hidden="true"></i> แอดไลน์จองคิวน้องๆ (LINE: @firstmodelhub)
+          <i class="fab fa-line" style="font-size: 16px; margin-right: 6px;" aria-hidden="true"></i> แอดไลน์จองคิวน้องๆ (LINE: @firstmodelhub)
         </a>
         <p class="cta-subtext" aria-live="polite">
-          <i class="fas fa-clock" style="color: #C084FC; margin-right: 4px;"></i> แอดมินสแตนบายคุมคิว ดูแลความปลอดภัยตลอด 24 ชั่วโมง
+          <i class="fas fa-shield-alt" style="color: #00E676; margin-right: 4px;"></i> แอดมินสแตนบายคุมคิว ดูแลความปลอดภัยและเช็กตัวจริงตลอด 24 ชั่วโมง
         </p>
       </div>
 
-      <!-- แคปซูลความปลอดภัย -->
+      <!-- SINGLE LINE HORIZONTAL SCROLL SAFE CAPSULES -->
       <div class="safe-capsules-grid">
-        <a href="/about" class="safe-capsule-item">
-          <span class="dot red"></span>
-          <span class="capsule-text">ไม่มีโอนมัดจำก่อน 100%</span>
-        </a>
-        <a href="/faq" class="safe-capsule-item">
-          <span class="dot red"></span>
-          <span class="capsule-text">ไม่มีค่าสมาชิกหมกเม็ด</span>
-        </a>
-        <a href="/about" class="safe-capsule-item">
-          <span class="dot green"></span>
-          <span class="capsule-text green-text">จ่ายหน้างานเมื่อเจอตัวจริง</span>
-        </a>
+          <a href="/about" class="safe-capsule-item">
+              <span style="width: 5px; height: 5px; border-radius: 50%; background-color: #EF4444;" aria-hidden="true"></span>
+              <span class="capsule-text">ไม่มีโอนมัดจำก่อน 100%</span>
+          </a>
+          <a href="/faq" class="safe-capsule-item">
+              <span style="width: 5px; height: 5px; border-radius: 50%; background-color: #EF4444;" aria-hidden="true"></span>
+              <span class="capsule-text">ไม่มีค่าสมาชิกหมกเม็ด</span>
+          </a>
+          <a href="/about" class="safe-capsule-item">
+              <span style="width: 5px; height: 5px; border-radius: 50%; background-color: #00E676;" aria-hidden="true"></span>
+              <span class="capsule-text" style="color: #00E676;">จ่ายหน้างานเมื่อเจอตัวจริง</span>
+          </a>
       </div>
-
-    </div>
-
-    <!-- ฝั่งขวา: โปสเตอร์ / รูปภาพแบนเนอร์หลักพร้อมกรอบไฟนีออน -->
-    <div class="hero-visual">
-      <div class="hero-card-frame">
-        <picture>
-          <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp">
-          <source media="(min-width: 769px)" srcset="/images/hero-firstmodelhub-1200.webp">
-          <img src="/images/hero-firstmodelhub-1200.webp" 
-               alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก ไม่โอนมัดจำ" 
-               title="ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} พรีเมียมตรงปก 100%"
-               width="600" 
-               height="800" 
-               class="hero-img"
-               fetchpriority="high" 
-               loading="eager">
-        </picture>
-        <div class="visual-badge">
-          <i class="fas fa-check-circle"></i> ภาพตรงปก 100%
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
+    </section>
 
     <!-- ============================== FEATURED PROFILES GRID ============================== -->
       <section id="featured-profiles" class="glass-panel" style="padding: 16px 0; overflow: hidden; position: relative;">
