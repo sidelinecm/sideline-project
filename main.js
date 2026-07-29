@@ -1158,24 +1158,24 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  // ============================== SEO METADATA & SCHEMA ENGINE ==============================
-  function removeJsonLdSchemas() {
-    const schemaIds = ["dynamic-schema", "schema-jsonld-person", "schema-jsonld-list", "schema-jsonld-faq", "schema-jsonld-breadcrumb"];
-    schemaIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.remove();
-    });
-  }
+function removeJsonLdSchemas() {
+  // 🟢 เอา "dynamic-schema" ออก เพื่อรักษา Schema หลักที่ SSR สร้างมาจากหลังบ้านไว้ตลอดเวลา
+  const schemaIds = ["schema-jsonld-person", "schema-jsonld-list", "schema-jsonld-faq", "schema-jsonld-breadcrumb"];
+  schemaIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+}
 
   function updateSEOMetadata(profile = null, locationData = null) {
-    const currentPath = window.location.pathname.toLowerCase();
-    const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+  // 🟢 หากเป็นการโหลดหน้าเว็บครั้งแรกสุด (SSR) ให้ข้ามฟังก์ชันนี้ทันที เพื่อรักษา Schema & Meta Tags จาก SSR ไว้
+  if (isFirstLoad) {
+    isFirstLoad = false;
+    console.log("SEO: Preserving Server-Rendered Schema & Metadata.");
+    return;
+  }
 
-    if (isFirstLoad) {
-      isFirstLoad = false;
-      console.log("SEO: First load detected. Preserving server-rendered metadata.");
-      return;
-    }
+
 
     if (isHomePage) {
       document.title = DEFAULT_SEO.title;
