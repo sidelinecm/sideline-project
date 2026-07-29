@@ -47,35 +47,35 @@ const CONFIG = {
 };
 
 // ==============================================================================
-// 3. DYNAMIC SEO DATA ARCHITECTURE (HIGH-CTR & NO KEYWORD STUFFING)
+// 3. DYNAMIC SEO DATA ARCHITECTURE (ปรับปรุง Title/Desc ให้ได้ CTR สูงสุด ลบคำซ้ำ)
 // ==============================================================================
 const PROVINCE_CUSTOM_METADATA = {
   chiangmai: {
-    title: "ไซด์ไลน์เชียงใหม่ - รับงานเชียงใหม่ [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
-    desc: "ศูนย์รวมสาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน คัดสรรเฉพาะโปรไฟล์ตรงปก 100% มีระบบยืนยันตัวตน ตรวจสอบคิวสด นัดเจอจ่ายหน้างาน ไม่มัดจำ ครอบคลุมพิกัดนิมมาน เจ็ดยอด สันติธรรม"
+    title: "สาวรับงานเชียงใหม่ ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "ศูนย์รวมสาวรับงานเชียงใหม่ และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน คัดสรรโปรไฟล์ตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมย่านนิมมาน เจ็ดยอด สันติธรรม"
   },
   chiangrai: {
-    title: "ไซด์ไลน์เชียงราย - รับงานเชียงราย [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
-    desc: "ศูนย์รวมสาวรับงานเชียงราย รับงานเชียงราย และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำล่วงหน้า ครอบคลุมตัวเมือง บ้านดู่ มฟล."
+    title: "สาวรับงานเชียงราย ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "ศูนย์รวมสาวรับงานเชียงราย และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% ปลอดภัยชำระเงินหน้างาน ไม่โอนมัดจำล่วงหน้า ครอบคลุมตัวเมือง บ้านดู่ มฟล."
   },
   udon: {
-    title: "ไซด์ไลน์อุดรธานี - รับงานอุดร [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
-    desc: "สารบัญสาวรับงานอุดร รับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า ครอบคลุมตัวเมืองอุดร UD Town"
+    title: "สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "สารบัญสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town"
   },
   lampang: {
-    title: "ไซด์ไลน์ลำปาง - รับงานลำปาง [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
-    desc: "ศูนย์รวมสาวรับงานลำปาง รับงานลำปาง และเพื่อนเที่ยวพรีเมียม ปลอดภัยชำระเงินหน้างานเมื่อเจอตัวจริง ปราศจากการโอนมัดจำล่วงหน้า ครอบคลุมตัวเมืองลำปาง สวนดอก"
+    title: "สาวรับงานลำปาง ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "ศูนย์รวมสาวรับงานลำปาง และเพื่อนเที่ยวพรีเมียม ปลอดภัยชำระเงินหน้างานเมื่อเจอตัวจริง ปราศจากการโอนมัดจำล่วงหน้า ครอบคลุมตัวเมืองลำปาง สวนดอก"
   },
   phitsanulok: {
-    title: "ไซด์ไลน์พิษณุโลก - รับงานพิษณุโลก [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
+    title: "สาวรับงานพิษณุโลก ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
     desc: "ศูนย์รวมสาวรับงานพิษณุโลก รับงาน มน. และเพื่อนเที่ยวสไตล์ฟิวแฟน ปลอดภัย จ่ายหน้างาน 100% ไม่โอนมัดจำล่วงหน้า ครอบคลุมตัวเมืองพิษณุโลก"
   },
   bangkok: {
-    title: "ไซด์ไลน์กรุงเทพ - รับงาน กทม [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
-    desc: "ศูนย์รวมสาวรับงานกรุงเทพ รับงาน กทม และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำล่วงหน้า ครอบคลุมสุขุมวิท รัชดา ลาดพร้าว เอกมัย"
+    title: "สาวรับงานกรุงเทพ ไซด์ไลน์ กทม ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "ศูนย์รวมสาวรับงานกรุงเทพ รับงาน กทม และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมสุขุมวิท รัชดา ลาดพร้าว เอกมัย"
   },
   chonburi: {
-    title: "ไซด์ไลน์พัทยา - รับงานชลบุรี บางแสน [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub",
+    title: "สาวรับงานชลบุรี ไซด์ไลน์พัทยา บางแสน ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
     desc: "สารบัญสาวรับงานชลบุรี รับงานพัทยา และเพื่อนเที่ยวบางแสน พรีเมียมดูแลใส่ใจสไตล์ฟิวแฟน ปลอดภัยสูงสุดชำระค่าบริการหน้างานเมื่อเจอตัวจริง"
   }
 };
@@ -256,12 +256,17 @@ const getDynamicReviews = provinceName => {
 };
 
 function customMetaTitle(province, customMeta) {
-  return customMeta && customMeta.title ? customMeta.title : `ไซด์ไลน์${province} - รับงาน${province} [อัปเดตสดวันนี้] โปรไฟล์ตรงปก ยืนยันตัวตน ไม่มัดจำ | First Model Hub`;
+  if (customMeta && customMeta.title) return customMeta.title;
+  return `สาวรับงาน${province} ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub`;
 }
 
-function customMetaDesc(province, seo, customMeta) {
+function customMetaDesc(province, seo, customMeta, topSnippetText = "") {
   if (customMeta && customMeta.desc) return customMeta.desc;
-  return `ศูนย์รวมสาวรับงาน${province} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100% ครอบคลุมพิกัด ${seo.zones && seo.zones.length > 0 ? seo.zones.slice(0, 4).join(", ") : province}`;
+  const zonesText = seo.zones && seo.zones.length > 0 ? seo.zones.slice(0, 3).join(", ") : province;
+  if (topSnippetText) {
+    return `${province} 🟢 พร้อมรับงานวันนี้: ${topSnippetText}... คัดสรรเฉพาะตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
+  }
+  return `ศูนย์รวมสาวรับงาน${province} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
 }
 
 function buildErrorPage(code, title, message) {
@@ -528,19 +533,27 @@ export default async (req, context) => {
       finalReviews = getDynamicReviews(provinceThaiName);
     }
 
+    // 🟢 สร้างข้อความสรุปโปรไฟล์สำหรับ Meta Description และ Googlebot Snippet
+    const topProfilesTextSnippet = profileList.slice(0, 5).map(p => {
+      const pName = (p.name || "").replace(/^น้อง/, "").trim();
+      const pAge = p.age ? ` (${p.age}ปี)` : "";
+      const pLoc = p.location ? ` - ${p.location}` : "";
+      return `น้อง${pName}${pAge}${pLoc}`;
+    }).join(" | ");
+
     let pageTitle = "", pageDesc = "";
 
     if (isNationalHome) {
-      pageTitle = "ไซด์ไลน์ สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปกทั่วไทย 2026 | First Model Hub";
-      pageDesc = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟน และเพื่อนเที่ยวพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมกรุงเทพฯ เชียงใหม่ ชลบุรี อุดรธานี";
+      pageTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
+      pageDesc = `ทั่วไทย 🟢 พร้อมรับงานวันนี้: ${topProfilesTextSnippet}... ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนพรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ`;
     } else {
       pageTitle = customMetaTitle(provinceThaiName, customMeta);
-      pageDesc = customMetaDesc(provinceThaiName, seoData, customMeta);
+      pageDesc = customMetaDesc(provinceThaiName, seoData, customMeta, topProfilesTextSnippet);
     }
 
     if (matchedProfile) {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
-      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} ไซด์ไลน์${provinceThaiName} รับงาน${provinceThaiName} ตรงปก 100% | First Model Hub`;
+      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` ${matchedProfile.age}` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
       pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${matchedProfile.location || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
@@ -552,32 +565,7 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // ==============================================================================
-    // 🔥 GOOGLE RICH SNIPPET DATA BOX GENERATOR (เพิ่มประสิทธิภาพดึงข้อมูลขึ้นอันดับ 1)
-    // ==============================================================================
-    const snippetItemsText = profileList.slice(0, 6).map(p => {
-      const pName = (p.name || "").replace(/^น้อง/, "").trim();
-      const pAge = p.age ? `อายุ ${p.age}` : "วัยรุ่น";
-      const pLoc = p.location || provinceThaiName;
-      const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(k => (p.availability || "").toLowerCase().includes(k));
-      const pStatus = isAvail ? "พร้อมรับงานสดวันนี้" : "สอบถามคิว";
-      return `น้อง${pName} (${pAge}) • พิกัด: ${pLoc} • สถานะ: ${pStatus} (ตรงปก 100% ไม่มัดจำ)`;
-    }).join(" | ");
-
-    const googleSnippetDataHtml = `
-      <!-- GOOGLE SEARCH BOT SNIPPET EXTRACTION BOX -->
-      <div class="google-snippet-data-box" style="background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-          <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #00E676; box-shadow: 0 0 8px #00E676; display: inline-block;"></span>
-          <strong style="font-size: 12.5px; color: #FFFFFF;">รายชื่อสาวรับงาน ไซด์ไลน์${provinceThaiName} พร้อมรับงานล่าสุด [อัปเดตวันนี้]:</strong>
-        </div>
-        <p style="font-size: 11.5px; color: #D4D4D8; margin: 0; line-height: 1.6;">
-          ${escapeHTML(snippetItemsText || "ศูนย์รวมสาวรับงานไซด์ไลน์พรีเมียม ปลอดภัย นัดเจอจ่ายหน้างาน ไม่มัดจำ 100%")}
-        </p>
-      </div>
-    `;
-
-    // ============================== STRUCTURED DATA GRAPH ==============================
+    // ============================== STRUCTURED DATA GRAPH (OPTIMIZED FOR RANK 1) ==============================
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -664,8 +652,7 @@ export default async (req, context) => {
         ]
       });
     } else {
-      schemaGraph.push(businessEntity);
-
+      // 🟢 กำหนดให้ CollectionPage และ ItemList เป็น Main Entity หลักของหน้าเพื่อเร่งคะแนน Catalog Indexing
       schemaGraph.push({
         "@type": "CollectionPage",
         "@id": `${canonUrl}/#webpage`,
@@ -676,20 +663,24 @@ export default async (req, context) => {
         "mainEntity": { "@id": `${canonUrl}/#itemlist` }
       });
 
+      schemaGraph.push(businessEntity);
+
       schemaGraph.push({
         "@type": "ItemList",
         "@id": `${canonUrl}/#itemlist`,
-        "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว${provinceThaiName}`,
+        "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceThaiName}`,
         "numberOfItems": profileList.length,
         "itemListElement": profileList.map((p, index) => ({
           "@type": "ListItem",
           "position": index + 1,
           "item": {
             "@type": "Person",
-            "name": p.name || "ผู้ให้บริการ",
+            "name": `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}`,
             "url": `${hostUrl}/sideline/${p.slug || p.id}`,
             "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
-            "description": `โปรไฟล์แนะนำน้อง${p.name || ""} สาวรับงานพิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัยไม่มีมัดจำ`
+            "jobTitle": "Companion",
+            "workLocation": p.location || provinceThaiName,
+            "description": `สาวรับงาน${provinceThaiName} พิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัย ไม่โอนมัดจำ`
           }
         }))
       });
@@ -704,6 +695,7 @@ export default async (req, context) => {
       });
     }
 
+    // 🟢 ย้าย FAQPage มาไว้ส่วนต่อท้ายเพื่อไม่ให้กลบน้ำหนักของ ItemList
     if (seoData.faqs && !profileSlug) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -718,7 +710,7 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== PROFILE CARDS GENERATOR ==============================
+    // ============================== PROFILE CARDS GENERATOR (OPTIMIZED FOR BOT EXTRACTION) ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
       const pLoc = escapeHTML(p.location || provinceThaiName);
@@ -769,13 +761,15 @@ export default async (req, context) => {
       const sloganText = escapeHTML(p.slogan || p.quote || "");
 
       return `
-        <div class="profile-card-new-container">
-          <div class="profile-card-new interactive-card"
+        <div class="profile-card-new-container" role="listitem">
+          <article class="profile-card-new interactive-card"
                data-profile-id="${p.id}"
                data-profile-slug="${escapeHTML(p.slug || p.id)}"
-               style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;"
-               role="listitem">
+               style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;">
               
+              <!-- Hidden Heading สำหรับ Googlebot เก็บ Index สด -->
+              <h3 style="display:none;">น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc}</h3>
+
               <img src="${imgUrl}" 
                    alt="${seoAltText}"
                    title="${seoAltText}"
@@ -798,11 +792,11 @@ export default async (req, context) => {
                   ${verifiedBadge}
               </div>
               
-              <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${pName}"></a>
+              <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName} สาวรับงาน${provinceThaiName}"></a>
 
               <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
                   <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
-                    ${pName}${ageDisplay}
+                    น้อง${pName}${ageDisplay}
                   </h3>
                   
                   ${sloganText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${sloganText}</p>` : ''}
@@ -816,7 +810,7 @@ export default async (req, context) => {
                       </span>
                   </div>
               </div>
-          </div>
+          </article>
         </div>
       `;
     }).join("");
@@ -893,7 +887,6 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{GOOGLE_SNIPPET_BOX}}", googleSnippetDataHtml);
 
     // 3. FIX RELATIVE ASSET PATHS
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
@@ -913,7 +906,16 @@ export default async (req, context) => {
       );
     }
 
+    // 🟢 ฝัง HTML Hidden Semantic Text Block เพื่อช่วย Googlebot ดึงข้อความรายชื่อโปรไฟล์สดไปทำ Snippet
+    const topCatalogSnippetHtml = `
+      <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
+        <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
+        <p>${escapeHTML(topProfilesTextSnippet.replace(/\|/g, " • "))}</p>
+      </div>
+    `;
+
     const liveCountChipHtml = `
+      ${topCatalogSnippetHtml}
       <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
               📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
