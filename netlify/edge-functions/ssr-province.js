@@ -5,11 +5,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 // ==============================================================================
 const PAGE_CACHE = new Map();
 const PAGE_CACHE_TTL_MS = 10 * 60 * 1000; // แคชผลลัพธ์การเรนเดอร์ใน Edge Memory นาน 10 นาที
-let TEMPLATE_HTML_CACHE = null; // แคชโครงสร้างไฟล์ index.html แม่แบบไว้ในหน่วยความจำ
+
+let TEMPLATE_HTML_CACHE = null;
+let TEMPLATE_CACHE_TIMESTAMP = 0;
+const TEMPLATE_CACHE_TTL_MS = 10 * 60 * 1000; // กำหนดอายุแคชไฟล์แม่แบบ index.html 10 นาที
 
 // Pre-compiled Regular Expressions (ลดภาระการสร้าง Regex ใหม่ทุก Request)
 const STRIP_HTML_REGEX = /<[^>]*>?/gm;
-const KEYWORDS_REGEX = /(เด็กเอ็น|ไซด์ไลน์|พรีเมียม|ฟีลแฟน|รับงาน|ฟิวแฟน|สาวรับงาน)(?![^<>]*>)/g;
+const KEYWORDS_REGEX = /(เด็กเอ็น|ไซด์ไลน์|พรีเมียม|ฟีลแฟน|รับงาน|ฟิวแฟน|สาวรับงาน)(?![^<]*>|[^<>]*<\/a>)/g;
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf)$/i;
 
 // ==============================================================================
@@ -157,6 +160,17 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 // ==============================================================================
 // 4. UTILITIES & OPTIMIZED HELPERS
 // ==============================================================================
+async function getTemplateHtml(url) {
+  const now = Date.now();
+  if (!TEMPLATE_HTML_CACHE || (now - TEMPLATE_CACHE_TIMESTAMP > TEMPLATE_CACHE_TTL_MS)) {
+    const templateUrl = new URL("/index.html", url.origin);
+    const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
+    TEMPLATE_HTML_CACHE = await mainTemplate.text();
+    TEMPLATE_CACHE_TIMESTAMP = now;
+  }
+  return TEMPLATE_HTML_CACHE;
+}
+
 function verifyHostname(req) {
   const host = (req.headers.get("host") || "").toLowerCase();
   return ["firstmodelhub.com", "sidelinechiangmai.netlify.app", "localhost"].some(h => host.includes(h)) || host.endsWith(".netlify.app");
@@ -194,30 +208,33 @@ const formatDateSSR = dateStr => {
   }
 };
 
-const smartLinkify = (text, flag, zones) => {
+// 🟢 FIX 1: smartLinkify ไดนามิกลิงก์ตาม provinceSlug จริง ป้องกันการครอบแท็กซ้ำซ้อน
+const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
   if (!text) return "";
   let res = text;
-  if (zones && zones.length > 0) {
+  const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
+
+  if (zones && Array.isArray(zones) && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
-      const regex = new RegExp(`(${zone})(?![^<>]*>)`, "g");
-      res = res.replace(regex, `<a href="/location/chiangmai" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
+      if (!zone) return;
+      const regex = new RegExp(`(${zone})(?![^<]*>|[^<>]*<\\/a>)`, "g");
+      res = res.replace(regex, `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
   return res.replace(KEYWORDS_REGEX, `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`);
 };
 
-const getDynamicIntro = (provinceName, zones) => {
-  let processedZones = zones ? [...zones] : [];
-  if (provinceName === "เชียงใหม่" && processedZones.includes("นิมมาน")) {
-    processedZones = processedZones.map(zone => 
-      zone === "นิมมาน" 
-        ? `<a href="/location/chiangmai" class="text-[#C084FC] hover:underline font-bold transition-colors">นิมมาน</a>`
-        : zone
-    );
-  }
+// 🟢 FIX 2: getDynamicIntro สร้างลิงก์ย่านไดนามิกตรงตามจังหวัด และไม่เกิดแท็ก <a> ว่างซ้ำ
+const getDynamicIntro = (provinceName, zones, provinceSlug = "chiangmai") => {
+  let processedZones = zones && Array.isArray(zones) ? [...zones] : [];
+  const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
 
-  const zoneSnippet = processedZones && processedZones.length > 0 
-    ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${processedZones.slice(0, 4).join(", โซน")}` 
+  const zoneLinks = processedZones.slice(0, 4).map(zone => 
+    `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">${escapeHTML(zone)}</a>`
+  );
+
+  const zoneSnippet = zoneLinks.length > 0 
+    ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${zoneLinks.join(", โซน")}` 
     : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
 
   return `
@@ -565,7 +582,7 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // ============================== STRUCTURED DATA GRAPH (OPTIMIZED FOR RANK 1) ==============================
+    // ============================== STRUCTURED DATA GRAPH ==============================
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -652,7 +669,6 @@ export default async (req, context) => {
         ]
       });
     } else {
-      // 🟢 กำหนดให้ CollectionPage และ ItemList เป็น Main Entity หลักของหน้าเพื่อเร่งคะแนน Catalog Indexing
       schemaGraph.push({
         "@type": "CollectionPage",
         "@id": `${canonUrl}/#webpage`,
@@ -695,7 +711,6 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 ย้าย FAQPage มาไว้ส่วนต่อท้ายเพื่อไม่ให้กลบน้ำหนักของ ItemList
     if (seoData.faqs && !profileSlug) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -710,7 +725,7 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // ============================== PROFILE CARDS GENERATOR (OPTIMIZED FOR BOT EXTRACTION) ==============================
+    // ============================== PROFILE CARDS GENERATOR ==============================
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
       const pLoc = escapeHTML(p.location || provinceThaiName);
@@ -838,8 +853,10 @@ export default async (req, context) => {
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const matchedZones = seoData.zones.slice(0, 4).join(", ");
-    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones);
-    const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones);
+    
+    // 🟢 ส่ง provinceSlug เข้า getDynamicIntro และ smartLinkify เพื่อสร้างลิงก์ตามจังหวัดจริง
+    const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones, provinceSlug);
+    const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
     const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       const key = p.key || p.slug || p.id;
@@ -849,15 +866,9 @@ export default async (req, context) => {
     }).join("") : "";
 
     // ==============================================================================
-    // ⚡ OPTIMIZED TEMPLATE FETCHING (ใช้ MEMORY CACHE ไฟล์ INDEX.HTML)
+    // ⚡ OPTIMIZED TEMPLATE FETCHING (เรียกใช้ getTemplateHtml พร้อมระบบ TTL)
     // ==============================================================================
-    let rawHtml = TEMPLATE_HTML_CACHE;
-    if (!rawHtml) {
-      const templateUrl = new URL("/index.html", url.origin);
-      const mainTemplate = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
-      rawHtml = await mainTemplate.text();
-      TEMPLATE_HTML_CACHE = rawHtml; // จำไว้ในหน่วยความจำ
-    }
+    let rawHtml = await getTemplateHtml(url);
 
     // 1. Inject <base href="/">
     if (!/<base\s+/i.test(rawHtml)) {
@@ -916,7 +927,7 @@ export default async (req, context) => {
 
     const liveCountChipHtml = `
       ${topCatalogSnippetHtml}
-      <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+      <div style="padding: 8px 4px 14px 4px; display: flex; align- items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
               📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
               <span class="live-count-chip">

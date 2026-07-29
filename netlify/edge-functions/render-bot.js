@@ -16,13 +16,13 @@ const CONFIG = {
     },
     DOMAIN: 'https://firstmodelhub.com',
     BRAND_NAME: 'First Model Hub',
-    DEFAULT_TELEPHONE: 'LINE: @firstmodelhub', // ✅ อัปเดตให้สอดคล้องกับนโยบาย
+    DEFAULT_TELEPHONE: 'LINE: @firstmodelhub',
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@firstmodelhub',
         twitter: 'https://twitter.com/firstmodelhub',
         linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
-        biosite: 'https://bio.site/firstmodelhub', // ✅ อัปเดต Bio.site
+        biosite: 'https://bio.site/firstmodelhub',
         linktree: 'https://linktr.ee/firstmodelhub',
         bluesky: 'https://bsky.app/profile/firstmodelhub.bsky.social'
     }
@@ -75,9 +75,9 @@ const generateSrcSet = (path) => {
     }).join(', ');
 };
 
-const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
 
-const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
+const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, '').trim() : '';
 
 const getLocalizedZone = (location, provinceName) => {
     if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
@@ -97,7 +97,12 @@ const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, loc
 
 export default async (request, context) => {
     const url = new URL(request.url);
-    const dynamicDomain = `${url.protocol}//${url.host}`; 
+    
+    // 🟢 บังคับใช้ HTTPS สำหรับโดเมนหลักบน Production
+    const dynamicDomain = url.host.includes('localhost') 
+        ? `${url.protocol}//${url.host}` 
+        : `https://${url.host}`;
+        
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
@@ -146,9 +151,7 @@ export default async (request, context) => {
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
         const provinceKey = p.provinces?.key || 'chiangmai';
         
-        const correctProvinceUrl = provinceKey === 'chiangmai' 
-            ? dynamicDomain 
-            : `${dynamicDomain}/location/${provinceKey}`;
+        const correctProvinceUrl = `${dynamicDomain}/location/${provinceKey}`;
         
         const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
         const rawRate = parseInt(cleanedRate, 10) || 1500;
@@ -158,10 +161,9 @@ export default async (request, context) => {
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
-        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
-        if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
-        }
+        // 🟢 FIX: ตัดเครื่องหมาย @ ออกอัตโนมัติ เพื่อไม่ให้ลิงก์ line.me พิการ
+        let rawLineId = (p.lineId || 'ksLUWB89Y_').trim().replace(/^@/, '');
+        let finalLineUrl = rawLineId.startsWith('http') ? rawLineId : `https://line.me/ti/p/~${rawLineId}`;
 
         const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
         const heightVal = getDeterministicValue(158, 168, slug, 2);
@@ -198,17 +200,12 @@ export default async (request, context) => {
             "reviewBody": stripHTML(t.text)
         }));
 
+        // 🟢 FIX: ปรับแต่ง Breadcrumb ให้ถูกต้องสอดคล้องกันทุกจังหวัด
         const breadcrumbElements = [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain },
+            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceName}`, "item": correctProvinceUrl },
+            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
         ];
-
-        if (provinceKey === 'chiangmai') {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
-        } else {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
-        }
-
-        breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
 
         const schemaData = {
             "@context": "https://schema.org/",
@@ -487,7 +484,7 @@ export default async (request, context) => {
                 <a href="/profiles">โปรไฟล์น้องๆ ทั้งหมด</a>
                 <a href="/locations">พิกัดรับงานทั่วประเทศ</a>
             </nav>
-            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+            © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
 </body>
