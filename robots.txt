@@ -4,26 +4,17 @@
 # ==============================================================================
 
 User-agent: *
-# Block admin/internal endpoints & internal search
-Disallow: /wp-admin/
-Disallow: /wp-login.php
-Disallow: /administrator/
-Disallow: /login/
-Disallow: /register/
+# Block internal endpoints & tracking search
 Disallow: /search
 Disallow: /api/
 Disallow: /netlify/
 Disallow: /.git/
-Disallow: /__sapper__/
-Disallow: /functions/
 
 # Reduce crawl duplication from tracking parameters
 Disallow: /*?*utm_*
 Disallow: /*?*fbclid*
 Disallow: /*?*gclid*
 Disallow: /*?*gclsrc*
-Disallow: /*?*affiliate*
-Disallow: /*?*ref*
 
 # Allow static resources for rendering & Core Web Vitals
 Allow: /*.js
@@ -36,7 +27,6 @@ Allow: /*.svg
 Allow: /*.jpeg
 Allow: /*.woff2
 Allow: /*.woff
-Allow: /llms.txt
 
-# Sitemap location
+# 🟢 FIX: ชี้ทางไปยังสไลด์ผังเว็บไซต์ที่ถูกต้อง 100%
 Sitemap: https://firstmodelhub.com/sitemap.xml

@@ -31,6 +31,18 @@ window.ScrollTrigger = ScrollTrigger;
     DEFAULT_OG_IMAGE: "/images/apple-touch-icon.png"
   };
 
+  // 🟢 ฐานข้อมูลย่านรับงานหลักสำหรับ Hydration ฝั่ง Client
+  const PROVINCE_ZONES_MAP = {
+    chiangmai: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก"],
+    chiangrai: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "หอนาฬิกา"],
+    udon: ["ตัวเมืองอุดร", "UD Town", "เซ็นทรัลอุดร", "หนองประจักษ์"],
+    lampang: ["ตัวเมืองลำปาง", "สวนดอก", "พระบาท", "ม.ราชภัฏลำปาง"],
+    phitsanulok: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
+    bangkok: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ"],
+    chonburi: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
+    national: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"]
+  };
+
   // ============================== STATE MANAGEMENT ==============================
   let STATE = {
     allProfiles: [],
@@ -183,14 +195,12 @@ window.ScrollTrigger = ScrollTrigger;
     if (loadMoreContainer) loadMoreContainer.classList.add("hidden");
   }
 
-// ============================== DATA SANITIZATION & MAPPER ==============================
+  // ============================== DATA SANITIZATION & MAPPER ==============================
   function processProfileObject(raw) {
     if (!raw || typeof raw !== "object") return null;
 
-    // 🟢 1. จัดการชื่อโปรไฟล์ (ขัดเกลาคำว่า "น้อง" ซ้ำซ้อน)
     const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
 
-    // 🟢 2. รวบรวมรูปภาพทั้งหมด + โหลดความละเอียด HD (1000px) สำหรับ Lightbox
     const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
     const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
     const galleryPaths = Array.isArray(rawGallery) ? rawGallery : (typeof rawGallery === "string" ? rawGallery.split(",").map(s => s.trim()) : []);
@@ -207,7 +217,7 @@ window.ScrollTrigger = ScrollTrigger;
       }
       return {
         src: getImageUrl(path, 400),
-        fullSrc: getImageUrl(path, 1000) // ความละเอียดสูง HD ชัดเต็มตาใน Lightbox
+        fullSrc: getImageUrl(path, 1000)
       };
     });
 
@@ -215,18 +225,15 @@ window.ScrollTrigger = ScrollTrigger;
       images.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
     }
 
-    // 🟢 3. แปลงคีย์จังหวัดและชื่อจังหวัดภาษาไทย (Standardized Province Key)
     let provKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "chiangmai").toString().toLowerCase().trim();
     if (provKey === "chiang_mai" || provKey === "chiang-mai") provKey = "chiangmai";
 
     const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "เชียงใหม่";
 
-    // 🟢 4. แปลงราคา/ค่าขนม
     const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
     const numericRate = Number(String(rawPrice).replace(/\D/g, "")) || 0;
     const displayPrice = numericRate > 0 ? `${numericRate.toLocaleString()}.-` : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? rawPrice : "สอบถาม");
 
-    // 🟢 5. สเปกสัดส่วน (Bust - Waist - Hips + Cup)
     let statsFormatted = "-";
     const bust = raw.bust || raw.breast;
     const waist = raw.waist;
@@ -239,7 +246,6 @@ window.ScrollTrigger = ScrollTrigger;
       statsFormatted = String(raw.stats || raw.proportion || raw.proportions).trim();
     }
 
-    // 🟢 6. ขัดเกลาสเปกร่างกาย แก้ปัญหา "- ปี" หรือ "- ซม." ลอย
     const rawAge = raw.age || raw.profile_age;
     const cleanAge = (rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0") ? String(rawAge).replace(/\D/g, "") : null;
     const safeAgeDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
@@ -257,20 +263,16 @@ window.ScrollTrigger = ScrollTrigger;
 
     const safeStats = (statsFormatted && statsFormatted !== "-") ? statsFormatted : "ไม่ระบุ";
 
-    // 🟢 7. คำโปรย & สไตล์แท็ก
     const sloganText = raw.slogan || raw.quote || raw.tagline || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน";
     const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
     const styleTags = Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",").map(t => t.trim()) : []);
 
-    // 🟢 8. สถานะความพร้อมรับงาน (Boolean Normalization)
     const availStatus = raw.availability || raw.status || "รับงาน";
     const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(keyword => availStatus.toLowerCase().includes(keyword));
     const isAvailable = !isBusy;
 
-    // 🟢 9. Line ID & Contact Link (ตัด @ นำหน้าอัตโนมัติ)
     const lineIdClean = (raw.line_id || raw.lineId || raw.line || "").toString().replace(/^@/, "").trim();
 
-    // 🟢 10. ข้อความสำหรับ Search Engine ในเว็บ (Full Text Search Index)
     const searchString = `
       ${formattedName} ${raw.id || ""} ${provinceThaiName} ${raw.location || ""} ${raw.district || ""}
       ${styleTags.join(" ")} ${raw.description || ""} ${sloganText} ${statsFormatted} ${safeSkin}
@@ -287,7 +289,6 @@ window.ScrollTrigger = ScrollTrigger;
       _price: numericRate,
       searchString: searchString,
       
-      // Sanitized Specs สำหรับนำไปแสดงบนหน้าเว็บอย่างสวยงาม
       safeAge: cleanAge || "-",
       safeAgeDisplay: safeAgeDisplay,
       safeHeight: safeHeight,
@@ -295,7 +296,6 @@ window.ScrollTrigger = ScrollTrigger;
       safeStats: safeStats,
       safeSkin: safeSkin,
 
-      // Status & Flags
       isAvailable: isAvailable,
       availability: availStatus,
       isVerified: raw.verified === true || raw.isVerified === true || raw.is_verified === true,
@@ -303,7 +303,6 @@ window.ScrollTrigger = ScrollTrigger;
       isNew: raw.is_new === true || raw.isNew === true,
       isfeatured: raw.isfeatured === true || raw.is_featured === true || raw.isFeatured === true,
       
-      // Contact & Style
       lineId: lineIdClean,
       styleTags: styleTags,
       quote: sloganText,
@@ -336,7 +335,6 @@ window.ScrollTrigger = ScrollTrigger;
     STATE.isFetching = true;
 
     try {
-      // ⚡ [PRIORITY 1: SSR HYDRATION] ถ้ามี window.profilesData แสดงผลทันที 0 วินาที
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         console.log("⚡ [Hydration] โหลดสเปกรายชื่อโปรไฟล์สำเร็จจาก SSR!");
         
@@ -361,7 +359,6 @@ window.ScrollTrigger = ScrollTrigger;
         return true;
       }
 
-      // 🔄 [PRIORITY 2: NETWORK / LOCAL CACHE SYNC]
       console.log("🔄 ตรวจสอบอัปเดตข้อมูล Supabase ผ่าน 'lastUpdated'...");
       const { data: latestRow, error: checkErr } = await supabaseClient
         .from("profiles")
@@ -598,7 +595,6 @@ window.ScrollTrigger = ScrollTrigger;
     wrapper.id = `province-${provinceKey}`;
     wrapper.style.cssText = "margin-top: 24px;";
     
-    // 🟢 ฝังป้ายจำนวนโปรไฟล์สดที่หัวข้อจังหวัด
     wrapper.innerHTML = `
       <div style="padding: 8px 4px 12px 4px;">
           <a href="/location/${provinceKey}" class="group" style="text-decoration: none; display: inline-block;">
@@ -683,7 +679,6 @@ window.ScrollTrigger = ScrollTrigger;
 
       if (targetProvinceKey === "chiang_mai") targetProvinceKey = "chiangmai";
 
-      // 🟢 กรองข้อมูลจังหวัด Multi-key Fallback (รองรับทั้ง chiangmai & chiang_mai)
       if (targetProvinceKey) {
         results = results.filter(p => {
           const k = (p.provinceKey || p.province_slug || p.province || "").toString().toLowerCase();
@@ -764,7 +759,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  // 🟢 เรนเดอร์การ์ดโปรไฟล์พร้อมฝัง "ป้ายจำนวนโปรไฟล์สด" ไว้ที่หัวข้อจังหวัด
   function renderProfilesGrid(profiles, isFilteredView) {
     if (!DOM.profilesDisplayArea) return;
 
@@ -808,7 +802,6 @@ window.ScrollTrigger = ScrollTrigger;
       sectionWrapper.className = "section-content-wrapper";
       sectionWrapper.style.cssText = "margin-top: 16px;";
       
-      // 🟢 ฝังป้ายจำนวนโปรไฟล์สด (Live Count Badge) ที่หัวข้อจังหวัดตรงๆ
       sectionWrapper.innerHTML = `
         <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
             <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
@@ -980,12 +973,10 @@ window.ScrollTrigger = ScrollTrigger;
 
     const nameClean = profile.displayName || sanitizeName(profile.name);
     
-    // 🟢 1. สถานะความพร้อมรับงาน
     const isAvailable = profile.isAvailable !== undefined ? profile.isAvailable : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(t => (profile.availability || "").toLowerCase().includes(t));
     const statusText = profile.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
     const statusColor = isAvailable ? "#00E676" : "#FF2E63";
 
-    // 🟢 2. ชื่อโปรไฟล์ + ยืนยันตัวตน
     const titleEl = document.getElementById("lightbox-profile-name-main");
     if (titleEl) {
       titleEl.innerHTML = `
@@ -994,7 +985,6 @@ window.ScrollTrigger = ScrollTrigger;
       `;
     }
 
-    // 🟢 3. Badge สถานะ
     const badgeEl = document.getElementById("lightbox-availability-badge-wrapper");
     if (badgeEl) {
       badgeEl.innerHTML = `
@@ -1005,7 +995,6 @@ window.ScrollTrigger = ScrollTrigger;
       `;
     }
 
-    // 🟢 4. โหลดรูปภาพขนาดใหญ่ความละเอียด HD
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
       const hdSrc = profile?.images?.[0]?.fullSrc || profile?.images?.[0]?.src || profile?.imagePath || CONFIG.DEFAULT_OG_IMAGE;
@@ -1013,7 +1002,6 @@ window.ScrollTrigger = ScrollTrigger;
       heroImg.alt = `${nameClean} สาวรับงาน${profile.provinceNameThai || "เชียงใหม่"} ตัวจริงตรงปก`;
     }
 
-    // 🟢 5. แถบภาพขนาดย่อ
     const strip = document.getElementById("lightboxThumbnailStrip");
     if (strip) {
       strip.innerHTML = "";
@@ -1046,13 +1034,11 @@ window.ScrollTrigger = ScrollTrigger;
       }
     }
 
-    // 🟢 6. คำโปรย
     const quoteEl = document.getElementById("lightboxQuote");
     if (quoteEl) {
       quoteEl.textContent = profile.quote || profile.slogan || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
     }
 
-    // 🟢 7. แท็กสไตล์
     const tagsEl = document.getElementById("lightboxTags");
     if (tagsEl) {
       tagsEl.innerHTML = "";
@@ -1065,7 +1051,6 @@ window.ScrollTrigger = ScrollTrigger;
       });
     }
 
-    // 🟢 8. คำนวณอายุและสเปกร่างกาย (ป้องกันคำว่า undefined ชัวร์ 100%)
     let ageDisplay = "ไม่ระบุ";
     if (profile.safeAgeDisplay && profile.safeAgeDisplay !== "undefined" && !profile.safeAgeDisplay.includes("undefined")) {
       ageDisplay = profile.safeAgeDisplay;
@@ -1083,15 +1068,15 @@ window.ScrollTrigger = ScrollTrigger;
     if (detailsEl) {
       detailsEl.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 10px; text-align: center;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
                 <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">อายุ</div>
                 <div style="font-weight: 800; font-size: 12px; color: ${ageDisplay === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${ageDisplay}</div>
             </div>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 10px; text-align: center;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
                 <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
                 <div style="font-weight: 800; font-size: 12px; color: ${statsText === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${statsText}</div>
             </div>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 10px; text-align: center;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
                 <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
                 <div style="font-weight: 800; font-size: 12px; color: ${heightText === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${heightText}</div>
             </div>
@@ -1114,7 +1099,6 @@ window.ScrollTrigger = ScrollTrigger;
       `;
     }
 
-    // 🟢 9. รายละเอียดเพิ่มเติม (เว้นบรรทัดอ่านง่าย ไม่แน่นอัดอัด)
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
@@ -1123,7 +1107,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
     if (descContainer) descContainer.style.display = "block";
 
-    // 🟢 10. ปุ่มแอดไลน์จองคิว
     const detailsContainer = document.querySelector(".lightbox-details");
     if (detailsContainer) {
       detailsContainer.scrollTop = 0;
@@ -1149,7 +1132,6 @@ window.ScrollTrigger = ScrollTrigger;
       detailsContainer.appendChild(stickyBtnWrapper);
     }
 
-    // 🟢 11. แสดงผล Pop-up
     lightbox.classList.add("active");
     lightbox.style.display = "flex";
     document.body.style.overflow = "hidden";
@@ -1161,59 +1143,20 @@ window.ScrollTrigger = ScrollTrigger;
 
     updateSEOMetadata(profile, null);
   }
-  
-  document.addEventListener("DOMContentLoaded", () => {
-  const lightbox = document.getElementById("lightbox");
-  const closeBtn = document.getElementById("closeLightboxBtn");
 
-  // ฟังก์ชันสำหรับสั่งปิด Lightbox
-  function closeLightbox() {
+  function closeLightboxModal(updateUrl = true) {
+    const lightbox = document.getElementById("lightbox");
     if (lightbox) {
       lightbox.style.display = "none";
-      document.body.style.overflow = ""; // คืนค่าการเลื่อนหน้าจอ
-    }
-  }
+      lightbox.classList.remove("active");
+      document.body.style.overflow = "";
 
-  // 1. กดปุ่มปิด (X)
-  if (closeBtn) {
-    closeBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeLightbox();
-    });
-  }
-
-  // 2. คลิกพื้นที่ว่างด้านนอกเพื่อปิด
-  if (lightbox) {
-    lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) {
-        closeLightbox();
+      STATE.currentProfileSlug = null;
+      if (updateUrl && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
+        history.pushState(null, "", "/");
       }
-    });
-  }
-
-  // 3. กดปุ่ม ESC บนคีย์บอร์ดเพื่อปิด
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && lightbox && lightbox.style.display !== "none") {
-      closeLightbox();
-    }
-  });
-});
-
-function closeLightbox() {
-  const lightbox = document.getElementById("lightbox");
-  if (lightbox) {
-    lightbox.style.display = "none";
-    lightbox.classList.remove("active");
-    document.body.style.overflow = "";
-
-    // 💡 เพิ่มเติม: เคลียร์ค่า State และเปลี่ยน URL กลับมาหน้าแรกโดยไม่ต้อง Refresh
-    if (typeof STATE !== "undefined") STATE.currentProfileSlug = null;
-    if (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/")) {
-      history.pushState(null, "", "/");
     }
   }
-}
 
   // ============================== SEO METADATA & SCHEMA ENGINE ==============================
   function removeJsonLdSchemas() {
@@ -1391,12 +1334,17 @@ function closeLightbox() {
     link.setAttribute("href", href);
   }
 
-  function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50) {
+  // 🟢 แก้ไขเพื่อป้องกันการเอาพิกัดย่านเชียงใหม่ไปเขียนทับจังหวัดอื่นในฝั่ง Client
+  function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
     try {
       const liveCountEl = document.getElementById("live-profile-count");
       if (liveCountEl) {
         liveCountEl.textContent = profileCount;
       }
+
+      const currentProvData = STATE.provincesMap.get(provinceSlug);
+      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones : ["ตัวเมือง", "บริเวณใกล้เคียง"];
+      const zoneText = currentZones.slice(0, 4).join(", ");
 
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
       let node;
@@ -1405,7 +1353,7 @@ function closeLightbox() {
           node.nodeValue = node.nodeValue
             .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
             .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-            .replace(/\{\{PROVINCE_ZONES\}\}/g, "นิมมาน, เจ็ดยอด, สันติธรรม, ช้างเผือกและโซนใกล้เคียง");
+            .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText);
         }
       }
 
@@ -1489,7 +1437,7 @@ function closeLightbox() {
       applyUltimateFilters(false);
 
       const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
-      replaceDomPlaceholders("ทั่วไทย", activeCount);
+      replaceDomPlaceholders("ทั่วไทย", activeCount, "national");
       return;
     }
 
@@ -1513,7 +1461,7 @@ function closeLightbox() {
           profiles: matchedProfiles
         });
 
-        replaceDomPlaceholders(provName, matchedProfiles.length || 50);
+        replaceDomPlaceholders(provName, matchedProfiles.length || 50, provinceSlug);
       }
       return;
     }
@@ -1529,7 +1477,7 @@ function closeLightbox() {
       const currentProvName = STATE.provincesMap.get(currentProvKey) || "เชียงใหม่";
       const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
       
-      replaceDomPlaceholders(currentProvName, activeCount);
+      replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
     }
   }
 
@@ -1789,8 +1737,7 @@ function closeLightbox() {
       const closeBtn = target.closest("#closeLightboxBtn");
       const lightboxModal = target.closest("#lightbox");
       if (closeBtn || (lightboxModal && e.target === lightboxModal)) {
-        history.pushState(null, "", "/");
-        handleRouteNavigation();
+        closeLightboxModal(true);
         if (STATE.lastFocusedElement?.focus) STATE.lastFocusedElement.focus();
         return;
       }
@@ -1799,8 +1746,7 @@ function closeLightbox() {
     // Escape Key Listener
     document.addEventListener("keydown", e => {
       if (e.key === "Escape" && STATE.currentProfileSlug) {
-        history.pushState(null, "", "/");
-        handleRouteNavigation();
+        closeLightboxModal(true);
         if (STATE.lastFocusedElement?.focus) STATE.lastFocusedElement.focus();
       }
     });
