@@ -1,5 +1,5 @@
 # ==============================================================================
-# Netlify configuration for First Model Hub
+# Netlify configuration for First Model Hub (SEO & Edge Optimized 2026)
 # ==============================================================================
 [build]
   publish = "."
@@ -15,14 +15,15 @@
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
-    # 🟢 FIX: เปลี่ยนจาก DENY เป็น SAMEORIGIN เพื่อให้ Google Search Console สแกนผ่าน 100%
+    # 🟢 SAMEORIGIN เพื่อให้ Google Search Console / Rich Results Test สแกนและถ่ายภาพผ่าน 100%
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     Cache-Control = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400"
-    Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com;"
+    # 🟢 FIX: เพิ่มการอนุญาต Google Analytics Region 1 & GTM ป้องกันสถิติหลุด
+    Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com;"
 
 # 🟢 ตั้งค่าแคช CSS และ JS
 [[headers]]
@@ -53,7 +54,7 @@
   function = "sitemap"
   path = "/sitemap.xml"
 
-# 🟢 แมป /sideline/* เข้ากับ ssr-province (หรือเปลี่ยนเป็น render-bot หากต้องการใช้ render-bot.js)
+# 🟢 รวมระบบเรนเดอร์ทั้งหมดไว้ที่ ssr-province เพื่อให้บอทและคนเห็นหน้าเว็บตรงกัน 100%
 [[edge_functions]]
   function = "ssr-province"
   path = "/sideline/*"
@@ -107,6 +108,14 @@
   status = 301
   force = true
 
+# 🟢 FIX: เปลี่ยน Query Parameter ของหน้าแรกเข้าหน้าจังหวัดแบบ Clean Path
+[[redirects]]
+  query = { province = ":p" }
+  from = "/"
+  to = "/location/:p"
+  status = 301
+  force = true
+
 # Normalize location query param -> clean path
 [[redirects]]
   query = { province = ":p" }
@@ -115,7 +124,7 @@
   status = 301
   force = true
 
-# Dynamic Profile & Location Fallback
+# Dynamic Profile & Location Fallback (SPA Single Page Application Rewrites)
 [[redirects]]
   from = "/sideline/*"
   to = "/index.html"
