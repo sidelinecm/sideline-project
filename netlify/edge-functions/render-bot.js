@@ -79,13 +79,13 @@ const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;',
 
 const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
 
-// 🟢 เพิ่มฟังก์ชันทำความสะอาดข้อความ ASCII Art เพื่อการประมวลผล SEO ที่ถูกต้อง
+// 🟢 แก้ไข: ลบเฉพาะเส้นกรอบ ASCII ป้องกันตัวหนังสือและ Emoji แตกเป็นตัวต่างดาว 
 const cleanAsciiArt = (text) => {
     if (!text) return "";
     return text
-        .replace(/[„•ㅅ•„₊˚(\\\/づ♡✦⁺.જ⁀➴🐻‍❄️ྀི Telescope🔭🫦➏➒🌷͙֒𐐪🐾˖°●╰╯╮╭]/g, "")
-        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "")
-        .replace(/\n\s*\n/g, "\n")
+        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "") // ลบเฉพาะเส้นกรอบ ASCII
+        .replace(/[„•ㅅ•„]+/g, "")                 // ลบตัวการ์ตูน ASCII
+        .replace(/\n\s*\n/g, "\n")                 // ลบบรรทัดว่างเกินจำเป็น
         .trim();
 };
 
