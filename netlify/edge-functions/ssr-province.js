@@ -418,19 +418,19 @@ export default async (req, context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let matchedProfile = null;
-
     if (profileSlug) {
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileErr } = await supabase
         .from("profiles")
-        .select("provinceKey, name, rate, location, age, imagePath, description, availability, quote, slogan")
+        .select("*")
         .eq("slug", profileSlug)
         .eq("active", true)
         .maybeSingle();
 
-      if (profileData) {
+      if (profileData && !profileErr) {
         matchedProfile = profileData;
-        provinceSlug = profileData.provinceKey || "chiangmai";
+        provinceSlug = profileData.provinceKey || profileData.province_key || profileData.province_slug || "chiangmai";
       } else {
+        console.warn(`[SSR Warnings] ไม่พบ Slug: ${profileSlug} หรือเกิดข้อผิดพลาด:`, profileErr?.message);
         return buildErrorPage(404, "404 - ไม่พบโปรไฟล์ที่ต้องการ", "โปรไฟล์น้องๆ รายนี้อาจถูกปิดการใช้งาน หรือระงับบริการชั่วคราวครับ");
       }
     }
