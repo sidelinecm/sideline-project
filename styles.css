@@ -542,7 +542,8 @@ footer a,
    8. ULTRA-SHARP 4:5 PROFILE GRID ENGINE (🟢 คุมการ์ดทุกใบไม่ให้รูปภาพล้นทะลุ)
    ============================================================================== */
 #profiles-display-area {
-  min-height: 450px;
+  min-height: 500px !important;
+  contain: layout style;
 }
 .profiles-grid,
 .profiles-grid-row,

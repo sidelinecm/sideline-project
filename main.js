@@ -555,30 +555,19 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   async function appendProfilesToContainer(gridElement, profiles, activeRenderId) {
-    if (!gridElement || !profiles) return;
-    gridElement.dataset.activeRenderId = activeRenderId;
-    gridElement.innerHTML = "";
+  if (!gridElement || !profiles) return;
+  gridElement.dataset.activeRenderId = activeRenderId;
 
-    const fragment = document.createDocumentFragment();
-    const batchSize = profiles.length > 20 ? 4 : 8;
-
-    for (let i = 0; i < profiles.length; i++) {
-      if (activeRenderId !== undefined && Number(gridElement.dataset.activeRenderId) !== activeRenderId) {
-        return;
-      }
-
-      const card = createProfileCardElement(profiles[i], i);
-      fragment.appendChild(card);
-
-      if ((i + 1) % batchSize === 0 || i === profiles.length - 1) {
-        gridElement.appendChild(fragment);
-        await new Promise(res => requestAnimationFrame(res));
-        if (profiles.length > 40) {
-          await new Promise(res => setTimeout(res, 10));
-        }
-      }
-    }
+  // สร้างแม็ปครั้งเดียว นำขึ้นแสดงผลทันทีแบบ Synchronous
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < profiles.length; i++) {
+    const card = createProfileCardElement(profiles[i], i);
+    fragment.appendChild(card);
   }
+  
+  gridElement.innerHTML = ""; // ล้างเฉพาะเมื่อจะใส่อันใหม่พร้อมกันทีเดียว
+  gridElement.appendChild(fragment); // ใส่ทีเดียวจบ ไม่ต้องติด await loop
+}
 
   function createProvinceSectionElement(provinceKey, provinceName, profiles) {
     const wrapper = document.createElement("div");
@@ -749,14 +738,24 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  function renderProfilesGrid(profiles, isFilteredView) {
-    if (!DOM.profilesDisplayArea) return;
 
-    STATE.renderId = (STATE.renderId || 0) + 1;
-    const currentRenderId = STATE.renderId;
+function renderProfilesGrid(profiles, isFilteredView) {
+  if (!DOM.profilesDisplayArea) return;
 
-    DOM.noResultsMessage?.classList.add("hidden");
-    DOM.fetchErrorMessage?.classList.add("hidden");
+  const hasSSRContent = DOM.profilesDisplayArea.querySelector('.profile-card-new-container');
+  if (isFirstLoad && hasSSRContent && !isFilteredView) {
+    console.log("⚡ [SEO Protection] คงเนื้อหา SSR ไว้สำหรับ Googlebot ไม่ล้างหน้าจอ");
+    bindMediaProtection();
+    isFirstLoad = false; // 👈 🟢 เพิ่มบรรทัดนี้ครับ! เพื่อปลดล็อกให้คนกดค้นหาทีหลังทำงานได้ปกติ
+    return; // จบการทำงานทันที ป้องกันหน้าจอกลายเป็นสีดำ
+  }
+
+  STATE.renderId = (STATE.renderId || 0) + 1;
+  const currentRenderId = STATE.renderId;
+
+  DOM.noResultsMessage?.classList.add("hidden");
+  DOM.fetchErrorMessage?.classList.add("hidden");
+
 
     if (DOM.featuredSection) {
       const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
