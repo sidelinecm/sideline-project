@@ -165,13 +165,11 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 FIX 4: บีบอัดรูปภาพ Cloudinary ให้ตรงกับขนาดการ์ดจริงบนมือถือ (ลดจาก w_600 เหลือ w_300)
-const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
+const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
   if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
   
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
-      // ใช้ q_auto:eco และ w_300 ช่วยประหยัดเน็ตบนมือถือได้มากกว่า 60%
       return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
     }
     return path;
@@ -264,11 +262,12 @@ function customMetaTitle(province, customMeta) {
   return `สาวรับงาน${province} ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub`;
 }
 
+// 🟢 FIX 2: ปรับปรุงฟังก์ชันการสร้าง Meta Description ตัดข้อความ ... ป้องกันคำขาด
 function customMetaDesc(province, seo, customMeta, topSnippetText = "") {
   if (customMeta && customMeta.desc) return customMeta.desc;
   const zonesText = seo.zones && seo.zones.length > 0 ? seo.zones.slice(0, 3).join(", ") : province;
   if (topSnippetText) {
-    return `${province} 🟢 พร้อมรับงานวันนี้: ${topSnippetText}... คัดสรรเฉพาะตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
+    return `สาวรับงาน${province} 🟢 พร้อมรับงานวันนี้: ${topSnippetText} - คัดสรรเฉพาะตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
   }
   return `ศูนย์รวมสาวรับงาน${province} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
 }
@@ -516,7 +515,9 @@ export default async (req, context) => {
 
     if (isNationalHome) {
       pageTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
-      pageDesc = `ทั่วไทย 🟢 พร้อมรับงานวันนี้: ${topProfilesTextSnippet}... ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนพรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ`;
+      pageDesc = topProfilesTextSnippet 
+        ? `ทั่วไทย 🟢 พร้อมรับงานวันนี้: ${topProfilesTextSnippet} - ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนพรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ`
+        : `ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`;
     } else {
       pageTitle = customMetaTitle(provinceThaiName, customMeta);
       pageDesc = customMetaDesc(provinceThaiName, seoData, customMeta, topProfilesTextSnippet);
@@ -635,25 +636,28 @@ export default async (req, context) => {
 
       schemaGraph.push(businessEntity);
 
-      schemaGraph.push({
-        "@type": "ItemList",
-        "@id": `${canonUrl}/#itemlist`,
-        "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceThaiName}`,
-        "numberOfItems": profileList.length,
-        "itemListElement": profileList.map((p, index) => ({
-          "@type": "ListItem",
-          "position": index + 1,
-          "item": {
-            "@type": "Person",
-            "name": `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}`,
-            "url": `${hostUrl}/sideline/${p.slug || p.id}`,
-            "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
-            "jobTitle": "Companion",
-            "workLocation": p.location || provinceThaiName,
-            "description": `สาวรับงาน${provinceThaiName} พิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัย ไม่โอนมัดจำ`
-          }
-        }))
-      });
+      // 🟢 FIX 1: สั่งสร้าง ItemList ใน Schema เฉพาะเมื่อ profileList มีข้อมูลจริงเท่านั้น
+      if (profileList.length > 0) {
+        schemaGraph.push({
+          "@type": "ItemList",
+          "@id": `${canonUrl}/#itemlist`,
+          "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceThaiName}`,
+          "numberOfItems": profileList.length,
+          "itemListElement": profileList.map((p, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Person",
+              "name": `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}`,
+              "url": `${hostUrl}/sideline/${p.slug || p.id}`,
+              "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
+              "jobTitle": "Companion",
+              "workLocation": p.location || provinceThaiName,
+              "description": `สาวรับงาน${provinceThaiName} พิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัย ไม่โอนมัดจำ`
+            }
+          }))
+        });
+      }
 
       schemaGraph.push({
         "@type": "BreadcrumbList",
@@ -857,9 +861,7 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 FIX: ควบคุมการแสดงผลระหว่างหน้าหลัก กับ หน้าจังหวัดไม่ให้เกิดภาพซ้อน
     if (!isNationalHome) {
-      // หน้าจังหวัด: ซ่อนเซกชัน Popular Selection ที่อยู่ส่วนบน เพื่อเอาพื้นที่ให้รายการจังหวัดหลัก
       rawHtml = rawHtml.replace(
         /<section id="featured-profiles"[\s\S]*?<\/section>/i,
         `<section id="featured-profiles" class="hidden" style="display:none !important;"></section>`
@@ -886,7 +888,6 @@ export default async (req, context) => {
       </div>
     `;
 
-    // 🟢 FIX: แทนที่บล็อก {{PROFILES_DISPLAY_AREA_HTML}} ด้วยการ์ดโปรไฟล์ที่สมบูรณ์ 100% ปราศจากบั๊ก Regex
     const displayAreaInnerHtml = `
       ${liveCountChipHtml}
       <div class="section-content-wrapper" style="margin-top: 16px;">
@@ -949,7 +950,7 @@ export default async (req, context) => {
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-"Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';"
+      "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';"
     };
 
     PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: Date.now() });

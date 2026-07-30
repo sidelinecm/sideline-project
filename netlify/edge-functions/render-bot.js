@@ -42,9 +42,13 @@ export default async (request, context) => {
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|lighthouse|bingbot|applebot/i.test(ua);
     if (!isBot) return context.next();
 
+    // 🟢 FIX: ประกาศ pathParts ก่อนนำไปใช้งาน ป้องกัน ReferenceError
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
+
     try {
-      const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
+        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
+        if (['province', 'category', 'search', 'app', 'location'].includes(slug)) return context.next();
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
@@ -73,7 +77,6 @@ export default async (request, context) => {
         const displayPrice = rawRate > 0 ? `${rawRate.toLocaleString()}.-` : 'สอบถาม';
         const baseImageUrl = optimizeImg(hostUrl, p.imagePath, 1200, 630);
         
-        // 🟢 FIX 1: แก้ไขลิงก์ LINE ให้ถูกต้อง ปราศจาก ~
         let rawLineId = (p.line_id || p.lineId || 'ksLUWB89Y_').trim().replace(/^@/, '');
         let finalLineUrl = rawLineId.startsWith('http') 
             ? rawLineId 
@@ -96,7 +99,6 @@ export default async (request, context) => {
             { author_name: "คุณผู้ใช้บริการ", location_detail: `ตัวเมือง${provinceName}`, rating_score: 5, review_body: "นัดเจอน้องตัวจริงเรียบร้อยตรงเวลาดีมากครับ คุยสนุก สุภาพ จ่ายหน้างานปลอดภัยดีครับ" }
         ];
 
-        // 🟢 FIX 2: ปรับแต่ง Schema JSON-LD ให้ถูกต้อง ปรอดภัยจากการโดน Google แบน
         const schemaGraph = [
             {
                 "@context": "https://schema.org",
@@ -135,7 +137,6 @@ export default async (request, context) => {
             }
         ];
 
-        // 🟢 FIX 3: เรนเดอร์ HTML ด้วยสไตล์ธีมสีม่วง (/styles.css) ให้บอทและคนเห็นหน้าเว็บตรงกัน 100%
         const html = `<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
