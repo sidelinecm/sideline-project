@@ -21,7 +21,7 @@ const CONFIG = {
     try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
   },
   get SUPABASE_KEY() {
-    try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA8NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
+    try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA8NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA8NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "First Model Hub",
@@ -364,6 +364,96 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
+// 🟢 PRE-RENDER LIGHTBOX HTML FOR SINGLE PROFILE PAGE (SEO & FAST FIRST PAINT)
+const buildSingleProfileModalHtml = (p, provName, hostUrl) => {
+  const cleanName = (p.name || "").replace(/^น้อง/, "").trim();
+  const displayName = `น้อง${cleanName}`;
+  const mainImg = optimizeOgImg(hostUrl, p.imagePath);
+  const rateVal = p.rate ? (!isNaN(p.rate) ? `${Number(p.rate).toLocaleString()}.-` : escapeHTML(p.rate)) : "1,500.-";
+  const locationVal = escapeHTML(p.location || provName);
+  const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+  const lineId = (p.line_id || p.lineId || "ksLUWB89Y_").replace(/^@/, "").trim();
+  const lineUrl = lineId.startsWith("http") ? lineId : `https://line.me/ti/p/${lineId.startsWith("%40") ? lineId : "@" + lineId}`;
+  const descHtml = escapeHTML(p.description || `${displayName} สาวรับงาน${provName} ตรงปก 100% สไตล์ฟิวแฟน ไม่โอนมัดจำ`).replace(/\n/g, "<br>");
+  const sloganText = escapeHTML(p.slogan || p.quote || "");
+
+  return `
+    <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: flex; opacity: 1;" class="active">
+      <div id="lightbox-content-wrapper-el" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+        <button id="closeLightboxBtn" style="position: absolute; top: 10px; right: 10px; z-index: 50; width: 34px; height: 36px; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;" aria-label="ปิดหน้าต่างโปรไฟล์">
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div style="overflow-y: auto; max-height: 85vh; padding: 0;">
+          <div class="lightbox-grid-layout">
+            <div class="lightbox-image-column">
+              <div class="lightbox-hero-container">
+                <img id="lightboxHeroImage" src="${mainImg}" alt="${displayName} สาวรับงาน${provName} ตัวจริงตรงปก" />
+              </div>
+            </div>
+            <div class="lightbox-details">
+              <header style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                  <h3 id="lightbox-profile-name-main" class="text-gradient-main" style="font-size: 22px; font-weight: 800; margin: 0; line-height: 1.2;">
+                    <span class="text-gradient-main" style="font-size: 20px; font-weight: 800;">${displayName}</span>
+                  </h3>
+                  <div id="lightbox-availability-badge-wrapper" style="flex-shrink: 0;">
+                    <span style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
+                      <span style="width: 7px; height: 7px; border-radius: 50%; background: ${isAvail ? '#00E676' : '#FF2E63'}; box-shadow: 0 0 8px ${isAvail ? '#00E676' : '#FF2E63'}; flex-shrink: 0;"></span>
+                      <span style="color: white; font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em;">${p.availability || (isAvail ? 'รับงาน' : 'สอบถามคิว')}</span>
+                    </span>
+                  </div>
+                </div>
+              </header>
+              ${sloganText ? `<div id="lightboxQuote" class="lightbox-quote-card" style="font-size: 12px; color: #C084FC; margin: 4px 0;">${sloganText}</div>` : ''}
+              <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 8px;">
+                <div id="lightboxDetailsCompact" style="font-size: 11.5px;">
+                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
+                      <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">อายุ</div>
+                      <div style="font-weight: 800; font-size: 12px; color: #FFFFFF; margin-top: 2px;">${p.age ? p.age + ' ปี' : 'ไม่ระบุ'}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
+                      <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
+                      <div style="font-weight: 800; font-size: 12px; color: #FFFFFF; margin-top: 2px;">${p.stats || 'ไม่ระบุ'}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
+                      <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
+                      <div style="font-weight: 800; font-size: 12px; color: #FFFFFF; margin-top: 2px;">${p.height ? p.height + ' ซม.' : 'ไม่ระบุ'}</div>
+                    </div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="color: #A1A1AA; font-size: 11px; font-weight: 600;">ค่าขนม</span>
+                      <span style="color: #00E676; font-weight: 900; font-size: 14px;">${rateVal}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="color: #A1A1AA; font-size: 11px; font-weight: 600;">พิกัดงาน</span>
+                      <span style="color: white; font-weight: 700; font-size: 11.5px;">${locationVal}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="lightboxDescriptionContainer" style="display: block; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; margin-top: 8px;">
+                <div style="color: white; font-weight: 800; font-size: 12px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                  <i class="fas fa-info-circle" style="color: var(--primary-purple);" aria-hidden="true"></i>
+                  <span>รายละเอียดเพิ่มเติม</span>
+                </div>
+                <div id="lightboxDescriptionContent" style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; white-space: pre-wrap;">${descHtml}</div>
+              </div>
+              <div id="line-btn-sticky-wrapper" style="margin-top: 14px; margin-bottom: 6px; width: 100%; position: relative;">
+                <a href="${lineUrl}" target="_blank" rel="noopener nofollow" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #11783B 0%, #00E676 100%); color: white; padding: 12px 18px; border-radius: 100px; font-weight: 800; font-size: 12.5px; text-decoration: none; box-shadow: 0 6px 20px rgba(0, 230, 118, 0.3);">
+                  <i class="fab fa-line" style="font-size: 18px; color: white;"></i>
+                  <span>แอดไลน์จองคิว ${displayName}</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
 // 🟢 SERVER-SIDE RENDERER HANDLER (MAIN ENTRY POINT)
 export default async (req, context) => {
   if (!verifyHostname(req)) {
@@ -461,7 +551,7 @@ export default async (req, context) => {
       .order("lastUpdated", { ascending: false })
       .limit(24);
 
-    if (!isNationalHome) {
+    if (!isNationalHome && !matchedProfile) {
       profileQuery = profileQuery.in("provinceKey", queryAliases);
     }
 
@@ -484,7 +574,7 @@ export default async (req, context) => {
       Promise.resolve(reviewQuery).catch(() => ({ data: [] }))
     ]);
 
-    // 🟢 3. SOFT FALLBACK FOR PROVINCES (ไม่ส่ง 404 แม้ไม่มีข้อมูลใน DB ตาราง provinces)
+    // 🟢 3. SOFT FALLBACK FOR PROVINCES
     let provinceData = provSingleRes.data;
     if (!provinceData && !isNationalHome) {
       const fallbackName = PROVINCE_NAMES_THAI[provinceStandardKey] || 
@@ -846,6 +936,7 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
+    // Update Title & Meta Tags
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
@@ -853,12 +944,16 @@ export default async (req, context) => {
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
 
+    // 🟢 Replace Canonical & EN URLs (ทั้งแบบธรรมดา และแบบ %7B%7B URL Encoded)
+    rawHtml = replaceGlobal(rawHtml, "%7B%7BSEO_CANONICAL%7D%7D", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+    rawHtml = replaceGlobal(rawHtml, "%7B%7BSEO_CANONICAL_EN%7D%7D", enUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", enUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
-    
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
+
+    // 🟢 Replace Province Key & Name Placeholders
+    rawHtml = replaceGlobal(rawHtml, "%7B%7BPROVINCE_KEY%7D%7D", provinceStandardKey);
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceStandardKey);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
@@ -866,6 +961,23 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
+
+    // 🟢 Convert Google Maps iframe data-src -> src for instant SSR rendering
+    rawHtml = rawHtml.replace(/<iframe([^>]+)data-src=["']([^"']+)["']/gi, '<iframe$1src="$2" data-src="$2"');
+
+    // 🟢 Inject Schema.org JSON-LD
+    const escapedSchemaJson = JSON.stringify(schemaJson).replace(/</g, '\\u003c');
+    if (rawHtml.includes("{{SCHEMA_JSON}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", escapedSchemaJson);
+    } else if (/<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][\s\S]*?<\/script>/i.test(rawHtml)) {
+      rawHtml = rawHtml.replace(
+        /<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][\s\S]*?<\/script>/i,
+        `<script type="application/ld+json" id="dynamic-schema">\n${escapedSchemaJson}\n</script>`
+      );
+    } else {
+      rawHtml = rawHtml.replace(/<\/head>/i, `<script type="application/ld+json" id="dynamic-schema">\n${escapedSchemaJson}\n</script>\n</head>`);
+    }
 
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
@@ -881,6 +993,12 @@ export default async (req, context) => {
         /<section id="featured-profiles"[\s\S]*?<\/section>/i,
         ""
       );
+    }
+
+    // 🟢 PRE-RENDER SINGLE PROFILE LIGHTBOX MODAL IF ON SINGLE PROFILE PAGE
+    if (matchedProfile) {
+      const singleModalHtml = buildSingleProfileModalHtml(matchedProfile, provinceThaiName, hostUrl);
+      rawHtml = rawHtml.replace(/<div id="lightbox"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i, singleModalHtml);
     }
 
     const topCatalogSnippetHtml = `
@@ -945,12 +1063,43 @@ export default async (req, context) => {
       styleTags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
+    const hydratedSingleProfileData = matchedProfile ? JSON.stringify({
+      id: matchedProfile.id,
+      slug: matchedProfile.slug,
+      name: matchedProfile.name,
+      age: matchedProfile.age,
+      height: matchedProfile.height || "",
+      weight: matchedProfile.weight || "",
+      stats: matchedProfile.stats || "",
+      skinTone: matchedProfile.skin_tone || matchedProfile.skinTone || "",
+      imagePath: matchedProfile.imagePath,
+      galleryPaths: matchedProfile.galleryPaths || matchedProfile.gallery_paths || [],
+      provinceKey: matchedProfile.provinceKey,
+      provinceThai: provinceThaiName,
+      location: matchedProfile.location,
+      rate: matchedProfile.rate,
+      availability: matchedProfile.availability,
+      isfeatured: matchedProfile.isfeatured,
+      verified: matchedProfile.verified || matchedProfile.isVerified,
+      description: matchedProfile.description || "",
+      lineId: matchedProfile.line_id || matchedProfile.lineId || "",
+      quote: matchedProfile.quote || matchedProfile.slogan || "",
+      styleTags: matchedProfile.style_tags || matchedProfile.styleTags || []
+    }).replace(/</g, '\\u003c') : "null";
+
+    const hydrationScript = `
+      <script>
+        window.profilesData = ${hydratedProfilesData};
+        window.initialSingleProfile = ${hydratedSingleProfileData};
+      </script>
+    `;
+
     if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
     } else if (/window\.profilesData\s*=\s*/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[[\s\S]*?\];?/i, `window.profilesData = ${hydratedProfilesData};`);
+      rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[[\s\S]*?\];?/i, `window.profilesData = ${hydratedProfilesData}; window.initialSingleProfile = ${hydratedSingleProfileData};`);
     } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `<script>window.profilesData = ${hydratedProfilesData};</script>\n</head>`);
+      rawHtml = rawHtml.replace(/<\/head>/i, `${hydrationScript}\n</head>`);
     }
 
     const responseHeaders = {
