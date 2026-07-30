@@ -22,7 +22,7 @@
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     Cache-Control = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400"
-    # 🟢 CSP ครอบคลุม Supabase, Cloudinary, Google Analytics, GTM, และ FontAwesome
+    # 🟢 FIX: เพิ่มการอนุญาต Google Analytics Region 1 & GTM ป้องกันสถิติหลุด
     Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com;"
 
 # 🟢 ตั้งค่าแคช CSS และ JS
@@ -48,7 +48,7 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 # ==============================================================================
-# 2. EDGE FUNCTIONS MAPPING (🟢 FIX: ชี้เข้าหาไฟล์ ssr.js ให้ถูกต้องตรงกัน)
+# 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
 
 [[edge_functions]]
@@ -56,41 +56,37 @@
   path = "/sitemap.xml"
 
 [[edge_functions]]
-  function = "ssr"
+  function = "render-bot"
   path = "/sideline/*"
 
 [[edge_functions]]
-  function = "ssr"
+  function = "ssr-province"
   path = "/location/*"
 
 [[edge_functions]]
-  function = "ssr"
+  function = "ssr-province"
   path = "/"
 
 [[edge_functions]]
-  function = "ssr"
+  function = "ssr-province"
   path = "/index.html"
-
-[[edge_functions]]
-  function = "ssr"
-  path = "/profiles"
-
 # ==============================================================================
 # 3. REDIRECTS & REWRITES
 # ==============================================================================
-# 🎯 301 Direct Redirects รักษาพลัง SEO จากโดเมนเดิมและซับโดเมนทั้งหมด
+# 🎯 301 Direct Redirects ส่งพลัง SEO เชียงใหม่จากโดเมนเดิม เข้าหน้า /location/chiangmai 100%
 [[redirects]]
   from = "https://sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
+  to = "https://firstmodelhub.com/location/chiangmai"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/:splat"
+  to = "https://firstmodelhub.com/location/chiangmai"
   status = 301
   force = true
 
+# 301 Redirects สำหรับโดเมนอื่นๆ เข้าโดเมนหลัก
 [[redirects]]
   from = "https://www.firstmodelhub.com/*"
   to = "https://firstmodelhub.com/:splat"
@@ -103,7 +99,7 @@
   status = 301
   force = true
 
-# 🟢 เปลี่ยน Query Parameter ของหน้าแรกเข้าหน้าจังหวัดแบบ Clean Path
+# 🟢 FIX: เปลี่ยน Query Parameter ของหน้าแรกเข้าหน้าจังหวัดแบบ Clean Path
 [[redirects]]
   query = { province = ":p" }
   from = "/"
