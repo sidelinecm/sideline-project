@@ -23,7 +23,7 @@
     Cache-Control = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400"
     Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com;"
 
-# 🟢 FIX: ปรับตั้งค่าแคช CSS และ JS ให้แสดงผลเร็วแบบฉับไว ไม่ต้องดาวน์โหลดใหม่ทุกวินาที
+# 🟢 ตั้งค่าแคช CSS และ JS ให้แสดงผลเร็วฉับไว
 [[headers]]
   for = "/*.css"
   [headers.values]
@@ -52,8 +52,9 @@
   function = "sitemap"
   path = "/sitemap.xml"
 
+# 🟢 FIX: เปลี่ยนการแมป /sideline/* ให้วิ่งเข้า ssr-province เพื่อทำ SSR สดๆ ทุกหน้าโปรไฟล์
 [[edge_functions]]
-  function = "render-bot"
+  function = "ssr-province"
   path = "/sideline/*"
 
 [[edge_functions]]
@@ -68,7 +69,6 @@
   function = "ssr-province"
   path = "/index.html"
 
-# 🟢 FIX: เพิ่มการแมปเส้นทาง /profiles ให้รัน SSR จะได้ติด SEO หน้าดักรวมโปรไฟล์
 [[edge_functions]]
   function = "ssr-province"
   path = "/profiles"
@@ -80,11 +80,6 @@
 # ==============================================================================
 # 3. REDIRECTS & REWRITES
 # ==============================================================================
-[[redirects]]
-  from = "/profiles"
-  to = "/profiles.html"
-  status = 200
-
 # 🎯 301 Direct Redirects ส่งพลัง SEO เชียงใหม่จากโดเมนเดิม เข้าหน้า /location/chiangmai 100%
 [[redirects]]
   from = "https://sidelinechiangmai.netlify.app/*"
@@ -98,7 +93,7 @@
   status = 301
   force = true
 
-# 301 Redirects สำหรับโดเมนอื่นๆ และ Subpaths
+# 301 Redirects สำหรับโดเมนอื่นๆ เข้าโดเมนหลัก
 [[redirects]]
   from = "https://www.firstmodelhub.com/*"
   to = "https://firstmodelhub.com/:splat"
@@ -127,5 +122,10 @@
 
 [[redirects]]
   from = "/location/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
   to = "/index.html"
   status = 200

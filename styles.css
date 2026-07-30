@@ -1,32 +1,43 @@
 /* ==============================================================================
-   1. FONT FACES & CLS OPTIMIZATION ENGINE (ZERO-SHIFT DISPLAY)
+   1. FONT FACES & CLS OPTIMIZATION ENGINE
    ============================================================================== */
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  font-display: swap; 
+  font-display: swap;
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  font-display: swap; 
+  font-display: swap;
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
 
+/* 🟢 FIX: เพิ่ม font-display: swap ให้ไอคอนเพื่อผ่านเกณฑ์ FCP ของ Google */
+@font-face {
+  font-family: 'Font Awesome 6 Free';
+  font-display: swap !important;
+}
+@font-face {
+  font-family: 'Font Awesome 6 Brands';
+  font-display: swap !important;
+}
+
 /* ==============================================================================
-   2. GLOBAL DESIGN SYSTEM & THEME VARIABLES (DYNAMIC DARK & LIGHT MODE)
+   2. GLOBAL DESIGN SYSTEM & THEME VARIABLES
    ============================================================================== */
 :root {
-  --primary-purple: #E9D5FF; 
+  --primary-purple: #E9D5FF;
   --secondary-dark: #09090C;
   --pure-black: #09090C;
   --pure-white: #FFFFFF;
-  --text-gray: #E4E4E7; 
+  --text-gray: #E4E4E7;
   --text-muted: #A1A1AA;
   --border-light: rgba(255, 255, 255, 0.1);
+
   --emerald-accent: #11783B; 
   --body-bg: #060411;
   --nav-bg: rgba(13, 8, 30, 0.85);
@@ -48,7 +59,7 @@
   --app-purple-glow: rgba(124, 58, 237, 0.15);
 }
 
-/* 🟢 FIX 1: ปรับแต่งธีมสว่าง (Light Mode) ให้อ่านง่าย ตัวหนังสือไม่กลืนกับพื้นหลัง */
+/* 🟢 FIX: ปรับแต่งธีมสว่าง (Light Mode) ให้หัวข้อชัดเจน ไม่เบลอ */
 html.light {
   --pure-black: #FFFFFF;
   --pure-white: #09090B;
@@ -72,6 +83,15 @@ html.light {
   --line-green-accessible: #03722e;
 }
 
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light .glow-heading-spark {
+  color: #09090B !important;
+  text-shadow: none !important;
+}
+
 /* ==============================================================================
    3. BASE & GLOBAL RESET
    ============================================================================== */
@@ -80,152 +100,184 @@ html.light {
   margin: 0;
   padding: 0;
 }
+
+/* 🟢 คุมไม่ให้รูปขยายทะลุความกว้างหน้าจอ แต่คงอัตราส่วนจริงไว้ 100% ไม่ยืดเสียทรง */
+img, picture, svg, video, canvas {
+  max-width: 100% !important;
+  height: auto;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
 @media (min-width: 1024px) {
   html {
     scrollbar-gutter: stable;
   }
 }
+
 html, body {
-  background-color: var(--body-bg);
+  background-color: var(--body-bg) !important;
   color: var(--text-gray);
-  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Prompt', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
   scroll-behavior: smooth;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .container {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 16px;
 }
+
 .hidden {
   display: none !important;
 }
+
 .fas, .fab, .far {
   display: inline-block;
   width: 1.25em;
   text-align: center;
 }
+
+/* 🟢 FIX: ปรับระยะคลิกปุ่มและลิงก์ทั้งหมดให้ผ่านเกณฑ์ Google Tap Targets (44-48px) */
+header a, 
+nav a, 
+footer a,
+.footer-nav a,
+.sidebar-links-wrapper a {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 48px !important;
+  min-width: 44px !important;
+  padding: 8px 12px !important;
+  margin: 2px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}
+
 .dock-item span {
-  font-size: 11px;
+  font-size: 11px !important;
 }
 .capsule-text {
-  font-size: 11px;
-  color: var(--text-gray);
+  font-size: 11px !important;
+  color: #F4F4F5 !important;
 }
 .social-link-card-item {
-  font-size: 11px;
+  font-size: 11px !important;
 }
 .cta-subtext {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 6px;
-  text-align: center;
+  font-size: 11px !important;
+  color: #CBD5E1 !important;
+  margin-top: 6px !important;
+  text-align: center !important;
 }
 
 /* ==============================================================================
    4. FIXED PAGE HEADER & NAVIGATION
    ============================================================================== */
 #page-header {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  height: 60px;
-  padding: 0 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 9999;
-  box-sizing: border-box;
-  background: var(--nav-bg);
-  backdrop-filter: var(--nav-blur);
-  -webkit-backdrop-filter: var(--nav-blur);
-  border-radius: 16px;
-  border: 1px solid var(--nav-border);
-  box-shadow: 0 10px 30px var(--nav-shadow);
+  position: fixed !important;
+  top: 12px !important;
+  left: 12px !important;
+  right: 12px !important;
+  height: 60px !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  z-index: 1000 !important;
+  box-sizing: border-box !important;
+  background: var(--nav-bg) !important;
+  backdrop-filter: var(--nav-blur) !important;
+  -webkit-backdrop-filter: var(--nav-blur) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--nav-border) !important;
+  box-shadow: 0 10px 30px var(--nav-shadow) !important;
 }
+
 .header-status-badge {
-  display: none;
+  display: none !important;
 }
 .desktop-nav {
-  display: none;
+  display: none !important;
 }
 .nav-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
 .circle-btn-el {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  border: 1px solid var(--circle-btn-border);
-  background-color: var(--circle-btn-bg);
-  color: var(--text-gray);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 0;
-  flex-shrink: 0;
+  width: 44px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--circle-btn-border) !important;
+  background-color: var(--circle-btn-bg) !important;
+  color: var(--text-gray) !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
 }
 .header-logo-container a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-decoration: none !important;
 }
 .logo-box-el {
-  display: flex;
-  height: 32px;
-  width: 32px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background-color: #7C3AED;
-  color: #FFFFFF;
-  flex-shrink: 0;
+  display: flex !important;
+  height: 32px !important;
+  width: 32px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  background-color: #7C3AED !important;
+  color: #FFFFFF !important;
+  flex-shrink: 0 !important;
 }
+
 @media (min-width: 1024px) {
   #page-header {
-    height: 64px;
-    top: 16px;
-    left: 16px;
-    right: 16px;
-    padding: 0 24px;
+    height: 64px !important;
+    top: 16px !important;
+    left: 16px !important;
+    right: 16px !important;
+    padding: 0 24px !important;
   }
   .header-status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-light);
-    padding: 6px 16px;
-    border-radius: 100px;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: #A1A1AA !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 6px 16px !important;
+    border-radius: 100px !important;
   }
   .desktop-nav {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
     margin-right: 8px;
   }
   .desktop-nav a {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.2s ease;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #A1A1AA !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease !important;
   }
   .desktop-nav a:hover {
-    color: var(--pure-white);
+    color: #FFFFFF !important;
   }
 }
 
@@ -237,75 +289,72 @@ html, body {
   top: 0;
   bottom: 0;
   right: 0;
-  width: 280px;
-  max-width: 80vw;
+  width: 280px !important;
+  max-width: 80vw !important;
   height: 100vh;
   height: 100dvh;
-  background: var(--secondary-dark);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-left: 1px solid var(--nav-border);
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9);
-  z-index: 9999;
+  background: rgba(12, 10, 20, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-left: 1px solid rgba(192, 132, 252, 0.25) !important;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(124, 58, 237, 0.15) !important;
+  z-index: 3001 !important;
   transform: translate3d(100%, 0, 0);
   visibility: hidden;
   pointer-events: none;
-  transition: transform 0.35s cubic-bezier(.16, 1, .3, 1), visibility 0.35s;
+  transition: transform 0.35s cubic-bezier(.16, 1, .3, 1), visibility 0.35s !important;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 }
+
 #sidebar-menu.active {
-  transform: translate3d(0, 0, 0);
-  visibility: visible;
-  pointer-events: auto;
+  transform: translate3d(0, 0, 0) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
+
+#sidebar-overlay {
+  z-index: 3000 !important;
+}
+
 @media (min-width: 1024px) {
   #sidebar-menu {
-    width: 320px;
-    max-width: 320px;
+    width: 320px !important;
+    max-width: 320px !important;
   }
 }
+
 .sidebar-header-div {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 18px;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(24, 24, 27, 0.8);
-}
-.sidebar-header-div span {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--text-muted);
-  letter-spacing: .1em;
-  text-transform: uppercase;
 }
 .sidebar-close-btn {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-light);
-  color: var(--pure-white);
-  width: 32px;
-  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FFFFFF !important;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  transition: all 0.2s ease;
 }
-.sidebar-close-btn:active {
-  transform: scale(0.9);
-  background: rgba(239, 68, 68, 0.2);
-  color: #F87171;
-}
+
 .sidebar-links-wrapper {
   flex-grow: 1;
   overflow-y: auto;
   padding: 12px 0;
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 .sidebar-links-wrapper a {
   display: flex;
@@ -314,28 +363,21 @@ html, body {
   padding: 0 20px;
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--text-gray);
+  color: #F4F4F5 !important;
   text-decoration: none;
-  text-align: left;
-  border-bottom: 1px solid var(--border-light);
-  transition: all 0.2s ease;
-}
-.sidebar-links-wrapper a:hover,
-.sidebar-links-wrapper a:active {
-  background-color: rgba(124, 58, 237, 0.18);
-  color: #E9D5FF;
-  padding-left: 26px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* ==============================================================================
-   6. HERO SECTION
+   6. HERO SECTION & BILLBOARD BANNER
    ============================================================================== */
 #main-content {
-  padding-top: clamp(75px, 10vw, 95px);
-  padding-bottom: 110px;
+  padding-top: clamp(75px, 10vw, 95px) !important;
+  padding-bottom: 110px !important;
   position: relative;
   overflow: hidden;
 }
+
 .hero-section {
   text-align: center;
   position: relative;
@@ -347,13 +389,26 @@ html, body {
   padding: 8px 12px;
   max-width: 850px;
   margin: 0 auto;
+  min-height: 420px;
 }
+
+/* 🟢 FIX: ล็อกพื้นที่ส่วนปุ่ม CTA ป้องกันเลย์เอาต์ขยับ (CLS 0.00) */
+.hero-cta-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 80px;
+  contain: layout style;
+}
+
 .clutch-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 4px 12px;
   border-radius: 100px;
   backdrop-filter: blur(12px);
@@ -361,115 +416,103 @@ html, body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* 🟢 FIX 2: ปรับแต่ง H1 ให้รองรับทั้ง Dark/Light Mode ตัวหนังสือไม่กลืน */
 #hero-h1, .hero-title {
-  font-size: clamp(20px, 5.2vw, 32px);
-  font-weight: 800;
-  line-height: 1.35;
-  letter-spacing: -0.02em;
-  display: block;
-  text-align: center;
-  margin: 8px auto;
-  width: 100%;
-  color: var(--pure-white);
+  font-size: clamp(20px, 5.2vw, 32px) !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.02em !important;
+  display: block !important;
+  text-align: center !important;
+  margin: 8px auto !important;
+  width: 100% !important;
+  color: #FFFFFF !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7) !important;
 }
+
 .highlight-neon, .text-gradient-main span {
   background: linear-gradient(135deg, #FF2E93 0%, #C084FC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
+
+/* 🟢 สเกลแบนเนอร์ HERO 16:9 สวยงาม คมชัด ไม่ล้นจอ */
 .billboard-container, 
-.hero-image-wrapper {
+.hero-image-wrapper,
+.hero-section picture,
+.hero-section picture img {
   position: relative;
-  width: 100%;
-  max-width: 768px;
-  aspect-ratio: 16 / 9;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid var(--border-light);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(124, 58, 237, 0.15);
-  background-color: #09090C;
-  margin: 6px auto 10px auto;
+  width: 100% !important;
+  max-width: 768px !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  object-fit: cover !important;
+  display: block !important;
 }
-.billboard-container img, 
-.hero-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
+
 .hero-subtitle-p {
-  font-size: 11.5px;
-  line-height: 1.6;
-  margin: 2px 0 10px 0;
-  text-align: center;
-  color: var(--text-muted);
+  font-size: 11.5px !important;
+  line-height: 1.6 !important;
+  margin: 2px 0 10px 0 !important;
+  text-align: center !important;
+  color: #CBD5E1 !important;
   max-width: 720px;
 }
+
 .btn-primary-webyst {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 380px;
-  min-height: 46px;
-  padding: 10px 22px;
-  font-size: 13px;
-  font-weight: 800;
-  border-radius: 100px;
-  background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%);
-  color: #FFFFFF;
-  text-decoration: none;
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 380px !important;
+  min-height: 48px !important;
+  padding: 10px 22px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  border-radius: 100px !important;
+  background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%) !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
-.btn-primary-webyst:hover,
-.btn-primary-webyst:active {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.6);
-}
+
 .safe-capsules-grid {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  width: 100%;
-  padding: 2px 0;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+  width: 100% !important;
 }
+
 .safe-capsule-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: 100px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-light);
-  text-decoration: none;
-  color: var(--text-gray);
-  white-space: nowrap;
-  flex-shrink: 0;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #F4F4F5 !important;
+  white-space: nowrap !important;
 }
 
 /* ==============================================================================
-   7. FILTER SYSTEM
+   7. SMART FILTER SYSTEM
    ============================================================================== */
 #search-section {
-  border-radius: 20px;
-  border: 1px solid var(--nav-border);
-  background: var(--glass-bg);
-  padding: 14px 12px;
-  margin: 12px auto;
+  border-radius: 20px !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+  background: linear-gradient(135deg, rgba(13, 8, 30, 0.85), rgba(9, 9, 12, 0.95)) !important;
+  padding: 14px 12px !important;
+  margin: 12px auto !important;
   max-width: 850px;
 }
 .search-inputs-row {
@@ -485,270 +528,322 @@ html, body {
 }
 .search-input-field, .search-select-field {
   width: 100%;
-  background-color: var(--secondary-dark);
-  border: 1px solid var(--border-light);
-  color: var(--text-gray);
+  background-color: #0c081d !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #FFF;
   padding: 8px 12px;
   font-size: 12px;
-  border-radius: 12px;
+  border-radius: 12px !important;
   outline: none;
-  height: 38px;
-}
-.search-select-field {
-  appearance: none;
-  cursor: pointer;
-}
-.search-input-field:focus, .search-select-field:focus {
-  border-color: #7C3AED;
-  box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
+  height: 38px !important;
 }
 
 /* ==============================================================================
-   8. PROFILE GRID ENGINE
+   8. ULTRA-SHARP 4:5 PROFILE GRID ENGINE (🟢 คุมการ์ดทุกใบไม่ให้รูปภาพล้นทะลุ)
    ============================================================================== */
 #profiles-display-area {
   min-height: 450px;
 }
-.profiles-grid, .profiles-grid-row, .profile-grid, #profiles-container, .profiles-container, #featured-profiles-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 0 4px;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
+.profiles-grid,
+.profiles-grid-row,
+.profile-grid,
+#profiles-container,
+.profiles-container,
+#featured-profiles-container {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  padding: 0 4px !important;
+  width: 100% !important;
+  max-width: 1100px !important;
+  margin: 0 auto !important;
 }
 @media (min-width: 768px) {
-  .profiles-grid, .profiles-grid-row, .profile-grid, #profiles-container, .profiles-container, #featured-profiles-container {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    padding: 0 16px;
+  .profiles-grid,
+  .profiles-grid-row,
+  .profile-grid,
+  #profiles-container,
+  .profiles-container,
+  #featured-profiles-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+    padding: 0 16px !important;
   }
 }
 @media (min-width: 1024px) {
-  .profiles-grid, .profiles-grid-row, .profile-grid, #profiles-container, .profiles-container, #featured-profiles-container {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+  .profiles-grid,
+  .profiles-grid-row,
+  .profile-grid,
+  #profiles-container,
+  .profiles-container,
+  #featured-profiles-container {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
   }
 }
-.profile-card-new-container { width: 100%; }
+.profile-card-new-container {
+  width: 100% !important;
+}
 .profile-card-new {
-  aspect-ratio: 4 / 5;
-  width: 100%;
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  background-color: #09090B;
-  border: 1px solid var(--border-light);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.35s ease, border-color 0.35s ease;
+  aspect-ratio: 4 / 5 !important;
+  width: 100% !important;
+  position: relative !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background-color: #09090B !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  cursor: pointer !important;
 }
-.profile-card-new:hover {
-  transform: translateY(-4px);
-  border-color: rgba(192, 132, 252, 0.45);
-}
+
+/* 🟢 ล็อกรูปการ์ดโปรไฟล์ให้อยู่ในกรอบ 4:5 พอดีเป๊ะ สวยงาม ไม่ล้นการ์ด */
 .profile-card-new img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  object-position: top center;
-  filter: brightness(0.96);
-  z-index: 0;
-  border-radius: 16px;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 4 / 5 !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+  border-radius: 16px !important;
+  filter: brightness(0.96) !important;
+  z-index: 0 !important;
 }
+
 .live-count-chip {
-  background: rgba(0, 230, 118, 0.12);
-  border: 1px solid rgba(0, 230, 118, 0.35);
-  color: var(--success-text);
-  font-size: 10.5px;
-  font-weight: 800;
-  padding: 3px 10px;
-  border-radius: 100px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-left: 8px;
-  vertical-align: middle;
+  background: rgba(0, 230, 118, 0.12) !important;
+  border: 1px solid rgba(0, 230, 118, 0.35) !important;
+  color: #00E676 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 100px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-left: 8px !important;
 }
 .pulse-dot-el {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #00E676;
-  box-shadow: 0 0 8px #00E676;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background-color: #00E676 !important;
+  box-shadow: 0 0 8px #00E676 !important;
 }
 
 /* ==============================================================================
-   9. LIGHTBOX POP-UP MODAL (🟢 FIX 3: แก้ไขการ Scroll บนมือถือให้เลื่อนลื่นไหล)
+   9. LIGHTBOX POP-UP MODAL SYSTEM (LUXURY SPACIOUS EDITION - โปร่ง สบายตา ไม่อึดอัด)
    ============================================================================== */
 #lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 4000 !important;
   display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 6px;
-  background-color: rgba(0, 0, 0, 0.90);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  overflow: hidden;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px 10px !important;
+  background-color: rgba(5, 3, 12, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  overflow-y: auto !important;
 }
+
+/* 🟢 FIX 1: ให้ทั้งการ์ดป๊อปอัพเลื่อน Scroll เป็นหน้าเดียวแบบสมูท ไม่ติดในกล่องเล็ก */
 #lightbox-content-wrapper-el {
-  position: relative;
-  width: 100%;
-  max-width: 800px;
-  max-height: 92vh;
-  background: var(--body-bg);
-  border-radius: 20px;
-  border: 1px solid var(--nav-border);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
-  overflow: hidden;
-  margin: auto;
+  position: relative !important;
+  width: 100% !important;
+  max-width: 880px !important;
+  max-height: 90vh !important;
+  background: #0E091F !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(192, 132, 252, 0.3) !important;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(124, 58, 237, 0.25) !important;
+  overflow-y: auto !important; /* รวมเลื่อนหน้าเดียวบนมือถือ */
+  margin: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
+
 .lightbox-grid-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
 }
+
 @media (min-width: 768px) {
-  .lightbox-grid-layout { grid-template-columns: 1.1fr 1fr; }
+  #lightbox-content-wrapper-el {
+    overflow: hidden !important; /* บนคอมพิวเตอร์แบ่ง 2 คอลัมน์พอดีหน้าจอ */
+  }
+  .lightbox-grid-layout {
+    grid-template-columns: 1.15fr 0.85fr !important;
+    max-height: 85vh !important;
+  }
 }
+
 .lightbox-image-column {
-  padding: 0;
-  margin: 0;
-  background: #000000;
-  width: 100%;
-  position: relative;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #05030C !important;
+  width: 100% !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
+
+/* 🟢 FIX 2: ปรับขนาดรูปภาพให้โปร่ง สวยงาม ไม่โดนบีบ */
 .lightbox-hero-container {
-  width: 100%;
-  height: 100%;
-  max-height: 62vh;
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
-  position: relative;
-  background-color: #09090C;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 380px !important;
+  max-height: 480px !important;
+  position: relative !important;
+  background-color: #05030C !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
+
 @media (min-width: 768px) {
-  .lightbox-hero-container { max-height: 75vh; }
+  .lightbox-hero-container {
+    max-height: 85vh !important;
+    min-height: 520px !important;
+  }
 }
+
 #lightboxHeroImage {
-  width: 100%;
-  height: 100%;
-  max-height: 62vh;
-  object-fit: cover;
-  object-position: top center;
-  filter: brightness(0.98);
-  border-radius: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important; /* เห็นรูปภาพเต็มตัว 100% */
+  object-position: center !important;
+  filter: brightness(0.98) !important;
+  display: block !important;
 }
-@media (min-width: 768px) {
-  #lightboxHeroImage { max-height: 75vh; }
-}
+
 #lightboxThumbnailStrip {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 8px 10px;
-  margin: 0;
-  justify-content: center;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  border-top: 1px solid var(--border-light);
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding: 10px 14px !important;
+  margin: 0 !important;
+  justify-content: center !important;
+  width: 100% !important;
+  background: rgba(5, 3, 12, 0.9) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+
+/* 🟢 FIX 3: เพิ่มระยะห่างองค์ประกอบภายในให้โปร่ง สบายตา ระดับพรีเมียม */
 .lightbox-details {
-  padding: 16px 14px 20px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: var(--glass-bg);
-  overflow-y: auto;
-  max-height: 85vh;
+  padding: 22px 20px 28px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important; /* เว้นระยะห่างไม่อัดแน่น */
+  background: linear-gradient(135deg, rgba(14, 9, 30, 0.98) 0%, rgba(9, 9, 12, 0.99) 100%) !important;
 }
+
 @media (min-width: 768px) {
-  .lightbox-details { padding: 24px; }
+  .lightbox-details {
+    padding: 28px 24px !important;
+    overflow-y: auto !important;
+    max-height: 85vh !important;
+  }
 }
 
 /* ==============================================================================
    10. FLOATING APP DOCK
    ============================================================================== */
-.floating-app-dock { display: none; }
+.floating-app-dock {
+  display: none;
+}
 @media (max-width: 768px) {
   .floating-app-dock {
-    display: flex;
-    position: fixed;
-    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 24px);
-    max-width: 450px;
-    height: 58px;
-    background: rgba(13, 8, 30, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(192, 132, 252, 0.3);
-    border-radius: 100px;
-    z-index: 9999;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px;
-    box-sizing: border-box;
+    display: flex !important;
+    position: fixed !important;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 24px) !important;
+    max-width: 450px !important;
+    height: 58px !important;
+    background: rgba(13, 8, 30, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(192, 132, 252, 0.3) !important;
+    border-radius: 100px !important;
+    z-index: 2000 !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 4px 8px !important;
+    box-sizing: border-box !important;
   }
   .dock-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 0%;
-    min-width: 0;
-    color: #A1A1AA;
-    text-decoration: none;
-    font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-    gap: 2px;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    color: #A1A1AA !important;
+    text-decoration: none !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    gap: 2px !important;
   }
-  .dock-item i { font-size: 15px; }
-  .dock-item.active, .dock-item:hover { color: #E9D5FF; }
+  .dock-item i {
+    font-size: 15px !important;
+  }
+  .dock-item.active, .dock-item:hover {
+    color: #E9D5FF !important;
+  }
   nav.floating-app-dock a.dock-item.dock-item-line {
-    flex: 1.2 1 0%;
-    background: linear-gradient(135deg, #11783B 0%, #00E676 100%);
-    color: #FFFFFF;
-    border-radius: 100px;
-    height: 42px;
-    flex-direction: row;
-    justify-content: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 800;
-    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
-    padding: 0 12px;
-  }
-  nav.floating-app-dock a.dock-item.dock-item-line i,
-  nav.floating-app-dock a.dock-item.dock-item-line span {
-    color: #FFFFFF;
-    font-size: 11px;
-    font-weight: 800;
+    flex: 1.2 1 0% !important;
+    background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important;
+    color: #FFFFFF !important;
+    border-radius: 100px !important;
+    height: 42px !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3) !important;
+    padding: 0 12px !important;
   }
 }
 
+.line-cta-btn, a[href*="line.me"]:not(.dock-item), [class*="line-btn"]:not(.dock-item) {
+  max-width: 330px !important;
+  width: 92% !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+  margin: 8px auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+}
+
 /* ==============================================================================
-   11. COMPACT LOWER SECTIONS & FOOTER
+   11. FOOTER & LOWER SECTIONS
    ============================================================================== */
 .glass-panel {
-  border-radius: 16px;
-  border: 1px solid var(--nav-border);
-  background: var(--glass-bg);
-  padding: 16px 12px;
+  border-radius: 16px !important;
+  border: 1px solid rgba(147, 51, 234, 0.15) !important;
+  background: rgba(13, 8, 30, 0.45) !important;
+  padding: 16px 12px !important;
 }
+
 .rule-item {
-  border: 1px solid var(--border-light);
-  background-color: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(13, 8, 30, 0.45);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 6px;
@@ -762,73 +857,84 @@ html, body {
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  color: var(--pure-white);
+  color: #FFFFFF;
   text-align: left;
 }
+
 .seo-content-container.collapsed {
-  max-height: 140px;
-  overflow: hidden;
+  max-height: 140px !important;
+  overflow: hidden !important;
 }
+
 .social-links-grid-wrapper {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  gap: 8px;
-  justify-content: flex-start;
-  padding: 4px 0;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  padding: 4px 0 !important;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
-.social-links-grid-wrapper::-webkit-scrollbar { display: none; }
-.social-link-card-item {
-  padding: 6px 14px;
-  font-size: 11px;
-  border-radius: 100px;
-  background: var(--social-bg);
-  border: 1px solid var(--social-border);
-  color: var(--social-text);
-  text-decoration: none;
-  white-space: nowrap;
-  flex-shrink: 0;
+.social-links-grid-wrapper::-webkit-scrollbar {
+  display: none;
 }
-#map-container { max-height: 180px; }
-footer { padding-bottom: 110px; }
-img {
-  user-select: none;
-  -webkit-user-drag: none;
+.social-link-card-item {
+  padding: 6px 14px !important;
+  font-size: 11px !important;
+  border-radius: 100px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
-/* ==============================================================================
-   ANIMATIONS & BASE THEME EFFECTS
-   ============================================================================== */
-a.highlight, [class*="text-[#C084FC]"] {
-  color: #C084FC;
+#map-container {
+  max-height: 180px !important;
 }
+
+footer {
+  padding-bottom: 110px !important;
+}
+
+#popular-locations-footer {
+  gap: 12px !important;
+}
+#popular-locations-footer li a {
+  padding: 8px 12px !important;
+  display: inline-block !important;
+  min-height: 44px !important;
+}
+
+a.highlight, 
+[class*="text-[#C084FC]"],
+[style*="color: #C084FC"] {
+  color: #E9D5FF !important;
+  text-shadow: 0 0 10px rgba(233, 213, 255, 0.25);
+}
+
 body { 
   font-family: 'Prompt', sans-serif; 
   background-color: var(--body-bg); 
   color: var(--text-gray);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
-/* 🟢 FIX 4: บังคับหัวข้อใช้ var(--pure-white) เพื่อให้เปลี่ยนเป็นสีดำสว่างใน Light Mode */
 h1, h2, h3, h4, .glow-heading-spark {
   color: var(--pure-white);
-  font-weight: 800;
+  font-weight: 800 !important;
   letter-spacing: -0.01em;
 }
 
-@keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes glow-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.85; } }
+.rule-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease-out;
+}
 
-.animate-fade-in-up { animation: fade-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-glow-pulse { animation: glow-pulse 3.5s ease-in-out infinite; }
-
-#seo-drawer-wrapper { max-height: 180px; overflow: hidden; transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
-#seo-drawer-wrapper.collapsed .seo-fade-overlay { background: linear-gradient(to top, var(--body-bg) 0%, transparent 100%); opacity: 1; pointer-events: auto; }
-#seo-drawer-wrapper:not(.collapsed) .seo-fade-overlay { opacity: 0; pointer-events: none; }
-
-.rule-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out, padding 0.35s ease-out; }
-.rule-item:not(.collapsed) .rule-content { max-height: 600px; }
+.rule-item:not(.collapsed) .rule-content {
+  max-height: 600px;
+}

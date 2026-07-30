@@ -3,7 +3,6 @@ import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
 import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.mjs";
 
-// ลงทะเบียน Plugin GSAP ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 window.gsap = gsap;
 window.ScrollTrigger = ScrollTrigger;
@@ -11,7 +10,6 @@ window.ScrollTrigger = ScrollTrigger;
 (function () {
   "use strict";
 
-  // ============================== CONFIGURATION & CACHE KEYS ==============================
   const CONFIG = {
     SUPABASE_URL: "https://zxetzqwjaiumqhrpumln.supabase.co",
     SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
@@ -31,7 +29,6 @@ window.ScrollTrigger = ScrollTrigger;
     DEFAULT_OG_IMAGE: "/images/apple-touch-icon.png"
   };
 
-  // 🟢 ฐานข้อมูลย่านรับงานหลักสำหรับ Hydration ฝั่ง Client
   const PROVINCE_ZONES_MAP = {
     chiangmai: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก"],
     chiangrai: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "หอนาฬิกา"],
@@ -43,7 +40,6 @@ window.ScrollTrigger = ScrollTrigger;
     national: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"]
   };
 
-  // ============================== STATE MANAGEMENT ==============================
   let STATE = {
     allProfiles: [],
     provincesMap: new Map(),
@@ -73,7 +69,6 @@ window.ScrollTrigger = ScrollTrigger;
 
   let isFirstLoad = true;
 
-  // ============================== UTILITY FUNCTIONS ==============================
   function sanitizeName(rawName) {
     if (!rawName || typeof rawName !== "string") return "";
     let cleaned = rawName.trim().replace(/^(น้อง\s?)+/gi, "");
@@ -195,7 +190,6 @@ window.ScrollTrigger = ScrollTrigger;
     if (loadMoreContainer) loadMoreContainer.classList.add("hidden");
   }
 
-  // ============================== DATA SANITIZATION & MAPPER ==============================
   function processProfileObject(raw) {
     if (!raw || typeof raw !== "object") return null;
 
@@ -329,7 +323,6 @@ window.ScrollTrigger = ScrollTrigger;
     }, 1500);
   }
 
-  // ============================== DATABASE FETCHING & SSR HYDRATION ==============================
   async function fetchProfilesData() {
     if (STATE.isFetching) return false;
     STATE.isFetching = true;
@@ -459,7 +452,6 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.provinceSelect.appendChild(fragment);
   }
 
-  // ============================== CARD HTML CREATOR (4:5 ASPECT RATIO) ==============================
   function createProfileCardElement(profile, index = 20) {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
@@ -562,7 +554,6 @@ window.ScrollTrigger = ScrollTrigger;
     return container;
   }
 
-  // ============================== BATCH RENDERING ==============================
   async function appendProfilesToContainer(gridElement, profiles, activeRenderId) {
     if (!gridElement || !profiles) return;
     gridElement.dataset.activeRenderId = activeRenderId;
@@ -613,7 +604,6 @@ window.ScrollTrigger = ScrollTrigger;
     return wrapper;
   }
 
-  // ============================== FILTER & SEARCH ENGINE ==============================
   function buildFuseIndex() {
     if (!DOM.searchForm) return;
 
@@ -858,7 +848,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  // ============================== MEDIA PROTECTION ==============================
   function bindMediaProtection() {
     document.querySelectorAll("img").forEach(img => {
       img.addEventListener("contextmenu", e => e.preventDefault());
@@ -866,7 +855,6 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // ============================== SEARCH SUGGESTIONS RENDERER ==============================
   function renderSearchSuggestions(query) {
     const suggestionsContainer = document.getElementById("search-suggestions");
     const clearBtn = document.getElementById("clear-search-btn");
@@ -962,8 +950,6 @@ window.ScrollTrigger = ScrollTrigger;
     suggestionsContainer.classList.remove("hidden");
   }
 
-
-// ============================== FULL LIGHTBOX MODAL (OPTIMIZED & NO UNDEFINED) ==============================
   function openLightboxForProfile(profile) {
     if (!profile) return;
 
@@ -1114,8 +1100,8 @@ window.ScrollTrigger = ScrollTrigger;
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
-      const lineIdToUse = profile.lineId || "ksLUWB89Y_";
-      const lineUrl = lineIdToUse.startsWith("http") ? lineIdToUse : `https://line.me/ti/p/~${lineIdToUse}`;
+      const lineIdToUse = (profile.lineId || "ksLUWB89Y_").replace(/^@/, "").trim();
+      const lineUrl = lineIdToUse.startsWith("http") ? lineIdToUse : `https://line.me/ti/p/${lineIdToUse.startsWith("%40") ? lineIdToUse : "@" + lineIdToUse}`;
 
       const stickyBtnWrapper = document.createElement("div");
       stickyBtnWrapper.id = "line-btn-sticky-wrapper";
@@ -1158,24 +1144,23 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-function removeJsonLdSchemas() {
-  // 🟢 เอา "dynamic-schema" ออก เพื่อรักษา Schema หลักที่ SSR สร้างมาจากหลังบ้านไว้ตลอดเวลา
-  const schemaIds = ["schema-jsonld-person", "schema-jsonld-list", "schema-jsonld-faq", "schema-jsonld-breadcrumb"];
-  schemaIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.remove();
-  });
-}
-
-  function updateSEOMetadata(profile = null, locationData = null) {
-  // 🟢 หากเป็นการโหลดหน้าเว็บครั้งแรกสุด (SSR) ให้ข้ามฟังก์ชันนี้ทันที เพื่อรักษา Schema & Meta Tags จาก SSR ไว้
-  if (isFirstLoad) {
-    isFirstLoad = false;
-    console.log("SEO: Preserving Server-Rendered Schema & Metadata.");
-    return;
+  function removeJsonLdSchemas() {
+    const schemaIds = ["dynamic-schema", "schema-jsonld-person", "schema-jsonld-list", "schema-jsonld-faq", "schema-jsonld-breadcrumb"];
+    schemaIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    });
   }
 
+  function updateSEOMetadata(profile = null, locationData = null) {
+    const currentPath = window.location.pathname.toLowerCase();
+    const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
 
+    if (isFirstLoad) {
+      isFirstLoad = false;
+      console.log("SEO: First load detected. Preserving server-rendered metadata.");
+      return;
+    }
 
     if (isHomePage) {
       document.title = DEFAULT_SEO.title;
@@ -1334,7 +1319,6 @@ function removeJsonLdSchemas() {
     link.setAttribute("href", href);
   }
 
-  // 🟢 แก้ไขเพื่อป้องกันการเอาพิกัดย่านเชียงใหม่ไปเขียนทับจังหวัดอื่นในฝั่ง Client
   function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
     try {
       const liveCountEl = document.getElementById("live-profile-count");
@@ -1366,7 +1350,6 @@ function removeJsonLdSchemas() {
     }
   }
 
-  // ============================== ROUTER (SPA ROUTING) ==============================
   async function handleRouteNavigation(isInitial = false) {
     let path = window.location.pathname.toLowerCase();
     
@@ -1530,7 +1513,6 @@ function removeJsonLdSchemas() {
     if (DOM.loadingPlaceholder) DOM.loadingPlaceholder.style.display = "none";
   }
 
-  // ============================== LIKE HANDLER ==============================
   window.handleLikeClick = async function (btnElement, profileId) {
     if (isLikeProcessing) return;
     isLikeProcessing = true;
@@ -1568,7 +1550,6 @@ function removeJsonLdSchemas() {
     setTimeout(() => { isLikeProcessing = false; }, 300);
   };
 
-  // ============================== GLOBAL SEARCH SUGGESTIONS & ACTION BINDINGS ==============================
   window.selectSuggestion = (slug, isProfile = false) => {
     const suggestionsEl = document.getElementById("search-suggestions");
     const inputEl = document.getElementById("search-keyword");
@@ -1606,7 +1587,6 @@ function removeJsonLdSchemas() {
     }
   };
 
-  // ============================== DOM INITIALIZATION & EVENTS ==============================
   document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 แอปพลิเคชัน First Model Hub กำลังเริ่มต้นทำงาน...");
 
@@ -1634,7 +1614,6 @@ function removeJsonLdSchemas() {
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
-    // Theme Toggle Handler
     (function initTheme() {
       const btns = document.querySelectorAll(".theme-toggle-btn");
       const icons = document.querySelectorAll(".theme-toggle-icon");
@@ -1662,7 +1641,6 @@ function removeJsonLdSchemas() {
       });
     })();
 
-    // Sidebar Mobile Menu Handler
     (function initMobileSidebar() {
       const toggleBtn = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar-menu");
@@ -1685,7 +1663,6 @@ function removeJsonLdSchemas() {
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
     })();
 
-    // Global Event Delegation for Cards, Likes & Lightbox
     document.body.addEventListener("click", e => {
       const target = e.target;
 
@@ -1743,7 +1720,6 @@ function removeJsonLdSchemas() {
       }
     });
 
-    // Escape Key Listener
     document.addEventListener("keydown", e => {
       if (e.key === "Escape" && STATE.currentProfileSlug) {
         closeLightboxModal(true);
@@ -1751,7 +1727,6 @@ function removeJsonLdSchemas() {
       }
     });
 
-    // Safe-Play Accordion Toggles
     (function initAccordions() {
       const items = document.querySelectorAll(".rule-item");
       items.forEach(item => {
@@ -1773,7 +1748,6 @@ function removeJsonLdSchemas() {
       });
     })();
 
-    // Star Rating Form Handler
     (function initStarRating() {
       const container = document.querySelector(".star-rating-input-container");
       const ratingInput = document.getElementById("review-rating-value");
@@ -1795,7 +1769,6 @@ function removeJsonLdSchemas() {
       }
     })();
 
-    // Review Form Submit Listener (ยิงบันทึกเข้า Supabase ตาราง reviews)
     (function initReviewForm() {
       const form = document.getElementById("review-form");
       if (!form) return;
@@ -1852,7 +1825,6 @@ function removeJsonLdSchemas() {
       });
     })();
 
-    // Search Controls Initial Bindings
     DOM.searchInput?.addEventListener("input", e => {
       clearTimeout(window.searchTimeout);
       const val = e.target.value;
@@ -1877,45 +1849,13 @@ function removeJsonLdSchemas() {
       applyUltimateFilters(true);
     });
 
-    // 5-Click Secret Admin Sitemap Downloader
-    (function initSecretAdminMenu() {
-      const clickTrigger = document.createElement("div");
-      Object.assign(clickTrigger.style, {
-        position: "fixed", bottom: "0", right: "0", width: "60px", height: "60px", zIndex: "99999", cursor: "pointer", background: "transparent"
-      });
-      document.body.appendChild(clickTrigger);
+    // 🟢 REMOVED: ลบฟังก์ชัน initSecretAdminMenu() ที่แอบสร้าง div ล่องหน 60x60px ออกอย่างสมบูรณ์
 
-      let clicks = 0;
-      let timer;
-      clickTrigger.addEventListener("click", e => {
-        e.preventDefault();
-        clicks++;
-        clearTimeout(timer);
-        timer = setTimeout(() => { clicks = 0; }, 1500);
-
-        if (clicks >= 5) {
-          clicks = 0;
-          if (confirm(`⚙️ Admin Menu:\nพบข้อมูล ${STATE.allProfiles.length} รายการ\nต้องการดาวน์โหลด sitemap.xml ใช่ไหม?`)) {
-            const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-              STATE.allProfiles.map(p => `  <url><loc>${CONFIG.SITE_URL}/sideline/${p.slug}</loc></url>\n`).join("") +
-              `</urlset>`;
-            const blob = new Blob([xml], { type: "application/xml" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "sitemap.xml";
-            link.click();
-          }
-        }
-      });
-    })();
-
-    // Initial Execution & Route Hydration
     await fetchProfilesData();
     await handleRouteNavigation(true);
     updateActiveNavLinks();
     hideGlobalLoader();
 
-    // 🟢 ตรวจสอบไฟล์ sw.js ก่อนลงทะเบียน PWA Service Worker
     if ('serviceWorker' in navigator) {
       const registerSW = () => {
         fetch('/sw.js', { method: 'HEAD' })
@@ -1937,7 +1877,6 @@ function removeJsonLdSchemas() {
       }
     }
 
-    // Listen to Browser Back/Forward Buttons
     window.addEventListener("popstate", async () => {
       await handleRouteNavigation(false);
       updateActiveNavLinks();

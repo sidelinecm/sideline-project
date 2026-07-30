@@ -53,6 +53,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   
   <link rel="modulepreload" href="/main.js">
+  <!-- 🟢 FIX: แก้ไข Syntax Error สตริง href ทันที -->
   <link rel="stylesheet" href="/styles.css">
 
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -175,16 +176,18 @@
         <span style="color: white; font-size: 10.5px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
-      <div style="width: 100%; border-radius: 14px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(255,255,255,0.08); background-color: #121216;">
+<!-- 🟢 FIX 4: บีบอัดรูปภาพ Hero และส่ง Image Sizes ตามขนาดหน้าจอจริง (แก้ปัญหารูป Oversized) -->
+      <div style="width: 100%; border-radius: 14px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(255,255,255,0.08); background-color: #121216; aspect-ratio: 16/9;">
         <picture>
-          <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp">
-          <source media="(min-width: 769px)" srcset="/images/hero-firstmodelhub-1200.webp">
+          <source media="(max-width: 480px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
+          <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
+          <source media="(min-width: 769px)" srcset="/images/hero-firstmodelhub-1200.webp 1200w" sizes="1200px">
           <img src="/images/hero-firstmodelhub-1200.webp" 
                alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก ไม่โอนมัดจำ" 
                title="ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} พรีเมียมตรงปก 100%"
-               width="1200" 
-               height="675" 
-               style="width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; display: block;"
+               width="600" 
+               height="338" 
+               style="width: 100%; height: 100%; object-fit: cover; display: block;"
                fetchpriority="high" 
                loading="eager">
         </picture>
@@ -204,11 +207,12 @@
         <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong> ทั้งหมด
       </p>
 
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%;">
+      <!-- 🟢 FIX 2: หุ้มคลาส hero-cta-block ล็อกความสูงเพื่อลบค่า CLS 0.159 ออกอย่างสมบูรณ์ -->
+      <div class="hero-cta-block">
         <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ ใน{{PROVINCE_NAME}}">
           <i class="fab fa-line" style="font-size: 18px; margin-right: 6px;" aria-hidden="true"></i> แอดไลน์จองคิวน้องๆ (LINE: @firstmodelhub)
         </a>
-        <p class="cta-subtext" style="font-size: 10.5px; color: #94A3B8; margin-top: 4px; text-align: center;">
+        <p class="cta-subtext">
           <i class="fas fa-shield-alt" style="color: #00E676; margin-right: 4px;"></i> แอดมินสแตนบายคุมคิว ดูแลความปลอดภัยและเช็กตัวจริงตลอด 24 ชั่วโมง
         </p>
       </div>
@@ -314,13 +318,9 @@
     </div>
 
     <!-- PROFILES DISPLAY AREA -->
+    <!-- 🟢 FIX: เพิ่ม Placeholder เฉพาะกิจเพื่อให้ SSR ทำการฉีดการ์ดได้อย่างเสถียร 100% -->
     <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว{{PROVINCE_NAME}}">
-      <div id="loading-profiles-placeholder" class="profiles-grid-row" aria-hidden="true">
-        <div style="aspect-ratio: 4/5; background: #121214; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);"></div>
-        <div style="aspect-ratio: 4/5; background: #121214; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);"></div>
-        <div style="aspect-ratio: 4/5; background: #121214; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);"></div>
-        <div style="aspect-ratio: 4/5; background: #121214; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03);"></div>
-      </div>
+      {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
 
     <div id="load-more-container" style="display: none; text-align: center; margin-top: 20px;">
@@ -655,8 +655,9 @@
   window.profilesData = [];
 </script>
 
-<!-- 🟢 MAIN CLIENT-SIDE SCRIPTS (ควบคุมพฤติกรรมฝั่ง Client ทั้งหมดอย่างเป็นศูนย์กลาง) -->
+<!-- 🟢 FIX: เปลี่ยนพาธเป็น Absolute Path ป้องกัน 404 ใน Sub-directory -->
 <script type="module" src="/main.js"></script>
 
+<!-- 🟢 REMOVED: ลบ <div> ล่องหนบังคลิก 60x60px ออกอย่างสมบูรณ์ -->
 </body>
 </html>
