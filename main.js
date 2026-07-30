@@ -26,7 +26,7 @@ window.ScrollTrigger = ScrollTrigger;
       LIKED_PROFILES: "liked_profiles"
     },
     SITE_URL: "https://firstmodelhub.com",
-    DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/apple-touch-icon.png"
+    DEFAULT_OG_IMAGE: "/images/apple-touch-icon.png"
   };
 
   const PROVINCE_ZONES_MAP = {
@@ -58,7 +58,6 @@ window.ScrollTrigger = ScrollTrigger;
   let supabaseClient = null;
   let fuseInstance = null;
   let isLikeProcessing = false;
-  let isFirstLoad = true;
 
   const DEFAULT_SEO = {
     title: "ไซด์ไลน์ สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปกทั่วไทย 2026 | First Model Hub",
@@ -67,6 +66,8 @@ window.ScrollTrigger = ScrollTrigger;
     canonical: "https://firstmodelhub.com/",
     ogImage: "https://firstmodelhub.com/images/apple-touch-icon.png"
   };
+
+  let isFirstLoad = true;
 
   function sanitizeName(rawName) {
     if (!rawName || typeof rawName !== "string") return "";
@@ -556,15 +557,27 @@ window.ScrollTrigger = ScrollTrigger;
   async function appendProfilesToContainer(gridElement, profiles, activeRenderId) {
     if (!gridElement || !profiles) return;
     gridElement.dataset.activeRenderId = activeRenderId;
+    gridElement.innerHTML = "";
 
     const fragment = document.createDocumentFragment();
+    const batchSize = profiles.length > 20 ? 4 : 8;
+
     for (let i = 0; i < profiles.length; i++) {
+      if (activeRenderId !== undefined && Number(gridElement.dataset.activeRenderId) !== activeRenderId) {
+        return;
+      }
+
       const card = createProfileCardElement(profiles[i], i);
       fragment.appendChild(card);
+
+      if ((i + 1) % batchSize === 0 || i === profiles.length - 1) {
+        gridElement.appendChild(fragment);
+        await new Promise(res => requestAnimationFrame(res));
+        if (profiles.length > 40) {
+          await new Promise(res => setTimeout(res, 10));
+        }
+      }
     }
-    
-    gridElement.innerHTML = "";
-    gridElement.appendChild(fragment);
   }
 
   function createProvinceSectionElement(provinceKey, provinceName, profiles) {
@@ -602,7 +615,7 @@ window.ScrollTrigger = ScrollTrigger;
       keys: [
         { name: "searchString", weight: 1.0 },
         { name: "name", weight: 0.8 },
-        { name: "displayName", weight: 0.8 },
+        { name: "englishName", weight: 0.8 },
         { name: "id", weight: 0.9 },
         { name: "provinceNameThai", weight: 0.5 },
         { name: "styleTags", weight: 0.4 }
@@ -739,38 +752,23 @@ window.ScrollTrigger = ScrollTrigger;
   function renderProfilesGrid(profiles, isFilteredView) {
     if (!DOM.profilesDisplayArea) return;
 
-    // 🟢 [SEO & SSR Protection]: หากเป็นการโหลดหน้าเว็บครั้งแรก (isFirstLoad = true) 
-    // และมีเนื้อหาการ์ดที่ SSR สร้างมาจากเซิร์ฟเวอร์แล้ว ให้คงเนื้อหาเดิมไว้ 100% 
-    // ห้ามเคลียร์ลบ DOM เด็ดขาด (ป้องกัน Googlebot เห็นหน้าว่าง/หน้าสีดำ และลดค่า CLS)
-    const hasSSRContent = DOM.profilesDisplayArea.querySelector('.profile-card-new-container');
-    if (isFirstLoad && hasSSRContent) {
-      console.log("⚡ [SEO Protection] คงเนื้อหา SSR ฝั่งเซิร์ฟเวอร์ไว้สมบูรณ์ ไม่ล้าง DOM");
-      bindMediaProtection();
-      isFirstLoad = false;
-      return;
-    }
-
-    // เมื่อผู้ใช้เริ่มกดตัวกรอง/พิมพ์ค้นหาจริง จึงเปลี่ยน Render ID และอัปเดตหน้าจอ
     STATE.renderId = (STATE.renderId || 0) + 1;
     const currentRenderId = STATE.renderId;
 
     DOM.noResultsMessage?.classList.add("hidden");
     DOM.fetchErrorMessage?.classList.add("hidden");
 
-    // ควบคุมการแสดงผลส่วนโปรไฟล์ VIP แนะนำ (Featured Profiles) เฉพาะหน้าแรกหลักเท่านั้น
     if (DOM.featuredSection) {
-      const path = window.location.pathname.toLowerCase();
-      const isHomePage = (path === "/" || path === "" || path.endsWith("/index.html")) && !isFilteredView;
-      const featuredProfiles = STATE.allProfiles.filter(p => p.isfeatured);
+      const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
+      const featuredCount = STATE.allProfiles.filter(p => p.isfeatured).length;
+      DOM.featuredSection.classList.toggle("hidden", !isHomePage || featuredCount === 0);
 
-      DOM.featuredSection.classList.toggle("hidden", !isHomePage || featuredProfiles.length === 0);
-
-      if (isHomePage && featuredProfiles.length > 0 && DOM.featuredContainer && DOM.featuredContainer.children.length === 0) {
+      if (isHomePage && featuredCount > 0 && DOM.featuredContainer && DOM.featuredContainer.children.length === 0) {
+        const featuredProfiles = STATE.allProfiles.filter(p => p.isfeatured);
         appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
       }
     }
 
-    // กรณีค้นหา/กรองแล้วไม่พบข้อมูลน้องๆ
     if (!profiles || profiles.length === 0) {
       DOM.profilesDisplayArea.innerHTML = "";
       DOM.noResultsMessage?.classList.remove("hidden");
@@ -1353,120 +1351,118 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   async function handleRouteNavigation(isInitial = false) {
-  let path = window.location.pathname.toLowerCase();
-  
-  if (path.length > 1 && path.endsWith("/")) {
-    path = path.slice(0, -1);
-  }
-  const cleanPath = path.replace(/\/+$/, "");
-
-  const isIndexPage = cleanPath === "" || cleanPath === "/" || cleanPath.endsWith("/index.html");
-  const isProfilesPage = cleanPath === "/profiles" || cleanPath.endsWith("/profiles.html");
-
-  const staticPages = ["/blog", "/about", "/faq", "/locations", "/contact", "/terms-of-service", "/privacy-policy", "/policy"];
-  const isStaticPage = !isIndexPage && !isProfilesPage && (
-    ((cleanPath.endsWith(".html") || cleanPath.endsWith(".htm")) && !cleanPath.includes("index.html") && !cleanPath.includes("profiles.html")) ||
-    staticPages.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))
-  );
-
-  // 🟢 1. หากเป็นหน้า Static (เช่น /about, /faq) ให้ปิดพื้นที่แสดงโปรไฟล์
-  if (isStaticPage) {
-    closeLightboxModal(false);
-    DOM.profilesDisplayArea?.classList.add("hidden");
-    DOM.featuredSection?.classList.add("hidden");
-    return;
-  }
-
-  DOM.profilesDisplayArea?.classList.remove("hidden");
-  DOM.featuredSection?.classList.remove("hidden");
-
-  // 🟢 2. ตรวจสอบ Route หน้าโปรไฟล์เดี่ยว (/sideline/xxx, /profile/xxx)
-  const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-  if (profileMatch) {
-    const slug = decodeURIComponent(profileMatch[1]);
-    STATE.currentProfileSlug = slug;
-
-    let foundProfile = STATE.allProfiles.find(p => (p.slug || "").toLowerCase() === slug.toLowerCase() || String(p.id) === slug);
+    let path = window.location.pathname.toLowerCase();
     
-    // หากหาใน Memory ไม่เจอ ให้ลองดึงข้อมูลจาก Database
-    if (!foundProfile) {
-      foundProfile = await fetchSingleProfileBySlug(slug);
+    if (path.length > 1 && path.endsWith("/")) {
+      path = path.slice(0, -1);
     }
 
-    if (foundProfile) {
-      openLightboxForProfile(foundProfile);
-    } else if (isInitial) {
-      // หาก SSR มีการเปิด Lightbox มาแล้ว ให้คงหน้าไว้ ห้ามเด้ง Redirect กลับ
-      const isLightboxActiveSSR = document.getElementById("lightbox")?.classList.contains("active");
-      if (!isLightboxActiveSSR) {
+    const cleanPath = path.replace(/\/+$/, "");
+
+    const isIndexPage = 
+      cleanPath === "" || 
+      cleanPath === "/" || 
+      cleanPath.endsWith("/index.html") || 
+      cleanPath.endsWith("/index.htm") || 
+      cleanPath.includes("index.html");
+
+    const isProfilesPage = 
+      cleanPath === "/profiles" || 
+      cleanPath.endsWith("/profiles.html");
+
+    const staticPages = [
+      "/blog", "/about", "/faq", "/locations", 
+      "/contact", "/terms-of-service", "/privacy-policy", "/policy"
+    ];
+
+    const isStaticPage = !isIndexPage && !isProfilesPage && (
+      ((cleanPath.endsWith(".html") || cleanPath.endsWith(".htm")) && !cleanPath.includes("index.html") && !cleanPath.includes("profiles.html")) ||
+      staticPages.some(p => cleanPath === p || cleanPath.startsWith(p + "/"))
+    );
+
+    if (isStaticPage) {
+      console.log(`🛑 ตรวจพบหน้า Static (${path}) ข้ามการทำงาน Router SPA`);
+      closeLightboxModal(false);
+      DOM.profilesDisplayArea?.classList.add("hidden");
+      DOM.featuredSection?.classList.add("hidden");
+      return;
+    }
+
+    DOM.profilesDisplayArea?.classList.remove("hidden");
+    DOM.featuredSection?.classList.remove("hidden");
+
+    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+    if (profileMatch) {
+      const slug = decodeURIComponent(profileMatch[1]);
+      STATE.currentProfileSlug = slug;
+
+      let foundProfile = STATE.allProfiles.find(p => (p.slug || "").toLowerCase() === slug.toLowerCase());
+      if (!foundProfile && !isInitial) {
+        foundProfile = await fetchSingleProfileBySlug(slug);
+      }
+
+      if (foundProfile) {
+        openLightboxForProfile(foundProfile);
+      } else if (isInitial) {
         history.replaceState(null, "", "/");
         closeLightboxModal(false);
         STATE.currentProfileSlug = null;
       }
+      return;
     }
-    return;
-  }
 
-  // หากไม่ใช่หน้าโปรไฟล์เดี่ยว ค่อยสั่งปิด Lightbox
-  if (!isInitial) {
-    closeLightboxModal(false);
-  }
+    if (isProfilesPage) {
+      STATE.currentProfileSlug = null;
+      closeLightboxModal(false);
 
-  // 🟢 3. ตรวจสอบ Route หน้าการกรองรวมทุกโปรไฟล์ (/profiles)
-  if (isProfilesPage) {
+      if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+
+      applyUltimateFilters(false);
+
+      const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
+      replaceDomPlaceholders("ทั่วไทย", activeCount, "national");
+      return;
+    }
+
+    const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+    if (locationMatch) {
+      let provinceSlug = decodeURIComponent(locationMatch[1]).toLowerCase();
+      if (provinceSlug === "chiang_mai") provinceSlug = "chiangmai";
+      STATE.currentProfileSlug = null;
+      closeLightboxModal(false);
+
+      if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
+
+      if (isInitial) {
+        applyUltimateFilters(false);
+        const provName = STATE.provincesMap.get(provinceSlug) || provinceSlug;
+        const matchedProfiles = STATE.allProfiles.filter(p => p.provinceKey === provinceSlug || (provinceSlug === "chiangmai" && p.provinceKey === "chiang_mai"));
+
+        updateSEOMetadata(null, {
+          provinceName: provName,
+          canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceSlug}`,
+          profiles: matchedProfiles
+        });
+
+        replaceDomPlaceholders(provName, matchedProfiles.length || 50, provinceSlug);
+      }
+      return;
+    }
+
     STATE.currentProfileSlug = null;
     closeLightboxModal(false);
-
-    if (DOM.provinceSelect) DOM.provinceSelect.value = "";
-
-    applyUltimateFilters(false);
-
-    const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
-    replaceDomPlaceholders("ทั่วไทย", activeCount, "national");
-    return;
-  }
-
-  // 🟢 4. ตรวจสอบ Route หน้าจังหวัด (/location/xxx)
-  const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
-  if (locationMatch) {
-    let provinceSlug = decodeURIComponent(locationMatch[1]).toLowerCase();
-    if (provinceSlug === "chiang_mai") provinceSlug = "chiangmai";
-    STATE.currentProfileSlug = null;
-    closeLightboxModal(false);
-
-    if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
 
     if (isInitial) {
       applyUltimateFilters(false);
-      const provName = STATE.provincesMap.get(provinceSlug) || provinceSlug;
-      const matchedProfiles = STATE.allProfiles.filter(p => p.provinceKey === provinceSlug || (provinceSlug === "chiangmai" && p.provinceKey === "chiang_mai"));
+      updateSEOMetadata(null, null);
 
-      updateSEOMetadata(null, {
-        provinceName: provName,
-        canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceSlug}`,
-        profiles: matchedProfiles
-      });
-
-      replaceDomPlaceholders(provName, matchedProfiles.length || 50, provinceSlug);
+      const currentProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "chiangmai";
+      const currentProvName = STATE.provincesMap.get(currentProvKey) || "เชียงใหม่";
+      const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
+      
+      replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
     }
-    return;
   }
-
-  // 🟢 5. Default: หน้าหลัก (Homepage)
-  STATE.currentProfileSlug = null;
-  closeLightboxModal(false);
-
-  if (isInitial) {
-    applyUltimateFilters(false);
-    updateSEOMetadata(null, null);
-
-    const currentProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "chiangmai";
-    const currentProvName = STATE.provincesMap.get(currentProvKey) || "เชียงใหม่";
-    const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
-    
-    replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
-  }
-}
 
   async function fetchSingleProfileBySlug(slug) {
     if (!window.supabase) return null;
@@ -1617,9 +1613,6 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.resetSearchBtn = document.getElementById("reset-search-btn");
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
-
-    // 🟢 บังคับปิด Lightbox และปลดล็อก Body ป้องกันอาการสกอร์ลไม่ได้ในครั้งแรก
-    closeLightboxModal(false);
 
     (function initTheme() {
       const btns = document.querySelectorAll(".theme-toggle-btn");
@@ -1855,6 +1848,8 @@ window.ScrollTrigger = ScrollTrigger;
       if (suggestionsEl) suggestionsEl.classList.add("hidden");
       applyUltimateFilters(true);
     });
+
+    // 🟢 REMOVED: ลบฟังก์ชัน initSecretAdminMenu() ที่แอบสร้าง div ล่องหน 60x60px ออกอย่างสมบูรณ์
 
     await fetchProfilesData();
     await handleRouteNavigation(true);
