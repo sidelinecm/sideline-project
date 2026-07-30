@@ -949,7 +949,7 @@ export default async (req, context) => {
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-      "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' https: 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com; font-src 'self' https: data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.google-analytics.com; frame-src 'self' https:;"
+"Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';"
     };
 
     PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: Date.now() });

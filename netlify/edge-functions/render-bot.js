@@ -43,10 +43,7 @@ export default async (request, context) => {
     if (!isBot) return context.next();
 
     try {
-        const pathParts = url.pathname.split('/').filter(Boolean);
-        if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
-        
-        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
+      const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
         if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
