@@ -407,6 +407,8 @@ export default async (req, context) => {
       ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
       : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
     
+    const enUrl = `${canonUrl}/en`;
+
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
 
@@ -754,6 +756,7 @@ export default async (req, context) => {
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
 
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", enUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     
@@ -775,10 +778,11 @@ export default async (req, context) => {
       );
     }
 
+    // 🟢 FIX: ลบก้อน #featured-profiles ออกจากหน้าจังหวัดอย่างสะอาดสะอ้าน ไม่เหลือแท็กขยะใน DOM
     if (!isNationalHome) {
       rawHtml = rawHtml.replace(
         /<section id="featured-profiles"[\s\S]*?<\/section>/i,
-        `<section id="featured-profiles" class="hidden" style="display:none !important;"></section>`
+        ""
       );
     }
 
@@ -802,6 +806,7 @@ export default async (req, context) => {
       </div>
     `;
 
+    // 🟢 FIX: แสดงเฉพาะการ์ดโปรไฟล์ของจังหวัดนั้นๆ ป้องกัน Content Pollution ในหน้าจังหวัด
     const displayAreaInnerHtml = `
       ${liveCountChipHtml}
       <div class="section-content-wrapper" style="margin-top: 16px;">
@@ -843,8 +848,11 @@ export default async (req, context) => {
       styleTags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
-    if (/window\.profilesData\s*=/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[\s*\];?/i, `window.profilesData = ${hydratedProfilesData};`);
+    // 🟢 FIX: รองรับทั้ง Placeholder {{SSR_PROFILES_JSON}} และ Regex การเว้นบรรทัด
+    if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
+    } else if (/window\.profilesData\s*=\s*/i.test(rawHtml)) {
+      rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[[\s\S]*?\];?/i, `window.profilesData = ${hydratedProfilesData};`);
     } else {
       rawHtml = rawHtml.replace(/<\/head>/i, `<script>window.profilesData = ${hydratedProfilesData};</script>\n</head>`);
     }
