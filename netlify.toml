@@ -15,7 +15,8 @@
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
+    # 🟢 FIX: เปลี่ยนจาก DENY เป็น SAMEORIGIN เพื่อให้ Google Search Console สแกนผ่าน 100%
+    X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
@@ -23,7 +24,7 @@
     Cache-Control = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400"
     Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com;"
 
-# 🟢 ตั้งค่าแคช CSS และ JS ให้แสดงผลเร็วฉับไว
+# 🟢 ตั้งค่าแคช CSS และ JS
 [[headers]]
   for = "/*.css"
   [headers.values]
@@ -52,7 +53,7 @@
   function = "sitemap"
   path = "/sitemap.xml"
 
-# 🟢 FIX: เปลี่ยนการแมป /sideline/* ให้วิ่งเข้า ssr-province เพื่อทำ SSR สดๆ ทุกหน้าโปรไฟล์
+# 🟢 แมป /sideline/* เข้ากับ ssr-province (หรือเปลี่ยนเป็น render-bot หากต้องการใช้ render-bot.js)
 [[edge_functions]]
   function = "ssr-province"
   path = "/sideline/*"
