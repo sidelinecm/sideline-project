@@ -1,3 +1,9 @@
+/**
+ * [ SYSTEM SSR ENGINE - PROD-READY OPTIMIZED ]
+ * Project: First Model Hub - Edge Function Server-Side Renderer
+ * Year: 2026 Core Engine Compliant (Unified Purple Theme Edition)
+ */
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
@@ -14,7 +20,7 @@ const CONFIG = {
     try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
   },
   get SUPABASE_KEY() {
-    try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
+    try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA8NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA8NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "First Model Hub",
@@ -105,10 +111,10 @@ function verifyHostname(req) {
 }
 
 const escapeHTML = str => (str !== null && str !== undefined) ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) : "";
-const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
+const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim().replace(/\s+/g, " ") : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
+const optimizeImg = (hostUrl, path, width = 350, height = 437) => {
   if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
@@ -118,6 +124,18 @@ const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
   }
   if (path.startsWith("http")) return path;
   return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=75&format=avif`;
+};
+
+const optimizeOgImg = (hostUrl, path) => {
+  if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
+  if (path.includes("res.cloudinary.com")) {
+    if (path.includes("/upload/")) {
+      return path.replace("/upload/", `/upload/f_jpg,q_auto:good,w_1200,h_630,c_fill,g_face/`);
+    }
+    return path;
+  }
+  if (path.startsWith("http")) return path;
+  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=1200&height=630&resize=cover&quality=85&format=jpeg`;
 };
 
 const formatDateSSR = dateStr => {
@@ -228,24 +246,36 @@ function buildErrorPage(code, title, message) {
 </html>`, { status: code, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=60" } });
 }
 
-const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
-  const priceVal = (profile.rate || "0").toString().replace(/\D/g, "");
+const generateServiceSchema = (profile, province, targetUrl, hostUrl) => {
+  const priceVal = Number((profile.rate || "1500").toString().replace(/\D/g, "")) || 1500;
   const cleanName = (profile.name || "").replace(/^น้อง/, "").trim();
+  const displayName = `น้อง${cleanName}`;
+  const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (profile.availability || "").toLowerCase().includes(kw));
+
   return {
-    "@type": "Person",
-    "@id": `${targetUrl}/#person`,
-    "name": `น้อง${cleanName}`,
-    "url": targetUrl,
-    "image": optimizeImg(hostUrl, profile.imagePath, 1200, 630),
-    "description": profile.description || `โปรไฟล์แนะนำน้อง${cleanName} สาวรับงานพิกัด ${profile.location || province} สไตล์เพื่อนเที่ยวดูแลดี ฟิวแฟน ตรงปก 100% ไม่มัดจำ บน First Model Hub`,
-    "jobTitle": "Freelance Companion & Entertainer",
-    "gender": "Female",
-    "knowsAbout": ["Companion Services", "Tour Guide Services", "Entertainment Services"],
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": profile.location || province,
-      "addressRegion": province,
-      "addressCountry": "TH"
+    "@type": "Service",
+    "@id": `${targetUrl}/#service`,
+    "name": `บริการเพื่อนเที่ยวฟิวแฟน ${displayName}`,
+    "serviceType": "Companion & Entertainment Service",
+    "description": profile.description || `โปรไฟล์แนะนำ${displayName} สาวรับงานพิกัด ${profile.location || province} สไตล์เพื่อนเที่ยวดูแลดี ฟิวแฟน ตรงปก 100% ไม่มัดจำ บน First Model Hub`,
+    "provider": {
+      "@type": "Person",
+      "@id": `${targetUrl}/#person`,
+      "name": displayName,
+      "url": targetUrl,
+      "image": optimizeOgImg(hostUrl, profile.imagePath),
+      "jobTitle": "Freelance Companion & Entertainer",
+      "gender": "Female",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": profile.location || province,
+        "addressRegion": province,
+        "addressCountry": "TH"
+      }
+    },
+    "areaServed": {
+      "@type": "AdministrativeArea",
+      "name": province
     },
     "offers": {
       "@type": "Offer",
@@ -253,9 +283,7 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
       "price": priceVal,
       "priceCurrency": "THB",
       "priceValidUntil": "2027-12-31",
-      "availability": !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (profile.availability || "").toLowerCase().includes(kw))
-        ? "https://schema.org/InStock"
-        : "https://schema.org/SoldOut",
+      "availability": isAvailable ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
       "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
     }
   };
@@ -339,6 +367,7 @@ export default async (req, context) => {
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let matchedProfile = null;
+
     if (profileSlug) {
       const { data: profileData, error: profileErr } = await supabase
         .from("profiles")
@@ -410,7 +439,7 @@ export default async (req, context) => {
     const enUrl = `${canonUrl}/en`;
 
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
-    const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
+    const metaImgUrl = mainImgPath ? optimizeOgImg(hostUrl, mainImgPath) : `${hostUrl}/images/apple-touch-icon.png`;
 
     const dbReviews = reviewsRes?.data || [];
     let finalReviews = [];
@@ -535,7 +564,7 @@ export default async (req, context) => {
 
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
-      schemaGraph.push(generatePersonSchema(matchedProfile, provinceThaiName, profileUrl, hostUrl));
+      schemaGraph.push(generateServiceSchema(matchedProfile, provinceThaiName, profileUrl, hostUrl));
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${profileUrl}/#breadcrumb`,
@@ -571,7 +600,7 @@ export default async (req, context) => {
               "@type": "Person",
               "name": `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}`,
               "url": `${hostUrl}/sideline/${p.slug || p.id}`,
-              "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
+              "image": optimizeOgImg(hostUrl, p.imagePath),
               "jobTitle": "Companion",
               "workLocation": p.location || provinceThaiName,
               "description": `สาวรับงาน${provinceThaiName} พิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัย ไม่โอนมัดจำ`
@@ -615,7 +644,7 @@ export default async (req, context) => {
       const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
       
       const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
-      const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
+      const imgUrl = optimizeImg(hostUrl, p.imagePath, 350, 437);
 
       const featuredBadge = p.isfeatured
         ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
@@ -778,7 +807,6 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 FIX: ลบก้อน #featured-profiles ออกจากหน้าจังหวัดอย่างสะอาดสะอ้าน ไม่เหลือแท็กขยะใน DOM
     if (!isNationalHome) {
       rawHtml = rawHtml.replace(
         /<section id="featured-profiles"[\s\S]*?<\/section>/i,
@@ -806,7 +834,6 @@ export default async (req, context) => {
       </div>
     `;
 
-    // 🟢 FIX: แสดงเฉพาะการ์ดโปรไฟล์ของจังหวัดนั้นๆ ป้องกัน Content Pollution ในหน้าจังหวัด
     const displayAreaInnerHtml = `
       ${liveCountChipHtml}
       <div class="section-content-wrapper" style="margin-top: 16px;">
@@ -848,7 +875,6 @@ export default async (req, context) => {
       styleTags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
-    // 🟢 FIX: รองรับทั้ง Placeholder {{SSR_PROFILES_JSON}} และ Regex การเว้นบรรทัด
     if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
     } else if (/window\.profilesData\s*=\s*/i.test(rawHtml)) {
