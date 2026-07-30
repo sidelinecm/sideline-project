@@ -50,13 +50,13 @@
 # ==============================================================================
 # 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
+
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
-# 🟢 รวมระบบเรนเดอร์ทั้งหมดไว้ที่ ssr-province เพื่อให้บอทและคนเห็นหน้าเว็บตรงกัน 100%
 [[edge_functions]]
-  function = "ssr-province"
+  function = "render-bot"
   path = "/sideline/*"
 
 [[edge_functions]]
@@ -70,15 +70,6 @@
 [[edge_functions]]
   function = "ssr-province"
   path = "/index.html"
-
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/profiles"
-
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/profiles.html"
-
 # ==============================================================================
 # 3. REDIRECTS & REWRITES
 # ==============================================================================

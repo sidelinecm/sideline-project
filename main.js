@@ -26,7 +26,7 @@ window.ScrollTrigger = ScrollTrigger;
       LIKED_PROFILES: "liked_profiles"
     },
     SITE_URL: "https://firstmodelhub.com",
-    DEFAULT_OG_IMAGE: "/images/apple-touch-icon.png"
+    DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/apple-touch-icon.png"
   };
 
   const PROVINCE_ZONES_MAP = {
@@ -58,6 +58,7 @@ window.ScrollTrigger = ScrollTrigger;
   let supabaseClient = null;
   let fuseInstance = null;
   let isLikeProcessing = false;
+  let isFirstLoad = true;
 
   const DEFAULT_SEO = {
     title: "ไซด์ไลน์ สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปกทั่วไทย 2026 | First Model Hub",
@@ -66,8 +67,6 @@ window.ScrollTrigger = ScrollTrigger;
     canonical: "https://firstmodelhub.com/",
     ogImage: "https://firstmodelhub.com/images/apple-touch-icon.png"
   };
-
-  let isFirstLoad = true;
 
   function sanitizeName(rawName) {
     if (!rawName || typeof rawName !== "string") return "";
@@ -555,19 +554,18 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   async function appendProfilesToContainer(gridElement, profiles, activeRenderId) {
-  if (!gridElement || !profiles) return;
-  gridElement.dataset.activeRenderId = activeRenderId;
+    if (!gridElement || !profiles) return;
+    gridElement.dataset.activeRenderId = activeRenderId;
 
-  // สร้างแม็ปครั้งเดียว นำขึ้นแสดงผลทันทีแบบ Synchronous
-  const fragment = document.createDocumentFragment();
-  for (let i = 0; i < profiles.length; i++) {
-    const card = createProfileCardElement(profiles[i], i);
-    fragment.appendChild(card);
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < profiles.length; i++) {
+      const card = createProfileCardElement(profiles[i], i);
+      fragment.appendChild(card);
+    }
+    
+    gridElement.innerHTML = "";
+    gridElement.appendChild(fragment);
   }
-  
-  gridElement.innerHTML = ""; // ล้างเฉพาะเมื่อจะใส่อันใหม่พร้อมกันทีเดียว
-  gridElement.appendChild(fragment); // ใส่ทีเดียวจบ ไม่ต้องติด await loop
-}
 
   function createProvinceSectionElement(provinceKey, provinceName, profiles) {
     const wrapper = document.createElement("div");
@@ -604,7 +602,7 @@ window.ScrollTrigger = ScrollTrigger;
       keys: [
         { name: "searchString", weight: 1.0 },
         { name: "name", weight: 0.8 },
-        { name: "englishName", weight: 0.8 },
+        { name: "displayName", weight: 0.8 },
         { name: "id", weight: 0.9 },
         { name: "provinceNameThai", weight: 0.5 },
         { name: "styleTags", weight: 0.4 }
@@ -738,24 +736,22 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
+  function renderProfilesGrid(profiles, isFilteredView) {
+    if (!DOM.profilesDisplayArea) return;
 
-function renderProfilesGrid(profiles, isFilteredView) {
-  if (!DOM.profilesDisplayArea) return;
+    const hasSSRContent = DOM.profilesDisplayArea.querySelector('.profile-card-new-container');
+    if (isFirstLoad && hasSSRContent && !isFilteredView) {
+      console.log("⚡ [SEO Protection] คงเนื้อหา SSR ไว้สำหรับ Googlebot ไม่ล้างหน้าจอ");
+      bindMediaProtection();
+      isFirstLoad = false;
+      return;
+    }
 
-  const hasSSRContent = DOM.profilesDisplayArea.querySelector('.profile-card-new-container');
-  if (isFirstLoad && hasSSRContent && !isFilteredView) {
-    console.log("⚡ [SEO Protection] คงเนื้อหา SSR ไว้สำหรับ Googlebot ไม่ล้างหน้าจอ");
-    bindMediaProtection();
-    isFirstLoad = false; // 👈 🟢 เพิ่มบรรทัดนี้ครับ! เพื่อปลดล็อกให้คนกดค้นหาทีหลังทำงานได้ปกติ
-    return; // จบการทำงานทันที ป้องกันหน้าจอกลายเป็นสีดำ
-  }
+    STATE.renderId = (STATE.renderId || 0) + 1;
+    const currentRenderId = STATE.renderId;
 
-  STATE.renderId = (STATE.renderId || 0) + 1;
-  const currentRenderId = STATE.renderId;
-
-  DOM.noResultsMessage?.classList.add("hidden");
-  DOM.fetchErrorMessage?.classList.add("hidden");
-
+    DOM.noResultsMessage?.classList.add("hidden");
+    DOM.fetchErrorMessage?.classList.add("hidden");
 
     if (DOM.featuredSection) {
       const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
@@ -1613,6 +1609,9 @@ function renderProfilesGrid(profiles, isFilteredView) {
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
+    // 🟢 บังคับปิด Lightbox และปลดล็อก Body ป้องกันอาการสกอร์ลไม่ได้ในครั้งแรก
+    closeLightboxModal(false);
+
     (function initTheme() {
       const btns = document.querySelectorAll(".theme-toggle-btn");
       const icons = document.querySelectorAll(".theme-toggle-icon");
@@ -1847,8 +1846,6 @@ function renderProfilesGrid(profiles, isFilteredView) {
       if (suggestionsEl) suggestionsEl.classList.add("hidden");
       applyUltimateFilters(true);
     });
-
-    // 🟢 REMOVED: ลบฟังก์ชัน initSecretAdminMenu() ที่แอบสร้าง div ล่องหน 60x60px ออกอย่างสมบูรณ์
 
     await fetchProfilesData();
     await handleRouteNavigation(true);

@@ -26,6 +26,7 @@
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%">
   <meta property="og:url" content="{{SEO_CANONICAL}}">
   <meta property="og:image" content="{{SEO_IMAGE}}">
+  <meta property="og:image:secure_url" content="{{SEO_IMAGE}}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
@@ -53,7 +54,6 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   
   <link rel="modulepreload" href="/main.js">
-  <!-- 🟢 FIX: แก้ไข Syntax Error สตริง href ทันที -->
   <link rel="stylesheet" href="/styles.css">
 
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -176,7 +176,6 @@
         <span style="color: white; font-size: 10.5px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
-<!-- 🟢 FIX 4: บีบอัดรูปภาพ Hero และส่ง Image Sizes ตามขนาดหน้าจอจริง (แก้ปัญหารูป Oversized) -->
       <div style="width: 100%; border-radius: 14px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(255,255,255,0.08); background-color: #121216; aspect-ratio: 16/9;">
         <picture>
           <source media="(max-width: 480px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
@@ -207,7 +206,6 @@
         <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong> ทั้งหมด
       </p>
 
-      <!-- 🟢 FIX 2: หุ้มคลาส hero-cta-block ล็อกความสูงเพื่อลบค่า CLS 0.159 ออกอย่างสมบูรณ์ -->
       <div class="hero-cta-block">
         <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ ใน{{PROVINCE_NAME}}">
           <i class="fab fa-line" style="font-size: 18px; margin-right: 6px;" aria-hidden="true"></i> แอดไลน์จองคิวน้องๆ (LINE: @firstmodelhub)
@@ -318,7 +316,6 @@
     </div>
 
     <!-- PROFILES DISPLAY AREA -->
-    <!-- 🟢 FIX: เพิ่ม Placeholder เฉพาะกิจเพื่อให้ SSR ทำการฉีดการ์ดได้อย่างเสถียร 100% -->
     <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว{{PROVINCE_NAME}}">
       {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
@@ -607,7 +604,7 @@
 </footer>
 
 <!-- ============================== LIGHTBOX DETAILS MODAL ============================== -->
-<div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main">
+<div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">
   <div id="lightbox-content-wrapper-el">
     <button id="closeLightboxBtn" style="position: absolute; top: 10px; right: 10px; z-index: 50; width: 34px; height: 36px; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;" aria-label="ปิดหน้าต่างโปรไฟล์">
       <i class="fas fa-times" aria-hidden="true"></i>
@@ -652,12 +649,10 @@
 </div>
 
 <script id="ssr-profiles-data">
-  window.profilesData = [];
+  window.profilesData = {{SSR_PROFILES_JSON}};
 </script>
 
-<!-- 🟢 FIX: เปลี่ยนพาธเป็น Absolute Path ป้องกัน 404 ใน Sub-directory -->
 <script type="module" src="/main.js"></script>
 
-<!-- 🟢 REMOVED: ลบ <div> ล่องหนบังคลิก 60x60px ออกอย่างสมบูรณ์ -->
 </body>
 </html>
