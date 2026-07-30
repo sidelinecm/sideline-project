@@ -11,31 +11,22 @@ const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanif
 
 const CONFIG = {
   get SUPABASE_URL() {
-    try {
-      return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co";
-    } catch {
-      return "https://zxetzqwjaiumqhrpumln.supabase.co";
-    }
+    try { return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co"; } catch { return "https://zxetzqwjaiumqhrpumln.supabase.co"; }
   },
   get SUPABASE_KEY() {
-    try {
-      return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-    } catch {
-      return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
-    }
+    try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "First Model Hub",
   BRAND_LEGAL_NAME: "First Model Hub Co., Ltd.",
   DEFAULT_TELEPHONE: "LINE: @firstmodelhub",
-  MAPS_SHARE_URL: "https://share.google/THArcPBibRkBAiSOd",
   SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
     tiktok: "https://tiktok.com/@firstmodelhub",
     twitter: "https://twitter.com/firstmodelhub",
     linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280",
     biosite: "https://bio.site/firstmodelhub",
-    linktree: "https://linktr.ee/firstmodelhub",
+    linktr: "https://linktr.ee/firstmodelhub",
     bluesky: "https://bsky.app/profile/firstmodelhub.bsky.social"
   }
 };
@@ -81,56 +72,8 @@ const PROVINCE_SEO_DATA = {
       { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
     ]
   },
-  chiangrai: {
-    name: "เชียงราย",
-    geo: { lat: 19.9071, lng: 99.8325 },
-    zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "ม.ราชภัฏเชียงราย", "หอนาฬิกา"],
-    faqs: [
-      { q: "นัดพบน้องๆ สาวรับงานเชียงราย โซน มฟล. หรือบ้านดู่ มีขั้นตอนอย่างไร?", a: "สามารถแจ้งพิกัดและช่วงเวลาที่ต้องการกับแอดมินทาง LINE Official (@firstmodelhub) เพื่อตรวจสอบคิวสแตนด์บายและนัดพบหน้างานได้ทันทีครับ" }
-    ]
-  },
-  udon: {
-    name: "อุดรธานี",
-    geo: { lat: 17.4138, lng: 102.7872 },
-    zones: ["ตัวเมืองอุดร", "UD Town", "เซ็นทรัลอุดร", "หนองประจักษ์", "รอบเมือง"],
-    faqs: [
-      { q: "หาสาวรับงานอุดร ไซด์ไลน์อุดร ปลอดภัยไม่โดนหลอกมัดจำได้อย่างไร?", a: "แพลตฟอร์ม First Model Hub ยึดมั่นมาตรการนัดเจอตัวจริงหน้างานแล้วค่อยจ่ายเงิน 100% จึงปลอดภัยจากการถูกหลอกโอนเงินแน่นอนครับ" }
-    ]
-  },
-  lampang: {
-    name: "ลำปาง",
-    geo: { lat: 18.2913, lng: 99.4922 },
-    zones: ["ตัวเมืองลำปาง", "สวนดอก", "พระบาท", "ม.ราชภัฏลำปาง", "เกาะคา"],
-    faqs: [
-      { q: "นัดหมายน้องๆ รับงานลำปาง ในตัวเมือง โซนไหนสะดวกและปลอดภัยที่สุด?", a: "พื้นที่ตัวเมืองลำปาง โซนสวนดอก และย่านพระบาท เป็นจุดที่มีที่พักและคอนโดคุณภาพดี รองรับการนัดเจออย่างสงบและเป็นส่วนตัวสูง" }
-    ]
-  },
-  phitsanulok: {
-    name: "พิษณุโลก",
-    geo: { lat: 16.8219, lng: 100.2659 },
-    zones: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
-    faqs: [
-      { q: "เรียกน้องๆ รับงานพิษณุโลก แถว มน. สะดวกเวลาไหนบ้าง?", a: "โซน ม.นเรศวร (มน.) มีน้องๆ พาร์ทไทม์พร้อมบริการหนาแน่น สะดวกนัดหมายได้เกือบตลอด 24 ชั่วโมงครับ" }
-    ]
-  },
-  bangkok: {
-    name: "กรุงเทพ",
-    geo: { lat: 13.7563, lng: 100.5018 },
-    zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "สาทร", "สีลม", "ทองหล่อ", "เอกมัย", "ปิ่นเกล้า", "บางนา"],
-    faqs: [
-      { q: "น้องๆ สาวรับงานกรุงเทพ บน First Model Hub สแตนด์บายแถวไหนบ้าง?", a: "พิกัดยอดนิยมที่มีน้องๆ ประจำการอยู่หนาแน่นคือ รัชดา-ห้วยขวาง และสุขุมวิท-ทองหล่อ ซึ่งเดินทางสะดวกด้วยรถไฟฟ้า BTS และ MRT ครับ" }
-    ]
-  },
-  chonburi: {
-    name: "ชลบุรี",
-    geo: { lat: 13.3611, lng: 100.9847 },
-    zones: ["พัทยา", "บางแสน", "ศรีราชา", "อมตะนคร", "ตัวเมืองชลบุรี"],
-    faqs: [
-      { q: "หาสาวรับงานพัทยา-บางแสน ปลอดภัยไม่โดนหลอกมัดจำได้อย่างไร?", a: "แพลตฟอร์ม First Model Hub ยึดมั่นมาตรการนัดเจอตัวจริงหน้างานแล้วค่อยจ่ายเงิน 100% ปลอดภัยจากการถูกหลอกโอนเงินครับ" }
-    ]
-  },
   default: {
-    name: "ทั่วประเทศ",
+    name: "ทั่วไทย",
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น", "ลำปาง"],
     faqs: [
@@ -167,16 +110,13 @@ const replaceGlobal = (source, target, replacement) => source.split(target).join
 
 const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
   if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
-  
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
       return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
     }
     return path;
   }
-  
   if (path.startsWith("http")) return path;
-  
   return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=75&format=avif`;
 };
 
@@ -197,7 +137,6 @@ const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
   if (!text) return "";
   let res = text;
   const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
-
   if (zones && Array.isArray(zones) && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
       if (!zone) return;
@@ -205,7 +144,6 @@ const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
       res = res.replace(regex, `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
-
   const keywordsRegex = /(เด็กเอ็น|ไซด์ไลน์|พรีเมียม|ฟีลแฟน|รับงาน|ฟิวแฟน|สาวรับงาน)(?![^<]*>|[^<>]*<\/a>)/g;
   return res.replace(keywordsRegex, `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`);
 };
@@ -213,14 +151,10 @@ const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
 const getDynamicIntro = (provinceName, zones, provinceSlug = "chiangmai") => {
   let processedZones = zones && Array.isArray(zones) ? [...zones] : [];
   const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
-
   const zoneLinks = processedZones.slice(0, 4).map(zone => 
     `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">${escapeHTML(zone)}</a>`
   );
-
-  const zoneSnippet = zoneLinks.length > 0 
-    ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${zoneLinks.join(", โซน")}` 
-    : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
+  const zoneSnippet = zoneLinks.length > 0 ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${zoneLinks.join(", โซน")}` : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
 
   return `
     <p>ยินดีต้อนรับสู่ <strong>${CONFIG.BRAND_NAME}</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน${provinceName}</strong>, <strong>เด็กเอ็น${provinceName}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
@@ -232,7 +166,6 @@ const getDynamicIntro = (provinceName, zones, provinceSlug = "chiangmai") => {
 const getDynamicReviews = provinceName => {
   const t = new Date();
   const isChiangMai = provinceName === "เชียงใหม่";
-
   return [
     {
       author: "คุณชลสิทธิ์ (C.)",
@@ -247,9 +180,7 @@ const getDynamicReviews = provinceName => {
     {
       author: "คุณอภิชาติ (A.)",
       location: isChiangMai ? "โซนยอดนิยม นิมมาน เชียงใหม่" : `โซนยอดนิยมใน${provinceName}`,
-      text: isChiangMai
-        ? '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง นัดเจอแถวนิมมานตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"'
-        : '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
+      text: '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
       rating: 5,
       date: "เมื่อ 2 สัปดาห์ก่อน",
       datePublished: new Date(t.getTime() - 1296000000).toISOString().split("T")[0]
@@ -262,7 +193,6 @@ function customMetaTitle(province, customMeta) {
   return `สาวรับงาน${province} ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub`;
 }
 
-// 🟢 FIX 2: ปรับปรุงฟังก์ชันการสร้าง Meta Description ตัดข้อความ ... ป้องกันคำขาด
 function customMetaDesc(province, seo, customMeta, topSnippetText = "") {
   if (customMeta && customMeta.desc) return customMeta.desc;
   const zonesText = seo.zones && seo.zones.length > 0 ? seo.zones.slice(0, 3).join(", ") : province;
@@ -279,8 +209,6 @@ function buildErrorPage(code, title, message) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>${code} - ${escapeHTML(title)}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <style>
         body { background: #07070a; color: #fff; font-family: 'Prompt', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin:0; padding: 16px; box-sizing:border-box;}
@@ -350,9 +278,6 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
-// ==============================================================================
-// 5. MAIN EDGE REQUEST HANDLER
-// ==============================================================================
 export default async (req, context) => {
   if (!verifyHostname(req)) {
     return new Response("403 Forbidden - Access Denied", { status: 403 });
@@ -362,7 +287,6 @@ export default async (req, context) => {
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
   const hostName = url.hostname.toLowerCase();
 
-  // 301 Redirects
   if (hostName.includes("sidelinechiangmai.netlify.app")) {
     if (url.pathname === "/" || url.pathname === "/index.html") {
       return Response.redirect(`${hostUrl}/location/chiangmai`, 301);
@@ -391,14 +315,12 @@ export default async (req, context) => {
     return Response.redirect(`${hostUrl}/`, 301);
   }
 
-  // Edge Memory Cache Check
   const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
   const cachedItem = PAGE_CACHE.get(cacheKey);
   if (cachedItem && (Date.now() - cachedItem.timestamp < PAGE_CACHE_TTL_MS)) {
     return new Response(cachedItem.html, { headers: cachedItem.headers });
   }
 
-  // Route Parsing
   const paths = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "", profileSlug = "", isNationalHome = false;
 
@@ -429,7 +351,6 @@ export default async (req, context) => {
         matchedProfile = profileData;
         provinceSlug = profileData.provinceKey || profileData.province_key || profileData.province_slug || "chiangmai";
       } else {
-        console.warn(`[SSR Warnings] ไม่พบ Slug: ${profileSlug} หรือเกิดข้อผิดพลาด:`, profileErr?.message);
         return buildErrorPage(404, "404 - ไม่พบโปรไฟล์ที่ต้องการ", "โปรไฟล์น้องๆ รายนี้อาจถูกปิดการใช้งาน หรือระงับบริการชั่วคราวครับ");
       }
     }
@@ -537,7 +458,6 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // Schema JSON-LD Graph
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -636,7 +556,6 @@ export default async (req, context) => {
 
       schemaGraph.push(businessEntity);
 
-      // 🟢 FIX 1: สั่งสร้าง ItemList ใน Schema เฉพาะเมื่อ profileList มีข้อมูลจริงเท่านั้น
       if (profileList.length > 0) {
         schemaGraph.push({
           "@type": "ItemList",
@@ -683,7 +602,6 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // Cards Generator
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
       const pLoc = escapeHTML(p.location || provinceThaiName);
@@ -827,7 +745,6 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    // Replace Metadata Placeholders
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
 
@@ -837,9 +754,7 @@ export default async (req, context) => {
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
 
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    
     rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
@@ -851,7 +766,6 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // Fix Relative Assets
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
     if (popularLocationsHtml) {
@@ -899,7 +813,6 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // Hydrate Client-Side Array
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -909,7 +822,6 @@ export default async (req, context) => {
       weight: p.weight || "",
       stats: p.stats || "",
       skinTone: p.skin_tone || p.skinTone || "",
-      skin_tone: p.skin_tone || p.skinTone || "",
       bust: p.bust || "",
       waist: p.waist || "",
       hips: p.hips || "",
@@ -925,14 +837,10 @@ export default async (req, context) => {
       isfeatured: p.isfeatured,
       verified: p.verified || p.isVerified,
       hasVideo: p.has_video || p.hasVideo || false,
-      has_video: p.has_video || p.hasVideo || false,
       description: p.description || "",
       lineId: p.line_id || p.lineId || "",
-      line_id: p.line_id || p.lineId || "",
       quote: p.quote || p.slogan || "",
-      slogan: p.slogan || p.quote || "",
-      styleTags: p.style_tags || p.styleTags || [],
-      style_tags: p.style_tags || p.styleTags || []
+      styleTags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
     if (/window\.profilesData\s*=/i.test(rawHtml)) {
@@ -948,9 +856,7 @@ export default async (req, context) => {
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
       "Referrer-Policy": "strict-origin-when-cross-origin",
-      "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-      "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';"
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
     };
 
     PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: Date.now() });

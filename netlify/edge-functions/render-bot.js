@@ -38,12 +38,13 @@ export default async (request, context) => {
     const hostUrl = CONFIG.DOMAIN;
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
-    // ดักจับเฉพาะ Googlebot และบอทค้นหาหลัก
+    // 🟢 ประกาศ pathParts ป้องกัน ReferenceError
+    const pathParts = url.pathname.split('/').filter(Boolean);
+
+    // ดักจับเฉพาะบอทค้นหาและโซเชียลคราวเลอร์
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|lighthouse|bingbot|applebot/i.test(ua);
     if (!isBot) return context.next();
 
-    // 🟢 FIX: ประกาศ pathParts ก่อนนำไปใช้งาน ป้องกัน ReferenceError
-    const pathParts = url.pathname.split('/').filter(Boolean);
     if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
 
     try {
@@ -54,7 +55,7 @@ export default async (request, context) => {
         
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, galleryPaths, location, rate, age, description, provinceKey, line_id, lineId, isfeatured, verified, has_video, slogan, quote, style_tags, provinces(nameThai, key)')
+            .select('id, slug, name, age, imagePath, galleryPaths, location, rate, description, provinceKey, line_id, lineId, isfeatured, verified, has_video, slogan, quote, style_tags, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
@@ -70,7 +71,7 @@ export default async (request, context) => {
         const cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
         const displayName = `น้อง${cleanName}`;
         const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
+        const provinceKey = p.provinceKey || p.provinces?.key || 'chiangmai';
         
         const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
         const rawRate = parseInt(cleanedRate, 10) || 1500;
@@ -87,7 +88,7 @@ export default async (request, context) => {
         const canonicalUrl = `${hostUrl}/sideline/${encodeURIComponent(slug)}`;
         const locationUrl = `${hostUrl}/location/${provinceKey}`;
 
-        // ดึงรีวิวจริงจาก Supabase
+        // ดึงรีวิวจริงตามจังหวัดของโปรไฟล์นั้นๆ
         const { data: dbReviews } = await supabase
             .from('reviews')
             .select('author_name, location_detail, rating_score, review_body, created_at')
@@ -199,11 +200,11 @@ export default async (request, context) => {
           <i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i> พิกัด: ${escapeHTML(p.location || provinceName)} | ค่าขนม: <span style="color: #00E676; font-size: 16px;">${displayPrice}</span>
         </p>
 
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; font-size: 12.5px; color: #E4E4E7; line-height: 1.6; margin-bottom: 20px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; font-size: 12.5px; color: #E4E4E7; line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap;">
           ${escapeHTML(p.description || metaDesc)}
         </div>
 
-        <a href="${finalLineUrl}" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" style="width: 100%; max-width: 100%;">
+        <a href="${finalLineUrl}" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" style="width: 100%; max-width: 100%; text-decoration: none; display: flex; justify-content: center; align-items: center; padding: 14px; border-radius: 100px; background: #00E676; color: #000; font-weight: 800;">
           <i class="fab fa-line" style="font-size: 20px; margin-right: 8px;"></i> แอดไลน์จองคิว ${displayName}
         </a>
       </article>
