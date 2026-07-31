@@ -1,3 +1,4 @@
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
@@ -38,6 +39,67 @@ window.ScrollTrigger = ScrollTrigger;
     bangkok: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ"],
     chonburi: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
     national: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"]
+  };
+
+  const LOCALIZED_SEO_MAP = {
+    chiangmai: {
+      zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"],
+      seoContent: `
+        <p>ยินดีต้อนรับสู่ <strong>First Model Hub เชียงใหม่</strong> แหล่งรวมโปรไฟล์ <strong>สาวรับงานเชียงใหม่</strong>, <strong>เด็กเอ็นเชียงใหม่</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์เชียงใหม่</strong> ระดับพรีเมียม การันตีรูปตรงปก 100% ปลอดภัย จ่ายค่าขนมหน้างานเมื่อพบตัวจริง ปราศจากการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
+        <p>เพื่อความสะดวกในการนัดหมาย น้องๆ ในระบบสแตนด์บายพร้อมดูแลครอบคลุมทุกทำเลยอดนิยมทั่วเมืองเชียงใหม่ ไม่ว่าจะเป็น <strong>ย่านนิมมานเหมินท์, สันติธรรม, คอนโดรอบเจ็ดยอด, โซนหลัง มช., ถนนช้างเผือก, สันทราย, ห้วยแก้ว</strong> และบริเวณใกล้สนามบินเชียงใหม่ เดินทางสะดวก ปลอดภัย และเป็นส่วนตัวสูง</p>
+        <p>น้องๆ ทุกคนผ่านการตรวจสอบตัวตน (Verified 2026) พร้อมให้บริการเอนเตอร์เทนดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อย เป็นกันเอง ให้คุณผ่อนคลายและคลายเหงาได้อย่างสบายใจที่สุด</p>
+      `,
+      reviews: [
+        { author: "คุณชลสิทธิ์ (C.)", location: "ย่านนิมมาน เชียงใหม่", rating: 5, text: "นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ", date: "เมื่อสัปดาห์ที่แล้ว" },
+        { author: "คุณอภิชาติ (A.)", location: "โซนยอดนิยม นิมมาน เชียงใหม่", rating: 5, text: "น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ", date: "เมื่อ 2 สัปดาห์ก่อน" },
+        { author: "คุณภัทร (P.)", location: "โซนเจ็ดยอด-หลัง มช.", rating: 5, text: "นัดเจอน้องแถวเจ็ดยอด คุยง่าย ตรงปก ไม่ต้องโอนมัดจำก่อน เจอตัวจริงค่อยจ่ายเงิน สบายใจมากๆ ครับ", date: "เมื่อ 3 วันก่อน" }
+      ],
+      faqs: [
+        { q: "นัดหมายสาวรับงานเชียงใหม่ ย่านนิมมาน หรือ สันติธรรม มีค่าเดินทางเพิ่มไหม?", a: "หากเป็นพิกัดในเขตตัวเมืองเชียงใหม่ เช่น นิมมานเหมินท์, สันติธรรม, เจ็ดยอด, ช้างเผือก หรือโซนหลัง มช. จะไม่มีค่าเดินทางเพิ่มเติมครับ ชำระเฉพาะค่าบริการตามตกลงตรงหน้างานได้เลย" },
+        { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
+      ]
+    },
+    bangkok: {
+      zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"],
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม</strong> ระดับพรีเมียม การันตีตรงปก 100% ปลอดภัยนัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด <strong>สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ และเอกมัย</strong></p>`,
+      reviews: [
+        { author: "คุณเอก (E.)", location: "ย่านสุขุมวิท กรุงเทพฯ", rating: 5, text: "นัดเจอน้องย่านสุขุมวิท ตรงปกมากครับ อัธยาศัยดี นัดเจอจ่ายหน้างานปลอดภัย 100% ประทับใจมากครับ", date: "เมื่อสัปดาห์ที่แล้ว" },
+        { author: "คุณต้น (T.)", location: "ย่านรัชดา กรุงเทพฯ", rating: 5, text: "แอดมินดูแลดี คิวเป๊ะ น้องเทคแคร์สุภาพเป็นกันเองสไตล์ฟิวแฟน ไม่มัดจำด้วย สบายใจสุดๆ ครับ", date: "เมื่อสัปดาห์ที่แล้ว" }
+      ],
+      faqs: [
+        { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนหลักใน กทม. เช่น สุขุมวิท รัชดา ห้วยขวาง ลาดพร้าว ทองหล่อ และเอกมัย นัดเจอง่ายเดินทางสะดวกครับ" }
+      ]
+    },
+    chonburi: {
+      zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
+      seoContent: `<p>ศูนย์รวมสาวรับงานชลบุรี รับงานพัทยา และเพื่อนเที่ยวบางแสน พรีเมียมดูแลใส่ใจสไตล์ฟิวแฟน ปลอดภัยสูงสุดชำระค่าบริการหน้างานเมื่อเจอตัวจริง ไม่มัดจำล่วงหน้า</p>`,
+      reviews: [
+        { author: "คุณเบนซ์ (B.)", location: "พัทยา ชลบุรี", rating: 5, text: "นัดเจอน้องโซนพัทยา ตรงปก บริการดีมาก นัดเจอชำระหน้างานไม่มีโอนมัดจำ ประทับใจครับ", date: "เมื่อ 4 วันก่อน" }
+      ],
+      faqs: [
+        { q: "นัดน้องๆ รับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระค่าขนมกับน้องโดยตรงหน้างานเมื่อนัดเจอตัวจริงเรียบร้อยแล้ว ไม่มีการโอนเงินมัดจำก่อนทุกกรณีครับ" }
+      ]
+    },
+    udon: {
+      zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"],
+      seoContent: `<p>ศูนย์รวมสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town</p>`,
+      reviews: [
+        { author: "คุณกอล์ฟ (G.)", location: "ตัวเมืองอุดรธานี", rating: 5, text: "ตรงปกครับ บริการดี สุภาพ นัดเจอจ่ายหน้างาน ไม่มีโอนมัดจำก่อน ปลอดภัยแน่นอนครับ", date: "เมื่อ 3 วันที่แล้ว" }
+      ],
+      faqs: []
+    },
+    national: {
+      zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"],
+      seoContent: `
+        <p>ยินดีต้อนรับสู่ <strong>First Model Hub</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงานทั่วไทย</strong>, <strong>เด็กเอ็นทั่วไทย</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์ทั่วไทย</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
+      `,
+      reviews: [
+        { author: "คุณเกริกพล (K.)", location: "ตัวเมือง", rating: 5, text: "บริการดีตรงปก เจอตัวจริงค่อยจ่ายเงิน สบายใจมากครับ", date: "เมื่อสัปดาห์ที่แล้ว" }
+      ],
+      faqs: [
+        { q: "เรียกใช้บริการ First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" }
+      ]
+    }
   };
 
   let STATE = {
@@ -744,6 +806,11 @@ window.ScrollTrigger = ScrollTrigger;
       STATE.currentFilters = activeFilters;
       STATE.filteredProfiles = results;
 
+      // 🟢 อัปเดต H1, บทความ SEO, รีวิว และหัวข้อทุกอย่างทันทีหลังกรอง
+      const currentProvKey = activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "" ? activeFilters.province : "national";
+      const currentProvName = (currentProvKey === "national") ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
+      replaceDomPlaceholders(currentProvName, results.length, currentProvKey);
+
     } catch (e) {
       console.error("❌ เกิดข้อผิดพลาดในระบบการกรอง:", e);
     }
@@ -1319,12 +1386,239 @@ window.ScrollTrigger = ScrollTrigger;
     link.setAttribute("href", href);
   }
 
+  // 🟢 ฟังก์ชันอัปเดตแผนที่ Google Maps แบบ Dynamic
+  function updateGoogleMap(provKey = "chiangmai", provName = "เชียงใหม่") {
+    const mapIframe = document.getElementById("google-map");
+    const mapPlaceholder = document.getElementById("map-placeholder");
+    if (!mapIframe) return;
+
+    const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (provKey === "national" ? "กรุงเทพ" : provName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    mapIframe.src = mapUrl;
+
+    mapIframe.onload = () => {
+      if (mapPlaceholder) mapPlaceholder.style.opacity = "0";
+      setTimeout(() => { if (mapPlaceholder) mapPlaceholder.style.display = "none"; }, 500);
+    };
+  }
+
+  // 🟢 ฟังก์ชันวาดปุ่มแท็กเลือกโซนย่อย (Zone Chips)
+  function renderZoneChips(provKey = "chiangmai") {
+    let chipsContainer = document.getElementById("zone-chips-container");
+    
+    if (!chipsContainer) {
+      chipsContainer = document.createElement("div");
+      chipsContainer.id = "zone-chips-container";
+      chipsContainer.style.cssText = "display: flex; gap: 8px; overflow-x: auto; padding: 10px 4px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none;";
+      
+      const targetSection = document.getElementById("profiles-display-area");
+      if (targetSection && targetSection.parentNode) {
+        targetSection.parentNode.insertBefore(chipsContainer, targetSection);
+      }
+    }
+
+    const data = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
+    const zones = data.zones || ["ทั้งหมด"];
+
+    chipsContainer.innerHTML = zones.map(zone => {
+      const isAll = zone === "ทั้งหมด";
+      return `
+        <button type="button" data-zone-keyword="${isAll ? '' : zone}" 
+                class="zone-chip-btn ${isAll ? 'active' : ''}"
+                style="padding: 6px 14px; font-size: 11px; font-weight: 800; border-radius: 100px; white-space: nowrap; flex-shrink: 0; cursor: pointer; transition: all 0.2s; background: ${isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.04)'}; color: ${isAll ? '#000000' : '#FFFFFF'}; border: 1px solid ${isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.1)'};">
+          📍 ${zone}
+        </button>
+      `;
+    }).join("");
+
+    chipsContainer.querySelectorAll(".zone-chip-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const keyword = btn.getAttribute("data-zone-keyword");
+        
+        chipsContainer.querySelectorAll(".zone-chip-btn").forEach(b => {
+          b.style.background = "rgba(255,255,255,0.04)";
+          b.style.color = "#FFFFFF";
+          b.style.borderColor = "rgba(255,255,255,0.1)";
+        });
+        btn.style.background = "var(--primary-purple)";
+        btn.style.color = "#000000";
+        btn.style.borderColor = "var(--primary-purple)";
+
+        if (DOM.searchInput) {
+          DOM.searchInput.value = keyword;
+          applyUltimateFilters(true);
+        }
+      });
+    });
+  }
+
+  // 🟢 ฟังก์ชันอัปเดตบทความ SEO, รีวิว, FAQ, H1 และย่อหน้า Hero ตามจังหวัด
+  function updateDynamicProvinceContent(provKey = "national", provName = "ทั่วไทย", count = 50) {
+    // 0. เช็คถ้าไม่มีการระบุจังหวัด หรือเป็นหน้าหลัก ให้ปรับเป็น "ทั่วไทย"
+    if (!provKey || provKey === "all" || provKey === "national" || provName === "national") {
+      provKey = "national";
+      provName = "ทั่วไทย";
+    }
+
+    const data = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
+
+    // 🟢 1. อัปเดต H1 และย่อหน้าคำอธิบาย Hero ด้านบนสุดให้สลับตามจังหวัดถูกต้อง 100%
+    const heroH1 = document.getElementById("hero-h1");
+    if (heroH1) {
+      heroH1.innerHTML = `
+        รับงาน${provName} ไซด์ไลน์${provName}<br>
+        <span class="highlight-neon">FirstModelHub สาวรับงานฟิวแฟน🌟</span>
+      `;
+    }
+
+    const heroSub = document.querySelector(".hero-subtitle-p");
+    if (heroSub) {
+      const currentProvData = STATE.provincesMap.get(provKey);
+      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones : ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี"];
+      const zoneText = currentZones.slice(0, 4).join(", ");
+      heroSub.innerHTML = `
+        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน${provName}</strong>, <strong>สาวรับงาน${provName}</strong>, <strong>เพื่อนเที่ยว${provName}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด 
+        <strong style="color: #C084FC;">${zoneText}</strong> ทั้งหมด
+      `;
+    }
+
+    // 2. อัปเดตบทความ SEO ใน Drawer
+    const drawerWrapper = document.getElementById("seo-drawer-wrapper");
+    if (drawerWrapper) {
+      const contentInner = drawerWrapper.querySelector("div");
+      if (contentInner) {
+        contentInner.innerHTML = data.seoContent + `
+          <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
+            <h3 style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in ${provName}</h3>
+            <p style="font-size: 11px; color: #A1A1AA; line-height: 1.5;">
+              Welcome to First Model Hub ${provName}, the premier platform connecting travelers with verified companions. We offer authentic Girlfriend Experience (GFE) services with absolute financial safety: <strong>No upfront deposits required. Pay cash directly to your companion upon meeting.</strong>
+            </p>
+          </div>
+        `;
+      }
+    }
+
+    // 3. อัปเดตการ์ดรีวิวประจำจังหวัด
+    const reviewsGrid = document.getElementById("reviews-container-grid");
+    if (reviewsGrid && data.reviews) {
+      reviewsGrid.innerHTML = data.reviews.map(r => `
+        <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${r.author.charAt(0)}</div>
+              <div>
+                <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${r.author}</span>
+                <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${r.location}</span>
+              </div>
+            </div>
+            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 9.5px;">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+          </div>
+          <p style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; margin: 0;">${r.text}</p>
+          <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${r.date}</span>
+        </div>
+      `).join("");
+    }
+
+    // 4. อัปเดตคำถาม-คำตอบ FAQ ประจำจังหวัด
+    const faqContainer = document.getElementById("faq-container-list");
+    if (faqContainer && data.faqs && data.faqs.length > 0) {
+      faqContainer.innerHTML = data.faqs.map(item => `
+        <div class="interactive-card" style="padding: 16px 20px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <h3 style="font-weight: 800; font-size: 13.5px; display: flex; align-items: start; gap: 10px; margin: 0;">
+                  <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 11px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
+                  <span class="text-gradient-sub" style="line-height: 1.4;">${item.q}</span>
+                </h3>
+                <div style="padding-left: 32px; color: var(--text-gray); font-size: 12px; line-height: 1.5; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
+                  ${item.a}
+                </div>
+            </div>
+        </div>
+      `).join("");
+    }
+
+    // 5. อัปเดตหัวข้อต่างๆ ตามจังหวัด
+    const drawerTitle = document.querySelector("#service-deep-dive h2");
+    if (drawerTitle) drawerTitle.textContent = `บริการเพื่อนเที่ยวและสาวรับงาน${provName} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า ${count}+ รายการ)`;
+
+    const rulesTitle = document.getElementById("rules-title");
+    if (rulesTitle) rulesTitle.textContent = `ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์${provName}`;
+
+    const faqHeading = document.getElementById("faq-main-heading");
+    if (faqHeading) faqHeading.textContent = `คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์${provName}`;
+
+    const reviewsHeading = document.getElementById("reviews-main-heading");
+    if (reviewsHeading) reviewsHeading.textContent = `รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน${provName}`;
+
+    // 6. วาดปุ่มแท็กเลือกโซนย่อย
+    renderZoneChips(provKey);
+
+    // 7. อัปเดตแผนที่ Google Maps
+    updateGoogleMap(provKey, provName);
+  }
+
+  // 🟢 สั่งงานปุ่มขยาย/ย่อบทความ SEO Drawer
+  function initSeoDrawer() {
+    const btn = document.getElementById("toggle-seo-drawer-btn");
+    const wrapper = document.getElementById("seo-drawer-wrapper");
+    if (!btn || !wrapper) return;
+
+    btn.addEventListener("click", () => {
+      const isCollapsed = wrapper.classList.contains("collapsed");
+      const overlay = wrapper.querySelector(".seo-fade-overlay");
+
+      if (isCollapsed) {
+        wrapper.classList.remove("collapsed");
+        if (overlay) overlay.style.display = "none";
+        btn.querySelector("span").textContent = "ย่อข้อความกลับ";
+        const icon = btn.querySelector("i");
+        if (icon) icon.className = "fas fa-chevron-up";
+      } else {
+        wrapper.classList.add("collapsed");
+        if (overlay) overlay.style.display = "block";
+        btn.querySelector("span").textContent = "ดูข้อมูลพื้นที่บริการทั้งหมด";
+        const icon = btn.querySelector("i");
+        if (icon) icon.className = "fas fa-chevron-down";
+      }
+    });
+  }
+
+  // 🟢 สั่งงานปุ่มแท็บเลือกภูมิภาค (Region Multi-Switch Tabs)
+  function initRegionTabs() {
+    const tabs = document.querySelectorAll(".region-tab");
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+
+        // 🟢 ล้างข้อความค้างในช่องค้นหาบนสุดออกทันที
+        if (DOM.searchInput) DOM.searchInput.value = "";
+        const clearBtn = document.getElementById("clear-search-btn");
+        if (clearBtn) clearBtn.style.display = "none";
+
+        const region = tab.getAttribute("data-region");
+        if (region === "ทั้งหมด") {
+          if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+        } else if (region === "ภาคเหนือ") {
+          if (DOM.provinceSelect) DOM.provinceSelect.value = "chiangmai";
+        } else if (region === "กรุงเทพฯ") {
+          if (DOM.provinceSelect) DOM.provinceSelect.value = "bangkok";
+        }
+        applyUltimateFilters(true);
+      });
+    });
+  }
+
+  // 🟢 ฟังก์ชันแทนที่ตัวแปรใน DOM พร้อมอัปเดตบทความ Hyper-Local
   function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
     try {
       const liveCountEl = document.getElementById("live-profile-count");
-      if (liveCountEl) {
-        liveCountEl.textContent = profileCount;
-      }
+      if (liveCountEl) liveCountEl.textContent = profileCount;
 
       const currentProvData = STATE.provincesMap.get(provinceSlug);
       const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones : ["ตัวเมือง", "บริเวณใกล้เคียง"];
@@ -1345,6 +1639,10 @@ window.ScrollTrigger = ScrollTrigger;
         if (el.href) el.href = el.href.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
         if (el.alt) el.alt = el.alt.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
       });
+
+      // 🟢 เรียกอัปเดตบทความ SEO Hyper-Local, รีวิว, แผนที่ และปุ่มแท็กโซนย่อยทันที
+      updateDynamicProvinceContent(provinceSlug, provinceName, profileCount);
+
     } catch (e) {
       console.warn("⚠️ Replace placeholders error:", e);
     }
@@ -1433,35 +1731,33 @@ window.ScrollTrigger = ScrollTrigger;
 
       if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
 
-      if (isInitial) {
-        applyUltimateFilters(false);
-        const provName = STATE.provincesMap.get(provinceSlug) || provinceSlug;
-        const matchedProfiles = STATE.allProfiles.filter(p => p.provinceKey === provinceSlug || (provinceSlug === "chiangmai" && p.provinceKey === "chiang_mai"));
+      applyUltimateFilters(false);
+      const provName = STATE.provincesMap.get(provinceSlug) || provinceSlug;
+      const matchedProfiles = STATE.allProfiles.filter(p => p.provinceKey === provinceSlug || (provinceSlug === "chiangmai" && p.provinceKey === "chiang_mai"));
 
-        updateSEOMetadata(null, {
-          provinceName: provName,
-          canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceSlug}`,
-          profiles: matchedProfiles
-        });
+      updateSEOMetadata(null, {
+        provinceName: provName,
+        canonicalUrl: `${CONFIG.SITE_URL}/location/${provinceSlug}`,
+        profiles: matchedProfiles
+      });
 
-        replaceDomPlaceholders(provName, matchedProfiles.length || 50, provinceSlug);
-      }
+      replaceDomPlaceholders(provName, matchedProfiles.length || 50, provinceSlug);
       return;
     }
 
+    // 🟢 หน้าหลัก (Home Page / Index)
     STATE.currentProfileSlug = null;
     closeLightboxModal(false);
 
-    if (isInitial) {
-      applyUltimateFilters(false);
-      updateSEOMetadata(null, null);
+    applyUltimateFilters(false);
+    updateSEOMetadata(null, null);
 
-      const currentProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "chiangmai";
-      const currentProvName = STATE.provincesMap.get(currentProvKey) || "เชียงใหม่";
-      const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
-      
-      replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
-    }
+    // 🟢 แก้ไขจุดนี้: บนหน้าหลัก ถ้าไม่มีการเลือกจังหวัดในดรอปดาวน์ ต้องให้แสดงเป็น "national" และ "ทั่วไทย" เสมอ!
+    const currentProvKey = (DOM.provinceSelect?.value && DOM.provinceSelect.value !== "all") ? DOM.provinceSelect.value : "national";
+    const currentProvName = (currentProvKey === "national") ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
+    const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
+    
+    replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
   }
 
   async function fetchSingleProfileBySlug(slug) {
@@ -1585,6 +1881,25 @@ window.ScrollTrigger = ScrollTrigger;
       const suggestionsEl = document.getElementById("search-suggestions");
       if (suggestionsEl) suggestionsEl.classList.add("hidden");
     }
+  };
+
+  // 🟢 ยามอัจฉริยะ (MutationObserver) ป้องกันตัวแปร {{...}} หลุดตอนย้อนกลับ
+  const initPlaceholderWatcher = () => {
+    let timeout;
+    const observer = new MutationObserver(() => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        if (document.body.innerHTML.includes('{{')) {
+          const currentProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "chiangmai";
+          const currentProvName = STATE.provincesMap.get(currentProvKey) || "เชียงใหม่";
+          const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
+
+          replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
+        }
+      }, 50);
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
   };
 
   document.addEventListener("DOMContentLoaded", async function () {
@@ -1825,6 +2140,24 @@ window.ScrollTrigger = ScrollTrigger;
       });
     })();
 
+    // 🟢 สั่งงานปุ่มเปิด/ปิดฟอร์มเขียนรีวิว
+    (function initReviewToggle() {
+      const btn = document.getElementById("toggle-review-form-btn");
+      const form = document.getElementById("review-form");
+      if (!btn || !form) return;
+
+      btn.addEventListener("click", () => {
+        const isHidden = form.style.display === "none" || form.style.display === "";
+        if (isHidden) {
+          form.style.display = "flex";
+          btn.textContent = "❌ ปิดหน้าต่างเขียนรีวิว";
+        } else {
+          form.style.display = "none";
+          btn.textContent = "✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์";
+        }
+      });
+    })();
+
     DOM.searchInput?.addEventListener("input", e => {
       clearTimeout(window.searchTimeout);
       const val = e.target.value;
@@ -1834,7 +2167,14 @@ window.ScrollTrigger = ScrollTrigger;
       }, 300);
     });
 
-    DOM.provinceSelect?.addEventListener("change", () => applyUltimateFilters(true));
+    // 🟢 แก้ไข: ล้างช่องค้นหาคำบนสุดออกทันทีเมื่อผู้ใช้เปลี่ยนจังหวัดในดรอปดาวน์
+    DOM.provinceSelect?.addEventListener("change", () => {
+      if (DOM.searchInput) DOM.searchInput.value = "";
+      const clearBtn = document.getElementById("clear-search-btn");
+      if (clearBtn) clearBtn.style.display = "none";
+      applyUltimateFilters(true);
+    });
+
     DOM.availabilitySelect?.addEventListener("change", () => applyUltimateFilters(true));
     DOM.featuredSelect?.addEventListener("change", () => applyUltimateFilters(true));
     DOM.sortSelect?.addEventListener("change", () => applyUltimateFilters(true));
@@ -1846,15 +2186,30 @@ window.ScrollTrigger = ScrollTrigger;
       if (DOM.sortSelect) DOM.sortSelect.value = "featured";
       const suggestionsEl = document.getElementById("search-suggestions");
       if (suggestionsEl) suggestionsEl.classList.add("hidden");
+      
+      // ล้างสถานะไฮไลต์ปุ่มโซนย่อย (Zone Chips)
+      const chipsContainer = document.getElementById("zone-chips-container");
+      if (chipsContainer) {
+        chipsContainer.querySelectorAll(".zone-chip-btn").forEach(b => {
+          const isAll = b.getAttribute("data-zone-keyword") === "";
+          b.style.background = isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.04)';
+          b.style.color = isAll ? '#000000' : '#FFFFFF';
+          b.style.borderColor = isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.1)';
+        });
+      }
+
       applyUltimateFilters(true);
     });
-
-    // 🟢 REMOVED: ลบฟังก์ชัน initSecretAdminMenu() ที่แอบสร้าง div ล่องหน 60x60px ออกอย่างสมบูรณ์
 
     await fetchProfilesData();
     await handleRouteNavigation(true);
     updateActiveNavLinks();
     hideGlobalLoader();
+    
+    // 🟢 สั่งรันยามอัจฉริยะ, ปุ่มขยายบทความ SEO และแท็บเลือกภูมิภาค
+    initPlaceholderWatcher();
+    initSeoDrawer();
+    initRegionTabs();
 
     if ('serviceWorker' in navigator) {
       const registerSW = () => {

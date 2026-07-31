@@ -108,16 +108,17 @@
 </nav>
 
 <!-- ============================== HEADER ============================== -->
-  <header id="page-header" role="banner">
+<header id="page-header" role="banner">
     <div class="header-logo-container">
-        <a href="/" aria-label="ไปที่หน้าแรก First Model Hub {{PROVINCE_NAME}}">
-           <span class="logo-box-el">
-             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><title>โลโก้ First Model Hub {{PROVINCE_NAME}}</title><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
+           <!-- ตัดไอคอนกล่องม่วงออกแล้ว ตัว F จะอยู่ซ้ายสุดทันที -->
+           <span class="brand-logo-text">
+             FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
            </span>
-           <span style="font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.02em;">First Model <span style="color: #C084FC">Hub</span></span>
         </a>
     </div>
 
+    <!-- ส่วนที่เหลือ (Status Badge และ Nav Controls) คงไว้เหมือนเดิมได้เลยครับ -->
     <div class="header-status-badge">
         <span class="status-dot-el" aria-hidden="true"></span>
         <span style="font-weight: 700; color: var(--text-gray);">ระบบพร้อมทำงาน: <span id="last-updated-time">อัปเดตน้องๆ ล่าสุดวันนี้</span></span>
@@ -137,7 +138,7 @@
             <i class="fas fa-bars" aria-hidden="true"></i>
         </button>
     </div>
-  </header>
+</header>
 
   <!-- ============================== MOBILE SIDEBAR MENU ============================== -->
   <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
@@ -176,7 +177,7 @@
 
   <div class="container space-y-24">
 
-    <!-- HERO SECTION -->
+<!-- HERO SECTION -->
     <section class="hero-section" aria-labelledby="hero-h1">
       <div class="clutch-pill">
         <span style="background-color: #7C3AED; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800;">VERIFIED 2026</span>
@@ -186,7 +187,8 @@
         <span style="color: white; font-size: 10.5px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
-      <div style="width: 100%; border-radius: 14px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(255,255,255,0.08); background-color: #121216; aspect-ratio: 16/9;">
+      <!-- 🟢 ปรับเพิ่มการ์ดแบนเนอร์รูปภาพให้มีพื้นหลังสำรองหรูหรา แม้รูปจะหลุดก็ยังสวย -->
+      <div class="hero-banner-card" style="width: 100%; border-radius: 16px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(192, 132, 252, 0.3); background: linear-gradient(135deg, #180d38 0%, #090518 100%); aspect-ratio: 16/9; box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(124, 58, 237, 0.25); position: relative;">
         <picture>
           <source media="(max-width: 480px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
           <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
@@ -198,15 +200,17 @@
                height="338" 
                style="width: 100%; height: 100%; object-fit: cover; display: block;"
                fetchpriority="high" 
-               loading="eager">
+               loading="eager"
+               onerror="this.style.display='none';">
         </picture>
       </div>
 
+      <!-- 🟢 แยกแท็กดาวเพื่อแก้ไขสีเพี้ยนในมือถือ -->
       <h1 id="hero-h1" class="hero-title">
           รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}}<br>
-          <span class="highlight-neon">สาวรับงานฟิวแฟนตรงปก 100%</span>
+          <span class="highlight-neon">FirstModelHub สาวรับงานฟิวแฟน <span class="emoji-star">🌟</span></span>
       </h1>
-
+      
       <p style="font-size: 12.5px; font-weight: 700; text-align: center; color: #E4E4E7; margin-bottom: 6px;">
           ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
       </p>
@@ -461,13 +465,14 @@
       </div>
     </section>
 
-    <!-- FAQ ACCORDIONS -->
+<!-- FAQ ACCORDIONS -->
     <section style="max-width: 768px; margin: 24px auto 0 auto; text-align: left; position: relative;" aria-labelledby="faq-main-heading">
          <h2 id="faq-main-heading" class="text-gradient-main" style="font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 12px;">
              คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}
          </h2>
 
-         <div style="display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 10;">
+         <!-- 🟢 ใส่ id="faq-container-list" เพิ่มตรงนี้เพื่อให้ JS สลับคำถามตามจังหวัดได้ -->
+         <div id="faq-container-list" style="display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 10;">
             {{PROVINCE_FAQS_HTML}}
          </div>
     </section>
@@ -580,11 +585,13 @@
   <div class="container">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
       <div style="display: flex; flex-direction: column; gap: 6px;">
-        <span style="font-size: 15px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">
-          First Model <span style="color: var(--primary-purple);">Hub</span>
+        <!-- อัปเกรดชื่อแบรนด์ใน Footer ให้มีดาวและเรืองแสงเหมือน Header -->
+        <span class="brand-logo-text" style="font-size: 16px;">
+          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
         </span>
         <p style="font-size: 11px; line-height: 1.5; color: var(--text-gray); margin: 0;">
-          <strong>First Model Hub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 ใน{{PROVINCE_NAME}} รูปถ่ายตรงปก 100% ปลอดภัย ไม่มัดจำ
+          <!-- แก้ชื่อตรงนี้ให้ติดกันด้วยครับ -->
+          <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 ใน{{PROVINCE_NAME}} รูปถ่ายตรงปก 100% ปลอดภัย ไม่มัดจำ
         </p>
       </div>
 
@@ -604,7 +611,8 @@
     </div>
 
     <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 10px; color: var(--text-muted);">
-      <p style="margin: 0;">© <span id="currentYearDynamic">2026</span> First Model Hub {{PROVINCE_NAME}}. All Rights Reserved.</p>
+      <!-- แก้ชื่อตรงลิขสิทธิ์ด้านล่างสุดให้ติดกัน -->
+      <p style="margin: 0;">© <span id="currentYearDynamic">2026</span> FirstModelHub {{PROVINCE_NAME}}. All Rights Reserved.</p>
       <div style="display: flex; gap: 12px;">
         <a href="/privacy-policy" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Privacy Policy</a>
         <a href="/terms-of-service" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Terms & Conditions</a>
