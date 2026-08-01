@@ -202,23 +202,43 @@ footer a,
   box-shadow: 0 10px 30px var(--nav-shadow) !important;
 }
 
-/* 🟢 BRAND LOGO: Metallic & Soft Layered Glow */
+/* 🟢 BRAND LOGO: สว่าง คมชัด เรืองแสงสีทองสวยแบบรูปที่ 2 */
 .brand-logo-text {
-  font-size: 19px;
-  font-weight: 800;
+  font-size: 19px !important;
+  font-weight: 800 !important;
   color: #FFFFFF !important;
-  display: flex;
-  align-items: center;
-  letter-spacing: -0.04em; 
+  display: inline-flex !important;
+  align-items: center !important;
+  letter-spacing: -0.03em !important;
+  /* เงาฟุ้งสีขาว + ม่วงลาเวนเดอร์ ช่วยให้ FirstModel สว่างใส ไม่มืดมัว */
   text-shadow: 
-    0 0 10px rgba(255, 255, 255, 0.4), 
-    0 0 20px var(--admin-lavender);
+    0 0 8px rgba(255, 255, 255, 0.8),
+    0 0 18px #C084FC,
+    0 0 30px rgba(147, 51, 234, 0.4) !important;
 }
 
+/* คำว่า Hub ไล่สีม่วงลาเวนเดอร์คมชัด */
 .brand-logo-text .hub-text {
-  background: linear-gradient(to bottom, #FFFFFF 0%, #C084FC 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #C084FC !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #C084FC 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* ดาว 🌟 เรืองแสงสีทองฟุ้งนุ่มนวล แก้ปัญหาดาวดรอปบนมือถือ Android */
+.brand-logo-text .star {
+  display: inline-block !important;
+  margin-left: 5px !important;
+  font-size: 1.15em !important;
+  -webkit-text-fill-color: initial !important;
+  background: none !important;
+  filter: drop-shadow(0 0 6px #FFEB3B) drop-shadow(0 0 14px rgba(255, 235, 59, 0.7)) !important;
+  animation: star-soft-pulse 2s infinite ease-in-out !important;
+}
+
+@keyframes star-soft-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.18) rotate(12deg); opacity: 0.9; }
 }
 
 .header-status-badge { display: none !important; }
@@ -486,6 +506,7 @@ footer a,
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(124, 58, 237, 0.25) !important;
 }
 
+/* 🟢 FIX HERO IMAGE: ดึงจุดโฟกัสไปด้านบนเพื่อโชว์ส่วนใบหน้าครบถ้วน รักษาสัดส่วนภาพไม่ให้เบี้ยว */
 .hero-banner-card img,
 .hero-image-wrapper img,
 .hero-section picture img {
@@ -494,7 +515,7 @@ footer a,
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  object-position: center !important;
+  object-position: top center !important; /* 👈 ปรับจุดโฟกัสไปที่ด้านบน ไม่ให้หัวโดนตัด */
   display: block !important;
 }
 
@@ -564,7 +585,6 @@ footer a,
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-
 /* ==============================================================================
    7. SMART FILTER SYSTEM & ZONE CHIPS
    ============================================================================== */
