@@ -490,7 +490,7 @@ footer a,
   filter: drop-shadow(0 0 8px rgba(147, 51, 234, 0.4));
 }
 
-/* 🟢 HERO BANNER CARD: Glassmorphism Fallback Background */
+/* 🟢 HERO BANNER CARD: Glassmorphism Fallback Background & Responsive Aspect Ratio */
 .hero-banner-card,
 .billboard-container, 
 .hero-image-wrapper,
@@ -498,7 +498,8 @@ footer a,
   position: relative !important;
   width: 100% !important;
   max-width: 768px !important;
-  aspect-ratio: 16 / 9 !important;
+  /* 🟢 บนมือถือปรับเป็นสัดส่วน 4/3 เพื่อเปิดความสูง ให้เห็นรูปน้องยาวลงมาถึงช่วงเอว/กางเกง */
+  aspect-ratio: 4 / 3 !important;
   border-radius: 16px !important;
   overflow: hidden !important;
   border: 1px solid rgba(192, 132, 252, 0.3) !important;
@@ -506,7 +507,17 @@ footer a,
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(124, 58, 237, 0.25) !important;
 }
 
-/* 🟢 FIX HERO IMAGE: ดึงจุดโฟกัสไปด้านบนเพื่อโชว์ส่วนใบหน้าครบถ้วน รักษาสัดส่วนภาพไม่ให้เบี้ยว */
+/* 🟢 บนคอมพิวเตอร์ (หน้าจอมากกว่า 768px) ปรับกลับเป็น 16/9 ตามปกติ */
+@media (min-width: 769px) {
+  .hero-banner-card,
+  .billboard-container, 
+  .hero-image-wrapper,
+  .hero-section picture {
+    aspect-ratio: 16 / 9 !important;
+  }
+}
+
+/* 🟢 FIX HERO IMAGE: จัดตำแหน่งภาพให้อยู่ด้านบนสุด ไม่โดนตัดหัว และสัดส่วนภาพไม่เบี้ยว */
 .hero-banner-card img,
 .hero-image-wrapper img,
 .hero-section picture img {
@@ -515,7 +526,7 @@ footer a,
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  object-position: top center !important; /* 👈 ปรับจุดโฟกัสไปที่ด้านบน ไม่ให้หัวโดนตัด */
+  object-position: top center !important; /* 👈 ดึงส่วนใบหน้าและส่วนบนลงมาโชว์ครบถ้วน */
   display: block !important;
 }
 
