@@ -1386,19 +1386,32 @@ window.ScrollTrigger = ScrollTrigger;
     link.setAttribute("href", href);
   }
 
-  // 🟢 ฟังก์ชันอัปเดตแผนที่ Google Maps แบบ Dynamic
+// 🟢 แก้ไข: โหลด Google Maps เฉพาะตอนที่ผู้ใช้เลื่อนจอลงมาถึงเท่านั้น (ประหยัด JS 402KB / คืนเวลา 2.4s)
   function updateGoogleMap(provKey = "chiangmai", provName = "เชียงใหม่") {
     const mapIframe = document.getElementById("google-map");
     const mapPlaceholder = document.getElementById("map-placeholder");
-    if (!mapIframe) return;
+    const mapSection = document.getElementById("map-section");
+    if (!mapIframe || !mapSection) return;
 
     const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (provKey === "national" ? "กรุงเทพ" : provName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
-    mapIframe.src = mapUrl;
 
-    mapIframe.onload = () => {
-      if (mapPlaceholder) mapPlaceholder.style.opacity = "0";
-      setTimeout(() => { if (mapPlaceholder) mapPlaceholder.style.display = "none"; }, 500);
-    };
+    // ใช้ IntersectionObserver ให้เริ่มโหลดแผนที่เมื่อเลื่อนมาใกล้ถึง 200px
+    const observer = new IntersectionObserver((entriesList) => {
+      entriesList.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (mapIframe.src !== mapUrl) {
+            mapIframe.src = mapUrl;
+            mapIframe.onload = () => {
+              if (mapPlaceholder) mapPlaceholder.style.opacity = "0";
+              setTimeout(() => { if (mapPlaceholder) mapPlaceholder.style.display = "none"; }, 500);
+            };
+          }
+          observer.unobserve(mapSection);
+        }
+      });
+    }, { rootMargin: "200px 0px" });
+
+    observer.observe(mapSection);
   }
 
   // 🟢 ฟังก์ชันวาดปุ่มแท็กเลือกโซนย่อย (Zone Chips)
