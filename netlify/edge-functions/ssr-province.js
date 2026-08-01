@@ -132,7 +132,8 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
+// 🟢 FIX: ปรับขนาดเป็น w=300, h=375 ให้พอดีกับหน้าจอมือถือ (291x364px) ช่วยลดขนาดไฟล์รูปจาก 38KB เหลือเพียง ~15KB
+const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
   if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
@@ -140,8 +141,10 @@ const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
     }
     return path;
   }
-  if (path.startsWith("http")) return path;
-  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=75&format=avif`;
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
 const formatDateSSR = dateStr => {
