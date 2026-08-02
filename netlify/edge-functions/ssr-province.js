@@ -25,6 +25,8 @@ const CONFIG = {
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "First Model Hub",
   BRAND_LEGAL_NAME: "First Model Hub Co., Ltd.",
+  DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
+  
   DEFAULT_TELEPHONE: "LINE: @firstmodelhub",
   SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -132,9 +134,9 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 FIX: ปรับขนาดเป็น w=300, h=375 ให้พอดีกับหน้าจอมือถือ (291x364px) ช่วยลดขนาดไฟล์รูปจาก 38KB เหลือเพียง ~15KB
 const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
-  if (!path) return `${hostUrl}/images/apple-touch-icon.png`;
+  // 🟢 แก้ไข: เปลี่ยนรูปสำรองเวลาน้องๆ ไม่มีรูปหรือพาธหลุดให้เป็น firstmodelhub.webp
+  if (!path) return "https://firstmodelhub.com/images/firstmodelhub.webp";
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
       return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
@@ -437,7 +439,8 @@ export default async (req, context) => {
     const enUrl = `${canonUrl}/en`;
 
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
-    const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${hostUrl}/images/apple-touch-icon.png`;
+    // 🟢 จุดที่ 1: เปลี่ยนรูปพรีวิวสำรองเป็น firstmodelhub.webp
+    const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : "https://firstmodelhub.com/images/firstmodelhub.webp";
 
     const dbReviews = reviewsRes?.data || [];
     let finalReviews = [];
@@ -537,7 +540,8 @@ export default async (req, context) => {
         "name": CONFIG.BRAND_NAME,
         "legalName": CONFIG.BRAND_LEGAL_NAME,
         "url": hostUrl,
-        "logo": { "@type": "ImageObject", "url": `${hostUrl}/images/apple-touch-icon.png` },
+        // 🟢 จุดที่ 2: เปลี่ยนโลโก้ Schema เป็น firstmodelhub.webp
+        "logo": { "@type": "ImageObject", "url": "https://firstmodelhub.com/images/firstmodelhub.webp" },
         "description": strippedDesc,
         "sameAs": Object.values(CONFIG.SOCIAL_LINKS),
         "contactPoint": {
