@@ -1,4 +1,3 @@
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
@@ -30,17 +29,6 @@ window.ScrollTrigger = ScrollTrigger;
     DEFAULT_OG_IMAGE: "/images/apple-touch-icon.png"
   };
 
-  const PROVINCE_ZONES_MAP = {
-    chiangmai: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก"],
-    chiangrai: ["ตัวเมืองเชียงราย", "บ้านดู่", "ม.แม่ฟ้าหลวง", "หอนาฬิกา"],
-    udon: ["ตัวเมืองอุดร", "UD Town", "เซ็นทรัลอุดร", "หนองประจักษ์"],
-    lampang: ["ตัวเมืองลำปาง", "สวนดอก", "พระบาท", "ม.ราชภัฏลำปาง"],
-    phitsanulok: ["ตัวเมืองพิษณุโลก", "ม.นเรศวร", "ริมน้ำน่าน", "เซ็นทรัลพิษณุโลก"],
-    bangkok: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ"],
-    chonburi: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
-    national: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"]
-  };
-
   const LOCALIZED_SEO_MAP = {
     chiangmai: {
       zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"],
@@ -63,8 +51,7 @@ window.ScrollTrigger = ScrollTrigger;
       zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"],
       seoContent: `<p>ศูนย์รวม <strong>สาวรับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม</strong> ระดับพรีเมียม การันตีตรงปก 100% ปลอดภัยนัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด <strong>สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ และเอกมัย</strong></p>`,
       reviews: [
-        { author: "คุณเอก (E.)", location: "ย่านสุขุมวิท กรุงเทพฯ", rating: 5, text: "นัดเจอน้องย่านสุขุมวิท ตรงปกมากครับ อัธยาศัยดี นัดเจอจ่ายหน้างานปลอดภัย 100% ประทับใจมากครับ", date: "เมื่อสัปดาห์ที่แล้ว" },
-        { author: "คุณต้น (T.)", location: "ย่านรัชดา กรุงเทพฯ", rating: 5, text: "แอดมินดูแลดี คิวเป๊ะ น้องเทคแคร์สุภาพเป็นกันเองสไตล์ฟิวแฟน ไม่มัดจำด้วย สบายใจสุดๆ ครับ", date: "เมื่อสัปดาห์ที่แล้ว" }
+        { author: "คุณเอก (E.)", location: "ย่านสุขุมวิท กรุงเทพฯ", rating: 5, text: "นัดเจอน้องย่านสุขุมวิท ตรงปกมากครับ อัธยาศัยดี นัดเจอจ่ายหน้างานปลอดภัย 100% ประทับใจมากครับ", date: "เมื่อสัปดาห์ที่แล้ว" }
       ],
       faqs: [
         { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนหลักใน กทม. เช่น สุขุมวิท รัชดา ห้วยขวาง ลาดพร้าว ทองหล่อ และเอกมัย นัดเจอง่ายเดินทางสะดวกครับ" }
@@ -90,9 +77,7 @@ window.ScrollTrigger = ScrollTrigger;
     },
     national: {
       zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"],
-      seoContent: `
-        <p>ยินดีต้อนรับสู่ <strong>First Model Hub</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงานทั่วไทย</strong>, <strong>เด็กเอ็นทั่วไทย</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์ทั่วไทย</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
-      `,
+      seoContent: `<p>ยินดีต้อนรับสู่ <strong>First Model Hub</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงานทั่วไทย</strong>, <strong>เด็กเอ็นทั่วไทย</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์ทั่วไทย</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>`,
       reviews: [
         { author: "คุณเกริกพล (K.)", location: "ตัวเมือง", rating: 5, text: "บริการดีตรงปก เจอตัวจริงค่อยจ่ายเงิน สบายใจมากครับ", date: "เมื่อสัปดาห์ที่แล้ว" }
       ],
@@ -109,7 +94,6 @@ window.ScrollTrigger = ScrollTrigger;
     lastFocusedElement: null,
     isFetching: false,
     lastFetchedAt: "1970-01-01T00:00:00Z",
-    realtimeSubscription: null,
     cleanupFunctions: [],
     currentFilters: null,
     filteredProfiles: [],
@@ -120,16 +104,15 @@ window.ScrollTrigger = ScrollTrigger;
   let supabaseClient = null;
   let fuseInstance = null;
   let isLikeProcessing = false;
+  let isFirstLoad = true;
 
   const DEFAULT_SEO = {
-    title: "ไซด์ไลน์ สาวรับงาน เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปกทั่วไทย 2026 | First Model Hub",
+    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปกทั่วไทย 2026 | First Model Hub",
     description: "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟน และเพื่อนเที่ยวพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
     keywords: "รับงาน, สาวรับงาน, เพื่อนเที่ยว, ไซด์ไลน์, เด็กเอ็น, ผู้ดูแลพรีเมียม, ไม่มัดจำ",
     canonical: "https://firstmodelhub.com/",
     ogImage: "https://firstmodelhub.com/images/apple-touch-icon.png"
   };
-
-  let isFirstLoad = true;
 
   function sanitizeName(rawName) {
     if (!rawName || typeof rawName !== "string") return "";
@@ -237,7 +220,7 @@ window.ScrollTrigger = ScrollTrigger;
         <div style="text-align: center; padding: 48px 16px; color: #EF4444; max-width: 500px; margin: 48px auto; background-color: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 24px;">
             <i class="fas fa-exclamation-triangle" style="font-size: 40px; margin-bottom: 16px; color: var(--primary-purple);"></i>
             <h3 style="font-size: 18px; font-weight: 800; color: white; margin: 0;">ระบบเชื่อมต่อขัดข้องชั่วคราว</h3>
-            <p style="margin-top: 12px; color: var(--text-gray); font-size: 13px; line-height: 1.6;">ไม่สามารถดึงข้อมูลโปรไฟล์ได้ในขณะนี้ กรุณาตรวจสอบสัญญาณเครือข่ายมือถือหรืออินเทอร์เน็ตของคุณใหม่อีกครั้งครับ</p>
+            <p style="margin-top: 12px; color: var(--text-gray); font-size: 13px; line-height: 1.6;">ไม่สามารถดึงข้อมูลโปรไฟล์ได้ในขณะนี้ กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตของคุณใหม่อีกครั้งครับ</p>
             <button onclick="window.location.reload()" 
                     style="margin-top: 24px; padding: 12px 28px; background-color: var(--primary-purple); color: white; border-radius: 100px; border: none; cursor: pointer; font-weight: 800; font-size: 13px; box-shadow: 0 4px 15px rgba(90, 44, 190, 0.3); transition: transform 0.2s;"
                     onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'">
@@ -246,17 +229,12 @@ window.ScrollTrigger = ScrollTrigger;
         </div>
       `;
     }
-    if (DOM.featuredSection) DOM.featuredSection.classList.add("hidden");
-    if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.add("hidden");
-    const loadMoreContainer = document.getElementById("load-more-container");
-    if (loadMoreContainer) loadMoreContainer.classList.add("hidden");
   }
 
   function processProfileObject(raw) {
     if (!raw || typeof raw !== "object") return null;
 
     const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
-
     const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
     const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
     const galleryPaths = Array.isArray(rawGallery) ? rawGallery : (typeof rawGallery === "string" ? rawGallery.split(",").map(s => s.trim()) : []);
@@ -372,7 +350,6 @@ window.ScrollTrigger = ScrollTrigger;
         localStorage.setItem(key, JSON.stringify(data));
       } catch (e) {
         if (e.name === "QuotaExceededError" || e.code === 22) {
-          console.warn("⚠️ LocalStorage full! เคลียร์ความจำสำรองเก่า...");
           localStorage.removeItem(CONFIG.KEYS.CACHE_PROFILES);
           localStorage.removeItem("recent_searches");
           try {
@@ -806,7 +783,6 @@ window.ScrollTrigger = ScrollTrigger;
       STATE.currentFilters = activeFilters;
       STATE.filteredProfiles = results;
 
-      // 🟢 อัปเดต H1, บทความ SEO, รีวิว และหัวข้อทุกอย่างทันทีหลังกรอง
       const currentProvKey = activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "" ? activeFilters.province : "national";
       const currentProvName = (currentProvKey === "national") ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
       replaceDomPlaceholders(currentProvName, results.length, currentProvKey);
@@ -1386,7 +1362,6 @@ window.ScrollTrigger = ScrollTrigger;
     link.setAttribute("href", href);
   }
 
-// 🟢 แก้ไข: โหลด Google Maps เฉพาะตอนที่ผู้ใช้เลื่อนจอลงมาถึงเท่านั้น (ประหยัด JS 402KB / คืนเวลา 2.4s)
   function updateGoogleMap(provKey = "chiangmai", provName = "เชียงใหม่") {
     const mapIframe = document.getElementById("google-map");
     const mapPlaceholder = document.getElementById("map-placeholder");
@@ -1395,7 +1370,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (provKey === "national" ? "กรุงเทพ" : provName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // ใช้ IntersectionObserver ให้เริ่มโหลดแผนที่เมื่อเลื่อนมาใกล้ถึง 200px
     const observer = new IntersectionObserver((entriesList) => {
       entriesList.forEach(entry => {
         if (entry.isIntersecting) {
@@ -1414,7 +1388,6 @@ window.ScrollTrigger = ScrollTrigger;
     observer.observe(mapSection);
   }
 
-  // 🟢 ฟังก์ชันวาดปุ่มแท็กเลือกโซนย่อย (Zone Chips)
   function renderZoneChips(provKey = "chiangmai") {
     let chipsContainer = document.getElementById("zone-chips-container");
     
@@ -1464,9 +1437,7 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // 🟢 ฟังก์ชันอัปเดตบทความ SEO, รีวิว, FAQ, H1 และย่อหน้า Hero ตามจังหวัด
   function updateDynamicProvinceContent(provKey = "national", provName = "ทั่วไทย", count = 50) {
-    // 0. เช็คถ้าไม่มีการระบุจังหวัด หรือเป็นหน้าหลัก ให้ปรับเป็น "ทั่วไทย"
     if (!provKey || provKey === "all" || provKey === "national" || provName === "national") {
       provKey = "national";
       provName = "ทั่วไทย";
@@ -1474,7 +1445,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     const data = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
 
-    // 🟢 1. อัปเดต H1 และย่อหน้าคำอธิบาย Hero ด้านบนสุดให้สลับตามจังหวัดถูกต้อง 100%
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       heroH1.innerHTML = `
@@ -1494,7 +1464,6 @@ window.ScrollTrigger = ScrollTrigger;
       `;
     }
 
-    // 2. อัปเดตบทความ SEO ใน Drawer
     const drawerWrapper = document.getElementById("seo-drawer-wrapper");
     if (drawerWrapper) {
       const contentInner = drawerWrapper.querySelector("div");
@@ -1510,7 +1479,6 @@ window.ScrollTrigger = ScrollTrigger;
       }
     }
 
-    // 3. อัปเดตการ์ดรีวิวประจำจังหวัด
     const reviewsGrid = document.getElementById("reviews-container-grid");
     if (reviewsGrid && data.reviews) {
       reviewsGrid.innerHTML = data.reviews.map(r => `
@@ -1533,7 +1501,6 @@ window.ScrollTrigger = ScrollTrigger;
       `).join("");
     }
 
-    // 4. อัปเดตคำถาม-คำตอบ FAQ ประจำจังหวัด
     const faqContainer = document.getElementById("faq-container-list");
     if (faqContainer && data.faqs && data.faqs.length > 0) {
       faqContainer.innerHTML = data.faqs.map(item => `
@@ -1551,7 +1518,6 @@ window.ScrollTrigger = ScrollTrigger;
       `).join("");
     }
 
-    // 5. อัปเดตหัวข้อต่างๆ ตามจังหวัด
     const drawerTitle = document.querySelector("#service-deep-dive h2");
     if (drawerTitle) drawerTitle.textContent = `บริการเพื่อนเที่ยวและสาวรับงาน${provName} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า ${count}+ รายการ)`;
 
@@ -1564,14 +1530,10 @@ window.ScrollTrigger = ScrollTrigger;
     const reviewsHeading = document.getElementById("reviews-main-heading");
     if (reviewsHeading) reviewsHeading.textContent = `รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน${provName}`;
 
-    // 6. วาดปุ่มแท็กเลือกโซนย่อย
     renderZoneChips(provKey);
-
-    // 7. อัปเดตแผนที่ Google Maps
     updateGoogleMap(provKey, provName);
   }
 
-  // 🟢 สั่งงานปุ่มขยาย/ย่อบทความ SEO Drawer
   function initSeoDrawer() {
     const btn = document.getElementById("toggle-seo-drawer-btn");
     const wrapper = document.getElementById("seo-drawer-wrapper");
@@ -1597,7 +1559,6 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // 🟢 สั่งงานปุ่มแท็บเลือกภูมิภาค (Region Multi-Switch Tabs)
   function initRegionTabs() {
     const tabs = document.querySelectorAll(".region-tab");
     tabs.forEach(tab => {
@@ -1609,7 +1570,6 @@ window.ScrollTrigger = ScrollTrigger;
         tab.classList.add("active");
         tab.setAttribute("aria-selected", "true");
 
-        // 🟢 ล้างข้อความค้างในช่องค้นหาบนสุดออกทันที
         if (DOM.searchInput) DOM.searchInput.value = "";
         const clearBtn = document.getElementById("clear-search-btn");
         if (clearBtn) clearBtn.style.display = "none";
@@ -1627,7 +1587,6 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // 🟢 ฟังก์ชันแทนที่ตัวแปรใน DOM พร้อมอัปเดตบทความ Hyper-Local
   function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
     try {
       const liveCountEl = document.getElementById("live-profile-count");
@@ -1653,7 +1612,6 @@ window.ScrollTrigger = ScrollTrigger;
         if (el.alt) el.alt = el.alt.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
       });
 
-      // 🟢 เรียกอัปเดตบทความ SEO Hyper-Local, รีวิว, แผนที่ และปุ่มแท็กโซนย่อยทันที
       updateDynamicProvinceContent(provinceSlug, provinceName, profileCount);
 
     } catch (e) {
@@ -1758,14 +1716,12 @@ window.ScrollTrigger = ScrollTrigger;
       return;
     }
 
-    // 🟢 หน้าหลัก (Home Page / Index)
     STATE.currentProfileSlug = null;
     closeLightboxModal(false);
 
     applyUltimateFilters(false);
     updateSEOMetadata(null, null);
 
-    // 🟢 แก้ไขจุดนี้: บนหน้าหลัก ถ้าไม่มีการเลือกจังหวัดในดรอปดาวน์ ต้องให้แสดงเป็น "national" และ "ทั่วไทย" เสมอ!
     const currentProvKey = (DOM.provinceSelect?.value && DOM.provinceSelect.value !== "all") ? DOM.provinceSelect.value : "national";
     const currentProvName = (currentProvKey === "national") ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
     const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
@@ -1896,7 +1852,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   };
 
-  // 🟢 ยามอัจฉริยะ (MutationObserver) ป้องกันตัวแปร {{...}} หลุดตอนย้อนกลับ
   const initPlaceholderWatcher = () => {
     let timeout;
     const observer = new MutationObserver(() => {
@@ -1914,6 +1869,86 @@ window.ScrollTrigger = ScrollTrigger;
 
     observer.observe(document.body, { childList: true, subtree: true });
   };
+
+  // 📱 🟢 PWA INSTALLATION ENGINE (ระบบตรวจจับและแจ้งเตือนติดตั้งแอป)
+  function initPwaInstaller() {
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log('📱 [PWA] เบราว์เซอร์พร้อมสำหรับการติดตั้งแอปแล้ว');
+      showPwaInstallBanner();
+    });
+
+    function showPwaInstallBanner() {
+      if (document.getElementById('pwa-install-banner') || localStorage.getItem('pwa_banner_dismissed')) return;
+
+      const banner = document.createElement('div');
+      banner.id = 'pwa-install-banner';
+      banner.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 24px);
+        max-width: 420px;
+        background: rgba(18, 12, 38, 0.95);
+        border: 1px solid rgba(192, 132, 252, 0.4);
+        border-radius: 16px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(124,58,237,0.3);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        z-index: 2900;
+      `;
+
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);" alt="First Model Hub App">
+          <div>
+            <div style="font-size: 12px; font-weight: 800; color: #FFF;">ติดตั้งแอป First Model Hub</div>
+            <div style="font-size: 10px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button id="pwa-install-btn" style="background: linear-gradient(135deg, #7C3AED, #5A2CBE); color: white; border: none; padding: 7px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; cursor: pointer;">ติดตั้ง</button>
+          <button id="pwa-dismiss-btn" style="background: none; border: none; color: #A1A1AA; font-size: 14px; padding: 4px; cursor: pointer;"><i class="fas fa-times"></i></button>
+        </div>
+      `;
+
+      document.body.appendChild(banner);
+
+      document.getElementById('pwa-install-btn').onclick = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log(`PWA outcome: ${outcome}`);
+          deferredPrompt = null;
+        } else if (isIOS()) {
+          alert('วิธีติดตั้งบน iPhone/iPad:\n1. กดปุ่ม "แชร์" (รูปกล่องสี่เหลี่ยมมีลูกศรชี้ขึ้น) ด้านล่างจอ Safari\n2. เลื่อนลงมาเลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)');
+        }
+        banner.remove();
+      };
+
+      document.getElementById('pwa-dismiss-btn').onclick = () => {
+        banner.remove();
+        localStorage.setItem('pwa_banner_dismissed', Date.now());
+      };
+    }
+
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    if (isIOS() && !window.navigator.standalone && !localStorage.getItem('pwa_banner_dismissed')) {
+      setTimeout(showPwaInstallBanner, 3000);
+    }
+  }
 
   document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 แอปพลิเคชัน First Model Hub กำลังเริ่มต้นทำงาน...");
@@ -2153,7 +2188,6 @@ window.ScrollTrigger = ScrollTrigger;
       });
     })();
 
-    // 🟢 สั่งงานปุ่มเปิด/ปิดฟอร์มเขียนรีวิว
     (function initReviewToggle() {
       const btn = document.getElementById("toggle-review-form-btn");
       const form = document.getElementById("review-form");
@@ -2180,7 +2214,6 @@ window.ScrollTrigger = ScrollTrigger;
       }, 300);
     });
 
-    // 🟢 แก้ไข: ล้างช่องค้นหาคำบนสุดออกทันทีเมื่อผู้ใช้เปลี่ยนจังหวัดในดรอปดาวน์
     DOM.provinceSelect?.addEventListener("change", () => {
       if (DOM.searchInput) DOM.searchInput.value = "";
       const clearBtn = document.getElementById("clear-search-btn");
@@ -2200,7 +2233,6 @@ window.ScrollTrigger = ScrollTrigger;
       const suggestionsEl = document.getElementById("search-suggestions");
       if (suggestionsEl) suggestionsEl.classList.add("hidden");
       
-      // ล้างสถานะไฮไลต์ปุ่มโซนย่อย (Zone Chips)
       const chipsContainer = document.getElementById("zone-chips-container");
       if (chipsContainer) {
         chipsContainer.querySelectorAll(".zone-chip-btn").forEach(b => {
@@ -2219,23 +2251,17 @@ window.ScrollTrigger = ScrollTrigger;
     updateActiveNavLinks();
     hideGlobalLoader();
     
-    // 🟢 สั่งรันยามอัจฉริยะ, ปุ่มขยายบทความ SEO และแท็บเลือกภูมิภาค
     initPlaceholderWatcher();
     initSeoDrawer();
     initRegionTabs();
+    initPwaInstaller();
 
+    // 📱 Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
       const registerSW = () => {
-        fetch('/sw.js', { method: 'HEAD' })
-          .then(response => {
-            if (response.ok) {
-              return navigator.serviceWorker.register('/sw.js');
-            }
-          })
-          .then(reg => {
-            if (reg) console.log('✅ [PWA] Service Worker สำเร็จ:', reg.scope);
-          })
-          .catch(() => {});
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('✅ [PWA] Service Worker ลงทะเบียนสำเร็จ:', reg.scope))
+          .catch(err => console.warn('⚠️ [PWA] Service Worker ลงทะเบียนล้มเหลว:', err));
       };
 
       if (document.readyState === 'complete') {
