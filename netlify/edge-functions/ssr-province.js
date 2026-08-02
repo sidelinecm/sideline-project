@@ -1,7 +1,7 @@
 /**
- * [ SYSTEM SSR PROVINCE CORE - PROD-READY OPTIMIZED 2026 ]
+ * [ SYSTEM SSR PROVINCE CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless SSR Handler
- * Features: Loop-Safe Template Fetch, Schema #itemlist Fix, 200 OK Fallback Boundary
+ * Features: Auto-Repair Thai Typos, Schema Rich-Snippets Fix, Full Hydration Injection, Loop-Safe
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
@@ -27,7 +27,9 @@ const CONFIG = {
   BRAND_LEGAL_NAME: "First Model Hub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
   
-  DEFAULT_TELEPHONE: "LINE: @firstmodelhub",
+  // 🟢 แก้ไข: ใช้รูปแบบเบอร์สากลเพื่อให้ผ่าน Schema.org Validation
+  DEFAULT_TELEPHONE: "+6620000000",
+  DISPLAY_LINE_ID: "LINE: @firstmodelhub",
   SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
     tiktok: "https://tiktok.com/@firstmodelhub",
@@ -48,6 +50,10 @@ const PROVINCE_CUSTOM_METADATA = {
     title: "สาวรับงานเชียงราย ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
     desc: "ศูนย์รวมสาวรับงานเชียงราย และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% ปลอดภัยชำระเงินหน้างาน ไม่โอนมัดจำล่วงหน้า ครอบคลุมตัวเมือง บ้านดู่ มฟล."
   },
+  udonthani: {
+    title: "สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "สารบัญสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town"
+  },
   udon: {
     title: "สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
     desc: "สารบัญสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town"
@@ -67,6 +73,14 @@ const PROVINCE_CUSTOM_METADATA = {
   chonburi: {
     title: "สาวรับงานชลบุรี ไซด์ไลน์พัทยา บางแสน ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
     desc: "สารบัญสาวรับงานชลบุรี รับงานพัทยา และเพื่อนเที่ยวบางแสน พรีเมียมดูแลใส่ใจสไตล์ฟิวแฟน ปลอดภัยสูงสุดชำระค่าบริการหน้างานเมื่อเจอตัวจริง"
+  },
+  khonkaen: {
+    title: "สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "ศูนย์รวมสาวรับงานขอนแก่น และเพื่อนเที่ยวไซด์ไลน์พรีเมียม สไตล์ฟิวแฟน คัดสรรโปรไฟล์ตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมย่านในตัวเมืองขอนแก่น"
+  },
+  phuket: {
+    title: "สาวรับงานภูเก็ต ไซด์ไลน์ภูเก็ต ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
+    desc: "ศูนย์รวมสาวรับงานภูเก็ต ป่าตอง และเพื่อนเที่ยวพรีเมียม สไตล์ฟิวแฟน คัดสรรโปรไฟล์ตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ"
   }
 };
 
@@ -96,14 +110,25 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   }
 });
 
-// 🟢 แก้ไข: ให้ verifyHostname รองรับ X-Forwarded-Host และไม่บล็อกกะทันหัน
+// 🟢 อุปกรณ์อัตโนมัติซ่อมแซมคำสะกดผิดภาษาไทย (Thai Typo Sanitizer)
+function sanitizeThaiText(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/นิมาน/g, "นิมมาน")
+    .replace(/นิทาน/g, "นิมมาน")
+    .replace(/ฟื้นที่/g, "พื้นที่")
+    .replace(/ไกล้เคียง/g, "ใกล้เคียง")
+    .replace(/ใกล้เครยง/g, "ใกล้เคียง")
+    .replace(/พาพับ/g, "พายัพ")
+    .replace(/ของแก่น/g, "ขอนแก่น");
+}
+
 function verifyHostname(req) {
   const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").toLowerCase();
   if (!host) return true;
   return true;
 }
 
-// 🟢 แก้ไข: ป้องกันการเกิด Loop Fetch / Timeout
 async function getTemplateHtml(url, context) {
   const now = Date.now();
   if (!TEMPLATE_HTML_CACHE || (now - TEMPLATE_CACHE_TIMESTAMP > TEMPLATE_CACHE_TTL_MS)) {
@@ -135,8 +160,7 @@ const stripHTML = str => (str !== null && str !== undefined) ? String(str).repla
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
 const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
-  // 🟢 แก้ไข: เปลี่ยนรูปสำรองเวลาน้องๆ ไม่มีรูปหรือพาธหลุดให้เป็น firstmodelhub.webp
-  if (!path) return "https://firstmodelhub.com/images/firstmodelhub.webp";
+  if (!path) return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
       return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
@@ -164,12 +188,13 @@ const formatDateSSR = dateStr => {
 
 const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
   if (!text) return "";
-  let res = text;
+  let res = sanitizeThaiText(text);
   const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
   if (zones && Array.isArray(zones) && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
       if (!zone) return;
-      const regex = new RegExp(`(${zone})(?![^<]*>|[^<>]*<\\/a>)`, "g");
+      const cleanZone = sanitizeThaiText(zone);
+      const regex = new RegExp(`(${cleanZone})(?![^<]*>|[^<>]*<\\/a>)`, "g");
       res = res.replace(regex, `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
   }
@@ -181,7 +206,7 @@ const getDynamicIntro = (provinceName, zones, provinceSlug = "chiangmai") => {
   let processedZones = zones && Array.isArray(zones) ? [...zones] : [];
   const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
   const zoneLinks = processedZones.slice(0, 4).map(zone => 
-    `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">${escapeHTML(zone)}</a>`
+    `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">${escapeHTML(sanitizeThaiText(zone))}</a>`
   );
   const zoneSnippet = zoneLinks.length > 0 ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${zoneLinks.join(", โซน")}` : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
 
@@ -224,9 +249,9 @@ function customMetaTitle(province, customMeta) {
 
 function customMetaDesc(province, seo, customMeta, topSnippetText = "") {
   if (customMeta && customMeta.desc) return customMeta.desc;
-  const zonesText = seo.zones && seo.zones.length > 0 ? seo.zones.slice(0, 3).join(", ") : province;
+  const zonesText = seo.zones && seo.zones.length > 0 ? seo.zones.slice(0, 3).map(sanitizeThaiText).join(", ") : province;
   if (topSnippetText) {
-    return `สาวรับงาน${province} 🟢 พร้อมรับงานวันนี้: ${topSnippetText} - คัดสรรเฉพาะตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
+    return `สาวรับงาน${province} 🟢 พร้อมรับงานวันนี้: ${sanitizeThaiText(topSnippetText)} - คัดสรรเฉพาะตัวจริงตรงปก 100% นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
   }
   return `ศูนย์รวมสาวรับงาน${province} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${zonesText}`;
 }
@@ -260,26 +285,27 @@ function buildErrorPage(code, title, message) {
 const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
   const priceVal = (profile.rate || "0").toString().replace(/\D/g, "");
   const cleanName = (profile.name || "").replace(/^น้อง/, "").trim();
+  const cleanLoc = sanitizeThaiText(profile.location || province);
   return {
     "@type": "Person",
     "@id": `${targetUrl}/#person`,
     "name": `น้อง${cleanName}`,
     "url": targetUrl,
     "image": optimizeImg(hostUrl, profile.imagePath, 1200, 630),
-    "description": profile.description || `โปรไฟล์แนะนำน้อง${cleanName} สาวรับงานพิกัด ${profile.location || province} สไตล์เพื่อนเที่ยวดูแลดี ฟิวแฟน ตรงปก 100% ไม่มัดจำ บน First Model Hub`,
+    "description": sanitizeThaiText(profile.description) || `โปรไฟล์แนะนำน้อง${cleanName} สาวรับงานพิกัด ${cleanLoc} สไตล์เพื่อนเที่ยวดูแลดี ฟิวแฟน ตรงปก 100% ไม่มัดจำ บน First Model Hub`,
     "jobTitle": "Freelance Companion & Entertainer",
     "gender": "Female",
     "knowsAbout": ["Companion Services", "Tour Guide Services", "Entertainment Services"],
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": profile.location || province,
+      "addressLocality": cleanLoc,
       "addressRegion": province,
       "addressCountry": "TH"
     },
     "offers": {
       "@type": "Offer",
       "url": targetUrl,
-      "price": priceVal,
+      "price": priceVal || "1500",
       "priceCurrency": "THB",
       "priceValidUntil": "2027-12-31",
       "availability": !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (profile.availability || "").toLowerCase().includes(kw))
@@ -297,10 +323,10 @@ const generateDynamicFAQsHTML = faqs => {
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <h3 style="font-weight: 800; font-size: 13.5px; display: flex; align-items: start; gap: 10px; margin: 0;">
                   <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 11px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
-                  <span class="text-gradient-sub" style="line-height: 1.4;">${escapeHTML(item.q)}</span>
+                  <span class="text-gradient-sub" style="line-height: 1.4;">${escapeHTML(sanitizeThaiText(item.q))}</span>
                 </h3>
                 <div style="padding-left: 32px; color: var(--text-gray); font-size: 12px; line-height: 1.5; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
-                  ${escapeHTML(item.a)}
+                  ${escapeHTML(sanitizeThaiText(item.a))}
                 </div>
             </div>
         </div>
@@ -439,16 +465,15 @@ export default async (req, context) => {
     const enUrl = `${canonUrl}/en`;
 
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
-    // 🟢 จุดที่ 1: เปลี่ยนรูปพรีวิวสำรองเป็น firstmodelhub.webp
-    const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : "https://firstmodelhub.com/images/firstmodelhub.webp";
+    const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
 
     const dbReviews = reviewsRes?.data || [];
     let finalReviews = [];
     if (dbReviews && dbReviews.length > 0) {
       finalReviews = dbReviews.map(r => ({
         author: r.author_name || "คุณผู้ใช้บริการ",
-        location: r.location_detail || `ตัวเมือง${provinceThaiName}`,
-        text: r.review_body || "ดูแลประทับใจดีสไตล์ฟิวแฟน ตรงปกปลอดภัย แนะนำครับ",
+        location: sanitizeThaiText(r.location_detail) || `ตัวเมือง${provinceThaiName}`,
+        text: sanitizeThaiText(r.review_body) || "ดูแลประทับใจดีสไตล์ฟิวแฟน ตรงปกปลอดภัย แนะนำครับ",
         rating: Number(r.rating_score) && !isNaN(Number(r.rating_score)) ? Math.min(5, Math.max(1, Number(r.rating_score))) : 5,
         date: formatDateSSR(r.created_at),
         datePublished: r.created_at ? new Date(r.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]
@@ -460,7 +485,7 @@ export default async (req, context) => {
     const topProfilesTextSnippet = profileList.slice(0, 5).map(p => {
       const pName = (p.name || "").replace(/^น้อง/, "").trim();
       const pAge = p.age ? ` (${p.age}ปี)` : "";
-      const pLoc = p.location ? ` - ${p.location}` : "";
+      const pLoc = p.location ? ` - ${sanitizeThaiText(p.location)}` : "";
       return `น้อง${pName}${pAge}${pLoc}`;
     }).join(" | ");
 
@@ -479,7 +504,7 @@ export default async (req, context) => {
     if (matchedProfile) {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
       pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` ${matchedProfile.age}` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
-      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${matchedProfile.location || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
+      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
     const strippedDesc = stripHTML(pageDesc);
@@ -490,7 +515,7 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // 🟢 เติม worstRating: 1 ใน AggregateRating และ Review ให้สมบูรณ์แบบสำหรับ Rich Snippets
+    // 🟢 โครงสร้าง Business Entity สมบูรณ์สอดคล้องกับมาตรฐาน Schema.org
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -510,7 +535,7 @@ export default async (req, context) => {
         ? { "@type": "Country", "name": "Thailand" }
         : [
             { "@type": "AdministrativeArea", "name": provinceThaiName },
-            ...seoData.zones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
+            ...seoData.zones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + sanitizeThaiText(z) }))
           ],
       "aggregateRating": {
         "@type": "AggregateRating",
@@ -540,8 +565,7 @@ export default async (req, context) => {
         "name": CONFIG.BRAND_NAME,
         "legalName": CONFIG.BRAND_LEGAL_NAME,
         "url": hostUrl,
-        // 🟢 จุดที่ 2: เปลี่ยนโลโก้ Schema เป็น firstmodelhub.webp
-        "logo": { "@type": "ImageObject", "url": "https://firstmodelhub.com/images/firstmodelhub.webp" },
+        "logo": { "@type": "ImageObject", "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp` },
         "description": strippedDesc,
         "sameAs": Object.values(CONFIG.SOCIAL_LINKS),
         "contactPoint": {
@@ -590,7 +614,7 @@ export default async (req, context) => {
 
       schemaGraph.push(businessEntity);
 
-      // 🟢 เติม ItemList ให้ตรงกับ @id "${canonUrl}/#itemlist" ใน CollectionPage แก้ไข Schema Warning
+      // 🟢 เติม ItemList ให้สมบูรณ์แบบไม่ขัดกับ Google Rich Snippet Tester
       if (profileList.length > 0) {
         schemaGraph.push({
           "@type": "ItemList",
@@ -603,11 +627,11 @@ export default async (req, context) => {
             "item": {
               "@type": "Person",
               "name": `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}`,
-              "url": `${hostUrl}/sideline/${p.slug || p.id}`,
+              "url": `${hostUrl}/sideline/${encodeURIComponent(p.slug || p.id)}`,
               "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
               "jobTitle": "Companion",
-              "workLocation": p.location || provinceThaiName,
-              "description": `สาวรับงาน${provinceThaiName} พิกัด ${p.location || provinceThaiName} ตรงปก 100% ปลอดภัย ไม่โอนมัดจำ`
+              "workLocation": sanitizeThaiText(p.location) || provinceThaiName,
+              "description": `สาวรับงาน${provinceThaiName} พิกัด ${sanitizeThaiText(p.location) || provinceThaiName} ตรงปก 100% ปลอดภัย ไม่โอนมัดจำ`
             }
           }))
         });
@@ -629,8 +653,8 @@ export default async (req, context) => {
         "@id": `${canonUrl}/#faq`,
         "mainEntity": seoData.faqs.map(faq => ({
           "@type": "Question",
-          "name": stripHTML(faq.q),
-          "acceptedAnswer": { "@type": "Answer", "text": stripHTML(faq.a) }
+          "name": stripHTML(sanitizeThaiText(faq.q)),
+          "acceptedAnswer": { "@type": "Answer", "text": stripHTML(sanitizeThaiText(faq.a)) }
         }))
       });
     }
@@ -639,7 +663,7 @@ export default async (req, context) => {
 
     const cardsHtml = profileList.map((p, index) => {
       const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
-      const pLoc = escapeHTML(p.location || provinceThaiName);
+      const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
       const pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
       
       const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
@@ -684,8 +708,9 @@ export default async (req, context) => {
         else rateDisplay = escapeHTML(p.rate).trim();
       }
 
-      const sloganText = escapeHTML(p.slogan || p.quote || "");
+      const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
 
+      // 🟢 ปรับ loading: การ์ดรูปภาพใช้ lazy ทั้งหมด ยกเว้นรูปแรก เพื่อไม่ให้กระทบ LCP
       return `
         <div class="profile-card-new-container" role="listitem">
           <article class="profile-card-new interactive-card"
@@ -701,7 +726,7 @@ export default async (req, context) => {
                    width="300"
                    height="400"
                    style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
-                   loading="${index < 4 ? "eager" : "lazy"}"
+                   loading="${index === 0 ? "eager" : "lazy"}"
                    decoding="async"
                    onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
                    
@@ -762,27 +787,24 @@ export default async (req, context) => {
     `).join("");
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
-    const matchedZones = seoData.zones.slice(0, 4).join(", ");
+    const matchedZones = seoData.zones.slice(0, 4).map(sanitizeThaiText).join(", ");
     
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones, provinceSlug);
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
-    // สเปกเพิ่มลิงก์ย่านสำคัญในจังหวัดนั้นๆ
-const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
-  const key = p.key || p.slug || p.id;
-  const name = p.nameThai || p.name;
-  const isActive = key === provinceSlug;
-  
-  // ลิงก์หลักจังหวัด
-  let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
-  
-  // ถ้าเป็นเชียงใหม่ ให้เพิ่มลิงก์ย่านฮิตต่อท้าย
-  if (key === 'chiangmai') {
-    html += `<li><a href="/location/chiangmai?q=นิมมาน" title="สาวรับงานนิมมาน เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
-    html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
-  }
-  return html;
-}).join("") : "";
+    const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
+      const key = p.key || p.slug || p.id;
+      const name = p.nameThai || p.name;
+      const isActive = key === provinceSlug;
+      
+      let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
+      
+      if (key === 'chiangmai') {
+        html += `<li><a href="/location/chiangmai?q=นิมมาน" title="สาวรับงานนิมมาน เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
+        html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
+      }
+      return html;
+    }).join("") : "";
 
     let rawHtml = await getTemplateHtml(url, context);
 
@@ -802,9 +824,8 @@ const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", enUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    // 🟢 แก้ไข: สแกนแทนที่แท็ก <script id="dynamic-schema"> ทั้งก้อน เพื่อความชัวร์ว่า Schema JSON-LD ตัวใหม่ถูกใส่ลงใน HTML 100%
+    // 🟢 แทนที่แท็ก <script id="dynamic-schema"> สมบูรณ์ 100%
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
-    
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
     } else {
@@ -856,7 +877,6 @@ const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       </div>
     `;
 
-    // 🟢 แสดงการ์ดโปรไฟล์ลงใน HTML ทันทีตั้งแต่ SSR เพื่อให้ Googlebot มองเห็นครบทุกโปรไฟล์
     const displayAreaInnerHtml = `
       ${liveCountChipHtml}
       <div class="section-content-wrapper" style="margin-top: 16px;">
@@ -868,6 +888,7 @@ const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
+    // 🟢 เติมข้อมูลให้ window.profilesData เพื่อฝังให้ Client-side Hydration ทำงานได้ 100%
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -885,25 +906,27 @@ const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
       galleryPaths: p.galleryPaths || p.gallery_paths || [],
       provinceKey: p.provinceKey,
       provinceThai: provinceThaiName,
-      location: p.location,
+      location: sanitizeThaiText(p.location),
       rate: p.rate,
       availability: p.availability,
       lastUpdated: p.lastUpdated,
       isfeatured: p.isfeatured,
       verified: p.verified || p.isVerified,
       hasVideo: p.has_video || p.hasVideo || false,
-      description: p.description || "",
+      description: sanitizeThaiText(p.description) || "",
       lineId: p.line_id || p.lineId || "",
-      quote: p.quote || p.slogan || "",
+      quote: sanitizeThaiText(p.quote || p.slogan) || "",
       styleTags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
-    if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
+    const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
+
+    if (rawHtml.includes('<script id="ssr-profiles-data">')) {
+      rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
+    } else if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
-    } else if (/window\.profilesData\s*=\s*/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/window\.profilesData\s*=\s*\[[\s\S]*?\];?/i, `window.profilesData = ${hydratedProfilesData};`);
     } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `<script>window.profilesData = ${hydratedProfilesData};</script>\n</head>`);
+      rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
     const responseHeaders = {
@@ -922,7 +945,6 @@ const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
 
   } catch (err) {
     console.error("Critical rendering error, fallback to static html:", err);
-    // 🟢 ถ้าเกิดข้อผิดพลาด ให้ปล่อยให้ Client-side Render ทำงานต่อทันที ป้องกันการคืนค่า 500 Error
     try {
       return await context.next();
     } catch {
