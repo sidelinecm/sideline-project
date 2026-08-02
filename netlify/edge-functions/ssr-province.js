@@ -110,7 +110,7 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   }
 });
 
-// 🟢 อุปกรณ์อัตโนมัติซ่อมแซมคำสะกดผิดภาษาไทย (Thai Typo Sanitizer)
+// 🟢 FIX: ปรับ Regex คำสะกดผิดให้เจาะจง ไม่ให้กระทบคำอื่น
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -120,7 +120,8 @@ function sanitizeThaiText(str) {
     .replace(/ไกล้เคียง/g, "ใกล้เคียง")
     .replace(/ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/พาพับ/g, "พายัพ")
-    .replace(/ของแก่น/g, "ขอนแก่น");
+    .replace(/รับงาน ของแก่น/g, "รับงาน ขอนแก่น")
+    .replace(/ตัวเมือง ของแก่น/g, "ตัวเมือง ขอนแก่น");
 }
 
 function verifyHostname(req) {
@@ -515,7 +516,12 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // 🟢 โครงสร้าง Business Entity สมบูรณ์สอดคล้องกับมาตรฐาน Schema.org
+// 🟢 1. กรองคำว่า "ทั้งหมด" ออกจาก zones ก่อนทำ areaServed
+    const validZones = (seoData.zones || [])
+      .map(sanitizeThaiText)
+      .filter(z => z && z !== "ทั้งหมด" && z !== "all");
+
+    // 🟢 2. โครงสร้าง Business Entity ที่แก้ไข areaServed แล้ว
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -535,7 +541,7 @@ export default async (req, context) => {
         ? { "@type": "Country", "name": "Thailand" }
         : [
             { "@type": "AdministrativeArea", "name": provinceThaiName },
-            ...seoData.zones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + sanitizeThaiText(z) }))
+            ...validZones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
           ],
       "aggregateRating": {
         "@type": "AggregateRating",
@@ -591,14 +597,27 @@ export default async (req, context) => {
 
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
+      const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
+
+      // 🟢 3. เพิ่ม WebPage Node ในหน้าโปรไฟล์เดี่ยวเพื่อเชื่อมโยง Graph ให้สมบูรณ์
+      schemaGraph.push({
+        "@type": "ItemPage",
+        "@id": `${profileUrl}/#webpage`,
+        "url": profileUrl,
+        "name": `น้อง${cleanName} - โปรไฟล์สาวรับงาน${provinceThaiName}`,
+        "isPartOf": { "@id": `${hostUrl}/#website` },
+        "mainEntity": { "@id": `${profileUrl}/#person` }
+      });
+
       schemaGraph.push(generatePersonSchema(matchedProfile, provinceThaiName, profileUrl, hostUrl));
+      
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${profileUrl}/#breadcrumb`,
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl },
           { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": `${hostUrl}/location/${provinceSlug}` },
-          { "@type": "ListItem", "position": 3, "name": `น้อง${(matchedProfile.name || "").replace(/^น้อง/, "").trim()}`, "item": profileUrl }
+          { "@type": "ListItem", "position": 3, "name": `น้อง${cleanName}`, "item": profileUrl }
         ]
       });
     } else {
@@ -614,26 +633,23 @@ export default async (req, context) => {
 
       schemaGraph.push(businessEntity);
 
-      // 🟢 เติม ItemList ให้สมบูรณ์แบบไม่ขัดกับ Google Rich Snippet Tester
+      // 🟢 4. แก้ไข ItemList ให้ถูกต้องตามข้อกำหนด Google Carousel (ใช้ URL references)
       if (profileList.length > 0) {
         schemaGraph.push({
           "@type": "ItemList",
           "@id": `${canonUrl}/#itemlist`,
           "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceThaiName}`,
           "numberOfItems": profileList.length,
-          "itemListElement": profileList.map((p, index) => ({
-            "@type": "ListItem",
-            "position": index + 1,
-            "item": {
-              "@type": "Person",
-              "name": `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}`,
-              "url": `${hostUrl}/sideline/${encodeURIComponent(p.slug || p.id)}`,
-              "image": optimizeImg(hostUrl, p.imagePath, 600, 750),
-              "jobTitle": "Companion",
-              "workLocation": sanitizeThaiText(p.location) || provinceThaiName,
-              "description": `สาวรับงาน${provinceThaiName} พิกัด ${sanitizeThaiText(p.location) || provinceThaiName} ตรงปก 100% ปลอดภัย ไม่โอนมัดจำ`
-            }
-          }))
+          "itemListElement": profileList.map((p, index) => {
+            const pCleanName = (p.name || "").replace(/^น้อง\s?/, "").trim();
+            const itemUrl = `${hostUrl}/sideline/${encodeURIComponent(p.slug || p.id)}`;
+            return {
+              "@type": "ListItem",
+              "position": index + 1,
+              "name": `น้อง${pCleanName}`,
+              "url": itemUrl
+            };
+          })
         });
       }
 
@@ -647,10 +663,12 @@ export default async (req, context) => {
       });
     }
 
+    // 🟢 5. เชื่อมโยง FAQPage เข้ากับ WebPage ผ่าน isPartOf
     if (seoData.faqs && !profileSlug) {
       schemaGraph.push({
         "@type": "FAQPage",
         "@id": `${canonUrl}/#faq`,
+        "isPartOf": { "@id": `${canonUrl}/#webpage` },
         "mainEntity": seoData.faqs.map(faq => ({
           "@type": "Question",
           "name": stripHTML(sanitizeThaiText(faq.q)),
