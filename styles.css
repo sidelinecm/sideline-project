@@ -1050,3 +1050,29 @@ img, picture, svg {
 a, .profile-card-new, .interactive-card {
   pointer-events: auto !important;
 }
+
+/* 🟢 FIX: บังคับเปลี่ยนสีข้อความสไตล์ Inline ให้เปิดอ่านได้ชัดเจน 100% ใน Light Mode */
+html.light p[style*="color: #A1A1AA"],
+html.light p[style*="color: #CBD5E1"],
+html.light p[style*="color: #E4E4E7"],
+html.light span[style*="color: #A1A1AA"],
+html.light span[style*="color: #D4D4D8"],
+html.light div[style*="color: #A1A1AA"] {
+  color: #3F3F46 !important;
+}
+
+html.light p[style*="color: white"],
+html.light span[style*="color: white"],
+html.light h1, html.light h2, html.light h3, html.light h4 {
+  color: #09090B !important;
+}
+
+/* 🟢 FIX: ปรับ Footer Padding ไม่ให้โดน Floating Dock ลอยทับบนมือถือ */
+footer {
+  padding-bottom: 30px !important;
+}
+@media (max-width: 768px) {
+  footer {
+    padding-bottom: 120px !important;
+  }
+}

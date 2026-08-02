@@ -1857,7 +1857,11 @@ window.ScrollTrigger = ScrollTrigger;
     }
   };
 
+
   const initPlaceholderWatcher = () => {
+    let hasPlaceholders = document.body.innerHTML.includes('{{');
+    if (!hasPlaceholders) return;
+
     let timeout;
     const observer = new MutationObserver(() => {
       clearTimeout(timeout);
@@ -1868,8 +1872,11 @@ window.ScrollTrigger = ScrollTrigger;
           const activeCount = STATE.filteredProfiles.length || STATE.allProfiles.length || 50;
 
           replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
+        } else {
+          // ถ้าไม่มี {{ เหลือแล้ว ให้หยุด Observer เพื่อประหยัด CPU
+          observer.disconnect();
         }
-      }, 50);
+      }, 150);
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
@@ -1892,7 +1899,7 @@ window.ScrollTrigger = ScrollTrigger;
       banner.id = 'pwa-install-banner';
       banner.style.cssText = `
         position: fixed;
-        bottom: 80px;
+        bottom: 95px;
         left: 50%;
         transform: translateX(-50%);
         width: calc(100% - 24px);

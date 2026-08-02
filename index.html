@@ -15,6 +15,8 @@
 
   <!-- ============================== MULTILINGUAL SEO ============================== -->
   <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
+  <!-- 🟢 FIX 1: เพิ่ม hreflang ภาษาอังกฤษให้ครบถ้วน -->
+  <link rel="alternate" hreflang="en" href="{{SEO_CANONICAL_EN}}" />
   <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
   <!-- ============================== OPEN GRAPH & TWITTER CARDS ============================== -->
@@ -36,6 +38,9 @@
   <meta name="twitter:image" content="{{SEO_IMAGE}}">
 
   <!-- ICONS & MANIFEST -->
+  <!-- 🟢 FIX 2: เพิ่ม Meta สำหรับ iOS PWA App -->
+  <meta name="apple-mobile-web-app-title" content="First Model Hub">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48x48.png">
@@ -55,7 +60,12 @@
   
   <link rel="modulepreload" href="/main.js">
   <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- 🟢 FIX 3: แก้ไขไวยากรณ์ FontAwesome Async ให้ถูกต้องตามมาตรฐาน HTML5 (rel="preload") -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </noscript>
 
   <link rel="preload" href="/images/hero-firstmodelhub-1200.webp" as="image" 
         imagesrcset="/images/hero-firstmodelhub-600.webp 600w, /images/hero-firstmodelhub-1200.webp 1200w" 
