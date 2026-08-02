@@ -1148,8 +1148,15 @@ window.ScrollTrigger = ScrollTrigger;
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
+      // 🟢 FIX: สร้าง URL LINE ที่ถูกต้อง ไม่เติม @ ซ้อน
       const lineIdToUse = (profile.lineId || "ksLUWB89Y_").replace(/^@/, "").trim();
-      const lineUrl = lineIdToUse.startsWith("http") ? lineIdToUse : `https://line.me/ti/p/${lineIdToUse.startsWith("%40") ? lineIdToUse : "@" + lineIdToUse}`;
+      let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
+      
+      if (lineIdToUse.startsWith("http")) {
+        lineUrl = lineIdToUse;
+      } else if (lineIdToUse && lineIdToUse !== "ksLUWB89Y_") {
+        lineUrl = `https://line.me/ti/p/${lineIdToUse}`;
+      }
 
       const stickyBtnWrapper = document.createElement("div");
       stickyBtnWrapper.id = "line-btn-sticky-wrapper";

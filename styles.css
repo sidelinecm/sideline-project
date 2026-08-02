@@ -845,6 +845,16 @@ footer a,
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
+/* 🟢 FIX: อนุญาตให้รูป Thumbnail ใน Lightbox สามารถรับการคลิกเพื่อเปลี่ยนรูปได้ 100% */
+#lightboxThumbnailStrip img,
+#lightboxHeroImage,
+button img,
+a img,
+.clickable-img {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
 .lightbox-details {
   padding: 22px 20px 28px 20px !important;
   display: flex !important;
@@ -1002,14 +1012,14 @@ footer a,
 
 #map-container { max-height: 180px !important; }
 
-/* 🟢 FIX: ปรับ Footer Padding ให้พอดีในจอใหญ่ และเว้น 110px เฉพาะบนมือถือ */
+/* 🟢 FIX: ปรับ Footer Padding ไม่ให้โดน Floating Dock ลอยทับบนมือถือ (รวบรวมเป็นชุดเดียว) */
 footer { 
   padding-bottom: 30px !important; 
 }
 
 @media (max-width: 768px) {
   footer { 
-    padding-bottom: 110px !important; 
+    padding-bottom: 120px !important; 
   }
 }
 
@@ -1034,7 +1044,7 @@ h1, h2, h3, h4, .glow-heading-spark {
 }
 
 /* ==============================================================================
-   12. MEDIA PROTECTION ENGINE (ป้องกันการบันทึกและก๊อปปี้รูปภาพ 100%)
+   12. MEDIA PROTECTION ENGINE (ป้องกันการบันทึกและก๊อปปี้รูปภาพ)
    ============================================================================== */
 img, picture, svg {
   -webkit-user-drag: none !important;
@@ -1044,10 +1054,9 @@ img, picture, svg {
   -ms-user-select: none !important;
   user-select: none !important;
   -webkit-touch-callout: none !important;
-  pointer-events: none !important;
 }
 
-a, .profile-card-new, .interactive-card {
+a, .profile-card-new, .interactive-card, button {
   pointer-events: auto !important;
 }
 
@@ -1065,14 +1074,4 @@ html.light p[style*="color: white"],
 html.light span[style*="color: white"],
 html.light h1, html.light h2, html.light h3, html.light h4 {
   color: #09090B !important;
-}
-
-/* 🟢 FIX: ปรับ Footer Padding ไม่ให้โดน Floating Dock ลอยทับบนมือถือ */
-footer {
-  padding-bottom: 30px !important;
-}
-@media (max-width: 768px) {
-  footer {
-    padding-bottom: 120px !important;
-  }
 }
