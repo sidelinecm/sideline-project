@@ -389,6 +389,7 @@ window.ScrollTrigger = ScrollTrigger;
         populateProvinceDropdown();
         buildFuseIndex();
         applyUltimateFilters(false);
+        updateHeroSwiperCards();
         STATE.isFetching = false;
         return true;
       }
@@ -417,6 +418,7 @@ window.ScrollTrigger = ScrollTrigger;
         populateProvinceDropdown();
         buildFuseIndex();
         applyUltimateFilters(false);
+        updateHeroSwiperCards();
         STATE.isFetching = false;
         return true;
       }
@@ -457,6 +459,7 @@ window.ScrollTrigger = ScrollTrigger;
       populateProvinceDropdown();
       buildFuseIndex();
       applyUltimateFilters(false);
+      updateHeroSwiperCards();
       return true;
 
     } catch (err) {
@@ -467,6 +470,7 @@ window.ScrollTrigger = ScrollTrigger;
         populateProvinceDropdown();
         buildFuseIndex();
         applyUltimateFilters(false);
+        updateHeroSwiperCards();
       } else {
         handleFatalError(err);
       }
@@ -474,6 +478,45 @@ window.ScrollTrigger = ScrollTrigger;
     } finally {
       STATE.isFetching = false;
     }
+  }
+
+// 🟢 ฟังก์ชันดึงน้องๆ #ฟิวแฟน พร้อมแสดงพิกัดย่าน/จังหวัดจริงแทนราคา 1,500.-
+  function updateHeroSwiperCards() {
+    const swiperContainer = document.getElementById("vip-swiper-container");
+    if (!swiperContainer || !STATE.allProfiles || STATE.allProfiles.length === 0) return;
+
+    // 1. กรองดึงเฉพาะน้องๆ ที่มีแท็ก "#ฟิวแฟน" หรือ "ฟิวแฟน"
+    let hotProfiles = STATE.allProfiles.filter(p => {
+      const tags = Array.isArray(p.styleTags) ? p.styleTags : (typeof p.styleTags === 'string' ? p.styleTags.split(',') : []);
+      const tagText = `${tags.join(" ")} ${p.slogan || ''} ${p.quote || ''}`.toLowerCase();
+      return tagText.includes("ฟิวแฟน") || tagText.includes("ฟิลแฟน");
+    });
+
+    if (hotProfiles.length === 0) {
+      hotProfiles = STATE.allProfiles.slice(0, 8);
+    } else {
+      hotProfiles = hotProfiles.slice(0, 8);
+    }
+
+    // 2. แสดงผลโดยดึงพิกัดย่าน/จังหวัดจริงของน้องคนนั้นๆ มาโชว์
+    swiperContainer.innerHTML = hotProfiles.map((p, idx) => {
+      const rankText = `#${idx + 1} HOT`;
+      const rankBadge = `<span class="hot-rank-badge"><i class="fas fa-crown"></i> ${rankText}</span>`;
+      const realLocation = p.location || p.provinceNameThai || "เชียงใหม่";
+
+      return `
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${p.slug || p.id}">
+          ${rankBadge}
+          <img src="${p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
+          <div class="vip-card-overlay"></div>
+          <span class="vip-status-chip">🟢 ${p.availability || 'พร้อมรับงาน'}</span>
+          <div class="vip-card-info">
+            <div class="vip-name">${p.displayName}</div>
+            <div class="vip-location"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
   }
 
   function populateProvinceDropdown() {
@@ -499,19 +542,8 @@ window.ScrollTrigger = ScrollTrigger;
 
     const card = document.createElement("div");
     card.className = "profile-card-new interactive-card";
-    card.style.cssText = `
-      aspect-ratio: 4 / 5; 
-      width: 100%; 
-      position: relative; 
-      border-radius: 16px; 
-      overflow: hidden; 
-      background-color: #09090B; 
-      border: 1px solid rgba(255, 255, 255, 0.08); 
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); 
-      cursor: pointer;
-    `;
     card.setAttribute("data-profile-id", profile.id);
-    card.setAttribute("data-profile-slug", profile.slug);
+    card.setAttribute("data-profile-slug", profile.slug || profile.id);
 
     const imageSrc = profile.images && profile.images.length > 0 ? profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
     const currentProvName = profile.provinceNameThai || "เชียงใหม่";
@@ -560,7 +592,7 @@ window.ScrollTrigger = ScrollTrigger;
            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
            loading="${index < 2 ? "eager" : "lazy"}"
            decoding="async"
-           onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
+           onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_OG_IMAGE}';" />
            
       <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
@@ -1148,7 +1180,6 @@ window.ScrollTrigger = ScrollTrigger;
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
-      // 🟢 FIX: สร้าง URL LINE ที่ถูกต้อง ไม่เติม @ ซ้อน
       const lineIdToUse = (profile.lineId || "ksLUWB89Y_").replace(/^@/, "").trim();
       let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
       
@@ -1213,7 +1244,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     if (isFirstLoad) {
       isFirstLoad = false;
-      console.log("SEO: First load detected. Preserving server-rendered metadata.");
       return;
     }
 
@@ -1421,8 +1451,7 @@ window.ScrollTrigger = ScrollTrigger;
       const isAll = zone === "ทั้งหมด";
       return `
         <button type="button" data-zone-keyword="${isAll ? '' : zone}" 
-                class="zone-chip-btn ${isAll ? 'active' : ''}"
-                style="padding: 6px 14px; font-size: 11px; font-weight: 800; border-radius: 100px; white-space: nowrap; flex-shrink: 0; cursor: pointer; transition: all 0.2s; background: ${isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.04)'}; color: ${isAll ? '#000000' : '#FFFFFF'}; border: 1px solid ${isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.1)'};">
+                class="zone-chip-btn ${isAll ? 'active' : ''}">
           📍 ${zone}
         </button>
       `;
@@ -1433,13 +1462,9 @@ window.ScrollTrigger = ScrollTrigger;
         const keyword = btn.getAttribute("data-zone-keyword");
         
         chipsContainer.querySelectorAll(".zone-chip-btn").forEach(b => {
-          b.style.background = "rgba(255,255,255,0.04)";
-          b.style.color = "#FFFFFF";
-          b.style.borderColor = "rgba(255,255,255,0.1)";
+          b.classList.remove("active");
         });
-        btn.style.background = "var(--primary-purple)";
-        btn.style.color = "#000000";
-        btn.style.borderColor = "var(--primary-purple)";
+        btn.classList.add("active");
 
         if (DOM.searchInput) {
           DOM.searchInput.value = keyword;
@@ -1449,52 +1474,82 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  function updateDynamicProvinceContent(provKey = "national", provName = "ทั่วไทย", count = 50) {
-    if (!provKey || provKey === "all" || provKey === "national" || provName === "national") {
-      provKey = "national";
-      provName = "ทั่วไทย";
-    }
-
+  function updateDynamicProvinceContent(provKey = "chiangmai", provName = "เชียงใหม่", count = 50) {
     const data = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
 
+    // แผนที่แปลงชื่อจังหวัดเป็นภาษาอังกฤษสำหรับ SEO ต่างชาติ
+    const ENG_PROV_MAP = {
+      chiangmai: "Chiang Mai",
+      bangkok: "Bangkok",
+      chonburi: "Chonburi",
+      udon: "Udon Thani",
+      national: "Thailand"
+    };
+    const engProvName = ENG_PROV_MAP[provKey] || "Thailand";
+
+    // 1. อัปเดต SEO H1
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       heroH1.innerHTML = `
-        รับงาน${provName} ไซด์ไลน์${provName}<br>
-        <span class="highlight-neon">FirstModelHub สาวรับงานฟิวแฟน🌟</span>
+        <span class="seo-sub-headline">รับงาน${provName} • ไซด์ไลน์${provName}</span><br>
+        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
       `;
     }
 
+    // 2. อัปเดตข้อความโซนใน Hero
     const heroSub = document.querySelector(".hero-subtitle-p");
     if (heroSub) {
-      const currentProvData = STATE.provincesMap.get(provKey);
-      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones : ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี"];
-      const zoneText = currentZones.slice(0, 4).join(", ");
+      const currentZones = (data && data.zones && data.zones.length > 1) 
+        ? data.zones.slice(1, 6) 
+        : ["ตัวเมือง", "บริเวณใกล้เคียง"];
       heroSub.innerHTML = `
-        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน${provName}</strong>, <strong>สาวรับงาน${provName}</strong>, <strong>เพื่อนเที่ยว${provName}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด 
-        <strong style="color: #C084FC;">${zoneText}</strong> ทั้งหมด
+        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน${provName}</strong>, <strong>สาวรับงาน${provName}</strong>, <strong>เพื่อนเที่ยว${provName}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด <strong style="color: #C084FC;">${currentZones.join(", ")}</strong> ทั้งหมด
       `;
     }
 
+    // 3. แก้ไขย่อหน้าเกริ่นนำบน SEO Drawer (แก้โซนขัดแย้งกัน)
+    const drawerTitle = document.querySelector("#service-deep-dive h2");
+    if (drawerTitle) drawerTitle.textContent = `บริการเพื่อนเที่ยวและสาวรับงาน${provName} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า ${count}+ รายการ)`;
+
+    const drawerIntroP = document.querySelector("#service-deep-dive .interactive-card p");
+    if (drawerIntroP) {
+      const currentZones = (data && data.zones && data.zones.length > 1) 
+        ? data.zones.slice(1, 6).join(", ") 
+        : "ตัวเมือง และพื้นที่ใกล้เคียง";
+      drawerIntroP.innerHTML = `
+        ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน${provName} คัดสรรโปรไฟล์ตรงปก 100% บริการเอนเตอร์เทนสไตล์ฟิวแฟน (GFE) ปลอดภัยสูงสุดด้วยนโยบาย <strong>"จ่ายหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำล่วงหน้าทุกกรณี"</strong> ครอบคลุมโซน <strong style="color: #C084FC;">${currentZones}</strong>
+      `;
+    }
+
+    // 4. อัปเดตข้อความ SEO ใน Drawer (แก้ภาษาอังกฤษปนไทย)
     const drawerWrapper = document.getElementById("seo-drawer-wrapper");
     if (drawerWrapper) {
       const contentInner = drawerWrapper.querySelector("div");
       if (contentInner) {
-        contentInner.innerHTML = data.seoContent + `
+        const seoText = (data && data.seoContent) 
+          ? data.seoContent 
+          : `<p>ศูนย์รวม <strong>สาวรับงาน${provName}</strong> และ <strong>เพื่อนเที่ยว${provName}</strong> พรีเมียมตรงปก 100% ปลอดภัย นัดเจอชำระหน้างาน ไม่โอนมัดจำ</p>`;
+        
+        contentInner.innerHTML = seoText + `
           <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
-            <h3 style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in ${provName}</h3>
+            <h3 style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in ${engProvName}</h3>
             <p style="font-size: 11px; color: #A1A1AA; line-height: 1.5;">
-              Welcome to First Model Hub ${provName}, the premier platform connecting travelers with verified companions. We offer authentic Girlfriend Experience (GFE) services with absolute financial safety: <strong>No upfront deposits required. Pay cash directly to your companion upon meeting.</strong>
+              Welcome to First Model Hub ${engProvName}, the premier platform connecting travelers with verified companions. We offer authentic Girlfriend Experience (GFE) services with absolute financial safety: <strong>No upfront deposits required. Pay cash directly to your companion upon meeting.</strong>
             </p>
           </div>
         `;
       }
     }
 
+    // 5. อัปเดตรีวิว
     const reviewsGrid = document.getElementById("reviews-container-grid");
-    if (reviewsGrid && data.reviews) {
-      reviewsGrid.innerHTML = data.reviews.map(r => `
-        <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+    if (reviewsGrid) {
+      const reviewsList = (data && data.reviews && data.reviews.length > 0) 
+        ? data.reviews 
+        : LOCALIZED_SEO_MAP["national"].reviews;
+        
+      reviewsGrid.innerHTML = reviewsList.map(r => `
+        <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(13,8,30,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${r.author.charAt(0)}</div>
@@ -1513,14 +1568,19 @@ window.ScrollTrigger = ScrollTrigger;
       `).join("");
     }
 
+    // 6. อัปเดต FAQ
     const faqContainer = document.getElementById("faq-container-list");
-    if (faqContainer && data.faqs && data.faqs.length > 0) {
-      faqContainer.innerHTML = data.faqs.map(item => `
-        <div class="interactive-card" style="padding: 16px 20px;">
+    if (faqContainer) {
+      const faqsList = (data && data.faqs && data.faqs.length > 0) 
+        ? data.faqs 
+        : LOCALIZED_SEO_MAP["national"].faqs;
+
+      faqContainer.innerHTML = faqsList.map(item => `
+        <div class="interactive-card" style="padding: 16px 20px; background: rgba(13,8,30,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;">
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <h3 style="font-weight: 800; font-size: 13.5px; display: flex; align-items: start; gap: 10px; margin: 0;">
                   <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 11px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
-                  <span class="text-gradient-sub" style="line-height: 1.4;">${item.q}</span>
+                  <span class="text-gradient-sub" style="line-height: 1.4; color: #E9D5FF;">${item.q}</span>
                 </h3>
                 <div style="padding-left: 32px; color: var(--text-gray); font-size: 12px; line-height: 1.5; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
                   ${item.a}
@@ -1529,9 +1589,6 @@ window.ScrollTrigger = ScrollTrigger;
         </div>
       `).join("");
     }
-
-    const drawerTitle = document.querySelector("#service-deep-dive h2");
-    if (drawerTitle) drawerTitle.textContent = `บริการเพื่อนเที่ยวและสาวรับงาน${provName} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า ${count}+ รายการ)`;
 
     const rulesTitle = document.getElementById("rules-title");
     if (rulesTitle) rulesTitle.textContent = `ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์${provName}`;
@@ -1604,9 +1661,9 @@ window.ScrollTrigger = ScrollTrigger;
       const liveCountEl = document.getElementById("live-profile-count");
       if (liveCountEl) liveCountEl.textContent = profileCount;
 
-      const currentProvData = STATE.provincesMap.get(provinceSlug);
-      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones : ["ตัวเมือง", "บริเวณใกล้เคียง"];
-      const zoneText = currentZones.slice(0, 4).join(", ");
+      const currentProvData = LOCALIZED_SEO_MAP[provinceSlug] || LOCALIZED_SEO_MAP["chiangmai"];
+      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
+      const zoneText = currentZones.join(", ");
 
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
       let node;
@@ -1615,7 +1672,12 @@ window.ScrollTrigger = ScrollTrigger;
           node.nodeValue = node.nodeValue
             .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
             .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-            .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText);
+            .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
+            .replace(/\{\{PROFILES_CARDS_HTML\}\}/g, "")
+            .replace(/\{\{PROFILES_DISPLAY_AREA_HTML\}\}/g, "")
+            .replace(/\{\{PROVINCE_SEO_CONTENT\}\}/g, "")
+            .replace(/\{\{PROVINCE_FAQS_HTML\}\}/g, "")
+            .replace(/\{\{PROVINCE_REVIEWS_HTML\}\}/g, "");
         }
       }
 
@@ -1864,7 +1926,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   };
 
-
   const initPlaceholderWatcher = () => {
     let hasPlaceholders = document.body.innerHTML.includes('{{');
     if (!hasPlaceholders) return;
@@ -1880,7 +1941,6 @@ window.ScrollTrigger = ScrollTrigger;
 
           replaceDomPlaceholders(currentProvName, activeCount, currentProvKey);
         } else {
-          // ถ้าไม่มี {{ เหลือแล้ว ให้หยุด Observer เพื่อประหยัด CPU
           observer.disconnect();
         }
       }, 150);
@@ -1895,7 +1955,6 @@ window.ScrollTrigger = ScrollTrigger;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      console.log('📱 [PWA] เบราว์เซอร์พร้อมสำหรับการติดตั้งแอปแล้ว');
       showPwaInstallBanner();
     });
 
@@ -1905,29 +1964,16 @@ window.ScrollTrigger = ScrollTrigger;
       const banner = document.createElement('div');
       banner.id = 'pwa-install-banner';
       banner.style.cssText = `
-        position: fixed;
-        bottom: 95px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 24px);
-        max-width: 420px;
-        background: rgba(18, 12, 38, 0.95);
-        border: 1px solid rgba(192, 132, 252, 0.4);
-        border-radius: 16px;
-        padding: 12px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(124,58,237,0.3);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        z-index: 2900;
+        position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
+        width: calc(100% - 24px); max-width: 420px; background: rgba(18, 12, 38, 0.95);
+        border: 1px solid rgba(192, 132, 252, 0.4); border-radius: 16px; padding: 12px 16px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 2900;
       `;
 
       banner.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px;">
-          <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);" alt="First Model Hub App">
+          <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px;" alt="First Model Hub App">
           <div>
             <div style="font-size: 12px; font-weight: 800; color: #FFF;">ติดตั้งแอป First Model Hub</div>
             <div style="font-size: 10px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
@@ -1935,7 +1981,7 @@ window.ScrollTrigger = ScrollTrigger;
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
           <button id="pwa-install-btn" style="background: linear-gradient(135deg, #7C3AED, #5A2CBE); color: white; border: none; padding: 7px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; cursor: pointer;">ติดตั้ง</button>
-          <button id="pwa-dismiss-btn" style="background: none; border: none; color: #A1A1AA; font-size: 14px; padding: 4px; cursor: pointer;"><i class="fas fa-times"></i></button>
+          <button id="pwa-dismiss-btn" style="background: none; border: none; color: #A1A1AA; font-size: 14px; cursor: pointer;"><i class="fas fa-times"></i></button>
         </div>
       `;
 
@@ -1944,11 +1990,8 @@ window.ScrollTrigger = ScrollTrigger;
       document.getElementById('pwa-install-btn').onclick = async () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log(`PWA outcome: ${outcome}`);
+          await deferredPrompt.userChoice;
           deferredPrompt = null;
-        } else if (isIOS()) {
-          alert('วิธีติดตั้งบน iPhone/iPad:\n1. กดปุ่ม "แชร์" (รูปกล่องสี่เหลี่ยมมีลูกศรชี้ขึ้น) ด้านล่างจอ Safari\n2. เลื่อนลงมาเลือก "เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)');
         }
         banner.remove();
       };
@@ -1958,14 +2001,61 @@ window.ScrollTrigger = ScrollTrigger;
         localStorage.setItem('pwa_banner_dismissed', Date.now());
       };
     }
+  }
 
-    function isIOS() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  function initThreeBg() {
+    const canvas = document.getElementById("three-canvas");
+    if (!canvas || typeof THREE === "undefined") return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const geometry = new THREE.BufferGeometry();
+    const count = window.innerWidth < 768 ? 180 : 350;
+    const positions = new Float32Array(count * 3);
+
+    for (let i = 0; i < count * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 12;
+      positions[i + 1] = (Math.random() - 0.5) * 12;
+      positions[i + 2] = (Math.random() - 0.5) * 10;
     }
 
-    if (isIOS() && !window.navigator.standalone && !localStorage.getItem('pwa_banner_dismissed')) {
-      setTimeout(showPwaInstallBanner, 3000);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      size: 0.035,
+      color: 0xc084fc,
+      transparent: true,
+      opacity: 0.55
+    });
+
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+    camera.position.z = 5;
+
+    let isVisible = true;
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+    });
+    observer.observe(canvas);
+
+    function animate() {
+      if (isVisible) {
+        points.rotation.y += 0.0012;
+        points.rotation.x += 0.0006;
+        renderer.render(scene, camera);
+      }
+      requestAnimationFrame(animate);
     }
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }, { passive: true });
   }
 
   document.addEventListener("DOMContentLoaded", async function () {
@@ -1974,7 +2064,6 @@ window.ScrollTrigger = ScrollTrigger;
     try {
       supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
       window.supabase = supabaseClient;
-      console.log("✅ เชื่อมต่อ Supabase DB สำเร็จ");
     } catch (e) {
       console.error("❌ เชื่อมต่อ Supabase DB ล้มเหลว:", e);
     }
@@ -2129,27 +2218,6 @@ window.ScrollTrigger = ScrollTrigger;
       });
     })();
 
-    (function initStarRating() {
-      const container = document.querySelector(".star-rating-input-container");
-      const ratingInput = document.getElementById("review-rating-value");
-      if (container && ratingInput) {
-        const stars = container.querySelectorAll(".star-rating-input-item");
-        stars.forEach(star => {
-          star.addEventListener("click", () => {
-            const val = parseInt(star.getAttribute("data-value"), 10);
-            ratingInput.value = val;
-            stars.forEach(s => {
-              if (parseInt(s.getAttribute("data-value"), 10) <= val) {
-                s.classList.add("active");
-              } else {
-                s.classList.remove("active");
-              }
-            });
-          });
-        });
-      }
-    })();
-
     (function initReviewForm() {
       const form = document.getElementById("review-form");
       if (!form) return;
@@ -2191,9 +2259,6 @@ window.ScrollTrigger = ScrollTrigger;
 
           showToast("✅ ส่งรีวิวเสร็จสิ้นแล้ว! ข้อมูลของคุณกำลังรอผู้ดูแลอนุมัติตรวจสอบครับ", "success");
           form.reset();
-          const rVal = document.getElementById("review-rating-value");
-          if (rVal) rVal.value = "5";
-          form.querySelectorAll(".star-rating-input-item").forEach(s => s.classList.add("active"));
         } catch (err) {
           console.error("Submission failed:", err);
           showToast("❌ ระบบบันทึกขัดข้อง กรุณาลองใหม่อีกครั้งครับ", "error");
@@ -2234,8 +2299,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     DOM.provinceSelect?.addEventListener("change", () => {
       if (DOM.searchInput) DOM.searchInput.value = "";
-      const clearBtn = document.getElementById("clear-search-btn");
-      if (clearBtn) clearBtn.style.display = "none";
       applyUltimateFilters(true);
     });
 
@@ -2248,22 +2311,10 @@ window.ScrollTrigger = ScrollTrigger;
       if (DOM.availabilitySelect) DOM.availabilitySelect.value = "";
       if (DOM.featuredSelect) DOM.featuredSelect.value = "";
       if (DOM.sortSelect) DOM.sortSelect.value = "featured";
-      const suggestionsEl = document.getElementById("search-suggestions");
-      if (suggestionsEl) suggestionsEl.classList.add("hidden");
-      
-      const chipsContainer = document.getElementById("zone-chips-container");
-      if (chipsContainer) {
-        chipsContainer.querySelectorAll(".zone-chip-btn").forEach(b => {
-          const isAll = b.getAttribute("data-zone-keyword") === "";
-          b.style.background = isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.04)';
-          b.style.color = isAll ? '#000000' : '#FFFFFF';
-          b.style.borderColor = isAll ? 'var(--primary-purple)' : 'rgba(255,255,255,0.1)';
-        });
-      }
-
       applyUltimateFilters(true);
     });
 
+    initThreeBg();
     await fetchProfilesData();
     await handleRouteNavigation(true);
     updateActiveNavLinks();
@@ -2274,20 +2325,6 @@ window.ScrollTrigger = ScrollTrigger;
     initRegionTabs();
     initPwaInstaller();
 
-    if ('serviceWorker' in navigator) {
-      const registerSW = () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('✅ [PWA] Service Worker ลงทะเบียนสำเร็จ:', reg.scope))
-          .catch(err => console.warn('⚠️ [PWA] Service Worker ลงทะเบียนล้มเหลว:', err));
-      };
-
-      if (document.readyState === 'complete') {
-        registerSW();
-      } else {
-        window.addEventListener('load', registerSW);
-      }
-    }
-
     window.addEventListener("popstate", async () => {
       await handleRouteNavigation(false);
       updateActiveNavLinks();
@@ -2297,4 +2334,3 @@ window.ScrollTrigger = ScrollTrigger;
   });
 
 })();
-
