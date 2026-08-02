@@ -36,7 +36,7 @@
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ">
   <meta name="twitter:image" content="{{SEO_IMAGE}}">
 
-<!-- ICONS & MANIFEST -->
+  <!-- 🟢 ICONS & PWA MANIFEST -->
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
@@ -44,11 +44,9 @@
   <link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48x48.png">
   <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png">
 
-  <!-- 🟢 เพิ่มเพื่อแก้ No touch web app title declared -->
   <meta name="apple-mobile-web-app-title" content="First Model Hub">
   <meta name="apple-mobile-web-app-capable" content="yes">
   
-  <!-- ชี้ Path ไปที่โฟลเดอร์ /images/ -->
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   
@@ -84,7 +82,6 @@
   <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-PG0QFDWTTG'); </script>
 </head>
 
-
 <body>
 
 <!-- ============================== FLOATING APP DOCK (MOBILE APP EXPERIENCE) ============================== -->
@@ -111,14 +108,12 @@
 <header id="page-header" role="banner">
     <div class="header-logo-container">
         <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
-           <!-- ตัดไอคอนกล่องม่วงออกแล้ว ตัว F จะอยู่ซ้ายสุดทันที -->
            <span class="brand-logo-text">
              FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
            </span>
         </a>
     </div>
 
-    <!-- ส่วนที่เหลือ (Status Badge และ Nav Controls) คงไว้เหมือนเดิมได้เลยครับ -->
     <div class="header-status-badge">
         <span class="status-dot-el" aria-hidden="true"></span>
         <span style="font-weight: 700; color: var(--text-gray);">ระบบพร้อมทำงาน: <span id="last-updated-time">อัปเดตน้องๆ ล่าสุดวันนี้</span></span>
@@ -177,7 +172,7 @@
 
   <div class="container space-y-24">
 
-<!-- HERO SECTION -->
+    <!-- HERO SECTION -->
     <section class="hero-section" aria-labelledby="hero-h1">
       <div class="clutch-pill">
         <span style="background-color: #7C3AED; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800;">VERIFIED 2026</span>
@@ -187,8 +182,9 @@
         <span style="color: white; font-size: 10.5px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
       
-      <!-- 🟢 ปรับเพิ่มการ์ดแบนเนอร์รูปภาพให้มีพื้นหลังสำรองหรูหรา แม้รูปจะหลุดก็ยังสวย -->
+      <!-- 🟢 การ์ดแบนเนอร์รูปภาพ -->
       <div class="hero-banner-card" style="width: 100%; border-radius: 16px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(192, 132, 252, 0.3); background: linear-gradient(135deg, #180d38 0%, #090518 100%); aspect-ratio: 16/9; box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(124, 58, 237, 0.25); position: relative;">
+        <picture>
           <source media="(max-width: 480px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
           <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
           <source media="(min-width: 769px)" srcset="/images/hero-firstmodelhub-1200.webp 1200w" sizes="1200px">
@@ -203,7 +199,7 @@
         </picture>
       </div>
 
-      <!-- 🟢 แยกแท็กดาวเพื่อแก้ไขสีเพี้ยนในมือถือ -->
+      <!-- 🟢 หัวข้อหลัก -->
       <h1 id="hero-h1" class="hero-title">
           รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}}<br>
           <span class="highlight-neon">FirstModelHub สาวรับงานฟิวแฟน <span class="emoji-star">🌟</span></span>
@@ -213,11 +209,30 @@
           ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
       </p>
       
-      <p class="hero-subtitle-p" style="font-size: 11.5px; line-height: 1.6; margin: 0 0 12px 0; text-align: center; color: #A1A1AA;">
+      <p class="hero-subtitle-p" style="font-size: 11.5px; line-height: 1.6; margin: 0 0 10px 0; text-align: center; color: #A1A1AA;">
         ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน{{PROVINCE_NAME}}</strong>, <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด 
         <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong> ทั้งหมด
       </p>
 
+      <!-- 🟢 LIVE SOCIAL PROOF & STATS BAR -->
+      <div class="hero-stats-trust-bar" style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px 0; padding: 8px 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 100px; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #FFFFFF;">
+          <i class="fas fa-users" style="color: #C084FC;" aria-hidden="true"></i>
+          <span><strong style="color: #00E676;">{{PROFILE_COUNT}}+</strong> โปรไฟล์{{PROVINCE_NAME}}</span>
+        </div>
+        <span style="color: rgba(255,255,255,0.2); font-size: 10px;" aria-hidden="true">•</span>
+        <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #FFFFFF;">
+          <i class="fas fa-star" style="color: #FBBF24;" aria-hidden="true"></i>
+          <span>เรตติ้ง <strong style="color: #FBBF24;">4.9/5</strong> (ผู้ใช้จริง)</span>
+        </div>
+        <span style="color: rgba(255,255,255,0.2); font-size: 10px;" aria-hidden="true">•</span>
+        <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #00E676;">
+          <i class="fas fa-shield-check" aria-hidden="true"></i>
+          <span>จ่ายหน้างาน 100%</span>
+        </div>
+      </div>
+
+      <!-- ปุ่มแอดไลน์ CTA -->
       <div class="hero-cta-block">
         <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ ใน{{PROVINCE_NAME}}">
           <i class="fab fa-line" style="font-size: 18px; margin-right: 6px;" aria-hidden="true"></i> แอดไลน์จองคิวน้องๆ (LINE: @firstmodelhub)
@@ -350,10 +365,14 @@
     <!-- SEO CONTENT DRAWER -->
     <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
       <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-         <div style="position: relative; padding: 14px 16px; border-bottom: 1px solid var(--border-light); background: rgba(13, 8, 30, 0.45);">
-             <h2 class="text-gradient-main" style="font-size: 14px; font-weight: 800; margin: 0;">
+         <div style="position: relative; padding: 16px; border-bottom: 1px solid var(--border-light); background: rgba(13, 8, 30, 0.45);">
+             <h2 class="text-gradient-main" style="font-size: 15px; font-weight: 800; margin: 0 0 8px 0;">
                  บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า {{PROFILE_COUNT}}+ รายการ)
              </h2>
+             <!-- 🟢 [ย่อหน้าเกริ่นนำภายนอก Drawer - SEO & User อ่านได้ทันที] -->
+             <p style="font-size: 12px; line-height: 1.6; color: #E4E4E7; margin: 0;">
+                 ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} คัดสรรโปรไฟล์ตรงปก 100% บริการเอนเตอร์เทนสไตล์ฟิวแฟน (GFE) ปลอดภัยสูงสุดด้วยนโยบาย <strong>"จ่ายหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำล่วงหน้าทุกกรณี"</strong> ครอบคลุมโซน {{PROVINCE_ZONES}}
+             </p>
          </div>
 
          <div class="seo-content-container collapsed" id="seo-drawer-wrapper" style="position: relative;">
@@ -463,13 +482,12 @@
       </div>
     </section>
 
-<!-- FAQ ACCORDIONS -->
+    <!-- FAQ ACCORDIONS -->
     <section style="max-width: 768px; margin: 24px auto 0 auto; text-align: left; position: relative;" aria-labelledby="faq-main-heading">
          <h2 id="faq-main-heading" class="text-gradient-main" style="font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 12px;">
              คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}
          </h2>
 
-         <!-- 🟢 ใส่ id="faq-container-list" เพิ่มตรงนี้เพื่อให้ JS สลับคำถามตามจังหวัดได้ -->
          <div id="faq-container-list" style="display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 10;">
             {{PROVINCE_FAQS_HTML}}
          </div>
@@ -583,12 +601,10 @@
   <div class="container">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
       <div style="display: flex; flex-direction: column; gap: 6px;">
-        <!-- อัปเกรดชื่อแบรนด์ใน Footer ให้มีดาวและเรืองแสงเหมือน Header -->
         <span class="brand-logo-text" style="font-size: 16px;">
           FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
         </span>
         <p style="font-size: 11px; line-height: 1.5; color: var(--text-gray); margin: 0;">
-          <!-- แก้ชื่อตรงนี้ให้ติดกันด้วยครับ -->
           <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 ใน{{PROVINCE_NAME}} รูปถ่ายตรงปก 100% ปลอดภัย ไม่มัดจำ
         </p>
       </div>
@@ -604,12 +620,12 @@
     </div>
 
     <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; margin-bottom: 12px;">
-      <h4 style="font-size: 11px; font-weight: 800; color: #A1A1AA; margin-bottom: 8px;">พื้นที่ให้บริการยอดนิยม</h4>
-      <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 11px; color: var(--text-gray);"></ul>
+      <h4 style="font-size: 11px; font-weight: 800; color: #A1A1AA; margin-bottom: 8px;">พื้นที่และย่านให้บริการยอดนิยม</h4>
+      <!-- 🟢 [ปรับสไตล์ Grid รองรับการลิงก์ย่านฮิตนิมมาน/สันติธรรมผ่าน SSR] -->
+      <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);"></ul>
     </div>
 
     <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 10px; color: var(--text-muted);">
-      <!-- แก้ชื่อตรงลิขสิทธิ์ด้านล่างสุดให้ติดกัน -->
       <p style="margin: 0;">© <span id="currentYearDynamic">2026</span> FirstModelHub {{PROVINCE_NAME}}. All Rights Reserved.</p>
       <div style="display: flex; gap: 12px;">
         <a href="/privacy-policy" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Privacy Policy</a>
