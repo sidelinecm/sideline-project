@@ -27,7 +27,8 @@
   <meta property="og:url" content="{{SEO_CANONICAL}}">
   <meta property="og:image" content="{{SEO_IMAGE}}">
   <meta property="og:image:secure_url" content="{{SEO_IMAGE}}">
-  <meta property="og:image:type" content="image/jpeg">
+  <!-- 🟢 FIX: แก้ไข MIME Type ให้ตรงกับไฟล์ WebP -->
+  <meta property="og:image:type" content="image/webp">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
@@ -59,7 +60,9 @@
   <link rel="modulepreload" href="/main.js">
   <link rel="stylesheet" href="/styles.css">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <!-- 🟢 FIX: ปรับแก้ไวยากรณ์ FontAwesome Preload ให้ถูกต้อง ไม่บล็อกการเรนเดอร์หน้าเว็บ -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
   <!-- SCHEMA.ORG STRUCTURED DATA GRAPH -->
   <script type="application/ld+json" id="dynamic-schema">
@@ -202,10 +205,11 @@
       </div>
 
       <!-- 🟢 5. VIP LIVE CARDS SWIPER (สไลด์รูปน้องๆ HOT แนะนำ) -->
+      <!-- 🟢 FIX: เพิ่ม onerror ป้องกันภาพหลุดวนลูป -->
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">
         <div class="vip-card-item active-glow">
           <span class="hot-rank-badge"><i class="fas fa-crown"></i> #1 HOT</span>
-          <img src="https://firstmodelhub.com/images/firstmodelhub.webp" alt="น้อง VIP รับงาน" loading="eager">
+          <img src="https://firstmodelhub.com/images/firstmodelhub.webp" alt="น้อง VIP รับงาน" loading="eager" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
           <div class="vip-card-overlay"></div>
           <span class="vip-status-chip">🟢 พร้อมรับงาน</span>
           <div class="vip-card-info">
@@ -216,7 +220,7 @@
 
         <div class="vip-card-item">
           <span class="hot-rank-badge"><i class="fas fa-crown"></i> #2 HOT</span>
-          <img src="https://firstmodelhub.com/images/firstmodelhub.webp" alt="น้องรับงานฟิวแฟน" loading="lazy">
+          <img src="https://firstmodelhub.com/images/firstmodelhub.webp" alt="น้องรับงานฟิวแฟน" loading="lazy" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
           <div class="vip-card-overlay"></div>
           <span class="vip-status-chip">🟢 ตรงปก 100%</span>
           <div class="vip-card-info">
@@ -227,7 +231,7 @@
 
         <div class="vip-card-item">
           <span class="hot-rank-badge"><i class="fas fa-crown"></i> #3 HOT</span>
-          <img src="https://firstmodelhub.com/images/firstmodelhub.webp" alt="สาวรับงานพรีเมียม" loading="lazy">
+          <img src="https://firstmodelhub.com/images/firstmodelhub.webp" alt="สาวรับงานพรีเมียม" loading="lazy" onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
           <div class="vip-card-overlay"></div>
           <span class="vip-status-chip">🟢 ว่างตอนนี้</span>
           <div class="vip-card-info">
@@ -520,14 +524,15 @@
                   </div>
               </div>
 
+              <!-- 🟢 FIX: เพิ่ม tabindex="0" และ role="button" ให้กับไอคอนดาวในฟอร์มเพื่อการใช้งานผ่าน Keyboard/Screen Reader -->
               <div style="display: flex; flex-direction: column; gap: 4px;">
                   <span id="star-rating-label" style="font-size: 10.5px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจ</span>
                   <div class="star-rating-input-container" role="group" aria-labelledby="star-rating-label" style="display: flex; gap: 6px; color: #71717A; font-size: 16px; cursor: pointer;">
-                      <i class="fas fa-star star-rating-input-item active" data-value="1" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="2" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="3" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="4" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="5" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="1 ดาว" data-value="1" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="2 ดาว" data-value="2" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="3 ดาว" data-value="3" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="4 ดาว" data-value="4" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="5 ดาว" data-value="5" aria-hidden="true"></i>
                   </div>
                   <input type="hidden" id="review-rating-value" name="rating" value="5">
                   <input type="hidden" id="review-province-key" name="province_key" value="{{PROVINCE_NAME}}">
