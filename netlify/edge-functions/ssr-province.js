@@ -1,3 +1,5 @@
+
+
 /**
  * [ SYSTEM SSR PROVINCE CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless SSR Handler
@@ -8,6 +10,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const PAGE_CACHE_TTL_MS = 10 * 60 * 1000;
+const MAX_CACHE_SIZE = 200; // 🟢 FIX: ป้องกัน Memory Leak ในระบบ Serverless
 
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
@@ -26,8 +29,6 @@ const CONFIG = {
   BRAND_NAME: "First Model Hub",
   BRAND_LEGAL_NAME: "First Model Hub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
-  
-  // 🟢 แก้ไข: ใช้รูปแบบเบอร์สากลเพื่อให้ผ่าน Schema.org Validation
   DEFAULT_TELEPHONE: "+6620000000",
   DISPLAY_LINE_ID: "LINE: @firstmodelhub",
   SOCIAL_LINKS: {
@@ -110,7 +111,6 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   }
 });
 
-// 🟢 FIX: ปรับ Regex คำสะกดผิดให้เจาะจง ไม่ให้กระทบคำอื่น
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -334,6 +334,110 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
+// 🟢 Helper Function สำหรับสร้าง HTML การ์ดโปรไฟล์ส่วนกลาง
+const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
+  const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
+  const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
+  const pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
+  
+  const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+  const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
+  const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
+  const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
+  
+  const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
+  const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
+
+  const featuredBadge = p.isfeatured
+    ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
+        <span style="letter-spacing: 0.02em;">แนะนำ</span>
+       </span>`
+    : "";
+
+  const statusBadge = `
+    <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
+        <span style="letter-spacing: 0.02em;">${statusText}</span>
+    </span>
+  `;
+
+  const hasVideo = p.has_video || p.hasVideo || false;
+  const videoBadge = hasVideo
+    ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
+       </span>`
+    : "";
+
+  const isVerified = p.verified || p.isVerified || false;
+  const verifiedBadge = isVerified
+    ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
+       </span>`
+    : "";
+
+  let rateDisplay = "1,500.-";
+  if (p.rate) {
+    if (!isNaN(p.rate)) rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
+    else rateDisplay = escapeHTML(p.rate).trim();
+  }
+
+  const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
+
+  return `
+    <div class="profile-card-new-container" role="listitem">
+      <article class="profile-card-new interactive-card"
+           data-profile-id="${p.id}"
+           data-profile-slug="${escapeHTML(p.slug || p.id)}"
+           style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;">
+          
+          <h3 style="display:none;">น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc}</h3>
+
+          <img src="${imgUrl}" 
+               alt="${seoAltText}"
+               title="${seoAltText}"
+               width="300"
+               height="400"
+               style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
+               loading="${index === 0 ? "eager" : "lazy"}"
+               decoding="async"
+               onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
+               
+          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
+
+          <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
+              ${featuredBadge}
+              ${statusBadge}
+              ${videoBadge}
+          </div>
+
+          <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+              ${verifiedBadge}
+          </div>
+          
+          <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName} สาวรับงาน${provinceThaiName}"></a>
+
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
+              <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+                น้อง${pName}${ageDisplay}
+              </h3>
+              
+              ${sloganText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${sloganText}</p>` : ''}
+              
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                      <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
+                  </span>
+                  <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+                      ${rateDisplay}
+                  </span>
+              </div>
+          </div>
+      </article>
+    </div>
+  `;
+};
+
 export default async (req, context) => {
   if (!verifyHostname(req)) {
     return new Response("403 Forbidden - Access Denied", { status: 403 });
@@ -516,12 +620,10 @@ export default async (req, context) => {
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-// 🟢 1. กรองคำว่า "ทั้งหมด" ออกจาก zones ก่อนทำ areaServed
     const validZones = (seoData.zones || [])
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 2. โครงสร้าง Business Entity ที่แก้ไข areaServed แล้ว
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -599,7 +701,6 @@ export default async (req, context) => {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
 
-      // 🟢 3. เพิ่ม WebPage Node ในหน้าโปรไฟล์เดี่ยวเพื่อเชื่อมโยง Graph ให้สมบูรณ์
       schemaGraph.push({
         "@type": "ItemPage",
         "@id": `${profileUrl}/#webpage`,
@@ -633,7 +734,6 @@ export default async (req, context) => {
 
       schemaGraph.push(businessEntity);
 
-      // 🟢 4. แก้ไข ItemList ให้ถูกต้องตามข้อกำหนด Google Carousel (ใช้ URL references)
       if (profileList.length > 0) {
         schemaGraph.push({
           "@type": "ItemList",
@@ -663,7 +763,6 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 5. เชื่อมโยง FAQPage เข้ากับ WebPage ผ่าน isPartOf
     if (seoData.faqs && !profileSlug) {
       schemaGraph.push({
         "@type": "FAQPage",
@@ -679,109 +778,13 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    const cardsHtml = profileList.map((p, index) => {
-      const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
-      const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
-      const pUrl = `/sideline/${encodeURIComponent(p.slug || p.id)}`;
-      
-      const isAvailable = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
-      const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
-      const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
-      const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
-      
-      const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
-      const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
+    // 🟢 1. สร้างการ์ดโปรไฟล์สำหรับ Main Display Area (การ์ดทั้งหมด)
+    const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
-      const featuredBadge = p.isfeatured
-        ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
-            <span style="letter-spacing: 0.02em;">แนะนำ</span>
-           </span>`
-        : "";
-
-      const statusBadge = `
-        <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
-            <span style="letter-spacing: 0.02em;">${statusText}</span>
-        </span>
-      `;
-
-      const hasVideo = p.has_video || p.hasVideo || false;
-      const videoBadge = hasVideo
-        ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
-           </span>`
-        : "";
-
-      const isVerified = p.verified || p.isVerified || false;
-      const verifiedBadge = isVerified
-        ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
-           </span>`
-        : "";
-
-      let rateDisplay = "1,500.-";
-      if (p.rate) {
-        if (!isNaN(p.rate)) rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
-        else rateDisplay = escapeHTML(p.rate).trim();
-      }
-
-      const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
-
-      // 🟢 ปรับ loading: การ์ดรูปภาพใช้ lazy ทั้งหมด ยกเว้นรูปแรก เพื่อไม่ให้กระทบ LCP
-      return `
-        <div class="profile-card-new-container" role="listitem">
-          <article class="profile-card-new interactive-card"
-               data-profile-id="${p.id}"
-               data-profile-slug="${escapeHTML(p.slug || p.id)}"
-               style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;">
-              
-              <h3 style="display:none;">น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc}</h3>
-
-              <img src="${imgUrl}" 
-                   alt="${seoAltText}"
-                   title="${seoAltText}"
-                   width="300"
-                   height="400"
-                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
-                   loading="${index === 0 ? "eager" : "lazy"}"
-                   decoding="async"
-                   onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
-                   
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
-
-              <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
-                  ${featuredBadge}
-                  ${statusBadge}
-                  ${videoBadge}
-              </div>
-
-              <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
-                  ${verifiedBadge}
-              </div>
-              
-              <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName} สาวรับงาน${provinceThaiName}"></a>
-
-              <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
-                  <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
-                    น้อง${pName}${ageDisplay}
-                  </h3>
-                  
-                  ${sloganText ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${sloganText}</p>` : ''}
-                  
-                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
-                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
-                          <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
-                      </span>
-                      <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
-                          ${rateDisplay}
-                      </span>
-                  </div>
-              </div>
-          </article>
-        </div>
-      `;
-    }).join("");
+    // 🟢 2. FIX: แยกสร้างการ์ดโปรไฟล์สำหรับ Featured Section (ดึงเฉพาะการ์ด VIP/Featured ไม่ให้แสดงการ์ดซ้ำ 2 เท่า)
+    const featuredList = profileList.filter(p => p.isfeatured === true);
+    const featuredListToRender = featuredList.length > 0 ? featuredList : profileList.slice(0, 8);
+    const featuredCardsHtml = featuredListToRender.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
     const reviewsHtml = finalReviews.map(r => `
       <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
@@ -842,7 +845,6 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", enUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    // 🟢 แทนที่แท็ก <script id="dynamic-schema"> สมบูรณ์ 100%
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
@@ -850,7 +852,8 @@ export default async (req, context) => {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     }
     
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", cardsHtml);
+    // 🟢 FIX: ใช้ featuredCardsHtml สำหรับ {{PROFILES_CARDS_HTML}} ไม่ให้แสดงซ้ำ
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
@@ -906,7 +909,6 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // 🟢 เติมข้อมูลให้ window.profilesData เพื่อฝังให้ Client-side Hydration ทำงานได้ 100%
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -957,6 +959,10 @@ export default async (req, context) => {
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
     };
 
+    // 🟢 FIX: เคลียร์ Cache หาก Map มีขนาดใหญ่เกินไปเพื่อป้องกัน Memory Bloat
+    if (PAGE_CACHE.size > MAX_CACHE_SIZE) {
+      PAGE_CACHE.clear();
+    }
     PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: Date.now() });
 
     return new Response(rawHtml, { headers: responseHeaders });

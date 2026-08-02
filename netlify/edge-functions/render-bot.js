@@ -238,12 +238,12 @@ export default async (request, context) => {
                         "addressRegion": provinceName,
                         "addressCountry": "TH"
                     },
-                    "aggregateRating": {
+"aggregateRating": {
                         "@type": "AggregateRating",
-                        "ratingValue": ratingValue,
-                        "reviewCount": reviewCount.toString(),
-                        "bestRating": "5",
-                        "worstRating": "1"
+                        "ratingValue": Number(ratingValue) || 4.8,
+                        "reviewCount": Number(reviewCount) || 150,
+                        "bestRating": 5,
+                        "worstRating": 1
                     },
                     "review": schemaReviews
                 },
