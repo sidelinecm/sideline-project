@@ -89,11 +89,55 @@ const PROVINCE_SEO_DATA = {
   chiangmai: {
     name: "เชียงใหม่",
     geo: { lat: 18.8140717, lng: 98.972096 },
-    zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก"],
+    zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย"],
     faqs: [
       { q: "นัดหมายสาวรับงานเชียงใหม่ บน First Model Hub โซนไหนสะดวกที่สุด?", a: "ถนนนิมมานเหมินท์, สันติธรรม, ช้างเผือก และรอบคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายพร้อมดูแลท่านอย่างสะดวกรวดเร็ว" },
       { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
     ]
+  },
+  khonkaen: {
+    name: "ขอนแก่น",
+    geo: { lat: 16.4322, lng: 102.8236 },
+    zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น"],
+    faqs: [
+      { q: "นัดหมายสาวรับงานขอนแก่น ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าครับ พบน้องและตรวจสอบความตรงปกหน้างานแล้วค่อยชำระค่าบริการครับ" }
+    ]
+  },
+  chonburi: {
+    name: "ชลบุรี",
+    geo: { lat: 12.9276, lng: 100.8771 },
+    zones: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
+    faqs: [
+      { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนทุกกรณีครับ" }
+    ]
+  },
+  bangkok: {
+    name: "กรุงเทพฯ",
+    geo: { lat: 13.7563, lng: 100.5018 },
+    zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"],
+    faqs: [
+      { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมสุขุมวิท รัชดา ห้วยขวาง ลาดพร้าว ทองหล่อ และเอกมัย สะดวกและเป็นส่วนตัวครับ" }
+    ]
+  },
+  phuket: {
+    name: "ภูเก็ต",
+    geo: { lat: 7.8804, lng: 98.3923 },
+    zones: ["ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง"],
+    faqs: [
+      { q: "นัดหมายสาวรับงานภูเก็ต จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าครับ" }
+    ]
+  },
+  udonthani: {
+    name: "อุดรธานี",
+    geo: { lat: 17.4138, lng: 102.7872 },
+    zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"],
+    faqs: []
+  },
+  lampang: {
+    name: "ลำปาง",
+    geo: { lat: 18.2888, lng: 99.4923 },
+    zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง"],
+    faqs: []
   },
   default: {
     name: "ทั่วไทย",
@@ -132,6 +176,27 @@ function verifyHostname(req) {
 
 async function getTemplateHtml(url, context) {
   const now = Date.now();
+  
+  const DEFAULT_FALLBACK_SHELL = `<!DOCTYPE html>
+<html lang="th" class="dark-theme dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>First Model Hub - ศูนย์รวมเพื่อนเที่ยวและสาวรับงานพรีเมียม</title>
+  <meta name="description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ" />
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main id="main-content">
+    <div class="container" style="padding: 40px 16px; text-align: center;">
+      <h1 style="color: #FFFFFF; font-size: 20px;">First Model Hub</h1>
+      <p style="color: #A1A1AA; font-size: 13px; margin-top: 8px;">กำลังโหลดข้อมูลโปรไฟล์...</p>
+    </div>
+  </main>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>`;
+
   if (!TEMPLATE_HTML_CACHE || (now - TEMPLATE_CACHE_TIMESTAMP > TEMPLATE_CACHE_TTL_MS)) {
     try {
       const controller = new AbortController();
@@ -147,13 +212,16 @@ async function getTemplateHtml(url, context) {
       if (mainTemplate.ok) {
         TEMPLATE_HTML_CACHE = await mainTemplate.text();
         TEMPLATE_CACHE_TIMESTAMP = now;
+      } else {
+        console.warn("⚠️ Fetching index.html returned non-200 status:", mainTemplate.status);
       }
     } catch (e) {
       console.warn("⚠️ Fetching index.html template timed out or failed, fallback to basic HTML shell");
-      return `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>{{SEO_TITLE}}</title></head><body><div id="app"></div></body></html>`;
+      return DEFAULT_FALLBACK_SHELL;
     }
   }
-  return TEMPLATE_HTML_CACHE || `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>First Model Hub</title></head><body></body></html>`;
+  
+  return TEMPLATE_HTML_CACHE || DEFAULT_FALLBACK_SHELL;
 }
 
 const escapeHTML = str => (str !== null && str !== undefined) ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) : "";
@@ -781,10 +849,9 @@ export default async (req, context) => {
     // 🟢 1. สร้างการ์ดโปรไฟล์สำหรับ Main Display Area (การ์ดทั้งหมด)
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
-    // 🟢 2. FIX: แยกสร้างการ์ดโปรไฟล์สำหรับ Featured Section (ดึงเฉพาะการ์ด VIP/Featured ไม่ให้แสดงการ์ดซ้ำ 2 เท่า)
-    const featuredList = profileList.filter(p => p.isfeatured === true);
-    const featuredListToRender = featuredList.length > 0 ? featuredList : profileList.slice(0, 8);
-    const featuredCardsHtml = featuredListToRender.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
+const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
+const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
+
 
     const reviewsHtml = finalReviews.map(r => `
       <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
@@ -852,8 +919,7 @@ export default async (req, context) => {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     }
     
-    // 🟢 FIX: ใช้ featuredCardsHtml สำหรับ {{PROFILES_CARDS_HTML}} ไม่ให้แสดงซ้ำ
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
+rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
@@ -941,8 +1007,8 @@ export default async (req, context) => {
 
     const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
 
-    if (rawHtml.includes('<script id="ssr-profiles-data">')) {
-      rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
+if (rawHtml.includes('<script id="ssr-profiles-data">')) {
+  rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
     } else if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
     } else {
