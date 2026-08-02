@@ -763,12 +763,22 @@ export default async (req, context) => {
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones, provinceSlug);
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
-    const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
-      const key = p.key || p.slug || p.id;
-      const name = p.nameThai || p.name;
-      const isActive = key === provinceSlug;
-      return `<li><a href="/location/${key}" title="ดูรายชื่อไซด์ไลน์ในจังหวัด ${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none; transition: color 0.2s;" onmouseenter="this.style.color='#C084FC'" onmouseleave="this.style.color='var(--text-gray)'" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
-    }).join("") : "";
+    // สเปกเพิ่มลิงก์ย่านสำคัญในจังหวัดนั้นๆ
+const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
+  const key = p.key || p.slug || p.id;
+  const name = p.nameThai || p.name;
+  const isActive = key === provinceSlug;
+  
+  // ลิงก์หลักจังหวัด
+  let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
+  
+  // ถ้าเป็นเชียงใหม่ ให้เพิ่มลิงก์ย่านฮิตต่อท้าย
+  if (key === 'chiangmai') {
+    html += `<li><a href="/location/chiangmai?q=นิมมาน" title="สาวรับงานนิมมาน เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
+    html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
+  }
+  return html;
+}).join("") : "";
 
     let rawHtml = await getTemplateHtml(url, context);
 
