@@ -1,5 +1,3 @@
-
-
 /**
  * [ SYSTEM SSR PROVINCE CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless SSR Handler
@@ -42,6 +40,7 @@ const CONFIG = {
   }
 };
 
+// 🟢 FIX: เพิ่มการรองรับ Key ทุกรูปแบบทั้งแบบมีขีดและไม่มีขีดกลาง
 const PROVINCE_CUSTOM_METADATA = {
   chiangmai: {
     title: "สาวรับงานเชียงใหม่ ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
@@ -154,6 +153,20 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
     PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
   }
 });
+
+// 🟢 Helper Function สำหรับค้นหาคีย์จังหวัดให้รองรับทั้งแบบมีขีดและไม่มีขีด
+function getProvinceSearchKeys(slug) {
+  if (!slug) return ["national"];
+  const norm = slug.replace(/[-_]/g, "").toLowerCase();
+  if (norm === "chiangmai") return ["chiangmai", "chiang_mai", "chiang-mai"];
+  if (norm === "chiangrai") return ["chiangrai", "chiang_rai", "chiang-rai"];
+  if (norm === "udonthani" || norm === "udon") return ["udonthani", "udon_thani", "udon-thani", "udon"];
+  if (norm === "khonkaen") return ["khonkaen", "khon_kaen", "khon-kaen"];
+  if (norm === "suratthani") return ["suratthani", "surat_thani", "surat-thani"];
+  if (norm === "ubonratchathani" || norm === "ubon") return ["ubonratchathani", "ubon_ratchathani", "ubon-ratchathani", "ubon"];
+  if (norm === "phranakhonsiayutthaya" || norm === "ayutthaya") return ["phranakhonsiayutthaya", "ayutthaya", "phra-nakhon-si-ayutthaya"];
+  return [slug, norm];
+}
 
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
@@ -413,7 +426,8 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
   const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
   
-  const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
+  // 🟢 FIX: ปรับ Alt Text รูปภาพให้เป็นธรรมชาติ ลดปัญหา Keyword Stuffing
+  const seoAltText = `โปรไฟล์น้อง${pName} สาวรับงานเอนเตอร์เทน จ.${provinceThaiName}`;
   const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
 
   const featuredBadge = p.isfeatured
@@ -452,6 +466,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
 
+  // 🟢 FIX: เปลี่ยน loading="lazy" ทั้งหมดสำหรับการ์ดในรายการส่วนแสดงผล
   return `
     <div class="profile-card-new-container" role="listitem">
       <article class="profile-card-new interactive-card"
@@ -467,9 +482,9 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                width="300"
                height="400"
                style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
-               loading="${index === 0 ? "eager" : "lazy"}"
+               loading="lazy"
                decoding="async"
-               onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
+               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
           <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
@@ -583,12 +598,9 @@ export default async (req, context) => {
       }
     }
 
-    let searchKeys = [provinceSlug];
-    if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
-      searchKeys = ["chiangmai", "chiang_mai"];
-    }
-
-    const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
+    // 🟢 FIX: เรียกใช้สคริปต์ช่วยทำความสะอาด Search Keys รองรับคีย์จังหวัดทั้งมีและไม่มีขีดกลาง
+    const searchKeys = getProvinceSearchKeys(provinceSlug);
+    const provinceParam = provinceSlug.replace(/[-_]/g, "");
 
     let profileQuery = supabase
       .from("profiles")
@@ -846,12 +858,11 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // 🟢 1. สร้างการ์ดโปรไฟล์สำหรับ Main Display Area (การ์ดทั้งหมด)
+    // 🟢 1. สร้างการ์ดโปรไฟล์สำหรับ Main Display Area
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
-const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
-const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
-
+    const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
+    const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
     const reviewsHtml = finalReviews.map(r => `
       <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
@@ -919,7 +930,7 @@ const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     }
     
-rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
@@ -1007,8 +1018,8 @@ rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
 
     const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
 
-if (rawHtml.includes('<script id="ssr-profiles-data">')) {
-  rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
+    if (rawHtml.includes('<script id="ssr-profiles-data">')) {
+      rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
     } else if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
     } else {
