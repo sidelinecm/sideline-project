@@ -1,3 +1,5 @@
+
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
@@ -26,7 +28,7 @@ window.ScrollTrigger = ScrollTrigger;
       LIKED_PROFILES: "liked_profiles"
     },
     SITE_URL: "https://firstmodelhub.com",
-    DEFAULT_OG_IMAGE: "/images/apple-touch-icon.png"
+    DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
 
   const LOCALIZED_SEO_MAP = {
@@ -111,7 +113,7 @@ window.ScrollTrigger = ScrollTrigger;
     description: "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟน และเพื่อนเที่ยวพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
     keywords: "รับงาน, สาวรับงาน, เพื่อนเที่ยว, ไซด์ไลน์, เด็กเอ็น, ผู้ดูแลพรีเมียม, ไม่มัดจำ",
     canonical: "https://firstmodelhub.com/",
-    ogImage: "https://firstmodelhub.com/images/apple-touch-icon.png"
+    ogImage: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
 
   function sanitizeName(rawName) {
@@ -547,6 +549,8 @@ window.ScrollTrigger = ScrollTrigger;
          </span>`
       : "";
 
+    const encodedSlug = encodeURIComponent(profile.slug || profile.id);
+
     card.innerHTML = `
       <img src="${imageSrc}" 
            alt="${seoAltText}"
@@ -554,7 +558,8 @@ window.ScrollTrigger = ScrollTrigger;
            width="300"
            height="400"
            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
-           loading="${index < 4 ? "eager" : "lazy"}"
+           loading="${index < 2 ? "eager" : "lazy"}"
+           decoding="async"
            onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
            
       <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
@@ -569,7 +574,7 @@ window.ScrollTrigger = ScrollTrigger;
           ${verifiedBadge}
       </div>
       
-      <a href="/sideline/${profile.slug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${nameClean}"></a>
+      <a href="/sideline/${encodedSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${nameClean}"></a>
 
       <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
           <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
@@ -958,7 +963,7 @@ window.ScrollTrigger = ScrollTrigger;
       html += `
         <div class="suggestion-item" 
              data-action="suggestion"
-             data-slug="${item.slug}"
+             data-slug="${encodeURIComponent(item.slug || item.id)}"
              data-is-profile="true"
              style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);">
             <div style="position: relative; width: 36px; height: 36px; shrink: 0;">
@@ -1221,7 +1226,7 @@ window.ScrollTrigger = ScrollTrigger;
       const nameClean = sanitizeName(profile.name);
       const provName = profile.provinceNameThai || "เชียงใหม่";
       const fullLoc = profile.location ? `${profile.location}, ${provName}` : provName;
-      const profileUrl = `${CONFIG.SITE_URL}/sideline/${profile.slug || profile.id}`;
+      const profileUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
       const locationUrl = `${CONFIG.SITE_URL}/location/${profile.provinceKey || "chiangmai"}`;
 
       const title = `${nameClean} รับงาน${provName} สาวรับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟนตรงปก | จ่ายหน้างาน`;
@@ -1299,7 +1304,7 @@ window.ScrollTrigger = ScrollTrigger;
             "item": {
               "@type": "Person",
               "name": p.name,
-              "url": `${CONFIG.SITE_URL}/sideline/${p.slug}`,
+              "url": `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(p.slug || p.id)}`,
               "image": p.images && p.images.length > 0 ? p.images[0].src : CONFIG.DEFAULT_OG_IMAGE
             }
           }))
@@ -1311,7 +1316,7 @@ window.ScrollTrigger = ScrollTrigger;
   function updateOpenGraphAndTwitter(profile, title, description, type) {
     updateMetaTag("og:title", title);
     updateMetaTag("og:description", description);
-    updateMetaTag("og:url", profile ? `${CONFIG.SITE_URL}/sideline/${profile.slug}` : CONFIG.SITE_URL);
+    updateMetaTag("og:url", profile ? `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}` : CONFIG.SITE_URL);
     updateMetaTag("og:type", type);
     updateMetaTag("og:locale", "th_TH");
     updateMetaTag("og:site_name", "First Model Hub");
@@ -1823,7 +1828,7 @@ window.ScrollTrigger = ScrollTrigger;
       suggestionsEl?.classList.add("hidden");
       if (inputEl) inputEl.value = "";
       document.getElementById("clear-search-btn")?.classList.add("hidden");
-      history.pushState(null, "", `/sideline/${slug}`);
+      history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
       handleRouteNavigation();
     } else if (inputEl) {
       inputEl.value = slug;
@@ -1870,7 +1875,6 @@ window.ScrollTrigger = ScrollTrigger;
     observer.observe(document.body, { childList: true, subtree: true });
   };
 
-  // 📱 🟢 PWA INSTALLATION ENGINE (ระบบตรวจจับและแจ้งเตือนติดตั้งแอป)
   function initPwaInstaller() {
     let deferredPrompt = null;
 
@@ -2068,7 +2072,7 @@ window.ScrollTrigger = ScrollTrigger;
         const slug = card ? card.getAttribute("data-profile-slug") : null;
         if (slug) {
           STATE.lastFocusedElement = cardLink;
-          history.pushState(null, "", `/sideline/${slug}`);
+          history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
           handleRouteNavigation();
         }
         return;
@@ -2256,7 +2260,6 @@ window.ScrollTrigger = ScrollTrigger;
     initRegionTabs();
     initPwaInstaller();
 
-    // 📱 Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
       const registerSW = () => {
         navigator.serviceWorker.register('/sw.js')
@@ -2280,3 +2283,4 @@ window.ScrollTrigger = ScrollTrigger;
   });
 
 })();
+

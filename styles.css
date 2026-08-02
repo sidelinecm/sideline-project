@@ -16,7 +16,7 @@
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
 
-/* 🟢 FIX: เพิ่ม font-display: swap ให้ไอคอนเพื่อผ่านเกณฑ์ FCP ของ Google */
+/* 🟢 FIX: บังคับ font-display: swap ให้กับไอคอนทั้งหมดผ่าน CSS หลัก ป้องกัน FOUT */
 @font-face {
   font-family: 'Font Awesome 6 Free';
   font-display: swap !important;
@@ -30,13 +30,11 @@
    2. GLOBAL DESIGN SYSTEM & THEME VARIABLES
    ============================================================================== */
 :root {
-  /* --- Admin Premium Colors (Metallic & Glow) --- */
   --admin-purple: #9333EA;      
   --admin-lavender: #C084FC;    
   --admin-glow: rgba(147, 51, 234, 0.5); 
   --star-yellow: #FFEB3B;
 
-  /* --- Original Variables --- */
   --primary-purple: #E9D5FF;
   --secondary-dark: #09090C;
   --pure-black: #09090C;
@@ -66,7 +64,7 @@
   --app-purple-glow: rgba(124, 58, 237, 0.15);
 }
 
-/* 🟢 FIX: ปรับแต่งธีมสว่าง (Light Mode) ให้หัวข้อชัดเจน ไม่เบลอ */
+/* 🟢 FIX: ปรับปรุงธีมสว่าง (Light Mode) ให้หัวข้อ การ์ด และลิงก์คมชัดอ่านง่าย 100% */
 html.light {
   --pure-black: #FFFFFF;
   --pure-white: #09090B;
@@ -75,10 +73,10 @@ html.light {
   --text-muted: #52525B;
   --border-light: rgba(9, 9, 11, 0.12);
   --body-bg: #F9FAFB;
-  --nav-bg: rgba(255, 255, 255, 0.90);
+  --nav-bg: rgba(255, 255, 255, 0.92);
   --nav-border: rgba(9, 9, 11, 0.12);
   --nav-shadow: rgba(0, 0, 0, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-bg: rgba(255, 255, 255, 0.88);
   --glass-border: rgba(9, 9, 11, 0.1);
   --glass-shadow: rgba(0, 0, 0, 0.05);
   --success-text: #047857;
@@ -180,7 +178,7 @@ footer a,
 }
 
 /* ==============================================================================
-   4. FIXED PAGE HEADER & NAVIGATION (NEW BRANDING LOGIC)
+   4. FIXED PAGE HEADER & NAVIGATION
    ============================================================================== */
 #page-header {
   position: fixed !important;
@@ -202,7 +200,6 @@ footer a,
   box-shadow: 0 10px 30px var(--nav-shadow) !important;
 }
 
-/* 🟢 BRAND LOGO: สว่าง คมชัด เรืองแสงสีทองสวยแบบรูปที่ 2 */
 .brand-logo-text {
   font-size: 19px !important;
   font-weight: 800 !important;
@@ -210,14 +207,12 @@ footer a,
   display: inline-flex !important;
   align-items: center !important;
   letter-spacing: -0.03em !important;
-  /* เงาฟุ้งสีขาว + ม่วงลาเวนเดอร์ ช่วยให้ FirstModel สว่างใส ไม่มืดมัว */
   text-shadow: 
     0 0 8px rgba(255, 255, 255, 0.8),
     0 0 18px #C084FC,
     0 0 30px rgba(147, 51, 234, 0.4) !important;
 }
 
-/* คำว่า Hub ไล่สีม่วงลาเวนเดอร์คมชัด */
 .brand-logo-text .hub-text {
   color: #C084FC !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #C084FC 100%) !important;
@@ -225,7 +220,6 @@ footer a,
   -webkit-text-fill-color: transparent !important;
 }
 
-/* ดาว 🌟 เรืองแสงสีทองฟุ้งนุ่มนวล แก้ปัญหาดาวดรอปบนมือถือ Android */
 .brand-logo-text .star {
   display: inline-block !important;
   margin-left: 5px !important;
@@ -395,11 +389,11 @@ footer a,
 }
 
 /* ==============================================================================
-   6. HERO SECTION & BILLBOARD (METALLIC & NEON GLOW ENGINE)
+   6. HERO SECTION & BILLBOARD
    ============================================================================== */
 #main-content {
   padding-top: clamp(75px, 10vw, 95px) !important;
-  padding-bottom: 110px !important;
+  padding-bottom: 60px !important;
   position: relative;
   overflow: hidden;
 }
@@ -441,7 +435,6 @@ footer a,
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(147, 51, 234, 0.2);
 }
 
-/* 🟢 HERO TITLE: Metallic Shine Reflection */
 #hero-h1, .hero-title {
   font-size: clamp(22px, 5.5vw, 34px) !important;
   font-weight: 900 !important;
@@ -464,7 +457,6 @@ footer a,
   to { background-position: 200% center; }
 }
 
-/* 🟢 FIX: ป้องกันรูปดาวและอีโมจิสีเพี้ยนในมือถือ Android/Chrome */
 .emoji-star, 
 .hero-title .emoji-star,
 .brand-logo-text .star {
@@ -480,7 +472,6 @@ footer a,
   50% { transform: translateY(-3px) scale(1.2); opacity: 0.85; }
 }
 
-/* 🟢 NEON TEXT: Smooth Glowing Pink/Purple */
 .highlight-neon, .text-gradient-main span {
   font-weight: 900;
   background: linear-gradient(135deg, #FF2E93 0%, #C084FC 100%);
@@ -490,7 +481,6 @@ footer a,
   filter: drop-shadow(0 0 8px rgba(147, 51, 234, 0.4));
 }
 
-/* 🟢 HERO BANNER CARD: Glassmorphism Fallback Background & Responsive Aspect Ratio */
 .hero-banner-card,
 .billboard-container, 
 .hero-image-wrapper,
@@ -498,7 +488,6 @@ footer a,
   position: relative !important;
   width: 100% !important;
   max-width: 768px !important;
-  /* 🟢 บนมือถือปรับเป็นสัดส่วน 4/3 เพื่อเปิดความสูง ให้เห็นรูปน้องยาวลงมาถึงช่วงเอว/กางเกง */
   aspect-ratio: 4 / 3 !important;
   border-radius: 16px !important;
   overflow: hidden !important;
@@ -507,7 +496,6 @@ footer a,
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(124, 58, 237, 0.25) !important;
 }
 
-/* 🟢 บนคอมพิวเตอร์ (หน้าจอมากกว่า 768px) ปรับกลับเป็น 16/9 ตามปกติ */
 @media (min-width: 769px) {
   .hero-banner-card,
   .billboard-container, 
@@ -517,7 +505,6 @@ footer a,
   }
 }
 
-/* 🟢 FIX HERO IMAGE: จัดตำแหน่งภาพให้อยู่ด้านบนสุด ไม่โดนตัดหัว และสัดส่วนภาพไม่เบี้ยว */
 .hero-banner-card img,
 .hero-image-wrapper img,
 .hero-section picture img {
@@ -526,7 +513,7 @@ footer a,
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  object-position: top center !important; /* 👈 ดึงส่วนใบหน้าและส่วนบนลงมาโชว์ครบถ้วน */
+  object-position: top center !important;
   display: block !important;
 }
 
@@ -539,7 +526,6 @@ footer a,
   max-width: 720px;
 }
 
-/* 🟢 LINE CTA BUTTON: Neon Green Glow & Pulse Animation */
 .btn-primary-webyst {
   display: inline-flex !important;
   align-items: center !important;
@@ -596,6 +582,7 @@ footer a,
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
 /* ==============================================================================
    7. SMART FILTER SYSTEM & ZONE CHIPS
    ============================================================================== */
@@ -641,7 +628,6 @@ footer a,
   box-shadow: 0 0 12px rgba(192, 132, 252, 0.3) !important;
 }
 
-/* 🟢 ZONE CHIPS CONTAINER */
 #zone-chips-container {
   display: flex !important;
   gap: 8px !important;
@@ -1016,7 +1002,16 @@ footer a,
 
 #map-container { max-height: 180px !important; }
 
-footer { padding-bottom: 110px !important; }
+/* 🟢 FIX: ปรับ Footer Padding ให้พอดีในจอใหญ่ และเว้น 110px เฉพาะบนมือถือ */
+footer { 
+  padding-bottom: 30px !important; 
+}
+
+@media (max-width: 768px) {
+  footer { 
+    padding-bottom: 110px !important; 
+  }
+}
 
 #popular-locations-footer { gap: 12px !important; }
 #popular-locations-footer li a {
@@ -1029,7 +1024,7 @@ a.highlight,
 [class*="text-[#C084FC]"],
 [style*="color: #C084FC"] {
   color: #E9D5FF !important;
-  text-shadow: 0 0 10px rgba(233, 213, 255, 0.25);
+  text-shadow: 0 0 10px rgba(233, 213, 252, 0.25);
 }
 
 h1, h2, h3, h4, .glow-heading-spark {
@@ -1042,24 +1037,16 @@ h1, h2, h3, h4, .glow-heading-spark {
    12. MEDIA PROTECTION ENGINE (ป้องกันการบันทึกและก๊อปปี้รูปภาพ 100%)
    ============================================================================== */
 img, picture, svg {
-  /* ป้องกันการลากรูปภาพออกไปวางเพื่อเซฟ (Drag & Drop) */
   -webkit-user-drag: none !important;
   user-drag: none !important;
-
-  /* ป้องกันการคลุมดำเลือกรูปภาพ */
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
   user-select: none !important;
-
-  /* 🟢 ป้องกันการ "กดค้างบนมือถือ" (iOS Safari & Android Chrome) เพื่อเซฟรูป */
   -webkit-touch-callout: none !important;
-
-  /* 🟢 ป้องกันการคลิกขวาโดยตรงที่ตัวรูปภาพ */
   pointer-events: none !important;
 }
 
-/* ปรับให้ตัวการ์ด หรือ ลิงก์ที่ครอบรูปอยู่ ยังคงคลิกเปิดดูโปรไฟล์ได้ตามปกติ */
 a, .profile-card-new, .interactive-card {
   pointer-events: auto !important;
 }
