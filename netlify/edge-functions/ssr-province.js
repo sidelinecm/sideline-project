@@ -881,9 +881,9 @@ export default async (req, context) => {
       const availText = escapeHTML(p.availability || "พร้อมรับงาน");
       const pSlug = encodeURIComponent(p.slug || p.id);
 
-      // 🟢 เพิ่มคลาส "interactive-card" และเพิ่ม cursor: pointer !important เพื่อให้กดเด้ง Lightbox ได้สมบูรณ์
+
       return `
-        <div class="vip-card-item interactive-card ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
+<div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
           <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-crown"></i> #${idx + 1} HOT</span>
           
           <img src="${imgUrl}" alt="น้อง${pName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important; pointer-events: none !important;" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
@@ -903,7 +903,6 @@ export default async (req, context) => {
       `;
     }).join("");
 
-    // 🟢 2. สร้างการ์ดรีวิวและเนื้อหา SEO
     const reviewsHtml = finalReviews.map(r => `
       <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -945,7 +944,7 @@ export default async (req, context) => {
       return html;
     }).join("") : "";
 
-    // 🟢 3. ดึง Template HTML และอัปเดต Metadata / SEO Tags
+
     let rawHtml = await getTemplateHtml(url, context);
 
     if (!/<base\s+/i.test(rawHtml)) {
@@ -990,14 +989,14 @@ export default async (req, context) => {
         swiperReplacementHTML
       );
     } else {
-      // เผื่อกรณี Fallback HTML
+
       rawHtml = rawHtml.replace(
         /<div id="vip-swiper-container"><\/div>/i,
         swiperReplacementHTML
       );
     }
 
-    // ปรับแต่ง Relative Paths ให้เป็น Absolute Root
+
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
     if (popularLocationsHtml) {
@@ -1014,7 +1013,7 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 5. สร้างแคตตาล็อก SEO แบบซ่อน และโครงสร้าง Main Grid
+
     const topCatalogSnippetHtml = `
       <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
         <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
@@ -1046,7 +1045,7 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // 🟢 6. ฉีดข้อมูล Hydration (window.profilesData) สำหรับ Client JS
+
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
