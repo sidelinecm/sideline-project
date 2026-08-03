@@ -71,28 +71,6 @@ html.light {
   --circle-btn-border: rgba(9, 9, 11, 0.15);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-img, picture, svg, video, canvas {
-  max-width: 100% !important;
-  height: auto;
-  user-select: none !important;
-  -webkit-user-drag: none !important;
-}
-
-html.light h1,
-html.light h2,
-html.light h3,
-html.light h4,
-html.light .glow-heading-spark {
-  color: #09090B !important;
-  text-shadow: none !important;
-}
-
 /* ==============================================================================
    3. BASE & GLOBAL RESET
    ============================================================================== */
@@ -156,25 +134,8 @@ footer a,
   touch-action: manipulation !important;
 }
 
-.dock-item span {
-  font-size: 11px !important;
-}
-.capsule-text {
-  font-size: 11px !important;
-  color: #F4F4F5 !important;
-}
-.social-link-card-item {
-  font-size: 11px !important;
-}
-.cta-subtext {
-  font-size: 11px !important;
-  color: #CBD5E1 !important;
-  margin-top: 6px !important;
-  text-align: center !important;
-}
-
 /* ==============================================================================
-   🔮 FIXED PAGE HEADER (CYBER-LUXURY GLASS & NEON GLOW)
+   4. FIXED PAGE HEADER
    ============================================================================== */
 #page-header {
   position: fixed !important;
@@ -187,7 +148,6 @@ footer a,
   justify-content: space-between !important;
   align-items: center !important;
   z-index: 1000 !important;
-  /* พื้นหลังกระจกเงาเรืองแสงม่วงไซเบอร์ */
   background: linear-gradient(135deg, rgba(20, 10, 42, 0.92) 0%, rgba(9, 5, 22, 0.96) 100%) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
@@ -196,7 +156,6 @@ footer a,
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85), 0 0 20px rgba(147, 51, 234, 0.3) !important;
 }
 
-/* ปุ่มกด [EN] [🌙] [☰] สไตล์กระจกนีออนหรูหรา */
 .circle-btn-el {
   width: 36px !important;
   height: 36px !important;
@@ -207,37 +166,12 @@ footer a,
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  border-radius: 10px !important;
+  border-radius: 100px !important;
   border: 1px solid rgba(192, 132, 252, 0.35) !important;
   background: rgba(255, 255, 255, 0.05) !important;
   color: #FFFFFF !important;
   font-size: 11px !important;
   font-weight: 800 !important;
-  box-shadow: inset 0 0 10px rgba(192, 132, 252, 0.15) !important;
-  transition: all 0.25s ease !important;
-}
-
-.circle-btn-el:hover {
-  background: rgba(192, 132, 252, 0.2) !important;
-  border-color: rgba(192, 132, 252, 0.7) !important;
-  box-shadow: 0 0 12px rgba(192, 132, 252, 0.5) !important;
-  transform: translateY(-1px) !important;
-}
-
-.header-logo-container {
-  display: flex !important;
-  align-items: center !important;
-  flex-shrink: 0 !important;
-}
-
-.header-logo-container a {
-  display: flex !important;
-  align-items: center !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  min-height: auto !important;
-  min-width: auto !important;
-  text-decoration: none !important;
 }
 
 .brand-logo-text {
@@ -246,21 +180,10 @@ footer a,
   color: #FFFFFF !important;
   letter-spacing: -0.02em !important;
   white-space: nowrap !important;
-  text-shadow: 
-    0 0 8px rgba(255, 255, 255, 0.8),
-    0 0 18px #C084FC,
-    0 0 30px rgba(147, 51, 234, 0.4) !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 18px #C084FC !important;
 }
 
-.brand-logo-text .hub-text {
-  color: #C084FC !important;
-}
-
-.brand-logo-text .star {
-  margin-left: 4px !important;
-  filter: drop-shadow(0 0 6px #FFEB3B) !important;
-}
-
+.brand-logo-text .hub-text { color: #C084FC !important; }
 .header-status-badge { display: none !important; }
 .desktop-nav { display: none !important; }
 
@@ -268,32 +191,17 @@ footer a,
   display: flex !important;
   align-items: center !important;
   gap: 5px !important;
-  flex-shrink: 0 !important;
-}
-
-
-@media (min-width: 1024px) {
-  #page-header {
-    height: 64px !important; top: 16px !important; left: 16px !important; right: 16px !important; padding: 0 24px !important;
-  }
-  .header-status-badge {
-    display: inline-flex !important; align-items: center !important; gap: 8px !important; font-size: 11px !important;
-    text-transform: uppercase !important; color: #A1A1AA !important; background-color: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important; padding: 6px 16px !important; border-radius: 100px !important;
-  }
-  .desktop-nav { display: flex !important; align-items: center !important; gap: 16px !important; margin-right: 8px; }
-  .desktop-nav a { font-size: 13px !important; font-weight: 700 !important; color: #A1A1AA !important; text-decoration: none !important; }
 }
 
 /* ==============================================================================
-   4. MOBILE SIDEBAR MENU
+   5. MOBILE SIDEBAR MENU
    ============================================================================== */
 #sidebar-menu {
   position: fixed; top: 0; bottom: 0; right: 0;
   width: 290px !important; max-width: 82vw !important; height: 100vh;
   background: rgba(13, 8, 30, 0.96) !important; backdrop-filter: blur(25px) !important;
   border-left: 1.5px solid rgba(192, 132, 252, 0.4) !important;
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(147, 51, 234, 0.25) !important;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9) !important;
   z-index: 3001 !important; transform: translate3d(100%, 0, 0); visibility: hidden;
   transition: transform 0.35s cubic-bezier(.16, 1, .3, 1), visibility 0.35s !important;
   display: flex; flex-direction: column;
@@ -306,27 +214,8 @@ footer a,
   z-index: 3000; display: none; opacity: 0; transition: opacity 0.3s;
 }
 
-.sidebar-header-div {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 18px; border-bottom: 1px solid rgba(192, 132, 252, 0.2); background: rgba(20, 12, 45, 0.6);
-}
-
-.sidebar-close-btn {
-  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(192, 132, 252, 0.3);
-  color: #FFFFFF !important; width: 38px; height: 38px; border-radius: 50%;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-}
-
-.sidebar-links-wrapper { flex-grow: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
-
-.sidebar-links-wrapper a {
-  display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 16px;
-  font-size: 13px; font-weight: 700; color: #E4E4E7 !important; text-decoration: none; border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); transition: all 0.25s ease;
-}
-
 /* ==============================================================================
-   5. MAIN CONTENT & HERO BRANDING + SEO H1
+   6. HERO SECTION & BRAND SHOWCASE (ป้องกันข้อความทับซ้อนกัน 100%)
    ============================================================================== */
 #main-content {
   padding-top: 72px !important;
@@ -337,44 +226,53 @@ footer a,
 
 .hero-section {
   text-align: center; position: relative; z-index: 10;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 8px 12px; max-width: 850px; margin: 0 auto;
 }
 
+/* 🔮 ป้าย VERIFIED BANNER (ป้ายแถวเดียว ไม่เด้งทับรูป) */
 .clutch-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(192, 132, 252, 0.35);
-  padding: 4px 12px; border-radius: 100px; backdrop-filter: blur(12px);
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 4px 12px !important;
+  border-radius: 100px !important;
+  background: linear-gradient(135deg, rgba(25, 10, 48, 0.92) 0%, rgba(42, 12, 75, 0.88) 100%) !important;
+  border: 1.5px solid rgba(192, 132, 252, 0.65) !important;
+  box-shadow: 0 0 15px rgba(147, 51, 234, 0.5) !important;
+  white-space: nowrap !important;
+  margin: 0 auto 4px auto !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 
-/* 🔮 MEGA NEON BRAND SHOWCASE */
+/* 🫟 MEGA NEON BRAND SHOWCASE */
 .brand-showcase-wrapper {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 10px !important;
-  margin: 12px 0 4px 0 !important;
+  gap: 8px !important;
+  margin: 6px auto !important;
   padding: 6px 20px !important;
   background: radial-gradient(ellipse at center, rgba(255, 46, 147, 0.28) 0%, rgba(124, 58, 237, 0.12) 60%, transparent 85%) !important;
   border-radius: 100px !important;
   position: relative !important;
+  z-index: 10 !important;
 }
 
 .brand-neon-text {
-  font-size: clamp(32px, 8.5vw, 54px) !important;
+  font-size: clamp(28px, 7vw, 48px) !important;
   font-weight: 900 !important;
   letter-spacing: -0.03em !important;
-  line-height: 1.05 !important;
+  line-height: 1.1 !important;
   color: #FFFFFF !important;
   background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
-  background-size: 200% auto !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  animation: pinkGlowShine 3.5s linear infinite !important;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.95))
-          drop-shadow(0 0 18px #FF1493)
-          drop-shadow(0 0 38px rgba(255, 20, 147, 0.8))
-          drop-shadow(0 0 65px rgba(192, 132, 252, 0.5)) !important;
+  filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.8)) !important;
 }
 
 .hub-text-pink {
@@ -383,135 +281,223 @@ footer a,
   -webkit-text-fill-color: transparent !important;
 }
 
-@keyframes pinkGlowShine {
-  0% { background-position: 0% center; }
-  50% { background-position: 100% center; }
-  100% { background-position: 200% center; }
-}
-
-/* 🌟 DANCING NEON STAR */
 .dancing-neon-star {
   display: inline-block !important;
-  font-size: clamp(28px, 7.5vw, 46px) !important;
-  filter: drop-shadow(0 0 10px #FFEB3B) 
-          drop-shadow(0 0 22px #FF9100) 
-          drop-shadow(0 0 40px rgba(255, 235, 59, 0.9)) !important;
-  animation: megaStarDance 1.8s infinite ease-in-out !important;
-  transform-origin: center bottom;
+  font-size: clamp(24px, 6vw, 38px) !important;
+  filter: drop-shadow(0 0 10px #FFEB3B) !important;
 }
 
-@keyframes megaStarDance {
-  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-  25% { transform: translateY(-10px) scale(1.3) rotate(-15deg); }
-  50% { transform: translateY(-2px) scale(1.12) rotate(0deg); }
-  75% { transform: translateY(-10px) scale(1.3) rotate(15deg); }
-}
-
-/* 🎯 SEO H1 TYPOGRAPHY (PURE KEYWORDS) */
+/* 🎯 SEO H1 (ไม่ทับกับ BRAND SHOWCASE) */
 .seo-h1-title {
-  font-size: clamp(20px, 5vw, 32px) !important;
+  font-size: clamp(18px, 4.5vw, 28px) !important;
   font-weight: 900 !important;
   line-height: 1.35 !important;
   text-align: center !important;
-  margin: 4px auto 8px auto !important;
+  margin: 6px auto 8px auto !important;
   width: 100% !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 
 .seo-sub-headline {
   display: inline-block !important;
-  font-size: clamp(14px, 3.5vw, 18px) !important;
+  font-size: clamp(13px, 3.2vw, 16px) !important;
   font-weight: 800 !important;
   color: #E2E8F0 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.03em !important;
-  text-shadow: 0 0 10px rgba(192, 132, 252, 0.7) !important;
 }
 
 .seo-main-headline {
   display: inline-block !important;
-  font-size: clamp(20px, 5.2vw, 32px) !important;
+  font-size: clamp(18px, 4.8vw, 28px) !important;
   font-weight: 900 !important;
   background: linear-gradient(135deg, #FFFFFF 0%, #E9D5FF 40%, #C084FC 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 0 12px rgba(192, 132, 252, 0.8)) !important;
 }
-
-.hero-subtitle-p {
-  font-size: 11.5px !important; line-height: 1.65 !important; margin: 2px 0 10px 0 !important;
-  text-align: center !important; color: #CBD5E1 !important; max-width: 720px !important;
-}
-
-/* 🟢 VIP SWIPER CARDS SHOWCASE */
-.vip-swiper-wrapper {
-  display: flex; gap: 10px; overflow-x: auto; padding: 8px 4px; margin: 4px 0 10px 0;
-  width: 100%; max-width: 768px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  justify-content: flex-start;
-}
-
-@media (min-width: 768px) { .vip-swiper-wrapper { justify-content: center; } }
-.vip-swiper-wrapper::-webkit-scrollbar { display: none; }
-
-.vip-card-item {
-  flex: 0 0 128px; aspect-ratio: 4 / 5; border-radius: 14px; overflow: hidden;
-  position: relative; background-color: #09090C; border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7); transition: all 0.3s ease; cursor: pointer;
-}
-
-.vip-card-item.active-glow, .vip-card-item:hover {
-  transform: translateY(-3px) scale(1.02); border-color: rgba(192, 132, 252, 0.7);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 18px rgba(147, 51, 234, 0.4);
-}
-
-.vip-card-item img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
-.vip-card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.1) 40%, transparent 70%); pointer-events: none; }
-.vip-status-chip {
-  position: absolute; top: 6px; left: 6px; background: rgba(9, 9, 11, 0.85);
-  border: 1px solid rgba(0, 230, 118, 0.5); color: #00E676; font-size: 8px; font-weight: 800;
-  padding: 2px 7px; border-radius: 100px;
-}
-
-.vip-card-info { position: absolute; bottom: 6px; left: 6px; right: 6px; text-align: left; }
-.vip-name { color: white; font-size: 11px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.vip-price { color: #00E676; font-size: 10.5px; font-weight: 900; }
-
-.hero-stats-trust-bar {
-  display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
-  margin: 4px 0 10px 0; padding: 8px 16px; background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 100px; backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.hero-cta-block { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
-
-.btn-primary-webyst {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  width: auto !important;
-  max-width: 320px !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  padding: 0 22px !important;
-  font-size: 12.5px !important;
-  font-weight: 800 !important;
-  border-radius: 100px !important;
-  background: linear-gradient(135deg, #00C853 0%, #00E676 100%) !important;
-  color: #05030C !important;
-  text-decoration: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 4px 20px rgba(0, 230, 118, 0.4) !important;
-  transition: all 0.25s ease !important;
-  margin: 4px auto !important;
-}
-
-.btn-primary-webyst:hover { transform: translateY(-2px) scale(1.02) !important; box-shadow: 0 6px 25px rgba(0, 230, 118, 0.6) !important; }
-.cta-subtext { font-size: 11px !important; color: #CBD5E1 !important; margin-top: 2px !important; text-align: center !important; }
 
 /* ==============================================================================
-   6. SMART FILTER SYSTEM
+   🔥 HOT OF THE MONTH HEADER & CARDS SWIPER (เรียงแนวนอน 100% ห้ามตกบรรทัด)
    ============================================================================== */
+.hot-section-header-centered {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  margin: 12px auto 6px auto !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.hot-title-red-pink {
+  font-size: clamp(18px, 4.5vw, 22px) !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+  background: linear-gradient(135deg, #FF1744 0%, #FF2E93 50%, #FF85C0 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.hot-sub-line {
+  font-size: clamp(13px, 3.5vw, 16px) !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+.hot-tag-badge-red {
+  background: rgba(255, 23, 68, 0.25) !important;
+  border: 1px solid rgba(255, 23, 68, 0.6) !important;
+  color: #FF85C0 !important;
+  font-size: 11px !important;
+  padding: 1px 8px !important;
+  border-radius: 100px !important;
+}
+
+.hot-swipe-hint-centered {
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #C084FC !important;
+  margin-top: 2px !important;
+}
+
+/* 🟢 คอนเทนเนอร์กล่องสไลด์ (บังคับเรียงแถวเดียวนอน) */
+#vip-swiper-container,
+.vip-swiper-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important; /* 🟢 บังคับเรียงแนวเดียว ห้ามซ้อนแนวตั้ง */
+  gap: 12px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 8px 4px 14px 4px !important;
+  margin: 6px auto 12px auto !important;
+  width: 100% !important;
+  max-width: 850px !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  scroll-snap-type: x mandatory !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+#vip-swiper-container::-webkit-scrollbar,
+.vip-swiper-wrapper::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 🟢 ตัวการ์ดรูปน้องๆ HOT (ล็อคขนาดคงที่ 135x175px) */
+.vip-card-item {
+  flex: 0 0 135px !important;
+  width: 135px !important;
+  height: 175px !important;
+  aspect-ratio: 4 / 5 !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  position: relative !important; /* 🟢 บังคับให้เป็นกรอบอ้างอิงตำแหน่งป้าย */
+  background-color: #09090C !important;
+  border: 1px solid rgba(192, 132, 252, 0.35) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7) !important;
+  flex-shrink: 0 !important;
+  scroll-snap-align: start !important;
+}
+
+/* 🟢 รูปภาพข้างในการ์ด (บังคับซ้อนเต็มแผ่นการ์ด ไม่ยืด) */
+.vip-card-item img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+  border-radius: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 1 !important;
+}
+
+.vip-card-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+/* 🟢 ป้ายปักมุมการ์ด (ลอยอยู่ข้างในการ์ดเท่านั้น) */
+.hot-rank-badge {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important;
+  color: #000000 !important;
+  font-size: 8.5px !important;
+  font-weight: 900 !important;
+  padding: 2px 6px !important;
+  border-radius: 100px !important;
+  z-index: 5 !important;
+}
+
+.vip-status-chip {
+  position: absolute !important;
+  top: 6px !important;
+  left: 6px !important;
+  background: rgba(9, 9, 11, 0.85) !important;
+  border: 1px solid rgba(0, 230, 118, 0.5) !important;
+  color: #00E676 !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  padding: 2px 6px !important;
+  border-radius: 100px !important;
+  z-index: 5 !important;
+}
+
+.vip-card-info {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  z-index: 5 !important;
+  text-align: left !important;
+  pointer-events: none !important;
+}
+
+.vip-name {
+  color: #FFFFFF !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.vip-location {
+  color: #C084FC !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin-top: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+/* ==============================================================================
+   7. TRUST STATS BAR & SMART FILTER
+   ============================================================================== */
+.hero-stats-trust-bar {
+  display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; flex-wrap: wrap !important;
+  margin: 4px auto 10px auto !important; padding: 8px 16px !important; background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important; border-radius: 100px !important;
+}
+
 .glass-panel {
   border-radius: 18px !important; border: 1px solid rgba(192, 132, 252, 0.25) !important;
   background: linear-gradient(135deg, rgba(13, 8, 30, 0.85), rgba(9, 9, 12, 0.95)) !important;
@@ -524,14 +510,12 @@ footer a,
 
 .search-input-field, .search-select-field {
   width: 100%; background-color: #0c081d !important; border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #FFF; padding: 8px 12px; font-size: 12px; border-radius: 10px !important; outline: none; height: 38px !important;
+  color: #FFF; padding: 8px 12px; font-size: 12px; border-radius: 10px !important; height: 38px !important;
 }
 
 /* ==============================================================================
-   7. PROFILE GRID SYSTEM (4:5 RATIO)
+   8. PROFILES GRID SYSTEM (4:5 RATIO)
    ============================================================================== */
-#profiles-display-area { min-height: 480px !important; }
-
 .profiles-grid-row, .profile-grid {
   display: grid !important; grid-template-columns: repeat(2, 1fr) !important;
   gap: 10px !important; padding: 0 2px !important; width: 100% !important; max-width: 1100px !important; margin: 0 auto !important;
@@ -540,229 +524,19 @@ footer a,
 @media (min-width: 768px) { .profiles-grid-row, .profile-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 14px !important; } }
 @media (min-width: 1024px) { .profiles-grid-row, .profile-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 18px !important; } }
 
-.profile-card-new-container { width: 100% !important; }
-
 .profile-card-new {
   aspect-ratio: 4 / 5 !important; width: 100% !important; position: relative !important;
   border-radius: 14px !important; overflow: hidden !important; background-color: #09090B !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
-  cursor: pointer !important; transition: transform 0.25s ease !important;
 }
-
-.profile-card-new:hover { transform: translateY(-3px) !important; border-color: rgba(192, 132, 252, 0.4) !important; }
 
 .profile-card-new img {
   position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important;
-  object-fit: cover !important; object-position: top center !important; border-radius: 14px !important;
-}
-
-.live-count-chip {
-  background: rgba(0, 230, 118, 0.12) !important; border: 1px solid rgba(0, 230, 118, 0.35) !important;
-  color: #00E676 !important; font-size: 10px !important; font-weight: 800 !important;
-  padding: 2px 8px !important; border-radius: 100px !important; display: inline-flex !important; align-items: center !important; gap: 4px !important;
-}
-
-.pulse-dot-el { width: 6px !important; height: 6px !important; border-radius: 50% !important; background-color: #00E676 !important; }
-
-/* ==============================================================================
-   9. LIGHTBOX POP-UP MODAL
-   ============================================================================== */
-#lightbox {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 4000 !important;
-  display: none;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 16px 10px !important;
-  background-color: rgba(5, 3, 12, 0.92) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  overflow-y: auto !important;
-}
-
-#lightbox-content-wrapper-el {
-  position: relative !important;
-  width: 100% !important;
-  max-width: 880px !important;
-  max-height: 90vh !important;
-  background: #0E091F !important;
-  border-radius: 24px !important;
-  border: 1px solid rgba(192, 132, 252, 0.3) !important;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(124, 58, 237, 0.25) !important;
-  overflow-y: auto !important; 
-  margin: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-.lightbox-grid-layout {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 0 !important;
-}
-
-@media (min-width: 768px) {
-  #lightbox-content-wrapper-el { overflow: hidden !important; }
-  .lightbox-grid-layout {
-    grid-template-columns: 1.15fr 0.85fr !important;
-    max-height: 85vh !important;
-  }
-}
-
-.lightbox-image-column {
-  padding: 0 !important;
-  margin: 0 !important;
-  background: #05030C !important;
-  width: 100% !important;
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-}
-
-.lightbox-hero-container {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 380px !important;
-  max-height: 480px !important;
-  position: relative !important;
-  background-color: #05030C !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-@media (min-width: 768px) {
-  .lightbox-hero-container {
-    max-height: 85vh !important;
-    min-height: 520px !important;
-  }
-}
-
-#lightboxHeroImage {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important; 
-  object-position: center !important;
-  filter: brightness(0.98) !important;
-  display: block !important;
-}
-
-#lightboxThumbnailStrip {
-  display: flex !important;
-  gap: 8px !important;
-  overflow-x: auto !important;
-  padding: 10px 14px !important;
-  margin: 0 !important;
-  justify-content: center !important;
-  width: 100% !important;
-  background: rgba(5, 3, 12, 0.9) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* 🟢 FIX: อนุญาตให้รูป Thumbnail ใน Lightbox สามารถรับการคลิกเพื่อเปลี่ยนรูปได้ 100% */
-#lightboxThumbnailStrip img,
-#lightboxHeroImage,
-button img,
-a img,
-.clickable-img {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
-
-.lightbox-details {
-  padding: 22px 20px 28px 20px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important; 
-  background: linear-gradient(135deg, rgba(14, 9, 30, 0.98) 0%, rgba(9, 9, 12, 0.99) 100%) !important;
-}
-
-@media (min-width: 768px) {
-  .lightbox-details {
-    padding: 28px 24px !important;
-    overflow-y: auto !important;
-    max-height: 85vh !important;
-  }
+  object-fit: cover !important; object-position: top center !important;
 }
 
 /* ==============================================================================
-   10. FLOATING APP DOCK
-   ============================================================================== */
-.floating-app-dock { display: none; }
-@media (max-width: 768px) {
-  .floating-app-dock {
-    display: flex !important;
-    position: fixed !important;
-    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: calc(100% - 24px) !important;
-    max-width: 450px !important;
-    height: 58px !important;
-    background: rgba(13, 8, 30, 0.95) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(192, 132, 252, 0.3) !important;
-    border-radius: 100px !important;
-    z-index: 2000 !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 4px 8px !important;
-    box-sizing: border-box !important;
-  }
-  .dock-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
-    color: #A1A1AA !important;
-    text-decoration: none !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
-    gap: 2px !important;
-  }
-  .dock-item i { font-size: 15px !important; }
-  .dock-item.active, .dock-item:hover { color: #E9D5FF !important; }
-  nav.floating-app-dock a.dock-item.dock-item-line {
-    flex: 1.2 1 0% !important;
-    background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important;
-    color: #FFFFFF !important;
-    border-radius: 100px !important;
-    height: 42px !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3) !important;
-    padding: 0 12px !important;
-  }
-}
-
-.line-cta-btn, a[href*="line.me"]:not(.dock-item), [class*="line-btn"]:not(.dock-item) {
-  max-width: 330px !important;
-  width: 92% !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  padding: 0 16px !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
-  border-radius: 9999px !important;
-  margin: 8px auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
-}
-/* ==============================================================================
-   9. FLOATING DOCK, ACCORDIONS & FOOTER
+   9. FLOATING APP DOCK & FOOTER (ป้องกันแถบลอยทับเนื้อหาล่างสุด)
    ============================================================================== */
 .floating-app-dock { display: none; }
 @media (max-width: 768px) {
@@ -786,682 +560,11 @@ a img,
   }
 }
 
-.rule-item { border: 1px solid rgba(255, 255, 255, 0.05); background-color: rgba(13, 8, 30, 0.45); border-radius: 12px; overflow: hidden; margin-bottom: 6px; }
-.rule-trigger { width: 100%; background: none; border: none; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: #FFFFFF; text-align: left; }
-.rule-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; }
-.rule-item:not(.collapsed) .rule-content { max-height: 600px; }
-
-.social-links-grid-wrapper { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 8px !important; padding: 4px 0 !important; scrollbar-width: none; }
-.social-links-grid-wrapper::-webkit-scrollbar { display: none; }
-.social-link-card-item { padding: 6px 14px !important; font-size: 11px !important; border-radius: 100px !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; color: #FFFFFF !important; text-decoration: none !important; flex-shrink: 0 !important; }
-
-#map-container { max-height: 180px !important; }
 footer { padding-bottom: 24px !important; }
 @media (max-width: 768px) { footer { padding-bottom: 110px !important; } }
 
-/* ==============================================================================
-   🔮 CSS ชุดสมบูรณ์ (BRAND NEON, SEO H1, HOT RANK BADGE & HOT HEADER)
-   ============================================================================== */
-
-/* 👑 ป้ายมงกุฎอันดับ #1 HOT, #2 HOT บนการ์ดรูปน้องๆ */
-.hot-rank-badge {
-  position: absolute !important;
-  top: 6px !important;
-  right: 6px !important;
-  background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important;
-  color: #000000 !important;
-  font-size: 8.5px !important;
-  font-weight: 900 !important;
-  padding: 2px 6px !important;
-  border-radius: 100px !important;
-  box-shadow: 0 2px 8px rgba(255, 145, 0, 0.8) !important;
-  z-index: 35 !important;
-}
-
-/* 🔥 คลาสหัวข้อ Hot ประจำเดือน (คุมไม่ให้ข้อความแตกบรรทัด #ฟิวแฟน) */
-.hot-section-header-clean {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  max-width: 768px !important;
-  margin: 10px auto 6px auto !important;
-  padding: 0 4px !important;
-  flex-wrap: nowrap !important;
-}
-
-.hot-title-text {
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  margin: 0 !important;
-  line-height: 1.4 !important;
-}
-
-.hot-tag-badge {
-  background: rgba(255, 46, 147, 0.25) !important;
-  border: 1px solid rgba(255, 46, 147, 0.5) !important;
-  color: #FF85C0 !important;
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-  padding: 1px 8px !important;
-  border-radius: 100px !important;
-  white-space: nowrap !important; /* ป้องกันคำว่า #ฟิวแฟน ตกบรรทัด */
-}
-
-.hot-swipe-text {
-  font-size: 10px !important;
-  color: #C084FC !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-}
-
-/* 🫟 กรอบออร่าเรืองแสงชื่อเว็บ FirstModelHub */
-.brand-showcase-wrapper {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  margin: 8px 0 2px 0 !important;
-  padding: 6px 20px !important;
-  background: radial-gradient(ellipse at center, rgba(255, 46, 147, 0.28) 0%, rgba(124, 58, 237, 0.12) 60%, transparent 85%) !important;
-  border-radius: 100px !important;
-  position: relative !important;
-}
-
-/* ตัวหนังสือชื่อเว็บสีชมพูพรีเมียม */
-.brand-neon-text {
-  font-size: clamp(32px, 8.5vw, 54px) !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.03em !important;
-  line-height: 1.05 !important;
-  color: #FFFFFF !important;
-  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
-  background-size: 200% auto !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  animation: pinkGlowShine 3.5s linear infinite !important;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.95))
-          drop-shadow(0 0 18px #FF1493)
-          drop-shadow(0 0 38px rgba(255, 20, 147, 0.8)) !important;
-}
-
-.hub-text-pink {
-  background: linear-gradient(180deg, #FFB3E6 0%, #FF1493 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-}
-
-@keyframes pinkGlowShine {
-  0% { background-position: 0% center; }
-  50% { background-position: 100% center; }
-  100% { background-position: 200% center; }
-}
-
-/* 🌟 ดาวกระโดดเต้นดุ๊กดิ๊ก */
-.dancing-neon-star {
-  display: inline-block !important;
-  font-size: clamp(28px, 7.5vw, 46px) !important;
-  filter: drop-shadow(0 0 10px #FFEB3B) drop-shadow(0 0 22px #FF9100) !important;
-  animation: megaStarDance 1.8s infinite ease-in-out !important;
-  transform-origin: center bottom;
-}
-
-@keyframes megaStarDance {
-  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-  25% { transform: translateY(-10px) scale(1.3) rotate(-15deg); }
-  50% { transform: translateY(-2px) scale(1.12) rotate(0deg); }
-  75% { transform: translateY(-10px) scale(1.3) rotate(15deg); }
-}
-
-/* 🎯 ตัวหนังสือ H1 สำหรับ SEO */
-.seo-h1-title {
-  font-size: clamp(20px, 5vw, 32px) !important;
-  font-weight: 900 !important;
-  line-height: 1.35 !important;
-  text-align: center !important;
-  margin: 4px auto 8px auto !important;
-  width: 100% !important;
-}
-
-.seo-sub-headline {
-  display: inline-block !important;
-  font-size: clamp(14px, 3.5vw, 18px) !important;
-  font-weight: 800 !important;
-  color: #E2E8F0 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.03em !important;
-  text-shadow: 0 0 10px rgba(192, 132, 252, 0.7) !important;
-}
-
-.seo-main-headline {
-  display: inline-block !important;
-  font-size: clamp(20px, 5.2vw, 32px) !important;
-  font-weight: 900 !important;
-  background: linear-gradient(135deg, #FFFFFF 0%, #E9D5FF 40%, #C084FC 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 0 12px rgba(192, 132, 252, 0.8)) !important;
-}
-
-/* ==============================================================================
-   🔥 HOT SECTION HEADER (CENTERED RED-TO-PINK NEON & SWIPE HINT)
-   ============================================================================== */
-.hot-section-header-centered {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  width: 100% !important;
-  max-width: 768px !important;
-  margin: 14px auto 8px auto !important;
-  padding: 0 8px !important;
-}
-
-/* หัวข้อตัวอักษรสีแดงไล่ไปชมพูนีออน */
-.hot-title-red-pink {
-  font-size: clamp(18px, 4.8vw, 24px) !important;
-  font-weight: 900 !important;
-  line-height: 1.35 !important;
-  margin: 0 0 4px 0 !important;
-  text-align: center !important;
-  /* สีแดงไล่ระดับไปสีชมพูนีออน */
-  background: linear-gradient(135deg, #FF1744 0%, #FF2E93 50%, #FF85C0 100%) !important;
-  background-size: 200% auto !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  animation: redPinkGlowShine 3s linear infinite !important;
-  /* แสงออร่ารัศมีไฟนีออนแดง-ชมพู */
-  filter: drop-shadow(0 0 6px rgba(255, 23, 68, 0.9))
-          drop-shadow(0 0 15px rgba(255, 46, 147, 0.85))
-          drop-shadow(0 0 28px rgba(255, 133, 192, 0.6)) !important;
-}
-
-@keyframes redPinkGlowShine {
-  0% { background-position: 0% center; }
-  50% { background-position: 100% center; }
-  100% { background-position: 200% center; }
-}
-
-.hot-sub-line {
-  font-size: clamp(14px, 3.8vw, 18px) !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: initial !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  margin-top: 2px !important;
-}
-
-/* แคปซูลป้ายแดง #ฟิวแฟน */
-.hot-tag-badge-red {
-  background: rgba(255, 23, 68, 0.25) !important;
-  border: 1px solid rgba(255, 23, 68, 0.6) !important;
-  color: #FF85C0 !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  padding: 2px 10px !important;
-  border-radius: 100px !important;
-  white-space: nowrap !important;
-  box-shadow: 0 0 10px rgba(255, 23, 68, 0.4) !important;
-}
-
-/* ตัวหนังสือบอกใบ้ <--- เลื่อนซ้าย-ขวา ---> ขยับดุ๊กดิ๊ก */
-.hot-swipe-hint-centered {
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  color: #C084FC !important;
-  letter-spacing: 0.08em !important;
-  margin-top: 4px !important;
-  text-align: center !important;
-  text-shadow: 0 0 8px rgba(192, 132, 252, 0.6) !important;
-  animation: pulseHint 2s infinite ease-in-out !important;
-}
-
-@keyframes pulseHint {
-  0%, 100% { opacity: 0.6; transform: scale(0.98); }
-  50% { opacity: 1; transform: scale(1.04); }
-}
-/* 📍 สไตล์แสดงพิกัดจังหวัดบนการ์ดรูปน้องๆ HOT */
-.vip-location {
-  color: #C084FC !important;
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  margin-top: 1px !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 3px !important;
-}
-
-.vip-location i {
-  color: #FF2E93 !important;
-  font-size: 9px !important;
-}
-
-/* ==============================================================================
-   11. FOOTER, ACCORDIONS & INTERACTIVE PANELS
-   ============================================================================== */
-.glass-panel {
-  border-radius: 16px !important;
-  border: 1px solid rgba(147, 51, 234, 0.15) !important;
-  background: rgba(13, 8, 30, 0.45) !important;
-  padding: 16px 12px !important;
-}
-
-.rule-item {
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgba(13, 8, 30, 0.45);
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.rule-trigger {
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  color: #FFFFFF;
-  text-align: left;
-}
-
-.rule-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease-out;
-}
-
-.rule-item:not(.collapsed) .rule-content { max-height: 600px; }
-
-.seo-content-container.collapsed { max-height: 140px !important; overflow: hidden !important; }
-
-.social-links-grid-wrapper {
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
-  gap: 8px !important;
-  justify-content: flex-start !important;
-  padding: 4px 0 !important;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.social-links-grid-wrapper::-webkit-scrollbar { display: none; }
-
-.social-link-card-item {
-  padding: 6px 14px !important;
-  font-size: 11px !important;
-  border-radius: 100px !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #FFFFFF !important;
-  text-decoration: none !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-}
-
-#map-container { max-height: 180px !important; }
-
-/* 🟢 FIX: ปรับ Footer Padding ไม่ให้โดน Floating Dock ลอยทับบนมือถือ (รวบรวมเป็นชุดเดียว) */
-footer { 
-  padding-bottom: 30px !important; 
-}
-
-@media (max-width: 768px) {
-  footer { 
-    padding-bottom: 120px !important; 
-  }
-}
-
-#popular-locations-footer { gap: 12px !important; }
-#popular-locations-footer li a {
-  padding: 8px 12px !important;
-  display: inline-block !important;
-  min-height: 44px !important;
-}
-
-a.highlight, 
-[class*="text-[#C084FC]"],
-[style*="color: #C084FC"] {
-  color: #E9D5FF !important;
-  text-shadow: 0 0 10px rgba(233, 213, 252, 0.25);
-}
-
-h1, h2, h3, h4, .glow-heading-spark {
-  color: var(--pure-white);
-  font-weight: 800 !important;
-  letter-spacing: -0.01em;
-}
-
-/* ==============================================================================
-   12. MEDIA PROTECTION ENGINE (ป้องกันการบันทึกและก๊อปปี้รูปภาพ)
-   ============================================================================== */
+/* ป้องกันการก๊อปปี้รูปภาพ */
 img, picture, svg {
   -webkit-user-drag: none !important;
-  user-drag: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
   user-select: none !important;
-  -webkit-touch-callout: none !important;
-}
-
-a, .profile-card-new, .interactive-card, button {
-  pointer-events: auto !important;
-}
-
-/* 🟢 FIX: บังคับเปลี่ยนสีข้อความสไตล์ Inline ให้เปิดอ่านได้ชัดเจน 100% ใน Light Mode */
-html.light p[style*="color: #A1A1AA"],
-html.light p[style*="color: #CBD5E1"],
-html.light p[style*="color: #E4E4E7"],
-html.light span[style*="color: #A1A1AA"],
-html.light span[style*="color: #D4D4D8"],
-html.light div[style*="color: #A1A1AA"] {
-  color: #3F3F46 !important;
-}
-
-html.light p[style*="color: white"],
-html.light span[style*="color: white"],
-html.light h1, html.light h2, html.light h3, html.light h4 {
-  color: #09090B !important;
-}
-
-/* ==============================================================================
-   🔮 NEON SINGLE-LINE CLUTCH PILL BADGE (ป้ายการันตีแถวเดียวนีออนพรีเมียม)
-   ============================================================================== */
-.clutch-pill {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important; /* 🟢 บังคับเรียงเป็นแถวเดียว 100% ไม่แตกบรรทัด */
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 4px 12px !important;
-  border-radius: 100px !important;
-  /* พื้นหลังกระจกเงาสีม่วงเข้มไซเบอร์ */
-  background: linear-gradient(135deg, rgba(25, 10, 48, 0.92) 0%, rgba(42, 12, 75, 0.88) 100%) !important;
-  /* ขอบเรืองแสงนีออนม่วงสว่าง */
-  border: 1.5px solid rgba(192, 132, 252, 0.65) !important;
-  /* รัศมีแสงออร่านีออนเปล่งแสงม่วงรอบป้าย */
-  box-shadow: 0 0 15px rgba(147, 51, 234, 0.5), 
-              inset 0 0 12px rgba(192, 132, 252, 0.25) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  white-space: nowrap !important;
-  max-width: 100% !important;
-  margin: 0 auto !important;
-}
-
-/* 🏷️ แท็กป้ายสีม่วงนีออน "VERIFIED 2026" */
-.clutch-tag {
-  background: linear-gradient(135deg, #7C3AED 0%, #D946EF 100%) !important;
-  color: #FFFFFF !important;
-  padding: 2px 7px !important;
-  border-radius: 100px !important;
-  font-size: 8.5px !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.05em !important;
-  box-shadow: 0 0 10px rgba(217, 70, 239, 0.7) !important;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.9) !important;
-  flex-shrink: 0 !important;
-}
-
-/* ⭐ ดาวทองเรียงแถวเดียวนีออนสว่างวับ */
-.clutch-pill .stars {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important; /* 🟢 บังคับดาวเรียงแนวนอนแถวเดียว */
-  align-items: center !important;
-  gap: 2px !important;
-  color: #FFEB3B !important;
-  font-size: 8.5px !important;
-  flex-shrink: 0 !important;
-}
-
-.clutch-pill .stars i {
-  /* แสงไฟนีออนเรืองแสงดาวทอง 2 ชั้น */
-  filter: drop-shadow(0 0 4px #FFEB3B) 
-          drop-shadow(0 0 8px #FF9100) !important;
-}
-
-/* 💬 ตัวหนังสือ "5/5 Verified Profiles" */
-.clutch-text {
-  color: #F4E8FF !important;
-  font-size: 9.5px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.02em !important;
-  text-shadow: 0 0 8px rgba(233, 213, 252, 0.9) !important;
-  flex-shrink: 0 !important;
-}
-
-/* 📱 ปรับแต่งพิเศษสำหรับจอมือถือขนาดเล็กมาก (น้อยกว่า 360px) ให้พอดีไม่ล้น */
-@media (max-width: 360px) {
-  .clutch-pill {
-    gap: 4px !important;
-    padding: 3px 8px !important;
-  }
-  .clutch-tag {
-    font-size: 7.5px !important;
-    padding: 1.5px 5px !important;
-  }
-  .clutch-pill .stars {
-    font-size: 7.5px !important;
-    gap: 1px !important;
-  }
-  .clutch-text {
-    font-size: 8.5px !important;
-  }
-}
-
-/* ==============================================================================
-   🟢 HOT SECTION HEADLINE ENHANCEMENT (สว่าง โดดเด่น อ่านง่าย)
-   ============================================================================== */
-.hot-section-header-box {
-  position: relative !important;
-  padding: 16px 10px 10px 10px !important;
-  margin-bottom: 12px !important;
-  text-align: center !important;
-  /* เพิ่มแสงออร่าชมพูทองจางๆ ด้านหลังหัวข้อ */
-  background: radial-gradient(circle, rgba(255, 46, 147, 0.18) 0%, rgba(124, 58, 237, 0.05) 50%, transparent 75%) !important;
-}
-
-.hot-title-text {
-  font-size: clamp(20px, 5.5vw, 24px) !important;
-  font-weight: 900 !important;
-  line-height: 1.25 !important;
-  margin: 6px 0 !important;
-  text-align: center !important;
-}
-
-/* เทกซ์ไล่สีชมพูนีออน-ส้มทอง สว่าง นีออน เรืองแสงชัดเจนบนพื้นหลังมืด */
-.hot-gradient-glow {
-  background: linear-gradient(135deg, #FF85C0 0%, #FF2E93 40%, #FFD600 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 2px 10px rgba(255, 46, 147, 0.6)) !important;
-}
-
-/* ปุ่มแท็กชิปเรืองแสงสไตล์ Luxury Glassmorphism */
-.hot-pill-tag {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  background: rgba(255, 46, 147, 0.15) !important;
-  border: 1px solid rgba(255, 133, 192, 0.4) !important;
-  color: #FFB0D9 !important;
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-  padding: 3px 12px !important;
-  border-radius: 100px !important;
-  backdrop-filter: blur(8px) !important;
-  box-shadow: 0 0 12px rgba(255, 46, 147, 0.3) !important;
-}
-
-/* ตัวหนังสือบอกเลื่อนซ้าย-ขวา สว่างชัดเจน */
-.hot-scroll-guide {
-  font-size: 11.5px !important;
-  color: #F4F4F5 !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.03em !important;
-  opacity: 0.9 !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
-  margin-top: 4px !important;
-}
-/* ==============================================================================
-   🟢 HOT SECTION HEADLINE ENHANCEMENT (สว่าง โดดเด่น อ่านง่าย 100%)
-   ============================================================================== */
-.hot-section-header-box {
-  position: relative !important;
-  padding: 16px 10px 10px 10px !important;
-  margin-bottom: 12px !important;
-  text-align: center !important;
-  background: radial-gradient(circle, rgba(255, 46, 147, 0.18) 0%, rgba(124, 58, 237, 0.05) 50%, transparent 75%) !important;
-}
-
-.hot-title-text {
-  font-size: clamp(20px, 5.5vw, 24px) !important;
-  font-weight: 900 !important;
-  line-height: 1.25 !important;
-  margin: 6px 0 !important;
-  text-align: center !important;
-}
-
-.hot-gradient-glow {
-  background: linear-gradient(135deg, #FF85C0 0%, #FF2E93 40%, #FFD600 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 2px 10px rgba(255, 46, 147, 0.6)) !important;
-}
-
-.hot-pill-tag {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  background: rgba(255, 46, 147, 0.15) !important;
-  border: 1px solid rgba(255, 133, 192, 0.4) !important;
-  color: #FFB0D9 !important;
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-  padding: 3px 12px !important;
-  border-radius: 100px !important;
-  backdrop-filter: blur(8px) !important;
-  box-shadow: 0 0 12px rgba(255, 46, 147, 0.3) !important;
-}
-
-.hot-scroll-guide {
-  font-size: 11.5px !important;
-  color: #F4F4F5 !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.03em !important;
-  opacity: 0.9 !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
-  margin-top: 4px !important;
-}
-
-/* ==============================================================================
-   🔒 FORCE FIX: ล็อคการแสดงผล VIP HOT SWIPER ห้ามยืด ห้ามตกบรรทัดแนวตั้ง 100%
-   ============================================================================== */
-
-/* 1. คอนเทนเนอร์กล่องสไลด์ (บังคับเรียงแถวเดียวนอน) */
-#vip-swiper-container,
-.vip-swiper-wrapper {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important; /* 🟢 ห้ามตกบรรทัดแนวตั้งเด็ดขาด */
-  gap: 12px !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  padding: 10px 4px 16px 4px !important;
-  margin: 6px auto 14px auto !important;
-  width: 100% !important;
-  max-width: 850px !important;
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: none !important;
-  scroll-snap-type: x mandatory !important;
-}
-
-#vip-swiper-container::-webkit-scrollbar,
-.vip-swiper-wrapper::-webkit-scrollbar {
-  display: none !important;
-}
-
-/* 2. ตัวการ์ดน้องๆ (บังคับกว้างและสูงคงที่) */
-.vip-card-item {
-  flex: 0 0 135px !important;
-  width: 135px !important;
-  height: 175px !important;
-  aspect-ratio: 4 / 5 !important;
-  border-radius: 16px !important;
-  overflow: hidden !important;
-  position: relative !important; /* 🟢 ล็อคไว้เพื่อให้รูปและข้อความซ้อนทับกัน */
-  background-color: #09090C !important;
-  border: 1px solid rgba(192, 132, 252, 0.35) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7) !important;
-  flex-shrink: 0 !important;
-  scroll-snap-align: start !important;
-}
-
-/* 3. รูปภาพข้างในการ์ด (บังคับซ้อนเต็มแผ่นการ์ด ล็อก height ไม่ให้ยืด) */
-.vip-card-item img {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: 100% !important; /* 🟢 ห้ามใช้ height: auto */
-  object-fit: cover !important;
-  object-position: top center !important;
-  border-radius: 16px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  z-index: 1 !important;
-}
-
-/* 4. เงา overlay ซ้อนบนรูป */
-.vip-card-overlay {
-  position: absolute !important;
-  inset: 0 !important;
-  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important;
-  z-index: 2 !important;
-  pointer-events: none !important;
-}
-
-/* 5. ป้ายปักมุมการ์ดและข้อความ (บังคับลอยเหนือรูปภาพ) */
-.hot-rank-badge {
-  position: absolute !important;
-  top: 6px !important;
-  right: 6px !important;
-  z-index: 5 !important;
-}
-
-.vip-status-chip {
-  position: absolute !important;
-  top: 6px !important;
-  left: 6px !important;
-  z-index: 5 !important;
-}
-
-.vip-card-info {
-  position: absolute !important;
-  bottom: 8px !important;
-  left: 8px !important;
-  right: 8px !important;
-  z-index: 5 !important;
-  text-align: left !important;
-  pointer-events: none !important;
 }
