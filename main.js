@@ -145,15 +145,21 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function getImageUrl(path, width = 400) {
-    if (!path) return CONFIG.DEFAULT_OG_IMAGE;
-    if (path.includes("res.cloudinary.com")) {
-      return path.replace("/upload/", `/upload/c_scale,w_${width},q_auto,f_auto/`);
-    }
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
-    }
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
+  if (!path) return CONFIG.DEFAULT_OG_IMAGE;
+  
+  // 🟢 เพิ่ม 3 บรรทัดนี้ป้องกัน Type พัง
+  if (Array.isArray(path)) path = path[0];
+  if (typeof path === "object" && path !== null) path = path.src || path.url || path.imagePath || "";
+  if (typeof path !== "string" || !path.trim()) return CONFIG.DEFAULT_OG_IMAGE;
+
+  if (path.includes("res.cloudinary.com")) {
+    return path.replace("/upload/", `/upload/c_scale,w_${width},q_auto,f_auto/`);
   }
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
+}
 
   function showToast(message, type = "success") {
     let container = document.getElementById("toast-container");
@@ -1744,25 +1750,40 @@ function updateHeroSwiperCards() {
     DOM.profilesDisplayArea?.classList.remove("hidden");
     DOM.featuredSection?.classList.remove("hidden");
 
-    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-    if (profileMatch) {
-      const slug = decodeURIComponent(profileMatch[1]);
-      STATE.currentProfileSlug = slug;
+    // 🟢 ในไฟล์ main.js ฟังก์ชัน handleRouteNavigation
+const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+if (profileMatch) {
+  let slug = profileMatch[1];
+  try { slug = decodeURIComponent(slug); } catch (e) {}
+  
+  STATE.currentProfileSlug = slug;
 
-      let foundProfile = STATE.allProfiles.find(p => (p.slug || "").toLowerCase() === slug.toLowerCase());
-      if (!foundProfile && !isInitial) {
-        foundProfile = await fetchSingleProfileBySlug(slug);
-      }
+  // 🟢 ค้นหาแบบยืดหยุ่น เปรียบเทียบทั้ง slug, id และแบบ URI Encoded
+  let foundProfile = STATE.allProfiles.find(p => {
+    const pSlug = String(p.slug || "").toLowerCase();
+    const pId = String(p.id);
+    const searchSlug = slug.toLowerCase();
+    return (
+      pSlug === searchSlug ||
+      pId === searchSlug ||
+      encodeURIComponent(pSlug) === searchSlug ||
+      decodeURIComponent(pSlug) === searchSlug
+    );
+  });
 
-      if (foundProfile) {
-        openLightboxForProfile(foundProfile);
-      } else if (isInitial) {
-        history.replaceState(null, "", "/");
-        closeLightboxModal(false);
-        STATE.currentProfileSlug = null;
-      }
-      return;
-    }
+  if (!foundProfile && !isInitial) {
+    foundProfile = await fetchSingleProfileBySlug(slug);
+  }
+
+  if (foundProfile) {
+    openLightboxForProfile(foundProfile);
+  } else if (isInitial) {
+    history.replaceState(null, "", "/");
+    closeLightboxModal(false);
+    STATE.currentProfileSlug = null;
+  }
+  return;
+}
 
     if (isProfilesPage) {
       STATE.currentProfileSlug = null;
@@ -2178,18 +2199,23 @@ function updateHeroSwiperCards() {
         return;
       }
 
-      const cardLink = target.closest("a.card-link");
-      if (cardLink) {
-        e.preventDefault();
-        const card = cardLink.closest(".profile-card-new, .vip-card-item");
-        const slug = card ? card.getAttribute("data-profile-slug") : null;
-        if (slug) {
-          STATE.lastFocusedElement = cardLink;
-          history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
-          handleRouteNavigation();
-        }
-        return;
-      }
+      // 🟢 ในไฟล์ main.js (ประมาณบรรทัดที่ 1050-1070)
+const cardLink = target.closest("a.card-link");
+if (cardLink) {
+  e.preventDefault();
+  const card = cardLink.closest(".profile-card-new, .vip-card-item");
+  let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
+  
+  if (rawSlug) {
+    // 🟢 ถอดรหัสก่อนเพื่อป้องกันปัญหา Double Encoding ภาษาไทย
+    try { rawSlug = decodeURIComponent(rawSlug); } catch (e) {}
+    
+    STATE.lastFocusedElement = cardLink;
+    history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
+    handleRouteNavigation();
+  }
+  return;
+}
 
       const closeBtn = target.closest("#closeLightboxBtn");
       const lightboxModal = target.closest("#lightbox");
