@@ -243,17 +243,34 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
+// 🟢 ปรับปรุงให้ปลอดภัยต่อ Type ที่ไม่ใช่ String
 const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
   if (!path) return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+  
+  // ถ้าเป็น Array ให้ดึงค่าแรกออกมา
+  if (Array.isArray(path)) path = path[0];
+  
+  // ถ้าเป็น Object ให้ดึง src หรือ url
+  if (typeof path === "object" && path !== null) {
+    path = path.src || path.url || path.imagePath || "";
+  }
+  
+  // ถ้าไม่ใช่ string ให้ return default
+  if (typeof path !== "string" || !path.trim()) {
+    return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+  }
+
   if (path.includes("res.cloudinary.com")) {
     if (path.includes("/upload/")) {
       return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
     }
     return path;
   }
+  
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
+  
   return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
@@ -866,7 +883,7 @@ export default async (req, context) => {
     const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
-// 🟢 1.1 สร้างสไลด์การ์ดน้องๆ HOT ประจำเดือนบน SSR พร้อมแท็กลิงก์เปิด Lightbox
+    // 🟢 1.1 สร้างสไลด์การ์ดน้องๆ HOT ประจำเดือนบน SSR พร้อมแท็กลิงก์เปิด Lightbox
     const hotProfilesList = profileList.filter(p => {
       const tagText = `${p.style_tags || ''} ${p.slogan || ''} ${p.quote || ''}`.toLowerCase();
       return tagText.includes("ฟิวแฟน") || tagText.includes("ฟิลแฟน");
@@ -874,7 +891,7 @@ export default async (req, context) => {
 
     const hotListToRender = hotProfilesList.length > 0 ? hotProfilesList : profileList.slice(0, 8);
 
-const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
+    const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
       const imgUrl = optimizeImg(hostUrl, p.imagePath, 300, 375);
       const pName = escapeHTML((p.name || "").replace(/^น้อง\s?/, "").trim());
       const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
@@ -892,8 +909,8 @@ const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
           
           <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
           
-          <!-- 🟢 ลิงก์ที่ครอบการ์ดไว้ให้ Javascript ดักจับ -->
-          <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 25 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+<!-- 🟢 ปรับ z-index เป็น 50 !important เพื่อให้ลอยเหนือเอฟเฟกต์เรืองแสง -->
+<a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 50 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
 
           <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
             <div class="vip-name" style="color: #FFFFFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">น้อง${pName}</div>
@@ -925,7 +942,7 @@ const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
     `).join("");
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
-    const matchedZones = seoData.zones.slice(0, 4).map(sanitizeThaiText).join(", ");
+    const matchedZones = (seoData.zones || []).slice(0, 4).map(sanitizeThaiText).join(", ");
     
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones, provinceSlug);
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
@@ -944,76 +961,81 @@ const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
       return html;
     }).join("") : "";
 
-
+    // 🟢 2. ดึง Template HTML หลัก
     let rawHtml = await getTemplateHtml(url, context);
 
+    // 🛠️ HELPER FUNCTIONS สำหรับป้องกันปัญหา String.prototype.replace ดักจับสัญลักษณ์ $
+    const safeRegexReplace = (html, regex, replacement) => {
+      return html.replace(regex, () => (replacement !== undefined && replacement !== null ? String(replacement) : ""));
+    };
+
+    const safePlaceholder = (val) => (val !== undefined && val !== null ? String(val) : "");
+
+    const safeJsonStringify = (obj) => {
+      return JSON.stringify(obj)
+        .replace(/</g, '\\u003c')
+        .replace(/>/g, '\\u003e')
+        .replace(/\u2028/g, '\\u2028')
+        .replace(/\u2029/g, '\\u2029');
+    };
+
+    // 🟢 3. จัดการ Base Tag และ Meta SEO Tags
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
+    rawHtml = safeRegexReplace(rawHtml, /<title>[\s\S]*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
+    rawHtml = safeRegexReplace(rawHtml, /<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
 
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
+    rawHtml = safeRegexReplace(rawHtml, /<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
+    rawHtml = safeRegexReplace(rawHtml, /<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
+    rawHtml = safeRegexReplace(rawHtml, /<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
+    rawHtml = safeRegexReplace(rawHtml, /<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
 
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", enUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
+    // 🟢 4. แทนที่ Canonical และ Schema JSON
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", safePlaceholder(canonUrl));
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", safePlaceholder(enUrl));
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", safePlaceholder(metaImgUrl));
     
-    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
+    const safeSchemaJson = safeJsonStringify(schemaJson);
+    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${safeSchemaJson}</script>`;
+
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
+      rawHtml = safeRegexReplace(rawHtml, /<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
     } else {
-      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
+      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", safeSchemaJson);
     }
     
-    // 🟢 4. แทนที่ Placeholders ต่างๆ ลงใน Template
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+    // 🟢 5. แทนที่ Placeholders ทั่วไปลงใน Template
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", safePlaceholder(featuredCardsHtml));
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", safePlaceholder(provinceThaiName));
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", safePlaceholder(profileList.length || 50));
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", safePlaceholder(matchedZones));
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", safePlaceholder(seoIntroContent));
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", safePlaceholder(reviewsHtml));
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", safePlaceholder(faqsHtml));
+    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", safePlaceholder(mapEmbedUrl));
 
-    // 🟢 [ADDED & PERFECTED] แทนที่กล่องสไลด์ #vip-swiper-container ด้วยการ์ด HOT สดจาก SSR พร้อม Inline CSS ล็อคโครงสร้าง 100%
-    const swiperReplacementHTML = `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;">${hotSwiperCardsHtml}</div>`;
+    // 🟢 6. แทนที่กล่องสไลด์ #vip-swiper-container ด้วยการ์ด HOT สดจาก SSR
+    const swiperReplacementHTML = `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;">${hotSwiperCardsHtml || ""}</div>`;
     
     if (/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(
-        /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i,
-        swiperReplacementHTML
-      );
-    } else {
-
-      rawHtml = rawHtml.replace(
-        /<div id="vip-swiper-container"><\/div>/i,
-        swiperReplacementHTML
-      );
+      rawHtml = safeRegexReplace(rawHtml, /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, swiperReplacementHTML);
+    } else if (rawHtml.includes('<div id="vip-swiper-container"></div>')) {
+      rawHtml = replaceGlobal(rawHtml, '<div id="vip-swiper-container"></div>', swiperReplacementHTML);
     }
 
-
-    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
-
+    // 🟢 7. ปรับแต่งโครงสร้างลิงก์ Footer และ Section ที่ไม่ต้องแสดงผล
     if (popularLocationsHtml) {
-      rawHtml = rawHtml.replace(
-        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
-        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
-      );
+      const popularLocationsFooterHTML = `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`;
+      rawHtml = safeRegexReplace(rawHtml, /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, popularLocationsFooterHTML);
     }
 
     if (!isNationalHome) {
-      rawHtml = rawHtml.replace(
-        /<section id="featured-profiles"[\s\S]*?<\/section>/i,
-        ""
-      );
+      rawHtml = safeRegexReplace(rawHtml, /<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
-
+    // 🟢 8. สร้าง Main Display Area สำหรับรายการโปรไฟล์ทั้งหมด
     const topCatalogSnippetHtml = `
       <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
         <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
@@ -1038,15 +1060,15 @@ const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
       ${liveCountChipHtml}
       <div class="section-content-wrapper" style="margin-top: 16px;">
         <div class="profile-grid profiles-grid-row" role="list">
-          ${cardsHtml}
+          ${cardsHtml || ""}
         </div>
       </div>
     `;
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-
-    const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
+    // 🟢 9. สร้าง Data Hydration สดให้ Client JS (`window.profilesData`) ปลอดภัย 100%
+    const hydratedProfilesData = safeJsonStringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -1074,19 +1096,25 @@ const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
       lineId: p.line_id || p.lineId || "",
       quote: sanitizeThaiText(p.quote || p.slogan) || "",
       styleTags: p.style_tags || p.styleTags || []
-    }))).replace(/</g, '\\u003c');
+    })));
 
     const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
 
     if (rawHtml.includes('<script id="ssr-profiles-data">')) {
-      rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
+      rawHtml = safeRegexReplace(rawHtml, /<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
     } else if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
     } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
+      rawHtml = safeRegexReplace(rawHtml, /<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // 🟢 7. ตั้งค่า Response Headers และส่งค่ากลับไปแสดงผล
+    // 🟢 10. ปรับแต่ง Relative Paths สำหรับ Asset ต่างๆ
+    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
+
+    // 🟢 11. CLEANUP STEP: ลบแท็ก {{...}} ตกค้างทั้งหมดออก ป้องกัน Crawler วิ่งเข้า URL เสีย
+    rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
+
+    // 🟢 12. ตั้งค่า Response Headers และส่งค่ากลับไปแสดงผล
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
@@ -1109,7 +1137,7 @@ const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
     try {
       return await context.next();
     } catch {
-      return new Response("<!DOCTYPE html><html><head><meta charset='utf-8'><title>First Model Hub</title></head><body><script src='/main.js'></script></body></html>", {
+      return new Response("<!DOCTYPE html><html><head><meta charset='utf-8'><title>First Model Hub</title></head><body><script type='module' src='/main.js'></script></body></html>", {
         status: 200,
         headers: { "Content-Type": "text/html; charset=utf-8" }
       });
