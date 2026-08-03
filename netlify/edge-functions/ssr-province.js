@@ -858,12 +858,46 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // 🟢 1. สร้างการ์ดโปรไฟล์สำหรับ Main Display Area
+// 🟢 1. สร้างการ์ดโปรไฟล์สำหรับ Main Display Area
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
     const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
+    // 🟢 [ADDED & PERFECTED] 1.1 สร้างสไลด์การ์ดน้องๆ HOT ประจำเดือนบน SSR พร้อมแท็กลิงก์เปิด Lightbox
+    const hotProfilesList = profileList.filter(p => {
+      const tagText = `${p.style_tags || ''} ${p.slogan || ''} ${p.quote || ''}`.toLowerCase();
+      return tagText.includes("ฟิวแฟน") || tagText.includes("ฟิลแฟน");
+    }).slice(0, 8);
+
+    const hotListToRender = hotProfilesList.length > 0 ? hotProfilesList : profileList.slice(0, 8);
+
+    const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
+      const imgUrl = optimizeImg(hostUrl, p.imagePath, 300, 375);
+      const pName = escapeHTML((p.name || "").replace(/^น้อง\s?/, "").trim());
+      const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
+      const availText = escapeHTML(p.availability || "พร้อมรับงาน");
+      const pSlug = encodeURIComponent(p.slug || p.id);
+
+      return `
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
+          <span class="hot-rank-badge"><i class="fas fa-crown"></i> #${idx + 1} HOT</span>
+          <img src="${imgUrl}" alt="น้อง${pName}" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+          <div class="vip-card-overlay"></div>
+          <span class="vip-status-chip">🟢 ${availText}</span>
+          
+          <!-- 🟢 แท็กลิงก์คลิกตรงนี้: เพื่อเปิด Lightbox และเปลี่ยน URL ไปที่โปรไฟล์น้อง -->
+          <a href="/sideline/${pSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+
+          <div class="vip-card-info">
+            <div class="vip-name">น้อง${pName}</div>
+            <div class="vip-location"><i class="fas fa-map-marker-alt"></i> ${pLoc}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // 🟢 2. สร้างการ์ดรีวิวและเนื้อหา SEO
     const reviewsHtml = finalReviews.map(r => `
       <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -905,6 +939,7 @@ export default async (req, context) => {
       return html;
     }).join("") : "";
 
+    // 🟢 3. ดึง Template HTML และอัปเดต Metadata / SEO Tags
     let rawHtml = await getTemplateHtml(url, context);
 
     if (!/<base\s+/i.test(rawHtml)) {
@@ -930,6 +965,7 @@ export default async (req, context) => {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     }
     
+    // 🟢 4. แทนที่ Placeholders ต่างๆ ลงใน Template
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
@@ -939,6 +975,13 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
+    // 🟢 [ADDED & PERFECTED] แทนที่กล่องสไลด์ #vip-swiper-container ด้วยการ์ด HOT สดจาก SSR
+    rawHtml = rawHtml.replace(
+      /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i,
+      `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`
+    );
+
+    // ปรับแต่ง Relative Paths ให้เป็น Absolute Root
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
     if (popularLocationsHtml) {
@@ -955,6 +998,7 @@ export default async (req, context) => {
       );
     }
 
+    // 🟢 5. สร้างแคตตาล็อก SEO แบบซ่อน และโครงสร้าง Main Grid
     const topCatalogSnippetHtml = `
       <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
         <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
@@ -986,6 +1030,7 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
+    // 🟢 6. ฉีดข้อมูล Hydration (window.profilesData) สำหรับ Client JS
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -1026,6 +1071,7 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
+    // 🟢 7. ตั้งค่า Response Headers และส่งค่ากลับไปแสดงผล
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
@@ -1036,7 +1082,6 @@ export default async (req, context) => {
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
     };
 
-    // 🟢 FIX: เคลียร์ Cache หาก Map มีขนาดใหญ่เกินไปเพื่อป้องกัน Memory Bloat
     if (PAGE_CACHE.size > MAX_CACHE_SIZE) {
       PAGE_CACHE.clear();
     }
