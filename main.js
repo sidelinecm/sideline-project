@@ -498,23 +498,24 @@ function updateHeroSwiperCards() {
 
     swiperContainer.innerHTML = hotProfiles.map((p, idx) => {
       const rankText = `#${idx + 1} HOT`;
-      const rankBadge = `<span class="hot-rank-badge"><i class="fas fa-crown"></i> ${rankText}</span>`;
       const realLocation = p.location || p.provinceNameThai || "เชียงใหม่";
       const pSlug = encodeURIComponent(p.slug || p.id);
+      const imgUrl = p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
+      const availText = p.availability || 'พร้อมรับงาน';
 
+      // 🟢 นำ Inline CSS มาบังคับล็อคทุกอย่างไว้ 100% ป้องกันรูปยืด ทะลุจอ และพังเมื่อโหลดเสร็จ
       return `
-        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
-          ${rankBadge}
-          <img src="${p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
-          <div class="vip-card-overlay"></div>
-          <span class="vip-status-chip">🟢 ${p.availability || 'พร้อมรับงาน'}</span>
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important;">
+          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important;"><i class="fas fa-crown"></i> ${rankText}</span>
+          <img src="${imgUrl}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important;" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
+          <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; pointer-events: none !important;"></div>
+          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important;">🟢 ${availText}</span>
           
-          <!-- 🟢 เพิ่มแท็กลิงก์คลิกตรงนี้ -->
-          <a href="/sideline/${pSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
+          <a href="/sideline/${pSlug}" class="card-link" style="position: absolute !important; inset: 0 !important; z-index: 25 !important;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
 
-          <div class="vip-card-info">
-            <div class="vip-name">${p.displayName}</div>
-            <div class="vip-location"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
+          <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important;">
+            <div class="vip-name" style="color: #FFFFFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">${p.displayName}</div>
+            <div class="vip-location" style="color: #C084FC !important; font-size: 9.5px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 2px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
           </div>
         </div>
       `;
