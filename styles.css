@@ -1372,4 +1372,96 @@ html.light h1, html.light h2, html.light h3, html.light h4 {
   margin-top: 4px !important;
 }
 
-📄 2. ไฟล์ index.html ฉบับสมบูรณ์ (ปรับปรุงดีไซน์สว่าง อ่านง่า
+/* ==============================================================================
+   🔒 FORCE FIX: ล็อคการแสดงผล VIP HOT SWIPER ห้ามยืด ห้ามตกบรรทัดแนวตั้ง 100%
+   ============================================================================== */
+
+/* 1. คอนเทนเนอร์กล่องสไลด์ (บังคับเรียงแถวเดียวนอน) */
+#vip-swiper-container,
+.vip-swiper-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important; /* 🟢 ห้ามตกบรรทัดแนวตั้งเด็ดขาด */
+  gap: 12px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 10px 4px 16px 4px !important;
+  margin: 6px auto 14px auto !important;
+  width: 100% !important;
+  max-width: 850px !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  scroll-snap-type: x mandatory !important;
+}
+
+#vip-swiper-container::-webkit-scrollbar,
+.vip-swiper-wrapper::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 2. ตัวการ์ดน้องๆ (บังคับกว้างและสูงคงที่) */
+.vip-card-item {
+  flex: 0 0 135px !important;
+  width: 135px !important;
+  height: 175px !important;
+  aspect-ratio: 4 / 5 !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  position: relative !important; /* 🟢 ล็อคไว้เพื่อให้รูปและข้อความซ้อนทับกัน */
+  background-color: #09090C !important;
+  border: 1px solid rgba(192, 132, 252, 0.35) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7) !important;
+  flex-shrink: 0 !important;
+  scroll-snap-align: start !important;
+}
+
+/* 3. รูปภาพข้างในการ์ด (บังคับซ้อนเต็มแผ่นการ์ด ล็อก height ไม่ให้ยืด) */
+.vip-card-item img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important; /* 🟢 ห้ามใช้ height: auto */
+  object-fit: cover !important;
+  object-position: top center !important;
+  border-radius: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 1 !important;
+}
+
+/* 4. เงา overlay ซ้อนบนรูป */
+.vip-card-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+/* 5. ป้ายปักมุมการ์ดและข้อความ (บังคับลอยเหนือรูปภาพ) */
+.hot-rank-badge {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  z-index: 5 !important;
+}
+
+.vip-status-chip {
+  position: absolute !important;
+  top: 6px !important;
+  left: 6px !important;
+  z-index: 5 !important;
+}
+
+.vip-card-info {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  z-index: 5 !important;
+  text-align: left !important;
+  pointer-events: none !important;
+}
