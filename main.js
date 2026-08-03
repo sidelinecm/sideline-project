@@ -2174,7 +2174,7 @@ function updateHeroSwiperCards() {
       const cardLink = target.closest("a.card-link");
       if (cardLink) {
         e.preventDefault();
-        const card = cardLink.closest(".profile-card-new");
+        const card = cardLink.closest(".profile-card-new, .vip-card-item");
         const slug = card ? card.getAttribute("data-profile-slug") : null;
         if (slug) {
           STATE.lastFocusedElement = cardLink;
