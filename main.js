@@ -480,12 +480,10 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-// 🟢 ฟังก์ชันดึงน้องๆ #ฟิวแฟน พร้อมแสดงพิกัดย่าน/จังหวัดจริงแทนราคา 1,500.-
-  function updateHeroSwiperCards() {
+function updateHeroSwiperCards() {
     const swiperContainer = document.getElementById("vip-swiper-container");
     if (!swiperContainer || !STATE.allProfiles || STATE.allProfiles.length === 0) return;
 
-    // 1. กรองดึงเฉพาะน้องๆ ที่มีแท็ก "#ฟิวแฟน" หรือ "ฟิวแฟน"
     let hotProfiles = STATE.allProfiles.filter(p => {
       const tags = Array.isArray(p.styleTags) ? p.styleTags : (typeof p.styleTags === 'string' ? p.styleTags.split(',') : []);
       const tagText = `${tags.join(" ")} ${p.slogan || ''} ${p.quote || ''}`.toLowerCase();
@@ -498,18 +496,22 @@ window.ScrollTrigger = ScrollTrigger;
       hotProfiles = hotProfiles.slice(0, 8);
     }
 
-    // 2. แสดงผลโดยดึงพิกัดย่าน/จังหวัดจริงของน้องคนนั้นๆ มาโชว์
     swiperContainer.innerHTML = hotProfiles.map((p, idx) => {
       const rankText = `#${idx + 1} HOT`;
       const rankBadge = `<span class="hot-rank-badge"><i class="fas fa-crown"></i> ${rankText}</span>`;
       const realLocation = p.location || p.provinceNameThai || "เชียงใหม่";
+      const pSlug = encodeURIComponent(p.slug || p.id);
 
       return `
-        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${p.slug || p.id}">
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
           ${rankBadge}
           <img src="${p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
           <div class="vip-card-overlay"></div>
           <span class="vip-status-chip">🟢 ${p.availability || 'พร้อมรับงาน'}</span>
+          
+          <!-- 🟢 เพิ่มแท็กลิงก์คลิกตรงนี้ -->
+          <a href="/sideline/${pSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
+
           <div class="vip-card-info">
             <div class="vip-name">${p.displayName}</div>
             <div class="vip-location"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
