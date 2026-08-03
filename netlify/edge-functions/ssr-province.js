@@ -190,6 +190,7 @@ function verifyHostname(req) {
 async function getTemplateHtml(url, context) {
   const now = Date.now();
   
+  // 🟢 แก้ไข Fallback Shell เติม swiper-container เพื่อกัน Layout พังตอน Netlify Timeout
   const DEFAULT_FALLBACK_SHELL = `<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
@@ -201,7 +202,8 @@ async function getTemplateHtml(url, context) {
 </head>
 <body>
   <main id="main-content">
-    <div class="container" style="padding: 40px 16px; text-align: center;">
+    <div class="container" style="padding: 10px 16px; text-align: center;">
+      <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important;"></div>
       <h1 style="color: #FFFFFF; font-size: 20px;">First Model Hub</h1>
       <p style="color: #A1A1AA; font-size: 13px; margin-top: 8px;">กำลังโหลดข้อมูลโปรไฟล์...</p>
     </div>
@@ -864,7 +866,7 @@ export default async (req, context) => {
     const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
-    // 🟢 [ADDED & PERFECTED] 1.1 สร้างสไลด์การ์ดน้องๆ HOT ประจำเดือนบน SSR พร้อมแท็กลิงก์เปิด Lightbox
+    // 🟢 [ADDED & PERFECTED] 1.1 สร้างสไลด์การ์ดน้องๆ HOT ประจำเดือนบน SSR พร้อมแท็กลิงก์เปิด Lightbox (เพิ่ม Inline CSS บังคับโครงสร้าง)
     const hotProfilesList = profileList.filter(p => {
       const tagText = `${p.style_tags || ''} ${p.slogan || ''} ${p.quote || ''}`.toLowerCase();
       return tagText.includes("ฟิวแฟน") || tagText.includes("ฟิลแฟน");
@@ -880,18 +882,17 @@ export default async (req, context) => {
       const pSlug = encodeURIComponent(p.slug || p.id);
 
       return `
-        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
-          <span class="hot-rank-badge"><i class="fas fa-crown"></i> #${idx + 1} HOT</span>
-          <img src="${imgUrl}" alt="น้อง${pName}" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
-          <div class="vip-card-overlay"></div>
-          <span class="vip-status-chip">🟢 ${availText}</span>
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important;">
+          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-crown"></i> #${idx + 1} HOT</span>
+          <img src="${imgUrl}" alt="น้อง${pName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important;" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+          <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; pointer-events: none !important;"></div>
+          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important;">🟢 ${availText}</span>
           
-          <!-- 🟢 แท็กลิงก์คลิกตรงนี้: เพื่อเปิด Lightbox และเปลี่ยน URL ไปที่โปรไฟล์น้อง -->
-          <a href="/sideline/${pSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+          <a href="/sideline/${pSlug}" class="card-link" style="position: absolute !important; inset: 0 !important; z-index: 25 !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
 
-          <div class="vip-card-info">
-            <div class="vip-name">น้อง${pName}</div>
-            <div class="vip-location"><i class="fas fa-map-marker-alt"></i> ${pLoc}</div>
+          <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
+            <div class="vip-name" style="color: #FFFFFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">น้อง${pName}</div>
+            <div class="vip-location" style="color: #C084FC !important; font-size: 9.5px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 2px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${pLoc}</div>
           </div>
         </div>
       `;
@@ -975,11 +976,21 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // 🟢 [ADDED & PERFECTED] แทนที่กล่องสไลด์ #vip-swiper-container ด้วยการ์ด HOT สดจาก SSR
-    rawHtml = rawHtml.replace(
-      /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i,
-      `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`
-    );
+    // 🟢 [ADDED & PERFECTED] แทนที่กล่องสไลด์ #vip-swiper-container ด้วยการ์ด HOT สดจาก SSR พร้อม Inline CSS ล็อคโครงสร้าง 100%
+    const swiperReplacementHTML = `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;">${hotSwiperCardsHtml}</div>`;
+    
+    if (/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i.test(rawHtml)) {
+      rawHtml = rawHtml.replace(
+        /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i,
+        swiperReplacementHTML
+      );
+    } else {
+      // เผื่อกรณี Fallback HTML
+      rawHtml = rawHtml.replace(
+        /<div id="vip-swiper-container"><\/div>/i,
+        swiperReplacementHTML
+      );
+    }
 
     // ปรับแต่ง Relative Paths ให้เป็น Absolute Root
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
