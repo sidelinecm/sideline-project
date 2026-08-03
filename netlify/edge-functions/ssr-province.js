@@ -874,26 +874,26 @@ export default async (req, context) => {
 
     const hotListToRender = hotProfilesList.length > 0 ? hotProfilesList : profileList.slice(0, 8);
 
-    const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
+const hotSwiperCardsHtml = hotListToRender.map((p, idx) => {
       const imgUrl = optimizeImg(hostUrl, p.imagePath, 300, 375);
       const pName = escapeHTML((p.name || "").replace(/^น้อง\s?/, "").trim());
       const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
       const availText = escapeHTML(p.availability || "พร้อมรับงาน");
       const pSlug = encodeURIComponent(p.slug || p.id);
 
-
       return `
-<div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
-          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-crown"></i> #${idx + 1} HOT</span>
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
+          
+          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; display: flex !important; align-items: center !important; gap: 3px !important; pointer-events: none !important;"><i class="fas fa-crown"></i> #${idx + 1} HOT</span>
           
           <img src="${imgUrl}" alt="น้อง${pName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important; pointer-events: none !important;" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
           
           <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; pointer-events: none !important;"></div>
           
-          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important;">🟢 ${availText}</span>
+          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
           
-          <!-- ลิงก์ที่ครอบการ์ดไว้ให้ Javascript ดักจับ -->
-          <a href="/sideline/${pSlug}" class="card-link" style="position: absolute !important; inset: 0 !important; z-index: 25 !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+          <!-- 🟢 ลิงก์ที่ครอบการ์ดไว้ให้ Javascript ดักจับ -->
+          <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 25 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
 
           <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
             <div class="vip-name" style="color: #FFFFFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">น้อง${pName}</div>
