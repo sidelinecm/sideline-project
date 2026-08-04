@@ -8,7 +8,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const PAGE_CACHE_TTL_MS = 10 * 60 * 1000;
-const MAX_CACHE_SIZE = 200; // 🟢 FIX: ป้องกัน Memory Leak ในระบบ Serverless
+const MAX_CACHE_SIZE = 200;
 
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
@@ -40,7 +40,6 @@ const CONFIG = {
   }
 };
 
-// 🟢 FIX: เพิ่มการรองรับ Key ทุกรูปแบบทั้งแบบมีขีดและไม่มีขีดกลาง
 const PROVINCE_CUSTOM_METADATA = {
   chiangmai: {
     title: "สาวรับงานเชียงใหม่ ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
@@ -154,7 +153,6 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   }
 });
 
-// 🟢 Helper Function สำหรับค้นหาคีย์จังหวัดให้รองรับทั้งแบบมีขีดและไม่มีขีด
 function getProvinceSearchKeys(slug) {
   if (!slug) return ["national"];
   const norm = slug.replace(/[-_]/g, "").toLowerCase();
@@ -190,7 +188,6 @@ function verifyHostname(req) {
 async function getTemplateHtml(url, context) {
   const now = Date.now();
   
-  // 🟢 แก้ไข Fallback Shell เติม swiper-container เพื่อกัน Layout พังตอน Netlify Timeout
   const DEFAULT_FALLBACK_SHELL = `<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
@@ -243,19 +240,13 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 ปรับปรุงให้ปลอดภัยต่อ Type ที่ไม่ใช่ String
 const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
   if (!path) return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
   
-  // ถ้าเป็น Array ให้ดึงค่าแรกออกมา
   if (Array.isArray(path)) path = path[0];
-  
-  // ถ้าเป็น Object ให้ดึง src หรือ url
   if (typeof path === "object" && path !== null) {
     path = path.src || path.url || path.imagePath || "";
   }
-  
-  // ถ้าไม่ใช่ string ให้ return default
   if (typeof path !== "string" || !path.trim()) {
     return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
   }
@@ -434,7 +425,6 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
-// 🟢 Helper Function สำหรับสร้าง HTML การ์ดโปรไฟล์ส่วนกลาง
 const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
@@ -445,7 +435,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
   const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
   
-  // 🟢 FIX: ปรับ Alt Text รูปภาพให้เป็นธรรมชาติ ลดปัญหา Keyword Stuffing
   const seoAltText = `โปรไฟล์น้อง${pName} สาวรับงานเอนเตอร์เทน จ.${provinceThaiName}`;
   const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
 
@@ -485,7 +474,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
 
-  // 🟢 FIX: เปลี่ยน loading="lazy" ทั้งหมดสำหรับการ์ดในรายการส่วนแสดงผล
   return `
     <div class="profile-card-new-container" role="listitem">
       <article class="profile-card-new interactive-card"
@@ -617,7 +605,6 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 FIX: เรียกใช้สคริปต์ช่วยทำความสะอาด Search Keys รองรับคีย์จังหวัดทั้งมีและไม่มีขีดกลาง
     const searchKeys = getProvinceSearchKeys(provinceSlug);
     const provinceParam = provinceSlug.replace(/[-_]/g, "");
 
@@ -666,18 +653,8 @@ export default async (req, context) => {
       ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
       : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
     
-    const profileList = profListRes.data || [];
-    const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
-    const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
-    const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
-
-    const canonUrl = matchedProfile 
-      ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
-      : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
-    
     const enUrl = `${canonUrl}?lang=en`;
 
-    // 🟢 1. ตรวจสอบสถานะการเลือกภาษาอังกฤษจาก URL
     const isEnglish = url.searchParams.get("lang") === "en" || url.pathname.endsWith("/en");
 
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
@@ -723,7 +700,6 @@ export default async (req, context) => {
       pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
-    // 🟢 2. สลับ Title & Description เป็นภาษาอังกฤษสำหรับ SEO
     if (isEnglish) {
       if (matchedProfile) {
         const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
@@ -901,13 +877,11 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-// 🟢 1. สร้างการ์ดโปรไฟล์สำหรับ Main Display Area
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
     const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
-    // 🟢 1.1 สร้างสไลด์การ์ดน้องๆ HOT ประจำเดือนบน SSR พร้อมแท็กลิงก์เปิด Lightbox
     const hotProfilesList = profileList.filter(p => {
       const tagText = `${p.style_tags || ''} ${p.slogan || ''} ${p.quote || ''}`.toLowerCase();
       return tagText.includes("ฟิวแฟน") || tagText.includes("ฟิลแฟน");
@@ -933,8 +907,7 @@ export default async (req, context) => {
           
           <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
           
-<!-- 🟢 ปรับ z-index เป็น 50 !important เพื่อให้ลอยเหนือเอฟเฟกต์เรืองแสง -->
-<a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 50 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+          <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 50 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
 
           <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
             <div class="vip-name" style="color: #FFFFFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">น้อง${pName}</div>
@@ -985,10 +958,8 @@ export default async (req, context) => {
       return html;
     }).join("") : "";
 
-    // 🟢 2. ดึง Template HTML หลัก
     let rawHtml = await getTemplateHtml(url, context);
 
-    // 🛠️ HELPER FUNCTIONS สำหรับป้องกันปัญหา String.prototype.replace ดักจับสัญลักษณ์ $
     const safeRegexReplace = (html, regex, replacement) => {
       return html.replace(regex, () => (replacement !== undefined && replacement !== null ? String(replacement) : ""));
     };
@@ -1003,7 +974,6 @@ export default async (req, context) => {
         .replace(/\u2029/g, '\\u2029');
     };
 
-    // 🟢 3. จัดการ Base Tag และ Meta SEO Tags
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
@@ -1016,7 +986,6 @@ export default async (req, context) => {
     rawHtml = safeRegexReplace(rawHtml, /<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = safeRegexReplace(rawHtml, /<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
 
-    // 🟢 4. แทนที่ Canonical และ Schema JSON
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", safePlaceholder(canonUrl));
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", safePlaceholder(enUrl));
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", safePlaceholder(metaImgUrl));
@@ -1030,7 +999,6 @@ export default async (req, context) => {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", safeSchemaJson);
     }
     
-    // 🟢 5. แทนที่ Placeholders ทั่วไปลงใน Template
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", safePlaceholder(featuredCardsHtml));
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", safePlaceholder(provinceThaiName));
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", safePlaceholder(profileList.length || 50));
@@ -1040,7 +1008,6 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", safePlaceholder(faqsHtml));
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", safePlaceholder(mapEmbedUrl));
 
-    // 🟢 6. แทนที่กล่องสไลด์ #vip-swiper-container ด้วยการ์ด HOT สดจาก SSR
     const swiperReplacementHTML = `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;">${hotSwiperCardsHtml || ""}</div>`;
     
     if (/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i.test(rawHtml)) {
@@ -1049,7 +1016,6 @@ export default async (req, context) => {
       rawHtml = replaceGlobal(rawHtml, '<div id="vip-swiper-container"></div>', swiperReplacementHTML);
     }
 
-    // 🟢 7. ปรับแต่งโครงสร้างลิงก์ Footer และ Section ที่ไม่ต้องแสดงผล
     if (popularLocationsHtml) {
       const popularLocationsFooterHTML = `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`;
       rawHtml = safeRegexReplace(rawHtml, /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, popularLocationsFooterHTML);
@@ -1059,7 +1025,6 @@ export default async (req, context) => {
       rawHtml = safeRegexReplace(rawHtml, /<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
-    // 🟢 8. สร้าง Main Display Area สำหรับรายการโปรไฟล์ทั้งหมด
     const topCatalogSnippetHtml = `
       <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
         <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
@@ -1091,7 +1056,6 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // 🟢 9. สร้าง Data Hydration สดให้ Client JS (`window.profilesData`) ปลอดภัย 100%
     const hydratedProfilesData = safeJsonStringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -1132,23 +1096,18 @@ export default async (req, context) => {
       rawHtml = safeRegexReplace(rawHtml, /<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // 🟢 10. ปรับแต่ง Relative Paths สำหรับ Asset ต่างๆ
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
-    // 🟢 11. CLEANUP STEP: ลบแท็ก {{...}} ตกค้างทั้งหมดออก ป้องกัน Crawler วิ่งเข้า URL เสีย
     rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
-
-// 🟢 [เพิ่มส่วนนี้] สลับข้อความปุ่มจาก EN เป็น TH เมื่ออยู่หน้าภาษาอังกฤษ
     if (isEnglish) {
-      const thUrl = canonUrl; // ลิงก์กลับหน้าภาษาไทย
+      const thUrl = canonUrl;
       rawHtml = rawHtml.replace(
         /id="lang-toggle-btn"[\s\S]*?>EN<\/a>/i,
         `id="lang-toggle-btn" href="${thUrl}" aria-label="Switch to Thai language" class="circle-btn-el" style="color: var(--text-gray) !important; text-decoration: none; font-size: 11px; font-weight: 800;">TH</a>`
       );
     }
     
-    // 🟢 12. ตั้งค่า Response Headers และส่งค่ากลับไปแสดงผล
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
