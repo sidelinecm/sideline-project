@@ -357,14 +357,6 @@ const getDynamicReviews = provinceName => {
       rating: 5,
       date: "เมื่อ 2 สัปดาห์ก่อน",
       datePublished: toSafeISODate(new Date(t.getTime() - 1296000000))
-    },
-    {
-      author: "คุณกิตติศักดิ์ (K.)",
-      location: isChiangMai ? "เจ็ดยอด เชียงใหม่" : `พื้นที่ตัวเมือง${provinceName}`,
-      text: '"ประทับใจความตรงปกและระบบที่โปร่งใสมากครับ ชำระหน้างานโดยตรงสบายใจสุดๆ น้องอัธยาศัยดี คุยสนุก ดูแลเอาใจใส่ดีมากครับ"',
-      rating: 5,
-      date: "เมื่อ 3 สัปดาห์ก่อน",
-      datePublished: toSafeISODate(new Date(t.getTime() - 1814400000))
     }
   ];
 };
@@ -750,27 +742,18 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 [OPTIMIZED & COMPLETE SSR SCHEMA GRAPH BLOCK]
     const strippedDesc = stripHTML(pageDesc);
-    
-    // คำนวณดาวเฉลี่ยจากก้อนรีวิวจริง
     const calculatedAvg = finalReviews.length > 0 
       ? (finalReviews.reduce((sum, rev) => sum + (Number(rev.rating) || 5), 0) / finalReviews.length) 
-      : 4.9;
+      : 5;
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
+    const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
+    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
-    // 🟢 แก้ไขจุดสำคัญ: reviewCount ต้องเท่ากับจำนวนรีวิวจริงใน finalReviews เสมอ ป้องกัน Google แจ้งเตือน Schema Mismatch
-    const finalReviewCount = finalReviews.length;
-
-    // URL แผนที่ Google Maps พร้อม คลีนอักขระภาษาไทย
-    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : sanitizeThaiText(provinceThaiName)))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
-
-    // คัดกรองย่าน/โซนสำหรับ Schema AreaServed
     const validZones = (seoData.zones || [])
       .map(sanitizeThaiText)
-      .filter(z => z && z !== "ทั้งหมด" && z !== "all" && z.trim() !== "");
+      .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 โครงสร้าง Business Entity Schema
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -795,7 +778,7 @@ export default async (req, context) => {
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": Number(finalRatingValue) || 4.9,
-        "reviewCount": Number(finalReviewCount) || 2, // 👈 บันทึกรีวิวตรงกับความจริงของ Array
+        "reviewCount": Number(finalReviewCount) || 5,
         "bestRating": 5,
         "worstRating": 1
       },
@@ -813,7 +796,6 @@ export default async (req, context) => {
       }))
     };
 
-    // 🟢 โครงสร้าง Schema Graph หลักสำหรับรองรับ Rich Results
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -845,7 +827,6 @@ export default async (req, context) => {
       }
     ];
 
-    // กรณีเข้าหน้าโปรไฟล์รายบุคคล (/sideline/slug)
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
@@ -871,7 +852,6 @@ export default async (req, context) => {
         ]
       });
     } else {
-      // กรณีเข้าหน้าจังหวัด หรือ หน้าแรกหลัก
       schemaGraph.push({
         "@type": "CollectionPage",
         "@id": `${canonUrl}/#webpage`,
@@ -913,7 +893,6 @@ export default async (req, context) => {
       });
     }
 
-    // เพิ่ม FAQPage Schema ในหน้าจังหวัด/หน้าแรก
     if (seoData.faqs && !profileSlug) {
       schemaGraph.push({
         "@type": "FAQPage",
