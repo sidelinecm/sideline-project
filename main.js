@@ -1,5 +1,4 @@
 
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
@@ -145,21 +144,19 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function getImageUrl(path, width = 400) {
-  if (!path) return CONFIG.DEFAULT_OG_IMAGE;
-  
-  // 🟢 เพิ่ม 3 บรรทัดนี้ป้องกัน Type พัง
-  if (Array.isArray(path)) path = path[0];
-  if (typeof path === "object" && path !== null) path = path.src || path.url || path.imagePath || "";
-  if (typeof path !== "string" || !path.trim()) return CONFIG.DEFAULT_OG_IMAGE;
+    if (!path) return CONFIG.DEFAULT_OG_IMAGE;
+    if (Array.isArray(path)) path = path[0];
+    if (typeof path === "object" && path !== null) path = path.src || path.url || path.imagePath || "";
+    if (typeof path !== "string" || !path.trim()) return CONFIG.DEFAULT_OG_IMAGE;
 
-  if (path.includes("res.cloudinary.com")) {
-    return path.replace("/upload/", `/upload/c_scale,w_${width},q_auto,f_auto/`);
+    if (path.includes("res.cloudinary.com")) {
+      return path.replace("/upload/", `/upload/c_scale,w_${width},q_auto,f_auto/`);
+    }
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
   }
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path;
-  }
-  return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
-}
 
   function showToast(message, type = "success") {
     let container = document.getElementById("toast-container");
@@ -486,7 +483,7 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-function updateHeroSwiperCards() {
+  function updateHeroSwiperCards() {
     const swiperContainer = document.getElementById("vip-swiper-container");
     if (!swiperContainer || !STATE.allProfiles || STATE.allProfiles.length === 0) return;
 
@@ -509,8 +506,6 @@ function updateHeroSwiperCards() {
       const imgUrl = p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
       const availText = p.availability || 'พร้อมรับงาน';
 
-      // 🟢 นำ Inline CSS มาบังคับล็อคทุกอย่างไว้ 100% ป้องกันรูปยืด ทะลุจอ
-      // 🟢 เพิ่ม pointer-events: none ในส่วนที่ไม่ใช่ปุ่ม และขยายแท็ก <a> ให้เต็มใบ
       return `
         <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
           
@@ -522,7 +517,6 @@ function updateHeroSwiperCards() {
           
           <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
           
-          <!-- 🎯 แท็ก <a> ล่องหน ดักการคลิก 100% ของพื้นที่การ์ด -->
           <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 25 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
 
           <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
@@ -533,7 +527,7 @@ function updateHeroSwiperCards() {
         </div>
       `;
     }).join("");
-}
+  }
 
   function populateProvinceDropdown() {
     if (!DOM.provinceSelect) return;
@@ -1062,8 +1056,8 @@ function updateHeroSwiperCards() {
     const titleEl = document.getElementById("lightbox-profile-name-main");
     if (titleEl) {
       titleEl.innerHTML = `
-        <span class="text-gradient-main" style="font-size: 20px; font-weight: 800;">${nameClean}</span>
-        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 15px;" title="ยืนยันตัวตนแล้ว"></i>' : ""}
+        <span style="font-size: 22px !important; font-weight: 900 !important; background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.85)) !important; letter-spacing: -0.02em;">${nameClean}</span>
+        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 16px; filter: drop-shadow(0 0 6px #00E676);" title="ยืนยันตัวตนแล้ว"></i>' : ""}
       `;
     }
 
@@ -1493,7 +1487,6 @@ function updateHeroSwiperCards() {
   function updateDynamicProvinceContent(provKey = "chiangmai", provName = "เชียงใหม่", count = 50) {
     const data = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
 
-    // แผนที่แปลงชื่อจังหวัดเป็นภาษาอังกฤษสำหรับ SEO ต่างชาติ
     const ENG_PROV_MAP = {
       chiangmai: "Chiang Mai",
       bangkok: "Bangkok",
@@ -1503,7 +1496,6 @@ function updateHeroSwiperCards() {
     };
     const engProvName = ENG_PROV_MAP[provKey] || "Thailand";
 
-    // 1. อัปเดต SEO H1
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       heroH1.innerHTML = `
@@ -1512,7 +1504,6 @@ function updateHeroSwiperCards() {
       `;
     }
 
-    // 2. อัปเดตข้อความโซนใน Hero
     const heroSub = document.querySelector(".hero-subtitle-p");
     if (heroSub) {
       const currentZones = (data && data.zones && data.zones.length > 1) 
@@ -1523,7 +1514,6 @@ function updateHeroSwiperCards() {
       `;
     }
 
-    // 3. แก้ไขย่อหน้าเกริ่นนำบน SEO Drawer (แก้โซนขัดแย้งกัน)
     const drawerTitle = document.querySelector("#service-deep-dive h2");
     if (drawerTitle) drawerTitle.textContent = `บริการเพื่อนเที่ยวและสาวรับงาน${provName} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า ${count}+ รายการ)`;
 
@@ -1537,7 +1527,6 @@ function updateHeroSwiperCards() {
       `;
     }
 
-    // 4. อัปเดตข้อความ SEO ใน Drawer (แก้ภาษาอังกฤษปนไทย)
     const drawerWrapper = document.getElementById("seo-drawer-wrapper");
     if (drawerWrapper) {
       const contentInner = drawerWrapper.querySelector("div");
@@ -1557,7 +1546,6 @@ function updateHeroSwiperCards() {
       }
     }
 
-    // 5. อัปเดตรีวิว
     const reviewsGrid = document.getElementById("reviews-container-grid");
     if (reviewsGrid) {
       const reviewsList = (data && data.reviews && data.reviews.length > 0) 
@@ -1584,7 +1572,6 @@ function updateHeroSwiperCards() {
       `).join("");
     }
 
-    // 6. อัปเดต FAQ
     const faqContainer = document.getElementById("faq-container-list");
     if (faqContainer) {
       const faqsList = (data && data.faqs && data.faqs.length > 0) 
@@ -1750,40 +1737,38 @@ function updateHeroSwiperCards() {
     DOM.profilesDisplayArea?.classList.remove("hidden");
     DOM.featuredSection?.classList.remove("hidden");
 
-    // 🟢 ในไฟล์ main.js ฟังก์ชัน handleRouteNavigation
-const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-if (profileMatch) {
-  let slug = profileMatch[1];
-  try { slug = decodeURIComponent(slug); } catch (e) {}
-  
-  STATE.currentProfileSlug = slug;
+    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+    if (profileMatch) {
+      let slug = profileMatch[1];
+      try { slug = decodeURIComponent(slug); } catch (e) {}
+      
+      STATE.currentProfileSlug = slug;
 
-  // 🟢 ค้นหาแบบยืดหยุ่น เปรียบเทียบทั้ง slug, id และแบบ URI Encoded
-  let foundProfile = STATE.allProfiles.find(p => {
-    const pSlug = String(p.slug || "").toLowerCase();
-    const pId = String(p.id);
-    const searchSlug = slug.toLowerCase();
-    return (
-      pSlug === searchSlug ||
-      pId === searchSlug ||
-      encodeURIComponent(pSlug) === searchSlug ||
-      decodeURIComponent(pSlug) === searchSlug
-    );
-  });
+      let foundProfile = STATE.allProfiles.find(p => {
+        const pSlug = String(p.slug || "").toLowerCase();
+        const pId = String(p.id);
+        const searchSlug = slug.toLowerCase();
+        return (
+          pSlug === searchSlug ||
+          pId === searchSlug ||
+          encodeURIComponent(pSlug) === searchSlug ||
+          decodeURIComponent(pSlug) === searchSlug
+        );
+      });
 
-  if (!foundProfile && !isInitial) {
-    foundProfile = await fetchSingleProfileBySlug(slug);
-  }
+      if (!foundProfile && !isInitial) {
+        foundProfile = await fetchSingleProfileBySlug(slug);
+      }
 
-  if (foundProfile) {
-    openLightboxForProfile(foundProfile);
-  } else if (isInitial) {
-    history.replaceState(null, "", "/");
-    closeLightboxModal(false);
-    STATE.currentProfileSlug = null;
-  }
-  return;
-}
+      if (foundProfile) {
+        openLightboxForProfile(foundProfile);
+      } else if (isInitial) {
+        history.replaceState(null, "", "/");
+        closeLightboxModal(false);
+        STATE.currentProfileSlug = null;
+      }
+      return;
+    }
 
     if (isProfilesPage) {
       STATE.currentProfileSlug = null;
@@ -1837,7 +1822,13 @@ if (profileMatch) {
   async function fetchSingleProfileBySlug(slug) {
     if (!window.supabase) return null;
     try {
-      const { data, error } = await window.supabase.from("profiles").select("*").eq("slug", slug).maybeSingle();
+      let query = window.supabase.from("profiles").select("*");
+      if (/^\d+$/.test(slug)) {
+        query = query.eq("id", slug);
+      } else {
+        query = query.eq("slug", slug);
+      }
+      const { data, error } = await query.maybeSingle();
       if (error) throw error;
       return data ? processProfileObject(data) : null;
     } catch (e) {
@@ -2115,33 +2106,33 @@ if (profileMatch) {
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
-    (function initTheme() {
-      const btns = document.querySelectorAll(".theme-toggle-btn");
-      const icons = document.querySelectorAll(".theme-toggle-icon");
-      const applyTheme = (theme) => {
-        const isDark = theme === "dark";
-        document.documentElement.classList.toggle("dark", isDark);
-        localStorage.setItem(CONFIG.KEYS.THEME, theme);
-        icons.forEach(ic => {
-          if (isDark) {
-            ic.classList.remove("fa-sun");
-            ic.classList.add("fa-moon");
-          } else {
-            ic.classList.remove("fa-moon");
-            ic.classList.add("fa-sun");
-          }
-        });
-      };
-      const savedTheme = localStorage.getItem(CONFIG.KEYS.THEME) || "dark";
-      applyTheme(savedTheme);
-      btns.forEach(b => {
-        b.onclick = () => {
-          const current = document.documentElement.classList.contains("dark") ? "light" : "dark";
-          applyTheme(current);
-        };
-      });
+    // 🟢 ระบบเปลี่ยนภาษา TH/EN
+    (function initLanguageSwitcher() {
+      const langBtn = document.getElementById("lang-toggle-btn");
+      if (!langBtn) return;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const isEnglish = urlParams.get("lang") === "en" || window.location.pathname.endsWith("/en");
+
+      if (isEnglish) {
+        langBtn.textContent = "TH";
+        langBtn.setAttribute("aria-label", "Switch to Thai language");
+        
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("lang");
+        cleanUrl.pathname = cleanUrl.pathname.replace(/\/en$/, "");
+        langBtn.href = cleanUrl.pathname + (cleanUrl.search ? cleanUrl.search : "");
+      } else {
+        langBtn.textContent = "EN";
+        langBtn.setAttribute("aria-label", "Switch to English language");
+        
+        const enUrl = new URL(window.location.href);
+        enUrl.searchParams.set("lang", "en");
+        langBtn.href = enUrl.pathname + "?" + enUrl.searchParams.toString();
+      }
     })();
 
+    // 🟢 ระบบ Mobile Sidebar
     (function initMobileSidebar() {
       const toggleBtn = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar-menu");
@@ -2164,6 +2155,7 @@ if (profileMatch) {
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
     })();
 
+    // 🟢 จัดการ Event Click ทั่วไป
     document.body.addEventListener("click", e => {
       const target = e.target;
 
@@ -2199,23 +2191,21 @@ if (profileMatch) {
         return;
       }
 
-      // 🟢 ในไฟล์ main.js (ประมาณบรรทัดที่ 1050-1070)
-const cardLink = target.closest("a.card-link");
-if (cardLink) {
-  e.preventDefault();
-  const card = cardLink.closest(".profile-card-new, .vip-card-item");
-  let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
-  
-  if (rawSlug) {
-    // 🟢 ถอดรหัสก่อนเพื่อป้องกันปัญหา Double Encoding ภาษาไทย
-    try { rawSlug = decodeURIComponent(rawSlug); } catch (e) {}
-    
-    STATE.lastFocusedElement = cardLink;
-    history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
-    handleRouteNavigation();
-  }
-  return;
-}
+      const cardLink = target.closest("a.card-link");
+      if (cardLink) {
+        e.preventDefault();
+        const card = cardLink.closest(".profile-card-new, .vip-card-item");
+        let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
+        
+        if (rawSlug) {
+          try { rawSlug = decodeURIComponent(rawSlug); } catch (e) {}
+          
+          STATE.lastFocusedElement = cardLink;
+          history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
+          handleRouteNavigation();
+        }
+        return;
+      }
 
       const closeBtn = target.closest("#closeLightboxBtn");
       const lightboxModal = target.closest("#lightbox");
