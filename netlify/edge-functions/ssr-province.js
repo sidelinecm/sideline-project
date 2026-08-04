@@ -147,9 +147,16 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
+// [FIX 2.2] ปรับปรุงการสืบทอดข้อมูลให้ Fallback FAQs จาก default กรณีอาร์เรย์เป็นค่าว่าง
 Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   if (key !== "default") {
-    PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
+    const prov = PROVINCE_SEO_DATA[key];
+    PROVINCE_SEO_DATA[key] = {
+      ...PROVINCE_SEO_DATA.default,
+      ...prov,
+      zones: (prov.zones && prov.zones.length > 0) ? prov.zones : PROVINCE_SEO_DATA.default.zones,
+      faqs: (prov.faqs && prov.faqs.length > 0) ? prov.faqs : PROVINCE_SEO_DATA.default.faqs
+    };
   }
 });
 
@@ -185,6 +192,9 @@ function verifyHostname(req) {
   return true;
 }
 
+const escapeRegExp = (str) => String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// [FIX 2.1] เพิ่ม Placeholders ครบถ้วนใน Fallback Shell ป้องกันหน้าขาวเมื่อ Fetch index.html ไม่สำเร็จ
 async function getTemplateHtml(url, context) {
   const now = Date.now();
   
@@ -196,13 +206,16 @@ async function getTemplateHtml(url, context) {
   <title>First Model Hub - ศูนย์รวมเพื่อนเที่ยวและสาวรับงานพรีเมียม</title>
   <meta name="description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ" />
   <link rel="stylesheet" href="/styles.css">
+  {{SCHEMA_JSON}}
 </head>
 <body>
   <main id="main-content">
     <div class="container" style="padding: 10px 16px; text-align: center;">
-      <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important;"></div>
-      <h1 style="color: #FFFFFF; font-size: 20px;">First Model Hub</h1>
-      <p style="color: #A1A1AA; font-size: 13px; margin-top: 8px;">กำลังโหลดข้อมูลโปรไฟล์...</p>
+      <div id="vip-swiper-container"></div>
+      <div id="profiles-display-area">{{PROFILES_DISPLAY_AREA_HTML}}</div>
+      <section id="province-seo-section" style="margin-top: 24px;">{{PROVINCE_SEO_CONTENT}}</section>
+      <section id="province-reviews-section">{{PROVINCE_REVIEWS_HTML}}</section>
+      <section id="province-faqs-section">{{PROVINCE_FAQS_HTML}}</section>
     </div>
   </main>
   <script type="module" src="/main.js"></script>
@@ -265,19 +278,33 @@ const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
   return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
+// [FIX 1.2] ป้องกันการคืนค่า NaN ใน formatDateSSR
 const formatDateSSR = dateStr => {
   if (!dateStr) return "เมื่อครู่นี้";
   try {
-    const t = new Date(dateStr),
-      months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."],
-      date = t.getDate(),
-      month = months[t.getMonth()];
+    const t = new Date(dateStr);
+    if (isNaN(t.getTime())) return "เมื่อครู่นี้";
+    
+    const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const date = t.getDate();
+    const month = months[t.getMonth()];
     return `${date} ${month} ${(t.getFullYear() + 543).toString().slice(-2)}`;
   } catch {
     return "เมื่อครู่นี้";
   }
 };
 
+const toSafeISODate = (dateStr) => {
+  try {
+    if (!dateStr) return new Date().toISOString().split("T")[0];
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? new Date().toISOString().split("T")[0] : d.toISOString().split("T")[0];
+  } catch {
+    return new Date().toISOString().split("T")[0];
+  }
+};
+
+// [FIX 1.1] แก้ไขจุดเสี่ยง Regex Crash โดยการทำ escapeRegExp ก่อนสร้าง RegExp
 const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
   if (!text) return "";
   let res = sanitizeThaiText(text);
@@ -285,7 +312,7 @@ const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
   if (zones && Array.isArray(zones) && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
       if (!zone) return;
-      const cleanZone = sanitizeThaiText(zone);
+      const cleanZone = escapeRegExp(sanitizeThaiText(zone));
       const regex = new RegExp(`(${cleanZone})(?![^<]*>|[^<>]*<\\/a>)`, "g");
       res = res.replace(regex, `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
     });
@@ -321,7 +348,7 @@ const getDynamicReviews = provinceName => {
         : `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ"`,
       rating: 5,
       date: "เมื่อสัปดาห์ที่แล้ว",
-      datePublished: new Date(t.getTime() - 691200000).toISOString().split("T")[0]
+      datePublished: toSafeISODate(new Date(t.getTime() - 691200000))
     },
     {
       author: "คุณอภิชาติ (A.)",
@@ -329,7 +356,7 @@ const getDynamicReviews = provinceName => {
       text: '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
       rating: 5,
       date: "เมื่อ 2 สัปดาห์ก่อน",
-      datePublished: new Date(t.getTime() - 1296000000).toISOString().split("T")[0]
+      datePublished: toSafeISODate(new Date(t.getTime() - 1296000000))
     }
   ];
 };
@@ -468,8 +495,11 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
 
   let rateDisplay = "1,500.-";
   if (p.rate) {
-    if (!isNaN(p.rate)) rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
-    else rateDisplay = escapeHTML(p.rate).trim();
+    if (typeof p.rate === "number" || (!isNaN(p.rate) && String(p.rate).trim() !== "")) {
+      rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
+    } else {
+      rateDisplay = escapeHTML(p.rate).trim();
+    }
   }
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
@@ -630,13 +660,14 @@ export default async (req, context) => {
       reviewQuery = reviewQuery.in("province_key", searchKeys);
     }
 
+    // [FIX 1.3] ปรับปรุงการ Execute reviewQuery ให้มั่นใจว่า Catch ได้
     const [provSingleRes, profListRes, provListRes, reviewsRes] = await Promise.all([
       isNationalHome 
         ? Promise.resolve({ data: { id: 0, nameThai: "ทั่วไทย", key: "national" } })
         : supabase.from("provinces").select("id, nameThai, key").in("key", searchKeys).limit(1).maybeSingle(),
       profileQuery,
       supabase.from("provinces").select("key, nameThai").order("nameThai", { ascending: true }),
-      Promise.resolve(reviewQuery).catch(() => ({ data: [] }))
+      reviewQuery.then(res => res).catch(() => ({ data: [] }))
     ]);
 
     const provinceData = provSingleRes.data;
@@ -669,7 +700,7 @@ export default async (req, context) => {
         text: sanitizeThaiText(r.review_body) || "ดูแลประทับใจดีสไตล์ฟิวแฟน ตรงปกปลอดภัย แนะนำครับ",
         rating: Number(r.rating_score) && !isNaN(Number(r.rating_score)) ? Math.min(5, Math.max(1, Number(r.rating_score))) : 5,
         date: formatDateSSR(r.created_at),
-        datePublished: r.created_at ? new Date(r.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]
+        datePublished: toSafeISODate(r.created_at)
       }));
     } else {
       finalReviews = getDynamicReviews(provinceThaiName);
@@ -754,7 +785,7 @@ export default async (req, context) => {
       "review": finalReviews.map(r => ({
         "@type": "Review",
         "author": { "@type": "Person", "name": r.author || "คุณผู้ใช้บริการ" },
-        "datePublished": r.datePublished || new Date().toISOString().split("T")[0],
+        "datePublished": r.datePublished || toSafeISODate(null),
         "reviewBody": stripHTML(r.text || "บริการประทับใจดีสไตล์ฟิวแฟน"),
         "reviewRating": { 
           "@type": "Rating", 
@@ -898,17 +929,11 @@ export default async (req, context) => {
 
       return `
         <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
-          
           <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; display: flex !important; align-items: center !important; gap: 3px !important; pointer-events: none !important;"><i class="fas fa-crown"></i> #${idx + 1} HOT</span>
-          
           <img src="${imgUrl}" alt="น้อง${pName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important; pointer-events: none !important;" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
-          
           <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; pointer-events: none !important;"></div>
-          
           <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
-          
           <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 50 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
-
           <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
             <div class="vip-name" style="color: #FFFFFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">น้อง${pName}</div>
             <div class="vip-location" style="color: #C084FC !important; font-size: 9.5px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 2px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${pLoc}</div>
@@ -996,7 +1021,7 @@ export default async (req, context) => {
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = safeRegexReplace(rawHtml, /<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
     } else {
-      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", safeSchemaJson);
+      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", safeSchemaScript);
     }
     
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", safePlaceholder(featuredCardsHtml));
@@ -1018,7 +1043,9 @@ export default async (req, context) => {
 
     if (popularLocationsHtml) {
       const popularLocationsFooterHTML = `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`;
-      rawHtml = safeRegexReplace(rawHtml, /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, popularLocationsFooterHTML);
+      if (/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i.test(rawHtml)) {
+        rawHtml = safeRegexReplace(rawHtml, /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, popularLocationsFooterHTML);
+      }
     }
 
     if (!isNationalHome) {
@@ -1096,7 +1123,8 @@ export default async (req, context) => {
       rawHtml = safeRegexReplace(rawHtml, /<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
+    // [FIX 2.3] ปรับให้จำกัดเฉพาะ Attribute Tags ใน HTML ป้องกันการแก้ String ใน Script
+    rawHtml = rawHtml.replace(/(<(?:a|img|link|script|source)\b[^>]*?\b(?:href|src|data-src)=["'])(?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1/$2"');
 
     rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
