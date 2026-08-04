@@ -1100,28 +1100,6 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
     suggestionsContainer.style.display = "block";
   }
   
-  // 🟢 ฟังก์ชันหมุนเวียนสลับข้อความแนะนำในช่องพิมพ์อัตโนมัติ
-  function initDynamicSearchPlaceholder() {
-    const searchInput = document.getElementById("search-keyword");
-    if (!searchInput) return;
-
-    const placeholders = [
-      "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
-      "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
-      "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
-      "🔢 ค้นรหัส ID เช่น 127, 143, 154...",
-      "💰 ค้นเรตราคา เช่น 1500, 2000..."
-    ];
-
-    let idx = 0;
-    setInterval(() => {
-      // ทำงานเฉพาะตอนที่ผู้ใช้ไม่ได้พิมพ์ข้อความค้างไว้ และไม่ได้โฟกัสช่องพิมพ์
-      if (document.activeElement !== searchInput && searchInput.value === "") {
-        idx = (idx + 1) % placeholders.length;
-        searchInput.setAttribute("placeholder", placeholders[idx]);
-      }
-    }, 2500);
-  }
 
   function openLightboxForProfile(profile) {
     if (!profile) return;
@@ -2103,6 +2081,29 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
     }
   }
 
+// 🟢 ฟังก์ชันหมุนเวียนสลับข้อความแนะนำในช่องพิมพ์อัตโนมัติ (ฉบับแก้ไขเสถียร 100%)
+  function initDynamicSearchPlaceholder() {
+    const placeholders = [
+      "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
+      "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
+      "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
+      "🔢 ค้นรหัส ID เช่น 127, 143, 154...",
+      "💰 ค้นเรตราคา เช่น 1500, 2000..."
+    ];
+
+    let idx = 0;
+
+    setInterval(() => {
+      const searchInput = document.getElementById("search-keyword");
+      if (!searchInput) return; // หากยังไม่พบในรอบนี้ ให้รอรอบถัดไป
+
+      // ทำงานเฉพาะตอนที่ไม่ได้โฟกัสช่องพิมพ์ และไม่มีข้อความพิมพ์ค้างไว้
+      if (document.activeElement !== searchInput && (!searchInput.value || searchInput.value.trim() === "")) {
+        idx = (idx + 1) % placeholders.length;
+        searchInput.setAttribute("placeholder", placeholders[idx]);
+      }
+    }, 2500);
+  }
 
 
   // 🟢 จุดเริ่มต้นการทำงานหลักของแอปพลิเคชัน (DOM Loaded)
@@ -2297,7 +2298,7 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
       });
     })();
 
-    (function initReviewForm() {
+(function initReviewForm() {
       const form = document.getElementById("review-form");
       if (!form) return;
       form.addEventListener("submit", async e => {
@@ -2367,9 +2368,7 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
       });
     })();
 
-    // 🟢 ระบบจัดการคำพิมพ์ค้นหาในช่อง Search Input
     if (DOM.searchInput) {
-      // เมื่อผู้ใช้พิมพ์คำค้นหา (Debounce 300ms)
       DOM.searchInput.addEventListener("input", e => {
         clearTimeout(window.searchTimeout);
         const val = e.target.value;
@@ -2382,12 +2381,10 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
         }, 300);
       });
 
-      // เมื่อเอานิ้วแตะหรือคลิกช่องค้นหา (Focus Event) ➔ แสดงคำแนะนำทันที
       DOM.searchInput.addEventListener("focus", () => {
         renderSearchSuggestions(DOM.searchInput.value);
       });
 
-      // ปุ่ม ESC ➔ ซ่อนดรอปดาวน์แนะนำ
       DOM.searchInput.addEventListener("keydown", e => {
         if (e.key === "Escape") {
           const suggestionsEl = document.getElementById("search-suggestions");
@@ -2399,7 +2396,6 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
       });
     }
 
-    // 🟢 ปุ่มล้างคำค้นหา (Clear Search Button)
     const clearSearchBtn = document.getElementById("clear-search-btn");
     if (clearSearchBtn) {
       clearSearchBtn.addEventListener("click", () => {
@@ -2416,7 +2412,6 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
       });
     }
 
-    // 🟢 ซ่อนดรอปดาวน์แนะนำอัตโนมัติเมื่อคลิกนอกพื้นที่ช่องค้นหา (Click Outside)
     document.addEventListener("click", e => {
       const searchInput = document.getElementById("search-keyword");
       const suggestionsEl = document.getElementById("search-suggestions");
@@ -2428,18 +2423,16 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
       }
     });
 
-    // 🟢 ตัวกรองเลือกจังหวัด, สถานะ, VIP และการจัดเรียง
     DOM.provinceSelect?.addEventListener("change", () => {
       if (DOM.searchInput) DOM.searchInput.value = "";
       applyUltimateFilters(true);
-      renderSmartFilterChips(); // อัปเดตชิปคำแนะนำย่านตามจังหวัดใหม่ทันที
+      renderSmartFilterChips();
     });
 
     DOM.availabilitySelect?.addEventListener("change", () => applyUltimateFilters(true));
     DOM.featuredSelect?.addEventListener("change", () => applyUltimateFilters(true));
     DOM.sortSelect?.addEventListener("change", () => applyUltimateFilters(true));
 
-    // ปุ่มรีเซ็ตตัวกรองทั้งหมด
     DOM.resetSearchBtn?.addEventListener("click", () => {
       if (DOM.searchInput) DOM.searchInput.value = "";
       if (DOM.provinceSelect) DOM.provinceSelect.value = "";
@@ -2460,29 +2453,24 @@ const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated)
       renderSmartFilterChips();
     });
 
-// 🟢 เริ่มต้นทำงานฟังก์ชันระบบทั้งหมด
-    initThemeToggle(); // 👈 เพิ่มบรรทัดนี้เพื่อให้ระบบสลับโหมดสว่าง/มืดเริ่มทำงานทันที
-    
+    initThemeToggle();
+    initDynamicSearchPlaceholder();
+    renderSmartFilterChips();
+    initSeoDrawer();
+    initRegionTabs();
+    initPwaInstaller();
+    initPlaceholderWatcher();
+
     await fetchProfilesData();
     await handleRouteNavigation(true);
     updateActiveNavLinks();
     hideGlobalLoader();
-
-    // รันระบบแสดงชิปตัวกรองแนะนำ และสลับคำแนะนำในช่องพิมพ์
-    renderSmartFilterChips();
-    initDynamicSearchPlaceholder();
-    
-    initPlaceholderWatcher();
-    initSeoDrawer();
-    initRegionTabs();
-    initPwaInstaller();
 
     window.addEventListener("popstate", async () => {
       await handleRouteNavigation(false);
       updateActiveNavLinks();
     });
 
-    console.log("✅ [FirstModelHub] ระบบ main.js ทำงานสมบูรณ์ 100%");
   });
 
 })();
