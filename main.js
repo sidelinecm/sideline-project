@@ -2,7 +2,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
-import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.mjs";
 
 gsap.registerPlugin(ScrollTrigger);
 window.gsap = gsap;
@@ -98,7 +97,6 @@ window.ScrollTrigger = ScrollTrigger;
 
   const DOM = {};
   let supabaseClient = null;
-  let fuseInstance = null;
   let isLikeProcessing = false;
   let isFirstLoad = true;
 
@@ -124,6 +122,11 @@ window.ScrollTrigger = ScrollTrigger;
     } else {
       setTimeout(fn, delay);
     }
+  }
+
+  function destroyLoadingPlaceholder() {
+    const el = document.getElementById("loading-profiles-placeholder");
+    if (el) el.remove();
   }
 
   function saveRecentSearch(keyword) {
@@ -212,6 +215,7 @@ window.ScrollTrigger = ScrollTrigger;
 
   function handleFatalError(err) {
     console.error("❌ เกิดข้อผิดพลาดร้ายแรง:", err);
+    destroyLoadingPlaceholder();
     hideGlobalLoader();
 
     if (DOM.profilesDisplayArea) {
@@ -269,9 +273,9 @@ window.ScrollTrigger = ScrollTrigger;
     const displayPrice = numericRate > 0 ? `${numericRate.toLocaleString()}.-` : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? rawPrice : "สอบถาม");
 
     let statsFormatted = "-";
-    const bust = raw.bust || raw.breast;
-    const waist = raw.waist;
-    const hips = raw.hip || raw.hips;
+    const bust = raw.bust || raw.breast || "";
+    const waist = raw.waist || "";
+    const hips = raw.hip || raw.hips || "";
     const cup = (raw.cup_size || raw.cupSize || raw.cup || "").toString().toUpperCase().trim();
 
     if (bust && waist && hips) {
@@ -307,12 +311,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     const lineIdClean = (raw.line_id || raw.lineId || raw.line || "").toString().replace(/^@/, "").trim();
 
-    const searchString = `
-      ${formattedName} ${raw.id || ""} ${provinceThaiName} ${raw.location || ""} ${raw.district || ""}
-      ${styleTags.join(" ")} ${raw.description || ""} ${sloganText} ${statsFormatted} ${safeSkin}
-      ${cleanAge ? cleanAge + "ปี" : ""} ${displayPrice} ${availStatus}
-    `.toLowerCase().replace(/\s+/g, " ").trim();
-
     return {
       ...raw,
       displayName: formattedName,
@@ -321,7 +319,7 @@ window.ScrollTrigger = ScrollTrigger;
       provinceKey: provKey,
       displayPrice: displayPrice,
       _price: numericRate,
-      searchString: searchString,
+      bust: String(bust),
       
       safeAge: cleanAge || "-",
       safeAgeDisplay: safeAgeDisplay,
@@ -385,7 +383,6 @@ window.ScrollTrigger = ScrollTrigger;
 
         STATE.allProfiles = window.profilesData.map(p => processProfileObject(p)).filter(Boolean);
         populateProvinceDropdown();
-        buildFuseIndex();
         applyUltimateFilters(false);
         updateHeroSwiperCards();
         STATE.isFetching = false;
@@ -414,7 +411,6 @@ window.ScrollTrigger = ScrollTrigger;
         STATE.provincesMap.clear();
         provincesArray.forEach(p => STATE.provincesMap.set(p.key.toString(), p.name));
         populateProvinceDropdown();
-        buildFuseIndex();
         applyUltimateFilters(false);
         updateHeroSwiperCards();
         STATE.isFetching = false;
@@ -455,7 +451,6 @@ window.ScrollTrigger = ScrollTrigger;
       }
 
       populateProvinceDropdown();
-      buildFuseIndex();
       applyUltimateFilters(false);
       updateHeroSwiperCards();
       return true;
@@ -466,7 +461,6 @@ window.ScrollTrigger = ScrollTrigger;
       if (fallbackRaw) {
         STATE.allProfiles = JSON.parse(fallbackRaw);
         populateProvinceDropdown();
-        buildFuseIndex();
         applyUltimateFilters(false);
         updateHeroSwiperCards();
       } else {
@@ -496,33 +490,42 @@ window.ScrollTrigger = ScrollTrigger;
 
     swiperContainer.innerHTML = hotProfiles.map((p, idx) => {
       const rankText = `#${idx + 1} HOT`;
-      const realLocation = p.location || p.provinceNameThai || "เชียงใหม่";
+      const realLocation = p.location || p.provinceNameThai || STATE.provincesMap.get(p.provinceKey) || "ทั่วไทย";
       const pSlug = encodeURIComponent(p.slug || p.id);
       const imgUrl = p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
-      const availText = p.availability || 'พร้อมรับงาน';
+      
+      // 🟢 1. ย่อข้อความสถานะให้กระชับ เพื่อไม่ให้ป้ายยาวจนล้นทับป้ายอันดับ HOT
+      const isAvail = p.status === "รับงาน" || !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
+      const availText = isAvail ? "รับงาน" : "สอบถาม";
 
       return `
-        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 155px !important; width: 155px !important; height: 215px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
           
-          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 12px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-crown"></i> ${rankText}</span>
+          <!-- ป้ายสถานะ (มุมซ้ายบน) -->
+          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.88) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 10px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important; pointer-events: none !important; white-space: nowrap !important; backdrop-filter: blur(8px) !important;">🟢 ${availText}</span>
+
+          <!-- ป้ายอันดับ (มุมขวาบน) -->
+          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 10px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important; pointer-events: none !important; display: flex !important; align-items: center !important; gap: 3px !important; white-space: nowrap !important;"><i class="fas fa-crown"></i> ${rankText}</span>
           
+          <!-- รูปภาพโปรไฟล์ -->
           <img src="${imgUrl}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important; pointer-events: none !important;" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
           
+          <!-- เงาซ้อนทับด้านล่าง -->
           <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; pointer-events: none !important;"></div>
           
-          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 12px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
-          
+          <!-- ลิงก์กดดูโปรไฟล์ -->
           <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 25 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
 
+          <!-- ข้อมูลชื่อและพิกัดด้านล่าง -->
           <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
             <div class="vip-name" style="color: #FFFFFF !important; font-size: 12px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">${p.displayName}</div>
-            <div class="vip-location" style="color: #C084FC !important; font-size: 12px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 2px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
+            <div class="vip-location" style="color: #C084FC !important; font-size: 11px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 1px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
           </div>
           
         </div>
       `;
     }).join("");
-  }
+}
 
   function populateProvinceDropdown() {
     if (!DOM.provinceSelect) return;
@@ -551,7 +554,7 @@ window.ScrollTrigger = ScrollTrigger;
     card.setAttribute("data-profile-slug", profile.slug || profile.id);
 
     const imageSrc = profile.images && profile.images.length > 0 ? profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
-    const currentProvName = profile.provinceNameThai || "เชียงใหม่";
+    const currentProvName = profile.provinceNameThai || STATE.provincesMap.get(profile.provinceKey) || "ทั่วไทย";
     const nameClean = sanitizeName(profile.displayName || profile.name);
     const seoAltText = `${nameClean} สาวรับงาน${currentProvName} ไซด์ไลน์${currentProvName} ฟิวแฟนตรงปก 100%`;
 
@@ -685,27 +688,58 @@ window.ScrollTrigger = ScrollTrigger;
     return wrapper;
   }
 
-  function buildFuseIndex() {
-    if (!DOM.searchForm) return;
-
-    const fuseOptions = {
-      includeScore: true,
-      threshold: 0.3,
-      ignoreLocation: true,
-      useExtendedSearch: true,
-      keys: [
-        { name: "searchString", weight: 1.0 },
-        { name: "name", weight: 0.8 },
-        { name: "englishName", weight: 0.8 },
-        { name: "id", weight: 0.9 },
-        { name: "provinceNameThai", weight: 0.5 },
-        { name: "styleTags", weight: 0.4 }
-      ]
-    };
-
-    if (STATE.allProfiles && STATE.allProfiles.length > 0) {
-      fuseInstance = new Fuse(STATE.allProfiles, fuseOptions);
+  function renderSmartFilterChips() {
+    let chipsWrapper = document.getElementById("smart-quick-chips");
+    if (!chipsWrapper) {
+      chipsWrapper = document.createElement("div");
+      chipsWrapper.id = "smart-quick-chips";
+      chipsWrapper.style.cssText = "display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px 2px 2px; margin-top: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none;";
+      
+      const searchForm = document.getElementById("search-form");
+      if (searchForm) searchForm.appendChild(chipsWrapper);
     }
+
+    const currentProv = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "chiangmai";
+    const data = LOCALIZED_SEO_MAP[currentProv] || LOCALIZED_SEO_MAP["national"];
+    const zones = (data && data.zones) ? data.zones.slice(1, 5) : ["ตัวเมือง"];
+
+    let chipsHtml = `
+      <button type="button" class="quick-chip-btn" data-type="featured" style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+        <i class="fas fa-star" style="color: #FBBF24;"></i> VIP แนะนำ
+      </button>
+      <button type="button" class="quick-chip-btn" data-type="avail" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(52, 211, 153, 0.35); color: #00E676; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #00E676;"></span> พร้อมรับงาน
+      </button>
+      <button type="button" class="quick-chip-btn" data-type="tag" data-val="ฟิวแฟน" style="background: rgba(255, 20, 147, 0.15); border: 1px solid rgba(255, 105, 180, 0.35); color: #FF85C0; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+        <i class="fas fa-heart" style="color: #FF1493;"></i> #ฟิวแฟน
+      </button>
+    `;
+
+    zones.forEach(z => {
+      chipsHtml += `
+        <button type="button" class="quick-chip-btn" data-type="keyword" data-val="${z}" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: #D4D4D8; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+          <i class="fas fa-map-marker-alt" style="color: #C084FC;"></i> ${z}
+        </button>
+      `;
+    });
+
+    chipsWrapper.innerHTML = chipsHtml;
+
+    chipsWrapper.querySelectorAll(".quick-chip-btn").forEach(btn => {
+      btn.onclick = () => {
+        const type = btn.dataset.type;
+        const val = btn.dataset.val;
+
+        if (type === "featured" && DOM.featuredSelect) {
+          DOM.featuredSelect.value = DOM.featuredSelect.value === "true" ? "" : "true";
+        } else if (type === "avail" && DOM.availabilitySelect) {
+          DOM.availabilitySelect.value = DOM.availabilitySelect.value === "รับงาน" ? "" : "รับงาน";
+        } else if ((type === "tag" || type === "keyword") && DOM.searchInput) {
+          DOM.searchInput.value = val;
+        }
+        applyUltimateFilters(true);
+      };
+    });
   }
 
   function applyUltimateFilters(updateUrlHistory = true) {
@@ -719,20 +753,6 @@ window.ScrollTrigger = ScrollTrigger;
       };
 
       if (activeFilters.text) saveRecentSearch(activeFilters.text);
-
-      if (activeFilters.text && STATE.provincesMap) {
-        for (const [key, name] of STATE.provincesMap.entries()) {
-          const inputLower = activeFilters.text.toLowerCase().trim();
-          const nameLower = name.toLowerCase().trim();
-          if (inputLower === nameLower || nameLower.includes(inputLower) || inputLower.includes(nameLower)) {
-            activeFilters.province = key;
-            activeFilters.text = "";
-            if (DOM.searchInput) DOM.searchInput.value = "";
-            if (DOM.provinceSelect) DOM.provinceSelect.value = key;
-            break;
-          }
-        }
-      }
 
       if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") {
         localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, activeFilters.province);
@@ -761,30 +781,55 @@ window.ScrollTrigger = ScrollTrigger;
       }
 
       if (activeFilters.text) {
-        const searchText = activeFilters.text.toLowerCase().trim();
-        let idMatched = false;
+        const queryRaw = activeFilters.text.toLowerCase().trim();
+        const queryClean = queryRaw.replace(/^(น้อง\s?)+/gi, "").trim();
 
-        if (/^\d+$/.test(searchText)) {
-          const idMatches = results.filter(p => String(p.id) === searchText || (p.slug && p.slug.endsWith(`-${searchText}`)));
-          if (idMatches.length > 0) {
-            results = idMatches;
-            idMatched = true;
-          }
-        }
+        results = results.filter(p => {
+          const pName = (p.displayName || p.name || "").toLowerCase();
+          const pCleanName = pName.replace(/^(น้อง\s?)+/gi, "").trim();
+          const pLoc = (p.location || "").toLowerCase();
+          const pProv = (p.provinceNameThai || "").toLowerCase();
+          const pSlogan = (p.slogan || p.quote || "").toLowerCase();
+          const pDesc = (p.description || "").toLowerCase();
+          const pTags = Array.isArray(p.styleTags) ? p.styleTags.join(" ").toLowerCase() : (p.styleTags || "").toLowerCase();
+          const pId = String(p.id || "");
+          const pSlug = (p.slug || "").toLowerCase();
+          const pAge = String(p.safeAge || p.age || "");
+          const pPrice = String(p._price || p.rate || "");
+          const pBust = String(p.bust || "");
 
-        if (!idMatched) {
-          if (fuseInstance) {
-            results = fuseInstance.search(activeFilters.text, { limit: 500 }).map(res => res.item);
-            if (targetProvinceKey) {
-              results = results.filter(p => {
-                const k = (p.provinceKey || p.province_slug || p.province || "").toString().toLowerCase();
-                return targetProvinceKey === "chiangmai" ? (k === "chiangmai" || k === "chiang_mai") : k === targetProvinceKey;
-              });
-            }
-          } else {
-            results = results.filter(p => p.searchString?.includes(searchText) || p.name?.toLowerCase().includes(searchText));
-          }
-        }
+          return (
+            pId === queryRaw ||
+            pSlug.includes(queryRaw) ||
+            pName.includes(queryRaw) ||
+            pCleanName.includes(queryClean) ||
+            pLoc.includes(queryRaw) ||
+            pProv.includes(queryRaw) ||
+            pSlogan.includes(queryRaw) ||
+            pDesc.includes(queryRaw) ||
+            pTags.includes(queryRaw) ||
+            pAge === queryRaw ||
+            pPrice.includes(queryRaw) ||
+            pBust === queryRaw
+          );
+        });
+
+        results.sort((a, b) => {
+          const aName = (a.displayName || a.name || "").toLowerCase().replace(/^(น้อง\s?)+/gi, "").trim();
+          const bName = (b.displayName || b.name || "").toLowerCase().replace(/^(น้อง\s?)+/gi, "").trim();
+          
+          const aExact = aName === queryClean || String(a.id) === queryRaw;
+          const bExact = bName === queryClean || String(b.id) === queryRaw;
+          if (aExact && !bExact) return -1;
+          if (!aExact && bExact) return 1;
+
+          const aStart = aName.startsWith(queryClean);
+          const bStart = bName.startsWith(queryClean);
+          if (aStart && !bStart) return -1;
+          if (!aStart && bStart) return 1;
+
+          return 0;
+        });
       }
 
       if (activeFilters.avail && activeFilters.avail !== "all") {
@@ -796,6 +841,7 @@ window.ScrollTrigger = ScrollTrigger;
       }
 
       results.sort((a, b) => {
+        if (activeFilters.text) return 0;
         switch (activeFilters.sort) {
           case "featured":
             return (b.isfeatured ? 1 : 0) - (a.isfeatured ? 1 : 0) || (a.name || "").localeCompare(b.name || "");
@@ -840,6 +886,7 @@ window.ScrollTrigger = ScrollTrigger;
     STATE.renderId = (STATE.renderId || 0) + 1;
     const currentRenderId = STATE.renderId;
 
+    destroyLoadingPlaceholder();
     DOM.noResultsMessage?.classList.add("hidden");
     DOM.fetchErrorMessage?.classList.add("hidden");
 
@@ -940,59 +987,64 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
+// 🟢 แสดงคำแนะนำติดขอบช่องพิมพ์ (ทั้งตอนแตะช่อง และตอนพิมพ์ข้อความ)
   function renderSearchSuggestions(query) {
     const suggestionsContainer = document.getElementById("search-suggestions");
     const clearBtn = document.getElementById("clear-search-btn");
 
-    if (clearBtn) clearBtn.classList.toggle("hidden", !query);
+    if (clearBtn) clearBtn.style.display = query ? "block" : "none";
     if (!suggestionsContainer) return;
 
+    // 🟢 ถ้ายังไม่ได้พิมพ์อะไรเลย แต่นิ้วแตะที่ช่องค้นหา ให้แสดงปุ่มคำค้นยอดฮิตติดช่องพิมพ์ทันที!
     if (!query) {
-      const recentSearches = JSON.parse(localStorage.getItem("recent_searches") || "[]");
-      if (recentSearches.length === 0) {
-        suggestionsContainer.classList.add("hidden");
-        return;
-      }
-      let html = '<div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.25); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">';
-      html += `
-        <div style="padding: 8px 14px; background-color: #09090B; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">ค้นหาล่าสุด</span>
-            <button data-action="clear-recent" style="background:none; border:none; color:#EF4444; font-size:12px; font-weight:700; cursor:pointer;">ล้างประวัติ</button>
-        </div>
-      `;
-      recentSearches.forEach(item => {
-        const cleanText = item.replace(/[<>]/g, "");
-        const escapedText = item.replace(/'/g, "\\'");
-        html += `
-          <div data-action="suggestion" data-slug="${escapedText}" data-is-profile="false"
-               style="padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.03);">
-              <i class="fas fa-history" style="color: var(--text-muted); font-size: 12px;"></i>
-              <span style="font-size: 12px; color: #FFFFFF; font-weight: 600;">${cleanText}</span>
-          </div>
-        `;
+      const currentProv = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "chiangmai";
+      const data = LOCALIZED_SEO_MAP[currentProv] || LOCALIZED_SEO_MAP["national"];
+      const zones = (data && data.zones) ? data.zones.slice(1, 5) : ["ตัวเมือง"];
+
+      let html = `<div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.3); border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px);">`;
+      html += `<div style="font-size: 11px; font-weight: 800; color: #C084FC; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-lightbulb" style="color: #FBBF24;"></i> คำแนะนำการค้นหายอดฮิต:</div>`;
+      html += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">`;
+      
+      html += `<span data-action="suggestion" data-slug="ฟิวแฟน" data-is-profile="false" style="background: rgba(255,20,147,0.15); border: 1px solid rgba(255,105,180,0.3); color: #FF85C0; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">❤️ #ฟิวแฟน</span>`;
+      html += `<span data-action="suggestion" data-slug="1500" data-is-profile="false" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(52,211,153,0.3); color: #00E676; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">💰 1,500.-</span>`;
+      
+      zones.forEach(z => {
+        html += `<span data-action="suggestion" data-slug="${z}" data-is-profile="false" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #D4D4D8; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">📍 ${z}</span>`;
       });
-      html += '</div>';
+
+      html += `</div></div>`;
       suggestionsContainer.innerHTML = html;
       suggestionsContainer.classList.remove("hidden");
+      suggestionsContainer.style.display = "block";
       return;
     }
 
-    if (!fuseInstance) return;
-    const matches = fuseInstance.search(query).slice(0, 5);
-    if (matches.length === 0) {
+    const q = query.toLowerCase().trim();
+    
+    // ค้นหาน้องๆ ที่ชื่อ ย่าน หรือสไตล์ตรง
+    const profileMatches = STATE.allProfiles.filter(item => {
+      const name = (item.displayName || item.name || "").toLowerCase();
+      const loc = (item.location || "").toLowerCase();
+      const prov = (item.provinceNameThai || "").toLowerCase();
+      const id = String(item.id || "");
+      return name.includes(q) || loc.includes(q) || prov.includes(q) || id === q;
+    }).slice(0, 4);
+
+    if (profileMatches.length === 0) {
       suggestionsContainer.classList.add("hidden");
+      suggestionsContainer.style.display = "none";
       return;
     }
 
     let html = `
-      <div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.25); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          <div style="padding: 8px 14px; background-color: #09090B; border-bottom: 1px solid rgba(255,255,255,0.05);">
-              <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">ผลลัพธ์ที่แนะนำ (${matches.length})</span>
+      <div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.3); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+          <div style="padding: 6px 14px; background-color: #09090B; border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <span style="font-size: 11px; font-weight: 800; color: #C084FC; text-transform: uppercase;">✨ ผลลัพธ์แนะนำ (${profileMatches.length})</span>
           </div>
           <div style="display: flex; flex-direction: column;">
     `;
 
-    matches.forEach(({ item }) => {
+    profileMatches.forEach(item => {
       const provName = STATE.provincesMap.get(item.provinceKey) || item.provinceNameThai || "";
       const isAvail = item.availability?.includes("ว่าง") || item.availability?.includes("รับงาน");
       const thumbImg = item.images && item.images[0] ? item.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
@@ -1003,18 +1055,18 @@ window.ScrollTrigger = ScrollTrigger;
              data-slug="${encodeURIComponent(item.slug || item.id)}"
              data-is-profile="true"
              style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);">
-            <div style="position: relative; width: 36px; height: 36px; shrink: 0;">
+            <div style="position: relative; width: 36px; height: 36px; flex-shrink: 0;">
                 <img src="${thumbImg}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);" alt="รูปแนะคีย์เสิร์ช">
                 <span style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background-color: ${isAvail ? "#00E676" : "#9CA3AF"}; border: 2px solid #121214; border-radius: 50%;"></span>
             </div>
             <div style="flex: 1; min-width: 0; text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
                     <div style="font-size: 12px; font-weight: 800; color: #FFFFFF; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.displayName || item.name}</div>
-                    ${item.age ? `<span style="font-size: 12px; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: var(--text-gray); font-weight: 700;">${item.age} ปี</span>` : ""}
+                    ${item.age ? `<span style="font-size: 10px; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: var(--text-gray); font-weight: 700;">${item.age} ปี</span>` : ""}
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                    <span style="font-size: 12px; color: var(--text-gray); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                        <i class="fas fa-map-marker-alt" style="font-size: 12px; color: var(--primary-purple); margin-right: 4px;"></i> ${provName}
+                    <span style="font-size: 11px; color: var(--text-gray); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                        <i class="fas fa-map-marker-alt" style="font-size: 10px; color: var(--primary-purple); margin-right: 4px;"></i> ${item.location || provName}
                     </span>
                 </div>
             </div>
@@ -1027,12 +1079,36 @@ window.ScrollTrigger = ScrollTrigger;
     html += `
       <div data-action="search-all" data-query="${query.replace(/'/g, "\\'")}" 
            style="padding: 10px; background-color: #09090B; text-align: center; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.05);">
-          <span style="font-size: 12px; font-weight: 800; color: var(--primary-purple);"><i class="fas fa-search" style="margin-right: 6px;"></i> ดูผลลัพธ์ทั้งหมด</span>
+          <span style="font-size: 12px; font-weight: 800; color: var(--primary-purple);"><i class="fas fa-search" style="margin-right: 6px;"></i> ค้นหาผลลัพธ์ทั้งหมดสำหรับ "${escapeHTML(query)}"</span>
       </div>
     </div>`;
 
     suggestionsContainer.innerHTML = html;
     suggestionsContainer.classList.remove("hidden");
+    suggestionsContainer.style.display = "block";
+  }
+  
+  // 🟢 ฟังก์ชันหมุนเวียนสลับข้อความแนะนำในช่องพิมพ์อัตโนมัติ
+  function initDynamicSearchPlaceholder() {
+    const searchInput = document.getElementById("search-keyword");
+    if (!searchInput) return;
+
+    const placeholders = [
+      "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
+      "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
+      "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
+      "🔢 ค้นรหัส ID เช่น 127, 143, 154...",
+      "💰 ค้นเรตราคา เช่น 1500, 2000..."
+    ];
+
+    let idx = 0;
+    setInterval(() => {
+      // ทำงานเฉพาะตอนที่ผู้ใช้ไม่ได้พิมพ์ข้อความค้างไว้ และไม่ได้โฟกัสช่องพิมพ์
+      if (document.activeElement !== searchInput && searchInput.value === "") {
+        idx = (idx + 1) % placeholders.length;
+        searchInput.setAttribute("placeholder", placeholders[idx]);
+      }
+    }, 2500);
   }
 
   function openLightboxForProfile(profile) {
@@ -1527,7 +1603,7 @@ window.ScrollTrigger = ScrollTrigger;
         
         contentInner.innerHTML = seoText + `
           <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
-            <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in ${engProvName}</h3>
+            <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts &amp; Companion Services in ${engProvName}</h3>
             <p style="font-size: 12px; color: #A1A1AA; line-height: 1.5;">
               Welcome to First Model Hub ${engProvName}, the premier platform connecting travelers with verified companions. We offer authentic Girlfriend Experience (GFE) services with absolute financial safety: <strong>No upfront deposits required. Pay cash directly to your companion upon meeting.</strong>
             </p>
@@ -2015,6 +2091,7 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
+  // 🟢 ฟังก์ชันฉากหลังเอฟเฟกต์สามมิติ Three.js
   function initThreeBg() {
     const canvas = document.getElementById("three-canvas");
     if (!canvas || typeof THREE === "undefined") return;
@@ -2070,6 +2147,29 @@ window.ScrollTrigger = ScrollTrigger;
     }, { passive: true });
   }
 
+  // 🟢 ฟังก์ชันหมุนเวียนสลับข้อความแนะนำในช่องพิมพ์อัตโนมัติ
+  function initDynamicSearchPlaceholder() {
+    const searchInput = document.getElementById("search-keyword");
+    if (!searchInput) return;
+
+    const placeholders = [
+      "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
+      "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
+      "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
+      "🔢 ค้นรหัส ID เช่น 127, 143, 154...",
+      "💰 ค้นเรตราคา เช่น 1500, 2000..."
+    ];
+
+    let idx = 0;
+    setInterval(() => {
+      if (document.activeElement !== searchInput && searchInput.value === "") {
+        idx = (idx + 1) % placeholders.length;
+        searchInput.setAttribute("placeholder", placeholders[idx]);
+      }
+    }, 2500);
+  }
+
+  // 🟢 จุดเริ่มต้นการทำงานหลักของแอปพลิเคชัน (DOM Loaded)
   document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 แอปพลิเคชัน First Model Hub กำลังเริ่มต้นทำงาน...");
 
@@ -2096,6 +2196,7 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
+    // 🟢 ระบบสลับภาษา TH/EN
     (function initLanguageSwitcher() {
       const langBtn = document.getElementById("lang-toggle-btn");
       if (!langBtn) return;
@@ -2121,6 +2222,7 @@ window.ScrollTrigger = ScrollTrigger;
       }
     })();
 
+    // 🟢 ระบบเมนู Sidebar บนมือถือ
     (function initMobileSidebar() {
       const toggleBtn = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar-menu");
@@ -2143,6 +2245,7 @@ window.ScrollTrigger = ScrollTrigger;
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
     })();
 
+    // 🟢 ระบบดักจับ Event Click ทั่วทั้งหน้าเว็บ
     document.body.addEventListener("click", e => {
       const target = e.target;
 
@@ -2306,37 +2409,109 @@ window.ScrollTrigger = ScrollTrigger;
       });
     })();
 
-    DOM.searchInput?.addEventListener("input", e => {
-      clearTimeout(window.searchTimeout);
-      const val = e.target.value;
-      window.searchTimeout = setTimeout(() => {
+    // 🟢 ระบบจัดการคำพิมพ์ค้นหาในช่อง Search Input
+    if (DOM.searchInput) {
+      // เมื่อผู้ใช้พิมพ์คำค้นหา (Debounce 300ms)
+      DOM.searchInput.addEventListener("input", e => {
+        clearTimeout(window.searchTimeout);
+        const val = e.target.value;
+        const clearBtn = document.getElementById("clear-search-btn");
+        if (clearBtn) clearBtn.style.display = val ? "block" : "none";
+
+        window.searchTimeout = setTimeout(() => {
+          applyUltimateFilters(true);
+          renderSearchSuggestions(val);
+        }, 300);
+      });
+
+      // เมื่อเอานิ้วแตะหรือคลิกช่องค้นหา (Focus Event) ➔ แสดงคำแนะนำทันที
+      DOM.searchInput.addEventListener("focus", () => {
+        renderSearchSuggestions(DOM.searchInput.value);
+      });
+
+      // ปุ่ม ESC ➔ ซ่อนดรอปดาวน์แนะนำ
+      DOM.searchInput.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+          const suggestionsEl = document.getElementById("search-suggestions");
+          if (suggestionsEl) {
+            suggestionsEl.style.display = "none";
+            suggestionsEl.classList.add("hidden");
+          }
+        }
+      });
+    }
+
+    // 🟢 ปุ่มล้างคำค้นหา (Clear Search Button)
+    const clearSearchBtn = document.getElementById("clear-search-btn");
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener("click", () => {
+        if (DOM.searchInput) DOM.searchInput.value = "";
+        clearSearchBtn.style.display = "none";
+        
+        const suggestionsEl = document.getElementById("search-suggestions");
+        if (suggestionsEl) {
+          suggestionsEl.style.display = "none";
+          suggestionsEl.classList.add("hidden");
+        }
+        
         applyUltimateFilters(true);
-        renderSearchSuggestions(val);
-      }, 300);
+      });
+    }
+
+    // 🟢 ซ่อนดรอปดาวน์แนะนำอัตโนมัติเมื่อคลิกนอกพื้นที่ช่องค้นหา (Click Outside)
+    document.addEventListener("click", e => {
+      const searchInput = document.getElementById("search-keyword");
+      const suggestionsEl = document.getElementById("search-suggestions");
+      if (suggestionsEl && searchInput) {
+        if (!searchInput.contains(e.target) && !suggestionsEl.contains(e.target)) {
+          suggestionsEl.style.display = "none";
+          suggestionsEl.classList.add("hidden");
+        }
+      }
     });
 
+    // 🟢 ตัวกรองเลือกจังหวัด, สถานะ, VIP และการจัดเรียง
     DOM.provinceSelect?.addEventListener("change", () => {
       if (DOM.searchInput) DOM.searchInput.value = "";
       applyUltimateFilters(true);
+      renderSmartFilterChips(); // อัปเดตชิปคำแนะนำย่านตามจังหวัดใหม่ทันที
     });
 
     DOM.availabilitySelect?.addEventListener("change", () => applyUltimateFilters(true));
     DOM.featuredSelect?.addEventListener("change", () => applyUltimateFilters(true));
     DOM.sortSelect?.addEventListener("change", () => applyUltimateFilters(true));
+
+    // ปุ่มรีเซ็ตตัวกรองทั้งหมด
     DOM.resetSearchBtn?.addEventListener("click", () => {
       if (DOM.searchInput) DOM.searchInput.value = "";
       if (DOM.provinceSelect) DOM.provinceSelect.value = "";
       if (DOM.availabilitySelect) DOM.availabilitySelect.value = "";
       if (DOM.featuredSelect) DOM.featuredSelect.value = "";
       if (DOM.sortSelect) DOM.sortSelect.value = "featured";
+
+      const clearBtn = document.getElementById("clear-search-btn");
+      if (clearBtn) clearBtn.style.display = "none";
+
+      const suggestionsEl = document.getElementById("search-suggestions");
+      if (suggestionsEl) {
+        suggestionsEl.style.display = "none";
+        suggestionsEl.classList.add("hidden");
+      }
+
       applyUltimateFilters(true);
+      renderSmartFilterChips();
     });
 
+    // 🟢 เริ่มต้นทำงานฟังก์ชันระบบทั้งหมด
     initThreeBg();
     await fetchProfilesData();
     await handleRouteNavigation(true);
     updateActiveNavLinks();
     hideGlobalLoader();
+
+    // รันระบบแสดงชิปตัวกรองแนะนำ และสลับคำแนะนำในช่องพิมพ์
+    renderSmartFilterChips();
+    initDynamicSearchPlaceholder();
     
     initPlaceholderWatcher();
     initSeoDrawer();
