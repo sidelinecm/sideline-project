@@ -391,15 +391,13 @@ window.ScrollTrigger = ScrollTrigger;
 
       console.log("🔄 ตรวจสอบอัปเดตข้อมูล Supabase ผ่าน 'lastUpdated'...");
       const { data: latestRow, error: checkErr } = await supabaseClient
-        .from("profiles")
-        .select("lastUpdated")
-        .order("lastUpdated", { ascending: false, nullsFirst: false })
-        .limit(1)
-        .maybeSingle();
+  .from("profiles")
+  .select("lastUpdated")
+  .order("lastUpdated", { ascending: false, nullsFirst: false })
+  .limit(1)
+  .maybeSingle();
 
-      if (checkErr) throw checkErr;
-
-      const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated).getTime().toString() : "0";
+const latestTimestamp = latestRow?.lastUpdated ? new Date(latestRow.lastUpdated).getTime().toString() : "0";
       const cachedSync = localStorage.getItem(CONFIG.KEYS.LAST_SYNC);
       const cachedProfilesRaw = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
       const cachedProvincesRaw = localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES);
@@ -886,6 +884,12 @@ window.ScrollTrigger = ScrollTrigger;
     STATE.renderId = (STATE.renderId || 0) + 1;
     const currentRenderId = STATE.renderId;
 
+    // 🟢 [จุดที่แก้ไข 1] จำความสูงปัจจุบันไว้ก่อนล้างข้อมูล เพื่อไม่ให้ความสูงวูบเหลือ 0px หน้าจอจะได้ไม่เด้ง
+    const currentHeight = DOM.profilesDisplayArea.offsetHeight;
+    if (currentHeight > 0) {
+      DOM.profilesDisplayArea.style.minHeight = `${currentHeight}px`;
+    }
+
     destroyLoadingPlaceholder();
     DOM.noResultsMessage?.classList.add("hidden");
     DOM.fetchErrorMessage?.classList.add("hidden");
@@ -903,6 +907,7 @@ window.ScrollTrigger = ScrollTrigger;
 
     if (!profiles || profiles.length === 0) {
       DOM.profilesDisplayArea.innerHTML = "";
+      DOM.profilesDisplayArea.style.minHeight = ""; // ปลดล็อกความสูงเมื่อไม่มีข้อมูล
       DOM.noResultsMessage?.classList.remove("hidden");
       return;
     }
@@ -937,8 +942,12 @@ window.ScrollTrigger = ScrollTrigger;
         <div class="profile-grid profiles-grid-row"></div>
       `;
 
-      appendProfilesToContainer(sectionWrapper.querySelector(".profile-grid"), profiles, currentRenderId);
       DOM.profilesDisplayArea.appendChild(sectionWrapper);
+
+      // 🟢 [จุดที่แก้ไข 2] เมื่อโหลดการ์ดใหม่แสดงผลเสร็จแล้ว ค่อยปลด minHeight ออก
+      appendProfilesToContainer(sectionWrapper.querySelector(".profile-grid"), profiles, currentRenderId).then(() => {
+        DOM.profilesDisplayArea.style.minHeight = "";
+      });
 
     } else {
       const grouped = profiles.reduce((acc, p) => {
@@ -968,8 +977,11 @@ window.ScrollTrigger = ScrollTrigger;
             await appendProfilesToContainer(grid, grouped[key], currentRenderId);
             await new Promise(res => setTimeout(res, 0));
           }
+          // 🟢 [จุดที่แก้ไข 3] เมื่อเรนเดอร์การ์ดครบทุกจังหวัดแล้ว ค่อยปลด minHeight ออก
+          DOM.profilesDisplayArea.style.minHeight = "";
         })();
       } else {
+        DOM.profilesDisplayArea.style.minHeight = "";
         DOM.noResultsMessage?.classList.remove("hidden");
       }
     }
@@ -2147,7 +2159,7 @@ window.ScrollTrigger = ScrollTrigger;
     })();
 
 // 🟢 ระบบสลับโหมดมืด / สว่าง (Theme Toggle)
-    (function initThemeToggle() {
+    function initThemeToggle() {
       const btn = document.querySelector(".theme-toggle-btn");
       if (!btn) return;
       
@@ -2166,7 +2178,7 @@ window.ScrollTrigger = ScrollTrigger;
           icon.className = isLight ? "fas fa-sun" : "fas fa-moon";
         }
       });
-    })();
+    }
     
     // 🟢 ระบบเมนู Sidebar บนมือถือ
     (function initMobileSidebar() {
