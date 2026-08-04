@@ -2091,83 +2091,7 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  // 🟢 ฟังก์ชันฉากหลังเอฟเฟกต์สามมิติ Three.js
-  function initThreeBg() {
-    const canvas = document.getElementById("three-canvas");
-    if (!canvas || typeof THREE === "undefined") return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const geometry = new THREE.BufferGeometry();
-    const count = window.innerWidth < 768 ? 180 : 350;
-    const positions = new Float32Array(count * 3);
-
-    for (let i = 0; i < count * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 12;
-      positions[i + 1] = (Math.random() - 0.5) * 12;
-      positions[i + 2] = (Math.random() - 0.5) * 10;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({
-      size: 0.035,
-      color: 0xc084fc,
-      transparent: true,
-      opacity: 0.55
-    });
-
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
-    camera.position.z = 5;
-
-    let isVisible = true;
-    const observer = new IntersectionObserver(([entry]) => {
-      isVisible = entry.isIntersecting;
-    });
-    observer.observe(canvas);
-
-    function animate() {
-      if (isVisible) {
-        points.rotation.y += 0.0012;
-        points.rotation.x += 0.0006;
-        renderer.render(scene, camera);
-      }
-      requestAnimationFrame(animate);
-    }
-    animate();
-
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }, { passive: true });
-  }
-
-  // 🟢 ฟังก์ชันหมุนเวียนสลับข้อความแนะนำในช่องพิมพ์อัตโนมัติ
-  function initDynamicSearchPlaceholder() {
-    const searchInput = document.getElementById("search-keyword");
-    if (!searchInput) return;
-
-    const placeholders = [
-      "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
-      "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
-      "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
-      "🔢 ค้นรหัส ID เช่น 127, 143, 154...",
-      "💰 ค้นเรตราคา เช่น 1500, 2000..."
-    ];
-
-    let idx = 0;
-    setInterval(() => {
-      if (document.activeElement !== searchInput && searchInput.value === "") {
-        idx = (idx + 1) % placeholders.length;
-        searchInput.setAttribute("placeholder", placeholders[idx]);
-      }
-    }, 2500);
-  }
 
   // 🟢 จุดเริ่มต้นการทำงานหลักของแอปพลิเคชัน (DOM Loaded)
   document.addEventListener("DOMContentLoaded", async function () {
@@ -2222,6 +2146,28 @@ window.ScrollTrigger = ScrollTrigger;
       }
     })();
 
+// 🟢 ระบบสลับโหมดมืด / สว่าง (Theme Toggle)
+    (function initThemeToggle() {
+      const btn = document.querySelector(".theme-toggle-btn");
+      if (!btn) return;
+      
+      const savedTheme = localStorage.getItem(CONFIG.KEYS.THEME) || "dark";
+      if (savedTheme === "light") {
+        document.documentElement.classList.add("light");
+        const icon = btn.querySelector("i");
+        if (icon) icon.className = "fas fa-sun";
+      }
+
+      btn.addEventListener("click", () => {
+        const isLight = document.documentElement.classList.toggle("light");
+        localStorage.setItem(CONFIG.KEYS.THEME, isLight ? "light" : "dark");
+        const icon = btn.querySelector("i");
+        if (icon) {
+          icon.className = isLight ? "fas fa-sun" : "fas fa-moon";
+        }
+      });
+    })();
+    
     // 🟢 ระบบเมนู Sidebar บนมือถือ
     (function initMobileSidebar() {
       const toggleBtn = document.getElementById("menu-toggle");
@@ -2502,8 +2448,9 @@ window.ScrollTrigger = ScrollTrigger;
       renderSmartFilterChips();
     });
 
-    // 🟢 เริ่มต้นทำงานฟังก์ชันระบบทั้งหมด
-    initThreeBg();
+// 🟢 เริ่มต้นทำงานฟังก์ชันระบบทั้งหมด
+    initThemeToggle(); // 👈 เพิ่มบรรทัดนี้เพื่อให้ระบบสลับโหมดสว่าง/มืดเริ่มทำงานทันที
+    
     await fetchProfilesData();
     await handleRouteNavigation(true);
     updateActiveNavLinks();
