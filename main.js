@@ -33,58 +33,53 @@ window.ScrollTrigger = ScrollTrigger;
   const LOCALIZED_SEO_MAP = {
     chiangmai: {
       zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"],
-      seoContent: `
-        <p>ยินดีต้อนรับสู่ <strong>First Model Hub เชียงใหม่</strong> แหล่งรวมโปรไฟล์ <strong>สาวรับงานเชียงใหม่</strong>, <strong>เด็กเอ็นเชียงใหม่</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์เชียงใหม่</strong> ระดับพรีเมียม การันตีรูปตรงปก 100% ปลอดภัย จ่ายค่าขนมหน้างานเมื่อพบตัวจริง ปราศจากการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
-        <p>เพื่อความสะดวกในการนัดหมาย น้องๆ ในระบบสแตนด์บายพร้อมดูแลครอบคลุมทุกทำเลยอดนิยมทั่วเมืองเชียงใหม่ ไม่ว่าจะเป็น <strong>ย่านนิมมานเหมินท์, สันติธรรม, คอนโดรอบเจ็ดยอด, โซนหลัง มช., ถนนช้างเผือก, สันทราย, ห้วยแก้ว</strong> และบริเวณใกล้สนามบินเชียงใหม่ เดินทางสะดวก ปลอดภัย และเป็นส่วนตัวสูง</p>
-        <p>น้องๆ ทุกคนผ่านการตรวจสอบตัวตน (Verified 2026) พร้อมให้บริการเอนเตอร์เทนดูแลเอาใจใส่สไตล์ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อย เป็นกันเอง ให้คุณผ่อนคลายและคลายเหงาได้อย่างสบายใจที่สุด</p>
-      `,
-      reviews: [
-        { author: "คุณชลสิทธิ์ (C.)", location: "ย่านนิมมาน เชียงใหม่", rating: 5, text: "นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ", date: "เมื่อสัปดาห์ที่แล้ว" },
-        { author: "คุณอภิชาติ (A.)", location: "โซนยอดนิยม นิมมาน เชียงใหม่", rating: 5, text: "น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ", date: "เมื่อ 2 สัปดาห์ก่อน" },
-        { author: "คุณภัทร (P.)", location: "โซนเจ็ดยอด-หลัง มช.", rating: 5, text: "นัดเจอน้องแถวเจ็ดยอด คุยง่าย ตรงปก ไม่ต้องโอนมัดจำก่อน เจอตัวจริงค่อยจ่ายเงิน สบายใจมากๆ ครับ", date: "เมื่อ 3 วันก่อน" }
-      ],
-      faqs: [
-        { q: "นัดหมายสาวรับงานเชียงใหม่ ย่านนิมมาน หรือ สันติธรรม มีค่าเดินทางเพิ่มไหม?", a: "หากเป็นพิกัดในเขตตัวเมืองเชียงใหม่ เช่น นิมมานเหมินท์, สันติธรรม, เจ็ดยอด, ช้างเผือก หรือโซนหลัง มช. จะไม่มีค่าเดินทางเพิ่มเติมครับ ชำระเฉพาะค่าบริการตามตกลงตรงหน้างานได้เลย" },
-        { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
-      ]
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานเชียงใหม่</strong> และ <strong>ไซด์ไลน์เชียงใหม่</strong> พรีเมียม คัดสรรตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมย่านนิมมาน สันติธรรม เจ็ดยอด</p>`,
+      reviews: [], faqs: []
+    },
+    chiangrai: {
+      zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย"],
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานเชียงราย</strong> และ <strong>ไซด์ไลน์เชียงราย</strong> พรีเมียม คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมโซนตัวเมือง บ้านดู่ มฟล.</p>`,
+      reviews: [], faqs: []
+    },
+    lampang: {
+      zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏ"],
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานลำปาง</strong> และ <strong>ไซด์ไลน์ลำปาง</strong> พรีเมียม ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</p>`,
+      reviews: [], faqs: []
+    },
+    phitsanulok: {
+      zones: ["ทั้งหมด", "ตัวเมืองพิษณุโลก", "รอบ มน.", "สมอแข"],
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานพิษณุโลก</strong> และ <strong>ไซด์ไลน์พิษณุโลก</strong> พรีเมียม ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</p>`,
+      reviews: [], faqs: []
     },
     bangkok: {
       zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"],
-      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม</strong> ระดับพรีเมียม การันตีตรงปก 100% ปลอดภัยนัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด <strong>สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ และเอกมัย</strong></p>`,
-      reviews: [
-        { author: "คุณเอก (E.)", location: "ย่านสุขุมวิท กรุงเทพฯ", rating: 5, text: "นัดเจอน้องย่านสุขุมวิท ตรงปกมากครับ อัธยาศัยดี นัดเจอจ่ายหน้างานปลอดภัย 100% ประทับใจมากครับ", date: "เมื่อสัปดาห์ที่แล้ว" }
-      ],
-      faqs: [
-        { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนหลักใน กทม. เช่น สุขุมวิท รัชดา ห้วยขวาง ลาดพร้าว ทองหล่อ และเอกมัย นัดเจอง่ายเดินทางสะดวกครับ" }
-      ]
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม</strong> ระดับพรีเมียม การันตีตรงปก 100% ปลอดภัยนัดเจอชำระหน้างาน ไม่โอนมัดจำ</p>`,
+      reviews: [], faqs: []
     },
     chonburi: {
       zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
-      seoContent: `<p>ศูนย์รวมสาวรับงานชลบุรี รับงานพัทยา และเพื่อนเที่ยวบางแสน พรีเมียมดูแลใส่ใจสไตล์ฟิวแฟน ปลอดภัยสูงสุดชำระค่าบริการหน้างานเมื่อเจอตัวจริง ไม่มัดจำล่วงหน้า</p>`,
-      reviews: [
-        { author: "คุณเบนซ์ (B.)", location: "พัทยา ชลบุรี", rating: 5, text: "นัดเจอน้องโซนพัทยา ตรงปก บริการดีมาก นัดเจอชำระหน้างานไม่มีโอนมัดจำ ประทับใจครับ", date: "เมื่อ 4 วันก่อน" }
-      ],
-      faqs: [
-        { q: "นัดน้องๆ รับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระค่าขนมกับน้องโดยตรงหน้างานเมื่อนัดเจอตัวจริงเรียบร้อยแล้ว ไม่มีการโอนเงินมัดจำก่อนทุกกรณีครับ" }
-      ]
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานชลบุรี</strong> รับงานพัทยา และเพื่อนเที่ยวบางแสน พรีเมียม ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ</p>`,
+      reviews: [], faqs: []
+    },
+    khonkaen: {
+      zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"],
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานขอนแก่น</strong> และเพื่อนเที่ยวไซด์ไลน์ขอนแก่น พรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>`,
+      reviews: [], faqs: []
+    },
+    phuket: {
+      zones: ["ทั้งหมด", "ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง"],
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานภูเก็ต</strong> ป่าตอง และเพื่อนเที่ยวพรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>`,
+      reviews: [], faqs: []
     },
     udon: {
       zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"],
-      seoContent: `<p>ศูนย์รวมสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town</p>`,
-      reviews: [
-        { author: "คุณกอล์ฟ (G.)", location: "ตัวเมืองอุดรธานี", rating: 5, text: "ตรงปกครับ บริการดี สุภาพ นัดเจอจ่ายหน้างาน ไม่มีโอนมัดจำก่อน ปลอดภัยแน่นอนครับ", date: "เมื่อ 3 วันที่แล้ว" }
-      ],
-      faqs: []
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานอุดรธานี</strong> และเพื่อนเที่ยวพรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>`,
+      reviews: [], faqs: []
     },
     national: {
       zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"],
-      seoContent: `<p>ยินดีต้อนรับสู่ <strong>First Model Hub</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงานทั่วไทย</strong>, <strong>เด็กเอ็นทั่วไทย</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์ทั่วไทย</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>`,
-      reviews: [
-        { author: "คุณเกริกพล (K.)", location: "ตัวเมือง", rating: 5, text: "บริการดีตรงปก เจอตัวจริงค่อยจ่ายเงิน สบายใจมากครับ", date: "เมื่อสัปดาห์ที่แล้ว" }
-      ],
-      faqs: [
-        { q: "เรียกใช้บริการ First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" }
-      ]
+      seoContent: `<p>ศูนย์รวม <strong>สาวรับงานทั่วไทย</strong> พรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</p>`,
+      reviews: [], faqs: []
     }
   };
 
@@ -509,19 +504,19 @@ window.ScrollTrigger = ScrollTrigger;
       return `
         <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 135px !important; width: 135px !important; height: 175px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
           
-          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-crown"></i> ${rankText}</span>
+          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 12px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-crown"></i> ${rankText}</span>
           
           <img src="${imgUrl}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important; pointer-events: none !important;" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
           
           <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; pointer-events: none !important;"></div>
           
-          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 8px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
+          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.85) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 12px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 10 !important; pointer-events: none !important;">🟢 ${availText}</span>
           
           <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 25 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
 
           <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
-            <div class="vip-name" style="color: #FFFFFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">${p.displayName}</div>
-            <div class="vip-location" style="color: #C084FC !important; font-size: 9.5px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 2px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
+            <div class="vip-name" style="color: #FFFFFF !important; font-size: 12px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">${p.displayName}</div>
+            <div class="vip-location" style="color: #C084FC !important; font-size: 12px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 2px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
           </div>
           
         </div>
@@ -566,28 +561,28 @@ window.ScrollTrigger = ScrollTrigger;
     const ageDisplay = profile.safeAge && profile.safeAge !== "-" ? ` ${profile.safeAge}` : "";
 
     const featuredBadge = profile.isfeatured
-      ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
+      ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <i class="fas fa-star" style="font-size: 10px; color: #FBBF24;"></i>
           <span style="letter-spacing: 0.02em;">แนะนำ</span>
          </span>`
       : "";
 
     const statusBadge = `
-      <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
+      <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
           <span style="letter-spacing: 0.02em;">${statusText}</span>
       </span>
     `;
 
     const videoBadge = profile.hasVideo
-      ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
+      ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <i class="fas fa-video" style="font-size: 10px;"></i> คลิป
          </span>`
       : "";
 
     const verifiedBadge = (profile.isVerified || profile.verified)
-      ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
+      ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <i class="fas fa-check-circle" style="font-size: 10px; color: #00E676;"></i> ยืนยันตัวตน
          </span>`
       : "";
 
@@ -619,17 +614,17 @@ window.ScrollTrigger = ScrollTrigger;
       <a href="/sideline/${encodedSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${nameClean}"></a>
 
       <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
-          <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+          <h3 style="font-size: 14px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
             ${nameClean}${ageDisplay}
           </h3>
           
-          ${(profile.slogan || profile.quote) ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
+          ${(profile.slogan || profile.quote) ? `<p style="font-size: 12px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
           
-          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
               <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
                   <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${profile.location || currentProvName}
               </span>
-              <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+              <span style="color: #00E676; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
                   ${profile.displayPrice}
               </span>
           </div>
@@ -961,8 +956,8 @@ window.ScrollTrigger = ScrollTrigger;
       let html = '<div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.25); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">';
       html += `
         <div style="padding: 8px 14px; background-color: #09090B; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">ค้นหาล่าสุด</span>
-            <button data-action="clear-recent" style="background:none; border:none; color:#EF4444; font-size:10px; font-weight:700; cursor:pointer;">ล้างประวัติ</button>
+            <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">ค้นหาล่าสุด</span>
+            <button data-action="clear-recent" style="background:none; border:none; color:#EF4444; font-size:12px; font-weight:700; cursor:pointer;">ล้างประวัติ</button>
         </div>
       `;
       recentSearches.forEach(item => {
@@ -971,7 +966,7 @@ window.ScrollTrigger = ScrollTrigger;
         html += `
           <div data-action="suggestion" data-slug="${escapedText}" data-is-profile="false"
                style="padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.03);">
-              <i class="fas fa-history" style="color: var(--text-muted); font-size: 11px;"></i>
+              <i class="fas fa-history" style="color: var(--text-muted); font-size: 12px;"></i>
               <span style="font-size: 12px; color: #FFFFFF; font-weight: 600;">${cleanText}</span>
           </div>
         `;
@@ -992,7 +987,7 @@ window.ScrollTrigger = ScrollTrigger;
     let html = `
       <div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.25); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
           <div style="padding: 8px 14px; background-color: #09090B; border-bottom: 1px solid rgba(255,255,255,0.05);">
-              <span style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">ผลลัพธ์ที่แนะนำ (${matches.length})</span>
+              <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">ผลลัพธ์ที่แนะนำ (${matches.length})</span>
           </div>
           <div style="display: flex; flex-direction: column;">
     `;
@@ -1015,15 +1010,15 @@ window.ScrollTrigger = ScrollTrigger;
             <div style="flex: 1; min-width: 0; text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
                     <div style="font-size: 12px; font-weight: 800; color: #FFFFFF; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.displayName || item.name}</div>
-                    ${item.age ? `<span style="font-size: 9px; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: var(--text-gray); font-weight: 700;">${item.age} ปี</span>` : ""}
+                    ${item.age ? `<span style="font-size: 12px; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: var(--text-gray); font-weight: 700;">${item.age} ปี</span>` : ""}
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                    <span style="font-size: 10px; color: var(--text-gray); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                        <i class="fas fa-map-marker-alt" style="font-size: 9px; color: var(--primary-purple); margin-right: 4px;"></i> ${provName}
+                    <span style="font-size: 12px; color: var(--text-gray); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                        <i class="fas fa-map-marker-alt" style="font-size: 12px; color: var(--primary-purple); margin-right: 4px;"></i> ${provName}
                     </span>
                 </div>
             </div>
-            <i class="fas fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 10px;"></i>
+            <i class="fas fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 12px;"></i>
         </div>
       `;
     });
@@ -1032,7 +1027,7 @@ window.ScrollTrigger = ScrollTrigger;
     html += `
       <div data-action="search-all" data-query="${query.replace(/'/g, "\\'")}" 
            style="padding: 10px; background-color: #09090B; text-align: center; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.05);">
-          <span style="font-size: 11px; font-weight: 800; color: var(--primary-purple);"><i class="fas fa-search" style="margin-right: 6px;"></i> ดูผลลัพธ์ทั้งหมด</span>
+          <span style="font-size: 12px; font-weight: 800; color: var(--primary-purple);"><i class="fas fa-search" style="margin-right: 6px;"></i> ดูผลลัพธ์ทั้งหมด</span>
       </div>
     </div>`;
 
@@ -1056,8 +1051,8 @@ window.ScrollTrigger = ScrollTrigger;
     const titleEl = document.getElementById("lightbox-profile-name-main");
     if (titleEl) {
       titleEl.innerHTML = `
-        <span style="font-size: 22px !important; font-weight: 900 !important; background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.85)) !important; letter-spacing: -0.02em;">${nameClean}</span>
-        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 16px; filter: drop-shadow(0 0 6px #00E676);" title="ยืนยันตัวตนแล้ว"></i>' : ""}
+        <span class="brand-neon-text" style="font-size: clamp(22px, 5.5vw, 28px) !important; font-weight: 900 !important; background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.8)) !important; letter-spacing: -0.02em;">${nameClean}</span>
+        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 18px; filter: drop-shadow(0 0 6px #00E676);" title="ยืนยันตัวตนแล้ว"></i>' : ""}
       `;
     }
 
@@ -1066,7 +1061,7 @@ window.ScrollTrigger = ScrollTrigger;
       badgeEl.innerHTML = `
         <span style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
             <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusColor}; box-shadow: 0 0 8px ${statusColor}; flex-shrink: 0;"></span>
-            <span style="color: white; font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em;">${statusText}</span>
+            <span style="color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.02em;">${statusText}</span>
         </span>
       `;
     }
@@ -1121,7 +1116,7 @@ window.ScrollTrigger = ScrollTrigger;
       const tagsList = Array.isArray(profile.styleTags) ? profile.styleTags : [];
       tagsList.forEach(tag => {
         const span = document.createElement("span");
-        span.style.cssText = "background: rgba(124, 58, 237, 0.12); border: 1px solid rgba(192, 132, 252, 0.3); color: #E9D5FF; font-size: 10px; padding: 3px 10px; border-radius: 100px; font-weight: 700;";
+        span.style.cssText = "background: rgba(124, 58, 237, 0.12); border: 1px solid rgba(192, 132, 252, 0.3); color: #E9D5FF; font-size: 12px; padding: 3px 10px; border-radius: 100px; font-weight: 700;";
         span.textContent = tag.startsWith("#") ? tag : `#${tag}`;
         tagsEl.appendChild(span);
       });
@@ -1138,38 +1133,33 @@ window.ScrollTrigger = ScrollTrigger;
 
     const statsText = (profile.safeStats && profile.safeStats !== "undefined") ? profile.safeStats : "ไม่ระบุ";
     const heightText = (profile.safeHeight && profile.safeHeight !== "undefined") ? profile.safeHeight : "ไม่ระบุ";
-    const skinText = (profile.safeSkin && profile.safeSkin !== "undefined") ? profile.safeSkin : "ไม่ระบุ";
 
     const detailsEl = document.getElementById("lightboxDetailsCompact");
     if (detailsEl) {
       detailsEl.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
             <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
-                <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">อายุ</div>
-                <div style="font-weight: 800; font-size: 12px; color: ${ageDisplay === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${ageDisplay}</div>
+                <div style="font-size: 12px; color: #A1A1AA; font-weight: 600;">อายุ</div>
+                <div style="font-weight: 800; font-size: 13px; color: ${ageDisplay === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${ageDisplay}</div>
             </div>
             <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
-                <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
-                <div style="font-weight: 800; font-size: 12px; color: ${statsText === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${statsText}</div>
+                <div style="font-size: 12px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
+                <div style="font-weight: 800; font-size: 13px; color: ${statsText === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${statsText}</div>
             </div>
             <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
-                <div style="font-size: 9px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
-                <div style="font-weight: 800; font-size: 12px; color: ${heightText === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${heightText}</div>
+                <div style="font-size: 12px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
+                <div style="font-weight: 800; font-size: 13px; color: ${heightText === 'ไม่ระบุ' ? '#71717A' : '#FFFFFF'}; margin-top: 2px;">${heightText}</div>
             </div>
         </div>
 
         <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #A1A1AA; font-size: 11px; font-weight: 600;">ค่าขนม</span>
+                <span style="color: #A1A1AA; font-size: 12px; font-weight: 600;">ค่าขนม</span>
                 <span style="color: #00E676; font-weight: 900; font-size: 14px;">${profile.displayPrice}</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #A1A1AA; font-size: 11px; font-weight: 600;">พิกัดงาน</span>
-                <span style="color: white; font-weight: 700; font-size: 11.5px;">${profile.location || profile.provinceNameThai || "เชียงใหม่"}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #A1A1AA; font-size: 11px; font-weight: 600;">สีผิว</span>
-                <span style="color: ${skinText === 'ไม่ระบุ' ? '#71717A' : 'white'}; font-weight: 700; font-size: 11.5px;">${skinText}</span>
+                <span style="color: #A1A1AA; font-size: 12px; font-weight: 600;">พิกัดงาน</span>
+                <span style="color: white; font-weight: 700; font-size: 12px;">${profile.location || profile.provinceNameThai || "เชียงใหม่"}</span>
             </div>
         </div>
       `;
@@ -1205,7 +1195,7 @@ window.ScrollTrigger = ScrollTrigger;
       
       stickyBtnWrapper.innerHTML = `
         <a href="${lineUrl}" target="_blank" rel="noopener nofollow" 
-           style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #11783B 0%, #00E676 100%); color: white; padding: 12px 18px; border-radius: 100px; font-weight: 800; font-size: 12.5px; text-decoration: none; box-shadow: 0 6px 20px rgba(0, 230, 118, 0.3); transition: transform 0.2s;"
+           style="display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #11783B 0%, #00E676 100%); color: white; padding: 12px 18px; border-radius: 100px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 6px 20px rgba(0, 230, 118, 0.3); transition: transform 0.2s;"
            onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
             <i class="fab fa-line" style="font-size: 18px; color: white;"></i>
             <span>แอดไลน์จองคิว ${nameClean}</span>
@@ -1537,8 +1527,8 @@ window.ScrollTrigger = ScrollTrigger;
         
         contentInner.innerHTML = seoText + `
           <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
-            <h3 style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in ${engProvName}</h3>
-            <p style="font-size: 11px; color: #A1A1AA; line-height: 1.5;">
+            <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in ${engProvName}</h3>
+            <p style="font-size: 12px; color: #A1A1AA; line-height: 1.5;">
               Welcome to First Model Hub ${engProvName}, the premier platform connecting travelers with verified companions. We offer authentic Girlfriend Experience (GFE) services with absolute financial safety: <strong>No upfront deposits required. Pay cash directly to your companion upon meeting.</strong>
             </p>
           </div>
@@ -1559,15 +1549,15 @@ window.ScrollTrigger = ScrollTrigger;
               <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${r.author.charAt(0)}</div>
               <div>
                 <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${r.author}</span>
-                <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${r.location}</span>
+                <span style="display: block; font-size: 12px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${r.location}</span>
               </div>
             </div>
-            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 9.5px;">
+            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 12px;">
               <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
             </div>
           </div>
-          <p style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; margin: 0;">${r.text}</p>
-          <span style="display: block; font-size: 9px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${r.date}</span>
+          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.5; margin: 0;">${r.text}</p>
+          <span style="display: block; font-size: 12px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${r.date}</span>
         </div>
       `).join("");
     }
@@ -1581,8 +1571,8 @@ window.ScrollTrigger = ScrollTrigger;
       faqContainer.innerHTML = faqsList.map(item => `
         <div class="interactive-card" style="padding: 16px 20px; background: rgba(13,8,30,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;">
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <h3 style="font-weight: 800; font-size: 13.5px; display: flex; align-items: start; gap: 10px; margin: 0;">
-                  <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 11px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
+                <h3 style="font-weight: 800; font-size: 14px; display: flex; align-items: start; gap: 10px; margin: 0;">
+                  <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 12px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
                   <span class="text-gradient-sub" style="line-height: 1.4; color: #E9D5FF;">${item.q}</span>
                 </h3>
                 <div style="padding-left: 32px; color: var(--text-gray); font-size: 12px; line-height: 1.5; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
@@ -1998,11 +1988,11 @@ window.ScrollTrigger = ScrollTrigger;
           <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px;" alt="First Model Hub App">
           <div>
             <div style="font-size: 12px; font-weight: 800; color: #FFF;">ติดตั้งแอป First Model Hub</div>
-            <div style="font-size: 10px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
+            <div style="font-size: 12px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-          <button id="pwa-install-btn" style="background: linear-gradient(135deg, #7C3AED, #5A2CBE); color: white; border: none; padding: 7px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; cursor: pointer;">ติดตั้ง</button>
+          <button id="pwa-install-btn" style="background: linear-gradient(135deg, #7C3AED, #5A2CBE); color: white; border: none; padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; cursor: pointer;">ติดตั้ง</button>
           <button id="pwa-dismiss-btn" style="background: none; border: none; color: #A1A1AA; font-size: 14px; cursor: pointer;"><i class="fas fa-times"></i></button>
         </div>
       `;
@@ -2106,7 +2096,6 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
-    // 🟢 ระบบเปลี่ยนภาษา TH/EN
     (function initLanguageSwitcher() {
       const langBtn = document.getElementById("lang-toggle-btn");
       if (!langBtn) return;
@@ -2132,7 +2121,6 @@ window.ScrollTrigger = ScrollTrigger;
       }
     })();
 
-    // 🟢 ระบบ Mobile Sidebar
     (function initMobileSidebar() {
       const toggleBtn = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar-menu");
@@ -2155,7 +2143,6 @@ window.ScrollTrigger = ScrollTrigger;
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
     })();
 
-    // 🟢 จัดการ Event Click ทั่วไป
     document.body.addEventListener("click", e => {
       const target = e.target;
 
@@ -2197,6 +2184,11 @@ window.ScrollTrigger = ScrollTrigger;
         const card = cardLink.closest(".profile-card-new, .vip-card-item");
         let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
         
+        if (!rawSlug && cardLink.getAttribute("href")) {
+          const href = cardLink.getAttribute("href");
+          rawSlug = href.replace(/^\/(sideline|profile)\//, "");
+        }
+
         if (rawSlug) {
           try { rawSlug = decodeURIComponent(rawSlug); } catch (e) {}
           

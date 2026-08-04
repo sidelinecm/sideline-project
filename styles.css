@@ -230,3 +230,40 @@ h1, h2, h3, h4, .glow-heading-spark { color: var(--pure-white); font-weight: 800
 
 html.light p[style*="color: #A1A1AA"], html.light p[style*="color: #CBD5E1"], html.light p[style*="color: #E4E4E7"], html.light span[style*="color: #A1A1AA"], html.light span[style*="color: #D4D4D8"], html.light div[style*="color: #A1A1AA"] { color: #3F3F46 !important; }
 html.light p[style*="color: white"], html.light span[style*="color: white"], html.light h1, html.light h2, html.light h3, html.light h4 { color: #09090B !important; }
+
+/* จัดป้ายบนการ์ด HOT ไม่ให้ทับซ้อนกัน */
+.hot-rank-badge {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important;
+  color: #000000 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  padding: 2px 6px !important;
+  border-radius: 100px !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  max-width: 58px !important;
+  overflow: hidden !important;
+}
+
+.vip-status-chip {
+  position: absolute !important;
+  top: 6px !important;
+  left: 6px !important;
+  background: rgba(9, 9, 11, 0.85) !important;
+  border: 1px solid rgba(0, 230, 118, 0.5) !important;
+  color: #00E676 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  padding: 2px 6px !important;
+  border-radius: 100px !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  max-width: 58px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
