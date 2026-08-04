@@ -666,7 +666,19 @@ export default async (req, context) => {
       ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
       : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
     
-    const enUrl = `${canonUrl}/en`;
+    const profileList = profListRes.data || [];
+    const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
+    const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
+    const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
+
+    const canonUrl = matchedProfile 
+      ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
+      : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
+    
+    const enUrl = `${canonUrl}?lang=en`;
+
+    // 🟢 1. ตรวจสอบสถานะการเลือกภาษาอังกฤษจาก URL
+    const isEnglish = url.searchParams.get("lang") === "en" || url.pathname.endsWith("/en");
 
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
@@ -709,6 +721,18 @@ export default async (req, context) => {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
       pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` ${matchedProfile.age}` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
       pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
+    }
+
+    // 🟢 2. สลับ Title & Description เป็นภาษาอังกฤษสำหรับ SEO
+    if (isEnglish) {
+      if (matchedProfile) {
+        const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
+        pageTitle = `${cleanProfileName} - High-Class Companion in ${provinceThaiName} | First Model Hub`;
+        pageDesc = `Verified VIP companion ${cleanProfileName} in ${provinceThaiName}. Girlfriend Experience (GFE), 100% real photos, pay cash upon meeting without advance deposit.`;
+      } else {
+        pageTitle = `Verified Escorts & Companions in ${provinceThaiName} | First Model Hub`;
+        pageDesc = `Premium companions and Girlfriend Experience (GFE) services in ${provinceThaiName}. 100% verified profiles. Pay cash on arrival, no upfront deposits.`;
+      }
     }
 
     const strippedDesc = stripHTML(pageDesc);
@@ -1114,6 +1138,16 @@ export default async (req, context) => {
     // 🟢 11. CLEANUP STEP: ลบแท็ก {{...}} ตกค้างทั้งหมดออก ป้องกัน Crawler วิ่งเข้า URL เสีย
     rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
+
+// 🟢 [เพิ่มส่วนนี้] สลับข้อความปุ่มจาก EN เป็น TH เมื่ออยู่หน้าภาษาอังกฤษ
+    if (isEnglish) {
+      const thUrl = canonUrl; // ลิงก์กลับหน้าภาษาไทย
+      rawHtml = rawHtml.replace(
+        /id="lang-toggle-btn"[\s\S]*?>EN<\/a>/i,
+        `id="lang-toggle-btn" href="${thUrl}" aria-label="Switch to Thai language" class="circle-btn-el" style="color: var(--text-gray) !important; text-decoration: none; font-size: 11px; font-weight: 800;">TH</a>`
+      );
+    }
+    
     // 🟢 12. ตั้งค่า Response Headers และส่งค่ากลับไปแสดงผล
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
