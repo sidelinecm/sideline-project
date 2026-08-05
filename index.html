@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#5A2CBE">
 
-<title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
-<meta name="description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ" />
-<meta name="keywords" content="รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน" />
+  <!-- SEO METADATA -->
+  <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
+  <meta name="description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ" />
+  <meta name="keywords" content="แฟนเช่า, แฟนเช่าเชียงใหม่, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
   <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
 
-  <!-- ============================== MULTILINGUAL SEO ============================== -->
+  <!-- MULTILINGUAL SEO -->
   <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
-
   <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
-  <!-- ============================== OPEN GRAPH & TWITTER CARDS ============================== -->
+  <!-- OPEN GRAPH & TWITTER CARDS -->
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="First Model Hub">
   <meta property="og:type" content="website">
@@ -26,7 +26,7 @@
   <meta property="og:url" content="{{SEO_CANONICAL}}">
   <meta property="og:image" content="{{SEO_IMAGE}}">
   <meta property="og:image:secure_url" content="{{SEO_IMAGE}}">
-  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:type" content="image/webp">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
@@ -36,7 +36,6 @@
   <meta name="twitter:image" content="{{SEO_IMAGE}}">
 
   <!-- ICONS & MANIFEST -->
-  <!-- 🟢 FIX 2: เพิ่ม Meta สำหรับ iOS PWA App -->
   <meta name="apple-mobile-web-app-title" content="First Model Hub">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="shortcut icon" href="/images/favicon.ico">
@@ -59,25 +58,35 @@
   <link rel="modulepreload" href="/main.js">
   <link rel="stylesheet" href="/styles.css">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-
-  <link rel="preload" href="/images/hero-firstmodelhub-1200.webp" as="image" 
-        imagesrcset="/images/hero-firstmodelhub-600.webp 600w, /images/hero-firstmodelhub-1200.webp 1200w" 
-        imagesizes="(max-width: 768px) 100vw, 1200px" fetchpriority="high">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
   <!-- SCHEMA.ORG STRUCTURED DATA GRAPH -->
   <script type="application/ld+json" id="dynamic-schema">
   {{SCHEMA_JSON}}
   </script>
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG"></script>
-  <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-PG0QFDWTTG'); </script>
+  <!-- Google tag (gtag.js) - Deferred loading for better Lighthouse score -->
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-PG0QFDWTTG';
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-PG0QFDWTTG');
+      }, 2000);
+    });
+  </script>
+
 </head>
 
 <body>
 
-<!-- ============================== FLOATING APP DOCK (MOBILE APP EXPERIENCE) ============================== -->
+<!-- FLOATING APP DOCK (MOBILE APP EXPERIENCE) -->
 <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
   <a href="/" class="dock-item active">
     <i class="fas fa-home" aria-hidden="true"></i>
@@ -97,7 +106,7 @@
   </a>
 </nav>
 
-<!-- ============================== HEADER ============================== -->
+<!-- HEADER -->
 <header id="page-header" role="banner">
     <div class="header-logo-container">
         <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
@@ -118,19 +127,17 @@
             <a href="/locations" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
         </nav>
 
-        <button class="theme-toggle-btn circle-btn-el" type="button" aria-label="เปลี่ยนโหมดแสงสว่าง" style="color: var(--text-gray) !important;">
-            <i class="fas fa-moon theme-toggle-icon" aria-hidden="true"></i>
-        </button>
+
         <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทางเสริมสำหรับมือถือ" style="color: var(--text-gray) !important;">
             <i class="fas fa-bars" aria-hidden="true"></i>
         </button>
     </div>
 </header>
 
-  <!-- ============================== MOBILE SIDEBAR MENU ============================== -->
+  <!-- MOBILE SIDEBAR MENU -->
   <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
     <div class="sidebar-header-div">
-      <span style="color: #A1A1AA !important;">Navigation</span>
+      <span style="color: #A1A1AA !important; font-size: 13px;">Navigation</span>
       <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>
@@ -147,118 +154,93 @@
 
     <div>
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-         style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 10px 0; border-radius: 8px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 10.5px; box-shadow: 0 4px 15px rgba(17, 120, 59, 0.25);">
-        <i class="fab fa-line" style="font-size: 14px;" aria-hidden="true"></i> แอดไลน์จองคิว
+         style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 10px 0; border-radius: 8px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 12px; box-shadow: 0 4px 15px rgba(17, 120, 59, 0.25);">
+        <i class="fab fa-line" style="font-size: 16px;" aria-hidden="true"></i> แอดไลน์จองคิว
       </a>
     </div>
   </aside>
 
   <div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
 
-<!-- ============================== MAIN CONTENT ============================== -->
+<!-- MAIN CONTENT -->
 <main id="main-content" style="position: relative; overflow: hidden;">
   
-  <div class="bg-glow-overlap" style="top: -50px; right: -50px;" aria-hidden="true"></div>
-  <div class="bg-glow-overlap" style="top: 35%; left: -100px;" aria-hidden="true"></div>
-  <div class="bg-glow-overlap" style="bottom: 5%; right: -50px;" aria-hidden="true"></div>
-
-  <div class="container space-y-24">
+    <div class="container space-y-24">
 
     <!-- HERO SECTION -->
     <section class="hero-section" aria-labelledby="hero-h1">
       <div class="clutch-pill">
-        <span style="background-color: #7C3AED; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800;">VERIFIED 2026</span>
-        <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 9px;" aria-hidden="true">
+        <span style="background-color: #7C3AED; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 800;">VERIFIED 2026</span>
+        <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 12px;" aria-hidden="true">
           <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
         </div>
-        <span style="color: white; font-size: 10.5px; font-weight: 700;">5/5 Verified Profiles</span>
-      </div>
-      
-      <div style="width: 100%; border-radius: 14px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(255,255,255,0.08); background-color: #121216; aspect-ratio: 16/9;">
-        <picture>
-          <source media="(max-width: 480px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
-          <source media="(max-width: 768px)" srcset="/images/hero-firstmodelhub-600.webp 600w" sizes="100vw">
-          <source media="(min-width: 769px)" srcset="/images/hero-firstmodelhub-1200.webp 1200w" sizes="1200px">
-          <img src="/images/hero-firstmodelhub-1200.webp" 
-               alt="รับงาน{{PROVINCE_NAME}} สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์พรีเมียมตรงปก ไม่โอนมัดจำ" 
-               title="ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} พรีเมียมตรงปก 100%"
-               width="600" 
-               height="338" 
-               style="width: 100%; height: 100%; object-fit: cover; display: block;"
-               fetchpriority="high" 
-               loading="eager">
-        </picture>
+        <span style="color: white; font-size: 12px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
 
-      <!-- 🟢 หัวข้อหลัก -->
-      <h1 id="hero-h1" class="hero-title">
-          รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}}<br>
-          <span class="highlight-neon">FirstModelHub สาวรับงานฟิวแฟน <span class="emoji-star">🌟</span></span>
+      <div class="brand-showcase-wrapper">
+        <span class="brand-neon-text">
+          FirstModel<span class="hub-text-pink">Hub</span>
+        </span>
+        <span class="dancing-neon-star">🌟</span>
+      </div>
+
+      <h1 id="hero-h1" class="seo-h1-title">
+        <span class="seo-sub-headline">รับงาน{{PROVINCE_NAME}} • ไซด์ไลน์{{PROVINCE_NAME}}</span><br>
+        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
       </h1>
       
-      <p style="font-size: 12.5px; font-weight: 700; text-align: center; color: #E4E4E7; margin-bottom: 6px;">
-          ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
+      <p class="hero-guarantee-tag">
+        ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
       </p>
       
-      <p class="hero-subtitle-p" style="font-size: 11.5px; line-height: 1.6; margin: 0 0 10px 0; text-align: center; color: #A1A1AA;">
-        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน{{PROVINCE_NAME}}</strong>, <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด 
-        <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong> ทั้งหมด
+      <p class="hero-subtitle-p">
+        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน{{PROVINCE_NAME}}</strong>, <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong> ทั้งหมด
       </p>
 
-      <!-- 🟢 LIVE SOCIAL PROOF & STATS BAR -->
-      <div class="hero-stats-trust-bar" style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px 0; padding: 8px 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 100px; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-        <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #FFFFFF;">
-          <i class="fas fa-users" style="color: #C084FC;" aria-hidden="true"></i>
-          <span><strong style="color: #00E676;">{{PROFILE_COUNT}}+</strong> โปรไฟล์{{PROVINCE_NAME}}</span>
+      <div class="hot-section-header-centered">
+        <h2 class="hot-title-red-pink">
+          น้องๆ ที่ HOT 🔥<br>
+          <span class="hot-sub-line">ประจำเดือน <span class="hot-tag-badge-red">#ฟิวแฟน</span></span>
+        </h2>
+        <div class="hot-swipe-hint-centered">
+          &lt;--- เลื่อนซ้าย-ขวา ---&gt;
         </div>
-        <span style="color: rgba(255,255,255,0.2); font-size: 10px;" aria-hidden="true">•</span>
-        <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #FFFFFF;">
+      </div>
+
+      <!-- HOT CARDS SWIPER -->
+      <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;">
+      </div>
+
+      <!-- TRUST STATS BAR -->
+      <div class="hero-stats-trust-bar">
+        <div class="trust-stat-item">
+          <i class="fas fa-users" style="color: #C084FC;" aria-hidden="true"></i>
+          <span><strong id="live-profile-count" style="color: #00E676;">{{PROFILE_COUNT}}+</strong> โปรไฟล์{{PROVINCE_NAME}}</span>
+        </div>
+        <span class="trust-stat-divider" aria-hidden="true">•</span>
+        <div class="trust-stat-item">
           <i class="fas fa-star" style="color: #FBBF24;" aria-hidden="true"></i>
           <span>เรตติ้ง <strong style="color: #FBBF24;">4.9/5</strong> (ผู้ใช้จริง)</span>
         </div>
-        <span style="color: rgba(255,255,255,0.2); font-size: 10px;" aria-hidden="true">•</span>
-        <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #00E676;">
-          <i class="fas fa-shield-check" aria-hidden="true"></i>
+        <span class="trust-stat-divider" aria-hidden="true">•</span>
+        <div class="trust-stat-item" style="color: #00E676;">
+          <i class="fas fa-shield-alt" aria-hidden="true"></i>
           <span>จ่ายหน้างาน 100%</span>
         </div>
       </div>
 
-      <!-- ปุ่มแอดไลน์ CTA -->
-      <div class="hero-cta-block">
-        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-primary-webyst" aria-label="แอดไลน์สอบถามข้อมูลเพื่อจองคิวน้องๆ ใน{{PROVINCE_NAME}}">
-          <i class="fab fa-line" style="font-size: 18px; margin-right: 6px;" aria-hidden="true"></i> แอดไลน์จองคิวน้องๆ (LINE: @firstmodelhub)
-        </a>
-        <p class="cta-subtext">
-          <i class="fas fa-shield-alt" style="color: #00E676; margin-right: 4px;"></i> แอดมินสแตนบายคุมคิว ดูแลความปลอดภัยและเช็กตัวจริงตลอด 24 ชั่วโมง
-        </p>
-      </div>
-
-      <div class="safe-capsules-grid">
-          <div class="safe-capsule-item">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #EF4444;" aria-hidden="true"></span>
-              <span>ไม่มีโอนมัดจำก่อน 100%</span>
-          </div>
-          <div class="safe-capsule-item">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #EF4444;" aria-hidden="true"></span>
-              <span>ไม่มีค่าสมาชิกหมกเม็ด</span>
-          </div>
-          <div class="safe-capsule-item">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #00E676;" aria-hidden="true"></span>
-              <span style="color: #00E676;">จ่ายหน้างานเมื่อเจอตัวจริง</span>
-          </div>
-      </div>
     </section>
 
     <!-- FEATURED PROFILES GRID -->
     <section id="featured-profiles" class="glass-panel" style="padding: 16px 0; overflow: hidden; position: relative;">
       <div class="section-spacing-container text-center-wrapper" style="position: relative; z-index: 10; padding: 0 8px; margin-bottom: 12px;">
           <div class="badge-wrapper" style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
-              <span style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-size: 9.5px; font-weight: 800; padding: 3px 10px; border-radius: 100px; text-transform: uppercase;">
+              <span style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 100px; text-transform: uppercase;">
                 POPULAR SELECTION
               </span>
           </div>
 
-          <h2 id="featured-heading" style="font-size: 16px; font-weight: 900; color: #FFFFFF; text-align: center; margin: 0 auto 6px auto;">
+          <h2 id="featured-heading" style="font-size: 18px; font-weight: 900; color: #FFFFFF; text-align: center; margin: 0 auto 6px auto;">
             แนะนำเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}<br>
             <span style="color: #C084FC;">ยอดนิยม และตรงปก 100%</span>
           </h2>
@@ -271,10 +253,10 @@
 
     <!-- SEARCH & FILTER SECTION -->
     <section id="search-section" class="glass-panel" style="max-width: 850px; margin: 12px auto; padding: 12px 10px; position: relative;">
-      <p style="font-size: 10px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary-purple); text-align: center; margin-bottom: 4px;">
+      <p style="font-size: 12px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary-purple); text-align: center; margin-bottom: 4px;">
         SMART FILTER SYSTEM
       </p>
-      <h2 id="search-form-heading" class="text-gradient-sub" style="font-size: 13px; font-weight: 800; text-align: center; margin-bottom: 10px;">
+      <h2 id="search-form-heading" class="text-gradient-sub" style="font-size: 14px; font-weight: 800; text-align: center; margin-bottom: 10px;">
           ค้นหาโปรไฟล์ไซด์ไลน์{{PROVINCE_NAME}} สัดส่วน สไตล์ และพิกัดนัดพบ
       </h2>
       
@@ -317,7 +299,7 @@
           </div>
           
           <div style="display: flex; justify-content: center; margin-top: 10px;">
-              <button type="button" id="reset-search-btn" style="border: 1px solid rgba(239, 68, 68, 0.2); background-color: rgba(127, 29, 29, 0.25); color: #F87171; font-weight: 700; font-size: 10.5px; padding: 6px 14px; border-radius: 100px; cursor: pointer;">
+              <button type="button" id="reset-search-btn" style="border: 1px solid rgba(239, 68, 68, 0.2); background-color: rgba(127, 29, 29, 0.25); color: #F87171; font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 100px; cursor: pointer;">
                   🔄 รีเซ็ตตัวกรองค้นหาทั้งหมด
               </button>
           </div>
@@ -338,42 +320,25 @@
       {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
 
-    <div id="load-more-container" style="display: none; text-align: center; margin-top: 20px;">
-      <button id="load-more-btn" style="background-color: var(--primary-purple); color: black; border: none; padding: 10px 24px; border-radius: 100px; font-weight: 800; font-size: 12px; cursor: pointer;">
-          แสดงโปรไฟล์เพิ่มเติม
-      </button>
-    </div>
-
-    <!-- ERROR & BLANK STATES -->
-    <div id="fetch-error-message" style="display: none; border: 1px solid rgba(239, 68, 68, 0.1); background-color: rgba(127, 29, 29, 0.1); padding: 16px; border-radius: 14px; text-align: center; color: #F87171; max-width: 600px; margin: 16px auto; font-size: 11.5px; font-weight: 700;">
-      เกิดข้อผิดพลาดในการโหลดข้อมูลโปรไฟล์ กรุณาลองใหม่อีกครั้ง
-    </div>
-
-    <div id="no-results-message" style="display: none; border: 1px solid var(--border-light); background-color: rgba(255, 255, 255, 0.01); padding: 16px; border-radius: 14px; text-align: center; color: var(--text-gray); max-width: 600px; margin: 16px auto; font-size: 11.5px; font-weight: 700;">
-      ไม่พบโปรไฟล์น้องๆ ตรงตามเงื่อนไขการค้นหาของคุณในขณะนี้
-    </div>
-
     <!-- SEO CONTENT DRAWER -->
     <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
       <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
          <div style="position: relative; padding: 16px; border-bottom: 1px solid var(--border-light); background: rgba(13, 8, 30, 0.45);">
-             <h2 class="text-gradient-main" style="font-size: 15px; font-weight: 800; margin: 0 0 8px 0;">
+             <h2 class="text-gradient-main" style="font-size: 16px; font-weight: 800; margin: 0 0 8px 0;">
                  บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า {{PROFILE_COUNT}}+ รายการ)
              </h2>
-             <!-- 🟢 [ย่อหน้าเกริ่นนำภายนอก Drawer - SEO & User อ่านได้ทันที] -->
              <p style="font-size: 12px; line-height: 1.6; color: #E4E4E7; margin: 0;">
                  ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} คัดสรรโปรไฟล์ตรงปก 100% บริการเอนเตอร์เทนสไตล์ฟิวแฟน (GFE) ปลอดภัยสูงสุดด้วยนโยบาย <strong>"จ่ายหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำล่วงหน้าทุกกรณี"</strong> ครอบคลุมโซน {{PROVINCE_ZONES}}
              </p>
          </div>
 
          <div class="seo-content-container collapsed" id="seo-drawer-wrapper" style="position: relative;">
-             <div style="padding: 14px 16px; color: var(--text-gray); font-size: 11.5px; line-height: 1.6; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 10;">
+             <div style="padding: 14px 16px; color: var(--text-gray); font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 10;">
                  {{PROVINCE_SEO_CONTENT}}
                  
-                 <!-- BILINGUAL SEO CONTENT -->
                  <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
-                   <h3 style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in {{PROVINCE_NAME}}</h3>
-                   <p style="font-size: 11px; color: #A1A1AA; line-height: 1.5;">
+                   <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in {{PROVINCE_NAME}}</h3>
+                   <p style="font-size: 12px; color: #A1A1AA; line-height: 1.5;">
                      Welcome to First Model Hub {{PROVINCE_NAME}}, the premier platform connecting travelers with verified companions. We offer authentic Girlfriend Experience (GFE) services with absolute financial safety: <strong>No upfront deposits required. Pay cash directly to your companion upon meeting.</strong>
                    </p>
                  </div>
@@ -382,7 +347,7 @@
          </div>
          
          <div style="text-align: center; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.03); background: rgba(9, 9, 12, 0.35); position: relative; z-index: 15;">
-             <button type="button" id="toggle-seo-drawer-btn" class="btn-read-more" style="font-size: 11px; padding: 6px 16px;">
+             <button type="button" id="toggle-seo-drawer-btn" class="btn-read-more" style="font-size: 12px; padding: 6px 16px;">
                  <span>ดูข้อมูลพื้นที่บริการทั้งหมด</span> <i class="fas fa-chevron-down" aria-hidden="true"></i>
              </button>
          </div>
@@ -392,10 +357,10 @@
     <!-- SAFE-PLAY FRAMEWORK -->
     <section style="text-align: center; margin-top: 24px; position: relative;" aria-labelledby="rules-title">
       <div class="section-spacing-container">
-        <p style="font-size: 10px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 4px;">
+        <p style="font-size: 12px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 4px;">
           SAFE-PLAY FRAMEWORK
         </p>
-        <h2 id="rules-title" class="text-gradient-main" style="font-size: 16px; font-weight: 800; margin-bottom: 12px;">
+        <h2 id="rules-title" class="text-gradient-main" style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
           ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}
         </h2>
       </div>
@@ -404,12 +369,12 @@
         <div class="rule-item collapsed">
           <h3 style="margin: 0;">
             <button type="button" class="rule-trigger" id="rule-btn-1" aria-expanded="false" aria-controls="rule-panel-1">
-              <span style="font-size: 12px; font-weight: 700;">01. ชำระค่าบริการหน้างาน 100% ไม่มีมัดจำ</span>
+              <span style="font-size: 13px; font-weight: 700;">01. ชำระค่าบริการหน้างาน 100% ไม่มีมัดจำ</span>
               <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
             </button>
           </h3>
           <div id="rule-panel-1" class="rule-content" role="region" aria-labelledby="rule-btn-1">
-            <p style="margin: 0; padding-top: 8px; font-size: 11.5px; color: var(--text-gray); line-height: 1.5;">
+            <p style="margin: 0; padding-top: 8px; font-size: 12px; color: var(--text-gray); line-height: 1.5;">
               ทางเราและผู้ดูแลจะไม่มีการเรียกเก็บเงินมัดจำล่วงหน้า ไม่มีค่าจองคิว หรือค่าธรรมเนียมจองสิทธิ์ใดๆ ทั้งสิ้น ชำระโดยตรงต่อน้องหลังพบตัวจริงเรียบร้อยแล้วเท่านั้น
             </p>
           </div>
@@ -418,12 +383,12 @@
         <div class="rule-item collapsed">
           <h3 style="margin: 0;">
             <button type="button" class="rule-trigger" id="rule-btn-2" aria-expanded="false" aria-controls="rule-panel-2">
-              <span style="font-size: 12px; font-weight: 700;">02. งดกิจกรรมที่ขัดต่อข้อกฎหมายศีลธรรม</span>
+              <span style="font-size: 13px; font-weight: 700;">02. งดกิจกรรมที่ขัดต่อข้อกฎหมายศีลธรรม</span>
               <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
             </button>
           </h3>
           <div id="rule-panel-2" class="rule-content" role="region" aria-labelledby="rule-btn-2">
-            <p style="margin: 0; padding-top: 8px; font-size: 11.5px; color: var(--text-gray); line-height: 1.5;">
+            <p style="margin: 0; padding-top: 8px; font-size: 12px; color: var(--text-gray); line-height: 1.5;">
               แพลตฟอร์มนี้ทำหน้าที่เป็นสื่อกลางส่งเสริมการประชาสัมพันธ์เฉพาะงานเอนเตอร์เทนระดับสุภาพสไตล์ฟิวแฟน เพื่อนเดินทาง เพื่อนเที่ยว ทานข้าวคลายเหงาเท่านั้น
             </p>
           </div>
@@ -432,12 +397,12 @@
         <div class="rule-item collapsed">
           <h3 style="margin: 0;">
             <button type="button" class="rule-trigger" id="rule-btn-3" aria-expanded="false" aria-controls="rule-panel-3">
-              <span style="font-size: 12px; font-weight: 700;">03. ผู้ใช้งานบริการต้องมีอายุ 20 ปีขึ้นไป</span>
+              <span style="font-size: 13px; font-weight: 700;">03. ผู้ใช้งานบริการต้องมีอายุ 20 ปีขึ้นไป</span>
               <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
             </button>
           </h3>
           <div id="rule-panel-3" class="rule-content" role="region" aria-labelledby="rule-btn-3">
-            <p style="margin: 0; padding-top: 8px; font-size: 11.5px; color: var(--text-gray); line-height: 1.5;">
+            <p style="margin: 0; padding-top: 8px; font-size: 12px; color: var(--text-gray); line-height: 1.5;">
               ผู้เข้าชมสารบัญข้อมูล ตลอดจนบุคคลที่ประสงค์จะนัดหมายใช้บริการ จะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
             </p>
           </div>
@@ -446,12 +411,12 @@
         <div class="rule-item collapsed">
           <h3 style="margin: 0;">
             <button type="button" class="rule-trigger" id="rule-btn-4" aria-expanded="false" aria-controls="rule-panel-4">
-              <span style="font-size: 12px; font-weight: 700;">04. ตารางเวลาปฏิบัติงานจริง</span>
+              <span style="font-size: 13px; font-weight: 700;">04. ตารางเวลาปฏิบัติงานจริง</span>
               <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
             </button>
           </h3>
           <div id="rule-panel-4" class="rule-content" role="region" aria-labelledby="rule-btn-4">
-            <p style="margin: 0; padding-top: 8px; font-size: 11.5px; color: var(--text-gray); line-height: 1.5;">
+            <p style="margin: 0; padding-top: 8px; font-size: 12px; color: var(--text-gray); line-height: 1.5;">
               ผู้ดูแลจะแสดงพิกัดที่สะดวกรับงานหลัก และช่วงเวลาทำงานระบุไว้ในโปรไฟล์ส่วนตัวอย่างโปร่งใส
             </p>
           </div>
@@ -460,12 +425,12 @@
         <div class="rule-item collapsed">
           <h3 style="margin: 0;">
             <button type="button" class="rule-trigger" id="rule-btn-5" aria-expanded="false" aria-controls="rule-panel-5">
-              <span style="font-size: 12px; font-weight: 700;">05. เกณฑ์สำหรับการเดินทางออกนอกเขตพื้นที่หลัก</span>
+              <span style="font-size: 13px; font-weight: 700;">05. เกณฑ์สำหรับการเดินทางออกนอกเขตพื้นที่หลัก</span>
               <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
             </button>
           </h3>
           <div id="rule-panel-5" class="rule-content" role="region" aria-labelledby="rule-btn-5">
-            <p style="margin: 0; padding-top: 8px; font-size: 11.5px; color: var(--text-gray); line-height: 1.5;">
+            <p style="margin: 0; padding-top: 8px; font-size: 12px; color: var(--text-gray); line-height: 1.5;">
               กรณีประสงค์ให้น้องเดินทางไปพบนอกทำเลปกติ น้องจำขอคิดเฉพาะ "อัตราค่าเดินทางไป-กลับ ตามระยะทางจริง" เท่านั้น ส่วนค่าบริการชำระหน้างานเมื่อเจอตัวจริงครับ
             </p>
           </div>
@@ -475,7 +440,7 @@
 
     <!-- FAQ ACCORDIONS -->
     <section style="max-width: 768px; margin: 24px auto 0 auto; text-align: left; position: relative;" aria-labelledby="faq-main-heading">
-         <h2 id="faq-main-heading" class="text-gradient-main" style="font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 12px;">
+         <h2 id="faq-main-heading" class="text-gradient-main" style="font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 12px;">
              คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}
          </h2>
 
@@ -487,7 +452,7 @@
     <!-- REVIEWS & FORM -->
     <section id="customer-reviews" style="text-align: center; margin-top: 24px; position: relative;" aria-labelledby="reviews-main-heading">
       <div class="section-spacing-container">
-        <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 16px; font-weight: 800; margin-bottom: 12px;">
+        <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
           รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน{{PROVINCE_NAME}}
         </h2>
       </div>
@@ -497,37 +462,37 @@
       </div>
 
       <div style="margin-top: 16px;">
-          <button type="button" id="toggle-review-form-btn" style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(192, 132, 252, 0.3); color: #C084FC; font-weight: 800; font-size: 11.5px; padding: 8px 18px; border-radius: 100px; cursor: pointer; transition: all 0.2s;">
+          <button type="button" id="toggle-review-form-btn" style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(192, 132, 252, 0.3); color: #C084FC; font-weight: 800; font-size: 12px; padding: 8px 18px; border-radius: 100px; cursor: pointer; transition: all 0.2s;">
             ✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์
           </button>
 
           <form id="review-form" style="display: none; flex-direction: column; gap: 10px; max-width: 500px; margin: 12px auto 0 auto; text-align: left; background: rgba(13,8,30,0.6); padding: 16px; border-radius: 14px; border: 1px solid rgba(147,51,234,0.2);">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                   <div style="display: flex; flex-direction: column; gap: 4px;">
-                      <label for="review-author" style="font-size: 10.5px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน</label>
+                      <label for="review-author" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน</label>
                       <input type="text" id="review-author" name="author" required placeholder="เช่น คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px;">
                   </div>
                   <div style="display: flex; flex-direction: column; gap: 4px;">
-                      <label for="review-location" style="font-size: 10.5px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอ</label>
+                      <label for="review-location" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอ</label>
                       <input type="text" id="review-location" name="location" placeholder="เช่น ตัวเมือง{{PROVINCE_NAME}}" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px;">
                   </div>
               </div>
 
               <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <span id="star-rating-label" style="font-size: 10.5px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจ</span>
-                  <div class="star-rating-input-container" role="group" aria-labelledby="star-rating-label" style="display: flex; gap: 6px; color: #71717A; font-size: 16px; cursor: pointer;">
-                      <i class="fas fa-star star-rating-input-item active" data-value="1" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="2" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="3" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="4" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" data-value="5" aria-hidden="true"></i>
+                  <span id="star-rating-label" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจ</span>
+                  <div class="star-rating-input-container" role="group" aria-labelledby="star-rating-label" style="display: flex; gap: 6px; color: #71717A; font-size: 18px; cursor: pointer;">
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="1 ดาว" data-value="1" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="2 ดาว" data-value="2" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="3 ดาว" data-value="3" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="4 ดาว" data-value="4" aria-hidden="true"></i>
+                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="5 ดาว" data-value="5" aria-hidden="true"></i>
                   </div>
                   <input type="hidden" id="review-rating-value" name="rating" value="5">
                   <input type="hidden" id="review-province-key" name="province_key" value="{{PROVINCE_NAME}}">
               </div>
 
               <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <label for="review-text" style="font-size: 10.5px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน</label>
+                  <label for="review-text" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน</label>
                   <textarea id="review-text" name="review_text" rows="3" required placeholder="น้องสุภาพเรียบร้อย เทคแคร์ประทับใจตรงปก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px; line-height: 1.5; resize: none;"></textarea>
               </div>
 
@@ -542,7 +507,7 @@
     <section id="verification-process" style="max-width: 850px; margin: 20px auto 0 auto;" aria-labelledby="verification-heading">
       <div style="padding: 12px 16px; background: rgba(13,8,30,0.4); border: 1px solid rgba(147, 51, 234, 0.2); border-radius: 12px; display: flex; align-items: center; gap: 10px;">
         <i class="fas fa-user-shield" style="font-size: 20px; color: var(--primary-purple);" aria-hidden="true"></i>
-        <p style="font-size: 11px; color: var(--text-gray); margin: 0; line-height: 1.4;">
+        <p style="font-size: 12px; color: var(--text-gray); margin: 0; line-height: 1.4;">
           <strong style="color: white;">EDITORIAL TRUST:</strong> ทุกโปรไฟล์ผ่านการตรวจสอบตัวตน รูปตรงปก 100% โดยทีมงาน First Model Hub Co. อ่านข้อมูลเพิ่มเติมได้ที่ <a href="/about" style="color: var(--primary-purple); text-decoration: underline;">หน้าเกี่ยวกับเรา</a>
         </p>
       </div>
@@ -571,7 +536,7 @@
       <figure id="map-container" style="width: 100%; height: 160px; position: relative; background-color: rgba(0,0,0,0.4); margin: 0;">
         <div id="map-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background-color: #09090c; color: var(--text-muted); transition: opacity 0.5s;">
           <i class="fas fa-map-marked-alt animate-pulse" style="font-size: 24px; color: var(--primary-purple);" aria-hidden="true"></i>
-          <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;">กำลังโหลดแผนที่ Google Maps...</span>
+          <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;">กำลังโหลดแผนที่ Google Maps...</span>
         </div>
         <iframe
           id="google-map"
@@ -587,7 +552,7 @@
   </div>
 </main>
 
-<!-- ============================== FOOTER WITH RESPONSIVE OFFSET ============================== -->
+<!-- FOOTER WITH RESPONSIVE OFFSET -->
 <footer style="border-top: 1px solid rgba(147, 51, 234, 0.15); background: rgba(14, 9, 30, 0.6);" role="contentinfo">
   <div class="container">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
@@ -595,14 +560,14 @@
         <span class="brand-logo-text" style="font-size: 16px;">
           FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
         </span>
-        <p style="font-size: 11px; line-height: 1.5; color: var(--text-gray); margin: 0;">
+        <p style="font-size: 12px; line-height: 1.5; color: var(--text-gray); margin: 0;">
           <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 ใน{{PROVINCE_NAME}} รูปถ่ายตรงปก 100% ปลอดภัย ไม่มัดจำ
         </p>
       </div>
 
       <nav aria-label="ลิงก์ส่วนท้ายเว็บ">
         <h3 style="font-size: 12px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px;">เมนูหลัก</h3>
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
           <li><a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a></li>
           <li><a href="/about" style="color: var(--text-gray); text-decoration: none;">เกี่ยวกับเรา</a></li>
           <li><a href="/faq" style="color: var(--text-gray); text-decoration: none;">คำถามที่พบบ่อย</a></li>
@@ -611,11 +576,30 @@
     </div>
 
     <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; margin-bottom: 12px;">
-      <h4 style="font-size: 11px; font-weight: 800; color: #A1A1AA; margin-bottom: 8px;">พื้นที่และย่านให้บริการยอดนิยม</h4>
+      <h4 style="font-size: 12px; font-weight: 800; color: #A1A1AA; margin-bottom: 8px;">พื้นที่และย่านให้บริการยอดนิยม</h4>
       <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);"></ul>
     </div>
 
-    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 10px; color: var(--text-muted);">
+<!-- AI CREATOR CREDIT BADGE (GEMINI 3.6 FLASH) -->
+<div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(192, 132, 252, 0.2); text-align: center;">
+  <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(90, 44, 190, 0.15); border: 1px solid rgba(192, 132, 252, 0.35); padding: 8px 18px; border-radius: 100px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.3s ease;"
+       onmouseover="this.style.borderColor='rgba(192, 132, 252, 0.8)'; this.style.transform='translateY(-2px)';"
+       onmouseout="this.style.borderColor='rgba(192, 132, 252, 0.35)'; this.style.transform='translateY(0)';">
+    <span style="font-size: 14px; display: inline-flex; align-items: center; filter: drop-shadow(0 0 6px #C084FC);">✨</span>
+    <span style="font-size: 11.5px; font-weight: 700; color: #E9D5FF; letter-spacing: 0.02em;">
+      พัฒนาและปรับแต่งโค้ดด้วย <strong style="color: #FFFFFF;">Google Gemini 3.6 Flash</strong>
+    </span>
+    <span style="color: rgba(255, 255, 255, 0.2); font-size: 10px;">|</span>
+    <a href="https://aistudio.google.com" target="_blank" rel="noopener nofollow" 
+       style="color: #00E676; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: color 0.2s;"
+       onmouseover="this.style.color='#69F0AE';" onmouseout="this.style.color='#00E676';">
+      <span>ทดลองใช้งาน</span>
+      <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+    </a>
+  </div>
+</div>
+
+    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-muted);">
       <p style="margin: 0;">© <span id="currentYearDynamic">2026</span> FirstModelHub {{PROVINCE_NAME}}. All Rights Reserved.</p>
       <div style="display: flex; gap: 12px;">
         <a href="/privacy-policy" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Privacy Policy</a>
@@ -625,10 +609,19 @@
   </div>
 </footer>
 
-<!-- ============================== LIGHTBOX DETAILS MODAL ============================== -->
+<!-- LIGHTBOX DETAILS MODAL -->
 <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">
   <div id="lightbox-content-wrapper-el">
-    <button id="closeLightboxBtn" style="position: absolute; top: 10px; right: 10px; z-index: 50; width: 34px; height: 36px; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;" aria-label="ปิดหน้าต่างโปรไฟล์">
+
+    <!-- Brand Logo in Lightbox Header -->
+    <div style="position: absolute; top: 10px; left: 12px; z-index: 50; display: flex; align-items: center; background: rgba(9, 5, 22, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 5px 12px; border-radius: 100px; border: 1px solid rgba(192, 132, 252, 0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.6); pointer-events: none;">
+      <span class="brand-logo-text" style="font-size: 14px !important; font-weight: 900 !important; color: #FFFFFF !important; text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 15px #FF1493 !important;">
+        FirstModel<span class="hub-text-pink" style="background: linear-gradient(180deg, #FFB3E6 0%, #FF1493 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;">Hub</span><span class="star" style="font-size: 12px;">🌟</span>
+      </span>
+    </div>
+
+    <!-- Close Lightbox Button -->
+    <button id="closeLightboxBtn" style="position: absolute; top: 10px; right: 10px; z-index: 50; width: 36px; height: 36px; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;" aria-label="ปิดหน้าต่างโปรไฟล์">
       <i class="fas fa-times" aria-hidden="true"></i>
     </button>
 
@@ -644,7 +637,7 @@
         <div class="lightbox-details">
           <header style="display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-              <h3 id="lightbox-profile-name-main" class="text-gradient-main" style="font-size: 22px; font-weight: 800; margin: 0; line-height: 1.2;">ชื่อโปรไฟล์</h3>
+              <h3 id="lightbox-profile-name-main" style="font-size: 24px; font-weight: 900; margin: 0; line-height: 1.2;">ชื่อโปรไฟล์</h3>
               <div id="lightbox-availability-badge-wrapper" style="flex-shrink: 0;"></div>
             </div>
           </header>
@@ -653,16 +646,16 @@
           <div id="lightboxTags" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
           
           <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 8px;">
-            <div id="lightboxDetailsCompact" style="font-size: 11.5px;"></div>
-            <div id="lightboxDateAdded" style="display: none; font-size: 10px; color: #94A3B8; margin-top: 8px;"></div>
+            <div id="lightboxDetailsCompact" style="font-size: 12px;"></div>
+            <div id="lightboxDateAdded" style="display: none; font-size: 12px; color: #94A3B8; margin-top: 8px;"></div>
           </div>
 
           <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 8px;">
-            <div style="color: white; font-weight: 800; font-size: 12px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+            <div style="color: white; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
               <i class="fas fa-info-circle" style="color: var(--primary-purple);" aria-hidden="true"></i>
               <span>รายละเอียดเพิ่มเติม</span>
             </div>
-            <div id="lightboxDescriptionContent" style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; white-space: pre-wrap;"></div>
+            <div id="lightboxDescriptionContent" style="font-size: 12px; color: var(--text-gray); line-height: 1.5; white-space: pre-wrap;"></div>
           </div>
         </div>
       </div>
@@ -671,10 +664,21 @@
 </div>
 
 <script id="ssr-profiles-data">
-  window.profilesData = {{SSR_PROFILES_JSON}};
+  window.profilesData = null;
 </script>
 
 <script type="module" src="/main.js"></script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('SW Registration failed: ', err);
+      });
+    });
+  }
+</script>
 
 </body>
 </html>
