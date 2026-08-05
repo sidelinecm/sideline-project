@@ -16,7 +16,7 @@ const CONFIG = {
     },
     DOMAIN: 'https://firstmodelhub.com',
     BRAND_NAME: 'First Model Hub',
-    DEFAULT_TELEPHONE: 'LINE: @firstmodelhub',
+    DEFAULT_TELEPHONE: "+6620000000",
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@firstmodelhub',
@@ -396,11 +396,11 @@ export default async (request, context) => {
         <main class="main-content">
             <article>
                 <section class="hero-section">
-                    <img src="${lcpImageUrl}" 
-                         ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
-                         class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
-                         loading="eager" fetchpriority="high" decoding="sync" 
-                         width="400" height="533">
+<img src="${lcpImageUrl}" 
+     ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
+     class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
+     loading="eager" fetchpriority="high" decoding="async" 
+     width="400" height="533">
                 </section>
 
                 <header class="profile-meta-header">

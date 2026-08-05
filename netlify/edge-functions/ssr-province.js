@@ -376,7 +376,7 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
       "url": targetUrl,
       "price": priceVal || "1500",
       "priceCurrency": "THB",
-      "priceValidUntil": "2027-12-31",
+      "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
       "availability": !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (profile.availability || "").toLowerCase().includes(kw))
         ? "https://schema.org/InStock"
         : "https://schema.org/SoldOut",
