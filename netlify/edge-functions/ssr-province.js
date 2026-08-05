@@ -228,14 +228,15 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
-  if (!path) return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+const optimizeImg = (hostUrl, path, width = 320, height = 400) => {
+  if (!path || typeof path !== "string") return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+
   if (path.includes("res.cloudinary.com")) {
-    if (path.includes("/upload/")) {
-      return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
-    }
-    return path;
+    // 🟢 ลบปารามิเตอร์ Cloudinary ซ้ำซ้อนเดิมออกให้คลีนก่อนบีบอัดใหม่
+    const cleanPath = path.replace(/\/image\/upload\/[^/]+\/(v\d+\/)/, '/image/upload/$1');
+    return cleanPath.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
   }
+
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
@@ -414,7 +415,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
   
   const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
-  const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
+  const imgUrl = optimizeImg(hostUrl, p.imagePath, 320, 400);
 
   const featuredBadge = p.isfeatured
     ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
@@ -468,7 +469,8 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                height="400"
                style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
                loading="${index === 0 ? "eager" : "lazy"}"
-               decoding="async"
+fetchpriority="${index === 0 ? "high" : "auto"}"
+decoding="async"
                onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
                
           <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
