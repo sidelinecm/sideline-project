@@ -6,10 +6,12 @@
 @font-face {
   font-family: 'Prompt'; font-style: normal; font-weight: 400; font-display: swap;
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
+  size-adjust: 100%;
 }
 @font-face {
   font-family: 'Prompt'; font-style: normal; font-weight: 700; font-display: swap;
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
+  size-adjust: 100%;
 }
 @font-face { font-family: 'Font Awesome 6 Free'; font-display: swap !important; }
 @font-face { font-family: 'Font Awesome 6 Brands'; font-display: swap !important; }
@@ -131,10 +133,17 @@ header a, nav a, footer a, .sidebar-links-wrapper a {
 .hero-guarantee-tag { font-size: 12.5px !important; font-weight: 800 !important; color: #00E676 !important; margin-bottom: 4px !important; text-align: center !important; }
 .hero-subtitle-p { font-size: 11.5px !important; line-height: 1.65 !important; margin: 2px auto 10px auto !important; text-align: center !important; color: #CBD5E1 !important; max-width: 720px !important; }
 
-.hero-stats-trust-bar { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 4px auto 10px auto !important; padding: 8px 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 100px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+/* 🟢 FIX CLS: ล็อกความสูงกล่อง Trust Bar ไม่ให้ขยับกระตุก */
+.hero-stats-trust-bar { 
+  display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; 
+  margin: 4px auto 10px auto !important; padding: 8px 16px; 
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(192, 132, 252, 0.25); 
+  border-radius: 100px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+  min-height: 42px !important; contain: layout style;
+}
 
 /* ==============================================================================
-   5. 🔥 HOT SECTION HEADER
+   5. 🔥 HOT SECTION HEADER & SWIPER
    ============================================================================== */
 .hot-section-header-centered { 
   display: flex !important; flex-direction: column !important; align-items: center !important; 
@@ -159,390 +168,11 @@ header a, nav a, footer a, .sidebar-links-wrapper a {
 .hot-swipe-hint-centered { font-size: 10px !important; font-weight: 700 !important; color: #A1A1AA !important; margin-top: 12px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; padding: 4px 16px !important; border-radius: 100px !important; letter-spacing: 0.05em !important; animation: pulseHint 2.5s infinite ease-in-out !important; }
 @keyframes pulseHint { 0%, 100% { opacity: 0.5; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.02); background: rgba(255, 255, 255, 0.1); } }
 
-/* ==============================================================================
-   6. 📱 MAIN GRID & SEARCH SYSTEM
-   ============================================================================== */
-.glass-panel { border-radius: 18px !important; border: 1px solid rgba(192, 132, 252, 0.25) !important; background: linear-gradient(135deg, rgba(13, 8, 30, 0.85), rgba(9, 9, 12, 0.95)) !important; padding: 12px 10px !important; margin: 10px auto !important; max-width: 850px; }
-.search-inputs-row { display: grid; grid-template-columns: 1fr; gap: 8px; }
-@media (min-width: 640px) { .search-inputs-row { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .search-inputs-row { grid-template-columns: repeat(5, 1fr); } }
-.search-input-field, .search-select-field { width: 100%; background-color: #0c081d !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; color: #FFF; padding: 8px 12px; font-size: 12px; border-radius: 10px !important; outline: none; height: 38px !important; }
-
-#profiles-display-area { min-height: 480px !important; }
-.profiles-grid-row, .profile-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; padding: 0 2px !important; width: 100% !important; max-width: 1100px !important; margin: 0 auto !important; }
-@media (min-width: 768px) { .profiles-grid-row, .profile-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 14px !important; } }
-@media (min-width: 1024px) { .profiles-grid-row, .profile-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 18px !important; } }
-
-.profile-card-new { aspect-ratio: 4 / 5 !important; width: 100% !important; position: relative !important; border-radius: 14px !important; overflow: hidden !important; background-color: #09090B !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important; cursor: pointer !important; transition: transform 0.25s ease !important; }
-.profile-card-new:hover { transform: translateY(-3px) !important; border-color: rgba(192, 132, 252, 0.4) !important; }
-.live-count-chip { background: rgba(0, 230, 118, 0.12) !important; border: 1px solid rgba(0, 230, 118, 0.35) !important; color: #00E676 !important; font-size: 10px !important; font-weight: 800 !important; padding: 2px 8px !important; border-radius: 100px !important; display: inline-flex !important; align-items: center !important; gap: 4px !important; }
-.pulse-dot-el { width: 6px !important; height: 6px !important; border-radius: 50% !important; background-color: #00E676 !important; }
-
-/* ==============================================================================
-   7. 🖼️ LIGHTBOX MODAL (ULTRA-PREMIUM VIP DESIGN 2026)
-   ============================================================================== */
-
-/* Backdrop Overlay หน้าต่างมืดเบลอฉากหลัง */
-#lightbox {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 4000 !important;
-  display: none;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 12px 8px !important;
-  background-color: rgba(5, 3, 12, 0.94) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  overflow-y: auto !important;
+/* 🟢 FIX CLS: สำรองความสูงแถบสไลด์ HOT ป้องกันหน้าจอกระตุก 0.263 */
+#vip-swiper-container {
+  min-height: 241px !important;
+  contain-intrinsic-size: 100% 241px;
 }
-
-/* กรอบคอนเทนเนอร์หลักของ Lightbox */
-#lightbox-content-wrapper-el {
-  position: relative !important;
-  width: 100% !important;
-  max-width: 880px !important;
-  max-height: 92vh !important;
-  background: #0E091F !important;
-  border-radius: 24px !important;
-  border: 1.5px solid rgba(192, 132, 252, 0.35) !important;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 50px rgba(124, 58, 237, 0.3) !important;
-  overflow-y: auto !important;
-  margin: auto !important;
-  -webkit-overflow-scrolling: touch;
-  animation: lightboxPopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes lightboxPopIn {
-  from { opacity: 0; transform: scale(0.92) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* Grid Layout: มือถือแสดง 1 คอลัมน์ -> จอคอมแสดง 2 คอลัมน์ */
-.lightbox-grid-layout {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 0 !important;
-}
-
-@media (min-width: 768px) {
-  #lightbox-content-wrapper-el {
-    overflow: hidden !important;
-  }
-  .lightbox-grid-layout {
-    grid-template-columns: 1.15fr 0.85fr !important;
-    max-height: 85vh !important;
-  }
-}
-
-/* คอลัมน์ฝั่งซ้าย: แสดงรูปภาพ */
-.lightbox-image-column {
-  padding: 0 !important;
-  margin: 0 !important;
-  background: #05030C !important;
-  width: 100% !important;
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-}
-
-/* คอนเทนเนอร์รูปภาพหลัก (คุมระยะไม่ให้ดันสัดส่วน) */
-.lightbox-hero-container {
-  width: 100% !important;
-  height: 52vh !important;
-  max-height: 500px !important;
-  min-height: 320px !important;
-  position: relative !important;
-  background-color: #05030C !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: hidden !important;
-}
-
-@media (min-width: 768px) {
-  .lightbox-hero-container {
-    height: 100% !important;
-    max-height: 85vh !important;
-    min-height: 480px !important;
-  }
-}
-
-/* 🟢 รูปภาพหลักใน Lightbox (คงสัดส่วนจริง 100% ไม่โดนตัดขอบ/ไม่เบี้ยว) */
-#lightboxHeroImage {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important; /* แสดงรูปเต็มใบดั้งเดิม ไม่โดน Crop */
-  object-position: center !important;
-  display: block !important;
-  filter: brightness(0.98) drop-shadow(0 10px 25px rgba(0,0,0,0.8)) !important;
-  transition: opacity 0.2s ease-in-out !important;
-}
-
-/* แถบรูปภาพย่อย (Thumbnail Strip ด้านล่างรูปใหญ่) */
-#lightboxThumbnailStrip {
-  display: flex !important;
-  gap: 8px !important;
-  overflow-x: auto !important;
-  padding: 10px 14px !important;
-  margin: 0 !important;
-  justify-content: flex-start !important;
-  align-items: center !important;
-  width: 100% !important;
-  background: rgba(5, 3, 12, 0.95) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none !important;
-}
-
-#lightboxThumbnailStrip::-webkit-scrollbar {
-  display: none !important;
-}
-
-#lightboxThumbnailStrip img {
-  width: 52px !important;
-  height: 64px !important;
-  object-fit: cover !important;
-  object-position: top center !important;
-  border-radius: 8px !important;
-  cursor: pointer !important;
-  border: 2px solid transparent !important;
-  opacity: 0.5;
-  transition: all 0.25s ease !important;
-  flex-shrink: 0 !important;
-}
-
-#lightboxThumbnailStrip img:hover,
-#lightboxThumbnailStrip img.active {
-  opacity: 1 !important;
-  border-color: #C084FC !important;
-  box-shadow: 0 0 12px rgba(192, 132, 252, 0.6) !important;
-  transform: scale(1.05) !important;
-}
-
-#lightboxThumbnailStrip img, #lightboxHeroImage, button, a, .clickable-img {
-  pointer-events: auto !important;
-}
-
-/* คอลัมน์ฝั่งขวา: ข้อมูลโปรไฟล์และรายละเอียด */
-.lightbox-details {
-  padding: 22px 20px 28px 20px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 14px !important;
-  background: linear-gradient(135deg, rgba(14, 9, 30, 0.98) 0%, rgba(9, 9, 12, 0.99) 100%) !important;
-  position: relative !important;
-}
-
-@media (min-width: 768px) {
-  .lightbox-details {
-    padding: 28px 24px !important;
-    overflow-y: auto !important;
-    max-height: 85vh !important;
-  }
-}
-
-/* ปุ่มปิดหน้าต่าง Lightbox (Close Button) */
-#closeLightboxBtn {
-  position: absolute !important;
-  top: 12px !important;
-  right: 12px !important;
-  z-index: 50 !important;
-  width: 38px !important;
-  height: 38px !important;
-  background-color: rgba(13, 8, 30, 0.8) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(192, 132, 252, 0.4) !important;
-  border-radius: 50% !important;
-  color: #FFFFFF !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 15px !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important;
-  transition: all 0.25s ease !important;
-}
-
-#closeLightboxBtn:hover, #closeLightboxBtn:active {
-  background-color: rgba(255, 23, 68, 0.85) !important;
-  border-color: #FF1744 !important;
-  transform: rotate(90deg) scale(1.1) !important;
-}
-
-/* การ์ดคำโปรย (Quote Card) */
-.lightbox-quote-card {
-  background: rgba(124, 58, 237, 0.1) !important;
-  border-left: 3px solid #C084FC !important;
-  padding: 8px 12px !important;
-  border-radius: 0 10px 10px 0 !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  color: #E9D5FF !important;
-  line-height: 1.5 !important;
-}
-
-/* 🟢 ปุ่มแอดไลน์จองคิวแบบตรึงลอยตัวติดด้านล่าง (Sticky Line CTA Button) */
-#line-btn-sticky-wrapper {
-  position: sticky !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  padding: 10px 0 2px 0 !important;
-  background: linear-gradient(to top, rgba(14, 9, 30, 0.99) 75%, transparent 100%) !important;
-  z-index: 100 !important;
-  margin-top: auto !important;
-}
-
-#line-btn-sticky-wrapper a {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important;
-  color: #FFFFFF !important;
-  padding: 12px 20px !important;
-  border-radius: 100px !important;
-  font-weight: 800 !important;
-  font-size: 13.5px !important;
-  text-decoration: none !important;
-  box-shadow: 0 6px 20px rgba(0, 230, 118, 0.35) !important;
-  transition: all 0.25s ease !important;
-  animation: lineBtnGlow 2.8s infinite ease-in-out !important;
-}
-
-@keyframes lineBtnGlow {
-  0%, 100% { box-shadow: 0 6px 20px rgba(0, 230, 118, 0.35); transform: translateY(0); }
-  50% { box-shadow: 0 8px 28px rgba(0, 230, 118, 0.65); transform: translateY(-2px); }
-}
-
-#line-btn-sticky-wrapper a:hover {
-  transform: translateY(-2px) scale(1.02) !important;
-  box-shadow: 0 10px 30px rgba(0, 230, 118, 0.6) !important;
-}
-/* ==============================================================================
-   8. 📌 FOOTER, DOCK & ACCORDIONS
-   ============================================================================== */
-.floating-app-dock { display: none; }
-@media (max-width: 768px) {
-  .floating-app-dock { display: flex !important; position: fixed !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 24px) !important; max-width: 450px !important; height: 58px !important; background: rgba(13, 8, 30, 0.95) !important; backdrop-filter: blur(20px) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; z-index: 2000 !important; justify-content: space-between !important; align-items: center !important; padding: 4px 8px !important; }
-  .dock-item { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; flex: 1 1 0% !important; color: #A1A1AA !important; text-decoration: none !important; font-size: 10px !important; font-weight: 700 !important; gap: 2px !important; }
-  .dock-item i { font-size: 15px !important; }
-  .dock-item.active, .dock-item:hover { color: #E9D5FF !important; }
-  nav.floating-app-dock a.dock-item.dock-item-line { background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important; color: #FFFFFF !important; border-radius: 100px !important; height: 42px !important; flex-direction: row !important; font-size: 11px !important; font-weight: 800 !important; padding: 0 12px !important; flex: 1.2 1 0% !important; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3) !important; }
-}
-
-footer { padding-bottom: 30px !important; }
-@media (max-width: 768px) { footer { padding-bottom: 120px !important; } }
-#popular-locations-footer { gap: 12px !important; }
-#popular-locations-footer li a { padding: 8px 12px !important; display: inline-block !important; min-height: 44px !important; }
-
-.rule-item { border: 1px solid rgba(255, 255, 255, 0.05); background-color: rgba(13, 8, 30, 0.45); border-radius: 12px; overflow: hidden; margin-bottom: 6px; }
-.rule-trigger { width: 100%; background: none; border: none; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: #FFFFFF; text-align: left; }
-.rule-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; }
-.rule-item:not(.collapsed) .rule-content { max-height: 600px; }
-
-.social-links-grid-wrapper { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 8px !important; justify-content: flex-start !important; padding: 4px 0 !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-.social-links-grid-wrapper::-webkit-scrollbar { display: none; }
-.social-link-card-item { padding: 6px 14px !important; font-size: 11px !important; border-radius: 100px !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; color: #FFFFFF !important; text-decoration: none !important; white-space: nowrap !important; flex-shrink: 0 !important; }
-
-#map-container { max-height: 180px !important; }
-a.highlight, [class*="text-[#C084FC]"], [style*="color: #C084FC"] { color: #E9D5FF !important; text-shadow: 0 0 10px rgba(233, 213, 252, 0.25); }
-h1, h2, h3, h4, .glow-heading-spark { color: var(--pure-white); font-weight: 800 !important; letter-spacing: -0.01em; }
-
-html.light p[style*="color: #A1A1AA"], html.light p[style*="color: #CBD5E1"], html.light p[style*="color: #E4E4E7"], html.light span[style*="color: #A1A1AA"], html.light span[style*="color: #D4D4D8"], html.light div[style*="color: #A1A1AA"] { color: #3F3F46 !important; }
-html.light p[style*="color: white"], html.light span[style*="color: white"], html.light h1, html.light h2, html.light h3, html.light h4 { color: #09090B !important; }
-
-/* ==============================================================================
-   🟢 1. แก้ไขป้ายสถานะ และขนาดการ์ด HOT (แก้ปัญหารูปเล็ก & ป้ายทับซ้อนกัน)
-   ============================================================================== */
-.vip-card-item {
-  flex: 0 0 155px !important; /* ขยายความกว้างการ์ดจาก 135px เป็น 155px */
-  width: 155px !important;
-  height: 215px !important;    /* ขยายความสูงการ์ดจาก 175px เป็น 215px */
-  position: relative !important;
-  overflow: hidden !important;
-  border-radius: 16px !important;
-  background-color: #09090C !important;
-  border: 1px solid rgba(192, 132, 252, 0.35) !important;
-  scroll-snap-align: start !important;
-  flex-shrink: 0 !important;
-}
-
-/* ป้ายอันดับฝั่งขวา (#1 HOT) */
-.hot-rank-badge {
-  position: absolute !important;
-  top: 6px !important;
-  right: 6px !important;
-  background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important;
-  color: #000000 !important;
-  font-size: 9.5px !important; /* ปรับขนาดตัวหนังสือเป็น 9.5px ไม่ให้ชนกัน */
-  font-weight: 900 !important;
-  padding: 2px 6px !important;  /* ปรับระยะขอบให้น้อยลงเพื่อไม่ให้ล้น */
-  border-radius: 100px !important;
-  z-index: 15 !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
-}
-
-/* ป้ายสถานะฝั่งซ้าย (🟢 รับงาน) */
-.vip-status-chip {
-  position: absolute !important;
-  top: 6px !important;
-  left: 6px !important;
-  background: rgba(9, 9, 11, 0.88) !important;
-  border: 1px solid rgba(0, 230, 118, 0.5) !important;
-  color: #00E676 !important;
-  font-size: 9.5px !important; /* ปรับขนาดตัวหนังสือเป็น 9.5px ไม่ให้ชนกัน */
-  font-weight: 800 !important;
-  padding: 2px 6px !important;  /* ปรับระยะขอบให้น้อยลงเพื่อไม่ให้ล้น */
-  border-radius: 100px !important;
-  z-index: 15 !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-  backdrop-filter: blur(8px) !important;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
-}
-
-/* ==============================================================================
-   🟢 2. แก้ไขรูปภาพใน Lightbox (แก้ปัญหารูปเล็ก/ขอบดำ/เสียสัดส่วน)
-   ============================================================================== */
-.lightbox-hero-container {
-  width: 100% !important;
-  aspect-ratio: 4 / 5 !important; /* บังคับสัดส่วนรูปภาพ 4:5 ทรงสวยมาตรฐาน */
-  max-height: 52vh !important;
-  position: relative !important;
-  background-color: #05030C !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: hidden !important;
-  border-radius: 16px 16px 0 0 !important;
-}
-
-@media (min-width: 768px) {
-  .lightbox-hero-container {
-    max-height: 85vh !important;
-    height: 100% !important;
-    border-radius: 16px 0 0 16px !important;
-  }
-}
-
-#lightboxHeroImage {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important; /* ปรับเป็น cover เพื่อให้รูปขยายเต็มกรอบสวยงาม */
-  object-position: top center !important; /* โฟกัสส่วนหน้าด้านบนเสมอ */
-  display: block !important;
-  filter: brightness(0.98) !important;
-}
-
-/* ==============================================================================
-   🟢 HOT SWIPER CARDS & LIGHTBOX STYLES (ชุดสมบูรณ์ไร้โค้ดซ้ำ)
-   ============================================================================== */
 
 /* ตัวการ์ดหลักในสไลด์ HOT */
 .vip-card-item {
@@ -565,7 +195,6 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   border-color: rgba(255, 20, 147, 0.6) !important;
 }
 
-/* รูปภาพในการ์ด */
 .vip-card-item img {
   position: absolute !important;
   top: 0 !important;
@@ -580,7 +209,6 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   pointer-events: none !important;
 }
 
-/* ป้ายสถานะ (ซ้ายบน) */
 .vip-status-chip {
   position: absolute !important;
   top: 6px !important;
@@ -599,7 +227,6 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
 }
 
-/* ป้ายอันดับ HOT (ขวาบน) */
 .hot-rank-badge {
   position: absolute !important;
   top: 6px !important;
@@ -619,7 +246,6 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   box-shadow: 0 2px 6px rgba(0,0,0,0.6) !important;
 }
 
-/* เงาดำซ้อนทับด้านล่าง */
 .vip-card-overlay {
   position: absolute !important;
   inset: 0 !important;
@@ -628,7 +254,6 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   pointer-events: none !important;
 }
 
-/* ลิงก์กดดูโปรไฟล์ */
 .vip-card-item .card-link {
   display: block !important;
   width: 100% !important;
@@ -640,7 +265,6 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   pointer-events: auto !important;
 }
 
-/* ข้อความส่วนล่างของการ์ด */
 .vip-card-info {
   position: absolute !important;
   bottom: 8px !important;
@@ -676,49 +300,277 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   gap: 3px !important;
 }
 
-/* รูปภาพและคอนเทนเนอร์ใน Lightbox */
+/* ==============================================================================
+   6. 📱 MAIN GRID & SEARCH SYSTEM
+   ============================================================================== */
+.glass-panel { border-radius: 18px !important; border: 1px solid rgba(192, 132, 252, 0.25) !important; background: linear-gradient(135deg, rgba(13, 8, 30, 0.85), rgba(9, 9, 12, 0.95)) !important; padding: 12px 10px !important; margin: 10px auto !important; max-width: 850px; }
+.search-inputs-row { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 640px) { .search-inputs-row { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .search-inputs-row { grid-template-columns: repeat(5, 1fr); } }
+.search-input-field, .search-select-field { width: 100%; background-color: #0c081d !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; color: #FFF; padding: 8px 12px; font-size: 12px; border-radius: 10px !important; outline: none; height: 38px !important; }
+
+#profiles-display-area { min-height: 480px !important; }
+.profiles-grid-row, .profile-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; padding: 0 2px !important; width: 100% !important; max-width: 1100px !important; margin: 0 auto !important; }
+@media (min-width: 768px) { .profiles-grid-row, .profile-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 14px !important; } }
+@media (min-width: 1024px) { .profiles-grid-row, .profile-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 18px !important; } }
+
+.profile-card-new { aspect-ratio: 4 / 5 !important; width: 100% !important; position: relative !important; border-radius: 14px !important; overflow: hidden !important; background-color: #09090B !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important; cursor: pointer !important; transition: transform 0.25s ease !important; }
+.profile-card-new:hover { transform: translateY(-3px) !important; border-color: rgba(192, 132, 252, 0.4) !important; }
+.live-count-chip { background: rgba(0, 230, 118, 0.12) !important; border: 1px solid rgba(0, 230, 118, 0.35) !important; color: #00E676 !important; font-size: 10px !important; font-weight: 800 !important; padding: 2px 8px !important; border-radius: 100px !important; display: inline-flex !important; align-items: center !important; gap: 4px !important; }
+.pulse-dot-el { width: 6px !important; height: 6px !important; border-radius: 50% !important; background-color: #00E676 !important; }
+
+/* 🟢 FIX CLS: ล็อกความสูงแถบปุ่มชิปย่าน ไม่ให้ดันกล่องล่าง */
+#zone-chips-container, #smart-quick-chips {
+  min-height: 48px !important;
+}
+
+/* ==============================================================================
+   🖼️ LIGHTBOX MODAL - PERFECT 4:5 ASPECT RATIO (อัตราส่วนมาตรฐาน 4/5)
+   ============================================================================== */
+
+/* Backdrop หน้าต่างมืดเบลอฉากหลัง */
+#lightbox {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 4000 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 6px !important;
+  background-color: rgba(4, 2, 10, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  overflow-y: auto !important;
+}
+
+/* กรอบคอนเทนเนอร์หลัก ให้ขยายกว้างโปร่ง ไม่บีบแคบ */
+#lightbox-content-wrapper-el {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 520px !important;
+  max-height: 94vh !important;
+  background: #0D081F !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(124, 58, 237, 0.2) !important;
+  overflow-y: auto !important;
+  margin: auto !important;
+  -webkit-overflow-scrolling: touch;
+  animation: lightboxPopIn 0.25s ease-out forwards;
+}
+
+@keyframes lightboxPopIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.lightbox-grid-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+@media (min-width: 768px) {
+  #lightbox-content-wrapper-el {
+    max-width: 860px !important;
+    max-height: 88vh !important;
+    overflow: hidden !important;
+  }
+  .lightbox-grid-layout {
+    display: grid !important;
+    grid-template-columns: 1.1fr 0.9fr !important;
+    max-height: 88vh !important;
+  }
+}
+
+/* คอลัมน์รูปภาพ */
+.lightbox-image-column {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #000000 !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+/* 🟢 กรอบรูปภาพทรง 4:5 มาตรฐานดั้งเดิม ใหญ่ โปร่ง ไม่โดนจำกัดความสูงเตี้ย */
 .lightbox-hero-container {
   width: 100% !important;
-  aspect-ratio: 4 / 5 !important;
-  max-height: 52vh !important;
+  aspect-ratio: 4 / 5 !important; /* อัตราส่วนมาตรฐาน 4/5 ตามรูปการ์ดเว็บ */
   position: relative !important;
-  background-color: #05030C !important;
+  background-color: #000000 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   overflow: hidden !important;
-  border-radius: 16px 16px 0 0 !important;
 }
 
 @media (min-width: 768px) {
   .lightbox-hero-container {
-    max-height: 85vh !important;
+    aspect-ratio: auto !important;
     height: 100% !important;
-    border-radius: 16px 0 0 16px !important;
+    max-height: 88vh !important;
   }
 }
 
+/* 🟢 รูปภาพแสดงผลใหญ่ คมชัด สัดส่วน 4/5 ตรงปก 100% */
 #lightboxHeroImage {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;
+  object-fit: cover !important; /* แสดงรูปเต็มกรอบ 4:5 โฟกัสช่วงหน้าและลำตัว */
   object-position: top center !important;
   display: block !important;
   filter: brightness(0.98) !important;
 }
 
-/* 🟢 ปุ่มแอดไลน์ลอยตรึงด้านล่างใน Lightbox บนมือถือ */
+/* แถบรูปย่อยด้านล่าง */
+#lightboxThumbnailStrip {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  width: 100% !important;
+  background: rgba(5, 3, 12, 0.95) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  scrollbar-width: none !important;
+}
+
+#lightboxThumbnailStrip::-webkit-scrollbar {
+  display: none !important;
+}
+
+#lightboxThumbnailStrip img {
+  width: 48px !important;
+  height: 60px !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  border: 1.5px solid transparent !important;
+  opacity: 0.5;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+}
+
+#lightboxThumbnailStrip img:hover,
+#lightboxThumbnailStrip img.active {
+  opacity: 1 !important;
+  border-color: #C084FC !important;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.5) !important;
+}
+
+/* รายละเอียดส่วนล่าง */
+.lightbox-details {
+  padding: 18px 16px 20px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  background: linear-gradient(180deg, #0D081F 0%, #070412 100%) !important;
+}
+
+@media (min-width: 768px) {
+  .lightbox-details {
+    padding: 24px 20px !important;
+    overflow-y: auto !important;
+    max-height: 88vh !important;
+  }
+}
+
+/* ปุ่มปิด (X) */
+#closeLightboxBtn {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 50 !important;
+  width: 36px !important;
+  height: 36px !important;
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 50% !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+  transition: all 0.2s ease !important;
+}
+
+#closeLightboxBtn:hover {
+  background-color: rgba(255, 23, 68, 0.85) !important;
+}
+
+/* คำโปรย */
+.lightbox-quote-card {
+  background: rgba(124, 58, 237, 0.12) !important;
+  border-left: 3px solid #C084FC !important;
+  padding: 8px 12px !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: #E9D5FF !important;
+  line-height: 1.4 !important;
+}
+
+/* ปุ่มแอดไลน์ */
 #line-btn-sticky-wrapper {
-  position: sticky !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  padding: 10px 0 4px 0 !important;
-  background: linear-gradient(to top, rgba(14, 9, 30, 0.98) 70%, transparent 100%) !important;
-  z-index: 100 !important;
+  margin-top: 6px !important;
+  width: 100% !important;
+}
+
+#line-btn-sticky-wrapper a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important;
+  color: #FFFFFF !important;
+  padding: 13px 20px !important;
+  border-radius: 100px !important;
+  font-weight: 800 !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  box-shadow: 0 6px 20px rgba(0, 230, 118, 0.35) !important;
 }
 /* ==============================================================================
-   🟢 SUPPLEMENT: EXTRA LUXURY & MICRO-INTERACTIONS 2026
+   8. 📌 FOOTER, DOCK & ACCORDIONS
+   ============================================================================== */
+.floating-app-dock { display: none; }
+@media (max-width: 768px) {
+  .floating-app-dock { display: flex !important; position: fixed !important; bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 24px) !important; max-width: 450px !important; height: 58px !important; background: rgba(13, 8, 30, 0.95) !important; backdrop-filter: blur(20px) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; z-index: 2000 !important; justify-content: space-between !important; align-items: center !important; padding: 4px 8px !important; }
+  .dock-item { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; flex: 1 1 0% !important; color: #A1A1AA !important; text-decoration: none !important; font-size: 10px !important; font-weight: 700 !important; gap: 2px !important; }
+  .dock-item i { font-size: 15px !important; }
+  .dock-item.active, .dock-item:hover { color: #E9D5FF !important; }
+  nav.floating-app-dock a.dock-item.dock-item-line { background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important; color: #FFFFFF !important; border-radius: 100px !important; height: 42px !important; flex-direction: row !important; font-size: 11px !important; font-weight: 800 !important; padding: 0 12px !important; flex: 1.2 1 0% !important; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3) !important; }
+}
+
+footer { padding-bottom: 30px !important; }
+@media (max-width: 768px) { footer { padding-bottom: 120px !important; } }
+#popular-locations-footer { gap: 12px !important; }
+#popular-locations-footer li a { padding: 8px 12px !important; display: inline-block !important; min-height: 44px !important; }
+
+.rule-item { border: 1px solid rgba(255, 255, 255, 0.05); background-color: rgba(13, 8, 30, 0.45); border-radius: 12px; overflow: hidden; margin-bottom: 6px; }
+.rule-trigger { width: 100%; background: none; border: none; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: #FFFFFF; text-align: left; }
+.rule-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; }
+.rule-item:not(.collapsed) .rule-content { max-height: 600px; }
+
+.social-links-grid-wrapper { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 8px !important; justify-content: flex-start !important; padding: 4px 0 !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.social-links-grid-wrapper::-webkit-scrollbar { display: none; }
+.social-link-card-item { padding: 6px 14px !important; font-size: 11px !important; border-radius: 100px !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; color: #FFFFFF !important; text-decoration: none !important; white-space: nowrap !important; flex-shrink: 0 !important; }
+
+#map-container { max-height: 180px !important; }
+a.highlight, [class*="text-[#C084FC]"], [style*="color: #C084FC"] { color: #E9D5FF !important; text-shadow: 0 0 10px rgba(233, 213, 252, 0.25); }
+h1, h2, h3, h4, .glow-heading-spark { color: var(--pure-white); font-weight: 800 !important; letter-spacing: -0.01em; }
+
+html.light p[style*="color: #A1A1AA"], html.light p[style*="color: #CBD5E1"], html.light p[style*="color: #E4E4E7"], html.light span[style*="color: #A1A1AA"], html.light span[style*="color: #D4D4D8"], html.light div[style*="color: #A1A1AA"] { color: #3F3F46 !important; }
+html.light p[style*="color: white"], html.light span[style*="color: white"], html.light h1, html.light h2, html.light h3, html.light h4 { color: #09090B !important; }
+
+/* ==============================================================================
+   🟢 SUPPLEMENT: EXTRA LUXURY, MICRO-INTERACTIONS & NO-SCROLLBAR
    ============================================================================== */
 
 /* 1. ซ่อน Scrollbar ของสไลด์แนวนอนให้เนียนกริบทุกเบราว์เซอร์ */
@@ -766,11 +618,183 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   transform: translateY(-1px) !important;
 }
 
-/* 4. เพิ่มเงาเรืองแสงให้ปุ่มไลน์ลอยใน Lightbox บนมือถือ */
-#line-btn-sticky-wrapper a {
-  animation: lineGlowPulse 3s infinite ease-in-out !important;
+/* ==============================================================================
+   ✨ REFACTORED MODERN TRUST STATS BAR (แก้ปัญหากล่องทรงไข่ยักษ์บนมือถือ)
+   ============================================================================== */
+
+/* กล่องรวมสถิติ เปลี่ยนเป็น Grid 3 ช่องบนมือถือ */
+.hero-stats-trust-bar {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 10px auto 14px auto !important;
+  padding: 8px 6px !important;
+  background: rgba(18, 12, 38, 0.55) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+  border-radius: 14px !important; /* เปลี่ยนจาก 100px เป็น 14px เพื่อไม่ให้เป็นทรงไข่ยักษ์ */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+  min-height: 0 !important;
+  contain: layout style !important;
 }
-@keyframes lineGlowPulse {
-  0%, 100% { box-shadow: 0 6px 20px rgba(0, 230, 118, 0.3); }
-  50% { box-shadow: 0 8px 25px rgba(0, 230, 118, 0.65); }
+
+/* ซ่อนจุดไข่ปลาแยกบรรทัดเดิมที่ทำให้รูปทรงเสีย */
+.trust-stat-divider {
+  display: none !important;
+}
+
+/* แต่งการ์ดสถิติจิ๋ว 3 ช่อง สไตล์ Bento Dashboard */
+.trust-stat-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  text-align: center !important;
+  padding: 8px 4px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 10px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #D4D4D8 !important;
+  line-height: 1.2 !important;
+}
+
+.trust-stat-item i {
+  font-size: 14px !important;
+  margin-bottom: 2px !important;
+}
+
+.trust-stat-item span {
+  display: block !important;
+  font-size: 9.5px !important;
+  white-space: nowrap !important;
+}
+
+.trust-stat-item strong {
+  font-weight: 900 !important;
+  font-size: 11px !important;
+}
+
+/* แสดงผลแบบแถบสลิมยาวเฉพาะบนจอคอมพิวเตอร์ */
+@media (min-width: 640px) {
+  .hero-stats-trust-bar {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 16px !important;
+    padding: 8px 24px !important;
+    border-radius: 100px !important;
+  }
+  .trust-stat-divider {
+    display: inline-block !important;
+    color: rgba(255, 255, 255, 0.2) !important;
+  }
+  .trust-stat-item {
+    flex-direction: row !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 11.5px !important;
+  }
+  .trust-stat-item span {
+    font-size: 11.5px !important;
+  }
+}
+
+/* ==============================================================================
+   📸 ULTRA PHOTO MAXIMIZER & ANIMATIONS 2026 (ขยายรูปใหญ่สะใจ + ใส่แอนิเมชั่น)
+   ============================================================================== */
+
+/* 1. ขยายความกว้างรูปภาพบนมือถือให้ใหญ่เต็มตา ลดขอบบีบข้างออก */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 4px !important; /* ลดขอบข้างจาก 16px เหลือ 4px ให้รูปขยายใหญ่ขึ้นทันที */
+  }
+  
+  .glass-panel#featured-profiles, .glass-panel {
+    padding: 10px 4px !important;
+    margin: 6px auto !important;
+    border-radius: 14px !important;
+  }
+  
+  .profiles-grid-row, .profile-grid {
+    gap: 6px !important; /* ลดช่องว่างระหว่างรูปเหลือ 6px เพื่อให้รูปกว้างขึ้นอีก */
+    padding: 0 !important;
+  }
+  
+  .profile-card-new {
+    border-radius: 12px !important;
+  }
+}
+
+/* 2. อนิเมชั่นการ์ดรูปภาพ (3D Zoom & Neon Glow) */
+.profile-card-new {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              box-shadow 0.35s ease, 
+              border-color 0.35s ease !important;
+}
+
+.profile-card-new img {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              filter 0.5s ease !important;
+}
+
+/* เมื่อแตะหรือชี้ที่รูปภาพ รูปจะค่อยๆ ซูมขยายใหญ่ขึ้นอย่างลื่นไหล */
+.profile-card-new:hover img, 
+.profile-card-new:active img {
+  transform: scale(1.07) !important;
+  filter: brightness(1.04) !important;
+}
+
+.profile-card-new:hover, 
+.profile-card-new:active {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.45), 0 0 15px rgba(255, 46, 99, 0.3) !important;
+  border-color: rgba(192, 132, 252, 0.7) !important;
+}
+
+/* 3. เอฟเฟกต์ประกายแสงวิ้งลากผ่านรูปภาพ (Shine Sweep Effect) */
+.profile-card-new::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  pointer-events: none;
+  z-index: 12;
+  opacity: 0;
+}
+
+.profile-card-new:hover::after, 
+.profile-card-new:active::after {
+  animation: shineSweep 0.85s ease-out;
+}
+
+@keyframes shineSweep {
+  0% { left: -60%; opacity: 1; }
+  100% { left: 140%; opacity: 0; }
+}
+
+/* 4. อนิเมชั่นหัวใจปุ่มถูกใจ (Heart Pop) */
+.like-heart-btn:active i, .like-heart-btn.liked i {
+  animation: heartPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.45); }
+  100% { transform: scale(1); }
 }
