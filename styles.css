@@ -798,3 +798,43 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
   50% { transform: scale(1.45); }
   100% { transform: scale(1); }
 }
+
+/* ==============================================================================
+   🎯 ZERO CLS ULTIMATE FIX (ดึง CLS จาก 0.135 ลงสู่ < 0.05 โซนสีเขียว)
+   ============================================================================== */
+
+/* 1. ล็อกขนาดไอคอน FontAwesome ป้องกันไอคอนเด้งขยายขยับเลย์เอาต์ตอนโหลดเสร็จ */
+.fas, .fab, .far, i[class*="fa-"] {
+  display: inline-block !important;
+  width: 1em !important;
+  height: 1em !important;
+  line-height: 1em !important;
+  vertical-align: -0.125em !important;
+  contain: layout size !important;
+}
+
+/* 2. ล็อกความสูงกล่องหัวเรื่องใน Hero Section ป้องกันฟอนต์สลับแล้วดันบรรทัด */
+.clutch-pill {
+  min-height: 28px !important;
+  contain: layout style !important;
+}
+
+.brand-showcase-wrapper {
+  min-height: 52px !important;
+  contain: layout style !important;
+}
+
+.seo-h1-title {
+  min-height: 64px !important;
+  contain: layout style !important;
+}
+
+.hot-section-header-centered {
+  min-height: 110px !important;
+  contain: layout style !important;
+}
+
+/* 3. ล็อกขอบเขตการประมวลผลเซกชั่น ป้องกันการส่งแรงกระตุกข้ามเซกชั่น */
+.hero-section, .glass-panel, #profiles-display-area {
+  contain: layout style !important;
+}
