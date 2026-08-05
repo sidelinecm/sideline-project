@@ -342,44 +342,62 @@
     </div>
   </main> 
 
-  <!-- FOOTER -->
-  <footer style="border-top: 1px solid rgba(147, 51, 234, 0.15); background: rgba(14, 9, 30, 0.6);" role="contentinfo">
-    <div class="container">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <span class="brand-logo-text" style="font-size: 16px;">
-            FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-          </span>
-          <p style="font-size: 12px; line-height: 1.5; color: var(--text-gray); margin: 0;">
-            <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 รูปถ่ายตรงปก 100% ปลอดภัย ไม่มัดจำ
-          </p>
-        </div>
-
-        <nav aria-label="ลิงก์ส่วนท้ายเว็บ">
-          <h3 style="font-size: 12px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px;">เมนูหลัก</h3>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
-            <li><a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a></li>
-            <li><a href="/about" style="color: var(--text-gray); text-decoration: none;">เกี่ยวกับเรา</a></li>
-            <li><a href="/faq" style="color: var(--text-gray); text-decoration: none;">คำถามที่พบบ่อย</a></li>
-          </ul>
-        </nav>
+<!-- FOOTER WITH RESPONSIVE OFFSET -->
+<footer style="border-top: 1px solid rgba(147, 51, 234, 0.15); background: rgba(14, 9, 30, 0.6);" role="contentinfo">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span class="brand-logo-text" style="font-size: 16px;">
+          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
+        </span>
+        <p style="font-size: 12px; line-height: 1.5; color: var(--text-gray); margin: 0;">
+          <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 ใน{{PROVINCE_NAME}} รูปถ่ายตรงปก 100% ปลอดภัย ไม่มัดจำ
+        </p>
       </div>
 
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; margin-bottom: 12px;">
-        <h4 style="font-size: 12px; font-weight: 800; color: #A1A1AA; margin-bottom: 8px;">พื้นที่และย่านให้บริการยอดนิยม</h4>
-        <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);"></ul>
-      </div>
+      <nav aria-label="ลิงก์ส่วนท้ายเว็บ">
+        <h3 style="font-size: 12px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px;">เมนูหลัก</h3>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+          <li><a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a></li>
+          <li><a href="/about" style="color: var(--text-gray); text-decoration: none;">เกี่ยวกับเรา</a></li>
+          <li><a href="/faq" style="color: var(--text-gray); text-decoration: none;">คำถามที่พบบ่อย</a></li>
+        </ul>
+      </nav>
+    </div>
 
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-muted);">
-        <p style="margin: 0;">© <span id="currentYearDynamic">2026</span> FirstModelHub. All Rights Reserved.</p>
-        <div style="display: flex; gap: 12px;">
-          <a href="/privacy-policy" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Privacy Policy</a>
-          <a href="/terms-of-service" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Terms & Conditions</a>
-        </div>
+    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; margin-bottom: 12px;">
+      <h4 style="font-size: 12px; font-weight: 800; color: #A1A1AA; margin-bottom: 8px;">พื้นที่และย่านให้บริการยอดนิยม</h4>
+      <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);"></ul>
+    </div>
+
+<!-- AI CREATOR CREDIT BADGE (GEMINI 3.6 FLASH) -->
+<div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(192, 132, 252, 0.2); text-align: center;">
+  <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(90, 44, 190, 0.15); border: 1px solid rgba(192, 132, 252, 0.35); padding: 8px 18px; border-radius: 100px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.3s ease;"
+       onmouseover="this.style.borderColor='rgba(192, 132, 252, 0.8)'; this.style.transform='translateY(-2px)';"
+       onmouseout="this.style.borderColor='rgba(192, 132, 252, 0.35)'; this.style.transform='translateY(0)';">
+    <span style="font-size: 14px; display: inline-flex; align-items: center; filter: drop-shadow(0 0 6px #C084FC);">✨</span>
+    <span style="font-size: 11.5px; font-weight: 700; color: #E9D5FF; letter-spacing: 0.02em;">
+      พัฒนาและปรับแต่งโค้ดด้วย <strong style="color: #FFFFFF;">Google Gemini 3.6 Flash</strong>
+    </span>
+    <span style="color: rgba(255, 255, 255, 0.2); font-size: 10px;">|</span>
+    <a href="https://aistudio.google.com" target="_blank" rel="noopener nofollow" 
+       style="color: #00E676; font-size: 11.5px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: color 0.2s;"
+       onmouseover="this.style.color='#69F0AE';" onmouseout="this.style.color='#00E676';">
+      <span>ทดลองใช้งาน</span>
+      <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+    </a>
+  </div>
+</div>
+
+    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-muted);">
+      <p style="margin: 0;">© <span id="currentYearDynamic">2026</span> FirstModelHub {{PROVINCE_NAME}}. All Rights Reserved.</p>
+      <div style="display: flex; gap: 12px;">
+        <a href="/privacy-policy" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Privacy Policy</a>
+        <a href="/terms-of-service" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">Terms & Conditions</a>
       </div>
     </div>
-  </footer>
-
+  </div>
+</footer>
   <!-- LIGHTBOX DETAILS MODAL -->
   <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">
     <div id="lightbox-content-wrapper-el">
