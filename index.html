@@ -85,25 +85,20 @@
 
 <body>
 
-<!-- FLOATING APP DOCK (MOBILE APP EXPERIENCE) -->
-<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-  <a href="/" class="dock-item active">
-    <i class="fas fa-home" aria-hidden="true"></i>
-    <span>หน้าแรก</span>
-  </a>
-  <a href="#search-section" class="dock-item">
-    <i class="fas fa-search" aria-hidden="true"></i>
-    <span>ตัวกรอง</span>
-  </a>
-  <a href="/profiles" class="dock-item">
-    <i class="fas fa-user-friends" aria-hidden="true"></i>
-    <span>รวมน้องๆ</span>
-  </a>
-  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
-    <i class="fab fa-line" aria-hidden="true"></i>
-    <span>จองคิว</span>
-  </a>
-</nav>
+
+<!-- GLOBAL PRELOADER -->
+<div id="global-loader-overlay" style="position: fixed; inset: 0; background-color: #060411; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease;">
+  <div style="position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+    <div style="position: absolute; width: 100%; height: 100%; border: 3px solid transparent; border-top-color: #C084FC; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div style="position: absolute; width: 70%; height: 70%; border: 3px solid transparent; border-top-color: #FF1493; border-radius: 50%; animation: spin 0.8s linear infinite reverse;"></div>
+    <span style="font-size: 24px;">🌟</span>
+  </div>
+  <div style="color: #E9D5FF; font-family: 'Prompt', sans-serif; font-size: 14px; font-weight: 800; margin-top: 16px; letter-spacing: 2px; animation: pulse 1.5s infinite;">กำลังเตรียมโปรไฟล์...</div>
+</div>
+<style>
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+</style>
 
 <!-- HEADER -->
 <header id="page-header" role="banner">
@@ -117,7 +112,7 @@
 
     <div class="header-status-badge">
         <span class="status-dot-el" aria-hidden="true"></span>
-        <span style="font-weight: 700; color: var(--text-gray);">ระบบพร้อมทำงาน: <span id="last-updated-time">อัปเดตน้องๆ ล่าสุดวันนี้</span></span>
+        <span style="font-weight: 700; color: var(--text-gray);">ระบบพร้อมทำงาน: <span id="last-updated-time">อัปเดตล่าสุดวันนี้</span></span>
     </div>
 
     <div class="nav-controls">
@@ -125,44 +120,38 @@
             <a href="/profiles" style="color: var(--text-gray) !important;">รวมโปรไฟล์แนะนำ</a>
             <a href="/locations" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
         </nav>
-
         <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทางเสริมสำหรับมือถือ" style="color: var(--text-gray) !important;">
             <i class="fas fa-bars" aria-hidden="true"></i>
         </button>
     </div>
 </header>
 
-  <!-- MOBILE SIDEBAR MENU -->
-  <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
-    <div class="sidebar-header-div">
-      <span style="color: #A1A1AA !important; font-size: 13px;">Navigation</span>
-      <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
-        <i class="fas fa-times" aria-hidden="true"></i>
-      </button>
-    </div>
-    
-    <div class="sidebar-links-wrapper">
-      <a href="/">หน้าแรก</a>
-      <a href="/profiles">น้องๆ VIP แนะนำ</a>
-      <a href="/locations">พื้นที่บริการทั่วไทย</a>
-      <a href="/about">เกี่ยวกับเรา & ปลอดภัย</a>
-      <a href="/faq">คำถามพบบ่อย</a>
-      <a href="/blog">บทความแนะนำ</a>
-    </div>
-
-    <div>
-      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-         style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 10px 0; border-radius: 8px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 12px; box-shadow: 0 4px 15px rgba(17, 120, 59, 0.25);">
-        <i class="fab fa-line" style="font-size: 16px;" aria-hidden="true"></i> แอดไลน์จองคิว
-      </a>
-    </div>
-  </aside>
-
-  <div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
+<!-- MOBILE SIDEBAR MENU -->
+<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+  <div class="sidebar-header-div">
+    <span style="color: #A1A1AA !important; font-size: 13px;">Navigation</span>
+    <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
+      <i class="fas fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
+  <div class="sidebar-links-wrapper">
+    <a href="/">หน้าแรก</a>
+    <a href="/profiles">รวมโปรไฟล์</a>
+    <a href="/locations">พื้นที่บริการทั่วไทย</a>
+    <a href="/about">เกี่ยวกับเรา & ปลอดภัย</a>
+    <a href="/faq">คำถามพบบ่อย</a>
+  </div>
+  <div>
+    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
+       style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 10px 0; border-radius: 8px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 12px;">
+      <i class="fab fa-line" style="font-size: 16px;" aria-hidden="true"></i> แอดไลน์จองคิว
+    </a>
+  </div>
+</aside>
+<div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
 
 <!-- MAIN CONTENT -->
 <main id="main-content" style="position: relative; overflow: hidden;">
-  
     <div class="container space-y-24">
 
     <!-- HERO SECTION -->
@@ -176,40 +165,27 @@
       </div>
 
       <div class="brand-showcase-wrapper">
-        <span class="brand-neon-text">
-          FirstModel<span class="hub-text-pink">Hub</span>
-        </span>
-        <span class="dancing-neon-star">🌟</span>
+
+<!-- หลังแก้: -->
+<span class="brand-logo-text">
+  FIRSTMODEL<span class="hub-text">HUB</span>
+</span>
       </div>
 
       <h1 id="hero-h1" class="seo-h1-title">
         <span class="seo-sub-headline">รับงาน{{PROVINCE_NAME}} • ไซด์ไลน์{{PROVINCE_NAME}}</span><br>
         <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
       </h1>
-      
-      <p class="hero-guarantee-tag">
-        ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%
-      </p>
-      
-      <p class="hero-subtitle-p">
-        ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong>รับงาน{{PROVINCE_NAME}}</strong>, <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยงด้วยนโยบาย<strong>ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong> ทั้งหมด
-      </p>
+      <p class="hero-guarantee-tag">ความปลอดภัยสูงสุด เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%</p>
+      <p class="hero-subtitle-p">ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP ยืนยันตัวตนจริง 100% ปราศจากความเสี่ยง ครอบคลุมพิกัด <strong style="color: #C084FC;">{{PROVINCE_ZONES}}</strong></p>
 
       <div class="hot-section-header-centered">
-        <h2 class="hot-title-red-pink">
-          น้องๆ ที่ HOT 🔥<br>
-          <span class="hot-sub-line">ประจำเดือน <span class="hot-tag-badge-red">#ฟิวแฟน</span></span>
-        </h2>
-        <div class="hot-swipe-hint-centered">
-          &lt;--- เลื่อนซ้าย-ขวา ---&gt;
-        </div>
+        <h2 class="hot-title-red-pink">น้องๆรับงาน ที่ HOT 🔥<br><span class="hot-sub-line">ประจำเดือน <span class="hot-tag-badge-red">#ฟิวแฟน</span></span></h2>
+        <div class="hot-swipe-hint-centered">&lt;--- เลื่อนซ้าย-ขวา ---&gt;</div>
       </div>
 
-      <!-- HOT CARDS SWIPER -->
-      <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;">
-      </div>
+      <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 12px !important; width: 100% !important; max-width: 850px !important; margin: 6px auto 14px auto !important; padding: 10px 4px 16px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;"></div>
 
-      <!-- TRUST STATS BAR -->
       <div class="hero-stats-trust-bar">
         <div class="trust-stat-item">
           <i class="fas fa-users" style="color: #C084FC;" aria-hidden="true"></i>
@@ -226,105 +202,64 @@
           <span>จ่ายหน้างาน 100%</span>
         </div>
       </div>
-
     </section>
 
     <!-- FEATURED PROFILES GRID -->
     <section id="featured-profiles" class="glass-panel" style="padding: 16px 0; overflow: hidden; position: relative;">
       <div class="section-spacing-container text-center-wrapper" style="position: relative; z-index: 10; padding: 0 8px; margin-bottom: 12px;">
           <div class="badge-wrapper" style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
-              <span style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 100px; text-transform: uppercase;">
-                POPULAR SELECTION
-              </span>
+              <span style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 100px;">POPULAR SELECTION</span>
           </div>
-
           <h2 id="featured-heading" style="font-size: 18px; font-weight: 900; color: #FFFFFF; text-align: center; margin: 0 auto 6px auto;">
-            แนะนำเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}<br>
-            <span style="color: #C084FC;">ยอดนิยม และตรงปก 100%</span>
+            แนะนำเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}<br><span style="color: #C084FC;">ยอดนิยม และตรงปก 100%</span>
           </h2>
       </div>
-      
       <div id="featured-profiles-container" class="profiles-grid-row" role="region" aria-live="polite" aria-labelledby="featured-heading">
         {{PROFILES_CARDS_HTML}}
       </div>
     </section>
 
-    <!-- SEARCH & FILTER SECTION -->
-    <section id="search-section" class="glass-panel" style="max-width: 850px; margin: 12px auto; padding: 12px 10px; position: relative;">
-      <p style="font-size: 12px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary-purple); text-align: center; margin-bottom: 4px;">
-        SMART FILTER SYSTEM
-      </p>
-      <h2 id="search-form-heading" class="text-gradient-sub" style="font-size: 14px; font-weight: 800; text-align: center; margin-bottom: 10px;">
-          ค้นหาโปรไฟล์ไซด์ไลน์{{PROVINCE_NAME}} สัดส่วน สไตล์ และพิกัดนัดพบ
-      </h2>
-      
-      <form id="search-form" autocomplete="off" aria-label="ฟอร์มค้นหาโปรไฟล์" style="position: relative; z-index: 10;">
-          <div class="search-inputs-row">
-              <div class="search-control" style="position: relative;">
-                  <input id="search-keyword" name="q" type="search" placeholder="🔍 ค้นชื่อ, นิมมาน, ฟิวแฟน..." aria-label="ค้นหาด้วยชื่อ สไตล์ หรือย่านรับงาน" class="search-input-field">
-                  <button type="button" id="clear-search-btn" style="display: none; position: absolute; top: 50%; right: 12px; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;" aria-label="ล้างข้อมูล"><i class="fas fa-times-circle" aria-hidden="true"></i></button>
-                  <div id="search-suggestions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 6px; z-index: 50;"></div>
-              </div>
-              
-              <div class="search-control">
-                  <select id="search-province" name="province" aria-label="กรองและค้นหาตามจังหวัดรับงาน" class="search-select-field">
-                      <option value="" style="background-color: #09090c; color: #D4D4D8;">🗺️ เลือกจังหวัด (ทั้งหมด)</option>
-                  </select>
-              </div>
-              
-              <div class="search-control">
-                  <select id="search-availability" name="availability" aria-label="เลือกสถานะความพร้อมรับงาน" class="search-select-field">
-                      <option value="" style="background-color: #09090c; color: #D4D4D8;">✅ สถานะรับงาน (ทั้งหมด)</option>
-                      <option value="รับงาน" style="background-color: #09090c; color: #D4D4D8;">🟢 พร้อมรับงานทันที</option>
-                      <option value="สอบถามคิว" style="background-color: #09090c; color: #D4D4D8;">🔴 สอบถามคิวล่วงหน้า</option>
-                  </select>
-              </div>
-              
-              <div class="search-control">
-                  <select id="search-featured" name="featured" aria-label="กรองเฉพาะโปรไฟล์ยอดนิยมแนะนำ" class="search-select-field">
-                      <option value="" style="background-color: #09090c; color: #D4D4D8;">⭐ โปรไฟล์ทั้งหมด</option>
-                      <option value="true" style="background-color: #09090c; color: #D4D4D8;">⭐ เฉพาะโปรไฟล์ VIP แนะนำ</option>
-                  </select>
-              </div>
+    <!-- ========================================== -->
+    <!-- 1. HIDDEN ANCHORS (ระบบหลังบ้านสำหรับ main.js) -->
+    <!-- ========================================== -->
+    <div style="display: none !important;" aria-hidden="true">
+      <input type="search" id="search-keyword">
+      <select id="search-province"><option value="">ทั้งหมด</option></select>
+      <select id="search-availability"><option value="">ทั้งหมด</option></select>
+      <select id="search-featured"><option value="">ทั้งหมด</option></select>
+      <select id="sort-select"><option value="featured">ยอดนิยม</option></select>
+      <select id="search-price"><option value="">ทั้งหมด</option></select>
+      <button type="button" id="reset-search-btn">Reset</button>
+      <button type="button" id="clear-search-btn">Clear</button>
+    </div>
 
-              <div class="search-control">
-                  <select id="sort-select" name="sort" aria-label="เรียงลำดับการแสดงผล" class="search-select-field">
-                      <option value="featured" style="background-color: #09090c; color: #D4D4D8;">🔥 เรียงลำดับตามความนิยม</option>
-                      <option value="name_asc" style="background-color: #09090c; color: #D4D4D8;">🔤 เรียงตามชื่อ (ก - ฮ)</option>
-                      <option value="rating" style="background-color: #09090c; color: #D4D4D8;">❤️ ยอดนิยมสูงสุด (Likes)</option>
-                  </select>
-              </div>
-          </div>
-          
-          <div style="display: flex; justify-content: center; margin-top: 10px;">
-              <button type="button" id="reset-search-btn" style="border: 1px solid rgba(239, 68, 68, 0.2); background-color: rgba(127, 29, 29, 0.25); color: #F87171; font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 100px; cursor: pointer;">
-                  🔄 รีเซ็ตตัวกรองค้นหาทั้งหมด
-              </button>
-          </div>
-      </form>
-    </section>
+
+    <!-- FLOATING APP DOCK (MOBILE APP EXPERIENCE) -->
+    <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+      <a href="/" class="dock-item active"><i class="fas fa-home"></i><span>หน้าแรก</span></a>
+      <button type="button" onclick="openFilterModal()" class="dock-item" style="background: none; border: none; padding: 0; cursor: pointer;"><i class="fas fa-search"></i><span>ตัวกรอง</span></button>
+      <a href="/profiles" class="dock-item"><i class="fas fa-user-friends"></i><span>รวมน้องๆ</span></a>
+      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line"><i class="fab fa-line"></i><span>จองคิว</span></a>
+    </nav>
 
     <!-- REGION MULTI-SWITCH TABS -->
     <div class="tabs-wrapper" style="margin: 10px 0;">
-      <div class="tabs-container" role="tablist" aria-label="คัดกรองพิกัดรับงานตามภูมิภาคหลัก" style="display: flex; justify-content: center; gap: 6px;">
-          <button type="button" data-region="ทั้งหมด" class="region-tab active" role="tab" aria-selected="true">ทั้งหมด</button>
-          <button type="button" data-region="ภาคเหนือ" class="region-tab" role="tab" aria-selected="false">ภาคเหนือ</button>
-          <button type="button" data-region="กรุงเทพฯ" class="region-tab" role="tab" aria-selected="false">กรุงเทพฯ</button>
+      <div class="tabs-container" role="tablist" style="display: flex; justify-content: center; gap: 6px;">
+          <button type="button" data-region="ทั้งหมด" class="region-tab active" role="tab">ทั้งหมด</button>
+          <button type="button" data-region="ภาคเหนือ" class="region-tab" role="tab">ภาคเหนือ</button>
+          <button type="button" data-region="กรุงเทพฯ" class="region-tab" role="tab">กรุงเทพฯ</button>
       </div>
     </div>
 
-    <!-- UI MESSAGES & LOADING PLACEHOLDERS -->
+    <!-- UI MESSAGES -->
     <div id="loading-profiles-placeholder" style="display: none;"></div>
-    <div id="no-results-message" class="hidden" style="text-align: center; padding: 30px; color: #A1A1AA;">
-        ไม่พบโปรไฟล์ตรงตามเงื่อนไข
-    </div>
+    <div id="no-results-message" class="hidden" style="text-align: center; padding: 30px; color: #A1A1AA;">ไม่พบโปรไฟล์ตรงตามเงื่อนไข</div>
     <div id="fetch-error-message" class="hidden"></div>
 
     <!-- PROFILES DISPLAY AREA -->
-    <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว{{PROVINCE_NAME}}">
+    <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">
       {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
-
     <!-- SEO CONTENT DRAWER -->
     <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
       <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
@@ -595,6 +530,89 @@
     </div>
   </div>
 </footer>
+<!-- ========================================== -->
+<!-- 🎯 SMART FILTER MODAL (มินิมอล & ปัดซ้ายขวา) -->
+<!-- ========================================== -->
+<div id="filter-modal-overlay" class="luxury-modal-overlay" style="display: none;">
+  <div class="luxury-modal-container">
+    <div class="modal-drag-handle"></div>
+    <div class="luxury-modal-header">
+      <div>
+        <h2 class="modal-main-title">ค้นหาแบบละเอียด</h2>
+        <p class="modal-sub-title">ระบุพิกัด เรตราคา และสไตล์ที่ต้องการ</p>
+      </div>
+      <button type="button" onclick="closeFilterModal()" class="modal-close-circle-btn"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="luxury-modal-body custom-modal-scroll">
+      <!-- 1. Text Search -->
+      <div class="filter-section">
+        <div class="luxury-input-wrapper">
+          <i class="fas fa-search search-inside-icon"></i>
+          <input id="modal-search-keyword" type="search" class="luxury-search-input" placeholder="พิมพ์ชื่อ, นิมมาน, สุขุมวิท...">
+          <button type="button" id="clear-modal-text-btn" class="input-clear-btn" style="display: none;"><i class="fas fa-times-circle"></i></button>
+        </div>
+      </div>
+
+      <!-- 2. Province -->
+      <div class="filter-section">
+        <label class="filter-section-label">📍 จังหวัด / พื้นที่</label>
+        <div id="modal-province-chips" class="horizontal-scroll-chips">
+          <button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>
+        </div>
+      </div>
+
+      <!-- 3. Availability -->
+      <div class="filter-section">
+        <label class="filter-section-label">⚡ สถานะรับงาน</label>
+        <div id="modal-availability-chips" class="horizontal-scroll-chips">
+          <button type="button" class="luxury-chip avail-chip active" data-value="">ทั้งหมด</button>
+          <button type="button" class="luxury-chip avail-chip status-online" data-value="รับงาน">
+            <span class="pulse-green-dot"></span> พร้อมรับงานทันที
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. Budget -->
+      <div class="filter-section">
+        <label class="filter-section-label">💰 ค่าขนม / เรตราคา</label>
+        <div id="modal-price-chips" class="horizontal-scroll-chips">
+          <button type="button" class="luxury-chip price-chip active" data-price="">ทุกราคา</button>
+          <button type="button" class="luxury-chip price-chip" data-price="under1500">ไม่เกิน 1,500</button>
+          <button type="button" class="luxury-chip price-chip" data-price="1500-2500">1,500 - 2,500</button>
+          <button type="button" class="luxury-chip price-chip" data-price="above2500">2,500 ขึ้นไป</button>
+        </div>
+      </div>
+
+      <!-- 5. Tags -->
+      <div class="filter-section">
+        <label class="filter-section-label">💖 สไตล์ยอดฮิต</label>
+        <div id="modal-tag-chips" class="horizontal-scroll-chips">
+          <button type="button" class="luxury-chip tag-chip" data-tag="ฟิวแฟน">#ฟิวแฟน</button>
+          <button type="button" class="luxury-chip tag-chip" data-tag="ตรงปก">#ตรงปก100%</button>
+          <button type="button" class="luxury-chip tag-chip" data-tag="เอาใจเก่ง">#เอาใจเก่ง</button>
+        </div>
+      </div>
+
+      <!-- 6. Sort -->
+      <div class="filter-section">
+        <label class="filter-section-label">เรียงลำดับ</label>
+        <div id="modal-sort-chips" class="horizontal-scroll-chips">
+          <button type="button" class="luxury-chip sort-chip active" data-sort="featured" data-featured="">🔥 ยอดนิยม</button>
+          <button type="button" class="luxury-chip sort-chip vip-gold" data-sort="featured" data-featured="true">⭐ VIP แนะนำ</button>
+          <button type="button" class="luxury-chip sort-chip" data-sort="price_asc" data-featured="">ราคา: น้อยไปมาก</button>
+          <button type="button" class="luxury-chip sort-chip" data-sort="price_desc" data-featured="">ราคา: มากไปน้อย</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🟢 จุดที่แก้ไข: เปลี่ยน onclick เป็น id สำหรับรับคำสั่งให้จอเลื่อน -->
+    <div class="luxury-modal-footer">
+      <button type="button" id="modal-reset-btn" class="footer-reset-btn">ล้างค่า</button>
+      <button type="button" id="modal-apply-btn" class="footer-apply-btn">ดูผลลัพธ์</button>
+    </div>
+  </div>
+</div>
 
 <!-- LIGHTBOX DETAILS MODAL -->
 <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">

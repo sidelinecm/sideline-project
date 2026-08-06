@@ -838,3 +838,414 @@ html.light p[style*="color: white"], html.light span[style*="color: white"], htm
 .hero-section, .glass-panel, #profiles-display-area {
   contain: layout style !important;
 }
+
+
+/* ==============================================================================
+   💎 ULTRA-LUXURY FILTER MODAL & TRIGGER STYLES 2026
+   ============================================================================== */
+
+/* 1. Main Trigger Button บนหน้าเว็บ */
+.luxury-filter-trigger-wrapper {
+  width: 100%;
+  max-width: 650px;
+  margin: 14px auto 10px auto;
+  padding: 0 8px;
+}
+
+.luxury-filter-trigger-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(20, 10, 42, 0.95) 0%, rgba(35, 12, 65, 0.85) 100%);
+  border: 1.5px solid rgba(192, 132, 252, 0.45);
+  border-radius: 100px;
+  padding: 8px 10px 8px 12px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(124, 58, 237, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.luxury-filter-trigger-btn:hover, .luxury-filter-trigger-btn:active {
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(255, 20, 147, 0.7);
+  box-shadow: 0 12px 30px rgba(255, 20, 147, 0.35);
+}
+
+.trigger-left-content { display: flex; align-items: center; gap: 12px; }
+.trigger-icon-box {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C3AED 0%, #FF1493 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: #FFFFFF; font-size: 15px;
+  box-shadow: 0 0 12px rgba(255, 20, 147, 0.6);
+}
+
+.trigger-text-box { display: flex; flex-direction: column; text-align: left; }
+.trigger-title { font-size: 13px; font-weight: 900; color: #FFFFFF; display: flex; align-items: center; gap: 6px; }
+.badge-sparkle { background: rgba(255, 20, 147, 0.2); border: 1px solid #FF85C0; color: #FF85C0; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 100px; }
+.trigger-subtitle { font-size: 11px; color: #A1A1AA; font-weight: 600; }
+
+.trigger-action-pill {
+  background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%);
+  color: white; font-size: 12px; font-weight: 800;
+  padding: 8px 16px; border-radius: 100px;
+  display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+/* 2. Modal Backdrop & Container */
+.luxury-modal-overlay {
+  position: fixed; inset: 0;
+  background-color: rgba(4, 2, 12, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 9999;
+  display: flex; align-items: flex-end; justify-content: center;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .luxury-modal-overlay { align-items: center; padding: 20px; }
+}
+
+.luxury-modal-container {
+  width: 100%; max-width: 580px;
+  background: linear-gradient(165deg, #130B29 0%, #080414 100%);
+  border-top-left-radius: 28px; border-top-right-radius: 28px;
+  border: 1.5px solid rgba(192, 132, 252, 0.35);
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.95), 0 0 40px rgba(124, 58, 237, 0.3);
+  max-height: 92vh; display: flex; flex-direction: column; overflow: hidden;
+  position: relative;
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 640px) {
+  .luxury-modal-container { border-radius: 28px; max-height: 88vh; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(60px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-drag-handle {
+  width: 38px; height: 4px; background: rgba(255, 255, 255, 0.2);
+  border-radius: 100px; margin: 10px auto 2px auto;
+}
+@media (min-width: 640px) { .modal-drag-handle { display: none; } }
+
+/* 3. Modal Header */
+.luxury-modal-header {
+  padding: 16px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.header-title-group { display: flex; align-items: center; gap: 12px; }
+.header-neon-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(251, 191, 36, 0.15); border: 1px solid #FBBF24;
+  color: #FBBF24; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+}
+.modal-main-title { font-size: 16px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.05em; margin: 0; }
+.modal-sub-title { font-size: 11px; color: #A1A1AA; margin: 2px 0 0 0; }
+
+.modal-close-circle-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #D4D4D8; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: all 0.2s;
+}
+.modal-close-circle-btn:hover { background: rgba(239, 68, 68, 0.2); color: #FF4D4D; border-color: #FF4D4D; }
+
+/* 4. Filter Sections & Inputs */
+.luxury-modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+.filter-section-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 800; color: #C084FC;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+}
+
+.luxury-input-wrapper { position: relative; display: flex; align-items: center; }
+.search-inside-icon { position: absolute; left: 16px; color: #C084FC; font-size: 14px; }
+.luxury-search-input {
+  width: 100%;
+  background: rgba(10, 5, 24, 0.9);
+  border: 1.5px solid rgba(192, 132, 252, 0.3);
+  padding: 13px 40px 13px 44px;
+  border-radius: 14px; color: #FFFFFF; font-size: 13px; font-weight: 600;
+  outline: none; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+  transition: all 0.25s ease;
+}
+.luxury-search-input:focus {
+  border-color: #FF1493;
+  box-shadow: 0 0 15px rgba(255, 20, 147, 0.4), inset 0 2px 6px rgba(0,0,0,0.6);
+}
+.input-clear-btn { position: absolute; right: 14px; background: none; border: none; color: #A1A1AA; cursor: pointer; font-size: 16px; }
+
+/* 5. Chips & Interactive Buttons */
+.chips-flex-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.luxury-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #E4E4E7; padding: 8px 16px; border-radius: 100px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+}
+.luxury-chip:hover { background: rgba(192, 132, 252, 0.15); border-color: #C084FC; color: #FFF; }
+.luxury-chip.active {
+  background: linear-gradient(135deg, #7C3AED 0%, #FF1493 100%);
+  border-color: #FF85C0; color: #FFFFFF;
+  box-shadow: 0 4px 15px rgba(255, 20, 147, 0.45);
+  transform: scale(1.02);
+}
+
+/* Status Cards Grid */
+.status-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.luxury-status-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 14px; border-radius: 16px; cursor: pointer;
+  display: flex; align-items: center; gap: 10px; text-align: left;
+  transition: all 0.2s ease;
+}
+.status-card-icon { font-size: 16px; color: #A1A1AA; }
+.status-title { display: block; font-size: 12px; font-weight: 800; color: #FFF; }
+.status-sub { display: block; font-size: 10px; color: #A1A1AA; margin-top: 1px; }
+
+.luxury-status-card.active {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: #C084FC;
+  box-shadow: 0 0 15px rgba(192, 132, 252, 0.3);
+}
+
+.luxury-status-card.status-online.active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #00E676;
+  box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+}
+.luxury-status-card.status-online.active .status-title { color: #00E676; }
+.pulse-green-icon { color: #00E676; animation: greenStatusPulse 2s infinite; }
+
+/* VIP Sort Chips */
+.luxury-sort-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #D4D4D8; padding: 8px 16px; border-radius: 100px;
+  font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.luxury-sort-chip.active {
+  background: rgba(251, 191, 36, 0.18);
+  border-color: #FBBF24; color: #FBBF24;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+}
+.vip-gold-chip.active {
+  background: linear-gradient(135deg, #FF9100 0%, #FBBF24 100%);
+  color: #000; font-weight: 900; border-color: #FFF;
+}
+
+/* 6. Modal Footer Action Buttons */
+.luxury-modal-footer {
+  padding: 16px 22px; background: rgba(6, 3, 15, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex; align-items: center; gap: 12px;
+}
+.footer-reset-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #FF6B6B; font-weight: 800; font-size: 12px;
+  padding: 13px 20px; border-radius: 100px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+}
+.footer-reset-btn:hover { background: rgba(239, 68, 68, 0.25); color: #FFF; }
+
+.footer-apply-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #7C3AED 0%, #FF1493 100%);
+  border: none; color: #FFFFFF; font-weight: 900; font-size: 14px;
+  padding: 13px 20px; border-radius: 100px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(255, 20, 147, 0.5); transition: all 0.2s;
+}
+.footer-apply-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(255, 20, 147, 0.7); }
+
+/* 🟢 ล็อคหน้าจอนิ่ง ป้องกันคีย์บอร์ดมือถือดันหน้าจอกระตุก */
+.luxury-modal-overlay {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.luxury-modal-container {
+  overscroll-behavior: contain;
+}
+
+/* ป้องกันตัวกรองดึง scrollbar หายแล้วหน้าจอกระตุกขยับ */
+body {
+  scrollbar-gutter: stable;
+}
+
+/* ==============================================================================
+   💎 ADVANCED SEARCH MODAL STYLES (NO-JITTER / MOBILE-FIRST)
+   ============================================================================== */
+.luxury-modal-overlay {
+  position: fixed; inset: 0;
+  background-color: rgba(4, 2, 12, 0.88);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  z-index: 9999;
+  display: flex; align-items: flex-end; justify-content: center;
+  touch-action: pan-y; -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
+  .luxury-modal-overlay { align-items: center; padding: 20px; }
+}
+
+.luxury-modal-container {
+  width: 100%; max-width: 580px;
+  background: linear-gradient(165deg, #130B29 0%, #080414 100%);
+  border-top-left-radius: 28px; border-top-right-radius: 28px;
+  border: 1.5px solid rgba(192, 132, 252, 0.35);
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.95), 0 0 40px rgba(124, 58, 237, 0.3);
+  max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+  overscroll-behavior: contain;
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 640px) {
+  .luxury-modal-container { border-radius: 28px; max-height: 85vh; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-drag-handle { width: 38px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 100px; margin: 10px auto 2px auto; }
+@media (min-width: 640px) { .modal-drag-handle { display: none; } }
+
+.luxury-modal-header { padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.header-title-group { display: flex; align-items: center; gap: 12px; }
+.header-neon-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(124, 58, 237, 0.2); border: 1px solid #C084FC; color: #C084FC; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.modal-main-title { font-size: 16px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.05em; margin: 0; }
+.modal-sub-title { font-size: 11px; color: #A1A1AA; margin: 2px 0 0 0; }
+
+.modal-close-circle-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15); color: #D4D4D8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+.luxury-modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+.filter-section-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #C084FC; text-transform: uppercase; margin-bottom: 10px; }
+
+.luxury-input-wrapper { position: relative; display: flex; align-items: center; }
+.search-inside-icon { position: absolute; left: 16px; color: #C084FC; font-size: 14px; }
+.luxury-search-input { width: 100%; background: rgba(10, 5, 24, 0.9); border: 1.5px solid rgba(192, 132, 252, 0.3); padding: 13px 40px 13px 44px; border-radius: 14px; color: #FFFFFF; font-size: 13px; font-weight: 600; outline: none; }
+.input-clear-btn { position: absolute; right: 14px; background: none; border: none; color: #A1A1AA; cursor: pointer; font-size: 16px; }
+
+.chips-flex-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.luxury-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); color: #E4E4E7; padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.luxury-chip.active { background: linear-gradient(135deg, #7C3AED 0%, #FF1493 100%); border-color: #FF85C0; color: #FFFFFF; box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4); }
+
+.status-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.luxury-status-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 14px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; text-align: left; }
+.status-title { display: block; font-size: 12px; font-weight: 800; color: #FFF; }
+.status-sub { display: block; font-size: 10px; color: #A1A1AA; }
+.luxury-status-card.active { background: rgba(124, 58, 237, 0.18); border-color: #C084FC; }
+.luxury-status-card.status-online.active { background: rgba(16, 185, 129, 0.15); border-color: #00E676; }
+.luxury-status-card.status-online.active .status-title { color: #00E676; }
+.pulse-green-icon { color: #00E676; }
+
+.luxury-sort-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: #D4D4D8; padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.luxury-sort-chip.active { background: rgba(251, 191, 36, 0.18); border-color: #FBBF24; color: #FBBF24; }
+
+.luxury-modal-footer { padding: 16px 22px; background: rgba(6, 3, 15, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 12px; }
+.footer-reset-btn { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); color: #FF6B6B; font-weight: 800; font-size: 12px; padding: 13px 20px; border-radius: 100px; cursor: pointer; }
+.footer-apply-btn { flex: 1; background: linear-gradient(135deg, #7C3AED 0%, #FF1493 100%); border: none; color: #FFFFFF; font-weight: 900; font-size: 14px; padding: 13px 20px; border-radius: 100px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 20px rgba(255, 20, 147, 0.5); }
+
+/* ==============================================================================
+   🎯 SMART MODAL OVERRIDES (ปรับให้ดูแพง อ่านง่าย สว่างขึ้น)
+   ============================================================================== */
+.luxury-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+@media (min-width: 640px) { .luxury-modal-overlay { align-items: center !important; padding: 20px !important; } }
+
+.luxury-modal-container {
+  max-height: 88vh !important;
+  border-radius: 28px 28px 0 0 !important;
+  background: #120A24 !important; /* 🟢 เปลี่ยนพื้นหลังให้เป็นสีม่วงเข้มหรูๆ แทนสีดำสนิท */
+  border: none !important;
+  border-top: 1.5px solid rgba(192, 132, 252, 0.4) !important;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8) !important;
+}
+@media (min-width: 640px) { .luxury-modal-container { border-radius: 24px !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; } }
+
+.luxury-modal-header { padding: 20px 20px 14px 20px !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+.modal-main-title { font-size: 18px !important; font-weight: 900 !important; color: #FFFFFF !important; }
+.modal-sub-title { font-size: 12px !important; color: #C084FC !important; margin-top: 4px !important; }
+.modal-close-circle-btn { width: 34px !important; height: 34px !important; background: rgba(255,255,255,0.1) !important; font-size: 14px !important; border: none !important; color: #FFF !important; }
+
+.luxury-modal-body { padding: 20px !important; gap: 20px !important; background: #0A0514 !important; }
+.filter-section-label { font-size: 12px !important; font-weight: 800 !important; color: #E9D5FF !important; margin-bottom: 10px !important; display: flex !important; align-items: center !important; gap: 6px !important;}
+
+/* ช่องพิมพ์ค้นหา */
+.luxury-search-input { background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; padding: 14px 35px 14px 40px !important; font-size: 14px !important; border-radius: 16px !important; color: #FFF !important; }
+.luxury-search-input:focus { border-color: #FF1493 !important; background: rgba(255,255,255,0.09) !important; }
+.search-inside-icon { font-size: 16px !important; color: #FF85C0 !important; }
+
+/* 🌟 ระบบปัดซ้ายขวา */
+.horizontal-scroll-chips {
+  display: flex !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  padding-bottom: 6px !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.horizontal-scroll-chips::-webkit-scrollbar { display: none; }
+
+/* ปุ่มชิปทั่วไป */
+.luxury-chip {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  padding: 10px 18px !important;
+  border-radius: 100px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  color: #E4E4E7 !important;
+  transition: all 0.2s ease !important;
+}
+
+/* ปุ่มที่ถูกเลือก (สีชมพู-ม่วง เด่นๆ) */
+.luxury-chip.active {
+  background: linear-gradient(135deg, #7C3AED 0%, #FF1493 100%) !important;
+  color: #FFF !important;
+  border-color: transparent !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+.luxury-chip.vip-gold.active { background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%) !important; color: #000 !important; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4) !important;}
+.luxury-chip.status-online { display: flex !important; align-items: center !important; gap: 8px !important; }
+.pulse-green-dot { width: 8px; height: 8px; background: #00E676; border-radius: 50%; box-shadow: 0 0 8px #00E676; animation: greenStatusPulse 2s infinite !important;}
+
+/* ส่วนล่าง (ปุ่มกดดูผลลัพธ์) */
+.luxury-modal-footer { padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px)) 20px !important; background: #120A24 !important; border-top: 1px solid rgba(255,255,255,0.08) !important;}
+.footer-reset-btn { font-size: 13px !important; color: #A1A1AA !important; text-decoration: underline !important; padding: 10px 16px !important; font-weight: 600 !important; }
+
+
+.floating-app-dock {
+  /* ใช้ cubic-bezier เพื่อให้จังหวะเด้งขึ้น-ลงดูเป็นธรรมชาติ ไม่แข็งกระด้าง */
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
+  will-change: transform, opacity; /* สั่งให้การ์ดจอ (GPU) ช่วยประมวลผลให้ลื่นไหล 60fps */
+}
+
+.floating-app-dock.dock-hidden {
+  transform: translate(-50%, 150%) !important; 
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

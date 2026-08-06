@@ -532,15 +532,36 @@ window.ScrollTrigger = ScrollTrigger;
     const sortedProvinces = Array.from(STATE.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], "th"));
     const fragment = document.createDocumentFragment();
 
+    const modalChipsContainer = document.getElementById("modal-province-chips");
+    // 🟢 แก้ไขตรงนี้: เปลี่ยน advanced-chip เป็น luxury-chip ให้ตรงกับ CSS
+    let modalChipsHTML = `<button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>`;
+
     sortedProvinces.forEach(([key, name]) => {
       const opt = document.createElement("option");
       opt.value = key;
       opt.textContent = name;
       fragment.appendChild(opt);
+      // 🟢 แก้ไขตรงนี้: เปลี่ยน advanced-chip เป็น luxury-chip
+      modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${key}">${name}</button>`;
     });
-    DOM.provinceSelect.appendChild(fragment);
-  }
 
+    DOM.provinceSelect.appendChild(fragment);
+
+    if (modalChipsContainer) {
+      modalChipsContainer.innerHTML = modalChipsHTML;
+      modalChipsContainer.querySelectorAll('.province-chip').forEach(btn => {
+        btn.onclick = function() {
+          modalChipsContainer.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          if (DOM.provinceSelect) {
+            DOM.provinceSelect.value = this.getAttribute('data-value') || '';
+            DOM.provinceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        };
+      });
+    }
+  }
+  
   function createProfileCardElement(profile, index = 20) {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
@@ -558,7 +579,9 @@ window.ScrollTrigger = ScrollTrigger;
     const isAvailable = profile.status === "รับงาน" || !(profile.availability || "").toLowerCase().includes("ไม่ว่าง");
     const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
     const statusText = profile.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
-    const ageDisplay = profile.safeAge && profile.safeAge !== "-" ? ` ${profile.safeAge}` : "";
+    
+    // 🟢 แก้ไขเรื่องอายุ ให้แสดงวงเล็บเฉพาะคนที่มีอายุ ไม่โชว์คำว่า "ไม่ระบุ"
+    const ageDisplay = (profile.safeAge && profile.safeAge !== "-" && profile.safeAge !== "ไม่ระบุ") ? ` <span style="font-size: 0.85em; opacity: 0.9;">(${profile.safeAge})</span>` : "";
 
     const featuredBadge = profile.isfeatured
       ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
@@ -844,7 +867,8 @@ window.ScrollTrigger = ScrollTrigger;
         province: DOM.provinceSelect?.value || "all",
         avail: DOM.availabilitySelect?.value || "all",
         featured: DOM.featuredSelect?.value === "true",
-        sort: DOM.sortSelect?.value || "featured"
+        sort: DOM.sortSelect?.value || "featured",
+        price: document.getElementById("search-price")?.value || "" 
       };
 
       if (activeFilters.text) saveRecentSearch(activeFilters.text);
@@ -912,6 +936,16 @@ window.ScrollTrigger = ScrollTrigger;
         results = results.filter(p => p.isfeatured === true);
       }
 
+      if (activeFilters.price) {
+        results = results.filter(p => {
+          const price = p._price || 0;
+          if (activeFilters.price === "under1500") return price > 0 && price <= 1500;
+          if (activeFilters.price === "1500-2500") return price > 1500 && price <= 2500;
+          if (activeFilters.price === "above2500") return price > 2500;
+          return true;
+        });
+      }
+
       results.sort((a, b) => {
         if (activeFilters.text) return 0;
         switch (activeFilters.sort) {
@@ -921,13 +955,17 @@ window.ScrollTrigger = ScrollTrigger;
             return (a.name || "").localeCompare(b.name || "");
           case "rating":
             return (b.rating || 0) - (a.rating || 0);
+          case "price_asc":
+            return (a._price || 0) - (b._price || 0); 
+          case "price_desc":
+            return (b._price || 0) - (a._price || 0);
           default:
             return 0;
         }
       });
 
       renderActiveFilterChips();
-      renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") || activeFilters.avail !== "all" || activeFilters.featured, isUserAction);
+      renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") || activeFilters.avail !== "all" || activeFilters.featured || activeFilters.price, isUserAction);
 
       if (updateUrlHistory) {
         let newPath = "/";
@@ -2018,6 +2056,9 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
+/* ==============================================================================
+   💎 DYNAMIC SEARCH PLACEHOLDER & GLOBAL HANDLERS
+   ============================================================================== */
   function initDynamicSearchPlaceholder() {
     const placeholders = [
       "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
@@ -2030,7 +2071,7 @@ window.ScrollTrigger = ScrollTrigger;
     let idx = 0;
 
     setInterval(() => {
-      const searchInput = document.getElementById("search-keyword");
+      const searchInput = document.getElementById("modal-search-keyword") || document.getElementById("search-keyword");
       if (!searchInput) return;
 
       if (document.activeElement !== searchInput && (!searchInput.value || searchInput.value.trim() === "")) {
@@ -2080,7 +2121,7 @@ window.ScrollTrigger = ScrollTrigger;
 
   window.selectSuggestion = (slug, isProfile = false) => {
     const suggestionsEl = document.getElementById("search-suggestions");
-    const inputEl = document.getElementById("search-keyword");
+    const inputEl = document.getElementById("modal-search-keyword") || document.getElementById("search-keyword");
 
     if (isProfile) {
       suggestionsEl?.classList.add("hidden");
@@ -2089,12 +2130,47 @@ window.ScrollTrigger = ScrollTrigger;
       handleRouteNavigation();
     } else if (inputEl) {
       inputEl.value = slug;
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
       saveRecentSearch(slug);
       applyUltimateFilters(true, true);
       suggestionsEl?.classList.add("hidden");
     }
   };
 
+  /* ==============================================================================
+   💎 ULTRA-LUXURY FILTER CONTROLLER
+   ============================================================================== */
+  window.openFilterModal = function() {
+    const modal = document.getElementById('filter-modal-overlay');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  window.closeFilterModal = function() {
+    const modal = document.getElementById('filter-modal-overlay');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    
+    setTimeout(() => {
+      const targetElement = document.getElementById("profiles-display-area");
+      if (targetElement) {
+        const headerOffset = 70;
+        const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+        window.scrollTo({
+          top: elementPosition - headerOffset,
+          behavior: "smooth"
+        });
+      }
+    }, 100);
+  };
+
+  /* ==============================================================================
+   🚀 MAIN DOM INITIALIZATION 
+   ============================================================================== */
   document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 แอปพลิเคชัน First Model Hub กำลังเริ่มต้นทำงาน...");
 
@@ -2120,6 +2196,7 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
+    // Sidebar Mobile
     (function initMobileSidebar() {
       const toggleBtn = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar-menu");
@@ -2142,20 +2219,20 @@ window.ScrollTrigger = ScrollTrigger;
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
     })();
 
+    // Delegation Clicks 
     document.body.addEventListener("click", e => {
       const target = e.target;
 
+      // 1. ระบบกด Like
       const likeBtn = target.closest('[data-action="like"]');
       if (likeBtn) {
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         const id = likeBtn.dataset.id;
-        if (id && typeof window.handleLikeClick === "function") {
-          window.handleLikeClick(likeBtn, id);
-        }
+        if (id && typeof window.handleLikeClick === "function") window.handleLikeClick(likeBtn, id);
         return;
       }
 
+      // 2. ระบบกด Search Suggestion
       const suggestionItem = target.closest('[data-action="suggestion"]');
       if (suggestionItem) {
         const slug = suggestionItem.dataset.slug;
@@ -2164,12 +2241,12 @@ window.ScrollTrigger = ScrollTrigger;
         return;
       }
 
+      // 3. ระบบกดเข้าดูโปรไฟล์
       const cardLink = target.closest("a.card-link");
       if (cardLink) {
         e.preventDefault();
         const card = cardLink.closest(".profile-card-new, .vip-card-item");
         let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
-
         if (rawSlug) {
           try { rawSlug = decodeURIComponent(rawSlug); } catch (e) {}
           STATE.lastFocusedElement = cardLink;
@@ -2179,45 +2256,106 @@ window.ScrollTrigger = ScrollTrigger;
         return;
       }
 
+      // 4. ปุ่มปิด Lightbox
       const closeBtn = target.closest("#closeLightboxBtn");
       const lightboxModal = target.closest("#lightbox");
       if (closeBtn || (lightboxModal && e.target === lightboxModal)) {
         closeLightboxModal(true);
         return;
       }
-    });
 
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && STATE.currentProfileSlug) {
-        closeLightboxModal(true);
+      // =========================================================
+      // 🌟 5. ระบบคลิกตัวกรองใน Modal
+      // =========================================================
+      
+      // 5.1 คลิกเลือกจังหวัด
+      if (target.closest('.province-chip')) {
+        const btn = target.closest('.province-chip');
+        document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (DOM.provinceSelect) {
+          DOM.provinceSelect.value = btn.getAttribute('data-value') || '';
+          DOM.provinceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+
+      // 5.2 คลิกเลือกสถานะ (Avail)
+      if (target.closest('.avail-chip')) {
+        const btn = target.closest('.avail-chip');
+        document.querySelectorAll('.avail-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (DOM.availabilitySelect) {
+          DOM.availabilitySelect.value = btn.getAttribute('data-value') || '';
+          DOM.availabilitySelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+
+      // 5.3 คลิกเลือกราคา 
+      if (target.closest('.price-chip')) {
+        const btn = target.closest('.price-chip');
+        document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const hiddenPrice = document.getElementById("search-price");
+        if (hiddenPrice) {
+          hiddenPrice.value = btn.getAttribute('data-price') || '';
+          applyUltimateFilters(true, true);
+        }
+      }
+
+      // 5.4 คลิกเลือกแท็ก
+      if (target.closest('.tag-chip')) {
+        const btn = target.closest('.tag-chip');
+        document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tagText = btn.getAttribute('data-tag') || '';
+        
+        const modalInput = document.getElementById('modal-search-keyword');
+        if (modalInput) modalInput.value = tagText;
+        
+        const inlineInput = document.getElementById("inline-search-input");
+        if (inlineInput) inlineInput.value = tagText;
+
+        if (DOM.searchInput) {
+          DOM.searchInput.value = tagText;
+          DOM.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+
+      // 5.5 คลิกเรียงลำดับ (Sort)
+      if (target.closest('.sort-chip')) {
+        const btn = target.closest('.sort-chip');
+        document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (DOM.sortSelect) DOM.sortSelect.value = btn.getAttribute('data-sort') || 'featured';
+        if (DOM.featuredSelect) {
+          DOM.featuredSelect.value = btn.getAttribute('data-featured') || '';
+          DOM.featuredSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       }
     });
 
-    if (DOM.searchInput) {
-      DOM.searchInput.addEventListener("input", e => {
-        clearTimeout(window.searchTimeout);
-        const val = e.target.value;
-        const clearBtn = document.getElementById("clear-search-btn");
-        if (clearBtn) clearBtn.style.display = val ? "block" : "none";
+    // Reset Buttons 
+    const modalResetBtn = document.getElementById('modal-reset-btn');
+    if (modalResetBtn) {
+      modalResetBtn.onclick = () => {
+        document.querySelector('#modal-province-chips .province-chip[data-value=""]')?.click();
+        document.querySelector('#modal-availability-chips .avail-chip[data-value=""]')?.click();
+        document.querySelector('#modal-sort-chips .sort-chip[data-sort="featured"]')?.click();
+        document.querySelector('#modal-price-chips .price-chip[data-price=""]')?.click();
 
-        window.searchTimeout = setTimeout(() => {
-          applyUltimateFilters(true, false);
-          renderSearchSuggestions(val);
-        }, 300);
-      });
+        document.querySelectorAll('#modal-tag-chips .tag-chip').forEach(b => b.classList.remove('active'));
 
-      DOM.searchInput.addEventListener("focus", () => {
-        renderSearchSuggestions(DOM.searchInput.value);
-      });
-    }
-
-    const clearSearchBtn = document.getElementById("clear-search-btn");
-    if (clearSearchBtn) {
-      clearSearchBtn.addEventListener("click", () => {
-        if (DOM.searchInput) DOM.searchInput.value = "";
-        clearSearchBtn.style.display = "none";
-        applyUltimateFilters(true, true);
-      });
+        const modalSearchInput = document.getElementById('modal-search-keyword');
+        const inlineSearchInput = document.getElementById('inline-search-input');
+        
+        if (modalSearchInput) modalSearchInput.value = '';
+        if (inlineSearchInput) inlineSearchInput.value = '';
+        
+        const clearTextBtn = document.getElementById('clear-modal-text-btn');
+        if (clearTextBtn) clearTextBtn.style.display = 'none';
+        
+        DOM.resetSearchBtn?.click();
+      };
     }
 
     DOM.provinceSelect?.addEventListener("change", () => {
@@ -2235,6 +2373,9 @@ window.ScrollTrigger = ScrollTrigger;
       if (DOM.availabilitySelect) DOM.availabilitySelect.value = "";
       if (DOM.featuredSelect) DOM.featuredSelect.value = "";
       if (DOM.sortSelect) DOM.sortSelect.value = "featured";
+      
+      const hiddenPriceSelect = document.getElementById("search-price");
+      if (hiddenPriceSelect) hiddenPriceSelect.value = "";
 
       const clearBtn = document.getElementById("clear-search-btn");
       if (clearBtn) clearBtn.style.display = "none";
@@ -2243,6 +2384,68 @@ window.ScrollTrigger = ScrollTrigger;
       renderSmartFilterChips();
     });
 
+    // 🟢 6. ซิงค์ข้อมูลเวลาพิมพ์ค้นหา (Inline Search + Modal Search)
+    const modalSearchInput = document.getElementById("modal-search-keyword");
+    const inlineSearchInput = document.getElementById("inline-search-input");
+    const clearTextBtn = document.getElementById("clear-modal-text-btn");
+
+    // ซิงค์จากช่องพิมพ์ใน Modal
+    if (modalSearchInput && DOM.searchInput) {
+      modalSearchInput.addEventListener("input", (e) => {
+        DOM.searchInput.value = e.target.value;
+        if (inlineSearchInput) inlineSearchInput.value = e.target.value;
+        if (clearTextBtn) {
+          clearTextBtn.style.display = e.target.value.length > 0 ? "block" : "none";
+        }
+      });
+      
+      modalSearchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          applyUltimateFilters(true, true);
+          if (typeof window.closeFilterModal === "function") window.closeFilterModal();
+        }
+      });
+
+      if (clearTextBtn) {
+        clearTextBtn.addEventListener("click", () => {
+          modalSearchInput.value = "";
+          DOM.searchInput.value = "";
+          if (inlineSearchInput) inlineSearchInput.value = "";
+          clearTextBtn.style.display = "none";
+          applyUltimateFilters(true, true);
+        });
+      }
+    }
+
+    // 🟢 ซิงค์จากช่องพิมพ์ในหน้าหลัก (Inline Search) ให้เริ่มค้นหาได้เลย!
+    if (inlineSearchInput && DOM.searchInput) {
+      inlineSearchInput.addEventListener("input", (e) => {
+        DOM.searchInput.value = e.target.value;
+        if (modalSearchInput) modalSearchInput.value = e.target.value;
+      });
+      
+      inlineSearchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          applyUltimateFilters(true, true);
+          scrollToSearchResults(); // เลื่อนจอลงไปดูผลลัพธ์
+        }
+      });
+    }
+
+    // 🟢 กดปุ่ม "ดูผลลัพธ์" ใน Modal
+    const modalApplyBtn = document.getElementById('modal-apply-btn');
+    if (modalApplyBtn) {
+      modalApplyBtn.onclick = () => {
+        applyUltimateFilters(true, true);
+        if (typeof window.closeFilterModal === "function") {
+          window.closeFilterModal();
+        }
+      };
+    }
+
+// Init Page Features
     initThemeToggle();
     initStarRating();
     initReviewForm();
@@ -2253,6 +2456,41 @@ window.ScrollTrigger = ScrollTrigger;
     initRegionTabs();
     initPwaInstaller();
     initDynamicSearchPlaceholder();
+
+// =========================================================
+    // 🟢 ระบบซ่อนเมนูเมื่อไถจอ และโชว์ทันทีที่จอนิ่ง (Smooth UX)
+    // =========================================================
+    let lastScrollY = window.scrollY;
+    let scrollTimeout = null; // ตัวแปรสำหรับจับเวลาจอนิ่ง
+    const dockMenu = document.querySelector('.floating-app-dock');
+    
+    window.addEventListener('scroll', () => {
+      if (!dockMenu) return;
+      const currentScrollY = window.scrollY;
+      
+      // 1. เคลียร์การนับเวลาถอยหลังทุกครั้งที่นิ้วกำลังไถจออยู่
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      // 2. ถ้าไถจอลง (เกิน 100px) ให้หลบไปก่อน
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        dockMenu.classList.add('dock-hidden');
+      } 
+      // 3. ถ้าตั้งใจไถจอขึ้น ให้โชว์ทันที
+      else {
+        dockMenu.classList.remove('dock-hidden');
+      }
+      
+      lastScrollY = currentScrollY;
+
+      // 4. พระเอกอยู่ตรงนี้! ถ้าหยุดไถจอ (จอนิ่งเกิน 0.4 วินาที) ให้เรียกเมนูกลับมา
+      scrollTimeout = setTimeout(() => {
+        dockMenu.classList.remove('dock-hidden');
+      }, 400); // 400 มิลลิวินาที คือจังหวะที่ลื่นไหลพอดี ไม่เร็วหรือช้าไป
+      
+    }, { passive: true });
+    // =========================================================
 
     await fetchProfilesData();
     await handleRouteNavigation(true);
