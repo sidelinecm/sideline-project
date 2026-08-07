@@ -11,9 +11,9 @@
   <meta name="keywords" content="แฟนเช่า, แฟนเช่าเชียงใหม่, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
+  
+  <!-- CANONICAL & ALTERNATE -->
   <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
-
-  <!-- MULTILINGUAL SEO -->
   <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
   <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
@@ -21,7 +21,7 @@
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="First Model Hub">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}}+ โปรไฟล์)">
+  <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}} โปรไฟล์)">
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%">
   <meta property="og:url" content="{{SEO_CANONICAL}}">
   <meta property="og:image" content="{{SEO_IMAGE}}">
@@ -61,14 +61,15 @@
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
-<script type="application/ld+json" id="dynamic-schema">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "First Model Hub",
-  "url": "https://firstmodelhub.com"
-}
-</script>
+  <!-- DYNAMIC SCHEMA OR FALLBACK SCHEMA -->
+  <script type="application/ld+json" id="dynamic-schema">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "First Model Hub",
+    "url": "https://firstmodelhub.com"
+  }
+  </script>
 
   <!-- Google tag (gtag.js) -->
   <script>
@@ -88,7 +89,6 @@
 </head>
 
 <body>
-
 
 <!-- GLOBAL PRELOADER -->
 <div id="global-loader-overlay" style="position: fixed; inset: 0; background-color: #060411; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease;">
@@ -158,7 +158,7 @@
 <main id="main-content" style="position: relative; overflow: hidden;">
     <div class="container space-y-24">
 
-<!-- HERO SECTION -->
+    <!-- HERO SECTION -->
     <section class="hero-section" aria-labelledby="hero-h1">
       <div class="clutch-pill">
         <span style="background-color: #7C3AED; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 800;">VERIFIED 2026</span>
@@ -191,7 +191,7 @@
       <div class="hero-stats-trust-bar">
         <div class="trust-stat-item">
           <i class="fas fa-users" style="color: #C084FC;" aria-hidden="true"></i>
-          <span><strong id="live-profile-count" style="color: #00E676;">{{PROFILE_COUNT}}+</strong> โปรไฟล์{{PROVINCE_NAME}}</span>
+          <span><strong id="live-profile-count" style="color: #00E676;">{{PROFILE_COUNT}}</strong> โปรไฟล์{{PROVINCE_NAME}}</span>
         </div>
         <span class="trust-stat-divider" aria-hidden="true">•</span>
         <div class="trust-stat-item">
@@ -221,9 +221,7 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- 1. HIDDEN ANCHORS (ระบบหลังบ้านสำหรับ main.js) -->
-    <!-- ========================================== -->
+    <!-- HIDDEN ANCHORS FOR MAIN.JS -->
     <div style="display: none !important;" aria-hidden="true">
       <input type="search" id="search-keyword">
       <select id="search-province"><option value="">ทั้งหมด</option></select>
@@ -234,7 +232,6 @@
       <button type="button" id="reset-search-btn">Reset</button>
       <button type="button" id="clear-search-btn">Clear</button>
     </div>
-
 
     <!-- FLOATING APP DOCK (MOBILE APP EXPERIENCE) -->
     <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
@@ -262,12 +259,13 @@
     <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">
       {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
+
     <!-- SEO CONTENT DRAWER -->
     <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
       <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
          <div style="position: relative; padding: 16px; border-bottom: 1px solid var(--border-light); background: rgba(13, 8, 30, 0.45);">
              <h2 class="text-gradient-main" style="font-size: 16px; font-weight: 800; margin: 0 0 8px 0;">
-                 บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า {{PROFILE_COUNT}}+ รายการ)
+                 บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า {{PROFILE_COUNT}} รายการ)
              </h2>
              <p style="font-size: 12px; line-height: 1.6; color: #E4E4E7; margin: 0;">
                  ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} คัดสรรโปรไฟล์ตรงปก 100% บริการเอนเตอร์เทนสไตล์ฟิวแฟน (GFE) ปลอดภัยสูงสุดด้วยนโยบาย <strong>"จ่ายหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำล่วงหน้าทุกกรณี"</strong> ครอบคลุมโซน {{PROVINCE_ZONES}}
@@ -476,12 +474,9 @@
     <!-- MAP & INFORMATION SECTION -->
     <section id="map-section" class="glass-panel" style="max-width: 850px; margin: 16px auto 0 auto; overflow: hidden; padding: 0; position: relative;" aria-labelledby="map-title">
       <figure id="map-container" style="width: 100%; height: 160px; position: relative; background-color: rgba(0,0,0,0.4); margin: 0;">
-        <div id="map-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background-color: #09090c; color: var(--text-muted); transition: opacity 0.5s;">
-          <i class="fas fa-map-marked-alt animate-pulse" style="font-size: 24px; color: var(--primary-purple);" aria-hidden="true"></i>
-          <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;">กำลังโหลดแผนที่ Google Maps...</span>
-        </div>
         <iframe
           id="google-map"
+          src="https://maps.google.com/maps?q=สาวรับงาน%20เชียงใหม่&t=&z=13&ie=UTF8&iwloc=&output=embed"
           data-src="{{MAP_EMBED_URL}}"
           title="แผนที่ขอบเขตบริการ สาวรับงาน{{PROVINCE_NAME}} เพื่อนเที่ยวไซด์ไลน์ฟิวแฟน"
           style="border:0; width:100%; height:100%;"
@@ -494,7 +489,7 @@
   </div>
 </main>
 
-<!-- FOOTER WITH RESPONSIVE OFFSET -->
+<!-- FOOTER -->
 <footer style="border-top: 1px solid rgba(147, 51, 234, 0.15); background: rgba(14, 9, 30, 0.6);" role="contentinfo">
   <div class="container">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
@@ -519,9 +514,13 @@
 
     <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; margin-bottom: 12px;">
       <h4 style="font-size: 12px; font-weight: 800; color: #A1A1AA; margin-bottom: 8px;">พื้นที่และย่านให้บริการยอดนิยม</h4>
-      <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);"></ul>
+      <ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">
+        <li><a href="/location/chiangmai" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์เชียงใหม่</a></li>
+        <li><a href="/location/bangkok" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์กรุงเทพฯ</a></li>
+        <li><a href="/location/chonburi" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์พัทยา/ชลบุรี</a></li>
+        <li><a href="/location/khonkaen" style="color: var(--text-gray); text-decoration: none;">ไซด์ไลน์ขอนแก่น</a></li>
+      </ul>
     </div>
-
 
     <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-muted);">
       <p style="margin: 0;">© <span id="currentYearDynamic">2026</span> FirstModelHub {{PROVINCE_NAME}}. All Rights Reserved.</p>
@@ -532,9 +531,8 @@
     </div>
   </div>
 </footer>
-<!-- ========================================== -->
-<!-- 🎯 SMART FILTER MODAL (มินิมอล & ปัดซ้ายขวา) -->
-<!-- ========================================== -->
+
+<!-- SMART FILTER MODAL -->
 <div id="filter-modal-overlay" class="luxury-modal-overlay" style="display: none;">
   <div class="luxury-modal-container">
     <div class="modal-drag-handle"></div>
@@ -547,7 +545,6 @@
     </div>
 
     <div class="luxury-modal-body custom-modal-scroll">
-      <!-- 1. Text Search -->
       <div class="filter-section">
         <div class="luxury-input-wrapper">
           <i class="fas fa-search search-inside-icon"></i>
@@ -556,7 +553,6 @@
         </div>
       </div>
 
-      <!-- 2. Province -->
       <div class="filter-section">
         <label class="filter-section-label">📍 จังหวัด / พื้นที่</label>
         <div id="modal-province-chips" class="horizontal-scroll-chips">
@@ -564,7 +560,6 @@
         </div>
       </div>
 
-      <!-- 3. Availability -->
       <div class="filter-section">
         <label class="filter-section-label">⚡ สถานะรับงาน</label>
         <div id="modal-availability-chips" class="horizontal-scroll-chips">
@@ -575,7 +570,6 @@
         </div>
       </div>
 
-      <!-- 4. Budget -->
       <div class="filter-section">
         <label class="filter-section-label">💰 ค่าขนม / เรตราคา</label>
         <div id="modal-price-chips" class="horizontal-scroll-chips">
@@ -586,7 +580,6 @@
         </div>
       </div>
 
-      <!-- 5. Tags -->
       <div class="filter-section">
         <label class="filter-section-label">💖 สไตล์ยอดฮิต</label>
         <div id="modal-tag-chips" class="horizontal-scroll-chips">
@@ -596,7 +589,6 @@
         </div>
       </div>
 
-      <!-- 6. Sort -->
       <div class="filter-section">
         <label class="filter-section-label">เรียงลำดับ</label>
         <div id="modal-sort-chips" class="horizontal-scroll-chips">
@@ -608,7 +600,6 @@
       </div>
     </div>
 
-    <!-- 🟢 จุดที่แก้ไข: เปลี่ยน onclick เป็น id สำหรับรับคำสั่งให้จอเลื่อน -->
     <div class="luxury-modal-footer">
       <button type="button" id="modal-reset-btn" class="footer-reset-btn">ล้างค่า</button>
       <button type="button" id="modal-apply-btn" class="footer-apply-btn">ดูผลลัพธ์</button>
@@ -668,13 +659,14 @@
   </div>
 </div>
 
+<!-- SSR PROFILES DATA HOLDER -->
 <script id="ssr-profiles-data">
   window.profilesData = null;
 </script>
 
 <script type="module" src="/main.js"></script>
 
-<!-- PWA Service Worker Registration -->
+<!-- PWA SERVICE WORKER -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
