@@ -1,8 +1,11 @@
 /**
- * [ SYSTEM BOT RENDERING CORE - PROD-READY OPTIMIZED 2026 ]
+ * [ SYSTEM BOT RENDERING CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless Crawler Handler
- * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
- * Features: Clean Text Filter (No ASCII Art), High-Speed Image Preload, Schema Rating Fix
+ * Fixes Applied:
+ *   1. Fixed Chiang Mai & Province Routing: Resolved Chiang Mai Breadcrumb & View-All link bug redirecting to Homepage.
+ *   2. Comprehensive Thai Typo Sanitization & Emoji Cleanup (Strips 🚨 and broken symbols).
+ *   3. Removed Fake Schema Phone Number (+6620000000) & Fabricated Measurements/Reviews.
+ *   4. Clean HTML Output & Valid Schema.org JSON-LD Structure.
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
@@ -16,7 +19,6 @@ const CONFIG = {
     },
     DOMAIN: 'https://firstmodelhub.com',
     BRAND_NAME: 'First Model Hub',
-    DEFAULT_TELEPHONE: "+6620000000",
     SOCIAL_PROFILES: {
         line: 'https://line.me/ti/p/ksLUWB89Y_',
         tiktok: 'https://tiktok.com/@firstmodelhub',
@@ -28,38 +30,33 @@ const CONFIG = {
     }
 };
 
-const REVIEW_POOL = [
-    { name: "พี่บอล", rating: 5, text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย" },
-    { name: "คุณเอก", rating: 5, text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ" },
-    { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ" },
-    { name: "คุณกอล์ฟ", rating: 5, text: "คุยง่ายเป็นกันเองมากครับ น้องน่ารักสไตล์ผู้ดี แนะนำเลยคนนี้ไม่ผิดหวัง" },
-    { name: "พี่ยอด", rating: 5, text: "ตรงเวลาดีครับ สุภาพเรียบร้อย นิสัยดีตรงตามรูปภาพในโปรไฟล์เลย" },
-    { name: "คุณเป้", rating: 5, text: "งานดีคุ้มราคามากครับ คุยเก่งเอาใจเก่ง ฟีลแฟนสุดใจเลยครับคนนี้" },
-    { name: "พี่แม็กซ์", rating: 5, text: "น้องคุยสนุก ตลก น่ารักเป็นกันเอง ดูแลดีตั้งแต่เริ่มจนจบเลยครับ" },
-    { name: "คุณต้น", rating: 5, text: "บริการประทับใจมาก สุภาพเรียบร้อย ไม่มีเร่งงานเลย แนะนำเลยครับ" },
-    { name: "พี่แบงค์", rating: 5, text: "น้องหุ่นดี ผิวพรรณดีมาก ตรงปกไม่จกตา คุยไลน์นัดแนะก็ง่าย" },
-    { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
-];
-
-const getDeterministicReviews = (slug, count = 3) => {
-    const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const selected = [];
-    for (let i = 0; i < count; i++) {
-        const index = (charCodeSum + i * 3) % REVIEW_POOL.length;
-        selected.push(REVIEW_POOL[index]);
-    }
-    return selected;
+// 🟢 ระบบล้างคำผิดภาษาไทย + ลบ Emoji/สัญลักษณ์พิเศษจากชื่อและเนื้อหา
+const sanitizeText = (str) => {
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replace(/นิมาน|นิทาน/g, "นิมมาน")
+        .replace(/ฟื้นที่/g, "พื้นที่")
+        .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
+        .replace(/พาพับ/g, "พายัพ")
+        .replace(/ของแก่น/g, "ขอนแก่น")
+        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨]/gu, "") // ลบ Emoji และ 🚨
+        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„]+/g, "") // ลบเส้นกรอบ ASCII
+        .replace(/\n\s*\n/g, "\n")
+        .trim();
 };
 
-const getDeterministicValue = (min, max, seedString, offset = 0) => {
-    const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
-    return Math.floor(min + (sum % (max - min + 1)));
+const sanitizeName = (rawName) => {
+    if (!rawName || typeof rawName !== "string") return "สาวสวย";
+    let cleaned = sanitizeText(rawName).replace(/^(น้อง\s?)+/gi, "").trim();
+    if (!cleaned) return "สาวสวย";
+    return `น้อง${cleaned}`;
 };
 
 const optimizeImg = (path, width = 600, height = 800) => {
     if (!path) return `${CONFIG.DOMAIN}/images/apple-touch-icon.png`;
     if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+        const cleanPath = path.replace(/\/image\/upload\/[^/]+\/(v\d+\/)/, '/image/upload/$1');
+        return cleanPath.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
     }
     return path.startsWith('http') 
         ? path 
@@ -75,35 +72,8 @@ const generateSrcSet = (path) => {
     }).join(', ');
 };
 
-const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
-
-const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
-
-// 🟢 แก้ไข: ลบเฉพาะเส้นกรอบ ASCII ป้องกันตัวหนังสือและ Emoji แตกเป็นตัวต่างดาว 
-const cleanAsciiArt = (text) => {
-    if (!text) return "";
-    return text
-        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "") // ลบเฉพาะเส้นกรอบ ASCII
-        .replace(/[„•ㅅ•„]+/g, "")                 // ลบตัวการ์ตูน ASCII
-        .replace(/\n\s*\n/g, "\n")                 // ลบบรรทัดว่างเกินจำเป็น
-        .trim();
-};
-
-const getLocalizedZone = (location, provinceName) => {
-    if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
-    const cleanLoc = location.trim();
-    if (cleanLoc.includes(provinceName)) {
-        return `ย่าน${cleanLoc}`;
-    }
-    return `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
-};
-
-const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, localizedZone) => {
-    if (p.description && p.description.trim().length > 10) {
-        return cleanAsciiArt(p.description.trim());
-    }
-    return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
-};
+const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, '').trim() : '';
 
 export default async (request, context) => {
     const url = new URL(request.url);
@@ -125,12 +95,11 @@ export default async (request, context) => {
         
         const { data: p } = await supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)')
+            .select('id, slug, name, imagePath, location, rate, age, height, weight, stats, bust, waist, hips, cup_size, description, provinceKey, lineId, slogan, quote, is_featured, verified, provinces(nameThai, key)')
             .eq('slug', slug)
             .eq('active', true)
             .maybeSingle();
 
-        // 🟢 แก้ไข: หากไม่เจอข้อมูลโปรไฟล์ ให้ปล่อยผ่านไปยัง Client-side JS แทนการตัดเป็น 404
         if (!p) {
             return context.next();
         }
@@ -147,17 +116,13 @@ export default async (request, context) => {
             related = relatedData || [];
         }
 
-        const rawName = p.name || 'สาวสวย';
-        let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
-        const displayName = `น้อง${cleanName}`;
+        const displayName = sanitizeName(p.name);
+        const provinceName = p.provinces?.nameThai || sanitizeText(p.location) || 'เชียงใหม่';
+        const provinceKey = (p.provinces?.key || p.provinceKey || 'chiangmai').toLowerCase().replace(/_/g, '-');
         
-        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
-        
-        const correctProvinceUrl = provinceKey === 'chiangmai' 
-            ? dynamicDomain 
-            : `${dynamicDomain}/location/${provinceKey}`;
-        
+        // 🟢 แก้ไขจุดตายที่ 1: ให้ URL จังหวัดชี้ไปที่ /location/chiangmai (ไม่ใช่หน้าหลัก domain เปล่าๆ)
+        const correctProvinceUrl = `${dynamicDomain}/location/${provinceKey}`;
+
         const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
         const rawRate = parseInt(cleanedRate, 10) || 1500;
         const displayPrice = rawRate.toLocaleString() + ".-";
@@ -168,58 +133,43 @@ export default async (request, context) => {
         
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
+            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl.replace(/^@/, '')}`;
         }
 
-        const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-        const heightVal = getDeterministicValue(158, 168, slug, 2);
-        const weightVal = getDeterministicValue(44, 52, slug, 3);
-        const breastVal = getDeterministicValue(32, 36, slug, 4);
-        const waistVal = getDeterministicValue(23, 26, slug, 5);
-        const hipVal = getDeterministicValue(33, 37, slug, 6);
-        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
-
-        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
-        const reviewCount = 150 + (charCodeSum % 100);
+        // 🟢 แก้ไขจุดตายที่ 2: ใช้ข้อมูลจริงจาก DB หากไม่มีให้แสดง "ไม่ระบุ" ไม่สร้างตัวเลขสัดส่วนปลอม
+        const ageVal = (p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0") ? `${p.age} ปี` : "ไม่ระบุ";
+        const heightVal = (p.height && String(p.height).trim() !== "-" && String(p.height).trim() !== "0") ? `${p.height} ซม.` : "ไม่ระบุ";
         
-        const localizedZone = getLocalizedZone(p.location, provinceName);
-        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
+        let bwhVal = "ไม่ระบุ";
+        if (p.bust && p.waist && p.hips) {
+            const cup = (p.cup_size || p.cupSize || "").toUpperCase().trim();
+            bwhVal = `${p.bust}${cup}-${p.waist}-${p.hips}`;
+        } else if (p.stats && String(p.stats).trim() !== "-") {
+            bwhVal = sanitizeText(p.stats);
+        }
+
+        const localizedZone = p.location ? `ย่าน${sanitizeText(p.location)} ในจังหวัด${provinceName}` : `จังหวัด${provinceName}`;
+        
+        let naturalDescriptionText = "";
+        if (p.description && p.description.trim().length > 10) {
+            naturalDescriptionText = sanitizeText(p.description);
+        } else {
+            naturalDescriptionText = `โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} สัดส่วน ${bwhVal} รูปร่างสมส่วน สุภาพเรียบร้อย ดูแลดีสไตล์ฟิวแฟน การันตีความปลอดภัย นัดเจอตัวจริงค่อยชำระค่าบริการหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้าทุกกรณี`;
+        }
         
         const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
-        const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
+        const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${sanitizeText(p.location) || provinceName} อายุ ${ageVal} สัดส่วน ${bwhVal} ดูแลเอาใจใส่สไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไม่โอนมัดจำล่วงหน้า`;
         
         const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(slug)}`;
 
-        // 🟢 เพิ่ม worstRating: "1" ในทุกก้อน Review ของ Schema
-        const dynamicReviews = getDeterministicReviews(slug, 3);
-        const schemaReviews = dynamicReviews.map(t => ({
-            "@type": "Review",
-            "reviewRating": {
-                "@type": "Rating",
-                "ratingValue": t.rating.toString(),
-                "bestRating": "5",
-                "worstRating": "1"
-            },
-            "author": {
-                "@type": "Person",
-                "name": stripHTML(t.name)
-            },
-            "reviewBody": stripHTML(t.text)
-        }));
-
+        // 🟢 แก้ไขจุดตายที่ 3: Breadcrumb สากล ชี้ไปที่หน้าจังหวัดนั้นๆ อย่างถูกต้องทั้งเชียงใหม่และทุกจังหวัด
         const breadcrumbElements = [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain },
+            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceName}`, "item": correctProvinceUrl },
+            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
         ];
 
-        if (provinceKey === 'chiangmai') {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
-        } else {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
-        }
-
-        breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
-
+        // 🟢 แก้ไขจุดตายที่ 4: ลบเบอร์โทรศัพท์ปลอม (+6620000000) และลบสคริปต์สุ่มรีวิวปลอมใน Schema JSON-LD
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -229,7 +179,6 @@ export default async (request, context) => {
                     "name": `${displayName} - ไซด์ไลน์${provinceName}`,
                     "image": [baseImageUrl],
                     "description": stripHTML(metaDesc),
-                    "telephone": CONFIG.DEFAULT_TELEPHONE,
                     "url": canonicalUrl,
                     "priceRange": "฿฿",
                     "address": {
@@ -237,15 +186,7 @@ export default async (request, context) => {
                         "addressLocality": provinceName,
                         "addressRegion": provinceName,
                         "addressCountry": "TH"
-                    },
-"aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": Number(ratingValue) || 4.8,
-                        "reviewCount": Number(reviewCount) || 150,
-                        "bestRating": 5,
-                        "worstRating": 1
-                    },
-                    "review": schemaReviews
+                    }
                 },
                 {
                     "@type": "BreadcrumbList",
@@ -265,7 +206,7 @@ export default async (request, context) => {
                         },
                         {
                             "@type": "Question",
-                            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${p.location || provinceName} ได้ที่ช่องทางใด?`,
+                            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${sanitizeText(p.location) || provinceName} ได้ที่ช่องทางใด?`,
                             "acceptedAnswer": {
                                 "@type": "Answer",
                                 "text": `สามารถดำเนินการคลิกแอดไลน์ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บ เพื่อดำเนินการขอตรวจสอบคิวงาน สแตนด์บายตารางงาน และจองคิวรับบริการเพื่อความสะดวกและรวดเร็วที่สุดผ่านไลน์แอดมินเจ้าหน้าที่อย่างเป็นทางการ`
@@ -276,14 +217,13 @@ export default async (request, context) => {
             ]
         };
 
-        // 🟢 ถอด Tailwind CDN ออกจาก <head> และซิงค์ Preload Image ให้ใช้ imagesrcset ป้องกันโหลดซ้ำ
         const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} | สารบัญตรวจสอบประวัติตรงปก</title>
-    <meta name="description" content="${metaDesc}">
+    <title>${escapeHTML(pageTitle)} | สารบัญตรวจสอบประวัติตรงปก</title>
+    <meta name="description" content="${escapeHTML(metaDesc)}">
     <link rel="canonical" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large">
     
@@ -293,8 +233,8 @@ export default async (request, context) => {
     
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${pageTitle}">
-    <meta name="twitter:description" content="${metaDesc}">
+    <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
+    <meta name="twitter:description" content="${escapeHTML(metaDesc)}">
     <meta name="twitter:image" content="${baseImageUrl}">
     <meta property="og:image" content="${baseImageUrl}">
     <meta property="og:image:width" content="600">   
@@ -302,8 +242,8 @@ export default async (request, context) => {
     
     <link rel="shortcut icon" href="/images/favicon.ico">
     
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
+    <meta property="og:title" content="${escapeHTML(pageTitle)}">
+    <meta property="og:description" content="${escapeHTML(metaDesc)}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
 
@@ -330,10 +270,6 @@ export default async (request, context) => {
         .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 1.5rem; box-shadow: 0 24px 48px rgba(0,0,0,0.7); border: 1px solid var(--bw); display: block; }
         .profile-meta-header { text-align: center; margin: 1.5rem 0; }
         h1 { font-size: clamp(1.8rem, 5vw, 2.3rem); font-weight: 900; line-height: 1.2; }
-        .rating { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700; font-size: 1.1rem; }
-        .rating .stars { font-size: 1.2rem; filter: drop-shadow(0 0 6px rgba(250,204,21,0.4)); }
-        .rating .rating-value { color: var(--gold); }
-        .rating .review-count { color: var(--muted); font-size: 0.95rem; font-weight: 400; }
         .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1.5rem 0; }
         .spec-box { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; }
         .spec-box dt { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
@@ -359,8 +295,6 @@ export default async (request, context) => {
         .related-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
         .related-name { padding: 0.75rem; text-align: center; font-weight: bold; font-size: 0.95rem; }
         .view-all-btn { display: block; text-align: center; color: var(--p); text-decoration: underline; font-weight: bold; margin-top: 1rem; }
-        
-        .testimonial { background: rgba(255,255,255,0.01); padding: 1.25rem; border-radius: 1.25rem; border: 1px solid var(--bw); margin-bottom: 1rem; }
         
         .footer { text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--bw); margin-top: 3.5rem; color: var(--muted); font-size: 0.85rem; }
         .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
@@ -390,7 +324,7 @@ export default async (request, context) => {
         <nav aria-label="breadcrumb" class="breadcrumb">
             <a href="/">หน้าแรก</a> &raquo; 
             <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${provinceName}</a> &raquo; 
-            <span>${displayName}</span>
+            <span>${escapeHTML(displayName)}</span>
         </nav>
 
         <main class="main-content">
@@ -398,18 +332,13 @@ export default async (request, context) => {
                 <section class="hero-section">
 <img src="${lcpImageUrl}" 
      ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
-     class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
+     class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
      loading="eager" fetchpriority="high" decoding="async" 
      width="400" height="533">
                 </section>
 
                 <header class="profile-meta-header">
-                    <h1>${pageTitle}</h1>
-                    <div class="rating">
-                        <span class="stars">⭐</span>
-                        <span class="rating-value">${ratingValue}</span>
-                        <span class="review-count">คะแนนโหวตจากลูกค้า (${reviewCount} รีวิว)</span>
-                    </div>
+                    <h1>${escapeHTML(pageTitle)}</h1>
                 </header>
 
                 <div class="info-grid">
@@ -419,13 +348,13 @@ export default async (request, context) => {
                     </div>
                     <div class="info-item">
                         <span class="info-label">อายุ</span>
-                        <span class="info-value">${ageVal} ปี</span>
+                        <span class="info-value">${escapeHTML(ageVal)}</span>
                     </div>
                 </div>
 
                 <div class="specs-grid">
-                    <dl class="spec-box"><dt>สัดส่วน</dt><dd>${bwhVal}</dd></dl>
-                    <dl class="spec-box"><dt>ส่วนสูง</dt><dd>${heightVal} ซม.</dd></dl>
+                    <dl class="spec-box"><dt>สัดส่วน</dt><dd>${escapeHTML(bwhVal)}</dd></dl>
+                    <dl class="spec-box"><dt>ส่วนสูง</dt><dd>${escapeHTML(heightVal)}</dd></dl>
                 </div>
 
                 <div class="description">
@@ -446,33 +375,21 @@ export default async (request, context) => {
                 <section class="faq-section">
                     <h2 class="faq-title">คำถามพบบ่อย</h2>
                     <div class="faq-item">
-                        <h3>${displayName} มีมัดจำไหม?</h3>
+                        <h3>${escapeHTML(displayName)} มีมัดจำไหม?</h3>
                         <p>ไม่มีนโยบายการรับเงินโอนจองมัดจำล่วงหน้าใดๆ ทุกกรณีค่ะ ลูกค้าสามารถเดินทางมานัดพบหน้างานเพื่อตรวจสอบสิทธิ์ความตรงปกเรียบร้อยแล้ว ค่อยตกลงชำระค่าขนมโดยตรงหน้างานเพื่อความปลอดภัย 100%</p>
                     </div>
                 </section>
 
-                <section>
-                    <h2 class="faq-title">รีวิวจากลูกค้า</h2>
-                    ${dynamicReviews.map(t => `
-                        <div class="testimonial">
-                            <strong>${escapeHTML(t.name)}</strong>
-                            <p>${escapeHTML(t.text)}</p>
-                        </div>
-                    `).join('')}
-                </section>
-                
                 ${related.length > 0 ? `
                 <section class="faq-section" style="margin-top: 3.5rem;">
                     <h2 class="faq-title">น้องๆ โซน${provinceName} ที่น่าสนใจ</h2>
                     <div class="related-grid">
                         ${related.map(r => {
-                            const rawRelName = r.name || 'สาวสวย';
-                            const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
-                            const displayRelName = `น้อง${cleanRelName}`;
+                            const displayRelName = sanitizeName(r.name);
                             return `
-                            <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${displayRelName}">
-                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
-                                <div class="related-name">${displayRelName}</div>
+                            <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${escapeHTML(displayRelName)}">
+                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${escapeHTML(displayRelName)} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
+                                <div class="related-name">${escapeHTML(displayRelName)}</div>
                             </a>
                             `;
                         }).join('')}
@@ -498,7 +415,7 @@ export default async (request, context) => {
                 <a href="/profiles">โปรไฟล์น้องๆ ทั้งหมด</a>
                 <a href="/locations">พิกัดรับงานทั่วประเทศ</a>
             </nav>
-            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+            © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
 </body>
