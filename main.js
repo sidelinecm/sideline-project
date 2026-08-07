@@ -1,4 +1,20 @@
 
+/* ==============================================================================
+   💎 FIRST MODEL HUB - MAIN CLIENT-SIDE ENGINE (PROD-READY ULTRA-OPTIMIZED 2026)
+   Project: First Model Hub
+   All 10 Client-Side Critical Fixes Included:
+     1. Client-Side Thai Typo Sanitizer & Unicode Emoji / Alert Icon Stripper.
+     2. Dynamic Fallback Slogan Generator (Eliminates Duplicate Tagline Penalties).
+     3. Global Profile Deduplication Engine (Prevents Duplicate Cards Across Views).
+     4. Clean Age Display (Shows age in parentheses only when valid).
+     5. Debounced Search Input (200ms) for Smooth Mobile Typing.
+     6. Synchronized Luxury-Chip Filters with Hidden Form Inputs.
+     7. Smooth Auto-Scroll to Results on Filter Selection.
+     8. DOM TreeWalker Placeholder Cleansing (Strips any leftover {{...}} tags).
+     9. Lightbox Modal Line ID Sanitizer & Clean Link Builder.
+    10. Smooth Floating Dock Scroll Handler with 400ms Stationary Detection.
+   ============================================================================== */
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
@@ -14,20 +30,77 @@ window.ScrollTrigger = ScrollTrigger;
     SUPABASE_URL: "https://zxetzqwjaiumqhrpumln.supabase.co",
     SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
     STORAGE_BUCKET: "profile-images",
-    ENABLE_REALTIME: false,
     KEYS: {
       LAST_PROVINCE: "firstmodelhub_last_province",
-      CACHE_PROFILES: "cachedProfiles_v3_2026",
-      CACHE_PROVINCES: "cachedProvinces_v3_2026",
-      LAST_SYNC: "data_last_sync_timestamp_v3_2026",
-      LAST_FETCH: "lastFetchTime",
-      AGE_CONFIRMED: "ageConfirmedTimestamp",
+      CACHE_PROFILES: "cachedProfiles_v4_2026",
+      CACHE_PROVINCES: "cachedProvinces_v4_2026",
       THEME: "theme",
       LIKED_PROFILES: "liked_profiles"
     },
     SITE_URL: "https://firstmodelhub.com",
     DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
+
+  // 🟢 คลังสโลแกนสำรองหลากหลายแบบ เพื่อขจัดปัญหาข้อความซ้ำกันทั้งเว็บ
+  const FALLBACK_SLOGANS = [
+    "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน",
+    "ตรงปก 100% เอาใจเก่ง พูดคุยเป็นกันเอง",
+    "สดใสน่ารัก ยิ้มเก่ง สไตล์เพื่อนเที่ยวฟิวแฟน",
+    "ดูแลเอาใจใส่สุภาพเรียบร้อย เป็นกันเองมากๆ ค่ะ",
+    "น่ารักคุยสนุก เทคแคร์ประทับใจ ไม่เร่งงาน",
+    "หุ่นดี รูปร่างสมส่วน สไตล์ฟิวแฟนอบอุ่น",
+    "ตรงปกแน่นอน น่ารัก นิสัยดี คุยง่ายสบายใจ",
+    "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ"
+  ];
+
+  function getDeterministicSlogan(idOrSlug, rawSlogan) {
+    if (rawSlogan && String(rawSlogan).trim().length > 3) {
+      return sanitizeThaiText(rawSlogan);
+    }
+    const str = String(idOrSlug || "0");
+    const sum = str.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const index = sum % FALLBACK_SLOGANS.length;
+    return FALLBACK_SLOGANS[index];
+  }
+
+  // 🟢 พจนานุกรมล้างคำผิดภาษาไทย + ลบ Emoji และสัญลักษณ์เตือนภัย 🚨
+  function sanitizeThaiText(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/นิมาน|นิทาน/g, "นิมมาน")
+      .replace(/ฟื้นที่/g, "พื้นที่")
+      .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
+      .replace(/พาพับ/g, "พายัพ")
+      .replace(/ของแก่น/g, "ขอนแก่น")
+      .replace(/บ้านดู๋/g, "บ้านดู่")
+      .replace(/ห้วยเเก้ว/g, "ห้วยแก้ว")
+      .replace(/ปาตอง/g, "ป่าตอง")
+      .replace(/ชลบรุี/g, "ชลบุรี")
+      .replace(/อยุธญา/g, "อยุธยา")
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨]/gu, "") // ลบ Emoji และ 🚨
+      .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„]+/g, "") // ลบเส้นกรอบ ASCII
+      .trim();
+  }
+
+  function sanitizeName(rawName) {
+    if (!rawName || typeof rawName !== "string") return "สาวสวย";
+    let cleaned = sanitizeThaiText(rawName).replace(/^(น้อง\s?)+/gi, "").trim();
+    if (!cleaned) return "สาวสวย";
+    return `น้อง${cleaned}`;
+  }
+
+  // 🟢 ระบบขจัดโปรไฟล์ซ้ำ (Profile Deduplication Engine)
+  function deduplicateProfiles(profileList) {
+    if (!Array.isArray(profileList)) return [];
+    const seen = new Set();
+    return profileList.filter(p => {
+      if (!p) return false;
+      const uniqueKey = String(p.id || p.slug || p.imagePath).toLowerCase().trim();
+      if (seen.has(uniqueKey)) return false;
+      seen.add(uniqueKey);
+      return true;
+    });
+  }
 
   const LOCALIZED_SEO_MAP = {
     chiangmai: {
@@ -114,7 +187,7 @@ window.ScrollTrigger = ScrollTrigger;
         { q: "สาวรับงานภูเก็ต รับงานโซนป่าตองไหม?", a: "มีน้องๆ พร้อมรับงานโซนป่าตอง ตัวเมืองภูเก็ต กะทู้ และฉลอง" }
       ]
     },
-    udon: {
+    udonthani: {
       zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"],
       seoContent: `<p>ศูนย์รวม <strong>สาวรับงานอุดรธานี</strong> และเพื่อนเที่ยวพรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>`,
       reviews: [
@@ -144,8 +217,6 @@ window.ScrollTrigger = ScrollTrigger;
     currentProfileSlug: null,
     lastFocusedElement: null,
     isFetching: false,
-    lastFetchedAt: "1970-01-01T00:00:00Z",
-    cleanupFunctions: [],
     currentFilters: null,
     filteredProfiles: [],
     renderId: 0
@@ -155,22 +226,15 @@ window.ScrollTrigger = ScrollTrigger;
   let supabaseClient = null;
   let isLikeProcessing = false;
   let isFirstLoad = true;
+  let searchDebounceTimer = null;
 
   const DEFAULT_SEO = {
-    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟน ตรงปกทั่วไทย 2026 | First Model Hub",
-    description: "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟน และเพื่อนเที่ยวพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
-    keywords: "รับงาน, สาวรับงาน, เพื่อนเที่ยว, ไซด์ไลน์, เด็กเอ็น, ผู้ดูแลพรีเมียม, ไม่มัดจำ",
+    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub",
+    description: "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
+    keywords: "แฟนเช่า, แฟนเช่าเชียงใหม่, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน",
     canonical: "https://firstmodelhub.com/",
     ogImage: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
-
-  function sanitizeName(rawName) {
-    if (!rawName || typeof rawName !== "string") return "";
-    let cleaned = rawName.trim().replace(/^(น้อง\s?)+/gi, "");
-    cleaned = cleaned.toLowerCase();
-    cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-    return `น้อง${cleaned}`;
-  }
 
   function runIdle(fn, delay = 0) {
     if ("requestIdleCallback" in window) {
@@ -357,7 +421,8 @@ window.ScrollTrigger = ScrollTrigger;
 
     const safeStats = (statsFormatted && statsFormatted !== "-") ? statsFormatted : "ไม่ระบุ";
 
-    const sloganText = raw.slogan || raw.quote || raw.tagline || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน";
+    // 🟢 ใช้สโลแกนแบบสุ่มไดนามิกเมื่อผู้ดูแลไม่ได้ใส่สโลแกนใน DB
+    const sloganText = getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote || raw.tagline);
     const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
     const styleTags = Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",").map(t => t.trim()) : []);
 
@@ -423,7 +488,7 @@ window.ScrollTrigger = ScrollTrigger;
     try {
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         console.log("⚡ [Hydration] โหลดข้อมูล SSR สำเร็จ!");
-        STATE.allProfiles = window.profilesData.map(p => processProfileObject(p)).filter(Boolean);
+        STATE.allProfiles = deduplicateProfiles(window.profilesData.map(p => processProfileObject(p)).filter(Boolean));
         populateProvinceDropdown();
         applyUltimateFilters(false, false);
         updateHeroSwiperCards();
@@ -458,7 +523,7 @@ window.ScrollTrigger = ScrollTrigger;
       }
 
       const rawProfiles = profilesRes.data || [];
-      STATE.allProfiles = rawProfiles.map(p => processProfileObject(p)).filter(Boolean);
+      STATE.allProfiles = deduplicateProfiles(rawProfiles.map(p => processProfileObject(p)).filter(Boolean));
       saveCacheToLocalStorage(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
 
       populateProvinceDropdown();
@@ -470,7 +535,7 @@ window.ScrollTrigger = ScrollTrigger;
       console.error("❌ โหลดข้อมูลล้มเหลว นำข้อมูลเก่ามาแสดงแทน:", err);
       const fallbackRaw = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
       if (fallbackRaw) {
-        STATE.allProfiles = JSON.parse(fallbackRaw);
+        STATE.allProfiles = deduplicateProfiles(JSON.parse(fallbackRaw));
         populateProvinceDropdown();
         applyUltimateFilters(false, false);
         updateHeroSwiperCards();
@@ -533,7 +598,6 @@ window.ScrollTrigger = ScrollTrigger;
     const fragment = document.createDocumentFragment();
 
     const modalChipsContainer = document.getElementById("modal-province-chips");
-    // 🟢 แก้ไขตรงนี้: เปลี่ยน advanced-chip เป็น luxury-chip ให้ตรงกับ CSS
     let modalChipsHTML = `<button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>`;
 
     sortedProvinces.forEach(([key, name]) => {
@@ -541,7 +605,6 @@ window.ScrollTrigger = ScrollTrigger;
       opt.value = key;
       opt.textContent = name;
       fragment.appendChild(opt);
-      // 🟢 แก้ไขตรงนี้: เปลี่ยน advanced-chip เป็น luxury-chip
       modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${key}">${name}</button>`;
     });
 
@@ -580,7 +643,7 @@ window.ScrollTrigger = ScrollTrigger;
     const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
     const statusText = profile.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
     
-    // 🟢 แก้ไขเรื่องอายุ ให้แสดงวงเล็บเฉพาะคนที่มีอายุ ไม่โชว์คำว่า "ไม่ระบุ"
+    // 🟢 แสดงอายุในวงเล็บเฉพาะคนที่มีข้อมูลอายุจริงเท่านั้น
     const ageDisplay = (profile.safeAge && profile.safeAge !== "-" && profile.safeAge !== "ไม่ระบุ") ? ` <span style="font-size: 0.85em; opacity: 0.9;">(${profile.safeAge})</span>` : "";
 
     const featuredBadge = profile.isfeatured
@@ -846,6 +909,7 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
+  // 🟢 เลื่อนหน้าจอลงไปยังจุดแสดงผลลัพธ์อัตโนมัติ
   function scrollToSearchResults() {
     const targetElement = document.getElementById("profiles-display-area");
     if (!targetElement) return;
@@ -945,6 +1009,9 @@ window.ScrollTrigger = ScrollTrigger;
           return true;
         });
       }
+
+      // 🟢 กรองรายการโปรไฟล์ไม่ให้ซ้ำกันก่อนเรียงลำดับ
+      results = deduplicateProfiles(results);
 
       results.sort((a, b) => {
         if (activeFilters.text) return 0;
@@ -1113,12 +1180,14 @@ window.ScrollTrigger = ScrollTrigger;
             if (STATE.renderId !== currentRenderId) return;
 
             const name = STATE.provincesMap.get(key) || (key === "no_province" ? "ไม่ระบุจังหวัด" : key);
-            const section = createProvinceSectionElement(key, name, grouped[key]);
+            // 🟢 ขจัดโปรไฟล์ซ้ำภายในกลุ่มย่อย
+            const cleanGroupProfiles = deduplicateProfiles(grouped[key]);
+            const section = createProvinceSectionElement(key, name, cleanGroupProfiles);
 
             DOM.profilesDisplayArea.appendChild(section);
 
             const grid = section.querySelector(".profile-grid");
-            await appendProfilesToContainer(grid, grouped[key], currentRenderId);
+            await appendProfilesToContainer(grid, cleanGroupProfiles, currentRenderId);
           }
           if (isUserAction) scrollToSearchResults();
         })();
@@ -1373,6 +1442,7 @@ window.ScrollTrigger = ScrollTrigger;
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
+      // 🟢 ล้าง Line ID ให้สะอาด ป้องกันลิงก์เสีย
       const lineIdToUse = (profile.lineId || "ksLUWB89Y_").replace(/^@/, "").trim();
       let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
       
@@ -1736,6 +1806,7 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
+  // 🟢 ลบแท็ก {{...}} ที่อาจหลุดออกมาบนหน้าจออัตโนมัติ
   function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
     try {
       const liveCountEl = document.getElementById("live-profile-count");
@@ -1753,17 +1824,15 @@ window.ScrollTrigger = ScrollTrigger;
             .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
             .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
             .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-            .replace(/\{\{PROFILES_CARDS_HTML\}\}/g, "")
-            .replace(/\{\{PROFILES_DISPLAY_AREA_HTML\}\}/g, "")
-            .replace(/\{\{PROVINCE_SEO_CONTENT\}\}/g, "")
-            .replace(/\{\{PROVINCE_FAQS_HTML\}\}/g, "")
-            .replace(/\{\{PROVINCE_REVIEWS_HTML\}\}/g, "");
+            .replace(/\{\{[A-Z0-9_]+\}\}/g, "");
         }
       }
 
       document.querySelectorAll('input[type="hidden"], input[type="text"]').forEach(el => {
-        if (el.value && el.value.includes("{{PROVINCE_NAME}}")) {
-          el.value = el.value.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
+        if (el.value && el.value.includes("{{")) {
+          el.value = el.value
+            .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
+            .replace(/\{\{[A-Z0-9_]+\}\}/g, "");
         }
       });
 
@@ -1779,8 +1848,6 @@ window.ScrollTrigger = ScrollTrigger;
     if (path.length > 1 && path.endsWith("/")) {
       path = path.slice(0, -1);
     }
-
-    const cleanPath = path.replace(/\/+$/, "");
 
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
     if (profileMatch) {
@@ -2056,9 +2123,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-/* ==============================================================================
-   💎 DYNAMIC SEARCH PLACEHOLDER & GLOBAL HANDLERS
-   ============================================================================== */
   function initDynamicSearchPlaceholder() {
     const placeholders = [
       "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
@@ -2137,9 +2201,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   };
 
-  /* ==============================================================================
-   💎 ULTRA-LUXURY FILTER CONTROLLER
-   ============================================================================== */
   window.openFilterModal = function() {
     const modal = document.getElementById('filter-modal-overlay');
     if (modal) {
@@ -2156,21 +2217,13 @@ window.ScrollTrigger = ScrollTrigger;
     }
     
     setTimeout(() => {
-      const targetElement = document.getElementById("profiles-display-area");
-      if (targetElement) {
-        const headerOffset = 70;
-        const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-        window.scrollTo({
-          top: elementPosition - headerOffset,
-          behavior: "smooth"
-        });
-      }
+      scrollToSearchResults();
     }, 100);
   };
 
   /* ==============================================================================
-   🚀 MAIN DOM INITIALIZATION 
-   ============================================================================== */
+     🚀 MAIN DOM INITIALIZATION
+     ============================================================================== */
   document.addEventListener("DOMContentLoaded", async function () {
     console.log("🚀 แอปพลิเคชัน First Model Hub กำลังเริ่มต้นทำงาน...");
 
@@ -2219,7 +2272,7 @@ window.ScrollTrigger = ScrollTrigger;
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
     })();
 
-    // Delegation Clicks 
+    // Delegation Clicks
     document.body.addEventListener("click", e => {
       const target = e.target;
 
@@ -2248,7 +2301,7 @@ window.ScrollTrigger = ScrollTrigger;
         const card = cardLink.closest(".profile-card-new, .vip-card-item");
         let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
         if (rawSlug) {
-          try { rawSlug = decodeURIComponent(rawSlug); } catch (e) {}
+          try { rawSlug = decodeURIComponent(rawSlug); } catch (err) {}
           STATE.lastFocusedElement = cardLink;
           history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
           handleRouteNavigation();
@@ -2264,11 +2317,7 @@ window.ScrollTrigger = ScrollTrigger;
         return;
       }
 
-      // =========================================================
-      // 🌟 5. ระบบคลิกตัวกรองใน Modal
-      // =========================================================
-      
-      // 5.1 คลิกเลือกจังหวัด
+      // 5.1 คลิกเลือกจังหวัดใน Modal
       if (target.closest('.province-chip')) {
         const btn = target.closest('.province-chip');
         document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
@@ -2279,7 +2328,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.2 คลิกเลือกสถานะ (Avail)
+      // 5.2 คลิกเลือกสถานะ (Avail) ใน Modal
       if (target.closest('.avail-chip')) {
         const btn = target.closest('.avail-chip');
         document.querySelectorAll('.avail-chip').forEach(b => b.classList.remove('active'));
@@ -2290,7 +2339,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.3 คลิกเลือกราคา 
+      // 5.3 คลิกเลือกราคา ใน Modal
       if (target.closest('.price-chip')) {
         const btn = target.closest('.price-chip');
         document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
@@ -2302,7 +2351,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.4 คลิกเลือกแท็ก
+      // 5.4 คลิกเลือกแท็ก ใน Modal
       if (target.closest('.tag-chip')) {
         const btn = target.closest('.tag-chip');
         document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
@@ -2321,7 +2370,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.5 คลิกเรียงลำดับ (Sort)
+      // 5.5 คลิกเรียงลำดับ (Sort) ใน Modal
       if (target.closest('.sort-chip')) {
         const btn = target.closest('.sort-chip');
         document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
@@ -2334,7 +2383,7 @@ window.ScrollTrigger = ScrollTrigger;
       }
     });
 
-    // Reset Buttons 
+    // Reset Buttons
     const modalResetBtn = document.getElementById('modal-reset-btn');
     if (modalResetBtn) {
       modalResetBtn.onclick = () => {
@@ -2384,33 +2433,39 @@ window.ScrollTrigger = ScrollTrigger;
       renderSmartFilterChips();
     });
 
-    // 🟢 6. ซิงค์ข้อมูลเวลาพิมพ์ค้นหา (Inline Search + Modal Search)
+    // 🟢 6. ซิงค์ช่องค้นหาและเพิ่ม Debounce (200ms) เพื่อความลื่นไหลสูงสุด
     const modalSearchInput = document.getElementById("modal-search-keyword");
     const inlineSearchInput = document.getElementById("inline-search-input");
     const clearTextBtn = document.getElementById("clear-modal-text-btn");
 
-    // ซิงค์จากช่องพิมพ์ใน Modal
-    if (modalSearchInput && DOM.searchInput) {
+    const triggerDebouncedSearch = (val) => {
+      if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        if (DOM.searchInput) DOM.searchInput.value = val;
+        applyUltimateFilters(true, true);
+      }, 200);
+    };
+
+    if (modalSearchInput) {
       modalSearchInput.addEventListener("input", (e) => {
-        DOM.searchInput.value = e.target.value;
-        if (inlineSearchInput) inlineSearchInput.value = e.target.value;
-        if (clearTextBtn) {
-          clearTextBtn.style.display = e.target.value.length > 0 ? "block" : "none";
-        }
+        const val = e.target.value;
+        if (inlineSearchInput) inlineSearchInput.value = val;
+        if (clearTextBtn) clearTextBtn.style.display = val.length > 0 ? "block" : "none";
+        triggerDebouncedSearch(val);
       });
       
       modalSearchInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           applyUltimateFilters(true, true);
-          if (typeof window.closeFilterModal === "function") window.closeFilterModal();
+          closeFilterModal();
         }
       });
 
       if (clearTextBtn) {
         clearTextBtn.addEventListener("click", () => {
           modalSearchInput.value = "";
-          DOM.searchInput.value = "";
+          if (DOM.searchInput) DOM.searchInput.value = "";
           if (inlineSearchInput) inlineSearchInput.value = "";
           clearTextBtn.style.display = "none";
           applyUltimateFilters(true, true);
@@ -2418,34 +2473,31 @@ window.ScrollTrigger = ScrollTrigger;
       }
     }
 
-    // 🟢 ซิงค์จากช่องพิมพ์ในหน้าหลัก (Inline Search) ให้เริ่มค้นหาได้เลย!
-    if (inlineSearchInput && DOM.searchInput) {
+    if (inlineSearchInput) {
       inlineSearchInput.addEventListener("input", (e) => {
-        DOM.searchInput.value = e.target.value;
-        if (modalSearchInput) modalSearchInput.value = e.target.value;
+        const val = e.target.value;
+        if (modalSearchInput) modalSearchInput.value = val;
+        triggerDebouncedSearch(val);
       });
       
       inlineSearchInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           applyUltimateFilters(true, true);
-          scrollToSearchResults(); // เลื่อนจอลงไปดูผลลัพธ์
+          scrollToSearchResults();
         }
       });
     }
 
-    // 🟢 กดปุ่ม "ดูผลลัพธ์" ใน Modal
     const modalApplyBtn = document.getElementById('modal-apply-btn');
     if (modalApplyBtn) {
       modalApplyBtn.onclick = () => {
         applyUltimateFilters(true, true);
-        if (typeof window.closeFilterModal === "function") {
-          window.closeFilterModal();
-        }
+        closeFilterModal();
       };
     }
 
-// Init Page Features
+    // Init Page Features
     initThemeToggle();
     initStarRating();
     initReviewForm();
@@ -2457,40 +2509,32 @@ window.ScrollTrigger = ScrollTrigger;
     initPwaInstaller();
     initDynamicSearchPlaceholder();
 
-// =========================================================
-    // 🟢 ระบบซ่อนเมนูเมื่อไถจอ และโชว์ทันทีที่จอนิ่ง (Smooth UX)
-    // =========================================================
+    // 🟢 10. ระบบซ่อนเมนูลอยเมื่อไถลง และโชว์อัตโนมัติเมื่อจอนิ่ง (400ms)
     let lastScrollY = window.scrollY;
-    let scrollTimeout = null; // ตัวแปรสำหรับจับเวลาจอนิ่ง
+    let scrollTimeout = null;
     const dockMenu = document.querySelector('.floating-app-dock');
     
     window.addEventListener('scroll', () => {
       if (!dockMenu) return;
       const currentScrollY = window.scrollY;
       
-      // 1. เคลียร์การนับเวลาถอยหลังทุกครั้งที่นิ้วกำลังไถจออยู่
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
       
-      // 2. ถ้าไถจอลง (เกิน 100px) ให้หลบไปก่อน
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         dockMenu.classList.add('dock-hidden');
-      } 
-      // 3. ถ้าตั้งใจไถจอขึ้น ให้โชว์ทันที
-      else {
+      } else {
         dockMenu.classList.remove('dock-hidden');
       }
       
       lastScrollY = currentScrollY;
 
-      // 4. พระเอกอยู่ตรงนี้! ถ้าหยุดไถจอ (จอนิ่งเกิน 0.4 วินาที) ให้เรียกเมนูกลับมา
       scrollTimeout = setTimeout(() => {
         dockMenu.classList.remove('dock-hidden');
-      }, 400); // 400 มิลลิวินาที คือจังหวะที่ลื่นไหลพอดี ไม่เร็วหรือช้าไป
+      }, 400);
       
     }, { passive: true });
-    // =========================================================
 
     await fetchProfilesData();
     await handleRouteNavigation(true);
