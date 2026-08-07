@@ -284,13 +284,16 @@ const optimizeImg = (path, width = 320, height = 400) => {
   return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
+// ✅ ปรับปรุงให้ตรวจสอบวันที่สมบูรณ์ก่อนแปลง ป้องกันคำว่า "NaN undefined NaN"
 const formatDateSSR = dateStr => {
   if (!dateStr) return "เมื่อครู่นี้";
   try {
-    const t = new Date(dateStr),
-      months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."],
-      date = t.getDate(),
-      month = months[t.getMonth()];
+    const t = new Date(dateStr);
+    if (isNaN(t.getTime())) return "เมื่อครู่นี้"; // ถ้าวันที่ผิดรูป ให้ส่งคำว่า "เมื่อครู่นี้" ทันที
+    
+    const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const date = t.getDate();
+    const month = months[t.getMonth()];
     return `${date} ${month} ${(t.getFullYear() + 543).toString().slice(-2)}`;
   } catch {
     return "เมื่อครู่นี้";
@@ -769,6 +772,7 @@ export default async (req, context) => {
       }
     ];
 
+    // 🟢 แก้ไขจุดที่ 1 & 2: เติม Person Schema ให้ครบสมบูรณ์ และป้องกัน Date Crash
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       const cleanName = sanitizeName(matchedProfile.name);
@@ -780,6 +784,35 @@ export default async (req, context) => {
         "name": `${cleanName} - โปรไฟล์สาวรับงาน${provinceThaiName}`,
         "isPartOf": { "@id": `${hostUrl}/#website` },
         "mainEntity": { "@id": `${profileUrl}/#person` }
+      });
+
+      // ✅ เติม Person Object ที่ขาดหายไป ให้ตรงกับ #person
+      schemaGraph.push({
+        "@type": "Person",
+        "@id": `${profileUrl}/#person`,
+        "name": cleanName,
+        "url": profileUrl,
+        "image": metaImgUrl,
+        "description": strippedDesc,
+        "jobTitle": "Companion & Entertainer",
+        "gender": "Female",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": sanitizeThaiText(matchedProfile.location) || provinceThaiName,
+          "addressRegion": provinceThaiName,
+          "addressCountry": "TH"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": profileUrl,
+          "price": String(matchedProfile.rate || "1500").replace(/\D/g, "") || "1500",
+          "priceCurrency": "THB",
+          "priceValidUntil": "2027-12-31",
+          "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (matchedProfile.availability || "").toLowerCase().includes(kw))
+            ? "https://schema.org/SoldOut"
+            : "https://schema.org/InStock",
+          "description": "นัดเจอตัวจริงค่อยชำระค่าบริการหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้า"
+        }
       });
       
       // 🟢 Breadcrumb ลิงก์ย้อนกลับโซนจังหวัดอย่างถูกต้อง
@@ -900,22 +933,25 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
+    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, () => `<title>${escapeHTML(pageTitle)}</title>`);
+    rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, () => `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
 
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
+    rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, () => `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
+    rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, () => `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
+    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, () => `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
+    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, () => `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
 
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
+    // 🟢 แก้ไขการฉีด Schema JSON-LD ให้ปลอดภัย 100% (ใช้ Replacer Function บล็อกสัญลักษณ์ $ ไม่ให้ทำลายไวยากรณ์ JSON)
+    const safeSchemaJsonStr = JSON.stringify(schemaJson).replace(/</g, '\\u003c');
+    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${safeSchemaJsonStr}</script>`;
+
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
+      rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, () => newSchemaScript);
     } else {
-      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
+      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", safeSchemaJsonStr);
     }
     
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
@@ -927,12 +963,14 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
+    // ✅ ใช้ Replacer Function เพื่อความปลอดภัย 100%
+rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, (match, p1, p2) => `${p1}="/${p2}"`);
 
     if (popularLocationsHtml) {
+      const footerListHtml = `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`;
       rawHtml = rawHtml.replace(
         /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
-        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
+        () => footerListHtml
       );
     }
 
@@ -1007,12 +1045,13 @@ export default async (req, context) => {
 
     const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
 
+    // 🟢 2. ป้องกันการโดนกวนด้วยสัญลักษณ์พิเศษในการแทรกแท็กสคริปต์
     if (rawHtml.includes('<script id="ssr-profiles-data">')) {
-      rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
+      rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, () => hydratedScriptTag);
     } else if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
     } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
+      rawHtml = rawHtml.replace(/<\/head>/i, () => `${hydratedScriptTag}\n</head>`);
     }
 
     // 🟢 การันตีลบแท็ก {{...}} ที่อาจตกค้างทั้งหมดออก 100% ป้องกันหลุดไปที่ Google Index

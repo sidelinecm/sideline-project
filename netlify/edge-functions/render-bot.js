@@ -1,9 +1,9 @@
 /**
  * [ SYSTEM BOT RENDERING CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
- * Project: First Model Hub - Serverless Crawler Handler
+ * Project: First Model Hub - Serverless Profile Renderer
  * Fixes Applied:
- *   1. FIXED CRITICAL JSON-LD PARSING ERROR: Replaced unrendered {{SCHEMA_JSON}} tag with single clean valid JSON-LD graph.
- *   2. Escaped '<' to '\\u003c' in JSON.stringify to prevent Googlebot JSON syntax crashes.
+ *   1. FIXED GOOGLE RICH RESULTS TEST ERROR: Always serve valid pre-rendered JSON-LD & HTML.
+ *   2. Replaced {{SCHEMA_JSON}} with clean Schema.org graph (Escaped '<' to '\\u003c').
  *   3. Fixed Chiang Mai & Province Routing: Breadcrumbs now link directly to /location/[province].
  *   4. Comprehensive Thai Typo Sanitization & Emoji Cleanup (Strips 🚨 and ASCII borders).
  *   5. Clean HTML Output without duplicate script tags or fake phone numbers.
@@ -79,11 +79,6 @@ const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, '').trim() : 
 export default async (request, context) => {
     const url = new URL(request.url);
     const dynamicDomain = `${url.protocol}//${url.host}`; 
-    const ua = (request.headers.get('User-Agent') || '').toLowerCase();
-    
-    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
-    
-    if (!isBot) return context.next();
 
     try {
         const pathParts = url.pathname.split('/').filter(Boolean);
@@ -217,7 +212,7 @@ export default async (request, context) => {
             ]
         };
 
-        // 🟢 แปลง JSON และ Encode เครื่องหมาย '<' เป็น '\u003c' เพื่อให้ Googlebot อ่านได้ไม่สะดุด
+        // 🟢 แปลง JSON และ Encode เครื่องหมาย '<' เป็น '\u003c' ป้องกันไวยากรณ์แตก
         const jsonLdString = JSON.stringify(schemaData).replace(/</g, '\\u003c');
 
         const html = `<!DOCTYPE html>
@@ -254,7 +249,7 @@ export default async (request, context) => {
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
     
-    <!-- 🟢 จุดที่แก้ไขสำเร็จ: ใส่ JSON-LD เพียงแท็กเดียวใน <head> อย่างสะอาดและสมบูรณ์ -->
+    <!-- 🟢 การันตี JSON-LD สะอาด ชัดเจน 100% -->
     <script type="application/ld+json" id="dynamic-schema">${jsonLdString}</script>
     
     <style>
