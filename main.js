@@ -1566,10 +1566,11 @@ window.ScrollTrigger = ScrollTrigger;
           "addressRegion": provName,
           "addressCountry": "TH"
         },
-        "offers": {
+"offers": {
           "@type": "Offer",
           "url": profileUrl,
-          "price": (profile.rate || "0").toString().replace(/\D/g, ""),
+          // ✅ ป้องกันค่าว่างด้วยการ fallback เป็น "1500" หากดึงตัวเลขไม่ได้
+          "price": String(profile.rate || profile._price || "1500").replace(/\D/g, "") || "1500",
           "priceCurrency": "THB",
           "priceValidUntil": "2027-12-31",
           "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => (profile.availability || "").toLowerCase().includes(e)) ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
