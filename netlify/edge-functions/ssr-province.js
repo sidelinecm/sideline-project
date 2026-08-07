@@ -1054,9 +1054,8 @@ rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|
       rawHtml = rawHtml.replace(/<\/head>/i, () => `${hydratedScriptTag}\n</head>`);
     }
 
-    // 🟢 การันตีลบแท็ก {{...}} ที่อาจตกค้างทั้งหมดออก 100% ป้องกันหลุดไปที่ Google Index
-    rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
-
+// ปรับแก้ให้ล้างตัวแปร Placeholder ทุกรูปแบบที่ไม่ถูกแทนที่
+rawHtml = rawHtml.replace(/\{\{[^}]+\}\}/g, "");
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=604800",
