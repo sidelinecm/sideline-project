@@ -678,7 +678,8 @@ export default async (req, context) => {
     let pageTitle = "", pageDesc = "";
 
     if (isNationalHome) {
-      pageTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
+      pageTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
+    
       pageDesc = topProfilesTextSnippet 
         ? `ทั่วไทย 🟢 พร้อมรับงานวันนี้: ${topProfilesTextSnippet} - ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนพรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ`
         : `ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`;
@@ -1054,8 +1055,13 @@ rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|
       rawHtml = rawHtml.replace(/<\/head>/i, () => `${hydratedScriptTag}\n</head>`);
     }
 
-// ปรับแก้ให้ล้างตัวแปร Placeholder ทุกรูปแบบที่ไม่ถูกแทนที่
-rawHtml = rawHtml.replace(/\{\{[^}]+\}\}/g, "");
+
+
+    // 🟢 ล้างตัวแปร Placeholder ทุกรูปแบบที่ไม่ถูกแทนที่ ทั้งใน Text และใน Attributes
+    rawHtml = rawHtml.replace(/\{\{[^}]+\}\}/g, "");
+
+
+
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=604800",
