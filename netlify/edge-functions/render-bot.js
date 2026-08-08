@@ -169,9 +169,8 @@ export default async (request, context) => {
         const rawRate = parseInt(cleanedRate, 10) || 1500;
         const displayPrice = rawRate.toLocaleString() + ".-";
         
-        const baseImageUrl = optimizeImg(p.imagePath, 600, 800);
-        const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
-        const imageSrcSet = generateSrcSet(p.imagePath);
+        const baseImageUrl = optimizeImg(null, p.imagePath, 600, 800);
+const lcpImageUrl = optimizeImg(null, p.imagePath, 400, 533);
         
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
@@ -478,7 +477,7 @@ export default async (request, context) => {
                             const displayRelName = `น้อง${cleanRelName}`;
                             return `
                             <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${displayRelName}">
-                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
+<img src="${optimizeImg(null, r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
                                 <div class="related-name">${displayRelName}</div>
                             </a>
                             `;
