@@ -1444,14 +1444,31 @@ window.ScrollTrigger = ScrollTrigger;
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
+      // 🟢 พจนานุกรม Line ID สำรองแยกรายจังหวัด (ป้องกันส่งผู้ใช้ไปไลน์แอดมินผิดจังหวัด)
+      const PROVINCE_LINE_FALLBACKS = {
+        chiangmai: "https://line.me/ti/p/ksLUWB89Y_",
+        bangkok: "https://line.me/ti/p/ksLUWB89Y_",
+        chonburi: "https://line.me/ti/p/ksLUWB89Y_",
+        khonkaen: "https://line.me/ti/p/ksLUWB89Y_",
+        phuket: "https://line.me/ti/p/ksLUWB89Y_",
+        udonthani: "https://line.me/ti/p/ksLUWB89Y_",
+        lampang: "https://line.me/ti/p/ksLUWB89Y_",
+        chiangrai: "https://line.me/ti/p/ksLUWB89Y_",
+        phitsanulok: "https://line.me/ti/p/ksLUWB89Y_",
+        national: "https://line.me/ti/p/ksLUWB89Y_",
+        default: "https://line.me/ti/p/ksLUWB89Y_"
+      };
+
+      const provKey = (profile.provinceKey || "default").toLowerCase();
+      const defaultLineUrl = PROVINCE_LINE_FALLBACKS[provKey] || PROVINCE_LINE_FALLBACKS.default;
 
       const lineIdToUse = (profile.lineId || "").replace(/^@/, "").trim();
-      let lineUrl = "https://line.me/R/ti/p/@sidelinecm";
+      let lineUrl = defaultLineUrl;
       
       if (lineIdToUse.startsWith("http")) {
         lineUrl = lineIdToUse;
       } else if (lineIdToUse && lineIdToUse !== "ksLUWB89Y_") {
-        lineUrl = `https://line.me/ti/p/${lineIdToUse}`;
+        lineUrl = `https://line.me/ti/p/~${lineIdToUse}`;
       }
 
       const stickyBtnWrapper = document.createElement("div");
@@ -1479,7 +1496,7 @@ window.ScrollTrigger = ScrollTrigger;
 
     updateSEOMetadata(profile, null);
   }
-
+  
   function closeLightboxModal(updateUrl = true) {
     const lightbox = document.getElementById("lightbox");
     if (lightbox) {
@@ -1490,6 +1507,9 @@ window.ScrollTrigger = ScrollTrigger;
       STATE.currentProfileSlug = null;
       if (updateUrl && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
         history.pushState(null, "", "/");
+        
+        // 🟢 รีเซ็ต <title> และ Meta Tag ของหน้าหลัก/หน้าหมวดหมู่ทันทีเมื่อปิดป๊อปอัป
+        updateSEOMetadata(null, null);
       }
     }
   }
@@ -1996,6 +2016,7 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
     });
   }
 
+  // 🟢 แก้ไข: ฟังก์ชัน initReviewForm ให้ดึงจังหวัดจาก URL ปัจจุบันอย่างถูกต้อง
   function initReviewForm() {
     const form = document.getElementById("review-form");
     if (!form) return;
@@ -2013,9 +2034,11 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
       const reviewText = document.getElementById("review-text")?.value.trim();
       
-      // 🟢 แก้ไข: ดึง Key ภาษาอังกฤษ (เช่น chiangmai, bangkok) เพื่อให้ตรงกับ DB
-      let rawProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
-      if (rawProvKey === "ทั่วไทย" || !rawProvKey) rawProvKey = "national";
+      // 🟢 ดึง Key จังหวัดจาก URL ปัจจุบันก่อน เพื่อให้รีวิวลงถูกจังหวัด 100%
+      const urlPath = window.location.pathname.toLowerCase();
+      const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
+      let rawProvKey = locMatch ? decodeURIComponent(locMatch[1]) : (DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
+      if (rawProvKey === "chiang_mai") rawProvKey = "chiangmai";
 
       if (!author || !reviewText) {
         showToast("❌ กรุณากรอกข้อมูลชื่อผู้ใช้งานและรายละเอียดรีวิวให้ครบถ้วนด้วยครับ", "error");
@@ -2033,7 +2056,7 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
           location_detail: location || "ไม่ระบุโซน",
           rating_score: rating,
           review_body: reviewText,
-          province_key: rawProvKey, // 🟢 ใช้ Key ภาษาอังกฤษ
+          province_key: rawProvKey, // 🟢 ใช้ Key จังหวัดที่สกัดได้จาก URL
           active_status: false
         }]);
 
@@ -2206,21 +2229,38 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
     setTimeout(() => { isLikeProcessing = false; }, 300);
   };
 
+  // 🟢 แบบใหม่: ปรับปรุงการซิงค์ช่องค้นหาทุกช่อง + ซ่อนกล่องคำแนะนำอย่างสมบูรณ์
   window.selectSuggestion = (slug, isProfile = false) => {
     const suggestionsEl = document.getElementById("search-suggestions");
-    const inputEl = document.getElementById("modal-search-keyword") || document.getElementById("search-keyword");
+    const modalInput = document.getElementById("modal-search-keyword");
+    const inlineInput = document.getElementById("inline-search-input");
 
     if (isProfile) {
-      suggestionsEl?.classList.add("hidden");
-      if (inputEl) inputEl.value = "";
+      if (suggestionsEl) {
+        suggestionsEl.classList.add("hidden");
+        suggestionsEl.style.display = "none";
+      }
+      // เคลียร์ค่าทุกช่องค้นหาเมื่อกดเลือกโปรไฟล์น้อง
+      if (modalInput) modalInput.value = "";
+      if (inlineInput) inlineInput.value = "";
+      if (DOM.searchInput) DOM.searchInput.value = "";
+      
       history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
       handleRouteNavigation();
-    } else if (inputEl) {
-      inputEl.value = slug;
-      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      // 🟢 เติมคำค้นหาลงในทุกช่องพร้อมกัน (Modal, Inline, Hidden)
+      if (modalInput) modalInput.value = slug;
+      if (inlineInput) inlineInput.value = slug;
+      if (DOM.searchInput) DOM.searchInput.value = slug;
+      
       saveRecentSearch(slug);
       applyUltimateFilters(true, true);
-      suggestionsEl?.classList.add("hidden");
+      
+      // ปิดกล่องแนะนำคำค้นหา
+      if (suggestionsEl) {
+        suggestionsEl.classList.add("hidden");
+        suggestionsEl.style.display = "none";
+      }
     }
   };
 
@@ -2362,7 +2402,7 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
         }
       }
 
-      // 5.3 คลิกเลือกราคา ใน Modal
+// 🟢 5.3 คลิกเลือกราคา ใน Modal (แก้ไขลบการสั่งกรองเบิ้ลออก)
       if (target.closest('.price-chip')) {
         const btn = target.closest('.price-chip');
         document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
@@ -2370,7 +2410,7 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
         const hiddenPrice = document.getElementById("search-price");
         if (hiddenPrice) {
           hiddenPrice.value = btn.getAttribute('data-price') || '';
-          applyUltimateFilters(true, true);
+
         }
       }
 

@@ -1266,3 +1266,17 @@ body {
   overflow: hidden !important;
   pointer-events: none !important;
 }
+/* 🟢 แก้ไขปัญหาสัญลักษณ์ทับกันบนมือถือจอแคบ (< 360px) */
+@media (max-width: 360px) {
+  .vip-status-chip, 
+  .profile-card-new [style*="top: 6px; left: 6px"] span {
+    font-size: 7.5px !important;
+    padding: 1px 4px !important;
+  }
+  
+  .hot-rank-badge,
+  .like-heart-btn {
+    transform: scale(0.85);
+    transform-origin: top right;
+  }
+}
