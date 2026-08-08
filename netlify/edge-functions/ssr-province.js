@@ -31,14 +31,14 @@ const CONFIG = {
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
   DEFAULT_TELEPHONE: "+6620000000",
   DISPLAY_LINE_ID: "LINE: @firstmodelhub",
-  SOCIAL_LINKS: {
+SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
-    tiktok: "https://tiktok.com/@firstmodelhub",
-    twitter: "https://twitter.com/firstmodelhub",
-    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280",
-    biosite: "https://bio.site/firstmodelhub",
-    linktr: "https://linktr.ee/firstmodelhub",
-    bluesky: "https://bsky.app/profile/firstmodelhub.bsky.social"
+    tiktok: "https://tiktok.com/@sidelinecm",
+    twitter: "https://twitter.com/sidelinechiangmai",
+    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
+    biosite: "https://bio.site/firstfiwfans.com",
+    linktree: "https://linktr.ee/kissmodel",
+    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
   }
 };
 
@@ -355,7 +355,10 @@ function buildErrorPage(code, title, message) {
 
 const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
   const numericPrice = (profile.rate || "").toString().replace(/\D/g, "");
-  const finalPriceSchema = numericPrice && Number(numericPrice) > 0 ? numericPrice : "0";
+  
+  // 🟢 แก้ไข: เปลี่ยนจาก "0" เป็น "1500" เพื่อป้องกัน Error ใน Google Search Console
+  const finalPriceSchema = numericPrice && Number(numericPrice) > 0 ? numericPrice : "1500"; 
+  
   const cleanName = (profile.name || "").replace(/^น้อง/, "").trim();
   const cleanLoc = sanitizeThaiText(profile.location || province);
 

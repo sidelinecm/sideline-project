@@ -14,18 +14,18 @@ const CONFIG = {
     get SUPABASE_KEY() {
         try { return Deno.env.get("SUPABASE_KEY") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; } catch { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; }
     },
-    DOMAIN: 'https://firstmodelhub.com',
+    PRIMARY_DOMAIN: 'https://firstmodelhub.com',
     BRAND_NAME: 'First Model Hub',
     DEFAULT_TELEPHONE: "+6620000000",
-    SOCIAL_PROFILES: {
-        line: 'https://line.me/ti/p/ksLUWB89Y_',
-        tiktok: 'https://tiktok.com/@firstmodelhub',
-        twitter: 'https://twitter.com/firstmodelhub',
-        linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
-        biosite: 'https://bio.site/firstmodelhub',
-        linktree: 'https://linktr.ee/firstmodelhub',
-        bluesky: 'https://bsky.app/profile/firstmodelhub.bsky.social'
-    }
+    SOCIAL_LINKS: {
+    line: "https://line.me/ti/p/ksLUWB89Y_",
+    tiktok: "https://tiktok.com/@sidelinecm",
+    twitter: "https://twitter.com/sidelinechiangmai",
+    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
+    biosite: "https://bio.site/firstfiwfans.com",
+    linktree: "https://linktr.ee/kissmodel",
+    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+  }
 };
 
 const REVIEW_POOL = [
@@ -77,7 +77,8 @@ const generateSrcSet = (path) => {
     const widths = [400, 600, 800];
     return widths.map(w => {
         const h = Math.round(w * (800 / 600)); 
-        return `${optimizeImg(path, w, h)} ${w}w`;
+        // 🟢 ตรวจสอบว่าตรงนี้แก้ให้มี null อยู่ตัวแรกหรือยัง
+        return `${optimizeImg(null, path, w, h)} ${w}w`; 
     }).join(', ');
 };
 
