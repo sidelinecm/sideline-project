@@ -1,23 +1,36 @@
 /**
- * [ SYSTEM BOT RENDERING CORE - PROD-READY OPTIMIZED 2026 ]
- * Project: First Model Hub - Serverless Crawler Handler
- * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
- * Features: Clean Text Filter (No ASCII Art), High-Speed Image Preload, Schema Rating Fix
+ * ==============================================================================
+ * 💎 FIRST MODEL HUB - SERVERLESS CRAWLER & BOT ENGINE (render-bot.js)
+ * Production-Ready Ultra-Optimized Edge Function
+ * Features:
+ *   - Fix 1: Safe Multi-fallback image getter (imagePath -> galleryPaths -> image_url -> default)
+ *   - Fix 2: 100% Synchronized Schema JSON-LD & HTML Body Testimonials with worstRating
+ *   - Fix 4: Try-catch safe URI Decoding against malformed/double-encoded Thai slugs
+ *   - Fix 5: Disambiguated ALT and Title tags for profiles with duplicate names
+ * ==============================================================================
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.8';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const CONFIG = {
-    get SUPABASE_URL() {
-        try { return Deno.env.get("SUPABASE_URL") || 'https://zxetzqwjaiumqhrpumln.supabase.co'; } catch { return 'https://zxetzqwjaiumqhrpumln.supabase.co'; }
-    },
-    get SUPABASE_KEY() {
-        try { return Deno.env.get("SUPABASE_KEY") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; } catch { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; }
-    },
-    PRIMARY_DOMAIN: 'https://firstmodelhub.com',
-    BRAND_NAME: 'First Model Hub',
-    DEFAULT_TELEPHONE: "+6620000000",
-    SOCIAL_LINKS: {
+  get SUPABASE_URL() {
+    try {
+      return Deno.env.get("SUPABASE_URL") || "https://zxetzqwjaiumqhrpumln.supabase.co";
+    } catch {
+      return "https://zxetzqwjaiumqhrpumln.supabase.co";
+    }
+  },
+  get SUPABASE_KEY() {
+    try {
+      return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
+    } catch {
+      return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
+    }
+  },
+  PRIMARY_DOMAIN: "https://firstmodelhub.com",
+  BRAND_NAME: "First Model Hub",
+  DEFAULT_TELEPHONE: "+6620000000",
+  SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
     tiktok: "https://tiktok.com/@sidelinecm",
     twitter: "https://twitter.com/sidelinechiangmai",
@@ -29,279 +42,303 @@ const CONFIG = {
 };
 
 const REVIEW_POOL = [
-    { name: "พี่บอล", rating: 5, text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย" },
-    { name: "คุณเอก", rating: 5, text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ" },
-    { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ" },
-    { name: "คุณกอล์ฟ", rating: 5, text: "คุยง่ายเป็นกันเองมากครับ น้องน่ารักสไตล์ผู้ดี แนะนำเลยคนนี้ไม่ผิดหวัง" },
-    { name: "พี่ยอด", rating: 5, text: "ตรงเวลาดีครับ สุภาพเรียบร้อย นิสัยดีตรงตามรูปภาพในโปรไฟล์เลย" },
-    { name: "คุณเป้", rating: 5, text: "งานดีคุ้มราคามากครับ คุยเก่งเอาใจเก่ง ฟีลแฟนสุดใจเลยครับคนนี้" },
-    { name: "พี่แม็กซ์", rating: 5, text: "น้องคุยสนุก ตลก น่ารักเป็นกันเอง ดูแลดีตั้งแต่เริ่มจนจบเลยครับ" },
-    { name: "คุณต้น", rating: 5, text: "บริการประทับใจมาก สุภาพเรียบร้อย ไม่มีเร่งงานเลย แนะนำเลยครับ" },
-    { name: "พี่แบงค์", rating: 5, text: "น้องหุ่นดี ผิวพรรณดีมาก ตรงปกไม่จกตา คุยไลน์นัดแนะก็ง่าย" },
-    { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
+  { name: "พี่บอล", rating: 5, text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย" },
+  { name: "คุณเอก", rating: 5, text: "น้องเอาใจเก่งมาก สวยสมราคา จองง่ายปลอดภัยครับ" },
+  { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ" },
+  { name: "คุณกอล์ฟ", rating: 5, text: "คุยง่ายเป็นกันเองมากครับ น้องน่ารักสไตล์ผู้ดี แนะนำเลยคนนี้ไม่ผิดหวัง" },
+  { name: "พี่ยอด", rating: 5, text: "ตรงเวลาดีครับ สุภาพเรียบร้อย นิสัยดีตรงตามรูปภาพในโปรไฟล์เลย" },
+  { name: "คุณเป้", rating: 5, text: "งานดีคุ้มราคามากครับ คุยเก่งเอาใจเก่ง ฟีลแฟนสุดใจเลยครับคนนี้" },
+  { name: "พี่แม็กซ์", rating: 5, text: "น้องคุยสนุก ตลก น่ารักเป็นกันเอง ดูแลดีตั้งแต่เริ่มจนจบเลยครับ" },
+  { name: "คุณต้น", rating: 5, text: "บริการประทับใจมาก สุภาพเรียบร้อย ไม่มีเร่งงานเลย แนะนำเลยครับ" },
+  { name: "พี่แบงค์", rating: 5, text: "น้องหุ่นดี ผิวพรรณดีมาก ตรงปกไม่จกตา คุยไลน์นัดแนะก็ง่าย" },
+  { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
 ];
 
 const getDeterministicReviews = (slug, count = 3) => {
-    const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const selected = [];
-    for (let i = 0; i < count; i++) {
-        const index = (charCodeSum + i * 3) % REVIEW_POOL.length;
-        selected.push(REVIEW_POOL[index]);
-    }
-    return selected;
+  const charCodeSum = String(slug || "0").split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const selected = [];
+  for (let i = 0; i < count; i++) {
+    const index = (charCodeSum + i * 3) % REVIEW_POOL.length;
+    selected.push(REVIEW_POOL[index]);
+  }
+  return selected;
 };
 
 const getDeterministicValue = (min, max, seedString, offset = 0) => {
-    const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
-    return Math.floor(min + (sum % (max - min + 1)));
+  const sum = String(seedString || "0").split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
+  return Math.floor(min + (sum % (max - min + 1)));
 };
 
-// 🟢 ฟังก์ชั่น optimizeImg ที่แก้ไขแล้ว
-const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
-  if (!path || typeof path !== "string") return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+// 🟢 [แก้ไขปัญหาที่ 1] ดึงรูปหลักแบบ Multi-fallback ป้องกันการหลุดเป็น null
+const getProfileMainImage = (p) => {
+  if (!p) return null;
+  if (p.imagePath && typeof p.imagePath === "string" && p.imagePath.trim()) return p.imagePath.trim();
+  const gallery = p.galleryPaths || p.gallery_paths || p.gallery;
+  if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) return String(gallery[0]).trim();
+  if (typeof gallery === "string" && gallery.trim()) return gallery.split(",")[0].trim();
+  if (p.image_url && typeof p.image_url === "string" && p.image_url.trim()) return p.image_url.trim();
+  if (p.imageUrl && typeof p.imageUrl === "string" && p.imageUrl.trim()) return p.imageUrl.trim();
+  return null;
+};
 
-  if (path.includes("res.cloudinary.com")) {
-    // ลบ Transformation ปัจจุบันที่ติดมาใน URL ออกก่อน (เช่น /c_scale,w_400.../)
-    const cleanCloudinaryUrl = path.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, '/upload/$1');
+const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
+  if (!path || typeof path !== "string" || !path.trim()) {
+    return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+  }
+  const cleanPath = path.trim();
+  if (cleanPath.includes("res.cloudinary.com")) {
+    const cleanCloudinaryUrl = cleanPath.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, "/upload/$1");
     return cleanCloudinaryUrl.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
   }
-
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path;
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    return cleanPath;
   }
-  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
+  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${cleanPath}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
 const generateSrcSet = (path) => {
-    if (!path) return '';
-    const widths = [400, 600, 800];
-    return widths.map(w => {
-        const h = Math.round(w * (800 / 600)); 
-        // 🟢 ตรวจสอบว่าตรงนี้แก้ให้มี null อยู่ตัวแรกหรือยัง
-        return `${optimizeImg(null, path, w, h)} ${w}w`; 
-    }).join(', ');
+  if (!path) return "";
+  const widths = [400, 600, 800];
+  return widths.map(w => {
+    const h = Math.round(w * (800 / 600));
+    return `${optimizeImg(null, path, w, h)} ${w}w`;
+  }).join(", ");
 };
 
-const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[tag])) : "";
 
-const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
+const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 
-// 🟢 แก้ไข: ลบเฉพาะเส้นกรอบ ASCII ป้องกันตัวหนังสือและ Emoji แตกเป็นตัวต่างดาว 
 const cleanAsciiArt = (text) => {
-    if (!text) return "";
-    return text
-        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "") // ลบเฉพาะเส้นกรอบ ASCII
-        .replace(/[„•ㅅ•„]+/g, "")                 // ลบตัวการ์ตูน ASCII
-        .replace(/\n\s*\n/g, "\n")                 // ลบบรรทัดว่างเกินจำเป็น
-        .trim();
+  if (!text) return "";
+  return String(text)
+    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "")
+    .replace(/[„•ㅅ•„]+/g, "")
+    .replace(/\n\s*\n/g, "\n")
+    .trim();
 };
 
 const getLocalizedZone = (location, provinceName) => {
-    if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
-    const cleanLoc = location.trim();
-    if (cleanLoc.includes(provinceName)) {
-        return `ย่าน${cleanLoc}`;
-    }
-    return `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
+  if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
+  const cleanLoc = location.trim();
+  if (cleanLoc.includes(provinceName)) {
+    return `ย่าน${cleanLoc}`;
+  }
+  return `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
 };
 
 const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, localizedZone) => {
-    if (p.description && p.description.trim().length > 10) {
-        return cleanAsciiArt(p.description.trim());
-    }
-    return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
+  if (p.description && p.description.trim().length > 10) {
+    return cleanAsciiArt(p.description.trim());
+  }
+  return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
 };
 
 export default async (request, context) => {
-    const url = new URL(request.url);
-    const dynamicDomain = `${url.protocol}//${url.host}`; 
-    const ua = (request.headers.get('User-Agent') || '').toLowerCase();
-    
-    const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
-    
-    if (!isBot) return context.next();
+  const url = new URL(request.url);
+  const dynamicDomain = `${url.protocol}//${url.host}`;
+  const ua = (request.headers.get("User-Agent") || "").toLowerCase();
 
+  const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
+
+  if (!isBot) return context.next();
+
+  try {
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    if (pathParts[0] !== "sideline" || pathParts.length < 2) return context.next();
+
+    // 🟢 [แก้ไขปัญหาที่ 4] ครอบ try-catch เพื่อป้องกัน URIError เมื่อเจอ Thai Slug ที่ถูก Encoded ซ้ำ
+    const rawSlugSegment = pathParts[pathParts.length - 1] || "";
+    let slug = rawSlugSegment;
     try {
-        const pathParts = url.pathname.split('/').filter(Boolean);
-        if (pathParts[0] !== 'sideline' || pathParts.length < 2) return context.next();
-        
-        const slug = decodeURIComponent(pathParts[pathParts.length - 1]);
-        if (['province', 'category', 'search', 'app'].includes(slug)) return context.next();
+      slug = decodeURIComponent(rawSlugSegment);
+    } catch (_e) {
+      slug = rawSlugSegment;
+    }
 
-        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        
-        const { data: p } = await supabase
-            .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)')
-            .eq('slug', slug)
-            .eq('active', true)
-            .maybeSingle();
+    if (["province", "category", "search", "app"].includes(slug)) return context.next();
 
-        // 🟢 แก้ไข: หากไม่เจอข้อมูลโปรไฟล์ ให้ปล่อยผ่านไปยัง Client-side JS แทนการตัดเป็น 404
-        if (!p) {
-            return context.next();
-        }
+    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-        let related = [];
-        if (p.provinceKey) {
-            const { data: relatedData } = await supabase
-                .from('profiles')
-                .select('slug, name, imagePath, location')
-                .eq('provinceKey', p.provinceKey)
-                .eq('active', true)
-                .neq('id', p.id) 
-                .limit(6);
-            related = relatedData || [];
-        }
+    // ดึงข้อมูลโปรไฟล์ตาม slug หรือ id (กรณีเป็นตัวเลข)
+    let query = supabase
+      .from("profiles")
+      .select("id, slug, name, imagePath, galleryPaths, gallery_paths, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)")
+      .eq("active", true);
 
-        const rawName = p.name || 'สาวสวย';
-        let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
-        const displayName = `น้อง${cleanName}`;
-        
-        const provinceName = p.provinces?.nameThai || p.location || 'เชียงใหม่';
-        const provinceKey = p.provinces?.key || 'chiangmai';
-        
-        const correctProvinceUrl = provinceKey === 'chiangmai' 
-            ? dynamicDomain 
-            : `${dynamicDomain}/location/${provinceKey}`;
-        
-        const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
-        const rawRate = parseInt(cleanedRate, 10) || 1500;
-        const displayPrice = rawRate.toLocaleString() + ".-";
-        
-const baseImageUrl = optimizeImg(null, p.imagePath, 600, 800);
-const lcpImageUrl = optimizeImg(null, p.imagePath, 400, 533);
-const imageSrcSet = generateSrcSet(p.imagePath); // 👈 เพิ่มบรรทัดนี้เข้าไปเพื่อให้ตัวแปรพร้อมใช้งาน
-        
-        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
-        if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
-        }
+    if (/^\d+$/.test(slug)) {
+      query = query.eq("id", slug);
+    } else {
+      query = query.eq("slug", slug);
+    }
 
-        const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-        const heightVal = getDeterministicValue(158, 168, slug, 2);
-        const weightVal = getDeterministicValue(44, 52, slug, 3);
-        const breastVal = getDeterministicValue(32, 36, slug, 4);
-        const waistVal = getDeterministicValue(23, 26, slug, 5);
-        const hipVal = getDeterministicValue(33, 37, slug, 6);
-        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+    const { data: p } = await query.maybeSingle();
 
-        const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
-        const reviewCount = 150 + (charCodeSum % 100);
-        
-        const localizedZone = getLocalizedZone(p.location, provinceName);
-        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
-        
-        const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
-        const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
-        
-        const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(slug)}`;
+    if (!p) {
+      return context.next();
+    }
 
-        // 🟢 เพิ่ม worstRating: "1" ในทุกก้อน Review ของ Schema
-        const dynamicReviews = getDeterministicReviews(slug, 3);
-        const schemaReviews = dynamicReviews.map(t => ({
-            "@type": "Review",
-            "reviewRating": {
-                "@type": "Rating",
-                "ratingValue": t.rating.toString(),
-                "bestRating": "5",
-                "worstRating": "1"
+    let related = [];
+    if (p.provinceKey) {
+      const { data: relatedData } = await supabase
+        .from("profiles")
+        .select("id, slug, name, imagePath, galleryPaths, gallery_paths, location")
+        .eq("provinceKey", p.provinceKey)
+        .eq("active", true)
+        .neq("id", p.id)
+        .limit(6);
+      related = relatedData || [];
+    }
+
+    const rawName = p.name || "สาวสวย";
+    let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, "");
+    const displayName = `น้อง${cleanName}`;
+
+    const provinceName = p.provinces?.nameThai || p.location || "เชียงใหม่";
+    const provinceKey = p.provinces?.key || "chiangmai";
+
+    const correctProvinceUrl = provinceKey === "chiangmai"
+      ? dynamicDomain
+      : `${dynamicDomain}/location/${provinceKey}`;
+
+    const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, "");
+    const rawRate = parseInt(cleanedRate, 10) || 1500;
+    const displayPrice = rawRate.toLocaleString() + ".-";
+
+    // 🟢 [แก้ไขปัญหาที่ 1] ดึงรูปภาพหลักผ่าน getProfileMainImage
+    const mainImagePath = getProfileMainImage(p);
+    const baseImageUrl = optimizeImg(null, mainImagePath, 600, 800);
+    const lcpImageUrl = optimizeImg(null, mainImagePath, 400, 533);
+    const imageSrcSet = generateSrcSet(mainImagePath);
+
+    let finalLineUrl = p.lineId || "ksLUWB89Y_";
+    if (!finalLineUrl.startsWith("http")) {
+      finalLineUrl = `https://line.me/ti/p/~${finalLineUrl.replace(/^@/, "").trim()}`;
+    }
+
+    const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
+    const heightVal = getDeterministicValue(158, 168, slug, 2);
+    const weightVal = getDeterministicValue(44, 52, slug, 3);
+    const breastVal = getDeterministicValue(32, 36, slug, 4);
+    const waistVal = getDeterministicValue(23, 26, slug, 5);
+    const hipVal = getDeterministicValue(33, 37, slug, 6);
+    const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+
+    const charCodeSum = slug.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
+    const reviewCount = 150 + (charCodeSum % 100);
+
+    const localizedZone = getLocalizedZone(p.location, provinceName);
+    const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
+
+    const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
+    const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
+
+    const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`;
+
+    // 🟢 [แก้ไขปัญหาที่ 2] ดึงรีวิวและซิงค์ข้อมูลระหว่าง JSON-LD Schema และ HTML Body ให้ตรงกันแบบ 100%
+    const dynamicReviews = getDeterministicReviews(slug, 3);
+    const schemaReviews = dynamicReviews.map(t => ({
+      "@type": "Review",
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": t.rating.toString(),
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "author": {
+        "@type": "Person",
+        "name": stripHTML(t.name)
+      },
+      "reviewBody": stripHTML(t.text)
+    }));
+
+    const breadcrumbElements = [
+      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
+    ];
+
+    if (provinceKey === "chiangmai") {
+      breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
+    } else {
+      breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
+    }
+
+    breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
+
+    const schemaData = {
+      "@context": "https://schema.org/",
+      "@graph": [
+        {
+          "@type": ["LocalBusiness", "EntertainmentBusiness"],
+          "@id": `${canonicalUrl}#serviceprovider`,
+          "name": `${displayName} - ไซด์ไลน์${provinceName}`,
+          "image": [baseImageUrl],
+          "description": stripHTML(metaDesc),
+          "telephone": CONFIG.DEFAULT_TELEPHONE,
+          "url": canonicalUrl,
+          "priceRange": "฿฿",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": provinceName,
+            "addressRegion": provinceName,
+            "addressCountry": "TH"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": Number(ratingValue) || 4.8,
+            "reviewCount": Number(reviewCount) || 150,
+            "bestRating": 5,
+            "worstRating": 1
+          },
+          "review": schemaReviews
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": breadcrumbElements
+        },
+        {
+          "@type": "FAQPage",
+          "@id": `${canonicalUrl}#faq`,
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": `${displayName} ไซด์ไลน์${provinceName} มีความปลอดภัยและการชำระเงินอย่างไร?`,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ เพื่อความคุ้มครองและความสบายใจสูงสุดของลูกค้า`
+              }
             },
-            "author": {
-                "@type": "Person",
-                "name": stripHTML(t.name)
-            },
-            "reviewBody": stripHTML(t.text)
-        }));
-
-        const breadcrumbElements = [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
-        ];
-
-        if (provinceKey === 'chiangmai') {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
-        } else {
-            breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
+            {
+              "@type": "Question",
+              "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${p.location || provinceName} ได้ที่ช่องทางใด?`,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": `สามารถดำเนินการคลิกแอดไลน์ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บ เพื่อดำเนินการขอตรวจสอบคิวงาน สแตนด์บายตารางงาน และจองคิวรับบริการเพื่อความสะดวกและรวดเร็วที่สุดผ่านไลน์แอดมินเจ้าหน้าที่อย่างเป็นทางการ`
+              }
+            }
+          ]
         }
+      ]
+    };
 
-        breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
-
-        const schemaData = {
-            "@context": "https://schema.org/",
-            "@graph": [
-                {
-                    "@type": ["LocalBusiness", "EntertainmentBusiness"],
-                    "@id": `${canonicalUrl}#serviceprovider`,
-                    "name": `${displayName} - ไซด์ไลน์${provinceName}`,
-                    "image": [baseImageUrl],
-                    "description": stripHTML(metaDesc),
-                    "telephone": CONFIG.DEFAULT_TELEPHONE,
-                    "url": canonicalUrl,
-                    "priceRange": "฿฿",
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressLocality": provinceName,
-                        "addressRegion": provinceName,
-                        "addressCountry": "TH"
-                    },
-"aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": Number(ratingValue) || 4.8,
-                        "reviewCount": Number(reviewCount) || 150,
-                        "bestRating": 5,
-                        "worstRating": 1
-                    },
-                    "review": schemaReviews
-                },
-                {
-                    "@type": "BreadcrumbList",
-                    "itemListElement": breadcrumbElements
-                },
-                {
-                    "@type": "FAQPage",
-                    "@id": `${canonicalUrl}#faq`,
-                    "mainEntity": [
-                        {
-                            "@type": "Question",
-                            "name": `${displayName} ไซด์ไลน์${provinceName} มีความปลอดภัยและการชำระเงินอย่างไร?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ เพื่อความคุ้มครองและความสบายใจสูงสุดของลูกค้า`
-                            }
-                        },
-                        {
-                            "@type": "Question",
-                            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${p.location || provinceName} ได้ที่ช่องทางใด?`,
-                            "acceptedAnswer": {
-                                "@type": "Answer",
-                                "text": `สามารถดำเนินการคลิกแอดไลน์ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บ เพื่อดำเนินการขอตรวจสอบคิวงาน สแตนด์บายตารางงาน และจองคิวรับบริการเพื่อความสะดวกและรวดเร็วที่สุดผ่านไลน์แอดมินเจ้าหน้าที่อย่างเป็นทางการ`
-                            }
-                        }
-                    ]
-                }
-            ]
-        };
-
-        // 🟢 ถอด Tailwind CDN ออกจาก <head> และซิงค์ Preload Image ให้ใช้ imagesrcset ป้องกันโหลดซ้ำ
-        const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} | สารบัญตรวจสอบประวัติตรงปก</title>
-    <meta name="description" content="${metaDesc}">
+    <title>${escapeHTML(pageTitle)} | สารบัญตรวจสอบประวัติตรงปก</title>
+    <meta name="description" content="${escapeHTML(metaDesc)}">
     <link rel="canonical" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large">
     
     <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
-    <link rel="preload" as="image" href="${lcpImageUrl}" ${imageSrcSet ? `imagesrcset="${imageSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ''} fetchpriority="high">
+    <link rel="preload" as="image" href="${lcpImageUrl}" ${imageSrcSet ? `imagesrcset="${imageSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ""} fetchpriority="high">
     <meta name="theme-color" content="#FF2E63">
     
-    <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
+    <meta property="og:site_name" content="${escapeHTML(CONFIG.BRAND_NAME)}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${pageTitle}">
-    <meta name="twitter:description" content="${metaDesc}">
+    <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
+    <meta name="twitter:description" content="${escapeHTML(metaDesc)}">
     <meta name="twitter:image" content="${baseImageUrl}">
     <meta property="og:image" content="${baseImageUrl}">
     <meta property="og:image:width" content="600">   
@@ -309,8 +346,8 @@ const imageSrcSet = generateSrcSet(p.imagePath); // 👈 เพิ่มบร�
     
     <link rel="shortcut icon" href="/images/favicon.ico">
     
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
+    <meta property="og:title" content="${escapeHTML(pageTitle)}">
+    <meta property="og:description" content="${escapeHTML(metaDesc)}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
 
@@ -396,22 +433,22 @@ const imageSrcSet = generateSrcSet(p.imagePath); // 👈 เพิ่มบร�
 
         <nav aria-label="breadcrumb" class="breadcrumb">
             <a href="/">หน้าแรก</a> &raquo; 
-            <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${provinceName}</a> &raquo; 
-            <span>${displayName}</span>
+            <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${escapeHTML(provinceName)}</a> &raquo; 
+            <span>${escapeHTML(displayName)}</span>
         </nav>
 
         <main class="main-content">
             <article>
                 <section class="hero-section">
 <img src="${lcpImageUrl}" 
-     ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
-     class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
+     ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
+     class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceName)} ไซด์ไลน์${escapeHTML(provinceName)} ฟิวแฟน" 
      loading="eager" fetchpriority="high" decoding="async" 
      width="400" height="533">
                 </section>
 
                 <header class="profile-meta-header">
-                    <h1>${pageTitle}</h1>
+                    <h1>${escapeHTML(pageTitle)}</h1>
                     <div class="rating">
                         <span class="stars">⭐</span>
                         <span class="rating-value">${ratingValue}</span>
@@ -453,7 +490,7 @@ const imageSrcSet = generateSrcSet(p.imagePath); // 👈 เพิ่มบร�
                 <section class="faq-section">
                     <h2 class="faq-title">คำถามพบบ่อย</h2>
                     <div class="faq-item">
-                        <h3>${displayName} มีมัดจำไหม?</h3>
+                        <h3>${escapeHTML(displayName)} มีมัดจำไหม?</h3>
                         <p>ไม่มีนโยบายการรับเงินโอนจองมัดจำล่วงหน้าใดๆ ทุกกรณีค่ะ ลูกค้าสามารถเดินทางมานัดพบหน้างานเพื่อตรวจสอบสิทธิ์ความตรงปกเรียบร้อยแล้ว ค่อยตกลงชำระค่าขนมโดยตรงหน้างานเพื่อความปลอดภัย 100%</p>
                     </div>
                 </section>
@@ -465,28 +502,32 @@ const imageSrcSet = generateSrcSet(p.imagePath); // 👈 เพิ่มบร�
                             <strong>${escapeHTML(t.name)}</strong>
                             <p>${escapeHTML(t.text)}</p>
                         </div>
-                    `).join('')}
+                    `).join("")}
                 </section>
                 
                 ${related.length > 0 ? `
                 <section class="faq-section" style="margin-top: 3.5rem;">
-                    <h2 class="faq-title">น้องๆ โซน${provinceName} ที่น่าสนใจ</h2>
+                    <h2 class="faq-title">น้องๆ โซน${escapeHTML(provinceName)} ที่น่าสนใจ</h2>
                     <div class="related-grid">
                         ${related.map(r => {
-                            const rawRelName = r.name || 'สาวสวย';
-                            const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
-                            const displayRelName = `น้อง${cleanRelName}`;
-                            return `
-                            <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${displayRelName}">
-<img src="${optimizeImg(null, r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
-                                <div class="related-name">${displayRelName}</div>
+                          const rawRelName = r.name || "สาวสวย";
+                          const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
+                          const displayRelName = `น้อง${cleanRelName}`;
+                          const relImgPath = getProfileMainImage(r);
+                          const relLoc = escapeHTML(r.location || provinceName);
+                          // 🟢 [แก้ไขปัญหาที่ 5] ใส่ ALT text สมบูรณ์ไม่ให้ซ้ำกัน
+                          const relAltText = `${displayRelName} สาวรับงาน${escapeHTML(provinceName)} ย่าน${relLoc} ไซด์ไลน์ตรงปก 100%`;
+                          return `
+                            <a href="/sideline/${encodeURIComponent(r.slug || r.id)}" class="related-card" title="${escapeHTML(displayRelName)}">
+<img src="${optimizeImg(null, relImgPath, 300, 400)}" class="related-img" alt="${escapeHTML(relAltText)}" loading="lazy" width="300" height="400">
+                                <div class="related-name">${escapeHTML(displayRelName)}</div>
                             </a>
                             `;
-                        }).join('')}
+                        }).join("")}
                     </div>
-                    <a href="${correctProvinceUrl}" class="view-all-btn">ดูน้องๆ รับงานโซน${provinceName} ทั้งหมด</a>
+                    <a href="${correctProvinceUrl}" class="view-all-btn">ดูน้องๆ รับงานโซน${escapeHTML(provinceName)} ทั้งหมด</a>
                 </section>
-                ` : ''}
+                ` : ""}
 
                 <section class="faq-section" style="margin-top: 2.5rem; border-top: 1px solid var(--bw); padding-top: 2rem;">
                     <h2 class="faq-title">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
@@ -505,28 +546,28 @@ const imageSrcSet = generateSrcSet(p.imagePath); // 👈 เพิ่มบร�
                 <a href="/profiles">โปรไฟล์น้องๆ ทั้งหมด</a>
                 <a href="/locations">พิกัดรับงานทั่วประเทศ</a>
             </nav>
-            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+            © ${new Date().getFullYear()} ${escapeHTML(CONFIG.BRAND_NAME)} - บริการด้วยความจริงใจ
         </footer>
     </div>
 </body>
 </html>`;
 
-        return new Response(html, {
-            headers: {
-                "Content-Type": "text/html; charset=utf-8",
-                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
-                "X-Content-Type-Options": "nosniff",
-                "X-Frame-Options": "DENY",
-                "X-XSS-Protection": "1; mode=block",
-                "Referrer-Policy": "strict-origin-when-cross-origin",
-                "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-                "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-                "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https:;"
-            }
-        });
+    return new Response(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https:;"
+      }
+    });
 
-    } catch (err) {
-        console.error("Bot rendering crash:", err);
-        return context.next();
-    }
+  } catch (err) {
+    console.error("Bot rendering crash:", err);
+    return context.next();
+  }
 };
