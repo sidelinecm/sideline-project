@@ -1249,3 +1249,20 @@ body {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+/* ==============================================================================
+   🎯 ULTIMATE FIX: การันตีการซ่อน EMPTY STATE & MESSAGES 100%
+   ============================================================================== */
+.hidden, 
+#no-results-message.hidden, 
+#fetch-error-message.hidden, 
+#loading-profiles-placeholder.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}

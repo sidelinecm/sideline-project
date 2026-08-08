@@ -1061,14 +1061,16 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function renderProfilesGrid(profiles, isFilteredView, isUserAction = false) {
-    if (!DOM.profilesDisplayArea) return;
+  if (!DOM.profilesDisplayArea) return;
 
-    STATE.renderId = (STATE.renderId || 0) + 1;
-    const currentRenderId = STATE.renderId;
+  STATE.renderId = (STATE.renderId || 0) + 1;
+  const currentRenderId = STATE.renderId;
 
-    destroyLoadingPlaceholder();
-    if (DOM.noResultsMessage) DOM.noResultsMessage.classList.add("hidden");
-    if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.add("hidden");
+  destroyLoadingPlaceholder();
+  
+  // 🟢 การันตีการซ่อนข้อความเตือนเมื่อมีการเริ่มเรนเดอร์ข้อมูล
+  if (DOM.noResultsMessage) DOM.noResultsMessage.classList.add("hidden");
+  if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.add("hidden");
 
     if (DOM.featuredSection) {
       const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
@@ -1640,30 +1642,34 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function updateGoogleMap(provKey = "chiangmai", provName = "เชียงใหม่") {
-    const mapIframe = document.getElementById("google-map");
-    const mapPlaceholder = document.getElementById("map-placeholder");
-    const mapSection = document.getElementById("map-section");
-    if (!mapIframe || !mapSection) return;
+  const mapIframe = document.getElementById("google-map");
+  const mapPlaceholder = document.getElementById("map-placeholder");
+  const mapSection = document.getElementById("map-section");
+  if (!mapIframe || !mapSection) return;
 
-    const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (provKey === "national" ? "กรุงเทพ" : provName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
-
-    const observer = new IntersectionObserver((entriesList) => {
-      entriesList.forEach(entry => {
-        if (entry.isIntersecting) {
-          if (mapIframe.src !== mapUrl) {
-            mapIframe.src = mapUrl;
-            mapIframe.onload = () => {
-              if (mapPlaceholder) mapPlaceholder.style.opacity = "0";
-              setTimeout(() => { if (mapPlaceholder) mapPlaceholder.style.display = "none"; }, 500);
-            };
-          }
-          observer.unobserve(mapSection);
-        }
-      });
-    }, { rootMargin: "200px 0px" });
-
-    observer.observe(mapSection);
+  // ตรวจสอบและสร้าง URL แผนที่ที่ถูกต้องเสมอ
+  let mapUrl = mapIframe.getAttribute("data-src") || "";
+  if (!mapUrl || mapUrl.includes("{{")) {
+    mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (provKey === "national" ? "กรุงเทพ" : provName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
   }
+
+  const observer = new IntersectionObserver((entriesList) => {
+    entriesList.forEach(entry => {
+      if (entry.isIntersecting) {
+        mapIframe.src = mapUrl;
+        mapIframe.onload = () => {
+          if (mapPlaceholder) {
+            mapPlaceholder.style.opacity = "0";
+            setTimeout(() => { mapPlaceholder.style.display = "none"; }, 300);
+          }
+        };
+        observer.unobserve(mapSection);
+      }
+    });
+  }, { rootMargin: "200px 0px" });
+
+  observer.observe(mapSection);
+}
 
   function renderZoneChips(provKey = "chiangmai") {
     let chipsContainer = document.getElementById("zone-chips-container");
@@ -1807,41 +1813,51 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // 🟢 ลบแท็ก {{...}} ที่อาจหลุดออกมาบนหน้าจออัตโนมัติ
-  function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
-    try {
-      const liveCountEl = document.getElementById("live-profile-count");
-      if (liveCountEl) liveCountEl.textContent = profileCount;
+function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
+  try {
+    const liveCountEl = document.getElementById("live-profile-count");
+    if (liveCountEl) liveCountEl.textContent = profileCount;
 
-      const currentProvData = LOCALIZED_SEO_MAP[provinceSlug] || LOCALIZED_SEO_MAP["chiangmai"];
-      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
-      const zoneText = currentZones.join(", ");
+    const currentProvData = LOCALIZED_SEO_MAP[provinceSlug] || LOCALIZED_SEO_MAP["chiangmai"];
+    const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
+    const zoneText = currentZones.join(", ");
 
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-      let node;
-      while ((node = walker.nextNode())) {
-        if (node.nodeValue && node.nodeValue.includes("{{")) {
-          node.nodeValue = node.nodeValue
-            .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
-            .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-            .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-            .replace(/\{\{[A-Z0-9_]+\}\}/g, "");
-        }
+    // 1. สแกนและเปลี่ยนข้อความใน Text Nodes
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.nodeValue && node.nodeValue.includes("{{")) {
+        node.nodeValue = node.nodeValue
+          .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
+          .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
+          .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
+          .replace(/\{\{[A-Z0-9_]+\}\}/g, "");
       }
+    }
 
-      document.querySelectorAll('input[type="hidden"], input[type="text"]').forEach(el => {
-        if (el.value && el.value.includes("{{")) {
-          el.value = el.value
-            .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
-            .replace(/\{\{[A-Z0-9_]+\}\}/g, "");
+    // 2. สแกนและเปลี่ยนตัวแปรใน Attributes ของทุก Element บนหน้าเว็บ (แก้ปัญหาตัวแปรหลุดใน Meta/Inputs/Links/Iframes)
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach(el => {
+      ['title', 'alt', 'content', 'placeholder', 'value', 'data-src', 'href'].forEach(attr => {
+        if (el.hasAttribute(attr)) {
+          let val = el.getAttribute(attr);
+          if (val && val.includes('{{')) {
+            val = val
+              .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
+              .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
+              .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
+              .replace(/\{\{[A-Z0-9_]+\}\}/g, '');
+            el.setAttribute(attr, val);
+          }
         }
       });
+    });
 
-      updateDynamicProvinceContent(provinceSlug, provinceName, profileCount);
-    } catch (e) {
-      console.warn("⚠️ Replace placeholders error:", e);
-    }
+    updateDynamicProvinceContent(provinceSlug, provinceName, profileCount);
+  } catch (e) {
+    console.warn("⚠️ Replace placeholders error:", e);
   }
+}
 
   async function handleRouteNavigation(isInitial = false) {
     let path = window.location.pathname.toLowerCase();
