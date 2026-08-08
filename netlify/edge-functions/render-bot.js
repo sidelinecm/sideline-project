@@ -169,8 +169,9 @@ export default async (request, context) => {
         const rawRate = parseInt(cleanedRate, 10) || 1500;
         const displayPrice = rawRate.toLocaleString() + ".-";
         
-        const baseImageUrl = optimizeImg(null, p.imagePath, 600, 800);
+const baseImageUrl = optimizeImg(null, p.imagePath, 600, 800);
 const lcpImageUrl = optimizeImg(null, p.imagePath, 400, 533);
+const imageSrcSet = generateSrcSet(p.imagePath); // 👈 เพิ่มบรรทัดนี้เข้าไปเพื่อให้ตัวแปรพร้อมใช้งาน
         
         let finalLineUrl = p.lineId || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
