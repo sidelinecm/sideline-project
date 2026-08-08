@@ -1444,9 +1444,9 @@ window.ScrollTrigger = ScrollTrigger;
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
-      // 🟢 ล้าง Line ID ให้สะอาด ป้องกันลิงก์เสีย
-      const lineIdToUse = (profile.lineId || "ksLUWB89Y_").replace(/^@/, "").trim();
-      let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
+
+      const lineIdToUse = (profile.lineId || "").replace(/^@/, "").trim();
+      let lineUrl = "https://line.me/R/ti/p/@sidelinecm";
       
       if (lineIdToUse.startsWith("http")) {
         lineUrl = lineIdToUse;
@@ -1518,10 +1518,12 @@ window.ScrollTrigger = ScrollTrigger;
     const currentPath = window.location.pathname.toLowerCase();
     const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
 
-    if (isFirstLoad) {
+    // 🟢 แก้ไข: ให้ข้ามเฉพาะกรณีเป็นหน้าแรก แต่ถ้าเข้าหน้าโปรไฟล์โดยตรงยอมให้อัปเดต Meta Tag
+    if (isFirstLoad && isHomePage) {
       isFirstLoad = false;
       return;
     }
+    isFirstLoad = false;
 
     if (isHomePage) {
       document.title = DEFAULT_SEO.title;
@@ -1532,6 +1534,7 @@ window.ScrollTrigger = ScrollTrigger;
       removeJsonLdSchemas();
       return;
     }
+
 
     removeJsonLdSchemas();
 
@@ -2009,7 +2012,10 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
       const location = document.getElementById("review-location")?.value.trim();
       const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
       const reviewText = document.getElementById("review-text")?.value.trim();
-      const provinceKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "ทั่วไทย";
+      
+      // 🟢 แก้ไข: ดึง Key ภาษาอังกฤษ (เช่น chiangmai, bangkok) เพื่อให้ตรงกับ DB
+      let rawProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
+      if (rawProvKey === "ทั่วไทย" || !rawProvKey) rawProvKey = "national";
 
       if (!author || !reviewText) {
         showToast("❌ กรุณากรอกข้อมูลชื่อผู้ใช้งานและรายละเอียดรีวิวให้ครบถ้วนด้วยครับ", "error");
@@ -2027,7 +2033,7 @@ function replaceDomPlaceholders(provinceName = "เชียงใหม่", pr
           location_detail: location || "ไม่ระบุโซน",
           rating_score: rating,
           review_body: reviewText,
-          province_key: provinceKey,
+          province_key: rawProvKey, // 🟢 ใช้ Key ภาษาอังกฤษ
           active_status: false
         }]);
 
