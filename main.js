@@ -1,14 +1,6 @@
 
 /* ==============================================================================
-   💎 FIRST MODEL HUB - MAIN CLIENT-SIDE ENGINE (PROD-READY ULTRA-OPTIMIZED 2026)
-   Project: First Model Hub
-   All Client-Side Critical Fixes Included:
-     1. Multi-fallback Image Getter (imagePath -> galleryPaths -> image_url -> null)
-     2. Safe URI Decoding against double-encoded Thai Slugs
-     3. Global Profile Deduplication Engine
-     4. Disambiguated ALT and Search Context for Duplicate Names
-     5. Corrected National Default (ทั่วไทย) for Homepage instead of Chiang Mai
-     6. Smart Review Form Province Injector
+   💎 FIRST MODEL HUB - MAIN CLIENT-SIDE ENGINE (PROD-READY PERFECT 2026)
    ============================================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
@@ -36,6 +28,20 @@ window.ScrollTrigger = ScrollTrigger;
     SITE_URL: "https://firstmodelhub.com",
     DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
+
+  // 🟢 Helper แปลง Key จังหวัดให้เป็นมาตรฐานเดียวกันทั้งระบบ 100%
+  function normalizeProvinceKey(key) {
+    if (!key) return "national";
+    let k = String(key).toLowerCase().trim().replace(/_/g, "-");
+    if (k === "chiang-mai" || k === "chiangmai") return "chiangmai";
+    if (k === "khon-kaen" || k === "khonkaen") return "khonkaen";
+    if (k === "udon-thani" || k === "udonthani" || k === "udon") return "udonthani";
+    if (k === "chiang-rai" || k === "chiangrai") return "chiangrai";
+    if (k === "phra-nakhon-si-ayutthaya" || k === "ayutthaya") return "phra-nakhon-si-ayutthaya";
+    if (k === "surat-thani" || k === "suratthani") return "surat-thani";
+    if (k === "ubon-ratchathani" || k === "ubonratchathani" || k === "ubon") return "ubonratchathani";
+    return k;
+  }
 
   const FALLBACK_SLOGANS = [
     "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน",
@@ -95,6 +101,7 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
+  // 🟢 FIX 1: ปรับคีย์ SEO MAP ให้ตรงกับคีย์มาตรฐาน 100%
   const LOCALIZED_SEO_MAP = {
     chiangmai: { zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"] },
     chiangrai: { zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย"] },
@@ -103,8 +110,10 @@ window.ScrollTrigger = ScrollTrigger;
     bangkok: { zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"] },
     chonburi: { zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"] },
     khonkaen: { zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"] },
+    "khon-kaen": { zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"] }, // Alias
     phuket: { zones: ["ทั้งหมด", "ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง"] },
     udonthani: { zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"] },
+    "udon-thani": { zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"] }, // Alias
     national: { zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"] }
   };
 
@@ -252,56 +261,68 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
+  // 🟢 processProfileObject - ปรับปรุงสมบูรณ์ 100%
   function processProfileObject(raw) {
-    if (!raw || typeof raw !== "object") return null;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
 
     const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
-    
-    // 🟢 [แก้ไขข้อ 1] ดึงภาพสำรองจาก galleryPaths ป้องกัน mainImg เป็น undefined หรือรูปโลโก้
-    const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
-    const galleryPaths = Array.isArray(rawGallery) ? rawGallery : (typeof rawGallery === "string" ? rawGallery.split(",").map(s => s.trim()) : []);
-    const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar || galleryPaths[0] || null;
-    
-    const imageList = [mainImg, ...galleryPaths].filter(Boolean);
-    const uniqueImages = [...new Set(imageList)];
 
-    let images = uniqueImages.map(path => {
+    const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+    const galleryPaths = Array.isArray(rawGallery) 
+      ? rawGallery 
+      : (typeof rawGallery === "string" ? rawGallery.split(",").map(s => s.trim()) : []);
+      
+    const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar || galleryPaths[0] || null;
+
+    const rawImageList = [mainImg, ...galleryPaths].filter(Boolean);
+    const pathSet = new Set();
+    const normalizedImages = [];
+
+    rawImageList.forEach(path => {
+      let srcStr = "";
+      let fullSrcStr = "";
+
       if (typeof path === "object" && path !== null) {
-        return {
-          src: path.src || path.url || CONFIG.DEFAULT_OG_IMAGE,
-          fullSrc: path.fullSrc || path.fullUrl || path.src || path.url || CONFIG.DEFAULT_OG_IMAGE
-        };
+        srcStr = path.src || path.url || "";
+        fullSrcStr = path.fullSrc || path.fullUrl || srcStr;
+      } else if (typeof path === "string") {
+        srcStr = path.trim();
+        fullSrcStr = path.trim();
       }
-      return {
-        src: getImageUrl(path, 400),
-        fullSrc: getImageUrl(path, 1000)
-      };
+
+      if (srcStr && !pathSet.has(srcStr)) {
+        pathSet.add(srcStr);
+        normalizedImages.push({
+          src: srcStr.startsWith("http") ? srcStr : getImageUrl(srcStr, 400),
+          fullSrc: fullSrcStr.startsWith("http") ? fullSrcStr : getImageUrl(fullSrcStr, 1000)
+        });
+      }
     });
 
-    if (images.length === 0) {
-      images.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
+    if (normalizedImages.length === 0) {
+      normalizedImages.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
     }
 
-    // 🟢 [แก้ไขเรื่อง Fallback] เปลี่ยน Fallback พื้นฐานให้เป็น "national" แทน "chiangmai"
-    let provKey = (raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "national").toString().toLowerCase().trim();
-    if (provKey === "chiang_mai" || provKey === "chiang-mai") provKey = "chiangmai";
-
+    const rawProvKey = raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "national";
+    const provKey = normalizeProvinceKey(rawProvKey);
     const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
 
     const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
     const numericRate = Number(String(rawPrice).replace(/\D/g, "")) || 0;
-    const displayPrice = numericRate > 0 ? `${numericRate.toLocaleString()}.-` : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? rawPrice : "สอบถาม");
+    const displayPrice = numericRate > 0 
+      ? `${numericRate.toLocaleString()}.-` 
+      : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
 
-    let statsFormatted = "-";
-    const bust = raw.bust || raw.breast || "";
-    const waist = raw.waist || "";
-    const hips = raw.hip || raw.hips || "";
-    const cup = (raw.cup_size || raw.cupSize || raw.cup || "").toString().toUpperCase().trim();
+    let bust = String(raw.bust || raw.breast || "").replace(/\D/g, "");
+    let waist = String(raw.waist || "").replace(/\D/g, "");
+    let hips = String(raw.hip || raw.hips || "").replace(/\D/g, "");
+    let cup = String(raw.cup_size || raw.cupSize || raw.cup || "").toUpperCase().replace(/[^A-Z]/g, "").trim();
 
+    let safeStats = "ไม่ระบุ";
     if (bust && waist && hips) {
-      statsFormatted = `${bust}${cup}-${waist}-${hips}`;
+      safeStats = `${bust}${cup ? `(${cup})` : ""}-${waist}-${hips}`;
     } else if (raw.stats || raw.proportion || raw.proportions) {
-      statsFormatted = String(raw.stats || raw.proportion || raw.proportions).trim();
+      safeStats = String(raw.stats || raw.proportion || raw.proportions).trim().replace(/[\s\/]+/g, "-");
     }
 
     const rawAge = raw.age || raw.profile_age;
@@ -317,29 +338,39 @@ window.ScrollTrigger = ScrollTrigger;
     const safeWeight = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
 
     const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
-    const safeSkin = (rawSkin && String(rawSkin).trim() !== "-") ? String(rawSkin).trim() : "ไม่ระบุ";
-
-    const safeStats = (statsFormatted && statsFormatted !== "-") ? statsFormatted : "ไม่ระบุ";
+    const safeSkin = (rawSkin && String(rawSkin).trim() !== "-") ? sanitizeThaiText(rawSkin) : "ไม่ระบุ";
 
     const sloganText = getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote || raw.tagline);
+    
     const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
-    const styleTags = Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",").map(t => t.trim()) : []);
+    const styleTags = (Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",") : []))
+      .map(t => sanitizeThaiText(t).replace(/^#/, "").trim())
+      .filter(Boolean);
 
-    const availStatus = raw.availability || raw.status || "รับงาน";
-    const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(keyword => availStatus.toLowerCase().includes(keyword));
+    const availStatus = sanitizeThaiText(raw.availability || raw.status || "รับงาน");
+    const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(kw => availStatus.toLowerCase().includes(kw));
     const isAvailable = !isBusy;
 
-    const lineIdClean = (raw.line_id || raw.lineId || raw.line || "").toString().replace(/^@/, "").trim();
+    const lineIdClean = String(raw.line_id || raw.lineId || raw.line || "").replace(/^@/, "").trim();
+    const cleanLocation = sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName);
+    const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "");
 
     return {
       ...raw,
+      id: raw.id,
+      slug: String(raw.slug || raw.id).trim(),
       displayName: formattedName,
-      images: images,
+      images: normalizedImages,
       provinceNameThai: provinceThaiName,
       provinceKey: provKey,
+      location: cleanLocation,
+      description: cleanDescription,
       displayPrice: displayPrice,
       _price: numericRate,
-      bust: String(bust),
+      bust: bust,
+      waist: waist,
+      hips: hips,
+      cupSize: cup,
       
       safeAge: cleanAge || "-",
       safeAgeDisplay: safeAgeDisplay,
@@ -350,10 +381,10 @@ window.ScrollTrigger = ScrollTrigger;
 
       isAvailable: isAvailable,
       availability: availStatus,
-      isVerified: raw.verified === true || raw.isVerified === true || raw.is_verified === true,
-      hasVideo: raw.has_video === true || raw.hasVideo === true || raw.hasVideoClip === true,
-      isNew: raw.is_new === true || raw.isNew === true,
-      isfeatured: raw.isfeatured === true || raw.is_featured === true || raw.isFeatured === true,
+      isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
+      hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
+      isNew: Boolean(raw.is_new || raw.isNew),
+      isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
       
       lineId: lineIdClean,
       styleTags: styleTags,
@@ -380,6 +411,7 @@ window.ScrollTrigger = ScrollTrigger;
     }, 1500);
   }
 
+  // 🟢 FIX 1: แก้ไข SSR Hydration ป้องกัน STATE.provincesMap ว่างเปล่า
   async function fetchProfilesData() {
     if (STATE.isFetching) return false;
     STATE.isFetching = true;
@@ -387,6 +419,37 @@ window.ScrollTrigger = ScrollTrigger;
     try {
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         console.log("⚡ [Hydration] โหลดข้อมูล SSR สำเร็จ!");
+        
+        // ⚡ สร้างข้อมูล STATE.provincesMap อัตโนมัติจากข้อมูล Hydration และ Cache
+        STATE.provincesMap.clear();
+        
+        // 1. อ่านคีย์จาก Cache ล่าสุด
+        try {
+          const cachedProvinces = JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES) || "[]");
+          cachedProvinces.forEach(p => {
+            if (p.key && p.name) STATE.provincesMap.set(normalizeProvinceKey(p.key), p.name);
+          });
+        } catch (e) {}
+
+        // 2. อ่านคีย์จากโปรไฟล์ SSR
+        window.profilesData.forEach(p => {
+          if (p.provinceKey && p.provinceThai) {
+            STATE.provincesMap.set(normalizeProvinceKey(p.provinceKey), p.provinceThai);
+          }
+        });
+
+        // 3. Fallback Map กันพลาด
+        if (STATE.provincesMap.size === 0) {
+          STATE.provincesMap.set("chiangmai", "เชียงใหม่");
+          STATE.provincesMap.set("bangkok", "กรุงเทพฯ");
+          STATE.provincesMap.set("chonburi", "ชลบุรี");
+          STATE.provincesMap.set("khonkaen", "ขอนแก่น");
+          STATE.provincesMap.set("phuket", "ภูเก็ต");
+          STATE.provincesMap.set("udonthani", "อุดรธานี");
+          STATE.provincesMap.set("lampang", "ลำปาง");
+          STATE.provincesMap.set("chiangrai", "เชียงราย");
+        }
+
         STATE.allProfiles = deduplicateProfiles(window.profilesData.map(p => processProfileObject(p)).filter(Boolean));
         populateProvinceDropdown();
         applyUltimateFilters(false, false);
@@ -407,8 +470,7 @@ window.ScrollTrigger = ScrollTrigger;
         const provincesCacheArr = [];
         provincesRes.data.forEach(p => {
           const name = p.nameThai || p.name_thai || p.name;
-          let key = (p.key || p.slug || p.id).toString().toLowerCase();
-          if (key === "chiang_mai") key = "chiangmai";
+          let key = normalizeProvinceKey(p.key || p.slug || p.id);
           if (key && name) {
             STATE.provincesMap.set(key, name);
             provincesCacheArr.push({ key: key, name: name });
@@ -447,21 +509,30 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  function updateHeroSwiperCards() {
+
+
+  // 🟢 FIX 2: สโคปน้องใน VIP Swiper และปรับตามจังหวัดปัจจุบัน
+  function updateHeroSwiperCards(targetProvinceKey = null) {
     const swiperContainer = document.getElementById("vip-swiper-container");
     if (!swiperContainer || !STATE.allProfiles || STATE.allProfiles.length === 0) return;
 
-    let hotProfiles = STATE.allProfiles.filter(p => {
+    const currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
+
+    let scopedProfiles = STATE.allProfiles;
+    if (currentProvKey && currentProvKey !== "national" && currentProvKey !== "all") {
+      scopedProfiles = STATE.allProfiles.filter(p => normalizeProvinceKey(p.provinceKey) === currentProvKey);
+    }
+
+    if (scopedProfiles.length === 0) scopedProfiles = STATE.allProfiles;
+
+    let hotProfiles = scopedProfiles.filter(p => {
       const tags = Array.isArray(p.styleTags) ? p.styleTags : (typeof p.styleTags === 'string' ? p.styleTags.split(',') : []);
       const tagText = `${tags.join(" ")} ${p.slogan || ''} ${p.quote || ''}`.toLowerCase();
       return tagText.includes("ฟิวแฟน") || tagText.includes("ฟิลแฟน");
     });
 
-    if (hotProfiles.length === 0) {
-      hotProfiles = STATE.allProfiles.slice(0, 8);
-    } else {
-      hotProfiles = hotProfiles.slice(0, 8);
-    }
+    if (hotProfiles.length === 0) hotProfiles = scopedProfiles.slice(0, 8);
+    else hotProfiles = hotProfiles.slice(0, 8);
 
     swiperContainer.innerHTML = hotProfiles.map((p, idx) => {
       const rankText = `#${idx + 1} HOT`;
@@ -473,38 +544,54 @@ window.ScrollTrigger = ScrollTrigger;
       const availText = isAvail ? "รับงาน" : "สอบถาม";
 
       return `
-        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 155px !important; width: 155px !important; height: 215px !important; position: relative !important; overflow: hidden !important; border-radius: 16px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.35) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer !important;">
-          <span class="vip-status-chip" style="position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.88) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 10px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important; pointer-events: none !important; white-space: nowrap !important; backdrop-filter: blur(8px) !important;">🟢 ${availText}</span>
-          <span class="hot-rank-badge" style="position: absolute !important; top: 6px !important; right: 6px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000000 !important; font-size: 10px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important; pointer-events: none !important; display: flex !important; align-items: center !important; gap: 3px !important; white-space: nowrap !important;"><i class="fas fa-crown"></i> ${rankText}</span>
-          <img src="${imgUrl}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important; pointer-events: none !important;" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
-          <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; pointer-events: none !important;"></div>
-          <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 25 !important; cursor: pointer !important; pointer-events: auto !important;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
-          <div class="vip-card-info" style="position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; pointer-events: none !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 2px !important;">
-            <div class="vip-name" style="color: #FFFFFF !important; font-size: 12px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">${p.displayName}</div>
-            <div class="vip-location" style="color: #C084FC !important; font-size: 11px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; margin-top: 1px !important; display: flex !important; align-items: center !important; gap: 3px !important;"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
+          <span class="vip-status-chip">🟢 ${availText}</span>
+          <span class="hot-rank-badge"><i class="fas fa-crown"></i> ${rankText}</span>
+          <img src="${imgUrl}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
+          <div class="vip-card-overlay"></div>
+          <a href="/sideline/${pSlug}" class="card-link" aria-label="ดูโปรไฟล์${p.displayName}"></a>
+          <div class="vip-card-info">
+            <div class="vip-name">${p.displayName}</div>
+            <div class="vip-location"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
           </div>
         </div>
       `;
     }).join("");
   }
 
+  // 🟢 FIX 1 & 5: นับจำนวนและแมปคีย์ตรงกัน 100%
   function populateProvinceDropdown() {
     if (!DOM.provinceSelect) return;
+
+    const activeProvinceCounts = new Map();
+    STATE.allProfiles.forEach(p => {
+      if (p.provinceKey) {
+        const k = normalizeProvinceKey(p.provinceKey);
+        activeProvinceCounts.set(k, (activeProvinceCounts.get(k) || 0) + 1);
+      }
+    });
+
     while (DOM.provinceSelect.options.length > 1) {
       DOM.provinceSelect.remove(1);
     }
-    const sortedProvinces = Array.from(STATE.provincesMap.entries()).sort((a, b) => a[1].localeCompare(b[1], "th"));
-    const fragment = document.createDocumentFragment();
 
+    const sortedProvinces = Array.from(STATE.provincesMap.entries())
+      .filter(([key]) => (activeProvinceCounts.get(normalizeProvinceKey(key)) || 0) > 0)
+      .sort((a, b) => a[1].localeCompare(b[1], "th"));
+
+    const fragment = document.createDocumentFragment();
     const modalChipsContainer = document.getElementById("modal-province-chips");
     let modalChipsHTML = `<button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>`;
 
     sortedProvinces.forEach(([key, name]) => {
+      const normKey = normalizeProvinceKey(key);
+      const count = activeProvinceCounts.get(normKey) || 0;
       const opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = name;
+      opt.value = normKey;
+      opt.textContent = `${name} (${count})`;
       fragment.appendChild(opt);
-      modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${key}">${name}</button>`;
+
+      modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${normKey}">${name} (${count})</button>`;
     });
 
     DOM.provinceSelect.appendChild(fragment);
@@ -537,7 +624,6 @@ window.ScrollTrigger = ScrollTrigger;
     const currentProvName = profile.provinceNameThai || STATE.provincesMap.get(profile.provinceKey) || "ทั่วไทย";
     const nameClean = sanitizeName(profile.displayName || profile.name);
     
-    // 🟢 [แก้ไขข้อ 5] เพิ่มชื่อย่านลงใน ALT Text เพื่อไม่ให้ข้อความซ้ำกัน ป้องกัน SEO Duplicate
     const pLoc = profile.location || currentProvName;
     const seoAltText = `${nameClean} สาวรับงาน${currentProvName} ย่าน${pLoc} ไซด์ไลน์ตรงปก 100%`;
 
@@ -702,7 +788,7 @@ window.ScrollTrigger = ScrollTrigger;
     }
 
     if (prov && prov !== "all" && prov !== "") {
-      const provName = STATE.provincesMap.get(prov) || prov;
+      const provName = STATE.provincesMap.get(normalizeProvinceKey(prov)) || prov;
       activeItems.push({
         label: `📍 ${provName}`,
         clear: () => {
@@ -767,7 +853,7 @@ window.ScrollTrigger = ScrollTrigger;
       if (searchForm) searchForm.appendChild(chipsWrapper);
     }
 
-    const currentProv = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
+    const currentProv = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
     const data = LOCALIZED_SEO_MAP[currentProv] || LOCALIZED_SEO_MAP["national"];
     const zones = (data && data.zones) ? data.zones.slice(1, 5) : ["ตัวเมือง"];
 
@@ -828,7 +914,7 @@ window.ScrollTrigger = ScrollTrigger;
     try {
       const activeFilters = {
         text: (DOM.searchInput?.value || "").trim(),
-        province: DOM.provinceSelect?.value || "all",
+        province: normalizeProvinceKey(DOM.provinceSelect?.value || "all"),
         avail: DOM.availabilitySelect?.value || "all",
         featured: DOM.featuredSelect?.value === "true",
         sort: DOM.sortSelect?.value || "featured",
@@ -848,20 +934,17 @@ window.ScrollTrigger = ScrollTrigger;
       
       let urlProvinceKey = "national";
       if (locMatch) {
-        try { urlProvinceKey = decodeURIComponent(locMatch[1]); } catch (e) { urlProvinceKey = locMatch[1]; }
+        try { urlProvinceKey = normalizeProvinceKey(decodeURIComponent(locMatch[1])); } catch (e) { urlProvinceKey = normalizeProvinceKey(locMatch[1]); }
       }
 
       let targetProvinceKey = (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") 
         ? activeFilters.province 
         : urlProvinceKey;
 
-      if (targetProvinceKey === "chiang_mai" || targetProvinceKey === "chiang-mai") targetProvinceKey = "chiangmai";
+      targetProvinceKey = normalizeProvinceKey(targetProvinceKey);
 
-      if (targetProvinceKey && targetProvinceKey !== "national") {
-        results = results.filter(p => {
-          const k = (p.provinceKey || p.province_slug || p.province || "").toString().toLowerCase();
-          return k === targetProvinceKey;
-        });
+      if (targetProvinceKey && targetProvinceKey !== "national" && targetProvinceKey !== "all") {
+        results = results.filter(p => normalizeProvinceKey(p.provinceKey) === targetProvinceKey);
       }
 
       if (activeFilters.text) {
@@ -934,9 +1017,12 @@ window.ScrollTrigger = ScrollTrigger;
       renderActiveFilterChips();
       renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") || activeFilters.avail !== "all" || activeFilters.featured || activeFilters.price, isUserAction);
 
+      // 🟢 FIX 2: อัปเดต VIP Swiper ทุกครั้งที่มีการเปลี่ยนแผ่นกรองค้นหา
+      updateHeroSwiperCards(targetProvinceKey);
+
       if (updateUrlHistory) {
         let newPath = "/";
-        if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") {
+        if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "" && activeFilters.province !== "national") {
           newPath = `/location/${activeFilters.province}`;
         }
         if (window.location.pathname !== newPath) {
@@ -1029,7 +1115,7 @@ window.ScrollTrigger = ScrollTrigger;
     const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
 
     if (isFilteredView || isLocationPage) {
-      const currentProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
+      const currentProvKey = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
       const provName = STATE.provincesMap.get(currentProvKey) || "ทั่วไทย";
       const count = profiles.length;
 
@@ -1117,7 +1203,7 @@ window.ScrollTrigger = ScrollTrigger;
     if (!suggestionsContainer) return;
 
     if (!query) {
-      const currentProv = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
+      const currentProv = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
       const data = LOCALIZED_SEO_MAP[currentProv] || LOCALIZED_SEO_MAP["national"];
       const zones = (data && data.zones) ? data.zones.slice(1, 5) : ["ตัวเมือง"];
 
@@ -1168,7 +1254,6 @@ window.ScrollTrigger = ScrollTrigger;
       const isAvail = item.availability?.includes("ว่าง") || item.availability?.includes("รับงาน");
       const thumbImg = item.images && item.images[0] ? item.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
 
-      // 🟢 [แก้ไขข้อ 5] เพิ่มชื่อจังหวัดกำกับต่อท้ายชื่อน้อง เพื่อแยกแยะกรณีชื่อซ้ำกัน
       html += `
         <div class="suggestion-item" 
              data-action="suggestion"
@@ -1359,7 +1444,7 @@ window.ScrollTrigger = ScrollTrigger;
         default: "https://line.me/ti/p/ksLUWB89Y_"
       };
 
-      const provKey = (profile.provinceKey || "default").toLowerCase();
+      const provKey = normalizeProvinceKey(profile.provinceKey);
       const defaultLineUrl = PROVINCE_LINE_FALLBACKS[provKey] || PROVINCE_LINE_FALLBACKS.default;
 
       const lineIdToUse = (profile.lineId || "").replace(/^@/, "").trim();
@@ -1602,7 +1687,8 @@ window.ScrollTrigger = ScrollTrigger;
       }
     }
 
-    const data = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
+    const normKey = normalizeProvinceKey(provKey);
+    const data = LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"];
     const zones = data.zones || ["ทั้งหมด"];
 
     chipsContainer.innerHTML = zones.map(zone => {
@@ -1633,7 +1719,8 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function updateDynamicProvinceContent(provKey = "national", provName = "ทั่วไทย", count = 50) {
-    const data = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
+    const normKey = normalizeProvinceKey(provKey);
+    const data = LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"];
 
     const reviewsGrid = document.getElementById("reviews-container-grid");
     if (reviewsGrid) {
@@ -1682,8 +1769,8 @@ window.ScrollTrigger = ScrollTrigger;
       `).join("");
     }
 
-    renderZoneChips(provKey);
-    updateGoogleMap(provKey, provName);
+    renderZoneChips(normKey);
+    updateGoogleMap(normKey, provName);
   }
 
   function initSeoDrawer() {
@@ -1707,21 +1794,23 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
+
+
+
   function initRegionTabs() {
     const tabs = document.querySelectorAll(".region-tab");
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
-        tabs.forEach(t => {
-          t.classList.remove("active");
-        });
+        tabs.forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
 
-        if (DOM.searchInput) DOM.searchInput.value = "";
         const region = tab.getAttribute("data-region");
+        if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+
         if (region === "ทั้งหมด") {
-          if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+          if (DOM.searchInput) DOM.searchInput.value = "";
         } else if (region === "ภาคเหนือ") {
-          if (DOM.provinceSelect) DOM.provinceSelect.value = "chiangmai";
+          if (DOM.searchInput) DOM.searchInput.value = "เชียงใหม่";
         } else if (region === "กรุงเทพฯ") {
           if (DOM.provinceSelect) DOM.provinceSelect.value = "bangkok";
         }
@@ -1735,7 +1824,8 @@ window.ScrollTrigger = ScrollTrigger;
       const liveCountEl = document.getElementById("live-profile-count");
       if (liveCountEl) liveCountEl.textContent = profileCount;
 
-      const currentProvData = LOCALIZED_SEO_MAP[provinceSlug] || LOCALIZED_SEO_MAP["national"];
+      const normKey = normalizeProvinceKey(provinceSlug);
+      const currentProvData = LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"];
       const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
       const zoneText = currentZones.join(", ");
 
@@ -1768,7 +1858,7 @@ window.ScrollTrigger = ScrollTrigger;
         });
       });
 
-      updateDynamicProvinceContent(provinceSlug, provinceName, profileCount);
+      updateDynamicProvinceContent(normKey, provinceName, profileCount);
     } catch (e) {
       console.warn("⚠️ Replace placeholders error:", e);
     }
@@ -1783,7 +1873,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
     if (profileMatch) {
-      // 🟢 [แก้ไขข้อ 4] ป้องกันแอปพลิเคชันล่มจาก URIError เมื่อเจอ Thai Slug ที่ถูก Encode ซ้ำซ้อน
       let slug = profileMatch[1];
       try { slug = decodeURIComponent(slug); } catch (e) {}
       
@@ -1814,10 +1903,8 @@ window.ScrollTrigger = ScrollTrigger;
 
     const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
     if (locationMatch) {
-      // 🟢 [แก้ไขข้อ 4] ป้องกันแอปพลิเคชันล่มจาก URIError เมื่อเจอ Thai Slug ที่ถูก Encode ซ้ำซ้อน
       let provinceSlug = locationMatch[1];
-      try { provinceSlug = decodeURIComponent(locationMatch[1]).toLowerCase(); } catch (e) { provinceSlug = locationMatch[1].toLowerCase(); }
-      if (provinceSlug === "chiang_mai" || provinceSlug === "chiang-mai") provinceSlug = "chiangmai";
+      try { provinceSlug = normalizeProvinceKey(decodeURIComponent(locationMatch[1])); } catch (e) { provinceSlug = normalizeProvinceKey(locationMatch[1]); }
       STATE.currentProfileSlug = null;
       closeLightboxModal(false);
 
@@ -1932,7 +2019,6 @@ window.ScrollTrigger = ScrollTrigger;
       const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
       const profileMatch = urlPath.match(/^\/(?:sideline|profile)\/([^/]+)/);
 
-      // 🟢 [แก้ไขข้อ 2] ป้องกันการส่งรีวิวผิดจังหวัด หากอยู่ในหน้าโปรไฟล์น้องคนนั้น ให้ดึง Province น้องมาใช้ทันที
       let rawProvKey = "national";
       if (locMatch) {
         try { rawProvKey = decodeURIComponent(locMatch[1]); } catch (e) { rawProvKey = locMatch[1]; }
@@ -1943,7 +2029,7 @@ window.ScrollTrigger = ScrollTrigger;
         rawProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
       }
 
-      if (rawProvKey === "chiang_mai" || rawProvKey === "chiang-mai") rawProvKey = "chiangmai";
+      rawProvKey = normalizeProvinceKey(rawProvKey);
 
       if (!author || !reviewText) {
         showToast("❌ กรุณากรอกข้อมูลชื่อผู้ใช้งานและรายละเอียดรีวิวให้ครบถ้วนด้วยครับ", "error");
@@ -2287,7 +2373,7 @@ window.ScrollTrigger = ScrollTrigger;
         document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         if (DOM.provinceSelect) {
-          DOM.provinceSelect.value = btn.getAttribute('data-value') || '';
+          DOM.provinceSelect.value = normalizeProvinceKey(btn.getAttribute('data-value') || '');
           DOM.provinceSelect.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
@@ -2396,7 +2482,6 @@ window.ScrollTrigger = ScrollTrigger;
       renderSmartFilterChips();
     });
 
-    // 🟢 6. ซิงค์ช่องค้นหาและเพิ่ม Debounce (200ms) เพื่อความลื่นไหลสูงสุด
     const modalSearchInput = document.getElementById("modal-search-keyword");
     const inlineSearchInput = document.getElementById("inline-search-input");
     const clearTextBtn = document.getElementById("clear-modal-text-btn");
@@ -2472,7 +2557,6 @@ window.ScrollTrigger = ScrollTrigger;
     initPwaInstaller();
     initDynamicSearchPlaceholder();
 
-    // 🟢 10. ระบบซ่อนเมนูลอยเมื่อไถลง และโชว์อัตโนมัติเมื่อจอนิ่ง (400ms)
     let lastScrollY = window.scrollY;
     let scrollTimeout = null;
     const dockMenu = document.querySelector('.floating-app-dock');
