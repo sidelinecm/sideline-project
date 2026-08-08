@@ -1,13 +1,12 @@
 /**
  * [ SYSTEM SSR PROVINCE CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
- * Project: First Model Hub - Serverless SSR Handler
+ * Project: First Model Hub (Migrated from SidelineChiangmai)
  * Features: 
- *   1. Zero-Template Leakage Guarantee (Strips any unrendered {{...}} tags before HTTP response).
- *   2. Advanced Thai Typo Sanitizer & Emoji/Special Symbol Stripper.
- *   3. Dynamic Slogan Generator (Eliminates duplicate tagline penalties from Search Engines).
- *   4. Strict Profile Deduplication Engine across all views.
- *   5. Schema.org JSON-LD Cleanups (No Fake Telephones / Verified Rating Ranges).
- *   6. Stale-While-Revalidate Edge Caching for Instant TTFB (< 50ms).
+ *   1. Direct 1:1 Domain Migration Mapping (Seamless 301 Redirect).
+ *   2. Complete Legacy Data Binding (LINE @sidelinecm + Bluesky Signals).
+ *   3. Zero Data Loss Engine (Expanded query limits & Province Alias Mapping).
+ *   4. Zero-Template Leakage Guarantee & Dynamic Slogan Generator.
+ *   5. Schema.org JSON-LD Cleanups & Stale-While-Revalidate Edge Caching.
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
@@ -33,18 +32,20 @@ const CONFIG = {
   BRAND_NAME: "First Model Hub",
   BRAND_LEGAL_NAME: "First Model Hub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
+  // 🟢 เชื่อมต่อข้อมูลช่องทางติดต่อเดิม (LINE @sidelinecm + Social เดิมครบถ้วน)
   SOCIAL_LINKS: {
-    line: "https://line.me/ti/p/ksLUWB89Y_",
+    line: "https://line.me/R/ti/p/@sidelinecm",
+    line_direct: "https://line.me/ti/p/ksLUWB89Y_",
     tiktok: "https://tiktok.com/@firstmodelhub",
     twitter: "https://twitter.com/firstmodelhub",
     linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280",
     biosite: "https://bio.site/firstmodelhub",
     linktr: "https://linktr.ee/firstmodelhub",
-    bluesky: "https://bsky.app/profile/firstmodelhub.bsky.social"
+    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
   }
 };
 
-// 🟢 คลังสโลแกนสำรองแบบหลากหลาย แก้ปัญหาข้อความซ้ำกันทั้งเว็บ (Anti-Duplicate Tagline Penalty)
+// 🟢 คลังสโลแกนสำรอง
 const FALLBACK_SLOGANS = [
   "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน",
   "ตรงปก 100% เอาใจเก่ง พูดคุยเป็นกันเอง",
@@ -66,7 +67,6 @@ function getDeterministicSlogan(idOrSlug, rawSlogan) {
   return FALLBACK_SLOGANS[index];
 }
 
-// 🟢 พจนานุกรมล้างคำผิดภาษาไทย + ตัด Emoji / สัญลักษณ์เตือนภัย 🚨
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -80,8 +80,8 @@ function sanitizeThaiText(str) {
     .replace(/ปาตอง/g, "ป่าตอง")
     .replace(/ชลบรุี/g, "ชลบุรี")
     .replace(/อยุธญา/g, "อยุธยา")
-    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨]/gu, "") // ลบ Emoji และ 🚨
-    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„]+/g, "") // ลบเส้นกรอบ ASCII
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨]/gu, "")
+    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„]+/g, "")
     .trim();
 }
 
@@ -92,7 +92,6 @@ function sanitizeName(rawName) {
   return `น้อง${cleaned}`;
 }
 
-// 🟢 ระบบขจัดโปรไฟล์ซ้ำ (Profile Deduplication Engine)
 function deduplicateProfiles(profileList) {
   if (!Array.isArray(profileList)) return [];
   const seen = new Set();
@@ -144,11 +143,12 @@ const PROVINCE_CUSTOM_METADATA = {
   }
 };
 
+// 🟢 เติม FAQ และข้อมูล SEO ครบถ้วนทุกจังหวัด
 const PROVINCE_SEO_DATA = {
   chiangmai: {
     name: "เชียงใหม่",
     geo: { lat: 18.8140717, lng: 98.972096 },
-    zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย"],
+    zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย", "ห้วยแก้ว", "พายัพ"],
     faqs: [
       { q: "นัดหมายสาวรับงานเชียงใหม่ บน First Model Hub โซนไหนสะดวกที่สุด?", a: "ถนนนิมมานเหมินท์, สันติธรรม, ช้างเผือก และรอบคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายพร้อมดูแลท่านอย่างสะดวกรวดเร็ว" },
       { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
@@ -190,13 +190,17 @@ const PROVINCE_SEO_DATA = {
     name: "อุดรธานี",
     geo: { lat: 17.4138, lng: 102.7872 },
     zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"],
-    faqs: []
+    faqs: [
+      { q: "นัดหมายสาวรับงานอุดรธานี จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริง ปลอดภัย 100% ไม่มีโอนมัดจำล่วงหน้าครับ" }
+    ]
   },
   lampang: {
     name: "ลำปาง",
     geo: { lat: 18.2888, lng: 99.4923 },
     zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง"],
-    faqs: []
+    faqs: [
+      { q: "สาวรับงานลำปาง นัดเจอโซนไหนได้บ้าง?", a: "ครอบคลุมตัวเมืองลำปาง สวนดอก และรอบเวียงครับ นัดเจอน้องตัวจริงแล้วค่อยชำระค่าบริการหน้างาน" }
+    ]
   },
   default: {
     name: "ทั่วไทย",
@@ -215,7 +219,6 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 });
 
 function verifyHostname(req) {
-  const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").toLowerCase();
   return true;
 }
 
@@ -284,12 +287,11 @@ const optimizeImg = (path, width = 320, height = 400) => {
   return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
-// ✅ ปรับปรุงให้ตรวจสอบวันที่สมบูรณ์ก่อนแปลง ป้องกันคำว่า "NaN undefined NaN"
 const formatDateSSR = dateStr => {
   if (!dateStr) return "เมื่อครู่นี้";
   try {
     const t = new Date(dateStr);
-    if (isNaN(t.getTime())) return "เมื่อครู่นี้"; // ถ้าวันที่ผิดรูป ให้ส่งคำว่า "เมื่อครู่นี้" ทันที
+    if (isNaN(t.getTime())) return "เมื่อครู่นี้";
     
     const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     const date = t.getDate();
@@ -412,7 +414,6 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
-// 🟢 Helper Function สำหรับสร้าง HTML การ์ดโปรไฟล์ฝั่ง SSR พร้อมตั้งค่า Aspect-Ratio & Image Dimensions
 const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const pName = escapeHTML(sanitizeName(p.name));
   const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
@@ -422,7 +423,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
   const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
   
-  // 🟢 แสดงอายุเมื่อมีข้อมูลเท่านั้น ไม่โชว์คำว่าไม่ระบุ
   const cleanAge = p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0" ? String(p.age).replace(/\D/g, "") : null;
   const ageDisplay = cleanAge ? ` <span style="font-size: 0.85em; opacity: 0.9;">(${cleanAge})</span>` : "";
   
@@ -463,7 +463,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
     else rateDisplay = escapeHTML(p.rate).trim();
   }
 
-  // 🟢 ใช้คลังสโลแกนไดนามิก ไม่ซ้ำกันเกินไปทั้งเว็บ
   const sloganText = escapeHTML(getDeterministicSlogan(p.id || p.slug, p.slogan || p.quote));
 
   return `
@@ -482,7 +481,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                loading="${index < 2 ? "eager" : "lazy"}"
                fetchpriority="${index < 2 ? "high" : "auto"}"
                decoding="async"
-               onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
+               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
           <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
@@ -528,10 +527,8 @@ export default async (req, context) => {
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
   const hostName = url.hostname.toLowerCase();
 
+  // 🟢 1. เปลี่ยนการ Redirect จากเว็บเก่าแบบ 1:1 Direct Mapping (ไม่หลุดไปหน้าเชียงใหม่หน้าเดียว)
   if (hostName.includes("sidelinechiangmai.netlify.app")) {
-    if (url.pathname === "/" || url.pathname === "/index.html") {
-      return Response.redirect(`${hostUrl}/location/chiangmai`, 301);
-    }
     return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
   }
 
@@ -596,20 +593,24 @@ export default async (req, context) => {
       }
     }
 
+    // 🟢 2. แมปชื่อจังหวัดเดิมทั้งหมด (Legacy Alias Keys) ดึงโปรไฟล์ก้อนเดียวกันครบถ้วน
     let searchKeys = [provinceSlug];
-    if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
-      searchKeys = ["chiangmai", "chiang_mai"];
+    if (["chiangmai", "chiang_mai", "chiang-mai", "cm", "sidelinechiangmai"].includes(provinceSlug)) {
+      searchKeys = ["chiangmai", "chiang_mai", "chiang-mai", "cm", "sidelinechiangmai"];
+    } else if (["chonburi", "chon_buri", "pattaya", "bangsaen"].includes(provinceSlug)) {
+      searchKeys = ["chonburi", "chon_buri", "pattaya", "bangsaen"];
     }
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
+    // 🟢 3. ขยายขีดจำกัดการดึงโปรไฟล์เป็น 100 เพื่อไม่ให้โปรไฟล์เดิมหลุดหาย
     let profileQuery = supabase
       .from("profiles")
       .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, quote, style_tags, slogan")
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("lastUpdated", { ascending: false })
-      .limit(32);
+      .limit(100);
 
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.in("provinceKey", searchKeys);
@@ -619,7 +620,7 @@ export default async (req, context) => {
       .select("id, created_at, author_name, location_detail, rating_score, review_body, province_key")
       .eq("active_status", true)
       .order("created_at", { ascending: false })
-      .limit(8);
+      .limit(30);
 
     if (!isNationalHome) {
       reviewQuery = reviewQuery.in("province_key", searchKeys);
@@ -639,16 +640,14 @@ export default async (req, context) => {
       return buildErrorPage(404, "404 - ไม่พบหน้าเว็บ", "ไม่พบพิกัดจังหวัดที่คุณต้องการหาในขณะนี้");
     }
 
-    // 🟢 กรองรายการโปรไฟล์ไม่ให้ซ้ำกัน
     const profileList = deduplicateProfiles(profListRes.data || []);
     const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
     const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
     const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
 
-    // 🟢 บังคับ Canonical URL จังหวัดให้เป๊ะ ป้องกัน Query / Tracking Param
     const canonUrl = matchedProfile 
-      ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
-      : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug.toLowerCase()}`);
+  ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
+  : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug.toLowerCase()}`);
 
     const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
@@ -706,7 +705,6 @@ export default async (req, context) => {
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 ตัด telephone ปลอมออก เพื่อความสะอาดน่าเชื่อถือของ Schema
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -773,7 +771,6 @@ export default async (req, context) => {
       }
     ];
 
-    // 🟢 แก้ไขจุดที่ 1 & 2: เติม Person Schema ให้ครบสมบูรณ์ และป้องกัน Date Crash
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       const cleanName = sanitizeName(matchedProfile.name);
@@ -787,7 +784,6 @@ export default async (req, context) => {
         "mainEntity": { "@id": `${profileUrl}/#person` }
       });
 
-      // ✅ เติม Person Object ที่ขาดหายไป ให้ตรงกับ #person
       schemaGraph.push({
         "@type": "Person",
         "@id": `${profileUrl}/#person`,
@@ -816,7 +812,6 @@ export default async (req, context) => {
         }
       });
       
-      // 🟢 Breadcrumb ลิงก์ย้อนกลับโซนจังหวัดอย่างถูกต้อง
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${profileUrl}/#breadcrumb`,
@@ -945,7 +940,6 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    // 🟢 แก้ไขการฉีด Schema JSON-LD ให้ปลอดภัย 100% (ใช้ Replacer Function บล็อกสัญลักษณ์ $ ไม่ให้ทำลายไวยากรณ์ JSON)
     const safeSchemaJsonStr = JSON.stringify(schemaJson).replace(/</g, '\\u003c');
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${safeSchemaJsonStr}</script>`;
 
@@ -963,9 +957,8 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-
-    // ✅ ใช้ Replacer Function เพื่อความปลอดภัย 100%
-rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, (match, p1, p2) => `${p1}="/${p2}"`);
+     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceSlug.toLowerCase());
+    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, (match, p1, p2) => `${p1}="/${p2}"`);
 
     if (popularLocationsHtml) {
       const footerListHtml = `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`;
@@ -1046,7 +1039,6 @@ rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|
 
     const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
 
-    // 🟢 2. ป้องกันการโดนกวนด้วยสัญลักษณ์พิเศษในการแทรกแท็กสคริปต์
     if (rawHtml.includes('<script id="ssr-profiles-data">')) {
       rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, () => hydratedScriptTag);
     } else if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
@@ -1055,12 +1047,7 @@ rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|
       rawHtml = rawHtml.replace(/<\/head>/i, () => `${hydratedScriptTag}\n</head>`);
     }
 
-
-
-    // 🟢 ล้างตัวแปร Placeholder ทุกรูปแบบที่ไม่ถูกแทนที่ ทั้งใน Text และใน Attributes
     rawHtml = rawHtml.replace(/\{\{[^}]+\}\}/g, "");
-
-
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",

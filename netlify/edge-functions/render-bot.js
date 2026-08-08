@@ -53,8 +53,9 @@ const sanitizeName = (rawName) => {
     return `น้อง${cleaned}`;
 };
 
+// 🟢 1. เปลี่ยนรูป Fallback ใน optimizeImg
 const optimizeImg = (path, width = 600, height = 800) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/apple-touch-icon.png`;
+    if (!path) return `${CONFIG.DOMAIN}/images/firstmodelhub.webp`;
     if (path.includes('res.cloudinary.com')) {
         const cleanPath = path.replace(/\/image\/upload\/[^/]+\/(v\d+\/)/, '/image/upload/$1');
         return cleanPath.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
@@ -63,6 +64,8 @@ const optimizeImg = (path, width = 600, height = 800) => {
         ? path 
         : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover`;
 };
+
+
 
 const generateSrcSet = (path) => {
     if (!path) return '';
@@ -127,10 +130,11 @@ export default async (request, context) => {
         const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
         const imageSrcSet = generateSrcSet(p.imagePath);
         
-        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
-        if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl.replace(/^@/, '')}`;
-        }
+     let finalLineUrl = p.lineId || 'ksLUWB89Y_';
+if (!finalLineUrl.startsWith('http')) {
+    const cleanLineId = finalLineUrl.replace(/^[@~]/, '').trim();
+    finalLineUrl = cleanLineId.startsWith('http') ? cleanLineId : `https://line.me/ti/p/${cleanLineId}`;
+}
 
         const ageVal = (p.age && String(p.age).trim() !== "-" && String(p.age).trim() !== "0") ? `${p.age} ปี` : "ไม่ระบุ";
         const heightVal = (p.height && String(p.height).trim() !== "-" && String(p.height).trim() !== "0") ? `${p.height} ซม.` : "ไม่ระบุ";
