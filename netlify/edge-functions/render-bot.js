@@ -56,14 +56,20 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
     return Math.floor(min + (sum % (max - min + 1)));
 };
 
-const optimizeImg = (path, width = 600, height = 800) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/apple-touch-icon.png`;
-    if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
-    }
-    return path.startsWith('http') 
-        ? path 
-        : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover`;
+// 🟢 ฟังก์ชั่น optimizeImg ที่แก้ไขแล้ว
+const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
+  if (!path || typeof path !== "string") return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+
+  if (path.includes("res.cloudinary.com")) {
+    // ลบ Transformation ปัจจุบันที่ติดมาใน URL ออกก่อน (เช่น /c_scale,w_400.../)
+    const cleanCloudinaryUrl = path.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, '/upload/$1');
+    return cleanCloudinaryUrl.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
+  }
+
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
 const generateSrcSet = (path) => {
