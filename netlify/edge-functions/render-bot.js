@@ -1,12 +1,7 @@
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - SERVERLESS CRAWLER & BOT ENGINE (render-bot.js)
- * Production-Ready Ultra-Optimized Edge Function
- * Features:
- *   - Fix 1: Safe Multi-fallback image getter (imagePath -> galleryPaths -> image_url -> default)
- *   - Fix 2: 100% Synchronized Schema JSON-LD & HTML Body Testimonials with worstRating
- *   - Fix 4: Try-catch safe URI Decoding against malformed/double-encoded Thai slugs
- *   - Fix 5: Disambiguated ALT and Title tags for profiles with duplicate names
+ * Production-Ready Ultra-Optimized Edge Function (FULL 2026)
  * ==============================================================================
  */
 
@@ -69,7 +64,6 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
   return Math.floor(min + (sum % (max - min + 1)));
 };
 
-// 🟢 [แก้ไขปัญหาที่ 1] ดึงรูปหลักแบบ Multi-fallback ป้องกันการหลุดเป็น null
 const getProfileMainImage = (p) => {
   if (!p) return null;
   if (p.imagePath && typeof p.imagePath === "string" && p.imagePath.trim()) return p.imagePath.trim();
@@ -147,7 +141,6 @@ export default async (request, context) => {
     const pathParts = url.pathname.split("/").filter(Boolean);
     if (pathParts[0] !== "sideline" || pathParts.length < 2) return context.next();
 
-    // 🟢 [แก้ไขปัญหาที่ 4] ครอบ try-catch เพื่อป้องกัน URIError เมื่อเจอ Thai Slug ที่ถูก Encoded ซ้ำ
     const rawSlugSegment = pathParts[pathParts.length - 1] || "";
     let slug = rawSlugSegment;
     try {
@@ -160,7 +153,6 @@ export default async (request, context) => {
 
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    // ดึงข้อมูลโปรไฟล์ตาม slug หรือ id (กรณีเป็นตัวเลข)
     let query = supabase
       .from("profiles")
       .select("id, slug, name, imagePath, galleryPaths, gallery_paths, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)")
@@ -205,15 +197,19 @@ export default async (request, context) => {
     const rawRate = parseInt(cleanedRate, 10) || 1500;
     const displayPrice = rawRate.toLocaleString() + ".-";
 
-    // 🟢 [แก้ไขปัญหาที่ 1] ดึงรูปภาพหลักผ่าน getProfileMainImage
     const mainImagePath = getProfileMainImage(p);
     const baseImageUrl = optimizeImg(null, mainImagePath, 600, 800);
     const lcpImageUrl = optimizeImg(null, mainImagePath, 400, 533);
     const imageSrcSet = generateSrcSet(mainImagePath);
 
-    let finalLineUrl = p.lineId || "ksLUWB89Y_";
-    if (!finalLineUrl.startsWith("http")) {
-      finalLineUrl = `https://line.me/ti/p/~${finalLineUrl.replace(/^@/, "").trim()}`;
+    const defaultLineUrl = CONFIG.SOCIAL_LINKS.line;
+    let finalLineUrl = defaultLineUrl;
+    const lineIdClean = String(p.lineId || "").replace(/^@/, "").trim();
+
+    if (lineIdClean.startsWith("http")) {
+      finalLineUrl = lineIdClean;
+    } else if (lineIdClean && lineIdClean !== "ksLUWB89Y_") {
+      finalLineUrl = `https://line.me/ti/p/~${lineIdClean}`;
     }
 
     const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
@@ -236,7 +232,6 @@ export default async (request, context) => {
 
     const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`;
 
-    // 🟢 [แก้ไขปัญหาที่ 2] ดึงรีวิวและซิงค์ข้อมูลระหว่าง JSON-LD Schema และ HTML Body ให้ตรงกันแบบ 100%
     const dynamicReviews = getDeterministicReviews(slug, 3);
     const schemaReviews = dynamicReviews.map(t => ({
       "@type": "Review",
@@ -515,7 +510,6 @@ export default async (request, context) => {
                           const displayRelName = `น้อง${cleanRelName}`;
                           const relImgPath = getProfileMainImage(r);
                           const relLoc = escapeHTML(r.location || provinceName);
-                          // 🟢 [แก้ไขปัญหาที่ 5] ใส่ ALT text สมบูรณ์ไม่ให้ซ้ำกัน
                           const relAltText = `${displayRelName} สาวรับงาน${escapeHTML(provinceName)} ย่าน${relLoc} ไซด์ไลน์ตรงปก 100%`;
                           return `
                             <a href="/sideline/${encodeURIComponent(r.slug || r.id)}" class="related-card" title="${escapeHTML(displayRelName)}">

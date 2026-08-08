@@ -972,15 +972,19 @@ export default async (req, context) => {
       return html;
     }).join("") : "";
 
+    // ==============================================================================
+    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (PROD-READY PERFECT 2026)
+    // ==============================================================================
     let rawHtml = await getTemplateHtml(url, context);
 
+    // 1. Base URL Injection
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
+    // 2. SEO Title & Meta Tags Replacements
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
-
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
@@ -988,14 +992,16 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    
+
+    // 3. Schema.org (JSON-LD) Injection
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
     } else {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     }
-    
+
+    // 4. Template Variables Replacements
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
@@ -1003,10 +1009,19 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+    
+// 🟢 FIX 1: ป้องกัน Map Iframe ดึงหน้าเว็บตัวเองมาวนลูป (Prevent Self-Referencing Iframe)
+const rawMapUrl = (seoData && seoData.geo) 
+  ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+  : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
+const safeMapEmbedUrl = escapeHTML(rawMapUrl);
+rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", safeMapEmbedUrl);
+
+    // 5. Fix Relative URLs
     rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
+    // 6. Popular Locations Footer Injection
     if (popularLocationsHtml) {
       rawHtml = rawHtml.replace(
         /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
@@ -1014,6 +1029,7 @@ export default async (req, context) => {
       );
     }
 
+    // 7. Remove Featured Section on Sub-pages
     if (!isNationalHome) {
       rawHtml = rawHtml.replace(
         /<section id="featured-profiles"[\s\S]*?<\/section>/i,
@@ -1021,6 +1037,7 @@ export default async (req, context) => {
       );
     }
 
+    // 8. Main Profiles Display Area Injection
     const topCatalogSnippetHtml = `
       <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
         <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
@@ -1052,7 +1069,7 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // 🟢 [แก้ไขปัญหาที่ 1] ส่งข้อมูลไปสคริปต์ Hydration โดยเรียก getProfileMainImage เพื่อไม่ให้ Client รับค่า imagePath ที่เป็น null
+    // 9. Client SSR Hydration Script Injection (window.profilesData)
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -1066,7 +1083,7 @@ export default async (req, context) => {
       waist: p.waist || "",
       hips: p.hips || "",
       cup_size: p.cup_size || "",
-      imagePath: getProfileMainImage(p),
+      imagePath: getProfileMainImage(p), // 🟢 เรียกใช้ Helper ดึงรูปที่ถูกต้องไม่ให้เป็น null
       galleryPaths: p.galleryPaths || p.gallery_paths || [],
       provinceKey: p.provinceKey,
       provinceThai: provinceThaiName,
@@ -1093,6 +1110,10 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
+    // 🟢 FIX 2: GLOBAL CATCH-ALL REGEX CLEANER (ล้างป้ายรหัสแม่แบบ {{...}} ที่หลุดตกค้าง 100%)
+    rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
+
+    // 10. Response Headers & Cache Management (แก้ไขไวยากรณ์ Syntax Error เรียบร้อย)
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
@@ -1106,7 +1127,13 @@ export default async (req, context) => {
     if (PAGE_CACHE.size > MAX_CACHE_SIZE) {
       PAGE_CACHE.clear();
     }
-    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: Date.now() });
+    
+    // บันทึกลง Memory Cache
+    PAGE_CACHE.set(cacheKey, { 
+      html: rawHtml, 
+      headers: responseHeaders, 
+      timestamp: Date.now() 
+    });
 
     return new Response(rawHtml, { headers: responseHeaders });
 
