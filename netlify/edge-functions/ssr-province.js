@@ -1,14 +1,14 @@
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - SERVERLESS SSR & HYDRATION ENGINE (ssr-province.js)
- * Production-Ready Fully Corrected & Optimized Edge Function
+ * Production-Ready Fully Corrected & Optimized Edge Function (FULL 2026)
  * ==============================================================================
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
-const PAGE_CACHE_TTL_MS = 10 * 60 * 1000;
+const PAGE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 Minutes Cache
 const MAX_CACHE_SIZE = 200;
 
 let TEMPLATE_HTML_CACHE = null;
@@ -210,10 +210,7 @@ async function getTemplateHtml(url, _context) {
 </head>
 <body>
   <main id="main-content">
-    <div class="container" style="padding: 40px 16px; text-align: center;">
-      <h1 style="color: #FFFFFF; font-size: 20px;">First Model Hub</h1>
-      <p style="color: #A1A1AA; font-size: 13px; margin-top: 8px;">กำลังโหลดข้อมูลโปรไฟล์...</p>
-    </div>
+    <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region"></div>
   </main>
   <script type="module" src="/main.js"></script>
 </body>
@@ -248,7 +245,6 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 [Helper Extractor] ดึงรูปปกหลักอย่างปลอดภัย
 const getProfileMainImage = (p) => {
   if (!p) return null;
   if (p.imagePath && typeof p.imagePath === "string" && p.imagePath.trim()) return p.imagePath.trim();
@@ -260,7 +256,6 @@ const getProfileMainImage = (p) => {
   return null;
 };
 
-// 🟢 [Helper Gallery Extractor] ดึงรูปภาพทั้งหมดลงอัลบั้ม
 const getProfileGalleryImages = (p) => {
   if (!p) return [];
   let list = [];
@@ -439,7 +434,7 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
 };
 
 const generateDynamicFAQsHTML = faqs => {
-  if (!faqs) return "";
+  if (!faqs || faqs.length === 0) return "";
   return faqs.map(item => `
         <div class="interactive-card" style="padding: 16px 20px;">
             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -655,7 +650,7 @@ export default async (req, context) => {
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("lastUpdated", { ascending: false })
-      .limit(16);
+      .limit(24);
 
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.in("provinceKey", searchKeys);
@@ -755,6 +750,7 @@ export default async (req, context) => {
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const displayReviewCount = profileList.length > 0 ? Math.max(35, profileList.length * 3) : 45;
     
+    // 🟢 แก้ไขปัญหาสูตร Map URL เป็นระเบียบและไม่ซ้ำซ้อน
     const rawMapUrl = (seoData && seoData.geo) 
       ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
       : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
@@ -764,7 +760,7 @@ export default async (req, context) => {
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // Schema.org Graph
+    // Schema.org Graph Construction
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -951,22 +947,8 @@ export default async (req, context) => {
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones, provinceSlug);
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
-    const popularLocationsHtml = provListRes.data ? provListRes.data.map(p => {
-      const key = p.key || p.slug || p.id;
-      const name = p.nameThai || p.name;
-      const isActive = key === provinceSlug;
-      
-      let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
-      
-      if (key === 'chiangmai') {
-        html += `<li><a href="/location/chiangmai?q=นิมมาน" title="สาวรับงานนิมมาน เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
-        html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
-      }
-      return html;
-    }).join("") : "";
-
-// ==============================================================================
-    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (FULL PROD-READY 2026)
+    // ==============================================================================
+    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE
     // ==============================================================================
     let rawHtml = await getTemplateHtml(url, context);
 
@@ -975,19 +957,22 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    // 2. SEO Title & Meta Tags Replacement (รองรับทั้ง / และ />)
+    // 2. SEO Meta Tags & Canonicals Replacement
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
+    rawHtml = rawHtml.replace(/<meta\s+property=["']og:url["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:url" content="${canonUrl}" />`);
+    rawHtml = rawHtml.replace(/<meta\s+property=["']og:image["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:image" content="${metaImgUrl}" />`);
+    rawHtml = rawHtml.replace(/<meta\s+property=["']og:image:secure_url["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:image:secure_url" content="${metaImgUrl}" />`);
+    
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:image["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:image" content="${metaImgUrl}" />`);
     
-    // Canonical & Alternate Links
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    rawHtml = rawHtml.replace(/<link\s+rel=["']canonical["']\s+id=["']canonical-link["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="canonical" id="canonical-link" href="${canonUrl}" />`);
+    rawHtml = rawHtml.replace(/<link\s+rel=["']canonical["']\s+(?:id=["'].*?["']\s+)?href=["'].*?["']\s*\/?>/i, `<link rel="canonical" id="canonical-link" href="${canonUrl}" />`);
     rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']th["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="alternate" hreflang="th" href="${canonUrl}" />`);
     rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']x-default["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="alternate" hreflang="x-default" href="${canonUrl}" />`);
 
@@ -1008,12 +993,13 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-    // 🟢 แก้ไขบั๊กแผนที่พัง: ป้องกันตัวแปรถูก URL Encode เป็น %7B%7BMAP_EMBED_URL%7D%7D
+    // 🟢 [FIX ปัญหาที่ 2] แก้ไขบั๊กแผนที่พังและเบิ้ลโดเมน 100%
+    rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     // ==============================================================================
-    // 🟢 FIX 1 (SOLUTION PRIMARY BUG): สลับการเรนเดอร์ระหว่าง "โปรไฟล์เดี่ยว" กับ "หน้าค้นหาจังหวัด"
+    // 🟢 [FIX ปัญหาที่ 1, 3, 4] สลับการเรนเดอร์ระหว่าง "โปรไฟล์เดี่ยว" กับ "หน้าค้นหาจังหวัด"
     // ==============================================================================
     let displayAreaInnerHtml = "";
 
@@ -1098,7 +1084,7 @@ export default async (req, context) => {
                 <small style="color:#A1A1AA; font-size: 11px; display:block;">ส่วนสูง</small>
                 <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.height || "-"} ซม.</strong>
               </div>
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 10px;">
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 100px;">
                 <small style="color:#A1A1AA; font-size: 11px; display:block;">น้ำหนัก</small>
                 <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.weight || "-"} กก.</strong>
               </div>
@@ -1121,6 +1107,11 @@ export default async (req, context) => {
           ${relatedGridHtml}
         </article>
       `;
+
+      // 🟢 [FIX ปัญหาที่ 8] ซ่อนเซกชันส่วนเกินเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว
+      rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
     } else {
       // 2. เรนเดอร์หน้าค้นหารายจังหวัดตามปกติเมื่อเข้า URL /location/:province หรือ /
       const topCatalogSnippetHtml = `
@@ -1151,18 +1142,13 @@ export default async (req, context) => {
           </div>
         </div>
       `;
+
+      if (!isNationalHome) {
+        rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+      }
     }
 
-    // 🟢 ซ่อนแบนเนอร์รวมจังหวัด เมื่อเข้าหน้าโปรไฟล์เดี่ยว (ป้องกันปัญหา H1 ซ้ำ และภาพซ้อน)
-    if (matchedProfile) {
-      rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
-    } else if (!isNationalHome) {
-      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
-    }
-
-    // 🟢 แทนที่เนื้อหาหลักในพื้นที่แสดงผล ป้องกันปัญหาแม่แบบค้างหน้าแรก
+    // แทนที่พื้นที่แสดงผลหลัก
     if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
     } else {
@@ -1172,8 +1158,9 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 [Client SSR Hydration] ส่งข้อมูลโปรไฟล์ลงหน้าเว็บสำหรับ Script หน้าบ้าน (main.js)
-    const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
+    // 🟢 [FIX ปัญหาที่ 7] ส่งข้อมูล Hydration ป้องกัน null/empty
+    const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
+    const hydratedProfilesData = JSON.stringify(allHydratedProfiles.map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -1213,7 +1200,7 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // ล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด
+    // 🟢 ล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด ป้องกันหลุด
     rawHtml = rawHtml.replace(/(\{\{|%7B%7B)[A-Z0-9_]+(\}\}|%7D%7D)/gi, "");
 
     const responseHeaders = {

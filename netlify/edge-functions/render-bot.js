@@ -155,7 +155,7 @@ export default async (request, context) => {
 
     let query = supabase
       .from("profiles")
-      .select("id, slug, name, imagePath, galleryPaths, gallery_paths, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)")
+      .select("id, slug, name, imagePath, galleryPaths, gallery_paths, location, rate, age, description, provinceKey, lineId, line_id, provinces(nameThai, key)")
       .eq("active", true);
 
     if (/^\d+$/.test(slug)) {
@@ -204,7 +204,8 @@ export default async (request, context) => {
 
     const defaultLineUrl = CONFIG.SOCIAL_LINKS.line;
     let finalLineUrl = defaultLineUrl;
-    const lineIdClean = String(p.lineId || "").replace(/^@/, "").trim();
+    const rawLineId = p.lineId || p.line_id || "";
+    const lineIdClean = String(rawLineId).replace(/^@/, "").trim();
 
     if (lineIdClean.startsWith("http")) {
       finalLineUrl = lineIdClean;
