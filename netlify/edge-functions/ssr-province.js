@@ -965,25 +965,33 @@ export default async (req, context) => {
       return html;
     }).join("") : "";
 
-    // ==============================================================================
-    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE
+// ==============================================================================
+    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (FULL PROD-READY 2026)
     // ==============================================================================
     let rawHtml = await getTemplateHtml(url, context);
 
+    // 1. Base Tag Injection
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
+    // 2. SEO Title & Meta Tags Replacement (รองรับทั้ง / และ />)
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
-
+    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:image["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:image" content="${metaImgUrl}" />`);
+    
+    // Canonical & Alternate Links
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
+    rawHtml = rawHtml.replace(/<link\s+rel=["']canonical["']\s+id=["']canonical-link["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="canonical" id="canonical-link" href="${canonUrl}" />`);
+    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']th["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="alternate" hreflang="th" href="${canonUrl}" />`);
+    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']x-default["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="alternate" hreflang="x-default" href="${canonUrl}" />`);
 
+    // 3. Schema JSON-LD Injection
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
@@ -991,6 +999,7 @@ export default async (req, context) => {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     }
 
+    // 4. Placeholders Replacement
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
@@ -998,6 +1007,9 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
+    
+    // 🟢 แก้ไขบั๊กแผนที่พัง: ป้องกันตัวแปรถูก URL Encode เป็น %7B%7BMAP_EMBED_URL%7D%7D
+    rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     // ==============================================================================
@@ -1086,7 +1098,7 @@ export default async (req, context) => {
                 <small style="color:#A1A1AA; font-size: 11px; display:block;">ส่วนสูง</small>
                 <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.height || "-"} ซม.</strong>
               </div>
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 100px; border-radius: 10px;">
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 10px;">
                 <small style="color:#A1A1AA; font-size: 11px; display:block;">น้ำหนัก</small>
                 <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.weight || "-"} กก.</strong>
               </div>
@@ -1141,15 +1153,26 @@ export default async (req, context) => {
       `;
     }
 
-    // 🟢 เพิ่ม 5 บรรทัดนี้ลงไป เพื่อไม่ให้แบนเนอร์รวมจังหวัดโผล่มาซ้ำในหน้าโปรไฟล์น้องรายบุคคล
+    // 🟢 ซ่อนแบนเนอร์รวมจังหวัด เมื่อเข้าหน้าโปรไฟล์เดี่ยว (ป้องกันปัญหา H1 ซ้ำ และภาพซ้อน)
     if (matchedProfile) {
       rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
+    } else if (!isNationalHome) {
+      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
-    // 🟢 [Client SSR Hydration] ส่งข้อมูลโปรไฟล์ลงหน้าเว็บ
+    // 🟢 แทนที่เนื้อหาหลักในพื้นที่แสดงผล ป้องกันปัญหาแม่แบบค้างหน้าแรก
+    if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
+    } else {
+      rawHtml = rawHtml.replace(
+        /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
+        `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
+      );
+    }
+
+    // 🟢 [Client SSR Hydration] ส่งข้อมูลโปรไฟล์ลงหน้าเว็บสำหรับ Script หน้าบ้าน (main.js)
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -1190,8 +1213,8 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // ล้างแม่แบบ {{...}} ที่ตกค้าง
-    rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
+    // ล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด
+    rawHtml = rawHtml.replace(/(\{\{|%7B%7B)[A-Z0-9_]+(\}\}|%7D%7D)/gi, "");
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
