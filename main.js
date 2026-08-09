@@ -29,7 +29,6 @@ window.ScrollTrigger = ScrollTrigger;
     DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
 
-  // 🟢 Helper แปลง Key จังหวัดให้เป็นมาตรฐานเดียวกันทั้งระบบ 100%
   function normalizeProvinceKey(key) {
     if (!key) return "national";
     let k = String(key).toLowerCase().trim().replace(/_/g, "-");
@@ -101,20 +100,74 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // 🟢 FIX 1: ปรับคีย์ SEO MAP ให้ตรงกับคีย์มาตรฐาน 100%
+  // 🟢 FIX 1: เพิ่ม reviews และ faqs ในทุกล็อคเพื่อป้องกัน TypeError
   const LOCALIZED_SEO_MAP = {
-    chiangmai: { zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"] },
-    chiangrai: { zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย"] },
-    lampang: { zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏ"] },
-    phitsanulok: { zones: ["ทั้งหมด", "ตัวเมืองพิษณุโลก", "รอบ มน.", "สมอแข"] },
-    bangkok: { zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"] },
-    chonburi: { zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"] },
-    khonkaen: { zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"] },
-    "khon-kaen": { zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"] }, // Alias
-    phuket: { zones: ["ทั้งหมด", "ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง"] },
-    udonthani: { zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"] },
-    "udon-thani": { zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"] }, // Alias
-    national: { zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"] }
+    chiangmai: {
+      zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"],
+      reviews: [
+        { author: "คุณเกริกพล", location: "นิมมาน เชียงใหม่", text: "นัดเจอน้องตรงปก 100% บริการน่ารักมาก มารยาทดี ไม่มีโอนมัดจำล่วงหน้าสบายใจสุดๆ ครับ", rating: 5, date: "เมื่อวานนี้" },
+        { author: "คุณอนุรักษ์", location: "สันติธรรม เชียงใหม่", text: "ดูแลเอนเตอร์เทนประทับใจ สไตล์ฟิวแฟน คุยสนุกเป็นกันเอง ให้ 5 ดาวครับ", rating: 5, date: "3 วันที่แล้ว" }
+      ],
+      faqs: [
+        { q: "นัดหมายสาวรับงานเชียงใหม่ บน First Model Hub โซนไหนสะดวกที่สุด?", a: "ถนนนิมมานเหมินท์, สันติธรรม, ช้างเผือก และรอบคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายพร้อมดูแลท่านอย่างสะดวกรวดเร็ว" },
+        { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
+      ]
+    },
+    chiangrai: {
+      zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย"],
+      reviews: [{ author: "คุณปิยะ", location: "ตัวเมืองเชียงราย", text: "น้องน่ารัก ตรงปก เทคแคร์ดีมาก ชำระเงินหน้างานปลอดภัยครับ", rating: 5, date: "2 วันที่แล้ว" }],
+      faqs: [{ q: "สาวรับงานเชียงราย จ่ายเงินอย่างไร?", a: "ชำระหน้างานเมื่อเจอน้องตัวจริงเท่านั้น ไม่มีโอนมัดจำล่วงหน้าทุกกรณี" }]
+    },
+    lampang: {
+      zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏ"],
+      reviews: [{ author: "คุณเมธี", location: "ตัวเมืองลำปาง", text: "น้องตรงปก สุภาพ อัธยาศัยดี นัดเจอจ่ายเงินหน้างานประทับใจครับ", rating: 5, date: "4 วันที่แล้ว" }],
+      faqs: []
+    },
+    phitsanulok: {
+      zones: ["ทั้งหมด", "ตัวเมืองพิษณุโลก", "รอบ มน.", "สมอแข"],
+      reviews: [{ author: "คุณกิตติ", location: "รอบ มน. พิษณุโลก", text: "ตรงปก อัธยาศัยดี ฟิวแฟนอบอุ่นมากครับ", rating: 5, date: "เมื่อวานนี้" }],
+      faqs: []
+    },
+    bangkok: {
+      zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"],
+      reviews: [
+        { author: "คุณวีรยุทธ", location: "รัชดา กรุงเทพฯ", text: "บริการพรีเมียมมาก ตรงปกตามรูป จ่ายหน้างาน 100% แนะนำเลยครับ", rating: 5, date: "เมื่อวานนี้" },
+        { author: "คุณปณิธาน", location: "สุขุมวิท กรุงเทพฯ", text: "ตรงปก บริการฟิวแฟนประทับใจ นัดเจอง่ายไม่มีมัดจำครับ", rating: 5, date: "3 วันที่แล้ว" }
+      ],
+      faqs: [
+        { q: "สาวรับงานกรุงเทพฯ ปลอดภัยแค่ไหน?", a: "ปลอดภัย 100% จ่ายเงินเมื่อเจอตัวน้องหน้างาน ไม่มีการโอนเงินก่อนล่วงหน้า" }
+      ]
+    },
+    chonburi: {
+      zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
+      reviews: [{ author: "คุณสมชาย", location: "พัทยา ชลบุรี", text: "น้องตรงปก น่ารัก เทคแคร์ดีมาก ชำระหน้างานปลอดภัยสุดๆ ครับ", rating: 5, date: "2 วันที่แล้ว" }],
+      faqs: [{ q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนทุกกรณีครับ" }]
+    },
+    khonkaen: {
+      zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"],
+      reviews: [{ author: "คุณธนกฤต", location: "กังสดาล ขอนแก่น", text: "น้องน่ารัก เป็นกันเองมากๆ สไตล์ฟิวแฟน ไม่ต้องโอนมัดจำล่วงหน้าครับ", rating: 5, date: "4 วันที่แล้ว" }],
+      faqs: [{ q: "นัดหมายสาวรับงานขอนแก่น ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าครับ พบน้องและตรวจสอบความตรงปกหน้างานแล้วค่อยชำระค่าบริการครับ" }]
+    },
+    phuket: {
+      zones: ["ทั้งหมด", "ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง"],
+      reviews: [{ author: "คุณอเล็กซ์", location: "ป่าตอง ภูเก็ต", text: "โปรไฟล์ตรงปก 100% บริการดี นัดเจอจ่ายหน้างาน สะดวกสบายมากครับ", rating: 5, date: "3 วันที่แล้ว" }],
+      faqs: [{ q: "นัดหมายสาวรับงานภูเก็ต จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าครับ" }]
+    },
+    udonthani: {
+      zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"],
+      reviews: [{ author: "คุณชัชวาล", location: "UD Town อุดรธานี", text: "น้องตรงปก บริการสุภาพ สไตล์ฟิวแฟน จ่ายหน้างานปลอดภัยครับ", rating: 5, date: "เมื่อวานนี้" }],
+      faqs: []
+    },
+    national: {
+      zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "อุดรธานี", "ขอนแก่น"],
+      reviews: [
+        { author: "คุณเกริกพล", location: "นิมมาน เชียงใหม่", text: "นัดเจอน้องตรงปก 100% บริการน่ารักมาก มารยาทดี ไม่มีโอนมัดจำล่วงหน้าสบายใจสุดๆ ครับ", rating: 5, date: "เมื่อวานนี้" },
+        { author: "คุณวีรยุทธ", location: "รัชดา กรุงเทพฯ", text: "บริการพรีเมียมมาก ตรงปกตามรูป จ่ายหน้างาน 100% แนะนำเลยครับ", rating: 5, date: "3 วันที่แล้ว" }
+      ],
+      faqs: [
+        { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" }
+      ]
+    }
   };
 
   let STATE = {
@@ -135,8 +188,8 @@ window.ScrollTrigger = ScrollTrigger;
   let searchDebounceTimer = null;
 
   const DEFAULT_SEO = {
-    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub",
-    description: "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
+    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub",
+    description: "ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ",
     keywords: "แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน",
     canonical: "https://firstmodelhub.com/",
     ogImage: "https://firstmodelhub.com/images/firstmodelhub.webp"
@@ -252,8 +305,7 @@ window.ScrollTrigger = ScrollTrigger;
             <h3 style="font-size: 18px; font-weight: 800; color: white; margin: 0;">ระบบเชื่อมต่อขัดข้องชั่วคราว</h3>
             <p style="margin-top: 12px; color: var(--text-gray); font-size: 13px; line-height: 1.6;">ไม่สามารถดึงข้อมูลโปรไฟล์ได้ในขณะนี้ กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตของคุณใหม่อีกครั้งครับ</p>
             <button onclick="window.location.reload()" 
-                    style="margin-top: 24px; padding: 12px 28px; background-color: var(--primary-purple); color: white; border-radius: 100px; border: none; cursor: pointer; font-weight: 800; font-size: 13px; box-shadow: 0 4px 15px rgba(90, 44, 190, 0.3); transition: transform 0.2s;"
-                    onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'">
+                    style="margin-top: 24px; padding: 12px 28px; background-color: var(--primary-purple); color: white; border-radius: 100px; border: none; cursor: pointer; font-weight: 800; font-size: 13px; box-shadow: 0 4px 15px rgba(90, 44, 190, 0.3); transition: transform 0.2s;">
                 <i class="fas fa-sync-alt" style="margin-right: 8px;"></i> รีโหลดหน้าเว็บ
             </button>
         </div>
@@ -261,7 +313,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  // 🟢 processProfileObject - ปรับปรุงสมบูรณ์ 100%
   function processProfileObject(raw) {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
 
@@ -411,7 +462,6 @@ window.ScrollTrigger = ScrollTrigger;
     }, 1500);
   }
 
-  // 🟢 FIX 1: แก้ไข SSR Hydration ป้องกัน STATE.provincesMap ว่างเปล่า
   async function fetchProfilesData() {
     if (STATE.isFetching) return false;
     STATE.isFetching = true;
@@ -420,10 +470,8 @@ window.ScrollTrigger = ScrollTrigger;
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         console.log("⚡ [Hydration] โหลดข้อมูล SSR สำเร็จ!");
         
-        // ⚡ สร้างข้อมูล STATE.provincesMap อัตโนมัติจากข้อมูล Hydration และ Cache
         STATE.provincesMap.clear();
         
-        // 1. อ่านคีย์จาก Cache ล่าสุด
         try {
           const cachedProvinces = JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES) || "[]");
           cachedProvinces.forEach(p => {
@@ -431,14 +479,12 @@ window.ScrollTrigger = ScrollTrigger;
           });
         } catch (e) {}
 
-        // 2. อ่านคีย์จากโปรไฟล์ SSR
         window.profilesData.forEach(p => {
           if (p.provinceKey && p.provinceThai) {
             STATE.provincesMap.set(normalizeProvinceKey(p.provinceKey), p.provinceThai);
           }
         });
 
-        // 3. Fallback Map กันพลาด
         if (STATE.provincesMap.size === 0) {
           STATE.provincesMap.set("chiangmai", "เชียงใหม่");
           STATE.provincesMap.set("bangkok", "กรุงเทพฯ");
@@ -509,9 +555,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-
-
-  // 🟢 FIX 2: สโคปน้องใน VIP Swiper และปรับตามจังหวัดปัจจุบัน
   function updateHeroSwiperCards(targetProvinceKey = null) {
     const swiperContainer = document.getElementById("vip-swiper-container");
     if (!swiperContainer || !STATE.allProfiles || STATE.allProfiles.length === 0) return;
@@ -559,7 +602,6 @@ window.ScrollTrigger = ScrollTrigger;
     }).join("");
   }
 
-  // 🟢 FIX 1 & 5: นับจำนวนและแมปคีย์ตรงกัน 100%
   function populateProvinceDropdown() {
     if (!DOM.provinceSelect) return;
 
@@ -780,7 +822,9 @@ window.ScrollTrigger = ScrollTrigger;
         label: `🔍 "${text}"`,
         clear: () => {
           if (DOM.searchInput) DOM.searchInput.value = "";
-          const clearBtn = document.getElementById("clear-search-btn");
+          const modalInput = document.getElementById("modal-search-keyword");
+          if (modalInput) modalInput.value = "";
+          const clearBtn = document.getElementById("clear-modal-text-btn");
           if (clearBtn) clearBtn.style.display = "none";
           applyUltimateFilters(true, true);
         }
@@ -793,6 +837,8 @@ window.ScrollTrigger = ScrollTrigger;
         label: `📍 ${provName}`,
         clear: () => {
           if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+          document.querySelectorAll("#modal-province-chips .province-chip").forEach(b => b.classList.remove("active"));
+          document.querySelector("#modal-province-chips .province-chip[data-value='']")?.classList.add("active");
           applyUltimateFilters(true, true);
         }
       });
@@ -803,6 +849,8 @@ window.ScrollTrigger = ScrollTrigger;
         label: `🟢 ${avail}`,
         clear: () => {
           if (DOM.availabilitySelect) DOM.availabilitySelect.value = "";
+          document.querySelectorAll("#modal-availability-chips .avail-chip").forEach(b => b.classList.remove("active"));
+          document.querySelector("#modal-availability-chips .avail-chip[data-value='']")?.classList.add("active");
           applyUltimateFilters(true, true);
         }
       });
@@ -890,6 +938,8 @@ window.ScrollTrigger = ScrollTrigger;
           DOM.availabilitySelect.value = DOM.availabilitySelect.value === "รับงาน" ? "" : "รับงาน";
         } else if ((type === "tag" || type === "keyword") && DOM.searchInput) {
           DOM.searchInput.value = val;
+          const modalInput = document.getElementById("modal-search-keyword");
+          if (modalInput) modalInput.value = val;
         }
         applyUltimateFilters(true, true);
       };
@@ -912,8 +962,11 @@ window.ScrollTrigger = ScrollTrigger;
 
   function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     try {
+      const modalSearchInput = document.getElementById("modal-search-keyword");
+      const searchKeywordVal = (DOM.searchInput?.value || modalSearchInput?.value || "").trim();
+
       const activeFilters = {
-        text: (DOM.searchInput?.value || "").trim(),
+        text: searchKeywordVal,
         province: normalizeProvinceKey(DOM.provinceSelect?.value || "all"),
         avail: DOM.availabilitySelect?.value || "all",
         featured: DOM.featuredSelect?.value === "true",
@@ -1015,12 +1068,15 @@ window.ScrollTrigger = ScrollTrigger;
       });
 
       renderActiveFilterChips();
-      renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") || activeFilters.avail !== "all" || activeFilters.featured || activeFilters.price, isUserAction);
+      
+      const isSingleProfilePage = Boolean(document.querySelector(".single-profile-wrapper"));
+      if (!isSingleProfilePage) {
+        renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") || activeFilters.avail !== "all" || activeFilters.featured || activeFilters.price, isUserAction);
+      }
 
-      // 🟢 FIX 2: อัปเดต VIP Swiper ทุกครั้งที่มีการเปลี่ยนแผ่นกรองค้นหา
       updateHeroSwiperCards(targetProvinceKey);
 
-      if (updateUrlHistory) {
+      if (updateUrlHistory && !isSingleProfilePage) {
         let newPath = "/";
         if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "" && activeFilters.province !== "national") {
           newPath = `/location/${activeFilters.province}`;
@@ -1037,7 +1093,7 @@ window.ScrollTrigger = ScrollTrigger;
       const currentProvName = (currentProvKey === "national") ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
       replaceDomPlaceholders(currentProvName, results.length, currentProvKey);
 
-      if (isUserAction) {
+      if (isUserAction && !isSingleProfilePage) {
         scrollToSearchResults();
       }
 
@@ -1120,8 +1176,9 @@ window.ScrollTrigger = ScrollTrigger;
       const count = profiles.length;
 
       let headingTitle = `📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${provName}</span>`;
-      if (DOM.searchInput?.value) {
-        headingTitle = `🔍 ผลการค้นหา "${DOM.searchInput.value}"`;
+      const modalKeyword = document.getElementById("modal-search-keyword")?.value;
+      if (DOM.searchInput?.value || modalKeyword) {
+        headingTitle = `🔍 ผลการค้นหา "${DOM.searchInput?.value || modalKeyword}"`;
       }
 
       const sectionWrapper = document.createElement("div");
@@ -1193,100 +1250,6 @@ window.ScrollTrigger = ScrollTrigger;
       img.addEventListener("contextmenu", e => e.preventDefault());
       img.addEventListener("dragstart", e => e.preventDefault());
     });
-  }
-
-  function renderSearchSuggestions(query) {
-    const suggestionsContainer = document.getElementById("search-suggestions");
-    const clearBtn = document.getElementById("clear-search-btn");
-
-    if (clearBtn) clearBtn.style.display = query ? "block" : "none";
-    if (!suggestionsContainer) return;
-
-    if (!query) {
-      const currentProv = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
-      const data = LOCALIZED_SEO_MAP[currentProv] || LOCALIZED_SEO_MAP["national"];
-      const zones = (data && data.zones) ? data.zones.slice(1, 5) : ["ตัวเมือง"];
-
-      let html = `<div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.3); border-radius: 12px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px);">`;
-      html += `<div style="font-size: 11px; font-weight: 800; color: #C084FC; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-lightbulb" style="color: #FBBF24;"></i> คำแนะนำการค้นหายอดฮิต:</div>`;
-      html += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">`;
-      
-      html += `<span data-action="suggestion" data-slug="ฟิวแฟน" data-is-profile="false" style="background: rgba(255,20,147,0.15); border: 1px solid rgba(255,105,180,0.3); color: #FF85C0; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">❤️ #ฟิวแฟน</span>`;
-      html += `<span data-action="suggestion" data-slug="1500" data-is-profile="false" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(52,211,153,0.3); color: #00E676; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">💰 1,500.-</span>`;
-      
-      zones.forEach(z => {
-        html += `<span data-action="suggestion" data-slug="${z}" data-is-profile="false" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #D4D4D8; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">📍 ${z}</span>`;
-      });
-
-      html += `</div></div>`;
-      suggestionsContainer.innerHTML = html;
-      suggestionsContainer.classList.remove("hidden");
-      suggestionsContainer.style.display = "block";
-      return;
-    }
-
-    const q = query.toLowerCase().trim();
-    
-    const profileMatches = STATE.allProfiles.filter(item => {
-      const name = (item.displayName || item.name || "").toLowerCase();
-      const loc = (item.location || "").toLowerCase();
-      const prov = (item.provinceNameThai || "").toLowerCase();
-      const id = String(item.id || "");
-      return name.includes(q) || loc.includes(q) || prov.includes(q) || id === q;
-    }).slice(0, 4);
-
-    if (profileMatches.length === 0) {
-      suggestionsContainer.classList.add("hidden");
-      suggestionsContainer.style.display = "none";
-      return;
-    }
-
-    let html = `
-      <div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.3); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
-          <div style="padding: 6px 14px; background-color: #09090B; border-bottom: 1px solid rgba(255,255,255,0.05);">
-              <span style="font-size: 11px; font-weight: 800; color: #C084FC; text-transform: uppercase;">✨ ผลลัพธ์แนะนำ (${profileMatches.length})</span>
-          </div>
-          <div style="display: flex; flex-direction: column;">
-    `;
-
-    profileMatches.forEach(item => {
-      const provName = STATE.provincesMap.get(item.provinceKey) || item.provinceNameThai || "";
-      const isAvail = item.availability?.includes("ว่าง") || item.availability?.includes("รับงาน");
-      const thumbImg = item.images && item.images[0] ? item.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
-
-      html += `
-        <div class="suggestion-item" 
-             data-action="suggestion"
-             data-slug="${encodeURIComponent(item.slug || item.id)}"
-             data-is-profile="true"
-             style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);">
-            <div style="position: relative; width: 36px; height: 36px; flex-shrink: 0;">
-                <img src="${thumbImg}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);" alt="รูป">
-                <span style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background-color: ${isAvail ? "#00E676" : "#9CA3AF"}; border: 2px solid #121214; border-radius: 50%;"></span>
-            </div>
-            <div style="flex: 1; min-width: 0; text-align: left;">
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
-                    <div style="font-size: 12px; font-weight: 800; color: #FFFFFF; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                      ${item.displayName || item.name} <span style="font-size: 10px; color: #C084FC; font-weight: 700;">(${provName})</span>
-                    </div>
-                    ${item.age ? `<span style="font-size: 10px; background-color: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; color: var(--text-gray); font-weight: 700;">${item.age} ปี</span>` : ""}
-                </div>
-                <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                    <span style="font-size: 11px; color: var(--text-gray); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                        <i class="fas fa-map-marker-alt" style="font-size: 10px; color: var(--primary-purple); margin-right: 4px;"></i> ${item.location || provName}
-                    </span>
-                </div>
-            </div>
-            <i class="fas fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 12px;"></i>
-        </div>
-      `;
-    });
-
-    html += "</div></div>";
-
-    suggestionsContainer.innerHTML = html;
-    suggestionsContainer.classList.remove("hidden");
-    suggestionsContainer.style.display = "block";
   }
 
   function openLightboxForProfile(profile) {
@@ -1610,16 +1573,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  function updateOpenGraphAndTwitter(profile, title, description, type) {
-    updateMetaTag("og:title", title);
-    updateMetaTag("og:description", description);
-    updateMetaTag("og:url", profile ? `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}` : CONFIG.SITE_URL);
-    updateMetaTag("og:type", type);
-    
-    const img = profile && profile.images && profile.images[0] ? profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
-    updateMetaTag("og:image", img);
-  }
-
   function updateMetaTag(nameOrProperty, content) {
     let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
     if (!tag) {
@@ -1646,12 +1599,11 @@ window.ScrollTrigger = ScrollTrigger;
 
   function updateGoogleMap(provKey = "national", provName = "ทั่วไทย") {
     const mapIframe = document.getElementById("google-map");
-    const mapPlaceholder = document.getElementById("map-placeholder");
     const mapSection = document.getElementById("map-section");
     if (!mapIframe || !mapSection) return;
 
     let mapUrl = mapIframe.getAttribute("data-src") || "";
-    if (!mapUrl || mapUrl.includes("{{")) {
+    if (!mapUrl || mapUrl.includes("{{") || mapUrl.includes("%7B")) {
       mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (provKey === "national" ? "กรุงเทพ" : provName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
     }
 
@@ -1659,12 +1611,6 @@ window.ScrollTrigger = ScrollTrigger;
       entriesList.forEach(entry => {
         if (entry.isIntersecting) {
           mapIframe.src = mapUrl;
-          mapIframe.onload = () => {
-            if (mapPlaceholder) {
-              mapPlaceholder.style.opacity = "0";
-              setTimeout(() => { mapPlaceholder.style.display = "none"; }, 300);
-            }
-          };
           observer.unobserve(mapSection);
         }
       });
@@ -1710,10 +1656,10 @@ window.ScrollTrigger = ScrollTrigger;
         });
         btn.classList.add("active");
 
-        if (DOM.searchInput) {
-          DOM.searchInput.value = keyword;
-          applyUltimateFilters(true, true);
-        }
+        if (DOM.searchInput) DOM.searchInput.value = keyword;
+        const modalInput = document.getElementById("modal-search-keyword");
+        if (modalInput) modalInput.value = keyword;
+        applyUltimateFilters(true, true);
       });
     });
   }
@@ -1794,9 +1740,6 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-
-
-
   function initRegionTabs() {
     const tabs = document.querySelectorAll(".region-tab");
     tabs.forEach(tab => {
@@ -1871,6 +1814,8 @@ window.ScrollTrigger = ScrollTrigger;
       path = path.slice(0, -1);
     }
 
+    const isSsrSingleProfile = Boolean(document.querySelector(".single-profile-wrapper"));
+
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
     if (profileMatch) {
       let slug = profileMatch[1];
@@ -1889,7 +1834,11 @@ window.ScrollTrigger = ScrollTrigger;
         foundProfile = await fetchSingleProfileBySlug(slug);
       }
 
-      applyUltimateFilters(false, false);
+      // 🟢 FIX 3: ถ้าเป็น SSR หน้าโปรไฟล์เดี่ยวแล้ว ไม่เปิด Lightbox ซ้ำซ้อน
+      if (isSsrSingleProfile && isInitial) {
+        closeLightboxModal(false);
+        return;
+      }
 
       if (foundProfile) {
         openLightboxForProfile(foundProfile);
@@ -1952,27 +1901,6 @@ window.ScrollTrigger = ScrollTrigger;
       loader.style.display = "none";
     }
     if (DOM.loadingPlaceholder) DOM.loadingPlaceholder.style.display = "none";
-  }
-
-  function initThemeToggle() {
-    const btn = document.querySelector(".theme-toggle-btn");
-    if (!btn) return;
-    
-    const savedTheme = localStorage.getItem(CONFIG.KEYS.THEME) || "dark";
-    if (savedTheme === "light") {
-      document.documentElement.classList.add("light");
-      const icon = btn.querySelector("i");
-      if (icon) icon.className = "fas fa-sun";
-    }
-
-    btn.addEventListener("click", () => {
-      const isLight = document.documentElement.classList.toggle("light");
-      localStorage.setItem(CONFIG.KEYS.THEME, isLight ? "light" : "dark");
-      const icon = btn.querySelector("i");
-      if (icon) {
-        icon.className = isLight ? "fas fa-sun" : "fas fa-moon";
-      }
-    });
   }
 
   function initStarRating() {
@@ -2220,37 +2148,6 @@ window.ScrollTrigger = ScrollTrigger;
     setTimeout(() => { isLikeProcessing = false; }, 300);
   };
 
-  window.selectSuggestion = (slug, isProfile = false) => {
-    const suggestionsEl = document.getElementById("search-suggestions");
-    const modalInput = document.getElementById("modal-search-keyword");
-    const inlineInput = document.getElementById("inline-search-input");
-
-    if (isProfile) {
-      if (suggestionsEl) {
-        suggestionsEl.classList.add("hidden");
-        suggestionsEl.style.display = "none";
-      }
-      if (modalInput) modalInput.value = "";
-      if (inlineInput) inlineInput.value = "";
-      if (DOM.searchInput) DOM.searchInput.value = "";
-      
-      history.pushState(null, "", `/sideline/${encodeURIComponent(slug)}`);
-      handleRouteNavigation();
-    } else {
-      if (modalInput) modalInput.value = slug;
-      if (inlineInput) inlineInput.value = slug;
-      if (DOM.searchInput) DOM.searchInput.value = slug;
-      
-      saveRecentSearch(slug);
-      applyUltimateFilters(true, true);
-      
-      if (suggestionsEl) {
-        suggestionsEl.classList.add("hidden");
-        suggestionsEl.style.display = "none";
-      }
-    }
-  };
-
   window.openFilterModal = function() {
     const modal = document.getElementById('filter-modal-overlay');
     if (modal) {
@@ -2299,7 +2196,7 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
-    // Sidebar Mobile
+    // Sidebar Mobile Navigation
     (function initMobileSidebar() {
       const toggleBtn = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar-menu");
@@ -2322,11 +2219,11 @@ window.ScrollTrigger = ScrollTrigger;
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
     })();
 
-    // Delegation Clicks
+    // Event Delegation Clicks
     document.body.addEventListener("click", e => {
       const target = e.target;
 
-      // 1. ระบบกด Like
+      // 1. กด Like
       const likeBtn = target.closest('[data-action="like"]');
       if (likeBtn) {
         e.preventDefault(); e.stopPropagation();
@@ -2335,16 +2232,7 @@ window.ScrollTrigger = ScrollTrigger;
         return;
       }
 
-      // 2. ระบบกด Search Suggestion
-      const suggestionItem = target.closest('[data-action="suggestion"]');
-      if (suggestionItem) {
-        const slug = suggestionItem.dataset.slug;
-        const isProfile = suggestionItem.dataset.isProfile === "true";
-        if (slug) window.selectSuggestion(slug, isProfile);
-        return;
-      }
-
-      // 3. ระบบกดเข้าดูโปรไฟล์
+      // 2. กดเข้าดูโปรไฟล์
       const cardLink = target.closest("a.card-link");
       if (cardLink) {
         e.preventDefault();
@@ -2359,7 +2247,7 @@ window.ScrollTrigger = ScrollTrigger;
         return;
       }
 
-      // 4. ปุ่มปิด Lightbox
+      // 3. ปุ่มปิด Lightbox
       const closeBtn = target.closest("#closeLightboxBtn");
       const lightboxModal = target.closest("#lightbox");
       if (closeBtn || (lightboxModal && e.target === lightboxModal)) {
@@ -2367,7 +2255,7 @@ window.ScrollTrigger = ScrollTrigger;
         return;
       }
 
-      // 5.1 คลิกเลือกจังหวัดใน Modal
+      // 4.1 เลือกจังหวัดใน Modal
       if (target.closest('.province-chip')) {
         const btn = target.closest('.province-chip');
         document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
@@ -2378,7 +2266,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.2 คลิกเลือกสถานะ (Avail) ใน Modal
+      // 4.2 เลือกสถานะรับงานใน Modal
       if (target.closest('.avail-chip')) {
         const btn = target.closest('.avail-chip');
         document.querySelectorAll('.avail-chip').forEach(b => b.classList.remove('active'));
@@ -2389,7 +2277,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.3 คลิกเลือกราคา ใน Modal
+      // 4.3 เลือกราคาใน Modal
       if (target.closest('.price-chip')) {
         const btn = target.closest('.price-chip');
         document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
@@ -2400,7 +2288,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.4 คลิกเลือกแท็ก ใน Modal
+      // 4.4 เลือกแท็กสไตล์ใน Modal
       if (target.closest('.tag-chip')) {
         const btn = target.closest('.tag-chip');
         document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
@@ -2409,9 +2297,6 @@ window.ScrollTrigger = ScrollTrigger;
         
         const modalInput = document.getElementById('modal-search-keyword');
         if (modalInput) modalInput.value = tagText;
-        
-        const inlineInput = document.getElementById("inline-search-input");
-        if (inlineInput) inlineInput.value = tagText;
 
         if (DOM.searchInput) {
           DOM.searchInput.value = tagText;
@@ -2419,7 +2304,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }
 
-      // 5.5 คลิกเรียงลำดับ (Sort) ใน Modal
+      // 4.5 เลือกการเรียงลำดับใน Modal
       if (target.closest('.sort-chip')) {
         const btn = target.closest('.sort-chip');
         document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
@@ -2432,7 +2317,7 @@ window.ScrollTrigger = ScrollTrigger;
       }
     });
 
-    // Reset Buttons
+    // Reset Search
     const modalResetBtn = document.getElementById('modal-reset-btn');
     if (modalResetBtn) {
       modalResetBtn.onclick = () => {
@@ -2444,10 +2329,7 @@ window.ScrollTrigger = ScrollTrigger;
         document.querySelectorAll('#modal-tag-chips .tag-chip').forEach(b => b.classList.remove('active'));
 
         const modalSearchInput = document.getElementById('modal-search-keyword');
-        const inlineSearchInput = document.getElementById('inline-search-input');
-        
         if (modalSearchInput) modalSearchInput.value = '';
-        if (inlineSearchInput) inlineSearchInput.value = '';
         
         const clearTextBtn = document.getElementById('clear-modal-text-btn');
         if (clearTextBtn) clearTextBtn.style.display = 'none';
@@ -2483,7 +2365,6 @@ window.ScrollTrigger = ScrollTrigger;
     });
 
     const modalSearchInput = document.getElementById("modal-search-keyword");
-    const inlineSearchInput = document.getElementById("inline-search-input");
     const clearTextBtn = document.getElementById("clear-modal-text-btn");
 
     const triggerDebouncedSearch = (val) => {
@@ -2497,7 +2378,6 @@ window.ScrollTrigger = ScrollTrigger;
     if (modalSearchInput) {
       modalSearchInput.addEventListener("input", (e) => {
         const val = e.target.value;
-        if (inlineSearchInput) inlineSearchInput.value = val;
         if (clearTextBtn) clearTextBtn.style.display = val.length > 0 ? "block" : "none";
         triggerDebouncedSearch(val);
       });
@@ -2514,27 +2394,10 @@ window.ScrollTrigger = ScrollTrigger;
         clearTextBtn.addEventListener("click", () => {
           modalSearchInput.value = "";
           if (DOM.searchInput) DOM.searchInput.value = "";
-          if (inlineSearchInput) inlineSearchInput.value = "";
           clearTextBtn.style.display = "none";
           applyUltimateFilters(true, true);
         });
       }
-    }
-
-    if (inlineSearchInput) {
-      inlineSearchInput.addEventListener("input", (e) => {
-        const val = e.target.value;
-        if (modalSearchInput) modalSearchInput.value = val;
-        triggerDebouncedSearch(val);
-      });
-      
-      inlineSearchInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          applyUltimateFilters(true, true);
-          scrollToSearchResults();
-        }
-      });
     }
 
     const modalApplyBtn = document.getElementById('modal-apply-btn');
@@ -2545,8 +2408,7 @@ window.ScrollTrigger = ScrollTrigger;
       };
     }
 
-    // Init Page Features
-    initThemeToggle();
+    // Init Features
     initStarRating();
     initReviewForm();
     initReviewToggle();
@@ -2565,9 +2427,7 @@ window.ScrollTrigger = ScrollTrigger;
       if (!dockMenu) return;
       const currentScrollY = window.scrollY;
       
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
+      if (scrollTimeout) clearTimeout(scrollTimeout);
       
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         dockMenu.classList.add('dock-hidden');
@@ -2596,3 +2456,4 @@ window.ScrollTrigger = ScrollTrigger;
   });
 
 })();
+
