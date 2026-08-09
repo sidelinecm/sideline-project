@@ -255,10 +255,12 @@
     <div id="no-results-message" class="hidden" style="text-align: center; padding: 30px; color: #A1A1AA;">ไม่พบโปรไฟล์ตรงตามเงื่อนไข</div>
     <div id="fetch-error-message" class="hidden"></div>
 
-    <!-- PROFILES DISPLAY AREA -->
+    <!-- PROFILES DISPLAY AREA (ตำแหน่งที่ถูกต้องเพียงจุดเดียว) -->
+    <!-- SSR_DISPLAY_AREA_START -->
     <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">
       {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
+    <!-- SSR_DISPLAY_AREA_END -->
 
     <!-- SEO CONTENT DRAWER -->
     <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
@@ -277,7 +279,7 @@
                  {{PROVINCE_SEO_CONTENT}}
                  
                  <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
-                   <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts & Companion Services in {{PROVINCE_NAME}}</h3>
+                   <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts &amp; Companion Services in {{PROVINCE_NAME}}</h3>
                    <p style="font-size: 12px; color: #A1A1AA; line-height: 1.5;">
                      Welcome to First Model Hub {{PROVINCE_NAME}}, the premier platform connecting travelers with verified companions. We offer authentic Girlfriend Experience (GFE) services with absolute financial safety: <strong>No upfront deposits required. Pay cash directly to your companion upon meeting.</strong>
                    </p>

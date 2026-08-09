@@ -1,4 +1,5 @@
 
+
 /* ==============================================================================
    💎 FIRST MODEL HUB - MAIN CLIENT-SIDE ENGINE (PROD-READY PERFECT 2026)
    ============================================================================== */
@@ -100,7 +101,6 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // 🟢 FIX 1: เพิ่ม reviews และ faqs ในทุกล็อคเพื่อป้องกัน TypeError
   const LOCALIZED_SEO_MAP = {
     chiangmai: {
       zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"],
@@ -404,7 +404,7 @@ window.ScrollTrigger = ScrollTrigger;
 
     const lineIdClean = String(raw.line_id || raw.lineId || raw.line || "").replace(/^@/, "").trim();
     const cleanLocation = sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName);
-    const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "");
+    const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ");
 
     return {
       ...raw,
@@ -638,18 +638,9 @@ window.ScrollTrigger = ScrollTrigger;
 
     DOM.provinceSelect.appendChild(fragment);
 
+    // 🟢 FIX 1: ปลดล็อก inline onclick ออก ปล่อยให้ Event Delegation จัดการยิงคำสั่งเดียวไม่ซ้ำซ้อน
     if (modalChipsContainer) {
       modalChipsContainer.innerHTML = modalChipsHTML;
-      modalChipsContainer.querySelectorAll('.province-chip').forEach(btn => {
-        btn.onclick = function() {
-          modalChipsContainer.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          if (DOM.provinceSelect) {
-            DOM.provinceSelect.value = this.getAttribute('data-value') || '';
-            DOM.provinceSelect.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        };
-      });
     }
   }
   
@@ -2456,4 +2447,3 @@ window.ScrollTrigger = ScrollTrigger;
   });
 
 })();
-
