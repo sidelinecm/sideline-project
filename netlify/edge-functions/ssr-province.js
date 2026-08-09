@@ -210,7 +210,9 @@ async function getTemplateHtml(url, _context) {
 </head>
 <body>
   <main id="main-content">
+    <!-- SSR_DISPLAY_AREA_START -->
     <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region"></div>
+    <!-- SSR_DISPLAY_AREA_END -->
   </main>
   <script type="module" src="/main.js"></script>
 </body>
@@ -519,7 +521,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                loading="${index === 0 ? "eager" : "lazy"}"
                fetchpriority="${index === 0 ? "high" : "auto"}"
                decoding="async"
-               onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
+               onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
                
           <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
@@ -644,13 +646,14 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
+    // 🟢 ดึงข้อมูลโปรไฟล์ได้สูงสุด 100 คนเพื่อให้ฝั่ง Client Hydration ได้ข้อมูลครบถ้วน
     let profileQuery = supabase
       .from("profiles")
       .select("id, slug, name, age, imagePath, galleryPaths, gallery_paths, provinceKey, province_key, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, lineId, quote, style_tags, slogan")
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("lastUpdated", { ascending: false })
-      .limit(24);
+      .limit(100);
 
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.in("provinceKey", searchKeys);
@@ -750,7 +753,7 @@ export default async (req, context) => {
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const displayReviewCount = profileList.length > 0 ? Math.max(35, profileList.length * 3) : 45;
     
-    // 🟢 แก้ไขปัญหาสูตร Map URL เป็นระเบียบและไม่ซ้ำซ้อน
+    // 🟢 Map URL
     const rawMapUrl = (seoData && seoData.geo) 
       ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
       : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
@@ -993,13 +996,13 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-    // 🟢 [FIX ปัญหาที่ 2] แก้ไขบั๊กแผนที่พังและเบิ้ลโดเมน 100%
+    // 🟢 แก้ไขปัญหาสูตร Map URL เป็นระเบียบและไม่ซ้ำซ้อน
     rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     // ==============================================================================
-    // 🟢 [FIX ปัญหาที่ 1, 3, 4] สลับการเรนเดอร์ระหว่าง "โปรไฟล์เดี่ยว" กับ "หน้าค้นหาจังหวัด"
+    // 🟢 สลับการเรนเดอร์ระหว่าง "โปรไฟล์เดี่ยว" กับ "หน้าค้นหาจังหวัด"
     // ==============================================================================
     let displayAreaInnerHtml = "";
 
@@ -1108,7 +1111,7 @@ export default async (req, context) => {
         </article>
       `;
 
-      // 🟢 [FIX ปัญหาที่ 8] ซ่อนเซกชันส่วนเกินเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว
+      // 🟢 [FIX] ซ่อนเซกชันส่วนเกินเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว
       rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
@@ -1148,17 +1151,23 @@ export default async (req, context) => {
       }
     }
 
-    // แทนที่พื้นที่แสดงผลหลัก
-    if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
-      rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
+    // 🟢 [FIX] แทนที่โดยใช้ Comment Marker ป้องกัน Regex ทำลาย HTML
+    if (rawHtml.includes("<!-- SSR_DISPLAY_AREA_START -->") && rawHtml.includes("<!-- SSR_DISPLAY_AREA_END -->")) {
+      const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
+      const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
+      rawHtml = `${before}<!-- SSR_DISPLAY_AREA_START -->\n<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>\n<!-- SSR_DISPLAY_AREA_END -->${after}`;
     } else {
-      rawHtml = rawHtml.replace(
-        /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
-        `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
-      );
+      if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
+        rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
+      } else {
+        rawHtml = rawHtml.replace(
+          /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
+          `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
+        );
+      }
     }
 
-    // 🟢 [FIX ปัญหาที่ 7] ส่งข้อมูล Hydration ป้องกัน null/empty
+    // 🟢 [FIX] ส่งข้อมูล Hydration ป้องกัน null/empty
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = JSON.stringify(allHydratedProfiles.map(p => ({
       id: p.id,
@@ -1200,7 +1209,7 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // 🟢 ล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด ป้องกันหลุด
+    // ล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด ป้องกันหลุด
     rawHtml = rawHtml.replace(/(\{\{|%7B%7B)[A-Z0-9_]+(\}\}|%7D%7D)/gi, "");
 
     const responseHeaders = {
