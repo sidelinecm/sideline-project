@@ -1,14 +1,7 @@
 /**
  * ==============================================================================
- * 💎 FIRST MODEL HUB - SERVERLESS SSR & HYDRATION ENGINE (server.js)
- * Production-Ready Ultra-Optimized Edge Function
- * Features:
- *   - Fix 1: Multi-fallback Image Extractor (imagePath -> galleryPaths -> image_url -> default)
- *   - Fix 2: 100% Synchronized Schema JSON-LD & HTML Body Reviews (worstRating: 1)
- *   - Fix 4: Safe URI Decoding with Try-Catch against Malformed/Double-Encoded Slugs
- *   - Fix 5: Disambiguated ALT Texts, Titles, and Search Context for Duplicate Names
- *   - Memory-Safe Page Caching (Max 200 items, 10 min TTL)
- *   - Instant Client-Side SSR Hydration Injection (window.profilesData)
+ * 💎 FIRST MODEL HUB - SERVERLESS SSR & HYDRATION ENGINE (ssr-province.js)
+ * Production-Ready Fully Corrected & Optimized Edge Function
  * ==============================================================================
  */
 
@@ -66,10 +59,6 @@ const PROVINCE_CUSTOM_METADATA = {
     desc: "ศูนย์รวมสาวรับงานเชียงราย และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% ปลอดภัยชำระเงินหน้างาน ไม่โอนมัดจำล่วงหน้า ครอบคลุมตัวเมือง บ้านดู่ มฟล."
   },
   udonthani: {
-    title: "สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
-    desc: "สารบัญสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town"
-  },
-  udon: {
     title: "สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
     desc: "สารบัญสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town"
   },
@@ -191,12 +180,6 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
-Object.keys(PROVINCE_SEO_DATA).forEach(key => {
-  if (key !== "default") {
-    PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
-  }
-});
-
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -216,7 +199,6 @@ function verifyHostname(_req) {
 
 async function getTemplateHtml(url, _context) {
   const now = Date.now();
-  
   const DEFAULT_FALLBACK_SHELL = `<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
@@ -266,7 +248,7 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 [แก้ไขปัญหาที่ 1] ดึงรูปหลักฝั่ง SSR ดักฟังจากทั้ง imagePath และ galleryPaths
+// 🟢 [Helper Extractor] ดึงรูปปกหลักอย่างปลอดภัย
 const getProfileMainImage = (p) => {
   if (!p) return null;
   if (p.imagePath && typeof p.imagePath === "string" && p.imagePath.trim()) return p.imagePath.trim();
@@ -276,6 +258,23 @@ const getProfileMainImage = (p) => {
   if (p.image_url && typeof p.image_url === "string" && p.image_url.trim()) return p.image_url.trim();
   if (p.imageUrl && typeof p.imageUrl === "string" && p.imageUrl.trim()) return p.imageUrl.trim();
   return null;
+};
+
+// 🟢 [Helper Gallery Extractor] ดึงรูปภาพทั้งหมดลงอัลบั้ม
+const getProfileGalleryImages = (p) => {
+  if (!p) return [];
+  let list = [];
+  const gallery = p.galleryPaths || p.gallery_paths || p.gallery;
+  if (Array.isArray(gallery)) {
+    list = gallery.map(img => String(img).trim()).filter(Boolean);
+  } else if (typeof gallery === "string" && gallery.trim()) {
+    list = gallery.split(",").map(img => img.trim()).filter(Boolean);
+  }
+  const mainImg = getProfileMainImage(p);
+  if (mainImg && !list.includes(mainImg)) {
+    list.unshift(mainImg);
+  }
+  return list;
 };
 
 const optimizeImg = (_hostUrl, path, width = 400, height = 500) => {
@@ -405,10 +404,8 @@ function buildErrorPage(code, title, message) {
 const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
   const numericPrice = (profile.rate || "").toString().replace(/\D/g, "");
   const finalPriceSchema = numericPrice && Number(numericPrice) > 0 ? numericPrice : "1500"; 
-  
   const cleanName = (profile.name || "").replace(/^น้อง/, "").trim();
   const cleanLoc = sanitizeThaiText(profile.location || province);
-
   const mainImgPath = getProfileMainImage(profile);
 
   return {
@@ -458,7 +455,6 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
-// 🟢 [แก้ไขปัญหาที่ 1 และ 5] เรนเดอร์การ์ดโปรไฟล์ที่ดึงรูปถูกต้อง + ระบุ Alt text ไม่ซ้ำกัน
 const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
@@ -469,10 +465,8 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
   const ageDisplay = p.age && p.age !== "-" ? ` (${escapeHTML(p.age)})` : "";
   
-  // 🟢 [แก้ไขปัญหาที่ 5] ใส่ชื่อจังหวัด และย่านในการ์ด ALT เพื่อป้องกัน SEO Duplicate
   const seoAltText = `น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc} ไซด์ไลน์ตรงปก 100%`;
   
-  // 🟢 [แก้ไขปัญหาที่ 1] ดึงรูปหลักผ่าน Helper ป้องกันหลุดรูปโลโก้
   const mainImgPath = getProfileMainImage(p);
   const imgUrl = optimizeImg(hostUrl, mainImgPath, 320, 400);
 
@@ -618,7 +612,6 @@ export default async (req, context) => {
     isNationalHome = true;
     provinceSlug = "national";
   } else if ("location" === paths[0] && paths[1]) {
-    // 🟢 [แก้ไขปัญหาที่ 4] ครอบ try-catch เพื่อความปลอดภัยต่อ URIError
     try { provinceSlug = decodeURIComponent(paths[1]).toLowerCase(); } catch { provinceSlug = paths[1].toLowerCase(); }
   } else if ("sideline" === paths[0] && paths[1]) {
     try { profileSlug = decodeURIComponent(paths[1]); } catch { profileSlug = paths[1]; }
@@ -658,7 +651,7 @@ export default async (req, context) => {
 
     let profileQuery = supabase
       .from("profiles")
-      .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, quote, style_tags, slogan")
+      .select("id, slug, name, age, imagePath, galleryPaths, gallery_paths, provinceKey, province_key, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, lineId, quote, style_tags, slogan")
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("lastUpdated", { ascending: false })
@@ -704,7 +697,6 @@ export default async (req, context) => {
     const mainImgPath = matchedProfile ? getProfileMainImage(matchedProfile) : (profileList.length > 0 ? getProfileMainImage(profileList[0]) : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
 
-    // 🟢 [แก้ไขปัญหาที่ 2] ซิงค์ข้อมูลรีวิวระหว่าง JSON-LD Schema และ HTML Body ให้เป็นคลังเดียวกัน
     const dbReviews = reviewsRes?.data || [];
     let finalReviews = [];
     if (dbReviews && dbReviews.length > 0) {
@@ -752,8 +744,8 @@ export default async (req, context) => {
 
     if (matchedProfile) {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
-      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` ${matchedProfile.age}` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
-      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "สอบถาม"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
+      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
+      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "1,500"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
     const strippedDesc = stripHTML(pageDesc);
@@ -762,13 +754,17 @@ export default async (req, context) => {
       : 5;
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const displayReviewCount = profileList.length > 0 ? Math.max(35, profileList.length * 3) : 45;
-    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    
+    const rawMapUrl = (seoData && seoData.geo) 
+      ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+      : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    const mapEmbedUrl = escapeHTML(rawMapUrl);
 
     const validZones = (seoData.zones || [])
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 [แก้ไขปัญหาที่ 2] รวม Schema Graph พร้อม worstRating และ Review ซิงค์ตรงกับ HTML Body
+    // Schema.org Graph
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
@@ -925,9 +921,7 @@ export default async (req, context) => {
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
-    // 🟢 [แก้ไขปัญหาที่ 1 และ 5] เรนเดอร์การ์ดรูปภาพที่ดึงรูปภาพถูกต้องและ Alt text ไม่ซ้ำกัน
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
-
     const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
@@ -954,7 +948,6 @@ export default async (req, context) => {
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const matchedZones = seoData.zones.slice(0, 4).map(sanitizeThaiText).join(", ");
-    
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones, provinceSlug);
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
@@ -973,16 +966,14 @@ export default async (req, context) => {
     }).join("") : "";
 
     // ==============================================================================
-    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (PROD-READY PERFECT 2026)
+    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE
     // ==============================================================================
     let rawHtml = await getTemplateHtml(url, context);
 
-    // 1. Base URL Injection
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    // 2. SEO Title & Meta Tags Replacements
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
@@ -993,7 +984,6 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
-    // 3. Schema.org (JSON-LD) Injection
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
@@ -1001,7 +991,6 @@ export default async (req, context) => {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
     }
 
-    // 4. Template Variables Replacements
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
@@ -1009,67 +998,158 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    
-// 🟢 FIX 1: ป้องกัน Map Iframe ดึงหน้าเว็บตัวเองมาวนลูป (Prevent Self-Referencing Iframe)
-const rawMapUrl = (seoData && seoData.geo) 
-  ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
-  : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-const safeMapEmbedUrl = escapeHTML(rawMapUrl);
-rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", safeMapEmbedUrl);
+    // ==============================================================================
+    // 🟢 FIX 1 (SOLUTION PRIMARY BUG): สลับการเรนเดอร์ระหว่าง "โปรไฟล์เดี่ยว" กับ "หน้าค้นหาจังหวัด"
+    // ==============================================================================
+    let displayAreaInnerHtml = "";
 
-    // 5. Fix Relative URLs
-    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
+    if (matchedProfile) {
+      // 1. เรนเดอร์หน้าโปรไฟล์น้องรายบุคคลเมื่อเข้าลิงก์ /sideline/:slug
+      const pName = escapeHTML((matchedProfile.name || "สาวสวย").replace(/^น้อง\s?/, "").trim());
+      const mainImg = getProfileMainImage(matchedProfile);
+      const heroImgUrl = optimizeImg(hostUrl, mainImg, 500, 650);
+      const galleryList = getProfileGalleryImages(matchedProfile);
+      const cleanLoc = escapeHTML(sanitizeThaiText(matchedProfile.location || provinceThaiName));
+      
+      let rateVal = "1,500.-";
+      if (matchedProfile.rate) {
+        rateVal = !isNaN(matchedProfile.rate) ? `${Number(matchedProfile.rate).toLocaleString()}.-` : escapeHTML(matchedProfile.rate);
+      }
 
-    // 6. Popular Locations Footer Injection
-    if (popularLocationsHtml) {
-      rawHtml = rawHtml.replace(
-        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
-        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
-      );
-    }
+      const rawLine = matchedProfile.line_id || matchedProfile.lineId || "";
+      const lineClean = String(rawLine).replace(/^@/, "").trim();
+      const lineUrl = lineClean 
+        ? (lineClean.startsWith("http") ? lineClean : `https://line.me/ti/p/~${lineClean}`) 
+        : CONFIG.SOCIAL_LINKS.line;
 
-    // 7. Remove Featured Section on Sub-pages
-    if (!isNationalHome) {
-      rawHtml = rawHtml.replace(
-        /<section id="featured-profiles"[\s\S]*?<\/section>/i,
-        ""
-      );
-    }
+      const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (matchedProfile.availability || "").toLowerCase().includes(kw));
+      const statusText = matchedProfile.availability || (isAvail ? "พร้อมรับงาน" : "สอบถามคิว");
+      const statusColor = isAvail ? "#00E676" : "#FF2E63";
 
-    // 8. Main Profiles Display Area Injection
-    const topCatalogSnippetHtml = `
-      <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
-        <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
-        <p>${escapeHTML(topProfilesTextSnippet.replace(/\|/g, " • "))}</p>
-      </div>
-    `;
-
-    const liveCountChipHtml = `
-      ${topCatalogSnippetHtml}
-      <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
-              📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
-              <span class="live-count-chip">
-                <span class="pulse-dot-el"></span>
-                <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
-              </span>
-          </h2>
-      </div>
-    `;
-
-    const displayAreaInnerHtml = `
-      ${liveCountChipHtml}
-      <div class="section-content-wrapper" style="margin-top: 16px;">
-        <div class="profile-grid profiles-grid-row" role="list">
-          ${cardsHtml}
+      const galleryThumbnailsHtml = galleryList.length > 1 ? `
+        <div class="gallery-thumbs" style="display: flex; gap: 8px; overflow-x: auto; padding-top: 12px;">
+          ${galleryList.map(img => `
+            <img src="${optimizeImg(hostUrl, img, 100, 130)}" alt="รูปน้อง${pName}" style="width: 70px; height: 90px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(255,255,255,0.15);" />
+          `).join("")}
         </div>
-      </div>
-    `;
+      ` : "";
+
+      const relatedProfiles = profileList.filter(p => p.id !== matchedProfile.id).slice(0, 4);
+      const relatedGridHtml = relatedProfiles.length > 0 ? `
+        <div style="margin-top: 32px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: #FFFFFF; margin-bottom: 14px;">น้องๆ โซน ${provinceThaiName} ที่แนะนำเพิ่มเติม</h3>
+          <div class="profile-grid profiles-grid-row" role="list">
+             ${relatedProfiles.map((p, idx) => renderCardHtml(p, idx, hostUrl, provinceThaiName)).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      displayAreaInnerHtml = `
+        <article class="single-profile-wrapper" style="max-width: 680px; margin: 16px auto; color: #FFFFFF;">
+          <nav aria-label="Breadcrumb" style="font-size: 12px; color: #A1A1AA; margin-bottom: 12px;">
+            <a href="/" style="color: #C084FC; text-decoration: none;">หน้าแรก</a> &gt; 
+            <a href="/location/${provinceSlug}" style="color: #C084FC; text-decoration: none;">สาวรับงาน${provinceThaiName}</a> &gt; 
+            <span>น้อง${pName}</span>
+          </nav>
+
+          <div style="position: relative; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background-color: #09090B; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+            <img src="${heroImgUrl}" alt="น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${cleanLoc}" style="width: 100%; max-height: 520px; display: block; object-fit: cover; object-position: top center;" />
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(9,9,11,0.98) 10%, rgba(9,9,11,0.5) 70%, transparent 100%); padding: 24px 18px 16px 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <span style="background: rgba(9, 9, 11, 0.8); border: 1px solid ${statusColor}; color: ${statusColor}; font-size: 11px; font-weight: 800; padding: 2px 10px; border-radius: 100px; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${statusColor};"></span>
+                    ${statusText}
+                  </span>
+                  <h1 style="font-size: 26px; font-weight: 900; margin: 0; line-height: 1.2;">น้อง${pName} ${matchedProfile.age ? `<span style="font-size: 0.8em; opacity: 0.85;">(${matchedProfile.age})</span>` : ""}</h1>
+                  <p style="color: #C084FC; font-size: 13px; font-weight: 700; margin: 4px 0 0 0;">📍 ย่าน${cleanLoc}</p>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-size: 11px; color: #A1A1AA; display: block;">ค่าขนมบริการ</span>
+                  <span style="color: #00E676; font-size: 24px; font-weight: 900; text-shadow: 0 2px 8px rgba(0,230,118,0.3);">${rateVal}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${galleryThumbnailsHtml}
+
+          <div style="background: rgba(18,18,24,0.85); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-top: 16px; backdrop-filter: blur(10px);">
+            <h2 style="font-size: 15px; font-weight: 800; color: #C084FC; margin: 0 0 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+              📋 ข้อมูลสัดส่วนและรายละเอียด
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 18px;">
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 10px;">
+                <small style="color:#A1A1AA; font-size: 11px; display:block;">ส่วนสูง</small>
+                <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.height || "-"} ซม.</strong>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 100px; border-radius: 10px;">
+                <small style="color:#A1A1AA; font-size: 11px; display:block;">น้ำหนัก</small>
+                <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.weight || "-"} กก.</strong>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 10px;">
+                <small style="color:#A1A1AA; font-size: 11px; display:block;">สัดส่วน (อก-เอว-สะโพก)</small>
+                <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.stats || `${matchedProfile.bust || 32}-${matchedProfile.waist || 24}-${matchedProfile.hips || 35}`}</strong>
+              </div>
+            </div>
+
+            <div style="background: rgba(9, 9, 12, 0.5); border-left: 3px solid #C084FC; padding: 12px 14px; border-radius: 6px; margin-bottom: 20px;">
+              <p style="font-size: 13px; line-height: 1.6; color: #E4E4E7; margin: 0; white-space: pre-line;">${escapeHTML(sanitizeThaiText(matchedProfile.description || matchedProfile.quote || matchedProfile.slogan || "น้องสุภาพเรียบร้อย ดูแลดีสไตล์เพื่อนเที่ยวฟิวแฟน ตรงปก 100% ไม่โอนมัดจำล่วงหน้า จ่ายหน้างานเมื่อเจอตัวจริง"))}</p>
+            </div>
+
+            <a href="${lineUrl}" target="_blank" rel="nofollow noopener" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; text-align: center; background: #06C755; color: white; font-weight: 800; font-size: 16px; padding: 14px 0; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(6,199,85,0.35); transition: transform 0.2s;">
+               <i class="fab fa-line" style="font-size: 20px;"></i>
+               <span>แอดไลน์จองคิว น้อง${pName}</span>
+            </a>
+          </div>
+
+          ${relatedGridHtml}
+        </article>
+      `;
+    } else {
+      // 2. เรนเดอร์หน้าค้นหารายจังหวัดตามปกติเมื่อเข้า URL /location/:province หรือ /
+      const topCatalogSnippetHtml = `
+        <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
+          <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
+          <p>${escapeHTML(topProfilesTextSnippet.replace(/\|/g, " • "))}</p>
+        </div>
+      `;
+
+      const liveCountChipHtml = `
+        ${topCatalogSnippetHtml}
+        <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
+                📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
+                <span class="live-count-chip">
+                  <span class="pulse-dot-el"></span>
+                  <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
+                </span>
+            </h2>
+        </div>
+      `;
+
+      displayAreaInnerHtml = `
+        ${liveCountChipHtml}
+        <div class="section-content-wrapper" style="margin-top: 16px;">
+          <div class="profile-grid profiles-grid-row" role="list">
+            ${cardsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // 🟢 เพิ่ม 5 บรรทัดนี้ลงไป เพื่อไม่ให้แบนเนอร์รวมจังหวัดโผล่มาซ้ำในหน้าโปรไฟล์น้องรายบุคคล
+    if (matchedProfile) {
+      rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
+    }
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
-
-    // 9. Client SSR Hydration Script Injection (window.profilesData)
+    // 🟢 [Client SSR Hydration] ส่งข้อมูลโปรไฟล์ลงหน้าเว็บ
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
       slug: p.slug,
@@ -1083,9 +1163,9 @@ rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", safeMapEmbedUrl);
       waist: p.waist || "",
       hips: p.hips || "",
       cup_size: p.cup_size || "",
-      imagePath: getProfileMainImage(p), // 🟢 เรียกใช้ Helper ดึงรูปที่ถูกต้องไม่ให้เป็น null
+      imagePath: getProfileMainImage(p),
       galleryPaths: p.galleryPaths || p.gallery_paths || [],
-      provinceKey: p.provinceKey,
+      provinceKey: p.provinceKey || p.province_key,
       provinceThai: provinceThaiName,
       location: sanitizeThaiText(p.location),
       rate: p.rate,
@@ -1110,10 +1190,9 @@ rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", safeMapEmbedUrl);
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // 🟢 FIX 2: GLOBAL CATCH-ALL REGEX CLEANER (ล้างป้ายรหัสแม่แบบ {{...}} ที่หลุดตกค้าง 100%)
+    // ล้างแม่แบบ {{...}} ที่ตกค้าง
     rawHtml = rawHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
-    // 10. Response Headers & Cache Management (แก้ไขไวยากรณ์ Syntax Error เรียบร้อย)
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
@@ -1128,7 +1207,6 @@ rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", safeMapEmbedUrl);
       PAGE_CACHE.clear();
     }
     
-    // บันทึกลง Memory Cache
     PAGE_CACHE.set(cacheKey, { 
       html: rawHtml, 
       headers: responseHeaders, 
