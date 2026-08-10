@@ -966,7 +966,7 @@ export default async (req, context) => {
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
     // ==============================================================================
-    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE
+    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (FIXED & BULLETPROOF)
     // ==============================================================================
     let rawHtml = await getTemplateHtml(url, context);
 
@@ -975,31 +975,47 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    // 2. SEO Meta Tags & Canonicals Replacement
+    // 🟢 [FIX 1] ฟังก์ชันยืดหยุ่นสำหรับแทนที่หรือฉีด Meta Tag ป้องกัน Regex จับไม่โดน
+    function setMetaTag(html, attrName, attrValue, contentValue) {
+      const regex = new RegExp(`<meta\\s+[^>]*?${attrName}=["']${attrValue}["'][^>]*?>`, "gi");
+      const newTag = `<meta ${attrName}="${attrValue}" content="${escapeHTML(contentValue)}" />`;
+      if (regex.test(html)) {
+        return html.replace(regex, newTag);
+      }
+      return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
+    }
+
+    // 2. SEO Meta Tags & Canonicals Replacement (การันตีเปลี่ยนค่าแน่นอน 100%)
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:url["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:url" content="${canonUrl}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:image["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:image" content="${metaImgUrl}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+property=["']og:image:secure_url["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:image:secure_url" content="${metaImgUrl}" />`);
+    rawHtml = setMetaTag(rawHtml, "name", "description", strippedDesc);
     
-    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
-    rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:image["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:image" content="${metaImgUrl}" />`);
+    // Open Graph Tags
+    rawHtml = setMetaTag(rawHtml, "property", "og:title", pageTitle);
+    rawHtml = setMetaTag(rawHtml, "property", "og:description", strippedDesc);
+    rawHtml = setMetaTag(rawHtml, "property", "og:url", canonUrl);
+    rawHtml = setMetaTag(rawHtml, "property", "og:image", metaImgUrl);
+    rawHtml = setMetaTag(rawHtml, "property", "og:image:secure_url", metaImgUrl);
     
+    // Twitter Card Tags
+    rawHtml = setMetaTag(rawHtml, "name", "twitter:title", pageTitle);
+    rawHtml = setMetaTag(rawHtml, "name", "twitter:description", strippedDesc);
+    rawHtml = setMetaTag(rawHtml, "name", "twitter:image", metaImgUrl);
+    
+    // Canonicals & Hreflangs
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    rawHtml = rawHtml.replace(/<link\s+rel=["']canonical["']\s+(?:id=["'].*?["']\s+)?href=["'].*?["']\s*\/?>/i, `<link rel="canonical" id="canonical-link" href="${canonUrl}" />`);
-    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']th["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="alternate" hreflang="th" href="${canonUrl}" />`);
-    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']x-default["']\s+href=["'].*?["']\s*\/?>/i, `<link rel="alternate" hreflang="x-default" href="${canonUrl}" />`);
+    
+    // แทนที่แท็ก <link rel="canonical"> และ <link rel="alternate">
+    rawHtml = rawHtml.replace(/<link\s+rel=["']canonical["'][^>]*?>/gi, `<link rel="canonical" id="canonical-link" href="${canonUrl}" />`);
+    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']th["'][^>]*?>/gi, `<link rel="alternate" hreflang="th" href="${canonUrl}" />`);
+    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']x-default["'][^>]*?>/gi, `<link rel="alternate" hreflang="x-default" href="${canonUrl}" />`);
 
-    // 3. Schema JSON-LD Injection
+    // 🟢 [FIX 2] ฉีด Schema JSON-LD การันตีวางใน <head> เสมอไม่ว่าเปิดหน้าไหน
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
     } else {
-      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
+      rawHtml = rawHtml.replace(/<\/head>/i, `  ${newSchemaScript}\n</head>`);
     }
 
     // 4. Placeholders Replacement
@@ -1011,7 +1027,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-    // 🟢 แทนที่ Map URL ทุกรูปแบบรวมถึง URL Encoded
+    // แทนที่ Map URL ทุกรูปแบบรวมถึง URL Encoded
     rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
@@ -1106,7 +1122,7 @@ export default async (req, context) => {
                 <small style="color:#A1A1AA; font-size: 11px; display:block;">น้ำหนัก</small>
                 <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.weight || "-"} กก.</strong>
               </div>
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 10px;">
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 100px;">
                 <small style="color:#A1A1AA; font-size: 11px; display:block;">สัดส่วน (อก-เอว-สะโพก)</small>
                 <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.stats || `${matchedProfile.bust || 32}-${matchedProfile.waist || 24}-${matchedProfile.hips || 35}`}</strong>
               </div>
@@ -1126,7 +1142,7 @@ export default async (req, context) => {
         </article>
       `;
 
-      // 🟢 [FIX] ลบทุกเซกชันที่ไม่เกี่ยวข้องออกเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว (รวมถึงส่วนรีวิวเพื่อไม่ให้ตัวแปรหลุด)
+      // ลบทุกเซกชันที่ไม่เกี่ยวข้องออกเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว
       rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
@@ -1167,7 +1183,7 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 [FIX] แทนที่ข้อมูลส่วนแสดงผลผ่าน Comment Marker
+    // แทนที่ข้อมูลส่วนแสดงผลผ่าน Comment Marker
     if (rawHtml.includes("<!-- SSR_DISPLAY_AREA_START -->") && rawHtml.includes("<!-- SSR_DISPLAY_AREA_END -->")) {
       const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
       const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
@@ -1183,7 +1199,7 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 [FIX] ส่งข้อมูล Hydration ให้สคริปต์ฝั่ง Client อย่างสมบูรณ์
+    // 🟢 [FIX 3] การันตีฉีดข้อมูล Hydration เสมอ ไม่ว่าหน้าไหน
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = JSON.stringify(allHydratedProfiles.map(p => ({
       id: p.id,
@@ -1217,15 +1233,13 @@ export default async (req, context) => {
 
     const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
 
-    if (rawHtml.includes('<script id="ssr-profiles-data">')) {
+    if (/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
-    } else if (rawHtml.includes("{{SSR_PROFILES_JSON}}")) {
-      rawHtml = replaceGlobal(rawHtml, "{{SSR_PROFILES_JSON}}", hydratedProfilesData);
     } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
+      rawHtml = rawHtml.replace(/<\/body>/i, `${hydratedScriptTag}\n</body>`);
     }
 
-    // 🟢 [CRITICAL FIX] กวาดล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด 100%
+    // 🟢 [FIX 4] กวาดล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด 100%
     rawHtml = rawHtml.replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
 
     const responseHeaders = {
