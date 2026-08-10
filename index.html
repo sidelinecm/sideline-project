@@ -1,67 +1,68 @@
 <!DOCTYPE html> 
 <html lang="th" class="dark-theme dark">
 <head>
+  <!-- 1. CHARACTER SET & VIEWPORT (ต้องวางไว้บนสุดเพื่อความถูกต้องในการประมวลผลภาษา) -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#5A2CBE">
+  <meta name="theme-color" content="#5A2CBE" />
 
-  <!-- SEO METADATA -->
+  <!-- 2. BASE SEO METADATA -->
   <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
   <meta name="description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ" />
   <meta name="keywords" content="แฟนเช่า, แฟนเช่าเชียงใหม่, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน" />
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
-  
-  <!-- CANONICAL & ALTERNATE -->
-  <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
+
+  <!-- 3. CANONICAL & HREFLANG METADATA -->
+  <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}" />
   <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
   <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
-  <!-- OPEN GRAPH & TWITTER CARDS -->
-  <meta property="og:locale" content="th_TH">
-  <meta property="og:site_name" content="First Model Hub">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}} โปรไฟล์)">
-  <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%">
-  <meta property="og:url" content="{{SEO_CANONICAL}}">
-  <meta property="og:image" content="{{SEO_IMAGE}}">
-  <meta property="og:image:secure_url" content="{{SEO_IMAGE}}">
-  <meta property="og:image:type" content="image/webp">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <!-- 4. PRECONNECT & DNS-PREFETCH (เชื่อมต่อ TCP/TLS ล่วงหน้าไปยัง Supabase & Cloudinary เพิ่มความเร็วการโหลดรูป) -->
+  <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin />
+  <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co" />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} ฟิวแฟนตรงปก 100%">
-  <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ">
-  <meta name="twitter:image" content="{{SEO_IMAGE}}">
+  <!-- 5. PRELOAD CRITICAL ASSETS (ฟอนต์และสคริปต์หลัก - ป้องกันปัญหาตัวหนังสือเด้งขยับ CLS) -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high" />
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high" />
+  <link rel="modulepreload" href="/main.js" />
 
-  <!-- ICONS & MANIFEST -->
-  <meta name="apple-mobile-web-app-title" content="First Model Hub">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="shortcut icon" href="/images/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48x48.png">
+  <!-- 6. STYLESHEETS & FONTS -->
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
 
-  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <!-- 7. OPEN GRAPH METADATA (FACEBOOK & LINE SHARE) -->
+  <meta property="og:locale" content="th_TH" />
+  <meta property="og:site_name" content="First Model Hub" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}} โปรไฟล์)" />
+  <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%" />
+  <meta property="og:url" content="{{SEO_CANONICAL}}" />
+  <meta property="og:image" content="{{SEO_IMAGE}}" />
+  <meta property="og:image:secure_url" content="{{SEO_IMAGE}}" />
+  <meta property="og:image:type" content="image/webp" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
 
-  <!-- PRECONNECT & PERFORMANCE -->
-  <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
-  <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
-  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <!-- 8. TWITTER CARDS METADATA -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} ฟิวแฟนตรงปก 100%" />
+  <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ" />
+  <meta name="twitter:image" content="{{SEO_IMAGE}}" />
 
-  <!-- PRELOAD FONTS & STYLES -->
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
-  
-  <link rel="modulepreload" href="/main.js">
-  <link rel="stylesheet" href="/styles.css">
+  <!-- 9. APP ICONS, FAVORITES & MANIFEST -->
+  <meta name="apple-mobile-web-app-title" content="First Model Hub" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="shortcut icon" href="/images/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48x48.png" />
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-
-  <!-- DYNAMIC SCHEMA OR FALLBACK SCHEMA -->
+  <!-- 10. STRUCTURED DATA (SCHEMA JSON-LD FALLBACK) -->
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -71,7 +72,7 @@
   }
   </script>
 
-  <!-- Google tag (gtag.js) -->
+  <!-- 11. GOOGLE ANALYTICS / GTM (โหลดแบบดีเลย์ 2 วินาที ป้องกันการดึงความเร็วการสแกนของ Googlebot) -->
   <script>
     window.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() {

@@ -64,9 +64,13 @@ window.ScrollTrigger = ScrollTrigger;
     return FALLBACK_SLOGANS[index];
   }
 
+
   function sanitizeThaiText(str) {
     if (str === null || str === undefined) return "";
     return String(str)
+      .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
+      .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
+      .replace(/ทดลองใช้งาน\.?/gi, "")
       .replace(/นิมาน|นิทาน/g, "นิมมาน")
       .replace(/ฟื้นที่/g, "พื้นที่")
       .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -1753,6 +1757,9 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
+
+
+  // 🟢 2. อัปเดตการเคลียร์ Tag หลุดใน DOM
   function replaceDomPlaceholders(provinceName = "ทั่วไทย", profileCount = 50, provinceSlug = "national") {
     try {
       const liveCountEl = document.getElementById("live-profile-count");
@@ -1766,12 +1773,12 @@ window.ScrollTrigger = ScrollTrigger;
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
       let node;
       while ((node = walker.nextNode())) {
-        if (node.nodeValue && node.nodeValue.includes("{{")) {
+        if (node.nodeValue && (node.nodeValue.includes("{{") || node.nodeValue.includes("%7B%7B"))) {
           node.nodeValue = node.nodeValue
             .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
             .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
             .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-            .replace(/\{\{[A-Z0-9_]+\}\}/g, "");
+            .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
         }
       }
 
@@ -1780,12 +1787,12 @@ window.ScrollTrigger = ScrollTrigger;
         ['title', 'alt', 'content', 'placeholder', 'value', 'data-src', 'href'].forEach(attr => {
           if (el.hasAttribute(attr)) {
             let val = el.getAttribute(attr);
-            if (val && val.includes('{{')) {
+            if (val && (val.includes('{{') || val.includes('%7B%7B'))) {
               val = val
                 .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
                 .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
                 .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-                .replace(/\{\{[A-Z0-9_]+\}\}/g, '');
+                .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, '');
               el.setAttribute(attr, val);
             }
           }
