@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
- * 💎 FIRST MODEL HUB - SERVERLESS SSR & HYDRATION ENGINE (ssr-province.js)
- * Production-Ready Fully Corrected & Optimized Edge Function (FULL 2026)
+ * 💎 FIRST MODEL HUB - ADVANCED SERVERLESS SSR & HYDRATION ENGINE (ssr-province.js)
+ * Production-Ready Ultra-Defensive & Fully Corrected Edge Function (FULL 2026)
  * ==============================================================================
  */
 
@@ -180,15 +180,13 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
-// 1. อัปเดต sanitizeThaiText ให้ลบทั้งข้อความ Debug Gemini และ Text Art/Emoji ในระดับโค้ด
+// 🟢 Advanced Sanitizer: คลีนข้อความ ลบ Gemini Debug Prompts, Emojis และ Text Art สไตล์แชต
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
-    // 🟢 ดักลบข้อความ Debug / Dev / Gemini ตกค้างจาก DB ทันที
     .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
     .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
     .replace(/ทดลองใช้งาน\.?/gi, "")
-    // คำผิดชื่อจังหวัด
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -199,14 +197,11 @@ function sanitizeThaiText(str) {
     .replace(/ปาตอง/g, "ป่าตอง")
     .replace(/ชลบรุี/g, "ชลบุรี")
     .replace(/อยุธญา/g, "อยุธยา")
-    // 🟢 ดักลบ Emoji และ Text Art สไตล์แชตออกเพื่อ SEO ที่สะอาด
-    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨]/gu, "")
-    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚(\)]+/g, " ")
+    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚()╭╮╰╯┊જ⁀⸝༘⋆ෆྀི]+/g, " ")
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦𐐪]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
 }
-
-
 
 function verifyHostname(_req) {
   return true;
@@ -261,6 +256,55 @@ async function getTemplateHtml(url, _context) {
 const escapeHTML = str => (str !== null && str !== undefined) ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) : "";
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
+
+// 🟢 Smart Helper: แทรกหรืออัปเดต Meta Tag การันตีไม่หลุด content=""
+function setMeta(html, attrName, attrValue, contentValue) {
+  const safeContent = escapeHTML(contentValue || "");
+  const regex = new RegExp(`<meta\\s+[^>]*?${attrName}=["']${attrValue}["'][^>]*?>`, "gi");
+  const newTag = `<meta ${attrName}="${attrValue}" content="${safeContent}" />`;
+  if (regex.test(html)) {
+    return html.replace(regex, newTag);
+  }
+  return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
+}
+
+// 🟢 Smart Helper: แทรกหรืออัปเดต Link Tag การันตีไม่หลุด href=""
+function setLink(html, relValue, hrefValue, extraAttrs = "") {
+  const safeHref = hrefValue || "";
+  const regex = new RegExp(`<link\\s+[^>]*?rel=["']${relValue}["'][^>]*?>`, "gi");
+  const newTag = `<link rel="${relValue}" href="${safeHref}" ${extraAttrs}/>`;
+  if (regex.test(html)) {
+    return html.replace(regex, newTag);
+  }
+  return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
+}
+
+// 🟢 Smart Helper: ฉีด Schema JSON-LD เข้าไปใน <head> เสมอ
+function injectSchema(html, schemaObj) {
+  const scriptTag = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaObj).replace(/</g, '\\u003c')}</script>`;
+  if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(html)) {
+    return html.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, scriptTag);
+  }
+  return html.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
+}
+
+// 🟢 Smart Helper: ฉีด Hydration Data เข้าไปที่ </body> เสมอ
+function injectHydrationData(html, hydratedDataObj) {
+  const jsonStr = JSON.stringify(hydratedDataObj).replace(/</g, '\\u003c');
+  const scriptTag = `<script id="ssr-profiles-data">window.profilesData = ${jsonStr};</script>`;
+  if (/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i.test(html)) {
+    return html.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, scriptTag);
+  }
+  return html.replace(/<\/body>/i, `  ${scriptTag}\n</body>`);
+}
+
+// 🟢 Smart Helper: กวาดล้างตัวแปรแม่แบบตกค้าง
+function sweepPlaceholders(html) {
+  return html
+    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "")
+    .replace(/%7B%7BMAP_EMBED_URL%7D%7D/gi, "")
+    .replace(/\{\{MAP_EMBED_URL\}\}/gi, "");
+}
 
 const getProfileMainImage = (p) => {
   if (!p) return null;
@@ -353,7 +397,7 @@ const getDynamicReviews = provinceName => {
   const isChiangMai = provinceName === "เชียงใหม่";
   return [
     {
-      author: "คุณชลสิทธิ์ (C.)",
+      author: "คุณเกริกพล",
       location: isChiangMai ? "ย่านนิมมาน เชียงใหม่" : `ตัวเมือง${provinceName}`,
       text: isChiangMai 
         ? `"นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ แถวนิมมาน"`
@@ -363,7 +407,7 @@ const getDynamicReviews = provinceName => {
       datePublished: new Date(t.getTime() - 691200000).toISOString().split("T")[0]
     },
     {
-      author: "คุณอภิชาติ (A.)",
+      author: "คุณอนุรักษ์",
       location: isChiangMai ? "โซนยอดนิยม นิมมาน เชียงใหม่" : `โซนยอดนิยมใน${provinceName}`,
       text: '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
       rating: 5,
@@ -661,7 +705,7 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
-    // 🟢 ดึงข้อมูลโปรไฟล์ได้สูงสุด 100 คนเพื่อให้ฝั่ง Client Hydration ได้ข้อมูลครบถ้วน
+    // 🟢 ดึงข้อมูลโปรไฟล์ได้สูงสุด 100 คนเพื่อการประมวลผลสมบูรณ์
     let profileQuery = supabase
       .from("profiles")
       .select("id, slug, name, age, imagePath, galleryPaths, gallery_paths, provinceKey, province_key, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, lineId, quote, style_tags, slogan")
@@ -757,7 +801,7 @@ export default async (req, context) => {
 
     if (matchedProfile) {
       const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
-      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} ไซด์ไลน์${provinceThaiName} เพื่อนเที่ยวตรงปก | First Model Hub`;
+      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} รับงาน${provinceThaiName} สาวรับงาน${provinceThaiName} ไซด์ไลน์ตรงปก | First Model Hub`;
       pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "1,500"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
     }
 
@@ -966,7 +1010,7 @@ export default async (req, context) => {
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
     // ==============================================================================
-    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (FIXED & BULLETPROOF)
+    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (BULLETPROOF FIX)
     // ==============================================================================
     let rawHtml = await getTemplateHtml(url, context);
 
@@ -975,48 +1019,32 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    // 🟢 [FIX 1] ฟังก์ชันยืดหยุ่นสำหรับแทนที่หรือฉีด Meta Tag ป้องกัน Regex จับไม่โดน
-    function setMetaTag(html, attrName, attrValue, contentValue) {
-      const regex = new RegExp(`<meta\\s+[^>]*?${attrName}=["']${attrValue}["'][^>]*?>`, "gi");
-      const newTag = `<meta ${attrName}="${attrValue}" content="${escapeHTML(contentValue)}" />`;
-      if (regex.test(html)) {
-        return html.replace(regex, newTag);
-      }
-      return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
-    }
-
-    // 2. SEO Meta Tags & Canonicals Replacement (การันตีเปลี่ยนค่าแน่นอน 100%)
+    // 2. SEO Meta Tags & Canonicals Replacement (ยืดหยุ่น การันตีเปลี่ยนค่าแน่นอน 100%)
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = setMetaTag(rawHtml, "name", "description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
     
     // Open Graph Tags
-    rawHtml = setMetaTag(rawHtml, "property", "og:title", pageTitle);
-    rawHtml = setMetaTag(rawHtml, "property", "og:description", strippedDesc);
-    rawHtml = setMetaTag(rawHtml, "property", "og:url", canonUrl);
-    rawHtml = setMetaTag(rawHtml, "property", "og:image", metaImgUrl);
-    rawHtml = setMetaTag(rawHtml, "property", "og:image:secure_url", metaImgUrl);
+    rawHtml = setMeta(rawHtml, "property", "og:title", pageTitle);
+    rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
+    rawHtml = setMeta(rawHtml, "property", "og:image", metaImgUrl);
+    rawHtml = setMeta(rawHtml, "property", "og:image:secure_url", metaImgUrl);
     
     // Twitter Card Tags
-    rawHtml = setMetaTag(rawHtml, "name", "twitter:title", pageTitle);
-    rawHtml = setMetaTag(rawHtml, "name", "twitter:description", strippedDesc);
-    rawHtml = setMetaTag(rawHtml, "name", "twitter:image", metaImgUrl);
+    rawHtml = setMeta(rawHtml, "name", "twitter:title", pageTitle);
+    rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "name", "twitter:image", metaImgUrl);
     
     // Canonicals & Hreflangs
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    // แทนที่แท็ก <link rel="canonical"> และ <link rel="alternate">
-    rawHtml = rawHtml.replace(/<link\s+rel=["']canonical["'][^>]*?>/gi, `<link rel="canonical" id="canonical-link" href="${canonUrl}" />`);
-    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']th["'][^>]*?>/gi, `<link rel="alternate" hreflang="th" href="${canonUrl}" />`);
-    rawHtml = rawHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']x-default["'][^>]*?>/gi, `<link rel="alternate" hreflang="x-default" href="${canonUrl}" />`);
+    rawHtml = setLink(rawHtml, "canonical", canonUrl, 'id="canonical-link" ');
+    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th" ');
+    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default" ');
 
-    // 🟢 [FIX 2] ฉีด Schema JSON-LD การันตีวางใน <head> เสมอไม่ว่าเปิดหน้าไหน
-    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
-    if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
-    } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `  ${newSchemaScript}\n</head>`);
-    }
+    // 3. ฉีด Schema JSON-LD เข้าไปใน <head> การันตี 100%
+    rawHtml = injectSchema(rawHtml, schemaJson);
 
     // 4. Placeholders Replacement
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
@@ -1199,9 +1227,9 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 [FIX 3] การันตีฉีดข้อมูล Hydration เสมอ ไม่ว่าหน้าไหน
+    // 🟢 [FIX] ฉีดข้อมูล Hydration ฝั่ง Client อย่างสมบูรณ์ 100%
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
-    const hydratedProfilesData = JSON.stringify(allHydratedProfiles.map(p => ({
+    const hydratedProfilesData = allHydratedProfiles.map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -1229,18 +1257,12 @@ export default async (req, context) => {
       lineId: p.line_id || p.lineId || "",
       quote: sanitizeThaiText(p.quote || p.slogan) || "",
       styleTags: p.style_tags || p.styleTags || []
-    }))).replace(/</g, '\\u003c');
+    }));
 
-    const hydratedScriptTag = `<script id="ssr-profiles-data">window.profilesData = ${hydratedProfilesData};</script>`;
+    rawHtml = injectHydrationData(rawHtml, hydratedProfilesData);
 
-    if (/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, hydratedScriptTag);
-    } else {
-      rawHtml = rawHtml.replace(/<\/body>/i, `${hydratedScriptTag}\n</body>`);
-    }
-
-    // 🟢 [FIX 4] กวาดล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด 100%
-    rawHtml = rawHtml.replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
+    // 🟢 [FIX] กวาดล้างตัวแปรแม่แบบ {{...}} ตกค้างในขั้นตอนสุดท้าย
+    rawHtml = sweepPlaceholders(rawHtml);
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
