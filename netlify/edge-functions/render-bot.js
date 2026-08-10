@@ -106,6 +106,10 @@ const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, "").trim() : 
 const cleanAsciiArt = (text) => {
   if (!text) return "";
   return String(text)
+    // 🟢 ลบข้อความ Debug Gemini ออกอัตโนมัติ
+    .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
+    .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
+    .replace(/ทดลองใช้งาน\.?/gi, "")
     .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "")
     .replace(/[„•ㅅ•„]+/g, "")
     .replace(/\n\s*\n/g, "\n")

@@ -180,18 +180,33 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
+// 1. อัปเดต sanitizeThaiText ให้ลบทั้งข้อความ Debug Gemini และ Text Art/Emoji ในระดับโค้ด
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
-    .replace(/นิมาน/g, "นิมมาน")
-    .replace(/นิทาน/g, "นิมมาน")
+    // 🟢 ดักลบข้อความ Debug / Dev / Gemini ตกค้างจาก DB ทันที
+    .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
+    .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
+    .replace(/ทดลองใช้งาน\.?/gi, "")
+    // คำผิดชื่อจังหวัด
+    .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ฟื้นที่/g, "พื้นที่")
-    .replace(/ไกล้เคียง/g, "ใกล้เคียง")
-    .replace(/ใกล้เครยง/g, "ใกล้เคียง")
+    .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/พาพับ/g, "พายัพ")
-    .replace(/รับงาน ของแก่น/g, "รับงาน ขอนแก่น")
-    .replace(/ตัวเมือง ของแก่น/g, "ตัวเมือง ขอนแก่น");
+    .replace(/ของแก่น/g, "ขอนแก่น")
+    .replace(/บ้านดู๋/g, "บ้านดู่")
+    .replace(/ห้วยเเก้ว/g, "ห้วยแก้ว")
+    .replace(/ปาตอง/g, "ป่าตอง")
+    .replace(/ชลบรุี/g, "ชลบุรี")
+    .replace(/อยุธญา/g, "อยุธยา")
+    // 🟢 ดักลบ Emoji และ Text Art สไตล์แชตออกเพื่อ SEO ที่สะอาด
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨]/gu, "")
+    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚(\)]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
+
+
 
 function verifyHostname(_req) {
   return true;
@@ -955,7 +970,7 @@ export default async (req, context) => {
     // ==============================================================================
     let rawHtml = await getTemplateHtml(url, context);
 
-    // 1. Base Tag Injection
+    // 1. Base Tag Injection (ป้องกันปัญหาความสัมพันธ์ของ Path)
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
@@ -996,7 +1011,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-    // 🟢 แก้ไขปัญหาสูตร Map URL เป็นระเบียบและไม่ซ้ำซ้อน
+    // 🟢 แทนที่ Map URL ทุกรูปแบบรวมถึง URL Encoded
     rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
@@ -1111,10 +1126,11 @@ export default async (req, context) => {
         </article>
       `;
 
-      // 🟢 [FIX] ซ่อนเซกชันส่วนเกินเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว
+      // 🟢 [FIX] ลบทุกเซกชันที่ไม่เกี่ยวข้องออกเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว (รวมถึงส่วนรีวิวเพื่อไม่ให้ตัวแปรหลุด)
       rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="customer-reviews"[\s\S]*?<\/section>/i, "");
     } else {
       // 2. เรนเดอร์หน้าค้นหารายจังหวัดตามปกติเมื่อเข้า URL /location/:province หรือ /
       const topCatalogSnippetHtml = `
@@ -1151,7 +1167,7 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 [FIX] แทนที่โดยใช้ Comment Marker ป้องกัน Regex ทำลาย HTML
+    // 🟢 [FIX] แทนที่ข้อมูลส่วนแสดงผลผ่าน Comment Marker
     if (rawHtml.includes("<!-- SSR_DISPLAY_AREA_START -->") && rawHtml.includes("<!-- SSR_DISPLAY_AREA_END -->")) {
       const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
       const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
@@ -1167,7 +1183,7 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 [FIX] ส่งข้อมูล Hydration ป้องกัน null/empty
+    // 🟢 [FIX] ส่งข้อมูล Hydration ให้สคริปต์ฝั่ง Client อย่างสมบูรณ์
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = JSON.stringify(allHydratedProfiles.map(p => ({
       id: p.id,
@@ -1209,8 +1225,8 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // ล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด ป้องกันหลุด
-    rawHtml = rawHtml.replace(/(\{\{|%7B%7B)[A-Z0-9_]+(\}\}|%7D%7D)/gi, "");
+    // 🟢 [CRITICAL FIX] กวาดล้างตัวแปรแม่แบบ {{...}} และ %7B%7B...%7D%7D ที่ตกค้างทั้งหมด 100%
+    rawHtml = rawHtml.replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
