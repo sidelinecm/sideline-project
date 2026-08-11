@@ -1464,14 +1464,23 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
+  // 🟢 ฟังก์ชันลบ Schema ชั่วคราวเมื่อสลับหน้า
   function removeJsonLdSchemas() {
-    const schemaIds = ["dynamic-schema", "schema-jsonld-person", "schema-jsonld-list", "schema-jsonld-faq", "schema-jsonld-breadcrumb"];
+    const schemaIds = [
+      "dynamic-schema",
+      "schema-jsonld-person",
+      "schema-jsonld-list",
+      "schema-jsonld-faq",
+      "schema-jsonld-breadcrumb",
+      "schema-jsonld-itemlist"
+    ];
     schemaIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.remove();
     });
   }
 
+  // 🟢 ฟังก์ชันฉีด Schema เข้าไปใน <head>
   function injectJsonLdSchema(schemaObj, elementId = "schema-jsonld") {
     if (!schemaObj) return;
     const existing = document.getElementById(elementId);
@@ -1484,23 +1493,7 @@ window.ScrollTrigger = ScrollTrigger;
     document.head.appendChild(script);
   }
 
-  function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
-    const ogImage = profile && profile.images && profile.images[0] ? profile.images[0].fullSrc : CONFIG.DEFAULT_OG_IMAGE;
-    const currentUrl = window.location.href;
-
-    updateMetaTag("og:title", title);
-    updateMetaTag("og:description", description);
-    updateMetaTag("og:type", type);
-    updateMetaTag("og:url", currentUrl);
-    updateMetaTag("og:image", ogImage);
-    updateMetaTag("og:site_name", "First Model Hub");
-
-    updateMetaTag("twitter:card", "summary_large_image");
-    updateMetaTag("twitter:title", title);
-    updateMetaTag("twitter:description", description);
-    updateMetaTag("twitter:image", ogImage);
-  }
-
+  // 🟢 ฟังก์ชันหลักในการจัดการ SEO และ Schema Dynamic (Client-Side SPA)
   function updateSEOMetadata(profile = null, locationData = null) {
     const currentPath = window.location.pathname.toLowerCase();
     const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
@@ -1511,6 +1504,7 @@ window.ScrollTrigger = ScrollTrigger;
     }
     isFirstLoad = false;
 
+    // 1. กรณีเป็นหน้าแรก (Home Page)
     if (isHomePage && !profile) {
       document.title = DEFAULT_SEO.title;
       updateMetaTag("description", DEFAULT_SEO.description);
@@ -1523,15 +1517,17 @@ window.ScrollTrigger = ScrollTrigger;
 
     removeJsonLdSchemas();
 
+    // 2. กรณีเปิดดูโปรไฟล์เดี่ยว (Single Profile Page)
     if (profile) {
-      const nameClean = sanitizeName(profile.name);
-      const provName = profile.provinceNameThai || "ทั่วไทย";
+      const nameClean = sanitizeName(profile.name || profile.displayName);
+      const provKey = normalizeProvinceKey(profile.provinceKey);
+      const provName = profile.provinceNameThai || STATE.provincesMap.get(provKey) || "ทั่วไทย";
       const fullLoc = profile.location ? `${profile.location}, ${provName}` : provName;
       const profileUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
-      const locationUrl = `${CONFIG.SITE_URL}/location/${profile.provinceKey || "national"}`;
+      const locationUrl = `${CONFIG.SITE_URL}/location/${provKey || "national"}`;
 
       const title = `${nameClean} รับงาน${provName} สาวรับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟนตรงปก | จ่ายหน้างาน`;
-      const description = `รายละเอียดโปรไฟล์ ${nameClean} สาวรับงานไซด์ไลน์พิกัดย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า (อัปเดต 2026)`;
+      const description = `รายละเอียดโปรไฟล์ ${nameClean} สาวรับงานไซด์ไลน์พิกัดย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า (อัปเดต 2026)`;
 
       document.title = title;
       updateMetaTag("description", description);
@@ -1540,16 +1536,18 @@ window.ScrollTrigger = ScrollTrigger;
 
       updateOpenGraphAndTwitter(profile, title, description, "profile");
 
+      // 2.1 Person Schema
       injectJsonLdSchema({
         "@context": "https://schema.org",
         "@type": "Person",
         "@id": `${profileUrl}/#person`,
         "name": nameClean,
         "url": profileUrl,
-        "image": profile.images && profile.images[0] ? profile.images[0].fullSrc : CONFIG.DEFAULT_OG_IMAGE,
+        "image": profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE,
         "description": description,
         "jobTitle": "Freelance Companion & Entertainer",
         "gender": "Female",
+        "worksFor": { "@id": `${CONFIG.SITE_URL}/#organization` },
         "address": {
           "@type": "PostalAddress",
           "addressLocality": profile.location || provName,
@@ -1567,9 +1565,11 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }, "schema-jsonld-person");
 
+      // 2.2 BreadcrumbList Schema
       injectJsonLdSchema({
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
+        "@id": `${profileUrl}/#breadcrumb`,
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
           { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": locationUrl },
@@ -1577,9 +1577,36 @@ window.ScrollTrigger = ScrollTrigger;
         ]
       }, "schema-jsonld-breadcrumb");
 
+      // 2.3 FAQPage Schema (✨ เพิ่มเติมสำหรับ Client-Side SPA)
+      injectJsonLdSchema({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "@id": `${profileUrl}/#faq`,
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": `${nameClean} ไซด์ไลน์${provName} ย่าน${profile.location || provName} มีมัดจำหรือไม่?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `ไม่มีนโยบายโอนเงินมัดจำล่วงหน้าทุกกรณีครับ ลูกค้าสามารถเดินทางพพบ${nameClean} ยืนยันตัวตนตรงปกหน้างานแล้วค่อยชำระค่าบริการแก่ตัวน้องโดยตรง 100%`
+            }
+          },
+          {
+            "@type": "Question",
+            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${nameClean} ได้ที่ไหน?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `สามารถกดปุ่มจองคิวบนหน้าโปรไฟล์ เพื่อสอบถามตารางเวลาและจองคิวรับบริการผ่านไลน์แอดมินเจ้าหน้าที่ได้อย่างสะดวกรวดเร็ว`
+            }
+          }
+        ]
+      }, "schema-jsonld-faq");
+
+    // 3. กรณีเลือกสลับดูหน้าหมวดหมู่/จังหวัด (Location / Category Page)
     } else if (locationData) {
-      const provName = locationData.provinceName || "ทั่วไทย";
-      const canonicalUrl = locationData.canonicalUrl || window.location.href;
+      const provKey = normalizeProvinceKey(locationData.provinceKey || locationData.provinceSlug || "national");
+      const provName = locationData.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย";
+      const canonicalUrl = locationData.canonicalUrl || `${CONFIG.SITE_URL}/location/${provKey}`;
       const count = locationData.profiles ? locationData.profiles.length : 50;
 
       const title = `รับงาน${provName} ไซด์ไลน์${provName} สาวรับงานฟิวแฟนตรงปก (อัปเดต ${count}+ โปรไฟล์ 2026) | First Model Hub`;
@@ -1591,9 +1618,59 @@ window.ScrollTrigger = ScrollTrigger;
       updateLinkRel("canonical", canonicalUrl);
 
       updateOpenGraphAndTwitter(null, title, description, "website");
+
+      // 3.1 BreadcrumbList Schema (สำหรับหน้าจังหวัด)
+      injectJsonLdSchema({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}/#breadcrumb`,
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
+          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": canonicalUrl }
+        ]
+      }, "schema-jsonld-breadcrumb");
+
+      // 3.2 FAQPage Schema (สำหรับหน้าจังหวัด)
+      const seoData = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
+      const faqs = (seoData && seoData.faqs) ? seoData.faqs : LOCALIZED_SEO_MAP["national"].faqs;
+
+      if (faqs && faqs.length > 0) {
+        injectJsonLdSchema({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "@id": `${canonicalUrl}/#faq`,
+          "mainEntity": faqs.map(faq => ({
+            "@type": "Question",
+            "name": faq.q,
+            "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+          }))
+        }, "schema-jsonld-faq");
+      }
+
+      // 3.3 ItemList Schema (รายการโปรไฟล์ในจังหวัด)
+      if (locationData.profiles && locationData.profiles.length > 0) {
+        injectJsonLdSchema({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "@id": `${canonicalUrl}/#itemlist`,
+          "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provName}`,
+          "numberOfItems": locationData.profiles.length,
+          "itemListElement": locationData.profiles.slice(0, 30).map((p, index) => {
+            const pCleanName = sanitizeName(p.name || p.displayName);
+            const itemUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(p.slug || p.id)}`;
+            return {
+              "@type": "ListItem",
+              "position": index + 1,
+              "name": pCleanName,
+              "url": itemUrl
+            };
+          })
+        }, "schema-jsonld-itemlist");
+      }
     }
   }
 
+  // 🟢 ฟังก์ชันจัดการ Meta Tag
   function updateMetaTag(nameOrProperty, content) {
     let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
     if (!tag) {
@@ -1608,6 +1685,7 @@ window.ScrollTrigger = ScrollTrigger;
     tag.setAttribute("content", content);
   }
 
+  // 🟢 ฟังก์ชันจัดการ Link Canonical
   function updateLinkRel(rel, href) {
     let link = document.querySelector(`link[rel="${rel}"]`);
     if (!link) {
