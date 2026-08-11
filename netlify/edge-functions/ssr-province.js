@@ -581,20 +581,19 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
        </span>`
     : "";
 
-  let rateDisplay = "1,500.-";
-  if (p.rate) {
-    const priceMatch = String(p.rate).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
-    if (priceMatch && !isNaN(Number(priceMatch[0].replace(/,/g, "")))) {
-        let num = Number(priceMatch[0].replace(/,/g, ""));
-        // ดักถ้าราคาต่ำกว่า 500 (เช่น แอดมินพิมพ์ตกเหลือ 150) ให้คูณ 10 เป็น 1500 ทันที
-        if (num > 0 && num < 500) {
-          num = num * 10;
+  let rateVal = "1,500.-";
+      if (matchedProfile.rate) {
+        const cleanedRate = String(matchedProfile.rate).replace(/[^0-9]/g, "");
+        if (cleanedRate && !isNaN(Number(cleanedRate))) {
+            let num = Number(cleanedRate);
+            if (num > 0 && num < 500) {
+              num = num * 10;
+            }
+            rateVal = `${num.toLocaleString()}.-`;
+        } else {
+            rateVal = escapeHTML(matchedProfile.rate);
         }
-        rateDisplay = `${num.toLocaleString()}.-`;
-    } else {
-        rateDisplay = escapeHTML(p.rate).trim();
-    }
-  }
+      }
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
 
