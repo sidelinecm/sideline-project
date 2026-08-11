@@ -180,13 +180,32 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
+// ==============================================================================
+// 💎 PERFECTED HELPER ENGINE & SANITIZERS (FULL-PROOF 2026)
+// ==============================================================================
+
+const escapeHTML = str => (str !== null && str !== undefined) 
+  ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) 
+  : "";
+
+const stripHTML = str => (str !== null && str !== undefined) 
+  ? String(str).replace(/<[^>]*>?/gm, "").trim() 
+  : "";
+
+const replaceGlobal = (source, target, replacement) => {
+  if (!source) return "";
+  return source.split(target).join(replacement !== undefined && replacement !== null ? replacement : "");
+};
+
 // 🟢 Advanced Sanitizer: คลีนข้อความ ลบ Gemini Debug Prompts, Emojis และ Text Art สไตล์แชต
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
+    // 1. ลบข้อความ Debug Gemini ออกอัตโนมัติ
     .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
     .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
     .replace(/ทดลองใช้งาน\.?/gi, "")
+    // 2. แก้คำสะกดผิดยอดฮิตในระบบ
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -197,14 +216,91 @@ function sanitizeThaiText(str) {
     .replace(/ปาตอง/g, "ป่าตอง")
     .replace(/ชลบรุี/g, "ชลบุรี")
     .replace(/อยุธญา/g, "อยุธยา")
-    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚()╭╮╰╯┊જ⁀⸝༘⋆ෆྀི]+/g, " ")
-    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦𐐪]/gu, "")
+    // 3. ลบกรอบภาพ Text Art สัญลักษณ์แชตตกแต่ง (เช่น ₊ ˚(\ (\ ... 𐐪)
+    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚()╭╮╰╯┊જ⁀⸝༘⋆ෆྀอิ◟ヾ͙֒𐐪づ⁺.]+/g, " ")
+    // 4. ลบ Emojis ทั้งหมดเพื่อไม่ให้ขยะหลุดไปถึง Meta Tags & Schema
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 function verifyHostname(_req) {
   return true;
+}
+
+// 🟢 Smart Helper: แทรกหรืออัปเดต Meta Tag การันตีไม่หลุด content="" หรือค่าว่าง
+function setMeta(html, attrName, attrValue, contentValue) {
+  let safeContent = escapeHTML(contentValue || "");
+  
+  // ป้องกันค่า content="" หลุด ด้วยการใส่ค่า Fallback สำรองเสมอ
+  if (!safeContent) {
+    if (attrValue.includes("image")) safeContent = CONFIG.DEFAULT_OG_IMAGE;
+    else if (attrValue.includes("url")) safeContent = CONFIG.PRIMARY_DOMAIN;
+  }
+
+  const regex = new RegExp(`<meta\\s+[^>]*?${attrName}=["']${attrValue}["'][^>]*?>`, "gi");
+  const newTag = `<meta ${attrName}="${attrValue}" content="${safeContent}" />`;
+  
+  if (regex.test(html)) {
+    return html.replace(regex, newTag);
+  }
+  return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
+}
+
+// 🟢 Smart Helper: แทรกหรืออัปเดต Link Tag (แก้ไข Hreflang ซ้ำซ้อน และ href="")
+function setLink(html, relValue, hrefValue, extraAttrs = "") {
+  const safeHref = escapeHTML(hrefValue || CONFIG.PRIMARY_DOMAIN);
+  
+  // ตรวจจับ hreflang เจาะจงเพื่อไม่ให้ซ้ำคู่กัน
+  let regex;
+  const hreflangMatch = extraAttrs.match(/hreflang=["']([^"']+)["']/i);
+  if (hreflangMatch) {
+    const lang = hreflangMatch[1];
+    regex = new RegExp(`<link\\s+[^>]*?rel=["']${relValue}["'][^>]*?hreflang=["']${lang}["'][^>]*?>`, "gi");
+  } else {
+    regex = new RegExp(`<link\\s+[^>]*?rel=["']${relValue}["'][^>]*?>`, "gi");
+  }
+
+  const newTag = `<link rel="${relValue}" href="${safeHref}" ${extraAttrs}/>`;
+  
+  if (regex.test(html)) {
+    return html.replace(regex, newTag);
+  }
+  return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
+}
+
+// 🟢 Smart Helper: ฉีด Schema JSON-LD เข้าก่อนปิด </head> การันตีขึ้น 100%
+function injectSchema(html, schemaObj) {
+  if (!schemaObj) return html;
+  const jsonStr = JSON.stringify(schemaObj).replace(/</g, '\\u003c');
+  const scriptTag = `<script type="application/ld+json" id="dynamic-schema">${jsonStr}</script>`;
+  
+  // ลบแท็ก Schema เก่าออกทั้งหมดก่อน
+  let cleanHtml = html.replace(/<script type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, "");
+  
+  // ฉีดแท็กใหม่เข้าก่อนปิด </head>
+  return cleanHtml.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
+}
+
+// 🟢 Smart Helper: ฉีด Hydration Data เข้าไปที่ </body> เสมอ (ป้องกัน Array ว่าง)
+function injectHydrationData(html, hydratedDataObj) {
+  const safeData = Array.isArray(hydratedDataObj) ? hydratedDataObj : [];
+  const jsonStr = JSON.stringify(safeData).replace(/</g, '\\u003c');
+  const scriptTag = `<script id="ssr-profiles-data">window.profilesData = ${jsonStr};</script>`;
+  
+  if (/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i.test(html)) {
+    return html.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, scriptTag);
+  }
+  return html.replace(/<\/body>/i, `  ${scriptTag}\n</body>`);
+}
+
+// 🟢 Smart Helper: กวาดล้างตัวแปรแม่แบบ {{...}} ตกค้างทั้งหมด
+function sweepPlaceholders(html) {
+  if (!html) return "";
+  return html
+    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "")
+    .replace(/%7B%7BMAP_EMBED_URL%7D%7D/gi, "")
+    .replace(/\{\{MAP_EMBED_URL\}\}/gi, "");
 }
 
 async function getTemplateHtml(url, _context) {
@@ -251,59 +347,6 @@ async function getTemplateHtml(url, _context) {
   }
   
   return TEMPLATE_HTML_CACHE || DEFAULT_FALLBACK_SHELL;
-}
-
-const escapeHTML = str => (str !== null && str !== undefined) ? String(str).replace(/[&<>'"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[m] || m)) : "";
-const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
-const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
-
-// 🟢 Smart Helper: แทรกหรืออัปเดต Meta Tag การันตีไม่หลุด content=""
-function setMeta(html, attrName, attrValue, contentValue) {
-  const safeContent = escapeHTML(contentValue || "");
-  const regex = new RegExp(`<meta\\s+[^>]*?${attrName}=["']${attrValue}["'][^>]*?>`, "gi");
-  const newTag = `<meta ${attrName}="${attrValue}" content="${safeContent}" />`;
-  if (regex.test(html)) {
-    return html.replace(regex, newTag);
-  }
-  return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
-}
-
-// 🟢 Smart Helper: แทรกหรืออัปเดต Link Tag การันตีไม่หลุด href=""
-function setLink(html, relValue, hrefValue, extraAttrs = "") {
-  const safeHref = hrefValue || "";
-  const regex = new RegExp(`<link\\s+[^>]*?rel=["']${relValue}["'][^>]*?>`, "gi");
-  const newTag = `<link rel="${relValue}" href="${safeHref}" ${extraAttrs}/>`;
-  if (regex.test(html)) {
-    return html.replace(regex, newTag);
-  }
-  return html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
-}
-
-// 🟢 Smart Helper: ฉีด Schema JSON-LD เข้าไปใน <head> เสมอ
-function injectSchema(html, schemaObj) {
-  const scriptTag = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaObj).replace(/</g, '\\u003c')}</script>`;
-  if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(html)) {
-    return html.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, scriptTag);
-  }
-  return html.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
-}
-
-// 🟢 Smart Helper: ฉีด Hydration Data เข้าไปที่ </body> เสมอ
-function injectHydrationData(html, hydratedDataObj) {
-  const jsonStr = JSON.stringify(hydratedDataObj).replace(/</g, '\\u003c');
-  const scriptTag = `<script id="ssr-profiles-data">window.profilesData = ${jsonStr};</script>`;
-  if (/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i.test(html)) {
-    return html.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, scriptTag);
-  }
-  return html.replace(/<\/body>/i, `  ${scriptTag}\n</body>`);
-}
-
-// 🟢 Smart Helper: กวาดล้างตัวแปรแม่แบบตกค้าง
-function sweepPlaceholders(html) {
-  return html
-    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "")
-    .replace(/%7B%7BMAP_EMBED_URL%7D%7D/gi, "")
-    .replace(/\{\{MAP_EMBED_URL\}\}/gi, "");
 }
 
 const getProfileMainImage = (p) => {
@@ -1211,18 +1254,14 @@ export default async (req, context) => {
       `;
     }
 
-    // ------------------------------------------------------------------------------
-    // STEP 3: ดึง HTML Shell แม่แบบและฉีด Base Tag
-    // ------------------------------------------------------------------------------
+
     let rawHtml = await getTemplateHtml(url, context);
 
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
-    // ------------------------------------------------------------------------------
-    // STEP 4: ทำความสะอาดส่วนแสดงผลคงที่หากเป็นหน้ารายบุคคล
-    // ------------------------------------------------------------------------------
+
     if (matchedProfile) {
       rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
       rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
@@ -1232,75 +1271,60 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
-    // ------------------------------------------------------------------------------
-    // STEP 5: แทรกส่วนแสดงผลหลัก (Display Area Inner HTML Injection)
-    // ------------------------------------------------------------------------------
+
     if (rawHtml.includes("<!-- SSR_DISPLAY_AREA_START -->") && rawHtml.includes("<!-- SSR_DISPLAY_AREA_END -->")) {
       const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
       const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
       rawHtml = `${before}<!-- SSR_DISPLAY_AREA_START -->\n<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>\n<!-- SSR_DISPLAY_AREA_END -->${after}`;
+    } else if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
     } else {
-      if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
-        rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
-      } else {
-        rawHtml = rawHtml.replace(
-          /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
-          `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
-        );
-      }
+      rawHtml = rawHtml.replace(
+        /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
+        `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
+      );
     }
 
-    // ------------------------------------------------------------------------------
-    // STEP 6: แทรก Meta Tags, Open Graph, Twitter Cards และ Canonical Links
-    // ------------------------------------------------------------------------------
+
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
     
-    // Open Graph
+
     rawHtml = setMeta(rawHtml, "property", "og:title", pageTitle);
     rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
     rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
     rawHtml = setMeta(rawHtml, "property", "og:image", metaImgUrl);
     rawHtml = setMeta(rawHtml, "property", "og:image:secure_url", metaImgUrl);
     
-    // Twitter Cards
+
     rawHtml = setMeta(rawHtml, "name", "twitter:title", pageTitle);
     rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
     rawHtml = setMeta(rawHtml, "name", "twitter:image", metaImgUrl);
     
-    // Canonicals & Hreflangs
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    
+
     rawHtml = setLink(rawHtml, "canonical", canonUrl, 'id="canonical-link" ');
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th" ');
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default" ');
 
-    // ------------------------------------------------------------------------------
-    // STEP 7: ฉีด Schema JSON-LD Graph เข้าไปใน <head>
-    // ------------------------------------------------------------------------------
+
     rawHtml = injectSchema(rawHtml, schemaJson);
 
-    // ------------------------------------------------------------------------------
-    // STEP 8: แทนที่ตัวแปรแม่แบบทั้งหมด (Global Placeholders Replacement)
-    // ------------------------------------------------------------------------------
+
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceSlug); // 👈 เติมค่า Key จังหวัดให้ฟอร์มรีวิว
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceSlug);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-    // แทนที่ Google Map Embed URL
+
     rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // ------------------------------------------------------------------------------
-    // STEP 9: ฉีด Hydration Data Payload & กวาดล้างคราบตัวแปรตกค้าง
-    // ------------------------------------------------------------------------------
+
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = allHydratedProfiles.map(p => ({
       id: p.id,
@@ -1317,8 +1341,8 @@ export default async (req, context) => {
       cup_size: p.cup_size || "",
       imagePath: getProfileMainImage(p),
       galleryPaths: p.galleryPaths || p.gallery_paths || [],
-      provinceKey: p.provinceKey || p.province_key,
-      provinceThai: provinceThaiName,
+      provinceKey: p.provinceKey || p.province_key || provinceSlug,
+      provinceThai: p.provinceThai || provinceThaiName,
       location: sanitizeThaiText(p.location),
       rate: p.rate,
       availability: p.availability,
@@ -1332,6 +1356,7 @@ export default async (req, context) => {
       quote: sanitizeThaiText(p.quote || p.slogan) || "",
       styleTags: p.style_tags || p.styleTags || []
     }));
+
 
     rawHtml = injectHydrationData(rawHtml, hydratedProfilesData);
 
