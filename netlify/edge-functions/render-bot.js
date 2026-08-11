@@ -202,8 +202,8 @@ export default async (request, context) => {
     const displayPrice = rawRate.toLocaleString() + ".-";
 
     const mainImagePath = getProfileMainImage(p);
-    const baseImageUrl = optimizeImg(null, mainImagePath, 600, 800);
-    const lcpImageUrl = optimizeImg(null, mainImagePath, 400, 533);
+    const baseImageUrl = optimizeImg(dynamicDomain, mainImagePath, 600, 800);
+const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
     const imageSrcSet = generateSrcSet(mainImagePath);
 
     const defaultLineUrl = CONFIG.SOCIAL_LINKS.line;
@@ -518,7 +518,7 @@ export default async (request, context) => {
                           const relAltText = `${displayRelName} สาวรับงาน${escapeHTML(provinceName)} ย่าน${relLoc} ไซด์ไลน์ตรงปก 100%`;
                           return `
                             <a href="/sideline/${encodeURIComponent(r.slug || r.id)}" class="related-card" title="${escapeHTML(displayRelName)}">
-<img src="${optimizeImg(null, relImgPath, 300, 400)}" class="related-img" alt="${escapeHTML(relAltText)}" loading="lazy" width="300" height="400">
+<img src="${optimizeImg(dynamicDomain, relImgPath, 300, 400)}" class="related-img" alt="${escapeHTML(relAltText)}" loading="lazy" width="300" height="400">
                                 <div class="related-name">${escapeHTML(displayRelName)}</div>
                             </a>
                             `;

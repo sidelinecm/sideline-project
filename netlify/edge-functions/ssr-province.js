@@ -1227,7 +1227,7 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 [FIX] ฉีดข้อมูล Hydration ฝั่ง Client อย่างสมบูรณ์ 100%
+
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = allHydratedProfiles.map(p => ({
       id: p.id,
@@ -1251,6 +1251,7 @@ export default async (req, context) => {
       availability: p.availability,
       lastUpdated: p.lastUpdated,
       isfeatured: p.isfeatured,
+      isNew: p.is_new || p.isNew || false, // 👈 [แก้ไขแล้ว] เพิ่มฟีลด์สถานะโปรไฟล์ใหม่เข้า Payload
       verified: p.verified || p.isVerified,
       hasVideo: p.has_video || p.hasVideo || false,
       description: sanitizeThaiText(p.description) || "",
