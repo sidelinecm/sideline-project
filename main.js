@@ -1,5 +1,4 @@
 
-
 /* ==============================================================================
    💎 FIRST MODEL HUB - MAIN CLIENT-SIDE ENGINE (PROD-READY PERFECT 2026)
    ============================================================================== */
@@ -28,6 +27,77 @@ window.ScrollTrigger = ScrollTrigger;
     },
     SITE_URL: "https://firstmodelhub.com",
     DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
+  };
+
+  const DEFAULT_SEO = {
+    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub",
+    description: "ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ",
+    keywords: "แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน",
+    canonical: "https://firstmodelhub.com/",
+    ogImage: "https://firstmodelhub.com/images/firstmodelhub.webp"
+  };
+
+  let STATE = {
+    allProfiles: [],
+    provincesMap: new Map(),
+    currentProfileSlug: null,
+    lastFocusedElement: null,
+    isFetching: false,
+    currentFilters: null,
+    filteredProfiles: [],
+    renderId: 0
+  };
+
+  const DOM = {};
+  let supabaseClient = null;
+  let isLikeProcessing = false;
+  let isFirstLoad = true;
+  let searchDebounceTimer = null;
+
+  // 🟢 IndexedDB
+  const idb = {
+    init() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open("FirstModelHubDB", 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains("cacheStore")) {
+            db.createObjectStore("cacheStore");
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    },
+    async get(key) {
+      try {
+        const db = await this.init();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction("cacheStore", "readonly");
+          const store = tx.objectStore("cacheStore");
+          const req = store.get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) {
+        console.warn("IndexedDB Get Error:", e);
+        return null;
+      }
+    },
+    async set(key, value) {
+      try {
+        const db = await this.init();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction("cacheStore", "readwrite");
+          const store = tx.objectStore("cacheStore");
+          const req = store.put(value, key);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) {
+        console.warn("IndexedDB Set Error:", e);
+      }
+    }
   };
 
   function normalizeProvinceKey(key) {
@@ -63,7 +133,6 @@ window.ScrollTrigger = ScrollTrigger;
     const index = sum % FALLBACK_SLOGANS.length;
     return FALLBACK_SLOGANS[index];
   }
-
 
   function sanitizeThaiText(str) {
     if (str === null || str === undefined) return "";
@@ -174,31 +243,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   };
 
-  let STATE = {
-    allProfiles: [],
-    provincesMap: new Map(),
-    currentProfileSlug: null,
-    lastFocusedElement: null,
-    isFetching: false,
-    currentFilters: null,
-    filteredProfiles: [],
-    renderId: 0
-  };
-
-  const DOM = {};
-  let supabaseClient = null;
-  let isLikeProcessing = false;
-  let isFirstLoad = true;
-  let searchDebounceTimer = null;
-
-  const DEFAULT_SEO = {
-    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub",
-    description: "ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ",
-    keywords: "แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน",
-    canonical: "https://firstmodelhub.com/",
-    ogImage: "https://firstmodelhub.com/images/firstmodelhub.webp"
-  };
-
   function runIdle(fn, delay = 0) {
     if ("requestIdleCallback" in window) {
       requestIdleCallback(() => fn());
@@ -244,7 +288,7 @@ window.ScrollTrigger = ScrollTrigger;
     if (!container) {
       container = document.createElement("div");
       container.id = "toast-container";
-      container.style.cssText = "position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 400px; pointer-events: none;";
+      container.style.cssText = "position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: var(--z-toast, 9000); display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 400px; pointer-events: none;";
       document.body.appendChild(container);
     }
 
@@ -252,23 +296,11 @@ window.ScrollTrigger = ScrollTrigger;
     const isSuccess = type === "success";
     toast.style.cssText = `
       background-color: ${isSuccess ? "rgba(16, 185, 129, 0.95)" : "rgba(239, 68, 68, 0.95)"};
-      color: white;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      color: white; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 700;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px);
       border: 1px solid ${isSuccess ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)"};
-      pointer-events: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transform: translateY(20px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      transform: translateY(20px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     `;
 
     toast.innerHTML = `
@@ -302,14 +334,14 @@ window.ScrollTrigger = ScrollTrigger;
     hideGlobalLoader();
 
     if (DOM.profilesDisplayArea) {
-      DOM.profilesDisplayArea.classList.remove("hidden");
+      DOM.profilesDisplayArea.classList.remove("hidden-state");
       DOM.profilesDisplayArea.innerHTML = `
         <div style="text-align: center; padding: 48px 16px; color: #EF4444; max-width: 500px; margin: 48px auto; background-color: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 24px;">
             <i class="fas fa-exclamation-triangle" style="font-size: 40px; margin-bottom: 16px; color: var(--primary-purple);"></i>
             <h3 style="font-size: 18px; font-weight: 800; color: white; margin: 0;">ระบบเชื่อมต่อขัดข้องชั่วคราว</h3>
             <p style="margin-top: 12px; color: var(--text-gray); font-size: 13px; line-height: 1.6;">ไม่สามารถดึงข้อมูลโปรไฟล์ได้ในขณะนี้ กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตของคุณใหม่อีกครั้งครับ</p>
             <button onclick="window.location.reload()" 
-                    style="margin-top: 24px; padding: 12px 28px; background-color: var(--primary-purple); color: white; border-radius: 100px; border: none; cursor: pointer; font-weight: 800; font-size: 13px; box-shadow: 0 4px 15px rgba(90, 44, 190, 0.3); transition: transform 0.2s;">
+                    style="margin-top: 24px; padding: 12px 28px; background-color: var(--primary-purple); color: black; border-radius: 100px; border: none; cursor: pointer; font-weight: 800; font-size: 13px; box-shadow: 0 4px 15px rgba(90, 44, 190, 0.3); transition: transform 0.2s;">
                 <i class="fas fa-sync-alt" style="margin-right: 8px;"></i> รีโหลดหน้าเว็บ
             </button>
         </div>
@@ -426,44 +458,23 @@ window.ScrollTrigger = ScrollTrigger;
       waist: waist,
       hips: hips,
       cupSize: cup,
-      
       safeAge: cleanAge || "-",
       safeAgeDisplay: safeAgeDisplay,
       safeHeight: safeHeight,
       safeWeight: safeWeight,
       safeStats: safeStats,
       safeSkin: safeSkin,
-
       isAvailable: isAvailable,
       availability: availStatus,
       isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
       hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
       isNew: Boolean(raw.is_new || raw.isNew),
       isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
-      
       lineId: lineIdClean,
       styleTags: styleTags,
       quote: sloganText,
       slogan: sloganText
     };
-  }
-
-  function saveCacheToLocalStorage(key, data) {
-    runIdle(() => {
-      try {
-        localStorage.setItem(key, JSON.stringify(data));
-      } catch (e) {
-        if (e.name === "QuotaExceededError" || e.code === 22) {
-          localStorage.removeItem(CONFIG.KEYS.CACHE_PROFILES);
-          localStorage.removeItem("recent_searches");
-          try {
-            localStorage.setItem(key, JSON.stringify(data));
-          } catch (err) {
-            console.error("❌ บันทึกแคชล้มเหลว:", err);
-          }
-        }
-      }
-    }, 1500);
   }
 
   async function fetchProfilesData() {
@@ -473,14 +484,15 @@ window.ScrollTrigger = ScrollTrigger;
     try {
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         console.log("⚡ [Hydration] โหลดข้อมูล SSR สำเร็จ!");
-        
         STATE.provincesMap.clear();
         
         try {
-          const cachedProvinces = JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES) || "[]");
-          cachedProvinces.forEach(p => {
-            if (p.key && p.name) STATE.provincesMap.set(normalizeProvinceKey(p.key), p.name);
-          });
+          const cachedProvinces = await idb.get(CONFIG.KEYS.CACHE_PROVINCES) || JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES) || "[]");
+          if (Array.isArray(cachedProvinces)) {
+            cachedProvinces.forEach(p => {
+              if (p.key && p.name) STATE.provincesMap.set(normalizeProvinceKey(p.key), p.name);
+            });
+          }
         } catch (e) {}
 
         window.profilesData.forEach(p => {
@@ -493,23 +505,30 @@ window.ScrollTrigger = ScrollTrigger;
           STATE.provincesMap.set("chiangmai", "เชียงใหม่");
           STATE.provincesMap.set("bangkok", "กรุงเทพฯ");
           STATE.provincesMap.set("chonburi", "ชลบุรี");
-          STATE.provincesMap.set("khonkaen", "ขอนแก่น");
-          STATE.provincesMap.set("phuket", "ภูเก็ต");
-          STATE.provincesMap.set("udonthani", "อุดรธานี");
-          STATE.provincesMap.set("lampang", "ลำปาง");
-          STATE.provincesMap.set("chiangrai", "เชียงราย");
         }
 
         STATE.allProfiles = deduplicateProfiles(window.profilesData.map(p => processProfileObject(p)).filter(Boolean));
+        
         populateProvinceDropdown();
         applyUltimateFilters(false, false);
         updateHeroSwiperCards();
+        
+        runIdle(async () => {
+          if (supabaseClient) {
+            const { data } = await supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false });
+            if (data) {
+              const fullData = deduplicateProfiles(data.map(p => processProfileObject(p)).filter(Boolean));
+              STATE.allProfiles = fullData;
+              idb.set(CONFIG.KEYS.CACHE_PROFILES, fullData);
+            }
+          }
+        }, 3000);
+
         STATE.isFetching = false;
         return true;
       }
 
       console.log("🚀 กำลังดึงข้อมูลโปรไฟล์จาก Supabase...");
-      
       const provincesPromise = supabaseClient.from("provinces").select("*");
       const profilesPromise = supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false });
 
@@ -526,16 +545,14 @@ window.ScrollTrigger = ScrollTrigger;
             provincesCacheArr.push({ key: key, name: name });
           }
         });
-        saveCacheToLocalStorage(CONFIG.KEYS.CACHE_PROVINCES, provincesCacheArr);
+        idb.set(CONFIG.KEYS.CACHE_PROVINCES, provincesCacheArr);
       }
 
-      if (profilesRes.error) {
-        throw profilesRes.error;
-      }
+      if (profilesRes.error) throw profilesRes.error;
 
       const rawProfiles = profilesRes.data || [];
       STATE.allProfiles = deduplicateProfiles(rawProfiles.map(p => processProfileObject(p)).filter(Boolean));
-      saveCacheToLocalStorage(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
+      idb.set(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
 
       populateProvinceDropdown();
       applyUltimateFilters(false, false);
@@ -544,9 +561,9 @@ window.ScrollTrigger = ScrollTrigger;
 
     } catch (err) {
       console.error("❌ โหลดข้อมูลล้มเหลว นำข้อมูลเก่ามาแสดงแทน:", err);
-      const fallbackRaw = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
-      if (fallbackRaw) {
-        STATE.allProfiles = deduplicateProfiles(JSON.parse(fallbackRaw));
+      const fallbackRaw = await idb.get(CONFIG.KEYS.CACHE_PROFILES) || JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES) || "[]");
+      if (fallbackRaw && Array.isArray(fallbackRaw) && fallbackRaw.length > 0) {
+        STATE.allProfiles = deduplicateProfiles(fallbackRaw);
         populateProvinceDropdown();
         applyUltimateFilters(false, false);
         updateHeroSwiperCards();
@@ -586,7 +603,6 @@ window.ScrollTrigger = ScrollTrigger;
       const realLocation = p.location || p.provinceNameThai || STATE.provincesMap.get(p.provinceKey) || "ทั่วไทย";
       const pSlug = encodeURIComponent(p.slug || p.id);
       const imgUrl = p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
-      
       const isAvail = p.status === "รับงาน" || !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
       const availText = isAvail ? "รับงาน" : "สอบถาม";
 
@@ -642,12 +658,11 @@ window.ScrollTrigger = ScrollTrigger;
 
     DOM.provinceSelect.appendChild(fragment);
 
-    // 🟢 FIX 1: ปลดล็อก inline onclick ออก ปล่อยให้ Event Delegation จัดการยิงคำสั่งเดียวไม่ซ้ำซ้อน
     if (modalChipsContainer) {
       modalChipsContainer.innerHTML = modalChipsHTML;
     }
   }
-  
+
   function createProfileCardElement(profile, index = 20) {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
@@ -671,28 +686,28 @@ window.ScrollTrigger = ScrollTrigger;
     const ageDisplay = (profile.safeAge && profile.safeAge !== "-" && profile.safeAge !== "ไม่ระบุ") ? ` <span style="font-size: 0.85em; opacity: 0.9;">(${profile.safeAge})</span>` : "";
 
     const featuredBadge = profile.isfeatured
-      ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-star" style="font-size: 10px; color: #FBBF24;"></i>
+      ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <i class="fas fa-star" style="font-size: 9px; color: #FBBF24;"></i>
           <span style="letter-spacing: 0.02em;">แนะนำ</span>
          </span>`
       : "";
 
     const statusBadge = `
-      <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+      <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
           <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
           <span style="letter-spacing: 0.02em;">${statusText}</span>
       </span>
     `;
 
     const videoBadge = profile.hasVideo
-      ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-video" style="font-size: 10px;"></i> คลิป
+      ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <i class="fas fa-video" style="font-size: 9px;"></i> คลิป
          </span>`
       : "";
 
     const verifiedBadge = (profile.isVerified || profile.verified)
-      ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-check-circle" style="font-size: 10px; color: #00E676;"></i> ยืนยันตัวตน
+      ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <i class="fas fa-check-circle" style="font-size: 9px; color: #00E676;"></i> ยืนยันตัวตน
          </span>`
       : "";
 
@@ -704,7 +719,7 @@ window.ScrollTrigger = ScrollTrigger;
            title="${seoAltText}"
            width="300"
            height="400"
-           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
+           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 14px;"
            loading="${index < 2 ? "eager" : "lazy"}"
            decoding="async"
            onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_OG_IMAGE}';" />
@@ -719,7 +734,7 @@ window.ScrollTrigger = ScrollTrigger;
 
       <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center; gap: 4px;">
           ${verifiedBadge}
-          <button type="button" data-action="like" data-id="${profile.id}" class="like-heart-btn" aria-label="กดถูกใจโปรไฟล์" style="background: rgba(9, 9, 11, 0.7); border: 1px solid rgba(255,255,255,0.2); color: #FF2E63; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(6px); transition: transform 0.2s;">
+          <button type="button" data-action="like" data-id="${profile.id}" class="like-heart-btn" aria-label="กดถูกใจโปรไฟล์">
             <i class="fas fa-heart" style="font-size: 12px;"></i>
           </button>
       </div>
@@ -731,9 +746,9 @@ window.ScrollTrigger = ScrollTrigger;
             ${nameClean}${ageDisplay}
           </h3>
           
-          ${(profile.slogan || profile.quote) ? `<p style="font-size: 12px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
+          ${(profile.slogan || profile.quote) ? `<p style="font-size: 11px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
           
-          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
               <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
                   <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
               </span>
@@ -773,12 +788,11 @@ window.ScrollTrigger = ScrollTrigger;
 
   function createProvinceSectionElement(provinceKey, provinceName, profiles) {
     const wrapper = document.createElement("div");
-    wrapper.className = "section-content-wrapper province-section";
+    wrapper.className = "section-content-wrapper province-section mt-6";
     wrapper.id = `province-${provinceKey}`;
-    wrapper.style.cssText = "margin-top: 24px;";
     
     wrapper.innerHTML = `
-      <div style="padding: 8px 4px 12px 4px;">
+      <div class="flex justify-between items-center flex-wrap gap-2 p-2">
           <a href="/location/${provinceKey}" class="group" style="text-decoration: none; display: inline-block;">
               <h2 class="province-section-header" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 18px; font-weight: 800; color: white; margin: 0;">
                   📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${provinceName}</span>
@@ -790,7 +804,7 @@ window.ScrollTrigger = ScrollTrigger;
               </h2>
           </a>
       </div>
-      <div class="profile-grid profiles-grid-row"></div>
+      <div class="profiles-grid-row mt-2"></div>
     `;
     return wrapper;
   }
@@ -802,7 +816,9 @@ window.ScrollTrigger = ScrollTrigger;
       container.id = "active-filter-chips";
       container.style.cssText = "display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; justify-content: center;";
       const searchForm = document.getElementById("search-form");
-      if (searchForm) searchForm.appendChild(container);
+      if (searchForm && searchForm.parentNode) {
+        searchForm.parentNode.insertBefore(container, searchForm.nextSibling);
+      }
     }
 
     const text = (DOM.searchInput?.value || "").trim();
@@ -869,7 +885,7 @@ window.ScrollTrigger = ScrollTrigger;
 
     container.style.display = "flex";
     container.innerHTML = activeItems.map((item, idx) => `
-      <span class="active-chip-item" data-idx="${idx}" style="background: rgba(192, 132, 252, 0.18); border: 1px solid rgba(192, 132, 252, 0.4); color: #E9D5FF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 100px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+      <span class="active-chip-item" data-idx="${idx}" style="background: rgba(192, 132, 252, 0.18); border: 1px solid rgba(192, 132, 252, 0.4); color: #E9D5FF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 100px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
         ${item.label}
         <i class="fas fa-times-circle" style="color: #FF85C0; font-size: 11px;"></i>
       </span>
@@ -890,10 +906,13 @@ window.ScrollTrigger = ScrollTrigger;
     if (!chipsWrapper) {
       chipsWrapper = document.createElement("div");
       chipsWrapper.id = "smart-quick-chips";
-      chipsWrapper.style.cssText = "display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px 2px 2px; margin-top: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none;";
+      chipsWrapper.className = "horizontal-scroll-chips";
+      chipsWrapper.style.cssText = "padding: 8px 2px; margin-top: 8px;";
       
       const searchForm = document.getElementById("search-form");
-      if (searchForm) searchForm.appendChild(chipsWrapper);
+      if (searchForm && searchForm.parentNode) {
+        searchForm.parentNode.insertBefore(chipsWrapper, searchForm.nextSibling);
+      }
     }
 
     const currentProv = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
@@ -901,20 +920,20 @@ window.ScrollTrigger = ScrollTrigger;
     const zones = (data && data.zones) ? data.zones.slice(1, 5) : ["ตัวเมือง"];
 
     let chipsHtml = `
-      <button type="button" class="quick-chip-btn" data-type="featured" style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+      <button type="button" class="quick-chip-btn luxury-chip" data-type="featured" style="background: rgba(124, 58, 237, 0.18); border-color: rgba(192, 132, 252, 0.35); color: #E9D5FF; display: inline-flex; align-items: center; gap: 4px;">
         <i class="fas fa-star" style="color: #FBBF24;"></i> VIP แนะนำ
       </button>
-      <button type="button" class="quick-chip-btn" data-type="avail" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(52, 211, 153, 0.35); color: #00E676; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
-        <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #00E676;"></span> พร้อมรับงาน
+      <button type="button" class="quick-chip-btn luxury-chip" data-type="avail" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(52, 211, 153, 0.35); color: #00E676; display: inline-flex; align-items: center; gap: 4px;">
+        <span class="pulse-green-dot"></span> พร้อมรับงาน
       </button>
-      <button type="button" class="quick-chip-btn" data-type="tag" data-val="ฟิวแฟน" style="background: rgba(255, 20, 147, 0.15); border: 1px solid rgba(255, 105, 180, 0.35); color: #FF85C0; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+      <button type="button" class="quick-chip-btn luxury-chip" data-type="tag" data-val="ฟิวแฟน" style="background: rgba(255, 20, 147, 0.15); border-color: rgba(255, 105, 180, 0.35); color: #FF85C0; display: inline-flex; align-items: center; gap: 4px;">
         <i class="fas fa-heart" style="color: #FF1493;"></i> #ฟิวแฟน
       </button>
     `;
 
     zones.forEach(z => {
       chipsHtml += `
-        <button type="button" class="quick-chip-btn" data-type="keyword" data-val="${z}" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: #D4D4D8; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 100px; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+        <button type="button" class="quick-chip-btn luxury-chip" data-type="keyword" data-val="${z}" style="display: inline-flex; align-items: center; gap: 4px;">
           <i class="fas fa-map-marker-alt" style="color: #C084FC;"></i> ${z}
         </button>
       `;
@@ -938,20 +957,6 @@ window.ScrollTrigger = ScrollTrigger;
         }
         applyUltimateFilters(true, true);
       };
-    });
-  }
-
-  function scrollToSearchResults() {
-    const targetElement = document.getElementById("profiles-display-area");
-    if (!targetElement) return;
-
-    const headerOffset = 70;
-    const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-    const offsetPosition = elementPosition - headerOffset;
-
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: "smooth"
     });
   }
 
@@ -1097,163 +1102,161 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  async function renderProfilesGrid(profiles, isFilteredView, isUserAction = false) {
-  if (!DOM.profilesDisplayArea) return;
+  function scrollToSearchResults() {
+    const targetElement = document.getElementById("profiles-display-area");
+    if (!targetElement) return;
 
-  STATE.renderId = (STATE.renderId || 0) + 1;
-  const currentRenderId = STATE.renderId;
-
-  destroyLoadingPlaceholder();
-  
-  if (DOM.noResultsMessage) DOM.noResultsMessage.classList.add("hidden");
-  if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.add("hidden");
-
-  const allProfiles = STATE.allProfiles || [];
-
-  // 1. จัดการส่วน Featured Profiles
-  if (DOM.featuredSection) {
-    const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
-    const featuredProfiles = allProfiles.filter(p => p.isfeatured);
-    DOM.featuredSection.classList.toggle("hidden", !isHomePage || featuredProfiles.length === 0);
-
-    if (isHomePage && featuredProfiles.length > 0 && DOM.featuredContainer && DOM.featuredContainer.children.length === 0) {
-      await appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
-    }
+    const offsetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - 70;
+    window.scrollTo({ top: offsetPosition, behavior: "smooth" });
   }
 
-  // 2. กรณีค้นหาไม่พบข้อมูล (Empty State)
-  if (!profiles || profiles.length === 0) {
-    DOM.profilesDisplayArea.innerHTML = "";
+  async function renderProfilesGrid(profiles, isFilteredView, isUserAction = false) {
+    if (!DOM.profilesDisplayArea) return;
 
-    const recommendations = allProfiles.filter(p => p.isfeatured || p.isAvailable).slice(0, 6);
+    STATE.renderId = (STATE.renderId || 0) + 1;
+    const currentRenderId = STATE.renderId;
 
-    let fallbackHtml = `
-      <div style="text-align: center; padding: 36px 16px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(192, 132, 252, 0.35); border-radius: 20px; margin-bottom: 24px; backdrop-filter: blur(10px);">
-        <div style="font-size: 36px; margin-bottom: 8px;">🔍</div>
-        <h3 style="font-size: 16px; font-weight: 800; color: #FFF; margin: 0;">ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไขที่คุณค้นหา</h3>
-        <p style="font-size: 12px; color: #A1A1AA; margin-top: 6px; line-height: 1.5;">ลองลดตัวกรอง พิมพ์คำค้นหาใหม่ หรือกดล้างตัวกรองด้านล่าง</p>
-        <button id="fallback-reset-btn" style="margin-top: 14px; background: rgba(192, 132, 252, 0.2); border: 1px solid #C084FC; color: #E9D5FF; padding: 8px 20px; border-radius: 100px; font-size: 12px; font-weight: 800; cursor: pointer;">
-          🔄 ล้างตัวกรองค้นหาทั้งหมด
-        </button>
-      </div>
-    `;
+    destroyLoadingPlaceholder();
+    
+    if (DOM.noResultsMessage) DOM.noResultsMessage.classList.add("hidden-state");
+    if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.add("hidden-state");
 
-    if (recommendations.length > 0) {
-      fallbackHtml += `
-        <div style="margin-top: 20px;">
-          <h3 style="font-size: 15px; font-weight: 800; color: #C084FC; margin-bottom: 12px;">
-            💡 โปรไฟล์ยอดนิยมแนะนำที่คุณอาจสนใจ:
-          </h3>
-          <div class="profile-grid profiles-grid-row" id="fallback-grid-area"></div>
+    const allProfiles = STATE.allProfiles || [];
+
+    if (DOM.featuredSection) {
+      const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
+      const featuredProfiles = allProfiles.filter(p => p.isfeatured);
+      DOM.featuredSection.classList.toggle("hidden", !isHomePage || featuredProfiles.length === 0);
+
+      if (isHomePage && featuredProfiles.length > 0 && DOM.featuredContainer && DOM.featuredContainer.children.length === 0) {
+        await appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
+      }
+    }
+
+    if (!profiles || profiles.length === 0) {
+      DOM.profilesDisplayArea.innerHTML = "";
+
+      const recommendations = allProfiles.filter(p => p.isfeatured || p.isAvailable).slice(0, 6);
+
+      let fallbackHtml = `
+        <div class="empty-state-box text-center mt-4">
+          <div class="empty-icon">🔍</div>
+          <h3 class="text-md font-extrabold text-white m-0">ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไขที่คุณค้นหา</h3>
+          <p class="text-xs text-gray-muted mt-2">ลองลดตัวกรอง พิมพ์คำค้นหาใหม่ หรือกดล้างตัวกรองด้านล่าง</p>
+          <button id="fallback-reset-btn" class="btn-outline-purple mt-3">🔄 ล้างตัวกรองค้นหาทั้งหมด</button>
         </div>
       `;
-    }
 
-    // กำหนด innerHTML เสมอ ไม่ว่าจะมี recommendations หรือไม่
-    DOM.profilesDisplayArea.innerHTML = fallbackHtml;
-
-    if (recommendations.length > 0) {
-      const fallbackGrid = document.getElementById("fallback-grid-area");
-      if (fallbackGrid) {
-        await appendProfilesToContainer(fallbackGrid, recommendations, currentRenderId);
+      if (recommendations.length > 0) {
+        fallbackHtml += `
+          <div class="mt-6">
+            <h3 class="text-sm font-extrabold text-purple mb-3">💡 โปรไฟล์ยอดนิยมแนะนำที่คุณอาจสนใจ:</h3>
+            <div class="profiles-grid-row" id="fallback-grid-area"></div>
+          </div>
+        `;
       }
-    } else {
-      if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden");
+
+      DOM.profilesDisplayArea.innerHTML = fallbackHtml;
+
+      if (recommendations.length > 0) {
+        const fallbackGrid = document.getElementById("fallback-grid-area");
+        if (fallbackGrid) {
+          await appendProfilesToContainer(fallbackGrid, recommendations, currentRenderId);
+        }
+      } else {
+        if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden-state");
+      }
+
+      document.getElementById("fallback-reset-btn")?.addEventListener("click", () => {
+        DOM.resetSearchBtn?.click();
+      });
+
+      bindMediaProtection();
+      if (isUserAction) scrollToSearchResults();
+      return;
     }
 
-    document.getElementById("fallback-reset-btn")?.addEventListener("click", () => {
-      DOM.resetSearchBtn?.click();
-    });
+    DOM.profilesDisplayArea.innerHTML = "";
+    const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
+
+    if (isFilteredView || isLocationPage) {
+      const currentProvKey = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
+      const provName = STATE.provincesMap?.get(currentProvKey) || "ทั่วไทย";
+      const count = profiles.length;
+
+      let headingTitle = `📍 น้องๆ ในจังหวัด <span class="text-purple mx-1">${provName}</span>`;
+      const modalKeyword = document.getElementById("modal-search-keyword")?.value;
+      if (DOM.searchInput?.value || modalKeyword) {
+        headingTitle = `🔍 ผลการค้นหา "${DOM.searchInput?.value || modalKeyword}"`;
+      }
+
+      const sectionWrapper = document.createElement("div");
+      sectionWrapper.className = "mt-4 relative";
+      
+      sectionWrapper.innerHTML = `
+        <div class="flex justify-between items-center flex-wrap gap-2 p-2">
+            <h2 class="text-lg font-extrabold text-white m-0 flex items-center flex-wrap gap-2">
+                ${headingTitle}
+                <span class="live-count-chip">
+                  <span class="pulse-dot-el"></span>
+                  <span>พบ ${count} โปรไฟล์พร้อมรับงาน</span>
+                </span>
+            </h2>
+        </div>
+        <div class="profiles-grid-row mt-2"></div>
+      `;
+
+      DOM.profilesDisplayArea.appendChild(sectionWrapper);
+
+      await appendProfilesToContainer(sectionWrapper.querySelector(".profiles-grid-row"), profiles, currentRenderId);
+      if (isUserAction) scrollToSearchResults();
+
+    } else {
+      const grouped = profiles.reduce((acc, p) => {
+        const key = p.provinceKey || "no_province";
+        acc[key] = acc[key] || [];
+        acc[key].push(p);
+        return acc;
+      }, {});
+
+      const sortedProvinceKeys = Object.keys(grouped).sort((a, b) => {
+        const nameA = STATE.provincesMap?.get(a) || a;
+        const nameB = STATE.provincesMap?.get(b) || b;
+        return nameA.localeCompare(nameB, "th");
+      });
+
+      if (sortedProvinceKeys.length !== 0) {
+        for (const key of sortedProvinceKeys) {
+          if (STATE.renderId !== currentRenderId) return;
+
+          const name = STATE.provincesMap?.get(key) || (key === "no_province" ? "ไม่ระบุจังหวัด" : key);
+          const cleanGroupProfiles = deduplicateProfiles(grouped[key]);
+          const section = createProvinceSectionElement(key, name, cleanGroupProfiles);
+
+          DOM.profilesDisplayArea.appendChild(section);
+
+          const grid = section.querySelector(".profiles-grid-row");
+          await appendProfilesToContainer(grid, cleanGroupProfiles, currentRenderId);
+        }
+        if (isUserAction) scrollToSearchResults();
+      } else {
+        if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden-state");
+      }
+    }
 
     bindMediaProtection();
-    if (isUserAction) scrollToSearchResults();
-    return;
+    if (window.ScrollTrigger) {
+      setTimeout(() => ScrollTrigger.refresh(), 200);
+    }
   }
 
-  // 3. กรณีมีข้อมูลโปรไฟล์
-  DOM.profilesDisplayArea.innerHTML = "";
-  const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
-
-  if (isFilteredView || isLocationPage) {
-    const currentProvKey = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
-    const provName = STATE.provincesMap?.get(currentProvKey) || "ทั่วไทย";
-    const count = profiles.length;
-
-    let headingTitle = `📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${provName}</span>`;
-    const modalKeyword = document.getElementById("modal-search-keyword")?.value;
-    if (DOM.searchInput?.value || modalKeyword) {
-      headingTitle = `🔍 ผลการค้นหา "${DOM.searchInput?.value || modalKeyword}"`;
-    }
-
-    const sectionWrapper = document.createElement("div");
-    sectionWrapper.className = "section-content-wrapper";
-    sectionWrapper.style.cssText = "margin-top: 16px;";
-    
-    sectionWrapper.innerHTML = `
-      <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-              ${headingTitle}
-              <span class="live-count-chip">
-                <span class="pulse-dot-el"></span>
-                <span>พบ ${count} โปรไฟล์พร้อมรับงาน</span>
-              </span>
-          </h2>
-      </div>
-      <div class="profile-grid profiles-grid-row"></div>
-    `;
-
-    DOM.profilesDisplayArea.appendChild(sectionWrapper);
-
-    await appendProfilesToContainer(sectionWrapper.querySelector(".profile-grid"), profiles, currentRenderId);
-    if (isUserAction) scrollToSearchResults();
-
-  } else {
-    const grouped = profiles.reduce((acc, p) => {
-      const key = p.provinceKey || "no_province";
-      acc[key] = acc[key] || [];
-      acc[key].push(p);
-      return acc;
-    }, {});
-
-    const sortedProvinceKeys = Object.keys(grouped).sort((a, b) => {
-      const nameA = STATE.provincesMap?.get(a) || a;
-      const nameB = STATE.provincesMap?.get(b) || b;
-      return nameA.localeCompare(nameB, "th");
+  function bindMediaProtection() {
+    if (!DOM.profilesDisplayArea) return;
+    DOM.profilesDisplayArea.querySelectorAll("img").forEach(img => {
+      img.oncontextmenu = e => e.preventDefault();
+      img.ondragstart = e => e.preventDefault();
     });
-
-    if (sortedProvinceKeys.length !== 0) {
-      for (const key of sortedProvinceKeys) {
-        if (STATE.renderId !== currentRenderId) return;
-
-        const name = STATE.provincesMap?.get(key) || (key === "no_province" ? "ไม่ระบุจังหวัด" : key);
-        const cleanGroupProfiles = deduplicateProfiles(grouped[key]);
-        const section = createProvinceSectionElement(key, name, cleanGroupProfiles);
-
-        DOM.profilesDisplayArea.appendChild(section);
-
-        const grid = section.querySelector(".profile-grid");
-        await appendProfilesToContainer(grid, cleanGroupProfiles, currentRenderId);
-      }
-      if (isUserAction) scrollToSearchResults();
-    } else {
-      if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden");
-    }
   }
-
-  // เรียกผูกระบบป้องกันรูปเมื่อ Render สิ้นสุดแน่นอนแล้ว
-  bindMediaProtection();
-  if (window.ScrollTrigger) {
-    setTimeout(() => ScrollTrigger.refresh(), 200);
-  }
-}
-
-function bindMediaProtection() {
-  if (!DOM.profilesDisplayArea) return;
-  DOM.profilesDisplayArea.querySelectorAll("img").forEach(img => {
-    img.oncontextmenu = e => e.preventDefault();
-    img.ondragstart = e => e.preventDefault();
-  });
-}
 
   function openLightboxForProfile(profile) {
     if (!profile) return;
@@ -1271,8 +1274,8 @@ function bindMediaProtection() {
     const titleEl = document.getElementById("lightbox-profile-name-main");
     if (titleEl) {
       titleEl.innerHTML = `
-        <span class="brand-neon-text" style="font-size: clamp(22px, 5.5vw, 28px) !important; font-weight: 900 !important; background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.8)) !important;">${nameClean}</span>
-        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 18px;" title="ยืนยันตัวตนแล้ว"></i>' : ""}
+        <span style="font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #FFF 0%, #FF85C0 35%, #FF1493 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${nameClean}</span>
+        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 16px;" title="ยืนยันตัวตนแล้ว"></i>' : ""}
       `;
     }
 
@@ -1301,20 +1304,14 @@ function bindMediaProtection() {
           const thumb = document.createElement("img");
           thumb.src = imgObj.src;
           thumb.alt = `ภาพที่ ${idx + 1}`;
-          thumb.style.cssText = "width: 50px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: all 0.2s; flex-shrink: 0;";
-          
           if (idx === 0) {
-            thumb.style.borderColor = "var(--primary-purple)";
+            thumb.style.borderColor = "#C084FC";
             thumb.style.opacity = "1";
           }
-
           thumb.onclick = () => {
             if (heroImg) heroImg.src = imgObj.fullSrc || imgObj.src;
-            Array.from(strip.children).forEach(child => {
-              child.style.borderColor = "transparent";
-              child.style.opacity = "0.5";
-            });
-            thumb.style.borderColor = "var(--primary-purple)";
+            Array.from(strip.children).forEach(child => { child.style.borderColor = "transparent"; child.style.opacity = "0.5"; });
+            thumb.style.borderColor = "#C084FC";
             thumb.style.opacity = "1";
           };
           strip.appendChild(thumb);
@@ -1336,7 +1333,9 @@ function bindMediaProtection() {
       const tagsList = Array.isArray(profile.styleTags) ? profile.styleTags : [];
       tagsList.forEach(tag => {
         const span = document.createElement("span");
-        span.style.cssText = "background: rgba(124, 58, 237, 0.12); border: 1px solid rgba(192, 132, 252, 0.3); color: #E9D5FF; font-size: 12px; padding: 3px 10px; border-radius: 100px; font-weight: 700;";
+        span.className = "luxury-chip";
+        span.style.padding = "4px 10px";
+        span.style.fontSize = "11px";
         span.textContent = tag.startsWith("#") ? tag : `#${tag}`;
         tagsEl.appendChild(span);
       });
@@ -1354,16 +1353,16 @@ function bindMediaProtection() {
     if (detailsEl) {
       detailsEl.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
-                <div style="font-size: 12px; color: #A1A1AA; font-weight: 600;">อายุ</div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">อายุ</div>
                 <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${ageDisplay}</div>
             </div>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
-                <div style="font-size: 12px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
                 <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${statsText}</div>
             </div>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 100px; text-align: center;">
-                <div style="font-size: 12px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
                 <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${heightText}</div>
             </div>
         </div>
@@ -1436,7 +1435,7 @@ function bindMediaProtection() {
       detailsContainer.appendChild(stickyBtnWrapper);
     }
 
-    lightbox.classList.add("active");
+    lightbox.classList.remove("hidden");
     lightbox.style.display = "flex";
     document.body.style.overflow = "hidden";
 
@@ -1445,6 +1444,7 @@ function bindMediaProtection() {
       gsap.fromTo(wrapper, { scale: 0.92, opacity: 0, y: 15 }, { scale: 1, opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.2)" });
     }
 
+    // 🟢 อัปเดต SEO Metadata เมื่อเปิด Lightbox
     updateSEOMetadata(profile, null);
   }
   
@@ -1452,12 +1452,13 @@ function bindMediaProtection() {
     const lightbox = document.getElementById("lightbox");
     if (lightbox) {
       lightbox.style.display = "none";
-      lightbox.classList.remove("active");
+      lightbox.classList.add("hidden");
       document.body.style.overflow = "";
 
       STATE.currentProfileSlug = null;
       if (updateUrl && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
         history.pushState(null, "", "/");
+        // 🟢 คืนค่า SEO กลับไปเป็นของหน้าแรก
         updateSEOMetadata(null, null);
       }
     }
@@ -1483,6 +1484,23 @@ function bindMediaProtection() {
     document.head.appendChild(script);
   }
 
+  function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
+    const ogImage = profile && profile.images && profile.images[0] ? profile.images[0].fullSrc : CONFIG.DEFAULT_OG_IMAGE;
+    const currentUrl = window.location.href;
+
+    updateMetaTag("og:title", title);
+    updateMetaTag("og:description", description);
+    updateMetaTag("og:type", type);
+    updateMetaTag("og:url", currentUrl);
+    updateMetaTag("og:image", ogImage);
+    updateMetaTag("og:site_name", "First Model Hub");
+
+    updateMetaTag("twitter:card", "summary_large_image");
+    updateMetaTag("twitter:title", title);
+    updateMetaTag("twitter:description", description);
+    updateMetaTag("twitter:image", ogImage);
+  }
+
   function updateSEOMetadata(profile = null, locationData = null) {
     const currentPath = window.location.pathname.toLowerCase();
     const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
@@ -1493,7 +1511,7 @@ function bindMediaProtection() {
     }
     isFirstLoad = false;
 
-    if (isHomePage) {
+    if (isHomePage && !profile) {
       document.title = DEFAULT_SEO.title;
       updateMetaTag("description", DEFAULT_SEO.description);
       updateMetaTag("keywords", DEFAULT_SEO.keywords);
@@ -1599,7 +1617,7 @@ function bindMediaProtection() {
     }
     link.setAttribute("href", href);
   }
-
+  
   function updateGoogleMap(provKey = "national", provName = "ทั่วไทย") {
     const mapIframe = document.getElementById("google-map");
     const mapSection = document.getElementById("map-section");
@@ -1628,7 +1646,8 @@ function bindMediaProtection() {
     if (!chipsContainer) {
       chipsContainer = document.createElement("div");
       chipsContainer.id = "zone-chips-container";
-      chipsContainer.style.cssText = "display: flex; gap: 8px; overflow-x: auto; padding: 10px 4px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none;";
+      chipsContainer.className = "horizontal-scroll-chips";
+      chipsContainer.style.cssText = "padding: 10px 4px; margin-bottom: 12px;";
       
       const targetSection = document.getElementById("profiles-display-area");
       if (targetSection && targetSection.parentNode) {
@@ -1644,7 +1663,7 @@ function bindMediaProtection() {
       const isAll = zone === "ทั้งหมด";
       return `
         <button type="button" data-zone-keyword="${isAll ? '' : zone}" 
-                class="zone-chip-btn ${isAll ? 'active' : ''}">
+                class="luxury-chip zone-chip-btn ${isAll ? 'active' : ''}">
           📍 ${zone}
         </button>
       `;
@@ -1678,21 +1697,21 @@ function bindMediaProtection() {
         : LOCALIZED_SEO_MAP["national"].reviews;
         
       reviewsGrid.innerHTML = reviewsList.map(r => `
-        <div class="interactive-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(13,8,30,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="interactive-card p-4 flex flex-col gap-2 text-left">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
               <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${r.author.charAt(0)}</div>
               <div>
-                <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${r.author}</span>
-                <span style="display: block; font-size: 12px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${r.location}</span>
+                <span class="block text-xs font-extrabold text-white">${r.author}</span>
+                <span class="block text-xs text-gray-muted font-bold">นัดเจอใน${r.location}</span>
               </div>
             </div>
-            <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 12px;">
+            <div class="stars flex gap-1 text-gold text-xs">
               <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
             </div>
           </div>
-          <p style="font-size: 12px; color: var(--text-gray); line-height: 1.5; margin: 0;">${r.text}</p>
-          <span style="display: block; font-size: 12px; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">ยืนยันการใช้บริการจริง • ${r.date}</span>
+          <p class="text-xs text-gray-light leading-relaxed m-0">${r.text}</p>
+          <span class="block text-xs text-gray-muted font-extrabold uppercase mt-2">ยืนยันการใช้บริการจริง • ${r.date}</span>
         </div>
       `).join("");
     }
@@ -1704,11 +1723,11 @@ function bindMediaProtection() {
         : LOCALIZED_SEO_MAP["national"].faqs;
 
       faqContainer.innerHTML = faqsList.map(item => `
-        <div class="interactive-card" style="padding: 16px 20px; background: rgba(13,8,30,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;">
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <h3 style="font-weight: 800; font-size: 14px; display: flex; align-items: start; gap: 10px; margin: 0;">
+        <div class="interactive-card p-4">
+            <div class="flex flex-col gap-2">
+                <h3 class="font-extrabold text-sm flex items-start gap-2 m-0">
                   <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 12px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
-                  <span class="text-gradient-sub" style="line-height: 1.4; color: #E9D5FF;">${item.q}</span>
+                  <span class="text-gradient-sub leading-relaxed">${item.q}</span>
                 </h3>
                 <div style="padding-left: 32px; color: var(--text-gray); font-size: 12px; line-height: 1.5; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
                   ${item.a}
@@ -1765,9 +1784,6 @@ function bindMediaProtection() {
     });
   }
 
-
-
-  // 🟢 2. อัปเดตการเคลียร์ Tag หลุดใน DOM
   function replaceDomPlaceholders(provinceName = "ทั่วไทย", profileCount = 50, provinceSlug = "national") {
     try {
       const liveCountEl = document.getElementById("live-profile-count");
@@ -1813,12 +1829,17 @@ function bindMediaProtection() {
     }
   }
 
+  function updateActiveNavLinks() {
+    const path = window.location.pathname;
+    document.querySelectorAll("nav a").forEach(a => {
+      const isActive = a.getAttribute("href") === path;
+      a.classList.toggle("active", isActive);
+    });
+  }
+
   async function handleRouteNavigation(isInitial = false) {
     let path = window.location.pathname.toLowerCase();
-    
-    if (path.length > 1 && path.endsWith("/")) {
-      path = path.slice(0, -1);
-    }
+    if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
 
     const isSsrSingleProfile = Boolean(document.querySelector(".single-profile-wrapper"));
 
@@ -1840,7 +1861,6 @@ function bindMediaProtection() {
         foundProfile = await fetchSingleProfileBySlug(slug);
       }
 
-      // 🟢 FIX 3: ถ้าเป็น SSR หน้าโปรไฟล์เดี่ยวแล้ว ไม่เปิด Lightbox ซ้ำซ้อน
       if (isSsrSingleProfile && isInitial) {
         closeLightboxModal(false);
         return;
@@ -1864,6 +1884,13 @@ function bindMediaProtection() {
       closeLightboxModal(false);
 
       if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
+      
+      const provName = STATE.provincesMap.get(provinceSlug) || "ทั่วไทย";
+      updateSEOMetadata(null, {
+        provinceName: provName,
+        profiles: STATE.allProfiles.filter(p => normalizeProvinceKey(p.provinceKey) === provinceSlug),
+        canonicalUrl: window.location.href
+      });
 
       applyUltimateFilters(false, false);
       return;
@@ -1871,7 +1898,7 @@ function bindMediaProtection() {
 
     STATE.currentProfileSlug = null;
     closeLightboxModal(false);
-
+    updateSEOMetadata(null, null);
     applyUltimateFilters(false, false);
   }
 
@@ -1879,11 +1906,9 @@ function bindMediaProtection() {
     if (!window.supabase) return null;
     try {
       let query = window.supabase.from("profiles").select("*");
-      if (/^\d+$/.test(slug)) {
-        query = query.eq("id", slug);
-      } else {
-        query = query.eq("slug", slug);
-      }
+      if (/^\d+$/.test(slug)) query = query.eq("id", slug);
+      else query = query.eq("slug", slug);
+      
       const { data, error } = await query.maybeSingle();
       if (error) throw error;
       return data ? processProfileObject(data) : null;
@@ -1891,22 +1916,6 @@ function bindMediaProtection() {
       console.error("❌ ดึงข้อมูลโปรไฟล์ล้มเหลว:", e);
       return null;
     }
-  }
-
-  function updateActiveNavLinks() {
-    const path = window.location.pathname;
-    document.querySelectorAll("nav a").forEach(a => {
-      const isActive = a.getAttribute("href") === path;
-      a.classList.toggle("active", isActive);
-    });
-  }
-
-  function hideGlobalLoader() {
-    const loader = document.getElementById("global-loader-overlay");
-    if (loader) {
-      loader.style.display = "none";
-    }
-    if (DOM.loadingPlaceholder) DOM.loadingPlaceholder.style.display = "none";
   }
 
   function initStarRating() {
@@ -1948,34 +1957,16 @@ function bindMediaProtection() {
       const location = document.getElementById("review-location")?.value.trim();
       const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
       const reviewText = document.getElementById("review-text")?.value.trim();
-      
-      const urlPath = window.location.pathname.toLowerCase();
-      const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
-      const profileMatch = urlPath.match(/^\/(?:sideline|profile)\/([^/]+)/);
-
-      let rawProvKey = "national";
-      if (locMatch) {
-        try { rawProvKey = decodeURIComponent(locMatch[1]); } catch (e) { rawProvKey = locMatch[1]; }
-      } else if (profileMatch && STATE.currentProfileSlug) {
-        const currentP = STATE.allProfiles.find(p => String(p.slug || p.id).toLowerCase() === STATE.currentProfileSlug.toLowerCase());
-        if (currentP) rawProvKey = currentP.provinceKey;
-      } else {
-        rawProvKey = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
-      }
-
-      rawProvKey = normalizeProvinceKey(rawProvKey);
+      const rawProvKey = DOM.provinceSelect?.value || "national";
 
       if (!author || !reviewText) {
-        showToast("❌ กรุณากรอกข้อมูลชื่อผู้ใช้งานและรายละเอียดรีวิวให้ครบถ้วนด้วยครับ", "error");
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ";
-        }
+        showToast("❌ กรุณากรอกชื่อและรายละเอียดให้ครบถ้วน", "error");
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ"; }
         return;
       }
 
       try {
-        if (!supabaseClient) throw new Error("Supabase client is not connected");
+        if (!supabaseClient) throw new Error("Database offline");
         const { error } = await supabaseClient.from("reviews").insert([{
           author_name: author,
           location_detail: location || "ไม่ระบุโซน",
@@ -1987,12 +1978,12 @@ function bindMediaProtection() {
 
         if (error) throw error;
 
-        showToast("✅ ส่งรีวิวเสร็จสิ้นแล้ว! ข้อมูลของคุณกำลังรอผู้ดูแลอนุมัติตรวจสอบครับ", "success");
+        showToast("✅ ส่งรีวิวสำเร็จ! ข้อมูลของคุณกำลังรอตรวจสอบ", "success");
         form.reset();
+        
       } catch (err) {
         console.error("Submission failed:", err);
-        showToast("✅ ส่งรีวิวสำเร็จเรียบร้อยแล้ว ขอบคุณที่ร่วมแบ่งปันประสบการณ์ครับ!", "success");
-        form.reset();
+        showToast("❌ เกิดข้อผิดพลาดในการส่งรีวิว กรุณาลองใหม่", "error");
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -2026,23 +2017,17 @@ function bindMediaProtection() {
       if (trigger) {
         trigger.addEventListener("click", () => {
           const isCollapsed = item.classList.contains("collapsed");
-          items.forEach(i => {
-            i.classList.add("collapsed");
-            const btn = i.querySelector(".rule-trigger");
-            if (btn) btn.setAttribute("aria-expanded", "false");
-          });
-          if (isCollapsed) {
-            item.classList.remove("collapsed");
-            trigger.setAttribute("aria-expanded", "true");
-          }
+          items.forEach(i => i.classList.add("collapsed"));
+          if (isCollapsed) item.classList.remove("collapsed");
         });
       }
     });
   }
 
   function initPwaInstaller() {
+    if (window.matchMedia('(display-mode: standalone)').matches) return;
+    
     let deferredPrompt = null;
-
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -2059,15 +2044,15 @@ function bindMediaProtection() {
         width: calc(100% - 24px); max-width: 420px; background: rgba(18, 12, 38, 0.95);
         border: 1px solid rgba(192, 132, 252, 0.4); border-radius: 16px; padding: 12px 16px;
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 2900;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: var(--z-toast, 9000);
       `;
 
       banner.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px;">
-          <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px;" alt="First Model Hub App" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
+          <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px;" alt="App">
           <div>
             <div style="font-size: 12px; font-weight: 800; color: #FFF;">ติดตั้งแอป First Model Hub</div>
-            <div style="font-size: 12px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
+            <div style="font-size: 11px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
@@ -2075,7 +2060,6 @@ function bindMediaProtection() {
           <button id="pwa-dismiss-btn" style="background: none; border: none; color: #A1A1AA; font-size: 14px; cursor: pointer;"><i class="fas fa-times"></i></button>
         </div>
       `;
-
       document.body.appendChild(banner);
 
       document.getElementById('pwa-install-btn').onclick = async () => {
@@ -2099,7 +2083,6 @@ function bindMediaProtection() {
       "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
       "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
       "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
-      "🔢 ค้นรหัส ID เช่น 127, 143, 154...",
       "💰 ค้นเรตราคา เช่น 1500, 2000..."
     ];
 
@@ -2138,17 +2121,13 @@ function bindMediaProtection() {
         delete likedMap[profileId];
       }
       localStorage.setItem(CONFIG.KEYS.LIKED_PROFILES, JSON.stringify(likedMap));
-    } catch (e) {
-      console.warn("⚠️ Local storage update failed:", e);
-    }
+    } catch (e) {}
 
     if (window.supabase) {
       try {
         const rpcName = isLiked ? "increment_likes" : "decrement_likes";
         await window.supabase.rpc(rpcName, { profile_id_to_update: profileId });
-      } catch (e) {
-        console.warn("🔌 Like RPC notice:", e);
-      }
+      } catch (e) {}
     }
 
     setTimeout(() => { isLikeProcessing = false; }, 300);
@@ -2168,30 +2147,24 @@ function bindMediaProtection() {
       modal.style.display = 'none';
       document.body.style.overflow = '';
     }
-    
-    setTimeout(() => {
-      scrollToSearchResults();
-    }, 100);
   };
 
-  /* ==============================================================================
-     🚀 MAIN DOM INITIALIZATION
-     ============================================================================== */
-  document.addEventListener("DOMContentLoaded", async function () {
-    console.log("🚀 แอปพลิเคชัน First Model Hub กำลังเริ่มต้นทำงาน...");
+  function hideGlobalLoader() {
+    const loader = document.getElementById("global-loader-overlay");
+    if (loader) loader.style.opacity = "0";
+    setTimeout(() => {
+      if (loader) loader.style.display = "none";
+    }, 500);
+  }
 
+  document.addEventListener("DOMContentLoaded", async function () {
     try {
       supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
       window.supabase = supabaseClient;
     } catch (e) {
-      console.error("❌ เชื่อมต่อ Supabase DB ล้มเหลว:", e);
+      console.error("❌ เชื่อมต่อ Supabase ล้มเหลว:", e);
     }
 
-    DOM.body = document.body;
-    DOM.loadingPlaceholder = document.getElementById("loading-profiles-placeholder");
-    DOM.profilesDisplayArea = document.getElementById("profiles-display-area");
-    DOM.noResultsMessage = document.getElementById("no-results-message");
-    DOM.fetchErrorMessage = document.getElementById("fetch-error-message");
     DOM.searchForm = document.getElementById("search-form");
     DOM.searchInput = document.getElementById("search-keyword");
     DOM.provinceSelect = document.getElementById("search-province");
@@ -2199,17 +2172,16 @@ function bindMediaProtection() {
     DOM.featuredSelect = document.getElementById("search-featured");
     DOM.sortSelect = document.getElementById("sort-select");
     DOM.resetSearchBtn = document.getElementById("reset-search-btn");
+    DOM.profilesDisplayArea = document.getElementById("profiles-display-area");
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
+    DOM.noResultsMessage = document.getElementById("no-results-message");
 
-    // Sidebar Mobile Navigation
-    (function initMobileSidebar() {
-      const toggleBtn = document.getElementById("menu-toggle");
-      const sidebar = document.getElementById("sidebar-menu");
-      const overlay = document.getElementById("sidebar-overlay");
-      const closeBtn = document.getElementById("close-menu-btn");
-      if (!toggleBtn || !sidebar) return;
-
+    const toggleBtn = document.getElementById("menu-toggle");
+    const sidebar = document.getElementById("sidebar-menu");
+    const overlay = document.getElementById("sidebar-overlay");
+    const closeBtn = document.getElementById("close-menu-btn");
+    if (toggleBtn && sidebar) {
       const toggleMenu = (open) => {
         sidebar.classList.toggle("active", open);
         if (overlay) {
@@ -2218,27 +2190,23 @@ function bindMediaProtection() {
         }
         document.body.style.overflow = open ? "hidden" : "";
       };
-
       toggleBtn.onclick = () => toggleMenu(true);
       if (closeBtn) closeBtn.onclick = () => toggleMenu(false);
       if (overlay) overlay.onclick = () => toggleMenu(false);
       sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
-    })();
+    }
 
-    // Event Delegation Clicks
     document.body.addEventListener("click", e => {
       const target = e.target;
 
-      // 1. กด Like
       const likeBtn = target.closest('[data-action="like"]');
       if (likeBtn) {
         e.preventDefault(); e.stopPropagation();
         const id = likeBtn.dataset.id;
-        if (id && typeof window.handleLikeClick === "function") window.handleLikeClick(likeBtn, id);
+        if (id) window.handleLikeClick(likeBtn, id);
         return;
       }
 
-      // 2. กดเข้าดูโปรไฟล์
       const cardLink = target.closest("a.card-link");
       if (cardLink) {
         e.preventDefault();
@@ -2246,165 +2214,53 @@ function bindMediaProtection() {
         let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
         if (rawSlug) {
           try { rawSlug = decodeURIComponent(rawSlug); } catch (err) {}
-          STATE.lastFocusedElement = cardLink;
           history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
           handleRouteNavigation();
         }
         return;
       }
 
-      // 3. ปุ่มปิด Lightbox
-      const closeBtn = target.closest("#closeLightboxBtn");
+      const closeLightbox = target.closest("#closeLightboxBtn");
       const lightboxModal = target.closest("#lightbox");
-      if (closeBtn || (lightboxModal && e.target === lightboxModal)) {
+      if (closeLightbox || (lightboxModal && e.target === lightboxModal)) {
         closeLightboxModal(true);
         return;
       }
 
-      // 4.1 เลือกจังหวัดใน Modal
       if (target.closest('.province-chip')) {
-        const btn = target.closest('.province-chip');
         document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        target.closest('.province-chip').classList.add('active');
         if (DOM.provinceSelect) {
-          DOM.provinceSelect.value = normalizeProvinceKey(btn.getAttribute('data-value') || '');
-          DOM.provinceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          DOM.provinceSelect.value = normalizeProvinceKey(target.closest('.province-chip').getAttribute('data-value') || '');
         }
       }
 
-      // 4.2 เลือกสถานะรับงานใน Modal
       if (target.closest('.avail-chip')) {
-        const btn = target.closest('.avail-chip');
         document.querySelectorAll('.avail-chip').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (DOM.availabilitySelect) {
-          DOM.availabilitySelect.value = btn.getAttribute('data-value') || '';
-          DOM.availabilitySelect.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+        target.closest('.avail-chip').classList.add('active');
+        if (DOM.availabilitySelect) DOM.availabilitySelect.value = target.closest('.avail-chip').getAttribute('data-value') || '';
       }
 
-      // 4.3 เลือกราคาใน Modal
       if (target.closest('.price-chip')) {
-        const btn = target.closest('.price-chip');
         document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        target.closest('.price-chip').classList.add('active');
         const hiddenPrice = document.getElementById("search-price");
-        if (hiddenPrice) {
-          hiddenPrice.value = btn.getAttribute('data-price') || '';
-        }
+        if (hiddenPrice) hiddenPrice.value = target.closest('.price-chip').getAttribute('data-price') || '';
       }
 
-      // 4.4 เลือกแท็กสไตล์ใน Modal
       if (target.closest('.tag-chip')) {
-        const btn = target.closest('.tag-chip');
         document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tagText = btn.getAttribute('data-tag') || '';
-        
+        target.closest('.tag-chip').classList.add('active');
         const modalInput = document.getElementById('modal-search-keyword');
-        if (modalInput) modalInput.value = tagText;
-
-        if (DOM.searchInput) {
-          DOM.searchInput.value = tagText;
-          DOM.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+        if (modalInput) modalInput.value = target.closest('.tag-chip').getAttribute('data-tag') || '';
       }
 
-      // 4.5 เลือกการเรียงลำดับใน Modal
       if (target.closest('.sort-chip')) {
-        const btn = target.closest('.sort-chip');
         document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (DOM.sortSelect) DOM.sortSelect.value = btn.getAttribute('data-sort') || 'featured';
-        if (DOM.featuredSelect) {
-          DOM.featuredSelect.value = btn.getAttribute('data-featured') || '';
-          DOM.featuredSelect.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+        target.closest('.sort-chip').classList.add('active');
+        if (DOM.sortSelect) DOM.sortSelect.value = target.closest('.sort-chip').getAttribute('data-sort') || 'featured';
       }
     });
-
-    // Reset Search
-    const modalResetBtn = document.getElementById('modal-reset-btn');
-    if (modalResetBtn) {
-      modalResetBtn.onclick = () => {
-        document.querySelector('#modal-province-chips .province-chip[data-value=""]')?.click();
-        document.querySelector('#modal-availability-chips .avail-chip[data-value=""]')?.click();
-        document.querySelector('#modal-sort-chips .sort-chip[data-sort="featured"]')?.click();
-        document.querySelector('#modal-price-chips .price-chip[data-price=""]')?.click();
-
-        document.querySelectorAll('#modal-tag-chips .tag-chip').forEach(b => b.classList.remove('active'));
-
-        const modalSearchInput = document.getElementById('modal-search-keyword');
-        if (modalSearchInput) modalSearchInput.value = '';
-        
-        const clearTextBtn = document.getElementById('clear-modal-text-btn');
-        if (clearTextBtn) clearTextBtn.style.display = 'none';
-        
-        DOM.resetSearchBtn?.click();
-      };
-    }
-
-    DOM.provinceSelect?.addEventListener("change", () => {
-      applyUltimateFilters(true, true);
-      renderSmartFilterChips();
-    });
-
-    DOM.availabilitySelect?.addEventListener("change", () => applyUltimateFilters(true, true));
-    DOM.featuredSelect?.addEventListener("change", () => applyUltimateFilters(true, true));
-    DOM.sortSelect?.addEventListener("change", () => applyUltimateFilters(true, true));
-
-    DOM.resetSearchBtn?.addEventListener("click", () => {
-      if (DOM.searchInput) DOM.searchInput.value = "";
-      if (DOM.provinceSelect) DOM.provinceSelect.value = "";
-      if (DOM.availabilitySelect) DOM.availabilitySelect.value = "";
-      if (DOM.featuredSelect) DOM.featuredSelect.value = "";
-      if (DOM.sortSelect) DOM.sortSelect.value = "featured";
-      
-      const hiddenPriceSelect = document.getElementById("search-price");
-      if (hiddenPriceSelect) hiddenPriceSelect.value = "";
-
-      const clearBtn = document.getElementById("clear-search-btn");
-      if (clearBtn) clearBtn.style.display = "none";
-
-      applyUltimateFilters(true, true);
-      renderSmartFilterChips();
-    });
-
-    const modalSearchInput = document.getElementById("modal-search-keyword");
-    const clearTextBtn = document.getElementById("clear-modal-text-btn");
-
-    const triggerDebouncedSearch = (val) => {
-      if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = setTimeout(() => {
-        if (DOM.searchInput) DOM.searchInput.value = val;
-        applyUltimateFilters(true, true);
-      }, 200);
-    };
-
-    if (modalSearchInput) {
-      modalSearchInput.addEventListener("input", (e) => {
-        const val = e.target.value;
-        if (clearTextBtn) clearTextBtn.style.display = val.length > 0 ? "block" : "none";
-        triggerDebouncedSearch(val);
-      });
-      
-      modalSearchInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          applyUltimateFilters(true, true);
-          closeFilterModal();
-        }
-      });
-
-      if (clearTextBtn) {
-        clearTextBtn.addEventListener("click", () => {
-          modalSearchInput.value = "";
-          if (DOM.searchInput) DOM.searchInput.value = "";
-          clearTextBtn.style.display = "none";
-          applyUltimateFilters(true, true);
-        });
-      }
-    }
 
     const modalApplyBtn = document.getElementById('modal-apply-btn');
     if (modalApplyBtn) {
@@ -2414,16 +2270,29 @@ function bindMediaProtection() {
       };
     }
 
-// Init Features
+    const modalResetBtn = document.getElementById('modal-reset-btn');
+    if (modalResetBtn) {
+      modalResetBtn.onclick = () => {
+        document.querySelector('#modal-province-chips .province-chip[data-value=""]')?.click();
+        document.querySelector('#modal-availability-chips .avail-chip[data-value=""]')?.click();
+        document.querySelector('#modal-sort-chips .sort-chip[data-sort="featured"]')?.click();
+        document.querySelector('#modal-price-chips .price-chip[data-price=""]')?.click();
+        document.querySelectorAll('#modal-tag-chips .tag-chip').forEach(b => b.classList.remove('active'));
+        if (document.getElementById('modal-search-keyword')) document.getElementById('modal-search-keyword').value = '';
+        if (DOM.searchInput) DOM.searchInput.value = '';
+        
+        applyUltimateFilters(true, true);
+      };
+    }
+
     initStarRating();
     initReviewForm();
     initReviewToggle();
     initAccordions();
-    renderSmartFilterChips();
-    initSeoDrawer();
-    initRegionTabs();
     initPwaInstaller();
     initDynamicSearchPlaceholder();
+    initSeoDrawer();
+    initRegionTabs();
 
     let lastScrollY = window.scrollY;
     let scrollTimeout = null;
@@ -2432,7 +2301,6 @@ function bindMediaProtection() {
     window.addEventListener('scroll', () => {
       if (!dockMenu) return;
       const currentScrollY = window.scrollY;
-      
       if (scrollTimeout) clearTimeout(scrollTimeout);
       
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
@@ -2440,20 +2308,9 @@ function bindMediaProtection() {
       } else {
         dockMenu.classList.remove('dock-hidden');
       }
-      
       lastScrollY = currentScrollY;
-
-      scrollTimeout = setTimeout(() => {
-        dockMenu.classList.remove('dock-hidden');
-      }, 400);
-      
+      scrollTimeout = setTimeout(() => { dockMenu.classList.remove('dock-hidden'); }, 400);
     }, { passive: true });
-
-    // Expose global functions for inline events
-    window.openFilterModal = openFilterModal;
-    window.closeFilterModal = closeFilterModal;
-    window.renderProfilesGrid = renderProfilesGrid;
-    window.bindMediaProtection = bindMediaProtection;
 
     await fetchProfilesData();
     await handleRouteNavigation(true);
@@ -2465,6 +2322,10 @@ function bindMediaProtection() {
       updateActiveNavLinks();
     });
 
+    window.openFilterModal = openFilterModal;
+    window.closeFilterModal = closeFilterModal;
+    window.renderProfilesGrid = renderProfilesGrid;
+    window.bindMediaProtection = bindMediaProtection;
   });
 
 })();
