@@ -1,3 +1,4 @@
+
 /* ==============================================================================
    💎 FIRST MODEL HUB - MAIN CLIENT-SIDE ENGINE (PROD-READY PERFECT 2026)
    ============================================================================== */
@@ -19,11 +20,13 @@ window.ScrollTrigger = ScrollTrigger;
     STORAGE_BUCKET: "profile-images",
     KEYS: {
       LAST_PROVINCE: "firstmodelhub_last_province",
-      CACHE_PROFILES: "cachedProfiles_v4_2026",
-      CACHE_PROVINCES: "cachedProvinces_v4_2026",
+      CACHE_PROFILES: "cachedProfiles_v5_2026",
+      CACHE_PROVINCES: "cachedProvinces_v5_2026",
       THEME: "theme",
-      LIKED_PROFILES: "liked_profiles"
+      LIKED_PROFILES: "liked_profiles",
+      LAST_REVIEW_TIME: "last_review_submit_time"
     },
+    CACHE_TTL_MS: 12 * 60 * 60 * 1000, // แคชมีอายุ 12 ชั่วโมง
     SITE_URL: "https://firstmodelhub.com",
     DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
@@ -53,11 +56,11 @@ window.ScrollTrigger = ScrollTrigger;
   let isFirstLoad = true;
   let searchDebounceTimer = null;
 
-  // 🟢 IndexedDB Engine
+  // 🟢 IndexedDB Engine (ปรับปรุงระบบ Smart Cache มีวันหมดอายุและลบเองได้)
   const idb = {
     init() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open("FirstModelHubDB", 1);
+        const req = indexedDB.open("FirstModelHubDB", 2);
         req.onupgradeneeded = (e) => {
           const db = e.target.result;
           if (!db.objectStoreNames.contains("cacheStore")) {
@@ -75,7 +78,23 @@ window.ScrollTrigger = ScrollTrigger;
           const tx = db.transaction("cacheStore", "readonly");
           const store = tx.objectStore("cacheStore");
           const req = store.get(key);
-          req.onsuccess = () => resolve(req.result);
+          req.onsuccess = () => {
+            const data = req.result;
+            if (!data) return resolve(null);
+            
+            // รองรับข้อมูลเก่าที่ไม่มี timestamp
+            if (!data.timestamp) {
+              return resolve(data);
+            }
+            
+            // ตรวจสอบวันหมดอายุของ Cache
+            if (Date.now() - data.timestamp < CONFIG.CACHE_TTL_MS) {
+              resolve(data.value);
+            } else {
+              this.delete(key);
+              resolve(null);
+            }
+          };
           req.onerror = () => reject(req.error);
         });
       } catch (e) {
@@ -89,12 +108,24 @@ window.ScrollTrigger = ScrollTrigger;
         return new Promise((resolve, reject) => {
           const tx = db.transaction("cacheStore", "readwrite");
           const store = tx.objectStore("cacheStore");
-          const req = store.put(value, key);
+          const req = store.put({ value, timestamp: Date.now() }, key);
           req.onsuccess = () => resolve();
           req.onerror = () => reject(req.error);
         });
       } catch (e) {
         console.warn("IndexedDB Set Error:", e);
+      }
+    },
+    async delete(key) {
+      try {
+        const db = await this.init();
+        return new Promise((resolve) => {
+          const tx = db.transaction("cacheStore", "readwrite");
+          tx.objectStore("cacheStore").delete(key);
+          tx.oncomplete = () => resolve();
+        });
+      } catch (e) {
+        console.warn("IndexedDB Delete Error:", e);
       }
     }
   };
@@ -109,6 +140,7 @@ window.ScrollTrigger = ScrollTrigger;
     if (k === "phra-nakhon-si-ayutthaya" || k === "ayutthaya") return "phra-nakhon-si-ayutthaya";
     if (k === "surat-thani" || k === "suratthani") return "surat-thani";
     if (k === "ubon-ratchathani" || k === "ubonratchathani" || k === "ubon") return "ubonratchathani";
+    if (k === "nakhon-ratchasima" || k === "korat") return "nakhon-ratchasima";
     return k;
   }
 
@@ -128,37 +160,37 @@ window.ScrollTrigger = ScrollTrigger;
       return sanitizeThaiText(rawSlogan);
     }
     const str = String(idOrSlug || "0");
-    const sum = str.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const sum = str.split("").reduce((acc, char, idx) => acc + (char.charCodeAt(0) * (idx + 1)), 0); // เพิ่ม Salt ด้วย Index ให้กระจายมากขึ้น
     const index = sum % FALLBACK_SLOGANS.length;
     return FALLBACK_SLOGANS[index];
   }
 
   // ✅ ฟังก์ชัน Sanitize ภาษาไทยที่ถูกต้องและปลอดภัย 100%
-function sanitizeThaiText(str) {
-  if (str === null || str === undefined) return "";
-  return String(str)
-    // 1. ลบข้อความ Debug Gemini / System Prompts
-    .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
-    .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
-    .replace(/ทดลองใช้งาน\.?/gi, "")
-    // 2. แก้ไขคำสะกดผิดที่พบบ่อย
-    .replace(/นิมาน|นิทาน/g, "นิมมาน")
-    .replace(/ฟื้นที่/g, "พื้นที่")
-    .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
-    .replace(/พาพับ/g, "พายัพ")
-    .replace(/ของแก่น/g, "ขอนแก่น")
-    .replace(/บ้านดู๋/g, "บ้านดู่")
-    .replace(/ห้วยเเก้ว/g, "ห้วยแก้ว")
-    .replace(/ปาตอง/g, "ป่าตอง")
-    .replace(/ชลบรุี/g, "ชลบุรี")
-    .replace(/อยุธญา/g, "อยุธยา")
-    // 3. ลบสัญลักษณ์ตกแต่ง Text Art โดยไม่กระทบสระไทย (เอา 'อิ' และตัวอักษรไทยออก)
-    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚╭╮╰╯┊જ⁀⸝༘⋆ෆ◟ヾ֒𐐪づ⁺.]+/g, " ")
-    // 4. ลบ Emojis
-    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+  function sanitizeThaiText(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      // 1. ลบข้อความ Debug Gemini / System Prompts
+      .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
+      .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
+      .replace(/ทดลองใช้งาน\.?/gi, "")
+      // 2. แก้ไขคำสะกดผิดที่พบบ่อย
+      .replace(/นิมาน|นิทาน/g, "นิมมาน")
+      .replace(/ฟื้นที่/g, "พื้นที่")
+      .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
+      .replace(/พาพับ/g, "พายัพ")
+      .replace(/ของแก่น/g, "ขอนแก่น")
+      .replace(/บ้านดู๋/g, "บ้านดู่")
+      .replace(/ห้วยเเก้ว/g, "ห้วยแก้ว")
+      .replace(/ปาตอง/g, "ป่าตอง")
+      .replace(/ชลบรุี/g, "ชลบุรี")
+      .replace(/อยุธญา/g, "อยุธยา")
+      // 3. ลบสัญลักษณ์ตกแต่ง Text Art โดยไม่กระทบสระไทย (เอา 'อิ' และตัวอักษรไทยออก)
+      .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚╭╮╰╯┊જ⁀⸝༘⋆ෆ◟ヾ֒𐐪づ⁺.]+/g, " ")
+      // 4. ลบ Emojis
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦]/gu, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
   function sanitizeName(rawName) {
     if (!rawName || typeof rawName !== "string") return "สาวสวย";
@@ -399,8 +431,10 @@ function sanitizeThaiText(str) {
     const provKey = normalizeProvinceKey(rawProvKey);
     const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
 
+    // ✅ FIX: Price Parsing Bug ป้องกันราคาแสดงผลหลักสิบล้าน
     const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
-    const numericRate = Number(String(rawPrice).replace(/\D/g, "")) || 0;
+    const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
+    const numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
     const displayPrice = numericRate > 0 
       ? `${numericRate.toLocaleString()}.-` 
       : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
@@ -521,7 +555,8 @@ function sanitizeThaiText(str) {
         
         runIdle(async () => {
           if (supabaseClient) {
-            const { data } = await supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false });
+            // ✅ FIX: ใส่ .limit(600) ป้องกันดึงข้อมูลมากเกินไปจนหน้าเว็บแฮงก์
+            const { data } = await supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600);
             if (data) {
               const fullData = deduplicateProfiles(data.map(p => processProfileObject(p)).filter(Boolean));
               STATE.allProfiles = fullData;
@@ -536,7 +571,9 @@ function sanitizeThaiText(str) {
 
       console.log("🚀 กำลังดึงข้อมูลโปรไฟล์จาก Supabase...");
       const provincesPromise = supabaseClient ? supabaseClient.from("provinces").select("*") : Promise.resolve({ data: [] });
-      const profilesPromise = supabaseClient ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }) : Promise.resolve({ data: [] });
+      
+      // ✅ FIX: ใส่ .limit(600) ป้องกันปัญหาข้อมูลมหาศาล
+      const profilesPromise = supabaseClient ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600) : Promise.resolve({ data: [] });
 
       const [provincesRes, profilesRes] = await Promise.all([provincesPromise, profilesPromise]);
 
@@ -1266,6 +1303,51 @@ function sanitizeThaiText(str) {
     });
   }
 
+  // ✅ FIX: ระบบเลื่อนดูโปรไฟล์ถัดไป (Next/Prev) ในหน้าต่าง Lightbox
+  function setupLightboxNavigation(currentIndex) {
+    let navContainer = document.getElementById("lightbox-nav-buttons");
+    if (!navContainer) {
+      const wrapper = document.getElementById("lightbox-content-wrapper-el");
+      if (!wrapper) return;
+      navContainer = document.createElement("div");
+      navContainer.id = "lightbox-nav-buttons";
+      navContainer.style.cssText = "position: absolute; top: 50%; width: 100%; left: 0; transform: translateY(-50%); display: flex; justify-content: space-between; pointer-events: none; z-index: 50; padding: 0 10px;";
+      
+      navContainer.innerHTML = `
+        <button id="lightbox-prev-btn" style="pointer-events: auto; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(8px); transform: translateX(-20px); transition: transform 0.2s;"><i class="fas fa-chevron-left"></i></button>
+        <button id="lightbox-next-btn" style="pointer-events: auto; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(8px); transform: translateX(20px); transition: transform 0.2s;"><i class="fas fa-chevron-right"></i></button>
+      `;
+      wrapper.appendChild(navContainer);
+    }
+
+    const prevBtn = document.getElementById("lightbox-prev-btn");
+    const nextBtn = document.getElementById("lightbox-next-btn");
+    const total = STATE.filteredProfiles.length;
+
+    if (total <= 1 || currentIndex === -1) {
+      navContainer.style.display = "none"; 
+      return;
+    } else {
+      navContainer.style.display = "flex";
+    }
+
+    prevBtn.style.display = currentIndex > 0 ? "flex" : "none";
+    nextBtn.style.display = currentIndex < total - 1 ? "flex" : "none";
+
+    prevBtn.onclick = (e) => { 
+      e.stopPropagation(); 
+      if (currentIndex > 0) {
+        openLightboxForProfile(STATE.filteredProfiles[currentIndex - 1]); 
+      }
+    };
+    nextBtn.onclick = (e) => { 
+      e.stopPropagation(); 
+      if (currentIndex < total - 1) {
+        openLightboxForProfile(STATE.filteredProfiles[currentIndex + 1]); 
+      }
+    };
+  }
+
   function openLightboxForProfile(profile) {
     if (!profile) return;
 
@@ -1443,6 +1525,10 @@ function sanitizeThaiText(str) {
       detailsContainer.appendChild(stickyBtnWrapper);
     }
 
+    // ✅ เรียกใช้ปุ่มเลื่อนโปรไฟล์ Lightbox ถัดไป
+    const currentIndex = STATE.filteredProfiles.findIndex(p => p.slug === profile.slug || p.id === profile.id);
+    setupLightboxNavigation(currentIndex);
+
     lightbox.classList.remove("hidden");
     lightbox.style.display = "flex";
     document.body.style.overflow = "hidden";
@@ -1539,20 +1625,22 @@ function sanitizeThaiText(str) {
 
       injectJsonLdSchema({
         "@context": "https://schema.org",
-        "@type": "Person",
-        "@id": `${profileUrl}/#person`,
-        "name": nameClean,
+        "@type": "Service",
+        "@id": `${profileUrl}/#service`,
+        "name": `บริการเพื่อนเที่ยว ฟิวแฟน - ${nameClean}`,
         "url": profileUrl,
         "image": profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE,
         "description": description,
-        "jobTitle": "Freelance Companion & Entertainer",
-        "gender": "Female",
-        "worksFor": { "@id": `${CONFIG.SITE_URL}/#organization` },
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": profile.location || provName,
-          "addressRegion": provName,
-          "addressCountry": "TH"
+        "provider": {
+            "@type": "Person",
+            "name": nameClean,
+            "gender": "Female",
+            "jobTitle": "Freelance Companion & Entertainer",
+            "image": profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE
+        },
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": provName
         },
         "offers": {
           "@type": "Offer",
@@ -2027,12 +2115,21 @@ function sanitizeThaiText(str) {
       });
     }
 
+    // ✅ FIX: ป้องกันระบบถูก Spam ยิง Review พร้อม Rate Limit 5 นาที
     function initReviewForm() {
       const form = document.getElementById("review-form");
       if (!form) return;
 
       form.addEventListener("submit", async e => {
         e.preventDefault();
+        
+        // เช็คการส่งล่าสุดจาก localStorage 
+        const lastSubmit = localStorage.getItem(CONFIG.KEYS.LAST_REVIEW_TIME);
+        if (lastSubmit && (Date.now() - parseInt(lastSubmit, 10) < 5 * 60 * 1000)) {
+          showToast("⏳ กรุณารออย่างน้อย 5 นาทีก่อนส่งรีวิวครั้งถัดไปครับ", "error");
+          return;
+        }
+
         const submitBtn = form.querySelector('button[type="submit"]');
         if (submitBtn) {
           submitBtn.disabled = true;
@@ -2065,6 +2162,7 @@ function sanitizeThaiText(str) {
           if (error) throw error;
 
           showToast("✅ ส่งรีวิวสำเร็จ! ข้อมูลของคุณกำลังรอตรวจสอบ", "success");
+          localStorage.setItem(CONFIG.KEYS.LAST_REVIEW_TIME, Date.now().toString());
           form.reset();
           
         } catch (err) {
@@ -2262,6 +2360,9 @@ function sanitizeThaiText(str) {
       DOM.featuredSection = document.getElementById("featured-profiles");
       DOM.featuredContainer = document.getElementById("featured-profiles-container");
       DOM.noResultsMessage = document.getElementById("no-results-message");
+      
+      // ✅ FIX: ประกาศตัวแปรเพื่อป้องกันข้อผิดพลาด Undefined ใน renderProfilesGrid
+      DOM.fetchErrorMessage = document.getElementById("fetch-error-message");
 
       const toggleBtn = document.getElementById("menu-toggle");
       const sidebar = document.getElementById("sidebar-menu");
@@ -2280,6 +2381,27 @@ function sanitizeThaiText(str) {
         if (closeBtn) closeBtn.onclick = () => toggleMenu(false);
         if (overlay) overlay.onclick = () => toggleMenu(false);
         sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
+      }
+
+      // ✅ FIX: ผูก Event ให้กับช่องค้นหาหลักเพื่อรองรับการใช้งานบน Desktop ที่ไม่ได้เปิด Modal 
+      if (DOM.searchInput) {
+        DOM.searchInput.addEventListener("input", (e) => {
+          const modalInput = document.getElementById("modal-search-keyword");
+          if (modalInput) modalInput.value = e.target.value;
+          
+          clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = setTimeout(() => {
+            applyUltimateFilters(true, false);
+          }, 300);
+        });
+      }
+      
+      // ✅ FIX: ผูก Event กดปุ่ม Enter บน Desktop Search Form ป้องกันหน้าเว็บ Refresh
+      if (DOM.searchForm) {
+        DOM.searchForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          applyUltimateFilters(true, true);
+        });
       }
 
       document.body.addEventListener("click", e => {
