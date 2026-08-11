@@ -822,16 +822,23 @@ export default async (req, context) => {
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // Schema.org Graph Construction
+// ==============================================================================
+    // 💎 PERFECTED SCHEMA.ORG GRAPH CONSTRUCTION (100% GOOGLE & AI SEARCH READY)
+    // ==============================================================================
+
+    // 1. Business / Local Service Entity (สำหรับหน้าหมวดหมู่/จังหวัด และหน้าแรก)
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}/#business`,
-      "name": isNationalHome ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` : `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
+      "name": isNationalHome 
+        ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
+        : `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
       "image": metaImgUrl,
       "telephone": CONFIG.DEFAULT_TELEPHONE,
       "priceRange": "฿฿",
       "url": canonUrl,
       "description": strippedDesc,
+      "parentOrganization": { "@id": `${hostUrl}/#organization` },
       "address": {
         "@type": "PostalAddress",
         "addressLocality": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
@@ -865,6 +872,7 @@ export default async (req, context) => {
       }))
     };
 
+    // 2. Base Schema Graph Construction (Organization & WebSite)
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -872,9 +880,14 @@ export default async (req, context) => {
         "name": CONFIG.BRAND_NAME,
         "legalName": CONFIG.BRAND_LEGAL_NAME,
         "url": hostUrl,
-        "logo": { "@type": "ImageObject", "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp` },
+        "logo": { 
+          "@type": "ImageObject", 
+          "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`,
+          "width": 1200,
+          "height": 630
+        },
         "description": strippedDesc,
-        "sameAs": Object.values(CONFIG.SOCIAL_LINKS),
+        "sameAs": Object.values(CONFIG.SOCIAL_LINKS).filter(Boolean),
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer service",
@@ -896,21 +909,30 @@ export default async (req, context) => {
       }
     ];
 
+    // 3. Conditional Graph Construction (สลับระหว่าง "โปรไฟล์เดี่ยว" กับ "หมวดหมู่/จังหวัด")
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
+      const cleanLoc = sanitizeThaiText(matchedProfile.location || provinceThaiName);
 
+      // 3.1 ItemPage Entity (หน้ารายบุคคล)
       schemaGraph.push({
         "@type": "ItemPage",
         "@id": `${profileUrl}/#webpage`,
         "url": profileUrl,
-        "name": `น้อง${cleanName} - โปรไฟล์สาวรับงาน${provinceThaiName}`,
+        "name": `น้อง${cleanName} - โปรไฟล์สาวรับงาน${provinceThaiName} ย่าน${cleanLoc}`,
+        "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
+        "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` },
         "mainEntity": { "@id": `${profileUrl}/#person` }
       });
 
-      schemaGraph.push(generatePersonSchema(matchedProfile, provinceThaiName, profileUrl, hostUrl));
+      // 3.2 Person Entity (เชื่อมโยงกับ Organization)
+      const personEntity = generatePersonSchema(matchedProfile, provinceThaiName, profileUrl, hostUrl);
+      personEntity["worksFor"] = { "@id": `${hostUrl}/#organization` };
+      schemaGraph.push(personEntity);
       
+      // 3.3 BreadcrumbList Entity (หน้ารายบุคคล)
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${profileUrl}/#breadcrumb`,
@@ -920,7 +942,34 @@ export default async (req, context) => {
           { "@type": "ListItem", "position": 3, "name": `น้อง${cleanName}`, "item": profileUrl }
         ]
       });
+
+      // 3.4 FAQPage Entity (✨ เพิ่มเติมสำหรับหน้ารายบุคคล - ป้องกันจุดหลุด)
+      schemaGraph.push({
+        "@type": "FAQPage",
+        "@id": `${profileUrl}/#faq`,
+        "isPartOf": { "@id": `${profileUrl}/#webpage` },
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": `น้อง${cleanName} ไซด์ไลน์${provinceThaiName} ย่าน${cleanLoc} มีมัดจำหรือไม่?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `ไม่มีนโยบายการเรียกเก็บเงินโอนจองมัดจำล่วงหน้าทุกกรณีครับ ลูกค้าสามารถเดินทางพบน้อง${cleanName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง 100% เพื่อความปลอดภัยสูงสุด`
+            }
+          },
+          {
+            "@type": "Question",
+            "name": `ต้องการตรวจสอบตารางเวลาหรือแอดไลน์จองคิว น้อง${cleanName} พิกัด ${cleanLoc} ได้ที่ไหน?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `สามารถกดปุ่ม 'แอดไลน์จองคิว น้อง${cleanName}' บนหน้าโปรไฟล์ เพื่อสอบถามตารางเวลา สแตนด์บายคิวงาน และรายละเอียดบริการเพิ่มเติมผ่านไลน์แอดมินเจ้าหน้าที่ได้อย่างสะดวกรวดเร็ว`
+            }
+          }
+        ]
+      });
+
     } else {
+      // 3.5 CollectionPage Entity (หน้าหมวดหมู่ / จังหวัด / หน้าแรก)
       schemaGraph.push({
         "@type": "CollectionPage",
         "@id": `${canonUrl}/#webpage`,
@@ -928,11 +977,14 @@ export default async (req, context) => {
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
         "about": { "@id": `${canonUrl}/#business` },
+        "breadcrumb": !isNationalHome ? { "@id": `${canonUrl}/#breadcrumb` } : undefined,
         "mainEntity": { "@id": `${canonUrl}/#itemlist` }
       });
 
+      // 3.6 LocalBusiness Entity
       schemaGraph.push(businessEntity);
 
+      // 3.7 ItemList Entity (ทำเนียบรวมโปรไฟล์)
       if (profileList.length > 0) {
         schemaGraph.push({
           "@type": "ItemList",
@@ -952,6 +1004,7 @@ export default async (req, context) => {
         });
       }
 
+      // 3.8 BreadcrumbList Entity (หน้าหมวดหมู่)
       if (!isNationalHome) {
         schemaGraph.push({
           "@type": "BreadcrumbList",
@@ -962,23 +1015,31 @@ export default async (req, context) => {
           ]
         });
       }
-    }
 
-    if (seoData.faqs && !profileSlug) {
-      schemaGraph.push({
-        "@type": "FAQPage",
-        "@id": `${canonUrl}/#faq`,
-        "isPartOf": { "@id": `${canonUrl}/#webpage` },
-        "mainEntity": seoData.faqs.map(faq => ({
-          "@type": "Question",
-          "name": stripHTML(sanitizeThaiText(faq.q)),
-          "acceptedAnswer": { "@type": "Answer", "text": stripHTML(sanitizeThaiText(faq.a)) }
-        }))
-      });
+      // 3.9 FAQPage Entity (หน้าหมวดหมู่)
+      if (seoData.faqs && seoData.faqs.length > 0) {
+        schemaGraph.push({
+          "@type": "FAQPage",
+          "@id": `${canonUrl}/#faq`,
+          "isPartOf": { "@id": `${canonUrl}/#webpage` },
+          "mainEntity": seoData.faqs.map(faq => ({
+            "@type": "Question",
+            "name": stripHTML(sanitizeThaiText(faq.q)),
+            "acceptedAnswer": { "@type": "Answer", "text": stripHTML(sanitizeThaiText(faq.a)) }
+          }))
+        });
+      }
     }
 
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
+    // ==============================================================================
+    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (BULLETPROOF PIPELINE)
+    // ==============================================================================
+
+    // ------------------------------------------------------------------------------
+    // STEP 1: เตรียม HTML Snippets ย่อยทั้งหมดล่วงหน้า (Prepare Snippets)
+    // ------------------------------------------------------------------------------
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
     const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
@@ -1009,64 +1070,13 @@ export default async (req, context) => {
     const introTemplate = seoData.uniqueIntro || getDynamicIntro(provinceThaiName, seoData.zones, provinceSlug);
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
-    // ==============================================================================
-    // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (BULLETPROOF FIX)
-    // ==============================================================================
-    let rawHtml = await getTemplateHtml(url, context);
-
-    // 1. Base Tag Injection (ป้องกันปัญหาความสัมพันธ์ของ Path)
-    if (!/<base\s+/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
-    }
-
-    // 2. SEO Meta Tags & Canonicals Replacement (ยืดหยุ่น การันตีเปลี่ยนค่าแน่นอน 100%)
-    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
-    
-    // Open Graph Tags
-    rawHtml = setMeta(rawHtml, "property", "og:title", pageTitle);
-    rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
-    rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
-    rawHtml = setMeta(rawHtml, "property", "og:image", metaImgUrl);
-    rawHtml = setMeta(rawHtml, "property", "og:image:secure_url", metaImgUrl);
-    
-    // Twitter Card Tags
-    rawHtml = setMeta(rawHtml, "name", "twitter:title", pageTitle);
-    rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
-    rawHtml = setMeta(rawHtml, "name", "twitter:image", metaImgUrl);
-    
-    // Canonicals & Hreflangs
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
-    
-    rawHtml = setLink(rawHtml, "canonical", canonUrl, 'id="canonical-link" ');
-    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th" ');
-    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default" ');
-
-    // 3. ฉีด Schema JSON-LD เข้าไปใน <head> การันตี 100%
-    rawHtml = injectSchema(rawHtml, schemaJson);
-
-    // 4. Placeholders Replacement
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
-    
-    // แทนที่ Map URL ทุกรูปแบบรวมถึง URL Encoded
-    rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
-    rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-
-    // ==============================================================================
-    // 🟢 สลับการเรนเดอร์ระหว่าง "โปรไฟล์เดี่ยว" กับ "หน้าค้นหาจังหวัด"
-    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // STEP 2: สร้างส่วนแสดงผลหลัก (Display Area Inner HTML: Single Profile vs Location)
+    // ------------------------------------------------------------------------------
     let displayAreaInnerHtml = "";
 
     if (matchedProfile) {
-      // 1. เรนเดอร์หน้าโปรไฟล์น้องรายบุคคลเมื่อเข้าลิงก์ /sideline/:slug
+      // 2.1 เรนเดอร์หน้ารายบุคคล
       const pName = escapeHTML((matchedProfile.name || "สาวสวย").replace(/^น้อง\s?/, "").trim());
       const mainImg = getProfileMainImage(matchedProfile);
       const heroImgUrl = optimizeImg(hostUrl, mainImg, 500, 650);
@@ -1169,14 +1179,8 @@ export default async (req, context) => {
           ${relatedGridHtml}
         </article>
       `;
-
-      // ลบทุกเซกชันที่ไม่เกี่ยวข้องออกเมื่ออยู่ในหน้าโปรไฟล์เดี่ยว
-      rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="customer-reviews"[\s\S]*?<\/section>/i, "");
     } else {
-      // 2. เรนเดอร์หน้าค้นหารายจังหวัดตามปกติเมื่อเข้า URL /location/:province หรือ /
+      // 2.2 เรนเดอร์หน้าค้นหารายจังหวัด / หน้าหมวดหมู่
       const topCatalogSnippetHtml = `
         <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
           <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
@@ -1205,13 +1209,32 @@ export default async (req, context) => {
           </div>
         </div>
       `;
-
-      if (!isNationalHome) {
-        rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
-      }
     }
 
-    // แทนที่ข้อมูลส่วนแสดงผลผ่าน Comment Marker
+    // ------------------------------------------------------------------------------
+    // STEP 3: ดึง HTML Shell แม่แบบและฉีด Base Tag
+    // ------------------------------------------------------------------------------
+    let rawHtml = await getTemplateHtml(url, context);
+
+    if (!/<base\s+/i.test(rawHtml)) {
+      rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
+    }
+
+    // ------------------------------------------------------------------------------
+    // STEP 4: ทำความสะอาดส่วนแสดงผลคงที่หากเป็นหน้ารายบุคคล
+    // ------------------------------------------------------------------------------
+    if (matchedProfile) {
+      rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section id="customer-reviews"[\s\S]*?<\/section>/i, "");
+    } else if (!isNationalHome) {
+      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+    }
+
+    // ------------------------------------------------------------------------------
+    // STEP 5: แทรกส่วนแสดงผลหลัก (Display Area Inner HTML Injection)
+    // ------------------------------------------------------------------------------
     if (rawHtml.includes("<!-- SSR_DISPLAY_AREA_START -->") && rawHtml.includes("<!-- SSR_DISPLAY_AREA_END -->")) {
       const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
       const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
@@ -1227,7 +1250,57 @@ export default async (req, context) => {
       }
     }
 
+    // ------------------------------------------------------------------------------
+    // STEP 6: แทรก Meta Tags, Open Graph, Twitter Cards และ Canonical Links
+    // ------------------------------------------------------------------------------
+    rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
+    rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
+    
+    // Open Graph
+    rawHtml = setMeta(rawHtml, "property", "og:title", pageTitle);
+    rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
+    rawHtml = setMeta(rawHtml, "property", "og:image", metaImgUrl);
+    rawHtml = setMeta(rawHtml, "property", "og:image:secure_url", metaImgUrl);
+    
+    // Twitter Cards
+    rawHtml = setMeta(rawHtml, "name", "twitter:title", pageTitle);
+    rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "name", "twitter:image", metaImgUrl);
+    
+    // Canonicals & Hreflangs
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
+    
+    rawHtml = setLink(rawHtml, "canonical", canonUrl, 'id="canonical-link" ');
+    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th" ');
+    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default" ');
 
+    // ------------------------------------------------------------------------------
+    // STEP 7: ฉีด Schema JSON-LD Graph เข้าไปใน <head>
+    // ------------------------------------------------------------------------------
+    rawHtml = injectSchema(rawHtml, schemaJson);
+
+    // ------------------------------------------------------------------------------
+    // STEP 8: แทนที่ตัวแปรแม่แบบทั้งหมด (Global Placeholders Replacement)
+    // ------------------------------------------------------------------------------
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceSlug); // 👈 เติมค่า Key จังหวัดให้ฟอร์มรีวิว
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
+    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
+    
+    // แทนที่ Google Map Embed URL
+    rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
+    rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+
+    // ------------------------------------------------------------------------------
+    // STEP 9: ฉีด Hydration Data Payload & กวาดล้างคราบตัวแปรตกค้าง
+    // ------------------------------------------------------------------------------
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = allHydratedProfiles.map(p => ({
       id: p.id,
@@ -1251,7 +1324,7 @@ export default async (req, context) => {
       availability: p.availability,
       lastUpdated: p.lastUpdated,
       isfeatured: p.isfeatured,
-      isNew: p.is_new || p.isNew || false, // 👈 [แก้ไขแล้ว] เพิ่มฟีลด์สถานะโปรไฟล์ใหม่เข้า Payload
+      isNew: p.is_new || p.isNew || false,
       verified: p.verified || p.isVerified,
       hasVideo: p.has_video || p.hasVideo || false,
       description: sanitizeThaiText(p.description) || "",
@@ -1262,9 +1335,9 @@ export default async (req, context) => {
 
     rawHtml = injectHydrationData(rawHtml, hydratedProfilesData);
 
-    // 🟢 [FIX] กวาดล้างตัวแปรแม่แบบ {{...}} ตกค้างในขั้นตอนสุดท้าย
-    rawHtml = sweepPlaceholders(rawHtml);
 
+    rawHtml = sweepPlaceholders(rawHtml);
+    
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
