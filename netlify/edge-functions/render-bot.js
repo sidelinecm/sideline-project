@@ -268,37 +268,77 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
     const schemaData = {
       "@context": "https://schema.org/",
       "@graph": [
+        // 1. Organization (แบรนด์ผู้ให้บริการ)
         {
-          "@type": ["LocalBusiness", "EntertainmentBusiness"],
-          "@id": `${canonicalUrl}#serviceprovider`,
-          "name": `${displayName} - ไซด์ไลน์${provinceName}`,
+          "@type": "Organization",
+          "@id": `${dynamicDomain}/#organization`,
+          "name": CONFIG.BRAND_NAME,
+          "url": dynamicDomain,
+          "logo": {
+            "@type": "ImageObject",
+            "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`,
+            "width": 1200,
+            "height": 630
+          }
+        },
+        // 2. ProfilePage (หน้าโปรไฟล์สำหรับ Search Engine)
+        {
+          "@type": "ProfilePage",
+          "@id": `${canonicalUrl}#webpage`,
+          "url": canonicalUrl,
+          "name": pageTitle,
+          "description": stripHTML(metaDesc),
+          "isPartOf": {
+            "@type": "WebSite",
+            "@id": `${dynamicDomain}/#website`,
+            "name": CONFIG.BRAND_NAME,
+            "url": dynamicDomain
+          },
+          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+          "mainEntity": { "@id": `${canonicalUrl}#person` }
+        },
+        // 3. Person Entity (ตัวตนของน้อง + ข้อเสนอราคา)
+        {
+          "@type": "Person",
+          "@id": `${canonicalUrl}#person`,
+          "name": displayName,
+          "alternateName": [cleanName, `${displayName} ไซด์ไลน์${provinceName}`],
+          "url": canonicalUrl,
           "image": [baseImageUrl],
           "description": stripHTML(metaDesc),
-          "telephone": CONFIG.DEFAULT_TELEPHONE,
-          "url": canonicalUrl,
-          "priceRange": "฿฿",
+          "jobTitle": "Freelance Companion & Entertainer",
+          "gender": "Female",
+          "knowsLanguage": ["th", "en"],
+          "worksFor": { "@id": `${dynamicDomain}/#organization` },
+          "height": heightVal ? { "@type": "QuantitativeValue", "value": Number(heightVal), "unitCode": "CMT" } : undefined,
+          "weight": weightVal ? { "@type": "QuantitativeValue", "value": Number(weightVal), "unitCode": "KGM" } : undefined,
           "address": {
             "@type": "PostalAddress",
-            "addressLocality": provinceName,
+            "addressLocality": p.location || provinceName,
             "addressRegion": provinceName,
             "addressCountry": "TH"
           },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": Number(ratingValue) || 4.8,
-            "reviewCount": Number(reviewCount) || 150,
-            "bestRating": 5,
-            "worstRating": 1
-          },
-          "review": schemaReviews
+          "offers": {
+            "@type": "Offer",
+            "url": canonicalUrl,
+            "price": rawRate ? rawRate.toString() : "1500",
+            "priceCurrency": "THB",
+            "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
+            "availability": "https://schema.org/InStock",
+            "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
+          }
         },
+        // 4. BreadcrumbList (ลำดับเส้นทางหน้าเว็บ)
         {
           "@type": "BreadcrumbList",
+          "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": breadcrumbElements
         },
+        // 5. FAQPage (ถาม-ตอบแสดงบน Google Search)
         {
           "@type": "FAQPage",
           "@id": `${canonicalUrl}#faq`,
+          "isPartOf": { "@id": `${canonicalUrl}#webpage` },
           "mainEntity": [
             {
               "@type": "Question",
