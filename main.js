@@ -427,8 +427,9 @@ window.ScrollTrigger = ScrollTrigger;
       normalizedImages.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
     }
 
-    const rawProvKey = document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
-    const provKey = normalizeProvinceKey(rawProvKey);
+ // 🟢 แก้ไขตรงนี้: ให้ดึงรหัสจังหวัดจากฐานข้อมูล (raw.provinceKey หรือ raw.province_key) มาใช้ก่อน
+const rawProvKey = raw.provinceKey || raw.province_key || raw.province_slug || document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
+const provKey = normalizeProvinceKey(rawProvKey);
     const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
 
 const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
