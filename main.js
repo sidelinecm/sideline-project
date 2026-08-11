@@ -133,26 +133,32 @@ window.ScrollTrigger = ScrollTrigger;
     return FALLBACK_SLOGANS[index];
   }
 
-  function sanitizeThaiText(str) {
-    if (str === null || str === undefined) return "";
-    return String(str)
-      .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
-      .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
-      .replace(/ทดลองใช้งาน\.?/gi, "")
-      .replace(/นิมาน|นิทาน/g, "นิมมาน")
-      .replace(/ฟื้นที่/g, "พื้นที่")
-      .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
-      .replace(/พาพับ/g, "พายัพ")
-      .replace(/ของแก่น/g, "ขอนแก่น")
-      .replace(/บ้านดู๋/g, "บ้านดู่")
-      .replace(/ห้วยเเก้ว/g, "ห้วยแก้ว")
-      .replace(/ปาตอง/g, "ป่าตอง")
-      .replace(/ชลบรุี/g, "ชลบุรี")
-      .replace(/อยุธญา/g, "อยุธยา")
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨]/gu, "")
-      .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„]+/g, "")
-      .trim();
-  }
+  // ✅ ฟังก์ชัน Sanitize ภาษาไทยที่ถูกต้องและปลอดภัย 100%
+function sanitizeThaiText(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    // 1. ลบข้อความ Debug Gemini / System Prompts
+    .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
+    .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
+    .replace(/ทดลองใช้งาน\.?/gi, "")
+    // 2. แก้ไขคำสะกดผิดที่พบบ่อย
+    .replace(/นิมาน|นิทาน/g, "นิมมาน")
+    .replace(/ฟื้นที่/g, "พื้นที่")
+    .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
+    .replace(/พาพับ/g, "พายัพ")
+    .replace(/ของแก่น/g, "ขอนแก่น")
+    .replace(/บ้านดู๋/g, "บ้านดู่")
+    .replace(/ห้วยเเก้ว/g, "ห้วยแก้ว")
+    .replace(/ปาตอง/g, "ป่าตอง")
+    .replace(/ชลบรุี/g, "ชลบุรี")
+    .replace(/อยุธญา/g, "อยุธยา")
+    // 3. ลบสัญลักษณ์ตกแต่ง Text Art โดยไม่กระทบสระไทย (เอา 'อิ' และตัวอักษรไทยออก)
+    .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚╭╮╰╯┊જ⁀⸝༘⋆ෆ◟ヾ֒𐐪づ⁺.]+/g, " ")
+    // 4. ลบ Emojis
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
   function sanitizeName(rawName) {
     if (!rawName || typeof rawName !== "string") return "สาวสวย";
