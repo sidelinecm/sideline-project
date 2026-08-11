@@ -1,4 +1,3 @@
-
 /* ==============================================================================
    💎 FIRST MODEL HUB - MAIN CLIENT-SIDE ENGINE (PROD-READY PERFECT 2026)
    ============================================================================== */
@@ -54,7 +53,7 @@ window.ScrollTrigger = ScrollTrigger;
   let isFirstLoad = true;
   let searchDebounceTimer = null;
 
-  // 🟢 IndexedDB
+  // 🟢 IndexedDB Engine
   const idb = {
     init() {
       return new Promise((resolve, reject) => {
@@ -510,6 +509,7 @@ window.ScrollTrigger = ScrollTrigger;
         STATE.allProfiles = deduplicateProfiles(window.profilesData.map(p => processProfileObject(p)).filter(Boolean));
         
         populateProvinceDropdown();
+        renderSmartFilterChips();
         applyUltimateFilters(false, false);
         updateHeroSwiperCards();
         
@@ -529,8 +529,8 @@ window.ScrollTrigger = ScrollTrigger;
       }
 
       console.log("🚀 กำลังดึงข้อมูลโปรไฟล์จาก Supabase...");
-      const provincesPromise = supabaseClient.from("provinces").select("*");
-      const profilesPromise = supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false });
+      const provincesPromise = supabaseClient ? supabaseClient.from("provinces").select("*") : Promise.resolve({ data: [] });
+      const profilesPromise = supabaseClient ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }) : Promise.resolve({ data: [] });
 
       const [provincesRes, profilesRes] = await Promise.all([provincesPromise, profilesPromise]);
 
@@ -555,6 +555,7 @@ window.ScrollTrigger = ScrollTrigger;
       idb.set(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
 
       populateProvinceDropdown();
+      renderSmartFilterChips();
       applyUltimateFilters(false, false);
       updateHeroSwiperCards();
       return true;
@@ -563,8 +564,9 @@ window.ScrollTrigger = ScrollTrigger;
       console.error("❌ โหลดข้อมูลล้มเหลว นำข้อมูลเก่ามาแสดงแทน:", err);
       const fallbackRaw = await idb.get(CONFIG.KEYS.CACHE_PROFILES) || JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES) || "[]");
       if (fallbackRaw && Array.isArray(fallbackRaw) && fallbackRaw.length > 0) {
-        STATE.allProfiles = deduplicateProfiles(fallbackRaw);
+        STATE.allProfiles = deduplicateProfiles(fallbackRaw.map(p => processProfileObject(p)).filter(Boolean));
         populateProvinceDropdown();
+        renderSmartFilterChips();
         applyUltimateFilters(false, false);
         updateHeroSwiperCards();
       } else {
@@ -1118,8 +1120,8 @@ window.ScrollTrigger = ScrollTrigger;
 
     destroyLoadingPlaceholder();
     
-    if (DOM.noResultsMessage) DOM.noResultsMessage.classList.add("hidden-state");
-    if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.add("hidden-state");
+    if (DOM.noResultsMessage) DOM.noResultsMessage.classList.add("hidden");
+    if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.add("hidden");
 
     const allProfiles = STATE.allProfiles || [];
 
@@ -1140,17 +1142,17 @@ window.ScrollTrigger = ScrollTrigger;
 
       let fallbackHtml = `
         <div class="empty-state-box text-center mt-4">
-          <div class="empty-icon">🔍</div>
-          <h3 class="text-md font-extrabold text-white m-0">ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไขที่คุณค้นหา</h3>
-          <p class="text-xs text-gray-muted mt-2">ลองลดตัวกรอง พิมพ์คำค้นหาใหม่ หรือกดล้างตัวกรองด้านล่าง</p>
-          <button id="fallback-reset-btn" class="btn-outline-purple mt-3">🔄 ล้างตัวกรองค้นหาทั้งหมด</button>
+          <div class="empty-icon" style="font-size: 36px; margin-bottom: 8px;">🔍</div>
+          <h3 class="text-md font-extrabold text-white m-0" style="font-size: 15px;">ไม่พบโปรไฟล์ที่ตรงกับเงื่อนไขที่คุณค้นหา</h3>
+          <p class="text-xs text-gray-muted mt-2" style="font-size: 12px; color: #A1A1AA;">ลองลดตัวกรอง พิมพ์คำค้นหาใหม่ หรือกดล้างตัวกรองด้านล่าง</p>
+          <button id="fallback-reset-btn" class="btn-outline-purple mt-3" style="background: rgba(124, 58, 237, 0.2); border: 1px solid #C084FC; color: #E9D5FF; padding: 8px 18px; border-radius: 100px; font-weight: 800; font-size: 12px; cursor: pointer; margin-top: 12px;">🔄 ล้างตัวกรองค้นหาทั้งหมด</button>
         </div>
       `;
 
       if (recommendations.length > 0) {
         fallbackHtml += `
-          <div class="mt-6">
-            <h3 class="text-sm font-extrabold text-purple mb-3">💡 โปรไฟล์ยอดนิยมแนะนำที่คุณอาจสนใจ:</h3>
+          <div style="margin-top: 24px;">
+            <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 12px;">💡 โปรไฟล์ยอดนิยมแนะนำที่คุณอาจสนใจ:</h3>
             <div class="profiles-grid-row" id="fallback-grid-area"></div>
           </div>
         `;
@@ -1164,7 +1166,7 @@ window.ScrollTrigger = ScrollTrigger;
           await appendProfilesToContainer(fallbackGrid, recommendations, currentRenderId);
         }
       } else {
-        if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden-state");
+        if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden");
       }
 
       document.getElementById("fallback-reset-btn")?.addEventListener("click", () => {
@@ -1184,7 +1186,7 @@ window.ScrollTrigger = ScrollTrigger;
       const provName = STATE.provincesMap?.get(currentProvKey) || "ทั่วไทย";
       const count = profiles.length;
 
-      let headingTitle = `📍 น้องๆ ในจังหวัด <span class="text-purple mx-1">${provName}</span>`;
+      let headingTitle = `📍 น้องๆ ในจังหวัด <span class="text-purple mx-1" style="color: #C084FC;">${provName}</span>`;
       const modalKeyword = document.getElementById("modal-search-keyword")?.value;
       if (DOM.searchInput?.value || modalKeyword) {
         headingTitle = `🔍 ผลการค้นหา "${DOM.searchInput?.value || modalKeyword}"`;
@@ -1194,8 +1196,8 @@ window.ScrollTrigger = ScrollTrigger;
       sectionWrapper.className = "mt-4 relative";
       
       sectionWrapper.innerHTML = `
-        <div class="flex justify-between items-center flex-wrap gap-2 p-2">
-            <h2 class="text-lg font-extrabold text-white m-0 flex items-center flex-wrap gap-2">
+        <div class="flex justify-between items-center flex-wrap gap-2 p-2" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px 4px;">
+            <h2 class="text-lg font-extrabold text-white m-0 flex items-center flex-wrap gap-2" style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; gap: 8px;">
                 ${headingTitle}
                 <span class="live-count-chip">
                   <span class="pulse-dot-el"></span>
@@ -1240,7 +1242,7 @@ window.ScrollTrigger = ScrollTrigger;
         }
         if (isUserAction) scrollToSearchResults();
       } else {
-        if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden-state");
+        if (DOM.noResultsMessage) DOM.noResultsMessage.classList.remove("hidden");
       }
     }
 
@@ -1444,7 +1446,6 @@ window.ScrollTrigger = ScrollTrigger;
       gsap.fromTo(wrapper, { scale: 0.92, opacity: 0, y: 15 }, { scale: 1, opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.2)" });
     }
 
-    // 🟢 อัปเดต SEO Metadata เมื่อเปิด Lightbox
     updateSEOMetadata(profile, null);
   }
   
@@ -1458,13 +1459,11 @@ window.ScrollTrigger = ScrollTrigger;
       STATE.currentProfileSlug = null;
       if (updateUrl && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
         history.pushState(null, "", "/");
-        // 🟢 คืนค่า SEO กลับไปเป็นของหน้าแรก
         updateSEOMetadata(null, null);
       }
     }
   }
 
-  // 🟢 ฟังก์ชันลบ Schema ชั่วคราวเมื่อสลับหน้า
   function removeJsonLdSchemas() {
     const schemaIds = [
       "dynamic-schema",
@@ -1480,7 +1479,6 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  // 🟢 ฟังก์ชันฉีด Schema เข้าไปใน <head>
   function injectJsonLdSchema(schemaObj, elementId = "schema-jsonld") {
     if (!schemaObj) return;
     const existing = document.getElementById(elementId);
@@ -1493,7 +1491,6 @@ window.ScrollTrigger = ScrollTrigger;
     document.head.appendChild(script);
   }
 
-  // 🟢 ฟังก์ชันหลักในการจัดการ SEO และ Schema Dynamic (Client-Side SPA)
   function updateSEOMetadata(profile = null, locationData = null) {
     const currentPath = window.location.pathname.toLowerCase();
     const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
@@ -1504,7 +1501,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
     isFirstLoad = false;
 
-    // 1. กรณีเป็นหน้าแรก (Home Page)
     if (isHomePage && !profile) {
       document.title = DEFAULT_SEO.title;
       updateMetaTag("description", DEFAULT_SEO.description);
@@ -1517,7 +1513,6 @@ window.ScrollTrigger = ScrollTrigger;
 
     removeJsonLdSchemas();
 
-    // 2. กรณีเปิดดูโปรไฟล์เดี่ยว (Single Profile Page)
     if (profile) {
       const nameClean = sanitizeName(profile.name || profile.displayName);
       const provKey = normalizeProvinceKey(profile.provinceKey);
@@ -1536,7 +1531,6 @@ window.ScrollTrigger = ScrollTrigger;
 
       updateOpenGraphAndTwitter(profile, title, description, "profile");
 
-      // 2.1 Person Schema
       injectJsonLdSchema({
         "@context": "https://schema.org",
         "@type": "Person",
@@ -1565,7 +1559,6 @@ window.ScrollTrigger = ScrollTrigger;
         }
       }, "schema-jsonld-person");
 
-      // 2.2 BreadcrumbList Schema
       injectJsonLdSchema({
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -1577,7 +1570,6 @@ window.ScrollTrigger = ScrollTrigger;
         ]
       }, "schema-jsonld-breadcrumb");
 
-      // 2.3 FAQPage Schema (✨ เพิ่มเติมสำหรับ Client-Side SPA)
       injectJsonLdSchema({
         "@context": "https://schema.org",
         "@type": "FAQPage",
@@ -1602,7 +1594,6 @@ window.ScrollTrigger = ScrollTrigger;
         ]
       }, "schema-jsonld-faq");
 
-    // 3. กรณีเลือกสลับดูหน้าหมวดหมู่/จังหวัด (Location / Category Page)
     } else if (locationData) {
       const provKey = normalizeProvinceKey(locationData.provinceKey || locationData.provinceSlug || "national");
       const provName = locationData.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย";
@@ -1619,7 +1610,6 @@ window.ScrollTrigger = ScrollTrigger;
 
       updateOpenGraphAndTwitter(null, title, description, "website");
 
-      // 3.1 BreadcrumbList Schema (สำหรับหน้าจังหวัด)
       injectJsonLdSchema({
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -1630,7 +1620,6 @@ window.ScrollTrigger = ScrollTrigger;
         ]
       }, "schema-jsonld-breadcrumb");
 
-      // 3.2 FAQPage Schema (สำหรับหน้าจังหวัด)
       const seoData = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
       const faqs = (seoData && seoData.faqs) ? seoData.faqs : LOCALIZED_SEO_MAP["national"].faqs;
 
@@ -1647,7 +1636,6 @@ window.ScrollTrigger = ScrollTrigger;
         }, "schema-jsonld-faq");
       }
 
-      // 3.3 ItemList Schema (รายการโปรไฟล์ในจังหวัด)
       if (locationData.profiles && locationData.profiles.length > 0) {
         injectJsonLdSchema({
           "@context": "https://schema.org",
@@ -1670,7 +1658,20 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  // 🟢 ฟังก์ชันจัดการ Meta Tag
+  function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
+    const imageUrl = profile && profile.images && profile.images[0] ? profile.images[0].fullSrc || profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
+    
+    updateMetaTag("og:title", title);
+    updateMetaTag("og:description", description);
+    updateMetaTag("og:type", type);
+    updateMetaTag("og:image", imageUrl);
+    updateMetaTag("og:image:secure_url", imageUrl);
+    
+    updateMetaTag("twitter:title", title);
+    updateMetaTag("twitter:description", description);
+    updateMetaTag("twitter:image", imageUrl);
+  }
+
   function updateMetaTag(nameOrProperty, content) {
     let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
     if (!tag) {
@@ -1685,7 +1686,6 @@ window.ScrollTrigger = ScrollTrigger;
     tag.setAttribute("content", content);
   }
 
-  // 🟢 ฟังก์ชันจัดการ Link Canonical
   function updateLinkRel(rel, href) {
     let link = document.querySelector(`link[rel="${rel}"]`);
     if (!link) {
@@ -1775,635 +1775,648 @@ window.ScrollTrigger = ScrollTrigger;
         : LOCALIZED_SEO_MAP["national"].reviews;
         
       reviewsGrid.innerHTML = reviewsList.map(r => `
-        <div class="interactive-card p-4 flex flex-col gap-2 text-left">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-2">
-              <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${r.author.charAt(0)}</div>
-              <div>
-                <span class="block text-xs font-extrabold text-white">${r.author}</span>
-                <span class="block text-xs text-gray-muted font-bold">นัดเจอใน${r.location}</span>
+        <div class="interactive-card p-4 flex flex-col gap-2 text-left" style="padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(13,8,30,0.4);">
+          <div class="flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+<div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${(r.author || "K").charAt(0)}</div>
+                <div>
+                  <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${r.author}</span>
+                  <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${r.location}</span>
+                </div>
+              </div>
+              <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 10px;">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
               </div>
             </div>
-            <div class="stars flex gap-1 text-gold text-xs">
-              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
+            <p style="font-size: 12px; color: var(--text-gray); line-height: 1.5; margin: 8px 0 0 0;">${r.text}</p>
+            <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-top: 8px;">ยืนยันการใช้บริการจริง • ${r.date}</span>
           </div>
-          <p class="text-xs text-gray-light leading-relaxed m-0">${r.text}</p>
-          <span class="block text-xs text-gray-muted font-extrabold uppercase mt-2">ยืนยันการใช้บริการจริง • ${r.date}</span>
-        </div>
-      `).join("");
-    }
-
-    const faqContainer = document.getElementById("faq-container-list");
-    if (faqContainer) {
-      const faqsList = (data && data.faqs && data.faqs.length > 0) 
-        ? data.faqs 
-        : LOCALIZED_SEO_MAP["national"].faqs;
-
-      faqContainer.innerHTML = faqsList.map(item => `
-        <div class="interactive-card p-4">
-            <div class="flex flex-col gap-2">
-                <h3 class="font-extrabold text-sm flex items-start gap-2 m-0">
-                  <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 12px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
-                  <span class="text-gradient-sub leading-relaxed">${item.q}</span>
-                </h3>
-                <div style="padding-left: 32px; color: var(--text-gray); font-size: 12px; line-height: 1.5; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
-                  ${item.a}
-                </div>
-            </div>
-        </div>
-      `).join("");
-    }
-
-    renderZoneChips(normKey);
-    updateGoogleMap(normKey, provName);
-  }
-
-  function initSeoDrawer() {
-    const btn = document.getElementById("toggle-seo-drawer-btn");
-    const wrapper = document.getElementById("seo-drawer-wrapper");
-    if (!btn || !wrapper) return;
-
-    btn.addEventListener("click", () => {
-      const isCollapsed = wrapper.classList.contains("collapsed");
-      const overlay = wrapper.querySelector(".seo-fade-overlay");
-
-      if (isCollapsed) {
-        wrapper.classList.remove("collapsed");
-        if (overlay) overlay.style.display = "none";
-        btn.querySelector("span").textContent = "ย่อข้อความกลับ";
-      } else {
-        wrapper.classList.add("collapsed");
-        if (overlay) overlay.style.display = "block";
-        btn.querySelector("span").textContent = "ดูข้อมูลพื้นที่บริการทั้งหมด";
+        `).join("");
       }
-    });
-  }
 
-  function initRegionTabs() {
-    const tabs = document.querySelectorAll(".region-tab");
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        tabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
+      const faqContainer = document.getElementById("faq-container-list");
+      if (faqContainer) {
+        const faqsList = (data && data.faqs && data.faqs.length > 0) 
+          ? data.faqs 
+          : LOCALIZED_SEO_MAP["national"].faqs;
 
-        const region = tab.getAttribute("data-region");
-        if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+        faqContainer.innerHTML = faqsList.map(item => `
+          <div class="interactive-card p-4" style="padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(13,8,30,0.4);">
+              <div class="flex flex-col gap-2" style="display: flex; flex-direction: column; gap: 8px;">
+                  <h3 class="font-extrabold text-sm flex items-start gap-2 m-0" style="font-size: 14px; font-weight: 800; margin: 0; display: flex; align-items: flex-start; gap: 8px;">
+                    <span style="display: flex; height: 22px; width: 22px; align-items: center; justify-content: center; border-radius: 6px; background-color: rgba(90, 44, 190, 0.2); color: #C084FC; font-size: 12px; font-weight: 900; border: 1px solid rgba(147, 51, 234, 0.3); flex-shrink: 0;">Q</span>
+                    <span class="text-gradient-sub" style="line-height: 1.5; color: white;">${item.q}</span>
+                  </h3>
+                  <div style="padding-left: 30px; color: var(--text-gray); font-size: 12px; line-height: 1.6; border-left: 2px solid rgba(147, 51, 234, 0.2); padding-top: 4px;">
+                    ${item.a}
+                  </div>
+              </div>
+          </div>
+        `).join("");
+      }
 
-        if (region === "ทั้งหมด") {
-          if (DOM.searchInput) DOM.searchInput.value = "";
-        } else if (region === "ภาคเหนือ") {
-          if (DOM.searchInput) DOM.searchInput.value = "เชียงใหม่";
-        } else if (region === "กรุงเทพฯ") {
-          if (DOM.provinceSelect) DOM.provinceSelect.value = "bangkok";
+      renderZoneChips(normKey);
+      updateGoogleMap(normKey, provName);
+    }
+
+    function initSeoDrawer() {
+      const btn = document.getElementById("toggle-seo-drawer-btn");
+      const wrapper = document.getElementById("seo-drawer-wrapper");
+      if (!btn || !wrapper) return;
+
+      btn.addEventListener("click", () => {
+        const isCollapsed = wrapper.classList.contains("collapsed");
+        const overlay = wrapper.querySelector(".seo-fade-overlay");
+
+        if (isCollapsed) {
+          wrapper.classList.remove("collapsed");
+          if (overlay) overlay.style.display = "none";
+          btn.querySelector("span").textContent = "ย่อข้อความกลับ";
+        } else {
+          wrapper.classList.add("collapsed");
+          if (overlay) overlay.style.display = "block";
+          btn.querySelector("span").textContent = "ดูข้อมูลพื้นที่บริการทั้งหมด";
         }
-        applyUltimateFilters(true, true);
       });
-    });
-  }
+    }
 
-  function replaceDomPlaceholders(provinceName = "ทั่วไทย", profileCount = 50, provinceSlug = "national") {
-    try {
-      const liveCountEl = document.getElementById("live-profile-count");
-      if (liveCountEl) liveCountEl.textContent = profileCount;
+    function initRegionTabs() {
+      const tabs = document.querySelectorAll(".region-tab");
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
 
-      const normKey = normalizeProvinceKey(provinceSlug);
-      const currentProvData = LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"];
-      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
-      const zoneText = currentZones.join(", ");
+          const region = tab.getAttribute("data-region");
+          if (DOM.provinceSelect) DOM.provinceSelect.value = "";
 
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-      let node;
-      while ((node = walker.nextNode())) {
-        if (node.nodeValue && (node.nodeValue.includes("{{") || node.nodeValue.includes("%7B%7B"))) {
-          node.nodeValue = node.nodeValue
-            .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
-            .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-            .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-            .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
-        }
-      }
-
-      const allElements = document.querySelectorAll('*');
-      allElements.forEach(el => {
-        ['title', 'alt', 'content', 'placeholder', 'value', 'data-src', 'href'].forEach(attr => {
-          if (el.hasAttribute(attr)) {
-            let val = el.getAttribute(attr);
-            if (val && (val.includes('{{') || val.includes('%7B%7B'))) {
-              val = val
-                .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
-                .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-                .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-                .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, '');
-              el.setAttribute(attr, val);
-            }
+          if (region === "ทั้งหมด") {
+            if (DOM.searchInput) DOM.searchInput.value = "";
+          } else if (region === "ภาคเหนือ") {
+            if (DOM.searchInput) DOM.searchInput.value = "เชียงใหม่";
+          } else if (region === "กรุงเทพฯ") {
+            if (DOM.provinceSelect) DOM.provinceSelect.value = "bangkok";
           }
+          applyUltimateFilters(true, true);
         });
       });
-
-      updateDynamicProvinceContent(normKey, provinceName, profileCount);
-    } catch (e) {
-      console.warn("⚠️ Replace placeholders error:", e);
     }
-  }
 
-  function updateActiveNavLinks() {
-    const path = window.location.pathname;
-    document.querySelectorAll("nav a").forEach(a => {
-      const isActive = a.getAttribute("href") === path;
-      a.classList.toggle("active", isActive);
-    });
-  }
+    function replaceDomPlaceholders(provinceName = "ทั่วไทย", profileCount = 50, provinceSlug = "national") {
+      try {
+        const liveCountEl = document.getElementById("live-profile-count");
+        if (liveCountEl) liveCountEl.textContent = profileCount;
 
-  async function handleRouteNavigation(isInitial = false) {
-    let path = window.location.pathname.toLowerCase();
-    if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
+        const normKey = normalizeProvinceKey(provinceSlug);
+        const currentProvData = LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"];
+        const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
+        const zoneText = currentZones.join(", ");
 
-    const isSsrSingleProfile = Boolean(document.querySelector(".single-profile-wrapper"));
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while ((node = walker.nextNode())) {
+          if (node.nodeValue && (node.nodeValue.includes("{{") || node.nodeValue.includes("%7B%7B"))) {
+            node.nodeValue = node.nodeValue
+              .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
+              .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
+              .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
+              .replace(/\{\{PROVINCE_KEY\}\}/g, normKey)
+              .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
+          }
+        }
 
-    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-    if (profileMatch) {
-      let slug = profileMatch[1];
-      try { slug = decodeURIComponent(slug); } catch (e) {}
-      
-      STATE.currentProfileSlug = slug;
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(el => {
+          ['title', 'alt', 'content', 'placeholder', 'value', 'data-src', 'href'].forEach(attr => {
+            if (el.hasAttribute(attr)) {
+              let val = el.getAttribute(attr);
+              if (val && (val.includes('{{') || val.includes('%7B%7B'))) {
+                val = val
+                  .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
+                  .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
+                  .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
+                  .replace(/\{\{PROVINCE_KEY\}\}/g, normKey)
+                  .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, '');
+                el.setAttribute(attr, val);
+              }
+            }
+          });
+        });
 
-      let foundProfile = STATE.allProfiles.find(p => {
-        const pSlug = String(p.slug || "").toLowerCase();
-        const pId = String(p.id);
-        const searchSlug = slug.toLowerCase();
-        return pSlug === searchSlug || pId === searchSlug;
-      });
-
-      if (!foundProfile && !isInitial) {
-        foundProfile = await fetchSingleProfileBySlug(slug);
+        updateDynamicProvinceContent(normKey, provinceName, profileCount);
+      } catch (e) {
+        console.warn("⚠️ Replace placeholders error:", e);
       }
+    }
 
-      if (isSsrSingleProfile && isInitial) {
-        closeLightboxModal(false);
+    function updateActiveNavLinks() {
+      const path = window.location.pathname;
+      document.querySelectorAll("nav a").forEach(a => {
+        const isActive = a.getAttribute("href") === path;
+        a.classList.toggle("active", isActive);
+      });
+    }
+
+    async function handleRouteNavigation(isInitial = false) {
+      let path = window.location.pathname.toLowerCase();
+      if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
+
+      const isSsrSingleProfile = Boolean(document.querySelector(".single-profile-wrapper"));
+
+      const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+      if (profileMatch) {
+        let slug = profileMatch[1];
+        try { slug = decodeURIComponent(slug); } catch (e) {}
+        
+        STATE.currentProfileSlug = slug;
+
+        let foundProfile = STATE.allProfiles.find(p => {
+          const pSlug = String(p.slug || "").toLowerCase();
+          const pId = String(p.id);
+          const searchSlug = slug.toLowerCase();
+          return pSlug === searchSlug || pId === searchSlug;
+        });
+
+        if (!foundProfile && !isInitial) {
+          foundProfile = await fetchSingleProfileBySlug(slug);
+        }
+
+        if (isSsrSingleProfile && isInitial) {
+          closeLightboxModal(false);
+          return;
+        }
+
+        if (foundProfile) {
+          openLightboxForProfile(foundProfile);
+        } else if (isInitial) {
+          history.replaceState(null, "", "/");
+          closeLightboxModal(false);
+          STATE.currentProfileSlug = null;
+        }
         return;
       }
 
-      if (foundProfile) {
-        openLightboxForProfile(foundProfile);
-      } else if (isInitial) {
-        history.replaceState(null, "", "/");
-        closeLightboxModal(false);
+      const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+      if (locationMatch) {
+        let provinceSlug = locationMatch[1];
+        try { provinceSlug = normalizeProvinceKey(decodeURIComponent(locationMatch[1])); } catch (e) { provinceSlug = normalizeProvinceKey(locationMatch[1]); }
         STATE.currentProfileSlug = null;
-      }
-      return;
-    }
+        closeLightboxModal(false);
 
-    const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
-    if (locationMatch) {
-      let provinceSlug = locationMatch[1];
-      try { provinceSlug = normalizeProvinceKey(decodeURIComponent(locationMatch[1])); } catch (e) { provinceSlug = normalizeProvinceKey(locationMatch[1]); }
+        if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
+        
+        const provName = STATE.provincesMap.get(provinceSlug) || "ทั่วไทย";
+        updateSEOMetadata(null, {
+          provinceName: provName,
+          profiles: STATE.allProfiles.filter(p => normalizeProvinceKey(p.provinceKey) === provinceSlug),
+          canonicalUrl: window.location.href
+        });
+
+        applyUltimateFilters(false, false);
+        return;
+      }
+
       STATE.currentProfileSlug = null;
       closeLightboxModal(false);
-
-      if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
-      
-      const provName = STATE.provincesMap.get(provinceSlug) || "ทั่วไทย";
-      updateSEOMetadata(null, {
-        provinceName: provName,
-        profiles: STATE.allProfiles.filter(p => normalizeProvinceKey(p.provinceKey) === provinceSlug),
-        canonicalUrl: window.location.href
-      });
-
+      updateSEOMetadata(null, null);
       applyUltimateFilters(false, false);
-      return;
     }
 
-    STATE.currentProfileSlug = null;
-    closeLightboxModal(false);
-    updateSEOMetadata(null, null);
-    applyUltimateFilters(false, false);
-  }
-
-  async function fetchSingleProfileBySlug(slug) {
-    if (!window.supabase) return null;
-    try {
-      let query = window.supabase.from("profiles").select("*");
-      if (/^\d+$/.test(slug)) query = query.eq("id", slug);
-      else query = query.eq("slug", slug);
-      
-      const { data, error } = await query.maybeSingle();
-      if (error) throw error;
-      return data ? processProfileObject(data) : null;
-    } catch (e) {
-      console.error("❌ ดึงข้อมูลโปรไฟล์ล้มเหลว:", e);
-      return null;
+    async function fetchSingleProfileBySlug(slug) {
+      if (!supabaseClient) return null;
+      try {
+        let query = supabaseClient.from("profiles").select("*");
+        if (/^\d+$/.test(slug)) query = query.eq("id", slug);
+        else query = query.eq("slug", slug);
+        
+        const { data, error } = await query.maybeSingle();
+        if (error) throw error;
+        return data ? processProfileObject(data) : null;
+      } catch (e) {
+        console.error("❌ ดึงข้อมูลโปรไฟล์ล้มเหลว:", e);
+        return null;
+      }
     }
-  }
 
-  function initStarRating() {
-    const stars = document.querySelectorAll(".star-rating-input-item");
-    const ratingInput = document.getElementById("review-rating-value");
-    if (!stars.length || !ratingInput) return;
+    function initStarRating() {
+      const stars = document.querySelectorAll(".star-rating-input-item");
+      const ratingInput = document.getElementById("review-rating-value");
+      if (!stars.length || !ratingInput) return;
 
-    stars.forEach(star => {
-      star.addEventListener("click", () => {
-        const val = parseInt(star.getAttribute("data-value") || "5", 10);
-        ratingInput.value = val;
-        stars.forEach(s => {
-          const sVal = parseInt(s.getAttribute("data-value") || "5", 10);
-          if (sVal <= val) {
-            s.classList.add("active");
-            s.style.color = "#FBBF24";
-          } else {
-            s.classList.remove("active");
-            s.style.color = "#71717A";
-          }
+      stars.forEach(star => {
+        star.addEventListener("click", () => {
+          const val = parseInt(star.getAttribute("data-value") || "5", 10);
+          ratingInput.value = val;
+          stars.forEach(s => {
+            const sVal = parseInt(s.getAttribute("data-value") || "5", 10);
+            if (sVal <= val) {
+              s.classList.add("active");
+              s.style.color = "#FBBF24";
+            } else {
+              s.classList.remove("active");
+              s.style.color = "#71717A";
+            }
+          });
         });
       });
-    });
-  }
+    }
 
-  function initReviewForm() {
-    const form = document.getElementById("review-form");
-    if (!form) return;
+    function initReviewForm() {
+      const form = document.getElementById("review-form");
+      if (!form) return;
 
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "กำลังส่งข้อมูล...";
+      form.addEventListener("submit", async e => {
+        e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "กำลังส่งข้อมูล...";
+        }
+
+        const author = document.getElementById("review-author")?.value.trim();
+        const location = document.getElementById("review-location")?.value.trim();
+        const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
+        const reviewText = document.getElementById("review-text")?.value.trim();
+        const rawProvKey = DOM.provinceSelect?.value || "national";
+
+        if (!author || !reviewText) {
+          showToast("❌ กรุณากรอกชื่อและรายละเอียดให้ครบถ้วน", "error");
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ"; }
+          return;
+        }
+
+        try {
+          if (!supabaseClient) throw new Error("Database offline");
+          const { error } = await supabaseClient.from("reviews").insert([{
+            author_name: author,
+            location_detail: location || "ไม่ระบุโซน",
+            rating_score: rating,
+            review_body: reviewText,
+            province_key: rawProvKey,
+            active_status: false
+          }]);
+
+          if (error) throw error;
+
+          showToast("✅ ส่งรีวิวสำเร็จ! ข้อมูลของคุณกำลังรอตรวจสอบ", "success");
+          form.reset();
+          
+        } catch (err) {
+          console.error("Submission failed:", err);
+          showToast("❌ เกิดข้อผิดพลาดในการส่งรีวิว กรุณาลองใหม่", "error");
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ";
+          }
+        }
+      });
+    }
+
+    function initReviewToggle() {
+      const btn = document.getElementById("toggle-review-form-btn");
+      const form = document.getElementById("review-form");
+      if (!btn || !form) return;
+
+      btn.addEventListener("click", () => {
+        const isHidden = form.style.display === "none" || form.style.display === "";
+        if (isHidden) {
+          form.style.display = "flex";
+          btn.textContent = "❌ ปิดหน้าต่างเขียนรีวิว";
+        } else {
+          form.style.display = "none";
+          btn.textContent = "✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์";
+        }
+      });
+    }
+
+    function initAccordions() {
+      const items = document.querySelectorAll(".rule-item");
+      items.forEach(item => {
+        const trigger = item.querySelector(".rule-trigger");
+        if (trigger) {
+          trigger.addEventListener("click", () => {
+            const isCollapsed = item.classList.contains("collapsed");
+            items.forEach(i => i.classList.add("collapsed"));
+            if (isCollapsed) item.classList.remove("collapsed");
+          });
+        }
+      });
+    }
+
+    function initPwaInstaller() {
+      if (window.matchMedia('(display-mode: standalone)').matches) return;
+      
+      let deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showPwaInstallBanner();
+      });
+
+      function showPwaInstallBanner() {
+        if (document.getElementById('pwa-install-banner') || localStorage.getItem('pwa_banner_dismissed')) return;
+
+        const banner = document.createElement('div');
+        banner.id = 'pwa-install-banner';
+        banner.style.cssText = `
+          position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
+          width: calc(100% - 24px); max-width: 420px; background: rgba(18, 12, 38, 0.95);
+          border: 1px solid rgba(192, 132, 252, 0.4); border-radius: 16px; padding: 12px 16px;
+          display: flex; align-items: center; justify-content: space-between; gap: 12px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: var(--z-toast, 9000);
+        `;
+
+        banner.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px;" alt="App">
+            <div>
+              <div style="font-size: 12px; font-weight: 800; color: #FFF;">ติดตั้งแอป First Model Hub</div>
+              <div style="font-size: 11px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button id="pwa-install-btn" style="background: linear-gradient(135deg, #7C3AED, #5A2CBE); color: white; border: none; padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; cursor: pointer;">ติดตั้ง</button>
+            <button id="pwa-dismiss-btn" style="background: none; border: none; color: #A1A1AA; font-size: 14px; cursor: pointer;"><i class="fas fa-times"></i></button>
+          </div>
+        `;
+        document.body.appendChild(banner);
+
+        document.getElementById('pwa-install-btn').onclick = async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+          }
+          banner.remove();
+        };
+
+        document.getElementById('pwa-dismiss-btn').onclick = () => {
+          banner.remove();
+          localStorage.setItem('pwa_banner_dismissed', Date.now());
+        };
       }
+    }
 
-      const author = document.getElementById("review-author")?.value.trim();
-      const location = document.getElementById("review-location")?.value.trim();
-      const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
-      const reviewText = document.getElementById("review-text")?.value.trim();
-      const rawProvKey = DOM.provinceSelect?.value || "national";
+    function initDynamicSearchPlaceholder() {
+      const placeholders = [
+        "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
+        "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
+        "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
+        "💰 ค้นเรตราคา เช่น 1500, 2000..."
+      ];
 
-      if (!author || !reviewText) {
-        showToast("❌ กรุณากรอกชื่อและรายละเอียดให้ครบถ้วน", "error");
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ"; }
-        return;
+      let idx = 0;
+
+      setInterval(() => {
+        const searchInput = document.getElementById("modal-search-keyword") || document.getElementById("search-keyword");
+        if (!searchInput) return;
+
+        if (document.activeElement !== searchInput && (!searchInput.value || searchInput.value.trim() === "")) {
+          idx = (idx + 1) % placeholders.length;
+          searchInput.setAttribute("placeholder", placeholders[idx]);
+        }
+      }, 2500);
+    }
+
+    window.handleLikeClick = async function (btnElement, profileId) {
+      if (isLikeProcessing) return;
+      isLikeProcessing = true;
+
+      const isLiked = btnElement.classList.toggle("liked");
+      const icon = btnElement.querySelector("i");
+
+      if (icon) {
+        icon.style.transform = isLiked ? "scale(1.4)" : "scale(0.9)";
+        icon.style.color = isLiked ? "#FF2E63" : "#FFFFFF";
+        setTimeout(() => { icon.style.transform = "scale(1)"; }, 200);
       }
 
       try {
-        if (!supabaseClient) throw new Error("Database offline");
-        const { error } = await supabaseClient.from("reviews").insert([{
-          author_name: author,
-          location_detail: location || "ไม่ระบุโซน",
-          rating_score: rating,
-          review_body: reviewText,
-          province_key: rawProvKey,
-          active_status: false
-        }]);
-
-        if (error) throw error;
-
-        showToast("✅ ส่งรีวิวสำเร็จ! ข้อมูลของคุณกำลังรอตรวจสอบ", "success");
-        form.reset();
-        
-      } catch (err) {
-        console.error("Submission failed:", err);
-        showToast("❌ เกิดข้อผิดพลาดในการส่งรีวิว กรุณาลองใหม่", "error");
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ";
+        const likedMap = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || "{}");
+        if (isLiked) {
+          likedMap[profileId] = true;
+          showToast("❤️ เพิ่มลงในรายการโปรดแล้ว", "success");
+        } else {
+          delete likedMap[profileId];
         }
+        localStorage.setItem(CONFIG.KEYS.LIKED_PROFILES, JSON.stringify(likedMap));
+      } catch (e) {}
+
+      if (supabaseClient) {
+        try {
+          const rpcName = isLiked ? "increment_likes" : "decrement_likes";
+          await supabaseClient.rpc(rpcName, { profile_id_to_update: profileId });
+        } catch (e) {}
       }
-    });
-  }
 
-  function initReviewToggle() {
-    const btn = document.getElementById("toggle-review-form-btn");
-    const form = document.getElementById("review-form");
-    if (!btn || !form) return;
+      setTimeout(() => { isLikeProcessing = false; }, 300);
+    };
 
-    btn.addEventListener("click", () => {
-      const isHidden = form.style.display === "none" || form.style.display === "";
-      if (isHidden) {
-        form.style.display = "flex";
-        btn.textContent = "❌ ปิดหน้าต่างเขียนรีวิว";
-      } else {
-        form.style.display = "none";
-        btn.textContent = "✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์";
+    window.openFilterModal = function() {
+      const modal = document.getElementById('filter-modal-overlay');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
       }
-    });
-  }
+    };
 
-  function initAccordions() {
-    const items = document.querySelectorAll(".rule-item");
-    items.forEach(item => {
-      const trigger = item.querySelector(".rule-trigger");
-      if (trigger) {
-        trigger.addEventListener("click", () => {
-          const isCollapsed = item.classList.contains("collapsed");
-          items.forEach(i => i.classList.add("collapsed"));
-          if (isCollapsed) item.classList.remove("collapsed");
+    window.closeFilterModal = function() {
+      const modal = document.getElementById('filter-modal-overlay');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    };
+
+    function hideGlobalLoader() {
+      const loader = document.getElementById("global-loader-overlay");
+      if (loader) loader.style.opacity = "0";
+      setTimeout(() => {
+        if (loader) loader.style.display = "none";
+      }, 500);
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+      try {
+        supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        window.supabase = supabaseClient;
+      } catch (e) {
+        console.error("❌ เชื่อมต่อ Supabase ล้มเหลว:", e);
+      }
+
+      DOM.searchForm = document.getElementById("search-form");
+      DOM.searchInput = document.getElementById("search-keyword");
+      DOM.provinceSelect = document.getElementById("search-province");
+      DOM.availabilitySelect = document.getElementById("search-availability");
+      DOM.featuredSelect = document.getElementById("search-featured");
+      DOM.sortSelect = document.getElementById("sort-select");
+      DOM.resetSearchBtn = document.getElementById("reset-search-btn");
+      DOM.profilesDisplayArea = document.getElementById("profiles-display-area");
+      DOM.featuredSection = document.getElementById("featured-profiles");
+      DOM.featuredContainer = document.getElementById("featured-profiles-container");
+      DOM.noResultsMessage = document.getElementById("no-results-message");
+
+      const toggleBtn = document.getElementById("menu-toggle");
+      const sidebar = document.getElementById("sidebar-menu");
+      const overlay = document.getElementById("sidebar-overlay");
+      const closeBtn = document.getElementById("close-menu-btn");
+      if (toggleBtn && sidebar) {
+        const toggleMenu = (open) => {
+          sidebar.classList.toggle("active", open);
+          if (overlay) {
+            overlay.style.display = open ? "block" : "none";
+            setTimeout(() => { overlay.style.opacity = open ? "1" : "0"; }, 10);
+          }
+          document.body.style.overflow = open ? "hidden" : "";
+        };
+        toggleBtn.onclick = () => toggleMenu(true);
+        if (closeBtn) closeBtn.onclick = () => toggleMenu(false);
+        if (overlay) overlay.onclick = () => toggleMenu(false);
+        sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
+      }
+
+      document.body.addEventListener("click", e => {
+        const target = e.target;
+
+        const likeBtn = target.closest('[data-action="like"]');
+        if (likeBtn) {
+          e.preventDefault(); e.stopPropagation();
+          const id = likeBtn.dataset.id;
+          if (id) window.handleLikeClick(likeBtn, id);
+          return;
+        }
+
+        const cardLink = target.closest("a.card-link");
+        if (cardLink) {
+          e.preventDefault();
+          const card = cardLink.closest(".profile-card-new, .vip-card-item");
+          let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
+          if (rawSlug) {
+            try { rawSlug = decodeURIComponent(rawSlug); } catch (err) {}
+            history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
+            handleRouteNavigation();
+          }
+          return;
+        }
+
+        const closeLightbox = target.closest("#closeLightboxBtn");
+        const lightboxModal = target.closest("#lightbox");
+        if (closeLightbox || (lightboxModal && e.target === lightboxModal)) {
+          closeLightboxModal(true);
+          return;
+        }
+
+        if (target.closest('.province-chip')) {
+          document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
+          target.closest('.province-chip').classList.add('active');
+          if (DOM.provinceSelect) {
+            DOM.provinceSelect.value = normalizeProvinceKey(target.closest('.province-chip').getAttribute('data-value') || '');
+          }
+        }
+
+        if (target.closest('.avail-chip')) {
+          document.querySelectorAll('.avail-chip').forEach(b => b.classList.remove('active'));
+          target.closest('.avail-chip').classList.add('active');
+          if (DOM.availabilitySelect) DOM.availabilitySelect.value = target.closest('.avail-chip').getAttribute('data-value') || '';
+        }
+
+        if (target.closest('.price-chip')) {
+          document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
+          target.closest('.price-chip').classList.add('active');
+          const hiddenPrice = document.getElementById("search-price");
+          if (hiddenPrice) hiddenPrice.value = target.closest('.price-chip').getAttribute('data-price') || '';
+        }
+
+        if (target.closest('.tag-chip')) {
+          document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
+          target.closest('.tag-chip').classList.add('active');
+          const modalInput = document.getElementById('modal-search-keyword');
+          if (modalInput) modalInput.value = target.closest('.tag-chip').getAttribute('data-tag') || '';
+        }
+
+        if (target.closest('.sort-chip')) {
+          document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
+          target.closest('.sort-chip').classList.add('active');
+          if (DOM.sortSelect) DOM.sortSelect.value = target.closest('.sort-chip').getAttribute('data-sort') || 'featured';
+        }
+      });
+
+      const modalApplyBtn = document.getElementById('modal-apply-btn');
+      if (modalApplyBtn) {
+        modalApplyBtn.onclick = () => {
+          applyUltimateFilters(true, true);
+          closeFilterModal();
+        };
+      }
+
+      const modalResetBtn = document.getElementById('modal-reset-btn');
+      if (modalResetBtn) {
+        modalResetBtn.onclick = () => {
+          document.querySelector('#modal-province-chips .province-chip[data-value=""]')?.click();
+          document.querySelector('#modal-availability-chips .avail-chip[data-value=""]')?.click();
+          document.querySelector('#modal-sort-chips .sort-chip[data-sort="featured"]')?.click();
+          document.querySelector('#modal-price-chips .price-chip[data-price=""]')?.click();
+          document.querySelectorAll('#modal-tag-chips .tag-chip').forEach(b => b.classList.remove('active'));
+          if (document.getElementById('modal-search-keyword')) document.getElementById('modal-search-keyword').value = '';
+          if (DOM.searchInput) DOM.searchInput.value = '';
+          
+          applyUltimateFilters(true, true);
+        };
+      }
+
+      const modalSearchInput = document.getElementById("modal-search-keyword");
+      if (modalSearchInput) {
+        modalSearchInput.addEventListener("input", (e) => {
+          if (DOM.searchInput) DOM.searchInput.value = e.target.value;
+          clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = setTimeout(() => {
+            applyUltimateFilters(true, false);
+          }, 300);
         });
       }
-    });
-  }
 
-  function initPwaInstaller() {
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-    
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      showPwaInstallBanner();
-    });
+      initStarRating();
+      initReviewForm();
+      initReviewToggle();
+      initAccordions();
+      initPwaInstaller();
+      initDynamicSearchPlaceholder();
+      initSeoDrawer();
+      initRegionTabs();
 
-    function showPwaInstallBanner() {
-      if (document.getElementById('pwa-install-banner') || localStorage.getItem('pwa_banner_dismissed')) return;
-
-      const banner = document.createElement('div');
-      banner.id = 'pwa-install-banner';
-      banner.style.cssText = `
-        position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
-        width: calc(100% - 24px); max-width: 420px; background: rgba(18, 12, 38, 0.95);
-        border: 1px solid rgba(192, 132, 252, 0.4); border-radius: 16px; padding: 12px 16px;
-        display: flex; align-items: center; justify-content: space-between; gap: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: var(--z-toast, 9000);
-      `;
-
-      banner.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <img src="/images/apple-touch-icon.png" style="width: 38px; height: 38px; border-radius: 10px;" alt="App">
-          <div>
-            <div style="font-size: 12px; font-weight: 800; color: #FFF;">ติดตั้งแอป First Model Hub</div>
-            <div style="font-size: 11px; color: #A1A1AA;">เข้าใช้งานรวดเร็ว ไม่ต้องค้นหาบน Google</div>
-          </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <button id="pwa-install-btn" style="background: linear-gradient(135deg, #7C3AED, #5A2CBE); color: white; border: none; padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; cursor: pointer;">ติดตั้ง</button>
-          <button id="pwa-dismiss-btn" style="background: none; border: none; color: #A1A1AA; font-size: 14px; cursor: pointer;"><i class="fas fa-times"></i></button>
-        </div>
-      `;
-      document.body.appendChild(banner);
-
-      document.getElementById('pwa-install-btn').onclick = async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          await deferredPrompt.userChoice;
-          deferredPrompt = null;
-        }
-        banner.remove();
-      };
-
-      document.getElementById('pwa-dismiss-btn').onclick = () => {
-        banner.remove();
-        localStorage.setItem('pwa_banner_dismissed', Date.now());
-      };
-    }
-  }
-
-  function initDynamicSearchPlaceholder() {
-    const placeholders = [
-      "🔍 ค้นชื่อน้อง เช่น น้องชะเอม, น้องโมจิ...",
-      "📍 ค้นย่านรับงาน เช่น นิมมาน, เจ็ดยอด, รัชดา...",
-      "❤️ ค้นสไตล์ เช่น ฟิวแฟน, เอาใจเก่ง, ผิวขาว...",
-      "💰 ค้นเรตราคา เช่น 1500, 2000..."
-    ];
-
-    let idx = 0;
-
-    setInterval(() => {
-      const searchInput = document.getElementById("modal-search-keyword") || document.getElementById("search-keyword");
-      if (!searchInput) return;
-
-      if (document.activeElement !== searchInput && (!searchInput.value || searchInput.value.trim() === "")) {
-        idx = (idx + 1) % placeholders.length;
-        searchInput.setAttribute("placeholder", placeholders[idx]);
-      }
-    }, 2500);
-  }
-
-  window.handleLikeClick = async function (btnElement, profileId) {
-    if (isLikeProcessing) return;
-    isLikeProcessing = true;
-
-    const isLiked = btnElement.classList.toggle("liked");
-    const icon = btnElement.querySelector("i");
-
-    if (icon) {
-      icon.style.transform = isLiked ? "scale(1.4)" : "scale(0.9)";
-      icon.style.color = isLiked ? "#FF2E63" : "#FFFFFF";
-      setTimeout(() => { icon.style.transform = "scale(1)"; }, 200);
-    }
-
-    try {
-      const likedMap = JSON.parse(localStorage.getItem(CONFIG.KEYS.LIKED_PROFILES) || "{}");
-      if (isLiked) {
-        likedMap[profileId] = true;
-        showToast("❤️ เพิ่มลงในรายการโปรดแล้ว", "success");
-      } else {
-        delete likedMap[profileId];
-      }
-      localStorage.setItem(CONFIG.KEYS.LIKED_PROFILES, JSON.stringify(likedMap));
-    } catch (e) {}
-
-    if (window.supabase) {
-      try {
-        const rpcName = isLiked ? "increment_likes" : "decrement_likes";
-        await window.supabase.rpc(rpcName, { profile_id_to_update: profileId });
-      } catch (e) {}
-    }
-
-    setTimeout(() => { isLikeProcessing = false; }, 300);
-  };
-
-  window.openFilterModal = function() {
-    const modal = document.getElementById('filter-modal-overlay');
-    if (modal) {
-      modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
-  };
-
-  window.closeFilterModal = function() {
-    const modal = document.getElementById('filter-modal-overlay');
-    if (modal) {
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
-    }
-  };
-
-  function hideGlobalLoader() {
-    const loader = document.getElementById("global-loader-overlay");
-    if (loader) loader.style.opacity = "0";
-    setTimeout(() => {
-      if (loader) loader.style.display = "none";
-    }, 500);
-  }
-
-  document.addEventListener("DOMContentLoaded", async function () {
-    try {
-      supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-      window.supabase = supabaseClient;
-    } catch (e) {
-      console.error("❌ เชื่อมต่อ Supabase ล้มเหลว:", e);
-    }
-
-    DOM.searchForm = document.getElementById("search-form");
-    DOM.searchInput = document.getElementById("search-keyword");
-    DOM.provinceSelect = document.getElementById("search-province");
-    DOM.availabilitySelect = document.getElementById("search-availability");
-    DOM.featuredSelect = document.getElementById("search-featured");
-    DOM.sortSelect = document.getElementById("sort-select");
-    DOM.resetSearchBtn = document.getElementById("reset-search-btn");
-    DOM.profilesDisplayArea = document.getElementById("profiles-display-area");
-    DOM.featuredSection = document.getElementById("featured-profiles");
-    DOM.featuredContainer = document.getElementById("featured-profiles-container");
-    DOM.noResultsMessage = document.getElementById("no-results-message");
-
-    const toggleBtn = document.getElementById("menu-toggle");
-    const sidebar = document.getElementById("sidebar-menu");
-    const overlay = document.getElementById("sidebar-overlay");
-    const closeBtn = document.getElementById("close-menu-btn");
-    if (toggleBtn && sidebar) {
-      const toggleMenu = (open) => {
-        sidebar.classList.toggle("active", open);
-        if (overlay) {
-          overlay.style.display = open ? "block" : "none";
-          setTimeout(() => { overlay.style.opacity = open ? "1" : "0"; }, 10);
-        }
-        document.body.style.overflow = open ? "hidden" : "";
-      };
-      toggleBtn.onclick = () => toggleMenu(true);
-      if (closeBtn) closeBtn.onclick = () => toggleMenu(false);
-      if (overlay) overlay.onclick = () => toggleMenu(false);
-      sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
-    }
-
-    document.body.addEventListener("click", e => {
-      const target = e.target;
-
-      const likeBtn = target.closest('[data-action="like"]');
-      if (likeBtn) {
-        e.preventDefault(); e.stopPropagation();
-        const id = likeBtn.dataset.id;
-        if (id) window.handleLikeClick(likeBtn, id);
-        return;
-      }
-
-      const cardLink = target.closest("a.card-link");
-      if (cardLink) {
-        e.preventDefault();
-        const card = cardLink.closest(".profile-card-new, .vip-card-item");
-        let rawSlug = card ? card.getAttribute("data-profile-slug") : null;
-        if (rawSlug) {
-          try { rawSlug = decodeURIComponent(rawSlug); } catch (err) {}
-          history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
-          handleRouteNavigation();
-        }
-        return;
-      }
-
-      const closeLightbox = target.closest("#closeLightboxBtn");
-      const lightboxModal = target.closest("#lightbox");
-      if (closeLightbox || (lightboxModal && e.target === lightboxModal)) {
-        closeLightboxModal(true);
-        return;
-      }
-
-      if (target.closest('.province-chip')) {
-        document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
-        target.closest('.province-chip').classList.add('active');
-        if (DOM.provinceSelect) {
-          DOM.provinceSelect.value = normalizeProvinceKey(target.closest('.province-chip').getAttribute('data-value') || '');
-        }
-      }
-
-      if (target.closest('.avail-chip')) {
-        document.querySelectorAll('.avail-chip').forEach(b => b.classList.remove('active'));
-        target.closest('.avail-chip').classList.add('active');
-        if (DOM.availabilitySelect) DOM.availabilitySelect.value = target.closest('.avail-chip').getAttribute('data-value') || '';
-      }
-
-      if (target.closest('.price-chip')) {
-        document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
-        target.closest('.price-chip').classList.add('active');
-        const hiddenPrice = document.getElementById("search-price");
-        if (hiddenPrice) hiddenPrice.value = target.closest('.price-chip').getAttribute('data-price') || '';
-      }
-
-      if (target.closest('.tag-chip')) {
-        document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
-        target.closest('.tag-chip').classList.add('active');
-        const modalInput = document.getElementById('modal-search-keyword');
-        if (modalInput) modalInput.value = target.closest('.tag-chip').getAttribute('data-tag') || '';
-      }
-
-      if (target.closest('.sort-chip')) {
-        document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
-        target.closest('.sort-chip').classList.add('active');
-        if (DOM.sortSelect) DOM.sortSelect.value = target.closest('.sort-chip').getAttribute('data-sort') || 'featured';
-      }
-    });
-
-    const modalApplyBtn = document.getElementById('modal-apply-btn');
-    if (modalApplyBtn) {
-      modalApplyBtn.onclick = () => {
-        applyUltimateFilters(true, true);
-        closeFilterModal();
-      };
-    }
-
-    const modalResetBtn = document.getElementById('modal-reset-btn');
-    if (modalResetBtn) {
-      modalResetBtn.onclick = () => {
-        document.querySelector('#modal-province-chips .province-chip[data-value=""]')?.click();
-        document.querySelector('#modal-availability-chips .avail-chip[data-value=""]')?.click();
-        document.querySelector('#modal-sort-chips .sort-chip[data-sort="featured"]')?.click();
-        document.querySelector('#modal-price-chips .price-chip[data-price=""]')?.click();
-        document.querySelectorAll('#modal-tag-chips .tag-chip').forEach(b => b.classList.remove('active'));
-        if (document.getElementById('modal-search-keyword')) document.getElementById('modal-search-keyword').value = '';
-        if (DOM.searchInput) DOM.searchInput.value = '';
-        
-        applyUltimateFilters(true, true);
-      };
-    }
-
-    initStarRating();
-    initReviewForm();
-    initReviewToggle();
-    initAccordions();
-    initPwaInstaller();
-    initDynamicSearchPlaceholder();
-    initSeoDrawer();
-    initRegionTabs();
-
-    let lastScrollY = window.scrollY;
-    let scrollTimeout = null;
-    const dockMenu = document.querySelector('.floating-app-dock');
-    
-    window.addEventListener('scroll', () => {
-      if (!dockMenu) return;
-      const currentScrollY = window.scrollY;
-      if (scrollTimeout) clearTimeout(scrollTimeout);
+      let lastScrollY = window.scrollY;
+      let scrollTimeout = null;
+      const dockMenu = document.querySelector('.floating-app-dock');
       
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        dockMenu.classList.add('dock-hidden');
-      } else {
-        dockMenu.classList.remove('dock-hidden');
-      }
-      lastScrollY = currentScrollY;
-      scrollTimeout = setTimeout(() => { dockMenu.classList.remove('dock-hidden'); }, 400);
-    }, { passive: true });
+      window.addEventListener('scroll', () => {
+        if (!dockMenu) return;
+        const currentScrollY = window.scrollY;
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          dockMenu.classList.add('dock-hidden');
+        } else {
+          dockMenu.classList.remove('dock-hidden');
+        }
+        lastScrollY = currentScrollY;
+        scrollTimeout = setTimeout(() => { dockMenu.classList.remove('dock-hidden'); }, 400);
+      }, { passive: true });
 
-    await fetchProfilesData();
-    await handleRouteNavigation(true);
-    updateActiveNavLinks();
-    hideGlobalLoader();
-
-    window.addEventListener("popstate", async () => {
-      await handleRouteNavigation(false);
+      await fetchProfilesData();
+      await handleRouteNavigation(true);
       updateActiveNavLinks();
-    });
+      hideGlobalLoader();
 
-    window.openFilterModal = openFilterModal;
-    window.closeFilterModal = closeFilterModal;
-    window.renderProfilesGrid = renderProfilesGrid;
-    window.bindMediaProtection = bindMediaProtection;
-  });
+      window.addEventListener("popstate", async () => {
+        await handleRouteNavigation(false);
+        updateActiveNavLinks();
+      });
+
+      window.openFilterModal = openFilterModal;
+      window.closeFilterModal = closeFilterModal;
+      window.renderProfilesGrid = renderProfilesGrid;
+      window.bindMediaProtection = bindMediaProtection;
+    });
 
 })();
