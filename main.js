@@ -305,21 +305,27 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  function getImageUrl(path, width = 400) {
-    if (!path) return CONFIG.DEFAULT_OG_IMAGE;
-    if (Array.isArray(path)) path = path[0];
-    if (typeof path === "object" && path !== null) path = path.src || path.url || path.imagePath || "";
-    if (typeof path !== "string" || !path.trim()) return CONFIG.DEFAULT_OG_IMAGE;
+const FALLBACK_SVG_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'><rect width='100%' height='100%' fill='%23120A24'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23C084FC' font-family='sans-serif' font-size='20' font-weight='bold'>First Model Hub</text></svg>";
 
-    if (path.includes("res.cloudinary.com")) {
-      return path.replace("/upload/", `/upload/c_scale,w_${width},q_auto,f_auto/`);
-    }
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
-    }
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
+function getImageUrl(path, width = 400) {
+  if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp")) {
+    return FALLBACK_SVG_AVATAR;
   }
 
+  const cleanPath = path.trim();
+
+  if (cleanPath.includes("res.cloudinary.com")) {
+    const cleanCloudinaryUrl = cleanPath.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, "/upload/$1");
+    return cleanCloudinaryUrl.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},c_fill,g_face/`);
+  }
+
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    return cleanPath;
+  }
+
+  const storagePath = cleanPath.replace(/^\/+/, "").replace(/^profile-images\//, "");
+  return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${storagePath}`;
+}
   function showToast(message, type = "success") {
     let container = document.getElementById("toast-container");
     if (!container) {
@@ -387,144 +393,151 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function processProfileObject(raw) {
-    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
 
-    const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
+  const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
 
-    const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
-    const galleryPaths = Array.isArray(rawGallery) 
-      ? rawGallery 
-      : (typeof rawGallery === "string" ? rawGallery.split(",").map(s => s.trim()) : []);
-      
-    const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar || galleryPaths[0] || null;
+  const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+  let parsedGallery = [];
 
-    const rawImageList = [mainImg, ...galleryPaths].filter(Boolean);
-    const pathSet = new Set();
-    const normalizedImages = [];
-
-    rawImageList.forEach(path => {
-      let srcStr = "";
-      let fullSrcStr = "";
-
-      if (typeof path === "object" && path !== null) {
-        srcStr = path.src || path.url || "";
-        fullSrcStr = path.fullSrc || path.fullUrl || srcStr;
-      } else if (typeof path === "string") {
-        srcStr = path.trim();
-        fullSrcStr = path.trim();
-      }
-
-      if (srcStr && !pathSet.has(srcStr)) {
-        pathSet.add(srcStr);
-        normalizedImages.push({
-          src: srcStr.startsWith("http") ? srcStr : getImageUrl(srcStr, 400),
-          fullSrc: fullSrcStr.startsWith("http") ? fullSrcStr : getImageUrl(fullSrcStr, 1000)
-        });
-      }
-    });
-
-    if (normalizedImages.length === 0) {
-      normalizedImages.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
+  if (Array.isArray(rawGallery)) {
+    parsedGallery = rawGallery.map(item => typeof item === "object" ? (item.src || item.url) : String(item));
+  } else if (typeof rawGallery === "string" && rawGallery.trim()) {
+    try {
+      const jsonParsed = JSON.parse(rawGallery);
+      if (Array.isArray(jsonParsed)) parsedGallery = jsonParsed;
+      else parsedGallery = rawGallery.split(",");
+    } catch {
+      parsedGallery = rawGallery.split(",");
     }
-
- // 🟢 แก้ไขตรงนี้: ให้ดึงรหัสจังหวัดจากฐานข้อมูล (raw.provinceKey หรือ raw.province_key) มาใช้ก่อน
-const rawProvKey = raw.provinceKey || raw.province_key || raw.province_slug || document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
-const provKey = normalizeProvinceKey(rawProvKey);
-    const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
-
-const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
-    const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
-    let numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
-
-    // ดักถ้าราคาต่ำกว่า 500 (เช่น พิมพ์มา 150) ให้คูณ 10 เป็น 1500 ทันที
-    if (numericRate > 0 && numericRate < 500) {
-      numericRate = numericRate * 10;
-    }
-
-    const displayPrice = numericRate > 0 
-      ? `${numericRate.toLocaleString()}.-` 
-      : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
-
-    let bust = String(raw.bust || raw.breast || "").replace(/\D/g, "");
-    let waist = String(raw.waist || "").replace(/\D/g, "");
-    let hips = String(raw.hip || raw.hips || "").replace(/\D/g, "");
-    let cup = String(raw.cup_size || raw.cupSize || raw.cup || "").toUpperCase().replace(/[^A-Z]/g, "").trim();
-
-    let safeStats = "ไม่ระบุ";
-    if (bust && waist && hips) {
-      safeStats = `${bust}${cup ? `(${cup})` : ""}-${waist}-${hips}`;
-    } else if (raw.stats || raw.proportion || raw.proportions) {
-      safeStats = String(raw.stats || raw.proportion || raw.proportions).trim().replace(/[\s\/]+/g, "-");
-    }
-
-    const rawAge = raw.age || raw.profile_age;
-    const cleanAge = (rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0") ? String(rawAge).replace(/\D/g, "") : null;
-    const safeAgeDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
-
-    const rawHeight = raw.height || raw.profile_height;
-    const cleanHeight = (rawHeight && String(rawHeight).trim() !== "-" && String(rawHeight).trim() !== "0") ? String(rawHeight).replace(/\D/g, "") : null;
-    const safeHeight = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
-
-    const rawWeight = raw.weight || raw.profile_weight;
-    const cleanWeight = (rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0") ? String(rawWeight).replace(/\D/g, "") : null;
-    const safeWeight = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
-
-    const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
-    const safeSkin = (rawSkin && String(rawSkin).trim() !== "-") ? sanitizeThaiText(rawSkin) : "ไม่ระบุ";
-
-    const sloganText = getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote || raw.tagline);
-    
-    const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
-    const styleTags = (Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",") : []))
-      .map(t => sanitizeThaiText(t).replace(/^#/, "").trim())
-      .filter(Boolean);
-
-    const availStatus = sanitizeThaiText(raw.availability || raw.status || "รับงาน");
-    const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(kw => availStatus.toLowerCase().includes(kw));
-    const isAvailable = !isBusy;
-
-    const lineIdClean = String(raw.line_id || raw.lineId || raw.line || "").replace(/^@/, "").trim();
-    const cleanLocation = sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName);
-    const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ");
-
-    return {
-      ...raw,
-      id: raw.id,
-      slug: String(raw.slug || raw.id).trim(),
-      displayName: formattedName,
-      images: normalizedImages,
-      provinceNameThai: provinceThaiName,
-      provinceKey: provKey,
-      location: cleanLocation,
-      description: cleanDescription,
-      displayPrice: displayPrice,
-      _price: numericRate,
-      bust: bust,
-      waist: waist,
-      hips: hips,
-      cupSize: cup,
-      safeAge: cleanAge || "-",
-      safeAgeDisplay: safeAgeDisplay,
-      safeHeight: safeHeight,
-      safeWeight: safeWeight,
-      safeStats: safeStats,
-      safeSkin: safeSkin,
-      isAvailable: isAvailable,
-      availability: availStatus,
-      isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
-      hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
-      isNew: Boolean(raw.is_new || raw.isNew),
-      isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
-      lineId: lineIdClean,
-      styleTags: styleTags,
-      quote: sloganText,
-      slogan: sloganText
-    };
   }
+
+  const mainCandidate = raw.imagePath || raw.image_path || raw.imageUrl || raw.image_url || raw.photo || raw.avatar || parsedGallery[0] || null;
+
+  const rawImageList = [mainCandidate, ...parsedGallery].filter(Boolean);
+  const pathSet = new Set();
+  const normalizedImages = [];
+
+  rawImageList.forEach(path => {
+    let srcStr = typeof path === "object" && path !== null ? (path.src || path.url || "") : String(path).trim();
+
+    if (srcStr && !srcStr.includes("firstmodelhub.webp") && !pathSet.has(srcStr)) {
+      pathSet.add(srcStr);
+      normalizedImages.push({
+        src: getImageUrl(srcStr, 400),
+        fullSrc: getImageUrl(srcStr, 1000)
+      });
+    }
+  });
+
+  if (normalizedImages.length === 0) {
+    normalizedImages.push({ src: FALLBACK_SVG_AVATAR, fullSrc: FALLBACK_SVG_AVATAR });
+  }
+
+  const rawProvKey = raw.provinceKey || raw.province_key || raw.province_slug || document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
+  const provKey = normalizeProvinceKey(rawProvKey);
+  const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
+
+  const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
+  const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
+  let numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
+
+  if (numericRate > 0 && numericRate < 500) {
+    numericRate = numericRate * 10;
+  }
+
+  const displayPrice = numericRate > 0 
+    ? `${numericRate.toLocaleString()}.-` 
+    : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
+
+  let bust = String(raw.bust || raw.breast || "").replace(/\D/g, "");
+  let waist = String(raw.waist || "").replace(/\D/g, "");
+  let hips = String(raw.hip || raw.hips || "").replace(/\D/g, "");
+  let cup = String(raw.cup_size || raw.cupSize || raw.cup || "").toUpperCase().replace(/[^A-Z]/g, "").trim();
+
+  let safeStats = "ไม่ระบุ";
+  if (bust && waist && hips) {
+    safeStats = `${bust}${cup ? `(${cup})` : ""}-${waist}-${hips}`;
+  } else if (raw.stats || raw.proportion || raw.proportions) {
+    safeStats = String(raw.stats || raw.proportion || raw.proportions).trim().replace(/[\s\/]+/g, "-");
+  }
+
+  const rawAge = raw.age || raw.profile_age;
+  const cleanAge = (rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0") ? String(rawAge).replace(/\D/g, "") : null;
+  const safeAgeDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
+
+  const rawHeight = raw.height || raw.profile_height;
+  const cleanHeight = (rawHeight && String(rawHeight).trim() !== "-" && String(rawHeight).trim() !== "0") ? String(rawHeight).replace(/\D/g, "") : null;
+  const safeHeight = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
+
+  const rawWeight = raw.weight || raw.profile_weight;
+  const cleanWeight = (rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0") ? String(rawWeight).replace(/\D/g, "") : null;
+  const safeWeight = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
+
+  const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
+  const safeSkin = (rawSkin && String(rawSkin).trim() !== "-") ? sanitizeThaiText(rawSkin) : "ไม่ระบุ";
+
+  const sloganText = getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote || raw.tagline);
+  
+  const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
+  const styleTags = (Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",") : []))
+    .map(t => sanitizeThaiText(t).replace(/^#/, "").trim())
+    .filter(Boolean);
+
+  const availStatus = sanitizeThaiText(raw.availability || raw.status || "รับงาน");
+  const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(kw => availStatus.toLowerCase().includes(kw));
+  const isAvailable = !isBusy;
+
+  const lineIdClean = String(raw.line_id || raw.lineId || raw.line || "").replace(/^@/, "").trim();
+  const cleanLocation = sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName);
+  const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ");
+
+  return {
+    ...raw,
+    id: raw.id,
+    slug: String(raw.slug || raw.id).trim(),
+    displayName: formattedName,
+    images: normalizedImages,
+    provinceNameThai: provinceThaiName,
+    provinceKey: provKey,
+    location: cleanLocation,
+    description: cleanDescription,
+    displayPrice: displayPrice,
+    _price: numericRate,
+    bust: bust,
+    waist: waist,
+    hips: hips,
+    cupSize: cup,
+    safeAge: cleanAge || "-",
+    safeAgeDisplay: safeAgeDisplay,
+    safeHeight: safeHeight,
+    safeWeight: safeWeight,
+    safeStats: safeStats,
+    safeSkin: safeSkin,
+    isAvailable: isAvailable,
+    availability: availStatus,
+    isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
+    hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
+    isNew: Boolean(raw.is_new || raw.isNew),
+    isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
+    lineId: lineIdClean,
+    styleTags: styleTags,
+    quote: sloganText,
+    slogan: sloganText
+  };
+}
 
   async function fetchProfilesData() {
     if (STATE.isFetching) return false;
     STATE.isFetching = true;
+
+    const ensureMapDefaults = () => {
+      STATE.provincesMap.set("national", "ทั่วไทย");
+      STATE.provincesMap.set("all", "ทั่วไทย");
+      if (!STATE.provincesMap.has("chiangmai")) STATE.provincesMap.set("chiangmai", "เชียงใหม่");
+      if (!STATE.provincesMap.has("bangkok")) STATE.provincesMap.set("bangkok", "กรุงเทพฯ");
+      if (!STATE.provincesMap.has("chonburi")) STATE.provincesMap.set("chonburi", "ชลบุรี");
+    };
 
     try {
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
@@ -546,11 +559,7 @@ const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
           }
         });
 
-        if (STATE.provincesMap.size === 0) {
-          STATE.provincesMap.set("chiangmai", "เชียงใหม่");
-          STATE.provincesMap.set("bangkok", "กรุงเทพฯ");
-          STATE.provincesMap.set("chonburi", "ชลบุรี");
-        }
+        ensureMapDefaults();
 
         STATE.allProfiles = deduplicateProfiles(window.profilesData.map(p => processProfileObject(p)).filter(Boolean));
         
@@ -560,46 +569,57 @@ const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
         updateHeroSwiperCards();
         
         runIdle(async () => {
-  if (supabaseClient) {
-    let query = supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600);
-    
-    // เช็คว่าอยู่หน้าจังหวัดไหม ถ้าใช่ ให้ดึงมาแค่จังหวัดนั้น ไม่ต้องดึงมาทั้งหมด
-    const currentPath = window.location.pathname;
-    if (currentPath.includes("/location/")) {
-        const provSlug = currentPath.split("/").filter(Boolean).pop();
-        query = query.eq("provinceKey", normalizeProvinceKey(provSlug));
-    }
-    
-    const { data } = await query;
-    
-    if (data) {
-      const fullData = deduplicateProfiles(data.map(p => processProfileObject(p)).filter(Boolean));
-      STATE.allProfiles = fullData;
-      idb.set(CONFIG.KEYS.CACHE_PROFILES, fullData);
-    }
-  }
-}, 3000);
+          if (!supabaseClient) return;
+          try {
+            let query = supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600);
+            
+            const currentPath = window.location.pathname.toLowerCase();
+            const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
+            
+            if (isLocationPage) {
+              const provSlug = normalizeProvinceKey(currentPath.split("/").filter(Boolean).pop());
+              const searchKeys = (provSlug === "chiangmai" || provSlug === "chiang_mai") ? ["chiangmai", "chiang_mai"] : [provSlug];
+              query = query.in("provinceKey", searchKeys);
+            }
+            
+            const { data } = await query;
+            
+            if (data && data.length > 0) {
+              const fetchedData = deduplicateProfiles(data.map(p => processProfileObject(p)).filter(Boolean));
+              
+              if (isLocationPage) {
+                STATE.allProfiles = deduplicateProfiles([...fetchedData, ...STATE.allProfiles]);
+              } else {
+                STATE.allProfiles = fetchedData;
+                idb.set(CONFIG.KEYS.CACHE_PROFILES, fetchedData);
+              }
+            }
+          } catch (e) {
+            console.warn("⚠️ Background re-fetch error:", e);
+          }
+        }, 3000);
 
         STATE.isFetching = false;
         return true;
       }
 
       console.log("🚀 กำลังดึงข้อมูลโปรไฟล์จาก Supabase...");
-const provincesPromise = supabaseClient ? supabaseClient.from("provinces").select("*") : Promise.resolve({ data: [] });
+      const provincesPromise = supabaseClient ? supabaseClient.from("provinces").select("*") : Promise.resolve({ data: [] });
 
-// เตรียม Query พื้นฐาน
-let activeProfileQuery = supabaseClient ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600) : null;
+      let activeProfileQuery = supabaseClient 
+        ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600) 
+        : null;
 
-// กรองเฉพาะจังหวัดที่กำลังเปิดอยู่
-if (activeProfileQuery) {
-    const currentPath = window.location.pathname;
-    if (currentPath.includes("/location/")) {
-        const provSlug = currentPath.split("/").filter(Boolean).pop();
-        activeProfileQuery = activeProfileQuery.eq("provinceKey", normalizeProvinceKey(provSlug));
-    }
-}
+      const currentPath = window.location.pathname.toLowerCase();
+      const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
 
-const profilesPromise = activeProfileQuery ? activeProfileQuery : Promise.resolve({ data: [] });
+      if (activeProfileQuery && isLocationPage) {
+          const provSlug = normalizeProvinceKey(currentPath.split("/").filter(Boolean).pop());
+          const searchKeys = (provSlug === "chiangmai" || provSlug === "chiang_mai") ? ["chiangmai", "chiang_mai"] : [provSlug];
+          activeProfileQuery = activeProfileQuery.in("provinceKey", searchKeys);
+      }
+
+      const profilesPromise = activeProfileQuery ? activeProfileQuery : Promise.resolve({ data: [] });
       const [provincesRes, profilesRes] = await Promise.all([provincesPromise, profilesPromise]);
 
       if (provincesRes.data) {
@@ -613,14 +633,25 @@ const profilesPromise = activeProfileQuery ? activeProfileQuery : Promise.resolv
             provincesCacheArr.push({ key: key, name: name });
           }
         });
+        ensureMapDefaults();
         idb.set(CONFIG.KEYS.CACHE_PROVINCES, provincesCacheArr);
+      } else {
+        ensureMapDefaults();
       }
 
       if (profilesRes.error) throw profilesRes.error;
 
       const rawProfiles = profilesRes.data || [];
-      STATE.allProfiles = deduplicateProfiles(rawProfiles.map(p => processProfileObject(p)).filter(Boolean));
-      idb.set(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
+      const fetchedProfiles = deduplicateProfiles(rawProfiles.map(p => processProfileObject(p)).filter(Boolean));
+
+      if (isLocationPage && STATE.allProfiles.length > 0) {
+        STATE.allProfiles = deduplicateProfiles([...fetchedProfiles, ...STATE.allProfiles]);
+      } else {
+        STATE.allProfiles = fetchedProfiles;
+        if (!isLocationPage) {
+          idb.set(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
+        }
+      }
 
       populateProvinceDropdown();
       renderSmartFilterChips();
@@ -630,6 +661,8 @@ const profilesPromise = activeProfileQuery ? activeProfileQuery : Promise.resolv
 
     } catch (err) {
       console.error("❌ โหลดข้อมูลล้มเหลว นำข้อมูลเก่ามาแสดงแทน:", err);
+      ensureMapDefaults();
+
       const fallbackRaw = await idb.get(CONFIG.KEYS.CACHE_PROFILES) || JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES) || "[]");
       if (fallbackRaw && Array.isArray(fallbackRaw) && fallbackRaw.length > 0) {
         STATE.allProfiles = deduplicateProfiles(fallbackRaw.map(p => processProfileObject(p)).filter(Boolean));
@@ -644,7 +677,7 @@ const profilesPromise = activeProfileQuery ? activeProfileQuery : Promise.resolv
     } finally {
       STATE.isFetching = false;
     }
-  }
+}
 
   function updateHeroSwiperCards(targetProvinceKey = null) {
     const swiperContainer = document.getElementById("vip-swiper-container");
@@ -700,45 +733,48 @@ if (!isHomePage) {
   }
 
   function populateProvinceDropdown() {
-    if (!DOM.provinceSelect) return;
+  if (!DOM.provinceSelect) return;
 
-    const activeProvinceCounts = new Map();
-    STATE.allProfiles.forEach(p => {
-      if (p.provinceKey) {
-        const k = normalizeProvinceKey(p.provinceKey);
-        activeProvinceCounts.set(k, (activeProvinceCounts.get(k) || 0) + 1);
-      }
-    });
-
-    while (DOM.provinceSelect.options.length > 1) {
-      DOM.provinceSelect.remove(1);
+  const activeProvinceCounts = new Map();
+  STATE.allProfiles.forEach(p => {
+    if (p.provinceKey) {
+      const k = normalizeProvinceKey(p.provinceKey);
+      activeProvinceCounts.set(k, (activeProvinceCounts.get(k) || 0) + 1);
     }
+  });
 
-    const sortedProvinces = Array.from(STATE.provincesMap.entries())
-      .filter(([key]) => (activeProvinceCounts.get(normalizeProvinceKey(key)) || 0) > 0)
-      .sort((a, b) => a[1].localeCompare(b[1], "th"));
-
-    const fragment = document.createDocumentFragment();
-    const modalChipsContainer = document.getElementById("modal-province-chips");
-    let modalChipsHTML = `<button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>`;
-
-    sortedProvinces.forEach(([key, name]) => {
-      const normKey = normalizeProvinceKey(key);
-      const count = activeProvinceCounts.get(normKey) || 0;
-      const opt = document.createElement("option");
-      opt.value = normKey;
-      opt.textContent = `${name} (${count})`;
-      fragment.appendChild(opt);
-
-      modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${normKey}">${name} (${count})</button>`;
-    });
-
-    DOM.provinceSelect.appendChild(fragment);
-
-    if (modalChipsContainer) {
-      modalChipsContainer.innerHTML = modalChipsHTML;
-    }
+  while (DOM.provinceSelect.options.length > 1) {
+    DOM.provinceSelect.remove(1);
   }
+
+  // 🟢 FIX: แสดงจังหวัดทั้งหมดที่มีในระบบ ไม่ตัดจังหวัดอื่นทิ้งแม้จำนวนโปรไฟล์ในเครื่องตอนนี้จะเป็น 0
+  const sortedProvinces = Array.from(STATE.provincesMap.entries())
+    .filter(([key]) => key !== "national" && key !== "all") // ซ่อนเฉพาะคีย์คำว่า "national"
+    .sort((a, b) => a[1].localeCompare(b[1], "th"));
+
+  const fragment = document.createDocumentFragment();
+  const modalChipsContainer = document.getElementById("modal-province-chips");
+  let modalChipsHTML = `<button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>`;
+
+  sortedProvinces.forEach(([key, name]) => {
+    const normKey = normalizeProvinceKey(key);
+    const count = activeProvinceCounts.get(normKey) || 0;
+    const countLabel = count > 0 ? ` (${count})` : "";
+    
+    const opt = document.createElement("option");
+    opt.value = normKey;
+    opt.textContent = `${name}${countLabel}`;
+    fragment.appendChild(opt);
+
+    modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${normKey}">${name}${countLabel}</button>`;
+  });
+
+  DOM.provinceSelect.appendChild(fragment);
+
+  if (modalChipsContainer) {
+    modalChipsContainer.innerHTML = modalChipsHTML;
+  }
+}
 
   function createProfileCardElement(profile, index = 20) {
     const container = document.createElement("div");
