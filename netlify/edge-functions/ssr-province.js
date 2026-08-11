@@ -585,7 +585,12 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   if (p.rate) {
     const priceMatch = String(p.rate).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
     if (priceMatch && !isNaN(Number(priceMatch[0].replace(/,/g, "")))) {
-        rateDisplay = `${Number(priceMatch[0].replace(/,/g, "")).toLocaleString()}.-`;
+        let num = Number(priceMatch[0].replace(/,/g, ""));
+        // ดักถ้าราคาต่ำกว่า 500 (เช่น แอดมินพิมพ์ตกเหลือ 150) ให้คูณ 10 เป็น 1500 ทันที
+        if (num > 0 && num < 500) {
+          num = num * 10;
+        }
+        rateDisplay = `${num.toLocaleString()}.-`;
     } else {
         rateDisplay = escapeHTML(p.rate).trim();
     }
@@ -602,27 +607,28 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
           
           <h3 style="display:none;">น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc}</h3>
 
-          <img src="${imgUrl}" 
-               alt="${seoAltText}"
-               title="${seoAltText}"
-               width="300"
-               height="400"
-               style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
-               loading="${index === 0 ? "eager" : "lazy"}"
-               fetchpriority="${index === 0 ? "high" : "auto"}"
-               decoding="async"
-               onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
+<img src="${imgUrl}" 
+     alt="${seoAltText}"
+     title="${seoAltText}"
+     width="300" height="400"
+     class="profile-card-img-cover" 
+     loading="${index === 0 ? "eager" : "lazy"}"
+     decoding="async"
+     onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
                
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
+<div class="profile-card-gradient"></div>
 
-          <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
-              ${featuredBadge}
-              ${statusBadge}
-              ${videoBadge}
-          </div>
+<div class="profile-card-badge-top-left">
+    ${featuredBadge}
+    ${statusBadge}
+    ${videoBadge}
+</div>
 
-          <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+<div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center; gap: 4px;">
               ${verifiedBadge}
+              <button type="button" data-action="like" data-id="${p.id}" class="like-heart-btn" aria-label="กดถูกใจโปรไฟล์" style="pointer-events: auto;">
+                <i class="fas fa-heart" style="font-size: 12px;"></i>
+              </button>
           </div>
           
           <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName} สาวรับงาน${provinceThaiName}"></a>
@@ -1311,36 +1317,21 @@ export default async (req, context) => {
       const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
       const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
       rawHtml = `${before}<!-- SSR_DISPLAY_AREA_START -->\n<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>\n<!-- SSR_DISPLAY_AREA_END -->${after}`;
-    } else if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
-      rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
-    } else {
-      rawHtml = rawHtml.replace(
-        /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
-        `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
-      );
-    }
+} else if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
+  rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
+} else { // ใส่วงเล็บปีกกาปิดตรงนี้ให้เรียบร้อย
+  rawHtml = rawHtml.replace(
+    /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i,
+    `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
+  );
+}
 
 
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
-    
+    rawHtml = replaceGlobal(rawHtml, 'content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ"', `content="${escapeHTML(strippedDesc)}"`);
 
-    rawHtml = setMeta(rawHtml, "property", "og:title", pageTitle);
-    rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
-    rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
-    rawHtml = setMeta(rawHtml, "property", "og:image", metaImgUrl);
-    rawHtml = setMeta(rawHtml, "property", "og:image:secure_url", metaImgUrl);
-    
-
-    rawHtml = setMeta(rawHtml, "name", "twitter:title", pageTitle);
-    rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
-    rawHtml = setMeta(rawHtml, "name", "twitter:image", metaImgUrl);
-    
-
-    rawHtml = setLink(rawHtml, "canonical", canonUrl, 'id="canonical-link" ');
-    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th" ');
-    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default" ');
-
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
     rawHtml = injectSchema(rawHtml, schemaJson);
 
