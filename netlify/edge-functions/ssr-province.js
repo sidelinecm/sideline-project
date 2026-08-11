@@ -581,19 +581,20 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
        </span>`
     : "";
 
+  // 🟢 แก้ไขตรงนี้: เปลี่ยน matchedProfile เป็น p ให้ดึงค่าของตัวเองอย่างถูกต้อง
   let rateVal = "1,500.-";
-      if (matchedProfile.rate) {
-        const cleanedRate = String(matchedProfile.rate).replace(/[^0-9]/g, "");
-        if (cleanedRate && !isNaN(Number(cleanedRate))) {
-            let num = Number(cleanedRate);
-            if (num > 0 && num < 500) {
-              num = num * 10;
-            }
-            rateVal = `${num.toLocaleString()}.-`;
-        } else {
-            rateVal = escapeHTML(matchedProfile.rate);
+  if (p.rate) {
+    const cleanedRate = String(p.rate).replace(/[^0-9]/g, "");
+    if (cleanedRate && !isNaN(Number(cleanedRate))) {
+        let num = Number(cleanedRate);
+        if (num > 0 && num < 500) {
+          num = num * 10;
         }
-      }
+        rateVal = `${num.toLocaleString()}.-`;
+    } else {
+        rateVal = escapeHTML(p.rate);
+    }
+  }
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
 
@@ -606,24 +607,24 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
           
           <h3 style="display:none;">น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc}</h3>
 
-<img src="${imgUrl}" 
-     alt="${seoAltText}"
-     title="${seoAltText}"
-     width="300" height="400"
-     class="profile-card-img-cover" 
-     loading="${index === 0 ? "eager" : "lazy"}"
-     decoding="async"
-     onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
-               
-<div class="profile-card-gradient"></div>
+          <img src="${imgUrl}" 
+               alt="${seoAltText}"
+               title="${seoAltText}"
+               width="300" height="400"
+               class="profile-card-img-cover" 
+               loading="${index === 0 ? "eager" : "lazy"}"
+               decoding="async"
+               onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
+                       
+          <div class="profile-card-gradient"></div>
 
-<div class="profile-card-badge-top-left">
-    ${featuredBadge}
-    ${statusBadge}
-    ${videoBadge}
-</div>
+          <div class="profile-card-badge-top-left">
+              ${featuredBadge}
+              ${statusBadge}
+              ${videoBadge}
+          </div>
 
-<div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center; gap: 4px;">
+          <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center; gap: 4px;">
               ${verifiedBadge}
               <button type="button" data-action="like" data-id="${p.id}" class="like-heart-btn" aria-label="กดถูกใจโปรไฟล์" style="pointer-events: auto;">
                 <i class="fas fa-heart" style="font-size: 12px;"></i>
@@ -644,7 +645,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                       <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
                   </span>
                   <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
-                      ${rateDisplay}
+                      ${rateVal} <!-- 🟢 แก้ไขตรงนี้: เปลี่ยนจาก rateDisplay เป็น rateVal -->
                   </span>
               </div>
           </div>
