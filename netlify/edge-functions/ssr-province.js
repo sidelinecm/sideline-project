@@ -1,4 +1,3 @@
-
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - ADVANCED SERVERLESS SSR & HYDRATION ENGINE (ssr-province.js)
@@ -221,6 +220,18 @@ function sanitizeThaiText(str) {
     .trim();
 }
 
+function deduplicateProfiles(profileList) {
+  if (!Array.isArray(profileList)) return [];
+  const seen = new Set();
+  return profileList.filter(p => {
+    if (!p) return false;
+    const uniqueKey = String(p.id || p.slug || p.imagePath || "").toLowerCase().trim();
+    if (!uniqueKey || seen.has(uniqueKey)) return false;
+    seen.add(uniqueKey);
+    return true;
+  });
+}
+
 function verifyHostname(_req) {
   return true;
 }
@@ -238,13 +249,13 @@ function setMeta(html, attrName, attrValue, contentValue) {
 
 function setLink(html, relValue, hrefValue, extraAttrs = "") {
   const safeHref = escapeHTML(hrefValue || CONFIG.PRIMARY_DOMAIN);
-  let regex;
   const hreflangMatch = extraAttrs.match(/hreflang=["']([^"']+)["']/i);
+  let regex;
   if (hreflangMatch) {
     const lang = hreflangMatch[1];
     regex = new RegExp(`<link\\s+[^>]*?rel=["']${relValue}["'][^>]*?hreflang=["']${lang}["'][^>]*?>`, "gi");
   } else {
-    regex = new RegExp(`<link\\s+[^>]*?rel=["']${relValue}["'][^>]*?>`, "gi");
+    regex = new RegExp(`<link\\s+[^>]*?rel=["']${relValue}["'](?:(?![^>]*?hreflang=)[^>])*?>`, "gi");
   }
   const newTag = `<link rel="${relValue}" href="${safeHref}" ${extraAttrs}/>`;
   return regex.test(html) ? html.replace(regex, newTag) : html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
@@ -256,29 +267,32 @@ function injectSchema(html, schemaObj) {
   const jsonStr = JSON.stringify(schemaObj).replace(/</g, '\\u003c');
   const scriptTag = `<script type="application/ld+json" id="dynamic-schema">${jsonStr}</script>`;
   
-  // ลบแท็ก Schema เก่าออกทั้งหมดก่อน
   let cleanHtml = html.replace(/<script type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, "");
-  
-  // ฉีดแท็กใหม่เข้าก่อนปิด </head>
   return cleanHtml.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
 }
 
-// 🟢 Smart Helper: ฉีด Hydration Data เข้าไปที่ </body> เสมอ ป้องกัน Array ว่าง
 function injectHydrationData(html, hydratedDataObj) {
   const safeData = Array.isArray(hydratedDataObj) ? hydratedDataObj : [];
   const jsonStr = JSON.stringify(safeData).replace(/</g, '\\u003c');
   const scriptTag = `<script id="ssr-profiles-data">window.profilesData = ${jsonStr};</script>`;
-  
-  // ใช้ Regex จับแท็กเก่าออกให้สะอาดหมดจด
-  let cleanHtml = html.replace(/<script\s+id=["']ssr-profiles-data["'][^>]*>[\s\S]*?<\/script>/gi, "");
-  return cleanHtml.replace(/<\/body>/i, `  ${scriptTag}\n</body>`);
+
+  let cleanHtml = html.replace(/<script\s+id=["']ssr-profiles-data["'][\s\S]*?<\/script>/gi, "");
+  if (cleanHtml.includes("</body>")) {
+    return cleanHtml.replace(/<\/body>/i, `  ${scriptTag}\n</body>`);
+  }
+  return cleanHtml + `\n${scriptTag}`;
 }
 
-// 🟢 Smart Helper: กวาดล้างตัวแปรแม่แบบ {{...}} ตกค้างทั้งหมด
 function sweepPlaceholders(html) {
   if (!html) return "";
   return html
-    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "")
+    .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, "ทั่วไทย")
+    .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
+    .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
+    .replace(/\{\{\s*province-key\s*\}\}/gi, "national")
+    .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, "50")
+    .replace(/\{\{\s*PROVINCE_ZONES\s*\}\}/gi, "กรุงเทพฯ, เชียงใหม่, ชลบุรี, อุดรธานี")
+    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "")
     .replace(/%7B%7BMAP_EMBED_URL%7D%7D/gi, "")
     .replace(/\{\{MAP_EMBED_URL\}\}/gi, "");
 }
@@ -330,13 +344,27 @@ async function getTemplateHtml(url, _context) {
 }
 
 const getProfileMainImage = (p) => {
-  if (!p) return null;
-  if (p.imagePath && typeof p.imagePath === "string" && p.imagePath.trim()) return p.imagePath.trim();
+  if (!p || typeof p !== "object") return null;
+
+  const candidates = [
+    p.imagePath, p.image_path, p.imageUrl, p.image_url, p.photo, p.avatar, p.image
+  ];
+
+  for (const item of candidates) {
+    if (item && typeof item === "string" && item.trim() && !item.includes("firstmodelhub.webp")) {
+      return item.trim();
+    }
+  }
+
   const gallery = p.galleryPaths || p.gallery_paths || p.gallery;
-  if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) return String(gallery[0]).trim();
-  if (typeof gallery === "string" && gallery.trim()) return gallery.split(",")[0].trim();
-  if (p.image_url && typeof p.image_url === "string" && p.image_url.trim()) return p.image_url.trim();
-  if (p.imageUrl && typeof p.imageUrl === "string" && p.imageUrl.trim()) return p.imageUrl.trim();
+  if (Array.isArray(gallery) && gallery.length > 0) {
+    const firstGallery = String(gallery[0]).trim();
+    if (firstGallery && !firstGallery.includes("firstmodelhub.webp")) return firstGallery;
+  } else if (typeof gallery === "string" && gallery.trim()) {
+    const firstGallery = gallery.split(",")[0].trim();
+    if (firstGallery && !firstGallery.includes("firstmodelhub.webp")) return firstGallery;
+  }
+
   return null;
 };
 
@@ -344,21 +372,32 @@ const getProfileGalleryImages = (p) => {
   if (!p) return [];
   let list = [];
   const gallery = p.galleryPaths || p.gallery_paths || p.gallery;
+
   if (Array.isArray(gallery)) {
     list = gallery.map(img => String(img).trim()).filter(Boolean);
   } else if (typeof gallery === "string" && gallery.trim()) {
-    list = gallery.split(",").map(img => img.trim()).filter(Boolean);
+    try {
+      const parsed = JSON.parse(gallery);
+      if (Array.isArray(parsed)) list = parsed.map(img => String(img).trim());
+      else list = gallery.split(",").map(img => img.trim());
+    } catch {
+      list = gallery.split(",").map(img => img.trim());
+    }
   }
+
   const mainImg = getProfileMainImage(p);
   if (mainImg && !list.includes(mainImg)) {
     list.unshift(mainImg);
   }
-  return list;
+
+  return list.filter(img => img && !img.includes("firstmodelhub.webp"));
 };
 
+const FALLBACK_SVG_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'><rect width='100%' height='100%' fill='%23120A24'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23C084FC' font-family='sans-serif' font-size='20' font-weight='bold'>First Model Hub</text></svg>";
+
 const optimizeImg = (_hostUrl, path, width = 400, height = 500) => {
-  if (!path || typeof path !== "string" || !path.trim()) {
-    return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+  if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp") || path.includes("placeholder")) {
+    return FALLBACK_SVG_AVATAR;
   }
   const cleanPath = path.trim();
   if (cleanPath.includes("res.cloudinary.com")) {
@@ -368,7 +407,8 @@ const optimizeImg = (_hostUrl, path, width = 400, height = 500) => {
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
     return cleanPath;
   }
-  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${cleanPath}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
+  const storagePath = cleanPath.replace(/^\/+/, "").replace(/^profile-images\//, "");
+  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${storagePath}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
 };
 
 const formatDateSSR = dateStr => {
@@ -482,11 +522,10 @@ function buildErrorPage(code, title, message) {
 
 // 🟢 FIX: เปลี่ยน @type Person เป็น Service ป้องกัน Schema Error จาก Google
 const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
-  // แก้ไข Regex ให้ตัดราคาสมบูรณ์ไม่เป็น 15 ล้าน
   const priceMatch = String(profile.rate || "").match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
   const numericPrice = priceMatch ? priceMatch[0].replace(/,/g, "") : "1500";
   const finalPriceSchema = numericPrice && Number(numericPrice) > 0 ? numericPrice : "1500"; 
-  const cleanName = (profile.name || "").replace(/^น้อง/, "").trim();
+  const cleanName = (profile.name || "").replace(/^น้อง\s?/, "").trim();
   const cleanLoc = sanitizeThaiText(profile.location || province);
   const mainImgPath = getProfileMainImage(profile);
 
@@ -581,7 +620,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
        </span>`
     : "";
 
-  // 🟢 แก้ไขตรงนี้: เปลี่ยน matchedProfile เป็น p ให้ดึงค่าของตัวเองอย่างถูกต้อง
   let rateVal = "1,500.-";
   if (p.rate) {
     const cleanedRate = String(p.rate).replace(/[^0-9]/g, "");
@@ -645,7 +683,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                       <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
                   </span>
                   <span style="color: #00E676; font-weight: 900; font-size: 12px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
-                      ${rateVal} <!-- 🟢 แก้ไขตรงนี้: เปลี่ยนจาก rateDisplay เป็น rateVal -->
+                      ${rateVal}
                   </span>
               </div>
           </div>
@@ -741,7 +779,6 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
-    // 🟢 FIX: เพิ่ม Limit เป็น 600 เท่ากันกับ Client เพื่อแก้ปัญหาหน้ากระตุกจาก Hydration Mismatch
     let profileQuery = supabase
       .from("profiles")
       .select("id, slug, name, age, imagePath, galleryPaths, gallery_paths, provinceKey, province_key, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, lineId, quote, style_tags, slogan")
@@ -778,7 +815,8 @@ export default async (req, context) => {
       return buildErrorPage(404, "404 - ไม่พบหน้าเว็บ", "ไม่พบพิกัดจังหวัดที่คุณต้องการหาในขณะนี้");
     }
 
-    const profileList = profListRes.data || [];
+    const rawProfileList = profListRes.data || [];
+    const profileList = deduplicateProfiles(rawProfileList);
     const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
     const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
     const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
@@ -856,7 +894,6 @@ export default async (req, context) => {
     const validZones = (seoData.zones || [])
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
-
 
     const businessEntity = {
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
@@ -1102,7 +1139,7 @@ export default async (req, context) => {
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
     // ------------------------------------------------------------------------------
-    // STEP 2: สร้างส่วนแสดงผลหลัก (Display Area Inner HTML) [🟢 FIX: การแก้ไขกลุ่มหน้าแรก]
+    // STEP 2: สร้างส่วนแสดงผลหลัก (Display Area Inner HTML)
     // ------------------------------------------------------------------------------
     let displayAreaInnerHtml = "";
 
@@ -1203,9 +1240,9 @@ export default async (req, context) => {
               <p style="font-size: 13px; line-height: 1.6; color: #E4E4E7; margin: 0; white-space: pre-line;">${escapeHTML(sanitizeThaiText(matchedProfile.description || matchedProfile.quote || matchedProfile.slogan || "น้องสุภาพเรียบร้อย ดูแลดีสไตล์เพื่อนเที่ยวฟิวแฟน ตรงปก 100% ไม่โอนมัดจำล่วงหน้า จ่ายหน้างานเมื่อเจอตัวจริง"))}</p>
             </div>
 
-            <a href="${lineUrl}" target="_blank" rel="nofollow noopener" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; text-align: center; background: #06C755; color: white; font-weight: 800; font-size: 16px; padding: 14px 0; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(6,199,85,0.35); transition: transform 0.2s;">
+            <a href="${lineUrl}" target="_blank" rel="nofollow noopener" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: center; background: #06C755; color: white; font-weight: 800; font-size: 16px; padding: 14px 20px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(6,199,85,0.35); transition: transform 0.2s;">
                <i class="fab fa-line" style="font-size: 20px;"></i>
-               <span>แอดไลน์จองคิว น้อง${pName}</span>
+               <span style="flex-grow: 1;">แอดไลน์จองคิว น้อง${pName}</span>
             </a>
           </div>
 
@@ -1215,7 +1252,6 @@ export default async (req, context) => {
     } else {
       
       if (isNationalHome) {
-          // 🟢 FIX: จัดกลุ่มน้องๆ ในหน้าแรกให้เป็นหมวดหมู่รายจังหวัด ไม่เป็นกล่องว่าง
           const provNameMap = {
             chiangmai: "เชียงใหม่",
             khonkaen: "ขอนแก่น",
@@ -1244,16 +1280,16 @@ export default async (req, context) => {
 
           let homeHtml = "";
           for (const key of sortedProvinceKeys) {
-              if (key === "national" && sortedProvinceKeys.length > 1) continue;
-              const name = provNameMap[key] || "จังหวัดอื่นๆ";
+              const name = provNameMap[key] || (key === "national" ? "ทั่วไทย" : "จังหวัดอื่นๆ");
               const groupCards = grouped[key].map((p, index) => renderCardHtml(p, index, hostUrl, name)).join("");
+              const displayTitle = key === "national" ? "น้องๆ แนะนำยอดนิยม ทั่วไทย" : `น้องๆ ในจังหวัด ${name}`;
               
               homeHtml += `
                 <div class="section-content-wrapper province-section mt-6" id="province-${key}">
                   <div class="flex justify-between items-center flex-wrap gap-2 p-2">
-                      <a href="/location/${key}" class="group" style="text-decoration: none; display: inline-block;">
+                      <a href="${key === "national" ? "/profiles" : `/location/${key}`}" class="group" style="text-decoration: none; display: inline-block;">
                           <h2 class="province-section-header" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 18px; font-weight: 800; color: white; margin: 0;">
-                              📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${name}</span>
+                              📍 <span style="color: #C084FC;">${displayTitle}</span>
                               <span class="live-count-chip">
                                 <span class="pulse-dot-el"></span>
                                 <span>พบ ${grouped[key].length} โปรไฟล์พร้อมรับงาน</span>
@@ -1269,7 +1305,6 @@ export default async (req, context) => {
           displayAreaInnerHtml = homeHtml;
 
       } else {
-          // 🟢 หน้าแยกจังหวัด (Location Pages)
           const topCatalogSnippetHtml = `
             <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
               <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
@@ -1296,36 +1331,35 @@ export default async (req, context) => {
       }
     }
 
-
     let rawHtml = await getTemplateHtml(url, context);
 
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
+    // 🟢 FIX: ใช้ Multi-line Regex กวาดล้างเซกชั่นซ้ำซ้อนในหน้าโปรไฟล์เดี่ยวเด็ดขาด
     if (matchedProfile) {
-      rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="service-deep-dive"[\s\S]*?<\/section>/i, "");
-      rawHtml = rawHtml.replace(/<section id="customer-reviews"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section\s+class=["']hero-section["'][\s\S]*?<\/section>/gi, "");
+      rawHtml = rawHtml.replace(/<section\s+id=["']featured-profiles["'][\s\S]*?<\/section>/gi, "");
+      rawHtml = rawHtml.replace(/<section\s+id=["']service-deep-dive["'][\s\S]*?<\/section>/gi, "");
+      rawHtml = rawHtml.replace(/<section\s+id=["']customer-reviews["'][\s\S]*?<\/section>/gi, "");
+      rawHtml = rawHtml.replace(/<div\s+class=["']tabs-wrapper["'][\s\S]*?<\/div>/gi, "");
     } else if (!isNationalHome) {
-      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+      rawHtml = rawHtml.replace(/<section\s+id=["']featured-profiles["'][\s\S]*?<\/section>/gi, "");
     }
-
 
     if (rawHtml.includes("<!-- SSR_DISPLAY_AREA_START -->") && rawHtml.includes("<!-- SSR_DISPLAY_AREA_END -->")) {
       const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
       const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
       rawHtml = `${before}<!-- SSR_DISPLAY_AREA_START -->\n<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>\n<!-- SSR_DISPLAY_AREA_END -->${after}`;
-} else if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
-  rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
-} else { // ใส่วงเล็บปีกกาปิดตรงนี้ให้เรียบร้อย
-  rawHtml = rawHtml.replace(
-    /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i,
-    `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
-  );
-}
-
+    } else if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
+    } else {
+      rawHtml = rawHtml.replace(
+        /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i,
+        `<div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">${displayAreaInnerHtml}</div>`
+      );
+    }
 
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = replaceGlobal(rawHtml, 'content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ"', `content="${escapeHTML(strippedDesc)}"`);
@@ -1333,11 +1367,23 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
+    // 🟢 FIX: อัปเดต og:url, twitter:url, canonical และ hreflang สำหรับโปรไฟล์เดี่ยว
+    if (matchedProfile) {
+      rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
+      rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
+      rawHtml = setLink(rawHtml, "canonical", canonUrl);
+      rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
+      rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
+    }
+
     rawHtml = injectSchema(rawHtml, schemaJson);
 
+    // 🟢 แทนที่ตัวแปรแบบยืดหยุ่น (ทั้งพิมพ์เล็กและพิมพ์ใหญ่)
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
+    rawHtml = replaceGlobal(rawHtml, "{{province-name}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceSlug);
+    rawHtml = replaceGlobal(rawHtml, "{{province-key}}", provinceSlug);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
@@ -1349,7 +1395,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
-    const hydratedProfilesData = allHydratedProfiles.map(p => ({
+    const hydratedProfilesData = deduplicateProfiles(allHydratedProfiles).map(p => ({
       id: p.id,
       slug: p.slug,
       name: p.name,
@@ -1380,9 +1426,10 @@ export default async (req, context) => {
       styleTags: p.style_tags || p.styleTags || []
     }));
 
-    // 🟢 FIX: เรียกใช้ฟังก์ชันที่แก้บั๊ก Hydration ลง HTML
+    // 🟢 FIX: ฉีด Hydration Data เข้าสู่ </body> การันตี window.profilesData มีข้อมูลเสมอ
     rawHtml = injectHydrationData(rawHtml, hydratedProfilesData);
 
+    // 🟢 FIX: กวาดล้างตัวแปรตกค้างทั้งหมด
     rawHtml = sweepPlaceholders(rawHtml);
     
     const responseHeaders = {
@@ -1419,4 +1466,3 @@ export default async (req, context) => {
     }
   }
 };
-
