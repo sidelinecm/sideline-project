@@ -354,7 +354,7 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
-    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
+<script type="application/ld+json">${JSON.stringify(schemaData).replace(/</g, '\\u003c')}</script>
     
     <style>
         :root { --p:#FF2E63; --s:#34d399; --bg:#07070A; --card:#111116; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
