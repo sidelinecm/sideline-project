@@ -427,14 +427,19 @@ window.ScrollTrigger = ScrollTrigger;
       normalizedImages.push({ src: CONFIG.DEFAULT_OG_IMAGE, fullSrc: CONFIG.DEFAULT_OG_IMAGE });
     }
 
-    const rawProvKey = raw.provinceKey || raw.province_slug || raw.province_key || raw.province || "national";
+    const rawProvKey = document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
     const provKey = normalizeProvinceKey(rawProvKey);
     const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
 
-    // ✅ FIX: Price Parsing Bug ป้องกันราคาแสดงผลหลักสิบล้าน
-    const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
+const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
     const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
-    const numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
+    let numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
+
+    // ดักถ้าราคาต่ำกว่า 500 (เช่น พิมพ์มา 150) ให้คูณ 10 เป็น 1500 ทันที
+    if (numericRate > 0 && numericRate < 500) {
+      numericRate = numericRate * 10;
+    }
+
     const displayPrice = numericRate > 0 
       ? `${numericRate.toLocaleString()}.-` 
       : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
@@ -554,27 +559,46 @@ window.ScrollTrigger = ScrollTrigger;
         updateHeroSwiperCards();
         
         runIdle(async () => {
-          if (supabaseClient) {
-            // ✅ FIX: ใส่ .limit(600) ป้องกันดึงข้อมูลมากเกินไปจนหน้าเว็บแฮงก์
-            const { data } = await supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600);
-            if (data) {
-              const fullData = deduplicateProfiles(data.map(p => processProfileObject(p)).filter(Boolean));
-              STATE.allProfiles = fullData;
-              idb.set(CONFIG.KEYS.CACHE_PROFILES, fullData);
-            }
-          }
-        }, 3000);
+  if (supabaseClient) {
+    let query = supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600);
+    
+    // เช็คว่าอยู่หน้าจังหวัดไหม ถ้าใช่ ให้ดึงมาแค่จังหวัดนั้น ไม่ต้องดึงมาทั้งหมด
+    const currentPath = window.location.pathname;
+    if (currentPath.includes("/location/")) {
+        const provSlug = currentPath.split("/").filter(Boolean).pop();
+        query = query.eq("provinceKey", normalizeProvinceKey(provSlug));
+    }
+    
+    const { data } = await query;
+    
+    if (data) {
+      const fullData = deduplicateProfiles(data.map(p => processProfileObject(p)).filter(Boolean));
+      STATE.allProfiles = fullData;
+      idb.set(CONFIG.KEYS.CACHE_PROFILES, fullData);
+    }
+  }
+}, 3000);
 
         STATE.isFetching = false;
         return true;
       }
 
       console.log("🚀 กำลังดึงข้อมูลโปรไฟล์จาก Supabase...");
-      const provincesPromise = supabaseClient ? supabaseClient.from("provinces").select("*") : Promise.resolve({ data: [] });
-      
-      // ✅ FIX: ใส่ .limit(600) ป้องกันปัญหาข้อมูลมหาศาล
-      const profilesPromise = supabaseClient ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600) : Promise.resolve({ data: [] });
+const provincesPromise = supabaseClient ? supabaseClient.from("provinces").select("*") : Promise.resolve({ data: [] });
 
+// เตรียม Query พื้นฐาน
+let activeProfileQuery = supabaseClient ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600) : null;
+
+// กรองเฉพาะจังหวัดที่กำลังเปิดอยู่
+if (activeProfileQuery) {
+    const currentPath = window.location.pathname;
+    if (currentPath.includes("/location/")) {
+        const provSlug = currentPath.split("/").filter(Boolean).pop();
+        activeProfileQuery = activeProfileQuery.eq("provinceKey", normalizeProvinceKey(provSlug));
+    }
+}
+
+const profilesPromise = activeProfileQuery ? activeProfileQuery : Promise.resolve({ data: [] });
       const [provincesRes, profilesRes] = await Promise.all([provincesPromise, profilesPromise]);
 
       if (provincesRes.data) {
@@ -625,7 +649,14 @@ window.ScrollTrigger = ScrollTrigger;
     const swiperContainer = document.getElementById("vip-swiper-container");
     if (!swiperContainer || !STATE.allProfiles || STATE.allProfiles.length === 0) return;
 
-    const currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
+    let currentProvKey = "national";
+const isHomePage = window.location.pathname === "/" || window.location.pathname === "/index.html";
+
+if (!isHomePage) {
+  currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
+} else if (targetProvinceKey || (DOM.provinceSelect?.value && DOM.provinceSelect.value !== "all")) {
+  currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect.value);
+}
 
     let scopedProfiles = STATE.allProfiles;
     if (currentProvKey && currentProvKey !== "national" && currentProvKey !== "all") {
@@ -758,24 +789,23 @@ window.ScrollTrigger = ScrollTrigger;
 
     const encodedSlug = encodeURIComponent(profile.slug || profile.id);
 
-    card.innerHTML = `
-      <img src="${imageSrc}" 
-           alt="${seoAltText}"
-           title="${seoAltText}"
-           width="300"
-           height="400"
-           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 14px;"
-           loading="${index < 2 ? "eager" : "lazy"}"
-           decoding="async"
-           onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_OG_IMAGE}';" />
-           
-      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
+card.innerHTML = `
+<img src="${imageSrc}" 
+   alt="${seoAltText}"
+   title="${seoAltText}"
+     width="300" height="400"
+     class="profile-card-img-cover" 
+     loading="${index === 0 ? "eager" : "lazy"}"
+     decoding="async"
+     onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
+               
+<div class="profile-card-gradient"></div>
 
-      <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
-          ${featuredBadge}
-          ${statusBadge}
-          ${videoBadge}
-      </div>
+<div class="profile-card-badge-top-left">
+    ${featuredBadge}
+    ${statusBadge}
+    ${videoBadge}
+</div>
 
       <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center; gap: 4px;">
           ${verifiedBadge}
@@ -1161,6 +1191,9 @@ window.ScrollTrigger = ScrollTrigger;
     STATE.renderId = (STATE.renderId || 0) + 1;
     const currentRenderId = STATE.renderId;
 
+    // 🟢 ตรวจสอบว่านี่คือการรัน JavaScript สร้างหน้าจอครั้งแรก (Hydration) หรือไม่
+    const isFirstHydration = STATE.renderId === 1;
+
     destroyLoadingPlaceholder();
     
     if (DOM.noResultsMessage) DOM.noResultsMessage.classList.add("hidden");
@@ -1173,6 +1206,7 @@ window.ScrollTrigger = ScrollTrigger;
       const featuredProfiles = allProfiles.filter(p => p.isfeatured);
       DOM.featuredSection.classList.toggle("hidden", !isHomePage || featuredProfiles.length === 0);
 
+      // ถ้าเป็นหน้าแรก มีน้องๆ แนะนำ และ กล่อง HTML ยังว่างเปล่า ให้เติมเข้าไป
       if (isHomePage && featuredProfiles.length > 0 && DOM.featuredContainer && DOM.featuredContainer.children.length === 0) {
         await appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
       }
@@ -1221,6 +1255,19 @@ window.ScrollTrigger = ScrollTrigger;
       return;
     }
 
+    // 🟢 [หัวใจสำคัญที่แก้ปัญหาจอกระตุก]
+    // ถ้าเป็นการโหลดครั้งแรกสุด (isFirstHydration) และมี HTML การ์ดน้องๆ ถูกสร้างมาจากฝั่ง Server รออยู่แล้ว
+    // และไม่ใช่การกดปุ่ม Filter ด้วยตัวผู้ใช้เอง (!isUserAction) 
+    // -> ให้หยุดการทำงาน (return) เพื่อไม่ให้มันลบ HTML ทิ้งแล้ววาดใหม่ ทำให้จอไม่กระพริบ
+    if (isFirstHydration && DOM.profilesDisplayArea.children.length > 0 && !isUserAction) {
+        bindMediaProtection();
+        if (window.ScrollTrigger) {
+          setTimeout(() => ScrollTrigger.refresh(), 200);
+        }
+        return; 
+    }
+
+    // หากผ่านด่านเช็คด้านบนมาได้ (แปลว่าผู้ใช้กด Filter หรือเปลี่ยนจังหวัด) ก็เคลียร์ HTML เก่าทิ้ง
     DOM.profilesDisplayArea.innerHTML = "";
     const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
 
@@ -1294,6 +1341,8 @@ window.ScrollTrigger = ScrollTrigger;
       setTimeout(() => ScrollTrigger.refresh(), 200);
     }
   }
+
+    
 
   function bindMediaProtection() {
     if (!DOM.profilesDisplayArea) return;
@@ -1942,14 +1991,22 @@ window.ScrollTrigger = ScrollTrigger;
           tab.classList.add("active");
 
           const region = tab.getAttribute("data-region");
-          if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+          const currentPath = window.location.pathname.toLowerCase();
+          const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
+
+          // ถ้าอยู่ในหน้าเฉพาะจังหวัด ห้ามให้ปุ่มแท็บมาล้างค่าจังหวัดเด็ดขาด
+          if (!isLocationPage) {
+             if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+          }
 
           if (region === "ทั้งหมด") {
             if (DOM.searchInput) DOM.searchInput.value = "";
           } else if (region === "ภาคเหนือ") {
             if (DOM.searchInput) DOM.searchInput.value = "เชียงใหม่";
           } else if (region === "กรุงเทพฯ") {
-            if (DOM.provinceSelect) DOM.provinceSelect.value = "bangkok";
+            // ไปหน้ากรุงเทพ
+            window.location.href = "/location/bangkok";
+            return;
           }
           applyUltimateFilters(true, true);
         });
