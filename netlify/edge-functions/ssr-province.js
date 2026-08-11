@@ -1,3 +1,4 @@
+
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - ADVANCED SERVERLESS SSR & HYDRATION ENGINE (ssr-province.js)
@@ -201,11 +202,9 @@ const replaceGlobal = (source, target, replacement) => {
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
-    // 1. ลบข้อความ Debug Gemini / System Prompts
     .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
     .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
     .replace(/ทดลองใช้งาน\.?/gi, "")
-    // 2. แก้ไขคำสะกดผิดที่พบบ่อย
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -216,9 +215,7 @@ function sanitizeThaiText(str) {
     .replace(/ปาตอง/g, "ป่าตอง")
     .replace(/ชลบรุี/g, "ชลบุรี")
     .replace(/อยุธญา/g, "อยุธยา")
-    // 3. ลบสัญลักษณ์ตกแต่ง Text Art โดยไม่กระทบสระไทย (เอา 'อิ' และตัวอักษรไทยออก)
     .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚╭╮╰╯┊જ⁀⸝༘⋆ෆ◟ヾ֒𐐪づ⁺.]+/g, " ")
-    // 4. ลบ Emojis
     .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -266,16 +263,15 @@ function injectSchema(html, schemaObj) {
   return cleanHtml.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
 }
 
-// 🟢 Smart Helper: ฉีด Hydration Data เข้าไปที่ </body> เสมอ (ป้องกัน Array ว่าง)
+// 🟢 Smart Helper: ฉีด Hydration Data เข้าไปที่ </body> เสมอ ป้องกัน Array ว่าง
 function injectHydrationData(html, hydratedDataObj) {
   const safeData = Array.isArray(hydratedDataObj) ? hydratedDataObj : [];
   const jsonStr = JSON.stringify(safeData).replace(/</g, '\\u003c');
   const scriptTag = `<script id="ssr-profiles-data">window.profilesData = ${jsonStr};</script>`;
   
-  if (/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i.test(html)) {
-    return html.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, scriptTag);
-  }
-  return html.replace(/<\/body>/i, `  ${scriptTag}\n</body>`);
+  // ใช้ Regex จับแท็กเก่าออกให้สะอาดหมดจด
+  let cleanHtml = html.replace(/<script\s+id=["']ssr-profiles-data["'][^>]*>[\s\S]*?<\/script>/gi, "");
+  return cleanHtml.replace(/<\/body>/i, `  ${scriptTag}\n</body>`);
 }
 
 // 🟢 Smart Helper: กวาดล้างตัวแปรแม่แบบ {{...}} ตกค้างทั้งหมด
@@ -484,28 +480,33 @@ function buildErrorPage(code, title, message) {
 </html>`, { status: code, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=60" } });
 }
 
+// 🟢 FIX: เปลี่ยน @type Person เป็น Service ป้องกัน Schema Error จาก Google
 const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
-  const numericPrice = (profile.rate || "").toString().replace(/\D/g, "");
+  // แก้ไข Regex ให้ตัดราคาสมบูรณ์ไม่เป็น 15 ล้าน
+  const priceMatch = String(profile.rate || "").match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
+  const numericPrice = priceMatch ? priceMatch[0].replace(/,/g, "") : "1500";
   const finalPriceSchema = numericPrice && Number(numericPrice) > 0 ? numericPrice : "1500"; 
   const cleanName = (profile.name || "").replace(/^น้อง/, "").trim();
   const cleanLoc = sanitizeThaiText(profile.location || province);
   const mainImgPath = getProfileMainImage(profile);
 
   return {
-    "@type": "Person",
-    "@id": `${targetUrl}/#person`,
-    "name": `น้อง${cleanName}`,
+    "@type": "Service",
+    "@id": `${targetUrl}/#service`,
+    "name": `บริการเพื่อนเที่ยว - น้อง${cleanName}`,
     "url": targetUrl,
     "image": optimizeImg(hostUrl, mainImgPath, 1200, 630),
-    "description": sanitizeThaiText(profile.description) || `โปรไฟล์แนะนำน้อง${cleanName} สาวรับงานพิกัด ${cleanLoc} สไตล์เพื่อนเที่ยวดูแลดี ฟิวแฟน ตรงปก 100% ไม่มัดจำ บน First Model Hub`,
-    "jobTitle": "Freelance Companion & Entertainer",
-    "gender": "Female",
-    "knowsAbout": ["Companion Services", "Tour Guide Services", "Entertainment Services"],
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": cleanLoc,
-      "addressRegion": province,
-      "addressCountry": "TH"
+    "description": sanitizeThaiText(profile.description) || `โปรไฟล์แนะนำน้อง${cleanName} สาวรับงานพิกัด ${cleanLoc} ตรงปก 100% ไม่มัดจำ`,
+    "provider": {
+        "@type": "Person",
+        "name": `น้อง${cleanName}`,
+        "gender": "Female",
+        "jobTitle": "Freelance Companion",
+        "image": optimizeImg(hostUrl, mainImgPath, 400, 500)
+    },
+    "areaServed": {
+      "@type": "AdministrativeArea",
+      "name": cleanLoc
     },
     "offers": {
       "@type": "Offer",
@@ -515,8 +516,7 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
       "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
       "availability": !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (profile.availability || "").toLowerCase().includes(kw))
         ? "https://schema.org/InStock"
-        : "https://schema.org/SoldOut",
-      "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
+        : "https://schema.org/SoldOut"
     }
   };
 };
@@ -583,8 +583,12 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
 
   let rateDisplay = "1,500.-";
   if (p.rate) {
-    if (!isNaN(p.rate)) rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
-    else rateDisplay = escapeHTML(p.rate).trim();
+    const priceMatch = String(p.rate).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
+    if (priceMatch && !isNaN(Number(priceMatch[0].replace(/,/g, "")))) {
+        rateDisplay = `${Number(priceMatch[0].replace(/,/g, "")).toLocaleString()}.-`;
+    } else {
+        rateDisplay = escapeHTML(p.rate).trim();
+    }
   }
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
@@ -653,7 +657,6 @@ export default async (req, context) => {
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
   const hostName = url.hostname.toLowerCase();
 
-  // Redirects
   if (hostName.includes("sidelinechiangmai.netlify.app")) {
     if (url.pathname === "/" || url.pathname === "/index.html") {
       return Response.redirect(`${hostUrl}/location/chiangmai`, 301);
@@ -732,14 +735,14 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
-    // 🟢 ดึงข้อมูลโปรไฟล์ได้สูงสุด 100 คนเพื่อการประมวลผลสมบูรณ์
+    // 🟢 FIX: เพิ่ม Limit เป็น 600 เท่ากันกับ Client เพื่อแก้ปัญหาหน้ากระตุกจาก Hydration Mismatch
     let profileQuery = supabase
       .from("profiles")
       .select("id, slug, name, age, imagePath, galleryPaths, gallery_paths, provinceKey, province_key, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, lineId, quote, style_tags, slogan")
       .eq("active", true)
       .order("isfeatured", { ascending: false })
       .order("lastUpdated", { ascending: false })
-      .limit(100);
+      .limit(600);
 
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.in("provinceKey", searchKeys);
@@ -839,7 +842,6 @@ export default async (req, context) => {
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const displayReviewCount = profileList.length > 0 ? Math.max(35, profileList.length * 3) : 45;
     
-    // 🟢 Map URL
     const rawMapUrl = (seoData && seoData.geo) 
       ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
       : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
@@ -895,7 +897,6 @@ export default async (req, context) => {
       }))
     };
 
-    // 2. Base Schema Graph Construction (Organization & WebSite)
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -932,13 +933,11 @@ export default async (req, context) => {
       }
     ];
 
-    // 3. Conditional Graph Construction (สลับระหว่าง "โปรไฟล์เดี่ยว" กับ "หมวดหมู่/จังหวัด")
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
       const cleanLoc = sanitizeThaiText(matchedProfile.location || provinceThaiName);
 
-      // 3.1 ProfilePage Entity (ปรับเป็น ProfilePage ตรงสเปก Google 100%)
       schemaGraph.push({
         "@type": "ProfilePage",
         "@id": `${profileUrl}/#webpage`,
@@ -947,15 +946,13 @@ export default async (req, context) => {
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
         "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` },
-        "mainEntity": { "@id": `${profileUrl}/#person` }
+        "mainEntity": { "@id": `${profileUrl}/#service` }
       });
 
-      // 3.2 Person Entity (เชื่อมโยงกับ Organization)
       const personEntity = generatePersonSchema(matchedProfile, provinceThaiName, profileUrl, hostUrl);
-      personEntity["worksFor"] = { "@id": `${hostUrl}/#organization` };
+      personEntity["provider"]["worksFor"] = { "@id": `${hostUrl}/#organization` };
       schemaGraph.push(personEntity);
       
-      // 3.3 BreadcrumbList Entity (หน้ารายบุคคล)
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${profileUrl}/#breadcrumb`,
@@ -966,7 +963,6 @@ export default async (req, context) => {
         ]
       });
 
-      // 3.4 FAQPage Entity (ถาม-ตอบสำหรับหน้ารายบุคคล)
       schemaGraph.push({
         "@type": "FAQPage",
         "@id": `${profileUrl}/#faq`,
@@ -992,7 +988,6 @@ export default async (req, context) => {
       });
 
     } else {
-      // 3.5 CollectionPage Entity (หน้าหมวดหมู่ / จังหวัด / หน้าแรก)
       const collectionPageObj = {
         "@type": "CollectionPage",
         "@id": `${canonUrl}/#webpage`,
@@ -1007,10 +1002,8 @@ export default async (req, context) => {
       }
       schemaGraph.push(collectionPageObj);
 
-      // 3.6 LocalBusiness Entity
       schemaGraph.push(businessEntity);
 
-      // 3.7 ItemList Entity (ฝัง Nested Person Entity สมบูรณ์แบบทุก Item)
       if (profileList.length > 0) {
         schemaGraph.push({
           "@type": "ItemList",
@@ -1041,7 +1034,6 @@ export default async (req, context) => {
         });
       }
 
-      // 3.8 BreadcrumbList Entity (หน้าหมวดหมู่)
       if (!isNationalHome) {
         schemaGraph.push({
           "@type": "BreadcrumbList",
@@ -1053,7 +1045,6 @@ export default async (req, context) => {
         });
       }
 
-      // 3.9 FAQPage Entity (หน้าหมวดหมู่)
       if (seoData.faqs && seoData.faqs.length > 0) {
         schemaGraph.push({
           "@type": "FAQPage",
@@ -1074,9 +1065,6 @@ export default async (req, context) => {
     // 🟢 SSR HTML TEMPLATE REPLACEMENT & HYDRATION ENGINE (BULLETPROOF PIPELINE)
     // ==============================================================================
 
-    // ------------------------------------------------------------------------------
-    // STEP 1: เตรียม HTML Snippets ย่อยทั้งหมดล่วงหน้า (Prepare Snippets)
-    // ------------------------------------------------------------------------------
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
     const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
@@ -1108,12 +1096,11 @@ export default async (req, context) => {
     const seoIntroContent = smartLinkify(introTemplate, 0, seoData.zones, provinceSlug);
 
     // ------------------------------------------------------------------------------
-    // STEP 2: สร้างส่วนแสดงผลหลัก (Display Area Inner HTML: Single Profile vs Location)
+    // STEP 2: สร้างส่วนแสดงผลหลัก (Display Area Inner HTML) [🟢 FIX: การแก้ไขกลุ่มหน้าแรก]
     // ------------------------------------------------------------------------------
     let displayAreaInnerHtml = "";
 
     if (matchedProfile) {
-      // 2.1 เรนเดอร์หน้ารายบุคคล
       const pName = escapeHTML((matchedProfile.name || "สาวสวย").replace(/^น้อง\s?/, "").trim());
       const mainImg = getProfileMainImage(matchedProfile);
       const heroImgUrl = optimizeImg(hostUrl, mainImg, 500, 650);
@@ -1122,7 +1109,10 @@ export default async (req, context) => {
       
       let rateVal = "1,500.-";
       if (matchedProfile.rate) {
-        rateVal = !isNaN(matchedProfile.rate) ? `${Number(matchedProfile.rate).toLocaleString()}.-` : escapeHTML(matchedProfile.rate);
+        const pMatch = String(matchedProfile.rate).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
+        rateVal = pMatch && !isNaN(Number(pMatch[0].replace(/,/g, ""))) 
+            ? `${Number(pMatch[0].replace(/,/g, "")).toLocaleString()}.-` 
+            : escapeHTML(matchedProfile.rate);
       }
 
       const rawLine = matchedProfile.line_id || matchedProfile.lineId || "";
@@ -1217,35 +1207,87 @@ export default async (req, context) => {
         </article>
       `;
     } else {
-      // 2.2 เรนเดอร์หน้าค้นหารายจังหวัด / หน้าหมวดหมู่
-      const topCatalogSnippetHtml = `
-        <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
-          <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
-          <p>${escapeHTML(topProfilesTextSnippet.replace(/\|/g, " • "))}</p>
-        </div>
-      `;
+      
+      if (isNationalHome) {
+          // 🟢 FIX: จัดกลุ่มน้องๆ ในหน้าแรกให้เป็นหมวดหมู่รายจังหวัด ไม่เป็นกล่องว่าง
+          const provNameMap = {
+            chiangmai: "เชียงใหม่",
+            khonkaen: "ขอนแก่น",
+            chonburi: "ชลบุรี",
+            bangkok: "กรุงเทพฯ",
+            phuket: "ภูเก็ต",
+            udonthani: "อุดรธานี",
+            lampang: "ลำปาง",
+            chiangrai: "เชียงราย",
+            phitsanulok: "พิษณุโลก",
+            national: "ทั่วไทย"
+          };
 
-      const liveCountChipHtml = `
-        ${topCatalogSnippetHtml}
-        <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
-                📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
-                <span class="live-count-chip">
-                  <span class="pulse-dot-el"></span>
-                  <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
-                </span>
-            </h2>
-        </div>
-      `;
+          const grouped = profileList.reduce((acc, p) => {
+              const key = p.provinceKey || p.province_key || "national";
+              acc[key] = acc[key] || [];
+              acc[key].push(p);
+              return acc;
+          }, {});
 
-      displayAreaInnerHtml = `
-        ${liveCountChipHtml}
-        <div class="section-content-wrapper" style="margin-top: 16px;">
-          <div class="profile-grid profiles-grid-row" role="list">
-            ${cardsHtml}
-          </div>
-        </div>
-      `;
+          const sortedProvinceKeys = Object.keys(grouped).sort((a, b) => {
+              const nameA = provNameMap[a] || a;
+              const nameB = provNameMap[b] || b;
+              return nameA.localeCompare(nameB, "th");
+          });
+
+          let homeHtml = "";
+          for (const key of sortedProvinceKeys) {
+              if (key === "national" && sortedProvinceKeys.length > 1) continue;
+              const name = provNameMap[key] || "จังหวัดอื่นๆ";
+              const groupCards = grouped[key].map((p, index) => renderCardHtml(p, index, hostUrl, name)).join("");
+              
+              homeHtml += `
+                <div class="section-content-wrapper province-section mt-6" id="province-${key}">
+                  <div class="flex justify-between items-center flex-wrap gap-2 p-2">
+                      <a href="/location/${key}" class="group" style="text-decoration: none; display: inline-block;">
+                          <h2 class="province-section-header" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 18px; font-weight: 800; color: white; margin: 0;">
+                              📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${name}</span>
+                              <span class="live-count-chip">
+                                <span class="pulse-dot-el"></span>
+                                <span>พบ ${grouped[key].length} โปรไฟล์พร้อมรับงาน</span>
+                              </span>
+                              <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px; color: var(--primary-purple);"></i>
+                          </h2>
+                      </a>
+                  </div>
+                  <div class="profiles-grid-row mt-2">${groupCards}</div>
+                </div>
+              `;
+          }
+          displayAreaInnerHtml = homeHtml;
+
+      } else {
+          // 🟢 หน้าแยกจังหวัด (Location Pages)
+          const topCatalogSnippetHtml = `
+            <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
+              <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
+              <p>${escapeHTML(topProfilesTextSnippet.replace(/\|/g, " • "))}</p>
+            </div>
+          `;
+
+          const liveCountChipHtml = `
+            ${topCatalogSnippetHtml}
+            <div class="mt-4 relative">
+              <div class="flex justify-between items-center flex-wrap gap-2 p-2" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px 4px;">
+                  <h2 class="text-lg font-extrabold text-white m-0 flex items-center flex-wrap gap-2" style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; gap: 8px;">
+                      📍 น้องๆ ในจังหวัด <span class="text-purple mx-1" style="color: #C084FC;">${provinceThaiName}</span>
+                      <span class="live-count-chip">
+                        <span class="pulse-dot-el"></span>
+                        <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
+                      </span>
+                  </h2>
+              </div>
+              <div class="profiles-grid-row mt-2">${cardsHtml}</div>
+            </div>
+          `;
+          displayAreaInnerHtml = liveCountChipHtml;
+      }
     }
 
 
@@ -1254,7 +1296,6 @@ export default async (req, context) => {
     if (!/<base\s+/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
-
 
     if (matchedProfile) {
       rawHtml = rawHtml.replace(/<section class="hero-section"[\s\S]*?<\/section>/i, "");
@@ -1303,7 +1344,6 @@ export default async (req, context) => {
 
     rawHtml = injectSchema(rawHtml, schemaJson);
 
-
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceSlug);
@@ -1313,11 +1353,9 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-
     rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-
 
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = allHydratedProfiles.map(p => ({
@@ -1351,9 +1389,8 @@ export default async (req, context) => {
       styleTags: p.style_tags || p.styleTags || []
     }));
 
-
+    // 🟢 FIX: เรียกใช้ฟังก์ชันที่แก้บั๊ก Hydration ลง HTML
     rawHtml = injectHydrationData(rawHtml, hydratedProfilesData);
-
 
     rawHtml = sweepPlaceholders(rawHtml);
     
@@ -1391,3 +1428,4 @@ export default async (req, context) => {
     }
   }
 };
+
