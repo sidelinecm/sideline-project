@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
   <meta charset="utf-8" />
@@ -7,16 +7,16 @@
   <base href="/" />
 
   <!-- BASE SEO METADATA -->
-  <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
+  <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub</title>
   <meta name="description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ" />
   <meta name="keywords" content="แฟนเช่า, แฟนเช่าเชียงใหม่, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
 
   <!-- CANONICAL & HREFLANG METADATA -->
-  <link rel="canonical" id="canonical-link" href="https://firstmodelhub.com/" />
-  <link rel="alternate" hreflang="th" href="https://firstmodelhub.com/" />
-  <link rel="alternate" hreflang="x-default" href="https://firstmodelhub.com/" />
+  <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}" />
+  <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
+  <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
   <!-- PRECONNECT & DNS-PREFETCH -->
   <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin />
@@ -41,9 +41,9 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="รับงานทั่วไทย ไซด์ไลน์สาวรับงานฟิวแฟนตรงปก | First Model Hub" />
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%" />
-  <meta property="og:url" content="https://firstmodelhub.com/" />
-  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
-  <meta property="og:image:secure_url" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
+  <meta property="og:url" content="{{SEO_CANONICAL}}" />
+  <meta property="og:image" content="{{SEO_IMAGE}}" />
+  <meta property="og:image:secure_url" content="{{SEO_IMAGE}}" />
   <meta property="og:image:type" content="image/webp" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -52,8 +52,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="รับงานทั่วไทย ไซด์ไลน์ ฟิวแฟนตรงปก 100%" />
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ" />
-  <meta name="twitter:url" content="https://firstmodelhub.com/" />
-  <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
+  <meta name="twitter:url" content="{{SEO_CANONICAL}}" />
+  <meta name="twitter:image" content="{{SEO_IMAGE}}" />
 
   <!-- APP ICONS & MANIFEST -->
   <meta name="apple-mobile-web-app-title" content="First Model Hub" />
@@ -66,12 +66,7 @@
   <link rel="manifest" href="/manifest.webmanifest" />
 
   <script type="application/ld+json" id="dynamic-schema">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "First Model Hub",
-    "url": "https://firstmodelhub.com"
-  }
+  {{SCHEMA_JSON}}
   </script>
 </head>
 
@@ -204,12 +199,13 @@
           </h2>
       </div>
       <div id="featured-profiles-container" class="profiles-grid-row" role="region" aria-live="polite" aria-labelledby="featured-heading">
+        {{PROFILES_CARDS_HTML}}
       </div>
     </section>
 
 <form id="search-form" action="javascript:void(0);" style="display: none !important;" aria-hidden="true">
   <input type="search" id="search-keyword" value="">
-  <input type="hidden" id="search-province" value="">
+  <input type="hidden" id="search-province" value="{{PROVINCE_KEY}}">
   <input type="hidden" id="search-availability" value="">
   <input type="hidden" id="search-featured" value="">
   <input type="hidden" id="search-price" value="">
@@ -238,8 +234,11 @@
     <div id="no-results-message" class="hidden" style="text-align: center; padding: 30px; color: #A1A1AA;">ไม่พบโปรไฟล์ตรงตามเงื่อนไข</div>
     <div id="fetch-error-message" class="hidden"></div>
 
+    <!-- SSR_DISPLAY_AREA_START -->
     <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">
+      {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
+    <!-- SSR_DISPLAY_AREA_END -->
 
     <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
       <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
@@ -254,7 +253,7 @@
 
          <div class="seo-content-container collapsed" id="seo-drawer-wrapper" style="position: relative;">
              <div style="padding: 14px 16px; color: var(--text-gray); font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 10;">
-                 
+                 {{PROVINCE_SEO_CONTENT}}
                  <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; margin-top: 6px;">
                    <h3 style="font-size: 14px; font-weight: 800; color: #C084FC; margin-bottom: 6px;">Premium Escorts &amp; Companion Services in {{PROVINCE_NAME}}</h3>
                    <p style="font-size: 12px; color: #A1A1AA; line-height: 1.5;">
@@ -364,6 +363,7 @@
          </h2>
 
          <div id="faq-container-list" style="display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 10;">
+             {{PROVINCE_FAQS_HTML}}
          </div>
     </section>
 
@@ -376,6 +376,7 @@
   </div>
 
   <div id="reviews-container-grid" style="display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left;">
+      {{PROVINCE_REVIEWS_HTML}}
   </div>
 
   <div style="margin-top: 16px;">
@@ -456,7 +457,7 @@
           <iframe
             id="google-map"
             src="about:blank"
-            data-src="https://maps.google.com/maps?q=%E0%B8%AA%E0%B8%B2%E0%B8%A7%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%87%E0%B8%B2%E0%B8%99%20%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E&t=&z=13&ie=UTF8&iwloc=&output=embed"
+            data-src="{{MAP_EMBED_URL}}"
             title="แผนที่ขอบเขตบริการ สาวรับงาน เพื่อนเที่ยวไซด์ไลน์ฟิวแฟน"
             style="border:0; width:100%; height:100%;"
             allowfullscreen=""
@@ -643,7 +644,6 @@
 </script>
 
 <script type="module" src="/main.js"></script>
-
 
 </body>
 </html>

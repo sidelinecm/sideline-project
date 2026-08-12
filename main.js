@@ -20,19 +20,19 @@ window.ScrollTrigger = ScrollTrigger;
     STORAGE_BUCKET: "profile-images",
     KEYS: {
       LAST_PROVINCE: "firstmodelhub_last_province",
-      CACHE_PROFILES: "cachedProfiles_v5_2026",
-      CACHE_PROVINCES: "cachedProvinces_v5_2026",
+      CACHE_PROFILES: "cachedProfiles_v6_2026",
+      CACHE_PROVINCES: "cachedProvinces_v6_2026",
       THEME: "theme",
       LIKED_PROFILES: "liked_profiles",
       LAST_REVIEW_TIME: "last_review_submit_time"
     },
-    CACHE_TTL_MS: 12 * 60 * 60 * 1000, // แคชมีอายุ 12 ชั่วโมง
+    CACHE_TTL_MS: 12 * 60 * 60 * 1000, // 12 Hours TTL
     SITE_URL: "https://firstmodelhub.com",
     DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
   };
 
   const DEFAULT_SEO = {
-    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub",
+    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub",
     description: "ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ",
     keywords: "แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน",
     canonical: "https://firstmodelhub.com/",
@@ -56,11 +56,11 @@ window.ScrollTrigger = ScrollTrigger;
   let isFirstLoad = true;
   let searchDebounceTimer = null;
 
-  // 🟢 IndexedDB Engine (ปรับปรุงระบบ Smart Cache มีวันหมดอายุและลบเองได้)
+  // 🟢 IndexedDB Engine
   const idb = {
     init() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open("FirstModelHubDB", 2);
+        const req = indexedDB.open("FirstModelHubDB", 3);
         req.onupgradeneeded = (e) => {
           const db = e.target.result;
           if (!db.objectStoreNames.contains("cacheStore")) {
@@ -81,11 +81,7 @@ window.ScrollTrigger = ScrollTrigger;
           req.onsuccess = () => {
             const data = req.result;
             if (!data) return resolve(null);
-            
-            if (!data.timestamp) {
-              return resolve(data);
-            }
-            
+            if (!data.timestamp) return resolve(data);
             if (Date.now() - data.timestamp < CONFIG.CACHE_TTL_MS) {
               resolve(data.value);
             } else {
@@ -198,7 +194,7 @@ window.ScrollTrigger = ScrollTrigger;
     return profileList.filter(p => {
       if (!p) return false;
       const uniqueKey = String(p.id || p.slug || p.imagePath).toLowerCase().trim();
-      if (seen.has(uniqueKey)) return false;
+      if (!uniqueKey || seen.has(uniqueKey)) return false;
       seen.add(uniqueKey);
       return true;
     });
@@ -273,14 +269,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   };
 
-  function runIdle(fn, delay = 0) {
-    if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => fn());
-    } else {
-      setTimeout(fn, delay);
-    }
-  }
-
   function destroyLoadingPlaceholder() {
     const el = document.getElementById("loading-profiles-placeholder");
     if (el) el.style.display = "none";
@@ -300,12 +288,13 @@ window.ScrollTrigger = ScrollTrigger;
 
   const FALLBACK_SVG_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'><rect width='100%' height='100%' fill='%23120A24'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23C084FC' font-family='sans-serif' font-size='20' font-weight='bold'>First Model Hub</text></svg>";
 
+  // 🟢 ฟังก์ชันแปลง URL รูปภาพให้ได้ตรรกะตรงกับ Edge Function
   function getImageUrl(path, width = 400) {
-    if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp")) {
+    if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp") || path.includes("placeholder")) {
       return FALLBACK_SVG_AVATAR;
     }
 
-    const cleanPath = path.trim();
+    const cleanPath = path.trim().replace(/^\/+/, "").replace(/^profile-images\//, "");
 
     if (cleanPath.includes("res.cloudinary.com")) {
       const cleanCloudinaryUrl = cleanPath.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, "/upload/$1");
@@ -316,8 +305,7 @@ window.ScrollTrigger = ScrollTrigger;
       return cleanPath;
     }
 
-    const storagePath = cleanPath.replace(/^\/+/, "").replace(/^profile-images\//, "");
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${storagePath}`;
+    return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${cleanPath}?width=${width}&height=${width * 1.25}&resize=cover&quality=70&format=avif`;
   }
 
   function showToast(message, type = "success") {
@@ -534,6 +522,7 @@ window.ScrollTrigger = ScrollTrigger;
     };
 
     try {
+      // 🟢 1. ตรวจสอบข้อมูลจาก SSR Hydration
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         console.log("⚡ [Hydration] โหลดข้อมูล SSR สำเร็จ!");
         STATE.provincesMap.clear();
@@ -1192,6 +1181,7 @@ window.ScrollTrigger = ScrollTrigger;
     window.scrollTo({ top: offsetPosition, behavior: "smooth" });
   }
 
+  // 🟢 PRESERVE-DOM HYDRATION PROTOCOL: ล็อกหน้าจอ ไม่ทำลาย DOM ที่มาจาก SSR
   async function renderProfilesGrid(profiles, isFilteredView, isUserAction = false) {
     if (!DOM.profilesDisplayArea) return;
 
@@ -1260,6 +1250,7 @@ window.ScrollTrigger = ScrollTrigger;
       return;
     }
 
+    // 🟢 ถ้าเป็นการโหลดครั้งแรกและมี HTML จาก SSR อยู่แล้ว ให้ผูก Event ทันทีโดยไม่ลบ DOM เดิม
     if (isFirstHydration && DOM.profilesDisplayArea.children.length > 0 && !isUserAction) {
         bindMediaProtection();
         if (window.ScrollTrigger) {
@@ -1605,10 +1596,6 @@ window.ScrollTrigger = ScrollTrigger;
    💎 FIRST MODEL HUB - ULTRA-OPTIMIZED SEO & SCHEMA ENGINE (2026 FULL)
    ============================================================================== */
 
-/**
- * 1. ฟังก์ชันล้าง Schema JSON-LD เก่าออกจาก DOM อย่างหมดจด
- * ครอบคลุมทั้งแท็ก #dynamic-schema จาก Server (SSR) และแท็ก #schema-jsonld-* จาก Client (CSR)
- */
 function removeJsonLdSchemas() {
   const schemaIds = [
     "dynamic-schema",
@@ -1621,24 +1608,18 @@ function removeJsonLdSchemas() {
     "schema-jsonld-itemlist"
   ];
 
-  // ลบตาม ID ที่ระบุ
   schemaIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.remove();
   });
 
-  // กวาดล้างแท็กตกค้างฝั่ง Client ที่สร้างขึ้นด้วย attribute พิเศษ
   const extraClientSchemas = document.querySelectorAll('script[type="application/ld+json"][data-client-schema="true"]');
   extraClientSchemas.forEach(el => el.remove());
 }
 
-/**
- * 2. ฟังก์ชันฉีด Schema JSON-LD ใหม่เข้าสู่ <head> ฝั่ง Client อย่างปลอดภัย
- */
 function injectJsonLdSchema(schemaObj, elementId = "schema-jsonld") {
   if (!schemaObj) return;
 
-  // ลบแท็กเดิมที่มี ID เดียวกันออกก่อนเพื่อป้องกันการสร้างซ้ำ
   const existing = document.getElementById(elementId);
   if (existing) existing.remove();
 
@@ -1658,7 +1639,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
   const currentPath = window.location.pathname.toLowerCase();
   const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
 
-  // 🟢 ตรวจสอบว่าถ้า Canonical ใน DOM ปัจจุบันว่างเปล่า ให้ Client ช่วยซ่อมและเติมทันที
   const currentCanonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href');
   if (isFirstLoad && currentCanonical && currentCanonical.trim() !== "" && !currentCanonical.includes("{{")) {
     isFirstLoad = false;
@@ -1666,11 +1646,8 @@ function updateSEOMetadata(profile = null, locationData = null) {
   }
   isFirstLoad = false;
 
-  // ล้าง Schema เก่าตามปกติ
   removeJsonLdSchemas();
- 
 
-  // 🟢 3. หากผู้ใช้กดย้อนกลับมาหน้าหลัก
   if (isHomePage && !profile) {
     document.title = DEFAULT_SEO.title;
     updateMetaTag("description", DEFAULT_SEO.description);
@@ -1680,7 +1657,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
     return;
   }
 
-  // 🟢 4. กรณีเปิดดูโปรไฟล์เดี่ยว (Modal / Single Profile View)
   if (profile) {
     const nameClean = sanitizeName(profile.name || profile.displayName);
     const provKey = normalizeProvinceKey(profile.provinceKey);
@@ -1699,12 +1675,10 @@ function updateSEOMetadata(profile = null, locationData = null) {
 
     updateOpenGraphAndTwitter(profile, title, description, "profile");
 
-    // ดึงเฉพาะตัวเลขราคาสุทธิสำหรับ Schema
     const priceMatch = String(profile.rate || profile._price || "").match(/\d+/g);
     const rawNum = priceMatch ? priceMatch.join("") : "1500";
     const finalPrice = Number(rawNum) > 0 ? rawNum : "1500";
 
-    // 🟢 ฉีด Product Schema ปลดล็อกดาวสีทอง + ราคาบน Google Search 2026
     injectJsonLdSchema({
       "@context": "https://schema.org",
       "@type": "Product",
@@ -1724,7 +1698,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
         "url": profileUrl,
         "price": finalPrice,
         "priceCurrency": "THB",
-        "priceValidUntil": "2027-12-31",
+        "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
         "itemCondition": "https://schema.org/NewCondition",
         "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => (profile.availability || "").toLowerCase().includes(e))
           ? "https://schema.org/SoldOut"
@@ -1740,7 +1714,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
       }
     }, "schema-jsonld-product");
 
-    // 🟢 ฉีด BreadcrumbList Schema
     injectJsonLdSchema({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -1753,7 +1726,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
     }, "schema-jsonld-breadcrumb");
 
   } else if (locationData) {
-    // 🟢 5. กรณีเปลี่ยนเป็นหน้าจังหวัดฝั่ง Client
     const provKey = normalizeProvinceKey(locationData.provinceKey || "national");
     const provName = locationData.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย";
     const canonicalUrl = locationData.canonicalUrl || `${CONFIG.SITE_URL}/location/${provKey}`;
@@ -1769,7 +1741,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
 
     updateOpenGraphAndTwitter(null, title, description, "website");
 
-    // 🟢 ฉีด BreadcrumbList สำหรับหน้าจังหวัด
     injectJsonLdSchema({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -1782,9 +1753,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
   }
 }
 
-/**
- * 4. ฟังก์ชันอัปเดต Open Graph และ Twitter Card
- */
 function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
   const imageUrl = profile && profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE;
 
@@ -1799,9 +1767,6 @@ function updateOpenGraphAndTwitter(profile, title, description, type = "website"
   updateMetaTag("twitter:image", imageUrl);
 }
 
-/**
- * 5. ฟังก์ชันอัปเดต Meta Tag ทั่วไป
- */
 function updateMetaTag(nameOrProperty, content) {
   let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
   if (!tag) {
@@ -1816,9 +1781,6 @@ function updateMetaTag(nameOrProperty, content) {
   tag.setAttribute("content", content);
 }
 
-/**
- * 6. ฟังก์ชันอัปเดต Link Canonical & Alternate
- */
 function updateLinkRel(rel, href) {
   let link = document.querySelector(`link[rel="${rel}"]`);
   if (!link) {
@@ -2137,13 +2099,10 @@ function updateLinkRel(rel, href) {
       }
     }
 
-    /* ==============================================================================
+/* ==============================================================================
    ✍️ PERFECTED REVIEW FORM ENGINE (แก้ไขเรื่องจังหวัดและการส่งรีวิว 100%)
    ============================================================================== */
 
-/**
- * ฟังก์ชันช่วยตรวจสอบจังหวัดของหน้าปัจจุบัน
- */
 function getActiveProvinceKey() {
   const path = window.location.pathname.toLowerCase();
   const locMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
@@ -2164,9 +2123,6 @@ function getActiveProvinceKey() {
   return "national";
 }
 
-/**
- * ฟังก์ชันเปิด-ปิด หน้าต่างฟอร์มเขียนรีวิว พร้อมอัปเดตจังหวัดอัตโนมัติ
- */
 function initReviewToggle() {
   const btn = document.getElementById("toggle-review-form-btn");
   const form = document.getElementById("review-form");
@@ -2178,12 +2134,10 @@ function initReviewToggle() {
       form.style.display = "flex";
       btn.textContent = "❌ ปิดหน้าต่างเขียนรีวิว";
 
-      // 🟢 แก้ไข: ดึงจังหวัดของหน้าปัจจุบันใส่ Hidden Input อัตโนมัติ 100%
       const activeProvKey = getActiveProvinceKey();
       const provInput = document.getElementById("review-province-key");
       if (provInput) provInput.value = activeProvKey;
 
-      // อัปเดต Placeholder ของพิกัดให้สอดคล้องกับจังหวัด
       const locInput = document.getElementById("review-location");
       const currentProvName = STATE.provincesMap?.get(activeProvKey) || "ตัวเมือง";
       if (locInput) {
@@ -2197,9 +2151,6 @@ function initReviewToggle() {
   });
 }
 
-/**
- * ฟังก์ชันจัดการการกดส่งฟอร์มรีวิวเข้าระบบ Supabase
- */
 function initReviewForm() {
   const form = document.getElementById("review-form");
   if (!form) return;
@@ -2207,7 +2158,6 @@ function initReviewForm() {
   form.addEventListener("submit", async e => {
     e.preventDefault();
 
-    // ตรวจสอบ Rate Limit (ป้องกันการสแปมส่งรีวิวซ้ำภายใน 5 นาที)
     const lastSubmit = localStorage.getItem(CONFIG.KEYS.LAST_REVIEW_TIME);
     if (lastSubmit && (Date.now() - parseInt(lastSubmit, 10) < 5 * 60 * 1000)) {
       showToast("⏳ กรุณารออย่างน้อย 5 นาทีก่อนส่งรีวิวครั้งถัดไปครับ", "error");
@@ -2225,7 +2175,6 @@ function initReviewForm() {
     const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
     const reviewText = document.getElementById("review-text")?.value.trim();
 
-    // 🟢 แก้ไข: ดึงจังหวัดจริงจากหน้าปัจจุบันการันตีส่งตรงหมวดหมู่
     const finalProvKey = getActiveProvinceKey();
 
     if (!author || !reviewText) {
@@ -2241,8 +2190,8 @@ function initReviewForm() {
         location_detail: location || "ไม่ระบุโซน",
         rating_score: rating,
         review_body: reviewText,
-        province_key: finalProvKey, // 🟢 บันทึกลงจังหวัดที่ถูกต้อง
-        active_status: false        // รอแอดมินอนุมัติก่อนแสดงผลจริง
+        province_key: finalProvKey,
+        active_status: false
       }]);
 
       if (error) throw error;
@@ -2267,9 +2216,6 @@ function initReviewForm() {
   });
 }
 
-/**
- * ฟังก์ชันจัดการระบบดาวเกรดในฟอร์มรีวิว
- */
 function initStarRating() {
   const stars = document.querySelectorAll(".star-rating-input-item");
   const ratingInput = document.getElementById("review-rating-value");
@@ -2459,7 +2405,6 @@ function initStarRating() {
       DOM.featuredSection = document.getElementById("featured-profiles");
       DOM.featuredContainer = document.getElementById("featured-profiles-container");
       DOM.noResultsMessage = document.getElementById("no-results-message");
-      
       DOM.fetchErrorMessage = document.getElementById("fetch-error-message");
 
       const toggleBtn = document.getElementById("menu-toggle");
@@ -2500,6 +2445,7 @@ function initStarRating() {
         });
       }
 
+      // 🟢 Event Delegation กลางเพียงจุดเดียวสำหรับทุกองค์ประกอบ
       document.body.addEventListener("click", e => {
         const target = e.target;
 
@@ -2697,4 +2643,3 @@ function initStarRating() {
     });
 
 })();
-
