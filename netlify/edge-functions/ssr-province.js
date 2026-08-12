@@ -261,15 +261,24 @@ function injectSchema(html, schemaObj) {
   const jsonStr = JSON.stringify(schemaObj).replace(/</g, '\\u003c');
   const newScriptTag = `<script type="application/ld+json" id="dynamic-schema">${jsonStr}</script>`;
 
+  // 1. ตรวจสอบบล็อก <script ... id="dynamic-schema"> ที่ครอบ {{SCHEMA_JSON}} แล้วแทนที่ทั้งบล็อก
+  const fullTagRegex = /<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?\{\{\s*SCHEMA_JSON\s*\}\}[\s\S]*?<\/script>/gi;
+  if (fullTagRegex.test(html)) {
+    return html.replace(fullTagRegex, newScriptTag);
+  }
+
+  // 2. หากมีคำว่า {{SCHEMA_JSON}} โดดๆ ให้แทนที่ด้วย newScriptTag
   if (html.includes("{{SCHEMA_JSON}}")) {
     return html.replace("{{SCHEMA_JSON}}", newScriptTag);
   }
 
+  // 3. หากมีแท็ก <script id="dynamic-schema"> เดิมอยู่แล้วโดยไม่มี placeholder ให้แทนที่ทั้งบล็อก
   const existingRegex = /<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?<\/script>/gi;
   if (existingRegex.test(html)) {
     return html.replace(existingRegex, newScriptTag);
   }
 
+  // 4. กรณีไม่พบสคริปต์เดิม ให้แทรกไว้ก่อนปิด </head>
   return html.replace(/<\/head>/i, `  ${newScriptTag}\n</head>`);
 }
 
@@ -287,8 +296,12 @@ function injectHydrationData(html, hydratedDataObj) {
 
 function sweepPlaceholders(html) {
   if (!html) return "";
-  return html
-    .replace(/\{\{\s*SCHEMA_JSON\s*\}\}/gi, '{"@context":"https://schema.org","@type":"WebSite","name":"First Model Hub"}')
+  
+  // ลบทั้งบล็อกสคริปต์ dynamic-schema หากยังมี {{SCHEMA_JSON}} ตกค้างอยู่
+  let cleanHtml = html.replace(/<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?\{\{\s*SCHEMA_JSON\s*\}\}[\s\S]*?<\/script>/gi, "");
+  
+  return cleanHtml
+    .replace(/\{\{\s*SCHEMA_JSON\s*\}\}/gi, "")
     .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
