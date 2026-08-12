@@ -1,10 +1,11 @@
 <!DOCTYPE html> 
 <html lang="th" class="dark-theme dark">
 <head>
-  <!-- 1. CHARACTER SET & VIEWPORT (ต้องวางไว้บนสุดเพื่อความถูกต้องในการประมวลผลภาษา) -->
+  <!-- 1. CHARACTER SET, VIEWPORT & BASE (ต้องวางไว้บนสุดเพื่อความถูกต้องในการประมวลผลภาษา) -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#5A2CBE" />
+  <base href="/" />
 
   <!-- 2. BASE SEO METADATA -->
   <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
@@ -13,37 +14,37 @@
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="google-site-verification" content="0N_IQUDZv9Y2WtNhjqSPTV3TuPsildmmO-TPwdMlSfg" />
 
-  <!-- 3. CANONICAL & HREFLANG METADATA -->
+  <!-- 3. CANONICAL & HREFLANG METADATA (รองรับ SSR & CSR - ป้องกัน Empty Canonical) -->
   <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}" />
   <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
   <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
-  <!-- 4. PRECONNECT & DNS-PREFETCH (เชื่อมต่อ TCP/TLS ล่วงหน้าไปยัง Supabase & Cloudinary เพิ่มความเร็วการโหลดรูป) -->
+  <!-- 4. PRECONNECT & DNS-PREFETCH (เชื่อมต่อ TCP/TLS ล่วงหน้า เพิ่มความเร็วการโหลดรูปและฐานข้อมูล) -->
   <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin />
   <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co" />
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="dns-prefetch" href="https://res.cloudinary.com" />
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 
-  <!-- 5. PRELOAD CRITICAL ASSETS (ฟอนต์และสคริปต์หลัก - ป้องกันปัญหาตัวหนังสือเด้งขยับ CLS) -->
+  <!-- 5. PRELOAD CRITICAL ASSETS (ฟอนต์หลักและสคริปต์ - ป้องกันตัวหนังสือกระตุก CLS) -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high" />
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high" />
   <link rel="modulepreload" href="/main.js" />
 
-  <!-- 6. STYLESHEETS & FONTS -->
+  <!-- 6. STYLESHEETS & FONTS (โหลด CSS แบบ Asynchronous ไม่บล็อกการเรนเดอร์) -->
   <link rel="stylesheet" href="/styles.css" />
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
 
-<!-- 7. OPEN GRAPH METADATA (FACEBOOK & LINE SHARE) -->
+  <!-- 7. OPEN GRAPH METADATA (FACEBOOK & LINE SHARE) -->
   <meta property="og:locale" content="th_TH" />
   <meta property="og:site_name" content="First Model Hub" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}} โปรไฟล์)" />
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%" />
   <meta property="og:url" content="{{SEO_CANONICAL}}" />
-  <!-- 🟢 [ปรับแก้ไข: เปลี่ยนเป็น URL รูปตั้งต้น เพื่อให้ตารางสแกนขึ้น '🟢 ปกติ'] -->
-  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
-  <meta property="og:image:secure_url" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
+  <meta property="og:image" content="{{SEO_IMAGE}}" />
+  <meta property="og:image:secure_url" content="{{SEO_IMAGE}}" />
   <meta property="og:image:type" content="image/webp" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -52,19 +53,20 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} ฟิวแฟนตรงปก 100%" />
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ" />
-  <!-- 🟢 [ปรับแก้ไข: ใส่ URL รูปตั้งต้นเช่นกัน] -->
-  <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
+  <meta name="twitter:url" content="{{SEO_CANONICAL}}" />
+  <meta name="twitter:image" content="{{SEO_IMAGE}}" />
 
-  <!-- 9. APP ICONS, FAVORITES & MANIFEST -->
+  <!-- 9. APP ICONS, FAVORITES & MANIFEST (PWA Support) -->
   <meta name="apple-mobile-web-app-title" content="First Model Hub" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="shortcut icon" href="/images/favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48x48.png" />
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-<!-- SCHEMA.ORG STRUCTURED DATA GRAPH -->
+  <!-- 10. SCHEMA.ORG STRUCTURED DATA GRAPH (รองรับ SSR Injection) -->
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -74,7 +76,7 @@
   }
   </script>
 
-  <!-- 11. GOOGLE ANALYTICS / GTM (โหลดแบบดีเลย์ 2 วินาที ป้องกันการดึงความเร็วการสแกนของ Googlebot) -->
+  <!-- 11. GOOGLE ANALYTICS / GTM (หน่วงเวลาโหลด 2 วินาที เพิ่มคะแนน PageSpeed) -->
   <script>
     window.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() {

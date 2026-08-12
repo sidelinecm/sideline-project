@@ -1654,22 +1654,21 @@ function injectJsonLdSchema(schemaObj, elementId = "schema-jsonld") {
   }
 }
 
-/**
- * 3. ฟังก์ชันอัปเดต Metadata และ Schema เมื่อเกิดการเปลี่ยนหน้าฝั่ง Client (SPA Navigation)
- */
 function updateSEOMetadata(profile = null, locationData = null) {
   const currentPath = window.location.pathname.toLowerCase();
   const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
 
-  // 🟢 1. หากเป็นการโหลดหน้าครั้งแรกสุดจาก Server (SSR)
-  // ให้ปล่อย Schema ที่ Server ฉีดมา (#dynamic-schema) ทำงาน ห้ามลบทิ้งเด็ดขาด!
-  if (isFirstLoad) {
+  // 🟢 ตรวจสอบว่าถ้า Canonical ใน DOM ปัจจุบันว่างเปล่า ให้ Client ช่วยซ่อมและเติมทันที
+  const currentCanonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href');
+  if (isFirstLoad && currentCanonical && currentCanonical.trim() !== "" && !currentCanonical.includes("{{")) {
     isFirstLoad = false;
     return;
   }
+  isFirstLoad = false;
 
-  // 🟢 2. ล้าง Schema เก่าออกทั้งหมด เมื่อผู้ใช้คลิกเปลี่ยนหน้าบน Client
+  // ล้าง Schema เก่าตามปกติ
   removeJsonLdSchemas();
+ 
 
   // 🟢 3. หากผู้ใช้กดย้อนกลับมาหน้าหลัก
   if (isHomePage && !profile) {
