@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - DYNAMIC XML SITEMAP ENGINE (sitemap.js)
- * Production-Ready Edge Function for Search Engines (FULL 2026)
+ * Production-Ready Ultra-Defensive Version (FULL 2026)
  * ==============================================================================
  */
 
@@ -53,6 +53,7 @@ const safeGetIsoDate = (dateStr, fallbackIso) => {
 const getProfileMainImage = (p) => {
   if (!p) return null;
   if (p.imagePath && typeof p.imagePath === "string" && p.imagePath.trim()) return p.imagePath.trim();
+  if (p.image_path && typeof p.image_path === "string" && p.image_path.trim()) return p.image_path.trim();
   const gallery = p.galleryPaths || p.gallery_paths || p.gallery;
   if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) return String(gallery[0]).trim();
   if (typeof gallery === "string" && gallery.trim()) return gallery.split(",")[0].trim();
@@ -74,16 +75,16 @@ const optimizeImgForXml = (path) => {
 };
 
 export default async (request, _context) => {
-  const url = new URL(request.url);
   const domain = CONFIG.PRIMARY_DOMAIN;
   const nowIso = new Date().toISOString();
 
   try {
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
+    // 🟢 แก้ไขใช้ select("*") และสืบค้นแบบปลอดภัย ป้องกัน PostgREST 400 Error
     const [provincesRes, profilesRes] = await Promise.all([
-      supabase.from("provinces").select("id, key, nameThai, updated_at, updatedAt").order("nameThai", { ascending: true }),
-      supabase.from("profiles").select("id, slug, name, imagePath, galleryPaths, gallery_paths, image_url, imageUrl, lastUpdated, last_updated, updated_at, created_at, active").eq("active", true).order("updated_at", { ascending: false })
+      supabase.from("provinces").select("*"),
+      supabase.from("profiles").select("*").eq("active", true)
     ]);
 
     const provinces = provincesRes.data || [];
@@ -116,7 +117,7 @@ export default async (request, _context) => {
       provinces.forEach(p => {
         if (p && p.key) {
           const cleanKey = String(p.key).trim().toLowerCase();
-          const provDate = safeGetIsoDate(p.updated_at || p.updatedAt, nowIso);
+          const provDate = safeGetIsoDate(p.updated_at || p.updatedAt || p.created_at, nowIso);
           xml += `  <url>\n`;
           xml += `    <loc>${domain}/location/${encodeURIComponent(cleanKey)}</loc>\n`;
           xml += `    <lastmod>${provDate}</lastmod>\n`;
@@ -127,7 +128,7 @@ export default async (request, _context) => {
       });
     }
 
-    // 3. หมวดโปรไฟล์ (Profiles Section with Image Metadata)
+    // 3. หมวดโปรไฟล์น้องๆ (Profiles Section with Image Metadata)
     if (profiles && profiles.length > 0) {
       profiles.forEach(p => {
         if (p && (p.slug || p.id)) {
