@@ -261,14 +261,19 @@ function setLink(html, relValue, hrefValue, extraAttrs = "") {
   return regex.test(html) ? html.replace(regex, newTag) : html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
 }
 
-// 🟢 Smart Helper: ฉีด Schema JSON-LD เข้าก่อนปิด </head> การันตีขึ้น 100%
+// 🟢 [แก้ไขใน ssr-province.js] ฟังก์ชันฉีด Schema 7 รายการที่ถูกต้อง
 function injectSchema(html, schemaObj) {
   if (!schemaObj) return html;
   const jsonStr = JSON.stringify(schemaObj).replace(/</g, '\\u003c');
   const scriptTag = `<script type="application/ld+json" id="dynamic-schema">${jsonStr}</script>`;
-  
-  let cleanHtml = html.replace(/<script type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, "");
-  return cleanHtml.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
+
+  // หากใน HTML มี {{SCHEMA_JSON}} ให้แทนที่ตรงนั้นทันที
+  if (html.includes("{{SCHEMA_JSON}}")) {
+    return html.replace("{{SCHEMA_JSON}}", jsonStr);
+  }
+
+  // หากไม่มี ให้ฉีดเข้าไปก่อนปิด </head> โดยไม่ไปลบแท็กเดิมทิ้ง
+  return html.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
 }
 
 function injectHydrationData(html, hydratedDataObj) {
@@ -1361,10 +1366,15 @@ export default async (req, context) => {
       );
     }
 
+    // 🟢 อัปเดต Title และ Description อย่างปลอดภัย
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
-    rawHtml = replaceGlobal(rawHtml, 'content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ"', `content="${escapeHTML(strippedDesc)}"`);
+    rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
 
+    // 🟢 แทนที่ Placeholders Canonical และ รูปภาพ SEO
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
     // 🟢 FIX: อัปเดต og:url, twitter:url, canonical และ hreflang สำหรับโปรไฟล์เดี่ยว
@@ -1376,6 +1386,7 @@ export default async (req, context) => {
       rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
     }
 
+    // 🟢 ฉีด Schema 7 รายการเข้าระบบ (ฉีดเพียงครั้งเดียวตรงนี้พอครับ)
     rawHtml = injectSchema(rawHtml, schemaJson);
 
     // 🟢 แทนที่ตัวแปรแบบยืดหยุ่น (ทั้งพิมพ์เล็กและพิมพ์ใหญ่)
