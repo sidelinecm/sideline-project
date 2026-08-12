@@ -1,4 +1,3 @@
-
 /**
  * ==============================================================================
  * 💎 FIRST MODEL HUB - ADVANCED SERVERLESS SSR & HYDRATION ENGINE (ssr-province.js)
@@ -257,7 +256,6 @@ function setLink(html, relValue, hrefValue, extraAttrs = "") {
   return regex.test(html) ? html.replace(regex, newTag) : html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
 }
 
-// 🟢 แก้ไขฟังก์ชัน injectSchema การันตีหุ้มแท็ก <script> ชัวร์ 100%
 function injectSchema(html, schemaObj) {
   if (!schemaObj) return html;
   const jsonStr = JSON.stringify(schemaObj).replace(/</g, '\\u003c');
@@ -400,7 +398,6 @@ const getProfileGalleryImages = (p) => {
 
 const FALLBACK_SVG_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'><rect width='100%' height='100%' fill='%23120A24'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23C084FC' font-family='sans-serif' font-size='20' font-weight='bold'>First Model Hub</text></svg>";
 
-// 🟢 แก้ไขฟังก์ชัน optimizeImg ป้องกันการสร้าง Path รูปภาพซ้ำซ้อน
 const optimizeImg = (_hostUrl, path, width = 400, height = 500) => {
   if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp") || path.includes("placeholder")) {
     return FALLBACK_SVG_AVATAR;
@@ -1297,19 +1294,16 @@ export default async (req, context) => {
     rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
     rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
 
-    // 🟢 แทนที่ Placeholder
-rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
-rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
+    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
-// 🟢 สั่งเซต Canonical และ OG URL บังคับสำหรับทุกหน้า (ทั้งโปรไฟล์เดี่ยว, หน้าจังหวัด, และหน้าแรก)
-rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
-rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
-rawHtml = setLink(rawHtml, "canonical", canonUrl);
-rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
-rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
+    rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
+    rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
+    rawHtml = setLink(rawHtml, "canonical", canonUrl);
+    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
+    rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
 
-    // 🟢 ฉีด Schema เข้าสู่ HTML อย่างปลอดภัย
     rawHtml = injectSchema(rawHtml, schemaJson);
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);

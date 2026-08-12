@@ -75,10 +75,11 @@ const getProfileMainImage = (p) => {
   return null;
 };
 
-// 🟢 แก้ไขฟังก์ชันจัดการ Path รูปภาพป้องกัน URL ซ้ำซ้อน
+const FALLBACK_SVG_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'><rect width='100%' height='100%' fill='%23120A24'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23C084FC' font-family='sans-serif' font-size='20' font-weight='bold'>First Model Hub</text></svg>";
+
 const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
-  if (!path || typeof path !== "string" || !path.trim()) {
-    return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+  if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp") || path.includes("placeholder")) {
+    return FALLBACK_SVG_AVATAR;
   }
   const cleanPath = path.trim().replace(/^\/+/, "").replace(/^profile-images\//, "");
   if (cleanPath.includes("res.cloudinary.com")) {
@@ -109,6 +110,16 @@ const cleanAsciiArt = (text) => {
     .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
     .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
     .replace(/ทดลองใช้งาน\.?/gi, "")
+    .replace(/นิมาน|นิทาน/g, "นิมมาน")
+    .replace(/ฟื้นที่/g, "พื้นที่")
+    .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
+    .replace(/พาพับ/g, "พายัพ")
+    .replace(/ของแก่น/g, "ขอนแก่น")
+    .replace(/บ้านดู๋/g, "บ้านดู่")
+    .replace(/ห้วยเเก้ว/g, "ห้วยแก้ว")
+    .replace(/ปาตอง/g, "ป่าตอง")
+    .replace(/ชลบรุี/g, "ชลบุรี")
+    .replace(/อยุธญา/g, "อยุธยา")
     .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "")
     .replace(/[„•ㅅ•„]+/g, "")
     .replace(/\n\s*\n/g, "\n")
@@ -330,7 +341,6 @@ export default async (request, context) => {
       ]
     };
 
-    // 🟢 แก้ไขแท็ก Meta ซ้ำซ้อนใน HTML Head
     const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
