@@ -30,7 +30,7 @@
   <link rel="modulepreload" href="/main.js" />
 
   <!-- 6. STYLESHEETS & FONTS -->
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
 
@@ -64,9 +64,14 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- SCHEMA.ORG STRUCTURED DATA GRAPH -->
+<!-- SCHEMA.ORG STRUCTURED DATA GRAPH -->
   <script type="application/ld+json" id="dynamic-schema">
-  {{SCHEMA_JSON}}
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "First Model Hub",
+    "url": "https://firstmodelhub.com"
+  }
   </script>
 
   <!-- 11. GOOGLE ANALYTICS / GTM (โหลดแบบดีเลย์ 2 วินาที ป้องกันการดึงความเร็วการสแกนของ Googlebot) -->
@@ -670,7 +675,7 @@
   window.profilesData = null;
 </script>
 
-<script type="module" src="/main.js"></script>
+<script type="module" src="main.js"></script>
 
 <!-- PWA SERVICE WORKER -->
 <script>
