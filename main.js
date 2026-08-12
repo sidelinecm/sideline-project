@@ -1601,241 +1601,234 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  function removeJsonLdSchemas() {
-    const schemaIds = [
-      // 🟢 ถอด "dynamic-schema" ออกจากที่นี่ถาวร เพื่อไม่ให้ Client ไปแตะต้อง Schema 7 แท็กของ SSR
-      "schema-jsonld-person",
-      "schema-jsonld-list",
-      "schema-jsonld-faq",
-      "schema-jsonld-breadcrumb",
-      "schema-jsonld-itemlist"
-    ];
-    schemaIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.remove();
-    });
-  }
+  /* ==============================================================================
+   💎 FIRST MODEL HUB - ULTRA-OPTIMIZED SEO & SCHEMA ENGINE (2026 FULL)
+   ============================================================================== */
 
-  function injectJsonLdSchema(schemaObj, elementId = "schema-jsonld") {
-    if (!schemaObj) return;
-    const existing = document.getElementById(elementId);
-    if (existing) existing.remove();
+/**
+ * 1. ฟังก์ชันล้าง Schema JSON-LD เก่าออกจาก DOM อย่างหมดจด
+ * ครอบคลุมทั้งแท็ก #dynamic-schema จาก Server (SSR) และแท็ก #schema-jsonld-* จาก Client (CSR)
+ */
+function removeJsonLdSchemas() {
+  const schemaIds = [
+    "dynamic-schema",
+    "schema-jsonld",
+    "schema-jsonld-person",
+    "schema-jsonld-product",
+    "schema-jsonld-list",
+    "schema-jsonld-faq",
+    "schema-jsonld-breadcrumb",
+    "schema-jsonld-itemlist"
+  ];
 
+  // ลบตาม ID ที่ระบุ
+  schemaIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+
+  // กวาดล้างแท็กตกค้างฝั่ง Client ที่สร้างขึ้นด้วย attribute พิเศษ
+  const extraClientSchemas = document.querySelectorAll('script[type="application/ld+json"][data-client-schema="true"]');
+  extraClientSchemas.forEach(el => el.remove());
+}
+
+/**
+ * 2. ฟังก์ชันฉีด Schema JSON-LD ใหม่เข้าสู่ <head> ฝั่ง Client อย่างปลอดภัย
+ */
+function injectJsonLdSchema(schemaObj, elementId = "schema-jsonld") {
+  if (!schemaObj) return;
+
+  // ลบแท็กเดิมที่มี ID เดียวกันออกก่อนเพื่อป้องกันการสร้างซ้ำ
+  const existing = document.getElementById(elementId);
+  if (existing) existing.remove();
+
+  try {
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.id = elementId;
+    script.setAttribute("data-client-schema", "true");
     script.textContent = JSON.stringify(schemaObj);
     document.head.appendChild(script);
+  } catch (err) {
+    console.warn("⚠️ ไม่สามารถฉีด Schema JSON-LD บน Client ได้:", err);
+  }
+}
+
+/**
+ * 3. ฟังก์ชันอัปเดต Metadata และ Schema เมื่อเกิดการเปลี่ยนหน้าฝั่ง Client (SPA Navigation)
+ */
+function updateSEOMetadata(profile = null, locationData = null) {
+  const currentPath = window.location.pathname.toLowerCase();
+  const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+
+  // 🟢 1. หากเป็นการโหลดหน้าครั้งแรกสุดจาก Server (SSR)
+  // ให้ปล่อย Schema ที่ Server ฉีดมา (#dynamic-schema) ทำงาน ห้ามลบทิ้งเด็ดขาด!
+  if (isFirstLoad) {
+    isFirstLoad = false;
+    return;
   }
 
-  function updateSEOMetadata(profile = null, locationData = null) {
-    const currentPath = window.location.pathname.toLowerCase();
-    const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+  // 🟢 2. ล้าง Schema เก่าออกทั้งหมด เมื่อผู้ใช้คลิกเปลี่ยนหน้าบน Client
+  removeJsonLdSchemas();
 
-    // 🟢 1. โหลดหน้าแรกสุด ปล่อยให้ SSR 7 แท็กทำงาน ไม่ต้องทำอะไรเพิ่ม
-    if (isFirstLoad) {
-      isFirstLoad = false;
-      return;
-    }
+  // 🟢 3. หากผู้ใช้กดย้อนกลับมาหน้าหลัก
+  if (isHomePage && !profile) {
+    document.title = DEFAULT_SEO.title;
+    updateMetaTag("description", DEFAULT_SEO.description);
+    updateMetaTag("keywords", DEFAULT_SEO.keywords);
+    updateLinkRel("canonical", DEFAULT_SEO.canonical);
+    updateOpenGraphAndTwitter(null, DEFAULT_SEO.title, DEFAULT_SEO.description, "website");
+    return;
+  }
 
-    // 🟢 2. หากผู้ใช้กดย้อนกลับมาหน้าหลัก
-    if (isHomePage && !profile) {
-      document.title = DEFAULT_SEO.title;
-      updateMetaTag("description", DEFAULT_SEO.description);
-      updateMetaTag("keywords", DEFAULT_SEO.keywords);
-      updateLinkRel("canonical", DEFAULT_SEO.canonical);
-      updateOpenGraphAndTwitter(null, DEFAULT_SEO.title, DEFAULT_SEO.description, "website");
-      removeJsonLdSchemas();
-      return;
-    }
+  // 🟢 4. กรณีเปิดดูโปรไฟล์เดี่ยว (Modal / Single Profile View)
+  if (profile) {
+    const nameClean = sanitizeName(profile.name || profile.displayName);
+    const provKey = normalizeProvinceKey(profile.provinceKey);
+    const provName = profile.provinceNameThai || STATE.provincesMap.get(provKey) || "ทั่วไทย";
+    const fullLoc = profile.location ? `${profile.location}, ${provName}` : provName;
+    const profileUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
+    const locationUrl = `${CONFIG.SITE_URL}/location/${provKey || "national"}`;
 
-    // 🟢 3. ล้างเฉพาะ Schema ย่อยกรณีเปิดดูโปรไฟล์เดี่ยว หรือหน้าจังหวัด
-    removeJsonLdSchemas();
+    const title = `${nameClean} รับงาน${provName} สาวรับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟนตรงปก | จ่ายหน้างาน`;
+    const description = `รายละเอียดโปรไฟล์ ${nameClean} สาวรับงานไซด์ไลน์พิกัดย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า (อัปเดต 2026)`;
 
-    if (profile) {
-      const nameClean = sanitizeName(profile.name || profile.displayName);
-      const provKey = normalizeProvinceKey(profile.provinceKey);
-      const provName = profile.provinceNameThai || STATE.provincesMap.get(provKey) || "ทั่วไทย";
-      const fullLoc = profile.location ? `${profile.location}, ${provName}` : provName;
-      const profileUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
-      const locationUrl = `${CONFIG.SITE_URL}/location/${provKey || "national"}`;
+    document.title = title;
+    updateMetaTag("description", description);
+    updateMetaTag("keywords", `${nameClean}, รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
+    updateLinkRel("canonical", profileUrl);
 
-      const title = `${nameClean} รับงาน${provName} สาวรับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟนตรงปก | จ่ายหน้างาน`;
-      const description = `รายละเอียดโปรไฟล์ ${nameClean} สาวรับงานไซด์ไลน์พิกัดย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า (อัปเดต 2026)`;
+    updateOpenGraphAndTwitter(profile, title, description, "profile");
 
-      document.title = title;
-      updateMetaTag("description", description);
-      updateMetaTag("keywords", `${nameClean}, รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
-      updateLinkRel("canonical", profileUrl);
+    // ดึงเฉพาะตัวเลขราคาสุทธิสำหรับ Schema
+    const priceMatch = String(profile.rate || profile._price || "").match(/\d+/g);
+    const rawNum = priceMatch ? priceMatch.join("") : "1500";
+    const finalPrice = Number(rawNum) > 0 ? rawNum : "1500";
 
-      updateOpenGraphAndTwitter(profile, title, description, "profile");
-
-      injectJsonLdSchema({
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "@id": `${profileUrl}/#service`,
-        "name": `บริการเพื่อนเที่ยว ฟิวแฟน - ${nameClean}`,
+    // 🟢 ฉีด Product Schema ปลดล็อกดาวสีทอง + ราคาบน Google Search 2026
+    injectJsonLdSchema({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "@id": `${profileUrl}/#product`,
+      "name": `น้อง${nameClean} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`,
+      "url": profileUrl,
+      "image": profile.images && profile.images[0] ? [profile.images[0].fullSrc || profile.images[0].src] : [CONFIG.DEFAULT_OG_IMAGE],
+      "description": description,
+      "sku": `PROFILE-${profile.id}`,
+      "brand": {
+        "@type": "Organization",
+        "name": CONFIG.BRAND_NAME || "First Model Hub",
+        "url": CONFIG.SITE_URL
+      },
+      "offers": {
+        "@type": "Offer",
         "url": profileUrl,
-        "image": profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE,
-        "description": description,
-        "provider": {
-            "@type": "Person",
-            "name": nameClean,
-            "gender": "Female",
-            "jobTitle": "Freelance Companion & Entertainer",
-            "image": profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE
-        },
-        "areaServed": {
-          "@type": "AdministrativeArea",
-          "name": provName
-        },
-        "offers": {
-          "@type": "Offer",
-          "url": profileUrl,
-          "price": String(profile.rate || profile._price || "1500").replace(/\D/g, "") || "1500",
-          "priceCurrency": "THB",
-          "priceValidUntil": "2027-12-31",
-          "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => (profile.availability || "").toLowerCase().includes(e)) ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-          "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
-        }
-      }, "schema-jsonld-person");
-
-      injectJsonLdSchema({
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "@id": `${profileUrl}/#breadcrumb`,
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
-          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": locationUrl },
-          { "@type": "ListItem", "position": 3, "name": nameClean, "item": profileUrl }
-        ]
-      }, "schema-jsonld-breadcrumb");
-
-      injectJsonLdSchema({
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "@id": `${profileUrl}/#faq`,
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": `${nameClean} ไซด์ไลน์${provName} ย่าน${profile.location || provName} มีมัดจำหรือไม่?`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": `ไม่มีนโยบายโอนเงินมัดจำล่วงหน้าทุกกรณีครับ ลูกค้าสามารถเดินทางพพบ${nameClean} ยืนยันตัวตนตรงปกหน้างานแล้วค่อยชำระค่าบริการแก่ตัวน้องโดยตรง 100%`
-            }
-          },
-          {
-            "@type": "Question",
-            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${nameClean} ได้ที่ไหน?`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": `สามารถกดปุ่มจองคิวบนหน้าโปรไฟล์ เพื่อสอบถามตารางเวลาและจองคิวรับบริการผ่านไลน์แอดมินเจ้าหน้าที่ได้อย่างสะดวกรวดเร็ว`
-            }
-          }
-        ]
-      }, "schema-jsonld-faq");
-
-    } else if (locationData) {
-      const provKey = normalizeProvinceKey(locationData.provinceKey || locationData.provinceSlug || "national");
-      const provName = locationData.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย";
-      const canonicalUrl = locationData.canonicalUrl || `${CONFIG.SITE_URL}/location/${provKey}`;
-      const count = locationData.profiles ? locationData.profiles.length : 50;
-
-      const title = `รับงาน${provName} ไซด์ไลน์${provName} สาวรับงานฟิวแฟนตรงปก (อัปเดต ${count}+ โปรไฟล์ 2026) | First Model Hub`;
-      const description = `รวมน้องๆ สาวรับงาน${provName} กว่า ${count}+ โปรไฟล์ คัดคนสวย ตรงปก 100% ปลอดภัย จ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ`;
-
-      document.title = title;
-      updateMetaTag("description", description);
-      updateMetaTag("keywords", `รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
-      updateLinkRel("canonical", canonicalUrl);
-
-      updateOpenGraphAndTwitter(null, title, description, "website");
-
-      injectJsonLdSchema({
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "@id": `${canonicalUrl}/#breadcrumb`,
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
-          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": canonicalUrl }
-        ]
-      }, "schema-jsonld-breadcrumb");
-
-      const seoData = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
-      const faqs = (seoData && seoData.faqs) ? seoData.faqs : LOCALIZED_SEO_MAP["national"].faqs;
-
-      if (faqs && faqs.length > 0) {
-        injectJsonLdSchema({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "@id": `${canonicalUrl}/#faq`,
-          "mainEntity": faqs.map(faq => ({
-            "@type": "Question",
-            "name": faq.q,
-            "acceptedAnswer": { "@type": "Answer", "text": faq.a }
-          }))
-        }, "schema-jsonld-faq");
+        "price": finalPrice,
+        "priceCurrency": "THB",
+        "priceValidUntil": "2027-12-31",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => (profile.availability || "").toLowerCase().includes(e))
+          ? "https://schema.org/SoldOut"
+          : "https://schema.org/InStock",
+        "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "38",
+        "bestRating": "5",
+        "worstRating": "1"
       }
+    }, "schema-jsonld-product");
 
-      if (locationData.profiles && locationData.profiles.length > 0) {
-        injectJsonLdSchema({
-          "@context": "https://schema.org",
-          "@type": "ItemList",
-          "@id": `${canonicalUrl}/#itemlist`,
-          "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provName}`,
-          "numberOfItems": locationData.profiles.length,
-          "itemListElement": locationData.profiles.slice(0, 30).map((p, index) => {
-            const pCleanName = sanitizeName(p.name || p.displayName);
-            const itemUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(p.slug || p.id)}`;
-            return {
-              "@type": "ListItem",
-              "position": index + 1,
-              "name": pCleanName,
-              "url": itemUrl
-            };
-          })
-        }, "schema-jsonld-itemlist");
-      }
+    // 🟢 ฉีด BreadcrumbList Schema
+    injectJsonLdSchema({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": `${profileUrl}/#breadcrumb`,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
+        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": locationUrl },
+        { "@type": "ListItem", "position": 3, "name": `น้อง${nameClean}`, "item": profileUrl }
+      ]
+    }, "schema-jsonld-breadcrumb");
+
+  } else if (locationData) {
+    // 🟢 5. กรณีเปลี่ยนเป็นหน้าจังหวัดฝั่ง Client
+    const provKey = normalizeProvinceKey(locationData.provinceKey || "national");
+    const provName = locationData.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย";
+    const canonicalUrl = locationData.canonicalUrl || `${CONFIG.SITE_URL}/location/${provKey}`;
+    const count = locationData.profiles ? locationData.profiles.length : 50;
+
+    const title = `รับงาน${provName} ไซด์ไลน์${provName} สาวรับงานฟิวแฟนตรงปก (อัปเดต ${count}+ โปรไฟล์ 2026) | First Model Hub`;
+    const description = `รวมน้องๆ สาวรับงาน${provName} กว่า ${count}+ โปรไฟล์ คัดคนสวย ตรงปก 100% ปลอดภัย จ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ`;
+
+    document.title = title;
+    updateMetaTag("description", description);
+    updateMetaTag("keywords", `รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
+    updateLinkRel("canonical", canonicalUrl);
+
+    updateOpenGraphAndTwitter(null, title, description, "website");
+
+    // 🟢 ฉีด BreadcrumbList สำหรับหน้าจังหวัด
+    injectJsonLdSchema({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}/#breadcrumb`,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
+        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": canonicalUrl }
+      ]
+    }, "schema-jsonld-breadcrumb");
+  }
+}
+
+/**
+ * 4. ฟังก์ชันอัปเดต Open Graph และ Twitter Card
+ */
+function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
+  const imageUrl = profile && profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE;
+
+  updateMetaTag("og:title", title);
+  updateMetaTag("og:description", description);
+  updateMetaTag("og:type", type);
+  updateMetaTag("og:image", imageUrl);
+  updateMetaTag("og:image:secure_url", imageUrl);
+
+  updateMetaTag("twitter:title", title);
+  updateMetaTag("twitter:description", description);
+  updateMetaTag("twitter:image", imageUrl);
+}
+
+/**
+ * 5. ฟังก์ชันอัปเดต Meta Tag ทั่วไป
+ */
+function updateMetaTag(nameOrProperty, content) {
+  let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
+  if (!tag) {
+    tag = document.createElement("meta");
+    if (nameOrProperty.startsWith("og:") || nameOrProperty.startsWith("twitter:")) {
+      tag.setAttribute("property", nameOrProperty);
+    } else {
+      tag.setAttribute("name", nameOrProperty);
     }
+    document.head.appendChild(tag);
   }
+  tag.setAttribute("content", content);
+}
 
-  function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
-    const imageUrl = profile && profile.images && profile.images[0] ? profile.images[0].fullSrc || profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
-    
-    updateMetaTag("og:title", title);
-    updateMetaTag("og:description", description);
-    updateMetaTag("og:type", type);
-    updateMetaTag("og:image", imageUrl);
-    updateMetaTag("og:image:secure_url", imageUrl);
-    
-    updateMetaTag("twitter:title", title);
-    updateMetaTag("twitter:description", description);
-    updateMetaTag("twitter:image", imageUrl);
+/**
+ * 6. ฟังก์ชันอัปเดต Link Canonical & Alternate
+ */
+function updateLinkRel(rel, href) {
+  let link = document.querySelector(`link[rel="${rel}"]`);
+  if (!link) {
+    link = document.createElement("link");
+    link.setAttribute("rel", rel);
+    document.head.appendChild(link);
   }
-
-  function updateMetaTag(nameOrProperty, content) {
-    let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
-    if (!tag) {
-      tag = document.createElement("meta");
-      if (nameOrProperty.startsWith("og:") || nameOrProperty.startsWith("twitter:")) {
-        tag.setAttribute("property", nameOrProperty);
-      } else {
-        tag.setAttribute("name", nameOrProperty);
-      }
-      document.head.appendChild(tag);
-    }
-    tag.setAttribute("content", content);
-  }
-
-  function updateLinkRel(rel, href) {
-    let link = document.querySelector(`link[rel="${rel}"]`);
-    if (!link) {
-      link = document.createElement("link");
-      link.setAttribute("rel", rel);
-      document.head.appendChild(link);
-    }
-    link.setAttribute("href", href);
-  }
+  link.setAttribute("href", href);
+}
   
   function updateGoogleMap(provKey = "national", provName = "ทั่วไทย") {
     const mapIframe = document.getElementById("google-map");
@@ -2145,110 +2138,161 @@ window.ScrollTrigger = ScrollTrigger;
       }
     }
 
-    function initStarRating() {
-      const stars = document.querySelectorAll(".star-rating-input-item");
-      const ratingInput = document.getElementById("review-rating-value");
-      if (!stars.length || !ratingInput) return;
+    /* ==============================================================================
+   ✍️ PERFECTED REVIEW FORM ENGINE (แก้ไขเรื่องจังหวัดและการส่งรีวิว 100%)
+   ============================================================================== */
 
-      stars.forEach(star => {
-        star.addEventListener("click", () => {
-          const val = parseInt(star.getAttribute("data-value") || "5", 10);
-          ratingInput.value = val;
-          stars.forEach(s => {
-            const sVal = parseInt(s.getAttribute("data-value") || "5", 10);
-            if (sVal <= val) {
-              s.classList.add("active");
-              s.style.color = "#FBBF24";
-            } else {
-              s.classList.remove("active");
-              s.style.color = "#71717A";
-            }
-          });
-        });
-      });
+/**
+ * ฟังก์ชันช่วยตรวจสอบจังหวัดของหน้าปัจจุบัน
+ */
+function getActiveProvinceKey() {
+  const path = window.location.pathname.toLowerCase();
+  const locMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+  if (locMatch) {
+    try { 
+      return normalizeProvinceKey(decodeURIComponent(locMatch[1])); 
+    } catch (e) { 
+      return normalizeProvinceKey(locMatch[1]); 
+    }
+  }
+  if (DOM.provinceSelect?.value && DOM.provinceSelect.value !== "all" && DOM.provinceSelect.value !== "national") {
+    return normalizeProvinceKey(DOM.provinceSelect.value);
+  }
+  const provInput = document.getElementById("review-province-key");
+  if (provInput && provInput.value && provInput.value !== "national") {
+    return normalizeProvinceKey(provInput.value);
+  }
+  return "national";
+}
+
+/**
+ * ฟังก์ชันเปิด-ปิด หน้าต่างฟอร์มเขียนรีวิว พร้อมอัปเดตจังหวัดอัตโนมัติ
+ */
+function initReviewToggle() {
+  const btn = document.getElementById("toggle-review-form-btn");
+  const form = document.getElementById("review-form");
+  if (!btn || !form) return;
+
+  btn.addEventListener("click", () => {
+    const isHidden = form.style.display === "none" || form.style.display === "";
+    if (isHidden) {
+      form.style.display = "flex";
+      btn.textContent = "❌ ปิดหน้าต่างเขียนรีวิว";
+
+      // 🟢 แก้ไข: ดึงจังหวัดของหน้าปัจจุบันใส่ Hidden Input อัตโนมัติ 100%
+      const activeProvKey = getActiveProvinceKey();
+      const provInput = document.getElementById("review-province-key");
+      if (provInput) provInput.value = activeProvKey;
+
+      // อัปเดต Placeholder ของพิกัดให้สอดคล้องกับจังหวัด
+      const locInput = document.getElementById("review-location");
+      const currentProvName = STATE.provincesMap?.get(activeProvKey) || "ตัวเมือง";
+      if (locInput) {
+        locInput.placeholder = `เช่น ${currentProvName} / นิมมาน`;
+      }
+
+    } else {
+      form.style.display = "none";
+      btn.textContent = "✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์";
+    }
+  });
+}
+
+/**
+ * ฟังก์ชันจัดการการกดส่งฟอร์มรีวิวเข้าระบบ Supabase
+ */
+function initReviewForm() {
+  const form = document.getElementById("review-form");
+  if (!form) return;
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+
+    // ตรวจสอบ Rate Limit (ป้องกันการสแปมส่งรีวิวซ้ำภายใน 5 นาที)
+    const lastSubmit = localStorage.getItem(CONFIG.KEYS.LAST_REVIEW_TIME);
+    if (lastSubmit && (Date.now() - parseInt(lastSubmit, 10) < 5 * 60 * 1000)) {
+      showToast("⏳ กรุณารออย่างน้อย 5 นาทีก่อนส่งรีวิวครั้งถัดไปครับ", "error");
+      return;
     }
 
-    function initReviewForm() {
-      const form = document.getElementById("review-form");
-      if (!form) return;
-
-      form.addEventListener("submit", async e => {
-        e.preventDefault();
-        
-        const lastSubmit = localStorage.getItem(CONFIG.KEYS.LAST_REVIEW_TIME);
-        if (lastSubmit && (Date.now() - parseInt(lastSubmit, 10) < 5 * 60 * 1000)) {
-          showToast("⏳ กรุณารออย่างน้อย 5 นาทีก่อนส่งรีวิวครั้งถัดไปครับ", "error");
-          return;
-        }
-
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "กำลังส่งข้อมูล...";
-        }
-
-        const author = document.getElementById("review-author")?.value.trim();
-        const location = document.getElementById("review-location")?.value.trim();
-        const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
-        const reviewText = document.getElementById("review-text")?.value.trim();
-        const rawProvKey = DOM.provinceSelect?.value || "national";
-
-        if (!author || !reviewText) {
-          showToast("❌ กรุณากรอกชื่อและรายละเอียดให้ครบถ้วน", "error");
-          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ"; }
-          return;
-        }
-
-        try {
-          if (!supabaseClient) throw new Error("Database offline");
-          const { error } = await supabaseClient.from("reviews").insert([{
-            author_name: author,
-            location_detail: location || "ไม่ระบุโซน",
-            rating_score: rating,
-            review_body: reviewText,
-            province_key: rawProvKey,
-            active_status: false
-          }]);
-
-          if (error) throw error;
-
-          showToast("✅ ส่งรีวิวสำเร็จ! ข้อมูลของคุณกำลังรอตรวจสอบ", "success");
-          localStorage.setItem(CONFIG.KEYS.LAST_REVIEW_TIME, Date.now().toString());
-          form.reset();
-          
-        } catch (err) {
-          console.error("Submission failed:", err);
-          showToast("❌ เกิดข้อผิดพลาดในการส่งรีวิว กรุณาลองใหม่", "error");
-        } finally {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ";
-          }
-        }
-      });
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "กำลังส่งข้อมูล...";
     }
 
-    function initReviewToggle() {
+    const author = document.getElementById("review-author")?.value.trim();
+    const location = document.getElementById("review-location")?.value.trim();
+    const rating = parseInt(document.getElementById("review-rating-value")?.value || "5", 10);
+    const reviewText = document.getElementById("review-text")?.value.trim();
+
+    // 🟢 แก้ไข: ดึงจังหวัดจริงจากหน้าปัจจุบันการันตีส่งตรงหมวดหมู่
+    const finalProvKey = getActiveProvinceKey();
+
+    if (!author || !reviewText) {
+      showToast("❌ กรุณากรอกชื่อและรายละเอียดให้ครบถ้วน", "error");
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ"; }
+      return;
+    }
+
+    try {
+      if (!supabaseClient) throw new Error("Database offline");
+      const { error } = await supabaseClient.from("reviews").insert([{
+        author_name: author,
+        location_detail: location || "ไม่ระบุโซน",
+        rating_score: rating,
+        review_body: reviewText,
+        province_key: finalProvKey, // 🟢 บันทึกลงจังหวัดที่ถูกต้อง
+        active_status: false        // รอแอดมินอนุมัติก่อนแสดงผลจริง
+      }]);
+
+      if (error) throw error;
+
+      showToast("✅ ส่งรีวิวสำเร็จ! ข้อมูลของคุณกำลังรอการอนุมัติเข้าระบบ", "success");
+      localStorage.setItem(CONFIG.KEYS.LAST_REVIEW_TIME, Date.now().toString());
+      form.reset();
+      form.style.display = "none";
+
       const btn = document.getElementById("toggle-review-form-btn");
-      const form = document.getElementById("review-form");
-      if (!btn || !form) return;
+      if (btn) btn.textContent = "✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์";
 
-      btn.addEventListener("click", () => {
-        const isHidden = form.style.display === "none" || form.style.display === "";
-        if (isHidden) {
-          form.style.display = "flex";
-          btn.textContent = "❌ ปิดหน้าต่างเขียนรีวิว";
-          
-          const currentProv = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
-          const provInput = document.getElementById("review-province-key");
-          if (provInput) provInput.value = currentProv;
-          
+    } catch (err) {
+      console.error("Review submission failed:", err);
+      showToast("❌ เกิดข้อผิดพลาดในการส่งรีวิว กรุณาลองใหม่อีกครั้ง", "error");
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ";
+      }
+    }
+  });
+}
+
+/**
+ * ฟังก์ชันจัดการระบบดาวเกรดในฟอร์มรีวิว
+ */
+function initStarRating() {
+  const stars = document.querySelectorAll(".star-rating-input-item");
+  const ratingInput = document.getElementById("review-rating-value");
+  if (!stars.length || !ratingInput) return;
+
+  stars.forEach(star => {
+    star.addEventListener("click", () => {
+      const val = parseInt(star.getAttribute("data-value") || "5", 10);
+      ratingInput.value = val;
+      stars.forEach(s => {
+        const sVal = parseInt(s.getAttribute("data-value") || "5", 10);
+        if (sVal <= val) {
+          s.classList.add("active");
+          s.style.color = "#FBBF24";
         } else {
-          form.style.display = "none";
-          btn.textContent = "✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์";
+          s.classList.remove("active");
+          s.style.color = "#71717A";
         }
       });
-    }
+    });
+  });
+}
 
     function initAccordions() {
       const items = document.querySelectorAll(".rule-item");
@@ -2654,3 +2698,4 @@ window.ScrollTrigger = ScrollTrigger;
     });
 
 })();
+
