@@ -232,12 +232,9 @@ function verifyHostname(_req) {
   return true;
 }
 
-// 🟢 [ฟังก์ชันที่ 2: แก้ไขการเซต Meta Tags และกวาดล้างตัวแปรค้างอย่างสมบูรณ์]
-
-// บังคับเซต Meta Content (ห้ามปล่อยเป็นค่าว่าง "" เด็ดขาด)
 function setMeta(html, attrName, attrValue, contentValue) {
   let safeContent = escapeHTML(contentValue || "");
-  if (!safeContent || safeContent.trim() === "") {
+  if (!safeContent) {
     if (attrValue.includes("image")) safeContent = CONFIG.DEFAULT_OG_IMAGE;
     else if (attrValue.includes("url")) safeContent = CONFIG.PRIMARY_DOMAIN;
   }
@@ -246,7 +243,6 @@ function setMeta(html, attrName, attrValue, contentValue) {
   return regex.test(html) ? html.replace(regex, newTag) : html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
 }
 
-// บังคับเซต Link Canonical & Hreflang (การันตีมี URL เสมอ)
 function setLink(html, relValue, hrefValue, extraAttrs = "") {
   const safeHref = escapeHTML(hrefValue || CONFIG.PRIMARY_DOMAIN);
   const hreflangMatch = extraAttrs.match(/hreflang=["']([^"']+)["']/i);
@@ -259,21 +255,6 @@ function setLink(html, relValue, hrefValue, extraAttrs = "") {
   }
   const newTag = `<link rel="${relValue}" href="${safeHref}" ${extraAttrs}/>`;
   return regex.test(html) ? html.replace(regex, newTag) : html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
-}
-
-// ฟังก์ชันกวาดล้างตัวแปรค้างทั้งหมด เช่น {{PROVINCE_NAME}}, {{SEO_CANONICAL}} ป้องกันการหลุดไปหาคนดู
-function sweepPlaceholders(html) {
-  if (!html) return "";
-  return html
-    .replace(/\{\{\s*SCHEMA_JSON\s*\}\}/gi, '{"@context":"https://schema.org","@type":"WebSite","name":"First Model Hub"}')
-    .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, "ทั่วไทย")
-    .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
-    .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
-    .replace(/\{\{\s*province-key\s*\}\}/gi, "national")
-    .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, "50")
-    .replace(/\{\{\s*PROVINCE_ZONES\s*\}\}/gi, "นิมมาน, สันติธรรม, เจ็ดยอด, ช้างเผือก")
-    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "") // กวาดล้างตัวแปร {{...}} และ %7B%7B...%7D%7D ทั้งหมด
-    .replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, "");
 }
 
 // 🟢 แก้ไขฟังก์ชัน injectSchema การันตีหุ้มแท็ก <script> ชัวร์ 100%
@@ -306,7 +287,20 @@ function injectHydrationData(html, hydratedDataObj) {
   return cleanHtml + `\n${scriptTag}`;
 }
 
-
+function sweepPlaceholders(html) {
+  if (!html) return "";
+  return html
+    .replace(/\{\{\s*SCHEMA_JSON\s*\}\}/gi, '{"@context":"https://schema.org","@type":"WebSite","name":"First Model Hub"}')
+    .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, "ทั่วไทย")
+    .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
+    .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
+    .replace(/\{\{\s*province-key\s*\}\}/gi, "national")
+    .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, "50")
+    .replace(/\{\{\s*PROVINCE_ZONES\s*\}\}/gi, "กรุงเทพฯ, เชียงใหม่, ชลบุรี, อุดรธานี")
+    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "")
+    .replace(/%7B%7BMAP_EMBED_URL%7D%7D/gi, "")
+    .replace(/\{\{MAP_EMBED_URL\}\}/gi, "");
+}
 
 async function getTemplateHtml(url, _context) {
   const now = Date.now();
@@ -663,7 +657,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   `;
 };
 
-// 🟢 [ฟังก์ชันที่ 1: แก้ไขระบบ Routing ไม่ให้แย่งหน้าแรกกับ Client JS]
 export default async (req, context) => {
   if (!verifyHostname(req)) {
     return new Response("403 Forbidden - Access Denied", { status: 403 });
@@ -671,29 +664,86 @@ export default async (req, context) => {
 
   const url = new URL(req.url);
   const hostUrl = CONFIG.PRIMARY_DOMAIN;
-  const paths = url.pathname.split("/").filter(Boolean);
+  const hostName = url.hostname.toLowerCase();
 
-  // 1. ปล่อยผ่านไฟล์ Static (.css, .js, รูปภาพ)
+  if (hostName.includes("sidelinechiangmai.netlify.app")) {
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      return Response.redirect(`${hostUrl}/location/chiangmai`, 301);
+    }
+    return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
+  }
+
+  if (hostName.startsWith("www.firstmodelhub.com") || hostName.includes("firstmodelhub.netlify.app")) {
+    return Response.redirect(`${hostUrl}${url.pathname}${url.search}`, 301);
+  }
+
+  if (req.headers.get("x-ssr-bypass") === "true") {
+    try { return await context.next(); } catch { return new Response("Bypass fetch failed", { status: 500 }); }
+  }
+
   if (STATIC_EXT_REGEX.test(url.pathname)) {
     try { return await context.next(); } catch { return await context.next(); }
   }
 
-  // 2. 🚨 แก้ไขจุดสำคัญ: หากเป็นหน้าแรก (/) หรือหน้าโปรไฟล์เดี่ยว (/sideline/) 
-  // ให้ปล่อยผ่านทันที! ไม่เข้ามารบกวนเด็ดขาด ให้ดูแลเฉพาะหน้ารวมจังหวัด (/location/...) เท่านั้น
-  if (paths.length === 0 || url.pathname === "/" || url.pathname === "/index.html" || paths[0] === "sideline") {
+  const staticPages = ["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/policy", "/locations"];
+  if (staticPages.some(page => url.pathname === page || url.pathname.startsWith(page + "/"))) {
     try { return await context.next(); } catch { return await context.next(); }
   }
 
-  // 3. ทำงานเฉพาะเมื่อเป็นหน้ารวมจังหวัดเท่านั้น (/location/[provinceKey])
-  let provinceSlug = "";
-  if ("location" === paths[0] && paths[1]) {
-    try { provinceSlug = decodeURIComponent(paths[1]).toLowerCase(); } catch { provinceSlug = paths[1].toLowerCase(); }
-  } else {
-    try { provinceSlug = decodeURIComponent(paths[paths.length - 1]).toLowerCase(); } catch { provinceSlug = paths[paths.length - 1].toLowerCase(); }
+  if (url.pathname === "/index.html") {
+    return Response.redirect(`${hostUrl}/`, 301);
   }
 
-  const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
-  
+  const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
+  const cachedItem = PAGE_CACHE.get(cacheKey);
+  if (cachedItem && (Date.now() - cachedItem.timestamp < PAGE_CACHE_TTL_MS)) {
+    return new Response(cachedItem.html, { headers: cachedItem.headers });
+  }
+
+  const paths = url.pathname.split("/").filter(Boolean);
+  let provinceSlug = "", profileSlug = "", isNationalHome = false;
+
+  if (paths.length === 0 || url.pathname === "/" || url.pathname === "/profiles" || url.pathname === "/profiles.html") {
+    isNationalHome = true;
+    provinceSlug = "national";
+  } else if ("location" === paths[0] && paths[1]) {
+    try { provinceSlug = decodeURIComponent(paths[1]).toLowerCase(); } catch { provinceSlug = paths[1].toLowerCase(); }
+  } else if ("sideline" === paths[0] && paths[1]) {
+    try { profileSlug = decodeURIComponent(paths[1]); } catch { profileSlug = paths[1]; }
+  } else {
+    const lastSegment = paths[paths.length - 1] || "";
+    try { provinceSlug = decodeURIComponent(lastSegment).toLowerCase(); } catch { provinceSlug = lastSegment.toLowerCase(); }
+  }
+
+  try {
+    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+    let matchedProfile = null;
+
+    if (profileSlug) {
+      let query = supabase.from("profiles").select("*").eq("active", true);
+      if (/^\d+$/.test(profileSlug)) {
+        query = query.eq("id", profileSlug);
+      } else {
+        query = query.eq("slug", profileSlug);
+      }
+
+      const { data: profileData, error: profileErr } = await query.maybeSingle();
+
+      if (profileData && !profileErr) {
+        matchedProfile = profileData;
+        provinceSlug = profileData.provinceKey || profileData.province_key || profileData.province_slug || "chiangmai";
+      } else {
+        return buildErrorPage(404, "404 - ไม่พบโปรไฟล์ที่ต้องการ", "โปรไฟล์น้องๆ รายนี้อาจถูกปิดการใช้งาน หรือระงับบริการชั่วคราวครับ");
+      }
+    }
+
+    let searchKeys = [provinceSlug];
+    if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
+      searchKeys = ["chiangmai", "chiang_mai"];
+    }
+
+    const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
+
     let profileQuery = supabase
       .from("profiles")
       .select("id, slug, name, age, imagePath, galleryPaths, gallery_paths, provinceKey, province_key, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, lineId, quote, style_tags, slogan")
@@ -801,64 +851,51 @@ export default async (req, context) => {
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const displayReviewCount = profileList.length > 0 ? Math.max(35, profileList.length * 3) : 45;
     
-    // 🟢 [ฟังก์ชันที่ 3: แก้ไขพิกัดแผนที่ตามจังหวัดจริง และเซต Schema Rating ตรงกับ UI]
+    const rawMapUrl = (seoData && seoData.geo) 
+      ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+      : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    const mapEmbedUrl = escapeHTML(rawMapUrl);
 
-// 1. ดึงพิกัด GPS Lat/Lng จริงตามจังหวัด ป้องกันการปักแผนที่ไปกรุงเทพฯ
-const rawMapUrl = (seoData && seoData.geo && seoData.geo.lat) 
-  ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
-  : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + provinceThaiName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    const validZones = (seoData.zones || [])
+      .map(sanitizeThaiText)
+      .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-const mapEmbedUrl = escapeHTML(rawMapUrl);
-
-// 2. สร้าง Schema Graph สำหรับหน้าจังหวัด โดยล็อกคะแนนดาว 4.9 ตรงกับ UI 100%
-const schemaGraph = [
-  {
-    "@type": "Organization",
-    "@id": `${hostUrl}/#organization`,
-    "name": CONFIG.BRAND_NAME,
-    "legalName": CONFIG.BRAND_LEGAL_NAME,
-    "url": hostUrl,
-    "logo": { "@type": "ImageObject", "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`, "width": 1200, "height": 630 }
-  },
-  {
-    "@type": ["EntertainmentBusiness", "ProfessionalService"],
-    "@id": `${canonUrl}/#business`,
-    "name": `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
-    "image": metaImgUrl,
-    "telephone": CONFIG.DEFAULT_TELEPHONE,
-    "priceRange": "฿฿",
-    "url": canonUrl,
-    "description": strippedDesc,
-    "parentOrganization": { "@id": `${hostUrl}/#organization` },
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": `อำเภอเมือง${provinceThaiName}`,
-      "addressLocality": provinceThaiName,
-      "addressRegion": provinceThaiName,
-      "addressCountry": "TH"
-    },
-    "areaServed": [
-      { "@type": "AdministrativeArea", "name": provinceThaiName },
-      ...validZones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
-    ],
-    // 🟢 ล็อกคะแนนดาว 4.9 และ worstRating: 1 ตรงตามเกณฑ์ Google Search 2026
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": 4.9,
-      "reviewCount": Number(displayReviewCount) || 35,
-      "bestRating": 5,
-      "worstRating": 1
-    }
-  },
-  {
-    "@type": "BreadcrumbList",
-    "@id": `${canonUrl}/#breadcrumb`,
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl },
-      { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": canonUrl }
-    ]
-  }
-];
+    // 🟢 สร้าง Schema Graph ครบ 100% ตรงตามเกณฑ์ Google Rich Results
+    const schemaGraph = [
+      {
+        "@type": "Organization",
+        "@id": `${hostUrl}/#organization`,
+        "name": CONFIG.BRAND_NAME,
+        "legalName": CONFIG.BRAND_LEGAL_NAME,
+        "url": hostUrl,
+        "logo": { 
+          "@type": "ImageObject", 
+          "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`,
+          "width": 1200,
+          "height": 630
+        },
+        "description": strippedDesc,
+        "sameAs": Object.values(CONFIG.SOCIAL_LINKS).filter(Boolean),
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "telephone": CONFIG.DEFAULT_TELEPHONE,
+          "availableLanguage": ["th", "en"]
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${hostUrl}/#website`,
+        "url": hostUrl,
+        "name": CONFIG.BRAND_NAME,
+        "publisher": { "@id": `${hostUrl}/#organization` },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": `${hostUrl}/search?q={search_term_string}`,
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ];
 
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
