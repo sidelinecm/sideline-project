@@ -1297,17 +1297,17 @@ export default async (req, context) => {
     rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
     rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
 
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
-    rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
+    // 🟢 แทนที่ Placeholder
+rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
+rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
+rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
-    if (matchedProfile) {
-      rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
-      rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
-      rawHtml = setLink(rawHtml, "canonical", canonUrl);
-      rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
-      rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
-    }
+// 🟢 สั่งเซต Canonical และ OG URL บังคับสำหรับทุกหน้า (ทั้งโปรไฟล์เดี่ยว, หน้าจังหวัด, และหน้าแรก)
+rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
+rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
+rawHtml = setLink(rawHtml, "canonical", canonUrl);
+rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
+rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
 
     // 🟢 ฉีด Schema เข้าสู่ HTML อย่างปลอดภัย
     rawHtml = injectSchema(rawHtml, schemaJson);
