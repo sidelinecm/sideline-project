@@ -261,19 +261,24 @@ function setLink(html, relValue, hrefValue, extraAttrs = "") {
   return regex.test(html) ? html.replace(regex, newTag) : html.replace(/<\/head>/i, `  ${newTag}\n</head>`);
 }
 
-// 🟢 [แก้ไขใน ssr-province.js] ฟังก์ชันฉีด Schema 7 รายการที่ถูกต้อง
 function injectSchema(html, schemaObj) {
   if (!schemaObj) return html;
   const jsonStr = JSON.stringify(schemaObj).replace(/</g, '\\u003c');
-  const scriptTag = `<script type="application/ld+json" id="dynamic-schema">${jsonStr}</script>`;
+  const newScriptTag = `<script type="application/ld+json" id="dynamic-schema">${jsonStr}</script>`;
 
-  // หากใน HTML มี {{SCHEMA_JSON}} ให้แทนที่ตรงนั้นทันที
+  // 1. ถ้ามีตัวแปร {{SCHEMA_JSON}} ให้แทนที่ตรงๆ
   if (html.includes("{{SCHEMA_JSON}}")) {
     return html.replace("{{SCHEMA_JSON}}", jsonStr);
   }
 
-  // หากไม่มี ให้ฉีดเข้าไปก่อนปิด </head> โดยไม่ไปลบแท็กเดิมทิ้ง
-  return html.replace(/<\/head>/i, `  ${scriptTag}\n</head>`);
+  // 2. ถ้าใน index.html มีแท็ก <script id="dynamic-schema">...</script> อยู่แล้ว ให้เขียนทับทั้งแท็ก
+  const existingRegex = /<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?<\/script>/gi;
+  if (existingRegex.test(html)) {
+    return html.replace(existingRegex, newScriptTag);
+  }
+
+  // 3. ถ้าไม่มีเลย ให้ฉีดเข้าก่อนปิด </head>
+  return html.replace(/<\/head>/i, `  ${newScriptTag}\n</head>`);
 }
 
 function injectHydrationData(html, hydratedDataObj) {
@@ -291,6 +296,7 @@ function injectHydrationData(html, hydratedDataObj) {
 function sweepPlaceholders(html) {
   if (!html) return "";
   return html
+    .replace(/\{\{\s*SCHEMA_JSON\s*\}\}/gi, '{"@context":"https://schema.org","@type":"WebSite","name":"First Model Hub"}')
     .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
