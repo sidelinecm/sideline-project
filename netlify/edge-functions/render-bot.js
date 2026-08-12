@@ -75,11 +75,12 @@ const getProfileMainImage = (p) => {
   return null;
 };
 
+// 🟢 แก้ไขฟังก์ชันจัดการ Path รูปภาพป้องกัน URL ซ้ำซ้อน
 const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
   if (!path || typeof path !== "string" || !path.trim()) {
     return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
   }
-  const cleanPath = path.trim();
+  const cleanPath = path.trim().replace(/^\/+/, "").replace(/^profile-images\//, "");
   if (cleanPath.includes("res.cloudinary.com")) {
     const cleanCloudinaryUrl = cleanPath.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, "/upload/$1");
     return cleanCloudinaryUrl.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
@@ -100,13 +101,11 @@ const generateSrcSet = (path) => {
 };
 
 const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[tag])) : "";
-
 const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 
 const cleanAsciiArt = (text) => {
   if (!text) return "";
   return String(text)
-    // 🟢 ลบข้อความ Debug Gemini ออกอัตโนมัติ
     .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
     .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
     .replace(/ทดลองใช้งาน\.?/gi, "")
@@ -203,7 +202,7 @@ export default async (request, context) => {
 
     const mainImagePath = getProfileMainImage(p);
     const baseImageUrl = optimizeImg(dynamicDomain, mainImagePath, 600, 800);
-const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
+    const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
     const imageSrcSet = generateSrcSet(mainImagePath);
 
     const defaultLineUrl = CONFIG.SOCIAL_LINKS.line;
@@ -265,10 +264,10 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
 
     breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
 
+    // 🟢 อัปเดต Schema ให้ถูกต้องตามเกณฑ์ Google Rich Results 2026 (Product + Offer + Rating)
     const schemaData = {
       "@context": "https://schema.org/",
       "@graph": [
-        // 1. Organization (แบรนด์ผู้ให้บริการ)
         {
           "@type": "Organization",
           "@id": `${dynamicDomain}/#organization`,
@@ -281,56 +280,15 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
             "height": 630
           }
         },
-        // 2. ProfilePage (หน้าโปรไฟล์สำหรับ Search Engine)
         {
-          "@type": "ProfilePage",
-          "@id": `${canonicalUrl}#webpage`,
-          "url": canonicalUrl,
+          "@type": "Product",
+          "@id": `${canonicalUrl}#product`,
           "name": pageTitle,
-          "description": stripHTML(metaDesc),
-          "isPartOf": {
-            "@type": "WebSite",
-            "@id": `${dynamicDomain}/#website`,
-            "name": CONFIG.BRAND_NAME,
-            "url": dynamicDomain
-          },
-          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-          "mainEntity": { "@id": `${canonicalUrl}#person` }
-        },
-        // 3. Person Entity (ตัวตนของน้อง)
-        {
-          "@type": "Person",
-          "@id": `${canonicalUrl}#person`,
-          "name": displayName,
-          "alternateName": [cleanName, `${displayName} ไซด์ไลน์${provinceName}`],
           "url": canonicalUrl,
           "image": [baseImageUrl],
           "description": stripHTML(metaDesc),
-          "jobTitle": "Freelance Companion & Entertainer",
-          "gender": "Female",
-          "knowsLanguage": ["th", "en"],
-          "worksFor": { "@id": `${dynamicDomain}/#organization` },
-          "height": heightVal ? { "@type": "QuantitativeValue", "value": Number(heightVal), "unitCode": "CMT" } : undefined,
-          "weight": weightVal ? { "@type": "QuantitativeValue", "value": Number(weightVal), "unitCode": "KGM" } : undefined,
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": `อำเภอเมือง${provinceName}`,
-            "addressLocality": p.location || provinceName,
-            "addressRegion": provinceName,
-            "addressCountry": "TH"
-          }
-        },
-        // 4. Service Entity (ข้อเสนอราคาและบริการ แยกมาตรงนี้จะถูกต้องตาม Google)
-        {
-          "@type": "Service",
-          "@id": `${canonicalUrl}#service`,
-          "name": `บริการเพื่อนเที่ยว - ${displayName}`,
-          "url": canonicalUrl,
-          "provider": { "@id": `${canonicalUrl}#person` },
-          "areaServed": {
-            "@type": "AdministrativeArea",
-            "name": p.location || provinceName
-          },
+          "sku": `BOT-${p.id}`,
+          "brand": { "@id": `${dynamicDomain}/#organization` },
           "offers": {
             "@type": "Offer",
             "url": canonicalUrl,
@@ -338,35 +296,33 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
             "priceCurrency": "THB",
             "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
             "availability": "https://schema.org/InStock",
-            "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
-          }
+            "itemCondition": "https://schema.org/NewCondition",
+            "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้า"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": ratingValue,
+            "reviewCount": reviewCount.toString(),
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "review": schemaReviews
         },
-        // 5. BreadcrumbList (ลำดับเส้นทางหน้าเว็บ)
         {
           "@type": "BreadcrumbList",
           "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": breadcrumbElements
         },
-        // 6. FAQPage (ถาม-ตอบแสดงบน Google Search)
         {
           "@type": "FAQPage",
           "@id": `${canonicalUrl}#faq`,
-          "isPartOf": { "@id": `${canonicalUrl}#webpage` },
           "mainEntity": [
             {
               "@type": "Question",
               "name": `${displayName} ไซด์ไลน์${provinceName} มีความปลอดภัยและการชำระเงินอย่างไร?`,
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ เพื่อความคุ้มครองและความสบายใจสูงสุดของลูกค้า`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${p.location || provinceName} ได้ที่ช่องทางใด?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `สามารถดำเนินการคลิกแอดไลน์ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บ เพื่อดำเนินการขอตรวจสอบคิวงาน สแตนด์บายตารางงาน และจองคิวรับบริการเพื่อความสะดวกและรวดเร็วที่สุดผ่านไลน์แอดมินเจ้าหน้าที่อย่างเป็นทางการ`
+                "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ`
               }
             }
           ]
@@ -374,6 +330,7 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
       ]
     };
 
+    // 🟢 แก้ไขแท็ก Meta ซ้ำซ้อนใน HTML Head
     const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -389,25 +346,24 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
     <meta name="theme-color" content="#FF2E63">
     
     <meta property="og:site_name" content="${escapeHTML(CONFIG.BRAND_NAME)}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
-    <meta name="twitter:description" content="${escapeHTML(metaDesc)}">
-    <meta name="twitter:image" content="${baseImageUrl}">
-    <meta property="og:image" content="${baseImageUrl}">
-    <meta property="og:image:width" content="600">   
-    <meta property="og:image:height" content="800">
-    
-    <link rel="shortcut icon" href="/images/favicon.ico">
-    
     <meta property="og:title" content="${escapeHTML(pageTitle)}">
     <meta property="og:description" content="${escapeHTML(metaDesc)}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="${baseImageUrl}">
+    <meta property="og:image:width" content="600">   
+    <meta property="og:image:height" content="800">
 
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
+    <meta name="twitter:description" content="${escapeHTML(metaDesc)}">
+    <meta name="twitter:image" content="${baseImageUrl}">
+    
+    <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
-<script type="application/ld+json">${JSON.stringify(schemaData).replace(/</g, '\\u003c')}</script>
+    <script type="application/ld+json">${JSON.stringify(schemaData).replace(/</g, '\\u003c')}</script>
     
     <style>
         :root { --p:#FF2E63; --s:#34d399; --bg:#07070A; --card:#111116; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
