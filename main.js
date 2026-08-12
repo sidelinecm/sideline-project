@@ -82,12 +82,10 @@ window.ScrollTrigger = ScrollTrigger;
             const data = req.result;
             if (!data) return resolve(null);
             
-            // รองรับข้อมูลเก่าที่ไม่มี timestamp
             if (!data.timestamp) {
               return resolve(data);
             }
             
-            // ตรวจสอบวันหมดอายุของ Cache
             if (Date.now() - data.timestamp < CONFIG.CACHE_TTL_MS) {
               resolve(data.value);
             } else {
@@ -160,20 +158,17 @@ window.ScrollTrigger = ScrollTrigger;
       return sanitizeThaiText(rawSlogan);
     }
     const str = String(idOrSlug || "0");
-    const sum = str.split("").reduce((acc, char, idx) => acc + (char.charCodeAt(0) * (idx + 1)), 0); // เพิ่ม Salt ด้วย Index ให้กระจายมากขึ้น
+    const sum = str.split("").reduce((acc, char, idx) => acc + (char.charCodeAt(0) * (idx + 1)), 0);
     const index = sum % FALLBACK_SLOGANS.length;
     return FALLBACK_SLOGANS[index];
   }
 
-  // ✅ ฟังก์ชัน Sanitize ภาษาไทยที่ถูกต้องและปลอดภัย 100%
   function sanitizeThaiText(str) {
     if (str === null || str === undefined) return "";
     return String(str)
-      // 1. ลบข้อความ Debug Gemini / System Prompts
       .replace(/✨?\s*พัฒนาและปรับแต่งโค้ดด้วย.*?(?:\||\n|$)/gi, "")
       .replace(/Google\s*Gemini.*?(?:\||\n|$)/gi, "")
       .replace(/ทดลองใช้งาน\.?/gi, "")
-      // 2. แก้ไขคำสะกดผิดที่พบบ่อย
       .replace(/นิมาน|นิทาน/g, "นิมมาน")
       .replace(/ฟื้นที่/g, "พื้นที่")
       .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -184,9 +179,7 @@ window.ScrollTrigger = ScrollTrigger;
       .replace(/ปาตอง/g, "ป่าตอง")
       .replace(/ชลบรุี/g, "ชลบุรี")
       .replace(/อยุธญา/g, "อยุธยา")
-      // 3. ลบสัญลักษณ์ตกแต่ง Text Art โดยไม่กระทบสระไทย (เอา 'อิ' และตัวอักษรไทยออก)
       .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬„•ㅅ•„₊˚╭╮╰╯┊જ⁀⸝༘⋆ෆ◟ヾ֒𐐪づ⁺.]+/g, " ")
-      // 4. ลบ Emojis
       .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🚨💦🐻🫦]/gu, "")
       .replace(/\s+/g, " ")
       .trim();
@@ -305,27 +298,28 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-const FALLBACK_SVG_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'><rect width='100%' height='100%' fill='%23120A24'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23C084FC' font-family='sans-serif' font-size='20' font-weight='bold'>First Model Hub</text></svg>";
+  const FALLBACK_SVG_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'><rect width='100%' height='100%' fill='%23120A24'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23C084FC' font-family='sans-serif' font-size='20' font-weight='bold'>First Model Hub</text></svg>";
 
-function getImageUrl(path, width = 400) {
-  if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp")) {
-    return FALLBACK_SVG_AVATAR;
+  function getImageUrl(path, width = 400) {
+    if (!path || typeof path !== "string" || !path.trim() || path.includes("firstmodelhub.webp")) {
+      return FALLBACK_SVG_AVATAR;
+    }
+
+    const cleanPath = path.trim();
+
+    if (cleanPath.includes("res.cloudinary.com")) {
+      const cleanCloudinaryUrl = cleanPath.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, "/upload/$1");
+      return cleanCloudinaryUrl.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},c_fill,g_face/`);
+    }
+
+    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+      return cleanPath;
+    }
+
+    const storagePath = cleanPath.replace(/^\/+/, "").replace(/^profile-images\//, "");
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${storagePath}`;
   }
 
-  const cleanPath = path.trim();
-
-  if (cleanPath.includes("res.cloudinary.com")) {
-    const cleanCloudinaryUrl = cleanPath.replace(/\/upload\/(?:[^\/]+\/)*(v\d+\/)/, "/upload/$1");
-    return cleanCloudinaryUrl.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},c_fill,g_face/`);
-  }
-
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-    return cleanPath;
-  }
-
-  const storagePath = cleanPath.replace(/^\/+/, "").replace(/^profile-images\//, "");
-  return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${storagePath}`;
-}
   function showToast(message, type = "success") {
     let container = document.getElementById("toast-container");
     if (!container) {
@@ -393,139 +387,139 @@ function getImageUrl(path, width = 400) {
   }
 
   function processProfileObject(raw) {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
 
-  const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
+    const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
 
-  const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
-  let parsedGallery = [];
+    const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+    let parsedGallery = [];
 
-  if (Array.isArray(rawGallery)) {
-    parsedGallery = rawGallery.map(item => typeof item === "object" ? (item.src || item.url) : String(item));
-  } else if (typeof rawGallery === "string" && rawGallery.trim()) {
-    try {
-      const jsonParsed = JSON.parse(rawGallery);
-      if (Array.isArray(jsonParsed)) parsedGallery = jsonParsed;
-      else parsedGallery = rawGallery.split(",");
-    } catch {
-      parsedGallery = rawGallery.split(",");
+    if (Array.isArray(rawGallery)) {
+      parsedGallery = rawGallery.map(item => typeof item === "object" ? (item.src || item.url) : String(item));
+    } else if (typeof rawGallery === "string" && rawGallery.trim()) {
+      try {
+        const jsonParsed = JSON.parse(rawGallery);
+        if (Array.isArray(jsonParsed)) parsedGallery = jsonParsed;
+        else parsedGallery = rawGallery.split(",");
+      } catch {
+        parsedGallery = rawGallery.split(",");
+      }
     }
-  }
 
-  const mainCandidate = raw.imagePath || raw.image_path || raw.imageUrl || raw.image_url || raw.photo || raw.avatar || parsedGallery[0] || null;
+    const mainCandidate = raw.imagePath || raw.image_path || raw.imageUrl || raw.image_url || raw.photo || raw.avatar || parsedGallery[0] || null;
 
-  const rawImageList = [mainCandidate, ...parsedGallery].filter(Boolean);
-  const pathSet = new Set();
-  const normalizedImages = [];
+    const rawImageList = [mainCandidate, ...parsedGallery].filter(Boolean);
+    const pathSet = new Set();
+    const normalizedImages = [];
 
-  rawImageList.forEach(path => {
-    let srcStr = typeof path === "object" && path !== null ? (path.src || path.url || "") : String(path).trim();
+    rawImageList.forEach(path => {
+      let srcStr = typeof path === "object" && path !== null ? (path.src || path.url || "") : String(path).trim();
 
-    if (srcStr && !srcStr.includes("firstmodelhub.webp") && !pathSet.has(srcStr)) {
-      pathSet.add(srcStr);
-      normalizedImages.push({
-        src: getImageUrl(srcStr, 400),
-        fullSrc: getImageUrl(srcStr, 1000)
-      });
+      if (srcStr && !srcStr.includes("firstmodelhub.webp") && !pathSet.has(srcStr)) {
+        pathSet.add(srcStr);
+        normalizedImages.push({
+          src: getImageUrl(srcStr, 400),
+          fullSrc: getImageUrl(srcStr, 1000)
+        });
+      }
+    });
+
+    if (normalizedImages.length === 0) {
+      normalizedImages.push({ src: FALLBACK_SVG_AVATAR, fullSrc: FALLBACK_SVG_AVATAR });
     }
-  });
 
-  if (normalizedImages.length === 0) {
-    normalizedImages.push({ src: FALLBACK_SVG_AVATAR, fullSrc: FALLBACK_SVG_AVATAR });
+    const rawProvKey = raw.provinceKey || raw.province_key || raw.province_slug || document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
+    const provKey = normalizeProvinceKey(rawProvKey);
+    const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
+
+    const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
+    const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
+    let numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
+
+    if (numericRate > 0 && numericRate < 500) {
+      numericRate = numericRate * 10;
+    }
+
+    const displayPrice = numericRate > 0 
+      ? `${numericRate.toLocaleString()}.-` 
+      : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
+
+    let bust = String(raw.bust || raw.breast || "").replace(/\D/g, "");
+    let waist = String(raw.waist || "").replace(/\D/g, "");
+    let hips = String(raw.hip || raw.hips || "").replace(/\D/g, "");
+    let cup = String(raw.cup_size || raw.cupSize || raw.cup || "").toUpperCase().replace(/[^A-Z]/g, "").trim();
+
+    let safeStats = "ไม่ระบุ";
+    if (bust && waist && hips) {
+      safeStats = `${bust}${cup ? `(${cup})` : ""}-${waist}-${hips}`;
+    } else if (raw.stats || raw.proportion || raw.proportions) {
+      safeStats = String(raw.stats || raw.proportion || raw.proportions).trim().replace(/[\s\/]+/g, "-");
+    }
+
+    const rawAge = raw.age || raw.profile_age;
+    const cleanAge = (rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0") ? String(rawAge).replace(/\D/g, "") : null;
+    const safeAgeDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
+
+    const rawHeight = raw.height || raw.profile_height;
+    const cleanHeight = (rawHeight && String(rawHeight).trim() !== "-" && String(rawHeight).trim() !== "0") ? String(rawHeight).replace(/\D/g, "") : null;
+    const safeHeight = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
+
+    const rawWeight = raw.weight || raw.profile_weight;
+    const cleanWeight = (rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0") ? String(rawWeight).replace(/\D/g, "") : null;
+    const safeWeight = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
+
+    const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
+    const safeSkin = (rawSkin && String(rawSkin).trim() !== "-") ? sanitizeThaiText(rawSkin) : "ไม่ระบุ";
+
+    const sloganText = getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote || raw.tagline);
+    
+    const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
+    const styleTags = (Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",") : []))
+      .map(t => sanitizeThaiText(t).replace(/^#/, "").trim())
+      .filter(Boolean);
+
+    const availStatus = sanitizeThaiText(raw.availability || raw.status || "รับงาน");
+    const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(kw => availStatus.toLowerCase().includes(kw));
+    const isAvailable = !isBusy;
+
+    const lineIdClean = String(raw.line_id || raw.lineId || raw.line || "").replace(/^@/, "").trim();
+    const cleanLocation = sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName);
+    const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ");
+
+    return {
+      ...raw,
+      id: raw.id,
+      slug: String(raw.slug || raw.id).trim(),
+      displayName: formattedName,
+      images: normalizedImages,
+      provinceNameThai: provinceThaiName,
+      provinceKey: provKey,
+      location: cleanLocation,
+      description: cleanDescription,
+      displayPrice: displayPrice,
+      _price: numericRate,
+      bust: bust,
+      waist: waist,
+      hips: hips,
+      cupSize: cup,
+      safeAge: cleanAge || "-",
+      safeAgeDisplay: safeAgeDisplay,
+      safeHeight: safeHeight,
+      safeWeight: safeWeight,
+      safeStats: safeStats,
+      safeSkin: safeSkin,
+      isAvailable: isAvailable,
+      availability: availStatus,
+      isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
+      hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
+      isNew: Boolean(raw.is_new || raw.isNew),
+      isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
+      lineId: lineIdClean,
+      styleTags: styleTags,
+      quote: sloganText,
+      slogan: sloganText
+    };
   }
-
-  const rawProvKey = raw.provinceKey || raw.province_key || raw.province_slug || document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
-  const provKey = normalizeProvinceKey(rawProvKey);
-  const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
-
-  const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
-  const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
-  let numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
-
-  if (numericRate > 0 && numericRate < 500) {
-    numericRate = numericRate * 10;
-  }
-
-  const displayPrice = numericRate > 0 
-    ? `${numericRate.toLocaleString()}.-` 
-    : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
-
-  let bust = String(raw.bust || raw.breast || "").replace(/\D/g, "");
-  let waist = String(raw.waist || "").replace(/\D/g, "");
-  let hips = String(raw.hip || raw.hips || "").replace(/\D/g, "");
-  let cup = String(raw.cup_size || raw.cupSize || raw.cup || "").toUpperCase().replace(/[^A-Z]/g, "").trim();
-
-  let safeStats = "ไม่ระบุ";
-  if (bust && waist && hips) {
-    safeStats = `${bust}${cup ? `(${cup})` : ""}-${waist}-${hips}`;
-  } else if (raw.stats || raw.proportion || raw.proportions) {
-    safeStats = String(raw.stats || raw.proportion || raw.proportions).trim().replace(/[\s\/]+/g, "-");
-  }
-
-  const rawAge = raw.age || raw.profile_age;
-  const cleanAge = (rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0") ? String(rawAge).replace(/\D/g, "") : null;
-  const safeAgeDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
-
-  const rawHeight = raw.height || raw.profile_height;
-  const cleanHeight = (rawHeight && String(rawHeight).trim() !== "-" && String(rawHeight).trim() !== "0") ? String(rawHeight).replace(/\D/g, "") : null;
-  const safeHeight = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
-
-  const rawWeight = raw.weight || raw.profile_weight;
-  const cleanWeight = (rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0") ? String(rawWeight).replace(/\D/g, "") : null;
-  const safeWeight = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
-
-  const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
-  const safeSkin = (rawSkin && String(rawSkin).trim() !== "-") ? sanitizeThaiText(rawSkin) : "ไม่ระบุ";
-
-  const sloganText = getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote || raw.tagline);
-  
-  const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
-  const styleTags = (Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",") : []))
-    .map(t => sanitizeThaiText(t).replace(/^#/, "").trim())
-    .filter(Boolean);
-
-  const availStatus = sanitizeThaiText(raw.availability || raw.status || "รับงาน");
-  const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(kw => availStatus.toLowerCase().includes(kw));
-  const isAvailable = !isBusy;
-
-  const lineIdClean = String(raw.line_id || raw.lineId || raw.line || "").replace(/^@/, "").trim();
-  const cleanLocation = sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName);
-  const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ");
-
-  return {
-    ...raw,
-    id: raw.id,
-    slug: String(raw.slug || raw.id).trim(),
-    displayName: formattedName,
-    images: normalizedImages,
-    provinceNameThai: provinceThaiName,
-    provinceKey: provKey,
-    location: cleanLocation,
-    description: cleanDescription,
-    displayPrice: displayPrice,
-    _price: numericRate,
-    bust: bust,
-    waist: waist,
-    hips: hips,
-    cupSize: cup,
-    safeAge: cleanAge || "-",
-    safeAgeDisplay: safeAgeDisplay,
-    safeHeight: safeHeight,
-    safeWeight: safeWeight,
-    safeStats: safeStats,
-    safeSkin: safeSkin,
-    isAvailable: isAvailable,
-    availability: availStatus,
-    isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
-    hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
-    isNew: Boolean(raw.is_new || raw.isNew),
-    isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
-    lineId: lineIdClean,
-    styleTags: styleTags,
-    quote: sloganText,
-    slogan: sloganText
-  };
-}
 
   async function fetchProfilesData() {
     if (STATE.isFetching) return false;
@@ -548,19 +542,18 @@ function getImageUrl(path, width = 400) {
           const cachedProvinces = await idb.get(CONFIG.KEYS.CACHE_PROVINCES) || JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROVINCES) || "[]");
           if (Array.isArray(cachedProvinces)) {
             cachedProvinces.forEach(p => {
-              if (p.key && p.name) STATE.provincesMap.set(normalizeProvinceKey(p.key), p.name);
+              if (p && p.key && p.name) STATE.provincesMap.set(normalizeProvinceKey(p.key), p.name);
             });
           }
         } catch (e) {}
 
         window.profilesData.forEach(p => {
-          if (p.provinceKey && p.provinceThai) {
+          if (p && p.provinceKey && p.provinceThai) {
             STATE.provincesMap.set(normalizeProvinceKey(p.provinceKey), p.provinceThai);
           }
         });
 
         ensureMapDefaults();
-
         STATE.allProfiles = deduplicateProfiles(window.profilesData.map(p => processProfileObject(p)).filter(Boolean));
         
         populateProvinceDropdown();
@@ -568,87 +561,64 @@ function getImageUrl(path, width = 400) {
         applyUltimateFilters(false, false);
         updateHeroSwiperCards();
         
-        runIdle(async () => {
-          if (!supabaseClient) return;
-          try {
-            let query = supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600);
-            
-            const currentPath = window.location.pathname.toLowerCase();
-            const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
-            
-            if (isLocationPage) {
-              const provSlug = normalizeProvinceKey(currentPath.split("/").filter(Boolean).pop());
-              const searchKeys = (provSlug === "chiangmai" || provSlug === "chiang_mai") ? ["chiangmai", "chiang_mai"] : [provSlug];
-              query = query.in("provinceKey", searchKeys);
-            }
-            
-            const { data } = await query;
-            
-            if (data && data.length > 0) {
-              const fetchedData = deduplicateProfiles(data.map(p => processProfileObject(p)).filter(Boolean));
-              
-              if (isLocationPage) {
-                STATE.allProfiles = deduplicateProfiles([...fetchedData, ...STATE.allProfiles]);
-              } else {
-                STATE.allProfiles = fetchedData;
-                idb.set(CONFIG.KEYS.CACHE_PROFILES, fetchedData);
-              }
-            }
-          } catch (e) {
-            console.warn("⚠️ Background re-fetch error:", e);
-          }
-        }, 3000);
-
         STATE.isFetching = false;
         return true;
       }
 
       console.log("🚀 กำลังดึงข้อมูลโปรไฟล์จาก Supabase...");
-      const provincesPromise = supabaseClient ? supabaseClient.from("provinces").select("*") : Promise.resolve({ data: [] });
+      
+      if (!supabaseClient) {
+        throw new Error("Supabase client is not initialized");
+      }
 
-      let activeProfileQuery = supabaseClient 
-        ? supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false }).limit(600) 
-        : null;
+      const provincesPromise = supabaseClient.from("provinces").select("*");
+      let activeProfileQuery = supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("active", true)
+        .order("isfeatured", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(600);
 
       const currentPath = window.location.pathname.toLowerCase();
       const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
 
-      if (activeProfileQuery && isLocationPage) {
-          const provSlug = normalizeProvinceKey(currentPath.split("/").filter(Boolean).pop());
-          const searchKeys = (provSlug === "chiangmai" || provSlug === "chiang_mai") ? ["chiangmai", "chiang_mai"] : [provSlug];
-          activeProfileQuery = activeProfileQuery.in("provinceKey", searchKeys);
+      if (isLocationPage) {
+        const provSlug = normalizeProvinceKey(currentPath.split("/").filter(Boolean).pop());
+        const searchKeys = (provSlug === "chiangmai" || provSlug === "chiang_mai") ? ["chiangmai", "chiang_mai"] : [provSlug];
+        activeProfileQuery = activeProfileQuery.in("provinceKey", searchKeys);
       }
 
-      const profilesPromise = activeProfileQuery ? activeProfileQuery : Promise.resolve({ data: [] });
-      const [provincesRes, profilesRes] = await Promise.all([provincesPromise, profilesPromise]);
+      const [provincesRes, profilesRes] = await Promise.all([provincesPromise, activeProfileQuery]);
 
-      if (provincesRes.data) {
-        STATE.provincesMap.clear();
-        const provincesCacheArr = [];
-        provincesRes.data.forEach(p => {
-          const name = p.nameThai || p.name_thai || p.name;
-          let key = normalizeProvinceKey(p.key || p.slug || p.id);
-          if (key && name) {
-            STATE.provincesMap.set(key, name);
-            provincesCacheArr.push({ key: key, name: name });
-          }
-        });
-        ensureMapDefaults();
+      const provincesData = Array.isArray(provincesRes?.data) ? provincesRes.data : [];
+      STATE.provincesMap.clear();
+      const provincesCacheArr = [];
+      
+      provincesData.forEach(p => {
+        if (!p) return;
+        const name = p.nameThai || p.name_thai || p.name;
+        let key = normalizeProvinceKey(p.key || p.slug || p.id);
+        if (key && name) {
+          STATE.provincesMap.set(key, name);
+          provincesCacheArr.push({ key: key, name: name });
+        }
+      });
+      ensureMapDefaults();
+      if (provincesCacheArr.length > 0) {
         idb.set(CONFIG.KEYS.CACHE_PROVINCES, provincesCacheArr);
-      } else {
-        ensureMapDefaults();
       }
 
-      if (profilesRes.error) throw profilesRes.error;
+      if (profilesRes?.error) throw profilesRes.error;
 
-      const rawProfiles = profilesRes.data || [];
+      const rawProfiles = Array.isArray(profilesRes?.data) ? profilesRes.data : [];
       const fetchedProfiles = deduplicateProfiles(rawProfiles.map(p => processProfileObject(p)).filter(Boolean));
 
       if (isLocationPage && STATE.allProfiles.length > 0) {
         STATE.allProfiles = deduplicateProfiles([...fetchedProfiles, ...STATE.allProfiles]);
       } else {
         STATE.allProfiles = fetchedProfiles;
-        if (!isLocationPage) {
+        if (!isLocationPage && fetchedProfiles.length > 0) {
           idb.set(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
         }
       }
@@ -660,11 +630,18 @@ function getImageUrl(path, width = 400) {
       return true;
 
     } catch (err) {
-      console.error("❌ โหลดข้อมูลล้มเหลว นำข้อมูลเก่ามาแสดงแทน:", err);
+      console.error("❌ เกิดข้อผิดพลาด นำข้อมูลเก่ามาแสดงแทน:", err);
       ensureMapDefaults();
 
-      const fallbackRaw = await idb.get(CONFIG.KEYS.CACHE_PROFILES) || JSON.parse(localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES) || "[]");
-      if (fallbackRaw && Array.isArray(fallbackRaw) && fallbackRaw.length > 0) {
+      const rawCache = await idb.get(CONFIG.KEYS.CACHE_PROFILES) || localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
+      let fallbackRaw = [];
+      try {
+        fallbackRaw = typeof rawCache === "string" ? JSON.parse(rawCache) : (Array.isArray(rawCache) ? rawCache : []);
+      } catch (e) {
+        fallbackRaw = [];
+      }
+
+      if (Array.isArray(fallbackRaw) && fallbackRaw.length > 0) {
         STATE.allProfiles = deduplicateProfiles(fallbackRaw.map(p => processProfileObject(p)).filter(Boolean));
         populateProvinceDropdown();
         renderSmartFilterChips();
@@ -677,20 +654,20 @@ function getImageUrl(path, width = 400) {
     } finally {
       STATE.isFetching = false;
     }
-}
+  }
 
   function updateHeroSwiperCards(targetProvinceKey = null) {
     const swiperContainer = document.getElementById("vip-swiper-container");
     if (!swiperContainer || !STATE.allProfiles || STATE.allProfiles.length === 0) return;
 
     let currentProvKey = "national";
-const isHomePage = window.location.pathname === "/" || window.location.pathname === "/index.html";
+    const isHomePage = window.location.pathname === "/" || window.location.pathname === "/index.html";
 
-if (!isHomePage) {
-  currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
-} else if (targetProvinceKey || (DOM.provinceSelect?.value && DOM.provinceSelect.value !== "all")) {
-  currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect.value);
-}
+    if (!isHomePage) {
+      currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
+    } else if (targetProvinceKey || (DOM.provinceSelect?.value && DOM.provinceSelect.value !== "all")) {
+      currentProvKey = normalizeProvinceKey(targetProvinceKey || DOM.provinceSelect.value);
+    }
 
     let scopedProfiles = STATE.allProfiles;
     if (currentProvKey && currentProvKey !== "national" && currentProvKey !== "all") {
@@ -733,48 +710,50 @@ if (!isHomePage) {
   }
 
   function populateProvinceDropdown() {
-  if (!DOM.provinceSelect) return;
-
-  const activeProvinceCounts = new Map();
-  STATE.allProfiles.forEach(p => {
-    if (p.provinceKey) {
-      const k = normalizeProvinceKey(p.provinceKey);
-      activeProvinceCounts.set(k, (activeProvinceCounts.get(k) || 0) + 1);
+    const activeProvinceCounts = new Map();
+    if (Array.isArray(STATE.allProfiles)) {
+      STATE.allProfiles.forEach(p => {
+        if (p && p.provinceKey) {
+          const k = normalizeProvinceKey(p.provinceKey);
+          activeProvinceCounts.set(k, (activeProvinceCounts.get(k) || 0) + 1);
+        }
+      });
     }
-  });
 
-  while (DOM.provinceSelect.options.length > 1) {
-    DOM.provinceSelect.remove(1);
+    const sortedProvinces = Array.from(STATE.provincesMap.entries())
+      .filter(([key]) => key !== "national" && key !== "all")
+      .sort((a, b) => a[1].localeCompare(b[1], "th"));
+
+    const fragment = document.createDocumentFragment();
+    const modalChipsContainer = document.getElementById("modal-province-chips");
+    let modalChipsHTML = `<button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>`;
+
+    sortedProvinces.forEach(([key, name]) => {
+      const normKey = normalizeProvinceKey(key);
+      const count = activeProvinceCounts.get(normKey) || 0;
+      const countLabel = count > 0 ? ` (${count})` : "";
+      
+      if (DOM.provinceSelect && DOM.provinceSelect.tagName === "SELECT") {
+        const opt = document.createElement("option");
+        opt.value = normKey;
+        opt.textContent = `${name}${countLabel}`;
+        fragment.appendChild(opt);
+      }
+
+      modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${normKey}">${name}${countLabel}</button>`;
+    });
+
+    if (DOM.provinceSelect && DOM.provinceSelect.tagName === "SELECT" && DOM.provinceSelect.options) {
+      while (DOM.provinceSelect.options.length > 1) {
+        DOM.provinceSelect.remove(1);
+      }
+      DOM.provinceSelect.appendChild(fragment);
+    }
+
+    if (modalChipsContainer) {
+      modalChipsContainer.innerHTML = modalChipsHTML;
+    }
   }
-
-  // 🟢 FIX: แสดงจังหวัดทั้งหมดที่มีในระบบ ไม่ตัดจังหวัดอื่นทิ้งแม้จำนวนโปรไฟล์ในเครื่องตอนนี้จะเป็น 0
-  const sortedProvinces = Array.from(STATE.provincesMap.entries())
-    .filter(([key]) => key !== "national" && key !== "all") // ซ่อนเฉพาะคีย์คำว่า "national"
-    .sort((a, b) => a[1].localeCompare(b[1], "th"));
-
-  const fragment = document.createDocumentFragment();
-  const modalChipsContainer = document.getElementById("modal-province-chips");
-  let modalChipsHTML = `<button type="button" class="luxury-chip province-chip active" data-value="">ทั้งหมด</button>`;
-
-  sortedProvinces.forEach(([key, name]) => {
-    const normKey = normalizeProvinceKey(key);
-    const count = activeProvinceCounts.get(normKey) || 0;
-    const countLabel = count > 0 ? ` (${count})` : "";
-    
-    const opt = document.createElement("option");
-    opt.value = normKey;
-    opt.textContent = `${name}${countLabel}`;
-    fragment.appendChild(opt);
-
-    modalChipsHTML += `<button type="button" class="luxury-chip province-chip" data-value="${normKey}">${name}${countLabel}</button>`;
-  });
-
-  DOM.provinceSelect.appendChild(fragment);
-
-  if (modalChipsContainer) {
-    modalChipsContainer.innerHTML = modalChipsHTML;
-  }
-}
 
   function createProfileCardElement(profile, index = 20) {
     const container = document.createElement("div");
@@ -826,7 +805,7 @@ if (!isHomePage) {
 
     const encodedSlug = encodeURIComponent(profile.slug || profile.id);
 
-card.innerHTML = `
+    card.innerHTML = `
 <img src="${imageSrc}" 
    alt="${seoAltText}"
    title="${seoAltText}"
@@ -1075,45 +1054,36 @@ card.innerHTML = `
   function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     try {
       const modalSearchInput = document.getElementById("modal-search-keyword");
-      const searchKeywordVal = (DOM.searchInput?.value || modalSearchInput?.value || "").trim();
+      const mainSearchInput = document.getElementById("search-keyword");
 
-      const activeFilters = {
-        text: searchKeywordVal,
-        province: normalizeProvinceKey(DOM.provinceSelect?.value || "all"),
-        avail: DOM.availabilitySelect?.value || "all",
-        featured: DOM.featuredSelect?.value === "true",
-        sort: DOM.sortSelect?.value || "featured",
-        price: document.getElementById("search-price")?.value || "" 
-      };
+      let keywordVal = (modalSearchInput?.value || mainSearchInput?.value || "").trim();
+      if (mainSearchInput) mainSearchInput.value = keywordVal;
+      if (modalSearchInput) modalSearchInput.value = keywordVal;
 
-      if (activeFilters.text) saveRecentSearch(activeFilters.text);
+      if (keywordVal) saveRecentSearch(keywordVal);
 
-      if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") {
-        localStorage.setItem(CONFIG.KEYS.LAST_PROVINCE, activeFilters.province);
-      }
-
-      let results = [...STATE.allProfiles];
+      const provVal = document.getElementById("search-province")?.value || "";
+      const availVal = document.getElementById("search-availability")?.value || "";
+      const featuredVal = document.getElementById("search-featured")?.value === "true";
+      const priceVal = document.getElementById("search-price")?.value || "";
+      const sortVal = document.getElementById("sort-select")?.value || "featured";
 
       const urlPath = window.location.pathname.toLowerCase();
       const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
-      
-      let urlProvinceKey = "national";
+      let urlProvinceKey = "";
       if (locMatch) {
         try { urlProvinceKey = normalizeProvinceKey(decodeURIComponent(locMatch[1])); } catch (e) { urlProvinceKey = normalizeProvinceKey(locMatch[1]); }
       }
 
-      let targetProvinceKey = (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") 
-        ? activeFilters.province 
-        : urlProvinceKey;
+      let targetProvinceKey = provVal ? normalizeProvinceKey(provVal) : urlProvinceKey;
+      let results = [...STATE.allProfiles];
 
-      targetProvinceKey = normalizeProvinceKey(targetProvinceKey);
-
-      if (targetProvinceKey && targetProvinceKey !== "national" && targetProvinceKey !== "all") {
+      if (targetProvinceKey && targetProvinceKey !== "national" && targetProvinceKey !== "all" && targetProvinceKey !== "") {
         results = results.filter(p => normalizeProvinceKey(p.provinceKey) === targetProvinceKey);
       }
 
-      if (activeFilters.text) {
-        const queryRaw = activeFilters.text.toLowerCase().trim();
+      if (keywordVal) {
+        const queryRaw = keywordVal.toLowerCase();
         const queryClean = queryRaw.replace(/^(น้อง\s?)+/gi, "").trim();
 
         results = results.filter(p => {
@@ -1141,20 +1111,20 @@ card.innerHTML = `
         });
       }
 
-      if (activeFilters.avail && activeFilters.avail !== "all") {
-        results = results.filter(p => p.availability === activeFilters.avail);
+      if (availVal && availVal !== "all" && availVal !== "") {
+        results = results.filter(p => p.availability === availVal);
       }
 
-      if (activeFilters.featured) {
+      if (featuredVal) {
         results = results.filter(p => p.isfeatured === true);
       }
 
-      if (activeFilters.price) {
+      if (priceVal) {
         results = results.filter(p => {
           const price = p._price || 0;
-          if (activeFilters.price === "under1500") return price > 0 && price <= 1500;
-          if (activeFilters.price === "1500-2500") return price > 1500 && price <= 2500;
-          if (activeFilters.price === "above2500") return price > 2500;
+          if (priceVal === "under1500") return price > 0 && price <= 1500;
+          if (priceVal === "1500-2500") return price > 1500 && price <= 2500;
+          if (priceVal === "above2500") return price > 2500;
           return true;
         });
       }
@@ -1162,8 +1132,8 @@ card.innerHTML = `
       results = deduplicateProfiles(results);
 
       results.sort((a, b) => {
-        if (activeFilters.text) return 0;
-        switch (activeFilters.sort) {
+        if (keywordVal) return 0;
+        switch (sortVal) {
           case "featured":
             return (b.isfeatured ? 1 : 0) - (a.isfeatured ? 1 : 0) || (a.name || "").localeCompare(b.name || "");
           case "name_asc":
@@ -1171,7 +1141,7 @@ card.innerHTML = `
           case "rating":
             return (b.rating || 0) - (a.rating || 0);
           case "price_asc":
-            return (a._price || 0) - (b._price || 0); 
+            return (a._price || 0) - (b._price || 0);
           case "price_desc":
             return (b._price || 0) - (a._price || 0);
           default:
@@ -1180,29 +1150,29 @@ card.innerHTML = `
       });
 
       renderActiveFilterChips();
-      
+
       const isSingleProfilePage = Boolean(document.querySelector(".single-profile-wrapper"));
       if (!isSingleProfilePage) {
-        renderProfilesGrid(results, activeFilters.text || (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "") || activeFilters.avail !== "all" || activeFilters.featured || activeFilters.price, isUserAction);
+        renderProfilesGrid(results, Boolean(keywordVal || provVal || availVal || featuredVal || priceVal), isUserAction);
       }
 
-      updateHeroSwiperCards(targetProvinceKey);
+      updateHeroSwiperCards(targetProvinceKey || "national");
 
       if (updateUrlHistory && !isSingleProfilePage) {
         let newPath = "/";
-        if (activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "" && activeFilters.province !== "national") {
-          newPath = `/location/${activeFilters.province}`;
+        if (provVal && provVal !== "all" && provVal !== "" && provVal !== "national") {
+          newPath = `/location/${provVal}`;
         }
         if (window.location.pathname !== newPath) {
           history.pushState(null, "", newPath);
         }
       }
 
-      STATE.currentFilters = activeFilters;
+      STATE.currentFilters = { text: keywordVal, province: provVal, avail: availVal, featured: featuredVal, sort: sortVal, price: priceVal };
       STATE.filteredProfiles = results;
 
-      const currentProvKey = activeFilters.province && activeFilters.province !== "all" && activeFilters.province !== "" ? activeFilters.province : "national";
-      const currentProvName = (currentProvKey === "national") ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
+      const currentProvKey = targetProvinceKey || "national";
+      const currentProvName = (currentProvKey === "national" || !currentProvKey) ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
       replaceDomPlaceholders(currentProvName, results.length, currentProvKey);
 
       if (isUserAction && !isSingleProfilePage) {
@@ -1228,7 +1198,6 @@ card.innerHTML = `
     STATE.renderId = (STATE.renderId || 0) + 1;
     const currentRenderId = STATE.renderId;
 
-    // 🟢 ตรวจสอบว่านี่คือการรัน JavaScript สร้างหน้าจอครั้งแรก (Hydration) หรือไม่
     const isFirstHydration = STATE.renderId === 1;
 
     destroyLoadingPlaceholder();
@@ -1243,7 +1212,6 @@ card.innerHTML = `
       const featuredProfiles = allProfiles.filter(p => p.isfeatured);
       DOM.featuredSection.classList.toggle("hidden", !isHomePage || featuredProfiles.length === 0);
 
-      // ถ้าเป็นหน้าแรก มีน้องๆ แนะนำ และ กล่อง HTML ยังว่างเปล่า ให้เติมเข้าไป
       if (isHomePage && featuredProfiles.length > 0 && DOM.featuredContainer && DOM.featuredContainer.children.length === 0) {
         await appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
       }
@@ -1292,10 +1260,6 @@ card.innerHTML = `
       return;
     }
 
-    // 🟢 [หัวใจสำคัญที่แก้ปัญหาจอกระตุก]
-    // ถ้าเป็นการโหลดครั้งแรกสุด (isFirstHydration) และมี HTML การ์ดน้องๆ ถูกสร้างมาจากฝั่ง Server รออยู่แล้ว
-    // และไม่ใช่การกดปุ่ม Filter ด้วยตัวผู้ใช้เอง (!isUserAction) 
-    // -> ให้หยุดการทำงาน (return) เพื่อไม่ให้มันลบ HTML ทิ้งแล้ววาดใหม่ ทำให้จอไม่กระพริบ
     if (isFirstHydration && DOM.profilesDisplayArea.children.length > 0 && !isUserAction) {
         bindMediaProtection();
         if (window.ScrollTrigger) {
@@ -1304,7 +1268,6 @@ card.innerHTML = `
         return; 
     }
 
-    // หากผ่านด่านเช็คด้านบนมาได้ (แปลว่าผู้ใช้กด Filter หรือเปลี่ยนจังหวัด) ก็เคลียร์ HTML เก่าทิ้ง
     DOM.profilesDisplayArea.innerHTML = "";
     const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
 
@@ -1379,8 +1342,6 @@ card.innerHTML = `
     }
   }
 
-    
-
   function bindMediaProtection() {
     if (!DOM.profilesDisplayArea) return;
     DOM.profilesDisplayArea.querySelectorAll("img").forEach(img => {
@@ -1389,7 +1350,6 @@ card.innerHTML = `
     });
   }
 
-  // ✅ FIX: ระบบเลื่อนดูโปรไฟล์ถัดไป (Next/Prev) ในหน้าต่าง Lightbox
   function setupLightboxNavigation(currentIndex) {
     let navContainer = document.getElementById("lightbox-nav-buttons");
     if (!navContainer) {
@@ -1611,7 +1571,6 @@ card.innerHTML = `
       detailsContainer.appendChild(stickyBtnWrapper);
     }
 
-    // ✅ เรียกใช้ปุ่มเลื่อนโปรไฟล์ Lightbox ถัดไป
     const currentIndex = STATE.filteredProfiles.findIndex(p => p.slug === profile.slug || p.id === profile.id);
     setupLightboxNavigation(currentIndex);
 
@@ -1626,7 +1585,7 @@ card.innerHTML = `
 
     updateSEOMetadata(profile, null);
   }
-  
+
   function closeLightboxModal(updateUrl = true) {
     const lightbox = document.getElementById("lightbox");
     if (lightbox) {
@@ -1644,7 +1603,7 @@ card.innerHTML = `
 
   function removeJsonLdSchemas() {
     const schemaIds = [
-      "dynamic-schema",
+      // 🟢 ถอด "dynamic-schema" ออกจากที่นี่ถาวร เพื่อไม่ให้ Client ไปแตะต้อง Schema 7 แท็กของ SSR
       "schema-jsonld-person",
       "schema-jsonld-list",
       "schema-jsonld-faq",
@@ -1673,12 +1632,13 @@ card.innerHTML = `
     const currentPath = window.location.pathname.toLowerCase();
     const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
 
-    if (isFirstLoad && isHomePage) {
+    // 🟢 1. โหลดหน้าแรกสุด ปล่อยให้ SSR 7 แท็กทำงาน ไม่ต้องทำอะไรเพิ่ม
+    if (isFirstLoad) {
       isFirstLoad = false;
       return;
     }
-    isFirstLoad = false;
 
+    // 🟢 2. หากผู้ใช้กดย้อนกลับมาหน้าหลัก
     if (isHomePage && !profile) {
       document.title = DEFAULT_SEO.title;
       updateMetaTag("description", DEFAULT_SEO.description);
@@ -1689,6 +1649,7 @@ card.innerHTML = `
       return;
     }
 
+    // 🟢 3. ล้างเฉพาะ Schema ย่อยกรณีเปิดดูโปรไฟล์เดี่ยว หรือหน้าจังหวัด
     removeJsonLdSchemas();
 
     if (profile) {
@@ -1956,9 +1917,9 @@ card.innerHTML = `
         
       reviewsGrid.innerHTML = reviewsList.map(r => `
         <div class="interactive-card p-4 flex flex-col gap-2 text-left" style="padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(13,8,30,0.4);">
-          <div class="flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="flex justify-between items-center" style="display: flex; justify-between: space-between; align-items: center;">
             <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
-<div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${(r.author || "K").charAt(0)}</div>
+              <div style="height: 36px; width: 36px; border-radius: 50%; background-color: #27272A; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700; font-size: 12px; border: 1px solid rgba(255,255,255,0.1);">${(r.author || "K").charAt(0)}</div>
                 <div>
                   <span style="display: block; font-size: 12px; font-weight: 800; color: white;">${r.author}</span>
                   <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">นัดเจอใน${r.location}</span>
@@ -2031,7 +1992,6 @@ card.innerHTML = `
           const currentPath = window.location.pathname.toLowerCase();
           const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
 
-          // ถ้าอยู่ในหน้าเฉพาะจังหวัด ห้ามให้ปุ่มแท็บมาล้างค่าจังหวัดเด็ดขาด
           if (!isLocationPage) {
              if (DOM.provinceSelect) DOM.provinceSelect.value = "";
           }
@@ -2041,7 +2001,6 @@ card.innerHTML = `
           } else if (region === "ภาคเหนือ") {
             if (DOM.searchInput) DOM.searchInput.value = "เชียงใหม่";
           } else if (region === "กรุงเทพฯ") {
-            // ไปหน้ากรุงเทพ
             window.location.href = "/location/bangkok";
             return;
           }
@@ -2209,7 +2168,6 @@ card.innerHTML = `
       });
     }
 
-    // ✅ FIX: ป้องกันระบบถูก Spam ยิง Review พร้อม Rate Limit 5 นาที
     function initReviewForm() {
       const form = document.getElementById("review-form");
       if (!form) return;
@@ -2217,7 +2175,6 @@ card.innerHTML = `
       form.addEventListener("submit", async e => {
         e.preventDefault();
         
-        // เช็คการส่งล่าสุดจาก localStorage 
         const lastSubmit = localStorage.getItem(CONFIG.KEYS.LAST_REVIEW_TIME);
         if (lastSubmit && (Date.now() - parseInt(lastSubmit, 10) < 5 * 60 * 1000)) {
           showToast("⏳ กรุณารออย่างน้อย 5 นาทีก่อนส่งรีวิวครั้งถัดไปครับ", "error");
@@ -2281,6 +2238,11 @@ card.innerHTML = `
         if (isHidden) {
           form.style.display = "flex";
           btn.textContent = "❌ ปิดหน้าต่างเขียนรีวิว";
+          
+          const currentProv = DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national";
+          const provInput = document.getElementById("review-province-key");
+          if (provInput) provInput.value = currentProv;
+          
         } else {
           form.style.display = "none";
           btn.textContent = "✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์";
@@ -2455,7 +2417,6 @@ card.innerHTML = `
       DOM.featuredContainer = document.getElementById("featured-profiles-container");
       DOM.noResultsMessage = document.getElementById("no-results-message");
       
-      // ✅ FIX: ประกาศตัวแปรเพื่อป้องกันข้อผิดพลาด Undefined ใน renderProfilesGrid
       DOM.fetchErrorMessage = document.getElementById("fetch-error-message");
 
       const toggleBtn = document.getElementById("menu-toggle");
@@ -2477,7 +2438,6 @@ card.innerHTML = `
         sidebar.querySelectorAll("a").forEach(a => a.onclick = () => toggleMenu(false));
       }
 
-      // ✅ FIX: ผูก Event ให้กับช่องค้นหาหลักเพื่อรองรับการใช้งานบน Desktop ที่ไม่ได้เปิด Modal 
       if (DOM.searchInput) {
         DOM.searchInput.addEventListener("input", (e) => {
           const modalInput = document.getElementById("modal-search-keyword");
@@ -2490,7 +2450,6 @@ card.innerHTML = `
         });
       }
       
-      // ✅ FIX: ผูก Event กดปุ่ม Enter บน Desktop Search Form ป้องกันหน้าเว็บ Refresh
       if (DOM.searchForm) {
         DOM.searchForm.addEventListener("submit", (e) => {
           e.preventDefault();
@@ -2529,38 +2488,69 @@ card.innerHTML = `
           return;
         }
 
-        if (target.closest('.province-chip')) {
+        const clearModalTextBtn = target.closest("#clear-modal-text-btn");
+        if (clearModalTextBtn) {
+          e.preventDefault();
+          const mKw = document.getElementById("modal-search-keyword");
+          const sKw = document.getElementById("search-keyword");
+          if (mKw) mKw.value = "";
+          if (sKw) sKw.value = "";
+          clearModalTextBtn.style.display = "none";
+          applyUltimateFilters(true, true);
+          return;
+        }
+
+        const provChip = target.closest('.province-chip');
+        if (provChip) {
           document.querySelectorAll('.province-chip').forEach(b => b.classList.remove('active'));
-          target.closest('.province-chip').classList.add('active');
-          if (DOM.provinceSelect) {
-            DOM.provinceSelect.value = normalizeProvinceKey(target.closest('.province-chip').getAttribute('data-value') || '');
-          }
+          provChip.classList.add('active');
+          const val = provChip.getAttribute('data-value') || '';
+          const provInput = document.getElementById("search-province");
+          if (provInput) provInput.value = val;
         }
 
-        if (target.closest('.avail-chip')) {
+        const availChip = target.closest('.avail-chip');
+        if (availChip) {
           document.querySelectorAll('.avail-chip').forEach(b => b.classList.remove('active'));
-          target.closest('.avail-chip').classList.add('active');
-          if (DOM.availabilitySelect) DOM.availabilitySelect.value = target.closest('.avail-chip').getAttribute('data-value') || '';
+          availChip.classList.add('active');
+          const val = availChip.getAttribute('data-value') || '';
+          const availInput = document.getElementById("search-availability");
+          if (availInput) availInput.value = val;
         }
 
-        if (target.closest('.price-chip')) {
+        const priceChip = target.closest('.price-chip');
+        if (priceChip) {
           document.querySelectorAll('.price-chip').forEach(b => b.classList.remove('active'));
-          target.closest('.price-chip').classList.add('active');
-          const hiddenPrice = document.getElementById("search-price");
-          if (hiddenPrice) hiddenPrice.value = target.closest('.price-chip').getAttribute('data-price') || '';
+          priceChip.classList.add('active');
+          const val = priceChip.getAttribute('data-price') || '';
+          const priceInput = document.getElementById("search-price");
+          if (priceInput) priceInput.value = val;
         }
 
-        if (target.closest('.tag-chip')) {
+        const tagChip = target.closest('.tag-chip');
+        if (tagChip) {
           document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
-          target.closest('.tag-chip').classList.add('active');
+          tagChip.classList.add('active');
+          const tagVal = tagChip.getAttribute('data-tag') || '';
           const modalInput = document.getElementById('modal-search-keyword');
-          if (modalInput) modalInput.value = target.closest('.tag-chip').getAttribute('data-tag') || '';
+          const mainInput = document.getElementById('search-keyword');
+          if (modalInput) modalInput.value = tagVal;
+          if (mainInput) mainInput.value = tagVal;
+
+          const clearBtn = document.getElementById("clear-modal-text-btn");
+          if (clearBtn) clearBtn.style.display = tagVal ? "block" : "none";
         }
 
-        if (target.closest('.sort-chip')) {
+        const sortChip = target.closest('.sort-chip');
+        if (sortChip) {
           document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
-          target.closest('.sort-chip').classList.add('active');
-          if (DOM.sortSelect) DOM.sortSelect.value = target.closest('.sort-chip').getAttribute('data-sort') || 'featured';
+          sortChip.classList.add('active');
+          const sortVal = sortChip.getAttribute('data-sort') || 'featured';
+          const featVal = sortChip.getAttribute('data-featured') || '';
+          const sortInput = document.getElementById('sort-select');
+          const featInput = document.getElementById('search-featured');
+          if (sortInput) sortInput.value = sortVal;
+          if (featInput) featInput.value = featVal;
         }
       });
 
@@ -2575,14 +2565,31 @@ card.innerHTML = `
       const modalResetBtn = document.getElementById('modal-reset-btn');
       if (modalResetBtn) {
         modalResetBtn.onclick = () => {
-          document.querySelector('#modal-province-chips .province-chip[data-value=""]')?.click();
-          document.querySelector('#modal-availability-chips .avail-chip[data-value=""]')?.click();
-          document.querySelector('#modal-sort-chips .sort-chip[data-sort="featured"]')?.click();
-          document.querySelector('#modal-price-chips .price-chip[data-price=""]')?.click();
+          document.querySelectorAll('#modal-province-chips .province-chip').forEach(b => b.classList.remove('active'));
+          document.querySelector('#modal-province-chips .province-chip[data-value=""]')?.classList.add('active');
+
+          document.querySelectorAll('#modal-availability-chips .avail-chip').forEach(b => b.classList.remove('active'));
+          document.querySelector('#modal-availability-chips .avail-chip[data-value=""]')?.classList.add('active');
+
+          document.querySelectorAll('#modal-price-chips .price-chip').forEach(b => b.classList.remove('active'));
+          document.querySelector('#modal-price-chips .price-chip[data-price=""]')?.classList.add('active');
+
           document.querySelectorAll('#modal-tag-chips .tag-chip').forEach(b => b.classList.remove('active'));
-          if (document.getElementById('modal-search-keyword')) document.getElementById('modal-search-keyword').value = '';
-          if (DOM.searchInput) DOM.searchInput.value = '';
-          
+
+          document.querySelectorAll('#modal-sort-chips .sort-chip').forEach(b => b.classList.remove('active'));
+          document.querySelector('#modal-sort-chips .sort-chip[data-sort="featured"]')?.classList.add('active');
+
+          const mKw = document.getElementById('modal-search-keyword'); if (mKw) mKw.value = '';
+          const sKw = document.getElementById('search-keyword'); if (sKw) sKw.value = '';
+          const sProv = document.getElementById('search-province'); if (sProv) sProv.value = '';
+          const sAvail = document.getElementById('search-availability'); if (sAvail) sAvail.value = '';
+          const sFeat = document.getElementById('search-featured'); if (sFeat) sFeat.value = '';
+          const sPrice = document.getElementById('search-price'); if (sPrice) sPrice.value = '';
+          const sSort = document.getElementById('sort-select'); if (sSort) sSort.value = 'featured';
+
+          const clearBtn = document.getElementById("clear-modal-text-btn");
+          if (clearBtn) clearBtn.style.display = "none";
+
           applyUltimateFilters(true, true);
         };
       }
@@ -2590,7 +2597,12 @@ card.innerHTML = `
       const modalSearchInput = document.getElementById("modal-search-keyword");
       if (modalSearchInput) {
         modalSearchInput.addEventListener("input", (e) => {
-          if (DOM.searchInput) DOM.searchInput.value = e.target.value;
+          const val = e.target.value;
+          if (DOM.searchInput) DOM.searchInput.value = val;
+
+          const clearBtn = document.getElementById("clear-modal-text-btn");
+          if (clearBtn) clearBtn.style.display = val.trim() ? "block" : "none";
+
           clearTimeout(searchDebounceTimer);
           searchDebounceTimer = setTimeout(() => {
             applyUltimateFilters(true, false);

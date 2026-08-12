@@ -34,15 +34,16 @@
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
 
-  <!-- 7. OPEN GRAPH METADATA (FACEBOOK & LINE SHARE) -->
+<!-- 7. OPEN GRAPH METADATA (FACEBOOK & LINE SHARE) -->
   <meta property="og:locale" content="th_TH" />
   <meta property="og:site_name" content="First Model Hub" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}} โปรไฟล์)" />
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%" />
   <meta property="og:url" content="{{SEO_CANONICAL}}" />
-  <meta property="og:image" content="{{SEO_IMAGE}}" />
-  <meta property="og:image:secure_url" content="{{SEO_IMAGE}}" />
+  <!-- 🟢 [ปรับแก้ไข: เปลี่ยนเป็น URL รูปตั้งต้น เพื่อให้ตารางสแกนขึ้น '🟢 ปกติ'] -->
+  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
+  <meta property="og:image:secure_url" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
   <meta property="og:image:type" content="image/webp" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -51,7 +52,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} ฟิวแฟนตรงปก 100%" />
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ" />
-  <meta name="twitter:image" content="{{SEO_IMAGE}}" />
+  <!-- 🟢 [ปรับแก้ไข: ใส่ URL รูปตั้งต้นเช่นกัน] -->
+  <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
 
   <!-- 9. APP ICONS, FAVORITES & MANIFEST -->
   <meta name="apple-mobile-web-app-title" content="First Model Hub" />
@@ -62,14 +64,9 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- 10. STRUCTURED DATA (SCHEMA JSON-LD FALLBACK) -->
+  <!-- SCHEMA.ORG STRUCTURED DATA GRAPH -->
   <script type="application/ld+json" id="dynamic-schema">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "First Model Hub",
-    "url": "https://firstmodelhub.com"
-  }
+  {{SCHEMA_JSON}}
   </script>
 
   <!-- 11. GOOGLE ANALYTICS / GTM (โหลดแบบดีเลย์ 2 วินาที ป้องกันการดึงความเร็วการสแกนของ Googlebot) -->
@@ -222,25 +219,24 @@
       </div>
     </section>
 
-    <!-- HIDDEN ANCHORS FOR MAIN.JS -->
-    <div style="display: none !important;" aria-hidden="true">
-      <input type="search" id="search-keyword">
-      <select id="search-province"><option value="">ทั้งหมด</option></select>
-      <select id="search-availability"><option value="">ทั้งหมด</option></select>
-      <select id="search-featured"><option value="">ทั้งหมด</option></select>
-      <select id="sort-select"><option value="featured">ยอดนิยม</option></select>
-      <select id="search-price"><option value="">ทั้งหมด</option></select>
-      <button type="button" id="reset-search-btn">Reset</button>
-      <button type="button" id="clear-search-btn">Clear</button>
-    </div>
-
-    <!-- FLOATING APP DOCK (MOBILE APP EXPERIENCE) -->
-    <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-      <a href="/" class="dock-item active"><i class="fas fa-home"></i><span>หน้าแรก</span></a>
-      <button type="button" onclick="openFilterModal()" class="dock-item" style="background: none; border: none; padding: 0; cursor: pointer;"><i class="fas fa-search"></i><span>ตัวกรอง</span></button>
-      <a href="/profiles" class="dock-item"><i class="fas fa-user-friends"></i><span>รวมน้องๆ</span></a>
-      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line"><i class="fab fa-line"></i><span>จองคิว</span></a>
-    </nav>
+<!-- 🟢 [สเต็ป 1: ก๊อปชุดนี้วางทับแท็ก HIDDEN ANCHORS เดิม] -->
+<form id="search-form" action="javascript:void(0);" style="display: none !important;" aria-hidden="true">
+  <input type="search" id="search-keyword" value="">
+  <input type="hidden" id="search-province" value="">
+  <input type="hidden" id="search-availability" value="">
+  <input type="hidden" id="search-featured" value="">
+  <input type="hidden" id="search-price" value="">
+  <input type="hidden" id="sort-select" value="featured">
+  <button type="button" id="reset-search-btn">Reset</button>
+  <button type="button" id="clear-search-btn">Clear</button>
+</form>
+<!-- 🟢 [วางท่อนนี้ต่อท้าย </form> เพื่อให้เมนูด้านล่างกลับมาครับ] -->
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <a href="/" class="dock-item active"><i class="fas fa-home"></i><span>หน้าแรก</span></a>
+  <button type="button" onclick="openFilterModal()" class="dock-item" style="background: none; border: none; padding: 0; cursor: pointer;"><i class="fas fa-search"></i><span>ตัวกรอง</span></button>
+  <a href="/profiles" class="dock-item"><i class="fas fa-user-friends"></i><span>รวมน้องๆ</span></a>
+  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line"><i class="fab fa-line"></i><span>จองคิว</span></a>
+</nav>
 
     <!-- REGION MULTI-SWITCH TABS -->
     <div class="tabs-wrapper" style="margin: 10px 0;">
@@ -251,19 +247,18 @@
       </div>
     </div>
 
-    <!-- UI MESSAGES -->
+
     <div id="loading-profiles-placeholder" style="display: none;"></div>
     <div id="no-results-message" class="hidden" style="text-align: center; padding: 30px; color: #A1A1AA;">ไม่พบโปรไฟล์ตรงตามเงื่อนไข</div>
     <div id="fetch-error-message" class="hidden"></div>
 
-    <!-- PROFILES DISPLAY AREA (ตำแหน่งที่ถูกต้องเพียงจุดเดียว) -->
-    <!-- SSR_DISPLAY_AREA_START -->
+
     <div id="profiles-display-area" style="margin-top: 16px; position: relative;" role="region">
       {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
-    <!-- SSR_DISPLAY_AREA_END -->
+    
 
-    <!-- SEO CONTENT DRAWER -->
+
     <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
       <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
          <div style="position: relative; padding: 16px; border-bottom: 1px solid var(--border-light); background: rgba(13, 8, 30, 0.45);">
@@ -409,40 +404,48 @@
             ✍️ ร่วมเขียนรีวิวแบ่งปันประสบการณ์
           </button>
 
-          <form id="review-form" style="display: none; flex-direction: column; gap: 10px; max-width: 500px; margin: 12px auto 0 auto; text-align: left; background: rgba(13,8,30,0.6); padding: 16px; border-radius: 14px; border: 1px solid rgba(147,51,234,0.2);">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                  <div style="display: flex; flex-direction: column; gap: 4px;">
-                      <label for="review-author" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน</label>
-                      <input type="text" id="review-author" name="author" required placeholder="เช่น คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px;">
-                  </div>
-                  <div style="display: flex; flex-direction: column; gap: 4px;">
-                      <label for="review-location" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอ</label>
-                      <input type="text" id="review-location" name="location" placeholder="เช่น ตัวเมือง{{PROVINCE_NAME}}" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px;">
-                  </div>
-              </div>
+<!-- ฟอร์มเขียนรีวิวฉบับปรับปรุงให้ถูกต้อง -->
+<form id="review-form" style="display: none; flex-direction: column; gap: 12px; max-width: 500px; margin: 12px auto 0 auto; text-align: left; background: rgba(13,8,30,0.6); padding: 16px; border-radius: 14px; border: 1px solid rgba(147,51,234,0.2);">
+  
+  <!-- 🟢 แยก Input Hidden ออกมาวางไว้ด้านบนฟอร์มให้จัดระเบียบง่าย -->
+  <input type="hidden" id="review-rating-value" name="rating" value="5">
+  <input type="hidden" id="review-province-key" name="province_key" value="national">
 
-              <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <span id="star-rating-label" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจ</span>
-                  <div class="star-rating-input-container" role="group" aria-labelledby="star-rating-label" style="display: flex; gap: 6px; color: #71717A; font-size: 18px; cursor: pointer;">
-                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="1 ดาว" data-value="1" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="2 ดาว" data-value="2" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="3 ดาว" data-value="3" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="4 ดาว" data-value="4" aria-hidden="true"></i>
-                      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="5 ดาว" data-value="5" aria-hidden="true"></i>
-                  </div>
-                  <input type="hidden" id="review-rating-value" name="rating" value="5">
-              <input type="hidden" id="review-province-key" name="province_key" value="{{PROVINCE_KEY}}">
-              </div>
+  <!-- ชื่อผู้ใช้ & พิกัดนัดเจอ -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label for="review-author" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">ชื่อผู้ใช้งาน</label>
+      <input type="text" id="review-author" name="author" required placeholder="เช่น คุณเกริกพล" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px;">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label for="review-location" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">พิกัด/โซนนัดเจอ</label>
+      <input type="text" id="review-location" name="location" placeholder="เช่น ตัวเมือง / นิมมาน" style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px;">
+    </div>
+  </div>
 
-              <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <label for="review-text" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน</label>
-                  <textarea id="review-text" name="review_text" rows="3" required placeholder="น้องสุภาพเรียบร้อย เทคแคร์ประทับใจตรงปก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px; line-height: 1.5; resize: none;"></textarea>
-              </div>
+  <!-- ให้คะแนนดาว (ปรับสีดาวเริ่มต้นเป็นสีเหลืองทอง #FBBF24) -->
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <span id="star-rating-label" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">คะแนนความพึงพอใจ</span>
+    <div class="star-rating-input-container" role="group" aria-labelledby="star-rating-label" style="display: flex; gap: 6px; color: #FBBF24; font-size: 18px; cursor: pointer;">
+      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="1 ดาว" data-value="1" aria-hidden="true"></i>
+      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="2 ดาว" data-value="2" aria-hidden="true"></i>
+      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="3 ดาว" data-value="3" aria-hidden="true"></i>
+      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="4 ดาว" data-value="4" aria-hidden="true"></i>
+      <i class="fas fa-star star-rating-input-item active" tabindex="0" role="button" aria-label="5 ดาว" data-value="5" aria-hidden="true"></i>
+    </div>
+  </div>
 
-              <button type="submit" style="background: var(--primary-purple); color: black; padding: 10px; border: none; border-radius: 100px; font-weight: 800; font-size: 12px; cursor: pointer; text-align: center;">
-                  ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ
-              </button>
-          </form>
+  <!-- รายละเอียดผลงาน -->
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <label for="review-text" style="font-size: 12px; font-weight: 700; color: #A1A1AA;">รายละเอียดผลงาน</label>
+    <textarea id="review-text" name="review_text" rows="3" required placeholder="น้องสุภาพเรียบร้อย เทคแคร์ประทับใจตรงปก..." style="background: #121214; border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; color: white; outline: none; font-size: 12px; line-height: 1.5; resize: none;"></textarea>
+  </div>
+
+  <!-- ปุ่มส่งรีวิว -->
+  <button type="submit" style="background: var(--primary-purple); color: black; padding: 10px; border: none; border-radius: 100px; font-weight: 800; font-size: 12px; cursor: pointer; text-align: center;">
+    ส่งคำติชมเพื่อยืนยันประวัติเข้าระบบ
+  </button>
+</form>
       </div>
     </section>
 
