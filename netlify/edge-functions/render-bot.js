@@ -297,7 +297,7 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
           "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
           "mainEntity": { "@id": `${canonicalUrl}#person` }
         },
-        // 3. Person Entity (ตัวตนของน้อง + ข้อเสนอราคา)
+        // 3. Person Entity (ตัวตนของน้อง)
         {
           "@type": "Person",
           "@id": `${canonicalUrl}#person`,
@@ -314,9 +314,22 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
           "weight": weightVal ? { "@type": "QuantitativeValue", "value": Number(weightVal), "unitCode": "KGM" } : undefined,
           "address": {
             "@type": "PostalAddress",
+            "streetAddress": `อำเภอเมือง${provinceName}`,
             "addressLocality": p.location || provinceName,
             "addressRegion": provinceName,
             "addressCountry": "TH"
+          }
+        },
+        // 4. Service Entity (ข้อเสนอราคาและบริการ แยกมาตรงนี้จะถูกต้องตาม Google)
+        {
+          "@type": "Service",
+          "@id": `${canonicalUrl}#service`,
+          "name": `บริการเพื่อนเที่ยว - ${displayName}`,
+          "url": canonicalUrl,
+          "provider": { "@id": `${canonicalUrl}#person` },
+          "areaServed": {
+            "@type": "AdministrativeArea",
+            "name": p.location || provinceName
           },
           "offers": {
             "@type": "Offer",
@@ -328,13 +341,13 @@ const lcpImageUrl = optimizeImg(dynamicDomain, mainImagePath, 400, 533);
             "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
           }
         },
-        // 4. BreadcrumbList (ลำดับเส้นทางหน้าเว็บ)
+        // 5. BreadcrumbList (ลำดับเส้นทางหน้าเว็บ)
         {
           "@type": "BreadcrumbList",
           "@id": `${canonicalUrl}#breadcrumb`,
           "itemListElement": breadcrumbElements
         },
-        // 5. FAQPage (ถาม-ตอบแสดงบน Google Search)
+        // 6. FAQPage (ถาม-ตอบแสดงบน Google Search)
         {
           "@type": "FAQPage",
           "@id": `${canonicalUrl}#faq`,

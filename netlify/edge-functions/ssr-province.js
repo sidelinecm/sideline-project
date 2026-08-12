@@ -525,11 +525,11 @@ function buildErrorPage(code, title, message) {
 </html>`, { status: code, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=60" } });
 }
 
-// 🟢 FIX: เปลี่ยน @type Person เป็น Service ป้องกัน Schema Error จาก Google
+// 🟢 โค้ดที่แก้ไขแล้ว:
 const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
-  const priceMatch = String(profile.rate || "").match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
-  const numericPrice = priceMatch ? priceMatch[0].replace(/,/g, "") : "1500";
-  const finalPriceSchema = numericPrice && Number(numericPrice) > 0 ? numericPrice : "1500"; 
+  const priceMatch = String(profile.rate || "").match(/\d+/g);
+  const rawNum = priceMatch ? priceMatch.join("") : "1500";
+  const finalPriceSchema = Number(rawNum) > 0 ? rawNum : "1500"; 
   const cleanName = (profile.name || "").replace(/^น้อง\s?/, "").trim();
   const cleanLoc = sanitizeThaiText(profile.location || province);
   const mainImgPath = getProfileMainImage(profile);
@@ -914,10 +914,11 @@ export default async (req, context) => {
       "parentOrganization": { "@id": `${hostUrl}/#organization` },
       "address": {
         "@type": "PostalAddress",
+        "streetAddress": isNationalHome ? "เขตพระนคร" : `อำเภอเมือง${provinceThaiName}`,
         "addressLocality": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
         "addressRegion": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
         "addressCountry": "TH"
-      },
+      }, // 🟢 เติมเครื่องหมาย , ตรงนี้แล้ว
       "areaServed": isNationalHome 
         ? { "@type": "Country", "name": "Thailand" }
         : [
