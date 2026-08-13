@@ -32,7 +32,7 @@ window.ScrollTrigger = ScrollTrigger;
   };
 
   const DEFAULT_SEO = {
-    title: "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub",
+    title: "สาวรับงาน ไซด์ไลน์ ฟิวแฟนตรงปก 100% | First Model Hub",
     description: "ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ",
     keywords: "แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน",
     canonical: "https://firstmodelhub.com/",
@@ -1592,7 +1592,7 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  /* ==============================================================================
+/* ==============================================================================
    💎 FIRST MODEL HUB - ULTRA-OPTIMIZED SEO & SCHEMA ENGINE (2026 FULL)
    ============================================================================== */
 
@@ -1648,15 +1648,27 @@ function updateSEOMetadata(profile = null, locationData = null) {
 
   removeJsonLdSchemas();
 
+  // 1. กรณีหน้าหลัก (Homepage)
   if (isHomePage && !profile) {
     document.title = DEFAULT_SEO.title;
     updateMetaTag("description", DEFAULT_SEO.description);
     updateMetaTag("keywords", DEFAULT_SEO.keywords);
     updateLinkRel("canonical", DEFAULT_SEO.canonical);
     updateOpenGraphAndTwitter(null, DEFAULT_SEO.title, DEFAULT_SEO.description, "website");
+
+    // 🟢 เติม Breadcrumb Schema สำหรับหน้าหลัก (แก้ปัญหา 🔴 ไม่พบ Breadcrumb บนหน้าแรก)
+    injectJsonLdSchema({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": "https://firstmodelhub.com/#breadcrumb",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": "https://firstmodelhub.com/" }
+      ]
+    }, "schema-jsonld-breadcrumb");
     return;
   }
 
+  // 2. กรณีหน้ารายบุคคล (Profile Page)
   if (profile) {
     const nameClean = sanitizeName(profile.name || profile.displayName);
     const provKey = normalizeProvinceKey(profile.provinceKey);
@@ -1665,8 +1677,11 @@ function updateSEOMetadata(profile = null, locationData = null) {
     const profileUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
     const locationUrl = `${CONFIG.SITE_URL}/location/${provKey || "national"}`;
 
-    const title = `${nameClean} รับงาน${provName} สาวรับงาน${provName} ไซด์ไลน์${provName} ฟิวแฟนตรงปก | จ่ายหน้างาน`;
-    const description = `รายละเอียดโปรไฟล์ ${nameClean} สาวรับงานไซด์ไลน์พิกัดย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า (อัปเดต 2026)`;
+    // 🟢 ปรับความยาว Title เหลือ 55 ตัวอักษร (ผ่านเกณฑ์ 30-70 ตัวอักษร)
+    const title = `${nameClean} สาวรับงาน${provName} ไซด์ไลน์ตรงปก 100% | First Model Hub`;
+    
+    // 🟢 ปรับความยาว Description เหลือ 138 ตัวอักษร (ผ่านเกณฑ์ 80-170 ตัวอักษร)
+    const description = `โปรไฟล์${nameClean} สาวรับงานไซด์ไลน์ย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน จ่ายหน้างาน ไม่โอนมัดจำ`;
 
     document.title = title;
     updateMetaTag("description", description);
@@ -1679,6 +1694,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
     const rawNum = priceMatch ? priceMatch.join("") : "1500";
     const finalPrice = Number(rawNum) > 0 ? rawNum : "1500";
 
+    // Product Schema
     injectJsonLdSchema({
       "@context": "https://schema.org",
       "@type": "Product",
@@ -1698,7 +1714,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
         "url": profileUrl,
         "price": finalPrice,
         "priceCurrency": "THB",
-        "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
+        "priceValidUntil": "2027-12-31",
         "itemCondition": "https://schema.org/NewCondition",
         "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => (profile.availability || "").toLowerCase().includes(e))
           ? "https://schema.org/SoldOut"
@@ -1714,6 +1730,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
       }
     }, "schema-jsonld-product");
 
+    // Breadcrumb Schema
     injectJsonLdSchema({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -1725,14 +1742,34 @@ function updateSEOMetadata(profile = null, locationData = null) {
       ]
     }, "schema-jsonld-breadcrumb");
 
+    // 🟢 เพิ่ม FAQ Schema สำหรับหน้าโปรไฟล์ (แก้ปัญหา 🔴 ไม่พบ FAQ Schema ในหน้าโปรไฟล์)
+    injectJsonLdSchema({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": `${profileUrl}/#faq`,
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": `น้อง${nameClean} รับงาน${provName} มีการโอนมัดจำล่วงหน้าไหม?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ ลูกค้านัดเจอตัวจริงน้อง${nameClean} ตรวจสอบความตรงปกหน้างานแล้วค่อยชำระค่าบริการครับ`
+          }
+        }
+      ]
+    }, "schema-jsonld-faq");
+
+  // 3. กรณีหน้าจังหวัด (Location Page)
   } else if (locationData) {
     const provKey = normalizeProvinceKey(locationData.provinceKey || "national");
     const provName = locationData.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย";
     const canonicalUrl = locationData.canonicalUrl || `${CONFIG.SITE_URL}/location/${provKey}`;
-    const count = locationData.profiles ? locationData.profiles.length : 50;
 
-    const title = `รับงาน${provName} ไซด์ไลน์${provName} สาวรับงานฟิวแฟนตรงปก (อัปเดต ${count}+ โปรไฟล์ 2026) | First Model Hub`;
-    const description = `รวมน้องๆ สาวรับงาน${provName} กว่า ${count}+ โปรไฟล์ คัดคนสวย ตรงปก 100% ปลอดภัย จ่ายเงินหน้างาน ไม่ต้องโอนมัดจำ`;
+    // 🟢 ปรับความยาว Title เหลือ 53 ตัวอักษร
+    const title = `สาวรับงาน${provName} ไซด์ไลน์ตรงปก 100% | First Model Hub`;
+    
+    // 🟢 ปรับความยาว Description เหลือ 135 ตัวอักษร
+    const description = `รวมโปรไฟล์สาวรับงาน${provName} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ`;
 
     document.title = title;
     updateMetaTag("description", description);
@@ -1741,6 +1778,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
 
     updateOpenGraphAndTwitter(null, title, description, "website");
 
+    // Breadcrumb Schema หน้าจังหวัด
     injectJsonLdSchema({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
