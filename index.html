@@ -42,8 +42,8 @@
   <meta property="og:title" content="รับงานทั่วไทย ไซด์ไลน์สาวรับงานฟิวแฟนตรงปก | First Model Hub" />
   <meta property="og:description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%" />
   <meta property="og:url" content="{{SEO_CANONICAL}}" />
-  <meta property="og:image" content="{{SEO_IMAGE}}" />
-  <meta property="og:image:secure_url" content="{{SEO_IMAGE}}" />
+  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
+  <meta property="og:image:secure_url" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
   <meta property="og:image:type" content="image/webp" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -53,7 +53,7 @@
   <meta name="twitter:title" content="รับงานทั่วไทย ไซด์ไลน์ ฟิวแฟนตรงปก 100%" />
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ" />
   <meta name="twitter:url" content="{{SEO_CANONICAL}}" />
-  <meta name="twitter:image" content="{{SEO_IMAGE}}" />
+  <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp" />
 
   <!-- APP ICONS & MANIFEST -->
   <meta name="apple-mobile-web-app-title" content="First Model Hub" />
@@ -205,7 +205,7 @@
 
 <form id="search-form" action="javascript:void(0);" style="display: none !important;" aria-hidden="true">
   <input type="search" id="search-keyword" value="">
-  <input type="hidden" id="search-province" value="{{PROVINCE_KEY}}">
+  <input type="hidden" id="search-province" value="">
   <input type="hidden" id="search-availability" value="">
   <input type="hidden" id="search-featured" value="">
   <input type="hidden" id="search-price" value="">
@@ -387,7 +387,7 @@
     <form id="review-form" style="display: none; flex-direction: column; gap: 12px; max-width: 500px; margin: 12px auto 0 auto; text-align: left; background: rgba(13,8,30,0.6); padding: 16px; border-radius: 14px; border: 1px solid rgba(147,51,234,0.2);">
       
       <input type="hidden" id="review-rating-value" name="rating" value="5">
-      <input type="hidden" id="review-province-key" name="province_key" value="{{PROVINCE_KEY}}">
+      <input type="hidden" id="review-province-key" name="province_key" value="national">
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -643,7 +643,21 @@
   window.profilesData = null;
 </script>
 
+<!-- 1. โหลด mainv1.js ก่อนเพื่อเริ่มดักจับ JS Errors ทันที -->
+<script src="/mainv1.js"></script>
+
+<!-- 2. โหลด main.js ที่เป็น ES Module -->
 <script type="module" src="/main.js"></script>
 
+<!-- PWA Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('SW Registration failed: ', err);
+      });
+    });
+  }
+</script>
 </body>
 </html>
