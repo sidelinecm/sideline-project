@@ -619,6 +619,9 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
 
+  // 🟢 ประกาศตัวแปรคำนวณ Above-the-Fold ก่อนส่งเข้า Template String
+  const isAboveFold = index < 6;
+
   return `
     <div class="profile-card-new-container" role="listitem">
       <article class="profile-card-new interactive-card"
@@ -633,7 +636,8 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                title="${seoAltText}"
                width="300" height="400"
                class="profile-card-img-cover" 
-               loading="${index === 0 ? "eager" : "lazy"}"
+               loading="${isAboveFold ? "eager" : "lazy"}"
+               ${isAboveFold ? 'fetchpriority="high"' : ""}
                decoding="async"
                onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
                        
