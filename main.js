@@ -720,7 +720,11 @@ window.ScrollTrigger = ScrollTrigger;
         <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
           <span class="vip-status-chip">🟢 ${availText}</span>
           <span class="hot-rank-badge"><i class="fas fa-crown"></i> ${rankText}</span>
-          <img src="${imgUrl}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
+          <img src="${imgUrl}" 
+               alt="${p.displayName}" 
+               loading="${idx < 4 ? 'eager' : 'lazy'}" 
+               ${idx === 0 ? 'fetchpriority="high"' : ''}
+               onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${pSlug}" class="card-link" aria-label="ดูโปรไฟล์${p.displayName}"></a>
           <div class="vip-card-info">
@@ -779,103 +783,111 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function createProfileCardElement(profile, index = 20) {
-    const container = document.createElement("div");
-    container.className = "profile-card-new-container";
+  const container = document.createElement("div");
+  container.className = "profile-card-new-container";
 
-    const card = document.createElement("div");
-    card.className = "profile-card-new interactive-card";
-    card.setAttribute("data-profile-id", profile.id);
-    card.setAttribute("data-profile-slug", profile.slug || profile.id);
+  const card = document.createElement("div");
+  card.className = "profile-card-new interactive-card";
+  card.setAttribute("data-profile-id", profile.id);
+  card.setAttribute("data-profile-slug", profile.slug || profile.id);
 
-    const imageSrc = profile.images && profile.images.length > 0 ? profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
-    const currentProvName = profile.provinceNameThai || STATE.provincesMap.get(profile.provinceKey) || "ทั่วไทย";
-    const nameClean = sanitizeName(profile.displayName || profile.name);
+  // 1. จัดการข้อมูลพื้นฐานและชื่อ
+  const imageSrc = profile.images && profile.images.length > 0 ? profile.images[0].src : CONFIG.DEFAULT_OG_IMAGE;
+  const currentProvName = profile.provinceNameThai || STATE.provincesMap.get(profile.provinceKey) || "ทั่วไทย";
+  const nameClean = sanitizeName(profile.displayName || profile.name);
+  const pLoc = profile.location || currentProvName;
+  const seoAltText = `${nameClean} สาวรับงาน${currentProvName} ย่าน${pLoc} ไซด์ไลน์ตรงปก 100%`;
+
+  // 2. ตรวจสอบสถานะการรับงาน
+  const isAvailable = profile.status === "รับงาน" || !(profile.availability || "").toLowerCase().includes("ไม่ว่าง");
+  const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
+  const statusText = profile.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
+  
+  const ageDisplay = (profile.safeAge && profile.safeAge !== "-" && profile.safeAge !== "ไม่ระบุ") 
+    ? ` <span style="font-size: 0.85em; opacity: 0.9;">(${profile.safeAge})</span>` 
+    : "";
+
+  // 3. ป้ายสัญลักษณ์ (Badges)
+  const featuredBadge = profile.isfeatured
+    ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-star" style="font-size: 9px; color: #FBBF24;"></i>
+        <span style="letter-spacing: 0.02em;">แนะนำ</span>
+       </span>`
+    : "";
+
+  const statusBadge = `
+    <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
+        <span style="letter-spacing: 0.02em;">${statusText}</span>
+    </span>
+  `;
+
+  const videoBadge = profile.hasVideo
+    ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-video" style="font-size: 9px;"></i> คลิป
+       </span>`
+    : "";
+
+  const verifiedBadge = (profile.isVerified || profile.verified)
+    ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-check-circle" style="font-size: 9px; color: #00E676;"></i> ยืนยันตัวตน
+       </span>`
+    : "";
+
+  const encodedSlug = encodeURIComponent(profile.slug || profile.id);
+
+
+  const isAboveFold = index < 6;
+
+  card.innerHTML = `
+    <img src="${imageSrc}" 
+         alt="${seoAltText}"
+         title="${seoAltText}"
+         width="300" height="400"
+         class="profile-card-img-cover" 
+         loading="${isAboveFold ? "eager" : "lazy"}"
+         ${isAboveFold ? 'fetchpriority="high"' : ""}
+         decoding="async"
+         onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
+                 
+    <div class="profile-card-gradient"></div>
+
+    <div class="profile-card-badge-top-left">
+        ${featuredBadge}
+        ${statusBadge}
+        ${videoBadge}
+    </div>
+
+    <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center; gap: 4px;">
+        ${verifiedBadge}
+        <button type="button" data-action="like" data-id="${profile.id}" class="like-heart-btn" aria-label="กดถูกใจโปรไฟล์" style="pointer-events: auto;">
+          <i class="fas fa-heart" style="font-size: 12px;"></i>
+        </button>
+    </div>
     
-    const pLoc = profile.location || currentProvName;
-    const seoAltText = `${nameClean} สาวรับงาน${currentProvName} ย่าน${pLoc} ไซด์ไลน์ตรงปก 100%`;
+    <a href="/sideline/${encodedSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${nameClean} สาวรับงาน${currentProvName}"></a>
 
-    const isAvailable = profile.status === "รับงาน" || !(profile.availability || "").toLowerCase().includes("ไม่ว่าง");
-    const statusDotColor = isAvailable ? "#00E676" : "#FF2E63";
-    const statusText = profile.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
-    
-    const ageDisplay = (profile.safeAge && profile.safeAge !== "-" && profile.safeAge !== "ไม่ระบุ") ? ` <span style="font-size: 0.85em; opacity: 0.9;">(${profile.safeAge})</span>` : "";
+    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
+        <h3 style="font-size: 14px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+          ${nameClean}${ageDisplay}
+        </h3>
+        
+        ${(profile.slogan || profile.quote) ? `<p style="font-size: 11px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
+        
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
+                <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
+            </span>
+            <span style="color: #00E676; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
+                ${profile.displayPrice}
+            </span>
+        </div>
+    </div>
+  `;
 
-    const featuredBadge = profile.isfeatured
-      ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-star" style="font-size: 9px; color: #FBBF24;"></i>
-          <span style="letter-spacing: 0.02em;">แนะนำ</span>
-         </span>`
-      : "";
-
-    const statusBadge = `
-      <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
-          <span style="letter-spacing: 0.02em;">${statusText}</span>
-      </span>
-    `;
-
-    const videoBadge = profile.hasVideo
-      ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-video" style="font-size: 9px;"></i> คลิป
-         </span>`
-      : "";
-
-    const verifiedBadge = (profile.isVerified || profile.verified)
-      ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          <i class="fas fa-check-circle" style="font-size: 9px; color: #00E676;"></i> ยืนยันตัวตน
-         </span>`
-      : "";
-
-    const encodedSlug = encodeURIComponent(profile.slug || profile.id);
-
-    card.innerHTML = `
-<img src="${imageSrc}" 
-   alt="${seoAltText}"
-   title="${seoAltText}"
-     width="300" height="400"
-     class="profile-card-img-cover" 
-     loading="${index === 0 ? "eager" : "lazy"}"
-     decoding="async"
-     onerror="this.onerror=null; this.src='/images/firstmodelhub.webp';" />
-               
-<div class="profile-card-gradient"></div>
-
-<div class="profile-card-badge-top-left">
-    ${featuredBadge}
-    ${statusBadge}
-    ${videoBadge}
-</div>
-
-      <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center; gap: 4px;">
-          ${verifiedBadge}
-          <button type="button" data-action="like" data-id="${profile.id}" class="like-heart-btn" aria-label="กดถูกใจโปรไฟล์">
-            <i class="fas fa-heart" style="font-size: 12px;"></i>
-          </button>
-      </div>
-      
-      <a href="/sideline/${encodedSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${nameClean}"></a>
-
-      <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
-          <h3 style="font-size: 14px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
-            ${nameClean}${ageDisplay}
-          </h3>
-          
-          ${(profile.slogan || profile.quote) ? `<p style="font-size: 11px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
-          
-          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
-              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
-                  <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${pLoc}
-              </span>
-              <span style="color: #00E676; font-weight: 900; font-size: 13px; text-shadow: 0 1.5px 3px rgba(0,0,0,0.95);">
-                  ${profile.displayPrice}
-              </span>
-          </div>
-      </div>
-    `;
-
-    container.appendChild(card);
-    return container;
-  }
+  container.appendChild(card);
+  return container;
+}
 
   async function appendProfilesToContainer(gridElement, profiles, activeRenderId) {
     if (!gridElement || !profiles) return;
