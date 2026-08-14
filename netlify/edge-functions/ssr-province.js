@@ -261,24 +261,20 @@ function injectSchema(html, schemaObj) {
   const jsonStr = JSON.stringify(schemaObj).replace(/</g, '\\u003c');
   const newScriptTag = `<script type="application/ld+json" id="dynamic-schema">${jsonStr}</script>`;
 
-  // 1. ตรวจสอบบล็อก <script ... id="dynamic-schema"> ที่ครอบ {{SCHEMA_JSON}} แล้วแทนที่ทั้งบล็อก
   const fullTagRegex = /<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?\{\{\s*SCHEMA_JSON\s*\}\}[\s\S]*?<\/script>/gi;
   if (fullTagRegex.test(html)) {
     return html.replace(fullTagRegex, newScriptTag);
   }
 
-  // 2. หากมีคำว่า {{SCHEMA_JSON}} โดดๆ ให้แทนที่ด้วย newScriptTag
   if (html.includes("{{SCHEMA_JSON}}")) {
     return html.replace("{{SCHEMA_JSON}}", newScriptTag);
   }
 
-  // 3. หากมีแท็ก <script id="dynamic-schema"> เดิมอยู่แล้วโดยไม่มี placeholder ให้แทนที่ทั้งบล็อก
   const existingRegex = /<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?<\/script>/gi;
   if (existingRegex.test(html)) {
     return html.replace(existingRegex, newScriptTag);
   }
 
-  // 4. กรณีไม่พบสคริปต์เดิม ให้แทรกไว้ก่อนปิด </head>
   return html.replace(/<\/head>/i, `  ${newScriptTag}\n</head>`);
 }
 
@@ -294,10 +290,10 @@ function injectHydrationData(html, hydratedDataObj) {
   return cleanHtml + `\n${scriptTag}`;
 }
 
+// 🟢 แก้ไขจุดที่ 1: แก้ไขลบตัวเลข 50 ค้างใน sweepPlaceholders
 function sweepPlaceholders(html) {
   if (!html) return "";
   
-  // ลบทั้งบล็อกสคริปต์ dynamic-schema หากยังมี {{SCHEMA_JSON}} ตกค้างอยู่
   let cleanHtml = html.replace(/<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?\{\{\s*SCHEMA_JSON\s*\}\}[\s\S]*?<\/script>/gi, "");
   
   return cleanHtml
@@ -306,7 +302,8 @@ function sweepPlaceholders(html) {
     .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
     .replace(/\{\{\s*province-key\s*\}\}/gi, "national")
-    .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, "50")
+    .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, "0")
+    .replace(/\{\{\s*COUNT_SNIPPET\s*\}\}/gi, "กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม")
     .replace(/\{\{\s*PROVINCE_ZONES\s*\}\}/gi, "กรุงเทพฯ, เชียงใหม่, ชลบุรี, อุดรธานี")
     .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "")
     .replace(/%7B%7BMAP_EMBED_URL%7D%7D/gi, "")
@@ -439,16 +436,16 @@ const formatDateSSR = dateStr => {
   }
 };
 
+// 🟢 แก้ไขจุดที่ 3: แก้ไขการสร้างลิงก์วนลูปชี้เข้าหาตัวเอง (Self-Referencing Links)
 const smartLinkify = (text, _flag, zones, provinceSlug = "chiangmai") => {
   if (!text) return "";
   let res = sanitizeThaiText(text);
-  const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
   if (zones && Array.isArray(zones) && zones.length > 0) {
     zones.slice(0, 3).forEach(zone => {
       if (!zone) return;
       const cleanZone = sanitizeThaiText(zone);
       const regex = new RegExp(`(${cleanZone})(?![^<]*>|[^<>]*<\\/a>)`, "g");
-      res = res.replace(regex, `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">$1</a>`);
+      res = res.replace(regex, `<span class="text-[#C084FC] font-extrabold">$1</span>`);
     });
   }
   const keywordsRegex = /(เด็กเอ็น|ไซด์ไลน์|พรีเมียม|ฟีลแฟน|รับงาน|ฟิวแฟน|สาวรับงาน)(?![^<]*>|[^<>]*<\/a>)/g;
@@ -457,9 +454,8 @@ const smartLinkify = (text, _flag, zones, provinceSlug = "chiangmai") => {
 
 const getDynamicIntro = (provinceName, zones, provinceSlug = "chiangmai") => {
   let processedZones = zones && Array.isArray(zones) ? [...zones] : [];
-  const targetUrl = (provinceSlug && provinceSlug !== "national") ? `/location/${provinceSlug}` : "/";
   const zoneLinks = processedZones.slice(0, 4).map(zone => 
-    `<a href="${targetUrl}" class="text-[#C084FC] hover:underline font-bold transition-colors">${escapeHTML(sanitizeThaiText(zone))}</a>`
+    `<span class="text-[#C084FC] font-bold">${escapeHTML(sanitizeThaiText(zone))}</span>`
   );
   const zoneSnippet = zoneLinks.length > 0 ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน${zoneLinks.join(", โซน")}` : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
 
@@ -747,9 +743,20 @@ export default async (req, context) => {
       }
     }
 
+    // 🟢 แก้ไขจุดที่ 1 (บั๊กค้นหาจังหวัดที่มี _ ไม่พบ): เพิ่มคีย์ค้นหาทั้งแบบมีขีดและไม่มีขีดให้ทุกจังหวัด
     let searchKeys = [provinceSlug];
-    if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
-      searchKeys = ["chiangmai", "chiang_mai"];
+    if (provinceSlug.includes("-")) {
+      searchKeys.push(provinceSlug.replace(/-/g, "_"));
+    } else if (provinceSlug.includes("_")) {
+      searchKeys.push(provinceSlug.replace(/_/g, "-"));
+    } else {
+      // เพิ่มรูปแบบมาตรฐานที่ใช้บ่อยใน DB
+      if (provinceSlug === "chiangmai") searchKeys.push("chiang_mai");
+      if (provinceSlug === "udonthani") searchKeys.push("udon_thani");
+      if (provinceSlug === "khonkaen") searchKeys.push("khon_kaen");
+      if (provinceSlug === "suratthani") searchKeys.push("surat_thani");
+      if (provinceSlug === "ubonratchathani") searchKeys.push("ubon_ratchathani");
+      if (provinceSlug === "nakhonratchasima") searchKeys.push("nakhon_ratchasima");
     }
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
@@ -870,7 +877,9 @@ export default async (req, context) => {
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // 🟢 สร้าง Schema Graph ครบ 100% ตรงตามเกณฑ์ Google Rich Results
+    // ==============================================================================
+    // 🟢 สร้าง SCHEMA GRAPH ครบ 100% ตรงตามเกณฑ์ GOOGLE RICH RESULTS (2026 FULL)
+    // ==============================================================================
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -907,6 +916,7 @@ export default async (req, context) => {
       }
     ];
 
+    // 1. กรณีหน้ารายบุคคล (Single Profile Page)
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
@@ -923,10 +933,10 @@ export default async (req, context) => {
         "mainEntity": { "@id": `${profileUrl}/#product` }
       });
 
-      // 🟢 Product Schema (ปลดล็อกดาวสีทองบน Google Search)
-      const priceMatch = String(matchedProfile.rate || "").match(/\d+/g);
-      const rawNum = priceMatch ? priceMatch.join("") : "1500";
-      const finalPrice = Number(rawNum) > 0 ? rawNum : "1500";
+      // 🟢 แก้ไขจุดที่ 2 (บั๊กคำนวณราคาสูงเกินจริง): สกัดเอาเฉพาะตัวเลขชุดแรกจากช่วงราคา
+      const rawRateStr = String(matchedProfile.rate || "1500");
+      const firstPriceMatch = rawRateStr.match(/\d{3,5}/);
+      const finalPrice = firstPriceMatch ? firstPriceMatch[0] : "1500";
 
       schemaGraph.push({
         "@type": "Product",
@@ -975,6 +985,23 @@ export default async (req, context) => {
         ]
       });
 
+      schemaGraph.push({
+        "@type": "FAQPage",
+        "@id": `${profileUrl}/#faq`,
+        "isPartOf": { "@id": `${profileUrl}/#webpage` },
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": `น้อง${cleanName} รับงาน${provinceThaiName} มีการโอนมัดจำล่วงหน้าไหม?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ ลูกค้านัดเจอตัวจริงน้อง${cleanName} ตรวจสอบความตรงปกหน้างานแล้วค่อยชำระค่าบริการครับ`
+            }
+          }
+        ]
+      });
+
+    // 2. กรณีหน้าหลัก (Homepage) และ หน้าจังหวัด (Location Pages)
     } else {
       const collectionPageObj = {
         "@type": "CollectionPage",
@@ -982,11 +1009,9 @@ export default async (req, context) => {
         "name": pageTitle,
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
-        "about": { "@id": `${canonUrl}/#business` }
+        "about": { "@id": `${canonUrl}/#business` },
+        "breadcrumb": { "@id": `${canonUrl}/#breadcrumb` }
       };
-      if (!isNationalHome) {
-        collectionPageObj["breadcrumb"] = { "@id": `${canonUrl}/#breadcrumb` };
-      }
       schemaGraph.push(collectionPageObj);
 
       schemaGraph.push({
@@ -1023,16 +1048,16 @@ export default async (req, context) => {
         }
       });
 
-      if (!isNationalHome) {
-        schemaGraph.push({
-          "@type": "BreadcrumbList",
-          "@id": `${canonUrl}/#breadcrumb`,
-          "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl },
-            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": canonUrl }
-          ]
-        });
-      }
+      schemaGraph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonUrl}/#breadcrumb`,
+        "itemListElement": isNationalHome ? [
+          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl }
+        ] : [
+          { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": hostUrl },
+          { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceThaiName}`, "item": canonUrl }
+        ]
+      });
 
       if (seoData.faqs && seoData.faqs.length > 0) {
         schemaGraph.push({
@@ -1165,7 +1190,7 @@ export default async (req, context) => {
             </h2>
 
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 18px;">
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 10px;">
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 6px; border-radius: 100px;">
                 <small style="color:#A1A1AA; font-size: 11px; display:block;">ส่วนสูง</small>
                 <strong style="font-size: 15px; color: #FFFFFF;">${matchedProfile.height || "-"} ซม.</strong>
               </div>
@@ -1319,12 +1344,17 @@ export default async (req, context) => {
 
     rawHtml = injectSchema(rawHtml, schemaJson);
 
+    // 🟢 แก้ไขจุดที่ 1: ป้องกันตัวเลขนับโปรไฟล์ 50 ค้าง/ขัดแย้ง
+    const profileCountVal = profileList ? profileList.length : 0;
+    const countSnippetText = profileCountVal > 0 ? `(พร้อมสแตนด์บาย ${profileCountVal} โปรไฟล์)` : `(กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม)`;
+
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{province-name}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_KEY}}", provinceSlug);
     rawHtml = replaceGlobal(rawHtml, "{{province-key}}", provinceSlug);
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileCountVal);
+    rawHtml = replaceGlobal(rawHtml, "{{COUNT_SNIPPET}}", countSnippetText);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
@@ -1369,9 +1399,10 @@ export default async (req, context) => {
     rawHtml = injectHydrationData(rawHtml, hydratedProfilesData);
     rawHtml = sweepPlaceholders(rawHtml);
     
+    // 🟢 แก้ไขจุดที่ 3: ปรับ Cache-Control ของ CDN ไม่ให้ค้างเกิน 1 นาทีเมื่ออัปเดต DB
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
