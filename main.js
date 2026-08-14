@@ -509,6 +509,26 @@ window.ScrollTrigger = ScrollTrigger;
     };
   }
 
+  // 🟢 1. ฟังก์ชันยิงเช็กเวลาอัปเดตล่าสุดของหลังบ้าน (ใช้เวลาไม่ถึง 0.05 วินาที)
+  async function getBackendLatestTimestamp() {
+    if (!supabaseClient) return 0;
+    try {
+      const { data, error } = await supabaseClient
+        .from("profiles")
+        .select("lastUpdated, created_at")
+        .order("lastUpdated", { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error || !data) return 0;
+      const lastTime = data.lastUpdated || data.created_at;
+      return lastTime ? new Date(lastTime).getTime() : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // 🟢 2. ฟังก์ชันดึงโปรไฟล์อัจฉริยะ (อัปเดตทันทีเมื่อหลังบ้านเปลี่ยน / ไม่อัปเดตถ้าหลังบ้านนิ่ง)
   async function fetchProfilesData() {
     if (STATE.isFetching) return false;
     STATE.isFetching = true;
@@ -522,7 +542,7 @@ window.ScrollTrigger = ScrollTrigger;
     };
 
     try {
-      // 🟢 1. ตรวจสอบข้อมูลจาก SSR Hydration
+      // A. ตรวจสอบข้อมูลจาก SSR Hydration (ถ้าเปิดหน้าเว็บเข้ามาครั้งแรก มี HTML จาก SSR ให้ใช้ก่อนทันที)
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         console.log("⚡ [Hydration] โหลดข้อมูล SSR สำเร็จ!");
         STATE.provincesMap.clear();
@@ -554,62 +574,77 @@ window.ScrollTrigger = ScrollTrigger;
         return true;
       }
 
-      console.log("🚀 กำลังดึงข้อมูลโปรไฟล์จาก Supabase...");
-      
-      if (!supabaseClient) {
-        throw new Error("Supabase client is not initialized");
-      }
+      if (!supabaseClient) throw new Error("Supabase client is not initialized");
 
-      const provincesPromise = supabaseClient.from("provinces").select("*");
-      let activeProfileQuery = supabaseClient
-        .from("profiles")
-        .select("*")
-        .eq("active", true)
-        .order("isfeatured", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(600);
+      // B. ระบบเช็กเวอร์ชันอัจฉริยะ (Smart Version Check)
+      const localSavedVersion = await idb.get("profiles_cache_version") || 0;
+      const serverLatestVersion = await getBackendLatestTimestamp();
 
-      const currentPath = window.location.pathname.toLowerCase();
-      const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
+      // เช็กว่าหลังบ้านมีข้อมูลใหม่กว่าในมือถือหรือไม่
+      const isBackendChanged = serverLatestVersion > localSavedVersion;
+      const cachedProfiles = await idb.get(CONFIG.KEYS.CACHE_PROFILES);
 
-      if (isLocationPage) {
-        const provSlug = normalizeProvinceKey(currentPath.split("/").filter(Boolean).pop());
-        const searchKeys = (provSlug === "chiangmai" || provSlug === "chiang_mai") ? ["chiangmai", "chiang_mai"] : [provSlug];
-        activeProfileQuery = activeProfileQuery.in("provinceKey", searchKeys);
-      }
+      // C. ถ้าหลังบ้านเปลี่ยน หรือยังไม่มีแคชในมือถือ -> ให้ดึงข้อมูลใหม่จาก Supabase
+      if (isBackendChanged || !cachedProfiles || cachedProfiles.length === 0) {
+        console.log("🔄 หลังบ้านมีการ เพิ่ม/แก้ไข/ลบ ข้อมูล! กำลังดึงข้อมูลใหม่ล่าสุด...");
 
-      const [provincesRes, profilesRes] = await Promise.all([provincesPromise, activeProfileQuery]);
+        const provincesPromise = supabaseClient.from("provinces").select("*");
+        let activeProfileQuery = supabaseClient
+          .from("profiles")
+          .select("*")
+          .eq("active", true)
+          .order("isfeatured", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(600);
 
-      const provincesData = Array.isArray(provincesRes?.data) ? provincesRes.data : [];
-      STATE.provincesMap.clear();
-      const provincesCacheArr = [];
-      
-      provincesData.forEach(p => {
-        if (!p) return;
-        const name = p.nameThai || p.name_thai || p.name;
-        let key = normalizeProvinceKey(p.key || p.slug || p.id);
-        if (key && name) {
-          STATE.provincesMap.set(key, name);
-          provincesCacheArr.push({ key: key, name: name });
+        const currentPath = window.location.pathname.toLowerCase();
+        const isLocationPage = currentPath.includes("/location/") || currentPath.includes("/province/");
+
+        if (isLocationPage) {
+          const provSlug = normalizeProvinceKey(currentPath.split("/").filter(Boolean).pop());
+          const searchKeys = (provSlug === "chiangmai" || provSlug === "chiang_mai") ? ["chiangmai", "chiang_mai"] : [provSlug];
+          activeProfileQuery = activeProfileQuery.in("provinceKey", searchKeys);
         }
-      });
-      ensureMapDefaults();
-      if (provincesCacheArr.length > 0) {
-        idb.set(CONFIG.KEYS.CACHE_PROVINCES, provincesCacheArr);
-      }
 
-      if (profilesRes?.error) throw profilesRes.error;
+        const [provincesRes, profilesRes] = await Promise.all([provincesPromise, activeProfileQuery]);
 
-      const rawProfiles = Array.isArray(profilesRes?.data) ? profilesRes.data : [];
-      const fetchedProfiles = deduplicateProfiles(rawProfiles.map(p => processProfileObject(p)).filter(Boolean));
+        const provincesData = Array.isArray(provincesRes?.data) ? provincesRes.data : [];
+        STATE.provincesMap.clear();
+        const provincesCacheArr = [];
+        
+        provincesData.forEach(p => {
+          if (!p) return;
+          const name = p.nameThai || p.name_thai || p.name;
+          let key = normalizeProvinceKey(p.key || p.slug || p.id);
+          if (key && name) {
+            STATE.provincesMap.set(key, name);
+            provincesCacheArr.push({ key: key, name: name });
+          }
+        });
+        ensureMapDefaults();
+        if (provincesCacheArr.length > 0) {
+          idb.set(CONFIG.KEYS.CACHE_PROVINCES, provincesCacheArr);
+        }
 
-      if (isLocationPage && STATE.allProfiles.length > 0) {
-        STATE.allProfiles = deduplicateProfiles([...fetchedProfiles, ...STATE.allProfiles]);
-      } else {
+        if (profilesRes?.error) throw profilesRes.error;
+
+        const rawProfiles = Array.isArray(profilesRes?.data) ? profilesRes.data : [];
+        const fetchedProfiles = deduplicateProfiles(rawProfiles.map(p => processProfileObject(p)).filter(Boolean));
+
         STATE.allProfiles = fetchedProfiles;
+        
+        // บันทึกแคชใหม่พร้อมจำเวลาเวอร์ชันหลังบ้านล่าสุดลง IndexedDB
         if (!isLocationPage && fetchedProfiles.length > 0) {
-          idb.set(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
+          await idb.set(CONFIG.KEYS.CACHE_PROFILES, STATE.allProfiles);
+          await idb.set("profiles_cache_version", serverLatestVersion);
         }
+        console.log("✅ อัปเดตข้อมูลบนจอมือถือเป็นเวอร์ชันล่าสุดเรียบร้อยแล้ว!");
+
+      } else {
+        // D. ถ้าหลังบ้านไม่มีอะไรเปลี่ยนแปลง -> ใช้ข้อมูลในมือถือทันที (เปิดไว 0.001 วิ ไม่เสียโควตาเน็ต)
+        console.log("⚡ หลังบ้านไม่มีการเปลี่ยนแปลง! ใช้ข้อมูลเดิมในมือถือต่อไป");
+        ensureMapDefaults();
+        STATE.allProfiles = cachedProfiles;
       }
 
       populateProvinceDropdown();
@@ -619,7 +654,7 @@ window.ScrollTrigger = ScrollTrigger;
       return true;
 
     } catch (err) {
-      console.error("❌ เกิดข้อผิดพลาด นำข้อมูลเก่ามาแสดงแทน:", err);
+      console.error("❌ เกิดข้อผิดพลาด นำข้อมูลแคชเก่ามาแสดงแทน:", err);
       ensureMapDefaults();
 
       const rawCache = await idb.get(CONFIG.KEYS.CACHE_PROFILES) || localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
