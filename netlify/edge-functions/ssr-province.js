@@ -290,14 +290,27 @@ function injectHydrationData(html, hydratedDataObj) {
   return cleanHtml + `\n${scriptTag}`;
 }
 
-// 🟢 แก้ไขจุดที่ 1: แก้ไขลบตัวเลข 50 ค้างใน sweepPlaceholders
-function sweepPlaceholders(html) {
+
+function normalizeProfileName(rawName) {
+  if (!rawName || typeof rawName !== "string") return "น้องสาวสวย";
+  const clean = sanitizeThaiText(rawName).replace(/^(น้อง\s*)+/gi, "").trim();
+  return clean ? `น้อง${clean}` : "น้องสาวสวย";
+}
+
+
+function sweepPlaceholders(html, currentCanonUrl = CONFIG.PRIMARY_DOMAIN, mapEmbedUrl = "") {
   if (!html) return "";
   
   let cleanHtml = html.replace(/<script\s+type=["']application\/ld\+json["']\s+id=["']dynamic-schema["'][^>]*>[\s\S]*?\{\{\s*SCHEMA_JSON\s*\}\}[\s\S]*?<\/script>/gi, "");
   
+  const fallbackMapUrl = mapEmbedUrl || `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน กรุงเทพ")}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+
   return cleanHtml
-    .replace(/\{\{\s*SCHEMA_JSON\s*\}\}/gi, "")
+    // 🛡️ ป้องกัน Tag SEO ตกค้าง
+    .replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)\s*SEO_CANONICAL\s*(%7D%7D|\}\})/gi, currentCanonUrl)
+    .replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)\s*SEO_IMAGE\s*(%7D%7D|\}\})/gi, CONFIG.DEFAULT_OG_IMAGE)
+    .replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)\s*MAP_EMBED_URL\s*(%7D%7D|\}\})/gi, fallbackMapUrl)
+    // 🛡️ ป้องกัน Variable ข้างในเนื้อหาตกค้าง
     .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
@@ -305,9 +318,8 @@ function sweepPlaceholders(html) {
     .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, "0")
     .replace(/\{\{\s*COUNT_SNIPPET\s*\}\}/gi, "กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม")
     .replace(/\{\{\s*PROVINCE_ZONES\s*\}\}/gi, "กรุงเทพฯ, เชียงใหม่, ชลบุรี, อุดรธานี")
-    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "")
-    .replace(/%7B%7BMAP_EMBED_URL%7D%7D/gi, "")
-    .replace(/\{\{MAP_EMBED_URL\}\}/gi, "");
+    // 🛡️ ไม้ตายสุดท้าย: ลบทุกอย่างที่เป็น {{...}} หรือ %7B%7B...%7D%7D ที่หลงเหลืออยู่ทิ้งทั้งหมด!
+    .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "");
 }
 
 async function getTemplateHtml(url, _context) {
@@ -837,28 +849,41 @@ export default async (req, context) => {
     }
 
     const topProfilesTextSnippet = profileList.slice(0, 5).map(p => {
-      const pName = (p.name || "").replace(/^น้อง/, "").trim();
+      // 🟢 ป้องกันคำว่า "น้อง" ซ้ำด้วย Regex /^(น้อง\s*)+/gi
+      const pName = (p.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
       const pAge = p.age ? ` (${p.age}ปี)` : "";
       const pLoc = p.location ? ` - ${sanitizeThaiText(p.location)}` : "";
       return `น้อง${pName}${pAge}${pLoc}`;
     }).join(" | ");
 
     let pageTitle = "", pageDesc = "";
+    let pageH1Sub = "", pageH1Main = ""; // 🟢 เพิ่มตัวแปรเก็บ H1 สำหรับ SSR
 
     if (isNationalHome) {
       pageTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
       pageDesc = topProfilesTextSnippet 
         ? `ทั่วไทย 🟢 พร้อมรับงานวันนี้: ${topProfilesTextSnippet} - ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนพรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ`
         : `ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`;
+      pageH1Sub = "รับงานทั่วไทย • ไซด์ไลน์ทั่วไทย";
+      pageH1Main = "สาวรับงาน ฟิวแฟนตรงปก 100%";
     } else {
       pageTitle = customMetaTitle(provinceThaiName, customMeta);
       pageDesc = customMetaDesc(provinceThaiName, seoData, customMeta, topProfilesTextSnippet);
+      pageH1Sub = `รับงาน${provinceThaiName} • ไซด์ไลน์${provinceThaiName}`;
+      pageH1Main = "สาวรับงาน ฟิวแฟนตรงปก 100%";
     }
 
     if (matchedProfile) {
-      const cleanProfileName = (matchedProfile.name || "").replace(/^น้อง/, "").trim();
-      pageTitle = `น้อง${cleanProfileName}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} รับงาน${provinceThaiName} สาวรับงาน${provinceThaiName} ไซด์ไลน์ตรงปก | First Model Hub`;
-      pageDesc = `รายละเอียดโปรไฟล์น้อง${cleanProfileName} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "1,500"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
+      // 🟢 ป้องกันคำว่า "น้อง" ซ้ำอย่างเด็ดขาด
+      const cleanProfileName = (matchedProfile.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
+      const profileNameFormatted = `น้อง${cleanProfileName}`;
+
+      pageTitle = `${profileNameFormatted}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} รับงาน${provinceThaiName} สาวรับงาน${provinceThaiName} ไซด์ไลน์ตรงปก | First Model Hub`;
+      pageDesc = `รายละเอียดโปรไฟล์${profileNameFormatted} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "1,500"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
+      
+      // 🟢 กำหนด H1 เจาะจงสำหรับหน้าโปรไฟล์รายบุคคล
+      pageH1Sub = `${profileNameFormatted} • สาวรับงาน${provinceThaiName}`;
+      pageH1Main = "เพื่อนเที่ยว ไซด์ไลน์ฟิวแฟน ตรงปก 100%";
     }
 
     const strippedDesc = stripHTML(pageDesc);
@@ -1327,21 +1352,44 @@ export default async (req, context) => {
       );
     }
 
+    // 🟢 1. อัปเดต Title และ Meta Description ใน HTML
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
-    rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
-    rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
 
+    // 🟢 2. อัปเดต OpenGraph และ Twitter Cards ให้ตรงกับ Title & Description ล่าสุด
+    rawHtml = setMeta(rawHtml, "property", "og:title", pageTitle);
+    rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "property", "og:image", metaImgUrl);
+    rawHtml = setMeta(rawHtml, "property", "og:image:secure_url", metaImgUrl);
+    rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
+
+    rawHtml = setMeta(rawHtml, "name", "twitter:title", pageTitle);
+    rawHtml = setMeta(rawHtml, "name", "twitter:description", strippedDesc);
+    rawHtml = setMeta(rawHtml, "name", "twitter:image", metaImgUrl);
+    rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
+
+    // 🟢 3. แทนที่ Template Placeholders สำหรับ URLs และรูปภาพ
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
-    rawHtml = setMeta(rawHtml, "property", "og:url", canonUrl);
-    rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
+    // 🟢 4. อัปเดต Link Canonical และ Hreflang
     rawHtml = setLink(rawHtml, "canonical", canonUrl);
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
 
+    // 🟢 5. แทนที่ H1 ใน Hero Section ให้ตรงกับประเภทหน้าเว็บแบบ Dynamic 100%
+    if (pageH1Sub && pageH1Main) {
+      const newH1Content = `
+        <h1 id="hero-h1" class="seo-h1-title">
+          <span class="seo-sub-headline">${escapeHTML(pageH1Sub)}</span><br>
+          <span class="seo-main-headline">${escapeHTML(pageH1Main)}</span>
+        </h1>
+      `;
+      rawHtml = rawHtml.replace(/<h1 id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>/gi, newH1Content);
+    }
+
+    // 🟢 6. ฉีด Schema JSON-LD Graph ที่เตรียมไว้ลงใน <head>
     rawHtml = injectSchema(rawHtml, schemaJson);
 
     // 🟢 แก้ไขจุดที่ 1: ป้องกันตัวเลขนับโปรไฟล์ 50 ค้าง/ขัดแย้ง
