@@ -1,10 +1,4 @@
-/* ==============================================================================
-   💎 FIRST MODEL HUB - MASTER SYSTEM STYLESHEET (PROD-READY PERFECT 2026)
-   ============================================================================== */
 
-/* ------------------------------------------------------------------------------
-   1. FONTS & ICON SETS
-   ------------------------------------------------------------------------------ */
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
@@ -1583,5 +1577,244 @@ html.light h4 {
   .like-heart-btn {
     transform: scale(0.85);
     transform-origin: top right;
+  }
+}
+
+/* ==============================================================================
+   👑 1. HERO GRAND BRAND SHOWCASE (จุดที่ 1 - เด่น อลังการ กลางหน้าแรก)
+   ============================================================================== */
+.hero-grand-brand-showcase {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 12px auto 16px auto !important;
+  padding: 10px !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  z-index: 10 !important;
+}
+
+/* รัศมีแสงนีออนฟุ้งอยู่หลังโลโก้ */
+.hero-ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 80px;
+  background: radial-gradient(ellipse at center, rgba(255, 20, 147, 0.45) 0%, rgba(124, 58, 237, 0.3) 45%, transparent 75%);
+  filter: blur(25px);
+  z-index: -1;
+  animation: ambientPulse 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes ambientPulse {
+  0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* แท่นกระจก VIP Badge กลาง Hero */
+.grand-brand-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 28px 10px 28px;
+  background: linear-gradient(135deg, rgba(20, 10, 42, 0.85) 0%, rgba(9, 5, 22, 0.95) 100%);
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 
+              0 0 25px rgba(255, 20, 147, 0.35), 
+              inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* มงกุฎใหญ่ 3D ด้านบน */
+.grand-crown-svg {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.9));
+  animation: crownFloat 3s ease-in-out infinite;
+}
+
+@keyframes crownFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(3deg); }
+}
+
+/* ชื่อแบรนด์ใหญ่ 3D + แสงวิ่งตัด */
+.grand-brand-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: clamp(22px, 6vw, 32px) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em;
+  background: linear-gradient(110deg, #FFF 0%, #FFF 30%, #FFE57F 45%, #FFF 60%, #FFF 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: grandShimmer 4s linear infinite;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
+}
+
+.grand-hub-pink {
+  background: linear-gradient(135deg, #FF1493 0%, #C084FC 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+@keyframes grandShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* สโลแกนเล็กใต้โลโก้ Hero */
+.grand-brand-subtag {
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  color: #FBBF24 !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+
+.star-sparkle {
+  color: #FF1493;
+  animation: blinkSparkle 1.5s infinite alternate;
+}
+
+@keyframes blinkSparkle {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ==============================================================================
+   👑 2. HEADER BRAND BADGE (จุดที่ 2 - แถบด้านบน มินิมอลหรู)
+   ============================================================================== */
+.brand-logo-link {
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.brand-badge-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* 🟢 เติมให้กระจกฝ้าทำงานบน Safari/iPhone */
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+/* 🟢 เติม Hover / Active effect เวลาเอานิ้วแตะโลโก้ Header */
+.brand-logo-link:hover .brand-badge-header,
+.brand-logo-link:active .brand-badge-header {
+  transform: scale(1.03);
+  border-color: #FF1493;
+}
+
+.header-crown-icon {
+  width: 16px;
+  height: 16px;
+  filter: drop-shadow(0 0 4px #C084FC);
+}
+
+.header-brand-text {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+}
+
+.header-brand-text .pink-glow {
+  color: #FF1493 !important;
+  text-shadow: 0 0 8px #FF1493;
+}
+
+/* ==============================================================================
+   👑 3. LIGHTBOX & FOOTER BRANDING (จุดที่ 3 - ตอกย้ำในป๊อปอัพและล่างสุด)
+   ============================================================================== */
+.lightbox-brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(9, 5, 22, 0.9);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #FFF;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); /* 🟢 เติมให้กระจกฝ้าทำงานบน Safari/iPhone */
+}
+
+.footer-brand-title {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-shadow: 0 0 10px rgba(192, 132, 252, 0.4);
+}
+
+/* ==============================================================================
+   🛡️ 4. ANTI-COPY & IMAGE PROTECTION STYLES (ระบบล็อกการก๊อปรูปภาพ)
+   ============================================================================== */
+/* 🟢 เติม selector ครอบคลุมทั้งการ์ดทั่วไป, การ์ด HOT, และรูปใหญ่ใน Lightbox */
+.profile-card-new,
+.vip-card-item,
+#lightboxHeroImage,
+.profile-card-img-cover {
+  position: relative;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important; /* ปิดเมนูกดค้างเซฟรูปบน iPhone/Android */
+}
+
+/* แผ่นกระจกใสบังรูป ป้องกันการกดค้างเซฟรูปบนการ์ด */
+.profile-card-new::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0); /* แผ่นใส */
+  pointer-events: auto;
+}
+
+/* เมื่อหน้าต่างเว็บไม่ได้ถูกโฟกัส (เช่น กำลังเปิดโปรแกรมแคปหน้าจอ/สลับหน้าต่าง) ให้เบลอรูปภาพ */
+body:not(:focus) .profile-card-img-cover,
+body:not(:focus) #lightboxHeroImage {
+  filter: blur(25px) brightness(0.2) !important;
+  transition: filter 0.1s ease;
+}
+
+/* ==============================================================================
+   📱 5. MOBILE SMALL SCREEN FIX (< 360px)
+   ============================================================================== */
+/* 🟢 เติมป้องกันขอบจอทะลุสำหรับมือถือเครื่องเล็กมากๆ เช่น iPhone SE */
+@media (max-width: 360px) {
+  .grand-brand-badge {
+    padding: 10px 16px 8px 16px !important;
+  }
+  .grand-brand-title {
+    font-size: 18px !important;
+  }
+  .grand-brand-subtag {
+    font-size: 7.5px !important;
+    letter-spacing: 0.1em !important;
   }
 }

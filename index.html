@@ -89,10 +89,19 @@
 <!-- HEADER -->
 <header id="page-header" role="banner">
     <div class="header-logo-container">
-        <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
-           <span class="brand-logo-text">
-             FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-           </span>
+        <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub" class="brand-logo-link">
+           <div class="brand-badge-header">
+             <svg class="header-crown-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+               <path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z" fill="url(#hdrGold)"/>
+               <defs>
+                 <linearGradient id="hdrGold" x1="0" y1="0" x2="24" y2="24">
+                   <stop offset="0%" stop-color="#FF1493"/>
+                   <stop offset="100%" stop-color="#C084FC"/>
+                 </linearGradient>
+               </defs>
+             </svg>
+             <span class="header-brand-text">FirstModel<span class="pink-glow">Hub</span></span>
+           </div>
         </a>
     </div>
 
@@ -115,22 +124,33 @@
 <!-- MOBILE SIDEBAR MENU -->
 <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
   <div class="sidebar-header-div">
-    <span style="color: #A1A1AA !important; font-size: 13px;">Navigation</span>
+    <div class="brand-badge-header" style="transform: scale(0.9); transform-origin: left center;">
+      <svg class="header-crown-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z" fill="url(#sidebarGold)"/>
+        <defs>
+          <linearGradient id="sidebarGold" x1="0" y1="0" x2="24" y2="24">
+            <stop offset="0%" stop-color="#FF1493"/>
+            <stop offset="100%" stop-color="#C084FC"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="header-brand-text">FirstModel<span class="pink-glow">Hub</span></span>
+    </div>
     <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
       <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </div>
   <div class="sidebar-links-wrapper">
-    <a href="/">หน้าแรก</a>
-    <a href="/profiles">รวมโปรไฟล์</a>
-    <a href="/locations">พื้นที่บริการทั่วไทย</a>
-    <a href="/about">เกี่ยวกับเรา & ปลอดภัย</a>
-    <a href="/faq">คำถามพบบ่อย</a>
+    <a href="/"><i class="fas fa-home" style="color: #C084FC; font-size: 14px;"></i> หน้าแรก</a>
+    <a href="/profiles"><i class="fas fa-users" style="color: #C084FC; font-size: 14px;"></i> รวมโปรไฟล์</a>
+    <a href="/locations"><i class="fas fa-map-marked-alt" style="color: #C084FC; font-size: 14px;"></i> พื้นที่บริการทั่วไทย</a>
+    <a href="/about"><i class="fas fa-shield-alt" style="color: #00E676; font-size: 14px;"></i> เกี่ยวกับเรา & ปลอดภัย</a>
+    <a href="/faq"><i class="fas fa-question-circle" style="color: #FBBF24; font-size: 14px;"></i> คำถามพบบ่อย</a>
   </div>
-  <div>
+  <div style="padding: 12px;">
     <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-       style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background-color: #11783B !important; color: #FFFFFF !important; padding: 10px 0; border-radius: 8px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 12px;">
-      <i class="fab fa-line" style="font-size: 16px;" aria-hidden="true"></i> แอดไลน์จองคิว
+       style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important; color: #FFFFFF !important; padding: 12px 0; border-radius: 12px; font-weight: 800 !important; text-decoration: none; text-transform: uppercase; font-size: 13px; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);">
+      <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว
     </a>
   </div>
 </aside>
@@ -150,10 +170,39 @@
         <span style="color: white; font-size: 12px; font-weight: 700;">5/5 Verified Profiles</span>
       </div>
 
-      <div class="brand-showcase-wrapper">
-        <span class="brand-logo-text">
-          FIRSTMODEL<span class="hub-text">HUB</span>
-        </span>
+      <!-- 👑 GRAND HERO BRAND SHOWCASE (จุดที่ 1 - เด่น อลังการ สะกดสายตาทันทีที่เข้าเว็บ) -->
+      <div class="hero-grand-brand-showcase">
+        <!-- แสงนีออนออร่าสะท้อนกระจายด้านหลัง -->
+        <div class="hero-ambient-glow" aria-hidden="true"></div>
+
+        <!-- โลโก้ตราประทับใหญ่ระดับ VIP -->
+        <div class="grand-brand-badge">
+          <div class="emblem-icon-wrapper">
+            <svg class="grand-crown-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" fill="url(#goldCrownHero)"/>
+              <circle cx="12" cy="19" r="1.5" fill="#FFF"/>
+              <circle cx="5" cy="19" r="1.5" fill="#FF1493"/>
+              <circle cx="19" cy="19" r="1.5" fill="#C084FC"/>
+              <defs>
+                <linearGradient id="goldCrownHero" x1="3" y1="4" x2="21" y2="19">
+                  <stop offset="0%" stop-color="#FFE57F"/>
+                  <stop offset="50%" stop-color="#F59E0B"/>
+                  <stop offset="100%" stop-color="#D97706"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <!-- ตัวหนังสือโลโก้ใหญ่ 3D พร้อมลำแสงชิมเมอร์วิ่งผ่าน -->
+          <div class="grand-brand-title">
+            FIRSTMODEL<span class="grand-hub-pink">HUB</span>
+          </div>
+
+          <!-- สโลแกนการันตีระดับพรีเมียม -->
+          <div class="grand-brand-subtag">
+            <span class="star-sparkle" aria-hidden="true">✦</span> THE ULTIMATE VIP COMPANIONS <span class="star-sparkle" aria-hidden="true">✦</span>
+          </div>
+        </div>
       </div>
 
       <h1 id="hero-h1" class="seo-h1-title">
@@ -510,9 +559,9 @@
   <div class="container">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
       <div style="display: flex; flex-direction: column; gap: 6px;">
-        <span class="brand-logo-text" style="font-size: 16px;">
-          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-        </span>
+<span class="footer-brand-title">
+  FirstModel<span style="color: #C084FC;">Hub</span> <i class="fas fa-certificate" style="color: #FBBF24; font-size: 14px;"></i>
+</span>
         <p style="font-size: 12px; line-height: 1.5; color: var(--text-gray); margin: 0;">
           <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 ใน{{PROVINCE_NAME}} รูปถ่ายตรงปก 100% ปลอดภัย ไม่มัดจำ
         </p>
@@ -624,28 +673,44 @@
 </div>
 
 <!-- LIGHTBOX MODAL -->
-<div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">
+<div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;" class="hidden">
   <div id="lightbox-content-wrapper-el">
 
-    <div style="position: absolute; top: 10px; left: 12px; z-index: 50; display: flex; align-items: center; background: rgba(9, 5, 22, 0.85); backdrop-filter: blur(8px); padding: 5px 12px; border-radius: 100px; border: 1px solid rgba(192, 132, 252, 0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.6); pointer-events: none;">
-      <span class="brand-logo-text" style="font-size: 14px !important; font-weight: 900 !important; color: #FFFFFF !important;">
-        FirstModel<span class="hub-text-pink">Hub</span><span class="star" style="font-size: 12px;">🌟</span>
-      </span>
+    <!-- 👑 ป้ายโลโก้แบรนด์ VIP แปะมุมซ้ายบนรูปภาพ (กันการแคปรูปไปแอบอ้าง) -->
+    <div class="lightbox-brand-chip" style="position: absolute; top: 12px; left: 12px; z-index: 50; pointer-events: none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z" fill="url(#lbGold)"/>
+        <defs>
+          <linearGradient id="lbGold" x1="0" y1="0" x2="24" y2="24">
+            <stop offset="0%" stop-color="#FF1493"/>
+            <stop offset="100%" stop-color="#C084FC"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span style="font-size: 11px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.02em;">FirstModel<strong style="color: #FF1493;">Hub</strong></span>
     </div>
 
-    <button id="closeLightboxBtn" style="position: absolute; top: 10px; right: 10px; z-index: 50; width: 36px; height: 36px; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;" aria-label="ปิดหน้าต่างโปรไฟล์">
+    <!-- ปุ่มปิดป๊อปอัพ -->
+    <button id="closeLightboxBtn" aria-label="ปิดหน้าต่างโปรไฟล์">
       <i class="fas fa-times" aria-hidden="true"></i>
     </button>
 
     <div style="overflow-y: auto; max-height: 85vh; padding: 0;">
       <div class="lightbox-grid-layout">
+        <!-- คอลัมน์แสดงรูปภาพหลักและรูปขนาดย่อ -->
         <div class="lightbox-image-column">
           <div class="lightbox-hero-container">
-            <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3C/svg%3E" alt="รูปโปรไฟล์">
+            <img id="lightboxHeroImage" 
+                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3C/svg%3E" 
+                 alt="รูปโปรไฟล์"
+                 oncontextmenu="return false;"
+                 ondragstart="return false;"
+                 style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;" />
           </div>
           <div id="lightboxThumbnailStrip"></div>
         </div>
 
+        <!-- คอลัมน์แสดงรายละเอียดน้องๆ -->
         <div class="lightbox-details">
           <header style="display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
@@ -654,7 +719,7 @@
             </div>
           </header>
           
-          <div id="lightboxQuote" class="lightbox-quote-card" style="font-size: 12px; color: #C084FC; margin: 4px 0;">คำโปรยประจำตัว</div>
+          <div id="lightboxQuote" class="lightbox-quote-card">คำโปรยประจำตัว</div>
           <div id="lightboxTags" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
           
           <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 8px;">
@@ -674,7 +739,6 @@
     </div>
   </div>
 </div>
-
 <script id="ssr-profiles-data">
   window.profilesData = null;
 </script>
