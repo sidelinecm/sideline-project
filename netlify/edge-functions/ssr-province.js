@@ -290,14 +290,6 @@ function injectHydrationData(html, hydratedDataObj) {
   return cleanHtml + `\n${scriptTag}`;
 }
 
-
-function normalizeProfileName(rawName) {
-  if (!rawName || typeof rawName !== "string") return "น้องสาวสวย";
-  const clean = sanitizeThaiText(rawName).replace(/^(น้อง\s*)+/gi, "").trim();
-  return clean ? `น้อง${clean}` : "น้องสาวสวย";
-}
-
-
 function sweepPlaceholders(html, currentCanonUrl = CONFIG.PRIMARY_DOMAIN, mapEmbedUrl = "") {
   if (!html) return "";
   
@@ -306,11 +298,9 @@ function sweepPlaceholders(html, currentCanonUrl = CONFIG.PRIMARY_DOMAIN, mapEmb
   const fallbackMapUrl = mapEmbedUrl || `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน กรุงเทพ")}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
   return cleanHtml
-    // 🛡️ ป้องกัน Tag SEO ตกค้าง
     .replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)\s*SEO_CANONICAL\s*(%7D%7D|\}\})/gi, currentCanonUrl)
     .replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)\s*SEO_IMAGE\s*(%7D%7D|\}\})/gi, CONFIG.DEFAULT_OG_IMAGE)
     .replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)\s*MAP_EMBED_URL\s*(%7D%7D|\}\})/gi, fallbackMapUrl)
-    // 🛡️ ป้องกัน Variable ข้างในเนื้อหาตกค้าง
     .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*province-name\s*\}\}/gi, "ทั่วไทย")
     .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, "national")
@@ -318,7 +308,6 @@ function sweepPlaceholders(html, currentCanonUrl = CONFIG.PRIMARY_DOMAIN, mapEmb
     .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, "0")
     .replace(/\{\{\s*COUNT_SNIPPET\s*\}\}/gi, "กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม")
     .replace(/\{\{\s*PROVINCE_ZONES\s*\}\}/gi, "กรุงเทพฯ, เชียงใหม่, ชลบุรี, อุดรธานี")
-    // 🛡️ ไม้ตายสุดท้าย: ลบทุกอย่างที่เป็น {{...}} หรือ %7B%7B...%7D%7D ที่หลงเหลืออยู่ทิ้งทั้งหมด!
     .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "");
 }
 
@@ -448,8 +437,7 @@ const formatDateSSR = dateStr => {
   }
 };
 
-// 🟢 แก้ไขจุดที่ 3: แก้ไขการสร้างลิงก์วนลูปชี้เข้าหาตัวเอง (Self-Referencing Links)
-const smartLinkify = (text, _flag, zones, provinceSlug = "chiangmai") => {
+const smartLinkify = (text, _flag, zones, _provinceSlug = "chiangmai") => {
   if (!text) return "";
   let res = sanitizeThaiText(text);
   if (zones && Array.isArray(zones) && zones.length > 0) {
@@ -464,7 +452,7 @@ const smartLinkify = (text, _flag, zones, provinceSlug = "chiangmai") => {
   return res.replace(keywordsRegex, `<span class="highlight text-[#C084FC] font-extrabold">$1</span>`);
 };
 
-const getDynamicIntro = (provinceName, zones, provinceSlug = "chiangmai") => {
+const getDynamicIntro = (provinceName, zones, _provinceSlug = "chiangmai") => {
   let processedZones = zones && Array.isArray(zones) ? [...zones] : [];
   const zoneLinks = processedZones.slice(0, 4).map(zone => 
     `<span class="text-[#C084FC] font-bold">${escapeHTML(sanitizeThaiText(zone))}</span>`
@@ -618,8 +606,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   }
 
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
-
-  // 🟢 ประกาศตัวแปรคำนวณ Above-the-Fold ก่อนส่งเข้า Template String
   const isAboveFold = index < 6;
 
   return `
@@ -628,8 +614,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
            data-profile-id="${p.id}"
            data-profile-slug="${escapeHTML(p.slug || p.id)}"
            style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;">
-          
-          <h3 style="display:none;">น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc}</h3>
 
           <img src="${imgUrl}" 
                alt="${seoAltText}"
@@ -759,14 +743,12 @@ export default async (req, context) => {
       }
     }
 
-    // 🟢 แก้ไขจุดที่ 1 (บั๊กค้นหาจังหวัดที่มี _ ไม่พบ): เพิ่มคีย์ค้นหาทั้งแบบมีขีดและไม่มีขีดให้ทุกจังหวัด
     let searchKeys = [provinceSlug];
     if (provinceSlug.includes("-")) {
       searchKeys.push(provinceSlug.replace(/-/g, "_"));
     } else if (provinceSlug.includes("_")) {
       searchKeys.push(provinceSlug.replace(/_/g, "-"));
     } else {
-      // เพิ่มรูปแบบมาตรฐานที่ใช้บ่อยใน DB
       if (provinceSlug === "chiangmai") searchKeys.push("chiang_mai");
       if (provinceSlug === "udonthani") searchKeys.push("udon_thani");
       if (provinceSlug === "khonkaen") searchKeys.push("khon_kaen");
@@ -809,7 +791,7 @@ export default async (req, context) => {
     ]);
 
     const provinceData = provSingleRes.data;
-    if (!provinceData && !isNationalHome) {
+    if (!provinceData && !isNationalHome && !matchedProfile) {
       return buildErrorPage(404, "404 - ไม่พบหน้าเว็บ", "ไม่พบพิกัดจังหวัดที่คุณต้องการหาในขณะนี้");
     }
 
@@ -821,7 +803,7 @@ export default async (req, context) => {
 
     const canonUrl = matchedProfile 
       ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
-      : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
+      : (isNationalHome ? `${hostUrl}/` : `${hostUrl}/location/${provinceSlug}`);
 
     const mainImgPath = matchedProfile ? getProfileMainImage(matchedProfile) : (profileList.length > 0 ? getProfileMainImage(profileList[0]) : null);
     const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
@@ -853,7 +835,6 @@ export default async (req, context) => {
     }
 
     const topProfilesTextSnippet = profileList.slice(0, 5).map(p => {
-      // 🟢 ป้องกันคำว่า "น้อง" ซ้ำด้วย Regex /^(น้อง\s*)+/gi
       const pName = (p.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
       const pAge = p.age ? ` (${p.age}ปี)` : "";
       const pLoc = p.location ? ` - ${sanitizeThaiText(p.location)}` : "";
@@ -861,7 +842,7 @@ export default async (req, context) => {
     }).join(" | ");
 
     let pageTitle = "", pageDesc = "";
-    let pageH1Sub = "", pageH1Main = ""; // 🟢 เพิ่มตัวแปรเก็บ H1 สำหรับ SSR
+    let pageH1Sub = "", pageH1Main = "";
 
     if (isNationalHome) {
       pageTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
@@ -878,14 +859,12 @@ export default async (req, context) => {
     }
 
     if (matchedProfile) {
-      // 🟢 ป้องกันคำว่า "น้อง" ซ้ำอย่างเด็ดขาด
       const cleanProfileName = (matchedProfile.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
       const profileNameFormatted = `น้อง${cleanProfileName}`;
 
       pageTitle = `${profileNameFormatted}${matchedProfile.age ? ` (${matchedProfile.age})` : ""} รับงาน${provinceThaiName} สาวรับงาน${provinceThaiName} ไซด์ไลน์ตรงปก | First Model Hub`;
       pageDesc = `รายละเอียดโปรไฟล์${profileNameFormatted} สาวรับงานไซด์ไลน์พิกัดย่าน ${sanitizeThaiText(matchedProfile.location) || provinceThaiName} ตรงปก 100% ค่าขนม ${matchedProfile.rate || "1,500"} ดูแลสไตล์ฟิวแฟน ไม่มีโอนมัดจำล่วงหน้า`;
       
-      // 🟢 กำหนด H1 เจาะจงสำหรับหน้าโปรไฟล์รายบุคคล
       pageH1Sub = `${profileNameFormatted} • สาวรับงาน${provinceThaiName}`;
       pageH1Main = "เพื่อนเที่ยว ไซด์ไลน์ฟิวแฟน ตรงปก 100%";
     }
@@ -897,16 +876,24 @@ export default async (req, context) => {
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const displayReviewCount = profileList.length > 0 ? Math.max(35, profileList.length * 3) : 45;
     
-    const rawMapUrl = (seoData && seoData.geo) 
-      ? `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`
-      : `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    // 🟢 คำนวณพิกัด Google Map ที่ถูกต้องสำหรับทุกกรณี
+    let rawMapUrl = "";
+    if (matchedProfile) {
+      const profileProvKey = (matchedProfile.provinceKey || matchedProfile.province_key || provinceSlug || "chiangmai").toLowerCase().replace(/[-_]/g, "");
+      const pSeo = PROVINCE_SEO_DATA[profileProvKey] || PROVINCE_SEO_DATA.chiangmai;
+      rawMapUrl = `https://maps.google.com/maps?q=${pSeo.geo.lat},${pSeo.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    } else if (seoData && seoData.geo && !isNationalHome) {
+      rawMapUrl = `https://maps.google.com/maps?q=${seoData.geo.lat},${seoData.geo.lng}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    } else {
+      rawMapUrl = `https://maps.google.com/maps?q=13.7563,100.5018&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    }
     const mapEmbedUrl = escapeHTML(rawMapUrl);
 
     const validZones = (seoData.zones || [])
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-// ==============================================================================
+    // ==============================================================================
     // 🟢 สร้าง SCHEMA GRAPH ครบ 100% ตรงตามเกณฑ์ GOOGLE RICH RESULTS (2026 FULL)
     // ==============================================================================
     const schemaGraph = [
@@ -948,26 +935,24 @@ export default async (req, context) => {
     // 1. กรณีหน้ารายบุคคล (Single Profile Page)
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
-      // 🟢 ป้องกันคำว่า "น้อง" ซ้ำด้วย Regex ที่รัดกุมขึ้น
       const cleanName = (matchedProfile.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
       const cleanLoc = sanitizeThaiText(matchedProfile.location || provinceThaiName);
 
       schemaGraph.push({
         "@type": "ProfilePage",
-        "@id": `${profileUrl}/#webpage`,
+        "@id": `${profileUrl}/#webpage`, // ✅ แก้ไขใส่ # แล้ว
         "url": profileUrl,
         "name": `น้อง${cleanName} - โปรไฟล์สาวรับงาน${provinceThaiName} ย่าน${cleanLoc}`,
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
-        "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` },
-        "mainEntity": { "@id": `${profileUrl}/#service` } // 🟢 เชื่อมกับ #service
+        "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` }, // ✅ แก้ไขใส่ # แล้ว
+        "mainEntity": { "@id": `${profileUrl}/#service` }       // ✅ แก้ไขใส่ # แล้ว
       });
 
       const rawRateStr = String(matchedProfile.rate || "1500");
       const firstPriceMatch = rawRateStr.match(/\d{3,5}/);
       const finalPrice = firstPriceMatch ? firstPriceMatch[0] : "1500";
 
-      // 🟢 เปลี่ยนจาก Product เป็น Service ถูกต้องตามเกณฑ์ Google 100%
       schemaGraph.push({
         "@type": "Service",
         "@id": `${profileUrl}/#service`,
@@ -1046,7 +1031,6 @@ export default async (req, context) => {
       };
       schemaGraph.push(collectionPageObj);
 
-      // 🟢 ปรับเปลี่ยนจาก EntertainmentBusiness เป็น Service ลบส่วนที่ซ้ำและไม่จำเป็นออก
       schemaGraph.push({
         "@type": "Service",
         "@id": `${canonUrl}/#service`,
@@ -1063,7 +1047,7 @@ export default async (req, context) => {
           : [
               { "@type": "AdministrativeArea", "name": provinceThaiName },
               ...validZones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
-            ], // 🟢 ลบส่วนเขียนซ้ำออกแล้ว
+            ],
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": Number(finalRatingValue) || 4.9,
@@ -1307,7 +1291,7 @@ export default async (req, context) => {
           const liveCountChipHtml = `
             ${topCatalogSnippetHtml}
             <div class="mt-4 relative">
-              <div class="flex justify-between items-center flex-wrap gap-2 p-2" style="display: flex; justify-between: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px 4px;">
+              <div class="flex justify-between items-center flex-wrap gap-2 p-2" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px 4px;">
                   <h2 class="text-lg font-extrabold text-white m-0 flex items-center flex-wrap gap-2" style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; gap: 8px;">
                       📍 น้องๆ ในจังหวัด <span class="text-purple mx-1" style="color: #C084FC;">${provinceThaiName}</span>
                       <span class="live-count-chip">
@@ -1329,16 +1313,21 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
     }
 
+    // 🟢 1. ลบ Section ที่ไม่เกี่ยวข้องออกตามประเภทหน้าเว็บ
     if (matchedProfile) {
       rawHtml = rawHtml.replace(/<section\s+class=["']hero-section["'][\s\S]*?<\/section>/gi, "");
       rawHtml = rawHtml.replace(/<section\s+id=["']featured-profiles["'][\s\S]*?<\/section>/gi, "");
       rawHtml = rawHtml.replace(/<section\s+id=["']service-deep-dive["'][\s\S]*?<\/section>/gi, "");
       rawHtml = rawHtml.replace(/<section\s+id=["']customer-reviews["'][\s\S]*?<\/section>/gi, "");
       rawHtml = rawHtml.replace(/<div\s+class=["']tabs-wrapper["'][\s\S]*?<\/div>/gi, "");
+      rawHtml = rawHtml.replace(/<div\s+id=["']smart-quick-chips["'][\s\S]*?<\/div>/gi, "");
+      rawHtml = rawHtml.replace(/<div\s+id=["']active-filter-chips["'][\s\S]*?<\/div>/gi, "");
+      rawHtml = rawHtml.replace(/<div\s+id=["']zone-chips-container["'][\s\S]*?<\/div>/gi, "");
     } else if (!isNationalHome) {
       rawHtml = rawHtml.replace(/<section\s+id=["']featured-profiles["'][\s\S]*?<\/section>/gi, "");
     }
 
+    // 🟢 2. ฝัง HTML ข้อมูลหลัก (SSR Grid)
     if (rawHtml.includes("<!-- SSR_DISPLAY_AREA_START -->") && rawHtml.includes("<!-- SSR_DISPLAY_AREA_END -->")) {
       const before = rawHtml.split("<!-- SSR_DISPLAY_AREA_START -->")[0];
       const after = rawHtml.split("<!-- SSR_DISPLAY_AREA_END -->")[1];
@@ -1352,11 +1341,12 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 1. อัปเดต Title และ Meta Description ใน HTML
+    // 🟢 3. อัปเดต Title และ Meta Description
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = setMeta(rawHtml, "name", "description", strippedDesc);
 
-    // 🟢 2. อัปเดต OpenGraph และ Twitter Cards ให้ตรงกับ Title & Description ล่าสุด
+    // 🟢 4. อัปเดต OpenGraph และ Twitter Cards
+    rawHtml = setMeta(rawHtml, "property", "og:type", matchedProfile ? "profile" : "website");
     rawHtml = setMeta(rawHtml, "property", "og:title", pageTitle);
     rawHtml = setMeta(rawHtml, "property", "og:description", strippedDesc);
     rawHtml = setMeta(rawHtml, "property", "og:image", metaImgUrl);
@@ -1368,18 +1358,18 @@ export default async (req, context) => {
     rawHtml = setMeta(rawHtml, "name", "twitter:image", metaImgUrl);
     rawHtml = setMeta(rawHtml, "name", "twitter:url", canonUrl);
 
-    // 🟢 3. แทนที่ Template Placeholders สำหรับ URLs และรูปภาพ
+    // 🟢 5. แทนที่ Template Placeholders สำหรับ URLs และรูปภาพ
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL_EN}}", `${canonUrl}/en`);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
 
-    // 🟢 4. อัปเดต Link Canonical และ Hreflang
+    // 🟢 6. อัปเดต Link Canonical และ Hreflang
     rawHtml = setLink(rawHtml, "canonical", canonUrl);
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
 
-    // 🟢 5. แทนที่ H1 ใน Hero Section ให้ตรงกับประเภทหน้าเว็บแบบ Dynamic 100%
-    if (pageH1Sub && pageH1Main) {
+    // 🟢 7. อัปเดต H1 ใน Hero Section (เฉพาะหน้าที่มี Hero Section)
+    if (!matchedProfile && pageH1Sub && pageH1Main) {
       const newH1Content = `
         <h1 id="hero-h1" class="seo-h1-title">
           <span class="seo-sub-headline">${escapeHTML(pageH1Sub)}</span><br>
@@ -1389,10 +1379,10 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<h1 id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>/gi, newH1Content);
     }
 
-    // 🟢 6. ฉีด Schema JSON-LD Graph ที่เตรียมไว้ลงใน <head>
+    // 🟢 8. ฉีด Schema JSON-LD Graph ลง <head>
     rawHtml = injectSchema(rawHtml, schemaJson);
 
-    // 🟢 แก้ไขจุดที่ 1: ป้องกันตัวเลขนับโปรไฟล์ 50 ค้าง/ขัดแย้ง
+    // 🟢 9. แทนที่ Placeholders ทั้งหมด
     const profileCountVal = profileList ? profileList.length : 0;
     const countSnippetText = profileCountVal > 0 ? `(พร้อมสแตนด์บาย ${profileCountVal} โปรไฟล์)` : `(กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม)`;
 
@@ -1408,10 +1398,13 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-    rawHtml = rawHtml.replace(/(https?:\/\/[^\s"'<>]+)?(%7B%7B|\{\{)MAP_EMBED_URL(%7D%7D|\}\})/gi, mapEmbedUrl);
-    rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
+    // 🟢 10. แก้ไขแผนที่ทั้ง src และ data-src
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+    rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
+    rawHtml = rawHtml.replace(/data-src=["'][^"']*?MAP_EMBED_URL[^"']*?["']/gi, `data-src="${mapEmbedUrl}"`);
+    rawHtml = rawHtml.replace(/<iframe id=["']google-map["'][^>]*?src=["'][^"']*?["']/gi, `<iframe id="google-map" src="${mapEmbedUrl}"`);
 
+    // 🟢 11. Hydration Data & Sweep Placeholders โดยส่งพารามิเตอร์ครบ
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
     const hydratedProfilesData = deduplicateProfiles(allHydratedProfiles).map(p => ({
       id: p.id,
@@ -1445,9 +1438,9 @@ export default async (req, context) => {
     }));
 
     rawHtml = injectHydrationData(rawHtml, hydratedProfilesData);
-    rawHtml = sweepPlaceholders(rawHtml);
+    rawHtml = sweepPlaceholders(rawHtml, canonUrl, mapEmbedUrl);
     
-    // 🟢 แก้ไขจุดที่ 3: ปรับ Cache-Control ของ CDN ไม่ให้ค้างเกิน 1 นาทีเมื่ออัปเดต DB
+    // 🟢 12. Headers & Response Caching
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
