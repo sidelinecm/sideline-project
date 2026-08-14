@@ -2059,27 +2059,41 @@ function updateSEOMetadata(profile = null, locationData = null) {
   injectJsonLdSchema({ "@context": "https://schema.org", "@graph": graph }, "dynamic-schema");
 }
   
-  function updateGoogleMap(provKey = "national", provName = "ทั่วไทย") {
-    const mapIframe = document.getElementById("google-map");
-    const mapSection = document.getElementById("map-section");
-    if (!mapIframe || !mapSection) return;
+  // ✅ อัปเดตฟังก์ชัน updateGoogleMap ให้ฉลาดขึ้น:
+function updateGoogleMap(provKey = "national", provName = "ทั่วไทย") {
+  const mapIframe = document.getElementById("google-map");
+  const mapSection = document.getElementById("map-section");
+  if (!mapIframe || !mapSection) return;
 
-    let mapUrl = mapIframe.getAttribute("data-src") || "";
-    if (!mapUrl || mapUrl.includes("{{") || mapUrl.includes("%7B")) {
-      mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (provKey === "national" ? "กรุงเทพ" : provName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+  const normKey = normalizeProvinceKey(provKey);
+  const data = LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"];
+  
+  let targetMapUrl = mapIframe.getAttribute("data-src") || "";
+  
+  // ถ้า data-src ว่างเปล่า หรือยังมี {{ }} ค้างอยู่ ให้สร้าง URL พิกัดจริงทันที
+  if (!targetMapUrl || targetMapUrl.includes("{{") || targetMapUrl.includes("%7B") || targetMapUrl === "about:blank") {
+    if (normKey === "chiangmai") {
+      targetMapUrl = "https://maps.google.com/maps?q=18.8140717,98.972096&t=&z=13&ie=UTF8&iwloc=&output=embed";
+    } else if (normKey === "bangkok") {
+      targetMapUrl = "https://maps.google.com/maps?q=13.7563,100.5018&t=&z=13&ie=UTF8&iwloc=&output=embed";
+    } else if (normKey === "chonburi") {
+      targetMapUrl = "https://maps.google.com/maps?q=12.9276,100.8771&t=&z=13&ie=UTF8&iwloc=&output=embed";
+    } else {
+      targetMapUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + provName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
     }
-
-    const observer = new IntersectionObserver((entriesList) => {
-      entriesList.forEach(entry => {
-        if (entry.isIntersecting) {
-          mapIframe.src = mapUrl;
-          observer.unobserve(mapSection);
-        }
-      });
-    }, { rootMargin: "200px 0px" });
-
-    observer.observe(mapSection);
   }
+
+  const observer = new IntersectionObserver((entriesList) => {
+    entriesList.forEach(entry => {
+      if (entry.isIntersecting) {
+        mapIframe.src = targetMapUrl;
+        observer.unobserve(mapSection);
+      }
+    });
+  }, { rootMargin: "200px 0px" });
+
+  observer.observe(mapSection);
+}
 
   function renderZoneChips(provKey = "national") {
     let chipsContainer = document.getElementById("zone-chips-container");
