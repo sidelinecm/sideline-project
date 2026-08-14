@@ -902,7 +902,7 @@ export default async (req, context) => {
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // ==============================================================================
+// ==============================================================================
     // 🟢 สร้าง SCHEMA GRAPH ครบ 100% ตรงตามเกณฑ์ GOOGLE RICH RESULTS (2026 FULL)
     // ==============================================================================
     const schemaGraph = [
@@ -944,7 +944,8 @@ export default async (req, context) => {
     // 1. กรณีหน้ารายบุคคล (Single Profile Page)
     if (profileSlug && matchedProfile) {
       const profileUrl = `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`;
-      const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
+      // 🟢 ป้องกันคำว่า "น้อง" ซ้ำด้วย Regex ที่รัดกุมขึ้น
+      const cleanName = (matchedProfile.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
       const cleanLoc = sanitizeThaiText(matchedProfile.location || provinceThaiName);
 
       schemaGraph.push({
@@ -955,23 +956,25 @@ export default async (req, context) => {
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
         "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` },
-        "mainEntity": { "@id": `${profileUrl}/#product` }
+        "mainEntity": { "@id": `${profileUrl}/#service` } // 🟢 เชื่อมกับ #service
       });
 
-      // 🟢 แก้ไขจุดที่ 2 (บั๊กคำนวณราคาสูงเกินจริง): สกัดเอาเฉพาะตัวเลขชุดแรกจากช่วงราคา
       const rawRateStr = String(matchedProfile.rate || "1500");
       const firstPriceMatch = rawRateStr.match(/\d{3,5}/);
       const finalPrice = firstPriceMatch ? firstPriceMatch[0] : "1500";
 
+      // 🟢 เปลี่ยนจาก Product เป็น Service ถูกต้องตามเกณฑ์ Google 100%
       schemaGraph.push({
-        "@type": "Product",
-        "@id": `${profileUrl}/#product`,
-        "name": `น้อง${cleanName} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provinceThaiName}`,
-        "image": [metaImgUrl],
+        "@type": "Service",
+        "@id": `${profileUrl}/#service`,
+        "name": `บริการเพื่อนเที่ยวฟิวแฟน น้อง${cleanName} ${provinceThaiName}`,
+        "serviceType": "Companion & Lifestyle Partner Service",
+        "provider": { "@id": `${hostUrl}/#organization` },
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": provinceThaiName
+        },
         "description": strippedDesc,
-        "sku": `PROFILE-${matchedProfile.id}`,
-        "mpn": `FMH-${matchedProfile.id}`,
-        "brand": { "@id": `${hostUrl}/#organization` },
         "offers": {
           "@type": "Offer",
           "url": profileUrl,
@@ -1034,36 +1037,29 @@ export default async (req, context) => {
         "name": pageTitle,
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
-        "about": { "@id": `${canonUrl}/#business` },
+        "about": { "@id": `${canonUrl}/#service` },
         "breadcrumb": { "@id": `${canonUrl}/#breadcrumb` }
       };
       schemaGraph.push(collectionPageObj);
 
+      // 🟢 ปรับเปลี่ยนจาก EntertainmentBusiness เป็น Service ลบส่วนที่ซ้ำและไม่จำเป็นออก
       schemaGraph.push({
-        "@type": ["EntertainmentBusiness", "ProfessionalService"],
-        "@id": `${canonUrl}/#business`,
+        "@type": "Service",
+        "@id": `${canonUrl}/#service`,
         "name": isNationalHome 
           ? `ศูนย์รวมไซด์ไลน์ สาวรับงาน เด็กเอ็น ฟิวแฟน ทั่วไทย - ${CONFIG.BRAND_NAME}` 
           : `สาวรับงาน${provinceThaiName} เพื่อนเที่ยว${provinceThaiName} - ${CONFIG.BRAND_NAME}`,
+        "serviceType": "Companion & Escort Directory Service",
         "image": metaImgUrl,
-        "telephone": CONFIG.DEFAULT_TELEPHONE,
-        "priceRange": "฿฿",
         "url": canonUrl,
         "description": strippedDesc,
-        "parentOrganization": { "@id": `${hostUrl}/#organization` },
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": isNationalHome ? "เขตพระนคร" : `อำเภอเมือง${provinceThaiName}`,
-          "addressLocality": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
-          "addressRegion": isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName,
-          "addressCountry": "TH"
-        },
+        "provider": { "@id": `${hostUrl}/#organization` },
         "areaServed": isNationalHome 
           ? { "@type": "Country", "name": "Thailand" }
           : [
               { "@type": "AdministrativeArea", "name": provinceThaiName },
               ...validZones.map(z => ({ "@type": "AdministrativeArea", "name": "โซน" + z }))
-            ],
+            ], // 🟢 ลบส่วนเขียนซ้ำออกแล้ว
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": Number(finalRatingValue) || 4.9,
