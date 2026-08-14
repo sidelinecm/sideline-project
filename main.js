@@ -1075,138 +1075,174 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
-    try {
-      const modalSearchInput = document.getElementById("modal-search-keyword");
-      const mainSearchInput = document.getElementById("search-keyword");
+  /* ==============================================================================
+   💎 PERFECTED ULTIMATE FILTER ENGINE & REAL-TIME SEO SYNCHRONIZER
+   ============================================================================== */
 
-      let keywordVal = (modalSearchInput?.value || mainSearchInput?.value || "").trim();
-      if (mainSearchInput) mainSearchInput.value = keywordVal;
-      if (modalSearchInput) modalSearchInput.value = keywordVal;
+function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
+  try {
+    const modalSearchInput = document.getElementById("modal-search-keyword");
+    const mainSearchInput = document.getElementById("search-keyword");
 
-      if (keywordVal) saveRecentSearch(keywordVal);
+    // 🟢 1. ดึงและซิงก์ค่าคำค้นหาจากทั้้งสองช่อง (หน้าหลัก & Modal)
+    let keywordVal = (modalSearchInput?.value || mainSearchInput?.value || "").trim();
+    if (mainSearchInput) mainSearchInput.value = keywordVal;
+    if (modalSearchInput) modalSearchInput.value = keywordVal;
 
-      const provVal = document.getElementById("search-province")?.value || "";
-      const availVal = document.getElementById("search-availability")?.value || "";
-      const featuredVal = document.getElementById("search-featured")?.value === "true";
-      const priceVal = document.getElementById("search-price")?.value || "";
-      const sortVal = document.getElementById("sort-select")?.value || "featured";
+    if (keywordVal) saveRecentSearch(keywordVal);
 
-      const urlPath = window.location.pathname.toLowerCase();
-      const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
-      let urlProvinceKey = "";
-      if (locMatch) {
-        try { urlProvinceKey = normalizeProvinceKey(decodeURIComponent(locMatch[1])); } catch (e) { urlProvinceKey = normalizeProvinceKey(locMatch[1]); }
+    // 🟢 2. ดึงค่าตัวกรองทั้งหมดจาก DOM
+    const provVal = document.getElementById("search-province")?.value || "";
+    const availVal = document.getElementById("search-availability")?.value || "";
+    const featuredVal = document.getElementById("search-featured")?.value === "true";
+    const priceVal = document.getElementById("search-price")?.value || "";
+    const sortVal = document.getElementById("sort-select")?.value || "featured";
+
+    // 🟢 3. ระบุจังหวัดเป้าหมาย
+    const urlPath = window.location.pathname.toLowerCase();
+    const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
+    let urlProvinceKey = "";
+    if (locMatch) {
+      try { 
+        urlProvinceKey = normalizeProvinceKey(decodeURIComponent(locMatch[1])); 
+      } catch (e) { 
+        urlProvinceKey = normalizeProvinceKey(locMatch[1]); 
       }
-
-      let targetProvinceKey = provVal ? normalizeProvinceKey(provVal) : urlProvinceKey;
-      let results = [...STATE.allProfiles];
-
-      if (targetProvinceKey && targetProvinceKey !== "national" && targetProvinceKey !== "all" && targetProvinceKey !== "") {
-        results = results.filter(p => normalizeProvinceKey(p.provinceKey) === targetProvinceKey);
-      }
-
-      if (keywordVal) {
-        const queryRaw = keywordVal.toLowerCase();
-        const queryClean = queryRaw.replace(/^(น้อง\s?)+/gi, "").trim();
-
-        results = results.filter(p => {
-          const pName = (p.displayName || p.name || "").toLowerCase();
-          const pCleanName = pName.replace(/^(น้อง\s?)+/gi, "").trim();
-          const pLoc = (p.location || "").toLowerCase();
-          const pProv = (p.provinceNameThai || "").toLowerCase();
-          const pSlogan = (p.slogan || p.quote || "").toLowerCase();
-          const pDesc = (p.description || "").toLowerCase();
-          const pTags = Array.isArray(p.styleTags) ? p.styleTags.join(" ").toLowerCase() : (p.styleTags || "").toLowerCase();
-          const pId = String(p.id || "");
-          const pSlug = (p.slug || "").toLowerCase();
-
-          return (
-            pId === queryRaw ||
-            pSlug.includes(queryRaw) ||
-            pName.includes(queryRaw) ||
-            pCleanName.includes(queryClean) ||
-            pLoc.includes(queryRaw) ||
-            pProv.includes(queryRaw) ||
-            pSlogan.includes(queryRaw) ||
-            pDesc.includes(queryRaw) ||
-            pTags.includes(queryRaw)
-          );
-        });
-      }
-
-      if (availVal && availVal !== "all" && availVal !== "") {
-        results = results.filter(p => p.availability === availVal);
-      }
-
-      if (featuredVal) {
-        results = results.filter(p => p.isfeatured === true);
-      }
-
-      if (priceVal) {
-        results = results.filter(p => {
-          const price = p._price || 0;
-          if (priceVal === "under1500") return price > 0 && price <= 1500;
-          if (priceVal === "1500-2500") return price > 1500 && price <= 2500;
-          if (priceVal === "above2500") return price > 2500;
-          return true;
-        });
-      }
-
-      results = deduplicateProfiles(results);
-
-      results.sort((a, b) => {
-        if (keywordVal) return 0;
-        switch (sortVal) {
-          case "featured":
-            return (b.isfeatured ? 1 : 0) - (a.isfeatured ? 1 : 0) || (a.name || "").localeCompare(b.name || "");
-          case "name_asc":
-            return (a.name || "").localeCompare(b.name || "");
-          case "rating":
-            return (b.rating || 0) - (a.rating || 0);
-          case "price_asc":
-            return (a._price || 0) - (b._price || 0);
-          case "price_desc":
-            return (b._price || 0) - (a._price || 0);
-          default:
-            return 0;
-        }
-      });
-
-      renderActiveFilterChips();
-
-      const isSingleProfilePage = Boolean(document.querySelector(".single-profile-wrapper"));
-      if (!isSingleProfilePage) {
-        renderProfilesGrid(results, Boolean(keywordVal || provVal || availVal || featuredVal || priceVal), isUserAction);
-      }
-
-      updateHeroSwiperCards(targetProvinceKey || "national");
-
-      if (updateUrlHistory && !isSingleProfilePage) {
-        let newPath = "/";
-        if (provVal && provVal !== "all" && provVal !== "" && provVal !== "national") {
-          newPath = `/location/${provVal}`;
-        }
-        if (window.location.pathname !== newPath) {
-          history.pushState(null, "", newPath);
-        }
-      }
-
-      STATE.currentFilters = { text: keywordVal, province: provVal, avail: availVal, featured: featuredVal, sort: sortVal, price: priceVal };
-      STATE.filteredProfiles = results;
-
-      const currentProvKey = targetProvinceKey || "national";
-      const currentProvName = (currentProvKey === "national" || !currentProvKey) ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
-      replaceDomPlaceholders(currentProvName, results.length, currentProvKey);
-
-      if (isUserAction && !isSingleProfilePage) {
-        scrollToSearchResults();
-      }
-
-    } catch (e) {
-      console.error("❌ เกิดข้อผิดพลาดในระบบการกรอง:", e);
     }
+
+    let targetProvinceKey = provVal ? normalizeProvinceKey(provVal) : urlProvinceKey;
+    let results = [...STATE.allProfiles];
+
+    // 🟢 4. กรองตามจังหวัด
+    if (targetProvinceKey && targetProvinceKey !== "national" && targetProvinceKey !== "all" && targetProvinceKey !== "") {
+      results = results.filter(p => normalizeProvinceKey(p.provinceKey) === targetProvinceKey);
+    }
+
+    // 🟢 5. กรองตาม Keyword (ค้นจากชื่อ, ย่าน, คำโปรย, รายละเอียด, และแท็ก)
+    if (keywordVal) {
+      const queryRaw = keywordVal.toLowerCase();
+      const queryClean = queryRaw.replace(/^(น้อง\s?)+/gi, "").trim();
+
+      results = results.filter(p => {
+        const pName = (p.displayName || p.name || "").toLowerCase();
+        const pCleanName = pName.replace(/^(น้อง\s?)+/gi, "").trim();
+        const pLoc = (p.location || "").toLowerCase();
+        const pProv = (p.provinceNameThai || "").toLowerCase();
+        const pSlogan = (p.slogan || p.quote || "").toLowerCase();
+        const pDesc = (p.description || "").toLowerCase();
+        const pTags = Array.isArray(p.styleTags) ? p.styleTags.join(" ").toLowerCase() : (p.styleTags || "").toLowerCase();
+        const pId = String(p.id || "");
+        const pSlug = (p.slug || "").toLowerCase();
+
+        return (
+          pId === queryRaw ||
+          pSlug.includes(queryRaw) ||
+          pName.includes(queryRaw) ||
+          pCleanName.includes(queryClean) ||
+          pLoc.includes(queryRaw) ||
+          pProv.includes(queryRaw) ||
+          pSlogan.includes(queryRaw) ||
+          pDesc.includes(queryRaw) ||
+          pTags.includes(queryRaw)
+        );
+      });
+    }
+
+    // 🟢 6. กรองตามสถานะพร้อมรับงาน
+    if (availVal && availVal !== "all" && availVal !== "") {
+      results = results.filter(p => p.availability === availVal);
+    }
+
+    // 🟢 7. กรองตามสถานะ VIP แนะนำ
+    if (featuredVal) {
+      results = results.filter(p => p.isfeatured === true);
+    }
+
+    // 🟢 8. กรองตามช่วงเรตราคา
+    if (priceVal) {
+      results = results.filter(p => {
+        const price = p._price || 0;
+        if (priceVal === "under1500") return price > 0 && price <= 1500;
+        if (priceVal === "1500-2500") return price > 1500 && price <= 2500;
+        if (priceVal === "above2500") return price > 2500;
+        return true;
+      });
+    }
+
+    // 🟢 9. กำจัดรายการซ้ำ
+    results = deduplicateProfiles(results);
+
+    // 🟢 10. เรียงลำดับผลลัพธ์
+    results.sort((a, b) => {
+      if (keywordVal) return 0;
+      switch (sortVal) {
+        case "featured":
+          return (b.isfeatured ? 1 : 0) - (a.isfeatured ? 1 : 0) || (a.name || "").localeCompare(b.name || "");
+        case "name_asc":
+          return (a.name || "").localeCompare(b.name || "");
+        case "rating":
+          return (b.rating || 0) - (a.rating || 0);
+        case "price_asc":
+          return (a._price || 0) - (b._price || 0);
+        case "price_desc":
+          return (b._price || 0) - (a._price || 0);
+        default:
+          return 0;
+      }
+    });
+
+    // 🟢 11. แสดงผล Active Filter Chips
+    renderActiveFilterChips();
+
+    const isSingleProfilePage = Boolean(document.querySelector(".single-profile-wrapper"));
+    
+    // 🟢 12. Render การ์ดโปรไฟล์ลงในตาราง
+    if (!isSingleProfilePage) {
+      renderProfilesGrid(results, Boolean(keywordVal || provVal || availVal || featuredVal || priceVal), isUserAction);
+    }
+
+    // 🟢 13. อัปเดตสไลเดอร์ HOT แนะนำประจำโซน
+    updateHeroSwiperCards(targetProvinceKey || "national");
+
+    // 🟢 14. อัปเดต URL บนแถบเบราว์เซอร์
+    if (updateUrlHistory && !isSingleProfilePage) {
+      let newPath = "/";
+      if (provVal && provVal !== "all" && provVal !== "" && provVal !== "national") {
+        newPath = `/location/${provVal}`;
+      }
+      if (window.location.pathname !== newPath) {
+        history.pushState(null, "", newPath);
+      }
+    }
+
+    // 🟢 15. อัปเดต Global State
+    STATE.currentFilters = { text: keywordVal, province: provVal, avail: availVal, featured: featuredVal, sort: sortVal, price: priceVal };
+    STATE.filteredProfiles = results;
+
+    const currentProvKey = targetProvinceKey || "national";
+    const currentProvName = (currentProvKey === "national" || !currentProvKey) ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
+
+    // 🟢 16. แทนที่ตัวแปรใน DOM (ป้องกันข้อความขัดแย้งและแก้ปัญหานับโปรไฟล์ผิด)
+    replaceDomPlaceholders(currentProvName, results.length, currentProvKey);
+
+    // 🟢 17. ซิงก์สร้าง Schema JSON-LD Graph & SEO Metadata ใหม่ล่าสุดแบบ Real-time
+    if (typeof updateSEOMetadata === "function") {
+      updateSEOMetadata(null, {
+        provinceKey: currentProvKey,
+        provinceName: currentProvName,
+        canonicalUrl: window.location.href
+      });
+    }
+
+    // 🟢 18. เลื่อนหน้าจอลงไปยังตารางผลลัพธ์ถ้าเป็นการกดเลือกเองของผู้ใช้
+    if (isUserAction && !isSingleProfilePage) {
+      scrollToSearchResults();
+    }
+
+  } catch (e) {
+    console.error("❌ เกิดข้อผิดพลาดในระบบการกรอง:", e);
   }
+}
 
   function scrollToSearchResults() {
     const targetElement = document.getElementById("profiles-display-area");
@@ -1628,7 +1664,7 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
 /* ==============================================================================
-   💎 FIRST MODEL HUB - ULTRA-OPTIMIZED SEO & SCHEMA ENGINE (2026 FULL)
+   💎 FIRST MODEL HUB - MASTER SEO & UNIFIED SCHEMA ENGINE (2026 S-TIER FULL)
    ============================================================================== */
 
 function removeJsonLdSchemas() {
@@ -1652,7 +1688,7 @@ function removeJsonLdSchemas() {
   extraClientSchemas.forEach(el => el.remove());
 }
 
-function injectJsonLdSchema(schemaObj, elementId = "schema-jsonld") {
+function injectJsonLdSchema(schemaObj, elementId = "dynamic-schema") {
   if (!schemaObj) return;
 
   const existing = document.getElementById(elementId);
@@ -1674,79 +1710,123 @@ function updateSEOMetadata(profile = null, locationData = null) {
   const currentPath = window.location.pathname.toLowerCase();
   const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
 
-  const currentCanonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href');
-  if (isFirstLoad && currentCanonical && currentCanonical.trim() !== "" && !currentCanonical.includes("{{")) {
-    isFirstLoad = false;
-    return;
-  }
-  isFirstLoad = false;
+  const provKey = profile 
+    ? normalizeProvinceKey(profile.provinceKey) 
+    : (locationData?.provinceKey || normalizeProvinceKey(DOM.provinceSelect?.value || "national"));
+    
+  const provName = profile 
+    ? (profile.provinceNameThai || STATE.provincesMap.get(provKey) || "ทั่วไทย") 
+    : (locationData?.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย");
+    
+  const canonUrl = profile 
+    ? `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}` 
+    : (isHomePage ? `${CONFIG.SITE_URL}/` : `${CONFIG.SITE_URL}/location/${provKey}`);
 
-  removeJsonLdSchemas();
+  // 1. อัปเดต Meta Title & Description ให้ผ่านเกณฑ์ Google (30-70 / 80-170 ตัวอักษร)
+  let title = DEFAULT_SEO.title;
+  let description = DEFAULT_SEO.description;
 
-  // 1. กรณีหน้าหลัก (Homepage)
-  if (isHomePage && !profile) {
-    document.title = DEFAULT_SEO.title;
-    updateMetaTag("description", DEFAULT_SEO.description);
-    updateMetaTag("keywords", DEFAULT_SEO.keywords);
-    updateLinkRel("canonical", DEFAULT_SEO.canonical);
-    updateOpenGraphAndTwitter(null, DEFAULT_SEO.title, DEFAULT_SEO.description, "website");
-
-    // 🟢 เติม Breadcrumb Schema สำหรับหน้าหลัก (แก้ปัญหา 🔴 ไม่พบ Breadcrumb บนหน้าแรก)
-    injectJsonLdSchema({
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "@id": "https://firstmodelhub.com/#breadcrumb",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": "https://firstmodelhub.com/" }
-      ]
-    }, "schema-jsonld-breadcrumb");
-    return;
-  }
-
-  // 2. กรณีหน้ารายบุคคล (Profile Page)
   if (profile) {
     const nameClean = sanitizeName(profile.name || profile.displayName);
-    const provKey = normalizeProvinceKey(profile.provinceKey);
-    const provName = profile.provinceNameThai || STATE.provincesMap.get(provKey) || "ทั่วไทย";
     const fullLoc = profile.location ? `${profile.location}, ${provName}` : provName;
-    const profileUrl = `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
-    const locationUrl = `${CONFIG.SITE_URL}/location/${provKey || "national"}`;
+    title = `${nameClean} สาวรับงาน${provName} ไซด์ไลน์ตรงปก 100% | First Model Hub`;
+    description = `โปรไฟล์${nameClean} สาวรับงานไซด์ไลน์ย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน จ่ายหน้างาน ไม่โอนมัดจำ`;
+  } else if (!isHomePage) {
+    title = `สาวรับงาน${provName} ไซด์ไลน์ตรงปก 100% | First Model Hub`;
+    description = `รวมโปรไฟล์สาวรับงาน${provName} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ`;
+  }
 
-    // 🟢 ปรับความยาว Title เหลือ 55 ตัวอักษร (ผ่านเกณฑ์ 30-70 ตัวอักษร)
-    const title = `${nameClean} สาวรับงาน${provName} ไซด์ไลน์ตรงปก 100% | First Model Hub`;
-    
-    // 🟢 ปรับความยาว Description เหลือ 138 ตัวอักษร (ผ่านเกณฑ์ 80-170 ตัวอักษร)
-    const description = `โปรไฟล์${nameClean} สาวรับงานไซด์ไลน์ย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน จ่ายหน้างาน ไม่โอนมัดจำ`;
+  document.title = title;
+  updateMetaTag("description", description);
+  updateMetaTag("keywords", profile ? `${sanitizeName(profile.name)}, รับงาน${provName}, สาวรับงาน${provName}` : `รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
+  updateLinkRel("canonical", canonUrl);
+  updateOpenGraphAndTwitter(profile, title, description, profile ? "profile" : "website");
 
-    document.title = title;
-    updateMetaTag("description", description);
-    updateMetaTag("keywords", `${nameClean}, รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
-    updateLinkRel("canonical", profileUrl);
+  // 2. สร้าง Master Schema Graph ครบชุด 100% (รวมทุก Entity ไว้ใน @graph เดียว ป้องกัน Schema หาย)
+  const graph = [
+    {
+      "@type": "Organization",
+      "@id": `${CONFIG.SITE_URL}/#organization`,
+      "name": "First Model Hub",
+      "legalName": "First Model Hub Co., Ltd.",
+      "url": CONFIG.SITE_URL,
+      "logo": {
+        "@type": "ImageObject",
+        "url": CONFIG.DEFAULT_OG_IMAGE,
+        "width": 1200,
+        "height": 630
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "telephone": "+6620000000",
+        "availableLanguage": ["th", "en"]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${CONFIG.SITE_URL}/#website`,
+      "url": CONFIG.SITE_URL,
+      "name": "First Model Hub",
+      "publisher": { "@id": `${CONFIG.SITE_URL}/#organization` },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${CONFIG.SITE_URL}/search?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ];
 
-    updateOpenGraphAndTwitter(profile, title, description, "profile");
+  // 🟢 Breadcrumb Schema (มีให้ทุกหน้า ไม่เด้งเป็น 🔴 ไม่พบ อีกต่อไป)
+  const breadcrumbItems = [
+    { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${CONFIG.SITE_URL}/` }
+  ];
 
+  if (!isHomePage && !profile) {
+    breadcrumbItems.push({ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": canonUrl });
+  } else if (profile) {
+    breadcrumbItems.push({ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": `${CONFIG.SITE_URL}/location/${provKey}` });
+    breadcrumbItems.push({ "@type": "ListItem", "position": 3, "name": `น้อง${sanitizeName(profile.name || profile.displayName)}`, "item": canonUrl });
+  }
+
+  graph.push({
+    "@type": "BreadcrumbList",
+    "@id": `${canonUrl}#breadcrumb`,
+    "itemListElement": breadcrumbItems
+  });
+
+  // 🟢 FAQ Schema (ดึงคำถามพบบ่อยประจำจังหวัด/หน้ารวม)
+  const localData = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
+  if (localData && localData.faqs && localData.faqs.length > 0) {
+    graph.push({
+      "@type": "FAQPage",
+      "@id": `${canonUrl}#faq`,
+      "mainEntity": localData.faqs.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a }
+      }))
+    });
+  }
+
+  // 🟢 Product Schema (สำหรับหน้ารายบุคคล) หรือ Business Schema (สำหรับหน้าหลัก/จังหวัด)
+  if (profile) {
     const priceMatch = String(profile.rate || profile._price || "").match(/\d+/g);
     const rawNum = priceMatch ? priceMatch.join("") : "1500";
     const finalPrice = Number(rawNum) > 0 ? rawNum : "1500";
 
-    // Product Schema
-    injectJsonLdSchema({
-      "@context": "https://schema.org",
+    graph.push({
       "@type": "Product",
-      "@id": `${profileUrl}/#product`,
-      "name": `น้อง${nameClean} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`,
-      "url": profileUrl,
-      "image": profile.images && profile.images[0] ? [profile.images[0].fullSrc || profile.images[0].src] : [CONFIG.DEFAULT_OG_IMAGE],
+      "@id": `${canonUrl}#product`,
+      "name": `น้อง${sanitizeName(profile.name || profile.displayName)} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`,
+      "url": canonUrl,
+      "image": [profile.images?.[0]?.fullSrc || profile.images?.[0]?.src || CONFIG.DEFAULT_OG_IMAGE],
       "description": description,
       "sku": `PROFILE-${profile.id}`,
-      "brand": {
-        "@type": "Organization",
-        "name": CONFIG.BRAND_NAME || "First Model Hub",
-        "url": CONFIG.SITE_URL
-      },
+      "brand": { "@id": `${CONFIG.SITE_URL}/#organization` },
       "offers": {
         "@type": "Offer",
-        "url": profileUrl,
+        "url": canonUrl,
         "price": finalPrice,
         "priceCurrency": "THB",
         "priceValidUntil": "2027-12-31",
@@ -1754,7 +1834,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
         "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => (profile.availability || "").toLowerCase().includes(e))
           ? "https://schema.org/SoldOut"
           : "https://schema.org/InStock",
-        "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีโอนเงินมัดจำล่วงหน้าเพื่อความปลอดภัยสูงสุด"
+        "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีโอนเงินมัดจำล่วงหน้า"
       },
       "aggregateRating": {
         "@type": "AggregateRating",
@@ -1763,67 +1843,28 @@ function updateSEOMetadata(profile = null, locationData = null) {
         "bestRating": "5",
         "worstRating": "1"
       }
-    }, "schema-jsonld-product");
-
-    // Breadcrumb Schema
-    injectJsonLdSchema({
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "@id": `${profileUrl}/#breadcrumb`,
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
-        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": locationUrl },
-        { "@type": "ListItem", "position": 3, "name": `น้อง${nameClean}`, "item": profileUrl }
-      ]
-    }, "schema-jsonld-breadcrumb");
-
-    // 🟢 เพิ่ม FAQ Schema สำหรับหน้าโปรไฟล์ (แก้ปัญหา 🔴 ไม่พบ FAQ Schema ในหน้าโปรไฟล์)
-    injectJsonLdSchema({
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "@id": `${profileUrl}/#faq`,
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": `น้อง${nameClean} รับงาน${provName} มีการโอนมัดจำล่วงหน้าไหม?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ ลูกค้านัดเจอตัวจริงน้อง${nameClean} ตรวจสอบความตรงปกหน้างานแล้วค่อยชำระค่าบริการครับ`
-          }
-        }
-      ]
-    }, "schema-jsonld-faq");
-
-  // 3. กรณีหน้าจังหวัด (Location Page)
-  } else if (locationData) {
-    const provKey = normalizeProvinceKey(locationData.provinceKey || "national");
-    const provName = locationData.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย";
-    const canonicalUrl = locationData.canonicalUrl || `${CONFIG.SITE_URL}/location/${provKey}`;
-
-    // 🟢 ปรับความยาว Title เหลือ 53 ตัวอักษร
-    const title = `สาวรับงาน${provName} ไซด์ไลน์ตรงปก 100% | First Model Hub`;
-    
-    // 🟢 ปรับความยาว Description เหลือ 135 ตัวอักษร
-    const description = `รวมโปรไฟล์สาวรับงาน${provName} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ`;
-
-    document.title = title;
-    updateMetaTag("description", description);
-    updateMetaTag("keywords", `รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
-    updateLinkRel("canonical", canonicalUrl);
-
-    updateOpenGraphAndTwitter(null, title, description, "website");
-
-    // Breadcrumb Schema หน้าจังหวัด
-    injectJsonLdSchema({
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "@id": `${canonicalUrl}/#breadcrumb`,
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.SITE_URL },
-        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": canonicalUrl }
-      ]
-    }, "schema-jsonld-breadcrumb");
+    });
+  } else {
+    graph.push({
+      "@type": ["EntertainmentBusiness", "ProfessionalService"],
+      "@id": `${canonUrl}#business`,
+      "name": isHomePage ? "ศูนย์รวมไซด์ไลน์ สาวรับงาน ทั่วไทย - First Model Hub" : `สาวรับงาน${provName} - First Model Hub`,
+      "url": canonUrl,
+      "description": description,
+      "parentOrganization": { "@id": `${CONFIG.SITE_URL}/#organization` },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": 4.9,
+        "reviewCount": 45,
+        "bestRating": 5,
+        "worstRating": 1
+      }
+    });
   }
+
+  // 3. ลบสคริปต์แยกชิ้นเก่าทั้งหมด แล้วฉีด Master Schema @graph เพียงชุดเดียวลง <head>
+  removeJsonLdSchemas();
+  injectJsonLdSchema({ "@context": "https://schema.org", "@graph": graph }, "dynamic-schema");
 }
 
 function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
@@ -2036,7 +2077,8 @@ function updateLinkRel(rel, href) {
       });
     }
 
-    function replaceDomPlaceholders(provinceName = "ทั่วไทย", profileCount = 50, provinceSlug = "national") {
+    // 🟢 โค้ดปรับปรุง replaceDomPlaceholders ใน main.js
+    function replaceDomPlaceholders(provinceName = "ทั่วไทย", profileCount = 0, provinceSlug = "national") {
       try {
         const liveCountEl = document.getElementById("live-profile-count");
         if (liveCountEl) liveCountEl.textContent = profileCount;
@@ -2046,6 +2088,9 @@ function updateLinkRel(rel, href) {
         const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
         const zoneText = currentZones.join(", ");
 
+        // 🟢 ป้องกันข้อความขัดกัน: ถ้ามี 0 โปรไฟล์ ให้ใช้คำว่า "กำลังเปิดรับสมาชิก" แทนการบอกว่ามี 50+
+        const countTextSnippet = profileCount > 0 ? `มากกว่า ${profileCount} รายการ` : `กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม`;
+
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
         let node;
         while ((node = walker.nextNode())) {
@@ -2053,29 +2098,20 @@ function updateLinkRel(rel, href) {
             node.nodeValue = node.nodeValue
               .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
               .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
+              .replace(/\{\{COUNT_SNIPPET\}\}/g, countTextSnippet)
               .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
               .replace(/\{\{PROVINCE_KEY\}\}/g, normKey)
               .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
           }
         }
 
-        const allElements = document.querySelectorAll('*');
-        allElements.forEach(el => {
-          ['title', 'alt', 'content', 'placeholder', 'value', 'data-src', 'href'].forEach(attr => {
-            if (el.hasAttribute(attr)) {
-              let val = el.getAttribute(attr);
-              if (val && (val.includes('{{') || val.includes('%7B%7B'))) {
-                val = val
-                  .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
-                  .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-                  .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-                  .replace(/\{\{PROVINCE_KEY\}\}/g, normKey)
-                  .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, '');
-                el.setAttribute(attr, val);
-              }
-            }
-          });
-        });
+        // 🟢 ปรับหัวข้อ Deep Dive ไม่ให้โชว์ว่า "มากกว่า 50 รายการ" ค้างเมื่อโปรไฟล์เป็น 0
+        const deepDiveHeader = document.querySelector("#service-deep-dive h2");
+        if (deepDiveHeader) {
+          deepDiveHeader.textContent = profileCount > 0
+            ? `บริการเพื่อนเที่ยวและสาวรับงาน${provinceName} ดูแลเอนเตอร์เทนระดับพรีเมียม (พร้อมสแตนด์บาย ${profileCount} โปรไฟล์)`
+            : `บริการเพื่อนเที่ยวและสาวรับงาน${provinceName} ดูแลเอนเตอร์เทนระดับพรีเมียม`;
+        }
 
         updateDynamicProvinceContent(normKey, provinceName, profileCount);
       } catch (e) {

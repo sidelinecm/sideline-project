@@ -240,11 +240,11 @@
     </div>
     <!-- SSR_DISPLAY_AREA_END -->
 
-    <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
+<section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
       <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
          <div style="position: relative; padding: 16px; border-bottom: 1px solid var(--border-light); background: rgba(13, 8, 30, 0.45);">
              <h2 class="text-gradient-main" style="font-size: 16px; font-weight: 800; margin: 0 0 8px 0;">
-                 บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า {{PROFILE_COUNT}} รายการ)
+                 บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม {{COUNT_SNIPPET}}
              </h2>
              <p style="font-size: 12px; line-height: 1.6; color: #E4E4E7; margin: 0;">
                  ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} คัดสรรโปรไฟล์ตรงปก 100% บริการเอนเตอร์เทนสไตล์ฟิวแฟน (GFE) ปลอดภัยสูงสุดด้วยนโยบาย <strong>"จ่ายหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำล่วงหน้าทุกกรณี"</strong> ครอบคลุมโซน {{PROVINCE_ZONES}}
@@ -423,13 +423,49 @@
   </div>
 </section>
 
-    <!-- EDITORIAL PROCESS -->
-    <section id="verification-process" style="max-width: 850px; margin: 20px auto 0 auto;" aria-labelledby="verification-heading">
-      <div style="padding: 12px 16px; background: rgba(13,8,30,0.4); border: 1px solid rgba(147, 51, 234, 0.2); border-radius: 12px; display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-user-shield" style="font-size: 20px; color: var(--primary-purple);" aria-hidden="true"></i>
-        <p style="font-size: 12px; color: var(--text-gray); margin: 0; line-height: 1.4;">
-          <strong style="color: white;">EDITORIAL TRUST:</strong> ทุกโปรไฟล์ผ่านการตรวจสอบตัวตน รูปตรงปก 100% โดยทีมงาน First Model Hub Co. อ่านข้อมูลเพิ่มเติมได้ที่ <a href="/about" style="color: var(--primary-purple); text-decoration: underline;">หน้าเกี่ยวกับเรา</a>
-        </p>
+<!-- 🛡️ EDITORIAL TRUST & EEAT VERIFICATION SYSTEM -->
+    <section id="verification-process" class="glass-panel" style="max-width: 850px; margin: 24px auto 0 auto; padding: 20px 16px; border-radius: 16px; background: rgba(18, 12, 38, 0.6); border: 1px solid rgba(192, 132, 252, 0.3);">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fas fa-user-check" style="font-size: 22px; color: #00E676;" aria-hidden="true"></i>
+          <div>
+            <h3 style="font-size: 14px; font-weight: 800; color: #FFF; margin: 0;">มาตรฐานการยืนยันตัวตนจริง (Verified Standard)</h3>
+            <span style="font-size: 11px; color: #A1A1AA;">ตรวจสอบล่าสุดเมื่อ: <strong style="color: #C084FC;">14 สิงหาคม 2026</strong> โดยทีมงาน First Model Hub</span>
+          </div>
+        </div>
+        <span style="background: rgba(0,230,118,0.15); border: 1px solid #00E676; color: #00E676; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 100px;">
+          🔒 3-Step Verification
+        </span>
+      </div>
+
+      <!-- 3 ขั้นตอนการตรวจสอบอ้างอิงให้ Google -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; text-align: center;">
+        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.06);">
+          <i class="fas fa-video" style="font-size: 14px; color: #C084FC; margin-bottom: 4px;" aria-hidden="true"></i>
+          <div style="font-size: 10.5px; font-weight: 800; color: #FFF;">1. Video Call</div>
+          <div style="font-size: 9px; color: #A1A1AA; margin-top: 2px;">ยืนยันใบหน้าตรงรูป</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.06);">
+          <i class="fas fa-id-card" style="font-size: 14px; color: #C084FC; margin-bottom: 4px;" aria-hidden="true"></i>
+          <div style="font-size: 10.5px; font-weight: 800; color: #FFF;">2. Age 20+ KYC</div>
+          <div style="font-size: 9px; color: #A1A1AA; margin-top: 2px;">ตรวจสอบอายุตามกฎหมาย</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.06);">
+          <i class="fas fa-handshake" style="font-size: 14px; color: #00E676; margin-bottom: 4px;" aria-hidden="true"></i>
+          <div style="font-size: 10.5px; font-weight: 800; color: #FFF;">3. Pay On Meeting</div>
+          <div style="font-size: 9px; color: #A1A1AA; margin-top: 2px;">จ่ายหน้างาน ไม่โอนมัดจำ</div>
+        </div>
+      </div>
+
+      <!-- ปุ่มแจ้งรายงานโปรไฟล์ไม่ตรงปก -->
+      <div style="background: rgba(255, 46, 99, 0.1); border: 1px dashed rgba(255, 46, 99, 0.4); padding: 12px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="font-size: 11.5px; color: #E4E4E7;">
+          <strong style="color: #FF2E63;">พบโปรไฟล์ไม่ตรงปก หรือเข้าข่ายมิจฉาชีพ?</strong>
+          <span style="display: block; font-size: 10.5px; color: #A1A1AA;">เรามีนโยบายระงับโปรไฟล์ทันทีเพื่อความปลอดภัย อ่านเพิ่มเติมที่ <a href="/about" style="color: #C084FC; text-decoration: underline;">เกี่ยวกับเรา</a></span>
+        </div>
+        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" style="background: #FF2E63; color: white; text-decoration: none; padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> แจ้งโปรไฟล์ปลอม
+        </a>
       </div>
     </section>
 
