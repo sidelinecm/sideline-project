@@ -182,11 +182,10 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   function sanitizeName(rawName) {
-    if (!rawName || typeof rawName !== "string") return "สาวสวย";
-    let cleaned = sanitizeThaiText(rawName).replace(/^(น้อง\s?)+/gi, "").trim();
-    if (!cleaned) return "สาวสวย";
-    return `น้อง${cleaned}`;
-  }
+  if (!rawName || typeof rawName !== "string") return "น้องสาวสวย";
+  const clean = sanitizeThaiText(rawName).replace(/^(น้อง\s*)+/gi, "").trim();
+  return clean ? `น้อง${clean}` : "น้องสาวสวย";
+}
 
   function deduplicateProfiles(profileList) {
     if (!Array.isArray(profileList)) return [];
@@ -1667,6 +1666,19 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
    💎 FIRST MODEL HUB - MASTER SEO & UNIFIED SCHEMA ENGINE (2026 S-TIER FULL)
    ============================================================================== */
 
+// 🟢 Helper 1: สกัดราคาตัวเลขชุดแรกบริสุทธิ์สำหรับ Schema (ป้องกันราคาพัง เช่น 15002000)
+function extractCleanPrice(profile) {
+  if (!profile) return "1500";
+  const rawPrice = String(profile._price || profile.rate || "1500");
+  const firstMatch = rawPrice.match(/\d+/);
+  if (!firstMatch) return "1500";
+  
+  let num = Number(firstMatch[0]);
+  if (num > 0 && num < 500) num *= 10; // รองรับกรณีพิมพ์ตัวเลขย่อ เช่น 150 -> 1500
+  return num > 0 ? String(num) : "1500";
+}
+
+// 🟢 Helper 2: ลบ Schema เก่าออกก่อนฉีดชุดใหม่ ป้องกัน Schema ซ้ำซ้อน
 function removeJsonLdSchemas() {
   const schemaIds = [
     "dynamic-schema",
@@ -1688,6 +1700,7 @@ function removeJsonLdSchemas() {
   extraClientSchemas.forEach(el => el.remove());
 }
 
+// 🟢 Helper 3: ฉีด Schema JSON-LD ลงใน <head>
 function injectJsonLdSchema(schemaObj, elementId = "dynamic-schema") {
   if (!schemaObj) return;
 
@@ -1706,28 +1719,109 @@ function injectJsonLdSchema(schemaObj, elementId = "dynamic-schema") {
   }
 }
 
+// 🟢 Helper 4: อัปเดต Meta Tag ทั้ง name และ property
+function updateMetaTag(nameOrProperty, content) {
+  if (content === undefined || content === null) return;
+  const safeContent = String(content).trim();
+
+  let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
+  if (!tag) {
+    tag = document.createElement("meta");
+    if (nameOrProperty.startsWith("og:") || nameOrProperty.startsWith("twitter:")) {
+      tag.setAttribute("property", nameOrProperty);
+    } else {
+      tag.setAttribute("name", nameOrProperty);
+    }
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("content", safeContent);
+}
+
+// 🟢 Helper 5: อัปเดต Link Canonical
+function updateLinkRel(rel, href) {
+  if (!href) return;
+  let link = document.querySelector(`link[rel="${rel}"]:not([hreflang])`);
+  if (!link) {
+    link = document.createElement("link");
+    link.setAttribute("rel", rel);
+    document.head.appendChild(link);
+  }
+  link.setAttribute("href", href);
+}
+
+// 🟢 Helper 6: อัปเดต Link Hreflang ทั้งหมดให้ตรงกับ Canonical URL ป้องกัน {{SEO_CANONICAL}} ค้าง
+function updateAllHreflangLinks(canonUrl) {
+  if (!canonUrl) return;
+  const hreflangTags = document.querySelectorAll('link[rel="alternate"][hreflang]');
+  if (hreflangTags.length > 0) {
+    hreflangTags.forEach(link => link.setAttribute("href", canonUrl));
+  } else {
+    ["th", "x-default"].forEach(lang => {
+      const link = document.createElement("link");
+      link.setAttribute("rel", "alternate");
+      link.setAttribute("hreflang", lang);
+      link.setAttribute("href", canonUrl);
+      document.head.appendChild(link);
+    });
+  }
+}
+
+// 🟢 Helper 7: อัปเดต OpenGraph และ Twitter Cards ครบทุกแท็ก (รวม og:url และ twitter:url)
+function updateOpenGraphAndTwitter(profile, title, description, type = "website", canonUrl = "") {
+  const imageUrl = profile && profile.images && profile.images[0] 
+    ? (profile.images[0].fullSrc || profile.images[0].src) 
+    : CONFIG.DEFAULT_OG_IMAGE;
+
+  updateMetaTag("og:locale", "th_TH");
+  updateMetaTag("og:site_name", CONFIG.BRAND_NAME || "First Model Hub");
+  updateMetaTag("og:type", type);
+  updateMetaTag("og:title", title);
+  updateMetaTag("og:description", description);
+  updateMetaTag("og:image", imageUrl);
+  updateMetaTag("og:image:secure_url", imageUrl);
+  updateMetaTag("og:image:type", "image/webp");
+  updateMetaTag("og:image:width", "1200");
+  updateMetaTag("og:image:height", "630");
+  if (canonUrl) updateMetaTag("og:url", canonUrl);
+
+  updateMetaTag("twitter:card", "summary_large_image");
+  updateMetaTag("twitter:title", title);
+  updateMetaTag("twitter:description", description);
+  updateMetaTag("twitter:image", imageUrl);
+  if (canonUrl) updateMetaTag("twitter:url", canonUrl);
+}
+
+// 🟢 MASTER FUNCTION: อัปเดต SEO Metadata & Schema JSON-LD Graph แบบสมบูรณ์ 100%
 function updateSEOMetadata(profile = null, locationData = null) {
   const currentPath = window.location.pathname.toLowerCase();
   const isHomePage = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
 
-  const provKey = profile 
-    ? normalizeProvinceKey(profile.provinceKey) 
-    : (locationData?.provinceKey || normalizeProvinceKey(DOM.provinceSelect?.value || "national"));
+  const rawKey = profile 
+    ? profile.provinceKey 
+    : (locationData?.provinceKey || DOM.provinceSelect?.value || "national");
+    
+  const provKey = typeof normalizeProvinceKey === "function" 
+    ? normalizeProvinceKey(rawKey) 
+    : String(rawKey || "national").toLowerCase();
     
   const provName = profile 
-    ? (profile.provinceNameThai || STATE.provincesMap.get(provKey) || "ทั่วไทย") 
-    : (locationData?.provinceName || STATE.provincesMap.get(provKey) || "ทั่วไทย");
+    ? (profile.provinceNameThai || STATE.provincesMap?.get(provKey) || "ทั่วไทย") 
+    : (locationData?.provinceName || STATE.provincesMap?.get(provKey) || "ทั่วไทย");
     
   const canonUrl = profile 
     ? `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}` 
     : (isHomePage ? `${CONFIG.SITE_URL}/` : `${CONFIG.SITE_URL}/location/${provKey}`);
+
+  // 🟢 คำนวณชื่อสะอาดที่การันตีไม่ซ้ำคำว่า "น้อง" (Idempotent Name)
+  const nameClean = profile 
+    ? (typeof sanitizeName === "function" ? sanitizeName(profile.name || profile.displayName) : `น้อง${String(profile.name || profile.displayName || "").replace(/^(น้อง\s*)+/gi, "").trim()}`)
+    : "";
 
   // 1. อัปเดต Meta Title & Description ให้ผ่านเกณฑ์ Google (30-70 / 80-170 ตัวอักษร)
   let title = DEFAULT_SEO.title;
   let description = DEFAULT_SEO.description;
 
   if (profile) {
-    const nameClean = sanitizeName(profile.name || profile.displayName);
     const fullLoc = profile.location ? `${profile.location}, ${provName}` : provName;
     title = `${nameClean} สาวรับงาน${provName} ไซด์ไลน์ตรงปก 100% | First Model Hub`;
     description = `โปรไฟล์${nameClean} สาวรับงานไซด์ไลน์ย่าน ${fullLoc} ตรงปก 100% ค่าขนม ${profile.displayPrice || "1,500.-"} ดูแลสไตล์ฟิวแฟน จ่ายหน้างาน ไม่โอนมัดจำ`;
@@ -1736,18 +1830,38 @@ function updateSEOMetadata(profile = null, locationData = null) {
     description = `รวมโปรไฟล์สาวรับงาน${provName} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ`;
   }
 
+  // 🟢 1. อัปเดต Meta Title & Description
   document.title = title;
   updateMetaTag("description", description);
-  updateMetaTag("keywords", profile ? `${sanitizeName(profile.name)}, รับงาน${provName}, สาวรับงาน${provName}` : `รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
+  updateMetaTag("keywords", profile ? `${nameClean}, รับงาน${provName}, สาวรับงาน${provName}` : `รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
   updateLinkRel("canonical", canonUrl);
-  updateOpenGraphAndTwitter(profile, title, description, profile ? "profile" : "website");
+  updateAllHreflangLinks(canonUrl);
+  updateOpenGraphAndTwitter(profile, title, description, profile ? "profile" : "website", canonUrl);
+
+  // 🟢 อัปเดต H1 ให้สอดคล้องกับหน้าโปรไฟล์รายบุคคลแบบ Dynamic 100%
+  const heroH1 = document.getElementById("hero-h1");
+  if (heroH1) {
+    if (profile) {
+      // หน้าโปรไฟล์น้อง: เปลี่ยน H1 เป็นชื่อน้อง + จังหวัด
+      heroH1.innerHTML = `
+        <span class="seo-sub-headline">${nameClean} • สาวรับงาน${provName}</span><br>
+        <span class="seo-main-headline">เพื่อนเที่ยว ไซด์ไลน์ฟิวแฟน ตรงปก 100%</span>
+      `;
+    } else {
+      // หน้าหลัก/หน้ารวมจังหวัด: คง H1 สรุปภาพรวมพื้นที่
+      heroH1.innerHTML = `
+        <span class="seo-sub-headline">รับงาน${provName} • ไซด์ไลน์${provName}</span><br>
+        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
+      `;
+    }
+  }
 
   // 2. สร้าง Master Schema Graph ครบชุด 100% (รวมทุก Entity ไว้ใน @graph เดียว ป้องกัน Schema หาย)
   const graph = [
     {
       "@type": "Organization",
       "@id": `${CONFIG.SITE_URL}/#organization`,
-      "name": "First Model Hub",
+      "name": CONFIG.BRAND_NAME || "First Model Hub",
       "legalName": "First Model Hub Co., Ltd.",
       "url": CONFIG.SITE_URL,
       "logo": {
@@ -1767,7 +1881,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
       "@type": "WebSite",
       "@id": `${CONFIG.SITE_URL}/#website`,
       "url": CONFIG.SITE_URL,
-      "name": "First Model Hub",
+      "name": CONFIG.BRAND_NAME || "First Model Hub",
       "publisher": { "@id": `${CONFIG.SITE_URL}/#organization` },
       "potentialAction": {
         "@type": "SearchAction",
@@ -1777,7 +1891,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
     }
   ];
 
-  // 🟢 Breadcrumb Schema (มีให้ทุกหน้า ไม่เด้งเป็น 🔴 ไม่พบ อีกต่อไป)
+  // 🟢 Breadcrumb Schema (ใช้ nameClean โดยไม่เติม "น้อง" ซ้ำ)
   const breadcrumbItems = [
     { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${CONFIG.SITE_URL}/` }
   ];
@@ -1786,7 +1900,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
     breadcrumbItems.push({ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": canonUrl });
   } else if (profile) {
     breadcrumbItems.push({ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": `${CONFIG.SITE_URL}/location/${provKey}` });
-    breadcrumbItems.push({ "@type": "ListItem", "position": 3, "name": `น้อง${sanitizeName(profile.name || profile.displayName)}`, "item": canonUrl });
+    breadcrumbItems.push({ "@type": "ListItem", "position": 3, "name": nameClean, "item": canonUrl }); // ✅ แก้ชื่อซ้ำแล้ว
   }
 
   graph.push({
@@ -1796,7 +1910,10 @@ function updateSEOMetadata(profile = null, locationData = null) {
   });
 
   // 🟢 FAQ Schema (ดึงคำถามพบบ่อยประจำจังหวัด/หน้ารวม)
-  const localData = LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"];
+  const localData = (typeof LOCALIZED_SEO_MAP !== "undefined") 
+    ? (LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"]) 
+    : null;
+
   if (localData && localData.faqs && localData.faqs.length > 0) {
     graph.push({
       "@type": "FAQPage",
@@ -1811,14 +1928,16 @@ function updateSEOMetadata(profile = null, locationData = null) {
 
   // 🟢 Product Schema (สำหรับหน้ารายบุคคล) หรือ Business Schema (สำหรับหน้าหลัก/จังหวัด)
   if (profile) {
-    const priceMatch = String(profile.rate || profile._price || "").match(/\d+/g);
-    const rawNum = priceMatch ? priceMatch.join("") : "1500";
-    const finalPrice = Number(rawNum) > 0 ? rawNum : "1500";
+    const cleanPrice = extractCleanPrice(profile); // ✅ ป้องกันราคาพัง เช่น 15002000
+
+    const isBusy = ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => 
+      (profile.availability || "").toLowerCase().includes(e)
+    );
 
     graph.push({
       "@type": "Product",
       "@id": `${canonUrl}#product`,
-      "name": `น้อง${sanitizeName(profile.name || profile.displayName)} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`,
+      "name": `${nameClean} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`, // ✅ แก้ชื่อซ้ำแล้ว
       "url": canonUrl,
       "image": [profile.images?.[0]?.fullSrc || profile.images?.[0]?.src || CONFIG.DEFAULT_OG_IMAGE],
       "description": description,
@@ -1827,14 +1946,13 @@ function updateSEOMetadata(profile = null, locationData = null) {
       "offers": {
         "@type": "Offer",
         "url": canonUrl,
-        "price": finalPrice,
+        "price": cleanPrice, // ✅ ได้ราคาตัวเลขสะอาด เช่น "1500"
         "priceCurrency": "THB",
         "priceValidUntil": "2027-12-31",
         "itemCondition": "https://schema.org/NewCondition",
-        "availability": ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => (profile.availability || "").toLowerCase().includes(e))
-          ? "https://schema.org/SoldOut"
-          : "https://schema.org/InStock",
-        "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีโอนเงินมัดจำล่วงหน้า"
+        "availability": isBusy ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีโอนเงินมัดจำล่วงหน้า",
+        "seller": { "@id": `${CONFIG.SITE_URL}/#organization` }
       },
       "aggregateRating": {
         "@type": "AggregateRating",
@@ -1865,44 +1983,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
   // 3. ลบสคริปต์แยกชิ้นเก่าทั้งหมด แล้วฉีด Master Schema @graph เพียงชุดเดียวลง <head>
   removeJsonLdSchemas();
   injectJsonLdSchema({ "@context": "https://schema.org", "@graph": graph }, "dynamic-schema");
-}
-
-function updateOpenGraphAndTwitter(profile, title, description, type = "website") {
-  const imageUrl = profile && profile.images && profile.images[0] ? (profile.images[0].fullSrc || profile.images[0].src) : CONFIG.DEFAULT_OG_IMAGE;
-
-  updateMetaTag("og:title", title);
-  updateMetaTag("og:description", description);
-  updateMetaTag("og:type", type);
-  updateMetaTag("og:image", imageUrl);
-  updateMetaTag("og:image:secure_url", imageUrl);
-
-  updateMetaTag("twitter:title", title);
-  updateMetaTag("twitter:description", description);
-  updateMetaTag("twitter:image", imageUrl);
-}
-
-function updateMetaTag(nameOrProperty, content) {
-  let tag = document.querySelector(`meta[name="${nameOrProperty}"], meta[property="${nameOrProperty}"]`);
-  if (!tag) {
-    tag = document.createElement("meta");
-    if (nameOrProperty.startsWith("og:") || nameOrProperty.startsWith("twitter:")) {
-      tag.setAttribute("property", nameOrProperty);
-    } else {
-      tag.setAttribute("name", nameOrProperty);
-    }
-    document.head.appendChild(tag);
-  }
-  tag.setAttribute("content", content);
-}
-
-function updateLinkRel(rel, href) {
-  let link = document.querySelector(`link[rel="${rel}"]`);
-  if (!link) {
-    link = document.createElement("link");
-    link.setAttribute("rel", rel);
-    document.head.appendChild(link);
-  }
-  link.setAttribute("href", href);
 }
   
   function updateGoogleMap(provKey = "national", provName = "ทั่วไทย") {
