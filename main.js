@@ -1,7 +1,7 @@
 /**
  * [ SYSTEM MAIN CORE - ADVANCED SMART ENGINE 2026 ]
  * Project: First Model Hub - Dynamic Client Controller & Search Engine
- * Features: 100% Working Lightbox, Floating Bottom Sheet, Eye-Level Smooth Scroll, 50% Slim Sidebar
+ * Features: 100% Pure Cloudinary Resolution, 100% Working Lightbox, Floating Bottom Sheet, Eye-Level Smooth Scroll, 50% Slim Sidebar
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
@@ -18,7 +18,8 @@ window.ScrollTrigger = ScrollTrigger;
   const CONFIG = {
     SUPABASE_URL: "https://zxetzqwjaiumqhrpumln.supabase.co",
     SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-    STORAGE_BUCKET: "profile-images",
+    CLOUDINARY_CLOUD_NAME: "drffioary",
+    CLOUDINARY_BASE_URL: "https://res.cloudinary.com/drffioary/image/upload/",
     KEYS: {
       LAST_PROVINCE: "firstmodelhub_last_province",
       CACHE_PROFILES: "cachedProfiles_v3_2026",
@@ -111,19 +112,41 @@ window.ScrollTrigger = ScrollTrigger;
     return `น้อง${cleaned}`;
   }
 
-  function getImageUrl(path, width = 400) {
+  // 🟢 ฟังก์ชันแปลง URL Cloudinary อัจฉริยะ 100% แก้ไขปัญหา 400 Bad Request และ 404 จาก Supabase
+  function getImageUrl(path, width = 400, height = null) {
     if (!path) return CONFIG.DEFAULT_OG_IMAGE;
     if (Array.isArray(path)) path = path[0];
-    if (typeof path === "object" && path !== null) path = path.src || path.url || path.imagePath || "";
+    if (typeof path === "object" && path !== null) path = path.src || path.url || path.imagePath || path.image_url || "";
     if (typeof path !== "string" || !path.trim()) return CONFIG.DEFAULT_OG_IMAGE;
 
-    if (path.includes("res.cloudinary.com")) {
-      return path.replace("/upload/", `/upload/c_scale,w_${width},q_auto,f_auto/`);
+    const cleanPath = path.trim();
+    const transform = height 
+      ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_face` 
+      : `c_scale,w_${width},q_auto,f_auto`;
+
+    // 1. กรณีเป็น Full Cloudinary URL อยู่แล้ว (ตัด Transform เก่าออกทั้งหมด ป้องกัน URL ซ้อนทับ)
+    if (cleanPath.includes("res.cloudinary.com")) {
+      const uploadIdx = cleanPath.indexOf("/upload/");
+      if (uploadIdx !== -1) {
+        const prefix = cleanPath.substring(0, uploadIdx + 8);
+        let rest = cleanPath.substring(uploadIdx + 8);
+        rest = rest.replace(/^([a-z0-9_,-:]+\/)+?(v\d+|images)/i, "$2");
+        if (!rest.startsWith("v") && !rest.startsWith("images") && rest.includes("/")) {
+          rest = rest.replace(/^[^/]+\//, "");
+        }
+        return `${prefix}${transform}/${rest}`;
+      }
+      return cleanPath;
     }
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
+
+    // 2. กรณีเป็น External URL อื่นๆ
+    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+      return cleanPath;
     }
-    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/${CONFIG.STORAGE_BUCKET}/${path}`;
+
+    // 3. กรณีเป็น Relative Path ที่บันทึกไว้ใน Supabase (แปลงเข้า Cloudinary URL ทันที)
+    const relativeClean = cleanPath.replace(/^\/+/, "");
+    return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${relativeClean}`;
   }
 
   function processProfileObject(raw) {
@@ -145,8 +168,8 @@ window.ScrollTrigger = ScrollTrigger;
         };
       }
       return {
-        src: getImageUrl(path, 400),
-        fullSrc: getImageUrl(path, 1000)
+        src: getImageUrl(path, 400, 500),
+        fullSrc: getImageUrl(path, 1000, null)
       };
     });
 
@@ -243,6 +266,7 @@ window.ScrollTrigger = ScrollTrigger;
         });
       }
 
+      // 🟢 อ่านข้อมูลรูปภาพ Cloudinary ตรงจาก SSR Hydration ก่อนเสมอ
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         STATE.allProfiles = window.profilesData.map(p => processProfileObject(p)).filter(Boolean);
         populateProvinceDropdown();
@@ -259,6 +283,7 @@ window.ScrollTrigger = ScrollTrigger;
         return true;
       }
 
+      // 🟢 ดึงข้อมูลทุกคอลัมน์จาก Supabase เผื่อกรณีเข้าหน้าแบบ SPA
       const [provincesRes, profilesRes] = await Promise.all([
         supabaseClient.from("provinces").select("*"),
         supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false })
@@ -687,6 +712,7 @@ window.ScrollTrigger = ScrollTrigger;
            height="400"
            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
            loading="${index < 2 ? "eager" : "lazy"}"
+           fetchpriority="${index === 0 ? "high" : "auto"}"
            decoding="async"
            onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_OG_IMAGE}';" />
            
@@ -816,7 +842,6 @@ window.ScrollTrigger = ScrollTrigger;
     }).join("");
   }
 
-// 🟢 ฟังก์ชัน Lightbox สไตล์ Bento-Grid & 3D Glow มีมิติคมชัด 100%
   function openLightboxForProfile(profile) {
     if (!profile) return;
     const lightbox = document.getElementById("lightbox");
@@ -848,7 +873,7 @@ window.ScrollTrigger = ScrollTrigger;
 
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
-      const hdSrc = profile?.images?.[0]?.fullSrc || profile?.images?.[0]?.src || profile?.imagePath || CONFIG.DEFAULT_OG_IMAGE;
+      const hdSrc = profile?.images?.[0]?.fullSrc || profile?.images?.[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
       heroImg.src = hdSrc;
       heroImg.alt = `${nameClean} สาวรับงานตัวจริงตรงปก`;
     }
@@ -906,7 +931,6 @@ window.ScrollTrigger = ScrollTrigger;
     const statsText = profile.safeStats || "ไม่ระบุ";
     const heightText = profile.safeHeight || "ไม่ระบุ";
 
-    // 🟢 กล่อง Bento Stat Tiles มีมิติ
     const detailsEl = document.getElementById("lightboxDetailsCompact");
     if (detailsEl) {
       detailsEl.innerHTML = `
@@ -960,7 +984,6 @@ window.ScrollTrigger = ScrollTrigger;
         lineUrl = `https://line.me/ti/p/${lineIdToUse}`;
       }
 
-      // 🟢 ปุ่มแอดไลน์จองคิว 3D Glow
       const stickyBtnWrapper = document.createElement("div");
       stickyBtnWrapper.id = "line-btn-sticky-wrapper";
       stickyBtnWrapper.style.cssText = "margin-top: 10px; width: 100%;";
@@ -1088,7 +1111,6 @@ window.ScrollTrigger = ScrollTrigger;
     applyUltimateFilters(false);
   }
 
-// 🟢 Event Listeners & Startup (ล็อกหน้าจอนิ่งสนิท 100% ไม่กระตุก ไม่ขยับ)
   document.addEventListener("DOMContentLoaded", async function () {
     try {
       supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -1109,7 +1131,6 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.featuredSection = document.getElementById("featured-profiles");
     DOM.featuredContainer = document.getElementById("featured-profiles-container");
 
-    // 🟢 1. ระบบเมนูขวาบน (สไลด์เปิด-ปิดนุ่มนวล หน้าจอนิ่งสนิท)
     const menuToggleBtn = document.getElementById("menu-toggle");
     const sidebarMenu = document.getElementById("sidebar-menu");
     const sidebarOverlay = document.getElementById("sidebar-overlay");
@@ -1129,7 +1150,6 @@ window.ScrollTrigger = ScrollTrigger;
     if (sidebarOverlay) sidebarOverlay.onclick = () => toggleSidebar(false);
     sidebarMenu?.querySelectorAll("a").forEach(a => a.onclick = () => toggleSidebar(false));
 
-    // 🟢 2. ระบบเปิด-ปิด ฟอร์มค้นหาแบบลอย (Floating Bottom Sheet)
     const openFilterBtn = document.getElementById("open-filter-dock-btn");
     const closeFilterBtn = document.getElementById("close-search-drawer-btn");
     const applyFilterBtn = document.getElementById("apply-filter-btn");
@@ -1149,7 +1169,6 @@ window.ScrollTrigger = ScrollTrigger;
     if (closeFilterBtn) closeFilterBtn.onclick = () => toggleSearchSheet(false);
     if (searchOverlay) searchOverlay.onclick = () => toggleSearchSheet(false);
 
-    // 🟢 3. เมื่อกด "แสดงผลลัพธ์" -> กรองข้อมูลและปิดหน้าต่างทันที (อยู่นิ่งตรงจุดเดิม ไม่เลื่อนจอ)
     if (applyFilterBtn) {
       applyFilterBtn.onclick = () => {
         applyUltimateFilters(true);
