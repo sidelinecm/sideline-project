@@ -503,6 +503,15 @@
 </script>
 
 <script type="module" src="/main.js"></script>
-
+<!-- PWA Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('SW Registration failed: ', err);
+      });
+    });
+  }
+</script>
 </body>
 </html>
