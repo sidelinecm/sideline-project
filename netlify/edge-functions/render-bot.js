@@ -275,7 +275,7 @@ if (provinceKey === "chiangmai") {
 
 breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
 
-// 🟢 SCHEMA GRAPH (แก้ไขให้ ProfilePage ชี้ mainEntity ไปที่ Person และผูกโยง Service อย่างถูกต้องตามเกณฑ์ Google)
+// 🟢 SCHEMA GRAPH สำหรับ Bot/Crawler
 const schemaData = {
   "@context": "https://schema.org/",
   "@graph": [
@@ -306,35 +306,34 @@ const schemaData = {
       "name": pageTitle,
       "description": stripHTML(metaDesc),
       "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-      "mainEntity": { "@id": `${canonicalUrl}#person` } // ✅ แก้เป็น #person (Person) เรียบร้อยตามกฎ Google
+      "mainEntity": { "@id": `${canonicalUrl}#person` }
     },
     {
-      "@type": "Service",
-      "@id": `${canonicalUrl}#service`,
+      "@type": "Product",
+      "@id": `${canonicalUrl}#product`,
       "name": pageTitle,
-      "serviceType": "Companion & Lifestyle Partner Service",
-      "provider": { "@id": `${dynamicDomain}/#organization` },
-      "areaServed": {
-        "@type": "AdministrativeArea",
-        "name": provinceName
-      },
+      "image": baseImageUrl,
       "description": stripHTML(metaDesc),
+      "brand": {
+        "@type": "Brand",
+        "name": CONFIG.BRAND_NAME
+      },
       "offers": {
         "@type": "Offer",
         "url": canonicalUrl,
-        "price": rawRate || 1500, // ✅ number
+        "price": rawRate || 1500,
         "priceCurrency": "THB",
         "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
         "availability": "https://schema.org/InStock",
         "itemCondition": "https://schema.org/NewCondition",
-        "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้า"
+        "seller": { "@id": `${dynamicDomain}/#organization` }
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": Number(parseFloat(ratingValue).toFixed(1)), // ✅ number
-        "reviewCount": Number(reviewCount),                       // ✅ number
-        "bestRating": 5,                                          // ✅ number
-        "worstRating": 1                                          // ✅ number
+        "ratingValue": parseFloat(ratingValue),
+        "reviewCount": Number(reviewCount),
+        "bestRating": 5,
+        "worstRating": 1
       },
       "review": schemaReviews
     },

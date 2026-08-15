@@ -940,7 +940,7 @@ export default async (req, context) => {
       const cleanName = (matchedProfile.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
       const cleanLoc = sanitizeThaiText(matchedProfile.location || provinceThaiName);
 
-      // 🟢 เพิ่ม Node Person เพื่อรองรับ ProfilePage
+      // 🟢 1.1 Node Person สำหรับระบุตัวตน
       schemaGraph.push({
         "@type": "Person",
         "@id": `${profileUrl}/#person`,
@@ -950,7 +950,7 @@ export default async (req, context) => {
         "url": profileUrl
       });
 
-      // 🟢 แก้ไข ProfilePage ให้ mainEntity ชี้ไปที่ #person (ถูกต้องตามเกณฑ์ Google)
+      // 🟢 1.2 ProfilePage ชี้ mainEntity ไปที่ Person (#person)
       schemaGraph.push({
         "@type": "ProfilePage",
         "@id": `${profileUrl}/#webpage`,
@@ -964,19 +964,19 @@ export default async (req, context) => {
 
       const rawRateStr = String(matchedProfile.rate || "1500");
       const firstPriceMatch = rawRateStr.match(/\d{3,5}/);
-      const finalPrice = firstPriceMatch ? parseInt(firstPriceMatch[0], 10) : 1500; // ✅ number
+      const finalPrice = firstPriceMatch ? parseInt(firstPriceMatch[0], 10) : 1500;
 
+      // 🟢 1.3 ใช้ Product เพื่อรองรับ Review Snippet, Rating และ Offers ใน Google Search
       schemaGraph.push({
-        "@type": "Service",
-        "@id": `${profileUrl}/#service`,
-        "name": `บริการเพื่อนเที่ยวฟิวแฟน น้อง${cleanName} ${provinceThaiName}`,
-        "serviceType": "Companion & Lifestyle Partner Service",
-        "provider": { "@id": `${hostUrl}/#organization` },
-        "areaServed": {
-          "@type": "AdministrativeArea",
-          "name": provinceThaiName
-        },
+        "@type": "Product",
+        "@id": `${profileUrl}/#product`,
+        "name": `น้อง${cleanName} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provinceThaiName}`,
+        "image": metaImgUrl,
         "description": strippedDesc,
+        "brand": {
+          "@type": "Brand",
+          "name": CONFIG.BRAND_NAME
+        },
         "offers": {
           "@type": "Offer",
           "url": profileUrl,
@@ -991,10 +991,10 @@ export default async (req, context) => {
         },
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": 4.9,  // ✅ number
-          "reviewCount": 38,   // ✅ number
-          "bestRating": 5,     // ✅ number
-          "worstRating": 1     // ✅ number
+          "ratingValue": 4.9, // ✅ number
+          "reviewCount": 38,  // ✅ number
+          "bestRating": 5,    // ✅ number
+          "worstRating": 1    // ✅ number
         },
         "review": finalReviews.slice(0, 3).map(r => ({
           "@type": "Review",
@@ -1003,13 +1003,14 @@ export default async (req, context) => {
           "reviewBody": stripHTML(r.text || "บริการประทับใจดีสไตล์ฟิวแฟน ตรงปกปลอดภัย"),
           "reviewRating": { 
             "@type": "Rating", 
-            "ratingValue": 5,  // ✅ number
-            "bestRating": 5,   // ✅ number
-            "worstRating": 1   // ✅ number
+            "ratingValue": 5, // ✅ number
+            "bestRating": 5,  // ✅ number
+            "worstRating": 1  // ✅ number
           }
         }))
       });
 
+      // 🟢 1.4 BreadcrumbList หน้ารายบุคคล
       schemaGraph.push({
         "@type": "BreadcrumbList",
         "@id": `${profileUrl}/#breadcrumb`,
@@ -1020,6 +1021,7 @@ export default async (req, context) => {
         ]
       });
 
+      // 🟢 1.5 FAQPage ประจำตัวน้อง
       schemaGraph.push({
         "@type": "FAQPage",
         "@id": `${profileUrl}/#faq`,
@@ -1068,10 +1070,10 @@ export default async (req, context) => {
             ],
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": Number(finalRatingValue) || 4.9,      // ✅ number
-          "reviewCount": Number(displayReviewCount) || 35,     // ✅ number
-          "bestRating": 5,      // ✅ number
-          "worstRating": 1      // ✅ number
+          "ratingValue": Number(finalRatingValue) || 4.9, // ✅ number
+          "reviewCount": Number(displayReviewCount) || 35, // ✅ number
+          "bestRating": 5, // ✅ number
+          "worstRating": 1  // ✅ number
         }
       });
 
