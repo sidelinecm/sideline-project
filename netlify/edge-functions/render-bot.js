@@ -247,14 +247,14 @@ export default async (request, context) => {
 
     const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`;
 
-    const dynamicReviews = getDeterministicReviews(slug, 3);
+const dynamicReviews = getDeterministicReviews(slug, 3);
 const schemaReviews = dynamicReviews.map(t => ({
   "@type": "Review",
   "reviewRating": {
     "@type": "Rating",
-    "ratingValue": t.rating,  // ✅ number ไม่ใช่ string
-    "bestRating": 5,          // ✅ number
-    "worstRating": 1          // ✅ number
+    "ratingValue": t.rating, // ✅ number
+    "bestRating": 5,         // ✅ number
+    "worstRating": 1         // ✅ number
   },
   "author": {
     "@type": "Person",
@@ -275,7 +275,7 @@ if (provinceKey === "chiangmai") {
 
 breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
 
-// 🟢 SCHEMA GRAPH (ปรับเปลี่ยนใช้ Service + ProfilePage ให้ถูกต้องตามเกณฑ์ Google)
+// 🟢 SCHEMA GRAPH (แก้ไขให้ ProfilePage ชี้ mainEntity ไปที่ Person และผูกโยง Service อย่างถูกต้องตามเกณฑ์ Google)
 const schemaData = {
   "@context": "https://schema.org/",
   "@graph": [
@@ -292,13 +292,21 @@ const schemaData = {
       }
     },
     {
+      "@type": "Person",
+      "@id": `${canonicalUrl}#person`,
+      "name": displayName,
+      "description": stripHTML(metaDesc),
+      "image": baseImageUrl,
+      "url": canonicalUrl
+    },
+    {
       "@type": "ProfilePage",
       "@id": `${canonicalUrl}#webpage`,
       "url": canonicalUrl,
       "name": pageTitle,
       "description": stripHTML(metaDesc),
       "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-      "mainEntity": { "@id": `${canonicalUrl}#service` }
+      "mainEntity": { "@id": `${canonicalUrl}#person` } // ✅ แก้เป็น #person (Person) เรียบร้อยตามกฎ Google
     },
     {
       "@type": "Service",
@@ -314,7 +322,7 @@ const schemaData = {
       "offers": {
         "@type": "Offer",
         "url": canonicalUrl,
-        "price": rawRate || 1500,  // ✅ number ไม่ใช่ string
+        "price": rawRate || 1500, // ✅ number
         "priceCurrency": "THB",
         "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
         "availability": "https://schema.org/InStock",
@@ -323,10 +331,10 @@ const schemaData = {
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": parseFloat(ratingValue.toFixed(1)),  // ✅ number
-        "reviewCount": reviewCount,  // ✅ number ไม่ใช่ string
-        "bestRating": 5,  // ✅ number
-        "worstRating": 1   // ✅ number
+        "ratingValue": Number(parseFloat(ratingValue).toFixed(1)), // ✅ number
+        "reviewCount": Number(reviewCount),                       // ✅ number
+        "bestRating": 5,                                          // ✅ number
+        "worstRating": 1                                          // ✅ number
       },
       "review": schemaReviews
     },

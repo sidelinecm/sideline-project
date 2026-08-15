@@ -895,7 +895,7 @@ export default async (req, context) => {
 
 
 
-    // ==============================================================================
+// ==============================================================================
     // 🟢 สร้าง SCHEMA GRAPH ครบ 100% ตรงตามเกณฑ์ GOOGLE RICH RESULTS (2026 FULL)
     // ==============================================================================
     const schemaGraph = [
@@ -940,6 +940,17 @@ export default async (req, context) => {
       const cleanName = (matchedProfile.name || "").replace(/^(น้อง\s*)+/gi, "").trim();
       const cleanLoc = sanitizeThaiText(matchedProfile.location || provinceThaiName);
 
+      // 🟢 เพิ่ม Node Person เพื่อรองรับ ProfilePage
+      schemaGraph.push({
+        "@type": "Person",
+        "@id": `${profileUrl}/#person`,
+        "name": `น้อง${cleanName}`,
+        "description": strippedDesc,
+        "image": metaImgUrl,
+        "url": profileUrl
+      });
+
+      // 🟢 แก้ไข ProfilePage ให้ mainEntity ชี้ไปที่ #person (ถูกต้องตามเกณฑ์ Google)
       schemaGraph.push({
         "@type": "ProfilePage",
         "@id": `${profileUrl}/#webpage`,
@@ -948,12 +959,12 @@ export default async (req, context) => {
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
         "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` },
-        "mainEntity": { "@id": `${profileUrl}/#service` }
+        "mainEntity": { "@id": `${profileUrl}/#person` }
       });
 
       const rawRateStr = String(matchedProfile.rate || "1500");
       const firstPriceMatch = rawRateStr.match(/\d{3,5}/);
-      const finalPrice = firstPriceMatch ? parseInt(firstPriceMatch[0], 10) : 1500; // ✅ แก้เป็น number
+      const finalPrice = firstPriceMatch ? parseInt(firstPriceMatch[0], 10) : 1500; // ✅ number
 
       schemaGraph.push({
         "@type": "Service",
