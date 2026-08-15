@@ -373,140 +373,96 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  function processProfileObject(raw) {
-    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  // 🟢 1. แก้ไข processProfileObject ไม่ให้จังหวัดเพี้ยน
+function processProfileObject(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
 
-    const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
+  const formattedName = sanitizeName(raw.name || raw.displayName || raw.title || "น้อง");
 
-    const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
-    let parsedGallery = [];
+  const rawGallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
+  let parsedGallery = [];
 
-    if (Array.isArray(rawGallery)) {
-      parsedGallery = rawGallery.map(item => typeof item === "object" ? (item.src || item.url) : String(item));
-    } else if (typeof rawGallery === "string" && rawGallery.trim()) {
-      try {
-        const jsonParsed = JSON.parse(rawGallery);
-        if (Array.isArray(jsonParsed)) parsedGallery = jsonParsed;
-        else parsedGallery = rawGallery.split(",");
-      } catch {
-        parsedGallery = rawGallery.split(",");
-      }
+  if (Array.isArray(rawGallery)) {
+    parsedGallery = rawGallery.map(item => typeof item === "object" ? (item.src || item.url) : String(item));
+  } else if (typeof rawGallery === "string" && rawGallery.trim()) {
+    try {
+      const jsonParsed = JSON.parse(rawGallery);
+      if (Array.isArray(jsonParsed)) parsedGallery = jsonParsed;
+      else parsedGallery = rawGallery.split(",");
+    } catch {
+      parsedGallery = rawGallery.split(",");
     }
-
-    const mainCandidate = raw.imagePath || raw.image_path || raw.imageUrl || raw.image_url || raw.photo || raw.avatar || parsedGallery[0] || null;
-
-    const rawImageList = [mainCandidate, ...parsedGallery].filter(Boolean);
-    const pathSet = new Set();
-    const normalizedImages = [];
-
-    rawImageList.forEach(path => {
-      let srcStr = typeof path === "object" && path !== null ? (path.src || path.url || "") : String(path).trim();
-
-      if (srcStr && !srcStr.includes("firstmodelhub.webp") && !pathSet.has(srcStr)) {
-        pathSet.add(srcStr);
-        normalizedImages.push({
-          src: getImageUrl(srcStr, 400),
-          fullSrc: getImageUrl(srcStr, 1000)
-        });
-      }
-    });
-
-    if (normalizedImages.length === 0) {
-      normalizedImages.push({ src: FALLBACK_SVG_AVATAR, fullSrc: FALLBACK_SVG_AVATAR });
-    }
-
-    const rawProvKey = raw.provinceKey || raw.province_key || raw.province_slug || document.getElementById("review-province-key")?.value || DOM.provinceSelect?.value || "national";
-    const provKey = normalizeProvinceKey(rawProvKey);
-    const provinceThaiName = STATE.provincesMap.get(provKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "ทั่วไทย";
-
-    const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
-    const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
-    let numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
-
-    if (numericRate > 0 && numericRate < 500) {
-      numericRate = numericRate * 10;
-    }
-
-    const displayPrice = numericRate > 0 
-      ? `${numericRate.toLocaleString()}.-` 
-      : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
-
-    let bust = String(raw.bust || raw.breast || "").replace(/\D/g, "");
-    let waist = String(raw.waist || "").replace(/\D/g, "");
-    let hips = String(raw.hip || raw.hips || "").replace(/\D/g, "");
-    let cup = String(raw.cup_size || raw.cupSize || raw.cup || "").toUpperCase().replace(/[^A-Z]/g, "").trim();
-
-    let safeStats = "ไม่ระบุ";
-    if (bust && waist && hips) {
-      safeStats = `${bust}${cup ? `(${cup})` : ""}-${waist}-${hips}`;
-    } else if (raw.stats || raw.proportion || raw.proportions) {
-      safeStats = String(raw.stats || raw.proportion || raw.proportions).trim().replace(/[\s\/]+/g, "-");
-    }
-
-    const rawAge = raw.age || raw.profile_age;
-    const cleanAge = (rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0") ? String(rawAge).replace(/\D/g, "") : null;
-    const safeAgeDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
-
-    const rawHeight = raw.height || raw.profile_height;
-    const cleanHeight = (rawHeight && String(rawHeight).trim() !== "-" && String(rawHeight).trim() !== "0") ? String(rawHeight).replace(/\D/g, "") : null;
-    const safeHeight = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
-
-    const rawWeight = raw.weight || raw.profile_weight;
-    const cleanWeight = (rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0") ? String(rawWeight).replace(/\D/g, "") : null;
-    const safeWeight = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
-
-    const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
-    const safeSkin = (rawSkin && String(rawSkin).trim() !== "-") ? sanitizeThaiText(rawSkin) : "ไม่ระบุ";
-
-    const sloganText = getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote || raw.tagline);
-    
-    const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
-    const styleTags = (Array.isArray(rawTags) ? rawTags : (typeof rawTags === "string" ? rawTags.split(",") : []))
-      .map(t => sanitizeThaiText(t).replace(/^#/, "").trim())
-      .filter(Boolean);
-
-    const availStatus = sanitizeThaiText(raw.availability || raw.status || "รับงาน");
-    const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(kw => availStatus.toLowerCase().includes(kw));
-    const isAvailable = !isBusy;
-
-    const lineIdClean = String(raw.line_id || raw.lineId || raw.line || "").replace(/^@/, "").trim();
-    const cleanLocation = sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName);
-    const cleanDescription = sanitizeThaiText(raw.description || raw.detail || "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ");
-
-    return {
-      ...raw,
-      id: raw.id,
-      slug: String(raw.slug || raw.id).trim(),
-      displayName: formattedName,
-      images: normalizedImages,
-      provinceNameThai: provinceThaiName,
-      provinceKey: provKey,
-      location: cleanLocation,
-      description: cleanDescription,
-      displayPrice: displayPrice,
-      _price: numericRate,
-      bust: bust,
-      waist: waist,
-      hips: hips,
-      cupSize: cup,
-      safeAge: cleanAge || "-",
-      safeAgeDisplay: safeAgeDisplay,
-      safeHeight: safeHeight,
-      safeWeight: safeWeight,
-      safeStats: safeStats,
-      safeSkin: safeSkin,
-      isAvailable: isAvailable,
-      availability: availStatus,
-      isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
-      hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
-      isNew: Boolean(raw.is_new || raw.isNew),
-      isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
-      lineId: lineIdClean,
-      styleTags: styleTags,
-      quote: sloganText,
-      slogan: sloganText
-    };
   }
+
+  const mainCandidate = raw.imagePath || raw.image_path || raw.imageUrl || raw.image_url || raw.photo || raw.avatar || parsedGallery[0] || null;
+  const rawImageList = [mainCandidate, ...parsedGallery].filter(Boolean);
+  const pathSet = new Set();
+  const normalizedImages = [];
+
+  rawImageList.forEach(path => {
+    let srcStr = typeof path === "object" && path !== null ? (path.src || path.url || "") : String(path).trim();
+    if (srcStr && !srcStr.includes("firstmodelhub.webp") && !pathSet.has(srcStr)) {
+      pathSet.add(srcStr);
+      normalizedImages.push({
+        src: getImageUrl(srcStr, 400),
+        fullSrc: getImageUrl(srcStr, 1000)
+      });
+    }
+  });
+
+  if (normalizedImages.length === 0) {
+    normalizedImages.push({ src: FALLBACK_SVG_AVATAR, fullSrc: FALLBACK_SVG_AVATAR });
+  }
+
+  // 🛡️ ป้องกันไม่ให้ไปดึง DOM.provinceSelect มาทับจังหวัดจริงของน้อง
+  const rawProvKey = raw.provinceKey || raw.province_key || raw.province_slug || "national";
+  const provKey = normalizeProvinceKey(rawProvKey);
+  const provinceThaiName = raw.provinceThai || raw.province_thai || STATE.provincesMap.get(provKey) || "ทั่วไทย";
+
+  const rawPrice = raw.rate || raw.price || raw.fee || raw.cost || 0;
+  const priceMatch = String(rawPrice).match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+/);
+  let numericRate = priceMatch ? Number(priceMatch[0].replace(/,/g, "")) : 0;
+  if (numericRate > 0 && numericRate < 500) numericRate = numericRate * 10;
+
+  const displayPrice = numericRate > 0 
+    ? `${numericRate.toLocaleString()}.-` 
+    : (typeof rawPrice === "string" && rawPrice.trim() !== "" ? sanitizeThaiText(rawPrice) : "สอบถาม");
+
+  const rawAge = raw.age || raw.profile_age;
+  const cleanAge = (rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0") ? String(rawAge).replace(/\D/g, "") : null;
+
+  const availStatus = sanitizeThaiText(raw.availability || raw.status || "รับงาน");
+  const isBusy = ["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(kw => availStatus.toLowerCase().includes(kw));
+
+  return {
+    ...raw,
+    id: raw.id,
+    slug: String(raw.slug || raw.id).trim(),
+    displayName: formattedName,
+    images: normalizedImages,
+    provinceNameThai: provinceThaiName,
+    provinceKey: provKey,
+    location: sanitizeThaiText(raw.location || raw.zone || raw.area || provinceThaiName),
+    description: sanitizeThaiText(raw.description || raw.detail || "ดูแลใส่ใจทุกรายละเอียด น่ารักเป็นธรรมชาติ"),
+    displayPrice: displayPrice,
+    _price: numericRate,
+    safeAge: cleanAge || "-",
+    safeAgeDisplay: cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ",
+    safeHeight: raw.height ? `${raw.height} ซม.` : "ไม่ระบุ",
+    safeWeight: raw.weight ? `${raw.weight} กก.` : "ไม่ระบุ",
+    safeStats: raw.stats || "ไม่ระบุ",
+    isAvailable: !isBusy,
+    availability: availStatus,
+    isVerified: Boolean(raw.verified || raw.isVerified || raw.is_verified),
+    hasVideo: Boolean(raw.has_video || raw.hasVideo || raw.hasVideoClip),
+    isfeatured: Boolean(raw.isfeatured || raw.is_featured || raw.isFeatured),
+    lineId: String(raw.line_id || raw.lineId || "").replace(/^@/, "").trim(),
+    styleTags: (Array.isArray(raw.style_tags || raw.tags) ? (raw.style_tags || raw.tags) : []).map(t => sanitizeThaiText(t).replace(/^#/, "").trim()).filter(Boolean),
+    slogan: getDeterministicSlogan(raw.id || raw.slug, raw.slogan || raw.quote)
+  };
+}
+
+
 
   // 🟢 1. ฟังก์ชันยิงเช็กเวลาอัปเดตล่าสุดของหลังบ้าน (ใช้เวลาไม่ถึง 0.05 วินาที)
   async function getBackendLatestTimestamp() {
@@ -1086,8 +1042,8 @@ window.ScrollTrigger = ScrollTrigger;
     });
   }
 
-  /* ==============================================================================
-   💎 PERFECTED ULTIMATE FILTER ENGINE & REAL-TIME SEO SYNCHRONIZER
+/* ==============================================================================
+   💎 PERFECTED ULTIMATE FILTER ENGINE (แก้บั๊กค้นหาไม่เจอ & ค้นหาข้ามจังหวัดอัจฉริยะ)
    ============================================================================== */
 
 function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
@@ -1095,7 +1051,7 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     const modalSearchInput = document.getElementById("modal-search-keyword");
     const mainSearchInput = document.getElementById("search-keyword");
 
-    // 🟢 1. ดึงและซิงก์ค่าคำค้นหาจากทั้้งสองช่อง (หน้าหลัก & Modal)
+    // 🟢 1. ดึงและซิงก์ค่าคำค้นหาจากทั้งสองช่อง (หน้าหลัก & Modal)
     let keywordVal = (modalSearchInput?.value || mainSearchInput?.value || "").trim();
     if (mainSearchInput) mainSearchInput.value = keywordVal;
     if (modalSearchInput) modalSearchInput.value = keywordVal;
@@ -1109,7 +1065,7 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     const priceVal = document.getElementById("search-price")?.value || "";
     const sortVal = document.getElementById("sort-select")?.value || "featured";
 
-    // 🟢 3. ระบุจังหวัดเป้าหมาย
+    // 🟢 3. ระบุจังหวัดเป้าหมายจาก URL หรือ Dropdown
     const urlPath = window.location.pathname.toLowerCase();
     const locMatch = urlPath.match(/^\/(?:location|province)\/([^/]+)/);
     let urlProvinceKey = "";
@@ -1122,21 +1078,18 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     }
 
     let targetProvinceKey = provVal ? normalizeProvinceKey(provVal) : urlProvinceKey;
-    let results = [...STATE.allProfiles];
+    let allBaseProfiles = Array.isArray(STATE.allProfiles) ? [...STATE.allProfiles] : [];
+    let results = [...allBaseProfiles];
 
-    // 🟢 4. กรองตามจังหวัด
-    if (targetProvinceKey && targetProvinceKey !== "national" && targetProvinceKey !== "all" && targetProvinceKey !== "") {
-      results = results.filter(p => normalizeProvinceKey(p.provinceKey) === targetProvinceKey);
-    }
+    // 🟢 4. ระบบกรอง Keyword (ค้นหาชื่อ, ย่าน, คำโปรย, สัดส่วน, แท็ก)
+    const filterByKeyword = (list, query) => {
+      if (!query) return list;
+      const queryRaw = query.toLowerCase();
+      const queryClean = queryRaw.replace(/^(น้อง\s*)+/gi, "").trim();
 
-    // 🟢 5. กรองตาม Keyword (ค้นจากชื่อ, ย่าน, คำโปรย, รายละเอียด, และแท็ก)
-    if (keywordVal) {
-      const queryRaw = keywordVal.toLowerCase();
-      const queryClean = queryRaw.replace(/^(น้อง\s?)+/gi, "").trim();
-
-      results = results.filter(p => {
+      return list.filter(p => {
         const pName = (p.displayName || p.name || "").toLowerCase();
-        const pCleanName = pName.replace(/^(น้อง\s?)+/gi, "").trim();
+        const pCleanName = pName.replace(/^(น้อง\s*)+/gi, "").trim();
         const pLoc = (p.location || "").toLowerCase();
         const pProv = (p.provinceNameThai || "").toLowerCase();
         const pSlogan = (p.slogan || p.quote || "").toLowerCase();
@@ -1153,15 +1106,46 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
           pLoc.includes(queryRaw) ||
           pProv.includes(queryRaw) ||
           pSlogan.includes(queryRaw) ||
-          pDesc.includes(queryRaw) ||
-          pTags.includes(queryRaw)
+          pDesc.includes(queryClean) ||
+          pTags.includes(queryClean)
         );
       });
+    };
+
+    // 🟢 5. กรองตามจังหวัด + ระบบ Smart Cross-Province Fallback
+    let isCrossProvinceSearch = false;
+
+    if (targetProvinceKey && targetProvinceKey !== "national" && targetProvinceKey !== "all" && targetProvinceKey !== "") {
+      const provinceMatched = allBaseProfiles.filter(p => normalizeProvinceKey(p.provinceKey) === targetProvinceKey);
+      
+      if (keywordVal) {
+        // ลองค้นหาในจังหวัดที่เลือกก่อน
+        const inProvinceResults = filterByKeyword(provinceMatched, keywordVal);
+        
+        if (inProvinceResults.length > 0) {
+          results = inProvinceResults;
+        } else {
+          // 💡 ถ้าในจังหวัดนั้นไม่พบน้องชื่อนี้ ให้ค้นหาจาก "ทุกจังหวัดทั่วไทย" แทนทันที
+          const nationalResults = filterByKeyword(allBaseProfiles, keywordVal);
+          if (nationalResults.length > 0) {
+            results = nationalResults;
+            isCrossProvinceSearch = true; // ปลดล็อกค้นหาทั่วประเทศ
+          } else {
+            results = [];
+          }
+        }
+      } else {
+        results = provinceMatched;
+      }
+    } else {
+      if (keywordVal) {
+        results = filterByKeyword(results, keywordVal);
+      }
     }
 
     // 🟢 6. กรองตามสถานะพร้อมรับงาน
     if (availVal && availVal !== "all" && availVal !== "") {
-      results = results.filter(p => p.availability === availVal);
+      results = results.filter(p => p.availability === availVal || p.isAvailable === true);
     }
 
     // 🟢 7. กรองตามสถานะ VIP แนะนำ
@@ -1185,7 +1169,6 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
 
     // 🟢 10. เรียงลำดับผลลัพธ์
     results.sort((a, b) => {
-      if (keywordVal) return 0;
       switch (sortVal) {
         case "featured":
           return (b.isfeatured ? 1 : 0) - (a.isfeatured ? 1 : 0) || (a.name || "").localeCompare(b.name || "");
@@ -1218,7 +1201,7 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     // 🟢 14. อัปเดต URL บนแถบเบราว์เซอร์
     if (updateUrlHistory && !isSingleProfilePage) {
       let newPath = "/";
-      if (provVal && provVal !== "all" && provVal !== "" && provVal !== "national") {
+      if (provVal && provVal !== "all" && provVal !== "" && provVal !== "national" && !isCrossProvinceSearch) {
         newPath = `/location/${provVal}`;
       }
       if (window.location.pathname !== newPath) {
@@ -1230,13 +1213,13 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     STATE.currentFilters = { text: keywordVal, province: provVal, avail: availVal, featured: featuredVal, sort: sortVal, price: priceVal };
     STATE.filteredProfiles = results;
 
-    const currentProvKey = targetProvinceKey || "national";
+    const currentProvKey = isCrossProvinceSearch ? "national" : (targetProvinceKey || "national");
     const currentProvName = (currentProvKey === "national" || !currentProvKey) ? "ทั่วไทย" : (STATE.provincesMap.get(currentProvKey) || "ทั่วไทย");
 
-    // 🟢 16. แทนที่ตัวแปรใน DOM (ป้องกันข้อความขัดแย้งและแก้ปัญหานับโปรไฟล์ผิด)
+    // 🟢 16. แทนที่ตัวแปรใน DOM (อัปเดตจำนวนโปรไฟล์ที่ถูกต้อง)
     replaceDomPlaceholders(currentProvName, results.length, currentProvKey);
 
-    // 🟢 17. ซิงก์สร้าง Schema JSON-LD Graph & SEO Metadata ใหม่ล่าสุดแบบ Real-time
+    // 🟢 17. ซิงก์สร้าง Schema JSON-LD Graph & SEO Metadata แบบ Real-time
     if (typeof updateSEOMetadata === "function") {
       updateSEOMetadata(null, {
         provinceKey: currentProvKey,
@@ -1245,7 +1228,7 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
       });
     }
 
-    // 🟢 18. เลื่อนหน้าจอลงไปยังตารางผลลัพธ์ถ้าเป็นการกดเลือกเองของผู้ใช้
+    // 🟢 18. เลื่อนหน้าจอลงไปยังผลลัพธ์ถ้าผู้ใช้เป็นคนกดค้นหาเอง
     if (isUserAction && !isSingleProfilePage) {
       scrollToSearchResults();
     }
