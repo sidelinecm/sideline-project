@@ -248,109 +248,109 @@ export default async (request, context) => {
     const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`;
 
     const dynamicReviews = getDeterministicReviews(slug, 3);
-    const schemaReviews = dynamicReviews.map(t => ({
-      "@type": "Review",
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": t.rating.toString(),
-        "bestRating": "5",
-        "worstRating": "1"
+const schemaReviews = dynamicReviews.map(t => ({
+  "@type": "Review",
+  "reviewRating": {
+    "@type": "Rating",
+    "ratingValue": t.rating,  // ✅ number ไม่ใช่ string
+    "bestRating": 5,          // ✅ number
+    "worstRating": 1          // ✅ number
+  },
+  "author": {
+    "@type": "Person",
+    "name": stripHTML(t.name)
+  },
+  "reviewBody": stripHTML(t.text)
+}));
+
+const breadcrumbElements = [
+  { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
+];
+
+if (provinceKey === "chiangmai") {
+  breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
+} else {
+  breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
+}
+
+breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
+
+// 🟢 SCHEMA GRAPH (ปรับเปลี่ยนใช้ Service + ProfilePage ให้ถูกต้องตามเกณฑ์ Google)
+const schemaData = {
+  "@context": "https://schema.org/",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${dynamicDomain}/#organization`,
+      "name": CONFIG.BRAND_NAME,
+      "url": dynamicDomain,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`,
+        "width": 1200,
+        "height": 630
+      }
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": `${canonicalUrl}#webpage`,
+      "url": canonicalUrl,
+      "name": pageTitle,
+      "description": stripHTML(metaDesc),
+      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+      "mainEntity": { "@id": `${canonicalUrl}#service` }
+    },
+    {
+      "@type": "Service",
+      "@id": `${canonicalUrl}#service`,
+      "name": pageTitle,
+      "serviceType": "Companion & Lifestyle Partner Service",
+      "provider": { "@id": `${dynamicDomain}/#organization` },
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": provinceName
       },
-      "author": {
-        "@type": "Person",
-        "name": stripHTML(t.name)
+      "description": stripHTML(metaDesc),
+      "offers": {
+        "@type": "Offer",
+        "url": canonicalUrl,
+        "price": rawRate || 1500,  // ✅ number ไม่ใช่ string
+        "priceCurrency": "THB",
+        "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
+        "availability": "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition",
+        "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้า"
       },
-      "reviewBody": stripHTML(t.text)
-    }));
-
-    const breadcrumbElements = [
-      { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain }
-    ];
-
-    if (provinceKey === "chiangmai") {
-      breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": "โปรไฟล์ทั้งหมด", "item": `${dynamicDomain}/profiles` });
-    } else {
-      breadcrumbElements.push({ "@type": "ListItem", "position": 2, "name": `ไซด์ไลน์${provinceName}`, "item": correctProvinceUrl });
-    }
-
-    breadcrumbElements.push({ "@type": "ListItem", "position": breadcrumbElements.length + 1, "name": displayName, "item": canonicalUrl });
-
-    // 🟢 SCHEMA GRAPH (ปรับเปลี่ยนใช้ Service + ProfilePage ให้ถูกต้องตามเกณฑ์ Google)
-    const schemaData = {
-      "@context": "https://schema.org/",
-      "@graph": [
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": parseFloat(ratingValue.toFixed(1)),  // ✅ number
+        "reviewCount": reviewCount,  // ✅ number ไม่ใช่ string
+        "bestRating": 5,  // ✅ number
+        "worstRating": 1   // ✅ number
+      },
+      "review": schemaReviews
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
+      "itemListElement": breadcrumbElements
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${canonicalUrl}#faq`,
+      "mainEntity": [
         {
-          "@type": "Organization",
-          "@id": `${dynamicDomain}/#organization`,
-          "name": CONFIG.BRAND_NAME,
-          "url": dynamicDomain,
-          "logo": {
-            "@type": "ImageObject",
-            "url": `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`,
-            "width": 1200,
-            "height": 630
+          "@type": "Question",
+          "name": `${displayName} ไซด์ไลน์${provinceName} มีความปลอดภัยและการชำระเงินอย่างไร?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ`
           }
-        },
-        {
-          "@type": "ProfilePage",
-          "@id": `${canonicalUrl}#webpage`,
-          "url": canonicalUrl,
-          "name": pageTitle,
-          "description": stripHTML(metaDesc),
-          "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
-          "mainEntity": { "@id": `${canonicalUrl}#service` }
-        },
-        {
-          "@type": "Service",
-          "@id": `${canonicalUrl}#service`,
-          "name": pageTitle,
-          "serviceType": "Companion & Lifestyle Partner Service",
-          "provider": { "@id": `${dynamicDomain}/#organization` },
-          "areaServed": {
-            "@type": "AdministrativeArea",
-            "name": provinceName
-          },
-          "description": stripHTML(metaDesc),
-          "offers": {
-            "@type": "Offer",
-            "url": canonicalUrl,
-            "price": rawRate ? rawRate.toString() : "1500",
-            "priceCurrency": "THB",
-            "priceValidUntil": `${new Date().getFullYear() + 1}-12-31`,
-            "availability": "https://schema.org/InStock",
-            "itemCondition": "https://schema.org/NewCondition",
-            "description": "นัดเจอตัวจ่ายค่าบริการโดยตรงหน้างาน ไม่มีการโอนเงินมัดจำล่วงหน้า"
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": ratingValue,
-            "reviewCount": reviewCount.toString(),
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "review": schemaReviews
-        },
-        {
-          "@type": "BreadcrumbList",
-          "@id": `${canonicalUrl}#breadcrumb`,
-          "itemListElement": breadcrumbElements
-        },
-        {
-          "@type": "FAQPage",
-          "@id": `${canonicalUrl}#faq`,
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": `${displayName} ไซด์ไลน์${provinceName} มีความปลอดภัยและการชำระเงินอย่างไร?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ`
-              }
-            }
-          ]
         }
       ]
-    };
+    }
+  ]
+};
 
     const html = `<!DOCTYPE html>
 <html lang="th">

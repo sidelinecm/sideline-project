@@ -893,6 +893,8 @@ export default async (req, context) => {
       .map(sanitizeThaiText)
       .filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
+
+
     // ==============================================================================
     // 🟢 สร้าง SCHEMA GRAPH ครบ 100% ตรงตามเกณฑ์ GOOGLE RICH RESULTS (2026 FULL)
     // ==============================================================================
@@ -940,18 +942,18 @@ export default async (req, context) => {
 
       schemaGraph.push({
         "@type": "ProfilePage",
-        "@id": `${profileUrl}/#webpage`, // ✅ แก้ไขใส่ # แล้ว
+        "@id": `${profileUrl}/#webpage`,
         "url": profileUrl,
         "name": `น้อง${cleanName} - โปรไฟล์สาวรับงาน${provinceThaiName} ย่าน${cleanLoc}`,
         "description": strippedDesc,
         "isPartOf": { "@id": `${hostUrl}/#website` },
-        "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` }, // ✅ แก้ไขใส่ # แล้ว
-        "mainEntity": { "@id": `${profileUrl}/#service` }       // ✅ แก้ไขใส่ # แล้ว
+        "breadcrumb": { "@id": `${profileUrl}/#breadcrumb` },
+        "mainEntity": { "@id": `${profileUrl}/#service` }
       });
 
       const rawRateStr = String(matchedProfile.rate || "1500");
       const firstPriceMatch = rawRateStr.match(/\d{3,5}/);
-      const finalPrice = firstPriceMatch ? firstPriceMatch[0] : "1500";
+      const finalPrice = firstPriceMatch ? parseInt(firstPriceMatch[0], 10) : 1500; // ✅ แก้เป็น number
 
       schemaGraph.push({
         "@type": "Service",
@@ -967,7 +969,7 @@ export default async (req, context) => {
         "offers": {
           "@type": "Offer",
           "url": profileUrl,
-          "price": finalPrice,
+          "price": finalPrice, // ✅ number
           "priceCurrency": "THB",
           "priceValidUntil": "2027-12-31",
           "itemCondition": "https://schema.org/NewCondition",
@@ -978,17 +980,22 @@ export default async (req, context) => {
         },
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "reviewCount": "38",
-          "bestRating": "5",
-          "worstRating": "1"
+          "ratingValue": 4.9,  // ✅ number
+          "reviewCount": 38,   // ✅ number
+          "bestRating": 5,     // ✅ number
+          "worstRating": 1     // ✅ number
         },
         "review": finalReviews.slice(0, 3).map(r => ({
           "@type": "Review",
           "author": { "@type": "Person", "name": r.author || "คุณผู้ใช้บริการ" },
           "datePublished": r.datePublished || "2026-08-01",
           "reviewBody": stripHTML(r.text || "บริการประทับใจดีสไตล์ฟิวแฟน ตรงปกปลอดภัย"),
-          "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5", "worstRating": "1" }
+          "reviewRating": { 
+            "@type": "Rating", 
+            "ratingValue": 5,  // ✅ number
+            "bestRating": 5,   // ✅ number
+            "worstRating": 1   // ✅ number
+          }
         }))
       });
 
@@ -1050,10 +1057,10 @@ export default async (req, context) => {
             ],
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": Number(finalRatingValue) || 4.9,
-          "reviewCount": Number(displayReviewCount) || 35,
-          "bestRating": 5,
-          "worstRating": 1
+          "ratingValue": Number(finalRatingValue) || 4.9,      // ✅ number
+          "reviewCount": Number(displayReviewCount) || 35,     // ✅ number
+          "bestRating": 5,      // ✅ number
+          "worstRating": 1      // ✅ number
         }
       });
 
