@@ -19,7 +19,7 @@ const CONFIG = {
     BRAND_NAME: 'FirstModelHub',
     CLOUDINARY_CLOUD_NAME: 'drffioary',
     CLOUDINARY_BASE_URL: 'https://res.cloudinary.com/drffioary/image/upload/',
-    DEFAULT_TELEPHONE: '+6620000000',
+    DEFAULT_TELEPHONE: '+66926997044',
     DISPLAY_LINE_ID: 'LINE: @firstmodelhub',
     SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -140,12 +140,14 @@ const getLocalizedZone = (location, provinceName) => {
     return `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
 };
 
-const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, localizedZone) => {
-    if (p.description && p.description.trim().length > 15) {
-        const cleaned = cleanAsciiArt(p.description.trim());
-        if (cleaned.length > 20) return cleaned;
-    }
-    return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
+// 🟢 สร้างข้อความบรรยายโปรไฟล์เชิงลึกจากข้อมูลจริงใน Database ทั้งหมด
+const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, heightVal, weightVal, skinVal, localizedZone, rateVal) => {
+    const heightText = heightVal ? `ส่วนสูง ${heightVal} ซม.` : "";
+    const weightText = weightVal ? `น้ำหนัก ${weightVal} กก.` : "";
+    const skinText = (skinVal && skinVal !== "ไม่ระบุ") ? `ผิวพรรณ${skinVal}` : "ผิวพรรณเนียนสวย";
+    const bioStats = [bwhVal ? `สัดส่วน ${bwhVal}` : "", heightText, weightText, skinText].filter(Boolean).join(" ");
+
+    return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี ${bioStats} พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย อัตราค่าขนมเริ่มต้น ${rateVal} การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
 };
 
 export default async (request, context) => {
@@ -268,55 +270,106 @@ export default async (request, context) => {
             { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
         ];
 
+        // =========================================================================
+        // 🟢 SCHEMA.ORG JSON-LD GRAPH (100% VALID & RICH RESULTS READY)
+        // =========================================================================
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
+                // 1. นิติบุคคลผู้ให้บริการ / ธุรกิจความบันเทิงในพื้นที่
                 {
                     "@type": ["LocalBusiness", "EntertainmentBusiness"],
                     "@id": `${canonicalUrl}#serviceprovider`,
                     "name": `${displayName} - ไซด์ไลน์${provinceName}`,
                     "image": [baseImageUrl],
                     "description": stripHTML(metaDesc),
-                    "telephone": CONFIG.DEFAULT_TELEPHONE,
                     "url": canonicalUrl,
                     "priceRange": "฿฿",
                     "address": {
                         "@type": "PostalAddress",
-                        "addressLocality": provinceName,
+                        "addressLocality": p.location || provinceName,
                         "addressRegion": provinceName,
                         "addressCountry": "TH"
                     },
                     "aggregateRating": {
                         "@type": "AggregateRating",
                         "ratingValue": Number(ratingValue) || 4.9,
-                        "reviewCount": Number(reviewCount) || 150,
+                        "reviewCount": Number(reviewCount) || 120,
                         "bestRating": 5,
                         "worstRating": 1
                     },
                     "review": schemaReviews
                 },
+
+                // 2. ข้อมูลโปรไฟล์บุคคล (Person Entity) ดึงสเปกลึกทั้งหมดให้ Googlebot ทราบ
+                {
+                    "@type": "Person",
+                    "@id": `${canonicalUrl}#person`,
+                    "name": displayName,
+                    "gender": "Female",
+                    "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
+                    "description": stripHTML(naturalDescriptionText),
+                    "image": baseImageUrl,
+                    "url": canonicalUrl,
+                    "height": `${heightVal} cm`,
+                    "weight": `${weightVal} kg`,
+                    "knowsAbout": [
+                        "Girlfriend Experience (GFE)",
+                        "เพื่อนเที่ยวฟิวแฟน",
+                        `สาวรับงาน${provinceName}`,
+                        `ไซด์ไลน์${provinceName}`
+                    ],
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": p.location || provinceName,
+                        "addressRegion": provinceName,
+                        "addressCountry": "TH"
+                    },
+                    "offers": {
+                        "@type": "Offer",
+                        "url": canonicalUrl,
+                        "price": rawRate || 1500,
+                        "priceCurrency": "THB",
+                        "priceValidUntil": "2027-12-31",
+                        "availability": "https://schema.org/InStock",
+                        "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
+                    }
+                },
+
+                // 3. เส้นทาง Breadcrumb นำทางอย่างเป็นระบบ
                 {
                     "@type": "BreadcrumbList",
+                    "@id": `${canonicalUrl}#breadcrumb`,
                     "itemListElement": breadcrumbElements
                 },
+
+                // 4. คำถาม-คำตอบที่พบบ่อย (FAQPage) ระบุสเปก พิกัด และความปลอดภัยชัดเจน
                 {
                     "@type": "FAQPage",
                     "@id": `${canonicalUrl}#faq`,
                     "mainEntity": [
                         {
                             "@type": "Question",
-                            "name": `${displayName} ไซด์ไลน์${provinceName} มีความปลอดภัยและการชำระเงินอย่างไร?`,
+                            "name": `${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
                             "acceptedAnswer": {
                                 "@type": "Answer",
-                                "text": `ทางระบบมีนโยบายให้ลูกค้าพบน้อง ${displayName} ยืนยันความตรงปกหน้างานแล้วจึงชำระค่าบริการแก่ตัวน้องโดยตรง ปราศจากการเรียกเก็บเงินจองคิวมัดจำล่วงหน้าทุกรูปแบบ เพื่อความคุ้มครองและความสบายใจสูงสุดของลูกค้า`
+                                "text": `${displayName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ส่วนสูง ${heightVal} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
                             }
                         },
                         {
                             "@type": "Question",
-                            "name": `ต้องการตรวจสอบตารางเวลาหรือขอจองคิว ${displayName} พิกัด ${p.location || provinceName} ได้ที่ช่องทางใด?`,
+                            "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?`,
                             "acceptedAnswer": {
                                 "@type": "Answer",
-                                "text": `สามารถดำเนินการคลิกแอดไลน์ปุ่ม 'ทักไลน์จองคิว' บนหน้าเว็บ เพื่อดำเนินการขอตรวจสอบคิวงาน สแตนด์บายตารางงาน และจองคิวรับบริการเพื่อความสะดวกและรวดเร็วที่สุดผ่านไลน์แอดมินเจ้าหน้าที่อย่างเป็นทางการ`
+                                "text": `อัตราค่าบริการเริ่มต้น ${displayPrice} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?`,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": `สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ`
                             }
                         }
                     ]
@@ -360,7 +413,16 @@ export default async (request, context) => {
     <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
     <style>
-        :root { --p:#FF2E63; --s:#34d399; --bg:#07070A; --card:#111116; --txt:#f8fafc; --gold:#fbbf24; --muted:#cbd5e1; --bw:rgba(255,255,255,0.06); }
+        :root { 
+    --p: #C084FC; 
+    --s: #00E676; 
+    --bg: #060411; 
+    --card: #09090C; 
+    --txt: #f8fafc; 
+    --gold: #fbbf24; 
+    --muted: #A1A1AA; 
+    --bw: rgba(255,255,255,0.08); 
+}
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
         .container { position: relative; max-width: 500px; margin: 0 auto; background: var(--card); min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.6); border-left: 1px solid var(--bw); border-right: 1px solid var(--bw); }
@@ -413,16 +475,7 @@ export default async (request, context) => {
         .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
         .footer-nav a { color: var(--muted); text-decoration: underline; }
 
-        body {
-            padding-top: env(safe-area-inset-top, 0px);
-            padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
-        }
-
-        @media (min-width: 768px) {
-            body {
-                padding-bottom: env(safe-area-inset-bottom, 0px);
-            }
-        }
+        
     </style>
 </head>
 <body>

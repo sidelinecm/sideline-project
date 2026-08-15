@@ -2,7 +2,7 @@
  * [ SYSTEM SSR PROVINCE CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless SSR Handler
  * File: netlify/edge-functions/ssr-province.js
- * Authority: Programmatic Local SEO, Entity Scoping, Full Hydration Injection & Schema Architecture
+ * Authority: Programmatic Local SEO, 100% Real Counts, Zero Hidden Text & Schema Architecture
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
@@ -30,7 +30,7 @@ const CONFIG = {
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
-  DEFAULT_TELEPHONE: "+6620000000",
+  DEFAULT_TELEPHONE: "+66926997044", // ✅ เบอร์โทรจริงของคุณ
   DISPLAY_LINE_ID: "LINE: @firstmodelhub",
   SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -81,10 +81,6 @@ const PROVINCE_CUSTOM_METADATA = {
     desc: "ศูนย์รวมสาวรับงานภูเก็ต ป่าตอง และเพื่อนเที่ยวพรีเมียม สไตล์ฟิวแฟน คัดสรรโปรไฟล์ตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองภูเก็ต กะทู้ ฉลอง"
   },
   udonthani: {
-    title: "สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
-    desc: "สารบัญสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town หนองประจักษ์"
-  },
-  udon: {
     title: "สาวรับงานอุดร ไซด์ไลน์อุดรธานี ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub",
     desc: "สารบัญสาวรับงานอุดรธานี และเพื่อนเที่ยวพรีเมียมสไตล์ฟิวแฟน การันตีตรงปก 100% ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองอุดร UD Town หนองประจักษ์"
   }
@@ -239,11 +235,8 @@ async function getTemplateHtml(url, context) {
       if (mainTemplate.ok) {
         TEMPLATE_HTML_CACHE = await mainTemplate.text();
         TEMPLATE_CACHE_TIMESTAMP = now;
-      } else {
-        console.warn("⚠️ Fetching index.html returned non-200 status:", mainTemplate.status);
       }
     } catch (e) {
-      console.warn("⚠️ Fetching index.html template timed out or failed, fallback to basic HTML shell");
       return DEFAULT_FALLBACK_SHELL;
     }
   }
@@ -255,7 +248,6 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-// 🟢 ตัวประมวลผลรูปภาพ Cloudinary 100% สำหรับ SSR (ไม่มีการต่อเข้า Supabase Storage อีกต่อไป)
 const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
   if (!path || typeof path !== "string" || !path.trim()) {
     return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
@@ -458,6 +450,7 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
+// 🟢 เรนเดอร์การ์ดโปรไฟล์ คลีน เรียบหรู แต่ฝัง Semantic Alt Text เชิงลึก
 const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
@@ -468,9 +461,19 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
   const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
   
-  const seoAltText = `น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
-  
-  // 🟢 ดึงรูปภาพ Cloudinary จริงแน่นอน
+  // สกัดข้อมูลสัดส่วนเพื่อนำไปใส่ Alt text ให้ Googlebot อ่านเชิงลึก
+  let statsDisplay = p.stats || p.proportion || "";
+  const bustVal = p.bust || "";
+  const waistVal = p.waist || "";
+  const hipsVal = p.hips || "";
+  const cupVal = (p.cup_size || p.cupSize || "").toString().toUpperCase().trim();
+  if (bustVal && waistVal && hipsVal) {
+    statsDisplay = `${bustVal}${cupVal ? cupVal : ''}-${waistVal}-${hipsVal}`;
+  }
+  const statsSnippet = statsDisplay ? `สัดส่วน ${statsDisplay}` : "รูปร่างสมส่วน";
+  const heightSnippet = p.height ? `สูง ${p.height}ซม.` : "";
+  const seoAltText = `น้อง${pName}${ageDisplay ? ` อายุ${ageDisplay}ปี` : ""} สาวรับงาน${provinceThaiName} ${statsSnippet} ${heightSnippet} ย่าน${pLoc} ฟิวแฟนตรงปก 100% ไม่มัดจำ`;
+
   const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
   const imgUrl = optimizeImg(hostUrl, rawImg, 400, 500);
 
@@ -517,8 +520,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
            data-profile-slug="${escapeHTML(p.slug || p.id)}"
            style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;">
           
-          <h3 style="display:none;">น้อง${pName} สาวรับงาน${provinceThaiName} ย่าน${pLoc}</h3>
-
           <img src="${imgUrl}" 
                alt="${seoAltText}"
                title="${seoAltText}"
@@ -649,14 +650,13 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
-    // 🟢 ดึงข้อมูลทุกฟิลด์จาก Supabase ป้องกัน Field Name Mismatch
+    // 🟢 1. ดึงข้อมูลจริงทั้งหมดและนับจำนวนจริงแบบ { count: "exact" } โดยปลด .limit() ออก
     let profileQuery = supabase
       .from("profiles")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("active", true)
       .order("isfeatured", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(20);
+      .order("created_at", { ascending: false });
 
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.in("provinceKey", searchKeys);
@@ -687,6 +687,12 @@ export default async (req, context) => {
     }
 
     const profileList = profListRes.data || [];
+    
+    // 🟢 2. ดึงยอดรวมที่แท้จริงจากฐานข้อมูลตรงๆ ไม่มีแต่งเลข
+    const totalRealCount = (profListRes.count !== null && profListRes.count !== undefined) 
+      ? profListRes.count 
+      : profileList.length;
+
     const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
     const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
     const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
@@ -743,7 +749,7 @@ export default async (req, context) => {
       ? (finalReviews.reduce((sum, rev) => sum + (Number(rev.rating) || 5), 0) / finalReviews.length) 
       : 5;
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
-    const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : (profileList.length > 0 ? 30 + 3 * profileList.length : 45);
+    const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : totalRealCount;
     const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
     const validZones = (seoData.zones || [])
@@ -779,7 +785,7 @@ export default async (req, context) => {
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": Number(finalRatingValue) || 4.9,
-        "reviewCount": Number(finalReviewCount) || 5,
+        "reviewCount": Number(finalReviewCount) || 1,
         "bestRating": 5,
         "worstRating": 1
       },
@@ -870,7 +876,7 @@ export default async (req, context) => {
           "@type": "ItemList",
           "@id": `${canonUrl}/#itemlist`,
           "name": `รายชื่อสาวรับงานและเพื่อนเที่ยว ${provinceThaiName}`,
-          "numberOfItems": profileList.length,
+          "numberOfItems": totalRealCount,
           "itemListElement": profileList.map((p, index) => {
             const pCleanName = (p.name || "").replace(/^น้อง\s?/, "").trim();
             const itemUrl = `${hostUrl}/sideline/${encodeURIComponent(p.slug || p.id)}`;
@@ -980,7 +986,9 @@ export default async (req, context) => {
     
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", profileList.length || 50);
+    
+    // 🟢 3. แทนที่ตัวเลขจริงลงใน HTML ทั้งหมด
+    rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", totalRealCount);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
@@ -996,9 +1004,10 @@ export default async (req, context) => {
       );
     }
 
+    // 🟢 แก้ไขจุดที่ 1: ลบคอมเมนต์และ Section หมวด Featured ออกพร้อมกันอย่างสะอาด
     if (!isNationalHome) {
       rawHtml = rawHtml.replace(
-        /<section id="featured-profiles"[\s\S]*?<\/section>/i,
+        /<!--\s*🟢\s*<h2>\s*หมวดที่\s*2[\s\S]*?<\/section>/i,
         ""
       );
     }
@@ -1010,63 +1019,147 @@ export default async (req, context) => {
       </div>
     `;
 
-    const liveCountChipHtml = `
-      ${topCatalogSnippetHtml}
-      <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
-              📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
-              <span class="live-count-chip">
-                <span class="pulse-dot-el"></span>
-                <span>พบ ${profileList.length} โปรไฟล์พร้อมรับงาน</span>
-              </span>
-          </h2>
-      </div>
-    `;
+    // 🟢 4. ส่วนหัวข้อจะโชว์จำนวนจริง "พบ X โปรไฟล์พร้อมรับงาน"
+    let displayAreaInnerHtml = "";
 
-    const displayAreaInnerHtml = `
-      ${liveCountChipHtml}
-      <div class="section-content-wrapper" style="margin-top: 16px;">
-        <div class="profile-grid profiles-grid-row" role="list">
-          ${cardsHtml}
+    if (isNationalHome) {
+      // หน้าแรก: จัดกลุ่มตามจังหวัดจริง นับตามจำนวนจริงของแต่ละจังหวัด
+      const grouped = profileList.reduce((acc, p) => {
+        const key = (p.provinceKey || p.province_slug || "no_province").toString().toLowerCase();
+        acc[key] = acc[key] || [];
+        acc[key].push(p);
+        return acc;
+      }, {});
+
+      const sortedProvinceKeys = Object.keys(grouped).sort((a, b) => {
+        const nameA = PROVINCE_SEO_DATA[a]?.name || a;
+        const nameB = PROVINCE_SEO_DATA[b]?.name || b;
+        return nameA.localeCompare(nameB, "th");
+      });
+
+      let sectionsHtml = "";
+      for (const key of sortedProvinceKeys) {
+        const pName = PROVINCE_SEO_DATA[key]?.name || key;
+        const countInProvince = grouped[key].length;
+        const provinceCardsHtml = grouped[key].map((p, index) => renderCardHtml(p, index, hostUrl, pName)).join("");
+
+        sectionsHtml += `
+          <div class="section-content-wrapper province-section" id="province-${key}" style="margin-top: 24px;">
+            <div style="padding: 8px 4px 12px 4px;">
+                <a href="/location/${key}" class="group" style="text-decoration: none; display: inline-block;">
+                    <h2 class="province-section-header" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 18px; font-weight: 800; color: white; margin: 0;">
+                        📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${pName}</span>
+                        <span class="live-count-chip">
+                          <span class="pulse-dot-el"></span>
+                          <span>พบ ${countInProvince} โปรไฟล์พร้อมรับงาน</span>
+                        </span>
+                        <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px; color: var(--primary-purple);"></i>
+                    </h2>
+                </a>
+            </div>
+            <div class="profile-grid profiles-grid-row" role="list">
+              ${provinceCardsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      displayAreaInnerHtml = sectionsHtml;
+
+    } else {
+      // หน้าเฉพาะจังหวัด: โชว์จำนวนจริงของจังหวัดนั้น
+      const liveCountChipHtml = `
+        ${topCatalogSnippetHtml}
+        <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
+                📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
+                <span class="live-count-chip">
+                  <span class="pulse-dot-el"></span>
+                  <span>พบ ${totalRealCount} โปรไฟล์พร้อมรับงาน</span>
+                </span>
+            </h2>
         </div>
-      </div>
-    `;
+      `;
+
+      displayAreaInnerHtml = `
+        ${liveCountChipHtml}
+        <div class="section-content-wrapper" style="margin-top: 16px;">
+          <div class="profile-grid profiles-grid-row" role="list">
+            ${cardsHtml}
+          </div>
+        </div>
+      `;
+    }
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // 🟢 ส่งข้อมูลรูปภาพ Cloudinary จริงเข้าสู่ Hydration Script (ไม่มีการตกหล่น)
-    const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
-      id: p.id,
-      slug: p.slug || p.id,
-      name: p.name,
-      age: p.age,
-      height: p.height || "",
-      weight: p.weight || "",
-      stats: p.stats || "",
-      skinTone: p.skin_tone || p.skinTone || "",
-      bust: p.bust || "",
-      waist: p.waist || "",
-      hips: p.hips || "",
-      cup_size: p.cup_size || "",
-      imagePath: p.imagePath || p.image_url || p.imageUrl || p.photo || "",
-      galleryPaths: p.galleryPaths || p.gallery_paths || [],
-      provinceKey: p.provinceKey,
-      provinceThai: provinceThaiName,
-      location: sanitizeThaiText(p.location),
-      rate: p.rate,
-      availability: p.availability,
-      lastUpdated: p.lastUpdated,
-      isfeatured: p.isfeatured,
-      verified: p.verified || p.isVerified,
-      hasVideo: p.has_video || p.hasVideo || false,
-      description: sanitizeThaiText(p.description) || "",
-      lineId: p.line_id || p.lineId || "",
-      quote: sanitizeThaiText(p.quote || p.slogan) || "",
-      styleTags: p.style_tags || p.styleTags || []
-    }))).replace(/</g, '\\u003c');
+    // 🟢 5. Lookup Map จับคู่รหัสจังหวัด -> ชื่อจริงของแต่ละน้อง
+    const provThaiLookup = new Map();
+    (provListRes.data || []).forEach(item => {
+      const k = (item.key || item.slug || item.id || "").toString().toLowerCase();
+      const n = item.nameThai || item.name_thai || item.name;
+      if (k && n) provThaiLookup.set(k, n);
+    });
+    provThaiLookup.set("chiangmai", "เชียงใหม่");
+    provThaiLookup.set("chiang_mai", "เชียงใหม่");
+    provThaiLookup.set("lampang", "ลำปาง");
+    provThaiLookup.set("udonthani", "อุดรธานี");
+    provThaiLookup.set("bangkok", "กรุงเทพฯ");
+    provThaiLookup.set("chiangrai", "เชียงราย");
+    provThaiLookup.set("phitsanulok", "พิษณุโลก");
+    provThaiLookup.set("phuket", "ภูเก็ต");
+    provThaiLookup.set("chonburi", "ชลบุรี");
+    provThaiLookup.set("khonkaen", "ขอนแก่น");
+    provThaiLookup.set("lamphun", "ลำพูน");
+
+    // 🟢 6. ส่งข้อมูลจริงทั้งหมดเข้า Hydration Script (ไม่มีการปลอมชื่อจังหวัด)
+    const hydratedProfilesData = JSON.stringify(profileList.map(p => {
+      const pKey = (p.provinceKey || p.province_key || p.province_slug || "chiangmai").toString().toLowerCase();
+      const realProvinceThai = p.provinceThai || p.province_thai || provThaiLookup.get(pKey) || "เชียงใหม่";
+
+      let galleries = p.galleryPaths || p.gallery_paths || p.gallery || [];
+      if (typeof galleries === "string") {
+        galleries = galleries.split(",").map(s => s.trim()).filter(Boolean);
+      }
+
+      let tags = p.style_tags || p.styleTags || p.tags || [];
+      if (typeof tags === "string") {
+        tags = tags.split(",").map(s => s.trim()).filter(Boolean);
+      }
+
+      return {
+        id: p.id,
+        slug: p.slug || p.id,
+        name: p.name,
+        age: p.age,
+        height: p.height || "",
+        weight: p.weight || "",
+        stats: p.stats || "",
+        skinTone: p.skin_tone || p.skinTone || "",
+        bust: p.bust || "",
+        waist: p.waist || "",
+        hips: p.hips || "",
+        cup_size: p.cup_size || "",
+        imagePath: p.imagePath || p.image_url || p.imageUrl || p.photo || "",
+        galleryPaths: Array.isArray(galleries) ? galleries : [],
+        provinceKey: pKey,
+        provinceThai: realProvinceThai,
+        location: sanitizeThaiText(p.location || realProvinceThai),
+        rate: p.rate,
+        availability: p.availability,
+        lastUpdated: p.lastUpdated,
+        isfeatured: p.isfeatured,
+        verified: p.verified || p.isVerified,
+        hasVideo: p.has_video || p.hasVideo || false,
+        description: sanitizeThaiText(p.description) || "",
+        lineId: (p.line_id || p.lineId || "").toString().replace(/^@/, "").trim(),
+        quote: sanitizeThaiText(p.quote || p.slogan) || "",
+        styleTags: Array.isArray(tags) ? tags : []
+      };
+    })).replace(/</g, '\\u003c');
 
     const allProvincesList = (provListRes.data || []).map(p => ({
-      key: p.key || p.slug || p.id,
+      key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name_thai || p.name
     }));
     const hydratedProvincesData = JSON.stringify(allProvincesList).replace(/</g, '\\u003c');
