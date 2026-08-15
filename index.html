@@ -81,7 +81,7 @@
   <div style="position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
     <div style="position: absolute; width: 100%; height: 100%; border: 3px solid transparent; border-top-color: #C084FC; border-radius: 50%; animation: spin 1s linear infinite;"></div>
     <div style="position: absolute; width: 70%; height: 70%; border: 3px solid transparent; border-top-color: #FF1493; border-radius: 50%; animation: spin 0.8s linear infinite reverse;"></div>
-    <span style="font-size: 24px;">🌟</span>
+    <span style="font-size: 24px; line-height: 1;">🌟</span>
   </div>
   <div style="color: #E9D5FF; font-family: 'Prompt', sans-serif; font-size: 14px; font-weight: 800; margin-top: 16px; letter-spacing: 2px; animation: pulse 1.5s infinite;">กำลังเตรียมโปรไฟล์...</div>
 </div>
@@ -92,10 +92,11 @@
 
 <!-- HEADER -->
 <header id="page-header" role="banner">
-    <div class="header-logo-container">
-        <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub" class="brand-logo-link">
-           <div class="brand-badge-header">
-             <svg class="header-crown-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <div class="header-logo-container" style="display: flex; align-items: center; min-width: 0;">
+        <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub" class="brand-logo-link" style="display: inline-flex; align-items: center; text-decoration: none;">
+           <div class="brand-badge-header" style="display: inline-flex; align-items: center; gap: 7px;">
+             <!-- ล็อกขนาด SVG กว้าง-สูง ชัดเจนในระดับ Attribute & Inline Style -->
+             <svg class="header-crown-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; flex-shrink: 0; display: inline-block;">
                <path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z" fill="url(#hdrGold)"/>
                <defs>
                  <linearGradient id="hdrGold" x1="0" y1="0" x2="24" y2="24">
@@ -104,7 +105,7 @@
                  </linearGradient>
                </defs>
              </svg>
-             <span class="header-brand-text">FirstModel<span class="pink-glow">Hub</span></span>
+             <span class="header-brand-text" style="white-space: nowrap;">FirstModel<span class="pink-glow">Hub</span></span>
            </div>
         </a>
     </div>
@@ -128,8 +129,8 @@
 <!-- MOBILE SIDEBAR MENU -->
 <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
   <div class="sidebar-header-div">
-    <div class="brand-badge-header" style="transform: scale(0.9); transform-origin: left center;">
-      <svg class="header-crown-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <div class="brand-badge-header" style="display: inline-flex; align-items: center; gap: 7px; transform: scale(0.9); transform-origin: left center;">
+      <svg class="header-crown-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; flex-shrink: 0; display: inline-block;">
         <path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z" fill="url(#sidebarGold)"/>
         <defs>
           <linearGradient id="sidebarGold" x1="0" y1="0" x2="24" y2="24">
@@ -138,7 +139,7 @@
           </linearGradient>
         </defs>
       </svg>
-      <span class="header-brand-text">FirstModel<span class="pink-glow">Hub</span></span>
+      <span class="header-brand-text" style="white-space: nowrap;">FirstModel<span class="pink-glow">Hub</span></span>
     </div>
     <button id="close-menu-btn" aria-label="ปิดเมนูนำทางสำหรับมือถือ" class="sidebar-close-btn" style="color: #FFFFFF !important;">
       <i class="fas fa-times" aria-hidden="true"></i>
@@ -161,17 +162,17 @@
 <div id="sidebar-overlay" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;" aria-hidden="true"></div>
 
 <!-- MAIN CONTENT -->
-<main id="main-content" style="position: relative; overflow: hidden;">
+<main id="main-content" style="position: relative; overflow: hidden; padding-top: 76px;">
     <div class="container space-y-24">
 
     <!-- HERO SECTION -->
     <section class="hero-section" aria-labelledby="hero-h1">
       <div class="clutch-pill">
-        <span style="background-color: #7C3AED; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 800;">VERIFIED 2026</span>
+        <span style="background-color: #7C3AED; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 800; white-space: nowrap;">VERIFIED 2026</span>
         <div class="stars" style="display: flex; gap: 2px; color: #FBBF24; font-size: 12px;" aria-hidden="true">
           <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
         </div>
-        <span style="color: white; font-size: 12px; font-weight: 700;">5/5 Verified Profiles</span>
+        <span style="color: white; font-size: 12px; font-weight: 700; white-space: nowrap;">5/5 Verified Profiles</span>
       </div>
 
       <!-- 👑 GRAND HERO BRAND SHOWCASE -->
@@ -183,8 +184,9 @@
           <span class="sparkle-p p2" aria-hidden="true">✨</span>
           <span class="sparkle-p p3" aria-hidden="true">✦</span>
 
-          <div class="emblem-icon-wrapper">
-            <svg class="grand-crown-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <!-- คุม Wrapper ขนาด 34px เพื่อไม่ให้มงกุฎขยายใหญ่ -->
+          <div class="emblem-icon-wrapper" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 36px; margin-bottom: 2px;">
+            <svg class="grand-crown-svg" width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; max-width: 34px; max-height: 34px; flex-shrink: 0; display: block;">
               <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" fill="url(#goldCrownHero)"/>
               <circle cx="12" cy="19" r="1.5" fill="#FFF"/>
               <circle cx="5" cy="19" r="1.5" fill="#FF1493"/>

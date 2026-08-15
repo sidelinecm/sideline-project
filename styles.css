@@ -1922,3 +1922,56 @@ html.light h4 {
     font-size: 19px !important;
   }
 }
+
+/* 🛡️ DEFENSIVE GUARD: ป้องกัน SVG Icon ขยายตัว 100% บนมือถือทุกกรณี */
+.header-crown-icon {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+.emblem-icon-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 36px !important;
+  margin: 0 auto !important;
+}
+
+.grand-crown-svg {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  max-width: 34px !important;
+  max-height: 34px !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+  margin: 0 auto !important;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.9));
+  animation: crownFloat 3s ease-in-out infinite;
+}
+
+/* ล็อกความสูงและระยะปลอดภัยของ Header */
+#page-header {
+  height: 54px !important;
+  overflow: hidden !important; /* ป้องกันไม่ให้โลโก้หรือเนื้อหาล้นทะลุลงมาทับส่วนล่าง */
+}
+
+.brand-badge-header {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  white-space: nowrap !important;
+}
+
+.clutch-pill {
+  white-space: nowrap !important;
+}
