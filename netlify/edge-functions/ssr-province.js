@@ -25,19 +25,21 @@ const CONFIG = {
     try { return Deno.env.get("SUPABASE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; } catch { return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"; }
   },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
-  BRAND_NAME: "First Model Hub",
-  BRAND_LEGAL_NAME: "First Model Hub Co., Ltd.",
+  CLOUDINARY_CLOUD_NAME: "drffioary",
+  CLOUDINARY_BASE_URL: "https://res.cloudinary.com/drffioary/image/upload/",
+  BRAND_NAME: "FirstModelHub",
+  BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
   DEFAULT_TELEPHONE: "+6620000000",
   DISPLAY_LINE_ID: "LINE: @firstmodelhub",
   SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
-    tiktok: "https://tiktok.com/@firstmodelhub",
-    twitter: "https://twitter.com/firstmodelhub",
-    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280",
-    biosite: "https://bio.site/firstmodelhub",
-    linktr: "https://linktr.ee/firstmodelhub",
-    bluesky: "https://bsky.app/profile/firstmodelhub.bsky.social"
+    tiktok: "https://tiktok.com/@sidelinecm",
+    twitter: "https://twitter.com/sidelinechiangmai",
+    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
+    biosite: "https://bio.site/firstfiwfans.com",
+    linktree: "https://linktr.ee/kissmodel",
+    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
   }
 };
 
@@ -253,18 +255,35 @@ const escapeHTML = str => (str !== null && str !== undefined) ? String(str).repl
 const stripHTML = str => (str !== null && str !== undefined) ? String(str).replace(/<[^>]*>?/gm, "").trim() : "";
 const replaceGlobal = (source, target, replacement) => source.split(target).join(replacement);
 
-const optimizeImg = (hostUrl, path, width = 300, height = 375) => {
-  if (!path) return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
-  if (path.includes("res.cloudinary.com")) {
-    if (path.includes("/upload/")) {
-      return path.replace("/upload/", `/upload/f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face/`);
+// 🟢 ตัวประมวลผลรูปภาพ Cloudinary 100% สำหรับ SSR (ไม่มีการต่อเข้า Supabase Storage อีกต่อไป)
+const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
+  if (!path || typeof path !== "string" || !path.trim()) {
+    return `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+  }
+  const cleanPath = path.trim();
+  const transform = height 
+    ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_face` 
+    : `c_scale,w_${width},q_auto,f_auto`;
+
+  if (cleanPath.includes("res.cloudinary.com")) {
+    const uploadIdx = cleanPath.indexOf("/upload/");
+    if (uploadIdx !== -1) {
+      const prefix = cleanPath.substring(0, uploadIdx + 8);
+      let rest = cleanPath.substring(uploadIdx + 8);
+      rest = rest.replace(/^([a-z0-9_,-:]+\/)+?(v\d+|images)/i, "$2");
+      if (!rest.startsWith("v") && !rest.startsWith("images") && rest.includes("/")) {
+        rest = rest.replace(/^[^/]+\//, "");
+      }
+      return `${prefix}${transform}/${rest}`;
     }
-    return path;
+    return cleanPath;
   }
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path;
+
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    return cleanPath;
   }
-  return `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover&quality=70&format=avif`;
+
+  return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${cleanPath.replace(/^\/+/, "")}`;
 };
 
 const formatDateSSR = dateStr => {
@@ -294,15 +313,12 @@ const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
     });
   }
   
-  // 🟣 เน้นสีคีย์เวิร์ดหลักบริการ
   const serviceRegex = /(สาวรับงาน|ไซด์ไลน์|เด็กเอ็น|เพื่อนเที่ยว|รับงาน|ฟิวแฟน|ฟีลแฟน)(?![^<]*>|[^<>]*<\/a>)/g;
   res = res.replace(serviceRegex, `<strong class="kw-purple">$1</strong>`);
 
-  // 🟢 เน้นสีคีย์เวิร์ดความปลอดภัย
   const safetyRegex = /(ไม่โอนมัดจำ|จ่ายหน้างาน 100%|ตรงปก 100%|ความปลอดภัยสูงสุด|นัดเจอตัวจริง)(?![^<]*>|[^<>]*<\/a>)/g;
   res = res.replace(safetyRegex, `<strong class="kw-green">$1</strong>`);
 
-  // 🔴 เน้นสีคำเตือนสำคัญ
   const warnRegex = /(ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี|ห้ามโอนเงินก่อน|ปราศจากการเรียกเก็บเงิน)(?![^<]*>|[^<>]*<\/a>)/g;
   res = res.replace(warnRegex, `<strong class="kw-red">$1</strong>`);
 
@@ -393,12 +409,14 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
   const priceVal = (profile.rate || "0").toString().replace(/\D/g, "");
   const cleanName = (profile.name || "").replace(/^น้อง/, "").trim();
   const cleanLoc = sanitizeThaiText(profile.location || province);
+  const rawImg = profile.imagePath || profile.image_url || profile.photo || "";
+
   return {
     "@type": "Person",
     "@id": `${targetUrl}/#person`,
     "name": `น้อง${cleanName}`,
     "url": targetUrl,
-    "image": optimizeImg(hostUrl, profile.imagePath, 1200, 630),
+    "image": optimizeImg(hostUrl, rawImg, 800, 1067),
     "description": sanitizeThaiText(profile.description) || `โปรไฟล์แนะนำน้อง${cleanName} สาวรับงานพิกัด ${cleanLoc} สไตล์เพื่อนเที่ยวดูแลดี ฟิวแฟน ตรงปก 100% ไม่มัดจำ บน First Model Hub`,
     "jobTitle": "Freelance Companion & Entertainer",
     "gender": "Female",
@@ -450,18 +468,21 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
   const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
   
-  const seoAltText = `${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
-  const imgUrl = optimizeImg(hostUrl, p.imagePath, 600, 750);
+  const seoAltText = `น้อง${pName} สาวรับงาน${provinceThaiName} ไซด์ไลน์${provinceThaiName} ฟิวแฟนตรงปก 100%`;
+  
+  // 🟢 ดึงรูปภาพ Cloudinary จริงแน่นอน
+  const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
+  const imgUrl = optimizeImg(hostUrl, rawImg, 400, 500);
 
   const featuredBadge = p.isfeatured
-    ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+    ? `<span style="background: rgba(90, 44, 190, 0.88); border: 1px solid rgba(192, 132, 252, 0.5); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
         <i class="fas fa-star" style="font-size: 6.5px; color: #FBBF24;"></i>
         <span style="letter-spacing: 0.02em;">แนะนำ</span>
        </span>`
     : "";
 
   const statusBadge = `
-    <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+    <span style="background: rgba(9, 9, 11, 0.82); border: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
         <span style="width: 5px; height: 5px; border-radius: 50%; background-color: ${statusDotColor}; box-shadow: 0 0 6px ${statusDotColor}; flex-shrink: 0;"></span>
         <span style="letter-spacing: 0.02em;">${statusText}</span>
     </span>
@@ -469,14 +490,14 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
 
   const hasVideo = p.has_video || p.hasVideo || false;
   const videoBadge = hasVideo
-    ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+    ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
         <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
        </span>`
     : "";
 
   const isVerified = p.verified || p.isVerified || false;
   const verifiedBadge = isVerified
-    ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+    ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
         <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
        </span>`
     : "";
@@ -505,8 +526,9 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
                height="400"
                style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
                loading="${index === 0 ? "eager" : "lazy"}"
+               fetchpriority="${index === 0 ? "high" : "auto"}"
                decoding="async"
-               onerror="this.onerror=null; this.src='/images/apple-touch-icon.png';" />
+               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
           <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 20%, transparent 38%); z-index: 10; pointer-events: none;"></div>
 
@@ -627,13 +649,14 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
+    // 🟢 ดึงข้อมูลทุกฟิลด์จาก Supabase ป้องกัน Field Name Mismatch
     let profileQuery = supabase
       .from("profiles")
-      .select("id, slug, name, age, imagePath, galleryPaths, provinceKey, location, rate, isfeatured, lastUpdated, active, availability, description, height, weight, stats, skin_tone, bust, waist, hips, cup_size, has_video, verified, line_id, quote, style_tags, slogan")
+      .select("*")
       .eq("active", true)
       .order("isfeatured", { ascending: false })
-      .order("lastUpdated", { ascending: false })
-      .limit(16);
+      .order("created_at", { ascending: false })
+      .limit(20);
 
     if (!isNationalHome && provinceSlug !== "national") {
       profileQuery = profileQuery.in("provinceKey", searchKeys);
@@ -672,8 +695,8 @@ export default async (req, context) => {
       ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
       : (isNationalHome ? hostUrl : `${hostUrl}/location/${provinceSlug}`);
     
-    const mainImgPath = matchedProfile?.imagePath || (profileList.length > 0 ? profileList[0].imagePath : null);
-    const metaImgUrl = mainImgPath ? optimizeImg(hostUrl, mainImgPath, 1200, 630) : `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
+    const rawMainImg = matchedProfile?.imagePath || matchedProfile?.image_url || (profileList.length > 0 ? (profileList[0].imagePath || profileList[0].image_url) : null);
+    const metaImgUrl = rawMainImg ? optimizeImg(hostUrl, rawMainImg, 1200, 630) : `${CONFIG.PRIMARY_DOMAIN}/images/firstmodelhub.webp`;
 
     const dbReviews = reviewsRes?.data || [];
     let finalReviews = [];
@@ -1011,10 +1034,10 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // 🟢 1. เตรียมก้อน Hydration โปรไฟล์
+    // 🟢 ส่งข้อมูลรูปภาพ Cloudinary จริงเข้าสู่ Hydration Script (ไม่มีการตกหล่น)
     const hydratedProfilesData = JSON.stringify(profileList.map(p => ({
       id: p.id,
-      slug: p.slug,
+      slug: p.slug || p.id,
       name: p.name,
       age: p.age,
       height: p.height || "",
@@ -1025,7 +1048,7 @@ export default async (req, context) => {
       waist: p.waist || "",
       hips: p.hips || "",
       cup_size: p.cup_size || "",
-      imagePath: p.imagePath,
+      imagePath: p.imagePath || p.image_url || p.imageUrl || p.photo || "",
       galleryPaths: p.galleryPaths || p.gallery_paths || [],
       provinceKey: p.provinceKey,
       provinceThai: provinceThaiName,
@@ -1042,14 +1065,12 @@ export default async (req, context) => {
       styleTags: p.style_tags || p.styleTags || []
     }))).replace(/</g, '\\u003c');
 
-    // 🟢 2. เตรียมก้อน Hydration จังหวัดทั้งหมด 77 จังหวัด
     const allProvincesList = (provListRes.data || []).map(p => ({
       key: p.key || p.slug || p.id,
       nameThai: p.nameThai || p.name_thai || p.name
     }));
     const hydratedProvincesData = JSON.stringify(allProvincesList).replace(/</g, '\\u003c');
 
-    // 🟢 3. ฝังข้อมูลสมบูรณ์เข้า <head>
     const hydratedScriptTag = `
       <script id="ssr-profiles-data">
         window.profilesData = ${hydratedProfilesData};

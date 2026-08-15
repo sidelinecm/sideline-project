@@ -3,7 +3,7 @@
  * Project: First Model Hub - Serverless Crawler Handler
  * File: netlify/edge-functions/render-bot.js
  * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
- * Features: Clean Text Filter (No ASCII Art), High-Speed Image Preload, Schema Rating Fix
+ * Features: Pure Cloudinary CDN, Clean Text Filter (No ASCII Art), High-Speed Image Preload, Schema Rating Fix
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.42.0';
@@ -16,18 +16,20 @@ const CONFIG = {
         try { return Deno.env.get("SUPABASE_KEY") || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; } catch { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4'; }
     },
     DOMAIN: 'https://firstmodelhub.com',
-    BRAND_NAME: 'First Model Hub',
+    BRAND_NAME: 'FirstModelHub',
+    CLOUDINARY_CLOUD_NAME: 'drffioary',
+    CLOUDINARY_BASE_URL: 'https://res.cloudinary.com/drffioary/image/upload/',
     DEFAULT_TELEPHONE: '+6620000000',
     DISPLAY_LINE_ID: 'LINE: @firstmodelhub',
-    SOCIAL_PROFILES: {
-        line: 'https://line.me/ti/p/ksLUWB89Y_',
-        tiktok: 'https://tiktok.com/@firstmodelhub',
-        twitter: 'https://twitter.com/firstmodelhub',
-        linkedin: 'https://linkedin.com/in/cuteti-sexythailand-398567280',
-        biosite: 'https://bio.site/firstmodelhub',
-        linktree: 'https://linktr.ee/firstmodelhub',
-        bluesky: 'https://bsky.app/profile/firstmodelhub.bsky.social'
-    }
+    SOCIAL_LINKS: {
+    line: "https://line.me/ti/p/ksLUWB89Y_",
+    tiktok: "https://tiktok.com/@sidelinecm",
+    twitter: "https://twitter.com/sidelinechiangmai",
+    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
+    biosite: "https://bio.site/firstfiwfans.com",
+    linktree: "https://linktr.ee/kissmodel",
+    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+  }
 };
 
 const REVIEW_POOL = [
@@ -54,7 +56,10 @@ const PROVINCE_NAME_MAP = {
     khonkaen: "ขอนแก่น",
     phuket: "ภูเก็ต",
     udonthani: "อุดรธานี",
-    udon: "อุดรธานี"
+    udon: "อุดรธานี",
+    ayutthaya: "พระนครศรีอยุธยา",
+    suratthani: "สุราษฎร์ธานี",
+    ubon: "อุบลราชธานี"
 };
 
 const getDeterministicReviews = (slug, count = 3) => {
@@ -72,14 +77,37 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
     return Math.floor(min + (sum % (max - min + 1)));
 };
 
+// 🟢 ฟังก์ชันแปลง URL รูปภาพ Cloudinary แบบ 100% ไร้รอยต่อ ป้องกัน URL ซ้อนทับและ 400 Bad Request
 const optimizeImg = (path, width = 600, height = 800) => {
-    if (!path) return `${CONFIG.DOMAIN}/images/apple-touch-icon.png`;
-    if (path.includes('res.cloudinary.com')) {
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width},h_${height},c_fill/`);
+    if (!path || typeof path !== 'string' || !path.trim()) {
+        return `${CONFIG.DOMAIN}/images/firstmodelhub.webp`;
     }
-    return path.startsWith('http') 
-        ? path 
-        : `${CONFIG.SUPABASE_URL}/storage/v1/render/image/public/profile-images/${path}?width=${width}&height=${height}&resize=cover`;
+    const cleanPath = path.trim();
+    const transform = height 
+        ? `f_auto,q_auto,w_${width},h_${height},c_fill` 
+        : `c_scale,w_${width},q_auto,f_auto`;
+
+    if (cleanPath.includes('res.cloudinary.com')) {
+        const uploadIdx = cleanPath.indexOf('/upload/');
+        if (uploadIdx !== -1) {
+            const prefix = cleanPath.substring(0, uploadIdx + 8);
+            let rest = cleanPath.substring(uploadIdx + 8);
+            // ล้าง Transformation parameters เก่าที่อาจติดมาใน Database ออกทั้งหมด
+            rest = rest.replace(/^([a-z0-9_,-:]+\/)+?(v\d+|images)/i, "$2");
+            if (!rest.startsWith("v") && !rest.startsWith("images") && rest.includes("/")) {
+                rest = rest.replace(/^[^/]+\//, "");
+            }
+            return `${prefix}${transform}/${rest}`;
+        }
+        return cleanPath;
+    }
+
+    if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+        return cleanPath;
+    }
+
+    // กรณีเป็น Relative Path เช่น "v1771782437/images/..." หรือ "images/..." จาก Supabase
+    return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${cleanPath.replace(/^\/+/, "")}`;
 };
 
 const generateSrcSet = (path) => {
@@ -91,14 +119,14 @@ const generateSrcSet = (path) => {
     }).join(', ');
 };
 
-const escapeHTML = (str) => str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
-const stripHTML = (str) => str ? str.replace(/<[^>]*>?/gm, '').trim() : '';
+const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
+const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, '').trim() : '';
 
 const cleanAsciiArt = (text) => {
     if (!text) return "";
     return text
-        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]+/g, "")
-        .replace(/[„•ㅅ•„]+/g, "")
+        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬╭╮╰╯┊]+/g, "")
+        .replace(/[„•ㅅ•„₊˚(\s\S)*?づ♡✦⁺.💦જ⁀➴🐻‍❄️ྀི·༘⋆*🔭🫦➏➒🌷͙֒𐐪🐾˖°●]+/g, " ")
         .replace(/\n\s*\n/g, "\n")
         .trim();
 };
@@ -113,8 +141,9 @@ const getLocalizedZone = (location, provinceName) => {
 };
 
 const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, localizedZone) => {
-    if (p.description && p.description.trim().length > 10) {
-        return cleanAsciiArt(p.description.trim());
+    if (p.description && p.description.trim().length > 15) {
+        const cleaned = cleanAsciiArt(p.description.trim());
+        if (cleaned.length > 20) return cleaned;
     }
     return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} รูปร่างสมส่วน ผิวพรรณดี พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
 };
@@ -137,10 +166,10 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // 🟢 1. ตรวจสอบทั้ง Slug และ ID เพื่อป้องกันบอทเข้าผ่านรหัสตัวเลขแล้ว 404
+        // 🟢 1. ตรวจสอบโปรไฟล์จากฐานข้อมูล Supabase ทั้ง Slug และ Numeric ID
         let profileQuery = supabase
             .from('profiles')
-            .select('id, slug, name, imagePath, location, rate, age, description, provinceKey, lineId, provinces(nameThai, key)')
+            .select('*')
             .eq('active', true);
 
         if (/^\d+$/.test(slug)) {
@@ -155,52 +184,59 @@ export default async (request, context) => {
             return context.next();
         }
 
+        // ดึงรายชื่อน้องๆ ที่อยู่ในโซนจังหวัดเดียวกันเพื่อทำ Cross-linking ดันคะแนน SEO
         let related = [];
-        if (p.provinceKey) {
+        const provKeyToQuery = p.provinceKey || p.province_key || p.province_slug || 'chiangmai';
+        if (provKeyToQuery) {
             const { data: relatedData } = await supabase
                 .from('profiles')
-                .select('slug, name, imagePath, location')
-                .eq('provinceKey', p.provinceKey)
+                .select('*')
+                .eq('provinceKey', provKeyToQuery)
                 .eq('active', true)
                 .neq('id', p.id) 
                 .limit(6);
             related = relatedData || [];
         }
 
-        const rawName = p.name || 'สาวสวย';
+        const rawName = p.name || p.displayName || 'สาวสวย';
         let cleanName = rawName.trim().replace(/^(น้อง\s?)+/gi, '');
         const displayName = `น้อง${cleanName}`;
         
-        const provinceKey = (p.provinceKey || p.provinces?.key || 'chiangmai').toLowerCase();
-        const provinceName = p.provinces?.nameThai || PROVINCE_NAME_MAP[provinceKey] || p.location || 'เชียงใหม่';
+        const provinceKey = provKeyToQuery.toLowerCase();
+        const provinceName = p.provinceThai || p.province_thai || PROVINCE_NAME_MAP[provinceKey] || p.location || 'เชียงใหม่';
         
-        // 🟢 2. ทำ Internal Link เชื่อมโยงไปยังหน้า Location ของจังหวัดนั้นตรงๆ เพื่อดันคะแนน SEO
         const correctProvinceUrl = `${dynamicDomain}/location/${provinceKey}`;
         
-        const cleanedRate = String(p.rate || "1500").replace(/[^0-9]/g, '');
+        const cleanedRate = String(p.rate || p.price || "1500").replace(/[^0-9]/g, '');
         const rawRate = parseInt(cleanedRate, 10) || 1500;
         const displayPrice = rawRate.toLocaleString() + ".-";
         
-        const baseImageUrl = optimizeImg(p.imagePath, 600, 800);
-        const lcpImageUrl = optimizeImg(p.imagePath, 400, 533);
-        const imageSrcSet = generateSrcSet(p.imagePath);
+        // 🟢 ดึงรูปภาพ Cloudinary จากทุกคอลัมน์ที่เป็นไปได้ใน Supabase
+        const rawImgPath = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || '';
+        const baseImageUrl = optimizeImg(rawImgPath, 600, 800);
+        const lcpImageUrl = optimizeImg(rawImgPath, 400, 533);
+        const imageSrcSet = generateSrcSet(rawImgPath);
         
-        let finalLineUrl = p.lineId || 'ksLUWB89Y_';
+        let finalLineUrl = p.line_id || p.lineId || p.line || 'ksLUWB89Y_';
         if (!finalLineUrl.startsWith('http')) {
-            finalLineUrl = `https://line.me/ti/p/~${finalLineUrl}`;
+            finalLineUrl = `https://line.me/ti/p/${finalLineUrl.replace(/^@/, '')}`;
         }
 
         const ageVal = p.age || getDeterministicValue(20, 26, slug, 1);
-        const heightVal = getDeterministicValue(158, 168, slug, 2);
-        const weightVal = getDeterministicValue(44, 52, slug, 3);
-        const breastVal = getDeterministicValue(32, 36, slug, 4);
-        const waistVal = getDeterministicValue(23, 26, slug, 5);
-        const hipVal = getDeterministicValue(33, 37, slug, 6);
-        const bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+        const heightVal = p.height || getDeterministicValue(158, 168, slug, 2);
+        const weightVal = p.weight || getDeterministicValue(44, 52, slug, 3);
+        
+        let bwhVal = p.stats || p.proportion || '';
+        if (!bwhVal || bwhVal === '-') {
+            const breastVal = p.bust || getDeterministicValue(32, 36, slug, 4);
+            const waistVal = p.waist || getDeterministicValue(23, 26, slug, 5);
+            const hipVal = p.hips || getDeterministicValue(33, 37, slug, 6);
+            bwhVal = `${breastVal}-${waistVal}-${hipVal}`;
+        }
 
         const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const ratingValue = (4.7 + (charCodeSum % 4) / 10).toFixed(1);
-        const reviewCount = 150 + (charCodeSum % 100);
+        const ratingValue = (4.8 + (charCodeSum % 3) / 10).toFixed(1);
+        const reviewCount = 120 + (charCodeSum % 80);
         
         const localizedZone = getLocalizedZone(p.location, provinceName);
         const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
@@ -252,7 +288,7 @@ export default async (request, context) => {
                     },
                     "aggregateRating": {
                         "@type": "AggregateRating",
-                        "ratingValue": Number(ratingValue) || 4.8,
+                        "ratingValue": Number(ratingValue) || 4.9,
                         "reviewCount": Number(reviewCount) || 150,
                         "bestRating": 5,
                         "worstRating": 1
@@ -298,7 +334,7 @@ export default async (request, context) => {
     <link rel="canonical" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large">
     
-    <link rel="preconnect" href="${CONFIG.SUPABASE_URL}" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="preload" as="image" href="${lcpImageUrl}" ${imageSrcSet ? `imagesrcset="${imageSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ''} fetchpriority="high">
     <meta name="theme-color" content="#FF2E63">
     
@@ -477,12 +513,13 @@ export default async (request, context) => {
                     <h2 class="faq-title">น้องๆ โซน${provinceName} ที่น่าสนใจ</h2>
                     <div class="related-grid">
                         ${related.map(r => {
-                            const rawRelName = r.name || 'สาวสวย';
+                            const rawRelName = r.name || r.displayName || 'สาวสวย';
                             const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
                             const displayRelName = `น้อง${cleanRelName}`;
+                            const relImgPath = r.imagePath || r.image_url || r.photo || '';
                             return `
-                            <a href="/sideline/${encodeURIComponent(r.slug)}" class="related-card" title="${displayRelName}">
-                                <img src="${optimizeImg(r.imagePath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
+                            <a href="/sideline/${encodeURIComponent(r.slug || r.id)}" class="related-card" title="${displayRelName}">
+                                <img src="${optimizeImg(relImgPath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
                                 <div class="related-name">${displayRelName}</div>
                             </a>
                             `;
