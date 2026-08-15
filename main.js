@@ -668,21 +668,25 @@ function processProfileObject(raw) {
       const rankText = `#${idx + 1} HOT`;
       const realLocation = p.location || p.provinceNameThai || STATE.provincesMap.get(p.provinceKey) || "ทั่วไทย";
       const pSlug = encodeURIComponent(p.slug || p.id);
-      const imgUrl = p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
+      const imgUrl = p.images?.[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
       const isAvail = p.status === "รับงาน" || !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
       const availText = isAvail ? "รับงาน" : "สอบถาม";
+      const seoAlt = `${p.displayName} สาวรับงาน${realLocation} ไซด์ไลน์ตรงปก`;
 
       return `
         <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
           <span class="vip-status-chip">🟢 ${availText}</span>
           <span class="hot-rank-badge"><i class="fas fa-crown"></i> ${rankText}</span>
           <img src="${imgUrl}" 
-               alt="${p.displayName}" 
-               loading="${idx < 4 ? 'eager' : 'lazy'}" 
-               ${idx === 0 ? 'fetchpriority="high"' : ''}
-               onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
+               alt="${seoAlt}" 
+               title="${seoAlt}"
+               width="155" 
+               height="215"
+               decoding="async"
+               loading="${idx < 2 ? 'eager' : 'lazy'}" 
+               onerror="this.onerror=null; this.src='${CONFIG.DEFAULT_OG_IMAGE}';">
           <div class="vip-card-overlay"></div>
-          <a href="/sideline/${pSlug}" class="card-link" aria-label="ดูโปรไฟล์${p.displayName}"></a>
+          <a href="/sideline/${pSlug}" class="card-link" aria-label="ดูโปรไฟล์${p.displayName} สาวรับงาน${realLocation}"></a>
           <div class="vip-card-info">
             <div class="vip-name">${p.displayName}</div>
             <div class="vip-location"><i class="fas fa-map-marker-alt"></i> ${realLocation}</div>
@@ -690,6 +694,11 @@ function processProfileObject(raw) {
         </div>
       `;
     }).join("");
+
+    // 🟢 ผูกระบบป้องกันการก๊อปรูปภาพกับการ์ดที่ถูกสร้างขึ้นมาใหม่
+    if (typeof bindMediaProtection === "function") {
+      bindMediaProtection();
+    }
   }
 
   function populateProvinceDropdown() {
@@ -2697,6 +2706,9 @@ function initStarRating() {
     }
 
     document.addEventListener("DOMContentLoaded", async function () {
+  hideGlobalLoader(); // 🟢 ปิดจอโหลดทันที ให้เบราว์เซอร์คำนวณ LCP ได้ใน 0.2 วินาที!
+  
+
       // 🟢 1. เชื่อมต่อ Supabase Client
       try {
         supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);

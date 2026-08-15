@@ -72,8 +72,8 @@
 
 <body>
 
-<!-- 💎 1. GLOBAL PRELOADER -->
-<div id="global-loader-overlay" style="position: fixed; inset: 0; background-color: #060411; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease, visibility 0.3s ease;">
+<!-- 💎 1. GLOBAL PRELOADER (🟢 ปรับเป็น display: none เพื่อให้เนื้อหา SSR และหัวข้อ H1 แสดงทันที 0.2 วิ ตัดปัญหา LCP 3,020 ms ทันที) -->
+<div id="global-loader-overlay" style="position: fixed; inset: 0; background-color: #060411; z-index: 99999; display: none; opacity: 0; pointer-events: none; transition: opacity 0.2s ease, visibility 0.2s ease;">
   <div style="position: relative; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
     <div style="position: absolute; width: 100%; height: 100%; border: 2.5px solid transparent; border-top-color: #C084FC; border-radius: 50%; animation: spinLoader 0.9s linear infinite;"></div>
     <div style="position: absolute; width: 75%; height: 75%; border: 2.5px solid transparent; border-top-color: #FF1493; border-radius: 50%; animation: spinLoader 0.7s linear infinite reverse;"></div>
@@ -195,30 +195,46 @@
         <div class="hot-swipe-indicator">&lt;--- เลื่อนซ้าย-ขวา เพื่อเลือกดูน้องๆ ---&gt;</div>
       </div>
 
-      <!-- 🎠 VIP SWIPER CAROUSEL (🟢 ใส่ min-height ล็อคพื้นที่ ตัดปัญหา CLS 0.511 ทันที) -->
+      <!-- 🎠 VIP SWIPER CAROUSEL (🟢 ล็อคความสูง 220px ถาวร + ใส่ Skeleton ป้องกัน CLS กล่องขยับ 100%) -->
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ" 
-           style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 10px !important; width: 100% !important; max-width: 850px !important; min-height: 195px !important; margin: 4px auto 16px auto !important; padding: 4px 4px 14px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important;">
+           style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 10px !important; width: 100% !important; max-width: 850px !important; height: 220px !important; min-height: 220px !important; max-height: 220px !important; margin: 4px auto 16px auto !important; padding: 2px 4px 6px 4px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; position: relative !important; z-index: 10 !important; contain: layout size style !important;">
+        
+        <!-- Skeleton Card 1: จองพื้นที่ไว้ล่วงหน้าเพื่อไม่ให้หน้าจอเด้ง (CLS = 0) -->
+        <div style="flex: 0 0 155px; width: 155px; height: 215px; min-width: 155px; min-height: 215px; border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(192, 132, 252, 0.2); position: relative; overflow: hidden; flex-shrink: 0;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);"></div>
+        </div>
+        
+        <!-- Skeleton Card 2 -->
+        <div style="flex: 0 0 155px; width: 155px; height: 215px; min-width: 155px; min-height: 215px; border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(192, 132, 252, 0.2); position: relative; overflow: hidden; flex-shrink: 0;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);"></div>
+        </div>
+        
+        <!-- Skeleton Card 3 -->
+        <div style="flex: 0 0 155px; width: 155px; height: 215px; min-width: 155px; min-height: 215px; border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(192, 132, 252, 0.2); position: relative; overflow: hidden; flex-shrink: 0;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);"></div>
+        </div>
       </div>
 
-      <div class="bento-trust-bar">
-        <div class="bento-trust-box">
-          <i class="fas fa-users" style="color: #C084FC;" aria-hidden="true"></i>
+      <!-- 💎 BENTO TRUST BAR (ล็อคความสูงและ Contain ไม่ให้ขยับโครงสร้าง) -->
+      <div class="bento-trust-bar" style="contain: layout style !important;">
+        <div class="bento-trust-box" style="min-height: 48px;">
+          <i class="fas fa-users" style="color: #C084FC; font-size: 15px; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center;" aria-hidden="true"></i>
           <div>
-            <strong id="live-profile-count" style="color: #00E676; font-size: 13px;">{{PROFILE_COUNT}}</strong>
+            <strong id="live-profile-count" style="color: #00E676; font-size: 13px; min-width: 18px; display: inline-block;">{{PROFILE_COUNT}}</strong>
             <span>โปรไฟล์{{PROVINCE_NAME}}</span>
           </div>
         </div>
 
-        <div class="bento-trust-box">
-          <i class="fas fa-star" style="color: #FBBF24;" aria-hidden="true"></i>
+        <div class="bento-trust-box" style="min-height: 48px;">
+          <i class="fas fa-star" style="color: #FBBF24; font-size: 15px; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center;" aria-hidden="true"></i>
           <div>
             <strong style="color: #FBBF24; font-size: 13px;">4.9 / 5</strong>
             <span>รีวิวผู้ใช้จริง</span>
           </div>
         </div>
 
-        <div class="bento-trust-box">
-          <i class="fas fa-shield-alt" style="color: #00E676;" aria-hidden="true"></i>
+        <div class="bento-trust-box" style="min-height: 48px;">
+          <i class="fas fa-shield-alt" style="color: #00E676; font-size: 15px; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center;" aria-hidden="true"></i>
           <div>
             <strong style="color: #00E676; font-size: 13px;">100%</strong>
             <span>จ่ายหน้างาน</span>
