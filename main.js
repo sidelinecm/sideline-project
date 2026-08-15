@@ -1427,255 +1427,247 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
   }
 
   function openLightboxForProfile(profile) {
-      if (!profile) return;
+  if (!profile) return;
 
-      const lightbox = document.getElementById("lightbox");
-      const wrapper = document.getElementById("lightbox-content-wrapper-el");
-      if (!lightbox) return;
+  const lightbox = document.getElementById("lightbox");
+  const wrapper = document.getElementById("lightbox-content-wrapper-el");
+  if (!lightbox) return;
 
-      // 🟢 1. จัดการชื่อแบบสะอาด ป้องกันคำว่า "น้อง" ซ้ำ
-      const nameClean = typeof sanitizeName === "function" 
-        ? sanitizeName(profile.displayName || profile.name) 
-        : `น้อง${String(profile.displayName || profile.name || "").replace(/^(น้อง\s*)+/gi, "").trim()}`;
+  // 🟢 1. จัดการชื่อแบบสะอาด ป้องกันคำว่า "น้อง" ซ้ำ
+  const nameClean = typeof sanitizeName === "function" 
+    ? sanitizeName(profile.displayName || profile.name) 
+    : `น้อง${String(profile.displayName || profile.name || "").replace(/^(น้อง\s*)+/gi, "").trim()}`;
 
-      // 🟢 2. ตรวจสอบสถานะการรับงาน
-      const isAvailable = profile.isAvailable !== undefined 
-        ? profile.isAvailable 
-        : !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(t => (profile.availability || "").toLowerCase().includes(t));
-      const statusText = profile.availability || (isAvailable ? "พร้อมรับงาน" : "สอบถามคิว");
-      const statusColor = isAvailable ? "#00E676" : "#FF2E63";
+  // 🟢 2. ตรวจสอบสถานะการรับงาน
+  const isAvailable = profile.isAvailable !== undefined 
+    ? profile.isAvailable 
+    : !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(t => (profile.availability || "").toLowerCase().includes(t));
+  const statusText = profile.availability || (isAvailable ? "พร้อมรับงาน" : "สอบถามคิว");
+  const statusColor = isAvailable ? "#00E676" : "#FF2E63";
 
-      // 🟢 3. อัปเดต Title และ Icon ยืนยันตัวตน
-      const titleEl = document.getElementById("lightbox-profile-name-main");
-      if (titleEl) {
-        const verifiedIcon = profile.isVerified || profile.verified
-          ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 16px;" title="ยืนยันตัวตนแล้ว"></i>'
-          : '';
-        titleEl.innerHTML = `
-          <span style="font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #FFF 0%, #FF85C0 35%, #FF1493 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${nameClean}</span>
-          ${verifiedIcon}
-        `;
-      }
+  // 🟢 3. อัปเดต Title และ Icon ยืนยันตัวตน
+  const titleEl = document.getElementById("lightbox-profile-name-main");
+  if (titleEl) {
+    const verifiedIcon = (profile.isVerified || profile.verified)
+      ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 16px;" title="ยืนยันตัวตนแล้ว"></i>'
+      : '';
+    titleEl.innerHTML = `
+      <span style="font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #FFF 0%, #FF85C0 35%, #FF1493 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${nameClean}</span>
+      ${verifiedIcon}
+    `;
+  }
 
-      // 🟢 4. อัปเดต Badge สถานะ
-      const badgeEl = document.getElementById("lightbox-availability-badge-wrapper");
-      if (badgeEl) {
-        badgeEl.innerHTML = `
-          <span style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
-              <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusColor}; box-shadow: 0 0 8px ${statusColor}; flex-shrink: 0;"></span>
-              <span style="color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.02em;">${statusText}</span>
-          </span>
-        `;
-      }
+  // 🟢 4. อัปเดต Badge สถานะ
+  const badgeEl = document.getElementById("lightbox-availability-badge-wrapper");
+  if (badgeEl) {
+    badgeEl.innerHTML = `
+      <span style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusColor}; box-shadow: 0 0 8px ${statusColor}; flex-shrink: 0;"></span>
+          <span style="color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.02em;">${statusText}</span>
+      </span>
+    `;
+  }
 
-      // 🟢 5. อัปเดตรูปภาพหลัก พร้อมฝังเกราะป้องกันการก๊อปรูป (Anti-Theft)
-      const heroImg = document.getElementById("lightboxHeroImage");
-      if (heroImg) {
-        const hdSrc = profile?.images?.[0]?.fullSrc || profile?.images?.[0]?.src || profile?.imagePath || CONFIG.DEFAULT_OG_IMAGE;
-        heroImg.src = hdSrc;
-        heroImg.alt = `${nameClean} สาวรับงาน${profile.provinceNameThai || "ทั่วไทย"}`;
+  // 🟢 5. อัปเดตรูปภาพหลัก พร้อมฝังเกราะป้องกันการก๊อปรูป (Anti-Theft)
+  const heroImg = document.getElementById("lightboxHeroImage");
+  if (heroImg) {
+    const hdSrc = profile?.images?.[0]?.fullSrc || profile?.images?.[0]?.src || profile?.imagePath || CONFIG.DEFAULT_OG_IMAGE;
+    heroImg.src = hdSrc;
+    heroImg.alt = `${nameClean} สาวรับงาน${profile.provinceNameThai || "ทั่วไทย"}`;
+    
+    heroImg.oncontextmenu = e => e.preventDefault();
+    heroImg.ondragstart = e => e.preventDefault();
+    heroImg.style.userSelect = "none";
+    heroImg.style.webkitUserSelect = "none";
+    heroImg.style.webkitTouchCallout = "none";
+  }
+
+  // 🟢 6. อัปเดต Thumbnail Strip พร้อมฝังเกราะป้องกัน
+  const strip = document.getElementById("lightboxThumbnailStrip");
+  if (strip) {
+    strip.innerHTML = "";
+    if (profile.images && profile.images.length > 1) {
+      profile.images.forEach((imgObj, idx) => {
+        const thumb = document.createElement("img");
+        thumb.src = imgObj.src;
+        thumb.alt = `ภาพที่ ${idx + 1}`;
         
-        // 🛡️ ล็อกป้องกันการก๊อปรูป/ลากรูป/กดค้างบนมือถือ
-        heroImg.oncontextmenu = e => e.preventDefault();
-        heroImg.ondragstart = e => e.preventDefault();
-        heroImg.style.userSelect = "none";
-        heroImg.style.webkitUserSelect = "none";
-        heroImg.style.webkitTouchCallout = "none";
-      }
+        thumb.oncontextmenu = e => e.preventDefault();
+        thumb.ondragstart = e => e.preventDefault();
+        thumb.style.userSelect = "none";
+        thumb.style.webkitUserSelect = "none";
+        thumb.style.webkitTouchCallout = "none";
 
-      // 🟢 6. อัปเดต Thumbnail Strip พร้อมฝังเกราะป้องกัน
-      const strip = document.getElementById("lightboxThumbnailStrip");
-      if (strip) {
-        strip.innerHTML = "";
-        if (profile.images && profile.images.length > 1) {
-          profile.images.forEach((imgObj, idx) => {
-            const thumb = document.createElement("img");
-            thumb.src = imgObj.src;
-            thumb.alt = `ภาพที่ ${idx + 1}`;
-            
-            // 🛡️ ล็อกภาพขนาดย่อ
-            thumb.oncontextmenu = e => e.preventDefault();
-            thumb.ondragstart = e => e.preventDefault();
-            thumb.style.userSelect = "none";
-            thumb.style.webkitUserSelect = "none";
-            thumb.style.webkitTouchCallout = "none";
-
-            if (idx === 0) {
-              thumb.style.borderColor = "#C084FC";
-              thumb.style.opacity = "1";
-            }
-            thumb.onclick = () => {
-              if (heroImg) heroImg.src = imgObj.fullSrc || imgObj.src;
-              Array.from(strip.children).forEach(child => { 
-                child.style.borderColor = "transparent"; 
-                child.style.opacity = "0.5"; 
-              });
-              thumb.style.borderColor = "#C084FC";
-              thumb.style.opacity = "1";
-            };
-            strip.appendChild(thumb);
+        if (idx === 0) {
+          thumb.style.borderColor = "#C084FC";
+          thumb.style.opacity = "1";
+        }
+        thumb.onclick = () => {
+          if (heroImg) heroImg.src = imgObj.fullSrc || imgObj.src;
+          Array.from(strip.children).forEach(child => { 
+            child.style.borderColor = "transparent"; 
+            child.style.opacity = "0.5"; 
           });
-          strip.style.display = "flex";
-        } else {
-          strip.style.display = "none";
-        }
-      }
-
-      // 🟢 7. อัปเดต คำโปรย (Quote / Slogan)
-      const quoteEl = document.getElementById("lightboxQuote");
-      if (quoteEl) {
-        quoteEl.textContent = profile.quote || profile.slogan || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
-      }
-
-      // 🟢 8. อัปเดต แท็กสไตล์ (Tags)
-      const tagsEl = document.getElementById("lightboxTags");
-      if (tagsEl) {
-        tagsEl.innerHTML = "";
-        const tagsList = Array.isArray(profile.styleTags) ? profile.styleTags : [];
-        tagsList.forEach(tag => {
-          const span = document.createElement("span");
-          span.className = "luxury-chip";
-          span.style.padding = "4px 10px";
-          span.style.fontSize = "11px";
-          span.textContent = tag.startsWith("#") ? tag : `#${tag}`;
-          tagsEl.appendChild(span);
-        });
-      }
-
-      // 🟢 9. อัปเดตข้อมูลรายละเอียดขนาดกระทำรัด (Age, Stats, Height, Price, Location)
-      let ageDisplay = "ไม่ระบุ";
-      if (profile.safeAgeDisplay && profile.safeAgeDisplay !== "undefined" && profile.safeAgeDisplay !== "null") {
-        ageDisplay = profile.safeAgeDisplay;
-      } else if (profile.safeAge && profile.safeAge !== "-") {
-        ageDisplay = `${profile.safeAge} ปี`;
-      }
-
-      const statsText = (profile.safeStats && profile.safeStats !== "undefined" && profile.safeStats !== "null") ? profile.safeStats : "ไม่ระบุ";
-      const heightText = (profile.safeHeight && profile.safeHeight !== "undefined" && profile.safeHeight !== "null") ? profile.safeHeight : "ไม่ระบุ";
-      const displayPrice = profile.displayPrice || "1,500.-";
-      const locationText = profile.location || profile.provinceNameThai || "ทั่วไทย";
-
-      const detailsEl = document.getElementById("lightboxDetailsCompact");
-      if (detailsEl) {
-        detailsEl.innerHTML = `
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
-                  <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">อายุ</div>
-                  <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${ageDisplay}</div>
-              </div>
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
-                  <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
-                  <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${statsText}</div>
-              </div>
-              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
-                  <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
-                  <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${heightText}</div>
-              </div>
-          </div>
-
-          <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="color: #A1A1AA; font-size: 12px; font-weight: 600;">ค่าขนม</span>
-                  <span style="color: #00E676; font-weight: 900; font-size: 14px;">${displayPrice}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="color: #A1A1AA; font-size: 12px; font-weight: 600;">พิกัดงาน</span>
-                  <span style="color: white; font-weight: 700; font-size: 12px;">${locationText}</span>
-              </div>
-          </div>
-        `;
-      }
-
-      // 🟢 10. อัปเดต รายละเอียดเพิ่มเติม (Description)
-      const descContainer = document.getElementById("lightboxDescriptionContainer");
-      const descContent = document.getElementById("lightboxDescriptionContent");
-      if (descContent) {
-        const defaultDesc = `${nameClean} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${locationText}`;
-        descContent.innerHTML = (profile.description || defaultDesc).replace(/\n/g, "<br>");
-      }
-      if (descContainer) descContainer.style.display = "block";
-
-      // 🟢 11. อัปเดต ปุ่มแอดไลน์จองคิว Sticky LINE CTA Button
-      const detailsContainer = document.querySelector(".lightbox-details");
-      if (detailsContainer) {
-        detailsContainer.scrollTop = 0;
-        
-        const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
-        if (oldLineBtn) oldLineBtn.remove();
-
-        const PROVINCE_LINE_FALLBACKS = {
-          chiangmai: "https://line.me/ti/p/ksLUWB89Y_",
-          bangkok: "https://line.me/ti/p/ksLUWB89Y_",
-          chonburi: "https://line.me/ti/p/ksLUWB89Y_",
-          khonkaen: "https://line.me/ti/p/ksLUWB89Y_",
-          phuket: "https://line.me/ti/p/ksLUWB89Y_",
-          udonthani: "https://line.me/ti/p/ksLUWB89Y_",
-          lampang: "https://line.me/ti/p/ksLUWB89Y_",
-          chiangrai: "https://line.me/ti/p/ksLUWB89Y_",
-          phitsanulok: "https://line.me/ti/p/ksLUWB89Y_",
-          national: "https://line.me/ti/p/ksLUWB89Y_",
-          default: "https://line.me/ti/p/ksLUWB89Y_"
+          thumb.style.borderColor = "#C084FC";
+          thumb.style.opacity = "1";
         };
-
-        const provKey = typeof normalizeProvinceKey === "function" 
-          ? normalizeProvinceKey(profile.provinceKey) 
-          : String(profile.provinceKey || "national").toLowerCase();
-          
-        const defaultLineUrl = PROVINCE_LINE_FALLBACKS[provKey] || PROVINCE_LINE_FALLBACKS.default;
-
-        const lineIdToUse = String(profile.lineId || profile.line_id || "").replace(/^@/, "").trim();
-        let lineUrl = defaultLineUrl;
-        
-        if (lineIdToUse.startsWith("http")) {
-          lineUrl = lineIdToUse;
-        } else if (lineIdToUse && lineIdToUse !== "ksLUWB89Y_") {
-          lineUrl = `https://line.me/ti/p/~${lineIdToUse}`;
-        }
-
-        const stickyBtnWrapper = document.createElement("div");
-        stickyBtnWrapper.id = "line-btn-sticky-wrapper";
-        stickyBtnWrapper.style.cssText = "margin-top: 14px; margin-bottom: 6px; width: 100%; position: relative;";
-        
-        stickyBtnWrapper.innerHTML = `
-          <a href="${lineUrl}" target="_blank" rel="noopener nofollow" 
-             style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: center; background: #06C755; color: white; font-weight: 800; font-size: 16px; padding: 14px 20px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(6,199,85,0.35); transition: transform 0.2s;">
-              <i class="fab fa-line" style="font-size: 20px;"></i>
-              <span style="flex-grow: 1;">แอดไลน์จองคิว ${nameClean}</span>
-          </a>
-        `;
-        detailsContainer.appendChild(stickyBtnWrapper);
-      }
-
-      // 🟢 12. ตั้งค่าระบบปุ่มกดเปลี่ยนหน้าการ์ด (Previous / Next Navigation)
-      if (Array.isArray(STATE.filteredProfiles) && STATE.filteredProfiles.length > 0) {
-        const currentIndex = STATE.filteredProfiles.findIndex(p => p.slug === profile.slug || p.id === profile.id);
-        if (typeof setupLightboxNavigation === "function") {
-          setupLightboxNavigation(currentIndex);
-        }
-      }
-
-      // 🟢 13. เปิดหน้าต่าง Lightbox พร้อมแอนิเมชัน GSAP (ถ้ามี)
-      lightbox.classList.remove("hidden");
-      lightbox.style.display = "flex";
-      document.body.style.overflow = "hidden";
-
-      if (window.gsap && typeof gsap.fromTo === "function") {
-        gsap.fromTo(lightbox, { opacity: 0 }, { opacity: 1, duration: 0.25 });
-        if (wrapper) {
-          gsap.fromTo(wrapper, { scale: 0.92, opacity: 0, y: 15 }, { scale: 1, opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.2)" });
-        }
-      }
-
-      // 🟢 14. เรียกผูกเกราะป้องกันรูปภาพสื่อใน Lightbox ซ้ำอีกครั้ง
-      if (typeof bindMediaProtection === "function") {
-        bindMediaProtection();
-      }
-
-      // 🟢 15. ซิงก์สร้าง Master Schema JSON-LD และ SEO Metadata ใหม่ในหน้า Lightbox
-      if (typeof updateSEOMetadata === "function") {
-        updateSEOMetadata(profile, null);
-      }
+        strip.appendChild(thumb);
+      });
+      strip.style.display = "flex";
+    } else {
+      strip.style.display = "none";
     }
+  }
+
+  // 🟢 7. อัปเดต คำโปรย (Quote / Slogan)
+  const quoteEl = document.getElementById("lightboxQuote");
+  if (quoteEl) {
+    quoteEl.textContent = profile.quote || profile.slogan || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
+  }
+
+  // 🟢 8. อัปเดต แท็กสไตล์ (Tags)
+  const tagsEl = document.getElementById("lightboxTags");
+  if (tagsEl) {
+    tagsEl.innerHTML = "";
+    const tagsList = Array.isArray(profile.styleTags) ? profile.styleTags : [];
+    tagsList.forEach(tag => {
+      const span = document.createElement("span");
+      span.className = "luxury-chip";
+      span.style.padding = "4px 10px";
+      span.style.fontSize = "11px";
+      span.textContent = tag.startsWith("#") ? tag : `#${tag}`;
+      tagsEl.appendChild(span);
+    });
+  }
+
+  // 🟢 9. อัปเดตข้อมูลรายละเอียดขนาดกะทัดรัด (Age, Stats, Height, Price, Location)
+  let ageDisplay = "ไม่ระบุ";
+  if (profile.safeAgeDisplay && profile.safeAgeDisplay !== "undefined" && profile.safeAgeDisplay !== "null") {
+    ageDisplay = profile.safeAgeDisplay;
+  } else if (profile.safeAge && profile.safeAge !== "-") {
+    ageDisplay = `${profile.safeAge} ปี`;
+  }
+
+  const statsText = (profile.safeStats && profile.safeStats !== "undefined" && profile.safeStats !== "null") ? profile.safeStats : "ไม่ระบุ";
+  const heightText = (profile.safeHeight && profile.safeHeight !== "undefined" && profile.safeHeight !== "null") ? profile.safeHeight : "ไม่ระบุ";
+  const displayPrice = profile.displayPrice || "1,500.-";
+  const locationText = profile.location || profile.provinceNameThai || "ทั่วไทย";
+
+  const detailsEl = document.getElementById("lightboxDetailsCompact");
+  if (detailsEl) {
+    detailsEl.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
+              <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">อายุ</div>
+              <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${ageDisplay}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
+              <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">สัดส่วน</div>
+              <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${statsText}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; border-radius: 12px; text-align: center;">
+              <div style="font-size: 11px; color: #A1A1AA; font-weight: 600;">ส่วนสูง</div>
+              <div style="font-weight: 800; font-size: 13px; color: white; margin-top: 2px;">${heightText}</div>
+          </div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #A1A1AA; font-size: 12px; font-weight: 600;">ค่าขนม</span>
+              <span style="color: #00E676; font-weight: 900; font-size: 14px;">${displayPrice}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #A1A1AA; font-size: 12px; font-weight: 600;">พิกัดงาน</span>
+              <span style="color: white; font-weight: 700; font-size: 12px;">${locationText}</span>
+          </div>
+      </div>
+    `;
+  }
+
+  // 🟢 10. อัปเดต รายละเอียดเพิ่มเติม (Description ป้องกัน XSS)
+  const descContainer = document.getElementById("lightboxDescriptionContainer");
+  const descContent = document.getElementById("lightboxDescriptionContent");
+  if (descContent) {
+    const rawDesc = profile.description || `${nameClean} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${locationText}`;
+    const safeDesc = typeof sanitizeThaiText === "function" ? sanitizeThaiText(rawDesc) : rawDesc;
+    // ป้องกัน XSS Injection ก่อนแปลงเว้นบรรทัด
+    descContent.innerHTML = String(safeDesc)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>");
+  }
+  if (descContainer) descContainer.style.display = "block";
+
+  // 🟢 11. อัปเดต ปุ่มแอดไลน์จองคิว Sticky LINE CTA Button (พร้อมข้อความอัตโนมัติ)
+  const detailsContainer = document.querySelector(".lightbox-details");
+  if (detailsContainer) {
+    detailsContainer.scrollTop = 0;
+    
+    const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
+    if (oldLineBtn) oldLineBtn.remove();
+
+    const provKey = typeof normalizeProvinceKey === "function" 
+      ? normalizeProvinceKey(profile.provinceKey) 
+      : String(profile.provinceKey || "national").toLowerCase();
+
+    const lineIdToUse = String(profile.lineId || profile.line_id || "").replace(/^@/, "").trim();
+    
+    // สร้างข้อความทักทายอัตโนมัติ เพื่อเพิ่มอัตราการปิดการจอง
+    const prefillText = encodeURIComponent(`สวัสดีครับ สอบถามคิวน้อง ${nameClean} พิกัดย่าน ${locationText} จากเว็บ First Model Hub ครับ`);
+    
+    let finalLineUrl = "https://line.me/ti/p/ksLUWB89Y_";
+    if (lineIdToUse.startsWith("http")) {
+      finalLineUrl = lineIdToUse;
+    } else if (lineIdToUse && lineIdToUse !== "ksLUWB89Y_") {
+      finalLineUrl = `https://line.me/R/oaMessage/${lineIdToUse}/?${prefillText}`;
+    }
+
+    const stickyBtnWrapper = document.createElement("div");
+    stickyBtnWrapper.id = "line-btn-sticky-wrapper";
+    stickyBtnWrapper.style.cssText = "margin-top: 14px; margin-bottom: 6px; width: 100%; position: relative;";
+    
+    stickyBtnWrapper.innerHTML = `
+      <a href="${finalLineUrl}" target="_blank" rel="noopener nofollow" 
+         style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: center; background: linear-gradient(135deg, #11783B 0%, #00E676 100%); color: white; font-weight: 800; font-size: 15px; padding: 13px 18px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(0,230,118,0.35); transition: transform 0.2s;">
+          <i class="fab fa-line" style="font-size: 20px;"></i>
+          <span style="flex-grow: 1;">แอดไลน์จองคิว ${nameClean}</span>
+          <i class="fas fa-chevron-right" style="font-size: 12px; opacity: 0.8;"></i>
+      </a>
+    `;
+    detailsContainer.appendChild(stickyBtnWrapper);
+  }
+
+  // 🟢 12. ตั้งค่าระบบปุ่มกดเปลี่ยนหน้าการ์ด (Previous / Next Navigation)
+  if (Array.isArray(STATE.filteredProfiles) && STATE.filteredProfiles.length > 0) {
+    const currentIndex = STATE.filteredProfiles.findIndex(p => p.slug === profile.slug || p.id === profile.id);
+    if (typeof setupLightboxNavigation === "function") {
+      setupLightboxNavigation(currentIndex);
+    }
+  }
+
+  // 🟢 13. เปิดหน้าต่าง Lightbox พร้อมแอนิเมชัน GSAP (ถ้ามี)
+  lightbox.classList.remove("hidden");
+  lightbox.style.display = "flex";
+  document.body.style.overflow = "hidden";
+
+  if (window.gsap && typeof gsap.fromTo === "function") {
+    gsap.fromTo(lightbox, { opacity: 0 }, { opacity: 1, duration: 0.25 });
+    if (wrapper) {
+      gsap.fromTo(wrapper, { scale: 0.92, opacity: 0, y: 15 }, { scale: 1, opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.2)" });
+    }
+  }
+
+  // 🟢 14. ผูกเกราะป้องกันรูปภาพใน Lightbox ซ้ำอีกครั้ง
+  if (typeof bindMediaProtection === "function") {
+    bindMediaProtection();
+  }
+
+  // 🟢 15. ซิงก์สร้าง Master Schema JSON-LD และ SEO Metadata ใหม่ในหน้า Lightbox
+  if (typeof updateSEOMetadata === "function") {
+    updateSEOMetadata(profile, null);
+  }
+}
 
   function closeLightboxModal(updateUrl = true) {
     const lightbox = document.getElementById("lightbox");
@@ -1691,6 +1683,47 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
       }
     }
   }
+
+// 🟢 1. ระบบ Haptic Feedback สำหรับมือถือ (สั่นสัมผัสเบาๆ สไตล์แอปหรูหรา)
+function triggerHaptic(duration = 15) {
+  try {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(duration);
+    }
+  } catch (e) {}
+}
+
+// 🟢 2. เพิ่มระบบ Touch Swipe ให้ Lightbox เลื่อนดูน้องคนถัดไปได้ด้วยการใช้นิ้วปัด
+function initLightboxSwipe() {
+  const lightbox = document.getElementById("lightbox");
+  if (!lightbox) return;
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  lightbox.addEventListener("touchstart", e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  lightbox.addEventListener("touchend", e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipeGesture();
+  }, { passive: true });
+
+  function handleSwipeGesture() {
+    const diff = touchEndX - touchStartX;
+    if (Math.abs(diff) > 45) { // ถ้านิ้วปัดเกิน 45px
+      triggerHaptic(12);
+      if (diff < 0) {
+        // ปัดนิ้วไปทางซ้าย -> ดูน้องคนถัดไป
+        document.getElementById("lightbox-next-btn")?.click();
+      } else {
+        // ปัดนิ้วไปทางขวา -> ดูน้องคนก่อนหน้า
+        document.getElementById("lightbox-prev-btn")?.click();
+      }
+    }
+  }
+}
 
 // 🟢 Helper 1: สกัดราคาตัวเลขบริสุทธิ์สำหรับ Schema (ป้องกันราคาพัง)
 function extractCleanPrice(profile) {
@@ -1930,12 +1963,12 @@ function updateSEOMetadata(profile = null, locationData = null) {
     "itemListElement": breadcrumbItems
   });
 
-  // FAQ Schema
+  // FAQ Schema สำหรับหน้าหลัก / หน้าจังหวัด
   const localData = (typeof LOCALIZED_SEO_MAP !== "undefined") 
     ? (LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"]) 
     : null;
 
-  if (localData && localData.faqs && localData.faqs.length > 0) {
+  if (!profile && localData && localData.faqs && localData.faqs.length > 0) {
     graph.push({
       "@type": "FAQPage",
       "@id": `${canonUrl}#faq`,
@@ -1955,7 +1988,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
     );
     const profileImgUrl = profile.images?.[0]?.fullSrc || profile.images?.[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
 
-    // 1. สร้าง Node Person สำหรับ ProfilePage
+    // 1. สร้าง Node Person สำหรับระบุตัวตนบุคคล
     graph.push({
       "@type": "Person",
       "@id": `${canonUrl}#person`,
@@ -1965,7 +1998,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
       "url": canonUrl
     });
 
-    // 2. ProfilePage ชี้ mainEntity ไปที่ Person (#person) เพื่อผ่านการตรวจสอบของ Google
+    // 2. ProfilePage ชี้ mainEntity ไปที่ Person (#person) ตามเกณฑ์ Google
     graph.push({
       "@type": "ProfilePage",
       "@id": `${canonUrl}#webpage`,
@@ -1974,23 +2007,20 @@ function updateSEOMetadata(profile = null, locationData = null) {
       "description": description,
       "isPartOf": { "@id": `${CONFIG.SITE_URL}/#website` },
       "breadcrumb": { "@id": `${canonUrl}#breadcrumb` },
-      "mainEntity": { "@id": `${canonUrl}#person` } // ✅ แก้ไขชี้ไปที่ #person แล้ว
+      "mainEntity": { "@id": `${canonUrl}#person` }
     });
 
-    // 3. Service Node พร้อมข้อเสนอและเรตติ้ง
+    // 3. เปลี่ยนจาก Service เป็น Product เพื่อรองรับ Review Snippets และ Merchant Listings 100%
     graph.push({
-      "@type": "Service",
-      "@id": `${canonUrl}#service`,
+      "@type": "Product",
+      "@id": `${canonUrl}#product`,
       "name": `${nameClean} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`,
-      "serviceType": "Companion & Lifestyle Partner Service",
-      "provider": { "@id": `${CONFIG.SITE_URL}/#organization` },
-      "areaServed": {
-        "@type": "AdministrativeArea",
-        "name": provName
-      },
-      "url": canonUrl,
-      "image": [profileImgUrl],
+      "image": profileImgUrl,
       "description": description,
+      "brand": {
+        "@type": "Brand",
+        "name": CONFIG.BRAND_NAME || "First Model Hub"
+      },
       "offers": {
         "@type": "Offer",
         "url": canonUrl,
@@ -2009,6 +2039,22 @@ function updateSEOMetadata(profile = null, locationData = null) {
         "bestRating": 5,    // ✅ number
         "worstRating": 1    // ✅ number
       }
+    });
+
+    // 4. FAQPage เฉพาะสำหรับหน้ารายบุคคล
+    graph.push({
+      "@type": "FAQPage",
+      "@id": `${canonUrl}#faq`,
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": `${nameClean} รับงาน${provName} มีการโอนมัดจำล่วงหน้าไหม?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ ลูกค้านัดเจอตัวจริง${nameClean} ตรวจสอบความตรงปกหน้างานแล้วค่อยชำระค่าบริการครับ`
+          }
+        }
+      ]
     });
   } else {
     // หน้าหลัก / หน้าจังหวัด
@@ -2569,12 +2615,18 @@ function initStarRating() {
       let idx = 0;
 
       setInterval(() => {
-        const searchInput = document.getElementById("modal-search-keyword") || document.getElementById("search-keyword");
-        if (!searchInput) return;
+        const modalInput = document.getElementById("modal-search-keyword");
+        const mainInput = document.getElementById("search-keyword");
 
-        if (document.activeElement !== searchInput && (!searchInput.value || searchInput.value.trim() === "")) {
-          idx = (idx + 1) % placeholders.length;
-          searchInput.setAttribute("placeholder", placeholders[idx]);
+        idx = (idx + 1) % placeholders.length;
+        const newPlaceholder = placeholders[idx];
+
+        // 🟢 อัปเดตทั้ง 2 ช่องถ้าผู้ใช้ไม่ได้กำลังพิมพ์อยู่
+        if (modalInput && document.activeElement !== modalInput && !modalInput.value.trim()) {
+          modalInput.setAttribute("placeholder", newPlaceholder);
+        }
+        if (mainInput && document.activeElement !== mainInput && !mainInput.value.trim()) {
+          mainInput.setAttribute("placeholder", newPlaceholder);
         }
       }, 2500);
     }
@@ -2582,6 +2634,9 @@ function initStarRating() {
     window.handleLikeClick = async function (btnElement, profileId) {
       if (isLikeProcessing) return;
       isLikeProcessing = true;
+
+      // 🟢 สั่นตอบสนองตอนกดหัวใจบนมือถือ
+      if (typeof triggerHaptic === "function") triggerHaptic(20);
 
       const isLiked = btnElement.classList.toggle("liked");
       const icon = btnElement.querySelector("i");
@@ -2616,6 +2671,7 @@ function initStarRating() {
     window.openFilterModal = function() {
       const modal = document.getElementById('filter-modal-overlay');
       if (modal) {
+        if (typeof triggerHaptic === "function") triggerHaptic(12);
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
       }
@@ -2631,10 +2687,13 @@ function initStarRating() {
 
     function hideGlobalLoader() {
       const loader = document.getElementById("global-loader-overlay");
-      if (loader) loader.style.opacity = "0";
-      setTimeout(() => {
-        if (loader) loader.style.display = "none";
-      }, 500);
+      if (loader) {
+        loader.style.pointerEvents = "none"; // 🟢 ปลดล็อกการสัมผัสหน้าจอทันที
+        loader.style.opacity = "0";
+        setTimeout(() => {
+          if (loader) loader.style.display = "none";
+        }, 400);
+      }
     }
 
     document.addEventListener("DOMContentLoaded", async function () {
@@ -2905,7 +2964,7 @@ function initStarRating() {
         });
       }
 
-      // 🟢 10. เรียกใช้งานโมดูลเสริมทั้งหมด
+// 🟢 10. เรียกใช้งานโมดูลเสริมทั้งหมด
       initStarRating();
       initReviewForm();
       initReviewToggle();
@@ -2914,6 +2973,7 @@ function initStarRating() {
       initDynamicSearchPlaceholder();
       initSeoDrawer();
       initRegionTabs();
+      initLightboxSwipe(); // 👈 ใส่ต่อตรงนี้ได้เลยครับ!
 
       // 🟢 11. ซ่อน/แสดง Floating App Dock ขณะสโครลหน้าจอ
       let lastScrollY = window.scrollY;
