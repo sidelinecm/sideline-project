@@ -333,28 +333,31 @@ async function getTemplateHtml(url, _context) {
 </html>`;
 
   if (!TEMPLATE_HTML_CACHE || (now - TEMPLATE_CACHE_TIMESTAMP > TEMPLATE_CACHE_TTL_MS)) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      
-      const templateUrl = new URL("/index.html", url.origin);
-      const mainTemplate = await fetch(templateUrl, { 
-        headers: { "x-ssr-bypass": "true" },
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
+    const templateUrl = new URL("/index.html", url.origin);
+    const mainTemplate = await fetch(templateUrl, { 
+      headers: { "x-ssr-bypass": "true" },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
 
-      if (mainTemplate.ok) {
-        TEMPLATE_HTML_CACHE = await mainTemplate.text();
+    if (mainTemplate.ok) {
+      const fetchedText = await mainTemplate.text();
+      // 🟢 ตรวจสอบความบริสุทธิ์ของ Template ก่อนบันทึกลง Cache (ต้องมี Placeholder ตัวหลักอยู่ครบ)
+      if (fetchedText.includes("{{PROVINCE_NAME}}") || fetchedText.includes("<!-- SSR_DISPLAY_AREA_START -->")) {
+        TEMPLATE_HTML_CACHE = fetchedText;
         TEMPLATE_CACHE_TIMESTAMP = now;
+      } else {
+        console.warn("⚠️ Fetched HTML was already rendered, skipping cache update to avoid duplicate markup.");
       }
-    } catch (e) {
-      console.warn("⚠️ Fetching index.html template timed out or failed, fallback to basic HTML shell", e);
-      return DEFAULT_FALLBACK_SHELL;
     }
+  } catch (e) {
+    console.warn("⚠️ Fetching index.html template timed out or failed", e);
+    return DEFAULT_FALLBACK_SHELL;
   }
-  
-  return TEMPLATE_HTML_CACHE || DEFAULT_FALLBACK_SHELL;
 }
 
 const getProfileMainImage = (p) => {
@@ -1388,16 +1391,16 @@ export default async (req, context) => {
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="th"');
     rawHtml = setLink(rawHtml, "alternate", canonUrl, 'hreflang="x-default"');
 
-    // 🟢 7. อัปเดต H1 ใน Hero Section (เฉพาะหน้าที่มี Hero Section)
-    if (!matchedProfile && pageH1Sub && pageH1Main) {
-      const newH1Content = `
-        <h1 id="hero-h1" class="seo-h1-title">
-          <span class="seo-sub-headline">${escapeHTML(pageH1Sub)}</span><br>
-          <span class="seo-main-headline">${escapeHTML(pageH1Main)}</span>
-        </h1>
-      `;
-      rawHtml = rawHtml.replace(/<h1 id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>/gi, newH1Content);
-    }
+// 🟢 7. อัปเดต H1 ใน Hero Section ให้คลาสตรงกับ styles.css 100%
+if (!matchedProfile && pageH1Sub && pageH1Main) {
+  const newH1Content = `
+    <h1 id="hero-h1" class="clean-hero-h1">
+      <span class="sub-headline">${escapeHTML(pageH1Sub)}</span>
+      <span class="main-headline">${escapeHTML(pageH1Main)}</span>
+    </h1>
+  `;
+  rawHtml = rawHtml.replace(/<h1 id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>/gi, newH1Content);
+}
 
     // 🟢 8. ฉีด Schema JSON-LD Graph ลง <head>
     rawHtml = injectSchema(rawHtml, schemaJson);
@@ -1418,11 +1421,10 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     
-    // 🟢 10. แก้ไขแผนที่ทั้ง src และ data-src
+// 🟢 10. แก้ไขเฉพาะ data-src เพื่อให้ Lazy Load ทำงานอย่างถูกต้อง
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
     rawHtml = replaceGlobal(rawHtml, "%7B%7BMAP_EMBED_URL%7D%7D", mapEmbedUrl);
     rawHtml = rawHtml.replace(/data-src=["'][^"']*?MAP_EMBED_URL[^"']*?["']/gi, `data-src="${mapEmbedUrl}"`);
-    rawHtml = rawHtml.replace(/<iframe id=["']google-map["'][^>]*?src=["'][^"']*?["']/gi, `<iframe id="google-map" src="${mapEmbedUrl}"`);
 
     // 🟢 11. Hydration Data & Sweep Placeholders โดยส่งพารามิเตอร์ครบ
     const allHydratedProfiles = matchedProfile ? [matchedProfile, ...profileList] : profileList;
