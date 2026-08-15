@@ -870,21 +870,21 @@ function processProfileObject(raw) {
 
   function createProvinceSectionElement(provinceKey, provinceName, profiles) {
     const wrapper = document.createElement("div");
-    wrapper.className = "section-content-wrapper province-section mt-6";
+    wrapper.className = "section-content-wrapper province-section mt-4";
     wrapper.id = `province-${provinceKey}`;
     
     wrapper.innerHTML = `
-      <div class="flex justify-between items-center flex-wrap gap-2 p-2">
-          <a href="/location/${provinceKey}" class="group" style="text-decoration: none; display: inline-block;">
-              <h2 class="province-section-header" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 18px; font-weight: 800; color: white; margin: 0;">
+      <div class="province-header-bar">
+          <a href="/location/${provinceKey}" style="text-decoration: none; display: inline-flex; align-items: center;">
+              <h2 class="province-section-header">
                   📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${provinceName}</span>
-                  <span class="live-count-chip">
-                    <span class="pulse-dot-el"></span>
-                    <span>พบ ${profiles.length} โปรไฟล์พร้อมรับงาน</span>
-                  </span>
-                  <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px; color: var(--primary-purple);"></i>
+                  <i class="fas fa-chevron-right" style="font-size: 11px; margin-left: 2px; color: var(--primary-purple);"></i>
               </h2>
           </a>
+          <span class="live-count-chip">
+            <span class="pulse-dot-el"></span>
+            <span>พบ ${profiles.length} โปรไฟล์</span>
+          </span>
       </div>
       <div class="profiles-grid-row mt-2"></div>
     `;
@@ -985,57 +985,30 @@ function processProfileObject(raw) {
 
   function renderSmartFilterChips() {
     let chipsWrapper = document.getElementById("smart-quick-chips");
-    if (!chipsWrapper) {
-      chipsWrapper = document.createElement("div");
-      chipsWrapper.id = "smart-quick-chips";
-      chipsWrapper.className = "horizontal-scroll-chips";
-      chipsWrapper.style.cssText = "padding: 8px 2px; margin-top: 8px;";
-      
-      const searchForm = document.getElementById("search-form");
-      if (searchForm && searchForm.parentNode) {
-        searchForm.parentNode.insertBefore(chipsWrapper, searchForm.nextSibling);
-      }
-    }
+    if (!chipsWrapper) return;
 
-    const currentProv = normalizeProvinceKey(DOM.provinceSelect?.value || localStorage.getItem(CONFIG.KEYS.LAST_PROVINCE) || "national");
-    const data = LOCALIZED_SEO_MAP[currentProv] || LOCALIZED_SEO_MAP["national"];
-    const zones = (data && data.zones) ? data.zones.slice(1, 5) : ["ตัวเมือง"];
-
-    let chipsHtml = `
-      <button type="button" class="quick-chip-btn luxury-chip" data-type="featured" style="background: rgba(124, 58, 237, 0.18); border-color: rgba(192, 132, 252, 0.35); color: #E9D5FF; display: inline-flex; align-items: center; gap: 4px;">
+    chipsWrapper.innerHTML = `
+      <button type="button" class="quick-chip-btn luxury-chip" data-type="featured">
         <i class="fas fa-star" style="color: #FBBF24;"></i> VIP แนะนำ
       </button>
-      <button type="button" class="quick-chip-btn luxury-chip" data-type="avail" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(52, 211, 153, 0.35); color: #00E676; display: inline-flex; align-items: center; gap: 4px;">
+      <button type="button" class="quick-chip-btn luxury-chip" data-type="avail">
         <span class="pulse-green-dot"></span> พร้อมรับงาน
       </button>
-      <button type="button" class="quick-chip-btn luxury-chip" data-type="tag" data-val="ฟิวแฟน" style="background: rgba(255, 20, 147, 0.15); border-color: rgba(255, 105, 180, 0.35); color: #FF85C0; display: inline-flex; align-items: center; gap: 4px;">
+      <button type="button" class="quick-chip-btn luxury-chip" data-type="tag" data-val="ฟิวแฟน">
         <i class="fas fa-heart" style="color: #FF1493;"></i> #ฟิวแฟน
       </button>
     `;
-
-    zones.forEach(z => {
-      chipsHtml += `
-        <button type="button" class="quick-chip-btn luxury-chip" data-type="keyword" data-val="${z}" style="display: inline-flex; align-items: center; gap: 4px;">
-          <i class="fas fa-map-marker-alt" style="color: #C084FC;"></i> ${z}
-        </button>
-      `;
-    });
-
-    chipsWrapper.innerHTML = chipsHtml;
 
     chipsWrapper.querySelectorAll(".quick-chip-btn").forEach(btn => {
       btn.onclick = () => {
         const type = btn.dataset.type;
         const val = btn.dataset.val;
-
         if (type === "featured" && DOM.featuredSelect) {
           DOM.featuredSelect.value = DOM.featuredSelect.value === "true" ? "" : "true";
         } else if (type === "avail" && DOM.availabilitySelect) {
           DOM.availabilitySelect.value = DOM.availabilitySelect.value === "รับงาน" ? "" : "รับงาน";
-        } else if ((type === "tag" || type === "keyword") && DOM.searchInput) {
+        } else if (type === "tag" && DOM.searchInput) {
           DOM.searchInput.value = val;
-          const modalInput = document.getElementById("modal-search-keyword");
-          if (modalInput) modalInput.value = val;
         }
         applyUltimateFilters(true, true);
       };
@@ -1719,19 +1692,15 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     }
   }
 
-/* ==============================================================================
-   💎 FIRST MODEL HUB - MASTER SEO & UNIFIED SCHEMA ENGINE (2026 S-TIER FULL)
-   ============================================================================== */
-
-// 🟢 Helper 1: สกัดราคาตัวเลขชุดแรกบริสุทธิ์สำหรับ Schema (ป้องกันราคาพัง เช่น 15002000)
+// 🟢 Helper 1: สกัดราคาตัวเลขบริสุทธิ์สำหรับ Schema (ป้องกันราคาพัง)
 function extractCleanPrice(profile) {
   if (!profile) return "1500";
-  const rawPrice = String(profile._price || profile.rate || "1500");
+  const rawPrice = String(profile._price || profile.rate || profile.price || "1500");
   const firstMatch = rawPrice.match(/\d+/);
   if (!firstMatch) return "1500";
   
   let num = Number(firstMatch[0]);
-  if (num > 0 && num < 500) num *= 10; // รองรับกรณีพิมพ์ตัวเลขย่อ เช่น 150 -> 1500
+  if (num > 0 && num < 500) num *= 10; // รองรับกรณีใส่เลขย่อ เช่น 150 -> 1500
   return num > 0 ? String(num) : "1500";
 }
 
@@ -1742,6 +1711,7 @@ function removeJsonLdSchemas() {
     "schema-jsonld",
     "schema-jsonld-person",
     "schema-jsonld-product",
+    "schema-jsonld-service",
     "schema-jsonld-list",
     "schema-jsonld-faq",
     "schema-jsonld-breadcrumb",
@@ -1806,7 +1776,7 @@ function updateLinkRel(rel, href) {
   link.setAttribute("href", href);
 }
 
-// 🟢 Helper 6: อัปเดต Link Hreflang ทั้งหมดให้ตรงกับ Canonical URL ป้องกัน {{SEO_CANONICAL}} ค้าง
+// 🟢 Helper 6: อัปเดต Link Hreflang ทั้งหมดให้ตรงกับ Canonical URL
 function updateAllHreflangLinks(canonUrl) {
   if (!canonUrl) return;
   const hreflangTags = document.querySelectorAll('link[rel="alternate"][hreflang]');
@@ -1823,7 +1793,7 @@ function updateAllHreflangLinks(canonUrl) {
   }
 }
 
-// 🟢 Helper 7: อัปเดต OpenGraph และ Twitter Cards ครบทุกแท็ก (รวม og:url และ twitter:url)
+// 🟢 Helper 7: อัปเดต OpenGraph และ Twitter Cards ครบทุกแท็ก
 function updateOpenGraphAndTwitter(profile, title, description, type = "website", canonUrl = "") {
   const imageUrl = profile && profile.images && profile.images[0] 
     ? (profile.images[0].fullSrc || profile.images[0].src) 
@@ -1869,12 +1839,10 @@ function updateSEOMetadata(profile = null, locationData = null) {
     ? `${CONFIG.SITE_URL}/sideline/${encodeURIComponent(profile.slug || profile.id)}` 
     : (isHomePage ? `${CONFIG.SITE_URL}/` : `${CONFIG.SITE_URL}/location/${provKey}`);
 
-  // 🟢 คำนวณชื่อสะอาดที่การันตีไม่ซ้ำคำว่า "น้อง" (Idempotent Name)
   const nameClean = profile 
     ? (typeof sanitizeName === "function" ? sanitizeName(profile.name || profile.displayName) : `น้อง${String(profile.name || profile.displayName || "").replace(/^(น้อง\s*)+/gi, "").trim()}`)
     : "";
 
-  // 1. อัปเดต Meta Title & Description ให้ผ่านเกณฑ์ Google (30-70 / 80-170 ตัวอักษร)
   let title = DEFAULT_SEO.title;
   let description = DEFAULT_SEO.description;
 
@@ -1887,7 +1855,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
     description = `รวมโปรไฟล์สาวรับงาน${provName} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ`;
   }
 
-  // 🟢 1. อัปเดต Meta Title & Description
   document.title = title;
   updateMetaTag("description", description);
   updateMetaTag("keywords", profile ? `${nameClean}, รับงาน${provName}, สาวรับงาน${provName}` : `รับงาน${provName}, สาวรับงาน${provName}, ไซด์ไลน์${provName}`);
@@ -1895,25 +1862,22 @@ function updateSEOMetadata(profile = null, locationData = null) {
   updateAllHreflangLinks(canonUrl);
   updateOpenGraphAndTwitter(profile, title, description, profile ? "profile" : "website", canonUrl);
 
-  // 🟢 อัปเดต H1 ให้สอดคล้องกับหน้าโปรไฟล์รายบุคคลแบบ Dynamic 100%
   const heroH1 = document.getElementById("hero-h1");
   if (heroH1) {
     if (profile) {
-      // หน้าโปรไฟล์น้อง: เปลี่ยน H1 เป็นชื่อน้อง + จังหวัด
       heroH1.innerHTML = `
-        <span class="seo-sub-headline">${nameClean} • สาวรับงาน${provName}</span><br>
-        <span class="seo-main-headline">เพื่อนเที่ยว ไซด์ไลน์ฟิวแฟน ตรงปก 100%</span>
+        <span class="seo-sub-headline sub-headline">${nameClean} • สาวรับงาน${provName}</span><br>
+        <span class="seo-main-headline main-headline">เพื่อนเที่ยว ไซด์ไลน์ฟิวแฟน ตรงปก 100%</span>
       `;
     } else {
-      // หน้าหลัก/หน้ารวมจังหวัด: คง H1 สรุปภาพรวมพื้นที่
       heroH1.innerHTML = `
-        <span class="seo-sub-headline">รับงาน${provName} • ไซด์ไลน์${provName}</span><br>
-        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
+        <span class="seo-sub-headline sub-headline">รับงาน${provName} • ไซด์ไลน์${provName}</span><br>
+        <span class="seo-main-headline main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
       `;
     }
   }
 
-  // 2. สร้าง Master Schema Graph ครบชุด 100% (รวมทุก Entity ไว้ใน @graph เดียว ป้องกัน Schema หาย)
+  // 🟢 Master Schema.org Graph
   const graph = [
     {
       "@type": "Organization",
@@ -1948,7 +1912,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
     }
   ];
 
-  // 🟢 Breadcrumb Schema (ใช้ nameClean โดยไม่เติม "น้อง" ซ้ำ)
+  // Breadcrumb Schema
   const breadcrumbItems = [
     { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": `${CONFIG.SITE_URL}/` }
   ];
@@ -1957,7 +1921,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
     breadcrumbItems.push({ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": canonUrl });
   } else if (profile) {
     breadcrumbItems.push({ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provName}`, "item": `${CONFIG.SITE_URL}/location/${provKey}` });
-    breadcrumbItems.push({ "@type": "ListItem", "position": 3, "name": nameClean, "item": canonUrl }); // ✅ แก้ชื่อซ้ำแล้ว
+    breadcrumbItems.push({ "@type": "ListItem", "position": 3, "name": nameClean, "item": canonUrl });
   }
 
   graph.push({
@@ -1966,7 +1930,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
     "itemListElement": breadcrumbItems
   });
 
-  // 🟢 FAQ Schema (ดึงคำถามพบบ่อยประจำจังหวัด/หน้ารวม)
+  // FAQ Schema
   const localData = (typeof LOCALIZED_SEO_MAP !== "undefined") 
     ? (LOCALIZED_SEO_MAP[provKey] || LOCALIZED_SEO_MAP["national"]) 
     : null;
@@ -1983,27 +1947,41 @@ function updateSEOMetadata(profile = null, locationData = null) {
     });
   }
 
-  // 🟢 Product Schema (สำหรับหน้ารายบุคคล) หรือ Business Schema (สำหรับหน้าหลัก/จังหวัด)
+  // 🟢 จุดสำคัญ: หน้ารายบุคคลใช้ Service + ProfilePage (ไม่ใช่ Product)
   if (profile) {
-    const cleanPrice = extractCleanPrice(profile); // ✅ ป้องกันราคาพัง เช่น 15002000
-
+    const cleanPrice = extractCleanPrice(profile);
     const isBusy = ["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(e => 
       (profile.availability || "").toLowerCase().includes(e)
     );
 
     graph.push({
-      "@type": "Product",
-      "@id": `${canonUrl}#product`,
-      "name": `${nameClean} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`, // ✅ แก้ชื่อซ้ำแล้ว
+      "@type": "ProfilePage",
+      "@id": `${canonUrl}#webpage`,
+      "url": canonUrl,
+      "name": title,
+      "description": description,
+      "isPartOf": { "@id": `${CONFIG.SITE_URL}/#website` },
+      "breadcrumb": { "@id": `${canonUrl}#breadcrumb` },
+      "mainEntity": { "@id": `${canonUrl}#service` }
+    });
+
+    graph.push({
+      "@type": "Service",
+      "@id": `${canonUrl}#service`,
+      "name": `${nameClean} - บริการเพื่อนเที่ยวไซด์ไลน์ ${provName}`,
+      "serviceType": "Companion & Lifestyle Partner Service",
+      "provider": { "@id": `${CONFIG.SITE_URL}/#organization` },
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": provName
+      },
       "url": canonUrl,
       "image": [profile.images?.[0]?.fullSrc || profile.images?.[0]?.src || CONFIG.DEFAULT_OG_IMAGE],
       "description": description,
-      "sku": `PROFILE-${profile.id}`,
-      "brand": { "@id": `${CONFIG.SITE_URL}/#organization` },
       "offers": {
         "@type": "Offer",
         "url": canonUrl,
-        "price": cleanPrice, // ✅ ได้ราคาตัวเลขสะอาด เช่น "1500"
+        "price": cleanPrice,
         "priceCurrency": "THB",
         "priceValidUntil": "2027-12-31",
         "itemCondition": "https://schema.org/NewCondition",
@@ -2020,6 +1998,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
       }
     });
   } else {
+    // หน้าหลัก / หน้าจังหวัด
     graph.push({
       "@type": ["EntertainmentBusiness", "ProfessionalService"],
       "@id": `${canonUrl}#business`,
@@ -2037,7 +2016,6 @@ function updateSEOMetadata(profile = null, locationData = null) {
     });
   }
 
-  // 3. ลบสคริปต์แยกชิ้นเก่าทั้งหมด แล้วฉีด Master Schema @graph เพียงชุดเดียวลง <head>
   removeJsonLdSchemas();
   injectJsonLdSchema({ "@context": "https://schema.org", "@graph": graph }, "dynamic-schema");
 }
