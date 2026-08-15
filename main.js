@@ -2349,9 +2349,16 @@ function updateGoogleMap(provKey = "national", provName = "ทั่วไทย
         }
 
         if (isSsrSingleProfile && isInitial) {
-          closeLightboxModal(false);
-          return;
-        }
+  // 🟢 บังคับปิด Modal และปลดล็อก scrollbar บน body ทันที
+  closeLightboxModal(false);
+  document.body.style.overflow = "";
+  const lb = document.getElementById("lightbox");
+  if (lb) {
+    lb.style.display = "none";
+    lb.classList.add("hidden");
+  }
+  return;
+}
 
         if (foundProfile) {
           openLightboxForProfile(foundProfile);
@@ -2363,31 +2370,38 @@ function updateGoogleMap(provKey = "national", provName = "ทั่วไทย
         return;
       }
 
-      const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
-      if (locationMatch) {
-        let provinceSlug = locationMatch[1];
-        try { provinceSlug = normalizeProvinceKey(decodeURIComponent(locationMatch[1])); } catch (e) { provinceSlug = normalizeProvinceKey(locationMatch[1]); }
-        STATE.currentProfileSlug = null;
-        closeLightboxModal(false);
+// ในฟังก์ชัน handleRouteNavigation() ของ main.js
+const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+if (locationMatch) {
+  let provinceSlug = locationMatch[1];
+  try { provinceSlug = normalizeProvinceKey(decodeURIComponent(locationMatch[1])); } catch (e) { provinceSlug = normalizeProvinceKey(locationMatch[1]); }
+  STATE.currentProfileSlug = null;
+  closeLightboxModal(false);
 
-        if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
-        
-        const provName = STATE.provincesMap.get(provinceSlug) || "ทั่วไทย";
-        updateSEOMetadata(null, {
-          provinceName: provName,
-          profiles: STATE.allProfiles.filter(p => normalizeProvinceKey(p.provinceKey) === provinceSlug),
-          canonicalUrl: window.location.href
-        });
+  if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
+  
+  const provName = STATE.provincesMap.get(provinceSlug) || "ทั่วไทย";
+  updateSEOMetadata(null, {
+    provinceName: provName,
+    profiles: STATE.allProfiles.filter(p => normalizeProvinceKey(p.provinceKey) === provinceSlug),
+    canonicalUrl: window.location.href
+  });
 
-        applyUltimateFilters(false, false);
-        return;
-      }
+  // 🟢 ถ้ารอบแรกมี SSR HTML อยู่แล้ว ไม่ต้องสั่งกรองซ้ำ ให้รอ User สั่งเอง
+  if (!isInitial) {
+    applyUltimateFilters(false, false);
+  }
+  return;
+}
 
-      STATE.currentProfileSlug = null;
-      closeLightboxModal(false);
-      updateSEOMetadata(null, null);
-      applyUltimateFilters(false, false);
-    }
+STATE.currentProfileSlug = null;
+closeLightboxModal(false);
+updateSEOMetadata(null, null);
+
+// 🟢 ถ้ารอบแรกมี SSR HTML อยู่แล้ว ไม่ต้องสั่งกรองซ้ำ
+if (!isInitial) {
+  applyUltimateFilters(false, false);
+}
 
     async function fetchSingleProfileBySlug(slug) {
       if (!supabaseClient) return null;
