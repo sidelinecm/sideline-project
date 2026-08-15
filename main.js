@@ -1257,13 +1257,15 @@ window.ScrollTrigger = ScrollTrigger;
       return;
     }
 
-    if (isFirstHydration && DOM.profilesDisplayArea.children.length > 0 && !isUserAction) {
-        bindMediaProtection();
-        if (window.ScrollTrigger) {
-          setTimeout(() => ScrollTrigger.refresh(), 200);
-        }
-        return; 
+
+const existingCards = DOM.profilesDisplayArea.querySelectorAll(".profile-card-new-container");
+if (isFirstHydration && existingCards.length > 0 && !isUserAction) {
+    bindMediaProtection();
+    if (window.ScrollTrigger) {
+      setTimeout(() => ScrollTrigger.refresh(), 200);
     }
+    return; 
+}
 
     DOM.profilesDisplayArea.innerHTML = "";
     const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
@@ -1543,19 +1545,18 @@ window.ScrollTrigger = ScrollTrigger;
       `;
     }
 
+    // 1. จัดการเนื้อหาคำบรรยายโปรไฟล์ (แก้ปัญหา Double Line-break และ XSS)
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
       const rawDesc = profile.description || `${nameClean} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${locationText}`;
       const safeDesc = typeof sanitizeThaiText === "function" ? sanitizeThaiText(rawDesc) : rawDesc;
-      descContent.innerHTML = String(safeDesc)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\n/g, "<br>");
+      // 🟢 ใช้ textContent ป้องกัน XSS และไม่ทำให้บรรทัดเว้นห่างเบิ้ล 2 เท่าจาก CSS white-space: pre-wrap
+      descContent.textContent = safeDesc;
     }
     if (descContainer) descContainer.style.display = "block";
 
+    // 2. จัดการปุ่มแอดไลน์จองคิว
     const detailsContainer = document.querySelector(".lightbox-details");
     if (detailsContainer) {
       detailsContainer.scrollTop = 0;
@@ -1570,6 +1571,7 @@ window.ScrollTrigger = ScrollTrigger;
       if (lineIdToUse.startsWith("http")) {
         finalLineUrl = lineIdToUse;
       } else if (lineIdToUse && lineIdToUse !== "ksLUWB89Y_") {
+        // รองรับทั้ง LINE Official Account และ LINE ID ทั่วไป
         finalLineUrl = `https://line.me/R/oaMessage/${lineIdToUse}/?${prefillText}`;
       }
 
@@ -1588,16 +1590,21 @@ window.ScrollTrigger = ScrollTrigger;
       detailsContainer.appendChild(stickyBtnWrapper);
     }
 
+    // 3. จัดการ Navigation ปุ่มซ้าย-ขวา ระหว่างโปรไฟล์
     if (Array.isArray(STATE.filteredProfiles) && STATE.filteredProfiles.length > 0) {
-      const currentIndex = STATE.filteredProfiles.findIndex(p => p.slug === profile.slug || p.id === profile.id);
+      const currentIndex = STATE.filteredProfiles.findIndex(p => String(p.slug) === String(profile.slug) || String(p.id) === String(profile.id));
       if (typeof setupLightboxNavigation === "function") {
         setupLightboxNavigation(currentIndex);
       }
     }
 
+    // 4. แสดงผล Lightbox Modal พร้อม Effect GSAP
     lightbox.classList.remove("hidden");
     lightbox.style.display = "flex";
     document.body.style.overflow = "hidden";
+
+    // 🟢 ประกาศตัวแปร wrapper ให้ชัดเจน ป้องกัน ReferenceError
+    const wrapper = document.getElementById("lightbox-content-wrapper-el");
 
     if (window.gsap && typeof gsap.fromTo === "function") {
       gsap.fromTo(lightbox, { opacity: 0 }, { opacity: 1, duration: 0.25 });
@@ -1615,6 +1622,7 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
+  // 🟢 5. ปิด Lightbox Modal และคืนค่า URL อย่างถูกต้องตามหน้าที่ผู้ใช้อยู่
   function closeLightboxModal(updateUrl = true) {
     const lightbox = document.getElementById("lightbox");
     if (lightbox) {
@@ -1623,9 +1631,20 @@ window.ScrollTrigger = ScrollTrigger;
       document.body.style.overflow = "";
 
       STATE.currentProfileSlug = null;
-      if (updateUrl && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
-        history.pushState(null, "", "/");
-        updateSEOMetadata(null, null);
+      
+      if (updateUrl) {
+        // ถ้าผู้ใช้เคยเลือกจังหวัดไว้ ให้คืน URL ไปที่หน้านั้นแทนที่จะเด้งกลับหน้าแรกเสมอ
+        const activeProv = DOM.provinceSelect?.value;
+        const returnUrl = (activeProv && activeProv !== "all" && activeProv !== "national") 
+          ? `/location/${activeProv}` 
+          : "/";
+
+        if (window.location.pathname.includes("/sideline/") || window.location.pathname.includes("/profile/")) {
+          history.pushState(null, "", returnUrl);
+          if (typeof updateSEOMetadata === "function") {
+            updateSEOMetadata(null, null);
+          }
+        }
       }
     }
   }
@@ -1638,27 +1657,38 @@ window.ScrollTrigger = ScrollTrigger;
     } catch (e) {}
   }
 
+  // 🟢 6. ระบบปัดหน้าจอ (Swipe Gestures) ซ้าย-ขวาบนมือถือ
   function initLightboxSwipe() {
     const lightbox = document.getElementById("lightbox");
     if (!lightbox) return;
 
     let touchStartX = 0;
     let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
 
     lightbox.addEventListener("touchstart", e => {
+      // ป้องกันการปัดหากกำลังเลื่อนแถบรูปเล็ก (Thumbnail Strip)
+      if (e.target.closest("#lightboxThumbnailStrip")) return;
       touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
     }, { passive: true });
 
     lightbox.addEventListener("touchend", e => {
+      if (e.target.closest("#lightboxThumbnailStrip")) return;
       touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
       handleSwipeGesture();
     }, { passive: true });
 
     function handleSwipeGesture() {
-      const diff = touchEndX - touchStartX;
-      if (Math.abs(diff) > 45) {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      // ตรวจสอบว่าเป็นการปัดแนวนอนจริงๆ (ไม่ใช่เลื่อนหน้าจอแนวตั้ง)
+      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
         triggerHaptic(12);
-        if (diff < 0) {
+        if (diffX < 0) {
           document.getElementById("lightbox-next-btn")?.click();
         } else {
           document.getElementById("lightbox-prev-btn")?.click();
@@ -2188,37 +2218,82 @@ window.ScrollTrigger = ScrollTrigger;
 
   function replaceDomPlaceholders(provinceName = "ทั่วไทย", profileCount = 0, provinceSlug = "national") {
     try {
-      const liveCountEl = document.getElementById("live-profile-count");
-      if (liveCountEl) liveCountEl.textContent = profileCount;
+      const normKey = typeof normalizeProvinceKey === "function" 
+        ? normalizeProvinceKey(provinceSlug) 
+        : String(provinceSlug || "national").toLowerCase().trim();
 
-      const normKey = normalizeProvinceKey(provinceSlug);
-      const currentProvData = LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"];
-      const currentZones = (currentProvData && currentProvData.zones) ? currentProvData.zones.slice(1, 5) : ["ตัวเมือง", "บริเวณใกล้เคียง"];
+      // 1. ตาราง Mapping ภาษาอังกฤษ (แก้ปัญหา "in ทั่วไทย" ให้เป็น "in Thailand" / "in Chiang Mai")
+      const PROVINCE_EN_MAP = {
+        chiangmai: "Chiang Mai",
+        bangkok: "Bangkok",
+        chonburi: "Chonburi",
+        khonkaen: "Khon Kaen",
+        phuket: "Phuket",
+        udonthani: "Udon Thani",
+        lampang: "Lampang",
+        chiangrai: "Chiang Rai",
+        phitsanulok: "Phitsanulok",
+        national: "Thailand"
+      };
+      
+      const provinceEnName = PROVINCE_EN_MAP[normKey] || (normKey === "national" ? "Thailand" : provinceName);
+
+      // 2. ดึงข้อมูลโซนและข้อความประกอบตามจังหวัด
+      const currentProvData = (typeof LOCALIZED_SEO_MAP !== "undefined") 
+        ? (LOCALIZED_SEO_MAP[normKey] || LOCALIZED_SEO_MAP["national"]) 
+        : null;
+        
+      const currentZones = (currentProvData && currentProvData.zones) 
+        ? currentProvData.zones.filter(z => z && z !== "ทั้งหมด" && z !== "all").slice(0, 4) 
+        : ["ตัวเมือง", "บริเวณใกล้เคียง"];
+        
       const zoneText = currentZones.join(", ");
-      const countTextSnippet = profileCount > 0 ? `มากกว่า ${profileCount} รายการ` : `กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม`;
+      const countTextSnippet = profileCount > 0 
+        ? `(พร้อมสแตนด์บาย ${profileCount} โปรไฟล์)` 
+        : `(กำลังเปิดรับสมัครผู้ดูแลเพิ่มเติม)`;
 
+      // 3. อัปเดตตัวเลขจำนวนโปรไฟล์สด (Bento Bar)
+      const liveCountEl = document.getElementById("live-profile-count");
+      if (liveCountEl) {
+        liveCountEl.textContent = profileCount;
+      }
+
+      // 4. วนลูปแทนที่ Placeholders ในทุกโหนดข้อความ (ครอบคลุมทั้งตัวพิมพ์เล็ก-ใหญ่)
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
       let node;
       while ((node = walker.nextNode())) {
         if (node.nodeValue && (node.nodeValue.includes("{{") || node.nodeValue.includes("%7B%7B"))) {
           node.nodeValue = node.nodeValue
-            .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
-            .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-            .replace(/\{\{COUNT_SNIPPET\}\}/g, countTextSnippet)
-            .replace(/\{\{PROVINCE_ZONES\}\}/g, zoneText)
-            .replace(/\{\{PROVINCE_KEY\}\}/g, normKey)
-            .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_-]+(%7D%7D|\}\})/gi, "");
+            // แทนที่ชื่อภาษาอังกฤษ
+            .replace(/\{\{\s*PROVINCE_NAME_EN\s*\}\}/gi, provinceEnName)
+            .replace(/\{\{\s*province-name-en\s*\}\}/gi, provinceEnName)
+            // แทนที่ชื่อภาษาไทย
+            .replace(/\{\{\s*PROVINCE_NAME\s*\}\}/gi, provinceName)
+            .replace(/\{\{\s*province-name\s*\}\}/gi, provinceName)
+            // แทนที่จำนวนและข้อความประกอบ
+            .replace(/\{\{\s*PROFILE_COUNT\s*\}\}/gi, profileCount)
+            .replace(/\{\{\s*profile-count\s*\}\}/gi, profileCount)
+            .replace(/\{\{\s*COUNT_SNIPPET\s*\}\}/gi, countTextSnippet)
+            .replace(/\{\{\s*count-snippet\s*\}\}/gi, countTextSnippet)
+            .replace(/\{\{\s*PROVINCE_ZONES\s*\}\}/gi, zoneText)
+            .replace(/\{\{\s*province-zones\s*\}\}/gi, zoneText)
+            .replace(/\{\{\s*PROVINCE_KEY\s*\}\}/gi, normKey)
+            .replace(/\{\{\s*province-key\s*\}\}/gi, normKey)
+            // ล้าง Placeholders ที่ตกค้างออกทั้งหมด
+            .replace(/(%7B%7B|\{\{)[a-zA-Z0-9_.-]+(%7D%7D|\}\})/gi, "");
         }
       }
 
-      const deepDiveHeader = document.querySelector("#service-deep-dive h2");
+      // 5. อัปเดตหัวข้อ Service Deep Dive Header ให้ตรงเป๊ะ
+      const deepDiveHeader = document.querySelector("#service-deep-dive h2, #deep-dive-title");
       if (deepDiveHeader) {
-        deepDiveHeader.textContent = profileCount > 0
-          ? `บริการเพื่อนเที่ยวและสาวรับงาน${provinceName} ดูแลเอนเตอร์เทนระดับพรีเมียม (พร้อมสแตนด์บาย ${profileCount} โปรไฟล์)`
-          : `บริการเพื่อนเที่ยวและสาวรับงาน${provinceName} ดูแลเอนเตอร์เทนระดับพรีเมียม`;
+        deepDiveHeader.textContent = `บริการเพื่อนเที่ยวและสาวรับงาน${provinceName} ดูแลเอนเตอร์เทนระดับพรีเมียม ${countTextSnippet}`;
       }
 
-      updateDynamicProvinceContent(normKey, provinceName, profileCount);
+      // 6. อัปเดตเนื้อหาไดนามิกเฉพาะจังหวัด (Reviews, FAQs, แผนที่ Google Maps)
+      if (typeof updateDynamicProvinceContent === "function") {
+        updateDynamicProvinceContent(normKey, provinceName, profileCount);
+      }
     } catch (e) {
       console.warn("⚠️ Replace placeholders error:", e);
     }
@@ -2233,83 +2308,134 @@ window.ScrollTrigger = ScrollTrigger;
   }
 
   async function handleRouteNavigation(isInitial = false) {
-    let path = window.location.pathname.toLowerCase();
-    if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
+    try {
+      let path = window.location.pathname.toLowerCase();
+      if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
 
-    STATE.isSingleProfilePage = Boolean(document.querySelector(".single-profile-wrapper"));
+      // 1. ตรวจสอบว่าหน้านี้เป็น Dedicated Single Profile SSR Page หรือไม่
+      STATE.isSingleProfilePage = Boolean(document.querySelector(".single-profile-wrapper"));
 
-    const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-    if (profileMatch) {
-      let slug = profileMatch[1];
-      try { slug = decodeURIComponent(slug); } catch (e) {}
-      
-      STATE.currentProfileSlug = slug;
+      // ==============================================================================
+      // CASE A: URL เป็นหน้าโปรไฟล์รายบุคคล (/sideline/:slug หรือ /profile/:slug)
+      // ==============================================================================
+      const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+      if (profileMatch) {
+        let rawSlug = profileMatch[1];
+        let decodedSlug = rawSlug;
+        try { 
+          decodedSlug = decodeURIComponent(rawSlug).trim(); 
+        } catch (e) {
+          decodedSlug = rawSlug.trim();
+        }
 
-      if (STATE.isSingleProfilePage && isInitial) {
-        closeLightboxModal(false);
-        document.body.style.overflow = "";
-        const lb = document.getElementById("lightbox");
-        if (lb) {
-          lb.style.display = "none";
-          lb.classList.add("hidden");
+        STATE.currentProfileSlug = decodedSlug;
+
+        // ถ้าเป็นหน้า Dedicated Single Profile ที่ SSR เรนเดอร์เนื้อหาเดี่ยวมาแล้ว ให้ปิด Modal และแสดงหน้าเว็บปกติ
+        if (STATE.isSingleProfilePage && isInitial) {
+          closeLightboxModal(false);
+          document.body.style.overflow = "";
+          const lb = document.getElementById("lightbox");
+          if (lb) {
+            lb.style.display = "none";
+            lb.classList.add("hidden");
+          }
+          return;
+        }
+
+        // ค้นหาโปรไฟล์จากแคชหน่วยความจำ Client (STATE.allProfiles)
+        const searchLower = decodedSlug.toLowerCase();
+        let foundProfile = Array.isArray(STATE.allProfiles) ? STATE.allProfiles.find(p => {
+          if (!p) return false;
+          const pSlug = String(p.slug || "").toLowerCase().trim();
+          const pId = String(p.id || "").trim();
+          return pSlug === searchLower || pId === searchLower || pSlug === rawSlug.toLowerCase();
+        }) : null;
+
+        // 🟢 แก้ไขจุดวิกฤต: ถ้าในแคชยังไม่มี ให้ fetch จาก Supabase เสมอ (ไม่ว่าจะเป็น isInitial หรือไม่)
+        if (!foundProfile) {
+          foundProfile = await fetchSingleProfileBySlug(decodedSlug);
+        }
+
+        if (foundProfile) {
+          openLightboxForProfile(foundProfile);
+        } else {
+          // ถ้าค้นหาในฐานข้อมูลแล้วไม่พบโปรไฟล์จริงๆ ค่อย Reset กลับหน้าแรก
+          console.warn(`⚠️ ไม่พบข้อมูลโปรไฟล์สำหรับ: ${decodedSlug}`);
+          if (isInitial) {
+            history.replaceState(null, "", "/");
+          }
+          closeLightboxModal(false);
+          STATE.currentProfileSlug = null;
         }
         return;
       }
 
-      let foundProfile = STATE.allProfiles.find(p => {
-        const pSlug = String(p.slug || "").toLowerCase();
-        const pId = String(p.id);
-        const searchSlug = slug.toLowerCase();
-        return pSlug === searchSlug || pId === searchSlug;
-      });
+      // ==============================================================================
+      // CASE B: URL เป็นหน้าจังหวัด (/location/:province หรือ /province/:province)
+      // ==============================================================================
+      const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
+      if (locationMatch) {
+        let rawProvSlug = locationMatch[1];
+        let provinceSlug = rawProvSlug;
+        try { 
+          provinceSlug = normalizeProvinceKey(decodeURIComponent(rawProvSlug)); 
+        } catch (e) { 
+          provinceSlug = normalizeProvinceKey(rawProvSlug); 
+        }
 
-      if (!foundProfile && !isInitial) {
-        foundProfile = await fetchSingleProfileBySlug(slug);
-      }
-
-      if (foundProfile) {
-        openLightboxForProfile(foundProfile);
-      } else if (isInitial) {
-        history.replaceState(null, "", "/");
-        closeLightboxModal(false);
         STATE.currentProfileSlug = null;
-      }
-      return;
-    }
+        closeLightboxModal(false);
 
-    const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
-    if (locationMatch) {
-      let provinceSlug = locationMatch[1];
-      try { 
-        provinceSlug = normalizeProvinceKey(decodeURIComponent(locationMatch[1])); 
-      } catch (e) { 
-        provinceSlug = normalizeProvinceKey(locationMatch[1]); 
+        // ซิงค์ค่า Dropdown และ Active Class ของชิปจังหวัดในโมดอล
+        if (DOM.provinceSelect) {
+          DOM.provinceSelect.value = provinceSlug;
+        }
+
+        const modalChips = document.querySelectorAll("#modal-province-chips .province-chip");
+        if (modalChips.length > 0) {
+          modalChips.forEach(b => {
+            const val = b.getAttribute("data-value") || "";
+            b.classList.toggle("active", normalizeProvinceKey(val) === provinceSlug);
+          });
+        }
+
+        const provName = STATE.provincesMap?.get(provinceSlug) || "ทั่วไทย";
+        
+        if (typeof updateSEOMetadata === "function") {
+          updateSEOMetadata(null, {
+            provinceName: provName,
+            provinceKey: provinceSlug,
+            canonicalUrl: window.location.href
+          });
+        }
+
+        // สั่งกรองข้อมูลเฉพาะจังหวัดเมื่อไม่ได้เปิดจาก SSR ครั้งแรก
+        if (!isInitial) {
+          applyUltimateFilters(false, false);
+        }
+        return;
       }
-      
+
+      // ==============================================================================
+      // CASE C: URL เป็นหน้าแรก (/) หรือ หน้ารวมโปรไฟล์ (/profiles)
+      // ==============================================================================
       STATE.currentProfileSlug = null;
       closeLightboxModal(false);
 
-      if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
-      
-      const provName = STATE.provincesMap.get(provinceSlug) || "ทั่วไทย";
-      updateSEOMetadata(null, {
-        provinceName: provName,
-        provinceKey: provinceSlug,
-        canonicalUrl: window.location.href
-      });
+      if (DOM.provinceSelect && !window.location.pathname.includes("/location/")) {
+        DOM.provinceSelect.value = "";
+      }
+
+      if (typeof updateSEOMetadata === "function") {
+        updateSEOMetadata(null, null);
+      }
 
       if (!isInitial) {
         applyUltimateFilters(false, false);
       }
-      return;
-    }
 
-    STATE.currentProfileSlug = null;
-    closeLightboxModal(false);
-    updateSEOMetadata(null, null);
-
-    if (!isInitial) {
-      applyUltimateFilters(false, false);
+    } catch (err) {
+      console.error("❌ เกิดข้อผิดพลาดในระบบ Route Navigation:", err);
     }
   }
 
