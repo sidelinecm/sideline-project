@@ -552,11 +552,6 @@ window.ScrollTrigger = ScrollTrigger;
     STATE.renderId = (STATE.renderId || 0) + 1;
     const currentRenderId = STATE.renderId;
 
-    const currentHeight = DOM.profilesDisplayArea.offsetHeight;
-    if (currentHeight > 0) {
-      DOM.profilesDisplayArea.style.minHeight = `${currentHeight}px`;
-    }
-
     DOM.noResultsMessage?.classList.add("hidden");
     DOM.fetchErrorMessage?.classList.add("hidden");
 
@@ -1013,10 +1008,24 @@ window.ScrollTrigger = ScrollTrigger;
       lightbox.classList.remove("active");
       document.body.style.overflow = "";
 
-      STATE.currentProfileSlug = null;
       if (updateUrl && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
-        history.pushState(null, "", "/");
+        // 🟢 ตรวจสอบว่าก่อนหน้านี้อยู่จังหวัดอะไร (จากตัวแปร SSR หรือจาก Dropdown)
+        const provKey = window.currentProvinceSlug || (DOM.provinceSelect && DOM.provinceSelect.value) || "";
+        
+        if (provKey && provKey !== "national" && provKey !== "all") {
+          // ถ้าอยู่หน้าจังหวัด (เช่น เชียงใหม่) ให้ย้อนกลับไปหน้าจังหวัดเดิม
+          history.pushState(null, "", `/location/${provKey}`);
+          if (DOM.provinceSelect) DOM.provinceSelect.value = provKey;
+          applyUltimateFilters(false);
+        } else {
+          // ถ้าอยู่หน้าแรกสุด ค่อยกลับไปหน้าแรก
+          history.pushState(null, "", "/");
+          if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+          applyUltimateFilters(false);
+        }
       }
+
+      STATE.currentProfileSlug = null;
     }
   }
 
@@ -1065,10 +1074,11 @@ window.ScrollTrigger = ScrollTrigger;
     } catch (e) {}
   }
 
-  async function handleRouteNavigation(isInitial = false) {
+async function handleRouteNavigation(isInitial = false) {
     let path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
     if (!path) path = "/";
 
+    // 1. เคสเปิดหน้าโปรไฟล์เดี่ยว หรือ รีเฟรชขณะเปิด Lightbox
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
     if (profileMatch) {
       let slug = decodeURIComponent(profileMatch[1]);
@@ -1089,11 +1099,18 @@ window.ScrollTrigger = ScrollTrigger;
       }
 
       if (foundProfile) {
+        // 🟢 จดจำจังหวัดของน้องคนนี้ไว้ เพื่อให้ตอนกดปิด Lightbox เด้งกลับมาจังหวัดนี้ถูก
+        const provKey = foundProfile.provinceKey || window.currentProvinceSlug || "";
+        if (provKey && provKey !== "national" && provKey !== "all") {
+          window.currentProvinceSlug = provKey;
+          if (DOM.provinceSelect) DOM.provinceSelect.value = provKey;
+        }
         openLightboxForProfile(foundProfile);
       }
       return;
     }
 
+    // 2. เคสอยู่หน้าจังหวัด (เช่น /location/chiangmai)
     const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
     if (locationMatch) {
       let provinceSlug = decodeURIComponent(locationMatch[1]).toLowerCase();
@@ -1106,6 +1123,7 @@ window.ScrollTrigger = ScrollTrigger;
       return;
     }
 
+    // 3. เคสหน้าแรกสุด (/)
     STATE.currentProfileSlug = null;
     closeLightboxModal(false);
     applyUltimateFilters(false);

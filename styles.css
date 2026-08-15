@@ -343,3 +343,16 @@ body {
 
 footer { padding-bottom: 30px !important; }
 @media (max-width: 768px) { footer { padding-bottom: 110px !important; } }
+
+/* ปรับขนาดพื้นที่กด (Tap Target) ของลิงก์ใน Footer ให้ได้มาตรฐานขั้นต่ำ 44-48px */
+footer ul li a {
+  display: inline-block !important;
+  padding: 8px 4px !important; /* เพิ่มพื้นที่สัมผัส */
+  min-height: 36px !important;
+  line-height: 20px !important;
+}
+
+#popular-locations-footer li a {
+  display: inline-block !important;
+  padding: 6px 0 !important;
+}
