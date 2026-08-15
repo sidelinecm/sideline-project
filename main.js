@@ -1692,16 +1692,16 @@ function applyUltimateFilters(updateUrlHistory = true, isUserAction = false) {
     }
   }
 
-// 🟢 Helper 1: สกัดราคาตัวเลขบริสุทธิ์สำหรับ Schema (ป้องกันราคาพัง)
+// 🟢 Helper 1: สกัดราคาตัวเลขบริสุทธิ์สำหรับ Schema (ป้องกันราคาพัง) - แก้ไขแล้ว
 function extractCleanPrice(profile) {
-  if (!profile) return "1500";
+  if (!profile) return 1500;  // ✅ เปลี่ยนจาก "1500" เป็น 1500 (number)
   const rawPrice = String(profile._price || profile.rate || profile.price || "1500");
   const firstMatch = rawPrice.match(/\d+/);
-  if (!firstMatch) return "1500";
+  if (!firstMatch) return 1500;  // ✅ เปลี่ยนจาก "1500" เป็น 1500 (number)
   
   let num = Number(firstMatch[0]);
   if (num > 0 && num < 500) num *= 10; // รองรับกรณีใส่เลขย่อ เช่น 150 -> 1500
-  return num > 0 ? String(num) : "1500";
+  return num > 0 ? num : 1500;  // ✅ เปลี่ยนจาก String(num) เป็น num (number)
 }
 
 // 🟢 Helper 2: ลบ Schema เก่าออกก่อนฉีดชุดใหม่ ป้องกัน Schema ซ้ำซ้อน
@@ -1981,7 +1981,7 @@ function updateSEOMetadata(profile = null, locationData = null) {
       "offers": {
         "@type": "Offer",
         "url": canonUrl,
-        "price": cleanPrice,
+        "price": cleanPrice,  // ✅ ถูกต้องแล้ว (number จาก extractCleanPrice)
         "priceCurrency": "THB",
         "priceValidUntil": "2027-12-31",
         "itemCondition": "https://schema.org/NewCondition",
@@ -1991,10 +1991,10 @@ function updateSEOMetadata(profile = null, locationData = null) {
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "reviewCount": "38",
-        "bestRating": "5",
-        "worstRating": "1"
+        "ratingValue": 4.9,  // ✅ เปลี่ยนจาก "4.9" เป็น 4.9 (number)
+        "reviewCount": 38,   // ✅ เปลี่ยนจาก "38" เป็น 38 (number)
+        "bestRating": 5,     // ✅ ถูกต้องแล้ว (number)
+        "worstRating": 1     // ✅ ถูกต้องแล้ว (number)
       }
     });
   } else {
@@ -2008,10 +2008,10 @@ function updateSEOMetadata(profile = null, locationData = null) {
       "parentOrganization": { "@id": `${CONFIG.SITE_URL}/#organization` },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": 4.9,
-        "reviewCount": 45,
-        "bestRating": 5,
-        "worstRating": 1
+        "ratingValue": 4.9,  // ✅ ถูกต้องแล้ว (number)
+        "reviewCount": 45,   // ✅ ถูกต้องแล้ว (number)
+        "bestRating": 5,     // ✅ ถูกต้องแล้ว (number)
+        "worstRating": 1     // ✅ ถูกต้องแล้ว (number)
       }
     });
   }
