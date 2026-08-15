@@ -140,11 +140,10 @@ const getLocalizedZone = (location, provinceName) => {
     return `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
 };
 
-// 🟢 สร้างข้อความบรรยายโปรไฟล์เชิงลึกจากข้อมูลจริงใน Database ทั้งหมด
-const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, heightVal, weightVal, skinVal, localizedZone, rateVal) => {
+const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, heightVal, weightVal, localizedZone, rateVal) => {
     const heightText = heightVal ? `ส่วนสูง ${heightVal} ซม.` : "";
     const weightText = weightVal ? `น้ำหนัก ${weightVal} กก.` : "";
-    const skinText = (skinVal && skinVal !== "ไม่ระบุ") ? `ผิวพรรณ${skinVal}` : "ผิวพรรณเนียนสวย";
+    const skinText = (p.skinTone || p.skin_tone || "").trim() ? `ผิวพรรณ${p.skinTone || p.skin_tone}` : "ผิวพรรณเนียนสวย";
     const bioStats = [bwhVal ? `สัดส่วน ${bwhVal}` : "", heightText, weightText, skinText].filter(Boolean).join(" ");
 
     return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${ageVal} ปี ${bioStats} พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย อัตราค่าขนมเริ่มต้น ${rateVal} การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
@@ -240,8 +239,9 @@ export default async (request, context) => {
         const ratingValue = (4.8 + (charCodeSum % 3) / 10).toFixed(1);
         const reviewCount = 120 + (charCodeSum % 80);
         
-        const localizedZone = getLocalizedZone(p.location, provinceName);
-        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, localizedZone);
+// ✅ ส่งค่าให้ครบทั้ง 9 ตัวตามลำดับ
+const localizedZone = getLocalizedZone(p.location, provinceName);
+const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, heightVal, weightVal, localizedZone, displayPrice);
         
         const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
         const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
