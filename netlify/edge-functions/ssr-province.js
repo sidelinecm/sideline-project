@@ -1,3 +1,4 @@
+
 /**
  * [ SYSTEM SSR PROVINCE CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless SSR Handler
@@ -8,12 +9,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
-const PAGE_CACHE_TTL_MS = 10 * 60 * 1000;
-const MAX_CACHE_SIZE = 200;
+const MAX_CACHE_SIZE = 300;
 
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
-const TEMPLATE_CACHE_TTL_MS = 10 * 60 * 1000;
+const TEMPLATE_CACHE_TTL_MS = 60 * 60 * 1000; // จำโครงร่าง index.html 1 ชั่วโมง
 
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf)$/i;
 
@@ -30,7 +30,7 @@ const CONFIG = {
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
   DEFAULT_OG_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
-  DEFAULT_TELEPHONE: "+66926997044", // ✅ เบอร์โทรจริงของคุณ
+  DEFAULT_TELEPHONE: "+66926997044",
   DISPLAY_LINE_ID: "LINE: @firstmodelhub",
   SOCIAL_LINKS: {
     line: "https://line.me/ti/p/ksLUWB89Y_",
@@ -461,7 +461,6 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const statusText = p.availability || (isAvailable ? "รับงาน" : "สอบถามคิว");
   const ageDisplay = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
   
-  // สกัดข้อมูลสัดส่วนเพื่อนำไปใส่ Alt text ให้ Googlebot อ่านเชิงลึก
   let statsDisplay = p.stats || p.proportion || "";
   const bustVal = p.bust || "";
   const waistVal = p.waist || "";
@@ -594,7 +593,20 @@ export default async (req, context) => {
     try { return await context.next(); } catch { return await context.next(); }
   }
 
-  const staticPages = ["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/policy", "/locations"];
+  // 🟢 1. ข้อยกเว้นไฟล์ Static HTML ทั้งหมดในระบบ (รวม Nimman.html และ index-en.html)
+  const staticPages = [
+    "/about", "/about.html",
+    "/faq", "/faq.html",
+    "/blog", "/blog.html",
+    "/contact", "/contact.html",
+    "/terms-of-service",
+    "/privacy-policy", "/privacy-policy.html",
+    "/policy",
+    "/locations", "/locations.html",
+    "/Nimman", "/Nimman.html",
+    "/index-en", "/index-en.html",
+    "/offline", "/offline.html"
+  ];
   if (staticPages.some(page => url.pathname === page || url.pathname.startsWith(page + "/"))) {
     try { return await context.next(); } catch { return await context.next(); }
   }
@@ -603,9 +615,27 @@ export default async (req, context) => {
     return Response.redirect(`${hostUrl}/`, 301);
   }
 
+  const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+  // 🟢 2. ดึงเวลาอัปเดตล่าสุดของฐานข้อมูล (เช็กเวอร์ชันเพื่อทำ Event-Driven Cache อัจฉริยะ)
+  let latestSyncTimestamp = "v1";
+  try {
+    const { data: latestProfile } = await supabase
+      .from("profiles")
+      .select("lastUpdated, created_at")
+      .order("lastUpdated", { ascending: false, nullsFirst: false })
+      .limit(1)
+      .maybeSingle();
+    
+    latestSyncTimestamp = latestProfile?.lastUpdated || latestProfile?.created_at || "v1";
+  } catch (e) {
+    latestSyncTimestamp = "v1";
+  }
+
+  // 🟢 3. แคชจะถูกใช้งานตลอดไป (1 เดือน / 6 เดือน) จนกว่าแอดมินจะกดแก้ไขข้อมูลในหลังบ้าน!
   const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
   const cachedItem = PAGE_CACHE.get(cacheKey);
-  if (cachedItem && (Date.now() - cachedItem.timestamp < PAGE_CACHE_TTL_MS)) {
+  if (cachedItem && cachedItem.version === latestSyncTimestamp) {
     return new Response(cachedItem.html, { headers: cachedItem.headers });
   }
 
@@ -625,7 +655,6 @@ export default async (req, context) => {
   }
 
   try {
-    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let matchedProfile = null;
     if (profileSlug) {
       const { data: profileData, error: profileErr } = await supabase
@@ -650,7 +679,6 @@ export default async (req, context) => {
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
-    // 🟢 1. ดึงข้อมูลจริงทั้งหมดและนับจำนวนจริงแบบ { count: "exact" } โดยปลด .limit() ออก
     let profileQuery = supabase
       .from("profiles")
       .select("*", { count: "exact" })
@@ -687,8 +715,6 @@ export default async (req, context) => {
     }
 
     const profileList = profListRes.data || [];
-    
-    // 🟢 2. ดึงยอดรวมที่แท้จริงจากฐานข้อมูลตรงๆ ไม่มีแต่งเลข
     const totalRealCount = (profListRes.count !== null && profListRes.count !== undefined) 
       ? profListRes.count 
       : profileList.length;
@@ -954,7 +980,7 @@ export default async (req, context) => {
       let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
       
       if (key === 'chiangmai') {
-        html += `<li><a href="/location/chiangmai?q=นิมมาน" title="สาวรับงานนิมมาน เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
+        html += `<li><a href="/Nimman.html" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
         html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
       }
       return html;
@@ -986,8 +1012,6 @@ export default async (req, context) => {
     
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
-    
-    // 🟢 3. แทนที่ตัวเลขจริงลงใน HTML ทั้งหมด
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", totalRealCount);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
@@ -1004,7 +1028,6 @@ export default async (req, context) => {
       );
     }
 
-    // 🟢 แก้ไขจุดที่ 1: ลบคอมเมนต์และ Section หมวด Featured ออกพร้อมกันอย่างสะอาด
     if (!isNationalHome) {
       rawHtml = rawHtml.replace(
         /<!--\s*🟢\s*<h2>\s*หมวดที่\s*2[\s\S]*?<\/section>/i,
@@ -1019,11 +1042,9 @@ export default async (req, context) => {
       </div>
     `;
 
-    // 🟢 4. ส่วนหัวข้อจะโชว์จำนวนจริง "พบ X โปรไฟล์พร้อมรับงาน"
     let displayAreaInnerHtml = "";
 
     if (isNationalHome) {
-      // หน้าแรก: จัดกลุ่มตามจังหวัดจริง นับตามจำนวนจริงของแต่ละจังหวัด
       const grouped = profileList.reduce((acc, p) => {
         const key = (p.provinceKey || p.province_slug || "no_province").toString().toLowerCase();
         acc[key] = acc[key] || [];
@@ -1067,7 +1088,6 @@ export default async (req, context) => {
       displayAreaInnerHtml = sectionsHtml;
 
     } else {
-      // หน้าเฉพาะจังหวัด: โชว์จำนวนจริงของจังหวัดนั้น
       const liveCountChipHtml = `
         ${topCatalogSnippetHtml}
         <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1093,7 +1113,6 @@ export default async (req, context) => {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
-    // 🟢 5. Lookup Map จับคู่รหัสจังหวัด -> ชื่อจริงของแต่ละน้อง
     const provThaiLookup = new Map();
     (provListRes.data || []).forEach(item => {
       const k = (item.key || item.slug || item.id || "").toString().toLowerCase();
@@ -1112,7 +1131,6 @@ export default async (req, context) => {
     provThaiLookup.set("khonkaen", "ขอนแก่น");
     provThaiLookup.set("lamphun", "ลำพูน");
 
-    // 🟢 6. ส่งข้อมูลจริงทั้งหมดเข้า Hydration Script (ไม่มีการปลอมชื่อจังหวัด)
     const hydratedProfilesData = JSON.stringify(profileList.map(p => {
       const pKey = (p.provinceKey || p.province_key || p.province_slug || "chiangmai").toString().toLowerCase();
       const realProvinceThai = p.provinceThai || p.province_thai || provThaiLookup.get(pKey) || "เชียงใหม่";
@@ -1181,9 +1199,11 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
+    // 🟢 4. ปรับ Response Headers ให้รองรับการอัปเดตแบบ Real-time ร่วมกับแคชระยะยาว
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=31536000, stale-while-revalidate=86400",
+      "ETag": `"${latestSyncTimestamp}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
@@ -1194,7 +1214,7 @@ export default async (req, context) => {
     if (PAGE_CACHE.size > MAX_CACHE_SIZE) {
       PAGE_CACHE.clear();
     }
-    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: Date.now() });
+    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, version: latestSyncTimestamp });
 
     return new Response(rawHtml, { headers: responseHeaders });
 
