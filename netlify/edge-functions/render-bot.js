@@ -2,8 +2,8 @@
  * [ SYSTEM BOT RENDERING CORE - PROD-READY OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless Crawler Handler
  * File: netlify/edge-functions/render-bot.js
- * Authority: Extended Crawler Identification, Dynamic Link Building & Schema Architecture
- * Features: Pure Cloudinary CDN, Clean Text Filter (No ASCII Art), High-Speed Image Preload, Schema Rating Fix
+ * Authority: Extended Crawler Identification, Dynamic Link Building & Cloudinary Parity
+ * Features: Zero 404 Cloudinary Handler, Clean Typography, 100% Valid Schema.org Graph
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.42.0';
@@ -22,14 +22,14 @@ const CONFIG = {
     DEFAULT_TELEPHONE: '+66926997044',
     DISPLAY_LINE_ID: 'LINE: @firstmodelhub',
     SOCIAL_LINKS: {
-    line: "https://line.me/ti/p/ksLUWB89Y_",
-    tiktok: "https://tiktok.com/@sidelinecm",
-    twitter: "https://twitter.com/sidelinechiangmai",
-    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
-    biosite: "https://bio.site/firstfiwfans.com",
-    linktree: "https://linktr.ee/kissmodel",
-    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
-  }
+        line: "https://line.me/ti/p/ksLUWB89Y_",
+        tiktok: "https://tiktok.com/@sidelinecm",
+        twitter: "https://twitter.com/sidelinechiangmai",
+        linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
+        biosite: "https://bio.site/firstfiwfans.com",
+        linktree: "https://linktr.ee/kissmodel",
+        bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+    }
 };
 
 const REVIEW_POOL = [
@@ -62,80 +62,109 @@ const PROVINCE_NAME_MAP = {
     ubon: "อุบลราชธานี"
 };
 
+// 🟢 1. จัดการคำผิดและปรับคำภาษาไทยให้สละสลวย
+const sanitizeThaiText = (str) => {
+    if (!str) return "";
+    return String(str)
+        .replace(/นิมาน/g, "นิมมาน")
+        .replace(/นิทาน/g, "นิมมาน")
+        .replace(/ฟื้นที่/g, "พื้นที่")
+        .replace(/ไกล้เคียง/g, "ใกล้เคียง")
+        .replace(/ใกล้เครยง/g, "ใกล้เคียง")
+        .replace(/พาพับ/g, "พายัพ")
+        .replace(/รับงาน ของแก่น/g, "รับงาน ขอนแก่น")
+        .replace(/ตัวเมือง ของแก่น/g, "ตัวเมือง ขอนแก่น");
+};
+
+// 🟢 2. สุ่มรีวิวคงที่ ปลอดภัยต่อ Type Error และไม่สุ่มซ้ำ
 const getDeterministicReviews = (slug, count = 3) => {
-    const charCodeSum = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const seed = String(slug || 'default');
+    const charCodeSum = seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const poolLength = REVIEW_POOL.length;
+    if (poolLength === 0) return [];
+
     const selected = [];
+    const usedIndices = new Set();
+    
     for (let i = 0; i < count; i++) {
-        const index = (charCodeSum + i * 3) % REVIEW_POOL.length;
+        let index = (charCodeSum + i * 3) % poolLength;
+        while (usedIndices.has(index) && usedIndices.size < poolLength) {
+            index = (index + 1) % poolLength;
+        }
+        usedIndices.add(index);
         selected.push(REVIEW_POOL[index]);
     }
     return selected;
 };
 
+// 🟢 3. สุ่มค่าคงที่สำหรับสัดส่วน/อายุ/ส่วนสูง
 const getDeterministicValue = (min, max, seedString, offset = 0) => {
-    const sum = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
-    return Math.floor(min + (sum % (max - min + 1)));
+    const seed = String(seedString || 'seed');
+    const sum = seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
+    const range = Math.max(1, max - min + 1);
+    return Math.floor(min + (sum % range));
 };
 
-// 🟢 1. ฟังก์ชันแปลงราคาอย่างปลอดภัย เอาเฉพาะตัวเลขชุดแรก (ป้องกัน 15002000)
+// 🟢 4. แปลงราคาอย่างแม่นยำ (ลบจุลภาค ป้องกัน 1,500 กลายเป็น 10)
 const extractCleanNumber = (rawRate) => {
-  if (!rawRate) return 1500;
-  const match = String(rawRate).match(/\d+/);
-  if (!match) return 1500;
-  let num = parseInt(match[0], 10);
-  if (num > 0 && num < 500) num *= 10; // รองรับกรณีพิมพ์ตัวเลขย่อ เช่น 150 -> 1500
-  return num > 0 ? num : 1500;
+    if (!rawRate) return 1500;
+    const cleanStr = String(rawRate).replace(/,/g, '');
+    const match = cleanStr.match(/\d+/);
+    if (!match) return 1500;
+    let num = parseInt(match[0], 10);
+    if (num > 0 && num < 500) num *= 10;
+    return num >= 500 ? num : 1500;
 };
 
-// 🟢 2. ฟังก์ชันจัดการรูปภาพ Cloudinary แบบสมบูรณ์ ป้องกัน URL ถูกตัดจนเกิด 404
+// 🟢 5. จัดการรูปภาพ Cloudinary 100% ปลอดภัย ไร้ปัญหา 404 (บังคับใส่ images/ เสมอ)
 const optimizeImg = (path, width = 600, height = 800) => {
-  if (!path || typeof path !== "string" || !path.trim()) {
-    const domain = CONFIG.PRIMARY_DOMAIN || CONFIG.DOMAIN || "https://firstmodelhub.com";
-    return `${domain}/images/firstmodelhub.webp`;
-  }
-
-  let cleanPath = path.trim();
-
-  const transform = height 
-    ? `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face` 
-    : `f_auto,q_auto:eco,w_${width},c_scale`;
-
-  // กรณีเป็น URL เต็มของ Cloudinary
-  if (cleanPath.includes("res.cloudinary.com")) {
-    const uploadIdx = cleanPath.indexOf("/upload/");
-    if (uploadIdx !== -1) {
-      const prefix = cleanPath.substring(0, uploadIdx + 8); // https://res.cloudinary.com/.../upload/
-      let afterUpload = cleanPath.substring(uploadIdx + 8);
-
-      // ลบ Parameter ปรับแต่งรูปเดิมออกอย่างปลอดภัย
-      afterUpload = afterUpload.replace(/^(?:[a-z]{1,2}_[a-z0-9_:-]+,?)+\//i, "");
-
-      // 🟢 ตัวป้องกัน Cloudinary 404: ถ้าชื่อไฟล์ขึ้นต้นด้วย v0... โดยไม่มี v1234/ นำหน้า ให้เติม v1/ นำหน้าเสมอ
-      if (/^v\d+[a-z0-9_-]/i.test(afterUpload) && !/^v\d+\//i.test(afterUpload)) {
-        afterUpload = `v1/${afterUpload}`;
-      }
-
-      return `${prefix}${transform}/${afterUpload}`;
+    const defaultImg = `${CONFIG.DOMAIN}/images/firstmodelhub.webp`;
+    if (!path || typeof path !== 'string' || !path.trim()) {
+        return defaultImg;
     }
-    return cleanPath;
-  }
 
-  // กรณีเป็น URL ภายนอกอื่นๆ
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-    return cleanPath;
-  }
+    const cleanPath = path.trim();
+    const transform = height 
+        ? `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face` 
+        : `f_auto,q_auto:eco,w_${width},c_scale`;
 
-  // กรณีเป็น Relative Path จาก Supabase
-  let relPath = cleanPath.replace(/^\/+/, "");
-  if (/^v\d+[a-z0-9_-]/i.test(relPath) && !/^v\d+\//i.test(relPath)) {
-    relPath = `v1/${relPath}`;
-  }
+    // กรณีเป็น Full URL ของ Cloudinary
+    if (cleanPath.includes('res.cloudinary.com')) {
+        const uploadIdx = cleanPath.indexOf('/upload/');
+        if (uploadIdx !== -1) {
+            const prefix = cleanPath.substring(0, uploadIdx + 8);
+            let afterUpload = cleanPath.substring(uploadIdx + 8);
 
-  return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${relPath}`;
+            // ลบพารามิเตอร์ Transformation เดิมออกทั้งหมด
+            afterUpload = afterUpload.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, '');
+
+            // ถ้าไม่มีโฟลเดอร์ images/ ให้เติมเข้าไป ป้องกันชื่อไฟล์ v0... ชนกับ Cloudinary Version
+            if (!afterUpload.includes('images/')) {
+                afterUpload = `images/${afterUpload.replace(/^v\d+\//i, '')}`;
+            }
+
+            return `${prefix}${transform}/${afterUpload}`;
+        }
+        return cleanPath;
+    }
+
+    // กรณีเป็น URL ภายนอกอื่นๆ
+    if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+        return cleanPath;
+    }
+
+    // กรณีเป็น Relative Path จาก Supabase (เช่น "v0mjwv..." หรือ "images/v0mjwv...")
+    let relPath = cleanPath.replace(/^\/+/, '');
+    if (!relPath.startsWith('images/')) {
+        relPath = `images/${relPath}`;
+    }
+
+    return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${relPath}`;
 };
 
+// 🟢 6. สร้าง SrcSet สำหรับรูป Responsive
 const generateSrcSet = (path) => {
-    if (!path) return '';
+    if (!path || typeof path !== 'string') return '';
     const widths = [400, 600, 800];
     return widths.map(w => {
         const h = Math.round(w * (800 / 600)); 
@@ -143,21 +172,30 @@ const generateSrcSet = (path) => {
     }).join(', ');
 };
 
-const escapeHTML = (str) => str ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag])) : '';
-const stripHTML = (str) => str ? String(str).replace(/<[^>]*>?/gm, '').trim() : '';
+// 🟢 7. ฟังก์ชัน Escape & Strip HTML
+const escapeHTML = (str) => (str !== null && str !== undefined) 
+    ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag)) 
+    : '';
 
+const stripHTML = (str) => (str !== null && str !== undefined) 
+    ? String(str).replace(/<[^>]*>?/gm, '').trim() 
+    : '';
+
+// 🟢 8. กรองข้อความ ASCII Art / สัญลักษณ์ตกแต่ง
 const cleanAsciiArt = (text) => {
-    if (!text) return "";
-    return text
-        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬╭╮╰╯┊]+/g, "")
-        .replace(/[„•ㅅ•„]+|[^\u0E00-\u0E7F\w\s.,-]/g, " ")
-        .replace(/\n\s*\n/g, "\n")
+    if (!text) return '';
+    return String(text)
+        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬╭╮╰╯┊●○★☆◆◇■□▲▼▶◀✦✧*🔭🐻‍❄️💦🫦🌷֒🐾]+/g, ' ')
+        .replace(/[„•ㅅ•„જ⁀➴·˚༘⋆₊✮⸜⸝𐐪𐑂]+/g, ' ')
+        .replace(/[^\u0E00-\u0E7F\w\s.,/%()+-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/\n\s*\n/g, '\n')
         .trim();
 };
 
 const getLocalizedZone = (location, provinceName) => {
     if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
-    const cleanLoc = location.trim();
+    const cleanLoc = sanitizeThaiText(location).trim();
     if (cleanLoc.includes(provinceName)) {
         return `ย่าน${cleanLoc}`;
     }
@@ -175,9 +213,10 @@ const getNaturalDescription = (p, displayName, provinceName, ageVal, bwhVal, hei
 
 export default async (request, context) => {
     const url = new URL(request.url);
-    const dynamicDomain = `${url.protocol}//${url.host}`; 
+    const dynamicDomain = CONFIG.DOMAIN; 
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
+    // ตรวจสอบว่าเป็น Bot / Crawler หรือไม่
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
     
     if (!isBot) return context.next();
@@ -191,7 +230,7 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
-        // 🟢 1. ตรวจสอบโปรไฟล์จากฐานข้อมูล Supabase ทั้ง Slug และ Numeric ID
+        // 🟢 ตรวจสอบโปรไฟล์จากฐานข้อมูล Supabase ทั้ง Slug และ Numeric ID
         let profileQuery = supabase
             .from('profiles')
             .select('*')
@@ -209,7 +248,7 @@ export default async (request, context) => {
             return context.next();
         }
 
-        // ดึงรายชื่อน้องๆ ที่อยู่ในโซนจังหวัดเดียวกันเพื่อทำ Cross-linking ดันคะแนน SEO
+        // ดึงรายชื่อน้องๆ โซนเดียวกันเพื่อทำ Internal Links
         let related = [];
         const provKeyToQuery = p.provinceKey || p.province_key || p.province_slug || 'chiangmai';
         if (provKeyToQuery) {
@@ -229,14 +268,11 @@ export default async (request, context) => {
         
         const provinceKey = provKeyToQuery.toLowerCase();
         const provinceName = p.provinceThai || p.province_thai || PROVINCE_NAME_MAP[provinceKey] || p.location || 'เชียงใหม่';
-        
         const correctProvinceUrl = `${dynamicDomain}/location/${provinceKey}`;
         
-        const cleanedRate = String(p.rate || p.price || "1500").replace(/[^0-9]/g, '');
-        const rawRate = parseInt(cleanedRate, 10) || 1500;
+        const rawRate = extractCleanNumber(p.rate || p.price);
         const displayPrice = rawRate.toLocaleString() + ".-";
         
-        // 🟢 ดึงรูปภาพ Cloudinary จากทุกคอลัมน์ที่เป็นไปได้ใน Supabase
         const rawImgPath = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || '';
         const baseImageUrl = optimizeImg(rawImgPath, 600, 800);
         const lcpImageUrl = optimizeImg(rawImgPath, 400, 533);
@@ -263,11 +299,10 @@ export default async (request, context) => {
         const ratingValue = (4.8 + (charCodeSum % 3) / 10).toFixed(1);
         const reviewCount = 120 + (charCodeSum % 80);
         
-// ✅ ส่งค่าให้ครบทั้ง 9 ตัวตามลำดับ
-const localizedZone = getLocalizedZone(p.location, provinceName);
-const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, heightVal, weightVal, localizedZone, displayPrice);
+        const localizedZone = getLocalizedZone(p.location, provinceName);
+        const naturalDescriptionText = getNaturalDescription(p, displayName, provinceName, ageVal, bwhVal, heightVal, weightVal, localizedZone, displayPrice);
         
-        const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก`;
+        const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก 100%`;
         const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
         
         const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`;
@@ -288,19 +323,12 @@ const naturalDescriptionText = getNaturalDescription(p, displayName, provinceNam
             "reviewBody": stripHTML(t.text)
         }));
 
-        const breadcrumbElements = [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain },
-            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceName}`, "item": correctProvinceUrl },
-            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
-        ];
-
         // =========================================================================
-        // 🟢 SCHEMA.ORG JSON-LD GRAPH (100% VALID & RICH RESULTS READY)
+        // 🟢 SCHEMA.ORG JSON-LD GRAPH (100% VALID & RICH SNIPPETS READY)
         // =========================================================================
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
-                // 1. นิติบุคคลผู้ให้บริการ / ธุรกิจความบันเทิงในพื้นที่
                 {
                     "@type": ["LocalBusiness", "EntertainmentBusiness"],
                     "@id": `${canonicalUrl}#serviceprovider`,
@@ -324,8 +352,6 @@ const naturalDescriptionText = getNaturalDescription(p, displayName, provinceNam
                     },
                     "review": schemaReviews
                 },
-
-                // 2. ข้อมูลโปรไฟล์บุคคล (Person Entity) ดึงสเปกลึกทั้งหมดให้ Googlebot ทราบ
                 {
                     "@type": "Person",
                     "@id": `${canonicalUrl}#person`,
@@ -359,15 +385,15 @@ const naturalDescriptionText = getNaturalDescription(p, displayName, provinceNam
                         "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
                     }
                 },
-
-                // 3. เส้นทาง Breadcrumb นำทางอย่างเป็นระบบ
                 {
                     "@type": "BreadcrumbList",
                     "@id": `${canonicalUrl}#breadcrumb`,
-                    "itemListElement": breadcrumbElements
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": dynamicDomain },
+                        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceName}`, "item": correctProvinceUrl },
+                        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
+                    ]
                 },
-
-                // 4. คำถาม-คำตอบที่พบบ่อย (FAQPage) ระบุสเปก พิกัด และความปลอดภัยชัดเจน
                 {
                     "@type": "FAQPage",
                     "@id": `${canonicalUrl}#faq`,
@@ -402,18 +428,18 @@ const naturalDescriptionText = getNaturalDescription(p, displayName, provinceNam
         };
 
         const html = `<!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="dark-theme dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} | สารบัญตรวจสอบประวัติตรงปก</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>${pageTitle} | ${CONFIG.BRAND_NAME}</title>
     <meta name="description" content="${metaDesc}">
     <link rel="canonical" href="${canonicalUrl}">
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="preload" as="image" href="${lcpImageUrl}" ${imageSrcSet ? `imagesrcset="${imageSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ''} fetchpriority="high">
-    <meta name="theme-color" content="#FF2E63">
+    <meta name="theme-color" content="#060411">
     
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta name="twitter:card" content="summary_large_image">
@@ -423,206 +449,151 @@ const naturalDescriptionText = getNaturalDescription(p, displayName, provinceNam
     <meta property="og:image" content="${baseImageUrl}">
     <meta property="og:image:width" content="600">   
     <meta property="og:image:height" content="800">
-    
-    <link rel="shortcut icon" href="/images/favicon.ico">
-    
-    <meta property="og:title" content="${pageTitle}">
-    <meta property="og:description" content="${metaDesc}">
     <meta property="og:url" content="${canonicalUrl}">
     <meta property="og:type" content="website">
 
+    <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
-    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
     
-    <style>
-        :root { 
-    --p: #C084FC; 
-    --s: #00E676; 
-    --bg: #060411; 
-    --card: #09090C; 
-    --txt: #f8fafc; 
-    --gold: #fbbf24; 
-    --muted: #A1A1AA; 
-    --bw: rgba(255,255,255,0.08); 
-}
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
-        .container { position: relative; max-width: 500px; margin: 0 auto; background: var(--card); min-height: 100vh; box-shadow: 0 0 60px rgba(0,0,0,0.6); border-left: 1px solid var(--bw); border-right: 1px solid var(--bw); }
-        @media (min-width: 768px) { .container { max-width: 600px; } }
-        
-        .fixed-nav { position: absolute; top: 0; left: 0; width: 100%; z-index: 100; background: linear-gradient(to bottom, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.4) 100%); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bw); }
-        .nav-content { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 64px; }
-        .logo-text { font-size: 18px; font-weight: 800; color: #FFFFFF; text-decoration: none; }
-        
-        .breadcrumb { padding: 84px 1.25rem 0.5rem 1.25rem; font-size: 0.85rem; color: var(--muted); }
-        .breadcrumb a { color: var(--p); text-decoration: none; }
-        
-        .main-content { padding: 0.5rem 1.25rem 2rem 1.25rem; }
-        .hero-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 1.5rem; box-shadow: 0 24px 48px rgba(0,0,0,0.7); border: 1px solid var(--bw); display: block; }
-        .profile-meta-header { text-align: center; margin: 1.5rem 0; }
-        h1 { font-size: clamp(1.8rem, 5vw, 2.3rem); font-weight: 900; line-height: 1.2; }
-        .rating { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700; font-size: 1.1rem; }
-        .rating .stars { font-size: 1.2rem; filter: drop-shadow(0 0 6px rgba(250,204,21,0.4)); }
-        .rating .rating-value { color: var(--gold); }
-        .rating .review-count { color: var(--muted); font-size: 0.95rem; font-weight: 400; }
-        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1.5rem 0; }
-        .spec-box { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .spec-box dt { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
-        .spec-box dd { font-size: 1.05rem; font-weight: 800; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
-        .info-item { background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2); border-radius: 1.25rem; padding: 1.25rem 0.75rem; text-align: center; }
-        .info-label { font-size: 0.85rem; color: var(--p); font-weight: 700; display: block; }
-        .info-value { font-size: 1.4rem; font-weight: 900; }
-        .description { background: rgba(255,255,255,0.01); border-radius: 1.25rem; padding: 1.5rem; margin: 1.5rem 0; border: 1px solid var(--bw); white-space: pre-line; font-size: 1.05rem; }
-        .btn-line { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--p), #db2777); color: #fff; padding: 1.1rem 2rem; border-radius: 3rem; font-weight: 800; font-size: 1.2rem; text-decoration: none; width: 100%; box-shadow: 0 12px 32px rgba(255,46,99,0.3); transition: all 0.25s ease; }
-        .pricing-section { margin: 2rem 0; background: rgba(0,0,0,0.2); border-radius: 1.25rem; padding: 1.5rem; border: 1px solid var(--bw); }
-        .pricing-title { color: var(--p); text-align: center; font-weight: 800; font-size: 1.2rem; margin-bottom: 1.25rem; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center; }
-        .pricing-item { background: rgba(255,255,255,0.03); padding: 0.85rem 0.5rem; border-radius: 0.85rem; border: 1px solid var(--bw); }
-        .faq-section { margin: 2.5rem 0; }
-        .faq-title { color: var(--p); font-size: 1.25rem; font-weight: 800; text-align: center; margin-bottom: 1.25rem; }
-        .faq-item { background: rgba(255,255,255,0.02); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; margin-bottom: 0.75rem; }
-        .faq-item h3 { font-size: 1rem; color: var(--txt); margin-bottom: 0.5rem; }
-        
-        .related-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
-        .related-card { background: rgba(255,255,255,0.03); border-radius: 1.25rem; overflow: hidden; border: 1px solid var(--bw); text-decoration: none; color: inherit; display: block; transition: border-color 0.2s; }
-        .related-card:hover { border-color: var(--p); }
-        .related-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
-        .related-name { padding: 0.75rem; text-align: center; font-weight: bold; font-size: 0.95rem; }
-        .view-all-btn { display: block; text-align: center; color: var(--p); text-decoration: underline; font-weight: bold; margin-top: 1rem; }
-        
-        .testimonial { background: rgba(255,255,255,0.01); padding: 1.25rem; border-radius: 1.25rem; border: 1px solid var(--bw); margin-bottom: 1rem; }
-        
-        .footer { text-align: center; padding: 2.5rem 1rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--bw); margin-top: 3.5rem; color: var(--muted); font-size: 0.85rem; }
-        .footer-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
-        .footer-nav a { color: var(--muted); text-decoration: underline; }
-
-        
-    </style>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script type="application/ld+json">${JSON.stringify(schemaData)}</script>
 </head>
 <body>
-
-    <div class="container">
-        <header class="fixed-nav">
-            <div class="nav-content">
-                <a href="/" class="logo-text">First Model <span style="color: #C084FC;">Hub</span></a>
+    <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 5rem 1rem;">
+        <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem;">
+            <div class="header-logo-container">
+                <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
+                    <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
+                </a>
             </div>
         </header>
 
-        <nav aria-label="breadcrumb" class="breadcrumb">
-            <a href="/">หน้าแรก</a> &raquo; 
-            <a href="${correctProvinceUrl}">ดูรายชื่อน้องๆ ไซด์ไลน์${provinceName}</a> &raquo; 
+        <nav aria-label="breadcrumb" style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a> &raquo; 
+            <a href="${correctProvinceUrl}" style="color: var(--primary-purple); text-decoration: none;">สาวรับงาน${provinceName}</a> &raquo; 
             <span>${displayName}</span>
         </nav>
 
         <main class="main-content">
-            <article>
+            <article class="interactive-card" style="padding: 1.25rem; border-radius: 20px; background: rgba(9, 9, 12, 0.95); border: 1px solid rgba(192, 132, 252, 0.2);">
                 <section class="hero-section">
-                    <img src="${lcpImageUrl}" 
-                         ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
-                         class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
-                         loading="eager" fetchpriority="high" decoding="sync" 
-                         width="400" height="533">
+                    <div style="position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 3/4; width: 100%;">
+                        <img src="${lcpImageUrl}" 
+                             ${imageSrcSet ? `srcset="${imageSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ''}
+                             class="hero-img" alt="${displayName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" 
+                             loading="eager" fetchpriority="high" decoding="sync" 
+                             width="400" height="533" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
                 </section>
 
-                <header class="profile-meta-header">
-                    <h1>${pageTitle}</h1>
-                    <div class="rating">
-                        <span class="stars">⭐</span>
-                        <span class="rating-value">${ratingValue}</span>
-                        <span class="review-count">คะแนนโหวตจากลูกค้า (${reviewCount} รีวิว)</span>
+                <header class="profile-meta-header" style="text-align: center; margin: 1.25rem 0 1rem 0;">
+                    <h1 style="font-size: 20px; font-weight: 900; color: #FFF; line-height: 1.3;">${pageTitle}</h1>
+                    <div style="display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;">
+                        <span style="color: #FBBF24;">⭐ ${ratingValue}</span>
+                        <span style="color: var(--text-muted); font-size: 12px;">(${reviewCount} รีวิว)</span>
                     </div>
                 </header>
 
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">ค่าขนม</span>
-                        <span class="info-value">${displayPrice}</span>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
+                    <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 11.5px;">สัดส่วน</span>
+                        <strong style="color: #FFF;">${bwhVal}</strong>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">อายุ</span>
-                        <span class="info-value">${ageVal} ปี</span>
+                    <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 11.5px;">ส่วนสูง / น้ำหนัก</span>
+                        <strong style="color: #FFF;">${heightVal} ซม. / ${weightVal} กก.</strong>
+                    </div>
+                    <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 11.5px;">อายุ</span>
+                        <strong style="color: #FFF;">${ageVal} ปี</strong>
+                    </div>
+                    <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 11.5px;">พิกัดบริการ</span>
+                        <strong style="color: #C084FC;">${escapeHTML(sanitizeThaiText(p.location || provinceName))}</strong>
                     </div>
                 </div>
 
-                <div class="specs-grid">
-                    <dl class="spec-box"><dt>สัดส่วน</dt><dd>${bwhVal}</dd></dl>
-                    <dl class="spec-box"><dt>ส่วนสูง</dt><dd>${heightVal} ซม.</dd></dl>
-                </div>
-
-                <div class="description">
+                <div class="description" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px; color: var(--text-gray); font-size: 12px; line-height: 1.6; margin-bottom: 1.25rem;">
                     ${escapeHTML(naturalDescriptionText)}
                 </div>
 
-                <a href="${finalLineUrl}" class="btn-line" rel="nofollow noopener" target="_blank">ทักไลน์จองคิว</a>
+                <div style="margin-bottom: 1.5rem;">
+                    <a href="${finalLineUrl}" class="sidebar-line-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #06C755; color: #FFFFFF; padding: 14px 0; border-radius: 100px; font-weight: 800; text-decoration: none; font-size: 14px; box-shadow: 0 4px 20px rgba(6, 199, 85, 0.4);" rel="nofollow noopener" target="_blank">
+                        <i class="fab fa-line" style="font-size: 20px;"></i> แอดไลน์สอบถามคิว (จ่ายหน้างาน)
+                    </a>
+                </div>
 
-                <section class="pricing-section">
-                    <h2 class="pricing-title">ราคาบริการ</h2>
-                    <div class="pricing-grid">
-                        <div class="pricing-item"><div>1 ชม.</div><strong>${rawRate.toLocaleString()}</strong></div>
-                        <div class="pricing-item"><div>2 ชม.</div><strong>${Math.floor(rawRate * 1.8).toLocaleString()}</strong></div>
-                        <div class="pricing-item"><div>ค้างคืน</div><strong>${Math.floor(rawRate * 4.5).toLocaleString()}</strong></div>
+                <section style="margin-bottom: 1.5rem; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                    <h2 style="color: #C084FC; text-align: center; font-weight: 800; font-size: 13.5px; margin-bottom: 10px;">ราคาบริการ</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>1 ชม.</div><strong style="color: #00E676;">${rawRate.toLocaleString()}.-</strong></div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>2 ชม.</div><strong style="color: #00E676;">${Math.floor(rawRate * 1.8).toLocaleString()}.-</strong></div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>ค้างคืน</div><strong style="color: #00E676;">${Math.floor(rawRate * 4.5).toLocaleString()}.-</strong></div>
                     </div>
                 </section>
 
-                <section class="faq-section">
-                    <h2 class="faq-title">คำถามพบบ่อย</h2>
-                    <div class="faq-item">
-                        <h3>${displayName} มีมัดจำไหม?</h3>
-                        <p>ไม่มีนโยบายการรับเงินโอนจองมัดจำล่วงหน้าใดๆ ทุกกรณีค่ะ ลูกค้าสามารถเดินทางมานัดพบหน้างานเพื่อตรวจสอบสิทธิ์ความตรงปกเรียบร้อยแล้ว ค่อยตกลงชำระค่าขนมโดยตรงหน้างานเพื่อความปลอดภัย 100%</p>
+                <section style="margin-bottom: 1.5rem;">
+                    <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">คำถามพบบ่อย</h2>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
+                        <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: ${displayName} มีมัดจำไหม?</h3>
+                        <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">ไม่มีนโยบายการรับเงินโอนจองมัดจำล่วงหน้าทุกกรณีค่ะ ลูกค้าสามารถนัดพบเจอตัวจริงหน้างานเพื่อตรวจสอบสิทธิ์ความตรงปกเรียบร้อยแล้ว ค่อยตกลงชำระค่าบริการหน้างานเพื่อความปลอดภัย 100%</p>
                     </div>
                 </section>
 
-                <section>
-                    <h2 class="faq-title">รีวิวจากลูกค้า</h2>
+                <section style="margin-bottom: 1.5rem;">
+                    <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">รีวิวจากลูกค้า</h2>
                     ${dynamicReviews.map(t => `
-                        <div class="testimonial">
-                            <strong>${escapeHTML(t.name)}</strong>
-                            <p>${escapeHTML(t.text)}</p>
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; margin-bottom: 8px;">
+                            <strong style="color: #FFF; font-size: 12px;">${escapeHTML(t.name)}</strong>
+                            <p style="font-size: 11.5px; color: var(--text-gray); margin: 4px 0 0 0;">${escapeHTML(t.text)}</p>
                         </div>
                     `).join('')}
                 </section>
                 
                 ${related.length > 0 ? `
-                <section class="faq-section" style="margin-top: 3.5rem;">
-                    <h2 class="faq-title">น้องๆ โซน${provinceName} ที่น่าสนใจ</h2>
-                    <div class="related-grid">
+                <section style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem;">
+                    <h2 style="color: #C084FC; font-size: 13.5px; font-weight: 800; margin-bottom: 12px; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${provinceName}</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
                         ${related.map(r => {
                             const rawRelName = r.name || r.displayName || 'สาวสวย';
                             const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
                             const displayRelName = `น้อง${cleanRelName}`;
                             const relImgPath = r.imagePath || r.image_url || r.photo || '';
                             return `
-                            <a href="/sideline/${encodeURIComponent(r.slug || r.id)}" class="related-card" title="${displayRelName}">
-                                <img src="${optimizeImg(relImgPath, 300, 400)}" class="related-img" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400">
-                                <div class="related-name">${displayRelName}</div>
+                            <a href="/sideline/${encodeURIComponent(r.slug || r.id)}" style="text-decoration: none; color: inherit; background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); display: block; text-align: center;">
+                                <img src="${optimizeImg(relImgPath, 300, 400)}" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
+                                <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #FFF;">${displayRelName}</div>
                             </a>
                             `;
                         }).join('')}
                     </div>
-                    <a href="${correctProvinceUrl}" class="view-all-btn">ดูน้องๆ รับงานโซน${provinceName} ทั้งหมด</a>
+                    <div style="text-align: center;">
+                        <a href="${correctProvinceUrl}" style="color: var(--primary-purple); font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${provinceName} ทั้งหมด &rarr;</a>
+                    </div>
                 </section>
                 ` : ''}
 
-                <section class="faq-section" style="margin-top: 2.5rem; border-top: 1px solid var(--bw); padding-top: 2rem;">
-                    <h2 class="faq-title">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
-                    <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--bw); border-radius: 1rem; padding: 1.25rem; font-size: 0.85rem; color: var(--muted); line-height: 1.75;">
-                        <p style="margin-bottom: 0.5rem;"><strong>✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
-                        <p style="margin-bottom: 0.5rem;"><strong>✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
-                        <p><strong>✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุดและจะถูกลบออกจากระบบทันทีหลังจากงานเสร็จสิ้น</p>
+                <section style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem;">
+                    <h2 style="color: var(--primary-purple); font-size: 13.5px; font-weight: 800; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
+                    <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; font-size: 11px; color: var(--text-muted); line-height: 1.6;">
+                        <p style="margin-bottom: 0.4rem;"><strong>✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
+                        <p style="margin-bottom: 0.4rem;"><strong>✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
+                        <p><strong>✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
                     </div>
                 </section>
             </article>
         </main>
         
-        <footer class="footer">
-            <nav class="footer-nav">
-                <a href="/">หน้าแรก</a>
-                <a href="/profiles">โปรไฟล์น้องๆ ทั้งหมด</a>
-                <a href="/locations">พิกัดรับงานทั่วประเทศ</a>
-            </nav>
+        <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 11px;">
+            <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
+                <a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a>
+                <a href="/profiles" style="color: var(--text-gray); text-decoration: none;">รวมโปรไฟล์</a>
+                <a href="/locations" style="color: var(--text-gray); text-decoration: none;">พื้นที่บริการ</a>
+            </div>
             © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
@@ -636,10 +607,7 @@ const naturalDescriptionText = getNaturalDescription(p, displayName, provinceNam
                 "X-Content-Type-Options": "nosniff",
                 "X-Frame-Options": "DENY",
                 "X-XSS-Protection": "1; mode=block",
-                "Referrer-Policy": "strict-origin-when-cross-origin",
-                "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-                "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-                "Content-Security-Policy": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https:;"
+                "Referrer-Policy": "strict-origin-when-cross-origin"
             }
         });
 
