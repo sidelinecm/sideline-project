@@ -77,37 +77,61 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
     return Math.floor(min + (sum % (max - min + 1)));
 };
 
+// 🟢 1. ฟังก์ชันแปลงราคาอย่างปลอดภัย เอาเฉพาะตัวเลขชุดแรก (ป้องกัน 15002000)
+const extractCleanNumber = (rawRate) => {
+  if (!rawRate) return 1500;
+  const match = String(rawRate).match(/\d+/);
+  if (!match) return 1500;
+  let num = parseInt(match[0], 10);
+  if (num > 0 && num < 500) num *= 10; // รองรับกรณีพิมพ์ตัวเลขย่อ เช่น 150 -> 1500
+  return num > 0 ? num : 1500;
+};
 
-const optimizeImg = (path, width = 400, height = 500) => {
-    if (!path || typeof path !== 'string' || !path.trim()) {
-        return `${CONFIG.DOMAIN}/images/firstmodelhub.webp`;
+// 🟢 2. ฟังก์ชันจัดการรูปภาพ Cloudinary แบบสมบูรณ์ ป้องกัน URL ถูกตัดจนเกิด 404
+const optimizeImg = (path, width = 600, height = 800) => {
+  if (!path || typeof path !== "string" || !path.trim()) {
+    const domain = CONFIG.PRIMARY_DOMAIN || CONFIG.DOMAIN || "https://firstmodelhub.com";
+    return `${domain}/images/firstmodelhub.webp`;
+  }
+
+  let cleanPath = path.trim();
+
+  const transform = height 
+    ? `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face` 
+    : `f_auto,q_auto:eco,w_${width},c_scale`;
+
+  // กรณีเป็น URL เต็มของ Cloudinary
+  if (cleanPath.includes("res.cloudinary.com")) {
+    const uploadIdx = cleanPath.indexOf("/upload/");
+    if (uploadIdx !== -1) {
+      const prefix = cleanPath.substring(0, uploadIdx + 8); // https://res.cloudinary.com/.../upload/
+      let afterUpload = cleanPath.substring(uploadIdx + 8);
+
+      // ลบ Parameter ปรับแต่งรูปเดิมออกอย่างปลอดภัย
+      afterUpload = afterUpload.replace(/^(?:[a-z]{1,2}_[a-z0-9_:-]+,?)+\//i, "");
+
+      // 🟢 ตัวป้องกัน Cloudinary 404: ถ้าชื่อไฟล์ขึ้นต้นด้วย v0... โดยไม่มี v1234/ นำหน้า ให้เติม v1/ นำหน้าเสมอ
+      if (/^v\d+[a-z0-9_-]/i.test(afterUpload) && !/^v\d+\//i.test(afterUpload)) {
+        afterUpload = `v1/${afterUpload}`;
+      }
+
+      return `${prefix}${transform}/${afterUpload}`;
     }
-    const cleanPath = path.trim();
-    const transform = height 
-        ? `f_auto,q_auto,w_${width},h_${height},c_fill` 
-        : `c_scale,w_${width},q_auto,f_auto`;
+    return cleanPath;
+  }
 
-    if (cleanPath.includes('res.cloudinary.com')) {
-        const uploadIdx = cleanPath.indexOf('/upload/');
-        if (uploadIdx !== -1) {
-            const prefix = cleanPath.substring(0, uploadIdx + 8);
-            let rest = cleanPath.substring(uploadIdx + 8);
-            // ล้าง Transformation parameters เก่าที่อาจติดมาใน Database ออกทั้งหมด
-            rest = rest.replace(/^([a-z0-9_,-:]+\/)+?(v\d+|images)/i, "$2");
-            if (!rest.startsWith("v") && !rest.startsWith("images") && rest.includes("/")) {
-                rest = rest.replace(/^[^/]+\//, "");
-            }
-            return `${prefix}${transform}/${rest}`;
-        }
-        return cleanPath;
-    }
+  // กรณีเป็น URL ภายนอกอื่นๆ
+  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+    return cleanPath;
+  }
 
-    if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
-        return cleanPath;
-    }
+  // กรณีเป็น Relative Path จาก Supabase
+  let relPath = cleanPath.replace(/^\/+/, "");
+  if (/^v\d+[a-z0-9_-]/i.test(relPath) && !/^v\d+\//i.test(relPath)) {
+    relPath = `v1/${relPath}`;
+  }
 
-    // กรณีเป็น Relative Path เช่น "v1771782437/images/..." หรือ "images/..." จาก Supabase
-    return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${cleanPath.replace(/^\/+/, "")}`;
+  return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${relPath}`;
 };
 
 const generateSrcSet = (path) => {
@@ -126,7 +150,7 @@ const cleanAsciiArt = (text) => {
     if (!text) return "";
     return text
         .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬╭╮╰╯┊]+/g, "")
-        .replace(/[„•ㅅ•„₊˚(\s\S)*?づ♡✦⁺.💦જ⁀➴🐻‍❄️ྀི·༘⋆*🔭🫦➏➒🌷͙֒𐐪🐾˖°●]+/g, " ")
+        .replace(/[„•ㅅ•„]+|[^\u0E00-\u0E7F\w\s.,-]/g, " ")
         .replace(/\n\s*\n/g, "\n")
         .trim();
 };
