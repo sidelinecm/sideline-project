@@ -77,8 +77,8 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
     return Math.floor(min + (sum % (max - min + 1)));
 };
 
-// 🟢 ฟังก์ชันแปลง URL รูปภาพ Cloudinary แบบ 100% ไร้รอยต่อ ป้องกัน URL ซ้อนทับและ 400 Bad Request
-const optimizeImg = (path, width = 600, height = 800) => {
+
+const optimizeImg = (path, width = 400, height = 500) => {
     if (!path || typeof path !== 'string' || !path.trim()) {
         return `${CONFIG.DOMAIN}/images/firstmodelhub.webp`;
     }

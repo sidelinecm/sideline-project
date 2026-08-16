@@ -254,27 +254,30 @@ const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
   }
   const cleanPath = path.trim();
   const transform = height 
-    ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_face` 
-    : `c_scale,w_${width},q_auto,f_auto`;
+    ? `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face` 
+    : `f_auto,q_auto:eco,w_${width},c_scale`;
 
+  // กรณีเป็น URL เต็มของ Cloudinary
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIdx = cleanPath.indexOf("/upload/");
     if (uploadIdx !== -1) {
-      const prefix = cleanPath.substring(0, uploadIdx + 8);
-      let rest = cleanPath.substring(uploadIdx + 8);
-      rest = rest.replace(/^([a-z0-9_,-:]+\/)+?(v\d+|images)/i, "$2");
-      if (!rest.startsWith("v") && !rest.startsWith("images") && rest.includes("/")) {
-        rest = rest.replace(/^[^/]+\//, "");
-      }
-      return `${prefix}${transform}/${rest}`;
+      const prefix = cleanPath.substring(0, uploadIdx + 8); // https://res.cloudinary.com/.../upload/
+      let afterUpload = cleanPath.substring(uploadIdx + 8);
+
+      // ลบ Parameter ปรับแต่งรูปเดิมออก (ถ้ามี) โดยไม่แตะต้อง Version (v1234...) หรือชื่อไฟล์
+      afterUpload = afterUpload.replace(/^(?:[a-z]_[a-z0-9_:-]+,?)+\//i, "");
+
+      return `${prefix}${transform}/${afterUpload}`;
     }
     return cleanPath;
   }
 
+  // กรณีเป็น URL ภายนอกอื่นๆ
   if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
     return cleanPath;
   }
 
+  // กรณีเป็น Relative Path
   return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${cleanPath.replace(/^\/+/, "")}`;
 };
 
