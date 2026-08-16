@@ -1,3 +1,4 @@
+
 /**
  * [ SYSTEM SSR PROVINCE CORE - PROD-READY ULTRA-OPTIMIZED 2026 ]
  * Project: First Model Hub - Serverless SSR Handler
@@ -9,7 +10,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_CACHE_SIZE = 300;
-const CACHE_TTL_MS = 5 * 60 * 1000; // แคช Memory 5 นาที
 
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
@@ -172,6 +172,12 @@ const PROVINCE_SEO_DATA = {
   }
 };
 
+Object.keys(PROVINCE_SEO_DATA).forEach(key => {
+  if (key !== "default") {
+    PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
+  }
+});
+
 function sanitizeThaiText(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -307,13 +313,13 @@ const smartLinkify = (text, flag, zones, provinceSlug = "chiangmai") => {
     });
   }
   
-  const serviceRegex = /(สาวรับงาน|ไซด์ไลน์|เด็กเอ็น|เพื่อนเที่ยว|รับงาน|ฟิวแฟน|ฟีลแฟน)(?![^<]*>|[^<>]*<\\/a>|[^<>]*<\\/strong>)/g;
+  const serviceRegex = /(สาวรับงาน|ไซด์ไลน์|เด็กเอ็น|เพื่อนเที่ยว|รับงาน|ฟิวแฟน|ฟีลแฟน)(?![^<]*>|[^<>]*<\/a>)/g;
   res = res.replace(serviceRegex, `<strong class="kw-purple">$1</strong>`);
 
-  const safetyRegex = /(ไม่โอนมัดจำ|จ่ายหน้างาน 100%|ตรงปก 100%|ความปลอดภัยสูงสุด|นัดเจอตัวจริง)(?![^<]*>|[^<>]*<\\/a>|[^<>]*<\\/strong>)/g;
+  const safetyRegex = /(ไม่โอนมัดจำ|จ่ายหน้างาน 100%|ตรงปก 100%|ความปลอดภัยสูงสุด|นัดเจอตัวจริง)(?![^<]*>|[^<>]*<\/a>)/g;
   res = res.replace(safetyRegex, `<strong class="kw-green">$1</strong>`);
 
-  const warnRegex = /(ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี|ห้ามโอนเงินก่อน|ปราศจากการเรียกเก็บเงิน)(?![^<]*>|[^<>]*<\\/a>|[^<>]*<\\/strong>)/g;
+  const warnRegex = /(ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี|ห้ามโอนเงินก่อน|ปราศจากการเรียกเก็บเงิน)(?![^<]*>|[^<>]*<\/a>)/g;
   res = res.replace(warnRegex, `<strong class="kw-red">$1</strong>`);
 
   return res;
@@ -328,9 +334,9 @@ const getDynamicIntro = (provinceName, zones, provinceSlug = "chiangmai") => {
   const zoneSnippet = zoneLinks.length > 0 ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน ${zoneLinks.join(", โซน ")}` : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
 
   return `
-    <p>ยินดีต้อนรับสู่ <strong>${CONFIG.BRAND_NAME}</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ สาวรับงาน${provinceName}, เด็กเอ็น${provinceName} และ เพื่อนเที่ยวไซด์ไลน์${provinceName} แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
+    <p>ยินดีต้อนรับสู่ <strong>${CONFIG.BRAND_NAME}</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong class="kw-purple">สาวรับงาน${provinceName}</strong>, <strong class="kw-purple">เด็กเอ็น${provinceName}</strong> และ <strong class="kw-purple">เพื่อนเที่ยวไซด์ไลน์${provinceName}</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ <strong class="kw-purple">ฟิวแฟน (Girlfriend Experience - GFE)</strong> อย่างสุภาพเรียบร้อยเป็นธรรมชาติ ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
     <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการในพื้นที่ ${provinceName} น้องๆ ในระบบของเรากระจายตัวอยู่ในจุดที่เหมาะสม${zoneSnippet} ไม่ว่าจะเป็นโรงแรมชั้นนำ คอนโดมิเนียมส่วนตัว หรือพิกัดยอดนิยม เดินทางสะดวกสบายและมีความปลอดภัยสูง พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
-    <p>รูปภาพและข้อมูลรายละเอียดสัดส่วนของน้องๆ ได้รับการคัดกรองและตรวจสอบยืนยันตัวตน (Verified System) อย่างรอบคอบ เพื่อให้สมาชิกมั่นใจได้ว่าข้อมูลถูกต้อง ตรงปก 100% ปลอดภัยนัดเจอ ชำระหน้างาน ไม่มีความเสี่ยงทางการเงินทุกกรณีครับ</p>
+    <p>รูปภาพและข้อมูลรายละเอียดสัดส่วนของน้องๆ ได้รับการคัดกรองและตรวจสอบยืนยันตัวตน (Verified System) อย่างรอบคอบ เพื่อให้สมาชิกมั่นใจได้ว่าข้อมูลถูกต้อง <strong class="kw-green">ตรงตามปก 100%</strong> ปลอดภัยนัดเจอ <strong class="kw-green">ชำระหน้างาน</strong> ไม่มีความเสี่ยงทางการเงินทุกกรณีครับ</p>
   `;
 };
 
@@ -452,6 +458,7 @@ const generateDynamicFAQsHTML = faqs => {
     `).join("");
 };
 
+// 🟢 เรนเดอร์การ์ดโปรไฟล์ คลีน เรียบหรู แต่ฝัง Semantic Alt Text เชิงลึก
 const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
@@ -491,6 +498,20 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
     </span>
   `;
 
+  const hasVideo = p.has_video || p.hasVideo || false;
+  const videoBadge = hasVideo
+    ? `<span style="background: rgba(255, 46, 99, 0.35); border: 1px solid rgba(255, 46, 99, 0.6); color: #FF2E63; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-video" style="font-size: 6.5px;"></i> คลิป
+       </span>`
+    : "";
+
+  const isVerified = p.verified || p.isVerified || false;
+  const verifiedBadge = isVerified
+    ? `<span style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(52, 211, 153, 0.55); color: #00E676; font-size: 8.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; backdrop-filter: blur(8px); display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+        <i class="fas fa-check-circle" style="font-size: 7.5px; color: #00E676;"></i> ยืนยันตัวตน
+       </span>`
+    : "";
+
   let rateDisplay = "1,500.-";
   if (p.rate) {
     if (!isNaN(p.rate)) rateDisplay = `${Number(p.rate).toLocaleString()}.-`;
@@ -522,6 +543,11 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
           <div style="position: absolute; top: 6px; left: 6px; z-index: 30; pointer-events: none; display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
               ${featuredBadge}
               ${statusBadge}
+              ${videoBadge}
+          </div>
+
+          <div style="position: absolute; top: 6px; right: 6px; z-index: 30; pointer-events: none; display: flex; align-items: center;">
+              ${verifiedBadge}
           </div>
           
           <a href="${pUrl}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์น้อง${pName} สาวรับงาน${provinceThaiName}"></a>
@@ -575,7 +601,7 @@ export default async (req, context) => {
     try { return await context.next(); } catch { return await context.next(); }
   }
 
-  // ข้อยกเว้นไฟล์ Static HTML ทั้งหมด
+  // 🟢 1. ข้อยกเว้นไฟล์ Static HTML ทั้งหมดในระบบ (รวม Nimman.html และ index-en.html)
   const staticPages = [
     "/about", "/about.html",
     "/faq", "/faq.html",
@@ -585,7 +611,7 @@ export default async (req, context) => {
     "/privacy-policy", "/privacy-policy.html",
     "/policy",
     "/locations", "/locations.html",
-    "/nimman", "/Nimman.html",
+    "/Nimman", "/Nimman.html",
     "/index-en", "/index-en.html",
     "/offline", "/offline.html"
   ];
@@ -597,15 +623,31 @@ export default async (req, context) => {
     return Response.redirect(`${hostUrl}/`, 301);
   }
 
-  // 🟢 1. Check Memory Cache First (Zero Database Query)
-  const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
-  const cachedItem = PAGE_CACHE.get(cacheKey);
-  const now = Date.now();
-  if (cachedItem && (now - cachedItem.timestamp < CACHE_TTL_MS)) {
-    return new Response(cachedItem.html, { headers: cachedItem.headers });
+  const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+  // 🟢 2. ดึงเวลาอัปเดตล่าสุดของฐานข้อมูล (เช็กเวอร์ชันเพื่อทำ Event-Driven Cache อัจฉริยะ)
+  let latestSyncTimestamp = "v1";
+  try {
+    const { data: latestProfile } = await supabase
+      .from("profiles")
+      .select("lastUpdated, created_at")
+      .order("lastUpdated", { ascending: false, nullsFirst: false })
+      .limit(1)
+      .maybeSingle();
+    
+    latestSyncTimestamp = latestProfile?.lastUpdated || latestProfile?.created_at || "v1";
+  } catch (e) {
+    latestSyncTimestamp = "v1";
   }
 
-  const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+// 🟢 ปรับแคชแบบ Zero-Query (ใช้ Cache-Control ของ CDN รับแขก ไม่ต้องยิง Supabase ถามเวลาทุกรอบ)
+const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
+const cachedItem = PAGE_CACHE.get(cacheKey);
+
+// ถ้ามีใน Memory Cache ให้ส่งกลับทันที
+if (cachedItem) {
+  return new Response(cachedItem.html, { headers: cachedItem.headers });
+}
 
   const paths = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "", profileSlug = "", isNationalHome = false;
@@ -689,19 +731,7 @@ export default async (req, context) => {
 
     const provinceThaiName = isNationalHome ? "ทั่วไทย" : (provinceData?.nameThai || "เชียงใหม่");
     const customMeta = isNationalHome ? null : (PROVINCE_CUSTOM_METADATA[provinceParam] || null);
-    
-    // ตั้งค่า SEO Data ให้สอดคล้องกับจังหวัด
-    let seoData = PROVINCE_SEO_DATA[provinceParam];
-    if (!seoData) {
-      seoData = {
-        name: provinceThaiName,
-        geo: { lat: 13.7563, lng: 100.5018 },
-        zones: [provinceThaiName, `ตัวเมือง${provinceThaiName}`, "ในพื้นที่ใกล้เคียง"],
-        faqs: [
-          { q: `นัดหมายสาวรับงาน${provinceThaiName} ต้องโอนมัดจำไหม?`, a: `ไม่มีการโอนมัดจำล่วงหน้าทุกกรณีครับ ตกลงจ่ายหน้างานเมื่อพบตัวจริงตรงปกเท่านั้น` }
-        ]
-      };
-    }
+    const seoData = isNationalHome ? PROVINCE_SEO_DATA.default : (PROVINCE_SEO_DATA[provinceParam] || PROVINCE_SEO_DATA.default);
 
     const canonUrl = matchedProfile 
       ? `${hostUrl}/sideline/${encodeURIComponent(profileSlug)}`
@@ -960,7 +990,7 @@ export default async (req, context) => {
       let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
       
       if (key === 'chiangmai') {
-        html += `<li><a href="/nimman" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
+        html += `<li><a href="/Nimman.html" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
         html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
       }
       return html;
@@ -1010,7 +1040,7 @@ export default async (req, context) => {
 
     if (!isNationalHome) {
       rawHtml = rawHtml.replace(
-        /<!--\s*🟢\s*หมวดที่\s*2[\s\S]*?<\/section>/i,
+        /<!--\s*🟢\s*<h2>\s*หมวดที่\s*2[\s\S]*?<\/section>/i,
         ""
       );
     }
@@ -1179,9 +1209,11 @@ export default async (req, context) => {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
+    // 🟢 4. ปรับ Response Headers ให้รองรับการอัปเดตแบบ Real-time ร่วมกับแคชระยะยาว
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=31536000, stale-while-revalidate=86400",
+      "ETag": `"${latestSyncTimestamp}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
@@ -1192,7 +1224,7 @@ export default async (req, context) => {
     if (PAGE_CACHE.size > MAX_CACHE_SIZE) {
       PAGE_CACHE.clear();
     }
-    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, timestamp: now });
+    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, version: latestSyncTimestamp });
 
     return new Response(rawHtml, { headers: responseHeaders });
 
