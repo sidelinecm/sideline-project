@@ -1,17 +1,9 @@
-/* ==============================================================================
-   [ SYSTEM STYLES CORE - MODERN LUXURY 2026 ULTRA-DIMENSIONAL ]
-   Project: First Model Hub
-   Features: Bento Grid Stats, Frosted Glass, Ambient Neon Glows, 3D Depth
-   ============================================================================== */
 
-/* ==============================================================================
-   1. FONTS: เปลี่ยน swap เป็น optional เพื่อป้องกัน Layout Shift 100%
-   ============================================================================== */
 @font-face {
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  font-display: optional; /* 🟢 เปลี่ยนเป็น optional เพื่อไม่ให้ตัวหนังสือกระตุกเปลี่ยนขนาด */
+  font-display: optional;
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
 
@@ -19,7 +11,7 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  font-display: optional; /* 🟢 เปลี่ยนเป็น optional */
+  font-display: optional;
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
 
@@ -65,7 +57,7 @@ body {
 .hidden { display: none !important; }
 
 /* ==============================================================================
-   🟢 1. COLOR-CODED SEO TYPOGRAPHY (ความเปรียบต่างสูง คมชัด เรืองแสงมีมิติ)
+   🟢 COLOR-CODED SEO TYPOGRAPHY & ICON PALETTES
    ============================================================================== */
 .kw-purple { color: #C084FC !important; font-weight: 800 !important; text-shadow: 0 0 12px rgba(192, 132, 252, 0.4); }
 .kw-green { color: #00E676 !important; font-weight: 800 !important; text-shadow: 0 0 12px rgba(0, 230, 118, 0.4); }
@@ -74,8 +66,18 @@ body {
 .kw-zone { color: #E9D5FF !important; font-weight: 700 !important; border-bottom: 1px dashed rgba(192, 132, 252, 0.4); text-decoration: none; }
 .kw-zone:hover { color: #FFFFFF !important; border-bottom-color: #00E676; }
 
+/* ไอคอนสีประจำ Sidebar เมนู */
+.icon-purple { color: #C084FC !important; }
+.icon-green { color: #00E676 !important; }
+.icon-gold { color: #FBBF24 !important; }
+.icon-pink { color: #FF2E93 !important; }
+.icon-blue { color: #38BDF8 !important; }
+.icon-lightpurple { color: #E9D5FF !important; }
+.icon-red { color: #FF2E63 !important; }
+.icon-gray { color: #94A3B8 !important; }
+
 /* ==============================================================================
-   🟢 2. FIXED HEADER & SLIM 50vw SIDEBAR (ภาพที่ 2 มีมิติกระจกฝ้า + ไอคอนสวยหรู)
+   🟢 FIXED HEADER & SLIM SIDEBAR
    ============================================================================== */
 #page-header {
   position: fixed !important; top: 8px !important; left: 8px !important; right: 8px !important;
@@ -101,15 +103,16 @@ body {
 }
 .brand-logo-text .hub-text { color: #C084FC !important; }
 .desktop-nav { display: none !important; }
-.nav-controls { display: flex !important; align-items: center !important; gap: 5px !important; }
+.nav-controls { display: flex !important; align-items: center !important; gap: 6px !important; }
 
 @media (min-width: 1024px) {
   #page-header { height: 60px !important; top: 14px !important; left: 16px !important; right: 16px !important; padding: 0 20px !important; }
   .desktop-nav { display: flex !important; align-items: center !important; gap: 16px !important; margin-right: 8px; }
-  .desktop-nav a { font-size: 13px !important; font-weight: 700 !important; color: #A1A1AA !important; text-decoration: none !important; }
+  .desktop-nav a { font-size: 13px !important; font-weight: 700 !important; color: #A1A1AA !important; text-decoration: none !important; transition: color 0.2s; }
+  .desktop-nav a:hover { color: #FFFFFF !important; }
 }
 
-/* 🟢 Sidebar Menu: 52vw กระจกฝ้าลึก มิติคมชัด */
+/* Sidebar Menu: กระจกฝ้าลึก มิติคมชัด */
 #sidebar-menu {
   position: fixed; top: 0; bottom: 0; right: 0; 
   width: 52vw !important; min-width: 210px !important; max-width: 280px !important; height: 100vh;
@@ -136,7 +139,7 @@ body {
 .sidebar-links-wrapper a:active { background: rgba(192, 132, 252, 0.15); border-color: rgba(192, 132, 252, 0.4); color: #FFF !important; }
 
 /* ==============================================================================
-   4. ✨ HERO SECTION & MICRO-PILL
+   4. HERO SECTION & MICRO-PILL
    ============================================================================== */
 #main-content { padding-top: 68px !important; padding-bottom: 95px !important; }
 
@@ -144,7 +147,7 @@ body {
 
 .clutch-pill-compact {
   display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;
-  padding: 3px 10px !important; border-radius: 100px !important; height: 24px !important;
+  padding: 3px 10px !important; border-radius: 100px !important; height: 24px !important; min-height: 24px !important;
   background: linear-gradient(135deg, rgba(25, 10, 48, 0.9) 0%, rgba(42, 12, 75, 0.85) 100%) !important;
   border: 1px solid rgba(192, 132, 252, 0.5) !important; box-shadow: 0 0 10px rgba(147, 51, 234, 0.3) !important;
   margin: 0 auto 2px auto !important;
@@ -167,7 +170,7 @@ body {
 .hero-subtitle-p { font-size: 11.5px !important; line-height: 1.65 !important; margin: 2px auto 8px auto !important; text-align: center !important; color: #CBD5E1 !important; max-width: 720px !important; }
 
 /* ==============================================================================
-   🟢 3. HOT SWIPER CARDS (ภาพที่ 4: เพิ่มมิติ 3D Depth & แสงเรืองรอง)
+   5. HOT SWIPER CARDS
    ============================================================================== */
 .hot-section-header-centered { display: flex !important; flex-direction: column !important; align-items: center !important; margin: 12px auto 8px auto !important; }
 .hot-title-red-pink { font-size: clamp(20px, 5vw, 26px) !important; font-weight: 900 !important; line-height: 1.25 !important; background: linear-gradient(135deg, #FF1744 0%, #FF5252 40%, #FF85C0 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; filter: drop-shadow(0 0 10px rgba(255, 23, 68, 0.5)) !important; }
@@ -175,9 +178,6 @@ body {
 .hot-tag-badge-red { background: linear-gradient(90deg, #E91E63 0%, #FF1744 100%) !important; color: #FFFFFF !important; font-size: 10px !important; font-weight: 800 !important; padding: 2px 10px !important; border-radius: 100px !important; box-shadow: 0 2px 8px rgba(233, 30, 99, 0.4); }
 .hot-swipe-hint-centered { font-size: 9.5px !important; font-weight: 700 !important; color: #A1A1AA !important; margin-top: 8px !important; background: rgba(255, 255, 255, 0.05); padding: 3px 12px !important; border-radius: 100px !important; letter-spacing: 0.05em; }
 
-/* ==============================================================================
-   3. HOT SWIPER CARDS (ล็อกพื้นที่ตายตัว ไม่ให้ขยับตอน JS โหลดเสร็จ)
-   ============================================================================== */
 .vip-swiper-wrapper { 
   display: flex !important; 
   flex-direction: row !important; 
@@ -188,30 +188,13 @@ body {
   max-width: 850px !important; 
   margin: 4px auto 10px auto !important; 
   padding: 6px 2px 10px 2px !important; 
-  height: 225px !important; /* 🟢 เปลี่ยนจาก min-height เป็น height ตายตัว */
+  height: 225px !important;
   min-height: 225px !important;
-  contain: layout size !important; /* 🟢 ล็อกขอบเขตการ Render */
+  contain: layout size !important;
   -webkit-overflow-scrolling: touch !important; 
   scrollbar-width: none !important; 
   scroll-snap-type: x mandatory !important; 
 }
-
-/* ล็อกขนาดความสูงของป้าย Verified ไม่ให้ยืดหด */
-.clutch-pill-compact {
-  display: inline-flex !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  gap: 6px !important;
-  padding: 3px 10px !important; 
-  border-radius: 100px !important; 
-  height: 24px !important; 
-  min-height: 24px !important; /* 🟢 เพิ่ม min-height */
-  background: linear-gradient(135deg, rgba(25, 10, 48, 0.9) 0%, rgba(42, 12, 75, 0.85) 100%) !important;
-  border: 1px solid rgba(192, 132, 252, 0.5) !important; 
-  box-shadow: 0 0 10px rgba(147, 51, 234, 0.3) !important;
-  margin: 0 auto 2px auto !important;
-}
-
 .vip-swiper-wrapper::-webkit-scrollbar { display: none; }
 
 .vip-card-item { 
@@ -232,7 +215,6 @@ body {
 .vip-name { color: #FFF !important; font-size: 12px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
 .vip-location { color: #C084FC !important; font-size: 10.5px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; text-shadow: 0 1px 2px rgba(0,0,0,0.9); }
 
-/* 🟢 แถบสถิติ 3 ชิป มินิมอลแนวนอน */
 .hero-stats-chips-row {
   display: flex !important; align-items: center !important; justify-content: center !important;
   gap: 5px !important; width: 100% !important; margin: 4px auto 8px auto !important; padding: 0 4px !important; flex-wrap: nowrap !important;
@@ -268,7 +250,7 @@ body {
 .pulse-dot-el { width: 5px !important; height: 5px !important; border-radius: 50% !important; background-color: #00E676 !important; }
 
 /* ==============================================================================
-   🟢 4. SAFE-PLAY ACCORDION (ภาพที่ 3: ปรับเป็นการ์ดลอย มีมิติ ไม่ทึบตัน)
+   7. SAFE-PLAY ACCORDION
    ============================================================================== */
 .rules-accordion { display: flex; flex-direction: column; gap: 8px; max-width: 768px; margin: 0 auto; }
 .rule-item {
@@ -291,7 +273,6 @@ body {
 .rule-item:not(.collapsed) .rule-content { max-height: 400px; padding: 0 14px 14px 14px; }
 .rule-content p { margin: 0; font-size: 11.5px; color: var(--text-gray); line-height: 1.6; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px; }
 
-/* ปุ่มขยายข้อมูลพื้นที่บริการ */
 .btn-read-more {
   background: rgba(124, 58, 237, 0.15) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important;
   color: #E9D5FF !important; border-radius: 100px; cursor: pointer; font-weight: 700; transition: all 0.2s ease;
@@ -299,7 +280,7 @@ body {
 .btn-read-more:active { transform: scale(0.95); }
 
 /* ==============================================================================
-   7. FLOATING BOTTOM SHEET (ฟอร์มค้นหา)
+   8. FLOATING BOTTOM SHEET (ค้นหา)
    ============================================================================== */
 .search-bottom-sheet {
   position: fixed !important; bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
@@ -328,7 +309,7 @@ body {
 .sheet-apply-btn { background: linear-gradient(135deg, #7C3AED, #5A2CBE); border: none; color: #FFF; border-radius: 100px; padding: 9px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
 
 /* ==============================================================================
-   🟢 5. LIGHTBOX MODAL (ภาพที่ 1: Bento Grid Tiles + ปุ่มแอดไลน์เรืองแสงมีมิติ)
+   9. LIGHTBOX MODAL
    ============================================================================== */
 #lightbox { position: fixed !important; inset: 0 !important; z-index: 4000 !important; display: none; align-items: center !important; justify-content: center !important; padding: 12px 6px !important; background-color: rgba(5, 3, 12, 0.94) !important; backdrop-filter: blur(25px) !important; overflow-y: auto !important; }
 #lightbox.active { display: flex !important; opacity: 1 !important; }
@@ -342,7 +323,6 @@ body {
 #lightboxThumbnailStrip { display: flex !important; gap: 6px !important; overflow-x: auto !important; padding: 8px 12px !important; background: rgba(5, 3, 12, 0.9) !important; }
 .lightbox-details { padding: 18px 16px 24px 16px !important; display: flex !important; flex-direction: column !important; gap: 12px !important; }
 
-/* 🟢 Bento Grid Tiles สำหรับสเปกใน Lightbox */
 .bento-stat-tile {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
   border: 1px solid rgba(192, 132, 252, 0.25) !important;
@@ -350,7 +330,6 @@ body {
   padding: 10px 4px !important; border-radius: 16px !important; text-align: center !important;
 }
 
-/* 🟢 แท็กคำโปรยใน Lightbox */
 .lightbox-tag-pill {
   background: rgba(124, 58, 237, 0.12) !important;
   border: 1px solid rgba(192, 132, 252, 0.3) !important;
@@ -359,7 +338,6 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-/* 🟢 ปุ่มแอดไลน์จองคิว 3D Glow */
 .lightbox-line-cta {
   display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important;
   background: linear-gradient(135deg, #05B34C 0%, #00E676 100%) !important;
@@ -370,7 +348,9 @@ body {
 }
 .lightbox-line-cta:active { transform: scale(0.97) !important; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3) !important; }
 
-/* FLOATING DOCK */
+/* ==============================================================================
+   10. FLOATING DOCK & FOOTER
+   ============================================================================== */
 .floating-app-dock { display: none; }
 @media (max-width: 768px) {
   .floating-app-dock { 
@@ -390,10 +370,9 @@ body {
 footer { padding-bottom: 30px !important; }
 @media (max-width: 768px) { footer { padding-bottom: 110px !important; } }
 
-/* ปรับขนาดพื้นที่กด (Tap Target) ของลิงก์ใน Footer ให้ได้มาตรฐานขั้นต่ำ 44-48px */
 footer ul li a {
   display: inline-block !important;
-  padding: 8px 4px !important; /* เพิ่มพื้นที่สัมผัส */
+  padding: 8px 4px !important;
   min-height: 36px !important;
   line-height: 20px !important;
 }
@@ -403,11 +382,6 @@ footer ul li a {
   padding: 6px 0 !important;
 }
 
-/* ==============================================================================
-   🟢 ส่วนที่เพิ่ม: สไตล์ปุ่มและองค์ประกอบที่ตกหล่นใน index.html
-   ============================================================================== */
-
-/* 1. ปุ่มสลับภาษา EN ที่ Header */
 .lang-micro-toggle {
   font-size: 11px !important;
   font-weight: 800 !important;
@@ -428,7 +402,6 @@ footer ul li a {
   border-color: rgba(192, 132, 252, 0.5) !important;
 }
 
-/* 2. หัวข้อและปุ่มจองคิว LINE ใน Sidebar */
 .sidebar-title {
   color: #A1A1AA !important;
   font-size: 13px !important;
@@ -466,7 +439,6 @@ footer ul li a {
   padding-top: 10px !important;
 }
 
-/* 3. กล่อง Skeleton ป้องกันหน้ากระตุก (CLS) ตอนโหลด HOT Swiper */
 .swiper-skeleton-card {
   flex: 0 0 148px !important;
   width: 148px !important;
@@ -482,4 +454,350 @@ footer ul li a {
 @keyframes skeletonShimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* ==============================================================================
+   🟢 [NEW 2026] SEO DRAWER, SAFE-PLAY, FAQ, REVIEWS & MAP SECTION STYLES
+   ============================================================================== */
+
+/* 1. Global Gradient Typography */
+.text-gradient-main {
+  background: linear-gradient(135deg, #FFFFFF 0%, #E9D5FF 50%, #C084FC 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+}
+
+.text-gradient-sub {
+  color: #A1A1AA !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* 2. SEO Content Deep Dive Drawer (ภาพที่ 2 ให้ดูหรู ไม่เทอะทะ) */
+.service-deep-dive-section {
+  margin: 20px auto 14px auto !important;
+  max-width: 850px !important;
+}
+
+.interactive-card.drawer-card-reset {
+  background: linear-gradient(135deg, rgba(20, 10, 42, 0.7) 0%, rgba(9, 5, 22, 0.9) 100%) !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+  border-radius: 20px !important;
+  padding: 16px 14px !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.seo-box-h2 {
+  font-size: clamp(15px, 4vw, 20px) !important;
+  margin-bottom: 8px !important;
+  text-align: left !important;
+}
+
+.seo-box-desc {
+  font-size: 11.5px !important;
+  line-height: 1.65 !important;
+  color: #CBD5E1 !important;
+  margin-bottom: 10px !important;
+}
+
+/* ระบบย่อขยายเนื้อหา SEO ไม่ให้รกหน้าจอ */
+.seo-content-container {
+  position: relative !important;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  overflow: hidden !important;
+}
+
+.seo-content-container.collapsed {
+  max-height: 100px !important;
+}
+
+.seo-content-container:not(.collapsed) {
+  max-height: 2000px !important;
+}
+
+.seo-content-inner {
+  font-size: 11.5px !important;
+  line-height: 1.7 !important;
+  color: #A1A1AA !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.seo-content-inner strong {
+  color: #E9D5FF !important;
+}
+
+.seo-fade-overlay {
+  display: none;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 60px !important;
+  background: linear-gradient(to top, rgba(9, 5, 22, 0.98) 0%, transparent 100%) !important;
+  pointer-events: none !important;
+}
+
+.seo-content-container.collapsed .seo-fade-overlay {
+  display: block !important;
+}
+
+.seo-footer-btn-wrapper {
+  margin-top: 10px !important;
+  text-align: center !important;
+}
+
+.btn-read-more {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 16px !important;
+  font-size: 11.5px !important;
+}
+
+/* 3. Safe-Play Framework */
+.safe-play-section {
+  max-width: 850px !important;
+  margin: 24px auto 14px auto !important;
+  text-align: center !important;
+}
+
+.safe-play-badge {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  color: #C084FC !important;
+  margin-bottom: 4px !important;
+}
+
+.safe-play-title {
+  font-size: clamp(16px, 4vw, 20px) !important;
+  margin-bottom: 12px !important;
+}
+
+/* 4. FAQ Section (ภาพที่ 3 ให้เป็นการ์ดโมเดิร์น) */
+.faq-section {
+  max-width: 850px !important;
+  margin: 24px auto 14px auto !important;
+}
+
+.faq-title {
+  font-size: clamp(16px, 4vw, 20px) !important;
+  text-align: center !important;
+  margin-bottom: 14px !important;
+}
+
+.faq-list-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.faq-item-card {
+  background: linear-gradient(135deg, rgba(25, 12, 50, 0.5) 0%, rgba(10, 6, 25, 0.7) 100%) !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.faq-q-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  margin-bottom: 6px !important;
+}
+
+.faq-q-badge {
+  background: #7C3AED !important;
+  color: #FFFFFF !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.faq-question-text {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  line-height: 1.4 !important;
+}
+
+.faq-answer-text {
+  font-size: 11.5px !important;
+  color: #CBD5E1 !important;
+  line-height: 1.6 !important;
+  padding-left: 32px !important;
+  border-left: 2px solid rgba(192, 132, 252, 0.3) !important;
+  margin-left: 10px !important;
+}
+
+/* 5. Customer Reviews Section */
+.reviews-section {
+  max-width: 850px !important;
+  margin: 24px auto 14px auto !important;
+}
+
+.reviews-title {
+  font-size: clamp(16px, 4vw, 20px) !important;
+  text-align: center !important;
+  margin-bottom: 14px !important;
+}
+
+.reviews-grid-wrapper {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+@media (min-width: 768px) {
+  .reviews-grid-wrapper {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+.review-card-item {
+  background: linear-gradient(135deg, rgba(20, 10, 42, 0.6) 0%, rgba(9, 5, 22, 0.85) 100%) !important;
+  border: 1px solid rgba(192, 132, 252, 0.22) !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.review-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 8px !important;
+}
+
+.review-user-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.review-avatar-circle {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  background: rgba(124, 58, 237, 0.3) !important;
+  border: 1px solid rgba(192, 132, 252, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+}
+
+.review-username {
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+}
+
+.review-user-loc {
+  font-size: 10.5px !important;
+  color: #A1A1AA !important;
+}
+
+.review-stars-list {
+  color: #FBBF24 !important;
+  font-size: 10px !important;
+  display: flex !important;
+  gap: 2px !important;
+}
+
+.review-comment-body {
+  font-size: 11.5px !important;
+  line-height: 1.6 !important;
+  color: #D4D4D8 !important;
+  margin-bottom: 8px !important;
+}
+
+.review-verified-badge {
+  font-size: 9.5px !important;
+  color: #00E676 !important;
+  font-weight: 700 !important;
+}
+
+/* 6. Google Map Container */
+#map-section {
+  max-width: 850px !important;
+  margin: 20px auto 20px auto !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6) !important;
+  background-color: #09090C !important;
+}
+
+#map-container {
+  width: 100% !important;
+  height: 180px !important;
+  position: relative !important;
+}
+
+#google-map {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+}
+/* ==============================================================================
+   🟢 HOT SWIPER CARDS (ล็อกขนาดตายตัว 100% ป้องกันรูปขยับ/กระตุก)
+   ============================================================================== */
+.vip-swiper-wrapper { 
+  display: flex !important; 
+  flex-direction: row !important; 
+  flex-wrap: nowrap !important; 
+  overflow-x: auto !important; 
+  gap: 10px !important; 
+  width: 100% !important; 
+  max-width: 850px !important; 
+  margin: 4px auto 10px auto !important; 
+  padding: 6px 4px 10px 4px !important; 
+  height: 225px !important;
+  min-height: 225px !important;
+  -webkit-overflow-scrolling: touch !important; 
+  scrollbar-width: none !important; 
+  scroll-snap-type: x mandatory !important; 
+}
+.vip-swiper-wrapper::-webkit-scrollbar { display: none; }
+
+.vip-card-item, .swiper-skeleton-card { 
+  flex: 0 0 150px !important; 
+  width: 150px !important; 
+  height: 210px !important; 
+  min-width: 150px !important;
+  max-width: 150px !important;
+  position: relative !important; 
+  overflow: hidden !important; 
+  border-radius: 16px !important; 
+  background-color: #09090C !important; 
+  border: 1px solid rgba(192, 132, 252, 0.35) !important; 
+  scroll-snap-align: start !important; 
+  flex-shrink: 0 !important; 
+  box-shadow: 0 8px 20px rgba(0,0,0,0.7) !important;
+}
+
+.vip-card-item img { 
+  position: absolute !important; 
+  inset: 0 !important; 
+  width: 100% !important; 
+  height: 100% !important; 
+  object-fit: cover !important; 
+  object-position: top center !important; 
+  pointer-events: none !important;
 }

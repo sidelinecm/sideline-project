@@ -705,7 +705,7 @@ window.ScrollTrigger = ScrollTrigger;
            title="${seoAltText}"
            width="300"
            height="400"
-           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 16px;"
+           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: brightness(0.96) saturate(0.92); transition: transform 0.4s ease, opacity 0.5s; opacity: 1; z-index: 0; border-radius: 18px;"
            loading="${index < 2 ? "eager" : "lazy"}"
            fetchpriority="${index === 0 ? "high" : "auto"}"
            decoding="async"
@@ -725,14 +725,14 @@ window.ScrollTrigger = ScrollTrigger;
       
       <a href="/sideline/${encodedSlug}" class="card-link" style="position: absolute; inset: 0; z-index: 25;" aria-label="ดูโปรไฟล์${nameClean}"></a>
 
-      <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px 10px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
-          <h3 style="font-size: 13.5px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
+      <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 11px 12px 11px; z-index: 20; pointer-events: none; text-align: left; display: flex; flex-direction: column; gap: 1px;">
+          <h3 style="font-size: 14px; font-weight: 800; color: white; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.95);">
             ${nameClean}${ageDisplay}
           </h3>
           
-          ${(profile.slogan || profile.quote) ? `<p style="font-size: 10px; color: #C084FC; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
+          ${(profile.slogan || profile.quote) ? `<p style="font-size: 11px; color: #f0a0cd; font-weight: 600; margin: 0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">${profile.slogan || profile.quote}</p>` : ''}
           
-          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #D4D4D8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #eee7f2; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 3px; margin-top: 2px;">
               <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
                   <i class="fas fa-map-marker-alt" style="color: #C084FC; margin-right: 2px;"></i> ${profile.location || currentProvName}
               </span>
@@ -822,15 +822,15 @@ window.ScrollTrigger = ScrollTrigger;
       const availText = isAvail ? "รับงาน" : "สอบถาม";
 
       return `
-        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}" style="flex: 0 0 148px !important; width: 148px !important; height: 205px !important; position: relative !important; overflow: hidden !important; border-radius: 14px !important; background-color: #09090C !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; scroll-snap-align: start !important; flex-shrink: 0 !important; cursor: pointer;">
-          <span class="vip-status-chip" style="position: absolute !important; top: 5px !important; left: 5px !important; background: rgba(9, 9, 11, 0.88) !important; border: 1px solid rgba(0, 230, 118, 0.5) !important; color: #00E676 !important; font-size: 9px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important;">🟢 ${availText}</span>
-          <span class="hot-rank-badge" style="position: absolute !important; top: 5px !important; right: 5px !important; background: linear-gradient(135deg, #FF9100 0%, #FFEB3B 100%) !important; color: #000 !important; font-size: 9px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important;">${rankText}</span>
-          <img src="${imgUrl}" alt="${p.displayName}" loading="${idx < 2 ? 'eager' : 'lazy'}" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; z-index: 1 !important; margin: 0 !important; padding: 0 !important; pointer-events: none !important;" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
-          <div class="vip-card-overlay" style="position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important;"></div>
-          <a href="/sideline/${pSlug}" class="card-link" style="display: block !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; z-index: 25 !important; cursor: pointer;" aria-label="ดูโปรไฟล์${p.displayName}"></a>
-          <div class="vip-card-info" style="position: absolute !important; bottom: 6px !important; left: 6px !important; right: 6px !important; z-index: 10 !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 1px !important;">
-            <div class="vip-name" style="color: #FFF !important; font-size: 11.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">${p.displayName}</div>
-            <div class="vip-location" style="color: #C084FC !important; font-size: 10px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">${realLocation}</div>
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
+          <span class="vip-status-chip">🟢 ${availText}</span>
+          <span class="hot-rank-badge">${rankText}</span>
+          <img src="${imgUrl}" alt="${p.displayName}" width="150" height="210" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
+          <div class="vip-card-overlay"></div>
+          <a href="/sideline/${pSlug}" class="card-link" aria-label="ดูโปรไฟล์${p.displayName}"></a>
+          <div class="vip-card-info">
+            <div class="vip-name">${p.displayName}</div>
+            <div class="vip-location">${realLocation}</div>
           </div>
         </div>
       `;
@@ -1041,44 +1041,107 @@ window.ScrollTrigger = ScrollTrigger;
     if (loader) loader.style.display = "none";
   }
 
-  function replaceDomPlaceholders(provinceName = "เชียงใหม่", profileCount = 50, provinceSlug = "chiangmai") {
+  // 🟢 1. ฟังก์ชันจัดการข้อความ, จำนวนโปรไฟล์, แผนที่ และ SEO ประจำหน้า (ตัดค่า Hardcode ทิ้ง 100%)
+  function replaceDomPlaceholders(provinceName, profileCount, provinceSlug) {
     try {
-      const data = LOCALIZED_SEO_MAP[provinceSlug] || LOCALIZED_SEO_MAP["chiangmai"] || LOCALIZED_SEO_MAP["national"];
-      const currentZones = (data && data.zones && data.zones.length > 1) 
-        ? data.zones.filter(z => z !== "ทั้งหมด").slice(0, 5).join(", ") 
-        : "ตัวเมือง และพื้นที่ใกล้เคียง";
+      // ตรวจสอบว่าเป็นหน้าประเทศ (ทั่วไทย) หรือหน้าจังหวัด
+      const isNational = (!provinceSlug || provinceSlug === "national" || provinceSlug === "all" || provinceSlug === "");
+      const activeKey = isNational ? "national" : provinceSlug;
 
+      // ดึงชื่อจังหวัดและจำนวนโปรไฟล์จริง (ถ้าไม่มีส่งมา ให้ดึงจากข้อมูลจริงที่มีในระบบ ห้ามใช้เลข 50)
+      const realProvName = isNational ? "ทั่วไทย" : (provinceName || STATE.provincesMap.get(activeKey) || "ทั่วไทย");
+      const realCount = (typeof profileCount === "number") 
+        ? profileCount 
+        : (STATE.filteredProfiles?.length ?? STATE.allProfiles?.length ?? 0);
+
+      // ดึงข้อมูล SEO ประจำจังหวัด (ถ้าหน้าทั่วไทย ให้ fallback ไปที่ 'national' ก่อนเสมอ ห้ามไปเชียงใหม่)
+      const data = LOCALIZED_SEO_MAP[activeKey] || LOCALIZED_SEO_MAP["national"] || {};
+      
+      const currentZones = (data.zones && data.zones.length > 0)
+        ? data.zones.filter(z => z !== "ทั้งหมด").slice(0, 6).join(", ")
+        : (isNational ? "กรุงเทพฯ, เชียงใหม่, พัทยา, ภูเก็ต, ขอนแก่น" : "ตัวเมือง และพื้นที่ใกล้เคียง");
+
+      // 1. อัปเดตตัวเลขสถิติจริงบนหน้าเว็บ
       const liveCountEl = document.getElementById("live-profile-count");
-      if (liveCountEl) liveCountEl.textContent = profileCount;
+      if (liveCountEl) liveCountEl.textContent = realCount;
 
+      // 2. อัปเดต Template Tag {{...}} ใน DOM Text Nodes
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
       let node;
       while ((node = walker.nextNode())) {
         if (node.nodeValue && node.nodeValue.includes("{{")) {
           node.nodeValue = node.nodeValue
-            .replace(/\{\{PROVINCE_NAME\}\}/g, provinceName)
-            .replace(/\{\{PROFILE_COUNT\}\}/g, profileCount)
-            .replace(/\{\{PROVINCE_ZONES\}\}/g, currentZones)
-            .replace(/\{\{PROFILES_CARDS_HTML\}\}/g, "")
-            .replace(/\{\{PROFILES_DISPLAY_AREA_HTML\}\}/g, "")
-            .replace(/\{\{PROVINCE_SEO_CONTENT\}\}/g, "")
-            .replace(/\{\{PROVINCE_FAQS_HTML\}\}/g, "")
-            .replace(/\{\{PROVINCE_REVIEWS_HTML\}\}/g, "");
+            .replace(/\{\{PROVINCE_NAME\}\}/g, realProvName)
+            .replace(/\{\{PROFILE_COUNT\}\}/g, realCount)
+            .replace(/\{\{PROVINCE_ZONES\}\}/g, currentZones);
         }
       }
 
+      // 3. อัปเดตเนื้อหาใน SEO Drawer ให้ตรงกับหน้า (ไม่ดึงข้อความเชียงใหม่มาแสดงในหน้าทั่วไทย)
+      const seoContentInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
+      if (seoContentInner && data.seoContent) {
+        seoContentInner.innerHTML = data.seoContent;
+      }
+
+      // 4. อัปเดตคำถามที่พบบ่อย (FAQs) ประจำหน้า
+      const faqContainer = document.getElementById("faq-container-list");
+      if (faqContainer && data.faqs && data.faqs.length > 0) {
+        faqContainer.innerHTML = data.faqs.map(item => `
+          <div class="faq-item-card">
+            <div class="faq-q-row">
+               <span class="faq-q-badge">Q</span>
+               <div class="faq-question-text">${item.q}</div>
+            </div>
+            <div class="faq-answer-text">${item.a}</div>
+          </div>
+        `).join("");
+      }
+
+      // 5. อัปเดตรีวิว (Reviews) ประจำหน้า
+      const reviewsContainer = document.getElementById("reviews-container-grid");
+      if (reviewsContainer && data.reviews && data.reviews.length > 0) {
+        reviewsContainer.innerHTML = data.reviews.map(r => `
+          <div class="review-card-item">
+             <div class="review-card-header">
+                <div class="review-user-info">
+                   <div class="review-avatar-circle">${r.initial || 'V'}</div>
+                   <div>
+                      <div class="review-username">${r.name}</div>
+                      <div class="review-user-loc">${r.loc}</div>
+                   </div>
+                </div>
+                <div class="review-stars-list">
+                   ${Array(r.stars || 5).fill('<i class="fas fa-star"></i>').join('')}
+                </div>
+             </div>
+             <p class="review-comment-body">"${r.text}"</p>
+             <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง</span>
+          </div>
+        `).join("");
+      }
+
+// 🟢 แก้ไข: หน้าทั่วไทยค้นหา Thailand (Zoom 6), หน้าจังหวัดค้นหาชื่อจังหวัด (Zoom 12)
+    const mapQueryStr = isNationalHome ? "Thailand" : (seoData.name || provinceThaiName);
+    const mapZoomLevel = isNationalHome ? 6 : 12;
+    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapQueryStr)}&t=&z=${mapZoomLevel}&ie=UTF8&iwloc=&output=embed`;
+
+      // 7. อัปเดต attribute a[href] และ img[alt]
       document.querySelectorAll('a[href*="{{"], img[alt*="{{"]').forEach(el => {
-        if (el.href) el.href = el.href.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
-        if (el.alt) el.alt = el.alt.replace(/\{\{PROVINCE_NAME\}\}/g, provinceName);
+        if (el.href) el.href = el.href.replace(/\{\{PROVINCE_NAME\}\}/g, realProvName);
+        if (el.alt) el.alt = el.alt.replace(/\{\{PROVINCE_NAME\}\}/g, realProvName);
       });
-    } catch (e) {}
+
+    } catch (e) {
+      console.error("❌ ข้อผิดพลาดใน replaceDomPlaceholders:", e);
+    }
   }
 
-async function handleRouteNavigation(isInitial = false) {
+  // 🟢 2. ฟังก์ชันตรวจสอบ URL Routing และสลับหน้าอัตโนมัติ
+  async function handleRouteNavigation(isInitial = false) {
     let path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
     if (!path) path = "/";
 
-    // 1. เคสเปิดหน้าโปรไฟล์เดี่ยว หรือ รีเฟรชขณะเปิด Lightbox
+    // 1. เคสเปิดหน้าโปรไฟล์เดี่ยว (/sideline/:slug หรือ /profile/:slug)
     const profileMatch = path.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
     if (profileMatch) {
       let slug = decodeURIComponent(profileMatch[1]);
@@ -1091,16 +1154,17 @@ async function handleRouteNavigation(isInitial = false) {
         return pSlug === searchSlug || pId === searchSlug;
       });
 
-      if (!foundProfile) {
+      if (!foundProfile && supabaseClient) {
         try {
-          const { data } = await supabaseClient.from("profiles").select("*").or(`slug.eq.${slug},id.eq.${/^\d+$/.test(slug) ? slug : 0}`).maybeSingle();
+          const isNumeric = /^\d+$/.test(slug);
+          const filterQuery = isNumeric ? `slug.eq.${slug},id.eq.${slug}` : `slug.eq.${slug}`;
+          const { data } = await supabaseClient.from("profiles").select("*").or(filterQuery).maybeSingle();
           if (data) foundProfile = processProfileObject(data);
         } catch (e) {}
       }
 
       if (foundProfile) {
-        // 🟢 จดจำจังหวัดของน้องคนนี้ไว้ เพื่อให้ตอนกดปิด Lightbox เด้งกลับมาจังหวัดนี้ถูก
-        const provKey = foundProfile.provinceKey || window.currentProvinceSlug || "";
+        const provKey = foundProfile.provinceKey || "";
         if (provKey && provKey !== "national" && provKey !== "all") {
           window.currentProvinceSlug = provKey;
           if (DOM.provinceSelect) DOM.provinceSelect.value = provKey;
@@ -1110,22 +1174,30 @@ async function handleRouteNavigation(isInitial = false) {
       return;
     }
 
-    // 2. เคสอยู่หน้าจังหวัด (เช่น /location/chiangmai)
+    // 2. เคสเปิดหน้ารายจังหวัด (/location/:slug หรือ /province/:slug)
     const locationMatch = path.match(/^\/(?:location|province)\/([^/]+)/);
     if (locationMatch) {
       let provinceSlug = decodeURIComponent(locationMatch[1]).toLowerCase();
       if (provinceSlug === "chiang_mai") provinceSlug = "chiangmai";
+      
       STATE.currentProfileSlug = null;
       closeLightboxModal(false);
 
+      window.currentProvinceSlug = provinceSlug;
       if (DOM.provinceSelect) DOM.provinceSelect.value = provinceSlug;
+      
       applyUltimateFilters(false);
       return;
     }
 
-    // 3. เคสหน้าแรกสุด (/)
+    // 3. เคสหน้าแรกสุดระดับประเทศ (/)
     STATE.currentProfileSlug = null;
+    window.currentProvinceSlug = "national";
     closeLightboxModal(false);
+
+    // เคลียร์ค่า Dropdown ให้กลับมาที่ "ทั้งหมด / ทั่วไทย"
+    if (DOM.provinceSelect) DOM.provinceSelect.value = "";
+    
     applyUltimateFilters(false);
   }
 
