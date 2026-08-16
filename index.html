@@ -12,7 +12,7 @@
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
 
-  <!-- MULTILINGUAL SEO (เชื่อมต่อไปยังหน้าภาษาอังกฤษ index-en.html) -->
+  <!-- MULTILINGUAL SEO -->
   <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
   <link rel="alternate" hreflang="en" href="https://firstmodelhub.com/index-en.html" />
   <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
@@ -50,7 +50,7 @@
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-  <!-- PRELOAD FONTS & STYLES -->
+  <!-- PRELOAD CRITICAL LOCAL FONTS (ป้องกัน Layout Shift 100%) -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   
@@ -68,7 +68,7 @@
 
 <body>
 
-<!-- 🟢 1. FLOATING APP DOCK (แถบเมนูด้านล่างสำหรับมือถือ) -->
+<!-- 🟢 1. FLOATING APP DOCK (แถบเมนูด้านล่างสำหรับมือถือ - Touch Target มาตรฐาน 48px) -->
 <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
   <a href="/index.html" class="dock-item active">
     <i class="fas fa-home" aria-hidden="true"></i>
@@ -98,20 +98,17 @@
         </a>
     </div>
 
-    <div class="nav-controls" style="display: flex; align-items: center; gap: 10px;">
-        <!-- Desktop Nav: เชื่อมต่อครบทุกไฟล์ในโฟลเดอร์ -->
+    <div class="nav-controls">
         <nav class="desktop-nav" aria-label="เมนูหลักบนคอมพิวเตอร์">
-            <a href="/profiles.html" style="color: var(--text-gray) !important;">รวมโปรไฟล์ VIP</a>
-            <a href="/locations.html" style="color: var(--text-gray) !important;">พื้นที่ให้บริการ</a>
-            <a href="/blog.html" style="color: var(--text-gray) !important;">บทความ & รีวิว</a>
-            <a href="/faq.html" style="color: var(--text-gray) !important;">คำถามที่พบบ่อย</a>
-            <a href="/about.html" style="color: var(--text-gray) !important;">เกี่ยวกับเรา</a>
+            <a href="/profiles.html">รวมโปรไฟล์ VIP</a>
+            <a href="/locations.html">พื้นที่ให้บริการ</a>
+            <a href="/blog.html">บทความ & รีวิว</a>
+            <a href="/faq.html">คำถามที่พบบ่อย</a>
+            <a href="/about.html">เกี่ยวกับเรา</a>
         </nav>
 
-        <!-- Luxury Micro Language Switcher (เชื่อมต่อไปหน้า index-en.html โดยตรง) -->
-        <a href="/index-en.html" class="lang-micro-toggle" aria-label="Switch to English" 
-           style="font-size: 11px; font-weight: 800; color: #A1A1AA; border: 1px solid rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.04); backdrop-filter: blur(8px);">
-          <i class="fas fa-globe" style="font-size: 10px; color: #C084FC;" aria-hidden="true"></i> EN
+        <a href="/index-en.html" class="lang-micro-toggle" aria-label="Switch to English">
+          <i class="fas fa-globe" aria-hidden="true"></i> EN
         </a>
 
         <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทางสำหรับมือถือ">
@@ -120,45 +117,44 @@
     </div>
 </header>
 
-<!-- MOBILE SIDEBAR MENU (เชื่อมโยงไฟล์ทั้งหมดจากโฟลเดอร์ 77777pro + Nimman.html) -->
+<!-- MOBILE SIDEBAR MENU -->
 <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
   <div class="sidebar-header-div">
-    <span style="color: #A1A1AA; font-size: 13px; font-weight: 700;">Navigation Hub</span>
+    <span class="sidebar-title">Navigation Hub</span>
     <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn" type="button">
       <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </div>
   
   <div class="sidebar-links-wrapper">
-    <a href="/index.html"><i class="fas fa-home" style="margin-right: 8px; color: #C084FC;"></i> หน้าแรก</a>
-    <a href="/profiles.html"><i class="fas fa-user-check" style="margin-right: 8px; color: #00E676;"></i> น้องๆ VIP แนะนำ</a>
-    <a href="/locations.html"><i class="fas fa-map-marked-alt" style="margin-right: 8px; color: #FBBF24;"></i> พื้นที่บริการทั่วไทย</a>
-    <a href="/Nimman.html"><i class="fas fa-gem" style="margin-right: 8px; color: #EC4899;"></i> โซนนิมมาน เชียงใหม่</a>
-    <a href="/blog.html"><i class="fas fa-newspaper" style="margin-right: 8px; color: #60A5FA;"></i> บทความ & คู่มือนัดหมาย</a>
-    <a href="/about.html"><i class="fas fa-shield-alt" style="margin-right: 8px; color: #A78BFA;"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
-    <a href="/faq.html"><i class="fas fa-question-circle" style="margin-right: 8px; color: #F87171;"></i> คำถามที่พบบ่อย (FAQ)</a>
-    <a href="/privacy-policy.html"><i class="fas fa-user-lock" style="margin-right: 8px; color: #9CA3AF;"></i> นโยบายความเป็นส่วนตัว</a>
-    <a href="/index-en.html" style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px; padding-top: 10px;"><i class="fas fa-globe" style="margin-right: 8px; color: #C084FC;"></i> English Version (EN)</a>
+    <a href="/index.html"><i class="fas fa-home icon-purple" aria-hidden="true"></i> หน้าแรก</a>
+    <a href="/profiles.html"><i class="fas fa-user-check icon-green" aria-hidden="true"></i> น้องๆ VIP แนะนำ</a>
+    <a href="/locations.html"><i class="fas fa-map-marked-alt icon-gold" aria-hidden="true"></i> พื้นที่บริการทั่วไทย</a>
+    <a href="/Nimman.html"><i class="fas fa-gem icon-pink" aria-hidden="true"></i> โซนนิมมาน เชียงใหม่</a>
+    <a href="/blog.html"><i class="fas fa-newspaper icon-blue" aria-hidden="true"></i> บทความ & คู่มือนัดหมาย</a>
+    <a href="/about.html"><i class="fas fa-shield-alt icon-lightpurple" aria-hidden="true"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
+    <a href="/faq.html"><i class="fas fa-question-circle icon-red" aria-hidden="true"></i> คำถามที่พบบ่อย (FAQ)</a>
+    <a href="/privacy-policy.html"><i class="fas fa-user-lock icon-gray" aria-hidden="true"></i> นโยบายความเป็นส่วนตัว</a>
+    <a href="/index-en.html" class="sidebar-lang-link"><i class="fas fa-globe icon-purple" aria-hidden="true"></i> English Version (EN)</a>
   </div>
 
-  <div style="padding: 12px;">
-    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" 
-       style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background-color: #06C755; color: #FFFFFF; padding: 11px 0; border-radius: 100px; font-weight: 800; text-decoration: none; font-size: 12.5px; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.3);">
-      <i class="fab fa-line" style="font-size: 18px;" aria-hidden="true"></i> แอดไลน์จองคิว VIP
+  <div class="sidebar-footer-cta">
+    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
+      <i class="fab fa-line" aria-hidden="true"></i> แอดไลน์จองคิว VIP
     </a>
   </div>
 </aside>
 
 <div id="sidebar-overlay" class="drawer-backdrop"></div>
 
-<!-- 🟢 3. MAIN CONTENT (SEMANTIC STRUCTURE) -->
+<!-- 🟢 3. MAIN CONTENT (ZERO CLS & FULL SEMANTIC) -->
 <main id="main-content">
   <div class="container">
 
     <!-- HERO SECTION -->
     <section class="hero-section" aria-labelledby="hero-h1">
       
-      <!-- ป้าย VERIFIED 2026 Micro-Pill -->
+      <!-- ป้าย VERIFIED 2026 Micro-Pill (ความสูงคงที่ ไม่สั่น) -->
       <div class="clutch-pill-compact">
         <span class="pill-badge-tag">VERIFIED 2026</span>
         <div class="stars-mini" aria-hidden="true">
@@ -167,12 +163,12 @@
         <span class="pill-badge-score">5/5 Verified Profiles</span>
       </div>
 
-      <!-- BRAND LOGO TEXT -->
+      <!-- BRAND LOGO TEXT (ล็อกพื้นที่ Render ป้องกันสลับบรรทัด) -->
       <div class="brand-showcase-wrapper">
         <span class="brand-neon-text">
           FirstModel<span class="hub-text-pink">Hub</span>
         </span>
-        <span class="dancing-neon-star">🌟</span>
+        <span class="dancing-neon-star" aria-hidden="true">🌟</span>
       </div>
 
       <!-- 🟢 <h1> หัวข้อหลักประจำหน้า -->
@@ -182,10 +178,9 @@
       </h1>
       
       <p class="hero-guarantee-tag">
-        <i class="fas fa-shield-alt" style="margin-right: 4px;" aria-hidden="true"></i> ความปลอดภัยสูงสุด <span class="kw-green">เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%</span>
+        <i class="fas fa-shield-alt" aria-hidden="true"></i> ความปลอดภัยสูงสุด <span class="kw-green">เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%</span>
       </p>
       
-      <!-- 🟢 <p> คอนเทนต์เกริ่นนำ -->
       <p class="hero-subtitle-p">
         ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong class="kw-purple">รับงาน{{PROVINCE_NAME}}</strong>, <strong class="kw-purple">สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong class="kw-purple">เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง <span class="kw-green">ตรงปก 100%</span> ปราศจากความเสี่ยงด้วยนโยบาย <strong class="kw-red">ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด <span class="kw-purple">{{PROVINCE_ZONES}}</span> ทั้งหมด
       </p>
@@ -201,8 +196,13 @@
         </div>
       </div>
 
-      <!-- HOT CARDS SWIPER -->
-      <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ"></div>
+      <!-- 🟢 HOT CARDS SWIPER (ใส่กล่อง Skeleton รอไว้ล่วงหน้า ตัดปัญหา CLS 0.217 ทันที) -->
+      <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">
+        <div class="swiper-skeleton-card"></div>
+        <div class="swiper-skeleton-card"></div>
+        <div class="swiper-skeleton-card"></div>
+        <div class="swiper-skeleton-card"></div>
+      </div>
 
       <!-- 🟢 แถบสถิติ 3 ชิปมินิมอล -->
       <div class="hero-stats-chips-row">
@@ -226,7 +226,7 @@
       <div class="clean-section-header">
           <h2 id="featured-heading" class="clean-section-h2">
             แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์{{PROVINCE_NAME}}</span><br>
-            <span class="text-gradient-sub" style="font-size: 13px; font-weight: 700;">คัดเกรดพรีเมียม สไตล์ฟิวแฟน การันตีตรงปก 100%</span>
+            <span class="text-gradient-sub">คัดเกรดพรีเมียม สไตล์ฟิวแฟน การันตีตรงปก 100%</span>
           </h2>
       </div>
       
@@ -241,26 +241,26 @@
     </div>
 
     <!-- 🟢 <h2> หมวดที่ 4: SEO CONTENT DRAWER -->
-    <section id="service-deep-dive" style="border-top: 1px solid var(--border-light); padding-top: 24px; margin-top: 24px;" aria-label="ข้อมูลเชิงลึก">
-      <div class="interactive-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-         <div style="position: relative; padding: 16px; border-bottom: 1px solid var(--border-light); background: rgba(13, 8, 30, 0.45);">
-             <h2 class="text-gradient-main" style="font-size: 15px; font-weight: 800; margin: 0 0 6px 0;">
+    <section id="service-deep-dive" class="service-deep-dive-section" aria-label="ข้อมูลเชิงลึก">
+      <div class="interactive-card drawer-card-reset">
+         <div class="seo-header-box">
+             <h2 class="text-gradient-main seo-box-h2">
                  บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า {{PROFILE_COUNT}}+ รายการ)
              </h2>
-             <p style="font-size: 12px; line-height: 1.6; color: #E4E4E7; margin: 0;">
+             <p class="seo-box-desc">
                  ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} คัดสรรโปรไฟล์ <span class="kw-green">ตรงปก 100%</span> บริการเอนเตอร์เทนสไตล์ <strong class="kw-purple">ฟิวแฟน (GFE)</strong> ปลอดภัยสูงสุดด้วยนโยบาย <strong class="kw-red">"จ่ายหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำล่วงหน้าทุกกรณี"</strong> ครอบคลุมโซน <span class="kw-purple">{{PROVINCE_ZONES}}</span>
              </p>
          </div>
 
          <div class="seo-content-container collapsed" id="seo-drawer-wrapper">
-             <div style="padding: 14px 16px; color: var(--text-gray); font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+             <div class="seo-content-inner">
                  {{PROVINCE_SEO_CONTENT}}
              </div>
              <div class="seo-fade-overlay"></div>
          </div>
          
-         <div style="text-align: center; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.03); background: rgba(9, 9, 12, 0.35);">
-             <button type="button" id="toggle-seo-drawer-btn" class="btn-read-more" style="font-size: 11px; padding: 5px 14px;" aria-label="ขยายหรือย่อข้อมูลพื้นที่บริการทั้งหมด">
+         <div class="seo-footer-btn-wrapper">
+             <button type="button" id="toggle-seo-drawer-btn" class="btn-read-more" aria-label="ขยายหรือย่อข้อมูลพื้นที่บริการทั้งหมด">
                  <span>ดูข้อมูลพื้นที่บริการทั้งหมด</span> <i class="fas fa-chevron-down" aria-hidden="true"></i>
              </button>
          </div>
@@ -268,11 +268,11 @@
     </section>
 
     <!-- 🟢 <h2> หมวดที่ 5: SAFE-PLAY FRAMEWORK -->
-    <section style="text-align: center; margin-top: 24px;" aria-labelledby="rules-title">
-      <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary-purple); margin-bottom: 4px;">
+    <section class="safe-play-section" aria-labelledby="rules-title">
+      <p class="safe-play-badge">
         SAFE-PLAY FRAMEWORK
       </p>
-      <h2 id="rules-title" class="text-gradient-main" style="font-size: 16px; font-weight: 800; margin-bottom: 12px;">
+      <h2 id="rules-title" class="text-gradient-main safe-play-title">
         ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}
       </h2>
 
@@ -316,24 +316,25 @@
     </section>
 
     <!-- 🟢 <h2> หมวดที่ 6: FAQ SECTION -->
-    <section style="max-width: 768px; margin: 24px auto 0 auto; text-align: left;" aria-labelledby="faq-main-heading">
-      <h2 id="faq-main-heading" class="text-gradient-main" style="font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 12px;">
+    <section class="faq-section" aria-labelledby="faq-main-heading">
+      <h2 id="faq-main-heading" class="text-gradient-main faq-title">
           คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}
       </h2>
-      <div id="faq-container-list" style="display: flex; flex-direction: column; gap: 8px;">
+      <div id="faq-container-list" class="faq-list-wrapper">
          {{PROVINCE_FAQS_HTML}}
       </div>
     </section>
 
     <!-- 🟢 <h2> หมวดที่ 7: REVIEWS SECTION -->
-    <section id="customer-reviews" style="text-align: center; margin-top: 24px;" aria-labelledby="reviews-main-heading">
-      <h2 id="reviews-main-heading" class="text-gradient-main" style="font-size: 16px; font-weight: 800; margin-bottom: 12px;">
+    <section id="customer-reviews" class="reviews-section" aria-labelledby="reviews-main-heading">
+      <h2 id="reviews-main-heading" class="text-gradient-main reviews-title">
         รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน{{PROVINCE_NAME}}
       </h2>
-      <div id="reviews-container-grid" style="display: grid; grid-template-columns: 1fr; gap: 8px; text-align: left;">
+      <div id="reviews-container-grid" class="reviews-grid-wrapper">
         {{PROVINCE_REVIEWS_HTML}}
       </div>
     </section>
+
 
     <!-- GOOGLE MAPS GEOLOCATION -->
     <section id="map-section" style="max-width: 850px; margin: 16px auto 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);">

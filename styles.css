@@ -4,17 +4,33 @@
    Features: Bento Grid Stats, Frosted Glass, Ambient Neon Glows, 3D Depth
    ============================================================================== */
 
-/* 1. FONTS */
+/* ==============================================================================
+   1. FONTS: เปลี่ยน swap เป็น optional เพื่อป้องกัน Layout Shift 100%
+   ============================================================================== */
 @font-face {
-  font-family: 'Prompt'; font-style: normal; font-weight: 400; font-display: swap;
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional; /* 🟢 เปลี่ยนเป็น optional เพื่อไม่ให้ตัวหนังสือกระตุกเปลี่ยนขนาด */
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
+
 @font-face {
-  font-family: 'Prompt'; font-style: normal; font-weight: 700; font-display: swap;
+  font-family: 'Prompt';
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional; /* 🟢 เปลี่ยนเป็น optional */
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
-@font-face { font-family: 'Font Awesome 6 Free'; font-display: swap !important; }
-@font-face { font-family: 'Font Awesome 6 Brands'; font-display: swap !important; }
+
+@font-face { 
+  font-family: 'Font Awesome 6 Free'; 
+  font-display: block !important; 
+}
+@font-face { 
+  font-family: 'Font Awesome 6 Brands'; 
+  font-display: block !important; 
+}
 
 /* 2. VARIABLES & THEME */
 :root {
@@ -159,13 +175,43 @@ body {
 .hot-tag-badge-red { background: linear-gradient(90deg, #E91E63 0%, #FF1744 100%) !important; color: #FFFFFF !important; font-size: 10px !important; font-weight: 800 !important; padding: 2px 10px !important; border-radius: 100px !important; box-shadow: 0 2px 8px rgba(233, 30, 99, 0.4); }
 .hot-swipe-hint-centered { font-size: 9.5px !important; font-weight: 700 !important; color: #A1A1AA !important; margin-top: 8px !important; background: rgba(255, 255, 255, 0.05); padding: 3px 12px !important; border-radius: 100px !important; letter-spacing: 0.05em; }
 
+/* ==============================================================================
+   3. HOT SWIPER CARDS (ล็อกพื้นที่ตายตัว ไม่ให้ขยับตอน JS โหลดเสร็จ)
+   ============================================================================== */
 .vip-swiper-wrapper { 
-  display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; 
-  overflow-x: auto !important; gap: 10px !important; width: 100% !important; max-width: 850px !important; 
-  margin: 4px auto 10px auto !important; padding: 6px 2px 10px 2px !important; 
+  display: flex !important; 
+  flex-direction: row !important; 
+  flex-wrap: nowrap !important; 
+  overflow-x: auto !important; 
+  gap: 10px !important; 
+  width: 100% !important; 
+  max-width: 850px !important; 
+  margin: 4px auto 10px auto !important; 
+  padding: 6px 2px 10px 2px !important; 
+  height: 225px !important; /* 🟢 เปลี่ยนจาก min-height เป็น height ตายตัว */
   min-height: 225px !important;
-  -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important; scroll-snap-type: x mandatory !important; 
+  contain: layout size !important; /* 🟢 ล็อกขอบเขตการ Render */
+  -webkit-overflow-scrolling: touch !important; 
+  scrollbar-width: none !important; 
+  scroll-snap-type: x mandatory !important; 
 }
+
+/* ล็อกขนาดความสูงของป้าย Verified ไม่ให้ยืดหด */
+.clutch-pill-compact {
+  display: inline-flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 6px !important;
+  padding: 3px 10px !important; 
+  border-radius: 100px !important; 
+  height: 24px !important; 
+  min-height: 24px !important; /* 🟢 เพิ่ม min-height */
+  background: linear-gradient(135deg, rgba(25, 10, 48, 0.9) 0%, rgba(42, 12, 75, 0.85) 100%) !important;
+  border: 1px solid rgba(192, 132, 252, 0.5) !important; 
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.3) !important;
+  margin: 0 auto 2px auto !important;
+}
+
 .vip-swiper-wrapper::-webkit-scrollbar { display: none; }
 
 .vip-card-item { 
