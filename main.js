@@ -256,6 +256,7 @@ window.ScrollTrigger = ScrollTrigger;
     STATE.isFetching = true;
 
     try {
+      // 1. โหลดข้อมูลจังหวัดจาก window.provincesData (ถ้ามี)
       if (window.provincesData && Array.isArray(window.provincesData)) {
         STATE.provincesMap.clear();
         window.provincesData.forEach(p => {
@@ -266,24 +267,22 @@ window.ScrollTrigger = ScrollTrigger;
         });
       }
 
-      // 🟢 อ่านข้อมูลรูปภาพ Cloudinary ตรงจาก SSR Hydration ก่อนเสมอ
+      // 2. ถ้ามีข้อมูลโปรไฟล์จาก SSR Hydration ให้ใช้ทันที (เร็วที่สุด ไม่เปลืองเน็ต)
       if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
         STATE.allProfiles = window.profilesData.map(p => processProfileObject(p)).filter(Boolean);
-        populateProvinceDropdown();
         
-        const urlMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
-        const activeSlug = urlMatch ? decodeURIComponent(urlMatch[1]).toLowerCase() : (window.currentProvinceSlug || "");
-        if (DOM.provinceSelect && activeSlug && activeSlug !== "national") {
-          DOM.provinceSelect.value = activeSlug;
-        }
+        // 🟢 บันทึกสำรองใส่ LocalStorage ไว้ใช้ยามฉุกเฉิน
+        try {
+          localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(window.profilesData));
+        } catch(e) {}
 
-        applyUltimateFilters(false);
-        updateHeroSwiperCards();
-        STATE.isFetching = false;
+        finishProfileLoading();
         return true;
       }
 
-      // 🟢 ดึงข้อมูลทุกคอลัมน์จาก Supabase เผื่อกรณีเข้าหน้าแบบ SPA
+      // 3. ถ้าไม่มี SSR ให้ดึงตรงจาก Supabase
+      if (!supabaseClient) throw new Error("Supabase client not initialized");
+
       const [provincesRes, profilesRes] = await Promise.all([
         supabaseClient.from("provinces").select("*"),
         supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false })
@@ -299,21 +298,58 @@ window.ScrollTrigger = ScrollTrigger;
         });
       }
 
-      if (profilesRes.data) {
+      if (profilesRes.data && profilesRes.data.length > 0) {
         STATE.allProfiles = profilesRes.data.map(p => processProfileObject(p)).filter(Boolean);
+        
+        // 🟢 บันทึกสำรองใส่ LocalStorage
+        try {
+          localStorage.setItem(CONFIG.KEYS.CACHE_PROFILES, JSON.stringify(profilesRes.data));
+        } catch(e) {}
+      } else {
+        throw new Error("No profiles data returned from Supabase");
       }
 
-      populateProvinceDropdown();
-      applyUltimateFilters(false);
-      updateHeroSwiperCards();
+      finishProfileLoading();
       return true;
 
     } catch (err) {
-      console.error("❌ โหลดข้อมูลล้มเหลว:", err);
+      console.warn("⚠️ โหลดจาก Supabase ไม่สำเร็จ กำลังกู้คืนจากระบบสำรอง (Cache)...", err);
+      
+      // 🟢 4. ระบบกู้ชีพฉุกเฉิน (Fallback): ถ้าเน็ตพังหรือ Supabase ล่ม ดึงจาก LocalStorage แทนทันที
+      try {
+        const cachedRaw = localStorage.getItem(CONFIG.KEYS.CACHE_PROFILES);
+        if (cachedRaw) {
+          const parsed = JSON.parse(cachedRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            STATE.allProfiles = parsed.map(p => processProfileObject(p)).filter(Boolean);
+            finishProfileLoading();
+            return true;
+          }
+        }
+      } catch (cacheErr) {
+        console.error("❌ โหลดจาก Cache สำรองก็ล้มเหลว:", cacheErr);
+      }
+
+      // ถ้าพังหมดจริงๆ ให้แสดงข้อความแจ้งเตือนเบาๆ ไม่ให้แอปค้าง
+      if (DOM.fetchErrorMessage) DOM.fetchErrorMessage.classList.remove("hidden");
       return false;
+
     } finally {
       STATE.isFetching = false;
+      hideGlobalLoader();
     }
+  }
+
+  // ฟังก์ชันย่อยสำหรับเซ็ตค่าหน้าจอหลังโหลดข้อมูลสำเร็จ (ลดโค้ดซ้ำซ้อน)
+  function finishProfileLoading() {
+    populateProvinceDropdown();
+    const urlMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
+    const activeSlug = urlMatch ? decodeURIComponent(urlMatch[1]).toLowerCase() : (window.currentProvinceSlug || "");
+    if (DOM.provinceSelect && activeSlug && activeSlug !== "national") {
+      DOM.provinceSelect.value = activeSlug;
+    }
+    applyUltimateFilters(false);
+    updateHeroSwiperCards();
   }
 
   function populateProvinceDropdown() {
