@@ -45,21 +45,29 @@ const REVIEW_POOL = [
     { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
 ];
 
+// 🟢 แก้ไข PROVINCE_NAME_MAP ให้รองรับทั้งแบบมีขีดและไม่มีขีดกลาง
 const PROVINCE_NAME_MAP = {
     chiangmai: "เชียงใหม่",
+    "chiang-mai": "เชียงใหม่",
     chiangrai: "เชียงราย",
+    "chiang-rai": "เชียงราย",
     lampang: "ลำปาง",
     lamphun: "ลำพูน",
     phitsanulok: "พิษณุโลก",
     bangkok: "กรุงเทพฯ",
     chonburi: "ชลบุรี",
     khonkaen: "ขอนแก่น",
+    "khon-kaen": "ขอนแก่น",
     phuket: "ภูเก็ต",
     udonthani: "อุดรธานี",
+    "udon-thani": "อุดรธานี",
     udon: "อุดรธานี",
     ayutthaya: "พระนครศรีอยุธยา",
+    "phra-nakhon-si-ayutthaya": "พระนครศรีอยุธยา",
     suratthani: "สุราษฎร์ธานี",
-    ubon: "อุบลราชธานี"
+    "surat-thani": "สุราษฎร์ธานี",
+    ubon: "อุบลราชธานี",
+    "ubon-ratchathani": "อุบลราชธานี"
 };
 
 // 🟢 1. จัดการคำผิดและปรับคำภาษาไทยให้สละสลวย

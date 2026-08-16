@@ -640,12 +640,14 @@ export default async (req, context) => {
     latestSyncTimestamp = "v1";
   }
 
-  // 🟢 3. แคชจะถูกใช้งานตลอดไป (1 เดือน / 6 เดือน) จนกว่าแอดมินจะกดแก้ไขข้อมูลในหลังบ้าน!
-  const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
-  const cachedItem = PAGE_CACHE.get(cacheKey);
-  if (cachedItem && cachedItem.version === latestSyncTimestamp) {
-    return new Response(cachedItem.html, { headers: cachedItem.headers });
-  }
+// 🟢 ปรับแคชแบบ Zero-Query (ใช้ Cache-Control ของ CDN รับแขก ไม่ต้องยิง Supabase ถามเวลาทุกรอบ)
+const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
+const cachedItem = PAGE_CACHE.get(cacheKey);
+
+// ถ้ามีใน Memory Cache ให้ส่งกลับทันที
+if (cachedItem) {
+  return new Response(cachedItem.html, { headers: cachedItem.headers });
+}
 
   const paths = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "", profileSlug = "", isNationalHome = false;
