@@ -20,7 +20,7 @@ let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
 const TEMPLATE_CACHE_TTL_MS = 60 * 60 * 1000; // จำโครงร่าง index.html 1 ชั่วโมง
 
-const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf)$/i;
+const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
 
 const CONFIG = {
   get SUPABASE_URL() {
@@ -268,7 +268,7 @@ const optimizeImg = (hostUrl, path, width = 400, height = 500) => {
       const prefix = cleanPath.substring(0, uploadIdx + 8);
       let afterUpload = cleanPath.substring(uploadIdx + 8);
 
-      afterUpload = afterUpload.replace(/^(?:[a-z]{1,2}_[a-z0-9_:-]+,?)+\//i, "");
+      afterUpload = afterUpload.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
 
       if (!afterUpload.includes("images/") && !afterUpload.startsWith("images/")) {
         afterUpload = `images/${afterUpload.replace(/^v\d+\//i, "")}`;
@@ -526,7 +526,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const sloganText = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
 
   return `
-    <div class="profile-card-new-container" role="listitem">
+    <div class="profile-card-new-container" >
       <article class="profile-card-new interactive-card"
            data-profile-id="${p.id}"
            data-profile-slug="${escapeHTML(p.slug || p.id)}"
@@ -606,20 +606,20 @@ export default async (req, context) => {
     try { return await context.next(); } catch { return await context.next(); }
   }
 
-// 🟢 รายการหน้า Static ที่ไม่ต้องรัน SSR จังหวัด (แปลงเป็นตัวพิมพ์เล็กทั้งหมด)
-  const staticPages = [
-    "/about", "/about.html",
-    "/faq", "/faq.html",
-    "/blog", "/blog.html",
-    "/contact", "/contact.html",
-    "/terms-of-service", "/terms-of-service.html",
-    "/privacy-policy", "/privacy-policy.html",
-    "/policy", "/policy.html",
-    "/locations", "/locations.html",
-    "/nimman", "/nimman.html",
-    "/index-en", "/index-en.html",
-    "/offline", "/offline.html"
-  ];
+const staticPages = [
+  "/about", "/about.html",
+  "/faq", "/faq.html",
+  "/blog", "/blog.html",
+  "/contact", "/contact.html",
+  "/terms-of-service", "/terms-of-service.html",
+  "/privacy-policy", "/privacy-policy.html",
+  "/policy", "/policy.html",
+  "/locations", "/locations.html",
+  "/nimman", "/nimman.html",
+  "/index-en", "/index-en.html",
+  "/offline", "/offline.html",
+  "/llms.txt"
+];
   
   // 🟢 1. ข้อยกเว้นไฟล์ Static (ตัด Trailing Slash และแปลงเป็นตัวพิมพ์เล็ก ป้องกันหลุดไปเป็นหน้าจังหวัด)
   const currentPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
@@ -1207,7 +1207,7 @@ export default async (req, context) => {
                     </h2>
                 </a>
             </div>
-            <div class="profile-grid profiles-grid-row" role="list">
+            <div class="profile-grid profiles-grid-row" >
               ${provinceCardsHtml}
             </div>
           </div>
@@ -1228,7 +1228,7 @@ export default async (req, context) => {
                   </span>
               </h2>
           </div>
-          <div class="profile-grid profiles-grid-row" role="list">
+          <div class="profile-grid profiles-grid-row" >
             ${cardsHtml}
           </div>
         </div>
