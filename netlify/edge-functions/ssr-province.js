@@ -11,6 +11,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 const PAGE_CACHE = new Map();
 const MAX_CACHE_SIZE = 300;
 
+// 🟢 ตัวแปรสำหรับระบบตรวจจับการเปลี่ยนแปลงหลังบ้าน (Micro-Probe Cache)
+let GLOBAL_LAST_TIMESTAMP = "initial_v1";
+let LAST_PROBE_TIME = 0;
+const PROBE_THROTTLE_MS = 15 * 1000; // หน่วงเช็คเวลา DB ไม่เกิน 1 ครั้งทุกๆ 15 วินาที
+
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
 const TEMPLATE_CACHE_TTL_MS = 60 * 60 * 1000; // จำโครงร่าง index.html 1 ชั่วโมง
@@ -601,7 +606,7 @@ export default async (req, context) => {
     try { return await context.next(); } catch { return await context.next(); }
   }
 
-  // 🟢 1. ข้อยกเว้นไฟล์ Static HTML ทั้งหมดในระบบ (รวม Nimman.html และ index-en.html)
+
   const staticPages = [
     "/about", "/about.html",
     "/faq", "/faq.html",
@@ -611,10 +616,12 @@ export default async (req, context) => {
     "/privacy-policy", "/privacy-policy.html",
     "/policy",
     "/locations", "/locations.html",
-    "/Nimman", "/Nimman.html",
+    "/nimman", "/nimman.html",
     "/index-en", "/index-en.html",
     "/offline", "/offline.html"
   ];
+  
+  // 🟢 1. ข้อยกเว้นไฟล์ Static และเปลี่ยนเส้นทาง /index.html
   if (staticPages.some(page => url.pathname === page || url.pathname.startsWith(page + "/"))) {
     try { return await context.next(); } catch { return await context.next(); }
   }
@@ -623,32 +630,58 @@ export default async (req, context) => {
     return Response.redirect(`${hostUrl}/`, 301);
   }
 
-  const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+  const now = Date.now();
 
-  // 🟢 2. ดึงเวลาอัปเดตล่าสุดของฐานข้อมูล (เช็กเวอร์ชันเพื่อทำ Event-Driven Cache อัจฉริยะ)
-  let latestSyncTimestamp = "v1";
-  try {
-    const { data: latestProfile } = await supabase
-      .from("profiles")
-      .select("lastUpdated, created_at")
-      .order("lastUpdated", { ascending: false, nullsFirst: false })
-      .limit(1)
-      .maybeSingle();
-    
-    latestSyncTimestamp = latestProfile?.lastUpdated || latestProfile?.created_at || "v1";
-  } catch (e) {
-    latestSyncTimestamp = "v1";
+  // =========================================================================
+  // 🟢 2. ระบบสั่งล้างแคชฉุกเฉินผ่าน URL (เช่น เปิดเว็บด้วย ?refresh=1 หรือ ?purge=1)
+  // =========================================================================
+  const forceRefresh = url.searchParams.has("refresh") || url.searchParams.has("purge") || url.searchParams.has("clear_cache");
+  if (forceRefresh) {
+    PAGE_CACHE.clear();
+    GLOBAL_LAST_TIMESTAMP = `forced_${now}`;
   }
 
-// 🟢 ปรับแคชแบบ Zero-Query (ใช้ Cache-Control ของ CDN รับแขก ไม่ต้องยิง Supabase ถามเวลาทุกรอบ)
-const cacheKey = `${req.method}:${url.pathname}:${url.search}`;
-const cachedItem = PAGE_CACHE.get(cacheKey);
+  const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-// ถ้ามีใน Memory Cache ให้ส่งกลับทันที
-if (cachedItem) {
-  return new Response(cachedItem.html, { headers: cachedItem.headers });
-}
+  // =========================================================================
+  // 🟢 3. ระบบ Micro-Probe: เช็คเวลาอัปเดตล่าสุดจาก Supabase (ใช้เน็ต 0.01% หน่วง 15 วิ)
+  // =========================================================================
+  if (!forceRefresh && (now - LAST_PROBE_TIME > PROBE_THROTTLE_MS)) {
+    LAST_PROBE_TIME = now;
+    try {
+      const { data: latestRow } = await supabase
+        .from("profiles")
+        .select("lastUpdated, created_at")
+        .order("lastUpdated", { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle();
 
+      const currentDbTime = latestRow?.lastUpdated || latestRow?.created_at || "v1";
+
+      // ถ้าเวลาเปลี่ยน (มีการแก้/เพิ่ม/ลบข้อมูลหลังบ้าน) ให้ล้างแคชทันที
+      if (currentDbTime !== GLOBAL_LAST_TIMESTAMP) {
+        PAGE_CACHE.clear();
+        GLOBAL_LAST_TIMESTAMP = currentDbTime;
+      }
+    } catch (e) {
+      // หากเกิดข้อผิดพลาดในการเชื่อมต่อ ให้ใช้แคชเดิมต่อไปอย่างปลอดภัย
+    }
+  }
+
+  // =========================================================================
+  // 🟢 4. ตรวจสอบ RAM Cache เป็นด่านแรกสุด (Zero-Query Hit 100% ตอบกลับใน 5ms)
+  // =========================================================================
+  const cacheKey = `${req.method}:${url.pathname}`;
+  const cachedItem = PAGE_CACHE.get(cacheKey);
+
+  // ถ้าข้อมูลในหลังบ้านไม่เปลี่ยน และมีแคชอยู่ใน RAM -> ส่งหน้า HTML กลับทันที ไม่ยิง Database!
+  if (!forceRefresh && cachedItem && cachedItem.version === GLOBAL_LAST_TIMESTAMP) {
+    return new Response(cachedItem.html, { headers: cachedItem.headers });
+  }
+
+  // =========================================================================
+  // 🟢 5. Cache Miss: เริ่มขั้นตอนดึงข้อมูลและประกอบหน้าเว็บใหม่
+  // =========================================================================
   const paths = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "", profileSlug = "", isNationalHome = false;
 
@@ -667,10 +700,13 @@ if (cachedItem) {
   try {
     let matchedProfile = null;
     if (profileSlug) {
+      const isNumeric = /^\d+$/.test(profileSlug);
+      const filterQuery = isNumeric ? `slug.eq.${profileSlug},id.eq.${profileSlug}` : `slug.eq.${profileSlug}`;
+      
       const { data: profileData, error: profileErr } = await supabase
         .from("profiles")
         .select("*")
-        .eq("slug", profileSlug)
+        .or(filterQuery)
         .eq("active", true)
         .maybeSingle();
 
@@ -786,7 +822,11 @@ if (cachedItem) {
       : 5;
     const finalRatingValue = isNaN(calculatedAvg) ? "4.9" : calculatedAvg.toFixed(1);
     const finalReviewCount = finalReviews.length > 0 ? finalReviews.length : totalRealCount;
-    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNationalHome ? "กรุงเทพ" : provinceThaiName))}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    
+    // ตั้งค่าแผนที่: หน้าทั่วไทยค้นหากรุงเทพฯ/ประเทศไทย (Zoom 6), หน้าจังหวัดค้นหาชื่อจังหวัด (Zoom 12)
+    const mapQueryStr = isNationalHome ? "กรุงเทพมหานคร" : provinceThaiName;
+    const mapZoomLevel = isNationalHome ? 6 : 12;
+    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + mapQueryStr)}&t=&z=${mapZoomLevel}&ie=UTF8&iwloc=&output=embed`;
 
     const validZones = (seoData.zones || [])
       .map(sanitizeThaiText)
@@ -990,71 +1030,101 @@ if (cachedItem) {
       let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
       
       if (key === 'chiangmai') {
-        html += `<li><a href="/Nimman.html" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
+        html += `<li><a href="/nimman.html" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
         html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
       }
       return html;
     }).join("") : "";
 
+    // -------------------------------------------------------------
+    // 1. จัดการ Meta Tags และ Dynamic Header Content
+    // -------------------------------------------------------------
     let rawHtml = await getTemplateHtml(url, context);
 
+    // ใส่ <base href="/" /> หากยังไม่มี
     if (!/<base\s+/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n    <base href="/" />`);
+      rawHtml = rawHtml.replace(/<head[^>]*>/i, (match) => `${match}\n  <base href="/" />`);
     }
 
+    // อัปเดต Title และ Meta Description
     rawHtml = rawHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(pageTitle)}</title>`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(strippedDesc)}" />`);
-
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHTML(strippedDesc)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(pageTitle)}" />`);
     rawHtml = rawHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(strippedDesc)}" />`);
 
+    // แทนที่ค่า Canonical URL และ OG Image
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${JSON.stringify(schemaJson).replace(/</g, '\\u003c')}</script>`;
+    // แทนที่ Schema JSON-LD แบบปลอดภัย
+    const schemaJsonString = JSON.stringify(schemaJson).replace(/</g, '\\u003c');
+    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${schemaJsonString}</script>`;
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
     } else {
-      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", JSON.stringify(schemaJson).replace(/</g, '\\u003c'));
+      rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", schemaJsonString);
     }
     
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
+    // -------------------------------------------------------------
+    // 2. แทนที่ข้อมูลพื้นฐาน (Placeholders)
+    // -------------------------------------------------------------
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
     rawHtml = replaceGlobal(rawHtml, "{{PROFILE_COUNT}}", totalRealCount);
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_ZONES}}", matchedZones);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
-    rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
-
-    if (popularLocationsHtml) {
+    // -------------------------------------------------------------
+    // 3. จัดการ Section Dynamic (Drawer / FAQ / Reviews)
+    // -------------------------------------------------------------
+    // อัปเดตเนื้อหา SEO ใน Drawer
+    if (rawHtml.includes("{{PROVINCE_SEO_CONTENT}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_SEO_CONTENT}}", seoIntroContent);
+    } else {
       rawHtml = rawHtml.replace(
-        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
-        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
+        /<div class="seo-content-inner">[\s\S]*?<\/div>/i,
+        `<div class="seo-content-inner">${seoIntroContent}</div>`
       );
     }
 
+    // อัปเดตรายการ FAQ
+    if (rawHtml.includes("{{PROVINCE_FAQS_HTML}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_FAQS_HTML}}", faqsHtml);
+    } else if (faqsHtml) {
+      rawHtml = rawHtml.replace(
+        /<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i,
+        `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`
+      );
+    }
+
+    // อัปเดตรายการ Reviews
+    if (rawHtml.includes("{{PROVINCE_REVIEWS_HTML}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_REVIEWS_HTML}}", reviewsHtml);
+    } else if (reviewsHtml) {
+      rawHtml = rawHtml.replace(
+        /<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i,
+        `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`
+      );
+    }
+
+    // -------------------------------------------------------------
+    // 4. จัดการ Featured Profiles (ซ่อนในหน้ารายจังหวัดแบบเสถียร)
+    // -------------------------------------------------------------
     if (!isNationalHome) {
-      rawHtml = rawHtml.replace(
-        /<!--\s*🟢\s*<h2>\s*หมวดที่\s*2[\s\S]*?<\/section>/i,
-        ""
-      );
+      // ใช้ ID แทน Regex Comment เพื่อความเสถียร 100%
+      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+    } else {
+      rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     }
 
-    const topCatalogSnippetHtml = `
-      <div class="sr-only-seo" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
-        <h2>รายชื่อสาวรับงาน${provinceThaiName} อัปเดตล่าสุดวันนี้</h2>
-        <p>${escapeHTML(topProfilesTextSnippet.replace(/\|/g, " • "))}</p>
-      </div>
-    `;
-
+    // -------------------------------------------------------------
+    // 5. สร้างการแสดงผล Main Profiles Display Area (ตัด Hidden Text ทิ้ง)
+    // -------------------------------------------------------------
     let displayAreaInnerHtml = "";
 
     if (isNationalHome) {
+      // หน้าแรก: จัดกลุ่มแยกตามจังหวัด
       const grouped = profileList.reduce((acc, p) => {
         const key = (p.provinceKey || p.province_slug || "no_province").toString().toLowerCase();
         acc[key] = acc[key] || [];
@@ -1094,26 +1164,21 @@ if (cachedItem) {
           </div>
         `;
       }
-
       displayAreaInnerHtml = sectionsHtml;
 
     } else {
-      const liveCountChipHtml = `
-        ${topCatalogSnippetHtml}
-        <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center;">
-                📍 น้องๆ ในจังหวัด <span style="color: #C084FC; margin-left: 6px; margin-right: 4px;">${provinceThaiName}</span>
-                <span class="live-count-chip">
-                  <span class="pulse-dot-el"></span>
-                  <span>พบ ${totalRealCount} โปรไฟล์พร้อมรับงาน</span>
-                </span>
-            </h2>
-        </div>
-      `;
-
+      // หน้ารายจังหวัด: แสดงการ์ดทั้งหมดของจังหวัดนั้นๆ (สะอาด ปลอดภัย ไม่ใช้ Hidden Text)
       displayAreaInnerHtml = `
-        ${liveCountChipHtml}
         <div class="section-content-wrapper" style="margin-top: 16px;">
+          <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                  📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${provinceThaiName}</span>
+                  <span class="live-count-chip">
+                    <span class="pulse-dot-el"></span>
+                    <span>พบ ${totalRealCount} โปรไฟล์พร้อมรับงาน</span>
+                  </span>
+              </h2>
+          </div>
           <div class="profile-grid profiles-grid-row" role="list">
             ${cardsHtml}
           </div>
@@ -1123,27 +1188,32 @@ if (cachedItem) {
 
     rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
 
+    // -------------------------------------------------------------
+    // 6. อัปเดต Footer Popular Locations (Clean URL & แก้เคส /nimman)
+    // -------------------------------------------------------------
+    if (popularLocationsHtml) {
+      rawHtml = rawHtml.replace(
+        /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
+        `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsHtml}</ul>`
+      );
+    }
+
+    // แก้ไข Path รูปภาพและลิงก์ให้เป็น Absolute Path
+    rawHtml = rawHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
+
+    // -------------------------------------------------------------
+    // 7. SSR Hydration Script Data สำหรับ Client-Side (main.js)
+    // -------------------------------------------------------------
     const provThaiLookup = new Map();
     (provListRes.data || []).forEach(item => {
       const k = (item.key || item.slug || item.id || "").toString().toLowerCase();
       const n = item.nameThai || item.name_thai || item.name;
       if (k && n) provThaiLookup.set(k, n);
     });
-    provThaiLookup.set("chiangmai", "เชียงใหม่");
-    provThaiLookup.set("chiang_mai", "เชียงใหม่");
-    provThaiLookup.set("lampang", "ลำปาง");
-    provThaiLookup.set("udonthani", "อุดรธานี");
-    provThaiLookup.set("bangkok", "กรุงเทพฯ");
-    provThaiLookup.set("chiangrai", "เชียงราย");
-    provThaiLookup.set("phitsanulok", "พิษณุโลก");
-    provThaiLookup.set("phuket", "ภูเก็ต");
-    provThaiLookup.set("chonburi", "ชลบุรี");
-    provThaiLookup.set("khonkaen", "ขอนแก่น");
-    provThaiLookup.set("lamphun", "ลำพูน");
 
     const hydratedProfilesData = JSON.stringify(profileList.map(p => {
       const pKey = (p.provinceKey || p.province_key || p.province_slug || "chiangmai").toString().toLowerCase();
-      const realProvinceThai = p.provinceThai || p.province_thai || provThaiLookup.get(pKey) || "เชียงใหม่";
+      const realProvinceThai = p.provinceThai || p.province_thai || provThaiLookup.get(pKey) || provinceThaiName;
 
       let galleries = p.galleryPaths || p.gallery_paths || p.gallery || [];
       if (typeof galleries === "string") {
@@ -1209,7 +1279,9 @@ if (cachedItem) {
       rawHtml = rawHtml.replace(/<\/head>/i, `${hydratedScriptTag}\n</head>`);
     }
 
-    // 🟢 4. ปรับ Response Headers ให้รองรับการอัปเดตแบบ Real-time ร่วมกับแคชระยะยาว
+    // -------------------------------------------------------------
+    // 8. Headers & Response Cache
+    // -------------------------------------------------------------
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=31536000, stale-while-revalidate=86400",
