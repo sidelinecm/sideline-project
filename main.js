@@ -112,7 +112,7 @@ window.ScrollTrigger = ScrollTrigger;
     return `น้อง${cleaned}`;
   }
 
-  // 🟢 ฟังก์ชันแปลง URL Cloudinary อัจฉริยะ 100% แก้ไขปัญหา 400 Bad Request และ 404 จาก Supabase
+// 🟢 ฟังก์ชันแปลง URL Cloudinary อัจฉริยะ 100% (บังคับใส่ images/ เสมอ ป้องกัน 404 จากชื่อไฟล์ v0...)
   function getImageUrl(path, width = 400, height = null) {
     if (!path) return CONFIG.DEFAULT_OG_IMAGE;
     if (Array.isArray(path)) path = path[0];
@@ -124,16 +124,21 @@ window.ScrollTrigger = ScrollTrigger;
       ? `f_auto,q_auto,w_${width},h_${height},c_fill,g_face` 
       : `c_scale,w_${width},q_auto,f_auto`;
 
-    // 1. กรณีเป็น Full Cloudinary URL อยู่แล้ว (ตัด Transform เก่าออกทั้งหมด ป้องกัน URL ซ้อนทับ)
+    // 1. กรณีเป็น Full Cloudinary URL อยู่แล้ว
     if (cleanPath.includes("res.cloudinary.com")) {
       const uploadIdx = cleanPath.indexOf("/upload/");
       if (uploadIdx !== -1) {
         const prefix = cleanPath.substring(0, uploadIdx + 8);
         let rest = cleanPath.substring(uploadIdx + 8);
-        rest = rest.replace(/^([a-z0-9_,-:]+\/)+?(v\d+|images)/i, "$2");
-        if (!rest.startsWith("v") && !rest.startsWith("images") && rest.includes("/")) {
-          rest = rest.replace(/^[^/]+\//, "");
+
+        // ตัด Transformations เก่าออก
+        rest = rest.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, "");
+
+        // ✅ บังคับให้มีโฟลเดอร์ images/ เสมอ ป้องกันชื่อไฟล์ v0... ชนกับ Cloudinary Version
+        if (!rest.includes("images/") && !rest.startsWith("images/")) {
+          rest = `images/${rest.replace(/^v\d+\//i, "")}`;
         }
+
         return `${prefix}${transform}/${rest}`;
       }
       return cleanPath;
@@ -144,8 +149,11 @@ window.ScrollTrigger = ScrollTrigger;
       return cleanPath;
     }
 
-    // 3. กรณีเป็น Relative Path ที่บันทึกไว้ใน Supabase (แปลงเข้า Cloudinary URL ทันที)
-    const relativeClean = cleanPath.replace(/^\/+/, "");
+    // 3. กรณีเป็น Relative Path จาก Supabase (บังคับเติม images/ ป้องกัน 404)
+    let relativeClean = cleanPath.replace(/^\/+/, "");
+    if (!relativeClean.startsWith("images/")) {
+      relativeClean = `images/${relativeClean}`;
+    }
     return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${relativeClean}`;
   }
 
