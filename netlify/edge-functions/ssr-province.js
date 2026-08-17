@@ -606,25 +606,29 @@ export default async (req, context) => {
     try { return await context.next(); } catch { return await context.next(); }
   }
 
-
+// 🟢 รายการหน้า Static ที่ไม่ต้องรัน SSR จังหวัด (แปลงเป็นตัวพิมพ์เล็กทั้งหมด)
   const staticPages = [
     "/about", "/about.html",
     "/faq", "/faq.html",
     "/blog", "/blog.html",
     "/contact", "/contact.html",
-    "/terms-of-service",
+    "/terms-of-service", "/terms-of-service.html",
     "/privacy-policy", "/privacy-policy.html",
-    "/policy",
+    "/policy", "/policy.html",
     "/locations", "/locations.html",
     "/nimman", "/nimman.html",
     "/index-en", "/index-en.html",
     "/offline", "/offline.html"
   ];
   
-  // 🟢 1. ข้อยกเว้นไฟล์ Static และเปลี่ยนเส้นทาง /index.html
-  if (staticPages.some(page => url.pathname === page || url.pathname.startsWith(page + "/"))) {
+  // 🟢 1. ข้อยกเว้นไฟล์ Static (ตัด Trailing Slash และแปลงเป็นตัวพิมพ์เล็ก ป้องกันหลุดไปเป็นหน้าจังหวัด)
+  const currentPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+  if (staticPages.some(page => currentPath === page || currentPath.startsWith(page + "/"))) {
     try { return await context.next(); } catch { return await context.next(); }
   }
+  
+  
+
 
   if (url.pathname === "/index.html") {
     return Response.redirect(`${hostUrl}/`, 301);
@@ -1035,7 +1039,7 @@ export default async (req, context) => {
       let html = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? 'var(--primary-purple)' : 'var(--text-gray)'}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ''}>ไซด์ไลน์${name}</a></li>`;
       
       if (key === 'chiangmai') {
-        html += `<li><a href="/nimman.html" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
+        html += `<li><a href="/nimman" title="สาวรับงานนิมมาน เชียงใหม่" style="color: #C084FC; text-decoration: none;">ไซด์ไลน์นิมมาน</a></li>`;
         html += `<li><a href="/location/chiangmai?q=สันติธรรม" title="สาวรับงานสันติธรรม เชียงใหม่" style="color: var(--text-muted); text-decoration: none;">ไซด์ไลน์สันติธรรม</a></li>`;
       }
       return html;
