@@ -671,7 +671,7 @@ async function renderProfilesGrid(profiles, isFilteredView) {
               </span>
           </h2>
       </div>
-      <div class="profile-grid profiles-grid-row" role="list"></div>
+<div class="profile-grid profiles-grid-row"></div>
     `;
 
     DOM.profilesDisplayArea.innerHTML = "";
