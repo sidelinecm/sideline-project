@@ -582,111 +582,146 @@ window.ScrollTrigger = ScrollTrigger;
     suggestionsContainer.style.display = "block";
   }
 
-  function renderProfilesGrid(profiles, isFilteredView) {
-    if (!DOM.profilesDisplayArea) return;
 
-    STATE.renderId = (STATE.renderId || 0) + 1;
-    const currentRenderId = STATE.renderId;
+function escapeHTML(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>'"]/g, tag => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;"
+  }[tag] || tag));
+}
 
-    DOM.noResultsMessage?.classList.add("hidden");
-    DOM.fetchErrorMessage?.classList.add("hidden");
 
-    if (DOM.featuredSection) {
-      const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
-      const featuredCount = STATE.allProfiles.filter(p => p.isfeatured).length;
-      DOM.featuredSection.classList.toggle("hidden", !isHomePage || featuredCount === 0);
 
-      if (isHomePage && featuredCount > 0 && DOM.featuredContainer && DOM.featuredContainer.children.length === 0) {
-        const featuredProfiles = STATE.allProfiles.filter(p => p.isfeatured);
-        appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
+async function renderProfilesGrid(profiles, isFilteredView) {
+  if (!DOM.profilesDisplayArea) return;
+
+  // 1. ควบคุม Render ID ป้องกัน Race Condition จากการค้นหาพิมพ์เร็ว
+  STATE.renderId = (STATE.renderId || 0) + 1;
+  const currentRenderId = STATE.renderId;
+
+  // 2. เคลียร์สถานะข้อความแจ้งเตือน
+  DOM.noResultsMessage?.classList.add("hidden");
+  DOM.fetchErrorMessage?.classList.add("hidden");
+
+  // 3. จัดการหมวด Featured Profiles (แสดงเฉพาะหน้าแรก และต้องไม่ติดตัวกรอง)
+  if (DOM.featuredSection) {
+    const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
+    const featuredProfiles = STATE.allProfiles.filter(p => p.isfeatured);
+    const hasFeatured = featuredProfiles.length > 0;
+
+    DOM.featuredSection.classList.toggle("hidden", !isHomePage || !hasFeatured);
+
+    if (isHomePage && hasFeatured && DOM.featuredContainer) {
+      // เรนเดอร์เมื่อคอนเทนเนอร์ยังว่างเปล่า
+      if (DOM.featuredContainer.children.length === 0) {
+        await appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
       }
     }
+  }
 
-    if (!profiles || profiles.length === 0) {
+  // 4. กรณีไม่พบข้อมูลโปรไฟล์
+  if (!profiles || profiles.length === 0) {
+    DOM.profilesDisplayArea.innerHTML = "";
+    DOM.profilesDisplayArea.style.minHeight = "";
+    DOM.noResultsMessage?.classList.remove("hidden");
+    return;
+  }
+
+  // 5. ตรวจสอบประเภทหน้า (หน้ารายจังหวัด / ผลการค้นหา หรือ หน้าหลักรวมจังหวัด)
+  const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
+
+  if (isFilteredView || isLocationPage) {
+    // -------------------------------------------------------------
+    // แบบที่ 1: หน้ารายจังหวัด หรือ หน้าผลการค้นหา/ตัวกรอง
+    // -------------------------------------------------------------
+    const urlMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
+    const activeSlug = urlMatch ? decodeURIComponent(urlMatch[1]).toLowerCase() : (DOM.provinceSelect?.value || "chiangmai");
+    const provName = STATE.provincesMap.get(activeSlug) || window.currentProvinceName || "เชียงใหม่";
+    const count = profiles.length;
+
+    // ✅ ป้องกัน XSS Injection 100% ด้วยการ Escape คำค้นหา
+    const searchVal = DOM.searchInput?.value?.trim();
+    const headingTitle = searchVal
+      ? `🔍 ผลการค้นหา "${escapeHTML(searchVal)}"`
+      : `📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${escapeHTML(provName)}</span>`;
+
+    const sectionWrapper = document.createElement("div");
+    sectionWrapper.className = "section-content-wrapper";
+    sectionWrapper.style.cssText = "margin-top: 16px;";
+    
+    sectionWrapper.innerHTML = `
+      <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+              ${headingTitle}
+              <span class="live-count-chip">
+                <span class="pulse-dot-el"></span>
+                <span>พบ ${count} โปรไฟล์พร้อมรับงาน</span>
+              </span>
+          </h2>
+      </div>
+      <div class="profile-grid profiles-grid-row" role="list"></div>
+    `;
+
+    DOM.profilesDisplayArea.innerHTML = "";
+    DOM.profilesDisplayArea.appendChild(sectionWrapper);
+
+    const grid = sectionWrapper.querySelector(".profile-grid");
+    await appendProfilesToContainer(grid, profiles, currentRenderId);
+    DOM.profilesDisplayArea.style.minHeight = "";
+
+  } else {
+    // -------------------------------------------------------------
+    // แบบที่ 2: หน้าแรกแยกหมวดหมู่ตามจังหวัด (National / Grouped View)
+    // -------------------------------------------------------------
+    const grouped = profiles.reduce((acc, p) => {
+      const key = p.provinceKey || "no_province";
+      acc[key] = acc[key] || [];
+      acc[key].push(p);
+      return acc;
+    }, {});
+
+    const sortedProvinceKeys = Object.keys(grouped).sort((a, b) => {
+      const nameA = STATE.provincesMap.get(a) || a;
+      const nameB = STATE.provincesMap.get(b) || b;
+      return nameA.localeCompare(nameB, "th");
+    });
+
+    if (sortedProvinceKeys.length > 0) {
+      DOM.profilesDisplayArea.innerHTML = "";
+
+      // ✅ ประมวลผลแบบเรียงลำดับ ป้องกัน Race Condition และโหลดครบจริง
+      for (const key of sortedProvinceKeys) {
+        if (STATE.renderId !== currentRenderId) return; // ยกเลิกการเรนเดอร์เก่าถ้ามีคำสั่งใหม่แทรกเข้ามา
+
+        const name = STATE.provincesMap.get(key) || (key === "no_province" ? "ไม่ระบุจังหวัด" : key);
+        const section = createProvinceSectionElement(key, name, grouped[key]);
+
+        DOM.profilesDisplayArea.appendChild(section);
+
+        const grid = section.querySelector(".profile-grid");
+        await appendProfilesToContainer(grid, grouped[key], currentRenderId);
+      }
+      DOM.profilesDisplayArea.style.minHeight = "";
+
+    } else {
       DOM.profilesDisplayArea.innerHTML = "";
       DOM.profilesDisplayArea.style.minHeight = "";
       DOM.noResultsMessage?.classList.remove("hidden");
-      return;
-    }
-
-    DOM.profilesDisplayArea.innerHTML = "";
-    const isLocationPage = window.location.pathname.includes("/location/") || window.location.pathname.includes("/province/");
-
-    if (isFilteredView || isLocationPage) {
-      const urlMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
-      const activeSlug = urlMatch ? decodeURIComponent(urlMatch[1]).toLowerCase() : (DOM.provinceSelect?.value || "chiangmai");
-      const provName = STATE.provincesMap.get(activeSlug) || window.currentProvinceName || "เชียงใหม่";
-      const count = profiles.length;
-
-      let headingTitle = `📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${provName}</span>`;
-      if (DOM.searchInput?.value) {
-        headingTitle = `🔍 ผลการค้นหา "${DOM.searchInput.value}"`;
-      }
-
-      const sectionWrapper = document.createElement("div");
-      sectionWrapper.className = "section-content-wrapper";
-      sectionWrapper.style.cssText = "margin-top: 16px;";
-      
-      sectionWrapper.innerHTML = `
-        <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                ${headingTitle}
-                <span class="live-count-chip">
-                  <span class="pulse-dot-el"></span>
-                  <span>พบ ${count} โปรไฟล์พร้อมรับงาน</span>
-                </span>
-            </h2>
-        </div>
-        <div class="profile-grid profiles-grid-row"></div>
-      `;
-
-      DOM.profilesDisplayArea.appendChild(sectionWrapper);
-
-      appendProfilesToContainer(sectionWrapper.querySelector(".profile-grid"), profiles, currentRenderId).then(() => {
-        DOM.profilesDisplayArea.style.minHeight = "";
-      });
-
-    } else {
-      const grouped = profiles.reduce((acc, p) => {
-        const key = p.provinceKey || "no_province";
-        acc[key] = acc[key] || [];
-        acc[key].push(p);
-        return acc;
-      }, {});
-
-      const sortedProvinceKeys = Object.keys(grouped).sort((a, b) => {
-        const nameA = STATE.provincesMap.get(a) || a;
-        const nameB = STATE.provincesMap.get(b) || b;
-        return nameA.localeCompare(nameB, "th");
-      });
-
-      if (sortedProvinceKeys.length !== 0) {
-        (async function () {
-          for (const key of sortedProvinceKeys) {
-            if (STATE.renderId !== currentRenderId) return;
-
-            const name = STATE.provincesMap.get(key) || (key === "no_province" ? "ไม่ระบุจังหวัด" : key);
-            const section = createProvinceSectionElement(key, name, grouped[key]);
-
-            DOM.profilesDisplayArea.appendChild(section);
-
-            const grid = section.querySelector(".profile-grid");
-            await appendProfilesToContainer(grid, grouped[key], currentRenderId);
-            await new Promise(res => setTimeout(res, 0));
-          }
-          DOM.profilesDisplayArea.style.minHeight = "";
-        })();
-      } else {
-        DOM.profilesDisplayArea.style.minHeight = "";
-        DOM.noResultsMessage?.classList.remove("hidden");
-      }
-    }
-
-    bindMediaProtection();
-    if (window.ScrollTrigger) {
-      setTimeout(() => ScrollTrigger.refresh(), 500);
     }
   }
+
+  // 6. ผูก Event ป้องกันรูปภาพและรีเฟรชความสูงจอ (ทำงานหลังการ์ดทุกใบเรนเดอร์ลง DOM เสร็จสมบูรณ์แล้ว)
+  if (STATE.renderId === currentRenderId) {
+    bindMediaProtection();
+    if (window.ScrollTrigger) {
+      ScrollTrigger.refresh();
+    }
+  }
+}
 
   function createProfileCardElement(profile, index = 20) {
     const container = document.createElement("div");
@@ -1156,10 +1191,12 @@ window.ScrollTrigger = ScrollTrigger;
         `).join("");
       }
 
-// 🟢 แก้ไข: หน้าทั่วไทยค้นหา Thailand (Zoom 6), หน้าจังหวัดค้นหาชื่อจังหวัด (Zoom 12)
-    const mapQueryStr = isNationalHome ? "Thailand" : (seoData.name || provinceThaiName);
-    const mapZoomLevel = isNationalHome ? 6 : 12;
-    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapQueryStr)}&t=&z=${mapZoomLevel}&ie=UTF8&iwloc=&output=embed`;
+// ✅ แก้ไขให้ถูกต้อง:
+const mapQueryStr = isNational ? "Thailand" : (data.name || realProvName);
+const mapZoomLevel = isNational ? 6 : 12;
+const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapQueryStr)}&t=&z=${mapZoomLevel}&ie=UTF8&iwloc=&output=embed`;
+const mapIframe = document.getElementById("google-map");
+if (mapIframe) mapIframe.src = mapEmbedUrl;
 
       // 7. อัปเดต attribute a[href] และ img[alt]
       document.querySelectorAll('a[href*="{{"], img[alt*="{{"]').forEach(el => {

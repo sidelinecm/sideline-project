@@ -801,3 +801,268 @@ footer ul li a {
   object-position: top center !important; 
   pointer-events: none !important;
 }
+
+/* ==============================================================================
+   🌟 [COMPLETE UI/UX & STYLING PACK 2026] FIRST MODEL HUB
+   ============================================================================== */
+
+/* ------------------------------------------------------------------------------
+   1. GLOBAL SPACING & DOCK ANTI-CLIPPING (แก้ปัญหา Floating Dock ลอยทับเนื้อหา)
+   ------------------------------------------------------------------------------ */
+#main-content {
+  padding-bottom: 120px !important; /* เว้นพื้นที่ด้านล่างสุดให้เลื่อนพ้น Dock ลอย */
+}
+
+footer.fmh-footer {
+  padding-bottom: 110px !important;
+}
+
+#map-section {
+  max-width: 850px !important;
+  margin: 20px auto 40px auto !important; /* เว้นระยะห่างก่อนถึงท้ายหน้า */
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  border: 1.5px solid rgba(192, 132, 252, 0.3) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(147, 51, 234, 0.2) !important;
+  background-color: #09090C !important;
+}
+
+/* ------------------------------------------------------------------------------
+   2. SIDEBAR NAVIGATION DRAWER (ขยายเมนูด้านข้างให้กว้างเต็มตา กดง่าย สบายมือ)
+   ------------------------------------------------------------------------------ */
+#sidebar-menu {
+  width: 80vw !important; /* ปรับจาก 52vw เป็น 80vw ให้พอดีหน้าจอมือถือ */
+  max-width: 320px !important;
+  min-width: 270px !important;
+}
+
+.sidebar-links-wrapper a {
+  min-height: 46px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(192, 132, 252, 0.15) !important;
+}
+
+.sidebar-links-wrapper a:active {
+  background: rgba(192, 132, 252, 0.2) !important;
+  border-color: rgba(192, 132, 252, 0.5) !important;
+  transform: scale(0.98);
+}
+
+/* ------------------------------------------------------------------------------
+   3. FAQ SECTION (กู้คืนสไตล์ FAQ ให้เป็นการ์ดนีออนพรีเมียม สวยงามระดับเดียวกับหน้าหลัก)
+   ------------------------------------------------------------------------------ */
+.faq-section {
+  max-width: 850px !important;
+  margin: 28px auto 16px auto !important;
+}
+
+.faq-title {
+  font-size: clamp(16px, 4.2vw, 22px) !important;
+  text-align: center !important;
+  margin-bottom: 16px !important;
+}
+
+.faq-list-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-top: 10px !important;
+}
+
+.faq-item-card {
+  background: linear-gradient(135deg, rgba(22, 11, 46, 0.8) 0%, rgba(9, 5, 22, 0.95) 100%) !important;
+  border: 1px solid rgba(192, 132, 252, 0.28) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  backdrop-filter: blur(14px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55), 0 0 15px rgba(147, 51, 234, 0.1) !important;
+}
+
+.faq-q-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 8px !important;
+}
+
+.faq-q-badge {
+  background: linear-gradient(135deg, #7C3AED 0%, #5A2CBE 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4) !important;
+}
+
+.faq-question-text {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  line-height: 1.4 !important;
+}
+
+.faq-answer-text {
+  font-size: 12px !important;
+  color: #CBD5E1 !important;
+  line-height: 1.65 !important;
+  padding-left: 34px !important;
+  border-left: 2px solid rgba(192, 132, 252, 0.35) !important;
+  margin-left: 11px !important;
+}
+
+/* ------------------------------------------------------------------------------
+   4. CUSTOMER REVIEWS (จัดระเบียบการ์ดรีวิว Bento สวยงาม ไม่หลุดข้อความดิบ)
+   ------------------------------------------------------------------------------ */
+.reviews-section {
+  max-width: 850px !important;
+  margin: 28px auto 16px auto !important;
+}
+
+.reviews-title {
+  font-size: clamp(16px, 4.2vw, 22px) !important;
+  text-align: center !important;
+  margin-bottom: 16px !important;
+}
+
+.reviews-grid-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-top: 10px !important;
+}
+
+@media (min-width: 768px) {
+  .reviews-grid-wrapper {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+.review-card-item {
+  background: linear-gradient(135deg, rgba(22, 11, 46, 0.8) 0%, rgba(9, 5, 22, 0.95) 100%) !important;
+  border: 1px solid rgba(192, 132, 252, 0.28) !important;
+  border-radius: 18px !important;
+  padding: 16px !important;
+  backdrop-filter: blur(14px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(147, 51, 234, 0.1) !important;
+}
+
+.review-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 10px !important;
+}
+
+.review-user-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.review-avatar-circle {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.4) 0%, rgba(192, 132, 252, 0.2) 100%) !important;
+  border: 1.5px solid rgba(192, 132, 252, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.review-username {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+}
+
+.review-user-loc {
+  font-size: 10.5px !important;
+  color: #A1A1AA !important;
+}
+
+.review-stars-list {
+  color: #FBBF24 !important;
+  font-size: 10.5px !important;
+  display: flex !important;
+  gap: 2px !important;
+}
+
+.review-comment-body {
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+  color: #D4D4D8 !important;
+  margin-bottom: 8px !important;
+}
+
+.review-verified-badge {
+  font-size: 10px !important;
+  color: #00E676 !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* ------------------------------------------------------------------------------
+   5. HOT SWIPER & PROFILE CARDS POLISH (จัดระเบียบการ์ดรูปและป้ายสถานะ)
+   ------------------------------------------------------------------------------ */
+.vip-swiper-wrapper {
+  padding: 8px 4px 14px 4px !important;
+  margin-bottom: 12px !important;
+}
+
+.vip-card-item {
+  border-radius: 16px !important;
+  border: 1.5px solid rgba(192, 132, 252, 0.35) !important;
+}
+
+.profile-card-new {
+  border-radius: 18px !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+}
+
+.profile-card-new:hover {
+  border-color: rgba(192, 132, 252, 0.6) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 0 0 20px rgba(147, 51, 234, 0.25) !important;
+}
+
+/* ------------------------------------------------------------------------------
+   6. SAFE-PLAY ACCORDION & SEO DRAWER (กล่องข้อตกลงและเนื้อหาย่อ-ขยาย)
+   ------------------------------------------------------------------------------ */
+.rule-item {
+  border-radius: 14px !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+}
+
+.rule-trigger {
+  min-height: 48px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+}
+
+.interactive-card.drawer-card-reset {
+  border-radius: 18px !important;
+  border: 1px solid rgba(192, 132, 252, 0.3) !important;
+}
+
+.btn-read-more {
+  min-height: 36px !important;
+  border-radius: 100px !important;
+  padding: 6px 18px !important;
+}
