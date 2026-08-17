@@ -718,10 +718,15 @@ export default async (req, context) => {
       }
     }
 
-    let searchKeys = [provinceSlug];
-    if (provinceSlug === "chiangmai" || provinceSlug === "chiang_mai") {
-      searchKeys = ["chiangmai", "chiang_mai"];
-    }
+    // 🟢 รองรับคีย์จังหวัดทุกรูปแบบ (ขีดกลาง, ขีดล่าง, ตัวติดกัน เช่น khon-kaen, khonkaen)
+    const cleanCompactSlug = provinceSlug.replace(/[-_]/g, "");
+    let searchKeys = [
+      provinceSlug,
+      cleanCompactSlug,
+      provinceSlug.replace(/-/g, "_"),
+      provinceSlug.replace(/_/g, "-")
+    ];
+    searchKeys = [...new Set(searchKeys.filter(Boolean))];
 
     const provinceParam = provinceSlug.replace(/-/g, "").replace(/_/g, "");
 
@@ -1036,8 +1041,8 @@ export default async (req, context) => {
       return html;
     }).join("") : "";
 
-    // -------------------------------------------------------------
-    // 1. จัดการ Meta Tags และ Dynamic Header Content
+// -------------------------------------------------------------
+    // 1. จัดการ Meta Tags, Canonical, OG และ Dynamic Schema
     // -------------------------------------------------------------
     let rawHtml = await getTemplateHtml(url, context);
 
@@ -1058,13 +1063,21 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{SEO_CANONICAL}}", canonUrl);
     rawHtml = replaceGlobal(rawHtml, "{{SEO_IMAGE}}", metaImgUrl);
     
-    // แทนที่ Schema JSON-LD แบบปลอดภัย
+    // อัปเดต Canonical Link ให้ชัวร์ 100%
+    if (rawHtml.includes('id="canonical-link"')) {
+      rawHtml = rawHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonUrl}">`);
+    }
+
+    // แทนที่ Schema JSON-LD แบบปลอดภัย (รองรับทั้ง id="dynamic-schema" และการฝังใหม่)
     const schemaJsonString = JSON.stringify(schemaJson).replace(/</g, '\\u003c');
-    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">${schemaJsonString}</script>`;
+    const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonString}\n</script>`;
+    
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
       rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
-    } else {
+    } else if (rawHtml.includes("{{SCHEMA_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", schemaJsonString);
+    } else {
+      rawHtml = rawHtml.replace(/<\/head>/i, `${newSchemaScript}\n</head>`);
     }
     
     // -------------------------------------------------------------
@@ -1076,7 +1089,7 @@ export default async (req, context) => {
     rawHtml = replaceGlobal(rawHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     // -------------------------------------------------------------
-    // 3. จัดการ Section Dynamic (Drawer / FAQ / Reviews)
+    // 3. จัดการ Section Dynamic (SEO Drawer / FAQ / Reviews)
     // -------------------------------------------------------------
     // อัปเดตเนื้อหา SEO ใน Drawer
     if (rawHtml.includes("{{PROVINCE_SEO_CONTENT}}")) {
@@ -1109,17 +1122,49 @@ export default async (req, context) => {
     }
 
     // -------------------------------------------------------------
-    // 4. จัดการ Featured Profiles (ซ่อนในหน้ารายจังหวัดแบบเสถียร)
+    // 4. เรนเดอร์แถบ HOT Swiper & Featured Profiles ตั้งแต่ระดับ Server
     // -------------------------------------------------------------
+    // สร้าง HTML การ์ด HOT ประจำเดือน เพื่อไม่ให้ Googlebot เห็นโครงกระดูก (Skeleton)
+    const hotProfilesList = profileList.slice(0, 8);
+    const hotSwiperHtml = hotProfilesList.map((p, idx) => {
+      const pName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
+      const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
+      const pSlug = encodeURIComponent(p.slug || p.id);
+      const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || "";
+      const imgUrl = optimizeImg(hostUrl, rawImg, 400, 500);
+      const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(kw => (p.availability || "").toLowerCase().includes(kw));
+
+      return `
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
+          <span class="vip-status-chip">🟢 ${isAvail ? 'รับงาน' : 'สอบถาม'}</span>
+          <span class="hot-rank-badge">#${idx + 1} HOT</span>
+          <img src="${imgUrl}" alt="น้อง${pName}" width="150" height="210" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp'">
+          <div class="vip-card-overlay"></div>
+          <a href="/sideline/${pSlug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${pName}"></a>
+          <div class="vip-card-info">
+            <div class="vip-name">น้อง${pName}</div>
+            <div class="vip-location">${pLoc}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    if (hotSwiperHtml) {
+      rawHtml = rawHtml.replace(
+        /<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i,
+        `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperHtml}</div>`
+      );
+    }
+
+    // จัดการ Featured Section (ซ่อนในหน้ารายจังหวัด แสดงเฉพาะหน้าแรก)
     if (!isNationalHome) {
-      // ใช้ ID แทน Regex Comment เพื่อความเสถียร 100%
       rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     } else {
       rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
     }
 
     // -------------------------------------------------------------
-    // 5. สร้างการแสดงผล Main Profiles Display Area (ตัด Hidden Text ทิ้ง)
+    // 5. สร้างการแสดงผล Main Profiles Display Area (Clean SSR Grid)
     // -------------------------------------------------------------
     let displayAreaInnerHtml = "";
 
@@ -1167,7 +1212,7 @@ export default async (req, context) => {
       displayAreaInnerHtml = sectionsHtml;
 
     } else {
-      // หน้ารายจังหวัด: แสดงการ์ดทั้งหมดของจังหวัดนั้นๆ (สะอาด ปลอดภัย ไม่ใช้ Hidden Text)
+      // หน้ารายจังหวัด: แสดงการ์ดทั้งหมดของจังหวัดนั้นๆ
       displayAreaInnerHtml = `
         <div class="section-content-wrapper" style="margin-top: 16px;">
           <div style="padding: 8px 4px 14px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -1186,11 +1231,31 @@ export default async (req, context) => {
       `;
     }
 
-    rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
+    if (rawHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
+      rawHtml = replaceGlobal(rawHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaInnerHtml);
+    } else {
+      rawHtml = rawHtml.replace(
+        /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i,
+        `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceThaiName}">${displayAreaInnerHtml}</div>`
+      );
+    }
 
     // -------------------------------------------------------------
-    // 6. อัปเดต Footer Popular Locations (Clean URL & แก้เคส /nimman)
+    // 6. อัปเดต Dropdown เลือกจังหวัด และ Footer Links
     // -------------------------------------------------------------
+    // ฝังตัวเลือกจังหวัดลงใน Dropdown ให้พร้อมใช้ทันที
+    const provinceOptionsHtml = `<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>` + 
+      (provListRes.data || []).map(p => {
+        const isSelected = p.key === provinceSlug ? 'selected' : '';
+        return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
+      }).join("");
+
+    rawHtml = rawHtml.replace(
+      /<select id="search-province"[^>]*>[\s\S]*?<\/select>/i,
+      `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceOptionsHtml}</select>`
+    );
+
+    // อัปเดต Footer
     if (popularLocationsHtml) {
       rawHtml = rawHtml.replace(
         /<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i,
@@ -1280,12 +1345,12 @@ export default async (req, context) => {
     }
 
     // -------------------------------------------------------------
-    // 8. Headers & Response Cache
+    // 8. Headers, RAM Cache และ Return Response (สมบูรณ์ 100%)
     // -------------------------------------------------------------
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=31536000, stale-while-revalidate=86400",
-      "ETag": `"${latestSyncTimestamp}"`,
+      "ETag": `"${GLOBAL_LAST_TIMESTAMP}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
@@ -1296,8 +1361,9 @@ export default async (req, context) => {
     if (PAGE_CACHE.size > MAX_CACHE_SIZE) {
       PAGE_CACHE.clear();
     }
-    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, version: latestSyncTimestamp });
+    PAGE_CACHE.set(cacheKey, { html: rawHtml, headers: responseHeaders, version: GLOBAL_LAST_TIMESTAMP });
 
+    // ✅ คืนค่า Response ที่ประกอบเสร็จสมบูรณ์กลับไปยัง Browser / Googlebot ทันที
     return new Response(rawHtml, { headers: responseHeaders });
 
   } catch (err) {
