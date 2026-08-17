@@ -15,17 +15,14 @@
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
-    # 🟢 SAMEORIGIN เพื่อให้ Google Search Console / Rich Results Test สแกนและถ่ายภาพผ่าน 100%
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     Cache-Control = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400"
-    # 🟢 FIX: เพิ่มการอนุญาต Google Analytics Region 1 & GTM ป้องกันสถิติหลุด
     Content-Security-Policy = "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://esm.sh https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.clarity.ms https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https: https://zxetzqwjaiumqhrpumln.supabase.co https://res.cloudinary.com https://images.unsplash.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; frame-src 'self' https://www.google.com https://maps.google.com; connect-src 'self' https: wss: https://zxetzqwjaiumqhrpumln.supabase.co https://www.clarity.ms https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com;"
 
-# 🟢 ตั้งค่าแคช CSS และ JS
 [[headers]]
   for = "/*.css"
   [headers.values]
@@ -36,7 +33,6 @@
   [headers.values]
     Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
 
-# Long cache for media images & fonts
 [[headers]]
   for = "/images/*"
   [headers.values]
@@ -48,32 +44,26 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 # ==============================================================================
-# 2. EDGE FUNCTIONS MAPPING
+# 2. EDGE FUNCTIONS MAPPING (✅ แก้ไขจุดนี้ให้ครอบคลุม 100% ไม่หลุดขบวน)
 # ==============================================================================
 
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
+# ให้ render-bot ดูแลเฉพาะหน้าโปรไฟล์เดี่ยวสำหรับบอท
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
+# ✅ ให้ ssr-province ดูแลเส้นทางทั้งหมด (หน้าแรก, หน้ารายจังหวัด) รวบจบในบรรทัดเดียว
 [[edge_functions]]
   function = "ssr-province"
-  path = "/location/*"
+  path = "/*"
 
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/"
-
-[[edge_functions]]
-  function = "ssr-province"
-  path = "/index.html"
 # ==============================================================================
 # 3. REDIRECTS & REWRITES
 # ==============================================================================
-# 🎯 301 Direct Redirects ส่งพลัง SEO เชียงใหม่จากโดเมนเดิม เข้าหน้า /location/chiangmai 100%
 [[redirects]]
   from = "https://sidelinechiangmai.netlify.app/*"
   to = "https://firstmodelhub.com/location/chiangmai"
@@ -86,7 +76,6 @@
   status = 301
   force = true
 
-# 301 Redirects สำหรับโดเมนอื่นๆ เข้าโดเมนหลัก
 [[redirects]]
   from = "https://www.firstmodelhub.com/*"
   to = "https://firstmodelhub.com/:splat"
@@ -99,7 +88,6 @@
   status = 301
   force = true
 
-# 🟢 FIX: เปลี่ยน Query Parameter ของหน้าแรกเข้าหน้าจังหวัดแบบ Clean Path
 [[redirects]]
   query = { province = ":p" }
   from = "/"
@@ -107,7 +95,6 @@
   status = 301
   force = true
 
-# Normalize location query param -> clean path
 [[redirects]]
   query = { province = ":p" }
   from = "/location/*"
@@ -115,18 +102,9 @@
   status = 301
   force = true
 
-# Dynamic Profile & Location Fallback (SPA Single Page Application Rewrites)
-[[redirects]]
-  from = "/sideline/*"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/location/*"
-  to = "/index.html"
-  status = 200
-
+# ✅ SPA Fallback: กำหนด force = false เพื่อให้ Edge Function ทำงานก่อนเสมอ
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
