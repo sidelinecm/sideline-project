@@ -590,16 +590,17 @@ window.ScrollTrigger = ScrollTrigger;
     DOM.fetchErrorMessage?.classList.add("hidden");
 
     if (DOM.featuredSection) {
-      const isHomePage = !isFilteredView && !window.location.pathname.includes("/location/");
-      const featuredProfiles = STATE.allProfiles.filter(p => p.isfeatured);
+      let featuredProfiles = profiles.filter(p => p.isfeatured).slice(0, 10);
+      if (featuredProfiles.length === 0 && !isFilteredView) {
+        featuredProfiles = STATE.allProfiles.filter(p => p.isfeatured).slice(0, 10);
+      }
       const hasFeatured = featuredProfiles.length > 0;
 
-      DOM.featuredSection.classList.toggle("hidden", !isHomePage || !hasFeatured);
+      DOM.featuredSection.classList.toggle("hidden", !hasFeatured);
 
-      if (isHomePage && hasFeatured && DOM.featuredContainer) {
-        if (DOM.featuredContainer.children.length === 0) {
-          await appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
-        }
+      if (hasFeatured && DOM.featuredContainer) {
+        DOM.featuredContainer.innerHTML = "";
+        await appendProfilesToContainer(DOM.featuredContainer, featuredProfiles, currentRenderId);
       }
     }
 
@@ -749,7 +750,9 @@ window.ScrollTrigger = ScrollTrigger;
          </span>`
       : "";
 
-    const encodedSlug = encodeURIComponent(profile.slug || profile.id);
+    const isThaiSlug = profile.slug && /[^\u0000-\u007F]/.test(profile.slug);
+    const cleanSlug = (profile.slug && !isThaiSlug) ? encodeURIComponent(profile.slug) : profile.id;
+    const encodedSlug = cleanSlug;
 
     card.innerHTML = `
       <img src="${escapeHTML(imageSrc)}" 
@@ -868,7 +871,8 @@ window.ScrollTrigger = ScrollTrigger;
     swiperContainer.innerHTML = hotProfiles.map((p, idx) => {
       const rankText = `#${idx + 1} HOT`;
       const realLocation = p.location || p.provinceNameThai || STATE.provincesMap.get(p.provinceKey) || "ทั่วไทย";
-      const pSlug = encodeURIComponent(p.slug || p.id);
+      const isThaiSlug = p.slug && /[^\u0000-\u007F]/.test(p.slug);
+      const cleanSlug = (p.slug && !isThaiSlug) ? encodeURIComponent(p.slug) : p.id;
       const imgUrl = p.images[0]?.src || CONFIG.DEFAULT_OG_IMAGE;
       
       const availRaw = (p.availability || p.status || "").trim();
@@ -884,12 +888,12 @@ window.ScrollTrigger = ScrollTrigger;
       }
 
       return `
-        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${pSlug}">
+        <div class="vip-card-item ${idx === 0 ? 'active-glow' : ''}" data-profile-id="${p.id}" data-profile-slug="${cleanSlug}">
           <span class="vip-status-chip">${isAvail ? '🟢 รับงาน' : '🟡 สอบถาม'}</span>
           <span class="hot-rank-badge">${rankText}</span>
           <img src="${escapeHTML(imgUrl)}" alt="${escapeHTML(p.displayName)}" width="150" height="210" loading="${idx < 2 ? 'eager' : 'lazy'}" onerror="this.src='${CONFIG.DEFAULT_OG_IMAGE}'">
           <div class="vip-card-overlay"></div>
-          <a href="/sideline/${pSlug}" class="card-link" aria-label="ดูโปรไฟล์${escapeHTML(p.displayName)}"></a>
+          <a href="/sideline/${cleanSlug}" class="card-link" aria-label="ดูโปรไฟล์${escapeHTML(p.displayName)}"></a>
           <div class="vip-card-info">
             <div class="vip-name">${escapeHTML(p.displayName)}</div>
             <div class="vip-location">${escapeHTML(realLocation)}</div>
@@ -1400,11 +1404,15 @@ window.ScrollTrigger = ScrollTrigger;
 
           let found = STATE.allProfiles.find(p => String(p.id) === String(profileId) || String(p.slug) === String(profileSlug));
           if (found) {
-            history.pushState(null, "", `/sideline/${encodeURIComponent(found.slug || found.id)}`);
+            const isThaiSlug = found.slug && /[^\u0000-\u007F]/.test(found.slug);
+            const cleanSlug = (found.slug && !isThaiSlug) ? encodeURIComponent(found.slug) : found.id;
+            history.pushState(null, "", `/sideline/${cleanSlug}`);
             openLightboxForProfile(found);
           } else {
             const rawSlug = profileSlug || profileId;
-            history.pushState(null, "", `/sideline/${encodeURIComponent(rawSlug)}`);
+            const isThaiSlug = rawSlug && /[^\u0000-\u007F]/.test(rawSlug);
+            const cleanSlug = (rawSlug && !isThaiSlug) ? encodeURIComponent(rawSlug) : profileId;
+            history.pushState(null, "", `/sideline/${cleanSlug}`);
             handleRouteNavigation();
           }
           return;
