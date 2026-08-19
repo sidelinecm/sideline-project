@@ -1,4 +1,3 @@
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
@@ -439,7 +438,7 @@ const generatePersonSchema = (profile, province, targetUrl, hostUrl) => {
     "knowsAbout": ["Companion Services", "Tour Guide Services", "Entertainment Services"],
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": cleanLoc,
+      "addressLocality": province,
       "addressRegion": province,
       "addressCountry": "TH"
     },
@@ -922,7 +921,7 @@ export default async (req, context) => {
     ];
 
     if (profileSlug && matchedProfile) {
-const cleanSlug = (matchedProfile.slug && !/[^\u0000-\u007F]/.test(matchedProfile.slug)) ? encodeURIComponent(matchedProfile.slug) : matchedProfile.id;
+      const cleanSlug = (matchedProfile.slug && !/[^\u0000-\u007F]/.test(matchedProfile.slug)) ? encodeURIComponent(matchedProfile.slug) : matchedProfile.id;
       const profileUrl = `${hostUrl}/sideline/${cleanSlug}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
 
@@ -1005,7 +1004,7 @@ const cleanSlug = (matchedProfile.slug && !/[^\u0000-\u007F]/.test(matchedProfil
     const schemaJson = { "@context": "https://schema.org", "@graph": schemaGraph };
 
     const cardsHtml = profileList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
-    const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 12);
+    const featuredProfilesList = profileList.filter(p => p.isfeatured === true).slice(0, 10);
     const featuredCardsHtml = featuredProfilesList.map((p, index) => renderCardHtml(p, index, hostUrl, provinceThaiName)).join("");
 
     const reviewsHtml = finalReviews.map(r => `
@@ -1154,10 +1153,10 @@ const cleanSlug = (matchedProfile.slug && !/[^\u0000-\u007F]/.test(matchedProfil
       );
     }
 
-    if (!isNationalHome) {
-      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
-    } else {
+    if (featuredProfilesList.length > 0) {
       rawHtml = replaceGlobal(rawHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml);
+    } else {
+      rawHtml = rawHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
     let displayAreaInnerHtml = "";
