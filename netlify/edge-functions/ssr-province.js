@@ -922,7 +922,7 @@ export default async (req, context) => {
     ];
 
     if (profileSlug && matchedProfile) {
-const cleanSlug = (p.slug && !/[^\u0000-\u007F]/.test(p.slug)) ? encodeURIComponent(p.slug) : p.id;
+const cleanSlug = (matchedProfile.slug && !/[^\u0000-\u007F]/.test(matchedProfile.slug)) ? encodeURIComponent(matchedProfile.slug) : matchedProfile.id;
       const profileUrl = `${hostUrl}/sideline/${cleanSlug}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
 
@@ -1073,11 +1073,11 @@ const cleanSlug = (p.slug && !/[^\u0000-\u007F]/.test(p.slug)) ? encodeURICompon
     const newSchemaScript = `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonString}\n</script>`;
     
     if (/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i.test(rawHtml)) {
-      rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, newSchemaScript);
+      rawHtml = rawHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, () => newSchemaScript);
     } else if (rawHtml.includes("{{SCHEMA_JSON}}")) {
       rawHtml = replaceGlobal(rawHtml, "{{SCHEMA_JSON}}", schemaJsonString);
     } else {
-      rawHtml = rawHtml.replace(/<\/head>/i, `${newSchemaScript}\n</head>`);
+      rawHtml = rawHtml.replace(/<\/head>/i, () => `${newSchemaScript}\n</head>`);
     }
     
     rawHtml = replaceGlobal(rawHtml, "{{PROVINCE_NAME}}", provinceThaiName);
@@ -1116,7 +1116,7 @@ const cleanSlug = (p.slug && !/[^\u0000-\u007F]/.test(p.slug)) ? encodeURICompon
     const hotSwiperHtml = hotProfilesList.map((p, idx) => {
       const pName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
-      const cleanSlug = p.slug ? encodeURIComponent(p.slug) : p.id;
+      const cleanSlug = (p.slug && !/[^\u0000-\u007F]/.test(p.slug)) ? encodeURIComponent(p.slug) : p.id;
       const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || "";
       const imgUrl = optimizeImg(hostUrl, rawImg, 400, 500);
       
