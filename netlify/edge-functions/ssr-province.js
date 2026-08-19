@@ -477,7 +477,8 @@ const generateDynamicFAQsHTML = faqs => {
 const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
   const pName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   const pLoc = escapeHTML(sanitizeThaiText(p.location) || provinceThaiName);
-  const pSlug = p.slug ? encodeURIComponent(p.slug) : p.id;
+  const isThaiSlug = p.slug && /[^\u0000-\u007F]/.test(p.slug);
+  const pSlug = (p.slug && !isThaiSlug) ? encodeURIComponent(p.slug) : p.id;
   const pUrl = `/sideline/${pSlug}`;
   
   const availRaw = (p.availability || p.status || "").trim();
@@ -552,7 +553,7 @@ const renderCardHtml = (p, index, hostUrl, provinceThaiName) => {
     <div class="profile-card-new-container" >
       <article class="profile-card-new interactive-card"
            data-profile-id="${p.id}"
-           data-profile-slug="${escapeHTML(p.slug || p.id)}"
+           data-profile-slug="${pSlug}"
            style="aspect-ratio: 4 / 5; width: 100%; position: relative; border-radius: 16px; overflow: hidden; background-color: #09090B; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); cursor: pointer;">
           
           <img src="${imgUrl}" 
@@ -921,7 +922,7 @@ export default async (req, context) => {
     ];
 
     if (profileSlug && matchedProfile) {
-      const cleanSlug = matchedProfile.slug ? encodeURIComponent(matchedProfile.slug) : matchedProfile.id;
+const cleanSlug = (p.slug && !/[^\u0000-\u007F]/.test(p.slug)) ? encodeURIComponent(p.slug) : p.id;
       const profileUrl = `${hostUrl}/sideline/${cleanSlug}`;
       const cleanName = (matchedProfile.name || "").replace(/^น้อง\s?/, "").trim();
 
@@ -966,7 +967,7 @@ export default async (req, context) => {
           "numberOfItems": totalRealCount,
           "itemListElement": profileList.map((p, index) => {
             const pCleanName = (p.name || "").replace(/^น้อง\s?/, "").trim();
-            const cleanSlug = p.slug ? encodeURIComponent(p.slug) : p.id;
+            const cleanSlug = (p.slug && !/[^\u0000-\u007F]/.test(p.slug)) ? encodeURIComponent(p.slug) : p.id;
             const itemUrl = `${hostUrl}/sideline/${cleanSlug}`;
             return {
               "@type": "ListItem",
@@ -1261,53 +1262,34 @@ export default async (req, context) => {
     const hydratedProfilesData = JSON.stringify(profileList.map(p => {
       const pKey = (p.provinceKey || p.province_key || p.province_slug || "chiangmai").toString().toLowerCase();
       const realProvinceThai = p.provinceThai || p.province_thai || provThaiLookup.get(pKey) || provinceThaiName;
-
-      let galleries = p.galleryPaths || p.gallery_paths || p.gallery || [];
-      if (typeof galleries === "string") {
-        galleries = galleries.split(",").map(s => s.trim()).filter(Boolean);
-      }
-
+      const isThaiSlug = p.slug && /[^\u0000-\u007F]/.test(p.slug);
+      const cleanSlug = (p.slug && !isThaiSlug) ? p.slug : p.id;
       let tags = p.style_tags || p.styleTags || p.tags || [];
-      if (typeof tags === "string") {
-        tags = tags.split(",").map(s => s.trim()).filter(Boolean);
-      }
+      if (typeof tags === "string") tags = tags.split(",").map(s => s.trim()).filter(Boolean);
 
       return {
         id: p.id,
-        slug: p.slug || p.id,
+        slug: cleanSlug,
         name: p.name,
-        age: p.age,
+        age: p.age || "",
         height: p.height || "",
         weight: p.weight || "",
         stats: p.stats || "",
         skinTone: p.skin_tone || p.skinTone || "",
         bust: p.bust || "",
-        waist: p.waist || "",
-        hips: p.hips || "",
         cup_size: p.cup_size || "",
         imagePath: p.imagePath || p.image_url || p.imageUrl || p.photo || "",
-        galleryPaths: Array.isArray(galleries) ? galleries : [],
         provinceKey: pKey,
         provinceThai: realProvinceThai,
         location: sanitizeThaiText(p.location || realProvinceThai),
-        rate: p.rate,
-        availability: p.availability,
-        lastUpdated: p.lastUpdated,
-        isfeatured: p.isfeatured,
-        verified: p.verified || p.isVerified,
-        hasVideo: p.has_video || p.hasVideo || false,
-        description: sanitizeThaiText(p.description) || "",
+        rate: p.rate || "1500",
+        availability: p.availability || "รับงาน",
+        isfeatured: p.isfeatured || false,
         lineId: (p.line_id || p.lineId || "").toString().replace(/^@/, "").trim(),
         quote: sanitizeThaiText(p.quote || p.slogan) || "",
         styleTags: Array.isArray(tags) ? tags : []
       };
     })).replace(/</g, '\\u003c');
-
-    const allProvincesList = (provListRes.data || []).map(p => ({
-      key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
-      nameThai: p.nameThai || p.name_thai || p.name
-    }));
-    const hydratedProvincesData = JSON.stringify(allProvincesList).replace(/</g, '\\u003c');
 
     const hydratedScriptTag = `
       <script id="ssr-profiles-data">
