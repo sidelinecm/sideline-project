@@ -1,15 +1,16 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
   <meta charset="utf-8" />
+  <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#07040d">
   <meta name="color-scheme" content="dark">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <title>สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
-  <meta name="description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัดทั่วไทย" />
+  <title>สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
+  <meta name="description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด{{PROVINCE_ZONES}}" />
   <meta name="keywords" content="แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน, รับงานเชียงใหม่, รับงานลำปาง, รับงานกรุงเทพ" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
@@ -52,9 +53,18 @@
   
   <link rel="modulepreload" href="/main.js">
   <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <script type="application/ld+json" id="dynamic-schema"></script>
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+
+<script type="application/ld+json" id="dynamic-schema">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "FirstModelHub",
+  "url": "https://firstmodelhub.com"
+}
+</script>
 </head>
 
 <body class="fmh-app-page">
@@ -137,7 +147,6 @@
 
 <main id="main-content" tabindex="-1">
   <div class="container">
-
     <section class="hero-section fmh-hero-surface" aria-labelledby="hero-h1">
       <div class="fmh-hero-ambient" aria-hidden="true">
         <span class="fmh-ambient-orb fmh-ambient-orb-a"></span>
@@ -454,7 +463,7 @@
       <div class="lightbox-grid-layout">
         <div class="lightbox-image-column">
           <div class="lightbox-hero-container">
-            <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3C/svg%3E" alt="" width="400" height="500">
+            <img id="lightboxHeroImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3C/svg%3E" alt="รูปภาพโปรไฟล์ขนาดใหญ่" width="400" height="500">
           </div>
           <div id="lightboxThumbnailStrip"></div>
         </div>
@@ -462,12 +471,12 @@
         <div class="lightbox-details">
           <header style="display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-              <h3 id="lightbox-profile-name-main" style="font-size: 22px; font-weight: 900; margin: 0; line-height: 1.2;"></h3>
+              <h3 id="lightbox-profile-name-main" style="font-size: 22px; font-weight: 900; margin: 0; line-height: 1.2;">ชื่อโปรไฟล์</h3>
               <div id="lightbox-availability-badge-wrapper"></div>
             </div>
           </header>
           
-          <div id="lightboxQuote" class="lightbox-quote-card" style="font-size: 11.5px; color: #C084FC; margin: 2px 0;"></div>
+          <div id="lightboxQuote" class="lightbox-quote-card" style="font-size: 11.5px; color: #C084FC; margin: 2px 0;">คำโปรยประจำตัว</div>
           <div id="lightboxTags" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
           
           <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; margin-top: 6px;">
@@ -475,6 +484,7 @@
           </div>
 
           <div id="lightboxDescriptionContainer" style="display: none; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; margin-top: 6px;">
+            <div style="color: white; font-weight: 800; font-size: 12px; margin-bottom: 4px;">รายละเอียดเพิ่มเติม</div>
             <div id="lightboxDescriptionContent" style="font-size: 11.5px; color: var(--text-gray); line-height: 1.5; white-space: pre-wrap;"></div>
           </div>
         </div>
