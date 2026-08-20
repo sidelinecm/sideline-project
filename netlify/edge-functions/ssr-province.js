@@ -470,9 +470,9 @@ export default async (req, context) => {
   }
 
   const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
-  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/llms.txt"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
-    return await context.next();
-  }
+  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/llms.txt", "/sideline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
+  return await context.next();
+}
   if (url.pathname === "/index.html") {
     return Response.redirect(`${primaryDomain}/`, 301);
   }
@@ -570,10 +570,10 @@ export default async (req, context) => {
       Promise.resolve(reviewsQuery).catch(() => ({ data: [] }))
     ]);
 
-    const provinceData = provinceDataRes.data;
-    if (!provinceData && !isNational) {
-      return new Response("404 - ไม่พบข้อมูลพื้นที่จังหวัดที่ต้องการ", { status: 404 });
-    }
+const provinceData = provinceDataRes.data;
+if (!provinceData && !isNational) {
+  return await context.next();
+}
 
     const profilesList = profilesRes.data || [];
     const totalCount = profilesRes.count !== null && profilesRes.count !== undefined ? profilesRes.count : profilesList.length;
@@ -688,6 +688,9 @@ export default async (req, context) => {
         },
         "review": activeReviews.map(r => ({
           "@type": "Review",
+          "itemReviewed": {
+            "@id": `${canonicalUrl}/#business`
+          },
           "author": { "@type": "Person", "name": r.author },
           "datePublished": r.datePublished,
           "reviewBody": stripHTML(r.text),
