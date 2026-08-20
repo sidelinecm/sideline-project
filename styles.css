@@ -584,3 +584,102 @@ img {
 /* 18. FOOTER */
 footer.fmh-footer { padding-bottom: 30px !important; }
 @media (max-width: 768px) { footer.fmh-footer { padding-bottom: 110px !important; } }
+
+/* ==============================================================================
+   🔥 HOT SECTION & FEATURED HEADER STYLES (ตรงตามรูปภาพ 100%)
+   ============================================================================== */
+
+/* 1. ส่วนหัวข้อ "น้องๆ ที่ HOT 🔥" */
+.hot-section-header-centered {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 18px auto 8px auto !important;
+  gap: 6px !important;
+}
+
+.hot-title-red-pink {
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  color: #FF2E63 !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  letter-spacing: -0.5px !important;
+  text-shadow: 0 0 16px rgba(255, 46, 99, 0.45) !important;
+}
+
+.hot-sub-line {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  margin-top: 4px !important;
+}
+
+/* ป้าย Badge #ฟิวแฟน */
+.hot-tag-badge-red {
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  padding: 2px 9px !important;
+  border-radius: 100px !important;
+  letter-spacing: 0.2px !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4) !important;
+}
+
+/* ป้ายแคปซูล <--- เลื่อนซ้าย-ขวา ---> */
+.hot-swipe-hint-centered {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #CBD5E1 !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  padding: 3px 14px !important;
+  border-radius: 100px !important;
+  letter-spacing: 0.5px !important;
+  margin-top: 2px !important;
+}
+
+/* 2. ส่วนหัวข้อ "แนะนำน้องๆ รับงาน ไซด์ไลน์ทั่วไทย" */
+.clean-section-wrapper {
+  width: 100% !important;
+  max-width: 1100px !important;
+  margin: 16px auto 10px auto !important;
+}
+
+.clean-section-header {
+  text-align: center !important;
+  margin-bottom: 12px !important;
+  padding: 0 10px !important;
+}
+
+.clean-section-h2 {
+  font-size: clamp(16px, 4.6vw, 21px) !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  line-height: 1.35 !important;
+  margin: 0 auto 4px auto !important;
+}
+
+.clean-section-h2 .kw-purple {
+  color: #C084FC !important;
+  font-weight: 900 !important;
+}
+
+.text-gradient-sub {
+  display: block !important;
+  font-size: clamp(11.5px, 3.2vw, 13px) !important;
+  font-weight: 500 !important;
+  color: #CBD5E1 !important;
+  line-height: 1.5 !important;
+  letter-spacing: -0.2px !important;
+}
