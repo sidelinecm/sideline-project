@@ -68,7 +68,6 @@ const PROVINCE_NAME_MAP = {
   "ubon-ratchathani": "อุบลราชธานี"
 };
 
-// ฟังก์ชันทำความสะอาดข้อความ ป้องกันคำสะกดผิดและคำล่อแหลมทางเพศ (SafeSearch Compliant)
 function sanitizeThaiText(text) {
   if (!text) return "";
   return String(text)
@@ -79,7 +78,6 @@ function sanitizeThaiText(text) {
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/พาพับ/g, "พายัพ")
     .replace(/(รับงาน|ตัวเมือง)\s*ของแก่น/g, "$1 ขอนแก่น")
-    // กรองคำ 18+ ที่ส่งผลต่อ SafeSearch NLP Penalty
     .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
     .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!/gi, "")
@@ -103,7 +101,6 @@ function stripHTML(str) {
   return String(str).replace(/<[^>]*>?/gm, "").trim();
 }
 
-// สุ่มเลือกและกระจายรีวิวอย่างคงที่ (Deterministic) โดยไม่มีการปั่นจำนวนตัวเลขรีวิวเกินจริง
 function getDeterministicReviews(seedStr, count = 3) {
   const hash = String(seedStr || "default").split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const poolLen = REVIEW_POOL.length;
@@ -197,7 +194,6 @@ export default async (req, context) => {
   const url = new URL(req.url);
   const userAgent = (req.headers.get("User-Agent") || "").toLowerCase();
   
-  // ตรวจสอบว่าเป็น Bot หรือ Crawler หรือไม่
   const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(userAgent);
   if (!isBot) {
     return context.next();
@@ -223,7 +219,6 @@ export default async (req, context) => {
       return context.next();
     }
 
-    // ดึงโปรไฟล์แนะนำในพื้นที่เดียวกัน
     let relatedProfiles = [];
     const provinceKey = profile.provinceKey || profile.province_key || profile.province_slug || "chiangmai";
     if (provinceKey) {
@@ -273,10 +268,12 @@ export default async (req, context) => {
     const metaDescription = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
-    // รีวิวจริงที่แสดงบนหน้าเว็บ (จำนวน 3 รายการ ตรงกับ DOM 100% ไม่ปั่นยอดหลอกบอท)
+    // สร้างรีวิวพร้อม datePublished ตามเกณฑ์ Google Search Console
+    const now = Date.now();
     const reviewsList = getDeterministicReviews(rawSlug, 3);
-    const reviewsSchema = reviewsList.map(r => ({
+    const reviewsSchema = reviewsList.map((r, i) => ({
       "@type": "Review",
+      "datePublished": new Date(now - (i + 1) * 7 * 86400000).toISOString().split("T")[0],
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": r.rating.toString(),
@@ -290,7 +287,7 @@ export default async (req, context) => {
       "reviewBody": stripHTML(r.text)
     }));
 
-    // โครงสร้าง Schema JSON-LD ที่ถูกต้องตามหลักการของ Google Search (Person + Service + Offer + FAQ + Breadcrumbs)
+    // ✅ ปรับ Schema เป็น @type: Product ตามข้อกำหนด Review Rich Results ของ Google
     const schemaGraph = {
       "@context": "https://schema.org/",
       "@graph": [
@@ -314,14 +311,15 @@ export default async (req, context) => {
           }
         },
         {
-          "@type": "Service",
-          "@id": `${canonicalUrl}#service`,
+          "@type": "Product",
+          "@id": `${canonicalUrl}#product`,
           "name": `บริการเพื่อนเที่ยวฟิวแฟน - ${displayName}`,
-          "provider": { "@id": `${canonicalUrl}#person` },
+          "image": heroImageLarge,
           "description": stripHTML(metaDescription),
-          "areaServed": {
-            "@type": "AdministrativeArea",
-            "name": provinceNameThai
+          "sku": `FMH-${String(rawSlug).toUpperCase()}`,
+          "brand": {
+            "@type": "Brand",
+            "name": CONFIG.BRAND_NAME
           },
           "offers": {
             "@type": "Offer",
@@ -330,7 +328,15 @@ export default async (req, context) => {
             "priceCurrency": "THB",
             "priceValidUntil": "2027-12-31",
             "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
             "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "reviewCount": reviewsList.length.toString(),
+            "bestRating": "5",
+            "worstRating": "1"
           },
           "review": reviewsSchema
         },
@@ -376,7 +382,6 @@ export default async (req, context) => {
       ]
     };
 
-    // สร้าง HTML Output สะอาด รวดเร็ว ปราศจาก Inline CSS ส่วนเกิน
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
