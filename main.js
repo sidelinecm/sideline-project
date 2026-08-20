@@ -975,8 +975,10 @@ if (domCache.featuredSection) {
       const lineWrapper = document.createElement("div");
       lineWrapper.id = "line-btn-sticky-wrapper";
       lineWrapper.style.cssText = "margin-top: 10px; width: 100%;";
+      
+      // 🟢 เติม onclick เข้าไปตรงนี้ครับ
       lineWrapper.innerHTML = `
-        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta">
+        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="if(window.trackLineClick) window.trackLineClick('${profile.id}')">
             <i class="fab fa-line" style="font-size: 18px;"></i>
             <span>แอดไลน์จองคิว ${nameStr}</span>
         </a>
@@ -994,7 +996,7 @@ if (domCache.featuredSection) {
         gsap.fromTo(contentWrapperEl, { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
       }
     }
-  }
+}
 
   // ปิดหน้าต่าง Lightbox
   function closeLightboxModal(updateHistory = true) {
@@ -1299,6 +1301,19 @@ if (domCache.featuredSection) {
         toggleSeoDrawerBtn.querySelector("i").className = isCollapsed ? "fas fa-chevron-down" : "fas fa-chevron-up";
       };
     }
+    
+// ฟังก์ชันบันทึกยอดคลิกแอดไลน์ โดยยืม increment_likes มาใช้
+window.trackLineClick = function(profileId) {
+  if (window.supabase) {
+    try {
+      const idToUpdate = Number(profileId) || profileId;
+      window.supabase.rpc("increment_likes", { profile_id_to_update: idToUpdate });
+      console.log("📈 บันทึกยอดกดไลน์ให้น้อง ID:", idToUpdate);
+    } catch (e) {
+      console.warn("Track failed:", e);
+    }
+  }
+};
 
     // ฟังก์ชันโหลดข้อมูลโปรไฟล์เริ่มต้น
     await (async function initializeData() {

@@ -742,3 +742,66 @@ footer.fmh-footer { padding-bottom: 30px !important; }
   object-fit: cover !important;
   object-position: top center !important;
 }
+
+/* =========================================================
+   ✨ คลาสใหม่สำหรับ Lightbox & Swiper (FirstModelHub)
+   ========================================================= */
+
+/* 1. ปุ่มแอดไลน์สีเขียวใน Lightbox */
+.lightbox-line-cta {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important;
+    color: #FFFFFF !important;
+    padding: 12px 18px !important;
+    border-radius: 100px !important;
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    text-decoration: none !important;
+    box-shadow: 0 6px 20px rgba(0, 230, 118, 0.35) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.lightbox-line-cta:active {
+    transform: scale(0.97) !important;
+}
+
+/* 2. กล่องสถิติ Bento (อายุ / สัดส่วน / ส่วนสูง) ใน Lightbox */
+.bento-stat-tile {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 8px 4px !important;
+    border-radius: 12px !important;
+    text-align: center !important;
+}
+
+/* 3. ป้ายแท็กสไตล์ (#ฟิวแฟน) ใน Lightbox */
+.lightbox-tag-pill {
+    background: rgba(124, 58, 237, 0.15) !important;
+    border: 1px solid rgba(192, 132, 252, 0.35) !important;
+    color: #E9D5FF !important;
+    font-size: 11px !important;
+    padding: 3px 10px !important;
+    border-radius: 100px !important;
+    font-weight: 700 !important;
+    display: inline-block !important;
+}
+
+/* 4. เอฟเฟกต์การ์ดเรืองแสงอันดับ #1 HOT ใน Swiper หน้าแรก */
+.vip-card-item.active-glow {
+    box-shadow: 0 0 15px rgba(192, 132, 252, 0.45) !important;
+    border-color: rgba(192, 132, 252, 0.8) !important;
+}
+
+/* 5. หน้ากากใสกันคนกดเซฟรูป (ตามที่คุยข้อ 3) */
+.profile-card-gradient-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
