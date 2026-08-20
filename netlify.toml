@@ -44,35 +44,67 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 # ==============================================================================
-# 2. EDGE FUNCTIONS MAPPING (✅ แก้ไขจุดนี้ให้ครอบคลุม 100% ไม่หลุดขบวน)
+# 2. EDGE FUNCTIONS MAPPING
 # ==============================================================================
-
 [[edge_functions]]
   function = "sitemap"
   path = "/sitemap.xml"
 
-# ให้ render-bot ดูแลเฉพาะหน้าโปรไฟล์เดี่ยวสำหรับบอท
 [[edge_functions]]
   function = "render-bot"
   path = "/sideline/*"
 
-# ✅ ให้ ssr-province ดูแลเส้นทางทั้งหมด (หน้าแรก, หน้ารายจังหวัด) รวบจบในบรรทัดเดียว
 [[edge_functions]]
   function = "ssr-province"
-  path = "/*"
+  path = "/location/*"
+
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/"
+
+[[edge_functions]]
+  function = "ssr-province"
+  path = "/index.html"
 
 # ==============================================================================
-# 3. REDIRECTS & REWRITES
+# 3. REDIRECTS (เข้าหน้าไหนในเว็บเดิม เด้งไปหน้านั้นในเว็บใหม่แบบ 1:1 ทันที)
 # ==============================================================================
+
+# 🟢 ลำดับที่ 1: 301 Permanent Redirect ส่งต่อ 1:1 ทุก URL จาก sidelinechiangmai มา firstmodelhub
 [[redirects]]
   from = "https://sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/location/chiangmai"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://sidelinechiangmai.netlify.app/*"
+  to = "https://firstmodelhub.com/:splat"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.sidelinechiangmai.netlify.app/*"
-  to = "https://firstmodelhub.com/location/chiangmai"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.sidelinechiangmai.netlify.app/*"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
+
+# 🟢 ลำดับที่ 2: รวมโดเมนสำรอง Netlify และ www เข้าสู่ https://firstmodelhub.com แบบ 1:1
+[[redirects]]
+  from = "https://firstmodelhub.netlify.app/*"
+  to = "https://firstmodelhub.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://firstmodelhub.netlify.app/*"
+  to = "https://firstmodelhub.com/:splat"
   status = 301
   force = true
 
@@ -83,11 +115,12 @@
   force = true
 
 [[redirects]]
-  from = "https://firstmodelhub.netlify.app/*"
+  from = "http://www.firstmodelhub.com/*"
   to = "https://firstmodelhub.com/:splat"
   status = 301
   force = true
 
+# 🟢 ลำดับที่ 3: จัดการ Clean URLs สำหรับพารามิเตอร์จังหวัด (?province=xxx -> /location/xxx)
 [[redirects]]
   query = { province = ":p" }
   from = "/"
@@ -102,9 +135,18 @@
   status = 301
   force = true
 
-# ✅ SPA Fallback: กำหนด force = false เพื่อให้ Edge Function ทำงานก่อนเสมอ
+# 🟢 ลำดับที่ 4: SPA Fallback สำหรับระบบ Client-side Routing
+[[redirects]]
+  from = "/sideline/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/location/*"
+  to = "/index.html"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false

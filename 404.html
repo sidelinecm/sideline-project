@@ -1,117 +1,155 @@
-<!doctype html>
-<html lang="th" class="scroll-smooth dark">
+<!DOCTYPE html>
+<html lang="th" class="dark-theme dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>404 - ไม่พบหน้า | First Model Hub</title>
-  <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#09090c" />
-  <link rel="icon" href="/images/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="canonical" href="https://firstmodelhub.com/404" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07040d">
+  <meta name="color-scheme" content="dark">
 
-  <!-- Preload assets -->
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-  <link rel="preload" href="/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript>
-    <link rel="stylesheet" href="/styles.css" />
-  </noscript>
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  </noscript>
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin />
-  <script rel="modulepreload" href="/main.js"></script>
+  <title>404 ไม่พบหน้าเว็บ | First Model Hub</title>
+  <meta name="description" content="ขออภัย ไม่พบหน้าที่คุณต้องการ หน้าดังกล่าวอาจถูกย้ายหรือไม่มีอยู่ในระบบ First Model Hub" />
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://firstmodelhub.com/404">
+
+  <link rel="shortcut icon" href="/images/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
+  
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body class="antialiased" data-page="404">
 
-<!-- Header -->
-<header id="page-header" class="fixed top-0 left-0 w-full z-40 transition-colors duration-300 border-b border-transparent">
-  <div class="container mx-auto px-4 h-18 flex items-center justify-between">
-    <a href="/" aria-label="First Model Hub หน้าแรก">
-      <span style="font-size: 18px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">First Model <span style="color: #C084FC">Hub</span></span>
-    </a>
-    <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="เมนูหลัก">
-      <a href="/profiles" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">น้องๆ ทั้งหมด</a>
-      <a href="/locations" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">พิกัดบริการ</a>
-      <a href="/about" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">เกี่ยวกับเรา</a>
-      <a href="/faq" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">FAQ</a>
-      <a href="/blog" class="px-4 py-2 rounded-full hover:bg-accent transition-colors">บทความ</a>
-    </nav>
-    <div class="flex items-center gap-2">
-      <button class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label="เปลี่ยนโหมดสี">
-        <i class="fas fa-sun theme-toggle-icon text-lg" aria-hidden="true"></i>
-      </button>
-      <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-accent" aria-label="เปิดเมนู" aria-haspopup="true" aria-controls="sidebar">
-        <i class="fas fa-bars text-xl" aria-hidden="true"></i>
-      </button>
+<body class="fmh-app-page">
+
+<!-- FLOATING APP DOCK -->
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <a href="/" class="dock-item">
+    <i class="fas fa-home" aria-hidden="true"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-search" aria-hidden="true"></i>
+    <span>ตัวกรอง</span>
+  </a>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-user-friends" aria-hidden="true"></i>
+    <span>รวมน้องๆ</span>
+  </a>
+  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line" aria-label="ติดต่อจองคิวผ่านไลน์">
+    <i class="fab fa-line" aria-hidden="true"></i>
+    <span>จองคิว</span>
+  </a>
+</nav>
+
+<!-- HEADER -->
+<header id="page-header" role="banner">
+    <div class="header-logo-container">
+        <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
+           <span class="brand-logo-text">
+             FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
+           </span>
+        </a>
     </div>
-  </div>
+
+    <div class="nav-controls">
+        <nav class="desktop-nav" aria-label="เมนูหลักบนคอมพิวเตอร์">
+            <a href="/profiles">รวมโปรไฟล์ VIP</a>
+            <a href="/locations">พื้นที่ให้บริการ</a>
+            <a href="/blog">บทความ & รีวิว</a>
+            <a href="/faq">คำถามที่พบบ่อย</a>
+            <a href="/about">เกี่ยวกับเรา</a>
+        </nav>
+
+        <a href="/index-en" class="lang-micro-toggle" aria-label="Switch to English">
+            <span style="font-size: 13px; line-height: 1;">🇬🇧</span> EN
+        </a>
+
+        <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทางสำหรับมือถือ">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+    </div>
 </header>
 
-<!-- Sidebar -->
-<div id="menu-backdrop" class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out overlay-backdrop" aria-hidden="true"></div>
-<div id="sidebar" class="fixed top-0 right-0 w-64 sm:w-72 h-dvh bg-card text-foreground border-l border-border shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col md:hidden" role="dialog" aria-labelledby="sidebar-nav-heading" aria-hidden="true" tabindex="-1">
-  <div class="flex justify-between items-center p-4 border-b border-border shrink-0">
-    <h3 id="sidebar-nav-heading" class="text-lg font-bold text-secondary">เมนู</h3>
-    <button id="close-sidebar-btn" class="btn-close-premium" aria-label="ปิดเมนู">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
+<!-- MOBILE SIDEBAR MENU -->
+<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+  <div class="sidebar-header-div">
+    <span class="sidebar-title">Navigation Hub</span>
+    <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn" type="button">
+      <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </div>
-  <nav aria-label="เมนูนำทางหลักในแถบด้านข้าง" class="flex-grow overflow-y-auto p-4 space-y-4">
-    <a href="/" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-home w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>หน้าแรก</span></a>
-    <a href="/profiles" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-users w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>น้องๆ ทั้งหมด</span></a>
-    <a href="/locations" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-map-marker-alt w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>พิกัดบริการ</span></a>
-    <a href="/about" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-info-circle w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>เกี่ยวกับเรา</span></a>
-    <a href="/faq" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-question-circle w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>คำถามพบบ่อย</span></a>
-    <a href="/blog" class="flex items-center gap-4 py-3 px-4 font-medium text-base"><i class="fas fa-newspaper w-5 text-center text-muted-foreground" aria-hidden="true"></i><span>บทความ</span></a>
-  </nav>
-  <div class="p-4 border-t border-border shrink-0">
-    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-line-shared"><i class="fab fa-line text-lg" aria-hidden="true"></i><span>ติดต่อผ่าน LINE</span></a>
+  
+  <div class="sidebar-links-wrapper">
+    <a href="/"><i class="fas fa-home icon-purple" aria-hidden="true"></i> หน้าแรก</a>
+    <a href="/profiles"><i class="fas fa-user-check icon-green" aria-hidden="true"></i> น้องๆ VIP แนะนำ</a>
+    <a href="/locations"><i class="fas fa-map-marked-alt icon-gold" aria-hidden="true"></i> พื้นที่บริการทั่วไทย</a>
+    <a href="/nimman"><i class="fas fa-gem icon-pink" aria-hidden="true"></i> โซนนิมมาน เชียงใหม่</a>
+    <a href="/blog"><i class="fas fa-newspaper icon-blue" aria-hidden="true"></i> บทความ & คู่มือนัดหมาย</a>
+    <a href="/about"><i class="fas fa-shield-alt icon-lightpurple" aria-hidden="true"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
+    <a href="/faq"><i class="fas fa-question-circle icon-red" aria-hidden="true"></i> คำถามที่พบบ่อย (FAQ)</a>
+    <a href="/privacy-policy"><i class="fas fa-user-lock icon-gray" aria-hidden="true"></i> นโยบายความเป็นส่วนตัว</a>
+    <a href="/index-en" class="sidebar-lang-link"><i class="fas fa-globe icon-purple" aria-hidden="true"></i> English Version (EN)</a>
   </div>
-</div>
 
-<!-- Main Content -->
-<main class="min-h-screen flex items-center justify-center text-center px-4 pt-20">
-  <div>
-    <h1 class="text-8xl md:text-9xl font-extrabold text-primary tracking-tighter">404</h1>
-    <p class="text-2xl md:text-3xl font-semibold text-foreground mt-4">ไม่พบหน้าที่คุณค้นหา</p>
-    <p class="text-muted-foreground mt-2 mb-8">ขออภัย, หน้าที่คุณพยายามเข้าถึงไม่มีอยู่จริง หรืออาจถูกย้ายไปที่อื่นแล้ว</p>
-    <a href="/" class="inline-block bg-secondary text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity">กลับสู่หน้าแรก</a>
+  <div class="sidebar-footer-cta">
+    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
+      <i class="fab fa-line" aria-hidden="true"></i> แอดไลน์จองคิว VIP
+    </a>
+  </div>
+</aside>
+
+<div id="sidebar-overlay" class="drawer-backdrop"></div>
+
+<!-- MAIN 404 CONTENT -->
+<main id="main-content" style="min-height: 65vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 40px 16px;">
+  <div class="container" style="max-width: 480px;">
+    <div style="font-size: 76px; font-weight: 900; line-height: 1; background: linear-gradient(135deg, #FF007A 0%, #C084FC 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px;">
+      404
+    </div>
+    <h1 style="font-size: 18px; font-weight: 800; color: #FFFFFF; margin-bottom: 8px;">ไม่พบหน้าที่คุณกำลังค้นหา</h1>
+    <p style="font-size: 12.5px; color: var(--text-gray); line-height: 1.6; margin-bottom: 24px;">
+      ขออภัย หน้าเว็บที่คุณต้องการอาจถูกย้าย ลบ หรือคุณอาจพิมพ์ URL ไม่ถูกต้อง
+    </p>
+    <a href="/" class="sidebar-line-btn" style="display: inline-flex; width: auto; padding: 10px 24px; text-decoration: none;">
+      <i class="fas fa-home" aria-hidden="true"></i> กลับสู่หน้าแรก First Model Hub
+    </a>
   </div>
 </main>
 
-<!-- Schema สำหรับ SEO -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "404 - ไม่พบหน้า",
-  "description": "หน้าไม่พบข้อมูลหรือไม่อยู่ในเว็บไซต์",
-  "url": "https://firstmodelhub.com/404"
-}
-</script>
+<!-- FOOTER -->
+<footer role="contentinfo" class="fmh-footer">
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text-muted);">
+      <p style="margin: 0;">© 2026 FirstModelHub. All Rights Reserved.</p>
+      <div style="display: flex; gap: 14px; align-items: center;">
+        <a href="/privacy-policy" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+        <a href="/about" style="color: var(--text-muted); text-decoration: none;">About Us</a>
+      </div>
+    </div>
+  </div>
+</footer>
 
-<!-- Scripts -->
-<script type="module" src="/main.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.body.classList.add('loaded');
-  });
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => navigator.serviceWorker.register('/sw.js'));
-      } else {
-        setTimeout(() => navigator.serviceWorker.register('/sw.js'), 1500);
-      }
-    });
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebarMenu = document.getElementById('sidebar-menu');
+  const closeMenuBtn = document.getElementById('close-menu-btn');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+  function openMenu() {
+    sidebarMenu.classList.add('active');
+    sidebarOverlay.classList.add('active');
   }
+  function closeMenu() {
+    sidebarMenu.classList.remove('active');
+    sidebarOverlay.classList.remove('active');
+  }
+
+  if (menuToggle) menuToggle.addEventListener('click', openMenu);
+  if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMenu);
 </script>
 
 </body>
