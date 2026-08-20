@@ -683,3 +683,62 @@ footer.fmh-footer { padding-bottom: 30px !important; }
   line-height: 1.5 !important;
   letter-spacing: -0.2px !important;
 }
+
+/* ==========================================================================
+   🔒 FIX GRID & FEATURED PROFILES CONTAINMENT
+   ========================================================================== */
+
+#featured-profiles-container,
+.profiles-grid-row,
+.profile-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* บังคับ 2 คอลัมน์บนมือถือ */
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 1100px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+@media (min-width: 768px) {
+  #featured-profiles-container,
+  .profiles-grid-row,
+  .profile-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  #featured-profiles-container,
+  .profiles-grid-row,
+  .profile-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+}
+
+.profile-card-new-container {
+  width: 100% !important;
+  min-width: 0 !important; /* ป้องกัน Grid Item ขยายเกินคอลัมน์ */
+  box-sizing: border-box !important;
+}
+
+.profile-card-new {
+  aspect-ratio: 4 / 5 !important;
+  width: 100% !important;
+  height: auto !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+}
+
+.profile-card-new img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+}

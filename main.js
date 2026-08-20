@@ -458,15 +458,17 @@ window.ScrollTrigger = ScrollTrigger;
     domCache.noResultsMessage?.classList.add("hidden");
     domCache.fetchErrorMessage?.classList.add("hidden");
 
-    if (domCache.featuredSection) {
-      const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/");
-      const featuredList = appState.allProfiles.filter(p => p.isfeatured);
-      const hasFeatured = featuredList.length > 0;
-      domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
-      if (isHomeView && hasFeatured && domCache.featuredContainer && domCache.featuredContainer.children.length === 0) {
-        await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
-      }
-    }
+
+if (domCache.featuredSection) {
+  const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/");
+  const featuredList = appState.allProfiles.filter(p => p.isfeatured);
+  const hasFeatured = featuredList.length > 0;
+  
+  domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
+  if (isHomeView && hasFeatured && domCache.featuredContainer) {
+    await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
+  }
+}
 
     if (!profiles || profiles.length === 0) {
       domCache.profilesDisplayArea.innerHTML = "";

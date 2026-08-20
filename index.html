@@ -189,7 +189,7 @@
         ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong class="kw-purple">รับงาน{{PROVINCE_NAME}}</strong>, <strong class="kw-purple">สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong class="kw-purple">เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง <span class="kw-green">ตรงปก 100%</span> ปราศจากความเสี่ยงด้วยนโยบาย <strong class="kw-red">ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด <span class="kw-purple">{{PROVINCE_ZONES}}</span> ทั้งหมด
       </p>
 
-<!-- ================= ส่วนน้องๆ HOT 🔥 ================= -->
+      <!-- ================= ส่วนน้องๆ HOT 🔥 (ใส่หัวข้อกลับมาให้สมบูรณ์) ================= -->
       <div class="hot-section-header-centered">
         <h2 class="hot-title-red-pink">น้องๆ ที่ HOT 🔥</h2>
         <div class="hot-sub-line">
@@ -203,7 +203,7 @@
       <!-- สไลด์รูปน้องๆ HOT -->
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ"></div>
 
-      <!-- แถบ 3 เม็ดสถิติ (โปรไฟล์ / เรตติ้ง / จ่ายหน้างาน) -->
+      <!-- แถบ 3 เม็ดสถิติ -->
       <div class="hero-stats-chips-row">
         <span class="stat-micro-chip">
           <i class="fas fa-users" style="color: #C084FC; font-size: 10px;" aria-hidden="true"></i>
@@ -220,7 +220,7 @@
       </div>
     </section>
 
-    <!-- ================= ส่วนรายการน้องๆ ทั้งหมด ================= -->
+    <!-- ================= ส่วนรายการน้องๆ แนะนำ ================= -->
     <section id="featured-profiles" class="clean-section-wrapper">
       <div class="clean-section-header">
         <h2 id="featured-heading" class="clean-section-h2">
@@ -229,7 +229,8 @@
         </h2>
       </div>
       
-      <div id="featured-profiles-container" class="profiles-grid-row fmh-profile-grid" aria-labelledby="featured-heading">
+      <!-- ใส่ {{PROFILES_CARDS_HTML}} ไว้เพื่อให้ SSR พ่นการ์ดให้ Google Bot อ่านได้ทันที -->
+      <div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">
         {{PROFILES_CARDS_HTML}}
       </div>
     </section>
