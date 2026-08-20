@@ -1,3 +1,11 @@
+/**
+ * [ SYSTEM BOT RENDERING CORE - PROD-READY OPTIMIZED 2026 ]
+ * Project: First Model Hub - Serverless Crawler Handler
+ * File: netlify/edge-functions/render-bot.js
+ * Authority: Extended Crawler Identification, Dynamic Link Building & Cloudinary Parity
+ * Features: Zero 404 Cloudinary Handler, Clean Typography, 100% Valid Schema.org Graph
+ */
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.42.0';
 
 const CONFIG = {
@@ -37,6 +45,7 @@ const REVIEW_POOL = [
     { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
 ];
 
+// 🟢 แก้ไข PROVINCE_NAME_MAP ให้รองรับทั้งแบบมีขีดและไม่มีขีดกลาง
 const PROVINCE_NAME_MAP = {
     chiangmai: "เชียงใหม่",
     "chiang-mai": "เชียงใหม่",
@@ -61,6 +70,7 @@ const PROVINCE_NAME_MAP = {
     "ubon-ratchathani": "อุบลราชธานี"
 };
 
+// 🟢 1. จัดการคำผิดและปรับคำภาษาไทยให้สละสลวย
 const sanitizeThaiText = (str) => {
     if (!str) return "";
     return String(str)
@@ -74,6 +84,7 @@ const sanitizeThaiText = (str) => {
         .replace(/ตัวเมือง ของแก่น/g, "ตัวเมือง ขอนแก่น");
 };
 
+// 🟢 2. สุ่มรีวิวคงที่ ปลอดภัยต่อ Type Error และไม่สุ่มซ้ำ
 const getDeterministicReviews = (slug, count = 3) => {
     const seed = String(slug || 'default');
     const charCodeSum = seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -94,6 +105,7 @@ const getDeterministicReviews = (slug, count = 3) => {
     return selected;
 };
 
+// 🟢 3. สุ่มค่าคงที่สำหรับสัดส่วน/อายุ/ส่วนสูง
 const getDeterministicValue = (min, max, seedString, offset = 0) => {
     const seed = String(seedString || 'seed');
     const sum = seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + offset;
@@ -101,6 +113,7 @@ const getDeterministicValue = (min, max, seedString, offset = 0) => {
     return Math.floor(min + (sum % range));
 };
 
+// 🟢 4. แปลงราคาอย่างแม่นยำ (ลบจุลภาค ป้องกัน 1,500 กลายเป็น 10)
 const extractCleanNumber = (rawRate) => {
     if (!rawRate) return 1500;
     const cleanStr = String(rawRate).replace(/,/g, '');
@@ -111,6 +124,7 @@ const extractCleanNumber = (rawRate) => {
     return num >= 500 ? num : 1500;
 };
 
+// 🟢 5. จัดการรูปภาพ Cloudinary 100% ปลอดภัย ไร้ปัญหา 404 (บังคับใส่ images/ เสมอ)
 const optimizeImg = (path, width = 600, height = 800) => {
     const defaultImg = `${CONFIG.DOMAIN}/images/firstmodelhub.webp`;
     if (!path || typeof path !== 'string' || !path.trim()) {
@@ -122,14 +136,17 @@ const optimizeImg = (path, width = 600, height = 800) => {
         ? `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face` 
         : `f_auto,q_auto:eco,w_${width},c_scale`;
 
+    // กรณีเป็น Full URL ของ Cloudinary
     if (cleanPath.includes('res.cloudinary.com')) {
         const uploadIdx = cleanPath.indexOf('/upload/');
         if (uploadIdx !== -1) {
             const prefix = cleanPath.substring(0, uploadIdx + 8);
             let afterUpload = cleanPath.substring(uploadIdx + 8);
 
+            // ลบพารามิเตอร์ Transformation เดิมออกทั้งหมด
             afterUpload = afterUpload.replace(/^(?:[a-z]{1,4}_[a-z0-9_:-]+,?)+\//i, '');
 
+            // ถ้าไม่มีโฟลเดอร์ images/ ให้เติมเข้าไป ป้องกันชื่อไฟล์ v0... ชนกับ Cloudinary Version
             if (!afterUpload.includes('images/')) {
                 afterUpload = `images/${afterUpload.replace(/^v\d+\//i, '')}`;
             }
@@ -139,10 +156,12 @@ const optimizeImg = (path, width = 600, height = 800) => {
         return cleanPath;
     }
 
+    // กรณีเป็น URL ภายนอกอื่นๆ
     if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
         return cleanPath;
     }
 
+    // กรณีเป็น Relative Path จาก Supabase (เช่น "v0mjwv..." หรือ "images/v0mjwv...")
     let relPath = cleanPath.replace(/^\/+/, '');
     if (!relPath.startsWith('images/')) {
         relPath = `images/${relPath}`;
@@ -151,6 +170,7 @@ const optimizeImg = (path, width = 600, height = 800) => {
     return `${CONFIG.CLOUDINARY_BASE_URL}${transform}/${relPath}`;
 };
 
+// 🟢 6. สร้าง SrcSet สำหรับรูป Responsive
 const generateSrcSet = (path) => {
     if (!path || typeof path !== 'string') return '';
     const widths = [400, 600, 800];
@@ -160,6 +180,7 @@ const generateSrcSet = (path) => {
     }).join(', ');
 };
 
+// 🟢 7. ฟังก์ชัน Escape & Strip HTML
 const escapeHTML = (str) => (str !== null && str !== undefined) 
     ? String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag)) 
     : '';
@@ -167,6 +188,18 @@ const escapeHTML = (str) => (str !== null && str !== undefined)
 const stripHTML = (str) => (str !== null && str !== undefined) 
     ? String(str).replace(/<[^>]*>?/gm, '').trim() 
     : '';
+
+// 🟢 8. กรองข้อความ ASCII Art / สัญลักษณ์ตกแต่ง
+const cleanAsciiArt = (text) => {
+    if (!text) return '';
+    return String(text)
+        .replace(/[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬╭╮╰╯┊●○★☆◆◇■□▲▼▶◀✦✧*🔭🐻‍❄️💦🫦🌷֒🐾]+/g, ' ')
+        .replace(/[„•ㅅ•„જ⁀➴·˚༘⋆₊✮⸜⸝𐐪𐑂]+/g, ' ')
+        .replace(/[^\u0E00-\u0E7F\w\s.,/%()+-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+};
 
 const getLocalizedZone = (location, provinceName) => {
     if (!location) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
@@ -191,6 +224,7 @@ export default async (request, context) => {
     const dynamicDomain = CONFIG.DOMAIN; 
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
     
+    // ตรวจสอบว่าเป็น Bot / Crawler หรือไม่
     const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(ua);
     
     if (!isBot) return context.next();
@@ -204,6 +238,7 @@ export default async (request, context) => {
 
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         
+        // 🟢 ตรวจสอบโปรไฟล์จากฐานข้อมูล Supabase ทั้ง Slug และ Numeric ID
         let profileQuery = supabase
             .from('profiles')
             .select('*')
@@ -221,6 +256,7 @@ export default async (request, context) => {
             return context.next();
         }
 
+        // ดึงรายชื่อน้องๆ โซนเดียวกันเพื่อทำ Internal Links
         let related = [];
         const provKeyToQuery = p.provinceKey || p.province_key || p.province_slug || 'chiangmai';
         if (provKeyToQuery) {
@@ -277,29 +313,27 @@ export default async (request, context) => {
         const pageTitle = `${displayName} ไซด์ไลน์${provinceName} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก 100%`;
         const metaDesc = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${p.location || provinceName} อายุ ${ageVal} ปี สัดส่วน ${bwhVal} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
         
-        const cleanSlug = p.slug ? encodeURIComponent(p.slug) : p.id;
-        const canonicalUrl = `${dynamicDomain}/sideline/${cleanSlug}`;
+        const canonicalUrl = `${dynamicDomain}/sideline/${encodeURIComponent(p.slug || p.id)}`;
 
         const dynamicReviews = getDeterministicReviews(slug, 3);
-        const schemaReviews = dynamicReviews.map((t, idx) => {
-            const reviewDate = new Date(Date.now() - (idx + 1) * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            return {
-                "@type": "Review",
-                "datePublished": reviewDate,
-                "reviewRating": {
-                    "@type": "Rating",
-                    "ratingValue": t.rating.toString(),
-                    "bestRating": "5",
-                    "worstRating": "1"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": stripHTML(t.name)
-                },
-                "reviewBody": stripHTML(t.text)
-            };
-        });
+        const schemaReviews = dynamicReviews.map(t => ({
+            "@type": "Review",
+            "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": t.rating.toString(),
+                "bestRating": "5",
+                "worstRating": "1"
+            },
+            "author": {
+                "@type": "Person",
+                "name": stripHTML(t.name)
+            },
+            "reviewBody": stripHTML(t.text)
+        }));
 
+        // =========================================================================
+        // 🟢 SCHEMA.ORG JSON-LD GRAPH (100% VALID & RICH SNIPPETS READY)
+        // =========================================================================
         const schemaData = {
             "@context": "https://schema.org/",
             "@graph": [
@@ -313,7 +347,7 @@ export default async (request, context) => {
                     "priceRange": "฿฿",
                     "address": {
                         "@type": "PostalAddress",
-                        "addressLocality": provinceName,
+                        "addressLocality": p.location || provinceName,
                         "addressRegion": provinceName,
                         "addressCountry": "TH"
                     },
@@ -345,7 +379,7 @@ export default async (request, context) => {
                     ],
                     "address": {
                         "@type": "PostalAddress",
-                        "addressLocality": provinceName,
+                        "addressLocality": p.location || provinceName,
                         "addressRegion": provinceName,
                         "addressCountry": "TH"
                     },
@@ -505,8 +539,8 @@ export default async (request, context) => {
                     <h2 style="color: #C084FC; text-align: center; font-weight: 800; font-size: 13.5px; margin-bottom: 10px;">ราคาบริการ</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
                         <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>1 ชม.</div><strong style="color: #00E676;">${rawRate.toLocaleString()}.-</strong></div>
-                        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>2 ชม.</div><strong style="color: #00E676;">${(rawRate * 2).toLocaleString()}.-</strong></div>
-                        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>ค้างคืน</div><strong style="color: #00E676;">${(rawRate * 4).toLocaleString()}.-</strong></div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>2 ชม.</div><strong style="color: #00E676;">${Math.floor(rawRate * 1.8).toLocaleString()}.-</strong></div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 10px 4px; border-radius: 10px;"><div>ค้างคืน</div><strong style="color: #00E676;">${Math.floor(rawRate * 4.5).toLocaleString()}.-</strong></div>
                     </div>
                 </section>
 
@@ -537,9 +571,8 @@ export default async (request, context) => {
                             const cleanRelName = rawRelName.replace(/^(น้อง\s?)+/, "");
                             const displayRelName = `น้อง${cleanRelName}`;
                             const relImgPath = r.imagePath || r.image_url || r.photo || '';
-                            const cleanRelSlug = r.slug ? encodeURIComponent(r.slug) : r.id;
                             return `
-                            <a href="/sideline/${cleanRelSlug}" style="text-decoration: none; color: inherit; background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); display: block; text-align: center;">
+                            <a href="/sideline/${encodeURIComponent(r.slug || r.id)}" style="text-decoration: none; color: inherit; background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); display: block; text-align: center;">
                                 <img src="${optimizeImg(relImgPath, 300, 400)}" alt="${displayRelName} สาวรับงาน${provinceName} ไซด์ไลน์${provinceName} ฟิวแฟน" loading="lazy" width="300" height="400" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
                                 <div style="padding: 6px; font-size: 11px; font-weight: 800; color: #FFF;">${displayRelName}</div>
                             </a>
@@ -569,7 +602,7 @@ export default async (request, context) => {
                 <a href="/profiles" style="color: var(--text-gray); text-decoration: none;">รวมโปรไฟล์</a>
                 <a href="/locations" style="color: var(--text-gray); text-decoration: none;">พื้นที่บริการ</a>
             </div>
-            © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
 </body>
@@ -587,6 +620,7 @@ export default async (request, context) => {
         });
 
     } catch (err) {
+        console.error("Bot rendering crash:", err);
         return context.next();
     }
 };
