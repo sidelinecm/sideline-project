@@ -12,7 +12,24 @@ window.ScrollTrigger = ScrollTrigger;
   const CACHE_STORAGE_KEY = "cachedProfiles_v3_2026";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
-  // ข้อมูล SEO และพื้นที่บริการ (แก้ไขใส่เครื่องหมายคำพูด "khon-kaen" เรียบร้อยแล้ว)
+  // ตรวจจับภาษาอัตโนมัติจากแท็ก html หรือ URL
+  const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
+
+  const PROVINCE_EN_MAP = {
+    chiangmai: "Chiang Mai",
+    chiangrai: "Chiang Rai",
+    lampang: "Lampang",
+    lamphun: "Lamphun",
+    phitsanulok: "Phitsanulok",
+    bangkok: "Bangkok",
+    chonburi: "Chonburi",
+    "khon-kaen": "Khon Kaen",
+    khonkaen: "Khon Kaen",
+    phuket: "Phuket",
+    udonthani: "Udon Thani",
+    national: "Nationwide (Thailand)"
+  };
+
   const SEO_PROVINCES_DATA = {
     chiangmai: {
       zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"],
@@ -125,7 +142,7 @@ window.ScrollTrigger = ScrollTrigger;
     let clean = name.trim().replace(/^(น้อง\s?)+/gi, "");
     clean = clean.toLowerCase();
     clean = clean.charAt(0).toUpperCase() + clean.slice(1);
-    return `น้อง${clean}`;
+    return isEN ? clean : `น้อง${clean}`;
   }
 
   // ปรับแต่ง URL รูปภาพผ่าน Cloudinary
@@ -171,7 +188,7 @@ window.ScrollTrigger = ScrollTrigger;
   function normalizeProfile(raw) {
     if (!raw || typeof raw !== "object") return null;
 
-    const displayName = formatDisplayName(raw.name || raw.displayName || raw.title || "น้อง");
+    const displayName = formatDisplayName(raw.name || raw.displayName || raw.title || "Model");
     const mainImg = raw.imagePath || raw.image_url || raw.imageUrl || raw.image || raw.photo || raw.avatar;
     const gallery = raw.galleryPaths || raw.gallery_paths || raw.gallery || raw.photos || raw.images || [];
     const combinedPhotos = [
@@ -202,7 +219,7 @@ window.ScrollTrigger = ScrollTrigger;
     const provinceThai = appState.provincesMap.get(pKey) || raw.provinceThai || raw.province_thai || raw.provinceName || "เชียงใหม่";
     const rawRate = raw.rate || raw.price || raw.fee || raw.cost || 0;
     const numPrice = Number(String(rawRate).replace(/\D/g, "")) || 0;
-    const displayPrice = numPrice > 0 ? `${numPrice.toLocaleString()}.-` : typeof rawRate === "string" && rawRate.trim() !== "" ? rawRate : "สอบถาม";
+    const displayPrice = numPrice > 0 ? `${numPrice.toLocaleString()}.-` : typeof rawRate === "string" && rawRate.trim() !== "" ? rawRate : (isEN ? "Inquire" : "สอบถาม");
 
     let statsStr = "-";
     const bust = raw.bust || raw.breast || "";
@@ -218,34 +235,34 @@ window.ScrollTrigger = ScrollTrigger;
 
     const rawAge = raw.age || raw.profile_age;
     const cleanAge = rawAge && String(rawAge).trim() !== "-" && String(rawAge).trim() !== "0" ? String(rawAge).replace(/\D/g, "") : null;
-    const ageDisplay = cleanAge ? `${cleanAge} ปี` : "ไม่ระบุ";
+    const ageDisplay = cleanAge ? (isEN ? `${cleanAge} yrs` : `${cleanAge} ปี`) : (isEN ? "N/A" : "ไม่ระบุ");
 
     const rawHeight = raw.height || raw.profile_height;
     const cleanHeight = rawHeight && String(rawHeight).trim() !== "-" && String(rawHeight).trim() !== "0" ? String(rawHeight).replace(/\D/g, "") : null;
-    const heightDisplay = cleanHeight ? `${cleanHeight} ซม.` : "ไม่ระบุ";
+    const heightDisplay = cleanHeight ? `${cleanHeight} cm` : (isEN ? "N/A" : "ไม่ระบุ");
 
     const rawWeight = raw.weight || raw.profile_weight;
     const cleanWeight = rawWeight && String(rawWeight).trim() !== "-" && String(rawWeight).trim() !== "0" ? String(rawWeight).replace(/\D/g, "") : null;
-    const weightDisplay = cleanWeight ? `${cleanWeight} กก.` : "ไม่ระบุ";
+    const weightDisplay = cleanWeight ? `${cleanWeight} kg` : (isEN ? "N/A" : "ไม่ระบุ");
 
     const rawSkin = raw.skin_tone || raw.skinTone || raw.skin_color || raw.skinColor || raw.skin;
-    const skinDisplay = rawSkin && String(rawSkin).trim() !== "-" ? String(rawSkin).trim() : "ไม่ระบุ";
-    const statsDisplay = statsStr && statsStr !== "-" ? statsStr : "ไม่ระบุ";
+    const skinDisplay = rawSkin && String(rawSkin).trim() !== "-" ? String(rawSkin).trim() : (isEN ? "Fair" : "ไม่ระบุ");
+    const statsDisplay = statsStr && statsStr !== "-" ? statsStr : (isEN ? "N/A" : "ไม่ระบุ");
 
-    const slogan = raw.slogan || raw.quote || raw.tagline || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน";
+    const slogan = raw.slogan || raw.quote || raw.tagline || (isEN ? "Romantic Girlfriend Experience, verified photos" : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
     const rawTags = raw.style_tags || raw.styleTags || raw.tags || [];
     const styleTags = Array.isArray(rawTags) ? rawTags : typeof rawTags === "string" ? rawTags.split(",").map(s => s.trim()) : [];
 
-    const availabilityStatus = raw.availability || raw.status || "รับงาน";
+    const availabilityStatus = raw.availability || raw.status || (isEN ? "Available" : "รับงาน");
     const isAvail = !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "off", "busy"].some(s => availabilityStatus.toLowerCase().includes(s));
     const lineId = (raw.line_id || raw.lineId || raw.line || "").toString().replace(/^@/, "").trim();
 
     return {
       ...raw,
-      location: sanitizeThaiText(raw.location || provinceThai),
+      location: isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : sanitizeThaiText(raw.location || provinceThai),
       description: sanitizeThaiText(raw.description || ""),
-      quote: sanitizeThaiText(slogan),
-      slogan: sanitizeThaiText(slogan),
+      quote: isEN ? slogan : sanitizeThaiText(slogan),
+      slogan: isEN ? slogan : sanitizeThaiText(slogan),
       displayName,
       images,
       provinceNameThai: provinceThai,
@@ -282,7 +299,7 @@ window.ScrollTrigger = ScrollTrigger;
       sortedProvinces.forEach(([k, nameThai]) => {
         const opt = document.createElement("option");
         opt.value = k;
-        opt.textContent = nameThai;
+        opt.textContent = isEN ? (PROVINCE_EN_MAP[k] || nameThai) : nameThai;
         fragment.appendChild(opt);
       });
       domCache.provinceSelect.appendChild(fragment);
@@ -303,18 +320,19 @@ window.ScrollTrigger = ScrollTrigger;
 
     let hotProfiles = appState.allProfiles.filter(p => {
       const combinedKeywords = `${(Array.isArray(p.styleTags) ? p.styleTags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
-      return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน");
+      return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
     });
 
     hotProfiles = hotProfiles.length === 0 ? appState.allProfiles.slice(0, 8) : hotProfiles.slice(0, 8);
 
     vipSwiperEl.innerHTML = hotProfiles.map((p, idx) => {
       const rankBadge = `#${idx + 1} HOT`;
-      const locationText = p.location || p.provinceNameThai || appState.provincesMap.get(p.provinceKey) || "ทั่วไทย";
+      const pKey = (p.provinceKey || "national").toLowerCase();
+      const locationText = isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : (p.location || p.provinceNameThai || "ทั่วไทย");
       const slug = encodeURIComponent(p.slug || p.id);
       const imgSrc = p.images[0]?.src || DEFAULT_FALLBACK_IMG;
       const isOnline = p.status === "รับงาน" || !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
-      const statusLabel = isOnline ? "รับงาน" : "สอบถาม";
+      const statusLabel = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถาม");
 
       return `
         <div class="vip-card-item ${idx === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
@@ -322,7 +340,7 @@ window.ScrollTrigger = ScrollTrigger;
           <span class="hot-rank-badge">${rankBadge}</span>
           <img src="${imgSrc}" alt="${p.displayName}" width="150" height="210" loading="${idx < 2 ? "eager" : "lazy"}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'">
           <div class="vip-card-overlay"></div>
-          <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์${p.displayName}"></a>
+          <a href="/sideline/${slug}" class="card-link" aria-label="View ${p.displayName}"></a>
           <div class="vip-card-info">
             <div class="vip-name">${p.displayName}</div>
             <div class="vip-location">${locationText}</div>
@@ -379,11 +397,6 @@ window.ScrollTrigger = ScrollTrigger;
           const idStr = String(p.id || "");
           const ageStr = String(p.safeAge || p.age || "");
           const priceStr = String(p._price || p.rate || "");
-          const bustStr = String(p.bust || "");
-          const cupStr = String(p.cup || "").toLowerCase();
-          const statsStr = String(p.safeStats || "").toLowerCase();
-          const heightStr = String(p.safeHeight || "").replace(/\D/g, "");
-          const weightStr = String(p.safeWeight || "").replace(/\D/g, "");
 
           return keywords.every(k => (
             idStr === k ||
@@ -395,12 +408,7 @@ window.ScrollTrigger = ScrollTrigger;
             slogan.includes(k) ||
             tags.includes(k) ||
             ageStr === k ||
-            priceStr.includes(k) ||
-            bustStr === k ||
-            statsStr.includes(k) ||
-            (cupStr && cupStr === k) ||
-            (heightStr && heightStr === k) ||
-            (weightStr && weightStr === k)
+            priceStr.includes(k)
           ));
         });
 
@@ -438,7 +446,9 @@ window.ScrollTrigger = ScrollTrigger;
 
       const isAllOrNational = activeProvince === "all" || activeProvince === "national";
       const resolvedSlug = isAllOrNational ? "national" : activeProvince;
-      const provinceDisplayName = isAllOrNational ? "ทั่วไทย" : appState.provincesMap.get(resolvedSlug) || window.currentProvinceName || "ลำปาง";
+      const provinceDisplayName = isEN 
+        ? (PROVINCE_EN_MAP[resolvedSlug] || "Thailand") 
+        : (isAllOrNational ? "ทั่วไทย" : appState.provincesMap.get(resolvedSlug) || "ทั่วไทย");
 
       renderDisplayArea(results, activeProvince !== "all" || Boolean(currentCriteria.text));
       appState.currentFilters = currentCriteria;
@@ -458,17 +468,16 @@ window.ScrollTrigger = ScrollTrigger;
     domCache.noResultsMessage?.classList.add("hidden");
     domCache.fetchErrorMessage?.classList.add("hidden");
 
-
-if (domCache.featuredSection) {
-  const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/");
-  const featuredList = appState.allProfiles.filter(p => p.isfeatured);
-  const hasFeatured = featuredList.length > 0;
-  
-  domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
-  if (isHomeView && hasFeatured && domCache.featuredContainer) {
-    await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
-  }
-}
+    if (domCache.featuredSection) {
+      const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/");
+      const featuredList = appState.allProfiles.filter(p => p.isfeatured);
+      const hasFeatured = featuredList.length > 0;
+      
+      domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
+      if (isHomeView && hasFeatured && domCache.featuredContainer) {
+        await renderProfilesBatch(domCache.featuredContainer, featuredList, activeRenderId);
+      }
+    }
 
     if (!profiles || profiles.length === 0) {
       domCache.profilesDisplayArea.innerHTML = "";
@@ -482,11 +491,13 @@ if (domCache.featuredSection) {
     if (isFilteredOrLocationView || isExplicitLocationPath) {
       const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
       const currentLocSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : domCache.provinceSelect?.value || "chiangmai";
-      const provinceLabel = appState.provincesMap.get(currentLocSlug) || window.currentProvinceName || "เชียงใหม่";
+      const provinceLabel = isEN ? (PROVINCE_EN_MAP[currentLocSlug] || currentLocSlug) : (appState.provincesMap.get(currentLocSlug) || "เชียงใหม่");
       const searchKeyword = domCache.searchInput?.value?.trim();
       const sectionTitle = searchKeyword
-        ? `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`
-        : `📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${escapeHTML(provinceLabel)}</span>`;
+        ? (isEN ? `🔍 Results for "${escapeHTML(searchKeyword)}"` : `🔍 ผลการค้นหา "${escapeHTML(searchKeyword)}"`)
+        : (isEN ? `📍 Models in <span style="color: #C084FC;">${escapeHTML(provinceLabel)}</span>` : `📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${escapeHTML(provinceLabel)}</span>`);
+
+      const countBadgeText = isEN ? `Found ${profiles.length} Verified Models` : `พบ ${profiles.length} โปรไฟล์พร้อมรับงาน`;
 
       const wrapper = document.createElement("div");
       wrapper.className = "section-content-wrapper";
@@ -497,7 +508,7 @@ if (domCache.featuredSection) {
                 ${sectionTitle}
                 <span class="live-count-chip">
                   <span class="pulse-dot-el"></span>
-                  <span>พบ ${profiles.length} โปรไฟล์พร้อมรับงาน</span>
+                  <span>${countBadgeText}</span>
                 </span>
             </h2>
         </div>
@@ -527,7 +538,7 @@ if (domCache.featuredSection) {
         domCache.profilesDisplayArea.innerHTML = "";
         for (const pKey of sortedProvinceKeys) {
           if (appState.renderId !== activeRenderId) return;
-          const provName = appState.provincesMap.get(pKey) || (pKey === "no_province" ? "ไม่ระบุจังหวัด" : pKey);
+          const provName = isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : (appState.provincesMap.get(pKey) || pKey);
           const sectionEl = createProvinceSectionDOM(pKey, provName, groupedByProvince[pKey]);
           domCache.profilesDisplayArea.appendChild(sectionEl);
           const gridEl = sectionEl.querySelector(".profile-grid");
@@ -550,20 +561,23 @@ if (domCache.featuredSection) {
     }
   }
 
-  // แทนที่ข้อความ SEO Template
+  // แทนที่ข้อความ SEO Template (ป้องกันการพ่นทับหน้า EN)
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
+    const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
+    const liveCounterEl = document.getElementById("live-profile-count");
+    if (liveCounterEl) liveCounterEl.textContent = totalCount;
+
+    // ถ้าเป็นหน้าภาษาอังกฤษ ให้อัปเดตแค่ตัวเลขโปรไฟล์แล้วหยุดทำงานทันที
+    if (isEN) return;
+
     try {
       const isNationalOrEmpty = !currentSlug || currentSlug === "national" || currentSlug === "all" || currentSlug === "";
       const resolvedKey = isNationalOrEmpty ? "national" : currentSlug;
       const targetName = isNationalOrEmpty ? "ทั่วไทย" : provinceName || appState.provincesMap.get(resolvedKey) || "ทั่วไทย";
-      const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
       const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
       const zonesStr = seoData.zones && seoData.zones.length > 0
         ? seoData.zones.filter(z => z !== "ทั้งหมด").slice(0, 6).join(", ")
-        : isNationalOrEmpty ? "เชียงใหม่, ขอนแก่น, เชียงราย, ลำปาง, อุดรธานี, ภูเก็ต" : "ตัวเมือง และพื้นที่ใกล้เคียง";
-
-      const liveCounterEl = document.getElementById("live-profile-count");
-      if (liveCounterEl) liveCounterEl.textContent = totalCount;
+        : "เชียงใหม่, ขอนแก่น, เชียงราย, ลำปาง, อุดรธานี, ภูเก็ต";
 
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
       let currentNode;
@@ -646,10 +660,13 @@ if (domCache.featuredSection) {
       const configObj = SEO_PROVINCES_DATA[activeProvince] || SEO_PROVINCES_DATA.national;
       const topZones = configObj && configObj.zones ? configObj.zones.filter(z => z !== "ทั้งหมด").slice(0, 4) : ["ตัวเมือง"];
 
+      const labelTopSearch = isEN ? "Popular Searches:" : "คำค้นหายอดนิยม:";
+      const labelGFE = isEN ? "❤️ #GFE" : "❤️ #ฟิวแฟน";
+
       let html = '<div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.4); border-radius: 14px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); backdrop-filter: blur(15px);">';
-      html += '<div style="font-size: 11px; font-weight: 800; color: #C084FC; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-lightbulb" style="color: #FBBF24;"></i> คำค้นหายอดนิยม:</div>';
+      html += `<div style="font-size: 11px; font-weight: 800; color: #C084FC; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-lightbulb" style="color: #FBBF24;"></i> ${labelTopSearch}</div>`;
       html += '<div style="display: flex; flex-wrap: wrap; gap: 6px;">';
-      html += '<span data-action="suggestion" data-slug="ฟิวแฟน" data-is-profile="false" style="background: rgba(255,20,147,0.15); border: 1px solid rgba(255,105,180,0.3); color: #FF85C0; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">❤️ #ฟิวแฟน</span>';
+      html += `<span data-action="suggestion" data-slug="${isEN ? "GFE" : "ฟิวแฟน"}" data-is-profile="false" style="background: rgba(255,20,147,0.15); border: 1px solid rgba(255,105,180,0.3); color: #FF85C0; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">${labelGFE}</span>`;
       html += '<span data-action="suggestion" data-slug="1500" data-is-profile="false" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(52,211,153,0.3); color: #00E676; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; cursor: pointer;">💰 1,500.-</span>';
 
       topZones.forEach(z => {
@@ -682,11 +699,12 @@ if (domCache.featuredSection) {
     let popoverHtml = '<div style="background-color: #121214; border: 1px solid rgba(147, 51, 234, 0.4); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">';
 
     if (matchedProvinces.length > 0) {
-      popoverHtml += '<div style="padding: 6px 12px; background: rgba(147, 51, 234, 0.18); font-size: 11px; font-weight: 800; color: #C084FC;">🗺️ ไปที่หน้าจังหวัด</div>';
+      popoverHtml += `<div style="padding: 6px 12px; background: rgba(147, 51, 234, 0.18); font-size: 11px; font-weight: 800; color: #C084FC;">${isEN ? "🗺️ Browse Province" : "🗺️ ไปที่หน้าจังหวัด"}</div>`;
       matchedProvinces.forEach(([k, nameThai]) => {
+        const provTitle = isEN ? (PROVINCE_EN_MAP[k] || nameThai) : `ไซด์ไลน์${nameThai}`;
         popoverHtml += `
           <div onclick="window.location.href='/location/${k}'" style="padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); color: #FFF; font-size: 13px; font-weight: 700; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-            <span>📍 ไซด์ไลน์${nameThai}</span>
+            <span>📍 ${provTitle}</span>
             <i class="fas fa-arrow-right" style="color: #C084FC; font-size: 12px;"></i>
           </div>
         `;
@@ -694,7 +712,7 @@ if (domCache.featuredSection) {
     }
 
     if (matchedProfiles.length > 0) {
-      popoverHtml += '<div style="padding: 6px 12px; background: #09090B; font-size: 11px; font-weight: 800; color: #E9D5FF;">✨ โปรไฟล์แนะนำ</div>';
+      popoverHtml += `<div style="padding: 6px 12px; background: #09090B; font-size: 11px; font-weight: 800; color: #E9D5FF;">${isEN ? "✨ Featured Companions" : "✨ โปรไฟล์แนะนำ"}</div>`;
       matchedProfiles.forEach(p => {
         const avatar = p.images && p.images[0] ? p.images[0].src : DEFAULT_FALLBACK_IMG;
         popoverHtml += `
@@ -721,7 +739,6 @@ if (domCache.featuredSection) {
     }[tag] || tag)) : "";
   }
 
-  // สร้าง DOM Element ของการ์ดโปรไฟล์
   function createProfileCardDOM(p, index = 20) {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
@@ -732,19 +749,27 @@ if (domCache.featuredSection) {
     article.setAttribute("data-profile-slug", p.slug || p.id);
 
     const imgSrc = p.images && p.images.length > 0 ? p.images[0].src : DEFAULT_FALLBACK_IMG;
-    const locName = p.location || p.provinceNameThai || appState.provincesMap.get(p.provinceKey) || "ทั่วไทย";
-    const modelName = formatDisplayName(p.displayName || p.name);
-    const imgAltText = `${modelName} สาวรับงาน${locName} ไซด์ไลน์${locName} ฟิวแฟนตรงปก 100%`;
+    const pKey = (p.provinceKey || "national").toLowerCase();
+    
+    // แปลงชื่อและสถานที่ตามภาษา
+    const locName = isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย");
+    const modelName = isEN ? (p.displayName || p.name).replace(/^น้อง\s?/, "") : formatDisplayName(p.displayName || p.name);
+    
     const isOnline = p.status === "รับงาน" || !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
-    const availText = p.availability || (isOnline ? "รับงาน" : "สอบถามคิว");
+    const availText = isEN 
+      ? (isOnline ? "Available" : "Inquire") 
+      : (p.availability || (isOnline ? "รับงาน" : "สอบถามคิว"));
+      
+    const featuredLabel = isEN ? "Featured" : "แนะนำ";
+    const verifiedLabel = isEN ? "Verified" : "ยืนยัน";
     const ageDisplay = p.safeAge && p.safeAge !== "-" ? ` ${p.safeAge}` : "";
     const profileSlug = encodeURIComponent(p.slug || p.id);
     const sloganText = p.slogan || p.quote || "";
 
     article.innerHTML = `
       <img src="${imgSrc}" 
-           alt="${imgAltText}"
-           title="${imgAltText}"
+           alt="${modelName} ${locName} Escort VIP"
+           title="${modelName} ${locName}"
            width="300"
            height="400"
            class="profile-card-img"
@@ -756,19 +781,18 @@ if (domCache.featuredSection) {
       <div class="profile-card-gradient-overlay"></div>
 
       <div class="profile-card-badges-left">
-          ${p.isfeatured ? '<span class="badge-featured"><i class="fas fa-star"></i> แนะนำ</span>' : ""}
+          ${p.isfeatured ? `<span class="badge-featured"><i class="fas fa-star"></i> ${featuredLabel}</span>` : ""}
           <span class="badge-status ${isOnline ? "online" : "busy"}">
               <span class="status-dot"></span>
               <span>${availText}</span>
           </span>
-          ${p.hasVideo ? '<span class="badge-status busy"><i class="fas fa-video"></i> คลิป</span>' : ""}
       </div>
 
       <div class="profile-card-badges-right">
-          ${p.isVerified || p.verified ? '<span class="badge-verified"><i class="fas fa-check-circle"></i> ยืนยัน</span>' : ""}
+          ${p.isVerified || p.verified ? `<span class="badge-verified"><i class="fas fa-check-circle"></i> ${verifiedLabel}</span>` : ""}
       </div>
       
-      <a href="/sideline/${profileSlug}" class="card-link" aria-label="ดูโปรไฟล์${modelName}"></a>
+      <a href="/sideline/${profileSlug}" class="card-link" aria-label="View ${modelName}"></a>
 
       <div class="profile-card-info-content">
           <h3 class="profile-card-name">${modelName}${ageDisplay}</h3>
@@ -812,20 +836,24 @@ if (domCache.featuredSection) {
     }
   }
 
-  // สร้าง Section จังหวัด
   function createProvinceSectionDOM(provinceKey, provinceName, profilesList) {
     const wrapper = document.createElement("div");
     wrapper.className = "section-content-wrapper province-section";
     wrapper.id = `province-${provinceKey}`;
     wrapper.style.cssText = "margin-top: 24px; width: 100%; box-sizing: border-box;";
+    
+    const displayTitle = isEN ? (PROVINCE_EN_MAP[provinceKey] || provinceName) : provinceName;
+    const badgeText = isEN ? `Found ${profilesList.length} Verified Models` : `พบ ${profilesList.length} โปรไฟล์พร้อมรับงาน`;
+    const headerPrefix = isEN ? `📍 Models in` : `📍 น้องๆ ในจังหวัด`;
+
     wrapper.innerHTML = `
       <div style="padding: 8px 4px 12px 4px;">
           <a href="/location/${provinceKey}" class="group" style="text-decoration: none; display: inline-block;">
               <h2 class="province-section-header" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 18px; font-weight: 800; color: white; margin: 0;">
-                  📍 น้องๆ ในจังหวัด <span style="color: #C084FC;">${provinceName}</span>
+                  ${headerPrefix} <span style="color: #C084FC;">${displayTitle}</span>
                   <span class="live-count-chip">
                     <span class="pulse-dot-el"></span>
-                    <span>พบ ${profilesList.length} โปรไฟล์พร้อมรับงาน</span>
+                    <span>${badgeText}</span>
                   </span>
                   <i class="fas fa-chevron-right" style="font-size: 12px; margin-left: 4px; color: var(--primary-purple);"></i>
               </h2>
@@ -836,7 +864,6 @@ if (domCache.featuredSection) {
     return wrapper;
   }
 
-  // เปิดหน้าต่าง Lightbox
   function openLightboxModal(profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
@@ -847,14 +874,18 @@ if (domCache.featuredSection) {
     const isAvail = profile.isAvailable !== undefined
       ? profile.isAvailable
       : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(s => (profile.availability || "").toLowerCase().includes(s));
-    const availStatus = profile.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
+    
+    const availStatus = isEN 
+      ? (isAvail ? "Available" : "Book Ahead") 
+      : (profile.availability || (isAvail ? "รับงาน" : "สอบถามคิว"));
+      
     const statusColor = isAvail ? "#00E676" : "#FF2E63";
 
     const nameMainEl = document.getElementById("lightbox-profile-name-main");
     if (nameMainEl) {
       nameMainEl.innerHTML = `
         <span class="brand-neon-text" style="font-size: clamp(20px, 5vw, 24px) !important; font-weight: 900 !important; background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; filter: drop-shadow(0 0 10px rgba(255, 20, 147, 0.7)) !important;">${nameStr}</span>
-        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 16px; filter: drop-shadow(0 0 6px #00E676);" title="ยืนยันตัวตนแล้ว"></i>' : ""}
+        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #00E676; margin-left: 6px; font-size: 16px;" title="Verified Profile"></i>' : ""}
       `;
     }
 
@@ -871,41 +902,11 @@ if (domCache.featuredSection) {
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
       heroImg.src = profile?.images?.[0]?.fullSrc || profile?.images?.[0]?.src || DEFAULT_FALLBACK_IMG;
-      heroImg.alt = `${nameStr} สาวรับงานตัวจริงตรงปก`;
-    }
-
-    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
-    if (thumbStrip) {
-      thumbStrip.innerHTML = "";
-      if (profile.images && profile.images.length > 1) {
-        profile.images.forEach((img, idx) => {
-          const thumb = document.createElement("img");
-          thumb.src = img.src;
-          thumb.alt = `ภาพที่ ${idx + 1}`;
-          thumb.style.cssText = "width: 48px; height: 56px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: all 0.2s;";
-          if (idx === 0) {
-            thumb.style.borderColor = "var(--primary-purple)";
-            thumb.style.opacity = "1";
-          }
-          thumb.onclick = () => {
-            if (heroImg) heroImg.src = img.fullSrc || img.src;
-            Array.from(thumbStrip.children).forEach(c => {
-              c.style.borderColor = "transparent";
-              c.style.opacity = "0.5";
-            });
-            thumb.style.borderColor = "var(--primary-purple)";
-            thumb.style.opacity = "1";
-          };
-          thumbStrip.appendChild(thumb);
-        });
-        thumbStrip.style.display = "flex";
-      } else {
-        thumbStrip.style.display = "none";
-      }
+      heroImg.alt = `${nameStr} Verified Photo`;
     }
 
     const quoteEl = document.getElementById("lightboxQuote");
-    if (quoteEl) quoteEl.textContent = profile.quote || profile.slogan || "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน ยินดีที่ได้รู้จักค่ะ";
+    if (quoteEl) quoteEl.textContent = profile.quote || profile.slogan || (isEN ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
 
     const tagsEl = document.getElementById("lightboxTags");
     if (tagsEl) {
@@ -918,36 +919,42 @@ if (domCache.featuredSection) {
       });
     }
 
-    const ageStr = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "ไม่ระบุ");
-    const statsStr = profile.safeStats || "ไม่ระบุ";
-    const heightStr = profile.safeHeight || "ไม่ระบุ";
+    const ageStr = profile.safeAgeDisplay || (profile.age ? `${profile.age} yrs` : "N/A");
+    const statsStr = profile.safeStats || "N/A";
+    const heightStr = profile.safeHeight || "N/A";
+
+    const labelAge = isEN ? "Age" : "อายุ";
+    const labelStats = isEN ? "Stats" : "สัดส่วน";
+    const labelHeight = isEN ? "Height" : "ส่วนสูง";
+    const labelPrice = isEN ? "Rate" : "ค่าขนม";
+    const labelLocation = isEN ? "Location" : "พิกัดงาน";
 
     const detailsCompactEl = document.getElementById("lightboxDetailsCompact");
     if (detailsCompactEl) {
       detailsCompactEl.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">
             <div class="bento-stat-tile">
-                <div style="font-size: 10.5px; color: #A1A1AA; font-weight: 700;">อายุ</div>
+                <div style="font-size: 10.5px; color: #A1A1AA; font-weight: 700;">${labelAge}</div>
                 <div style="font-weight: 900; font-size: 13px; color: #FFFFFF; margin-top: 2px;">${ageStr}</div>
             </div>
             <div class="bento-stat-tile">
-                <div style="font-size: 10.5px; color: #A1A1AA; font-weight: 700;">สัดส่วน</div>
+                <div style="font-size: 10.5px; color: #A1A1AA; font-weight: 700;">${labelStats}</div>
                 <div style="font-weight: 900; font-size: 13px; color: #FFFFFF; margin-top: 2px;">${statsStr}</div>
             </div>
             <div class="bento-stat-tile">
-                <div style="font-size: 10.5px; color: #A1A1AA; font-weight: 700;">ส่วนสูง</div>
+                <div style="font-size: 10.5px; color: #A1A1AA; font-weight: 700;">${labelHeight}</div>
                 <div style="font-weight: 900; font-size: 13px; color: #FFFFFF; margin-top: 2px;">${heightStr}</div>
             </div>
         </div>
 
-        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%); padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.06); display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%); padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.06); display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #A1A1AA; font-size: 12px; font-weight: 700;"><i class="fas fa-tag" style="color:#C084FC; margin-right:4px;"></i> ค่าขนม</span>
-                <span style="color: #00E676; font-weight: 900; font-size: 14px; text-shadow: 0 0 10px rgba(0, 230, 118, 0.4);">${profile.displayPrice}</span>
+                <span style="color: #A1A1AA; font-size: 12px; font-weight: 700;"><i class="fas fa-tag" style="color:#C084FC; margin-right:4px;"></i> ${labelPrice}</span>
+                <span style="color: #00E676; font-weight: 900; font-size: 14px;">${profile.displayPrice}</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 6px;">
-                <span style="color: #A1A1AA; font-size: 12px; font-weight: 700;"><i class="fas fa-map-marker-alt" style="color:#C084FC; margin-right:4px;"></i> พิกัดงาน</span>
-                <span style="color: white; font-weight: 800; font-size: 12px;">${profile.location || profile.provinceNameThai || "เชียงใหม่"}</span>
+                <span style="color: #A1A1AA; font-size: 12px; font-weight: 700;"><i class="fas fa-map-marker-alt" style="color:#C084FC; margin-right:4px;"></i> ${labelLocation}</span>
+                <span style="color: white; font-weight: 800; font-size: 12px;">${profile.location || profile.provinceNameThai || "Thailand"}</span>
             </div>
         </div>
       `;
@@ -956,7 +963,9 @@ if (domCache.featuredSection) {
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
-      const defaultDesc = `${nameStr} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${profile.location || profile.provinceNameThai} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
+      const defaultDesc = isEN 
+        ? `${nameStr} is a verified VIP companion ready for polite dinner dates and travel escort services in ${profile.location || "Thailand"}. Guaranteed 100% real photos, pay in person upon arrival.`
+        : `${nameStr} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${profile.location || profile.provinceNameThai} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
       descContent.innerHTML = (profile.description || defaultDesc).replace(/\n/g, "<br>");
     }
     if (descContainer) descContainer.style.display = "block";
@@ -976,11 +985,12 @@ if (domCache.featuredSection) {
       lineWrapper.id = "line-btn-sticky-wrapper";
       lineWrapper.style.cssText = "margin-top: 10px; width: 100%;";
       
-      // 🟢 เติม onclick เข้าไปตรงนี้ครับ
+      const lineBtnText = isEN ? `Book ${nameStr} via LINE` : `แอดไลน์จองคิว ${nameStr}`;
+      
       lineWrapper.innerHTML = `
         <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="if(window.trackLineClick) window.trackLineClick('${profile.id}')">
             <i class="fab fa-line" style="font-size: 18px;"></i>
-            <span>แอดไลน์จองคิว ${nameStr}</span>
+            <span>${lineBtnText}</span>
         </a>
       `;
       detailsParent.appendChild(lineWrapper);
@@ -996,9 +1006,8 @@ if (domCache.featuredSection) {
         gsap.fromTo(contentWrapperEl, { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
       }
     }
-}
+  }
 
-  // ปิดหน้าต่าง Lightbox
   function closeLightboxModal(updateHistory = true) {
     const lightboxEl = document.getElementById("lightbox");
     if (lightboxEl) {
@@ -1013,7 +1022,7 @@ if (domCache.featuredSection) {
           if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
           executeFilterAndRender(false);
         } else {
-          history.pushState(null, "", "/");
+          history.pushState(null, "", isEN ? "/index-en" : "/");
           if (domCache.provinceSelect) domCache.provinceSelect.value = "";
           executeFilterAndRender(false);
         }
@@ -1027,7 +1036,6 @@ if (domCache.featuredSection) {
     if (loader) loader.style.display = "none";
   }
 
-  // ตัวจัดการ Routing ตาม URL
   async function handleUrlRouting(isInitial = false) {
     let cleanPath = window.location.pathname.toLowerCase().replace(/\/+$/, "");
     if (!cleanPath) cleanPath = "/";
@@ -1129,7 +1137,7 @@ if (domCache.featuredSection) {
       });
     }
 
-    // ✅ จัดการหน้าต่างตัวกรองค้นหา (Bottom Sheet) - ผูก Event ชัดเจน ไม่ชนตัวแปรอื่น
+    // จัดการหน้าต่างตัวกรองค้นหา (Bottom Sheet)
     const openFilterDockBtn = document.getElementById("open-filter-dock-btn");
     const closeSearchDrawerBtn = document.getElementById("close-search-drawer-btn");
     const applyFilterBtn = document.getElementById("apply-filter-btn");
@@ -1161,7 +1169,11 @@ if (domCache.featuredSection) {
     if (domCache.provinceSelect) {
       domCache.provinceSelect.addEventListener("change", (e) => {
         const val = e.target.value;
-        window.location.href = val && val !== "all" && val !== "national" ? `/location/${val}` : "/";
+        if (isEN) {
+          executeFilterAndRender(true);
+        } else {
+          window.location.href = val && val !== "all" && val !== "national" ? `/location/${val}` : "/";
+        }
       });
     }
 
@@ -1286,7 +1298,7 @@ if (domCache.featuredSection) {
         document.querySelectorAll(".region-tab").forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
         const region = tab.getAttribute("data-region");
-        if (region === "ทั้งหมด") window.location.href = "/";
+        if (region === "ทั้งหมด") window.location.href = isEN ? "/index-en" : "/";
         else if (region === "ภาคเหนือ") window.location.href = "/location/chiangmai";
         else if (region === "ภาคอีสาน") window.location.href = "/location/khon-kaen";
       });
@@ -1297,44 +1309,37 @@ if (domCache.featuredSection) {
     if (toggleSeoDrawerBtn && seoDrawerWrapper) {
       toggleSeoDrawerBtn.onclick = () => {
         const isCollapsed = seoDrawerWrapper.classList.toggle("collapsed");
-        toggleSeoDrawerBtn.querySelector("span").textContent = isCollapsed ? "ดูข้อมูลพื้นที่บริการทั้งหมด" : "ย่อข้อความ";
+        toggleSeoDrawerBtn.querySelector("span").textContent = isCollapsed ? (isEN ? "Read More" : "ดูข้อมูลพื้นที่บริการทั้งหมด") : (isEN ? "Collapse" : "ย่อข้อความ");
         toggleSeoDrawerBtn.querySelector("i").className = isCollapsed ? "fas fa-chevron-down" : "fas fa-chevron-up";
       };
     }
     
-// ฟังก์ชันบันทึกยอดคลิกแอดไลน์ โดยยืม increment_likes มาใช้
-window.trackLineClick = function(profileId) {
-  if (window.supabase) {
-    try {
-      const idToUpdate = Number(profileId) || profileId;
-      window.supabase.rpc("increment_likes", { profile_id_to_update: idToUpdate });
-      console.log("📈 บันทึกยอดกดไลน์ให้น้อง ID:", idToUpdate);
-    } catch (e) {
-      console.warn("Track failed:", e);
-    }
-  }
-};
+    // ฟังก์ชันบันทึกยอดคลิกแอดไลน์
+    window.trackLineClick = function(profileId) {
+      if (window.supabase) {
+        try {
+          const idToUpdate = Number(profileId) || profileId;
+          window.supabase.rpc("increment_likes", { profile_id_to_update: idToUpdate });
+        } catch (e) {
+          console.warn("Track failed:", e);
+        }
+      }
+    };
 
+    (function initDockAutoHide() {
+      let idleTimer = null;
+      const floatingDock = document.querySelector('.floating-app-dock');
 
-(function initDockAutoHide() {
-  let idleTimer = null;
-  const floatingDock = document.querySelector('.floating-app-dock');
+      if (!floatingDock) return;
 
-  if (!floatingDock) return;
-
-  window.addEventListener('scroll', function () {
-    // 1. ทันทีที่มีการเลื่อนจอ (ไม่ว่าจะเลื่อนขึ้น หรือ เลื่อนลง) -> ซ่อนเมนูทันที
-    floatingDock.classList.add('dock-hidden');
-
-    // 2. ล้างเวลานับถอยหลังเดิม
-    clearTimeout(idleTimer);
-
-    // 3. เมื่อหยุดเลื่อนหน้าจอ (จอนิ่งเกิน 0.8 วินาที) -> แสดงเมนูกลับขึ้นมา
-    idleTimer = setTimeout(function () {
-      floatingDock.classList.remove('dock-hidden');
-    }, 800); // 800ms กำลังพอดี ไม่ช้าไม่เร็วจนเกินไป
-  }, { passive: true });
-})();
+      window.addEventListener('scroll', function () {
+        floatingDock.classList.add('dock-hidden');
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(function () {
+          floatingDock.classList.remove('dock-hidden');
+        }, 800);
+      }, { passive: true });
+    })();
 
     // ฟังก์ชันโหลดข้อมูลโปรไฟล์เริ่มต้น
     await (async function initializeData() {
