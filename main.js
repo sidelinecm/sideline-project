@@ -1315,6 +1315,27 @@ window.trackLineClick = function(profileId) {
   }
 };
 
+
+(function initDockAutoHide() {
+  let idleTimer = null;
+  const floatingDock = document.querySelector('.floating-app-dock');
+
+  if (!floatingDock) return;
+
+  window.addEventListener('scroll', function () {
+    // 1. ทันทีที่มีการเลื่อนจอ (ไม่ว่าจะเลื่อนขึ้น หรือ เลื่อนลง) -> ซ่อนเมนูทันที
+    floatingDock.classList.add('dock-hidden');
+
+    // 2. ล้างเวลานับถอยหลังเดิม
+    clearTimeout(idleTimer);
+
+    // 3. เมื่อหยุดเลื่อนหน้าจอ (จอนิ่งเกิน 0.8 วินาที) -> แสดงเมนูกลับขึ้นมา
+    idleTimer = setTimeout(function () {
+      floatingDock.classList.remove('dock-hidden');
+    }, 800); // 800ms กำลังพอดี ไม่ช้าไม่เร็วจนเกินไป
+  }, { passive: true });
+})();
+
     // ฟังก์ชันโหลดข้อมูลโปรไฟล์เริ่มต้น
     await (async function initializeData() {
       if (appState.isFetching) return false;
