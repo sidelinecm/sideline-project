@@ -12,23 +12,27 @@ window.ScrollTrigger = ScrollTrigger;
   const CACHE_STORAGE_KEY = "cachedProfiles_v3_2026";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
-  // ตรวจจับภาษาอัตโนมัติจากแท็ก html หรือ URL
-  const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
-
-  const PROVINCE_EN_MAP = {
-    chiangmai: "Chiang Mai",
-    chiangrai: "Chiang Rai",
-    lampang: "Lampang",
-    lamphun: "Lamphun",
-    phitsanulok: "Phitsanulok",
-    bangkok: "Bangkok",
-    chonburi: "Chonburi",
-    "khon-kaen": "Khon Kaen",
-    khonkaen: "Khon Kaen",
-    phuket: "Phuket",
-    udonthani: "Udon Thani",
-    national: "Nationwide (Thailand)"
-  };
+const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
+const PROVINCE_EN_MAP = {
+  chiangmai: "Chiang Mai",
+  chiangrai: "Chiang Rai",
+  lampang: "Lampang",
+  lamphun: "Lamphun",
+  phitsanulok: "Phitsanulok",
+  bangkok: "Bangkok",
+  chonburi: "Chonburi",
+  "khon-kaen": "Khon Kaen",
+  khonkaen: "Khon Kaen",
+  phuket: "Phuket",
+  udonthani: "Udon Thani",
+  "phra-nakhon-si-ayutthaya": "Ayutthaya",
+  ayutthaya: "Ayutthaya",
+  "surat-thani": "Surat Thani",
+  suratthani: "Surat Thani",
+  "ubon-ratchathani": "Ubon Ratchathani",
+  ubon: "Ubon Ratchathani",
+  national: "Nationwide (Thailand)"
+};
 
   const SEO_PROVINCES_DATA = {
     chiangmai: {
@@ -459,7 +463,6 @@ window.ScrollTrigger = ScrollTrigger;
     }
   }
 
-  // วาดผลลัพธ์ลงบนหน้าเว็บ
   async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     if (!domCache.profilesDisplayArea) return;
     appState.renderId = (appState.renderId || 0) + 1;
@@ -470,7 +473,8 @@ window.ScrollTrigger = ScrollTrigger;
 
     if (domCache.featuredSection) {
       const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/");
-      const featuredList = appState.allProfiles.filter(p => p.isfeatured);
+      
+      const featuredList = appState.allProfiles.filter(p => p.isfeatured).slice(0, 8);
       const hasFeatured = featuredList.length > 0;
       
       domCache.featuredSection.classList.toggle("hidden", !isHomeView || !hasFeatured);
