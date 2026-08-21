@@ -991,12 +991,13 @@ const PROVINCE_EN_MAP = {
       
       const lineBtnText = isEN ? `Book ${nameStr} via LINE` : `แอดไลน์จองคิว ${nameStr}`;
       
-      lineWrapper.innerHTML = `
-        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="if(window.trackLineClick) window.trackLineClick('${profile.id}')">
-            <i class="fab fa-line" style="font-size: 18px;"></i>
-            <span>${lineBtnText}</span>
-        </a>
-      `;
+
+lineWrapper.innerHTML = `
+  <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="window.trackLineClick('${profile.id}')">
+      <i class="fab fa-line" style="font-size: 18px;"></i>
+      <span>${lineBtnText}</span>
+  </a>
+`;
       detailsParent.appendChild(lineWrapper);
     }
 
@@ -1318,17 +1319,29 @@ const PROVINCE_EN_MAP = {
       };
     }
     
-    // ฟังก์ชันบันทึกยอดคลิกแอดไลน์
-    window.trackLineClick = function(profileId) {
-      if (window.supabase) {
-        try {
-          const idToUpdate = Number(profileId) || profileId;
-          window.supabase.rpc("increment_likes", { profile_id_to_update: idToUpdate });
-        } catch (e) {
-          console.warn("Track failed:", e);
-        }
-      }
-    };
+// 🟢 ฟังก์ชันบันทึกยอดแอดไลน์ (ดักไว้ทั้ง 2 ชื่อเพื่อกัน Error 100%)
+window.trackLineClick = function(profileId) {
+  try {
+    const idNum = parseInt(profileId, 10);
+    if (isNaN(idNum)) return;
+
+    fetch("https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1/rpc/increment_likes", {
+      method: "POST",
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ profile_id_to_update: idNum }),
+      keepalive: true
+    }).catch(() => {});
+  } catch (_) {}
+};
+
+// 🟢 เพิ่มบรรทัดนี้: ผูกชื่อ handleLineBooking ให้ชี้มาที่ trackLineClick ทันที
+window.handleLineBooking = function(profileId, lineUrl) {
+  window.trackLineClick(profileId);
+};
 
     (function initDockAutoHide() {
       let idleTimer = null;

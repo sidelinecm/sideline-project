@@ -220,7 +220,7 @@
       </div>
     </section>
 
-    <!-- ================= ส่วนรายการน้องๆ แนะนำ ================= -->
+
     <section id="featured-profiles" class="clean-section-wrapper">
       <div class="clean-section-header">
         <h2 id="featured-heading" class="clean-section-h2">
@@ -229,7 +229,7 @@
         </h2>
       </div>
       
-      <!-- ใส่ {{PROFILES_CARDS_HTML}} ไว้เพื่อให้ SSR พ่นการ์ดให้ Google Bot อ่านได้ทันที -->
+
       <div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">
         {{PROFILES_CARDS_HTML}}
       </div>
@@ -239,154 +239,290 @@
       {{PROFILES_DISPLAY_AREA_HTML}}
     </div>
     
-    <section id="service-deep-dive" class="service-deep-dive-section" aria-label="ข้อมูลเชิงลึก">
-      <div class="interactive-card drawer-card-reset">
-         <div class="seo-header-box">
-             <h2 class="text-gradient-main seo-box-h2">
-                 บริการเพื่อนเที่ยวและสาวรับงาน{{PROVINCE_NAME}} ดูแลเอนเตอร์เทนระดับพรีเมียม (มากกว่า {{PROFILE_COUNT}}+ รายการ)
-             </h2>
-             <p class="seo-box-desc">
-                 ศูนย์รวมผู้ดูแลและเพื่อนเที่ยวสาวรับงาน{{PROVINCE_NAME}} คัดสรรโปรไฟล์ <span class="kw-green">ตรงปก 100%</span> บริการเอนเตอร์เทนสไตล์ <strong class="kw-purple">ฟิวแฟน (GFE)</strong> ปลอดภัยสูงสุดด้วยนโยบาย <strong class="kw-red">"จ่ายหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำล่วงหน้าทุกกรณี"</strong> ครอบคลุมโซน <span class="kw-purple">{{PROVINCE_ZONES}}</span>
-             </p>
-         </div>
+<!-- ==============================================================================
+         💎 1. CONCIERGE GUIDE, OUTCALL RULES & 24/7 SUPPORT DESK
+         ============================================================================== -->
+    <section class="concierge-guide-section" aria-label="คู่มือการนัดหมายและตอบข้อสงสัย">
+      <div class="luxury-guide-container">
+        
+        <!-- 🟢 1.1 ขั้นตอนการนัดหมาย 1-2-3 -->
+        <div class="guide-header-center">
+          <span class="guide-mini-tag">HOW IT WORKS</span>
+          <h2 class="guide-headline">
+            3 ขั้นตอนการนัดหมายที่ปลอดภัยใน <span class="kw-purple">{{PROVINCE_NAME}}</span>
+          </h2>
+          <p class="guide-sub-desc">นัดหมายง่าย สะดวกสบาย และรักษาความเป็นส่วนตัวสูงสุด</p>
+        </div>
 
-         <div class="seo-content-container collapsed" id="seo-drawer-wrapper">
-             <div class="seo-content-inner">
-                 <p>ยินดีต้อนรับสู่ <strong>FirstModelHub</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ <strong>สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong>เด็กเอ็น{{PROVINCE_NAME}}</strong> และ <strong>เพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}</strong> แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ <strong>ฟิวแฟน (GFE)</strong> อย่างสุภาพเรียบร้อยเป็นธรรมชาติ ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
-                 <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการในพื้นที่ {{PROVINCE_NAME}} น้องๆ ในระบบของเรากระจายตัวอยู่ในจุดที่เหมาะสม ครอบคลุมพิกัดสำคัญ เช่น {{PROVINCE_ZONES}} สามารถนัดหมายได้อย่างรวดเร็วและเป็นส่วนตัว</p>
-             </div>
-             <div class="seo-fade-overlay"></div>
-         </div>
-         
-         <div class="seo-footer-btn-wrapper">
-             <button type="button" id="toggle-seo-drawer-btn" class="btn-read-more" aria-label="ขยายหรือย่อข้อมูลพื้นที่บริการทั้งหมด">
-                 <span>ดูข้อมูลพื้นที่บริการทั้งหมด</span> <i class="fas fa-chevron-down" aria-hidden="true"></i>
-             </button>
-         </div>
+        <div class="steps-bento-row">
+          <div class="step-bento-card">
+            <div class="step-badge-num">01</div>
+            <h3 class="step-card-title">เลือกโปรไฟล์ที่ตรงใจ</h3>
+            <p class="step-card-desc">เลือกชมโปรไฟล์น้องๆ ในพื้นที่ ตรวจสอบสัดส่วน เรทราคา และสไตล์การดูแล</p>
+          </div>
+
+          <div class="step-bento-card">
+            <div class="step-badge-num">02</div>
+            <h3 class="step-card-title">ทักไลน์สอบถามคิวงาน</h3>
+            <p class="step-card-desc">แตะปุ่มแอดไลน์เพื่อนัดหมายเวลา ระบุพิกัดโรงแรมหรือสถานที่นัดพบที่สะดวก</p>
+          </div>
+
+          <div class="step-bento-card">
+            <div class="step-badge-num">03</div>
+            <h3 class="step-card-title">พบตัวจริงค่อยชำระเงิน</h3>
+            <p class="step-card-desc">พบตัวจริงหน้างาน ตรวจสอบความถูกต้องตรงปกเรียบร้อยแล้ว จึงค่อยชำระค่าบริการ</p>
+          </div>
+        </div>
+
+        <!-- 🟢 1.2 เงื่อนไขการนัดหมายนอกสถานที่ (Outcall Guidelines) -->
+        <div class="outcall-guidelines-box">
+          <div class="outcall-header">
+            <span class="outcall-tag"><i class="fas fa-car text-purple-400"></i> OUTCALL SERVICE GUIDELINES</span>
+            <h4 class="outcall-title">ข้อกำหนดและเงื่อนไขการนัดหมายนอกสถานที่ (โรงแรม / ที่พักส่วนตัว)</h4>
+            <p class="outcall-desc">เพื่อความเข้าใจที่ถูกต้องและป้องกันข้อสงสัยหน้างาน โปรดตรวจสอบรายละเอียดดังนี้ครับ</p>
+          </div>
+
+          <div class="outcall-grid">
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="fas fa-hotel text-purple-400"></i></div>
+              <div class="outcall-text">
+                <strong>1. สถานที่นัดหมายที่ชัดเจน</strong>
+                <p>รับนัดเฉพาะ <strong>โรงแรม, คอนโดมิเนียม, รีสอร์ต หรือที่พักส่วนตัว</strong> ที่มีพิกัดชัดเจน (ขอสงวนสิทธิ์งดรับนัดในพื้นที่เปลี่ยวหรือสถานที่เสี่ยง)</p>
+              </div>
+            </div>
+
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="fas fa-taxi text-emerald-400"></i></div>
+              <div class="outcall-text">
+                <strong>2. ค่าเดินทางตามระยะทางจริง</strong>
+                <p>อัตราค่าบริการยังไม่รวมค่าเดินทาง โดย <strong>ค่ารถคิดราคาตามจริงตามแอป (Grab / Bolt)</strong> และชำระโดยตรงกับน้องเมื่อพบตัวจริงหน้างาน</p>
+              </div>
+            </div>
+
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="far fa-clock text-pink-400"></i></div>
+              <div class="outcall-text">
+                <strong>3. ระยะเวลาการเดินทาง</strong>
+                <p>แนะนำนัดหมายคิวล่วงหน้าประมาณ <strong>30 – 60 นาที</strong> เพื่อให้น้องมีเวลาเดินทางและไปถึงพิกัดนัดหมายได้อย่างตรงเวลา</p>
+              </div>
+            </div>
+
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="fas fa-handshake text-yellow-400"></i></div>
+              <div class="outcall-text">
+                <strong>4. ความสุภาพและให้เกียรติ</strong>
+                <p>เน้นการดูแลสไตล์เพื่อนเที่ยวฟิวแฟนที่อบอุ่นและสุภาพ โดยยึดมั่นในการให้เกียรติซึ่งกันและกัน และรักษาความลับของลูกค้าสูงสุด</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🟢 1.3 ส่วนคลายข้อสงสัยที่คนกังวล (Problem Solving FAQ) -->
+        <div class="guide-faq-block">
+          <h3 class="guide-faq-heading">
+            <i class="fas fa-shield-alt text-purple-400"></i> สิ่งที่คุณมั่นใจได้เมื่อใช้บริการ First Model Hub
+          </h3>
+
+          <div class="qa-luxury-item">
+            <div class="qa-q-text">
+              <span class="qa-dot"></span>
+              <strong>ถ้าพบตัวจริงหน้างานแล้ว "ไม่ตรงปก" สามารถยกเลิกได้ไหม?</strong>
+            </div>
+            <p class="qa-a-text">
+              <strong>สามารถปฏิเสธและยกเลิกนัดได้ทันทีหน้างานครับ</strong> เพราะเรายึดมั่นนโยบายชำระเงินเมื่อเจอตัวจริงเท่านั้น เพื่อให้ลูกค้ามั่นใจว่าจะได้รับบริการตรงตามที่คาดหวัง 100%
+            </p>
+          </div>
+
+          <div class="qa-luxury-item">
+            <div class="qa-q-text">
+              <span class="qa-dot"></span>
+              <strong>ทำไมทางระบบถึงไม่มีการเรียกเก็บเงินมัดจำล่วงหน้า?</strong>
+            </div>
+            <p class="qa-a-text">
+              เพื่อตัดปัญหาเรื่องมิจฉาชีพหลอกโอนเงินอย่างสิ้นเชิง ลูกค้าไม่ต้องกังวลเรื่องการโอนเงินก่อน นัดพบตัวจริงที่สถานที่นัดหมายแล้วค่อยชำระโดยตรง สบายใจทั้งสองฝ่ายครับ
+            </p>
+          </div>
+
+          <div class="qa-luxury-item">
+            <div class="qa-q-text">
+              <span class="qa-dot"></span>
+              <strong>ขอบเขตการดูแลสไตล์ "ฟิวแฟน" (Girlfriend Experience) คืออะไร?</strong>
+            </div>
+            <p class="qa-a-text">
+              เน้นการดูแลเอาใจใส่ที่อบอุ่น เป็นกันเอง และให้เกียรติซึ่งกันและกัน เสมือนมีคนพิเศษร่วมเดินทาง ท่องเที่ยว รับประทานอาหาร หรืองานสังสรรค์ส่วนตัว พร้อมรักษาความลับสูงสุด
+            </p>
+          </div>
+        </div>
+
+        <div class="outcall-guidelines-box">
+          <div class="outcall-header">
+            <span class="outcall-tag"><i class="fas fa-car text-purple-400"></i> OUTCALL & TRAVEL POLICY</span>
+            <h4 class="outcall-title">ข้อกำหนดการนัดหมายนอกสถานที่ และ นอกโซนบริการ</h4>
+            <p class="outcall-desc">เพื่อความเข้าใจที่ถูกต้อง ป้องกันปัญหาการนัดทิ้ง และความสบายใจของทั้งสองฝ่าย โปรดตรวจสอบเงื่อนไขดังนี้ครับ</p>
+          </div>
+
+          <div class="outcall-grid">
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="fas fa-hotel text-purple-400"></i></div>
+              <div class="outcall-text">
+                <strong>1. สถานที่นัดหมายที่ชัดเจน</strong>
+                <p>รับนัดเฉพาะ <strong>โรงแรม, คอนโดมิเนียม, รีสอร์ต หรือที่พักส่วนตัว</strong> ที่มีพิกัดชัดเจน (ขอสงวนสิทธิ์งดรับนัดในพื้นที่เปลี่ยวหรือสถานที่เสี่ยง)</p>
+              </div>
+            </div>
+
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="fas fa-route text-amber-400"></i></div>
+              <div class="outcall-text">
+                <strong style="color: #FBBF24;">2. กรณีเดินทาง "นอกโซนทำงาน"</strong>
+                <p>กรณีให้น้องเดินทางออกนอกโซนบริการหลัก <strong>ลูกค้าต้องชำระเฉพาะค่าเดินทางล่วงหน้าตามจริงทุกกรณี</strong> เพื่อยืนยันการเดินทางและป้องกันน้องเสียเที่ยว</p>
+              </div>
+            </div>
+
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="fas fa-hand-holding-usd text-emerald-400"></i></div>
+              <div class="outcall-text">
+                <strong style="color: #00E676;">3. ค่าบริการชำระหน้างานตามเดิม</strong>
+                <p><strong>ค่าบริการหลัก (ค่าขนมน้อง) ชำระหน้างาน 100%</strong> เมื่อพบตัวจริงและตรวจสอบความถูกต้องตรงปกเรียบร้อยแล้ว ปราศจากการเก็บค่าบริการล่วงหน้า</p>
+              </div>
+            </div>
+
+            <div class="outcall-item">
+              <div class="outcall-icon"><i class="far fa-clock text-pink-400"></i></div>
+              <div class="outcall-text">
+                <strong>4. การเผื่อเวลาเดินทาง</strong>
+                <p>แนะนำนัดหมายคิวล่วงหน้า <strong>30 – 60 นาที</strong> (หรือ 1-2 ชั่วโมงสำหรับนอกโซน) เพื่อให้น้องมีเวลาเตรียมตัวและเดินทางไปถึงตามนัดหมาย</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="concierge-support-card">
+          <div class="support-left-info">
+            <div class="support-status-pill">
+              <span class="live-status-dot"></span>
+              <span>LIVE CONCIERGE DESK</span>
+            </div>
+            
+            <h4 class="support-main-title">ศูนย์ประสานงานและดูแลลูกค้า First Model Hub</h4>
+            
+            <div class="support-hours-line">
+              <i class="far fa-clock text-purple-400"></i>
+              <span>เวลาทำการ: <strong>10:00 น. – 04:00 น.</strong> (เปิดบริการทุกวัน)</span>
+            </div>
+            
+            <p class="support-detail-text">
+              หากท่านมีข้อสงสัย นัดหมายคิวงานเฉพาะจุด หรือต้องการความช่วยเหลือเรื่องการใช้บริการ สามารถติดต่อสอบถามแอดมินเพื่อรับการดูแลที่รวดเร็วและเป็นส่วนตัวได้ตลอดเวลาทำการครับ
+            </p>
+          </div>
+
+          <div class="support-right-cta">
+            <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-contact-admin">
+              <i class="fab fa-line text-lg"></i>
+              <span>ติดต่อแอดมินโดยตรง</span>
+            </a>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <section class="safe-play-section" aria-labelledby="rules-title">
-      <p class="safe-play-badge">SAFE-PLAY FRAMEWORK</p>
-      <h2 id="rules-title" class="text-gradient-main safe-play-title">
-        ข้อตกลงและเงื่อนไขการใช้บริการเพื่อนเที่ยว ไซด์ไลน์{{PROVINCE_NAME}}
-      </h2>
-
-      <div class="rules-accordion">
-        <div class="rule-item collapsed">
-          <h3>
-            <button type="button" class="rule-trigger" aria-expanded="false">
-              <span>01. <strong class="kw-green">ชำระค่าบริการหน้างาน 100% ไม่มีมัดจำ</strong></span>
-              <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
-            </button>
-          </h3>
-          <div class="rule-content">
-            <p>ทางเราและผู้ดูแลจะไม่มีการเรียกเก็บเงินมัดจำล่วงหน้า ไม่มีค่าจองคิว หรือค่าธรรมเนียมจองสิทธิ์ใดๆ ทั้งสิ้น ชำระโดยตรงต่อน้องหลังพบตัวจริงเรียบร้อยแล้วเท่านั้น</p>
-          </div>
-        </div>
-
-        <div class="rule-item collapsed">
-          <h3>
-            <button type="button" class="rule-trigger" aria-expanded="false">
-              <span>02. <strong class="kw-red">งดกิจกรรมที่ขัดต่อข้อกฎหมายศีลธรรม</strong></span>
-              <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
-            </button>
-          </h3>
-          <div class="rule-content">
-            <p>แพลตฟอร์มนี้ทำหน้าที่เป็นสื่อกลางส่งเสริมการประชาสัมพันธ์เฉพาะงานเอนเตอร์เทนระดับสุภาพสไตล์ฟิวแฟน เพื่อนเดินทาง เพื่อนเที่ยว ทานข้าวคลายเหงาเท่านั้น</p>
-          </div>
-        </div>
-
-        <div class="rule-item collapsed">
-          <h3>
-            <button type="button" class="rule-trigger" aria-expanded="false">
-              <span>03. <strong class="kw-purple">ผู้ใช้งานบริการต้องมีอายุ 20 ปีขึ้นไป</strong></span>
-              <i class="fas fa-chevron-down rule-icon" aria-hidden="true"></i>
-            </button>
-          </h3>
-          <div class="rule-content">
-            <p>ผู้เข้าชมสารบัญข้อมูล ตลอดจนบุคคลที่ประสงค์จะนัดหมายใช้บริการ จะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    <!-- ==============================================================================
+         💬 2. DYNAMIC FAQS & REVIEWS (ดึงข้อมูลจาก main.js)
+         ============================================================================== -->
     <section class="faq-section" aria-labelledby="faq-main-heading">
-       <h2 id="faq-main-heading" class="text-gradient-main faq-title">
-           คำถามที่พบบ่อยเกี่ยวกับบริการเพื่อนเที่ยวไซด์ไลน์{{PROVINCE_NAME}}
+       <span class="safe-play-badge" style="display:block; text-align:center;">FAQ & KNOWLEDGE</span>
+       <h2 id="faq-main-heading" class="faq-title">
+           คำถามที่พบบ่อยเกี่ยวกับการนัดหมายใน <span class="kw-purple">{{PROVINCE_NAME}}</span>
        </h2>
        <div id="faq-container-list" class="faq-list-wrapper"></div>
     </section>
 
     <section id="customer-reviews" class="reviews-section" aria-labelledby="reviews-main-heading">
-       <h2 id="reviews-main-heading" class="text-gradient-main reviews-title">
-         รีวิวและความคิดเห็นจริงจากผู้ใช้บริการใน{{PROVINCE_NAME}}
+       <span class="safe-play-badge" style="display:block; text-align:center;">VERIFIED EXPERIENCES</span>
+       <h2 id="reviews-main-heading" class="reviews-title">
+         เสียงสะท้อนจากผู้ใช้บริการจริงใน <span class="kw-purple">{{PROVINCE_NAME}}</span>
        </h2>
        <div id="reviews-container-grid" class="reviews-grid-wrapper"></div>
     </section>
 
-    <!-- TRUST BADGE STRIP -->
+    <!-- ==============================================================================
+         🏆 3. EDITORIAL TRUST & AUTHENTICITY SEAL
+         ============================================================================== -->
     <section id="verification-process" class="verification-section" aria-labelledby="verification-heading">
       <div class="verification-box">
-        <i class="fas fa-user-shield icon-purple" style="font-size: 20px; flex-shrink: 0;" aria-hidden="true"></i>
-        <p style="font-size: 12px; color: var(--text-gray); margin: 0; line-height: 1.5;">
-          <strong id="verification-heading" style="color: #ffffff; font-weight: 700;">EDITORIAL TRUST:</strong> ทุกโปรไฟล์ผ่านการตรวจสอบตัวตน รูปตรงปก 100% โดยทีมงาน First Model Hub Co. อ่านข้อมูลเพิ่มเติมได้ที่ <a href="/about" style="color: var(--primary-purple); text-decoration: underline; font-weight: 500;">หน้าเกี่ยวกับเรา</a>
+        <i class="fas fa-award icon-purple" style="font-size: 26px; flex-shrink: 0;"></i>
+        <p style="font-size: 11.5px; color: var(--text-gray); margin: 0; line-height: 1.6;">
+          <strong id="verification-heading" style="color: #ffffff; font-weight: 800; letter-spacing: 0.5px;">EDITORIAL TRUST & AUTHENTICITY SEAL:</strong> ทุกโปรไฟล์ผ่านการตรวจสอบประวัติและภาพถ่ายจริง 100% โดยทีมงาน First Model Hub เพื่อมอบประสบการณ์ที่ตรงปก ปลอดภัย และไร้ความเสี่ยงในทุกการนัดพบ
         </p>
       </div>
     </section>
 
-    <!-- SOCIAL CHIPS (Clean CSS Classes 100%) -->
+    <!-- ==============================================================================
+         🌐 4. SOCIAL CHANNELS (ครบทั้ง 7 ช่องทาง)
+         ============================================================================== -->
     <section class="social-chips-container" aria-label="ช่องทางสื่อสารภายนอกและโซเชียลมีเดีย">
+      <!-- 1. LINE -->
       <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="social-chip-link">
-        <i class="fab fa-line" style="color: #06C755; font-size: 14px;" aria-hidden="true"></i>
+        <i class="fab fa-line" style="color: #06C755; font-size: 14px;"></i>
         <span>LINE OFFICIAL</span>
       </a>
 
+      <!-- 2. BLUESKY -->
       <a href="https://bsky.app/profile/sidelinechiangmai.bsky.social" target="_blank" rel="noopener nofollow" class="social-chip-link">
-        <svg style="width: 13px; height: 13px; fill: #0285FF; flex-shrink: 0;" viewBox="0 0 568 501" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg style="width: 13px; height: 13px; fill: #0285FF; flex-shrink: 0;" viewBox="0 0 568 501" xmlns="http://www.w3.org/2000/svg">
           <path d="M123.12 35.77C184.28 81.75 251.27 194.88 284 260.6c32.73-65.72 99.72-178.85 160.88-224.83C489.17-2.3 568-18.72 568 76.71c0 19.06-11 163.63-17.5 186.9-22.58 80.79-105.15 101.4-178.5 88.94 128.16 21.84 161.27 95.27 90.72 168.04-134.1 138.35-178.72-104.4-178.72-104.4s-44.62 242.75-178.72 104.4c-70.55-72.77-37.44-146.2 90.72-168.04-73.35 12.46-155.92-8.15-178.5-88.94C11 240.34 0 95.77 0 76.71 0-18.72 78.83-2.3 123.12 35.77z"/>
         </svg>
         <span>BLUESKY</span>
       </a>
 
+      <!-- 3. TWITTER (X) -->
       <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener nofollow" class="social-chip-link">
-        <i class="fab fa-x-twitter" style="color: #ffffff; font-size: 13px;" aria-hidden="true"></i>
+        <i class="fab fa-x-twitter" style="color: #ffffff; font-size: 13px;"></i>
         <span>TWITTER (X)</span>
       </a>
 
+      <!-- 4. TIKTOK -->
       <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" class="social-chip-link">
-        <i class="fab fa-tiktok" style="color: #ff0050; font-size: 13px;" aria-hidden="true"></i>
+        <i class="fab fa-tiktok" style="color: #ff0050; font-size: 13px;"></i>
         <span>TIKTOK</span>
       </a>
 
+      <!-- 5. LINKEDIN -->
       <a href="https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info" target="_blank" rel="noopener nofollow" class="social-chip-link">
-        <i class="fab fa-linkedin" style="color: #0A66C2; font-size: 13px;" aria-hidden="true"></i>
+        <i class="fab fa-linkedin" style="color: #0A66C2; font-size: 13px;"></i>
         <span>LINKEDIN</span>
       </a>
 
+      <!-- 6. BIO.SITE -->
       <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow" class="social-chip-link">
-        <i class="fas fa-globe icon-purple" style="font-size: 13px;" aria-hidden="true"></i>
+        <i class="fas fa-globe icon-purple" style="font-size: 13px;"></i>
         <span>BIO.SITE</span>
       </a>
 
+      <!-- 7. LINKTREE -->
       <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" class="social-chip-link">
-        <i class="fas fa-tree" style="color: #10B981; font-size: 13px;" aria-hidden="true"></i>
+        <i class="fas fa-tree" style="color: #10B981; font-size: 13px;"></i>
         <span>LINKTREE</span>
       </a>
     </section>
 
-    <section id="map-section" aria-label="แผนที่พื้นที่บริการ">
+    <!-- ==============================================================================
+         🗺️ 5. GOOGLE MAP COVERAGE
+         ============================================================================== -->
+    <section id="map-section" aria-label="แผนที่ขอบเขตพื้นที่บริการ">
       <figure id="map-container">
         <iframe
           id="google-map"
           src="{{MAP_EMBED_URL}}"
           data-src="{{MAP_EMBED_URL}}"
-          title="แผนที่ขอบเขตบริการ สาวรับงาน{{PROVINCE_NAME}}"
+          title="แผนที่ขอบเขตบริการใน{{PROVINCE_NAME}}"
           loading="lazy"
           allowfullscreen
         ></iframe>
       </figure>
     </section>
+
   </div>
 </main>
 

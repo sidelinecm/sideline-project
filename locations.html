@@ -1,264 +1,232 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th" class="dark-theme dark">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#07040d">
-  <meta name="color-scheme" content="dark">
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
   
-  <title>พิกัดรับงานและพื้นที่ให้บริการทั่วไทย | First Model Hub</title>
-  <meta name="description" content="ตรวจสอบพื้นที่ให้บริการเพื่อนเที่ยวและผู้ดูแลพรีเมียม เชียงใหม่ นิมมาน กรุงเทพฯ และจังหวัดอื่นๆ ทั่วประเทศ สะดวก ปลอดภัย จ่ายหน้างาน ไร้มัดจำ">
+  <title>พิกัดรับงานและพื้นที่ให้บริการเพื่อนเที่ยวทั่วไทย 77 จังหวัด | First Model Hub</title>
+  <meta name="description" content="สารบัญพื้นที่ให้บริการเพื่อนเที่ยวและผู้ดูแลพรีเมียม ครอบคลุมกรุงเทพฯ เชียงใหม่ พัทยา ขอนแก่น ภูเก็ต ลำปาง และ 77 จังหวัดทั่วไทย ปลอดภัย จ่ายหน้างาน ไร้มัดจำ" />
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="https://firstmodelhub.com/locations">
 
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="First Model Hub">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="พิกัดรับงานและพื้นที่ให้บริการทั่วไทย | First Model Hub">
-  <meta property="og:description" content="ตรวจสอบพื้นที่ให้บริการเพื่อนเที่ยวและผู้ดูแลพรีเมียม สไตล์ฟิวแฟนตรงปก 100% จ่ายหน้างาน">
+  <meta property="og:title" content="พิกัดรับงานและพื้นที่ให้บริการทั่วไทย 77 จังหวัด | First Model Hub">
+  <meta property="og:description" content="ค้นหาพิกัดผู้ดูแลระดับพรีเมียมใกล้คุณ เช็กย่านยอดนิยม นัดหมายจ่ายหน้างาน 100%">
   <meta property="og:url" content="https://firstmodelhub.com/locations">
+  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
 
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
-  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
-
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <link rel="modulepreload" href="/main.js">
+  <link rel="stylesheet" href="/styles.css">
+
+  <style>
+    body { background-color: #000000 !important; color: #E4E4E7; font-family: 'Prompt', sans-serif; }
+    .locations-page-wrapper { max-width: 950px; margin: 0 auto; padding: 90px 14px 60px 14px; }
+    .location-hub-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 24px; }
+    @media (min-width: 768px) { .location-hub-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+    .region-bento-card {
+      background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px; padding: 22px 18px; backdrop-filter: blur(20px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column;
+    }
+    .region-bento-card h3 { font-size: 16px; font-weight: 900; color: #FFF; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 10px; }
+    .province-link-item {
+      display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;
+      border-radius: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);
+      color: #E2E8F0; text-decoration: none; font-size: 12px; font-weight: 700; transition: all 0.2s ease;
+      margin-bottom: 6px;
+    }
+    .province-link-item:hover { background: rgba(192, 132, 252, 0.12); border-color: rgba(192, 132, 252, 0.4); color: #FFF; transform: translateX(3px); }
+    .province-link-item i { color: #C084FC; font-size: 11px; }
+  </style>
 </head>
 
-<body class="fmh-app-page">
+<body>
 
-<!-- FLOATING APP DOCK -->
-<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
-  <a href="/" class="dock-item">
-    <i class="fas fa-home" aria-hidden="true"></i>
-    <span>หน้าแรก</span>
-  </a>
-  <a href="/profiles" class="dock-item">
-    <i class="fas fa-search" aria-hidden="true"></i>
-    <span>ตัวกรอง</span>
-  </a>
-  <a href="/locations" class="dock-item active">
-    <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
-    <span>พื้นที่บริการ</span>
-  </a>
-  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line" aria-label="ติดต่อจองคิวผ่านไลน์">
-    <i class="fab fa-line" aria-hidden="true"></i>
-    <span>จองคิว</span>
-  </a>
-</nav>
-
-<!-- HEADER -->
-<header id="page-header" role="banner">
+  <!-- HEADER -->
+  <header id="page-header" role="banner">
     <div class="header-logo-container">
-        <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
-           <span class="brand-logo-text">
-             FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-           </span>
+        <a href="/" aria-label="FirstModelHub">
+           <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
         </a>
     </div>
-
     <div class="nav-controls">
-        <nav class="desktop-nav" aria-label="เมนูหลักบนคอมพิวเตอร์">
+        <nav class="desktop-nav">
             <a href="/profiles">รวมโปรไฟล์ VIP</a>
-            <a href="/locations" style="color: #C084FC !important; font-weight: 800;">พื้นที่ให้บริการ</a>
-            <a href="/blog">บทความ & รีวิว</a>
-            <a href="/faq">คำถามที่พบบ่อย</a>
+            <a href="/locations" style="color: #C084FC !important;">พื้นที่ให้บริการ</a>
+            <a href="/faq">คำถามพบบ่อย</a>
             <a href="/about">เกี่ยวกับเรา</a>
         </nav>
+        <a href="/index-en" class="lang-micro-toggle"><span>🇬🇧</span> EN</a>
+        <button id="menu-toggle" class="circle-btn-el" type="button"><i class="fas fa-bars"></i></button>
+    </div>
+  </header>
 
-        <a href="/index-en" class="lang-micro-toggle" aria-label="Switch to English">
-            <span style="font-size: 13px; line-height: 1;">🇬🇧</span> EN
+  <!-- MAIN LOCATIONS CONTENT -->
+  <main class="locations-page-wrapper">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #C084FC; text-transform: uppercase;">THAILAND PRIME LOCATIONS DIRECTORY</span>
+      <h1 style="font-size: clamp(22px, 5vw, 32px); font-weight: 900; color: #FFF; margin: 6px 0 10px 0;">พิกัดและพื้นที่ให้บริการทั่วประเทศ</h1>
+      <p style="font-size: 12px; color: #94A3B8; max-width: 650px; margin: 0 auto; line-height: 1.6;">
+        เลือกชมโปรไฟล์ผู้ดูแลและเพื่อนเที่ยวฟิวแฟนตามจังหวัดและย่านสำคัญที่คุณสะดวก นัดหมายง่าย จ่ายหน้างาน 100%
+      </p>
+    </div>
+
+    <!-- 4 REGIONS BENTO HUB -->
+    <div class="location-hub-grid">
+      
+      <!-- ภาคเหนือ -->
+      <div class="region-bento-card">
+        <h3><i class="fas fa-mountain text-purple-400"></i> ภาคเหนือ (Northern Zone)</h3>
+        <a href="/location/chiangmai" class="province-link-item">
+          <span>📍 ไซด์ไลน์เชียงใหม่ (นิมมาน, เจ็ดยอด, สันติธรรม, หลัง มช.)</span>
+          <i class="fas fa-chevron-right"></i>
         </a>
-
-        <button id="menu-toggle" class="circle-btn-el" type="button" aria-label="เปิดเมนูนำทางสำหรับมือถือ">
-            <i class="fas fa-bars" aria-hidden="true"></i>
-        </button>
-    </div>
-</header>
-
-<!-- MOBILE SIDEBAR MENU -->
-<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
-  <div class="sidebar-header-div">
-    <span class="sidebar-title">Navigation Hub</span>
-    <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn" type="button">
-      <i class="fas fa-times" aria-hidden="true"></i>
-    </button>
-  </div>
-  
-  <div class="sidebar-links-wrapper">
-    <a href="/"><i class="fas fa-home icon-purple" aria-hidden="true"></i> หน้าแรก</a>
-    <a href="/profiles"><i class="fas fa-user-check icon-green" aria-hidden="true"></i> น้องๆ VIP แนะนำ</a>
-    <a href="/locations" class="active"><i class="fas fa-map-marked-alt icon-gold" aria-hidden="true"></i> พื้นที่บริการทั่วไทย</a>
-    <a href="/nimman"><i class="fas fa-gem icon-pink" aria-hidden="true"></i> โซนนิมมาน เชียงใหม่</a>
-    <a href="/blog"><i class="fas fa-newspaper icon-blue" aria-hidden="true"></i> บทความ & คู่มือนัดหมาย</a>
-    <a href="/about"><i class="fas fa-shield-alt icon-lightpurple" aria-hidden="true"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
-    <a href="/faq"><i class="fas fa-question-circle icon-red" aria-hidden="true"></i> คำถามที่พบบ่อย (FAQ)</a>
-    <a href="/privacy-policy"><i class="fas fa-user-lock icon-gray" aria-hidden="true"></i> นโยบายความเป็นส่วนตัว</a>
-    <a href="/index-en" class="sidebar-lang-link"><i class="fas fa-globe icon-purple" aria-hidden="true"></i> English Version (EN)</a>
-  </div>
-
-  <div class="sidebar-footer-cta">
-    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
-      <i class="fab fa-line" aria-hidden="true"></i> แอดไลน์จองคิว VIP
-    </a>
-  </div>
-</aside>
-
-<div id="sidebar-overlay" class="drawer-backdrop"></div>
-
-<!-- MAIN CONTENT -->
-<main id="main-content" tabindex="-1">
-  <div class="container">
-    <section class="hero-section fmh-hero-surface" aria-labelledby="locations-heading">
-      <div class="clutch-pill-compact">
-        <span class="pill-badge-tag">SERVICE AREA</span>
-        <span class="pill-badge-score">พื้นที่ให้บริการครอบคลุมทั่วไทย</span>
+        <a href="/location/chiangrai" class="province-link-item">
+          <span>📍 ไซด์ไลน์เชียงราย (บ้านดู่, มฟล., หอนาฬิกา, แม่สาย)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/lampang" class="province-link-item">
+          <span>📍 ไซด์ไลน์ลำปาง (ในเมือง, ราชภัฏลำปาง, สบตุ๋ย)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/lamphun" class="province-link-item">
+          <span>📍 ไซด์ไลน์ลำพูน (นิคมลำพูน, ในเมืองลำพูน, ป่าซาง)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/phitsanulok" class="province-link-item">
+          <span>📍 ไซด์ไลน์พิษณุโลก (รอบ มน., ท็อปแลนด์, สมอแข)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
       </div>
 
-      <div class="brand-showcase-wrapper">
-        <span class="brand-neon-text">
-          FirstModel<span class="hub-text-pink">Hub</span>
-        </span>
-        <span class="dancing-neon-star" aria-hidden="true">🌟</span>
+      <!-- ภาคอีสาน -->
+      <div class="region-bento-card">
+        <h3><i class="fas fa-sun text-amber-400"></i> ภาคอีสาน (Northeastern Zone)</h3>
+        <a href="/location/khon-kaen" class="province-link-item">
+          <span>📍 ไซด์ไลน์ขอนแก่น (กังสดาล, หลัง มข., เซ็นทรัลขอนแก่น)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/udonthani" class="province-link-item">
+          <span>📍 ไซด์ไลน์อุดรธานี (UD Town, เซ็นทรัลอุดร, หนองประจักษ์)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/ubon-ratchathani" class="province-link-item">
+          <span>📍 ไซด์ไลน์อุบลราชธานี (วารินชำราบ, ม.อุบล, ดอนกลาง)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/nakhonratchasima" class="province-link-item">
+          <span>📍 ไซด์ไลน์โคราช / นครราชสีมา (เซฟวัน, จอหอ, มทส.)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
       </div>
 
-      <h1 id="locations-heading" class="seo-h1-title">
-        <span class="seo-sub-headline">พิกัดและพื้นที่ให้บริการเพื่อนเที่ยว</span><br>
-        <span class="seo-main-headline">เชียงใหม่ • นิมมาน • กรุงเทพฯ • ทั่วไทย</span>
-      </h1>
-
-      <p class="hero-guarantee-tag">
-        <i class="fas fa-shield-alt" aria-hidden="true"></i> ความปลอดภัยสูงสุด <span class="kw-green">ชำระค่าบริการหน้างานเมื่อพบตัวจริง ไม่โอนมัดจำ 100%</span>
-      </p>
-
-      <p class="hero-subtitle-p">
-        First Model Hub รวบรวมข้อมูลพิกัดบริการที่ปลอดภัย สะดวกสบาย และเข้าถึงได้ง่าย ทั้งในเขตอำเภอเมืองเชียงใหม่ โซนนิมมาน สันติธรรม เจ็ดยอด รวมถึงกรุงเทพฯ และหัวเมืองใหญ่
-      </p>
-    </section>
-
-    <!-- MAP SECTION -->
-    <section id="map-section" style="max-width: 850px; margin: 16px auto 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);">
-      <figure id="map-container" style="width: 100%; height: 220px; margin: 0;">
-        <iframe
-          id="google-map"
-          src="https://maps.google.com/maps?q=Chiang%20Mai%20Thailand&t=&z=12&ie=UTF8&iwloc=&output=embed"
-          title="แผนที่ตำแหน่ง First Model Hub"
-          style="border:0; width:100%; height:100%;"
-          loading="lazy"
-          allowfullscreen
-        ></iframe>
-      </figure>
-    </section>
-
-    <!-- SOCIAL CHIPS (ดึงจาก index.html 100%) -->
-    <section style="display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 8px !important; align-items: center !important; margin: 20px auto 0 auto !important; max-width: 850px !important; padding: 0 12px !important; box-sizing: border-box !important;" aria-label="ช่องทางสื่อสารภายนอกและโซเชียลมีเดีย">
-      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 6px 14px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; backdrop-filter: blur(8px) !important;">
-        <i class="fab fa-line" style="color: #06C755; font-size: 14px;" aria-hidden="true"></i>
-        <span>LINE OFFICIAL</span>
-      </a>
-
-      <a href="https://bsky.app/profile/sidelinechiangmai.bsky.social" target="_blank" rel="noopener nofollow" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 6px 14px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; backdrop-filter: blur(8px) !important;">
-        <svg style="width: 13px; height: 13px; fill: #0285FF; flex-shrink: 0;" viewBox="0 0 568 501" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M123.12 35.77C184.28 81.75 251.27 194.88 284 260.6c32.73-65.72 99.72-178.85 160.88-224.83C489.17-2.3 568-18.72 568 76.71c0 19.06-11 163.63-17.5 186.9-22.58 80.79-105.15 101.4-178.5 88.94 128.16 21.84 161.27 95.27 90.72 168.04-134.1 138.35-178.72-104.4-178.72-104.4s-44.62 242.75-178.72 104.4c-70.55-72.77-37.44-146.2 90.72-168.04-73.35 12.46-155.92-8.15-178.5-88.94C11 240.34 0 95.77 0 76.71 0-18.72 78.83-2.3 123.12 35.77z"/>
-        </svg>
-        <span>BLUESKY</span>
-      </a>
-
-      <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener nofollow" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 6px 14px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; backdrop-filter: blur(8px) !important;">
-        <i class="fab fa-x-twitter" style="color: #ffffff; font-size: 13px;" aria-hidden="true"></i>
-        <span>TWITTER (X)</span>
-      </a>
-
-      <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 6px 14px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; backdrop-filter: blur(8px) !important;">
-        <i class="fab fa-tiktok" style="color: #ff0050; font-size: 13px;" aria-hidden="true"></i>
-        <span>TIKTOK</span>
-      </a>
-
-      <a href="https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info" target="_blank" rel="noopener nofollow" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 6px 14px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; backdrop-filter: blur(8px) !important;">
-        <i class="fab fa-linkedin" style="color: #0A66C2; font-size: 13px;" aria-hidden="true"></i>
-        <span>LINKEDIN</span>
-      </a>
-
-      <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 6px 14px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; backdrop-filter: blur(8px) !important;">
-        <i class="fas fa-globe" style="color: #C084FC; font-size: 13px;" aria-hidden="true"></i>
-        <span>BIO.SITE</span>
-      </a>
-
-      <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" style="display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 6px 14px !important; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; backdrop-filter: blur(8px) !important;">
-        <i class="fas fa-tree" style="color: #10B981; font-size: 13px;" aria-hidden="true"></i>
-        <span>LINKTREE</span>
-      </a>
-    </section>
-
-  </div>
-</main>
-
-<!-- FOOTER -->
-<footer role="contentinfo" class="fmh-footer" style="margin-top: 32px;">
-  <div class="container">
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; margin-bottom: 16px;">
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <span class="brand-logo-text" style="font-size: 15px;">
-          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
-        </span>
-        <p style="font-size: 11px; line-height: 1.5; color: var(--text-gray); margin: 0;">
-          <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 รูปถ่ายตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ
-        </p>
+      <!-- กรุงเทพฯ & ภาคกลาง -->
+      <div class="region-bento-card">
+        <h3><i class="fas fa-city text-emerald-400"></i> กรุงเทพฯ & ภาคกลาง (Central Zone)</h3>
+        <a href="/location/bangkok" class="province-link-item">
+          <span>📍 ไซด์ไลน์กรุงเทพฯ (สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/chonburi" class="province-link-item">
+          <span>📍 ไซด์ไลน์พัทยา / ชลบุรี (บางแสน, ศรีราชา, จอมเทียน)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/phra-nakhon-si-ayutthaya" class="province-link-item">
+          <span>📍 ไซด์ไลน์อยุธยา (โรจนะ, ในเกาะเมือง, วังน้อย)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
       </div>
 
-      <nav aria-label="ลิงก์ส่วนท้ายเว็บ">
-        <h3 style="font-size: 12px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px;">เมนูหลัก</h3>
-        <ul style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11.5px;">
-          <li><a href="/" style="display: inline-flex; align-items: center; min-height: 34px; color: var(--text-gray); text-decoration: none;">หน้าแรก</a></li>
-          <li><a href="/profiles" style="display: inline-flex; align-items: center; min-height: 34px; color: var(--text-gray); text-decoration: none;">รวมโปรไฟล์</a></li>
-          <li><a href="/locations" style="display: inline-flex; align-items: center; min-height: 34px; color: #C084FC; text-decoration: none;">พื้นที่บริการ</a></li>
-          <li><a href="/nimman" style="display: inline-flex; align-items: center; min-height: 34px; color: var(--text-gray); text-decoration: none;">โซนนิมมาน</a></li>
-          <li><a href="/blog" style="display: inline-flex; align-items: center; min-height: 34px; color: var(--text-gray); text-decoration: none;">บทความ</a></li>
-          <li><a href="/faq" style="display: inline-flex; align-items: center; min-height: 34px; color: var(--text-gray); text-decoration: none;">คำถามที่พบบ่อย</a></li>
-          <li><a href="/about" style="display: inline-flex; align-items: center; min-height: 34px; color: var(--text-gray); text-decoration: none;">เกี่ยวกับเรา</a></li>
-          <li><a href="/privacy-policy" style="display: inline-flex; align-items: center; min-height: 34px; color: var(--text-gray); text-decoration: none;">นโยบายส่วนบุคคล</a></li>
-        </ul>
-      </nav>
+      <!-- ภาคใต้ -->
+      <div class="region-bento-card">
+        <h3><i class="fas fa-umbrella-beach text-blue-400"></i> ภาคใต้ (Southern Zone)</h3>
+        <a href="/location/phuket" class="province-link-item">
+          <span>📍 ไซด์ไลน์ภูเก็ต (ป่าตอง, กะทู้, ตัวเมือง, บางเทา)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/surat-thani" class="province-link-item">
+          <span>📍 ไซด์ไลน์สุราษฎร์ธานี / เกาะสมุย (เฉวง, ละไม)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="/location/songkhla" class="province-link-item">
+          <span>📍 ไซด์ไลน์หาดใหญ่ / สงขลา (ม.อ., ด่านนอก)</span>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+
     </div>
 
-    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text-muted);">
-      <p style="margin: 0;">© 2026 FirstModelHub. All Rights Reserved.</p>
-      <div style="display: flex; gap: 14px; align-items: center;">
-        <a href="/privacy-policy" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
-        <a href="/about" style="color: var(--text-muted); text-decoration: none;">Terms & Safe Protocol</a>
+    <!-- OUTCALL RULES & TRAVEL POLICY -->
+    <div class="outcall-guidelines-box" style="margin-top: 24px;">
+      <div class="outcall-header">
+        <span class="outcall-tag"><i class="fas fa-car text-purple-400"></i> OUTCALL & TRAVEL POLICY</span>
+        <h4 class="outcall-title">ข้อกำหนดการนัดหมายนอกสถานที่ และ นอกโซนบริการ</h4>
+        <p class="outcall-desc">เพื่อความเข้าใจที่ถูกต้อง ป้องกันปัญหาการนัดทิ้ง โปรดตรวจสอบเงื่อนไขดังนี้ครับ</p>
+      </div>
+
+      <div class="outcall-grid">
+        <div class="outcall-item">
+          <div class="outcall-icon"><i class="fas fa-hotel text-purple-400"></i></div>
+          <div class="outcall-text">
+            <strong>1. สถานที่นัดหมายที่ชัดเจน</strong>
+            <p>รับนัดเฉพาะ <strong>โรงแรม, คอนโดมิเนียม, รีสอร์ต หรือที่พักส่วนตัว</strong> ที่มีพิกัดระบุชัดเจน</p>
+          </div>
+        </div>
+
+        <div class="outcall-item">
+          <div class="outcall-icon"><i class="fas fa-route text-amber-400"></i></div>
+          <div class="outcall-text">
+            <strong style="color: #FBBF24;">2. กรณีเดินทาง "นอกโซนทำงาน"</strong>
+            <p>กรณีให้น้องเดินทางออกนอกโซนบริการหลัก <strong>ลูกค้าต้องชำระเฉพาะค่าเดินทางล่วงหน้าตามจริง (Grab/Bolt) ทุกกรณี</strong> เพื่อยืนยันการเดินทางและป้องกันน้องเสียเที่ยว</p>
+          </div>
+        </div>
+
+        <div class="outcall-item">
+          <div class="outcall-icon"><i class="fas fa-hand-holding-usd text-emerald-400"></i></div>
+          <div class="outcall-text">
+            <strong style="color: #00E676;">3. ค่าบริการชำระหน้างานตามเดิม</strong>
+            <p><strong>ค่าบริการหลัก (ค่าขนมน้อง) ชำระหน้างาน 100%</strong> เมื่อพบตัวจริงเรียบร้อยแล้ว ไม่มีการเก็บค่าบริการล่วงหน้า</p>
+          </div>
+        </div>
+
+        <div class="outcall-item">
+          <div class="outcall-icon"><i class="far fa-clock text-pink-400"></i></div>
+          <div class="outcall-text">
+            <strong>4. การเผื่อเวลาเดินทาง</strong>
+            <p>แนะนำนัดหมายคิวล่วงหน้า <strong>30 – 60 นาที</strong> เพื่อให้น้องมีเวลาเดินทางไปถึงตามนัดหมาย</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</footer>
 
-<script>
-  const menuToggle = document.getElementById('menu-toggle');
-  const sidebarMenu = document.getElementById('sidebar-menu');
-  const closeMenuBtn = document.getElementById('close-menu-btn');
-  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  </main>
 
-  function openMenu() {
-    sidebarMenu.classList.add('active');
-    sidebarOverlay.classList.add('active');
-  }
-  function closeMenu() {
-    sidebarMenu.classList.remove('active');
-    sidebarOverlay.classList.remove('active');
-  }
+  <!-- FOOTER -->
+  <footer role="contentinfo" class="fmh-footer">
+    <div class="container">
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 11px; color: #94A3B8;">
+        <p style="margin: 0;">© 2026 FirstModelHub. All Rights Reserved.</p>
+        <div style="display: flex; gap: 14px;">
+          <a href="/privacy-policy" style="color: #94A3B8; text-decoration: none;">Privacy Policy</a>
+          <a href="/about" style="color: #94A3B8; text-decoration: none;">About Us</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-  if (menuToggle) menuToggle.addEventListener('click', openMenu);
-  if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
-  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMenu);
-</script>
-
+  <script type="module" src="/main.js"></script>
 </body>
 </html>
