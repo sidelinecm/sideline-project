@@ -298,19 +298,21 @@ function getDynamicReviews(provinceName) {
   const isChiangMai = provinceName === "เชียงใหม่";
   return [
     {
-      author: "คุณชลสิทธิ์ (C.)",
+      author: "คุณชลสิทธิ์",
+      initial: "C", // ใช้อักษรภาษาอังกฤษหรือชื่อย่อที่อ่านง่าย
       location: isChiangMai ? "ย่านนิมมาน เชียงใหม่" : `ตัวเมือง${provinceName}`,
       text: isChiangMai
-        ? '"นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับสำหรับคนที่หาเพื่อนเที่ยวฟิวแฟนดีๆ แถวนิมมาน"'
-        : `"นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ"`,
+        ? "นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ"
+        : `นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ`,
       rating: 5,
       date: "เมื่อสัปดาห์ที่แล้ว",
       datePublished: new Date(now.getTime() - 7 * 86400000).toISOString().split("T")[0]
     },
     {
-      author: "คุณอภิชาติ (A.)",
-      location: isChiangMai ? "โซนยอดนิยม นิมมาน เชียงใหม่" : `โซนยอดนิยมใน${provinceName}`,
-      text: '"น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ"',
+      author: "คุณอภิชาติ",
+      initial: "A",
+      location: isChiangMai ? "โซนยอดนิยม นิมมาน" : `โซนยอดนิยมใน${provinceName}`,
+      text: "น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ",
       rating: 5,
       date: "เมื่อ 2 สัปดาห์ก่อน",
       datePublished: new Date(now.getTime() - 14 * 86400000).toISOString().split("T")[0]
@@ -736,24 +738,29 @@ export default async (req, context) => {
     const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i, 0, provinceNameThai)).join("");
     const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i, 0, provinceNameThai)).join("");
     
-    const reviewsHtml = activeReviews.map(r => `
-      <div class="review-card-item">
-          <div class="review-card-header">
-            <div class="review-user-info">
-              <div class="review-avatar-circle">${escapeHTML((r.author || "K").charAt(0).toUpperCase())}</div>
-              <div>
-                <div class="review-username">${escapeHTML(r.author)}</div>
-                <div class="review-user-loc">นัดเจอใน${escapeHTML(r.location)}</div>
-              </div>
-            </div>
-            <div class="review-stars-list">
-              ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};"></i>`).join("")}
+const reviewsHtml = activeReviews.map(r => {
+  const avatarLetter = r.initial || (r.author ? r.author.replace(/^คุณ/, "").trim().charAt(0) : "V");
+  const cleanText = stripHTML(r.text).replace(/^["']|["']$/g, "");
+
+  return `
+    <div class="review-card-item">
+        <div class="review-card-header">
+          <div class="review-user-info">
+            <div class="review-avatar-circle">${escapeHTML(avatarLetter)}</div>
+            <div>
+              <div class="review-username">${escapeHTML(r.author)}</div>
+              <div class="review-user-loc">นัดเจอใน${escapeHTML(r.location)}</div>
             </div>
           </div>
-          <p class="review-comment-body">${escapeHTML(r.text)}</p>
-          <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
-      </div>
-    `).join("");
+          <div class="review-stars-list">
+            ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};"></i>`).join("")}
+          </div>
+        </div>
+        <p class="review-comment-body">"${escapeHTML(cleanText)}"</p>
+        <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
+    </div>
+  `;
+}).join("");
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
