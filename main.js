@@ -1051,59 +1051,69 @@ lineWrapper.innerHTML = `
     if (loader) loader.style.display = "none";
   }
 
-  async function handleUrlRouting(isInitial = false) {
-    let cleanPath = window.location.pathname.toLowerCase().replace(/\/+$/, "");
-    if (!cleanPath) cleanPath = "/";
+// ✅ แก้ไข: เติม Logic ค้นหาโปรไฟล์และเปิด Lightbox พร้อมป้องกัน Re-render ซ้ำ
+async function handleUrlRouting(isInitial = false) {
+  let cleanPath = window.location.pathname.toLowerCase().replace(/\/+$/, "");
+  if (!cleanPath) cleanPath = "/";
 
-    const sidelineMatch = cleanPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
-    if (sidelineMatch) {
-      const slugVal = decodeURIComponent(sidelineMatch[1]);
-      appState.currentProfileSlug = slugVal;
+  // 1. ตรวจสอบหน้าโปรไฟล์เดี่ยว (/sideline/xxx)
+  const sidelineMatch = cleanPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+  if (sidelineMatch) {
+    const slugVal = decodeURIComponent(sidelineMatch[1]);
+    appState.currentProfileSlug = slugVal;
 
-      let foundProfile = appState.allProfiles.find(p => {
-        const s = String(p.slug || "").toLowerCase();
-        const id = String(p.id);
-        const target = slugVal.toLowerCase();
-        return s === target || id === target;
-      });
+    let foundProfile = appState.allProfiles.find(p => {
+      const s = String(p.slug || "").toLowerCase();
+      const id = String(p.id);
+      const target = slugVal.toLowerCase();
+      return s === target || id === target;
+    });
 
-      if (!foundProfile && supabaseClient) {
-        try {
-          const condition = /^\d+$/.test(slugVal) ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
-          const { data: dbProfile } = await supabaseClient.from("profiles").select("*").or(condition).maybeSingle();
-          if (dbProfile) foundProfile = normalizeProfile(dbProfile);
-        } catch (_) {}
-      }
-
-      if (foundProfile) {
-        const provKey = foundProfile.provinceKey || "";
-        if (provKey && provKey !== "national" && provKey !== "all") {
-          window.currentProvinceSlug = provKey;
-          if (domCache.provinceSelect) domCache.provinceSelect.value = provKey;
-        }
-        openLightboxModal(foundProfile);
-      }
-      return;
+    if (!foundProfile && supabaseClient) {
+      try {
+        const condition = /^\d+$/.test(slugVal) ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
+        const { data: dbProfile } = await supabaseClient.from("profiles").select("*").or(condition).maybeSingle();
+        if (dbProfile) foundProfile = normalizeProfile(dbProfile);
+      } catch (_) {}
     }
 
-    const locationMatch = cleanPath.match(/^\/(?:location|province)\/([^/]+)/);
-    if (locationMatch) {
-      let locSlug = decodeURIComponent(locationMatch[1]).toLowerCase();
-      if (locSlug === "chiang_mai") locSlug = "chiangmai";
-      appState.currentProfileSlug = null;
-      closeLightboxModal(false);
-      window.currentProvinceSlug = locSlug;
-      if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
-      executeFilterAndRender(false);
-      return;
+    if (foundProfile) {
+      const provKey = foundProfile.provinceKey || "";
+      if (provKey && provKey !== "national" && provKey !== "all") {
+        window.currentProvinceSlug = provKey;
+        if (domCache.provinceSelect) domCache.provinceSelect.value = provKey;
+      }
+      openLightboxModal(foundProfile);
     }
-
-    appState.currentProfileSlug = null;
-    window.currentProvinceSlug = "national";
-    closeLightboxModal(false);
-    if (domCache.provinceSelect) domCache.provinceSelect.value = "";
-    executeFilterAndRender(false);
+    return;
   }
+
+  // 2. ถ้าเป็น Initial Load หน้าแรก และมี DOM การ์ดจาก SSR อยู่แล้ว ไม่ต้อง Re-render ซ้ำ
+  const hasExistingCards = domCache.profilesDisplayArea && domCache.profilesDisplayArea.querySelector(".profile-card-new");
+  if (isInitial && hasExistingCards) {
+    return;
+  }
+
+  // 3. ตรวจสอบหน้าจังหวัด (/location/xxx)
+  const locationMatch = cleanPath.match(/^\/(?:location|province)\/([^/]+)/);
+  if (locationMatch) {
+    let locSlug = decodeURIComponent(locationMatch[1]).toLowerCase();
+    if (locSlug === "chiang_mai") locSlug = "chiangmai";
+    appState.currentProfileSlug = null;
+    closeLightboxModal(false);
+    window.currentProvinceSlug = locSlug;
+    if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
+    executeFilterAndRender(false);
+    return;
+  }
+
+  // 4. หน้าแรกหลัก
+  appState.currentProfileSlug = null;
+  window.currentProvinceSlug = "national";
+  closeLightboxModal(false);
+  if (domCache.provinceSelect) domCache.provinceSelect.value = "";
+  executeFilterAndRender(false);
+}
 
   // ==============================================================================
   // เริ่มต้นผูก Event Listener ทันทีที่ DOM พร้อม
