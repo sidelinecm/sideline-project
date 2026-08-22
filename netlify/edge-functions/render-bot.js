@@ -491,13 +491,27 @@ export default async (req, context) => {
                     </div>
                 </section>
 
-                <section style="margin-bottom: 1.5rem;">
-                    <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">คำถามพบบ่อย</h2>
-                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
-                        <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีมัดจำไหม?</h3>
-                        <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">ไม่มีนโยบายการรับเงินโอนจองมัดจำล่วงหน้าทุกกรณีค่ะ ลูกค้าสามารถนัดพบเจอตัวจริงหน้างานเพื่อตรวจสอบสิทธิ์ความตรงปกเรียบร้อยแล้ว ค่อยตกลงชำระค่าบริการหน้างานเพื่อความปลอดภัย 100%</p>
-                    </div>
-                </section>
+
+<section style="margin-bottom: 1.5rem;">
+    <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)}</h2>
+    
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
+            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
+            <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
+            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
+            <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
+            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
+            <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
+        </div>
+    </div>
+</section>
 
                 <section style="margin-bottom: 1.5rem;">
                     <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">รีวิวจากลูกค้าจริง</h2>

@@ -360,7 +360,6 @@ async function getTemplateHtml(url, context) {
   return TEMPLATE_HTML_CACHE || fallbackHtml;
 }
 
-// ✅ เรนเดอร์การ์ดโปรไฟล์ HTML สะอาด 100% ปราศจาก Inline Styles บวม
 const renderCardHtml = (p, index, total, provinceName) => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   const loc = escapeHTML(sanitizeThaiText(p.location) || provinceName);
@@ -368,6 +367,7 @@ const renderCardHtml = (p, index, total, provinceName) => {
   const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
   const availStatus = p.availability || (isAvail ? "รับงาน" : "สอบถามคิว");
   const ageStr = p.age && p.age !== "-" ? ` ${escapeHTML(p.age)}` : "";
+  const statusClass = isAvail ? "status-online" : "status-busy";
   
   let statsStr = p.stats || p.proportion || "";
   const bust = p.bust || "";
@@ -381,7 +381,6 @@ const renderCardHtml = (p, index, total, provinceName) => {
   const imgAlt = `น้อง${cleanName}${ageStr ? ` อายุ${ageStr}ปี` : ""} สาวรับงาน${provinceName} ${statsStr ? `สัดส่วน ${statsStr}` : "รูปร่างสมส่วน"} ${p.height ? `สูง ${p.height}ซม.` : ""} ย่าน${loc} ฟิวแฟนตรงปก 100% ไม่มัดจำ`;
   const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
   const cardImg = optimizeImg(0, rawImg, 400, 500);
-  const slogan = escapeHTML(sanitizeThaiText(p.slogan || p.quote || ""));
   
   let priceStr = "1,500.-";
   if (p.rate) {
@@ -404,24 +403,26 @@ const renderCardHtml = (p, index, total, provinceName) => {
                
           <div class="profile-card-gradient-overlay"></div>
 
-          <div class="profile-card-badges-left">
-              ${p.isfeatured ? '<span class="badge-featured"><i class="fas fa-star"></i> แนะนำ</span>' : ""}
-              <span class="badge-status ${isAvail ? 'online' : 'busy'}">
-                  <span class="status-dot"></span>
-                  <span>${availStatus}</span>
-              </span>
-              ${p.has_video || p.hasVideo ? '<span class="badge-status busy"><i class="fas fa-video"></i> คลิป</span>' : ""}
-          </div>
-
-          <div class="profile-card-badges-right">
-              ${p.verified || p.isVerified ? '<span class="badge-verified"><i class="fas fa-check-circle"></i> ยืนยัน</span>' : ""}
+          <div class="profile-card-badges-top">
+              <div class="badges-left">
+                  <span class="badge-status ${statusClass}">
+                      <span class="status-dot"></span>
+                      <span>${availStatus}</span>
+                  </span>
+                  ${p.isfeatured ? '<span class="badge-featured"><i class="fas fa-star"></i> VIP</span>' : ""}
+              </div>
+              <div class="badges-right">
+                  ${p.verified || p.isVerified ? '<span class="badge-verified"><i class="fas fa-check-circle"></i> ตรงปก</span>' : ""}
+              </div>
           </div>
           
           <a href="${profileUrl}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName} สาวรับงาน${provinceName}"></a>
 
           <div class="profile-card-info-content">
-              <h3 class="profile-card-name">น้อง${cleanName}${ageStr}</h3>
-              ${slogan ? `<p class="profile-card-quote">${slogan}</p>` : ""}
+              <div class="profile-card-title-row">
+                  <h3 class="profile-card-name">น้อง${cleanName}</h3>
+                  ${ageStr ? `<span class="profile-card-age-tag">${ageStr.trim()} ปี</span>` : ""}
+              </div>
               <div class="profile-card-bottom-row">
                   <span class="profile-card-location">
                       <i class="fas fa-map-marker-alt"></i> ${loc}
@@ -439,12 +440,13 @@ const renderCardHtml = (p, index, total, provinceName) => {
 const generateDynamicFAQsHTML = faqs => {
   if (!faqs || !Array.isArray(faqs)) return "";
   return faqs.map(f => `
-    <div class="faq-item-card">
-        <div class="faq-q-row">
-            <span class="faq-q-badge">Q</span>
-            <div class="faq-question-text">${escapeHTML(sanitizeThaiText(f.q))}</div>
+    <div class="faq-item-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px;">
+        <div style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">
+            Q: ${escapeHTML(sanitizeThaiText(f.q))}
         </div>
-        <div class="faq-answer-text">${escapeHTML(sanitizeThaiText(f.a))}</div>
+        <div style="font-size: 12px; color: var(--text-gray); line-height: 1.5;">
+            ${escapeHTML(sanitizeThaiText(f.a))}
+        </div>
     </div>
   `).join("");
 };
@@ -605,9 +607,7 @@ export default async (req, context) => {
     let metaDescription = "";
     if (isNational) {
       metaTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
-      metaDescription = topModelsList
-        ? `ทั่วไทย 🟢 พร้อมรับงานวันนี้: ${topModelsList} - ศูนย์รวมสาวรับงาน ไซด์ไลน์ ฟิวแฟนพรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ`
-        : "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนพรีเมียมทั่วไทย คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ";
+      metaDescription = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนพรีเมียมทั่วไทย เชียงใหม่ ขอนแก่น เชียงราย ลำปาง การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ";
     } else {
       metaTitle = customMetadata?.title || `สาวรับงาน${provinceNameThai} ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub`;
       metaDescription = customMetadata?.desc || `ศูนย์รวมสาวรับงาน${provinceNameThai} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${provinceNameThai}`;
