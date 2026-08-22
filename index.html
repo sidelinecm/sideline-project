@@ -242,7 +242,7 @@
       </div>
     </section>
 
-    <!-- ==============================================================================
+<!-- ==============================================================================
          📍 3. PROVINCE PROFILES DISPLAY AREA
          ============================================================================== -->
     <div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว{{PROVINCE_NAME}}">
@@ -252,26 +252,50 @@
     <!-- ==============================================================================
          💬 4. LOCAL SEO INTRO, REVIEWS & FAQ BLOCK (แก้ปัญหา Ghost Schema 100%)
          ============================================================================== -->
-    <section id="seo-content-section" class="clean-section-wrapper">
-      <!-- ข้อมูลเกริ่นนำพื้นที่ -->
-      <div class="seo-drawer-wrapper" id="seo-drawer-wrapper">
-        <div class="seo-content-inner"></div>
+    <section id="seo-content-section" class="clean-section-wrapper" aria-label="ข้อมูลแนะนำพื้นที่และบริการ">
+      
+      <!-- 4.1 ข้อมูลเกริ่นนำพื้นที่ (SEO Drawer พร้อมระบบพับเก็บอัตโนมัติ) -->
+      <div class="seo-bento-card">
+        <div class="seo-card-header">
+          <span class="bento-tag-pill"><i class="fas fa-info-circle"></i> AREA GUIDE & INFO</span>
+          <h2 class="seo-intro-heading">
+            ข้อมูลและคู่มือแนะนำ <span class="kw-purple">สาวรับงาน{{PROVINCE_NAME}}</span>
+          </h2>
+        </div>
+
+        <div class="seo-drawer-wrapper collapsed" id="seo-drawer-wrapper">
+          <div class="seo-content-inner"></div>
+          <div class="seo-drawer-fade"></div>
+        </div>
+
+        <div class="seo-drawer-btn-row">
+          <button type="button" id="toggle-seo-drawer-btn" class="seo-drawer-toggle-btn" aria-expanded="false">
+            <span>ดูข้อมูลพื้นที่บริการทั้งหมด</span>
+            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- รีวิวจากผู้ใช้จริงในพื้นที่ -->
-      <div id="reviews-wrapper-block" style="margin-top: 24px;">
-        <h3 style="color: #FFF; font-size: 15px; font-weight: 800; margin-bottom: 12px; text-align: center;">
-          ⭐ รีวิวความประทับใจจากลูกค้าจริง ({{PROVINCE_NAME}})
-        </h3>
-        <div id="reviews-container-grid" class="reviews-grid-wrapper" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;"></div>
+      <!-- 4.2 รีวิวจากผู้ใช้จริงในพื้นที่ -->
+      <div id="reviews-wrapper-block">
+        <div class="sub-block-header">
+          <span class="bento-tag-pill"><i class="fas fa-star"></i> REVIEWS</span>
+          <h3 class="sub-block-title">
+            รีวิวความประทับใจจากลูกค้าจริง (<span class="kw-purple">{{PROVINCE_NAME}}</span>)
+          </h3>
+        </div>
+        <div id="reviews-container-grid" class="reviews-grid-wrapper"></div>
       </div>
 
-      <!-- คำถามที่พบบ่อยประจำพื้นที่ (FAQ ตรงกับ Schema 100%) -->
-      <div id="faq-wrapper-block" style="margin-top: 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 18px;">
-        <h3 style="color: #C084FC; font-size: 15px; font-weight: 800; margin-bottom: 14px; text-align: center;">
-          ❓ คำถามที่พบบ่อย (FAQ {{PROVINCE_NAME}})
-        </h3>
-        <div id="faq-container-list" class="faq-list-wrapper" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      <!-- 4.3 คำถามที่พบบ่อยประจำพื้นที่ (FAQ) -->
+      <div id="faq-wrapper-block">
+        <div class="sub-block-header">
+          <span class="bento-tag-pill"><i class="fas fa-question-circle"></i> FAQ</span>
+          <h3 class="sub-block-title">
+            คำถามที่พบบ่อย (FAQ <span class="kw-purple">{{PROVINCE_NAME}}</span>)
+          </h3>
+        </div>
+        <div id="faq-container-list" class="faq-list-wrapper"></div>
       </div>
     </section>
 
@@ -281,6 +305,7 @@
     <section class="concierge-luxury-section" aria-label="ศูนย์รวมความปลอดภัยและคู่มือการนัดหมาย">
       <div class="luxury-bento-wrapper">
 
+        <!-- 5.1 หัวข้อ 3 ขั้นตอน -->
         <div class="bento-header-center">
           <span class="bento-tag-pill"><i class="fas fa-sparkles"></i> HOW IT WORKS</span>
           <h2 class="bento-headline">
@@ -289,6 +314,7 @@
           <p class="bento-sub-desc">สะดวกรวดเร็ว ปลอดภัย และรักษาความลับระดับสูงสุด</p>
         </div>
 
+        <!-- 5.2 กล่อง 3 ขั้นตอน (STEP 01 - 03 ครบถ้วน) -->
         <div class="steps-compact-grid">
           <div class="step-compact-card">
             <div class="step-card-header">
@@ -318,6 +344,7 @@
           </div>
         </div>
 
+        <!-- 5.3 กล่องมาตรฐานความปลอดภัย 4 ข้อ ครบถ้วน -->
         <div class="trust-protocol-bento">
           <div class="trust-bento-item">
             <div class="trust-icon-box check-green"><i class="fas fa-shield-check"></i></div>
@@ -352,6 +379,7 @@
           </div>
         </div>
 
+        <!-- 5.4 บาร์ประสานงานสด LIVE CONCIERGE -->
         <div class="live-concierge-bar">
           <div class="concierge-left-meta">
             <div class="concierge-status-badge">
@@ -371,6 +399,7 @@
           </div>
         </div>
 
+        <!-- 5.5 ลิงก์ข้อมูลเพิ่มเติม -->
         <div class="hub-links-nav" aria-label="เมนูข้อมูลเพิ่มเติม">
           <span class="hub-nav-label">ข้อมูลเพิ่มเติม:</span>
           <a href="/faq" class="hub-nav-chip"><i class="fas fa-question-circle"></i> คำถามที่พบบ่อย (FAQ)</a>
