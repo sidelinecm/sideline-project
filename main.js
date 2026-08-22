@@ -467,6 +467,13 @@ function populateInitialComponents() {
 
   async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     if (!domCache.profilesDisplayArea) return;
+    
+    // 🟢 1. ล็อกความสูงปัจจุบันไว้ก่อน ป้องกันหน้าเว็บยุบตัวและจอวูบลงล่าง
+    const currentHeight = domCache.profilesDisplayArea.offsetHeight;
+    if (currentHeight > 0) {
+      domCache.profilesDisplayArea.style.minHeight = `${currentHeight}px`;
+    }
+
     appState.renderId = (appState.renderId || 0) + 1;
     const activeRenderId = appState.renderId;
 
@@ -525,6 +532,7 @@ function populateInitialComponents() {
       domCache.profilesDisplayArea.appendChild(wrapper);
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
+      // 🟢 2. ปลดล็อกความสูงเมื่อการ์ดเรนเดอร์ครบแล้ว
       domCache.profilesDisplayArea.style.minHeight = "";
     } else {
       const groupedByProvince = profiles.reduce((acc, p) => {
@@ -550,6 +558,7 @@ function populateInitialComponents() {
           const gridEl = sectionEl.querySelector(".profile-grid");
           await renderProfilesBatch(gridEl, groupedByProvince[pKey], activeRenderId);
         }
+        // 🟢 2. ปลดล็อกความสูงเมื่อการ์ดเรนเดอร์ครบแล้ว
         domCache.profilesDisplayArea.style.minHeight = "";
       } else {
         domCache.profilesDisplayArea.innerHTML = "";
@@ -1028,11 +1037,9 @@ lineWrapper.innerHTML = `
         if (slug && slug !== "national" && slug !== "all") {
           history.pushState(null, "", `/location/${slug}`);
           if (domCache.provinceSelect) domCache.provinceSelect.value = slug;
-          executeFilterAndRender(false);
         } else {
           history.pushState(null, "", isEN ? "/index-en" : "/");
           if (domCache.provinceSelect) domCache.provinceSelect.value = "";
-          executeFilterAndRender(false);
         }
       }
       appState.currentProfileSlug = null;

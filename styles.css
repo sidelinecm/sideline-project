@@ -61,8 +61,8 @@
 html {
   overflow-x: hidden;
   scrollbar-gutter: stable;
-  scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* เอา scroll-behavior: smooth; ออก หรือใช้เฉพาะตอนกด anchor scroll */
 }
 
 body {
