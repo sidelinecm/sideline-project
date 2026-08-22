@@ -44,34 +44,33 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-<link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
   <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
-
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
-  <!-- Preload Fonts สำหรับความเร็ว Core Web Vitals -->
+  <!-- Preload Fonts สำหรับ Core Web Vitals -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   
   <link rel="modulepreload" href="/main.js">
   <link rel="stylesheet" href="/styles.css">
 
-  
-
-<script type="application/ld+json" id="dynamic-schema">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "FirstModelHub",
-  "url": "https://firstmodelhub.com"
-}
-</script>
+  <!-- Schema.org Dynamic Template (แทนที่โดย ssr-province.js อัตโนมัติ) -->
+  <script type="application/ld+json" id="dynamic-schema">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "FirstModelHub",
+    "url": "https://firstmodelhub.com"
+  }
+  </script>
 </head>
 
 <body class="fmh-app-page">
 
+<!-- 📱 FLOATING APP DOCK (เมนูลอยตัวบนมือถือ) -->
 <nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
   <a href="/" class="dock-item active">
     <i class="fas fa-home" aria-hidden="true"></i>
@@ -91,6 +90,7 @@
   </a>
 </nav>
 
+<!-- 🧭 HEADER BAR -->
 <header id="page-header" role="banner">
     <div class="header-logo-container">
         <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
@@ -119,6 +119,7 @@
     </div>
 </header>
 
+<!-- 📱 MOBILE SIDEBAR DRAWER -->
 <aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
   <div class="sidebar-header-div">
     <span class="sidebar-title">Navigation Hub</span>
@@ -155,21 +156,17 @@
          🌟 1. HERO & HOT SWIPER SECTION
          ============================================================================== -->
     <section class="hero-section fmh-hero-surface" aria-labelledby="hero-h1">
-      
-      <!-- พื้นหลังแสง Ambient Glow ประจำปี 2026 -->
       <div class="fmh-hero-ambient" aria-hidden="true">
         <span class="fmh-ambient-orb fmh-ambient-orb-a"></span>
         <span class="fmh-ambient-orb fmh-ambient-orb-b"></span>
         <span class="fmh-hero-grid"></span>
       </div>
 
-      <!-- ป้ายฉลากหัวเว็บแบบ Super Luxury -->
       <div class="fmh-hero-index" aria-hidden="true">
         <span>FMH / 2026</span>
         <span>THE PRIVATE EDIT</span>
       </div>
       
-      <!-- Badge การันตีความน่าเชื่อถือ -->
       <div class="clutch-pill-compact">
         <span class="pill-badge-tag">VERIFIED 2026</span>
         <div class="stars-mini" aria-hidden="true">
@@ -178,7 +175,6 @@
         <span class="pill-badge-score">5/5 Verified Profiles</span>
       </div>
 
-      <!-- โลโก้แบรนด์เรืองแสง -->
       <div class="brand-showcase-wrapper">
         <span class="brand-neon-text">
           FirstModel<span class="hub-text-pink">Hub</span>
@@ -186,13 +182,11 @@
         <span class="dancing-neon-star" aria-hidden="true">🌟</span>
       </div>
 
-      <!-- หัวข้อ H1 หลักของหน้า -->
       <h1 id="hero-h1" class="seo-h1-title">
         <span class="seo-sub-headline">รับงาน{{PROVINCE_NAME}} • ไซด์ไลน์{{PROVINCE_NAME}}</span><br>
         <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
       </h1>
       
-      <!-- แท็กรับประกันความปลอดภัย -->
       <div class="hero-guarantee-tag">
         <i class="fas fa-shield-alt" aria-hidden="true"></i> ความปลอดภัยสูงสุด <span class="kw-green">เจอตัวจริงค่อยจ่ายหน้างาน ไม่โอนมัดจำ 100%</span>
       </div>
@@ -201,7 +195,7 @@
         ศูนย์รวมข้อมูลสารบัญผู้ดูแลระดับ VIP <strong class="kw-purple">รับงาน{{PROVINCE_NAME}}</strong>, <strong class="kw-purple">สาวรับงาน{{PROVINCE_NAME}}</strong>, <strong class="kw-purple">เพื่อนเที่ยว{{PROVINCE_NAME}}</strong> ยืนยันตัวตนจริง <span class="kw-green">ตรงปก 100%</span> ปราศจากความเสี่ยงด้วยนโยบาย <strong class="kw-red">ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong> ครอบคลุมพิกัด <span class="kw-purple">{{PROVINCE_ZONES}}</span> ทั้งหมด
       </p>
 
-      <!-- หัวข้อสไลด์ HOT ประจำเดือน -->
+      <!-- สไลด์น้องๆ HOT 🔥 -->
       <div class="hot-section-header-centered">
         <h2 class="hot-title-red-pink">น้องๆ ที่ HOT 🔥</h2>
         <div class="hot-sub-line">
@@ -212,10 +206,9 @@
         </div>
       </div>
 
-      <!-- สไลด์รูปน้องๆ HOT (เรนเดอร์ผ่าน JS) -->
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ"></div>
 
-      <!-- แถบ 3 เม็ดสถิติแบบ Glassmorphism -->
+      <!-- สถิติ Glassmorphism -->
       <div class="hero-stats-chips-row">
         <span class="stat-micro-chip">
           <i class="fas fa-users" style="color: #C084FC;" aria-hidden="true"></i>
@@ -257,12 +250,37 @@
     </div>
 
     <!-- ==============================================================================
-         💎 4. LUXURY TRUST & BOOKING CONCIERGE (COMPACT BENTO)
+         💬 4. LOCAL SEO INTRO, REVIEWS & FAQ BLOCK (แก้ปัญหา Ghost Schema 100%)
+         ============================================================================== -->
+    <section id="seo-content-section" class="clean-section-wrapper">
+      <!-- ข้อมูลเกริ่นนำพื้นที่ -->
+      <div class="seo-drawer-wrapper" id="seo-drawer-wrapper">
+        <div class="seo-content-inner"></div>
+      </div>
+
+      <!-- รีวิวจากผู้ใช้จริงในพื้นที่ -->
+      <div id="reviews-wrapper-block" style="margin-top: 24px;">
+        <h3 style="color: #FFF; font-size: 15px; font-weight: 800; margin-bottom: 12px; text-align: center;">
+          ⭐ รีวิวความประทับใจจากลูกค้าจริง ({{PROVINCE_NAME}})
+        </h3>
+        <div id="reviews-container-grid" class="reviews-grid-wrapper" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;"></div>
+      </div>
+
+      <!-- คำถามที่พบบ่อยประจำพื้นที่ (FAQ ตรงกับ Schema 100%) -->
+      <div id="faq-wrapper-block" style="margin-top: 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 18px;">
+        <h3 style="color: #C084FC; font-size: 15px; font-weight: 800; margin-bottom: 14px; text-align: center;">
+          ❓ คำถามที่พบบ่อย (FAQ {{PROVINCE_NAME}})
+        </h3>
+        <div id="faq-container-list" class="faq-list-wrapper" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      </div>
+    </section>
+
+    <!-- ==============================================================================
+         💎 5. LUXURY TRUST & BOOKING CONCIERGE (COMPACT BENTO)
          ============================================================================== -->
     <section class="concierge-luxury-section" aria-label="ศูนย์รวมความปลอดภัยและคู่มือการนัดหมาย">
       <div class="luxury-bento-wrapper">
 
-        <!-- 4.1 Header: ขั้นตอนการนัดหมาย -->
         <div class="bento-header-center">
           <span class="bento-tag-pill"><i class="fas fa-sparkles"></i> HOW IT WORKS</span>
           <h2 class="bento-headline">
@@ -271,7 +289,6 @@
           <p class="bento-sub-desc">สะดวกรวดเร็ว ปลอดภัย และรักษาความลับระดับสูงสุด</p>
         </div>
 
-        <!-- 4.2 Grid 3 Steps -->
         <div class="steps-compact-grid">
           <div class="step-compact-card">
             <div class="step-card-header">
@@ -301,7 +318,6 @@
           </div>
         </div>
 
-        <!-- 4.3 Safe Protocol (Bento 2x2) -->
         <div class="trust-protocol-bento">
           <div class="trust-bento-item">
             <div class="trust-icon-box check-green"><i class="fas fa-shield-check"></i></div>
@@ -336,7 +352,6 @@
           </div>
         </div>
 
-        <!-- 4.4 Live Concierge Desk -->
         <div class="live-concierge-bar">
           <div class="concierge-left-meta">
             <div class="concierge-status-badge">
@@ -356,7 +371,6 @@
           </div>
         </div>
 
-        <!-- 4.5 Quick Nav Links -->
         <div class="hub-links-nav" aria-label="เมนูข้อมูลเพิ่มเติม">
           <span class="hub-nav-label">ข้อมูลเพิ่มเติม:</span>
           <a href="/faq" class="hub-nav-chip"><i class="fas fa-question-circle"></i> คำถามที่พบบ่อย (FAQ)</a>
@@ -367,11 +381,68 @@
       </div>
     </section>
 
+    <!-- ==============================================================================
+         🌐 6. SOCIAL OFFICIAL CHANNELS (ครบทั้ง 7 ช่องทาง)
+         ============================================================================== -->
+    <section class="social-chips-container" aria-label="ช่องทางสื่อสารภายนอกและโซเชียลมีเดีย">
+      <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="social-chip-link">
+        <i class="fab fa-line" style="color: #06C755; font-size: 14px;"></i>
+        <span>LINE OFFICIAL</span>
+      </a>
+
+      <a href="https://bsky.app/profile/sidelinechiangmai.bsky.social" target="_blank" rel="noopener nofollow" class="social-chip-link">
+        <svg style="width: 13px; height: 13px; fill: #0285FF; flex-shrink: 0;" viewBox="0 0 568 501" xmlns="http://www.w3.org/2000/svg">
+          <path d="M123.12 35.77C184.28 81.75 251.27 194.88 284 260.6c32.73-65.72 99.72-178.85 160.88-224.83C489.17-2.3 568-18.72 568 76.71c0 19.06-11 163.63-17.5 186.9-22.58 80.79-105.15 101.4-178.5 88.94 128.16 21.84 161.27 95.27 90.72 168.04-134.1 138.35-178.72-104.4-178.72-104.4s-44.62 242.75-178.72 104.4c-70.55-72.77-37.44-146.2 90.72-168.04-73.35 12.46-155.92-8.15-178.5-88.94C11 240.34 0 95.77 0 76.71 0-18.72 78.83-2.3 123.12 35.77z"/>
+        </svg>
+        <span>BLUESKY</span>
+      </a>
+
+      <a href="https://twitter.com/sidelinechiangmai" target="_blank" rel="noopener nofollow" class="social-chip-link">
+        <i class="fab fa-x-twitter" style="color: #ffffff; font-size: 13px;"></i>
+        <span>TWITTER (X)</span>
+      </a>
+
+      <a href="https://tiktok.com/@sidelinecm" target="_blank" rel="noopener nofollow" class="social-chip-link">
+        <i class="fab fa-tiktok" style="color: #ff0050; font-size: 13px;"></i>
+        <span>TIKTOK</span>
+      </a>
+
+      <a href="https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info" target="_blank" rel="noopener nofollow" class="social-chip-link">
+        <i class="fab fa-linkedin" style="color: #0A66C2; font-size: 13px;"></i>
+        <span>LINKEDIN</span>
+      </a>
+
+      <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow" class="social-chip-link">
+        <i class="fas fa-globe icon-purple" style="font-size: 13px;"></i>
+        <span>BIO.SITE</span>
+      </a>
+
+      <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" class="social-chip-link">
+        <i class="fas fa-tree" style="color: #10B981; font-size: 13px;"></i>
+        <span>LINKTREE</span>
+      </a>
+    </section>
+
+    <!-- ==============================================================================
+         🗺️ 7. GOOGLE MAP COVERAGE
+         ============================================================================== -->
+    <section id="map-section" aria-label="แผนที่พื้นที่ให้บริการ">
+      <figure id="map-container">
+        <iframe
+          id="google-map"
+          src="{{MAP_EMBED_URL}}"
+          title="แผนที่พื้นที่ให้บริการ First Model Hub"
+          loading="lazy"
+          allowfullscreen
+        ></iframe>
+      </figure>
+    </section>
+
   </div>
 </main>
 
 <!-- ==============================================================================
-     🔍 5. SEARCH BOTTOM SHEET DRAWER
+     🔍 8. SEARCH BOTTOM SHEET DRAWER
      ============================================================================== -->
 <div id="search-drawer-overlay" class="drawer-backdrop"></div>
 
@@ -442,7 +513,7 @@
 </div>
 
 <!-- ==============================================================================
-     📌 6. FOOTER
+     📌 9. FOOTER
      ============================================================================== -->
 <footer role="contentinfo" class="fmh-footer">
   <div class="container">
@@ -487,7 +558,7 @@
 </footer>
 
 <!-- ==============================================================================
-     🖼️ 7. LIGHTBOX MODAL
+     🖼️ 10. LIGHTBOX MODAL
      ============================================================================== -->
 <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">
   <div id="lightbox-content-wrapper-el">

@@ -291,8 +291,7 @@ const PROVINCE_EN_MAP = {
     };
   }
 
-  // อัปเดต Dropdown จังหวัด และ Swiper HOT
-  function populateInitialComponents() {
+function populateInitialComponents() {
     // 1. เติม Option ใน Dropdown จังหวัด
     if (domCache.provinceSelect) {
       while (domCache.provinceSelect.options.length > 1) {
@@ -315,13 +314,16 @@ const PROVINCE_EN_MAP = {
       domCache.provinceSelect.value = activeProvinceSlug;
     }
 
-    // 2. เรียกฟังก์ชันกรองและเรนเดอร์ครั้งแรก
-    executeFilterAndRender(false);
+    // ✅ ตรวจสอบว่าถ้ามีโปรไฟล์จาก SSR อยู่แล้ว ไม่ต้อง Re-render ซ้ำทันที
+    const hasExistingSSRProfiles = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
+    if (!hasExistingSSRProfiles) {
+      executeFilterAndRender(false);
+    }
 
     // 3. เรนเดอร์ Swiper HOT
     const vipSwiperEl = document.getElementById("vip-swiper-container");
     if (!vipSwiperEl || !appState.allProfiles || appState.allProfiles.length === 0) return;
-
+    
     let hotProfiles = appState.allProfiles.filter(p => {
       const combinedKeywords = `${(Array.isArray(p.styleTags) ? p.styleTags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();
       return combinedKeywords.includes("ฟิวแฟน") || combinedKeywords.includes("ฟิลแฟน") || combinedKeywords.includes("gfe");
@@ -755,59 +757,60 @@ const PROVINCE_EN_MAP = {
     const imgSrc = p.images && p.images.length > 0 ? p.images[0].src : DEFAULT_FALLBACK_IMG;
     const pKey = (p.provinceKey || "national").toLowerCase();
     
-    // แปลงชื่อและสถานที่ตามภาษา
-    const locName = isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย");
-    const modelName = isEN ? (p.displayName || p.name).replace(/^น้อง\s?/, "") : formatDisplayName(p.displayName || p.name);
-    
-    const isOnline = p.status === "รับงาน" || !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
-    const availText = isEN 
-      ? (isOnline ? "Available" : "Inquire") 
-      : (p.availability || (isOnline ? "รับงาน" : "สอบถามคิว"));
+    let rawName = p.displayName || p.name || "Model";
+    const modelName = isEN
+      ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim())
+      : formatDisplayName(rawName);
       
-    const featuredLabel = isEN ? "Featured" : "แนะนำ";
-    const verifiedLabel = isEN ? "Verified" : "ยืนยัน";
-    const ageDisplay = p.safeAge && p.safeAge !== "-" ? ` ${p.safeAge}` : "";
+    const ageDisplay = p.safeAge && p.safeAge !== "-" ? `${p.safeAge} ปี` : "";
+    const locName = isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย");
+    
+    const isOnline = p.availability === "รับงาน" || p.status === "รับงาน" ||
+      !(p.availability || "").toLowerCase().includes("ไม่ว่าง") &&
+      !(p.availability || "").toLowerCase().includes("สอบถาม");
+    
+    const statusClass = isOnline ? "status-online" : "status-busy";
+    const availText = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถาม");
+    const priceDisplay = isEN && p._price > 0 ? `${p._price.toLocaleString()} THB` : p.displayPrice;
     const profileSlug = encodeURIComponent(p.slug || p.id);
-    const sloganText = p.slogan || p.quote || "";
 
     article.innerHTML = `
       <img src="${imgSrc}" 
-           alt="${modelName} ${locName} Escort VIP"
-           title="${modelName} ${locName}"
+           alt="${modelName} ${locName}"
            width="300"
            height="400"
            class="profile-card-img"
            loading="${index < 2 ? "eager" : "lazy"}"
-           fetchpriority="${index === 0 ? "high" : "auto"}"
            decoding="async"
            onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
            
       <div class="profile-card-gradient-overlay"></div>
 
-      <div class="profile-card-badges-left">
-          ${p.isfeatured ? `<span class="badge-featured"><i class="fas fa-star"></i> ${featuredLabel}</span>` : ""}
-          <span class="badge-status ${isOnline ? "online" : "busy"}">
-              <span class="status-dot"></span>
-              <span>${availText}</span>
-          </span>
-      </div>
-
-      <div class="profile-card-badges-right">
-          ${p.isVerified || p.verified ? `<span class="badge-verified"><i class="fas fa-check-circle"></i> ${verifiedLabel}</span>` : ""}
+      <div class="profile-card-badges-top">
+          <div class="badges-left">
+              <span class="badge-status ${statusClass}">
+                  <span class="status-dot"></span>
+                  <span>${availText}</span>
+              </span>
+              ${p.isfeatured ? `<span class="badge-featured"><i class="fas fa-star"></i> VIP</span>` : ""}
+          </div>
+          <div class="badges-right">
+              ${p.isVerified || p.verified ? `<span class="badge-verified"><i class="fas fa-check-circle"></i> ตรงปก</span>` : ""}
+          </div>
       </div>
       
       <a href="/sideline/${profileSlug}" class="card-link" aria-label="View ${modelName}"></a>
 
       <div class="profile-card-info-content">
-          <h3 class="profile-card-name">${modelName}${ageDisplay}</h3>
-          ${sloganText ? `<p class="profile-card-quote">${sloganText}</p>` : ""}
+          <div class="profile-card-title-row">
+              <h3 class="profile-card-name">${modelName}</h3>
+              ${ageDisplay ? `<span class="profile-card-age-tag">${ageDisplay}</span>` : ""}
+          </div>
           <div class="profile-card-bottom-row">
-              <span class="profile-card-location">
+              <span class="profile-card-location" title="${locName}">
                   <i class="fas fa-map-marker-alt"></i> ${locName}
               </span>
-              <span class="profile-card-price">
-                  ${p.displayPrice}
-              </span>
+              <span class="profile-card-price">${priceDisplay}</span>
           </div>
       </div>
     `;
