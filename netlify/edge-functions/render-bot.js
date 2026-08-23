@@ -287,100 +287,92 @@ export default async (req, context) => {
       "reviewBody": stripHTML(r.text)
     }));
 
-    // ✅ ปรับ Schema เป็น @type: Product ตามข้อกำหนด Review Rich Results ของ Google
-    const schemaGraph = {
-      "@context": "https://schema.org/",
-      "@graph": [
+// --- ส่วนของ schemaGraph ใน render-bot.js ---
+const schemaGraph = {
+  "@context": "https://schema.org/",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${canonicalUrl}#person`,
+      "name": displayName,
+      "gender": "Female",
+      "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
+      "description": stripHTML(naturalDesc),
+      "image": heroImageLarge,
+      "url": canonicalUrl,
+      "height": `${height} cm`,
+      "weight": `${weight} kg`,
+      "knowsAbout": ["Girlfriend Experience (GFE)", "เพื่อนเที่ยวฟิวแฟน", `สาวรับงาน${provinceNameThai}`, `ไซด์ไลน์${provinceNameThai}`],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": profile.location || provinceNameThai,
+        "addressRegion": provinceNameThai,
+        "addressCountry": "TH"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": `${canonicalUrl}#service`,
+      "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน - ${displayName}`,
+      "provider": { "@id": `${canonicalUrl}#person` },
+      "image": heroImageLarge,
+      "description": stripHTML(metaDescription),
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": provinceNameThai
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": canonicalUrl,
+        "price": rateNumber,
+        "priceCurrency": "THB",
+        "priceValidUntil": "2027-12-31",
+        "availability": "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition",
+        "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": provinceHubUrl },
+        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${canonicalUrl}#faq`,
+      "mainEntity": [
         {
-          "@type": "Person",
-          "@id": `${canonicalUrl}#person`,
-          "name": displayName,
-          "gender": "Female",
-          "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
-          "description": stripHTML(naturalDesc),
-          "image": heroImageLarge,
-          "url": canonicalUrl,
-          "height": `${height} cm`,
-          "weight": `${weight} kg`,
-          "knowsAbout": ["Girlfriend Experience (GFE)", "เพื่อนเที่ยวฟิวแฟน", `สาวรับงาน${provinceNameThai}`, `ไซด์ไลน์${provinceNameThai}`],
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": profile.location || provinceNameThai,
-            "addressRegion": provinceNameThai,
-            "addressCountry": "TH"
+          "@type": "Question",
+          "name": `${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `${displayName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
           }
         },
         {
-          "@type": "Product",
-          "@id": `${canonicalUrl}#product`,
-          "name": `บริการเพื่อนเที่ยวฟิวแฟน - ${displayName}`,
-          "image": heroImageLarge,
-          "description": stripHTML(metaDescription),
-          "sku": `FMH-${String(rawSlug).toUpperCase()}`,
-          "brand": {
-            "@type": "Brand",
-            "name": CONFIG.BRAND_NAME
-          },
-          "offers": {
-            "@type": "Offer",
-            "url": canonicalUrl,
-            "price": rateNumber,
-            "priceCurrency": "THB",
-            "priceValidUntil": "2027-12-31",
-            "availability": "https://schema.org/InStock",
-            "itemCondition": "https://schema.org/NewCondition",
-            "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "reviewCount": reviewsList.length.toString(),
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "review": reviewsSchema
+          "@type": "Question",
+          "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
+          }
         },
         {
-          "@type": "BreadcrumbList",
-          "@id": `${canonicalUrl}#breadcrumb`,
-          "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": provinceHubUrl },
-            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
-          ]
-        },
-        {
-          "@type": "FAQPage",
-          "@id": `${canonicalUrl}#faq`,
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": `${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `${displayName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ"
-              }
-            }
-          ]
+          "@type": "Question",
+          "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ"
+          }
         }
       ]
-    };
+    }
+  ]
+};
 
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
