@@ -576,89 +576,29 @@ function populateInitialComponents() {
     }
   }
 
-  // แทนที่ข้อความ SEO Template (ป้องกันการพ่นทับหน้า EN)
-  function replaceDomPlaceholders(provinceName, count, currentSlug) {
-    const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
-    const liveCounterEl = document.getElementById("live-profile-count");
-    if (liveCounterEl) liveCounterEl.textContent = totalCount;
 
-    // ถ้าเป็นหน้าภาษาอังกฤษ ให้อัปเดตแค่ตัวเลขโปรไฟล์แล้วหยุดทำงานทันที
-    if (isEN) return;
+function replaceDomPlaceholders(provinceName, count, currentSlug) {
+  const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
+  const liveCounterEl = document.getElementById("live-profile-count");
+  if (liveCounterEl) liveCounterEl.textContent = totalCount;
 
-    try {
-      const isNationalOrEmpty = !currentSlug || currentSlug === "national" || currentSlug === "all" || currentSlug === "";
-      const resolvedKey = isNationalOrEmpty ? "national" : currentSlug;
-      const targetName = isNationalOrEmpty ? "ทั่วไทย" : provinceName || appState.provincesMap.get(resolvedKey) || "ทั่วไทย";
-      const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
-      const zonesStr = seoData.zones && seoData.zones.length > 0
-        ? seoData.zones.filter(z => z !== "ทั้งหมด").slice(0, 6).join(", ")
-        : "เชียงใหม่, ขอนแก่น, เชียงราย, ลำปาง, อุดรธานี, ภูเก็ต";
+  if (isEN) return;
 
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-      let currentNode;
-      while ((currentNode = walker.nextNode())) {
-        if (currentNode.nodeValue && currentNode.nodeValue.includes("{{")) {
-          currentNode.nodeValue = currentNode.nodeValue
-            .replace(/\{\{PROVINCE_NAME\}\}/g, targetName)
-            .replace(/\{\{PROFILE_COUNT\}\}/g, totalCount)
-            .replace(/\{\{PROVINCE_ZONES\}\}/g, zonesStr);
-        }
-      }
+  try {
+    const isNationalOrEmpty = !currentSlug || currentSlug === "national" || currentSlug === "all" || currentSlug === "";
+    const resolvedKey = isNationalOrEmpty ? "national" : currentSlug;
+    const targetName = isNationalOrEmpty ? "ทั่วไทย" : provinceName || appState.provincesMap.get(resolvedKey) || "ทั่วไทย";
+    const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
 
-      const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
-      if (seoDrawerInner && seoData.seoContent) {
-        seoDrawerInner.innerHTML = seoData.seoContent;
-      }
-
-      const faqContainer = document.getElementById("faq-container-list");
-      if (faqContainer && seoData.faqs && seoData.faqs.length > 0) {
-        faqContainer.innerHTML = seoData.faqs.map(f => `
-          <div class="faq-item-card">
-            <div class="faq-q-row">
-               <span class="faq-q-badge">Q</span>
-               <div class="faq-question-text">${f.q}</div>
-            </div>
-            <div class="faq-answer-text">${f.a}</div>
-          </div>
-        `).join("");
-      }
-
-      const reviewsContainer = document.getElementById("reviews-container-grid");
-      if (reviewsContainer && seoData.reviews && seoData.reviews.length > 0) {
-        reviewsContainer.innerHTML = seoData.reviews.map(r => `
-          <div class="review-card-item">
-             <div class="review-card-header">
-                <div class="review-user-info">
-                   <div class="review-avatar-circle">${r.initial || "V"}</div>
-                   <div>
-                      <div class="review-username">${r.name}</div>
-                      <div class="review-user-loc">${r.loc}</div>
-                   </div>
-                </div>
-                <div class="review-stars-list">
-                   ${Array(r.stars || 5).fill('<i class="fas fa-star"></i>').join("")}
-                </div>
-             </div>
-             <p class="review-comment-body">"${r.text}"</p>
-             <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง</span>
-          </div>
-        `).join("");
-      }
-
-      const mapQuery = isNationalOrEmpty ? "Thailand" : seoData.name || targetName;
-      const zoomLevel = isNationalOrEmpty ? 6 : 12;
-      const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=${zoomLevel}&ie=UTF8&iwloc=&output=embed`;
-      const googleMapIframe = document.getElementById("google-map");
-      if (googleMapIframe) googleMapIframe.src = mapUrl;
-
-      document.querySelectorAll('a[href*="{{"], img[alt*="{{"]').forEach(el => {
-        if (el.href) el.href = el.href.replace(/\{\{PROVINCE_NAME\}\}/g, targetName);
-        if (el.alt) el.alt = el.alt.replace(/\{\{PROVINCE_NAME\}\}/g, targetName);
-      });
-    } catch (err) {
-      console.error("replaceDomPlaceholders error:", err);
+    // 🟢 ถ้ากล่อง SEO มีเนื้อหา SSR อยู่แล้ว ไม่ต้องเอาข้อความสั้นของ JS ไปทับ
+    const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
+    if (seoDrawerInner && (!seoDrawerInner.innerHTML || seoDrawerInner.innerHTML.trim() === "")) {
+      if (seoData.seoContent) seoDrawerInner.innerHTML = seoData.seoContent;
     }
+  } catch (err) {
+    console.error("replaceDomPlaceholders error:", err);
   }
+}
 
   // กล่องคำค้นหาแนะนำ (Suggestions)
   function showSearchSuggestions(inputVal) {
@@ -1051,29 +991,43 @@ lineWrapper.innerHTML = `
     if (loader) loader.style.display = "none";
   }
 
-// ✅ แก้ไข: เติม Logic ค้นหาโปรไฟล์และเปิด Lightbox พร้อมป้องกัน Re-render ซ้ำ
+// ✅ แก้ไข: จัดลำดับ Routing ใหม่ ป้องกัน Re-render ทับ SSR 100% และซิงค์ตัวแปรจังหวัดถูกต้อง
 async function handleUrlRouting(isInitial = false) {
-  let cleanPath = window.location.pathname.toLowerCase().replace(/\/+$/, "");
-  if (!cleanPath) cleanPath = "/";
+  let rawPath = window.location.pathname.replace(/\/+$/, "");
+  if (!rawPath) rawPath = "/";
 
-  // 1. ตรวจสอบหน้าโปรไฟล์เดี่ยว (/sideline/xxx)
-  const sidelineMatch = cleanPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/);
+  // --------------------------------------------------------------------------
+  // 1. ตรวจสอบหน้าโปรไฟล์เดี่ยว (/sideline/xxx หรือ /profile/xxx)
+  // --------------------------------------------------------------------------
+  const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
   if (sidelineMatch) {
-    const slugVal = decodeURIComponent(sidelineMatch[1]);
+    let slugVal = "";
+    try {
+      slugVal = decodeURIComponent(sidelineMatch[1]).trim();
+    } catch {
+      slugVal = sidelineMatch[1].trim();
+    }
+
     appState.currentProfileSlug = slugVal;
 
+    // ค้นหาใน Memory ก่อน (รองรับทั้ง slug, id, และชื่อ)
     let foundProfile = appState.allProfiles.find(p => {
       const s = String(p.slug || "").toLowerCase();
       const id = String(p.id);
       const target = slugVal.toLowerCase();
-      return s === target || id === target;
+      return s === target || id === target || String(p.name || "").toLowerCase() === target;
     });
 
+    // ถ้าไม่เจอใน Memory ให้ดึงตรงจาก Supabase
     if (!foundProfile && supabaseClient) {
       try {
-        const condition = /^\d+$/.test(slugVal) ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
+        const isNum = /^\d+$/.test(slugVal);
+        const condition = isNum ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
         const { data: dbProfile } = await supabaseClient.from("profiles").select("*").or(condition).maybeSingle();
-        if (dbProfile) foundProfile = normalizeProfile(dbProfile);
+        if (dbProfile) {
+          foundProfile = normalizeProfile(dbProfile);
+          if (foundProfile) appState.allProfiles.push(foundProfile); // บันทึกเข้าแคช Memory
+        }
       } catch (_) {}
     }
 
@@ -1088,30 +1042,53 @@ async function handleUrlRouting(isInitial = false) {
     return;
   }
 
-  // 2. ถ้าเป็น Initial Load หน้าแรก และมี DOM การ์ดจาก SSR อยู่แล้ว ไม่ต้อง Re-render ซ้ำ
-  const hasExistingCards = domCache.profilesDisplayArea && domCache.profilesDisplayArea.querySelector(".profile-card-new");
-  if (isInitial && hasExistingCards) {
-    return;
-  }
+  // ตรวจสอบว่าในหน้าเว็บมี DOM การ์ดโปรไฟล์ที่ Server (SSR) พ่นมาให้แล้วหรือไม่
+  const hasSSRDOM = Boolean(
+    domCache.profilesDisplayArea && 
+    domCache.profilesDisplayArea.querySelector(".profile-card-new, .interactive-card")
+  );
 
-  // 3. ตรวจสอบหน้าจังหวัด (/location/xxx)
-  const locationMatch = cleanPath.match(/^\/(?:location|province)\/([^/]+)/);
+  // --------------------------------------------------------------------------
+  // 2. ตรวจสอบหน้าจังหวัด (/location/xxx หรือ /province/xxx)
+  // --------------------------------------------------------------------------
+  const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
   if (locationMatch) {
-    let locSlug = decodeURIComponent(locationMatch[1]).toLowerCase();
+    let locSlug = "";
+    try {
+      locSlug = decodeURIComponent(locationMatch[1]).toLowerCase().trim();
+    } catch {
+      locSlug = locationMatch[1].toLowerCase().trim();
+    }
     if (locSlug === "chiang_mai") locSlug = "chiangmai";
+
     appState.currentProfileSlug = null;
     closeLightboxModal(false);
     window.currentProvinceSlug = locSlug;
     if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
+
+    // ✅ ถ้าเป็นการโหลดครั้งแรกจาก SSR ให้ Sync ค่าตัวแปรเสร็จแล้ว "หยุดทันที" ไม่ต้องวาดการ์ดใหม่
+    if (isInitial && hasSSRDOM) {
+      return;
+    }
+
+    // ทำงานเฉพาะตอนผู้ใช้กด Back/Forward ในเบราว์เซอร์ หรือเปลี่ยนตัวกรอง
     executeFilterAndRender(false);
     return;
   }
 
-  // 4. หน้าแรกหลัก
+  // --------------------------------------------------------------------------
+  // 3. หน้าแรกหลัก (/) หรือ (/index-en)
+  // --------------------------------------------------------------------------
   appState.currentProfileSlug = null;
   window.currentProvinceSlug = "national";
   closeLightboxModal(false);
   if (domCache.provinceSelect) domCache.provinceSelect.value = "";
+
+  // ✅ ถ้าเป็นหน้าแรกที่มีการ์ด SSR พ่นมาอยู่แล้ว ให้ "หยุดทันที" เช่นกัน
+  if (isInitial && hasSSRDOM) {
+    return;
+  }
+
   executeFilterAndRender(false);
 }
 
