@@ -1,10 +1,21 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
-import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm";
-import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm";
 
-gsap.registerPlugin(ScrollTrigger);
-window.gsap = gsap;
-window.ScrollTrigger = ScrollTrigger;
+// 🟢 โหลด GSAP แบบ Safe Dynamic Import ป้องกันสคริปต์ตายทั้งหน้าถ้า CDN มีปัญหา
+let gsap = null;
+let ScrollTrigger = null;
+try {
+  const gsapModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm");
+  gsap = gsapModule.gsap;
+  const stModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm");
+  ScrollTrigger = stModule.ScrollTrigger;
+  if (gsap && ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    window.gsap = gsap;
+    window.ScrollTrigger = ScrollTrigger;
+  }
+} catch (e) {
+  console.warn("GSAP/ScrollTrigger skipped or offline, using fallback.");
+}
 
 (function () {
   "use strict";
@@ -12,27 +23,27 @@ window.ScrollTrigger = ScrollTrigger;
   const CACHE_STORAGE_KEY = "cachedProfiles_v3_2026";
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
-const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
-const PROVINCE_EN_MAP = {
-  chiangmai: "Chiang Mai",
-  chiangrai: "Chiang Rai",
-  lampang: "Lampang",
-  lamphun: "Lamphun",
-  phitsanulok: "Phitsanulok",
-  bangkok: "Bangkok",
-  chonburi: "Chonburi",
-  "khon-kaen": "Khon Kaen",
-  khonkaen: "Khon Kaen",
-  phuket: "Phuket",
-  udonthani: "Udon Thani",
-  "phra-nakhon-si-ayutthaya": "Ayutthaya",
-  ayutthaya: "Ayutthaya",
-  "surat-thani": "Surat Thani",
-  suratthani: "Surat Thani",
-  "ubon-ratchathani": "Ubon Ratchathani",
-  ubon: "Ubon Ratchathani",
-  national: "Nationwide (Thailand)"
-};
+  const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
+  const PROVINCE_EN_MAP = {
+    chiangmai: "Chiang Mai",
+    chiangrai: "Chiang Rai",
+    lampang: "Lampang",
+    lamphun: "Lamphun",
+    phitsanulok: "Phitsanulok",
+    bangkok: "Bangkok",
+    chonburi: "Chonburi",
+    "khon-kaen": "Khon Kaen",
+    khonkaen: "Khon Kaen",
+    phuket: "Phuket",
+    udonthani: "Udon Thani",
+    "phra-nakhon-si-ayutthaya": "Ayutthaya",
+    ayutthaya: "Ayutthaya",
+    "surat-thani": "Surat Thani",
+    suratthani: "Surat Thani",
+    "ubon-ratchathani": "Ubon Ratchathani",
+    ubon: "Ubon Ratchathani",
+    national: "Nationwide (Thailand)"
+  };
 
   const SEO_PROVINCES_DATA = {
     chiangmai: {
@@ -122,24 +133,23 @@ const PROVINCE_EN_MAP = {
   const domCache = {};
   let supabaseClient = null;
 
-function sanitizeThaiText(text) {
-  if (!text || typeof text !== "string") return "";
-  return text
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระ/วรรณยุกต์ซ้อน (เช่น เจ็็ดยอด)
-    .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
-    .replace(/นิมาน|นิทาน/g, "นิมมาน")
-    .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
-    .replace(/พาพับ/g, "พายัพ")
-    .replace(/ของแก่น/g, "ขอนแก่น")
-    .replace(/ฟื้นที่/g, "พื้นที่")
-    .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
-    .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
-    .replace(/ฟรีถุงยาง!/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+  function sanitizeThaiText(text) {
+    if (!text || typeof text !== "string") return "";
+    return text
+      .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+      .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
+      .replace(/นิมาน|นิทาน/g, "นิมมาน")
+      .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
+      .replace(/พาพับ/g, "พายัพ")
+      .replace(/ของแก่น/g, "ขอนแก่น")
+      .replace(/ฟื้นที่/g, "พื้นที่")
+      .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
+      .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
+      .replace(/ฟรีถุงยาง!/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
-  // จัดรูปแบบชื่อโปรไฟล์
   function formatDisplayName(name) {
     if (!name || typeof name !== "string") return "";
     let clean = name.trim().replace(/^(น้อง\s?)+/gi, "");
@@ -148,7 +158,6 @@ function sanitizeThaiText(text) {
     return isEN ? clean : `น้อง${clean}`;
   }
 
-  // ปรับแต่ง URL รูปภาพผ่าน Cloudinary
   function optimizeImg(imagePath, width = 400, height = null) {
     if (!imagePath) return DEFAULT_FALLBACK_IMG;
     if (Array.isArray(imagePath)) imagePath = imagePath[0];
@@ -187,7 +196,6 @@ function sanitizeThaiText(text) {
     return `https://res.cloudinary.com/drffioary/image/upload/${cropParam}/${formatted}`;
   }
 
-  // แปลงข้อมูลโปรไฟล์ให้อยู่ในรูปแบบมาตรฐาน
   function normalizeProfile(raw) {
     if (!raw || typeof raw !== "object") return null;
 
@@ -262,6 +270,8 @@ function sanitizeThaiText(text) {
 
     return {
       ...raw,
+      id: raw.id,
+      slug: raw.slug || String(raw.id),
       location: isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : sanitizeThaiText(raw.location || provinceThai),
       description: sanitizeThaiText(raw.description || ""),
       quote: isEN ? slogan : sanitizeThaiText(slogan),
@@ -290,8 +300,7 @@ function sanitizeThaiText(text) {
     };
   }
 
-function populateInitialComponents() {
-    // 1. เติม Option ใน Dropdown จังหวัด
+  function populateInitialComponents() {
     if (domCache.provinceSelect) {
       while (domCache.provinceSelect.options.length > 1) {
         domCache.provinceSelect.remove(1);
@@ -313,13 +322,11 @@ function populateInitialComponents() {
       domCache.provinceSelect.value = activeProvinceSlug;
     }
 
-    // ✅ ตรวจสอบว่าถ้ามีโปรไฟล์จาก SSR อยู่แล้ว ไม่ต้อง Re-render ซ้ำทันที
     const hasExistingSSRProfiles = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
     if (!hasExistingSSRProfiles) {
       executeFilterAndRender(false);
     }
 
-    // 3. เรนเดอร์ Swiper HOT
     const vipSwiperEl = document.getElementById("vip-swiper-container");
     if (!vipSwiperEl || !appState.allProfiles || appState.allProfiles.length === 0) return;
     
@@ -355,7 +362,6 @@ function populateInitialComponents() {
     }).join("");
   }
 
-  // ระบบค้นหา กรอง และจัดเรียงข้อมูล
   function executeFilterAndRender(isUserTriggered = true) {
     try {
       const pathMatch = window.location.pathname.toLowerCase().match(/^\/(?:location|province)\/([^/]+)/);
@@ -386,7 +392,7 @@ function populateInitialComponents() {
         });
       }
 
-if (currentCriteria.text) {
+      if (currentCriteria.text) {
         const cleanQuery = currentCriteria.text.toLowerCase().trim();
         let baseQuery = cleanQuery.replace(/^(น้อง|สาว|พี่|รับงาน|ไซด์ไลน์|ย่าน|โซน)\s*/gi, "").trim();
         if (!baseQuery) baseQuery = cleanQuery;
@@ -468,7 +474,6 @@ if (currentCriteria.text) {
   async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     if (!domCache.profilesDisplayArea) return;
     
-    // 🟢 1. ล็อกความสูงปัจจุบันไว้ก่อน ป้องกันหน้าเว็บยุบตัวและจอวูบลงล่าง
     const currentHeight = domCache.profilesDisplayArea.offsetHeight;
     if (currentHeight > 0) {
       domCache.profilesDisplayArea.style.minHeight = `${currentHeight}px`;
@@ -532,7 +537,6 @@ if (currentCriteria.text) {
       domCache.profilesDisplayArea.appendChild(wrapper);
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
-      // 🟢 2. ปลดล็อกความสูงเมื่อการ์ดเรนเดอร์ครบแล้ว
       domCache.profilesDisplayArea.style.minHeight = "";
     } else {
       const groupedByProvince = profiles.reduce((acc, p) => {
@@ -558,7 +562,6 @@ if (currentCriteria.text) {
           const gridEl = sectionEl.querySelector(".profile-grid");
           await renderProfilesBatch(gridEl, groupedByProvince[pKey], activeRenderId);
         }
-        // 🟢 2. ปลดล็อกความสูงเมื่อการ์ดเรนเดอร์ครบแล้ว
         domCache.profilesDisplayArea.style.minHeight = "";
       } else {
         domCache.profilesDisplayArea.innerHTML = "";
@@ -576,31 +579,28 @@ if (currentCriteria.text) {
     }
   }
 
+  function replaceDomPlaceholders(provinceName, count, currentSlug) {
+    const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
+    const liveCounterEl = document.getElementById("live-profile-count");
+    if (liveCounterEl) liveCounterEl.textContent = totalCount;
 
-function replaceDomPlaceholders(provinceName, count, currentSlug) {
-  const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
-  const liveCounterEl = document.getElementById("live-profile-count");
-  if (liveCounterEl) liveCounterEl.textContent = totalCount;
+    if (isEN) return;
 
-  if (isEN) return;
+    try {
+      const isNationalOrEmpty = !currentSlug || currentSlug === "national" || currentSlug === "all" || currentSlug === "";
+      const resolvedKey = isNationalOrEmpty ? "national" : currentSlug;
+      const targetName = isNationalOrEmpty ? "ทั่วไทย" : provinceName || appState.provincesMap.get(resolvedKey) || "ทั่วไทย";
+      const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
 
-  try {
-    const isNationalOrEmpty = !currentSlug || currentSlug === "national" || currentSlug === "all" || currentSlug === "";
-    const resolvedKey = isNationalOrEmpty ? "national" : currentSlug;
-    const targetName = isNationalOrEmpty ? "ทั่วไทย" : provinceName || appState.provincesMap.get(resolvedKey) || "ทั่วไทย";
-    const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
-
-    // 🟢 ถ้ากล่อง SEO มีเนื้อหา SSR อยู่แล้ว ไม่ต้องเอาข้อความสั้นของ JS ไปทับ
-    const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
-    if (seoDrawerInner && (!seoDrawerInner.innerHTML || seoDrawerInner.innerHTML.trim() === "")) {
-      if (seoData.seoContent) seoDrawerInner.innerHTML = seoData.seoContent;
+      const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
+      if (seoDrawerInner && (!seoDrawerInner.innerHTML || seoDrawerInner.innerHTML.trim() === "")) {
+        if (seoData.seoContent) seoDrawerInner.innerHTML = seoData.seoContent;
+      }
+    } catch (err) {
+      console.error("replaceDomPlaceholders error:", err);
     }
-  } catch (err) {
-    console.error("replaceDomPlaceholders error:", err);
   }
-}
 
-  // กล่องคำค้นหาแนะนำ (Suggestions)
   function showSearchSuggestions(inputVal) {
     const popover = document.getElementById("search-suggestions");
     const clearBtn = document.getElementById("clear-search-btn");
@@ -720,7 +720,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const priceDisplay = isEN && p._price > 0 ? `${p._price.toLocaleString()} THB` : p.displayPrice;
     const profileSlug = encodeURIComponent(p.slug || p.id);
 
-    // 🌟 ระบบป้ายกำกับขวาบนแบบใหม่ (ลบดาวและ VIP ออก 100%)
     let rightBadgeHtml = "";
     if (index < 2) {
       rightBadgeHtml = `<span class="badge-hot-tag">#${index + 1} HOT 🔥</span>`;
@@ -743,14 +742,12 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       <div class="profile-card-gradient-overlay"></div>
 
       <div class="profile-card-badges-top">
-          <!-- 🌟 ป้ายซ้ายบน: แสดงแค่สถานะ รับงาน/สอบถามคิว -->
           <div class="badges-left">
               <span class="badge-status ${statusClass}">
                   <span class="status-dot"></span>
                   <span>${availText}</span>
               </span>
           </div>
-          <!-- 🌟 ป้ายขวาบน: แสดง HOT / VERIFIED 100% / ตรงปก -->
           <div class="badges-right">
               ${rightBadgeHtml}
           </div>
@@ -776,7 +773,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
     return container;
   }
 
-  // เรนเดอร์การ์ดเป็นชุดแบบ Non-blocking
   async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
     containerEl.dataset.activeRenderId = renderId;
@@ -845,7 +841,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       
     const statusColor = isAvail ? "#00E676" : "#FF2E63";
 
-    // 1. หัวข้อชื่อโปรไฟล์
     const nameMainEl = document.getElementById("lightbox-profile-name-main");
     if (nameMainEl) {
       nameMainEl.innerHTML = `
@@ -854,7 +849,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       `;
     }
 
-    // 2. ป้ายสถานะ
     const availBadgeWrapper = document.getElementById("lightbox-availability-badge-wrapper");
     if (availBadgeWrapper) {
       availBadgeWrapper.innerHTML = `
@@ -865,7 +859,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       `;
     }
 
-    // 3. 🌟 จัดการรูปภาพขนาดใหญ่ (HD) และแถบสลับภาพ (Thumbnail Strip)
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG }];
@@ -904,11 +897,9 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       }
     }
 
-    // 4. คำโปรย
     const quoteEl = document.getElementById("lightboxQuote");
     if (quoteEl) quoteEl.textContent = profile.quote || profile.slogan || (isEN ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
 
-    // 5. แท็กสไตล์
     const tagsEl = document.getElementById("lightboxTags");
     if (tagsEl) {
       tagsEl.innerHTML = "";
@@ -920,7 +911,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       });
     }
 
-    // 6. ข้อมูลสัดส่วน
     const ageStr = profile.safeAgeDisplay || (profile.age ? `${profile.age} yrs` : "N/A");
     const statsStr = profile.safeStats || "N/A";
     const heightStr = profile.safeHeight || "N/A";
@@ -962,7 +952,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       `;
     }
 
-    // 7. รายละเอียด
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
@@ -973,7 +962,6 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
     }
     if (descContainer) descContainer.style.display = "block";
 
-    // 8. ปุ่มไลน์จองคิว
     const detailsParent = document.querySelector(".lightbox-details");
     if (detailsParent) {
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
@@ -1000,13 +988,12 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
 
     lightboxEl.classList.add("active");
     lightboxEl.style.display = "flex";
-    document.body.style.overflow = "hidden";
+    lightboxEl.style.pointerEvents = "auto"; // 🟢 เปิดให้แตะสัมผัสได้
+    document.body.style.overflow = "hidden"; // ล็อก scroll ตอนเปิด
 
-    if (window.gsap) {
-      gsap.fromTo(lightboxEl, { opacity: 0 }, { opacity: 1, duration: 0.2 });
-      if (contentWrapperEl) {
-        gsap.fromTo(contentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
-      }
+    if (window.gsap && contentWrapperEl) {
+      window.gsap.fromTo(lightboxEl, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+      window.gsap.fromTo(contentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
     }
   }
 
@@ -1015,7 +1002,8 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
     if (lightboxEl) {
       lightboxEl.style.display = "none";
       lightboxEl.classList.remove("active");
-      document.body.style.overflow = "";
+      lightboxEl.style.pointerEvents = "none"; // 🟢 ตัดเลเยอร์คลิกตอนปิด
+      document.body.style.overflow = "";       // 🟢 ปลดล็อกการเลื่อนหน้าจอ
 
       if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
         const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
@@ -1036,110 +1024,91 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
     if (loader) loader.style.display = "none";
   }
 
-// ✅ แก้ไข: จัดลำดับ Routing ใหม่ ป้องกัน Re-render ทับ SSR 100% และซิงค์ตัวแปรจังหวัดถูกต้อง
-async function handleUrlRouting(isInitial = false) {
-  let rawPath = window.location.pathname.replace(/\/+$/, "");
-  if (!rawPath) rawPath = "/";
+  async function handleUrlRouting(isInitial = false) {
+    let rawPath = window.location.pathname.replace(/\/+$/, "");
+    if (!rawPath) rawPath = "/";
 
-  // --------------------------------------------------------------------------
-  // 1. ตรวจสอบหน้าโปรไฟล์เดี่ยว (/sideline/xxx หรือ /profile/xxx)
-  // --------------------------------------------------------------------------
-  const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
-  if (sidelineMatch) {
-    let slugVal = "";
-    try {
-      slugVal = decodeURIComponent(sidelineMatch[1]).trim();
-    } catch {
-      slugVal = sidelineMatch[1].trim();
-    }
-
-    appState.currentProfileSlug = slugVal;
-
-    // ค้นหาใน Memory ก่อน (รองรับทั้ง slug, id, และชื่อ)
-    let foundProfile = appState.allProfiles.find(p => {
-      const s = String(p.slug || "").toLowerCase();
-      const id = String(p.id);
-      const target = slugVal.toLowerCase();
-      return s === target || id === target || String(p.name || "").toLowerCase() === target;
-    });
-
-    // ถ้าไม่เจอใน Memory ให้ดึงตรงจาก Supabase
-    if (!foundProfile && supabaseClient) {
+    const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
+    if (sidelineMatch) {
+      let slugVal = "";
       try {
-        const isNum = /^\d+$/.test(slugVal);
-        const condition = isNum ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
-        const { data: dbProfile } = await supabaseClient.from("profiles").select("*").or(condition).maybeSingle();
-        if (dbProfile) {
-          foundProfile = normalizeProfile(dbProfile);
-          if (foundProfile) appState.allProfiles.push(foundProfile); // บันทึกเข้าแคช Memory
-        }
-      } catch (_) {}
-    }
-
-    if (foundProfile) {
-      const provKey = foundProfile.provinceKey || "";
-      if (provKey && provKey !== "national" && provKey !== "all") {
-        window.currentProvinceSlug = provKey;
-        if (domCache.provinceSelect) domCache.provinceSelect.value = provKey;
+        slugVal = decodeURIComponent(sidelineMatch[1]).trim();
+      } catch {
+        slugVal = sidelineMatch[1].trim();
       }
-      openLightboxModal(foundProfile);
-    }
-    return;
-  }
 
-  // ตรวจสอบว่าในหน้าเว็บมี DOM การ์ดโปรไฟล์ที่ Server (SSR) พ่นมาให้แล้วหรือไม่
-  const hasSSRDOM = Boolean(
-    domCache.profilesDisplayArea && 
-    domCache.profilesDisplayArea.querySelector(".profile-card-new, .interactive-card")
-  );
+      appState.currentProfileSlug = slugVal;
 
-  // --------------------------------------------------------------------------
-  // 2. ตรวจสอบหน้าจังหวัด (/location/xxx หรือ /province/xxx)
-  // --------------------------------------------------------------------------
-  const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
-  if (locationMatch) {
-    let locSlug = "";
-    try {
-      locSlug = decodeURIComponent(locationMatch[1]).toLowerCase().trim();
-    } catch {
-      locSlug = locationMatch[1].toLowerCase().trim();
+      let foundProfile = appState.allProfiles.find(p => {
+        const s = String(p.slug || "").toLowerCase();
+        const id = String(p.id);
+        const target = slugVal.toLowerCase();
+        return s === target || id === target || String(p.name || "").toLowerCase() === target;
+      });
+
+      if (!foundProfile && supabaseClient) {
+        try {
+          const isNum = /^\d+$/.test(slugVal);
+          const condition = isNum ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
+          const { data: dbProfile } = await supabaseClient.from("profiles").select("*").or(condition).maybeSingle();
+          if (dbProfile) {
+            foundProfile = normalizeProfile(dbProfile);
+            if (foundProfile) appState.allProfiles.push(foundProfile);
+          }
+        } catch (_) {}
+      }
+
+      if (foundProfile) {
+        const provKey = foundProfile.provinceKey || "";
+        if (provKey && provKey !== "national" && provKey !== "all") {
+          window.currentProvinceSlug = provKey;
+          if (domCache.provinceSelect) domCache.provinceSelect.value = provKey;
+        }
+        openLightboxModal(foundProfile);
+      }
+      return;
     }
-    if (locSlug === "chiang_mai") locSlug = "chiangmai";
+
+    const hasSSRDOM = Boolean(
+      domCache.profilesDisplayArea && 
+      domCache.profilesDisplayArea.querySelector(".profile-card-new, .interactive-card")
+    );
+
+    const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
+    if (locationMatch) {
+      let locSlug = "";
+      try {
+        locSlug = decodeURIComponent(locationMatch[1]).toLowerCase().trim();
+      } catch {
+        locSlug = locationMatch[1].toLowerCase().trim();
+      }
+      if (locSlug === "chiang_mai") locSlug = "chiangmai";
+
+      appState.currentProfileSlug = null;
+      closeLightboxModal(false);
+      window.currentProvinceSlug = locSlug;
+      if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
+
+      if (isInitial && hasSSRDOM) {
+        return;
+      }
+
+      executeFilterAndRender(false);
+      return;
+    }
 
     appState.currentProfileSlug = null;
+    window.currentProvinceSlug = "national";
     closeLightboxModal(false);
-    window.currentProvinceSlug = locSlug;
-    if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
+    if (domCache.provinceSelect) domCache.provinceSelect.value = "";
 
-    // ✅ ถ้าเป็นการโหลดครั้งแรกจาก SSR ให้ Sync ค่าตัวแปรเสร็จแล้ว "หยุดทันที" ไม่ต้องวาดการ์ดใหม่
     if (isInitial && hasSSRDOM) {
       return;
     }
 
-    // ทำงานเฉพาะตอนผู้ใช้กด Back/Forward ในเบราว์เซอร์ หรือเปลี่ยนตัวกรอง
     executeFilterAndRender(false);
-    return;
   }
 
-  // --------------------------------------------------------------------------
-  // 3. หน้าแรกหลัก (/) หรือ (/index-en)
-  // --------------------------------------------------------------------------
-  appState.currentProfileSlug = null;
-  window.currentProvinceSlug = "national";
-  closeLightboxModal(false);
-  if (domCache.provinceSelect) domCache.provinceSelect.value = "";
-
-  // ✅ ถ้าเป็นหน้าแรกที่มีการ์ด SSR พ่นมาอยู่แล้ว ให้ "หยุดทันที" เช่นกัน
-  if (isInitial && hasSSRDOM) {
-    return;
-  }
-
-  executeFilterAndRender(false);
-}
-
-  // ==============================================================================
-  // เริ่มต้นผูก Event Listener ทันทีที่ DOM พร้อม
-  // ==============================================================================
   document.addEventListener("DOMContentLoaded", async function () {
     try {
       supabaseClient = createClient(
@@ -1163,15 +1132,22 @@ async function handleUrlRouting(isInitial = false) {
     domCache.featuredSection = document.getElementById("featured-profiles");
     domCache.featuredContainer = document.getElementById("featured-profiles-container");
 
-    // จัดการเมนู Sidebar
     const menuToggleBtn = document.getElementById("menu-toggle");
     const sidebarMenuEl = document.getElementById("sidebar-menu");
     const sidebarOverlayEl = document.getElementById("sidebar-overlay");
     const closeMenuBtn = document.getElementById("close-menu-btn");
 
     const toggleSidebar = (isOpen) => {
-      if (sidebarMenuEl) sidebarMenuEl.classList.toggle("active", isOpen);
-      if (sidebarOverlayEl) sidebarOverlayEl.classList.toggle("active", isOpen);
+      if (sidebarMenuEl) {
+        sidebarMenuEl.classList.toggle("active", isOpen);
+        sidebarMenuEl.style.pointerEvents = isOpen ? "auto" : "none";
+        sidebarMenuEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
+      if (sidebarOverlayEl) {
+        sidebarOverlayEl.classList.toggle("active", isOpen);
+        sidebarOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
+        sidebarOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
       document.body.style.overflow = isOpen ? "hidden" : "";
     };
 
@@ -1184,7 +1160,6 @@ async function handleUrlRouting(isInitial = false) {
       });
     }
 
-    // จัดการหน้าต่างตัวกรองค้นหา (Bottom Sheet)
     const openFilterDockBtn = document.getElementById("open-filter-dock-btn");
     const closeSearchDrawerBtn = document.getElementById("close-search-drawer-btn");
     const applyFilterBtn = document.getElementById("apply-filter-btn");
@@ -1192,8 +1167,16 @@ async function handleUrlRouting(isInitial = false) {
     const searchDrawerOverlayEl = document.getElementById("search-drawer-overlay");
 
     const toggleSearchDrawer = (isOpen) => {
-      if (searchBottomSheetEl) searchBottomSheetEl.classList.toggle("active", isOpen);
-      if (searchDrawerOverlayEl) searchDrawerOverlayEl.classList.toggle("active", isOpen);
+      if (searchBottomSheetEl) {
+        searchBottomSheetEl.classList.toggle("active", isOpen);
+        searchBottomSheetEl.style.pointerEvents = isOpen ? "auto" : "none";
+        searchBottomSheetEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
+      if (searchDrawerOverlayEl) {
+        searchDrawerOverlayEl.classList.toggle("active", isOpen);
+        searchDrawerOverlayEl.style.pointerEvents = isOpen ? "auto" : "none";
+        searchDrawerOverlayEl.style.visibility = isOpen ? "visible" : "hidden";
+      }
       document.body.style.overflow = isOpen ? "hidden" : "";
     };
 
@@ -1252,7 +1235,7 @@ async function handleUrlRouting(isInitial = false) {
       });
     }
 
-    // Global Click Delegation สำหรับ Card, Lightbox และ Suggestion
+    // 🟢 Click Delegation สมบูรณ์แบบ ไม่เกิด Dead Click 100%
     document.body.addEventListener("click", (e) => {
       const searchInputEl = document.getElementById("search-keyword");
       const suggestionsEl = document.getElementById("search-suggestions");
@@ -1281,32 +1264,37 @@ async function handleUrlRouting(isInitial = false) {
       }
 
       const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
-      const cardLink = e.target.closest("a.card-link");
-      if (cardLink || cardElement) {
-        const targetCard = cardElement || cardLink?.closest(".profile-card-new, .vip-card-item");
-        const profileId = targetCard?.getAttribute("data-profile-id");
-        const profileSlug = targetCard?.getAttribute("data-profile-slug");
+      if (cardElement) {
+        const profileId = cardElement.getAttribute("data-profile-id");
+        const profileSlug = cardElement.getAttribute("data-profile-slug");
 
         if (profileId || profileSlug) {
           e.preventDefault();
           e.stopPropagation();
 
-          let targetProfile = appState.allProfiles.find(p => String(p.id) === String(profileId) || String(p.slug) === String(profileSlug));
+          const searchId = String(profileId || "");
+          const searchSlug = String(profileSlug || "");
+
+          let targetProfile = appState.allProfiles.find(p => 
+            String(p.id) === searchId || 
+            (p.slug && String(p.slug) === searchSlug) ||
+            (searchSlug && String(p.id) === searchSlug)
+          );
+
           if (targetProfile) {
             history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
             openLightboxModal(targetProfile);
           } else {
-            const fallbackSlug = profileSlug || profileId;
-            history.pushState(null, "", `/sideline/${encodeURIComponent(fallbackSlug)}`);
-            handleUrlRouting();
+            // 🟢 Fallback กรณีใน Memory โหลดไม่ทัน ให้เปลี่ยนหน้าตามปกติทันที
+            window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
           }
           return;
         }
       }
 
-const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
-      const lightboxModal = e.target.closest("#lightbox");
-      if (closeLightboxBtn || (lightboxModal && e.target === lightboxModal)) {
+      const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
+      const lightboxModal = document.getElementById("lightbox");
+      if (closeLightboxBtn || e.target === lightboxModal) {
         closeLightboxModal(true);
       }
     });
@@ -1361,9 +1349,6 @@ const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       };
     }
 
-    // =========================================================================
-    // 🟢 [เพิ่มตรงนี้] ระบบสลับแท็บ Bento Tabs (FAQ / Reviews / Map) หน้า index-en.html
-    // =========================================================================
     document.querySelectorAll(".tab-pill-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-target");
@@ -1389,31 +1374,28 @@ const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       });
     });
 
+    window.trackLineClick = function(profileId) {
+      try {
+        const idNum = parseInt(profileId, 10);
+        if (isNaN(idNum)) return;
 
-window.trackLineClick = function(profileId) {
-  try {
-    const idNum = parseInt(profileId, 10);
-    if (isNaN(idNum)) return;
+        fetch("https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1/rpc/increment_likes", {
+          method: "POST",
+          headers: {
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ profile_id_to_update: idNum }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (_) {}
+    };
 
-    fetch("https://zxetzqwjaiumqhrpumln.supabase.co/rest/v1/rpc/increment_likes", {
-      method: "POST",
-      headers: {
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ profile_id_to_update: idNum }),
-      keepalive: true
-    }).catch(() => {});
-  } catch (_) {}
-};
+    window.handleLineBooking = function(profileId, lineUrl) {
+      window.trackLineClick(profileId);
+    };
 
-// 🟢 เพิ่มบรรทัดนี้: ผูกชื่อ handleLineBooking ให้ชี้มาที่ trackLineClick ทันที
-window.handleLineBooking = function(profileId, lineUrl) {
-  window.trackLineClick(profileId);
-};
-
-// 2. ปรับปรุง Scroll Listener ให้ลื่นไหล 60FPS
     (function initDockAutoHide() {
       const floatingDock = document.querySelector('.floating-app-dock');
       if (!floatingDock) return;
@@ -1438,7 +1420,6 @@ window.handleLineBooking = function(profileId, lineUrl) {
       }, { passive: true });
     })();
 
-    // ฟังก์ชันโหลดข้อมูลโปรไฟล์เริ่มต้น
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
