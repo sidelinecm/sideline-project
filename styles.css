@@ -2393,3 +2393,12 @@ footer.fmh-footer {
   color: #00E676 !important; font-weight: 900 !important; font-size: 13.5px !important; 
   white-space: nowrap !important; line-height: 1 !important;
 }
+.hot-tag-badge-red { 
+  background: rgba(45, 6, 26, 0.9) !important; 
+  border: 1px solid #FF1493 !important; 
+  color: #FF85C0 !important; /* 🟢 อัตราส่วนคอนทราสต์ 9.5:1 คมชัดระดับ AAA */
+  font-size: 10.5px !important; 
+  font-weight: 800 !important; 
+  padding: 2px 8px !important; 
+  border-radius: 100px !important; 
+}

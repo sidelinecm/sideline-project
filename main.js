@@ -1304,7 +1304,7 @@ async function handleUrlRouting(isInitial = false) {
         }
       }
 
-      const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
+const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = e.target.closest("#lightbox");
       if (closeLightboxBtn || (lightboxModal && e.target === lightboxModal)) {
         closeLightboxModal(true);
@@ -1360,8 +1360,36 @@ async function handleUrlRouting(isInitial = false) {
         toggleSeoDrawerBtn.querySelector("i").className = isCollapsed ? "fas fa-chevron-down" : "fas fa-chevron-up";
       };
     }
-    
-// 🟢 ฟังก์ชันบันทึกยอดแอดไลน์ (ดักไว้ทั้ง 2 ชื่อเพื่อกัน Error 100%)
+
+    // =========================================================================
+    // 🟢 [เพิ่มตรงนี้] ระบบสลับแท็บ Bento Tabs (FAQ / Reviews / Map) หน้า index-en.html
+    // =========================================================================
+    document.querySelectorAll(".tab-pill-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-target");
+        if (!targetId) return;
+
+        document.querySelectorAll(".tab-pill-btn").forEach(b => {
+          b.classList.remove("active");
+          b.setAttribute("aria-selected", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+
+        document.querySelectorAll(".bento-tab-pane").forEach(pane => {
+          pane.style.display = "none";
+          pane.classList.remove("active");
+        });
+
+        const activePane = document.getElementById(targetId);
+        if (activePane) {
+          activePane.style.display = "block";
+          activePane.classList.add("active");
+        }
+      });
+    });
+
+
 window.trackLineClick = function(profileId) {
   try {
     const idNum = parseInt(profileId, 10);
