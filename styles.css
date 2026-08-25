@@ -1310,9 +1310,13 @@ img {
   box-shadow: 0 8px 30px rgba(0, 230, 118, 0.6) !important;
 }
 /* ==============================================================================
-   14. FOOTER & ALL SUBPAGE STYLES
+   14. FOOTER & SOCIAL ICONS (DARK OLED CONSOLIDATED)
    ============================================================================== */
-footer.fmh-footer { padding-bottom: 30px !important; }
+footer.fmh-footer { 
+  background: #060411 !important; 
+  border-top: 1px solid rgba(192, 132, 252, 0.18) !important; 
+  padding: 30px 14px !important; 
+}
 @media (max-width: 768px) { footer.fmh-footer { padding-bottom: 110px !important; } }
 
 .footer-top-grid {
@@ -1334,11 +1338,59 @@ footer.fmh-footer { padding-bottom: 30px !important; }
 }
 
 .footer-brand-desc {
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.6;
-  color: #94A3B8;
+  color: var(--text-muted);
   margin: 0;
 }
+
+.footer-social-wrapper {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-social-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.footer-social-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.social-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  text-decoration: none;
+  font-size: 14px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.social-icon-btn svg { width: 14px; height: 14px; }
+.social-icon-btn:hover { transform: translateY(-2px); border-color: var(--primary-purple); }
+
+.social-icon-btn.line { color: #06C755; }
+.social-icon-btn.twitter { color: #FFFFFF; }
+.social-icon-btn.tiktok { color: #EE1D52; }
+.social-icon-btn.bluesky { color: #0285FF; }
+.social-icon-btn.bluesky svg { fill: #0285FF; }
+.social-icon-btn.linkedin { color: #0A66C2; }
+.social-icon-btn.biosite { color: #C084FC; }
+.social-icon-btn.linktree { color: #10B981; }
 
 .footer-heading {
   font-size: 13px;
@@ -1360,14 +1412,13 @@ footer.fmh-footer { padding-bottom: 30px !important; }
 }
 
 .footer-nav-links a {
-  color: #CBD5E1;
+  color: var(--text-gray);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
+  min-height: 30px;
 }
-
-.footer-nav-links a:hover { color: #C084FC; }
+.footer-nav-links a:hover { color: var(--primary-purple); }
 
 .footer-locations-block {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1379,7 +1430,7 @@ footer.fmh-footer { padding-bottom: 30px !important; }
 .footer-subheading {
   font-size: 11.5px;
   font-weight: 800;
-  color: #A1A1AA;
+  color: var(--text-muted);
   margin-bottom: 10px;
 }
 
@@ -1390,9 +1441,13 @@ footer.fmh-footer { padding-bottom: 30px !important; }
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  font-size: 11.5px;
-  color: #94A3B8;
+  font-size: 12px;
+  color: var(--text-gray);
 }
+
+.popular-locations-grid a { color: var(--text-gray); text-decoration: none; }
+.popular-locations-grid a:hover { color: var(--primary-purple); }
+.popular-locations-grid a.active { color: var(--primary-purple); font-weight: 700; }
 
 .footer-bottom-bar {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1402,72 +1457,26 @@ footer.fmh-footer { padding-bottom: 30px !important; }
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 11px;
-  color: #64748B;
+  font-size: 11.5px;
+  color: var(--text-muted);
 }
 
-.footer-legal-links {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
+.footer-legal-links { display: flex; gap: 14px; align-items: center; }
+.footer-legal-links a { color: var(--text-muted); text-decoration: none; }
+.footer-legal-links a:hover { color: var(--primary-purple); }
 
-.footer-legal-links a { color: #64748B; text-decoration: none; }
-.footer-legal-links a:hover { color: #E2E8F0; }
-
-/* Subpages: Locations, Blog, Privacy */
-.locations-page-wrapper { max-width: 950px; margin: 0 auto; padding: 90px 14px 60px 14px; }
-.location-hub-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 24px; }
-@media (min-width: 768px) { .location-hub-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
-.region-bento-card {
-  background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px; padding: 22px 18px; backdrop-filter: blur(20px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column;
+/* Verification Section */
+.verification-section { max-width: 850px; margin: 24px auto 0 auto; padding: 0 12px; box-sizing: border-box; }
+.verification-box { 
+  padding: 14px 18px !important; 
+  background: rgba(14, 10, 24, 0.85) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
+  border-radius: 16px; 
+  display: flex; 
+  align-items: center; 
+  gap: 14px; 
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8); 
 }
-.region-bento-card h3 { font-size: 16px; font-weight: 900; color: #FFF; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 10px; }
-.province-link-item {
-  display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;
-  border-radius: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);
-  color: #E2E8F0; text-decoration: none; font-size: 12px; font-weight: 700; transition: all 0.2s ease;
-  margin-bottom: 6px;
-}
-.province-link-item:hover { background: rgba(192, 132, 252, 0.12); border-color: rgba(192, 132, 252, 0.4); color: #FFF; transform: translateX(3px); }
-.province-link-item i { color: #C084FC; font-size: 11px; }
-
-.blog-page-wrapper { max-width: 950px; margin: 0 auto; padding: 90px 14px 60px 14px; }
-.blog-grid-luxury { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 24px; }
-@media (min-width: 768px) { .blog-grid-luxury { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
-.blog-card-item {
-  background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px; overflow: hidden; backdrop-filter: blur(20px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column;
-  transition: transform 0.3s ease, border-color 0.3s ease; text-decoration: none; color: inherit;
-}
-.blog-card-item:hover { transform: translateY(-4px); border-color: rgba(192, 132, 252, 0.4); }
-.blog-thumb-box { aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #0d0d12; position: relative; }
-.blog-thumb-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.blog-card-item:hover .blog-thumb-box img { transform: scale(1.05); }
-.blog-content-body { padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
-.blog-tag-badge { font-size: 9.5px; font-weight: 800; color: #C084FC; text-transform: uppercase; letter-spacing: 1px; }
-.blog-post-title { font-size: 14px; font-weight: 800; color: #FFFFFF; line-height: 1.4; margin: 2px 0; }
-.blog-post-snippet { font-size: 11.5px; color: #94A3B8; line-height: 1.55; margin: 0; }
-
-.privacy-page-wrapper { max-width: 850px; margin: 0 auto; padding: 100px 14px 60px 14px; }
-.privacy-doc-card {
-  background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px; padding: 32px 22px; backdrop-filter: blur(20px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; gap: 20px;
-}
-.privacy-clause-title {
-  color: #FFFFFF; font-size: 15px; font-weight: 800; margin-bottom: 6px;
-  display: flex; align-items: center; gap: 8px; border-left: 3px solid #C084FC; padding-left: 10px;
-}
-.privacy-clause-p { color: #94A3B8; font-size: 12.5px; line-height: 1.75; margin: 0; }
-
-@media (min-width: 768px) {
-  .qa-full-width { grid-column: 1 / -1 !important; }
-}
-
 
 /* ==============================================================================
    ⭐ REVIEWS & FAQ MODERN OLED GLASSMORPHISM (สัดส่วนสมบูรณ์แบบ 100%)

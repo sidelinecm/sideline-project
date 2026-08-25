@@ -386,9 +386,11 @@ function populateInitialComponents() {
         });
       }
 
+      // 1. แก้ไขจุดตัดคำค้นหาไม่ให้เหลือสตริงว่าง
       if (currentCriteria.text) {
         const cleanQuery = currentCriteria.text.toLowerCase().trim();
-        const baseQuery = cleanQuery.replace(/^(น้อง|สาว|พี่|รับงาน|ไซด์ไลน์|ย่าน|โซน)\s*/gi, "").trim();
+        let baseQuery = cleanQuery.replace(/^(น้อง|สาว|พี่|รับงาน|ไซด์ไลน์|ย่าน|โซน)\s*/gi, "").trim();
+        if (!baseQuery) baseQuery = cleanQuery; // 🟢 ถ้าลบแล้วหมด ให้ใช้คำค้นหาเดิม
         const keywords = baseQuery.split(/\s+/).filter(Boolean);
 
         results = results.filter(p => {
@@ -416,6 +418,7 @@ function populateInitialComponents() {
             priceStr.includes(k)
           ));
         });
+      }
 
         results.sort((a, b) => {
           const nameA = (a.displayName || a.name || "").toLowerCase().replace(/^(น้อง\s?)+/gi, "").trim();
@@ -1412,18 +1415,28 @@ window.handleLineBooking = function(profileId, lineUrl) {
   window.trackLineClick(profileId);
 };
 
+// 2. ปรับปรุง Scroll Listener ให้ลื่นไหล 60FPS
     (function initDockAutoHide() {
-      let idleTimer = null;
       const floatingDock = document.querySelector('.floating-app-dock');
-
       if (!floatingDock) return;
 
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+
       window.addEventListener('scroll', function () {
-        floatingDock.classList.add('dock-hidden');
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(function () {
-          floatingDock.classList.remove('dock-hidden');
-        }, 800);
+        if (!ticking) {
+          window.requestAnimationFrame(function () {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY && currentScrollY > 120) {
+              floatingDock.classList.add('dock-hidden');
+            } else {
+              floatingDock.classList.remove('dock-hidden');
+            }
+            lastScrollY = Math.max(0, currentScrollY);
+            ticking = false;
+          });
+          ticking = true;
+        }
       }, { passive: true });
     })();
 
