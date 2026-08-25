@@ -538,9 +538,10 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
         return acc;
       }, {});
 
+
       const sortedProvinceKeys = Object.keys(groupedByProvince).sort((a, b) => {
-        const nameA = appState.provincesMap.get(a) || a;
-        const nameB = appState.provincesMap.get(b) || b;
+        const nameA = String(appState.provincesMap.get(a) || a || "");
+        const nameB = String(appState.provincesMap.get(b) || b || "");
         return nameA.localeCompare(nameB, "th");
       });
 
@@ -573,13 +574,28 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
     const liveCounterEl = document.getElementById("live-profile-count");
-    if (liveCounterEl) liveCounterEl.textContent = totalCount;
+    if (liveCounterEl) liveCounterEl.textContent = `${totalCount}+`;
+
+    const targetName = (!currentSlug || currentSlug === "national" || currentSlug === "all") ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+
+    // 🟢 อัปเดตหัวข้อ H1 และ H2 ให้แสดงชื่อจังหวัดจริง
+    const heroH1 = document.getElementById("hero-h1");
+    if (heroH1) {
+      heroH1.innerHTML = `
+        <span class="seo-sub-headline">รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}</span><br>
+        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
+      `;
+    }
+
+    const featuredH2 = document.getElementById("featured-heading");
+    if (featuredH2) {
+      featuredH2.innerHTML = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(targetName)}</span>`;
+    }
 
     if (isEN) return;
 
     try {
-      const isNationalOrEmpty = !currentSlug || currentSlug === "national" || currentSlug === "all" || currentSlug === "";
-      const resolvedKey = isNationalOrEmpty ? "national" : currentSlug;
+      const resolvedKey = (!currentSlug || currentSlug === "national" || currentSlug === "all") ? "national" : currentSlug;
       const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
 
       const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
