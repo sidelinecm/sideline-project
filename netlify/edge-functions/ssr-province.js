@@ -179,18 +179,16 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   }
 });
 
-// ฟังก์ชันทำความสะอาดข้อความ ป้องกันคำสะกดผิดและคำล่อแหลมทางเพศ (SafeSearch Compliant)
 function sanitizeThaiText(text) {
-  if (text == null) return "";
-  return String(text)
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
+  if (!text || typeof text !== "string") return "";
+  return text
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระ/วรรณยุกต์ซ้อน (เช่น เจ็็ดยอด)
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
-    .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
     .replace(/พาพับ/g, "พายัพ")
-    .replace(/(รับงาน|ตัวเมือง)\s*ของแก่น/g, "$1 ขอนแก่น")
-    // กรองคำ 18+ ที่ส่งผลต่อ SafeSearch NLP Penalty
+    .replace(/ของแก่น/g, "ขอนแก่น")
+    .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
     .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!/gi, "")
