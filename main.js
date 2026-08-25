@@ -1,21 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
-// 🟢 โหลด GSAP แบบ Safe Dynamic Import ป้องกันสคริปต์ตายทั้งหน้าถ้า CDN มีปัญหา
+// 🟢 1. โหลด GSAP แบบ Non-blocking Background (ไม่บล็อกหน้าเว็บแม้เน็ตช้า)
 let gsap = null;
-let ScrollTrigger = null;
-try {
-  const gsapModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm");
-  gsap = gsapModule.gsap;
-  const stModule = await import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm");
-  ScrollTrigger = stModule.ScrollTrigger;
-  if (gsap && ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
+import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
+  .then(m => {
+    gsap = m.gsap;
     window.gsap = gsap;
-    window.ScrollTrigger = ScrollTrigger;
-  }
-} catch (e) {
-  console.warn("GSAP/ScrollTrigger skipped or offline, using fallback.");
-}
+  })
+  .catch(() => console.warn("GSAP loaded in fallback mode"));
 
 (function () {
   "use strict";
@@ -575,7 +567,6 @@ try {
         img.addEventListener("contextmenu", e => e.preventDefault());
         img.addEventListener("dragstart", e => e.preventDefault());
       });
-      if (window.ScrollTrigger) ScrollTrigger.refresh();
     }
   }
 
@@ -589,7 +580,6 @@ try {
     try {
       const isNationalOrEmpty = !currentSlug || currentSlug === "national" || currentSlug === "all" || currentSlug === "";
       const resolvedKey = isNationalOrEmpty ? "national" : currentSlug;
-      const targetName = isNationalOrEmpty ? "ทั่วไทย" : provinceName || appState.provincesMap.get(resolvedKey) || "ทั่วไทย";
       const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
 
       const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
@@ -789,9 +779,6 @@ try {
       if ((i + 1) % batchSize === 0 || i === profilesList.length - 1) {
         containerEl.appendChild(fragment);
         await new Promise(resolve => requestAnimationFrame(resolve));
-        if (profilesList.length > 40) {
-          await new Promise(resolve => setTimeout(resolve, 10));
-        }
       }
     }
   }
@@ -824,7 +811,8 @@ try {
     return wrapper;
   }
 
-  function openLightboxModal(profile) {
+  // 🟢 2. Lightbox Modal แบบ Fail-safe 100%
+  window.openLightboxModal = function (profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
@@ -988,22 +976,25 @@ try {
 
     lightboxEl.classList.add("active");
     lightboxEl.style.display = "flex";
-    lightboxEl.style.pointerEvents = "auto"; // 🟢 เปิดให้แตะสัมผัสได้
-    document.body.style.overflow = "hidden"; // ล็อก scroll ตอนเปิด
+    lightboxEl.style.pointerEvents = "auto";
+    document.body.style.overflow = "hidden";
 
     if (window.gsap && contentWrapperEl) {
-      window.gsap.fromTo(lightboxEl, { opacity: 0 }, { opacity: 1, duration: 0.2 });
-      window.gsap.fromTo(contentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
+      try {
+        window.gsap.fromTo(lightboxEl, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+        window.gsap.fromTo(contentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
+      } catch (_) {}
     }
-  }
+  };
 
-  function closeLightboxModal(updateHistory = true) {
+  // 🟢 3. ปิด Lightbox พร้อมปลดล็อกการเลื่อนจอ 100%
+  window.closeLightboxModal = function (updateHistory = true) {
     const lightboxEl = document.getElementById("lightbox");
     if (lightboxEl) {
       lightboxEl.style.display = "none";
       lightboxEl.classList.remove("active");
-      lightboxEl.style.pointerEvents = "none"; // 🟢 ตัดเลเยอร์คลิกตอนปิด
-      document.body.style.overflow = "";       // 🟢 ปลดล็อกการเลื่อนหน้าจอ
+      lightboxEl.style.pointerEvents = "none";
+      document.body.style.overflow = ""; // 🟢 คืนค่าการเลื่อนหน้าจอ
 
       if (updateHistory && (window.location.pathname.includes("/profile/") || window.location.pathname.includes("/sideline/"))) {
         const slug = window.currentProvinceSlug || (domCache.provinceSelect && domCache.provinceSelect.value) || "";
@@ -1017,7 +1008,7 @@ try {
       }
       appState.currentProfileSlug = null;
     }
-  }
+  };
 
   function hideGlobalLoader() {
     const loader = document.getElementById("global-loader-overlay");
@@ -1064,7 +1055,7 @@ try {
           window.currentProvinceSlug = provKey;
           if (domCache.provinceSelect) domCache.provinceSelect.value = provKey;
         }
-        openLightboxModal(foundProfile);
+        window.openLightboxModal(foundProfile);
       }
       return;
     }
@@ -1085,7 +1076,7 @@ try {
       if (locSlug === "chiang_mai") locSlug = "chiangmai";
 
       appState.currentProfileSlug = null;
-      closeLightboxModal(false);
+      window.closeLightboxModal(false);
       window.currentProvinceSlug = locSlug;
       if (domCache.provinceSelect) domCache.provinceSelect.value = locSlug;
 
@@ -1099,7 +1090,7 @@ try {
 
     appState.currentProfileSlug = null;
     window.currentProvinceSlug = "national";
-    closeLightboxModal(false);
+    window.closeLightboxModal(false);
     if (domCache.provinceSelect) domCache.provinceSelect.value = "";
 
     if (isInitial && hasSSRDOM) {
@@ -1109,7 +1100,8 @@ try {
     executeFilterAndRender(false);
   }
 
-  document.addEventListener("DOMContentLoaded", async function () {
+  // 🟢 4. Main Init Engine (ตรวจสอบ readyState ป้องกัน Race Condition)
+  async function initApplication() {
     try {
       supabaseClient = createClient(
         "https://zxetzqwjaiumqhrpumln.supabase.co",
@@ -1235,7 +1227,7 @@ try {
       });
     }
 
-    // 🟢 Click Delegation สมบูรณ์แบบ ไม่เกิด Dead Click 100%
+    // 🟢 5. Global Click Delegation สมบูรณ์แบบ
     document.body.addEventListener("click", (e) => {
       const searchInputEl = document.getElementById("search-keyword");
       const suggestionsEl = document.getElementById("search-suggestions");
@@ -1263,6 +1255,7 @@ try {
         }
       }
 
+      // คลิกการ์ด
       const cardElement = e.target.closest(".profile-card-new, .vip-card-item, .interactive-card");
       if (cardElement) {
         const profileId = cardElement.getAttribute("data-profile-id");
@@ -1270,7 +1263,6 @@ try {
 
         if (profileId || profileSlug) {
           e.preventDefault();
-          e.stopPropagation();
 
           const searchId = String(profileId || "");
           const searchSlug = String(profileSlug || "");
@@ -1281,21 +1273,35 @@ try {
             (searchSlug && String(p.id) === searchSlug)
           );
 
+          if (!targetProfile && window.profilesData && Array.isArray(window.profilesData)) {
+            const rawP = window.profilesData.find(p => String(p.id) === searchId || String(p.slug) === searchSlug);
+            if (rawP) targetProfile = normalizeProfile(rawP);
+          }
+
           if (targetProfile) {
             history.pushState(null, "", `/sideline/${encodeURIComponent(targetProfile.slug || targetProfile.id)}`);
-            openLightboxModal(targetProfile);
+            window.openLightboxModal(targetProfile);
           } else {
-            // 🟢 Fallback กรณีใน Memory โหลดไม่ทัน ให้เปลี่ยนหน้าตามปกติทันที
             window.location.href = `/sideline/${encodeURIComponent(profileSlug || profileId)}`;
           }
           return;
         }
       }
 
+      // คลิกปิด Lightbox
       const closeLightboxBtn = e.target.closest("#closeLightboxBtn");
       const lightboxModal = document.getElementById("lightbox");
       if (closeLightboxBtn || e.target === lightboxModal) {
-        closeLightboxModal(true);
+        window.closeLightboxModal(true);
+      }
+    });
+
+    // คีย์บอร์ด ESC ปิด Modal
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        window.closeLightboxModal(true);
+        toggleSidebar(false);
+        toggleSearchDrawer(false);
       }
     });
 
@@ -1319,15 +1325,6 @@ try {
       });
     }
 
-    document.querySelectorAll(".rule-item").forEach(item => {
-      const trigger = item.querySelector(".rule-trigger");
-      trigger?.addEventListener("click", () => {
-        const isCollapsed = item.classList.contains("collapsed");
-        document.querySelectorAll(".rule-item").forEach(r => r.classList.add("collapsed"));
-        if (isCollapsed) item.classList.remove("collapsed");
-      });
-    });
-
     document.querySelectorAll(".region-tab").forEach(tab => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".region-tab").forEach(t => t.classList.remove("active"));
@@ -1348,31 +1345,6 @@ try {
         toggleSeoDrawerBtn.querySelector("i").className = isCollapsed ? "fas fa-chevron-down" : "fas fa-chevron-up";
       };
     }
-
-    document.querySelectorAll(".tab-pill-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const targetId = btn.getAttribute("data-target");
-        if (!targetId) return;
-
-        document.querySelectorAll(".tab-pill-btn").forEach(b => {
-          b.classList.remove("active");
-          b.setAttribute("aria-selected", "false");
-        });
-        btn.classList.add("active");
-        btn.setAttribute("aria-selected", "true");
-
-        document.querySelectorAll(".bento-tab-pane").forEach(pane => {
-          pane.style.display = "none";
-          pane.classList.remove("active");
-        });
-
-        const activePane = document.getElementById(targetId);
-        if (activePane) {
-          activePane.style.display = "block";
-          activePane.classList.add("active");
-        }
-      });
-    });
 
     window.trackLineClick = function(profileId) {
       try {
@@ -1420,6 +1392,7 @@ try {
       }, { passive: true });
     })();
 
+    // Initial Data Fetch
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
@@ -1461,19 +1434,17 @@ try {
           });
         }
 
-        if (!profilesRes.data || profilesRes.data.length === 0) {
-          throw new Error("No profiles data returned from Supabase");
+        if (profilesRes.data && profilesRes.data.length > 0) {
+          appState.allProfiles = profilesRes.data.map(normalizeProfile).filter(Boolean);
+          try {
+            localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(profilesRes.data));
+          } catch (_) {}
+          populateInitialComponents();
+          return true;
         }
-
-        appState.allProfiles = profilesRes.data.map(normalizeProfile).filter(Boolean);
-        try {
-          localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(profilesRes.data));
-        } catch (_) {}
-
-        populateInitialComponents();
-        return true;
+        return false;
       } catch (fetchErr) {
-        console.warn("⚠️ โหลดจาก Supabase ไม่สำเร็จ กำลังกู้คืนจากระบบสำรอง (Cache)...", fetchErr);
+        console.warn("Recovering from cache...", fetchErr);
         try {
           const cachedStr = localStorage.getItem(CACHE_STORAGE_KEY);
           if (cachedStr) {
@@ -1484,9 +1455,7 @@ try {
               return true;
             }
           }
-        } catch (cacheErr) {
-          console.error("❌ โหลดจาก Cache สำรองก็ล้มเหลว:", cacheErr);
-        }
+        } catch (_) {}
         domCache.fetchErrorMessage?.classList.remove("hidden");
         return false;
       } finally {
@@ -1501,5 +1470,12 @@ try {
     window.addEventListener("popstate", async () => {
       await handleUrlRouting(false);
     });
-  });
+  }
+
+  // 🟢 6. เริ่มต้นทำงานทันทีไม่ว่าจะโหลดก่อนหรือหลัง DOMContentLoaded
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initApplication);
+  } else {
+    initApplication();
+  }
 })();
