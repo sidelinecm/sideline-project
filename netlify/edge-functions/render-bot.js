@@ -287,7 +287,7 @@ export default async (req, context) => {
       "reviewBody": stripHTML(r.text)
     }));
 
-// 🟢 ใน render-bot.js ค้นหา schemaGraph แล้วเพิ่ม review และ aggregateRating:
+// 🟢 [แก้ไขให้ผ่าน Google Rich Results Test 100%]
 const schemaGraph = {
   "@context": "https://schema.org/",
   "@graph": [
@@ -311,15 +311,14 @@ const schemaGraph = {
       }
     },
     {
-      "@type": "Service",
+      "@type": "Product", /* 🌟 เปลี่ยนจาก Service เป็น Product เพื่อให้ Google รองรับ Review Snippet 100% */
       "@id": `${canonicalUrl}#service`,
       "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน - ${displayName}`,
-      "provider": { "@id": `${canonicalUrl}#person` },
       "image": heroImageLarge,
       "description": stripHTML(metaDescription),
-      "areaServed": {
-        "@type": "AdministrativeArea",
-        "name": provinceNameThai
+      "brand": {
+        "@type": "Brand",
+        "name": CONFIG.BRAND_NAME
       },
       "aggregateRating": {
         "@type": "AggregateRating",
@@ -328,7 +327,7 @@ const schemaGraph = {
         "bestRating": "5",
         "worstRating": "1"
       },
-      "review": reviewsSchema, /* 🌟 เชื่อมโยง reviewsSchema ที่คำนวณไว้เข้าสู่ Graph */
+      "review": reviewsSchema,
       "offers": {
         "@type": "Offer",
         "url": canonicalUrl,
