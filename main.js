@@ -845,6 +845,7 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       
     const statusColor = isAvail ? "#00E676" : "#FF2E63";
 
+    // 1. หัวข้อชื่อโปรไฟล์
     const nameMainEl = document.getElementById("lightbox-profile-name-main");
     if (nameMainEl) {
       nameMainEl.innerHTML = `
@@ -853,6 +854,7 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       `;
     }
 
+    // 2. ป้ายสถานะ
     const availBadgeWrapper = document.getElementById("lightbox-availability-badge-wrapper");
     if (availBadgeWrapper) {
       availBadgeWrapper.innerHTML = `
@@ -863,15 +865,50 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       `;
     }
 
+    // 3. 🌟 จัดการรูปภาพขนาดใหญ่ (HD) และแถบสลับภาพ (Thumbnail Strip)
+    const images = Array.isArray(profile.images) && profile.images.length > 0
+      ? profile.images
+      : [{ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG }];
+
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
-      heroImg.src = profile?.images?.[0]?.fullSrc || profile?.images?.[0]?.src || DEFAULT_FALLBACK_IMG;
-      heroImg.alt = `${nameStr} Verified Photo`;
+      heroImg.src = images[0]?.fullSrc || images[0]?.src || DEFAULT_FALLBACK_IMG;
+      heroImg.alt = `${nameStr} รูปถ่ายตัวจริงตรงปก 100%`;
     }
 
+    const thumbStrip = document.getElementById("lightboxThumbnailStrip");
+    if (thumbStrip) {
+      if (images.length > 1) {
+        thumbStrip.style.display = "flex";
+        thumbStrip.innerHTML = images.map((img, idx) => `
+          <div class="lightbox-thumb-item ${idx === 0 ? "active" : ""}" data-img-idx="${idx}">
+            <img src="${img.src || DEFAULT_FALLBACK_IMG}" alt="${nameStr} รูปที่ ${idx + 1}" loading="lazy">
+          </div>
+        `).join("");
+
+        thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(item => {
+          item.addEventListener("click", () => {
+            thumbStrip.querySelectorAll(".lightbox-thumb-item").forEach(t => t.classList.remove("active"));
+            item.classList.add("active");
+            const idx = parseInt(item.getAttribute("data-img-idx"), 10);
+            if (images[idx] && heroImg) {
+              heroImg.style.opacity = "0.3";
+              heroImg.src = images[idx].fullSrc || images[idx].src;
+              setTimeout(() => { heroImg.style.opacity = "1"; }, 120);
+            }
+          });
+        });
+      } else {
+        thumbStrip.style.display = "none";
+        thumbStrip.innerHTML = "";
+      }
+    }
+
+    // 4. คำโปรย
     const quoteEl = document.getElementById("lightboxQuote");
     if (quoteEl) quoteEl.textContent = profile.quote || profile.slogan || (isEN ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
 
+    // 5. แท็กสไตล์
     const tagsEl = document.getElementById("lightboxTags");
     if (tagsEl) {
       tagsEl.innerHTML = "";
@@ -883,6 +920,7 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       });
     }
 
+    // 6. ข้อมูลสัดส่วน
     const ageStr = profile.safeAgeDisplay || (profile.age ? `${profile.age} yrs` : "N/A");
     const statsStr = profile.safeStats || "N/A";
     const heightStr = profile.safeHeight || "N/A";
@@ -924,6 +962,7 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       `;
     }
 
+    // 7. รายละเอียด
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
@@ -934,9 +973,9 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
     }
     if (descContainer) descContainer.style.display = "block";
 
+    // 8. ปุ่มไลน์จองคิว
     const detailsParent = document.querySelector(".lightbox-details");
     if (detailsParent) {
-      detailsParent.scrollTop = 0;
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
@@ -950,14 +989,12 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       lineWrapper.style.cssText = "margin-top: 10px; width: 100%;";
       
       const lineBtnText = isEN ? `Book ${nameStr} via LINE` : `แอดไลน์จองคิว ${nameStr}`;
-      
-
-lineWrapper.innerHTML = `
-  <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="window.trackLineClick('${profile.id}')">
-      <i class="fab fa-line" style="font-size: 18px;"></i>
-      <span>${lineBtnText}</span>
-  </a>
-`;
+      lineWrapper.innerHTML = `
+        <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="window.trackLineClick('${profile.id}')">
+            <i class="fab fa-line" style="font-size: 18px;"></i>
+            <span>${lineBtnText}</span>
+        </a>
+      `;
       detailsParent.appendChild(lineWrapper);
     }
 
@@ -968,7 +1005,7 @@ lineWrapper.innerHTML = `
     if (window.gsap) {
       gsap.fromTo(lightboxEl, { opacity: 0 }, { opacity: 1, duration: 0.2 });
       if (contentWrapperEl) {
-        gsap.fromTo(contentWrapperEl, { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
+        gsap.fromTo(contentWrapperEl, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: "power2.out" });
       }
     }
   }

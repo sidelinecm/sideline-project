@@ -1020,96 +1020,295 @@ img {
 }
 
 /* ==============================================================================
-   13. ROCK-SOLID LIGHTBOX MODAL
+   13. FULL-SCREEN LUXURY IMMERSIVE LIGHTBOX (ขยายรูปทรงยาวพิเศษ FULL-PORTRAIT)
    ============================================================================== */
 #lightbox { 
   position: fixed !important; 
   inset: 0 !important; 
   width: 100vw !important; 
-  height: 100% !important; 
+  height: 100dvh !important; 
   z-index: 9999 !important; 
   display: none; 
   align-items: center !important; 
   justify-content: center !important; 
-  padding: 12px 8px !important; 
-  background-color: rgba(0, 0, 0, 0.94) !important; 
-  backdrop-filter: blur(20px) !important;
+  padding: 0 !important; 
+  background-color: rgba(3, 2, 8, 0.96) !important; 
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  box-sizing: border-box !important;
 }
 
 #lightbox.active { display: flex !important; }
 
+/* ตัวครอบหลัก: บนมือถือเต็มจอ 100% / บนคอมขยายสูงใหญ่ถึง 900px */
 #lightbox-content-wrapper-el { 
   position: relative !important; 
   width: 100% !important; 
-  max-width: 850px !important; 
-  max-height: 92vh !important; 
-  background: #0E091F !important; 
-  border-radius: 24px !important; 
-  border: 1.5px solid rgba(192, 132, 252, 0.35) !important; 
-  overflow-y: auto !important; 
-  margin: auto !important; 
+  height: 100dvh !important; 
+  max-width: 100% !important; 
+  max-height: 100dvh !important; 
+  background: #080514 !important; 
+  border-radius: 0 !important; 
+  border: none !important;
+  overflow: hidden !important; 
+  margin: 0 !important; 
+  display: flex !important;
+  flex-direction: column !important;
 }
 
+@media (min-width: 900px) {
+  #lightbox {
+    padding: 20px 16px !important;
+  }
+  #lightbox-content-wrapper-el {
+    width: 94vw !important;
+    max-width: 1150px !important;
+    height: 92vh !important;
+    max-height: 900px !important; /* 🌟 บนคอมขยายความสูงเต็มตา 900px */
+    border-radius: 28px !important;
+    border: 1px solid rgba(192, 132, 252, 0.35) !important;
+    box-shadow: 0 30px 100px rgba(0, 0, 0, 0.98), 0 0 50px rgba(124, 58, 237, 0.25) !important;
+  }
+}
+
+/* ปุ่มและโลโก้ลอยตัวสไตล์ Glassmorphism */
 .lightbox-top-brand {
-  position: absolute;
-  top: 12px;
-  left: 14px;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  background: rgba(9, 5, 22, 0.85);
-  backdrop-filter: blur(8px);
-  padding: 4px 10px;
-  border-radius: 100px;
-  border: 1px solid rgba(192, 132, 252, 0.4);
-  pointer-events: none;
+  position: absolute !important;
+  top: 16px !important;
+  left: 16px !important;
+  z-index: 60 !important;
+  display: flex !important;
+  align-items: center !important;
+  background: rgba(10, 6, 24, 0.8) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  padding: 6px 14px !important;
+  border-radius: 100px !important;
+  border: 1px solid rgba(192, 132, 252, 0.4) !important;
+  pointer-events: none !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
 }
 
 .lightbox-close-circle-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 50;
-  width: 34px;
-  height: 34px;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  z-index: 60 !important;
+  width: 40px !important;
+  height: 40px !important;
+  background: rgba(10, 6, 24, 0.8) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 50% !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
+}
+.lightbox-close-circle-btn:hover {
+  background: rgba(255, 46, 99, 0.9) !important;
+  border-color: #FF2E63 !important;
+  transform: scale(1.08) !important;
 }
 
 .lightbox-scroll-body {
-  overflow-y: auto;
-  max-height: 90vh;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  height: 100% !important;
+  width: 100% !important;
 }
 
-.lightbox-grid-layout { display: grid !important; grid-template-columns: 1fr !important; width: 100% !important; }
-@media (min-width: 768px) { .lightbox-grid-layout { grid-template-columns: 1.1fr 0.9fr !important; } }
-
-.lightbox-hero-container { 
+.lightbox-grid-layout { 
+  display: grid !important; 
+  grid-template-columns: 1fr !important; 
   width: 100% !important; 
-  max-height: 60vh !important; 
-  min-height: 360px !important; 
-  position: relative !important; 
-  background-color: #05030C !important; 
+  min-height: 100% !important;
+}
+
+@media (min-width: 900px) { 
+  .lightbox-grid-layout { 
+    grid-template-columns: 1.2fr 0.8fr !important; /* เพิ่มสัดส่วนให้ฝั่งรูปกว้างและยาวสง่างาม */
+    height: 100% !important;
+  } 
+}
+
+/* คอลัมน์รูปภาพ */
+.lightbox-image-column {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background-color: #04020a !important;
+  overflow: hidden !important;
+}
+
+@media (min-width: 900px) {
+  .lightbox-image-column {
+    height: 100% !important;
+    border-right: 1px solid rgba(192, 132, 252, 0.2) !important;
+  }
+}
+
+/* 🌟 กล่องรูปภาพทรงยาวพิเศษ (Full-Portrait View) */
+.lightbox-hero-container { 
+  position: relative !important;
+  width: 100% !important; 
+  height: 75dvh !important; /* 🌟 ขยายรูปให้ยาวเต็มอิ่มถึง 75% ของจอ */
+  min-height: 500px !important;
+  max-height: 750px !important;
+  background: #000000 !important;
   display: flex !important; 
   align-items: center !important; 
   justify-content: center !important; 
+  overflow: hidden !important;
 }
-#lightboxHeroImage { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; }
-#lightboxThumbnailStrip { display: flex !important; gap: 6px !important; overflow-x: auto !important; padding: 8px 12px !important; background: rgba(5, 3, 12, 0.9) !important; }
 
-.lightbox-details { padding: 18px 16px 24px 16px !important; display: flex !important; flex-direction: column !important; gap: 10px !important; text-align: left !important; }
-.bento-stat-tile { background: rgba(255, 255, 255, 0.04) !important; border: 1px solid rgba(192, 132, 252, 0.25) !important; padding: 8px 4px !important; border-radius: 14px !important; text-align: center !important; }
-.lightbox-tag-pill { background: rgba(124, 58, 237, 0.12) !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; color: #E9D5FF !important; font-size: 11px !important; font-weight: 700 !important; padding: 3px 10px !important; border-radius: 100px !important; }
-.lightbox-line-cta { display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; background: #00E676 !important; color: #000000 !important; padding: 12px 18px !important; border-radius: 100px !important; font-weight: 900 !important; font-size: 13.5px !important; text-decoration: none !important; cursor: pointer !important; }
+/* เพิ่ม Gradient ไล่เฉดปลายรูปด้านล่างให้เชื่อมกับข้อมูลอย่างนุ่มนวล */
+.lightbox-hero-container::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 80px !important;
+  background: linear-gradient(to bottom, transparent 0%, rgba(8, 5, 20, 0.95) 100%) !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+}
 
+@media (min-width: 900px) {
+  .lightbox-hero-container {
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+  }
+  .lightbox-hero-container::after {
+    display: none !important; /* บนคอมแสดงรูปเต็มเฟรม */
+  }
+}
+
+#lightboxHeroImage { 
+  width: 100% !important; 
+  height: 100% !important; 
+  object-fit: cover !important; 
+  object-position: top center !important; 
+  display: block !important;
+  transition: opacity 0.25s ease, transform 0.35s ease !important;
+}
+
+/* แถบ Thumbnail สลับรูปภาพ */
+#lightboxThumbnailStrip { 
+  display: none; 
+  gap: 10px !important; 
+  overflow-x: auto !important; 
+  padding: 12px 18px !important; 
+  background: rgba(8, 4, 18, 0.9) !important; 
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+#lightboxThumbnailStrip::-webkit-scrollbar { display: none; }
+
+.lightbox-thumb-item {
+  width: 58px !important;
+  height: 74px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  background: #000 !important;
+}
+.lightbox-thumb-item.active,
+.lightbox-thumb-item:hover {
+  border-color: #C084FC !important;
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.8) !important;
+  transform: scale(1.06) !important;
+}
+.lightbox-thumb-item img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+}
+
+/* คอลัมน์รายละเอียด */
+.lightbox-details { 
+  padding: 24px 20px 40px 20px !important; 
+  display: flex !important; 
+  flex-direction: column !important; 
+  gap: 16px !important; 
+  text-align: left !important; 
+  background: rgba(10, 6, 22, 0.7) !important;
+}
+
+@media (min-width: 900px) {
+  .lightbox-details {
+    padding: 32px 28px !important;
+    overflow-y: auto !important;
+    height: 100% !important;
+  }
+}
+
+.bento-stat-tile { 
+  background: rgba(255, 255, 255, 0.04) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
+  padding: 10px 6px !important; 
+  border-radius: 16px !important; 
+  text-align: center !important; 
+}
+
+.lightbox-quote-card {
+  font-size: 13px !important;
+  color: #F1F5F9 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-left: 3.5px solid #C084FC !important;
+  padding: 10px 14px !important;
+  border-radius: 6px 14px 14px 6px !important;
+  line-height: 1.6 !important;
+}
+
+.lightbox-tags-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.lightbox-tag-pill { 
+  background: rgba(124, 58, 237, 0.18) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.4) !important; 
+  color: #E9D5FF !important; 
+  font-size: 11.5px !important; 
+  font-weight: 700 !important; 
+  padding: 4px 12px !important; 
+  border-radius: 100px !important; 
+}
+
+.lightbox-line-cta { 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 10px !important; 
+  background: linear-gradient(135deg, #00E676 0%, #00B050 100%) !important; 
+  color: #000000 !important; 
+  padding: 15px 24px !important; 
+  border-radius: 100px !important; 
+  font-weight: 900 !important; 
+  font-size: 15px !important; 
+  text-decoration: none !important; 
+  cursor: pointer !important; 
+  box-shadow: 0 6px 25px rgba(0, 230, 118, 0.45) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.lightbox-line-cta:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 30px rgba(0, 230, 118, 0.6) !important;
+}
 /* ==============================================================================
    14. FOOTER & ALL SUBPAGE STYLES
    ============================================================================== */
