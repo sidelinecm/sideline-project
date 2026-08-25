@@ -1269,24 +1269,6 @@ footer.fmh-footer { padding-bottom: 30px !important; }
   .qa-full-width { grid-column: 1 / -1 !important; }
 }
 
-/* ==============================================================================
-   13. TRUST SEAL, SOCIAL CHIPS & GOOGLE MAP
-   ============================================================================== */
-.verification-section { max-width: 850px; margin: 28px auto 0 auto; padding: 0 12px; box-sizing: border-box; }
-.verification-box { padding: 14px 18px !important; background: rgba(14, 14, 18, 0.7) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 16px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(16px); }
-
-.social-chips-container { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 8px !important; align-items: center !important; margin: 20px auto 0 auto !important; max-width: 850px !important; padding: 0 12px !important; }
-.social-chip-link {
-  display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 7px 15px !important;
-  background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 100px !important;
-  font-size: 11px !important; font-weight: 700 !important; color: #FFFFFF !important; text-decoration: none !important;
-  backdrop-filter: blur(12px) !important; transition: all 0.25s ease !important;
-}
-.social-chip-link:hover { background: rgba(192, 132, 252, 0.15) !important; border-color: rgba(192, 132, 252, 0.5) !important; transform: translateY(-2px) !important; }
-
-#map-section { max-width: 850px !important; margin: 24px auto 40px auto !important; border-radius: 18px !important; overflow: hidden !important; border: 1.5px solid rgba(255, 255, 255, 0.08) !important; background-color: #000000 !important; }
-#map-container { width: 100% !important; height: 180px !important; position: relative !important; }
-#google-map { width: 100% !important; height: 100% !important; border: 0 !important; }
 
 /* ==============================================================================
    ⭐ REVIEWS & FAQ MODERN OLED GLASSMORPHISM (สัดส่วนสมบูรณ์แบบ 100%)
@@ -1897,4 +1879,318 @@ footer.fmh-footer { padding-bottom: 30px !important; }
   background: rgba(192, 132, 252, 0.15) !important;
   border-color: rgba(192, 132, 252, 0.4) !important;
   color: #FFF !important;
+}
+
+/* ==============================================================================
+   15. FOOTER & SOCIAL ICONS (LIGHT EDITION)
+   ============================================================================== */
+footer.fmh-footer { 
+  background: var(--surface-white) !important; 
+  border-top: 1px solid var(--border-hairline) !important; 
+  padding: 30px 14px !important; 
+}
+@media (max-width: 768px) { footer.fmh-footer { padding-bottom: 110px !important; } }
+
+.footer-top-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .footer-top-grid { grid-template-columns: 1.2fr 1fr; gap: 24px; }
+}
+
+.footer-brand-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.footer-brand-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-sub);
+  margin: 0;
+}
+
+/* 🌐 แถบโซเชียลมีเดียทางการ (7 ช่องทาง) */
+.footer-social-wrapper {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-social-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.footer-social-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.social-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-card);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 14px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.social-icon-btn svg { width: 14px; height: 14px; }
+.social-icon-btn:hover { transform: translateY(-2px); }
+
+.social-icon-btn.line { color: #06C755; }
+.social-icon-btn.twitter { color: #000000; }
+.social-icon-btn.tiktok { color: #EE1D52; }
+.social-icon-btn.bluesky { color: #0285FF; }
+.social-icon-btn.bluesky svg { fill: #0285FF; }
+.social-icon-btn.linkedin { color: #0A66C2; }
+.social-icon-btn.biosite { color: var(--violet-main); }
+.social-icon-btn.linktree { color: #10B981; }
+
+.footer-heading {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.footer-nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 12px;
+  text-align: left;
+}
+
+.footer-nav-links a {
+  color: var(--text-sub);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+}
+.footer-nav-links a:hover { color: var(--crimson-main); }
+
+.footer-locations-block {
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 14px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.footer-subheading {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.popular-locations-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.popular-locations-grid a { color: var(--text-sub); text-decoration: none; }
+.popular-locations-grid a:hover { color: var(--crimson-main); }
+.popular-locations-grid a.active { color: var(--crimson-main); font-weight: 700; }
+
+.footer-bottom-bar {
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.footer-legal-links { display: flex; gap: 14px; align-items: center; }
+.footer-legal-links a { color: var(--text-muted); text-decoration: none; }
+.footer-legal-links a:hover { color: var(--crimson-main); }
+
+/* ==============================================================================
+   16. TRUST SEAL & SOCIAL CHIPS SECTION
+   ============================================================================== */
+.verification-section { max-width: 850px; margin: 24px auto 0 auto; padding: 0 12px; box-sizing: border-box; }
+.verification-box { padding: 14px 18px !important; background: var(--surface-white) !important; border: 1px solid var(--border-card) !important; border-radius: 16px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-ambient); }
+
+.social-chips-container { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 8px !important; align-items: center !important; margin: 20px auto 0 auto !important; max-width: 850px !important; padding: 0 12px !important; }
+.social-chip-link {
+  display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 7px 15px !important;
+  background: var(--surface-white) !important; border: 1px solid var(--border-card) !important; border-radius: 100px !important;
+  font-size: 11.5px !important; font-weight: 700 !important; color: var(--text-main) !important; text-decoration: none !important;
+  box-shadow: var(--shadow-ambient) !important; transition: all 0.25s ease !important;
+}
+.social-chip-link:hover { background: var(--crimson-soft) !important; color: var(--crimson-main) !important; transform: translateY(-2px) !important; }
+
+#map-section { max-width: 850px !important; margin: 20px auto 30px auto !important; border-radius: 18px !important; overflow: hidden !important; border: 1px solid var(--border-card) !important; box-shadow: var(--shadow-ambient) !important; }
+#map-container { width: 100% !important; height: 180px !important; position: relative !important; }
+#google-map { width: 100% !important; height: 100% !important; border: 0 !important; }
+
+/* ==============================================================================
+   🌟 แก้ไขป้ายกำกับบนการ์ด (Badges & Tags) ให้สวยงาม ไม่ตกบรรทัด 100%
+   ============================================================================== */
+
+/* กล่องคุมป้ายทั้งหมดให้อยู่ซ้าย-ขวา */
+.profile-card-badges-top {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important; /* ให้ป้ายชิดขอบบนเสมอ */
+  z-index: 20 !important;
+  pointer-events: none !important;
+}
+
+.badges-left, .badges-right { 
+  display: flex !important; 
+  align-items: center !important; 
+  gap: 4px !important; 
+}
+
+/* 🟢 ป้ายสถานะ รับงาน/สอบถาม (แก้ปัญหาการตกบรรทัดและวงกลมเละๆ) */
+.badge-status { 
+  display: inline-flex !important; 
+  align-items: center !important; 
+  gap: 5px !important; 
+  padding: 3px 8px !important; /* บีบให้เป็นแคปซูลพอดีคำ */
+  border-radius: 100px !important; 
+  font-size: 10px !important; 
+  font-weight: 700 !important; 
+  background: rgba(14, 10, 26, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6) !important;
+  white-space: nowrap !important; /* 🌟 สำคัญ: ป้องกันข้อความตกบรรทัด 100% */
+  line-height: 1 !important;
+}
+
+.badge-status.status-online { 
+  color: #00E676 !important; 
+  border: 1px solid rgba(0, 230, 118, 0.3) !important; 
+}
+.badge-status.status-online .status-dot { 
+  width: 6px !important; height: 6px !important; border-radius: 50% !important; 
+  background-color: #00E676 !important; box-shadow: 0 0 6px #00E676 !important;
+}
+
+.badge-status.status-busy { 
+  color: #FF1493 !important; 
+  border: 1px solid rgba(255, 20, 147, 0.3) !important; 
+}
+.badge-status.status-busy .status-dot { 
+  width: 6px !important; height: 6px !important; border-radius: 50% !important; 
+  background-color: #FF1493 !important; box-shadow: 0 0 6px #FF1493 !important;
+}
+
+/* 🔥 ป้าย #1 HOT (แก้ปัญหาตัวหนังสือใหญ่ยักษ์บังรูป) */
+.badge-hot-tag {
+  display: inline-flex !important;
+  background: linear-gradient(135deg, #FF1493, #FF5E3A) !important;
+  color: #FFFFFF !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  padding: 3px 8px !important;
+  border-radius: 100px !important;
+  white-space: nowrap !important; /* 🌟 ป้องกันตกบรรทัด */
+  line-height: 1 !important;
+  box-shadow: 0 4px 12px rgba(255, 20, 147, 0.4) !important;
+}
+
+/* ✦ ป้าย VERIFIED 100% / ตรงปก (แก้ปัญหาตัวหนังสือใหญ่ยักษ์ทะลุจอ) */
+.badge-verified-top {
+  display: inline-flex !important;
+  background: rgba(14, 10, 26, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(192, 132, 252, 0.5) !important;
+  color: #E9D5FF !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  padding: 3px 8px !important;
+  border-radius: 100px !important;
+  white-space: nowrap !important; /* 🌟 ป้องกันตกบรรทัด */
+  line-height: 1 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ==============================================================================
+   🌟 แก้ไขแถวล่าง (ชื่อ / อายุ / พิกัด / ราคา) ให้สมมาตร ไม่ดันบรรทัด
+   ============================================================================== */
+.profile-card-info-content { 
+  position: absolute !important; 
+  bottom: 0 !important; left: 0 !important; right: 0 !important; 
+  padding: 10px !important; 
+  z-index: 20 !important; pointer-events: none !important; 
+  display: flex !important; flex-direction: column !important; gap: 4px !important; 
+}
+
+.profile-card-title-row {
+  display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 6px !important; width: 100% !important;
+}
+
+.profile-card-name { 
+  flex: 1 1 auto !important; min-width: 0 !important; /* 🌟 สำคัญ: ทำให้ตัดคำได้ */
+  font-size: 14px !important; font-weight: 800 !important; color: #FFFFFF !important; 
+  margin: 0 !important; line-height: 1.2 !important; 
+  white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; 
+}
+
+.profile-card-age-tag {
+  flex-shrink: 0 !important; /* 🌟 สำคัญ: ล็อกป้ายอายุไม่ให้โดนบีบ */
+  font-size: 10px !important; color: #FF85C0 !important; font-weight: 700 !important;
+  background: rgba(255, 255, 255, 0.1) !important; padding: 2px 6px !important; border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.profile-card-bottom-row { 
+  display: flex !important; align-items: center !important; justify-content: space-between !important; 
+  gap: 6px !important; width: 100% !important;
+}
+
+.profile-card-location { 
+  flex: 1 1 auto !important; min-width: 0 !important; /* 🌟 สำคัญ: ป้องกันสระภาษาไทยล้นขอบ */
+  display: inline-flex !important; align-items: center !important; gap: 4px !important; 
+  font-size: 11px !important; font-weight: 500 !important; color: #D4D4D8 !important;
+  white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; 
+}
+
+.profile-card-location i { color: #C084FC !important; font-size: 10px !important; flex-shrink: 0 !important; }
+
+.profile-card-price { 
+  flex-shrink: 0 !important; /* 🌟 สำคัญ: ล็อกราคาไม่ให้โดนบีบ */
+  color: #00E676 !important; font-weight: 900 !important; font-size: 13.5px !important; 
+  white-space: nowrap !important; line-height: 1 !important;
 }

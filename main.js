@@ -711,44 +711,52 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
       ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim())
       : formatDisplayName(rawName);
       
-    const ageDisplay = p.safeAge && p.safeAge !== "-" ? `${p.safeAge} ปี` : "";
+    const ageDisplay = p.safeAge && p.safeAge !== "-" && p.safeAge !== "0" ? `${p.safeAge} ปี` : "";
     const locName = isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย");
     
-    const isOnline = p.availability === "รับงาน" || p.status === "รับงาน" ||
-      !(p.availability || "").toLowerCase().includes("ไม่ว่าง") &&
-      !(p.availability || "").toLowerCase().includes("สอบถาม");
-    
+    const isOnline = p.isAvailable;
     const statusClass = isOnline ? "status-online" : "status-busy";
-    const availText = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถาม");
+    const availText = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถามคิว");
     const priceDisplay = isEN && p._price > 0 ? `${p._price.toLocaleString()} THB` : p.displayPrice;
     const profileSlug = encodeURIComponent(p.slug || p.id);
+
+    // 🌟 ระบบป้ายกำกับขวาบนแบบใหม่ (ลบดาวและ VIP ออก 100%)
+    let rightBadgeHtml = "";
+    if (index < 2) {
+      rightBadgeHtml = `<span class="badge-hot-tag">#${index + 1} HOT 🔥</span>`;
+    } else if (p.isfeatured) {
+      rightBadgeHtml = `<span class="badge-verified-top">✦ VERIFIED 100%</span>`;
+    } else {
+      rightBadgeHtml = `<span class="badge-verified-top">✓ ตรงปก</span>`;
+    }
 
     article.innerHTML = `
       <img src="${imgSrc}" 
            alt="${modelName} ${locName}"
-           width="300"
-           height="400"
+           width="400"
+           height="533"
            class="profile-card-img"
-           loading="${index < 2 ? "eager" : "lazy"}"
+           loading="${index < 4 ? "eager" : "lazy"}"
            decoding="async"
            onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
            
       <div class="profile-card-gradient-overlay"></div>
 
       <div class="profile-card-badges-top">
+          <!-- 🌟 ป้ายซ้ายบน: แสดงแค่สถานะ รับงาน/สอบถามคิว -->
           <div class="badges-left">
               <span class="badge-status ${statusClass}">
                   <span class="status-dot"></span>
                   <span>${availText}</span>
               </span>
-              ${p.isfeatured ? `<span class="badge-featured"><i class="fas fa-star"></i> VIP</span>` : ""}
           </div>
+          <!-- 🌟 ป้ายขวาบน: แสดง HOT / VERIFIED 100% / ตรงปก -->
           <div class="badges-right">
-              ${p.isVerified || p.verified ? `<span class="badge-verified"><i class="fas fa-check-circle"></i> ตรงปก</span>` : ""}
+              ${rightBadgeHtml}
           </div>
       </div>
       
-      <a href="/sideline/${profileSlug}" class="card-link" aria-label="View ${modelName}"></a>
+      <a href="/sideline/${profileSlug}" class="card-link" aria-label="ดูโปรไฟล์ ${modelName}"></a>
 
       <div class="profile-card-info-content">
           <div class="profile-card-title-row">
@@ -757,7 +765,7 @@ function replaceDomPlaceholders(provinceName, count, currentSlug) {
           </div>
           <div class="profile-card-bottom-row">
               <span class="profile-card-location" title="${locName}">
-                  <i class="fas fa-map-marker-alt"></i> ${locName}
+                  <i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${locName}
               </span>
               <span class="profile-card-price">${priceDisplay}</span>
           </div>
