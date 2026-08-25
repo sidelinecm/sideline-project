@@ -382,11 +382,21 @@ const renderCardHtml = (p, index, total, provinceName) => {
   
   const imgAlt = `น้อง${cleanName}${ageStr ? ` อายุ${ageStr}ปี` : ""} สาวรับงาน${provinceName} ${statsStr ? `สัดส่วน ${statsStr}` : "รูปร่างสมส่วน"} ${p.height ? `สูง ${p.height}ซม.` : ""} ย่าน${loc} ฟิวแฟนตรงปก 100% ไม่มัดจำ`;
   const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
-  const cardImg = optimizeImg(0, rawImg, 400, 500);
+  const cardImg = optimizeImg(0, rawImg, 400, 533);
   
   let priceStr = "1,500.-";
   if (p.rate) {
     priceStr = isNaN(p.rate) ? escapeHTML(p.rate).trim() : `${Number(p.rate).toLocaleString()}.-`;
+  }
+
+  // 🌟 ระบบป้ายกำกับขวาบนแบบใหม่ (ลบดาวและ VIP ออก 100%)
+  let rightBadgeHtml = "";
+  if (index < 2) {
+    rightBadgeHtml = `<span class="badge-hot-tag">#${index + 1} HOT 🔥</span>`;
+  } else if (p.isfeatured) {
+    rightBadgeHtml = `<span class="badge-verified-top">✦ VERIFIED 100%</span>`;
+  } else {
+    rightBadgeHtml = `<span class="badge-verified-top">✓ ตรงปก</span>`;
   }
 
   return `
@@ -406,15 +416,16 @@ const renderCardHtml = (p, index, total, provinceName) => {
           <div class="profile-card-gradient-overlay"></div>
 
           <div class="profile-card-badges-top">
+              <!-- 🌟 ป้ายซ้ายบน: แสดงแค่สถานะ รับงาน/สอบถามคิว -->
               <div class="badges-left">
                   <span class="badge-status ${statusClass}">
                       <span class="status-dot"></span>
                       <span>${availStatus}</span>
                   </span>
-                  ${p.isfeatured ? '<span class="badge-featured"><i class="fas fa-star"></i> VIP</span>' : ""}
               </div>
+              <!-- 🌟 ป้ายขวาบน: แสดง HOT / VERIFIED 100% / ตรงปก -->
               <div class="badges-right">
-                  ${p.verified || p.isVerified ? '<span class="badge-verified"><i class="fas fa-check-circle"></i> ตรงปก</span>' : ""}
+                  ${rightBadgeHtml}
               </div>
           </div>
           
