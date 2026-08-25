@@ -386,11 +386,10 @@ function populateInitialComponents() {
         });
       }
 
-      // 1. แก้ไขจุดตัดคำค้นหาไม่ให้เหลือสตริงว่าง
-      if (currentCriteria.text) {
+if (currentCriteria.text) {
         const cleanQuery = currentCriteria.text.toLowerCase().trim();
         let baseQuery = cleanQuery.replace(/^(น้อง|สาว|พี่|รับงาน|ไซด์ไลน์|ย่าน|โซน)\s*/gi, "").trim();
-        if (!baseQuery) baseQuery = cleanQuery; // 🟢 ถ้าลบแล้วหมด ให้ใช้คำค้นหาเดิม
+        if (!baseQuery) baseQuery = cleanQuery;
         const keywords = baseQuery.split(/\s+/).filter(Boolean);
 
         results = results.filter(p => {
@@ -418,7 +417,6 @@ function populateInitialComponents() {
             priceStr.includes(k)
           ));
         });
-      }
 
         results.sort((a, b) => {
           const nameA = (a.displayName || a.name || "").toLowerCase().replace(/^(น้อง\s?)+/gi, "").trim();
