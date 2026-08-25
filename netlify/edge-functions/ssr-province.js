@@ -825,8 +825,10 @@ const reviewsHtml = activeReviews.map(r => {
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", totalCount);
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr);
     finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-    finalHtml = finalHtml.replace(/<div class="seo-content-inner">[\s\S]*?<\/div>/i, `<div class="seo-content-inner">${linkedIntro}</div>`);
-
+finalHtml = finalHtml.replace(
+  /<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i,
+  `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`
+);
     if (faqsHtml) {
       finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     }

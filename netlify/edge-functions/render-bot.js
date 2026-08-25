@@ -287,7 +287,7 @@ export default async (req, context) => {
       "reviewBody": stripHTML(r.text)
     }));
 
-// --- ส่วนของ schemaGraph ใน render-bot.js ---
+// 🟢 ใน render-bot.js ค้นหา schemaGraph แล้วเพิ่ม review และ aggregateRating:
 const schemaGraph = {
   "@context": "https://schema.org/",
   "@graph": [
@@ -321,6 +321,14 @@ const schemaGraph = {
         "@type": "AdministrativeArea",
         "name": provinceNameThai
       },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.0",
+        "reviewCount": reviewsList.length.toString(),
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": reviewsSchema, /* 🌟 เชื่อมโยง reviewsSchema ที่คำนวณไว้เข้าสู่ Graph */
       "offers": {
         "@type": "Offer",
         "url": canonicalUrl,
