@@ -1152,7 +1152,12 @@ export default async (req, context) => {
     
     const ssrFeaturedH2 = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
-
+// 🟢 แทนที่ตัวเลขสถิติ Hero ให้ตรงกับจำนวนโปรไฟล์จริงในฐานข้อมูล 100%
+    const countDisplay = isNational ? `${totalCount}+` : `${totalCount}`;
+    finalHtml = finalHtml.replace(
+      /<strong id="live-profile-count"[^>]*>[\s\S]*?<\/strong>/i,
+      `<strong id="live-profile-count" class="kw-green">${countDisplay}</strong>`
+    );
     // 4. ปรับแต่ง Hreflang Tags สำหรับระบบหลายภาษา
     if (isNational) {
       finalHtml = finalHtml.replace(
