@@ -573,12 +573,18 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
 
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
+    const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+    
+    // 🟢 ประกาศตัวแปร targetName ให้ชัดเจน (แก้ Error: targetName is not defined)
+    const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+
+    // 1. อัปเดตตัวเลขจำนวนโปรไฟล์จริงจากฐานข้อมูล
     const liveCounterEl = document.getElementById("live-profile-count");
-    if (liveCounterEl) liveCounterEl.textContent = `${totalCount}+`;
+    if (liveCounterEl) {
+      liveCounterEl.textContent = isAllOrNational ? `${totalCount}+` : `${totalCount}`;
+    }
 
-    const targetName = (!currentSlug || currentSlug === "national" || currentSlug === "all") ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
-
-    // 🟢 อัปเดตหัวข้อ H1 และ H2 ให้แสดงชื่อจังหวัดจริง
+    // 2. อัปเดตหัวข้อ H1 และ H2 ให้แสดงชื่อจังหวัดจริง
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       heroH1.innerHTML = `
@@ -595,7 +601,7 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
     if (isEN) return;
 
     try {
-      const resolvedKey = (!currentSlug || currentSlug === "national" || currentSlug === "all") ? "national" : currentSlug;
+      const resolvedKey = isAllOrNational ? "national" : currentSlug;
       const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
 
       const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
