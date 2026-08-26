@@ -957,7 +957,7 @@ export default async (req, context) => {
       metaDescription = `ศูนย์รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`;
     }
 
-    const cleanMetaDesc = stripHTML(metaDescription);
+   const cleanMetaDesc = stripHTML(metaDescription);
     const avgRatingScore = activeReviews.length > 0 ? (activeReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / activeReviews.length).toFixed(1) : "5.0";
     
     const mapZoom = isNational ? 6 : 12;
@@ -969,7 +969,8 @@ export default async (req, context) => {
 
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     
-    
+    // 🟢 ประกาศ cleanZonesList ตรงนี้ก่อนสร้าง schemaGraph (แก้บั๊ก SSR Crash 100%)
+    const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
     // โครงสร้าง Schema.org แบบรวมศูนย์ ถูกต้องตามกฎ Google Search 100%
     const schemaGraph = [
@@ -1048,7 +1049,7 @@ export default async (req, context) => {
       },
       {
         "@type": "BreadcrumbList",
-        "@id": `${canonicalUrl}/#breadcrumb`,
+        "@id": `${canonicalUrl}#breadcrumb`,
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": primaryDomain },
           ...(isNational ? [] : [{ "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": canonicalUrl }])
@@ -1133,12 +1134,17 @@ export default async (req, context) => {
     // =========================================================================
     // 🏗️ ประกอบและแทนที่เนื้อหา HTML แบบสมบูรณ์แบบ (FULL HYDRATION & SEO)
     // =========================================================================
+    // =========================================================================
+    // 🏗️ ประกอบและแทนที่เนื้อหา HTML แบบสมบูรณ์แบบ (FULL HYDRATION & SEO)
+    // =========================================================================
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) {
       return await context.next();
     }
 
-    // 1. แทรก Meta Title & Description
+    const exactCount = String(totalCount);
+
+    // 1. แทรก Meta Title & Description (ความยาวพอดี ไม่โดนตัด ... ไม่โดนเตือนยาวเกิน)
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -1146,14 +1152,14 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
     
-    // 🟢 2. แทนที่ Canonical URL และ Open Graph (แก้ปัญหา Canonical ซ้ำซ้อน 100%)
+    // 2. แทนที่ Canonical URL และ Open Graph (ป้องกัน URL ซ้ำซ้อน 100%)
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 🟢 3. ปรับแต่ง H1 & H2 ฝั่ง SSR ให้เป็นชื่อจังหวัดจริงทันที (สำคัญสูงสุดต่อ Google SEO)
+    // 3. ปรับแต่ง H1 & H2 ฝั่ง SSR ให้เป็นชื่อจังหวัดจริงทันที (ดันอันดับ SEO รายจังหวัด)
     const ssrH1Html = `
       <span class="seo-sub-headline">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span><br>
       <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
@@ -1162,13 +1168,19 @@ export default async (req, context) => {
     
     const ssrFeaturedH2 = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
-// 🟢 แทนที่ตัวเลขสถิติ Hero ให้ตรงกับจำนวนโปรไฟล์จริงในฐานข้อมูล 100%
-    const countDisplay = isNational ? `${totalCount}+` : `${totalCount}`;
+
+    // 4. แทนที่ตัวเลขสถิติด้วยตัวเลขจริงจากฐานข้อมูล 100%
     finalHtml = finalHtml.replace(
       /<strong id="live-profile-count"[^>]*>[\s\S]*?<\/strong>/i,
-      `<strong id="live-profile-count" class="kw-green">${countDisplay}</strong>`
+      `<strong id="live-profile-count" class="kw-green">${exactCount}</strong>`
     );
-    // 4. ปรับแต่ง Hreflang Tags สำหรับระบบหลายภาษา
+
+    finalHtml = finalHtml.replace(
+      /<strong id="pill-count-display"[^>]*>[\s\S]*?<\/strong>/i,
+      `<strong id="pill-count-display">${exactCount}</strong>`
+    );
+
+    // 5. ปรับแต่ง Hreflang Tags สำหรับระบบหลายภาษา
     if (isNational) {
       finalHtml = finalHtml.replace(
         /<link\s+rel=["']alternate["']\s+hreflang=["']en["'][^>]*>/i,
@@ -1178,24 +1190,31 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']en["'][^>]*>\s*/gi, "");
     }
 
-    // 5. แทรก Schema.org JSON-LD (Rich Snippets & Google Graph)
+    // 🟢 6. แทรก Schema.org JSON-LD แบบ Fail-Safe (รับประกันตรวจเจอใน Google Rich Results 100%)
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     const schemaTag = `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`;
-    finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, schemaTag);
+    
+    if (finalHtml.includes('id="dynamic-schema"')) {
+      finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, schemaTag);
+    } else if (finalHtml.includes('</head>')) {
+      finalHtml = finalHtml.replace(/<\/head>/i, `${schemaTag}\n</head>`);
+    } else {
+      finalHtml = schemaTag + finalHtml;
+    }
 
-    // 6. แทนที่ Placeholders ทั่วไป
+    // 7. แทนที่ Placeholders ทั่วไปและแผนที่
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
-    finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
+    finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", exactCount);
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
-   finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+    finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // 7. แทนที่เนื้อหา SEO Intro
+    // 8. แทนที่เนื้อหา SEO Intro
     finalHtml = finalHtml.replace(
       /<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i,
       `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`
     );
 
-    // 8. แทรก FAQs และ Reviews ประจำพื้นที่
+    // 9. แทรก FAQs และ Reviews ประจำพื้นที่
     if (faqsHtml) {
       finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     }
@@ -1203,7 +1222,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // 9. สไลด์ HOT Swiper
+    // 10. สไลด์ HOT Swiper
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -1230,7 +1249,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
-    // 10. จัดการส่วน Featured Profiles VIP (แสดงเฉพาะหน้าแรกทั่วไทย)
+    // 11. จัดการส่วน Featured Profiles (แสดงเฉพาะหน้าแรกทั่วไทย)
     if (isNational) {
       if (finalHtml.includes("{{PROFILES_CARDS_HTML}}")) {
         finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml || "");
@@ -1244,7 +1263,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
-    // 11. แสดงผล Grid รายชื่อน้องๆ ใน Display Area
+    // 12. แสดงผล Grid รายชื่อน้องๆ ใน Display Area
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -1314,7 +1333,7 @@ export default async (req, context) => {
       );
     }
 
-    // 12. Dropdown ค้นหาจังหวัด
+    // 13. Dropdown ค้นหาจังหวัด
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
@@ -1322,15 +1341,15 @@ export default async (req, context) => {
     
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-    // 13. รายชื่อลิงก์จังหวัดยอดนิยมใน Footer
+    // 14. รายชื่อลิงก์จังหวัดยอดนิยมใน Footer
     if (popularLocationsFooter) {
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsFooter}</ul>`);
     }
 
-    // 14. แก้ไข Relative Path ให้โหลดไฟล์ Static ผ่าน Root เสมอ
+    // 15. แก้ไข Relative Path ให้โหลดไฟล์ Static ผ่าน Root เสมอ
     finalHtml = finalHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
-    // 15. Serialization ข้อมูลสำหรับ Client-side Hydration
+    // 16. Serialization ข้อมูลสำหรับ Client-side Hydration
     const provinceMap = new Map();
     (allProvincesRes?.data || []).forEach(p => {
       const k = (p.key || p.slug || p.id || "").toString().toLowerCase();
@@ -1399,10 +1418,10 @@ export default async (req, context) => {
       ? finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript)
       : finalHtml.replace(/<\/head>/i, `${ssrDataScript}\n</head>`);
 
-    // 16. Safety Net: ล้าง Placeholder {{...}} ตกค้างทั้งหมด
+    // 17. Safety Net: ล้าง Placeholder {{...}} ตกค้างทั้งหมด
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
-    // 17. Response Headers (เซฟ Supabase Free Tier และอัปเดตข้อมูลไว)
+    // 18. Response Headers (เซฟ Supabase Free Tier และอัปเดตข้อมูลไว)
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=30",
