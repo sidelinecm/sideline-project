@@ -949,17 +949,25 @@ export default async (req, context) => {
     let metaDescription = "";
     if (isNational) {
       metaTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
-      metaDescription = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนพรีเมียมทั่วไทย เชียงใหม่ ขอนแก่น เชียงราย ลำปาง การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ";
+      metaDescription = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนพรีเมียมทั่วไทย เชียงใหม่ ขอนแก่น เชียงราย ลำปาง การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำ";
     } else {
-      metaTitle = customMetadata?.title || `สาวรับงาน${provinceNameThai} ไซด์ไลน์ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานวันนี้) | First Model Hub`;
+     metaTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
       metaDescription = customMetadata?.desc || `ศูนย์รวมสาวรับงาน${provinceNameThai} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${provinceNameThai}`;
     }
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const avgRatingScore = activeReviews.length > 0 ? (activeReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / activeReviews.length).toFixed(1) : "5.0";
+    
     const mapZoom = isNational ? 6 : 12;
-    const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent("สาวรับงาน " + (isNational ? "ประเทศไทย" : provinceNameThai))}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
-    const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
+    
+    // กำหนดคำค้นหาพิกัดให้ Google Map แม่นยำ 100%
+    const mapQuery = isNational 
+      ? encodeURIComponent("ประเทศไทย") 
+      : encodeURIComponent(`จังหวัด${provinceNameThai}`);
+
+    const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
+    
+    
 
     // โครงสร้าง Schema.org แบบรวมศูนย์ ถูกต้องตามกฎ Google Search 100%
     const schemaGraph = [
@@ -1177,7 +1185,7 @@ export default async (req, context) => {
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
-    finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
+   finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
     // 7. แทนที่เนื้อหา SEO Intro
     finalHtml = finalHtml.replace(
