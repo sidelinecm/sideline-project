@@ -574,8 +574,6 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
     const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
     const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
-    
-    // 🟢 ประกาศตัวแปร targetName ให้ชัดเจน (แก้ Error: targetName is not defined)
     const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
 
     // 1. อัปเดตตัวเลขจำนวนโปรไฟล์จริงจากฐานข้อมูล
@@ -596,6 +594,22 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
     const featuredH2 = document.getElementById("featured-heading");
     if (featuredH2) {
       featuredH2.innerHTML = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(targetName)}</span>`;
+    }
+
+    // 🟢 3. เพิ่มส่วนนี้: อัปเดตแผนที่ Google Map ให้ตรงกับจังหวัดที่เลือกทันที
+    const mapIframe = document.getElementById("google-map");
+    if (mapIframe) {
+      const zoom = isAllOrNational ? 6 : 12;
+      const query = isAllOrNational 
+        ? encodeURIComponent("ประเทศไทย") 
+        : encodeURIComponent(`จังหวัด${targetName}`);
+      
+      const newMapSrc = `https://maps.google.com/maps?q=${query}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+      
+      // ป้องกันการรีโหลดซ้ำถ้าเป็นพิกัดเดิม
+      if (mapIframe.src !== newMapSrc) {
+        mapIframe.src = newMapSrc;
+      }
     }
 
     if (isEN) return;

@@ -1,10 +1,4 @@
 /* ==============================================================================
-   🌟 FIRST MODEL HUB - MASTER STYLESHEET 2026 (FULL CONSOLIDATED EDITION)
-   THEME: OLED PITCH BLACK (#000000) & FROSTED OBSIDIAN GLASS
-   PERFORMANCE: 60FPS HARDWARE-ACCELERATED MOBILE-FIRST
-   ============================================================================== */
-
-/* ==============================================================================
    1. FONTS & DISPLAY RULES
    ============================================================================== */
 @font-face {
@@ -23,14 +17,6 @@
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
 
-@font-face { 
-  font-family: 'Font Awesome 6 Free'; 
-  font-display: block !important; 
-}
-@font-face { 
-  font-family: 'Font Awesome 6 Brands'; 
-  font-display: block !important; 
-}
 
 /* ==============================================================================
    2. ROOT VARIABLES & GLOBAL BASE
@@ -1924,3 +1910,62 @@ footer.fmh-footer {
 }
 #map-container { width: 100% !important; height: 180px !important; position: relative !important; }
 #google-map { width: 100% !important; height: 100% !important; border: 0 !important; }
+
+/* ==============================================================================
+   🌟 FOOTER SOCIAL ICONS (คมชัด สวยหรู ไม่พึ่งพาฟอนต์ภายนอก 100%)
+   ============================================================================== */
+.footer-social-icons {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin-top: 4px !important;
+}
+
+.social-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* ตั้งค่า SVG ให้ชัดเต็มตา */
+.social-btn svg {
+  width: 17px !important;
+  height: 17px !important;
+  fill: currentColor !important;
+  display: block !important;
+  transition: transform 0.25s ease !important;
+}
+
+/* สีประจำแบรนด์แบบคมชัด */
+.social-btn.line { color: #06C755 !important; border-color: rgba(6, 199, 85, 0.3) !important; }
+.social-btn.twitter { color: #FFFFFF !important; border-color: rgba(255, 255, 255, 0.3) !important; }
+.social-btn.tiktok { color: #FF2E63 !important; border-color: rgba(255, 46, 99, 0.3) !important; }
+.social-btn.bluesky { color: #0285FF !important; border-color: rgba(2, 133, 255, 0.3) !important; }
+.social-btn.linkedin { color: #0A66C2 !important; border-color: rgba(10, 102, 194, 0.3) !important; }
+.social-btn.biosite { color: #C084FC !important; border-color: rgba(192, 132, 252, 0.3) !important; }
+.social-btn.linktree { color: #00E676 !important; border-color: rgba(0, 230, 118, 0.3) !important; }
+
+/* แตะหรือวางเมาส์: ขยายเบาๆ พร้อมแสงนีออนรอบปุ่ม */
+.social-btn:hover,
+.social-btn:active {
+  transform: translateY(-3px) scale(1.08) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.social-btn.line:hover { box-shadow: 0 0 12px rgba(6, 199, 85, 0.5) !important; }
+.social-btn.twitter:hover { box-shadow: 0 0 12px rgba(255, 255, 255, 0.5) !important; }
+.social-btn.tiktok:hover { box-shadow: 0 0 12px rgba(255, 46, 99, 0.5) !important; }
+.social-btn.bluesky:hover { box-shadow: 0 0 12px rgba(2, 133, 255, 0.5) !important; }
+.social-btn.linkedin:hover { box-shadow: 0 0 12px rgba(10, 102, 194, 0.5) !important; }
+.social-btn.biosite:hover { box-shadow: 0 0 12px rgba(192, 132, 252, 0.5) !important; }
+.social-btn.linktree:hover { box-shadow: 0 0 12px rgba(0, 230, 118, 0.5) !important; }
