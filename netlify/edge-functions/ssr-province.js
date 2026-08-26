@@ -2,9 +2,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
 const MAX_CACHE_SIZE = 300;
-let GLOBAL_LAST_TIMESTAMP = "initial_v1";
+let GLOBAL_LAST_TIMESTAMP = `init_${Date.now()}`;
 let LAST_PROBE_TIME = 0;
 
+// 🟢 ตั้งเวลาเช็คฐานข้อมูลอัตโนมัติ (30 วินาที = ปลอดภัยต่อ Free Tier ไม่เกินลิมิต 100%)
+const AUTO_CHECK_INTERVAL_MS = 30000;
+
+const PURGE_SECRET_KEY = "fmh_secure_purge_2026";
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
 const TEMPLATE_CACHE_TTL_MS = 3600000; // แคชเทมเพลต 1 ชั่วโมง
@@ -140,8 +144,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 18.5772, lng: 99.0087 },
     zones: ["ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
     faqs: [
-      { q: "สาวรับงานลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งในโซนนิคมลำพูน ตัวเมืองลำพูน และเวียงยอง สามารถนัดเจอที่โรงแรมหรือที่พักส่วนตัวได้อย่างปลอดภัยครับ" },
-      { q: "มีค่าใช้จ่ายจองคิวก่อนพบตัวน้องลำพูนไหม?", a: "ไม่มีค่าจองคิวล่วงหน้า 100% ชำระหน้างานเมื่อพบตัวน้องเรียบร้อยแล้วเท่านั้นครับ" }
+      { q: "สาวรับงานลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งในโซนนิคมลำพูน ตัวเมืองลำพูน และเวียงยอง สามารถนัดเจอที่โรงแรมหรือที่พักส่วนตัวได้อย่างปลอดภัยครับ" }
     ]
   },
   phitsanulok: {
@@ -149,8 +152,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 16.8211, lng: 100.2659 },
     zones: ["ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
     faqs: [
-      { q: "สาวรับงานพิษณุโลก รอบ ม.นเรศวร (มน.) นัดหมายอย่างไร?", a: "มีน้องๆ ประจำอยู่ในโซนรอบ มน. ท่าโพธิ์ และใจกลางเมืองพิษณุโลก นัดหมายง่าย สะดวกและเป็นส่วนตัวครับ" },
-      { q: "บริการไซด์ไลน์พิษณุโลก ต้องโอนมัดจำก่อนไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าทุกกรณีครับ ตรวจสอบความตรงปกและชำระค่าบริการหน้างานได้โดยตรงครับ" }
+      { q: "สาวรับงานพิษณุโลก รอบ ม.นเรศวร (มน.) นัดหมายอย่างไร?", a: "มีน้องๆ ประจำอยู่ในโซนรอบ มน. ท่าโพธิ์ และใจกลางเมืองพิษณุโลก นัดหมายง่าย สะดวกและเป็นส่วนตัวครับ" }
     ]
   },
   phrae: {
@@ -178,8 +180,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 16.4322, lng: 102.8236 },
     zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
     faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่นครับ" },
-      { q: "สาวรับงานขอนแก่น บน First Model Hub ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้า 100% เจอตัวจริงหน้างาน ตรวจสอบความตรงปกแล้วค่อยชำระค่าบริการครับ" }
+      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่นครับ" }
     ]
   },
   "khon-kaen": {
@@ -187,8 +188,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 16.4322, lng: 102.8236 },
     zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
     faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่นครับ" },
-      { q: "สาวรับงานขอนแก่น บน First Model Hub ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้า 100% เจอตัวจริงหน้างาน ตรวจสอบความตรงปกแล้วค่อยชำระค่าบริการครับ" }
+      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่นครับ" }
     ]
   },
   udonthani: {
@@ -196,8 +196,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 17.4138, lng: 102.7872 },
     zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
     faqs: [
-      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบยอดนิยมครับ" },
-      { q: "ไซด์ไลน์อุดรธานี จ่ายเงินอย่างไร ปลอดภัยไหม?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ปลอดภัยจากมิจฉาชีพ 100% ไม่มีการโอนเงินก่อนครับ" }
+      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบยอดนิยมครับ" }
     ]
   },
   "udon-thani": {
@@ -205,8 +204,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 17.4138, lng: 102.7872 },
     zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
     faqs: [
-      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบยอดนิยมครับ" },
-      { q: "ไซด์ไลน์อุดรธานี จ่ายเงินอย่างไร ปลอดภัยไหม?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ปลอดภัยจากมิจฉาชีพ 100% ไม่มีการโอนเงินก่อนครับ" }
+      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบยอดนิยมครับ" }
     ]
   },
   udon: {
@@ -222,8 +220,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 15.2448, lng: 104.8473 },
     zones: ["ตัวเมืองอุบล", "วารินชำราบ", "ม.อุบล", "ดอนกลาง", "เซ็นทรัลอุบล", "ชยางกูร"],
     faqs: [
-      { q: "สาวรับงานอุบลราชธานี นัดหมายแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือตัวเมืองอุบล, ย่านถนนชยางกูร, วารินชำราบ และรอบมหาวิทยาลัยอุบลราชธานีครับ" },
-      { q: "การนัดหมายไซด์ไลน์อุบลราชธานี ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้า 100% เจอน้องตัวจริงหน้างาน ตรวจสอบความตรงปกแล้วค่อยชำระค่าบริการครับ" }
+      { q: "สาวรับงานอุบลราชธานี นัดหมายแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือตัวเมืองอุบล, ย่านถนนชยางกูร, วารินชำราบ และรอบมหาวิทยาลัยอุบลราชธานีครับ" }
     ]
   },
   "ubon-ratchathani": {
@@ -231,8 +228,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 15.2448, lng: 104.8473 },
     zones: ["ตัวเมืองอุบล", "วารินชำราบ", "ม.อุบล", "ดอนกลาง", "เซ็นทรัลอุบล", "ชยางกูร"],
     faqs: [
-      { q: "สาวรับงานอุบลราชธานี นัดหมายแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือตัวเมืองอุบล, ย่านถนนชยางกูร, วารินชำราบ และรอบมหาวิทยาลัยอุบลราชธานีครับ" },
-      { q: "การนัดหมายไซด์ไลน์อุบลราชธานี ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้า 100% เจอน้องตัวจริงหน้างาน ตรวจสอบความตรงปกแล้วค่อยชำระค่าบริการครับ" }
+      { q: "สาวรับงานอุบลราชธานี นัดหมายแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือตัวเมืองอุบล, ย่านถนนชยางกูร, วารินชำราบ และรอบมหาวิทยาลัยอุบลราชธานีครับ" }
     ]
   },
   ubon: {
@@ -248,8 +244,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 14.9799, lng: 102.0978 },
     zones: ["ตัวเมืองโคราช", "ตลาดเซฟวัน", "จอหอ", "มทส.", "เดอะมอลล์โคราช", "เซ็นทรัลโคราช"],
     faqs: [
-      { q: "สาวรับงานโคราช นครราชสีมา นัดหมายโซนไหนสะดวก?", a: "ย่านเซฟวัน, จอหอ, ตัวเมืองโคราช และละแวก มทส. มีน้องๆ สแตนด์บายพร้อมบริการอย่างสะดวกรวดเร็วครับ" },
-      { q: "ไซด์ไลน์โคราช ต้องโอนเงินก่อนพบตัวไหม?", a: "ไม่มีนโยบายโอนเงินก่อนทุกกรณีครับ เจอน้องตัวจริงตรงปกหน้างานแล้วค่อยจ่ายเงินครับ" }
+      { q: "สาวรับงานโคราช นครราชสีมา นัดหมายโซนไหนสะดวก?", a: "ย่านเซฟวัน, จอหอ, ตัวเมืองโคราช และละแวก มทส. มีน้องๆ สแตนด์บายพร้อมบริการอย่างสะดวกรวดเร็วครับ" }
     ]
   },
   "nakhon-ratchasima": {
@@ -301,8 +296,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา"],
     faqs: [
-      { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนสำคัญ เช่น สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ, สาทร และบางนา สะดวกและเป็นส่วนตัวครับ" },
-      { q: "ไซด์ไลน์ กทม จ่ายเงินอย่างไร?", a: "ชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกเท่านั้น ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณีครับ" }
+      { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนสำคัญ เช่น สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ, สาทร และบางนา สะดวกและเป็นส่วนตัวครับ" }
     ]
   },
   bkk: {
@@ -318,8 +312,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.3611, lng: 100.9847 },
     zones: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "จอมเทียน", "อมตะนคร", "แหลมฉบัง"],
     faqs: [
-      { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนทุกกรณีครับ" },
-      { q: "ไซด์ไลน์ชลบุรี ครอบคลุมโซนอมตะนครและศรีราชาไหม?", a: "ครอบคลุมทั้งโซนพัทยา, บางแสน, ศรีราชา, นิคมอมตะนคร และตัวเมืองชลบุรีครับ" }
+      { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนทุกกรณีครับ" }
     ]
   },
   pattaya: {
@@ -327,8 +320,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 12.9276, lng: 100.8771 },
     zones: ["พัทยากลาง", "พัทยาเหนือ", "พัทยาใต้", "หาดจอมเทียน", "นาเกลือ", "เขาพระตำหนัก", "วงศ์อมาตย์"],
     faqs: [
-      { q: "สาวรับงานพัทยา สแตนด์บายโซนไหนบ้าง?", a: "มีน้องๆ พร้อมดูแลตลอดแนวชายหาดพัทยา, จอมเทียน, วงศ์อมาตย์ และโรงแรมชั้นนำในพัทยาทุกโซนครับ" },
-      { q: "จองไซด์ไลน์พัทยา มีค่ามัดจำล่วงหน้าไหม?", a: "ไม่มีค่ามัดจำล่วงหน้าครับ นัดพบเจอน้องตัวจริงตรงปกหน้างานแล้วค่อยชำระค่าบริการครับ" }
+      { q: "สาวรับงานพัทยา สแตนด์บายโซนไหนบ้าง?", a: "มีน้องๆ พร้อมดูแลตลอดแนวชายหาดพัทยา, จอมเทียน, วงศ์อมาตย์ และโรงแรมชั้นนำในพัทยาทุกโซนครับ" }
     ]
   },
   rayong: {
@@ -336,8 +328,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 12.6814, lng: 101.2816 },
     zones: ["ตัวเมืองระยอง", "มาบตาพุด", "ปลวกแดง", "หาดแม่รำพึง", "บ้านฉาง", "แหลมแม่พิมพ์"],
     faqs: [
-      { q: "สาวรับงานระยอง โซนมาบตาพุดและปลวกแดงนัดอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมบริการทั้งในเขตนิคมมาบตาพุด ปลวกแดง ตัวเมืองระยอง และบ้านฉางครับ" },
-      { q: "ไซด์ไลน์ระยอง ปลอดภัยไม่มัดจำจริงไหม?", a: "จริงแท้ 100% ครับ จ่ายหน้างานกับน้องโดยตรง ไม่มีการขอโอนเงินก่อนล่วงหน้าครับ" }
+      { q: "สาวรับงานระยอง โซนมาบตาพุดและปลวกแดงนัดอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมบริการทั้งในเขตนิคมมาบตาพุด ปลวกแดง ตัวเมืองระยอง และบ้านฉางครับ" }
     ]
   },
   ayutthaya: {
@@ -345,8 +336,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 14.3532, lng: 100.5684 },
     zones: ["ตัวเมืองอยุธยา", "นิคมโรจนะ", "วังน้อย", "บางปะอิน", "เซ็นทรัลอยุธยา", "อุทัย"],
     faqs: [
-      { q: "สาวรับงานอยุธยา โซนนิคมโรจนะและวังน้อยนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งโซนนิคมโรจนะ วังน้อย บางปะอิน และเขตตัวเมืองอยุธยาครับ" },
-      { q: "ไซด์ไลน์อยุธยา จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระค่าบริการ ปลอดภัยไร้กังวล 100% ครับ" }
+      { q: "สาวรับงานอยุธยา โซนนิคมโรจนะและวังน้อยนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งโซนนิคมโรจนะ วังน้อย บางปะอิน และเขตตัวเมืองอยุธยาครับ" }
     ]
   },
   "phra-nakhon-si-ayutthaya": {
@@ -390,8 +380,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 7.8804, lng: 98.3923 },
     zones: ["ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์"],
     faqs: [
-      { q: "นัดหมายสาวรับงานภูเก็ต ป่าตอง จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีครับ" },
-      { q: "เพื่อนเที่ยวภูเก็ต ให้บริการโซนไหนบ้าง?", a: "ครอบคลุมหาดป่าตอง, กะทู้, ตัวเมืองภูเก็ต, หาดบางเทา และโรงแรมชั้นนำทั่วเกาะภูเก็ตครับ" }
+      { q: "นัดหมายสาวรับงานภูเก็ต ป่าตอง จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีครับ" }
     ]
   },
   suratthani: {
@@ -399,8 +388,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 9.1382, lng: 99.3215 },
     zones: ["ตัวเมืองสุราษฎร์", "เกาะสมุย", "เฉวง", "ละไม", "เกาะพะงัน", "พุนพิน", "เซ็นทรัลสุราษฎร์"],
     faqs: [
-      { q: "สาวรับงานสุราษฎร์ธานี และเกาะสมุย นัดหมายอย่างไร?", a: "มีน้องๆ สแตนด์บายทั้งในตัวเมืองสุราษฎร์ธานี และโซนหาดเฉวง หาดละไม บนเกาะสมุยครับ" },
-      { q: "ไซด์ไลน์เกาะสมุย สุราษฎร์ ต้องโอนมัดจำไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้า 100% เจอตัวจริงหน้างานแล้วค่อยชำระค่าบริการครับ" }
+      { q: "สาวรับงานสุราษฎร์ธานี และเกาะสมุย นัดหมายอย่างไร?", a: "มีน้องๆ สแตนด์บายทั้งในตัวเมืองสุราษฎร์ธานี และโซนหาดเฉวง หาดละไม บนเกาะสมุยครับ" }
     ]
   },
   "surat-thani": {
@@ -424,8 +412,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 7.1898, lng: 100.5954 },
     zones: ["หาดใหญ่", "ตัวเมืองสงขลา", "รอบ ม.อ.", "ด่านนอก", "สะเดา", "เซ็นทรัลหาดใหญ่"],
     faqs: [
-      { q: "สาวรับงานหาดใหญ่ สงขลา นัดหมายแถวไหนสะดวก?", a: "ย่านใจกลางเมืองหาดใหญ่, รอบมหาวิทยาลัยสงขลานครินทร์ (ม.อ.) และโซนด่านนอกสะเดา มีน้องๆ พร้อมบริการครับ" },
-      { q: "ไซด์ไลน์หาดใหญ่ ปลอดภัยจ่ายหน้างานไหม?", a: "ปลอดภัย 100% ตรวจสอบความตรงปกหน้างานแล้วจึงชำระเงิน ไม่มีโอนเงินก่อนครับ" }
+      { q: "สาวรับงานหาดใหญ่ สงขลา นัดหมายแถวไหนสะดวก?", a: "ย่านใจกลางเมืองหาดใหญ่, รอบมหาวิทยาลัยสงขลานครินทร์ (ม.อ.) และโซนด่านนอกสะเดา มีน้องๆ พร้อมบริการครับ" }
     ]
   },
   hatyai: {
@@ -433,8 +420,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 7.0084, lng: 100.4767 },
     zones: ["ตัวเมืองหาดใหญ่", "รอบ ม.อ.", "ลีการ์เดนส์", "เซ็นทรัลหาดใหญ่", "ด่านนอก", "คอหงส์"],
     faqs: [
-      { q: "สาวรับงานหาดใหญ่ นัดหมายแถวไหนสะดวก?", a: "ย่านใจกลางเมืองหาดใหญ่, รอบ ม.อ. และเซ็นทรัลเฟสติวัลหาดใหญ่ เป็นจุดนัดพบยอดนิยมครับ" },
-      { q: "ไซด์ไลน์หาดใหญ่ ปลอดภัยจ่ายหน้างานไหม?", a: "ปลอดภัย 100% ตรวจสอบความตรงปกหน้างานแล้วจึงชำระเงิน ไม่มีโอนเงินก่อนครับ" }
+      { q: "สาวรับงานหาดใหญ่ นัดหมายแถวไหนสะดวก?", a: "ย่านใจกลางเมืองหาดใหญ่, รอบ ม.อ. และเซ็นทรัลเฟสติวัลหาดใหญ่ เป็นจุดนัดพบยอดนิยมครับ" }
     ]
   },
   "hat-yai": {
@@ -478,8 +464,7 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "หาดใหญ่"],
     faqs: [
-      { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" },
-      { q: "First Model Hub ครอบคลุมพื้นที่ใดบ้างทั่วประเทศ?", a: "ครอบคลุม 77 จังหวัดทั่วไทย โดยเฉพาะเมืองท่องเที่ยวและหัวเมืองเศรษฐกิจหลัก เช่น กรุงเทพฯ, เชียงใหม่, พัทยา, ภูเก็ต, ขอนแก่น และหาดใหญ่ครับ" }
+      { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" }
     ]
   },
   default: {
@@ -487,13 +472,11 @@ const PROVINCE_SEO_DATA = {
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "หาดใหญ่"],
     faqs: [
-      { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" },
-      { q: "First Model Hub ครอบคลุมพื้นที่ใดบ้างทั่วประเทศ?", a: "ครอบคลุม 77 จังหวัดทั่วไทย โดยเฉพาะเมืองท่องเที่ยวและหัวเมืองเศรษฐกิจหลัก เช่น กรุงเทพฯ, เชียงใหม่, พัทยา, ภูเก็ต, ขอนแก่น และหาดใหญ่ครับ" }
+      { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" }
     ]
   }
 };
 
-// เติมค่า Default ให้กับทุกจังหวัดป้องกัน Error
 Object.keys(PROVINCE_SEO_DATA).forEach(key => {
   if (key !== "default") {
     PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
@@ -503,7 +486,7 @@ Object.keys(PROVINCE_SEO_DATA).forEach(key => {
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
   return text
-    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1") // ตัดสระ/วรรณยุกต์ซ้อน (เช่น เจ็็ดยอด)
+    .replace(/([\u0E31\u0E34-\u0E3A\u0E47-\u0E4E])\1+/g, "$1")
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
@@ -535,7 +518,6 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-// 🟢 แก้ไข Signature ให้เหมือนกันทุกไฟล์: optimizeImg(path, width, height)
 function optimizeImg(path, width = 400, height = 500) {
   if (!path || typeof path !== "string" || !path.trim()) {
     return CONFIG.DEFAULT_OG_IMAGE;
@@ -600,7 +582,6 @@ function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
   return formatted;
 }
 
-// 🟢 แก้ไขฟังก์ชัน getDynamicIntro ใน ssr-province.js เป็นโค้ดนี้:
 function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
   let cleanZones = zones && Array.isArray(zones) ? zones.filter(z => z && z !== "ทั้งหมด") : [];
   const locationUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
@@ -620,7 +601,7 @@ function getDynamicReviews(provinceName) {
   return [
     {
       author: "คุณชลสิทธิ์",
-      initial: "C", // ใช้อักษรภาษาอังกฤษหรือชื่อย่อที่อ่านง่าย
+      initial: "C",
       location: isChiangMai ? "ย่านนิมมาน เชียงใหม่" : `ตัวเมือง${provinceName}`,
       text: isChiangMai
         ? "นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ"
@@ -710,7 +691,6 @@ const renderCardHtml = (p, index, total, provinceName) => {
     priceStr = isNaN(p.rate) ? escapeHTML(p.rate).trim() : `${Number(p.rate).toLocaleString()}.-`;
   }
 
-  // 🌟 ระบบป้ายกำกับขวาบนแบบใหม่ (ลบดาวและ VIP ออก 100%)
   let rightBadgeHtml = "";
   if (index < 2) {
     rightBadgeHtml = `<span class="badge-hot-tag">#${index + 1} HOT 🔥</span>`;
@@ -737,14 +717,12 @@ const renderCardHtml = (p, index, total, provinceName) => {
           <div class="profile-card-gradient-overlay"></div>
 
           <div class="profile-card-badges-top">
-              <!-- 🌟 ป้ายซ้ายบน: แสดงแค่สถานะ รับงาน/สอบถามคิว -->
               <div class="badges-left">
                   <span class="badge-status ${statusClass}">
                       <span class="status-dot"></span>
                       <span>${availStatus}</span>
                   </span>
               </div>
-              <!-- 🌟 ป้ายขวาบน: แสดง HOT / VERIFIED 100% / ตรงปก -->
               <div class="badges-right">
                   ${rightBadgeHtml}
               </div>
@@ -790,6 +768,31 @@ export default async (req, context) => {
   const primaryDomain = CONFIG.PRIMARY_DOMAIN;
   const hostname = url.hostname.toLowerCase();
 
+  // =========================================================================
+  // ⚡ 1. คำสั่งล้างแคชด้วยตนเอง (Manual Purge URL ทางลัดสำหรับแอดมิน)
+  // =========================================================================
+  if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
+    const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
+    if (secret === PURGE_SECRET_KEY) {
+      PAGE_CACHE.clear();
+      TEMPLATE_HTML_CACHE = null;
+      GLOBAL_LAST_TIMESTAMP = `manual_${Date.now()}`;
+      return new Response(JSON.stringify({
+        success: true,
+        message: "⚡ All SSR & HTML In-Memory Caches Purged Successfully!",
+        purged_at: new Date().toISOString(),
+        version: GLOBAL_LAST_TIMESTAMP
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" }
+      });
+    }
+    return new Response(JSON.stringify({ error: "Unauthorized: Invalid Secret Key" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json; charset=utf-8" }
+    });
+  }
+
   // จัดการ 301 Redirect สำหรับโดเมนสำรอง
   if (hostname.includes("sidelinechiangmai.netlify.app")) {
     return url.pathname === "/" || url.pathname === "/index.html"
@@ -800,14 +803,13 @@ export default async (req, context) => {
     return Response.redirect(`${primaryDomain}${url.pathname}${url.search}`, 301);
   }
 
-// Bypass สำหรับ Static Assets
+  // Bypass สำหรับ Static Assets
   if (req.headers.get("x-ssr-bypass") === "true" || STATIC_EXT_REGEX.test(url.pathname)) {
     return await context.next();
   }
 
   const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
   
-  // 🟢 เพิ่ม "/sideline" และ "/profile" เข้าไปใน Array ด้านล่างนี้ครับ
   if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/llms.txt", "/sideline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
     return await context.next();
   }
@@ -816,34 +818,39 @@ export default async (req, context) => {
     return Response.redirect(`${primaryDomain}/`, 301);
   }
 
-  // ระบบตรวจจับ Cache อัจฉริยะ
+  // =========================================================================
+  // ⚡ 2. ระบบตรวจจับการเปลี่ยนแปลงฐานข้อมูลอัตโนมัติ (Self-Healing Auto Cache)
+  // =========================================================================
   const now = Date.now();
   const isForcedPurge = url.searchParams.has("refresh") || url.searchParams.has("purge") || url.searchParams.has("clear_cache");
+  
   if (isForcedPurge) {
     PAGE_CACHE.clear();
     GLOBAL_LAST_TIMESTAMP = `forced_${now}`;
   }
 
   const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-  if (!isForcedPurge && now - LAST_PROBE_TIME > 15000) {
+
+  // 🟢 ตรวจสอบฐานข้อมูลอัตโนมัติทุกๆ 30 วินาทีแบบประหยัดโควต้า (ไม่เกินขีดจำกัด Free Tier แน่นอน)
+  if (!isForcedPurge && now - LAST_PROBE_TIME > AUTO_CHECK_INTERVAL_MS) {
     LAST_PROBE_TIME = now;
     try {
-      const { data: latestProfile } = await supabase
-        .from("profiles")
-        .select("lastUpdated, created_at")
-        .order("lastUpdated", { ascending: false, nullsFirst: false })
-        .limit(1)
-        .maybeSingle();
-      const latestTs = latestProfile?.lastUpdated || latestProfile?.created_at || "v1";
+      const [{ count }, { data: latestProfile }] = await Promise.all([
+        supabase.from("profiles").select("*", { count: "exact", head: true }).eq("active", true),
+        supabase.from("profiles").select("lastUpdated, created_at").eq("active", true).order("lastUpdated", { ascending: false, nullsFirst: false }).limit(1).maybeSingle()
+      ]);
+
+      const latestTs = `${count || 0}_${latestProfile?.lastUpdated || latestProfile?.created_at || "v1"}`;
       if (latestTs !== GLOBAL_LAST_TIMESTAMP) {
-        PAGE_CACHE.clear();
+        PAGE_CACHE.clear(); // ล้างแคชทันทีเมื่อพบว่ามีการ เพิ่ม/ลบ/แก้ไข ในหลังบ้าน
         GLOBAL_LAST_TIMESTAMP = latestTs;
       }
     } catch {
-      // Ignored probe error
+      // ป้องกัน Error หากการเชื่อมต่อขัดข้อง
     }
   }
 
+  // 🟢 เสิร์ฟจาก RAM แคชทันทีหากไม่มีการเปลี่ยนแปลง (Supabase ไม่ถูกเรียก = 0 Request)
   const cacheKey = `${req.method}:${url.pathname}`;
   const cachedPage = PAGE_CACHE.get(cacheKey);
   if (!isForcedPurge && cachedPage && cachedPage.version === GLOBAL_LAST_TIMESTAMP) {
@@ -921,9 +928,9 @@ export default async (req, context) => {
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
     
     const canonicalUrl = isNational ? primaryDomain : `${primaryDomain}/location/${provinceSlug}`;
-const heroImage = profilesList.length > 0 && (profilesList[0].imagePath || profilesList[0].image_url)
-  ? optimizeImg(profilesList[0].imagePath || profilesList[0].image_url, 1200, 630)
-  : CONFIG.DEFAULT_OG_IMAGE;
+    const heroImage = profilesList.length > 0 && (profilesList[0].imagePath || profilesList[0].image_url)
+      ? optimizeImg(profilesList[0].imagePath || profilesList[0].image_url, 1200, 630)
+      : CONFIG.DEFAULT_OG_IMAGE;
 
     // ประมวลผลรีวิว
     const dbReviews = reviewsRes?.data || [];
@@ -937,8 +944,6 @@ const heroImage = profilesList.length > 0 && (profilesList[0].imagePath || profi
           datePublished: r.created_at ? new Date(r.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]
         }))
       : getDynamicReviews(provinceNameThai);
-
-    const topModelsList = profilesList.slice(0, 5).map(p => `น้อง${(p.name || "").replace(/^น้อง/, "").trim()}${p.age ? ` (${p.age}ปี)` : ""}${p.location ? ` - ${sanitizeThaiText(p.location)}` : ""}`).join(" | ");
 
     let metaTitle = "";
     let metaDescription = "";
@@ -1073,29 +1078,29 @@ const heroImage = profilesList.length > 0 && (profilesList[0].imagePath || profi
     const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i, 0, provinceNameThai)).join("");
     const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i, 0, provinceNameThai)).join("");
     
-const reviewsHtml = activeReviews.map(r => {
-  const avatarLetter = r.initial || (r.author ? r.author.replace(/^คุณ/, "").trim().charAt(0) : "V");
-  const cleanText = stripHTML(r.text).replace(/^["']|["']$/g, "");
+    const reviewsHtml = activeReviews.map(r => {
+      const avatarLetter = r.initial || (r.author ? r.author.replace(/^คุณ/, "").trim().charAt(0) : "V");
+      const cleanText = stripHTML(r.text).replace(/^["']|["']$/g, "");
 
-  return `
-    <div class="review-card-item">
-        <div class="review-card-header">
-          <div class="review-user-info">
-            <div class="review-avatar-circle">${escapeHTML(avatarLetter)}</div>
-            <div>
-              <div class="review-username">${escapeHTML(r.author)}</div>
-              <div class="review-user-loc">นัดเจอใน${escapeHTML(r.location)}</div>
+      return `
+        <div class="review-card-item">
+            <div class="review-card-header">
+              <div class="review-user-info">
+                <div class="review-avatar-circle">${escapeHTML(avatarLetter)}</div>
+                <div>
+                  <div class="review-username">${escapeHTML(r.author)}</div>
+                  <div class="review-user-loc">นัดเจอใน${escapeHTML(r.location)}</div>
+                </div>
+              </div>
+              <div class="review-stars-list">
+                ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};"></i>`).join("")}
+              </div>
             </div>
-          </div>
-          <div class="review-stars-list">
-            ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};"></i>`).join("")}
-          </div>
+            <p class="review-comment-body">"${escapeHTML(cleanText)}"</p>
+            <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
         </div>
-        <p class="review-comment-body">"${escapeHTML(cleanText)}"</p>
-        <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
-    </div>
-  `;
-}).join("");
+      `;
+    }).join("");
 
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
@@ -1115,12 +1120,15 @@ const reviewsHtml = activeReviews.map(r => {
         }).join("")
       : "";
 
+    // =========================================================================
+    // 🏗️ ประกอบและแทนที่เนื้อหา HTML แบบสมบูรณ์แบบ (FULL HYDRATION & SEO)
+    // =========================================================================
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) {
       return await context.next();
     }
 
-    // 1. แทรก Meta Tags
+    // 1. แทรก Meta Title & Description
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -1128,10 +1136,24 @@ const reviewsHtml = activeReviews.map(r => {
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
     
-    finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
-    finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
+    // 🟢 2. แทนที่ Canonical URL และ Open Graph (แก้ปัญหา Canonical ซ้ำซ้อน 100%)
+    finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
+    finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
+    finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
+    finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
+    finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 2. ปรับแต่ง Hreflang Tags
+    // 🟢 3. ปรับแต่ง H1 & H2 ฝั่ง SSR ให้เป็นชื่อจังหวัดจริงทันที (สำคัญสูงสุดต่อ Google SEO)
+    const ssrH1Html = `
+      <span class="seo-sub-headline">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span><br>
+      <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
+    `;
+    finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="hero-h1" class="seo-h1-title">${ssrH1Html}</h1>`);
+    
+    const ssrFeaturedH2 = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
+    finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
+
+    // 4. ปรับแต่ง Hreflang Tags สำหรับระบบหลายภาษา
     if (isNational) {
       finalHtml = finalHtml.replace(
         /<link\s+rel=["']alternate["']\s+hreflang=["']en["'][^>]*>/i,
@@ -1141,24 +1163,24 @@ const reviewsHtml = activeReviews.map(r => {
       finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']en["'][^>]*>\s*/gi, "");
     }
 
-    // 3. แทรก Schema JSON-LD
+    // 5. แทรก Schema.org JSON-LD (Rich Snippets & Google Graph)
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     const schemaTag = `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`;
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, schemaTag);
 
-    // 4. แทนที่ข้อความ Placeholders
+    // 6. แทนที่ Placeholders ทั่วไป
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
     finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    // 5. แทนที่เนื้อหา SEO Intro
+    // 7. แทนที่เนื้อหา SEO Intro
     finalHtml = finalHtml.replace(
       /<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i,
       `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`
     );
 
-    // 6. แทรก FAQs และ Reviews
+    // 8. แทรก FAQs และ Reviews ประจำพื้นที่
     if (faqsHtml) {
       finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     }
@@ -1166,7 +1188,7 @@ const reviewsHtml = activeReviews.map(r => {
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // 7. สไลด์ HOT Swiper
+    // 9. สไลด์ HOT Swiper
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -1193,7 +1215,7 @@ const reviewsHtml = activeReviews.map(r => {
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
-    // 8. จัดการส่วน Featured Profiles VIP (รองรับทั้ง index.html เดิม และ index.html ใหม่ที่ล้างแท็กแล้ว)
+    // 10. จัดการส่วน Featured Profiles VIP (แสดงเฉพาะหน้าแรกทั่วไทย)
     if (isNational) {
       if (finalHtml.includes("{{PROFILES_CARDS_HTML}}")) {
         finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml || "");
@@ -1207,7 +1229,7 @@ const reviewsHtml = activeReviews.map(r => {
       finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
-    // 9. แสดงผล Grid รายชื่อน้องๆ ใน Display Area
+    // 11. แสดงผล Grid รายชื่อน้องๆ ใน Display Area
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -1277,7 +1299,7 @@ const reviewsHtml = activeReviews.map(r => {
       );
     }
 
-    // 10. Dropdown ค้นหาจังหวัด
+    // 12. Dropdown ค้นหาจังหวัด
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
@@ -1285,14 +1307,15 @@ const reviewsHtml = activeReviews.map(r => {
     
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-    // 11. รายชื่อลิงก์จังหวัดยอดนิยมใน Footer
+    // 13. รายชื่อลิงก์จังหวัดยอดนิยมใน Footer
     if (popularLocationsFooter) {
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsFooter}</ul>`);
     }
 
+    // 14. แก้ไข Relative Path ให้โหลดไฟล์ Static ผ่าน Root เสมอ
     finalHtml = finalHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
-    // 12. Serialization ข้อมูลโปรไฟล์สำหรับ Client-side Hydration
+    // 15. Serialization ข้อมูลสำหรับ Client-side Hydration
     const provinceMap = new Map();
     (allProvincesRes?.data || []).forEach(p => {
       const k = (p.key || p.slug || p.id || "").toString().toLowerCase();
@@ -1361,12 +1384,13 @@ const reviewsHtml = activeReviews.map(r => {
       ? finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript)
       : finalHtml.replace(/<\/head>/i, `${ssrDataScript}\n</head>`);
 
-    // 🟢 13. Safety Net: กวาดล้างแท็ก {{...}} ที่อาจหลงเหลือทิ้ง 100% ป้องกันการหลุดสู่หน้าจอ
+    // 16. Safety Net: ล้าง Placeholder {{...}} ตกค้างทั้งหมด
     finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
+    // 17. Response Headers (เซฟ Supabase Free Tier และอัปเดตข้อมูลไว)
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=31536000, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=30",
       "ETag": `"${GLOBAL_LAST_TIMESTAMP}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",

@@ -569,7 +569,7 @@ const schemaGraph = {
     return new Response(htmlResponse, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+"Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "X-XSS-Protection": "1; mode=block",
