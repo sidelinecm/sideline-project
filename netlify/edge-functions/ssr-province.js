@@ -800,15 +800,18 @@ export default async (req, context) => {
     return Response.redirect(`${primaryDomain}${url.pathname}${url.search}`, 301);
   }
 
-  // Bypass สำหรับ Static Assets
+// Bypass สำหรับ Static Assets
   if (req.headers.get("x-ssr-bypass") === "true" || STATIC_EXT_REGEX.test(url.pathname)) {
     return await context.next();
   }
 
   const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
-  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/llms.txt"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
+  
+  // 🟢 เพิ่ม "/sideline" และ "/profile" เข้าไปใน Array ด้านล่างนี้ครับ
+  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/llms.txt", "/sideline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
     return await context.next();
   }
+
   if (url.pathname === "/index.html") {
     return Response.redirect(`${primaryDomain}/`, 301);
   }
@@ -1113,8 +1116,11 @@ const reviewsHtml = activeReviews.map(r => {
       : "";
 
     let finalHtml = await getTemplateHtml(url, context);
+    if (!finalHtml) {
+      return await context.next();
+    }
 
-    // แทรก Meta Tags
+    // 1. แทรก Meta Tags
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -1125,31 +1131,34 @@ const reviewsHtml = activeReviews.map(r => {
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
     finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
 
-    // ✅ แก้ไข Hreflang ไม่ให้ Error ชี้ข้ามหน้าผิดคู่
+    // 2. ปรับแต่ง Hreflang Tags
     if (isNational) {
       finalHtml = finalHtml.replace(
         /<link\s+rel=["']alternate["']\s+hreflang=["']en["'][^>]*>/i,
         `<link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />`
       );
     } else {
-      // หน้าจังหวัดย่อย ตัด hreflang="en" ออกเพื่อป้องกัน Search Console แจ้ง Error
       finalHtml = finalHtml.replace(/<link\s+rel=["']alternate["']\s+hreflang=["']en["'][^>]*>\s*/gi, "");
     }
 
-    // แทรก Schema JSON-LD
+    // 3. แทรก Schema JSON-LD
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     const schemaTag = `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`;
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, schemaTag);
 
-    // แทนที่ Placeholders
+    // 4. แทนที่ข้อความ Placeholders
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
-    finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", totalCount);
-    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr);
+    finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", String(totalCount));
+    finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
     finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
-finalHtml = finalHtml.replace(
-  /<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i,
-  `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`
-);
+
+    // 5. แทนที่เนื้อหา SEO Intro
+    finalHtml = finalHtml.replace(
+      /<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i,
+      `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`
+    );
+
+    // 6. แทรก FAQs และ Reviews
     if (faqsHtml) {
       finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     }
@@ -1157,12 +1166,12 @@ finalHtml = finalHtml.replace(
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // Swiper HOT Cards
+    // 7. สไลด์ HOT Swiper
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
       const slug = encodeURIComponent(p.slug || p.id);
-     const img = optimizeImg(p.imagePath || p.image_url || "", 400, 500);
+      const img = optimizeImg(p.imagePath || p.image_url || "", 400, 500);
       const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
       
       return `
@@ -1184,11 +1193,21 @@ finalHtml = finalHtml.replace(
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
-    finalHtml = isNational
-      ? replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml)
-      : finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+    // 8. จัดการส่วน Featured Profiles VIP (รองรับทั้ง index.html เดิม และ index.html ใหม่ที่ล้างแท็กแล้ว)
+    if (isNational) {
+      if (finalHtml.includes("{{PROFILES_CARDS_HTML}}")) {
+        finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", featuredCardsHtml || "");
+      } else {
+        finalHtml = finalHtml.replace(
+          /<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i,
+          `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`
+        );
+      }
+    } else {
+      finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+    }
 
-    // แสดงผล Grid ตามโครงสร้าง
+    // 9. แสดงผล Grid รายชื่อน้องๆ ใน Display Area
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -1199,8 +1218,8 @@ finalHtml = finalHtml.replace(
       }, {});
 
       const sortedProvinceKeys = Object.keys(groupedByProvince).sort((a, b) => {
-        const nameA = PROVINCE_SEO_DATA[a]?.name || a;
-        const nameB = PROVINCE_SEO_DATA[b]?.name || b;
+        const nameA = String(PROVINCE_SEO_DATA[a]?.name || a || "");
+        const nameB = String(PROVINCE_SEO_DATA[b]?.name || b || "");
         return nameA.localeCompare(nameB, "th");
       });
 
@@ -1249,27 +1268,33 @@ finalHtml = finalHtml.replace(
       `;
     }
 
-    finalHtml = finalHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")
-      ? replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaHtml)
-      : finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>\s*<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
+    if (finalHtml.includes("{{PROFILES_DISPLAY_AREA_HTML}}")) {
+      finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", displayAreaHtml);
+    } else {
+      finalHtml = finalHtml.replace(
+        /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i,
+        `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`
+      );
+    }
 
-    // Dropdown ค้นหาจังหวัด
-    const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes.data || []).map(p => {
+    // 10. Dropdown ค้นหาจังหวัด
+    const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
     }).join("");
     
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
+    // 11. รายชื่อลิงก์จังหวัดยอดนิยมใน Footer
     if (popularLocationsFooter) {
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsFooter}</ul>`);
     }
 
     finalHtml = finalHtml.replace(/(href|src|data-src)=["'](?!https?:\/\/|\/\/|\/|data:|blob:|#|javascript:|mailto:|tel:|\{\{)([^"']+)["']/gi, '$1="/$2"');
 
-    // Serialization โปรไฟล์เข้า Window Object
+    // 12. Serialization ข้อมูลโปรไฟล์สำหรับ Client-side Hydration
     const provinceMap = new Map();
-    (allProvincesRes.data || []).forEach(p => {
+    (allProvincesRes?.data || []).forEach(p => {
       const k = (p.key || p.slug || p.id || "").toString().toLowerCase();
       const n = p.nameThai || p.name_thai || p.name;
       if (k && n) provinceMap.set(k, n);
@@ -1318,7 +1343,7 @@ finalHtml = finalHtml.replace(
       };
     })).replace(/</g, "\\u003c");
 
-    const serializedProvinces = (allProvincesRes.data || []).map(p => ({
+    const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),
       nameThai: p.nameThai || p.name_thai || p.name
     }));
@@ -1335,6 +1360,9 @@ finalHtml = finalHtml.replace(
     finalHtml = finalHtml.includes('<script id="ssr-profiles-data">')
       ? finalHtml.replace(/<script id="ssr-profiles-data">[\s\S]*?<\/script>/i, ssrDataScript)
       : finalHtml.replace(/<\/head>/i, `${ssrDataScript}\n</head>`);
+
+    // 🟢 13. Safety Net: กวาดล้างแท็ก {{...}} ที่อาจหลงเหลือทิ้ง 100% ป้องกันการหลุดสู่หน้าจอ
+    finalHtml = finalHtml.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
 
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
