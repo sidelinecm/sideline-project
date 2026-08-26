@@ -54,7 +54,7 @@
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   
   <link rel="modulepreload" href="/main.js">
- <link rel="stylesheet" href="/styles.css?v=2.0">
+ <link rel="stylesheet" href="/styles.css">
 
   <script type="application/ld+json" id="dynamic-schema">
   {
@@ -564,12 +564,13 @@
 </script>
 
 <script type="module" src="/main.js?v=2.0"></script>
+<!-- ปิดและล้าง Service Worker เก่าทิ้ง 100% -->
 <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').catch(function(err) {
-        console.warn('SW Registration failed: ', err);
-      });
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
     });
   }
 </script>

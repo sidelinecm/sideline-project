@@ -616,12 +616,13 @@
 
 <script type="module" src="/main.js"></script>
 
+
 <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').catch(function(err) {
-        console.warn('SW Registration failed: ', err);
-      });
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
     });
   }
 </script>

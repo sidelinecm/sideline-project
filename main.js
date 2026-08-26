@@ -1408,7 +1408,7 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
       }, { passive: true });
     })();
 
-    // Initial Data Fetch
+// Initial Data Fetch (Clean No-LocalStorage Version)
     await (async function initializeData() {
       if (appState.isFetching) return false;
       appState.isFetching = true;
@@ -1424,11 +1424,9 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
           });
         }
 
+        // 🟢 ดึงจาก SSR ทันที (ไม่ต้องผ่าน LocalStorage)
         if (window.profilesData && Array.isArray(window.profilesData) && window.profilesData.length > 0) {
           appState.allProfiles = window.profilesData.map(normalizeProfile).filter(Boolean);
-          try {
-            localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(window.profilesData));
-          } catch (_) {}
           populateInitialComponents();
           return true;
         }
@@ -1452,26 +1450,12 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
 
         if (profilesRes.data && profilesRes.data.length > 0) {
           appState.allProfiles = profilesRes.data.map(normalizeProfile).filter(Boolean);
-          try {
-            localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(profilesRes.data));
-          } catch (_) {}
           populateInitialComponents();
           return true;
         }
         return false;
       } catch (fetchErr) {
-        console.warn("Recovering from cache...", fetchErr);
-        try {
-          const cachedStr = localStorage.getItem(CACHE_STORAGE_KEY);
-          if (cachedStr) {
-            const parsedData = JSON.parse(cachedStr);
-            if (Array.isArray(parsedData) && parsedData.length > 0) {
-              appState.allProfiles = parsedData.map(normalizeProfile).filter(Boolean);
-              populateInitialComponents();
-              return true;
-            }
-          }
-        } catch (_) {}
+        console.error("Data Fetch Error:", fetchErr);
         domCache.fetchErrorMessage?.classList.remove("hidden");
         return false;
       } finally {
