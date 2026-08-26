@@ -948,11 +948,13 @@ export default async (req, context) => {
     let metaTitle = "";
     let metaDescription = "";
     if (isNational) {
-      metaTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% (🟢 พร้อมรับงานทั่วไทย) | First Model Hub";
-      metaDescription = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น เพื่อนเที่ยวฟิวแฟนพรีเมียมทั่วไทย เชียงใหม่ ขอนแก่น เชียงราย ลำปาง การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มีโอนมัดจำ";
+      
+      metaTitle = "สาวรับงาน ไซด์ไลน์ ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub";
+      metaDescription = "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ";
     } else {
-     metaTitle = "สาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% | First Model Hub";
-      metaDescription = customMetadata?.desc || `ศูนย์รวมสาวรับงาน${provinceNameThai} และเพื่อนเที่ยวไซด์ไลน์ฟิวแฟน คัดสรรเฉพาะตัวจริงตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด ${provinceNameThai}`;
+      
+      metaTitle = `สาวรับงาน${provinceNameThai} ไซด์ไลน์ ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub`;
+      metaDescription = `ศูนย์รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`;
     }
 
     const cleanMetaDesc = stripHTML(metaDescription);
