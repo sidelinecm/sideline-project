@@ -928,11 +928,8 @@ export default async (req, context) => {
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
     
     const canonicalUrl = isNational ? primaryDomain : `${primaryDomain}/location/${provinceSlug}`;
-    const heroImage = profilesList.length > 0 && (profilesList[0].imagePath || profilesList[0].image_url)
-      ? optimizeImg(profilesList[0].imagePath || profilesList[0].image_url, 1200, 630)
-      : CONFIG.DEFAULT_OG_IMAGE;
+const heroImage = CONFIG.DEFAULT_OG_IMAGE;
 
-    // ประมวลผลรีวิว
     const dbReviews = reviewsRes?.data || [];
     let activeReviews = dbReviews.length > 0
       ? dbReviews.map(r => ({
@@ -1131,11 +1128,9 @@ export default async (req, context) => {
         }).join("")
       : "";
 
+
     // =========================================================================
-    // 🏗️ ประกอบและแทนที่เนื้อหา HTML แบบสมบูรณ์แบบ (FULL HYDRATION & SEO)
-    // =========================================================================
-    // =========================================================================
-    // 🏗️ ประกอบและแทนที่เนื้อหา HTML แบบสมบูรณ์แบบ (FULL HYDRATION & SEO)
+    // 🏗️ ประกอบและแทนที่เนื้อหา HTML แบบสมบูรณ์แบบ (FULL HYDRATION, SEO & SPEED)
     // =========================================================================
     let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) {
@@ -1158,6 +1153,13 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
+
+    // ⚡ 2.1 แทรก Preload รูปภาพ LCP (รูปน้องคนแรก) เข้าไปใน <head> เพื่อดันคะแนน LCP ทันที
+    if (profilesList.length > 0) {
+      const firstLcpImg = optimizeImg(profilesList[0].imagePath || profilesList[0].image_url || "", 400, 500);
+      const lcpPreloadTag = `<link rel="preload" as="image" href="${firstLcpImg}" fetchpriority="high">`;
+      finalHtml = finalHtml.replace(/<\/head>/i, `${lcpPreloadTag}\n</head>`);
+    }
 
     // 3. ปรับแต่ง H1 & H2 ฝั่ง SSR ให้เป็นชื่อจังหวัดจริงทันที (ดันอันดับ SEO รายจังหวัด)
     const ssrH1Html = `
@@ -1222,7 +1224,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // 10. สไลด์ HOT Swiper
+    // 10. สไลด์ HOT Swiper (เพิ่ม High Priority & Async Decoding เพื่อเพิ่มคะแนน LCP)
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -1234,7 +1236,14 @@ export default async (req, context) => {
         <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
           <span class="vip-status-chip">🟢 ${isAvail ? "รับงาน" : "สอบถาม"}</span>
           <span class="hot-rank-badge">#${i + 1} HOT</span>
-          <img src="${img}" alt="น้อง${cleanName}" width="150" height="210" loading="${i < 2 ? "eager" : "lazy"}" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp'">
+          <img src="${img}" 
+               alt="น้อง${cleanName}" 
+               width="150" 
+               height="210" 
+               loading="${i === 0 ? "eager" : "lazy"}" 
+               fetchpriority="${i === 0 ? "high" : "auto"}" 
+               decoding="async"
+               onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp'">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
           <div class="vip-card-info">
