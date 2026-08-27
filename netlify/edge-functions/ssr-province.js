@@ -801,6 +801,51 @@ export default async (req, context) => {
     });
   }
 
+  // =========================================================================
+  // ⚡ 1.1 เสิร์ฟไฟล์ llms.txt ตอบกลับทันที (วางบนสุดเพื่อไม่ให้โดน .txt บายพาส)
+  // =========================================================================
+  if (url.pathname === "/llms.txt") {
+    const llmsContent = `# First Model Hub
+
+> แพลตฟอร์มศูนย์รวมข้อมูลแนะนำโปรไฟล์เพื่อนเที่ยว เพื่อนร่วมทาง และผู้ดูแลระดับพรีเมียมอันดับ 1 ในเชียงใหม่และทั่วประเทศไทย คัดสรรเฉพาะโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างานเมื่อเจอตัวจริง ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี
+
+## หน้าหลักและบริการสำคัญ (Main Directory & Services)
+
+- [หน้าแรก (Home Page)](https://firstmodelhub.com/): ศูนย์กลางค้นหาโปรไฟล์เพื่อนเที่ยว และข้อมูลพิกัดบริการล่าสุด
+- [English Version (EN)](https://firstmodelhub.com/index-en): Directory of verified VIP companions in Thailand
+- [รวมโปรไฟล์ทั้งหมด (All Profiles)](https://firstmodelhub.com/profiles): สารบัญคัดสรรโปรไฟล์น้องๆ VIP ยืนยันตัวตนจริง ตรงปก 100%
+- [พื้นที่ให้บริการ (Locations)](https://firstmodelhub.com/locations): ค้นหาและคัดกรองพิกัดรับงานตามโซนพื้นที่และจังหวัดทั่วประเทศ
+- [เกี่ยวกับเรา (About Us)](https://firstmodelhub.com/about): ข้อมูลความโปร่งใส มาตรฐานความน่าเชื่อถือ และนโยบายความปลอดภัย
+- [คำถามที่พบบ่อย (FAQ)](https://firstmodelhub.com/faq): ขั้นตอนการนัดหมาย และกติกาการใช้งานระบบ
+
+## พื้นที่ให้บริการยอดนิยม (Major Locations)
+
+- [สาวรับงานเชียงใหม่](https://firstmodelhub.com/location/chiangmai): โซนนิมมาน, เจ็ดยอด, สันติธรรม, ช้างเผือก
+- [สาวรับงานกรุงเทพฯ](https://firstmodelhub.com/location/bangkok): สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, สาทร
+- [สาวรับงานภูเก็ต](https://firstmodelhub.com/location/phuket): ป่าตอง, กะทู้, ฉลอง, ตัวเมืองภูเก็ต
+- [สาวรับงานชลบุรีและพัทยา](https://firstmodelhub.com/location/chonburi): พัทยา, บางแสน, ศรีราชา
+- [สาวรับงานขอนแก่น](https://firstmodelhub.com/location/khon-kaen): ในตัวเมืองขอนแก่น, กังสดาล, มข.
+- [สาวรับงานอุดรธานี](https://firstmodelhub.com/location/udonthani): ตัวเมืองอุดร, UD Town
+- [สาวรับงานลำปาง](https://firstmodelhub.com/location/lampang): ตัวเมืองลำปาง, สวนดอก, รอบเวียง
+- [สาวรับงานเชียงราย](https://firstmodelhub.com/location/chiangrai): ตัวเมืองเชียงราย, บ้านดู่, มฟล.
+
+## มาตรฐานความปลอดภัย (Safe-Play Framework)
+
+- จ่ายหน้างาน 100% (No Deposit): ชำระโดยตรงกับน้องหลังพบหน้างาน ไม่มีโอนมัดจำก่อนทุกกรณี
+- ยืนยันตัวตนตรงปก (Verified Profiles): ตรวจสอบรูปถ่ายจริงตรงปก 100%
+- จำกัดอายุผู้ใช้งาน: รองรับเฉพาะบุคคลที่มีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
+`;
+
+    return new Response(llmsContent, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+  }
+
   // จัดการ 301 Redirect สำหรับโดเมนสำรอง
   if (hostname.includes("sidelinechiangmai.netlify.app")) {
     return url.pathname === "/" || url.pathname === "/index.html"
@@ -818,7 +863,7 @@ export default async (req, context) => {
 
   const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
   
-  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/llms.txt", "/sideline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
+  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/sideline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
     return await context.next();
   }
 
@@ -826,9 +871,7 @@ export default async (req, context) => {
     return Response.redirect(`${primaryDomain}/`, 301);
   }
 
-  // =========================================================================
-  // ⚡ 2. ระบบตรวจจับการเปลี่ยนแปลงฐานข้อมูลอัตโนมัติ (Self-Healing Auto Cache)
-  // =========================================================================
+  
   const now = Date.now();
   const isForcedPurge = url.searchParams.has("refresh") || url.searchParams.has("purge") || url.searchParams.has("clear_cache");
   
