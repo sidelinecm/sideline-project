@@ -341,7 +341,7 @@ async function getSupabaseClient() {
     }
 
     const vipSwiperEl = document.getElementById("vip-swiper-container");
-    if (!vipSwiperEl || !appState.allProfiles || appState.allProfiles.length === 0) return;
+    if (!vipSwiperEl || vipSwiperEl.children.length > 0) return;
     
     let hotProfiles = appState.allProfiles.filter(p => {
       const combinedKeywords = `${(Array.isArray(p.styleTags) ? p.styleTags : []).join(" ")} ${p.slogan || ""} ${p.quote || ""}`.toLowerCase();

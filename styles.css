@@ -1968,3 +1968,36 @@ footer.fmh-footer {
 .social-btn.linkedin:hover { box-shadow: 0 0 12px rgba(10, 102, 194, 0.5) !important; }
 .social-btn.biosite:hover { box-shadow: 0 0 12px rgba(192, 132, 252, 0.5) !important; }
 .social-btn.linktree:hover { box-shadow: 0 0 12px rgba(0, 230, 118, 0.5) !important; }
+
+.vip-swiper-wrapper { 
+  display: flex !important; 
+  flex-direction: row !important; 
+  flex-wrap: nowrap !important; 
+  overflow-x: auto !important; 
+  gap: 10px !important; 
+  width: 100% !important; 
+  max-width: 850px !important; 
+  margin: 6px auto 10px auto !important; 
+  padding: 4px 4px 10px 4px !important; 
+  height: 220px !important; 
+  min-height: 220px !important; /* 🟢 ล็อกความสูงขั้นต่ำไว้ ไม่ให้ยุบตัว */
+  contain: layout paint;        /* 🟢 ป้องกันการขยับขององค์ประกอบข้างเคียง */
+  -webkit-overflow-scrolling: touch !important; 
+  scrollbar-width: none !important; 
+  position: relative; 
+  z-index: 2;
+}
+
+.vip-card-item { 
+  flex: 0 0 150px !important; 
+  width: 150px !important; 
+  height: 210px !important; 
+  min-width: 150px !important;  /* 🟢 ล็อกความกว้างการ์ด */
+  min-height: 210px !important; /* 🟢 ล็อกความสูงการ์ด */
+  position: relative !important; 
+  overflow: hidden !important; 
+  border-radius: 18px !important; 
+  background-color: #0d0d12 !important; 
+  border: 1.5px solid rgba(192, 132, 252, 0.35) !important; 
+  flex-shrink: 0 !important; 
+}
