@@ -228,7 +228,7 @@ async function getSupabaseClient() {
         };
       }
       return {
-        src: optimizeImg(img, 400, 500),
+        src: optimizeImg(img, 400, 533),
         fullSrc: optimizeImg(img, 1000, null)
       };
     });
@@ -493,11 +493,6 @@ async function getSupabaseClient() {
 
   async function renderDisplayArea(profiles, isFilteredOrLocationView) {
     if (!domCache.profilesDisplayArea) return;
-    
-    const currentHeight = domCache.profilesDisplayArea.offsetHeight;
-    if (currentHeight > 0) {
-      domCache.profilesDisplayArea.style.minHeight = `${currentHeight}px`;
-    }
 
     appState.renderId = (appState.renderId || 0) + 1;
     const activeRenderId = appState.renderId;
@@ -507,7 +502,6 @@ async function getSupabaseClient() {
 
     if (domCache.featuredSection) {
       const isHomeView = !isFilteredOrLocationView && !window.location.pathname.includes("/location/") && !window.location.pathname.includes("/province/");
-      
       const featuredList = appState.allProfiles.filter(p => p.isfeatured).slice(0, 8);
       const hasFeatured = featuredList.length > 0;
       
@@ -519,7 +513,6 @@ async function getSupabaseClient() {
 
     if (!profiles || profiles.length === 0) {
       domCache.profilesDisplayArea.innerHTML = "";
-      domCache.profilesDisplayArea.style.minHeight = "";
       domCache.noResultsMessage?.classList.remove("hidden");
       return;
     }
@@ -557,7 +550,6 @@ async function getSupabaseClient() {
       domCache.profilesDisplayArea.appendChild(wrapper);
       const gridContainer = wrapper.querySelector(".profile-grid");
       await renderProfilesBatch(gridContainer, profiles, activeRenderId);
-      domCache.profilesDisplayArea.style.minHeight = "";
     } else {
       const groupedByProvince = profiles.reduce((acc, p) => {
         const k = p.provinceKey || "no_province";
@@ -565,7 +557,6 @@ async function getSupabaseClient() {
         acc[k].push(p);
         return acc;
       }, {});
-
 
       const sortedProvinceKeys = Object.keys(groupedByProvince).sort((a, b) => {
         const nameA = String(appState.provincesMap.get(a) || a || "");
@@ -583,19 +574,10 @@ async function getSupabaseClient() {
           const gridEl = sectionEl.querySelector(".profile-grid");
           await renderProfilesBatch(gridEl, groupedByProvince[pKey], activeRenderId);
         }
-        domCache.profilesDisplayArea.style.minHeight = "";
       } else {
         domCache.profilesDisplayArea.innerHTML = "";
-        domCache.profilesDisplayArea.style.minHeight = "";
         domCache.noResultsMessage?.classList.remove("hidden");
       }
-    }
-
-    if (appState.renderId === activeRenderId) {
-      document.querySelectorAll("img").forEach(img => {
-        img.addEventListener("contextmenu", e => e.preventDefault());
-        img.addEventListener("dragstart", e => e.preventDefault());
-      });
     }
   }
 
@@ -757,7 +739,10 @@ async function getSupabaseClient() {
     article.setAttribute("data-profile-id", p.id);
     article.setAttribute("data-profile-slug", p.slug || p.id);
 
-    const imgSrc = p.images && p.images.length > 0 ? p.images[0].src : DEFAULT_FALLBACK_IMG;
+    const rawImg = p.imagePath || p.image_url || p.imageUrl || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
+    const imgSrc = optimizeImg(rawImg, 400, 533);
+    const cardSrcSet = `${optimizeImg(rawImg, 320, 427)} 320w, ${optimizeImg(rawImg, 400, 533)} 400w, ${optimizeImg(rawImg, 600, 800)} 600w`;
+    
     const pKey = (p.provinceKey || "national").toLowerCase();
     
     let rawName = p.displayName || p.name || "Model";
@@ -785,6 +770,8 @@ async function getSupabaseClient() {
 
     article.innerHTML = `
       <img src="${imgSrc}" 
+           srcset="${cardSrcSet}"
+           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
            alt="${modelName} ${locName}"
            width="400"
            height="533"
@@ -833,18 +820,12 @@ async function getSupabaseClient() {
     containerEl.innerHTML = "";
 
     const fragment = document.createDocumentFragment();
-    const batchSize = profilesList.length > 20 ? 4 : 8;
-
     for (let i = 0; i < profilesList.length; i++) {
       if (renderId !== undefined && Number(containerEl.dataset.activeRenderId) !== renderId) return;
       const cardEl = createProfileCardDOM(profilesList[i], i);
       fragment.appendChild(cardEl);
-
-      if ((i + 1) % batchSize === 0 || i === profilesList.length - 1) {
-        containerEl.appendChild(fragment);
-        await new Promise(resolve => requestAnimationFrame(resolve));
-      }
     }
+    containerEl.appendChild(fragment);
   }
 
   function createProvinceSectionDOM(provinceKey, provinceName, profilesList) {
