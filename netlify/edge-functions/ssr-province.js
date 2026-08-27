@@ -518,12 +518,12 @@ function stripHTML(str) {
 
 const replaceGlobal = (str, target, replacement) => str.split(target).join(replacement);
 
-function optimizeImg(path, width = 400, height = 500) {
+function optimizeImg(path, width = 400, height = 533) {
   if (!path || typeof path !== "string" || !path.trim()) {
     return CONFIG.DEFAULT_OG_IMAGE;
   }
   const cleanPath = path.trim();
-  const cropParam = height ? `f_auto,q_auto:eco,w_${width},h_${height},c_fill,g_face` : `f_auto,q_auto:eco,w_${width},c_scale`;
+  const cropParam = height ? `f_auto,q_auto:best,w_${width},h_${height},c_fill,g_face` : `f_auto,q_auto:best,w_${width},c_scale`;
   
   if (cleanPath.includes("res.cloudinary.com")) {
     const uploadIndex = cleanPath.indexOf("/upload/");
@@ -664,6 +664,12 @@ async function getTemplateHtml(url, context) {
   return TEMPLATE_HTML_CACHE || fallbackHtml;
 }
 
+// 🟢 สร้าง Responsive Srcset แสดงภาพสวย คมกริบ ระดับ Retina Display
+function generateCardSrcSet(rawImg) {
+  if (!rawImg || typeof rawImg !== "string" || !rawImg.trim()) return "";
+  return `${optimizeImg(rawImg, 320, 427)} 320w, ${optimizeImg(rawImg, 400, 533)} 400w, ${optimizeImg(rawImg, 600, 800)} 600w`;
+}
+
 const renderCardHtml = (p, index, total, provinceName) => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   const loc = escapeHTML(sanitizeThaiText(p.location) || provinceName);
@@ -685,6 +691,7 @@ const renderCardHtml = (p, index, total, provinceName) => {
   const imgAlt = `น้อง${cleanName}${ageStr ? ` อายุ${ageStr}ปี` : ""} สาวรับงาน${provinceName} ${statsStr ? `สัดส่วน ${statsStr}` : "รูปร่างสมส่วน"} ${p.height ? `สูง ${p.height}ซม.` : ""} ย่าน${loc} ฟิวแฟนตรงปก 100% ไม่มัดจำ`;
   const rawImg = p.imagePath || p.image_url || p.imageUrl || p.photo || p.avatar || "";
   const cardImg = optimizeImg(rawImg, 400, 533);
+  const cardSrcSet = generateCardSrcSet(rawImg);
   
   let priceStr = "1,500.-";
   if (p.rate) {
@@ -704,10 +711,11 @@ const renderCardHtml = (p, index, total, provinceName) => {
     <div class="profile-card-new-container">
       <article class="profile-card-new interactive-card" data-profile-id="${p.id}" data-profile-slug="${escapeHTML(p.slug || p.id)}">
           <img src="${cardImg}" 
+               ${cardSrcSet ? `srcset="${cardSrcSet}" sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"` : ""}
                alt="${imgAlt}"
                title="${imgAlt}"
-               width="300"
-               height="400"
+               width="400"
+               height="533"
                class="profile-card-img"
                loading="${index < 2 ? "eager" : "lazy"}"
                fetchpriority="${index === 0 ? "high" : "auto"}"
@@ -1154,10 +1162,12 @@ const heroImage = CONFIG.DEFAULT_OG_IMAGE;
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // ⚡ 2.1 แทรก Preload รูปภาพ LCP (รูปน้องคนแรก) เข้าไปใน <head> เพื่อดันคะแนน LCP ทันที
+    // ⚡ 2.1 แทรก Preload รูปภาพ LCP แบบ Responsive ตรงกับ <img> จริง 100%
     if (profilesList.length > 0) {
-      const firstLcpImg = optimizeImg(profilesList[0].imagePath || profilesList[0].image_url || "", 400, 500);
-      const lcpPreloadTag = `<link rel="preload" as="image" href="${firstLcpImg}" fetchpriority="high">`;
+      const rawFirstImg = profilesList[0].imagePath || profilesList[0].image_url || "";
+      const firstLcpImg = optimizeImg(rawFirstImg, 400, 533);
+      const firstLcpSrcSet = generateCardSrcSet(rawFirstImg);
+      const lcpPreloadTag = `<link rel="preload" as="image" href="${firstLcpImg}" imagesrcset="${firstLcpSrcSet}" imagesizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" fetchpriority="high">`;
       finalHtml = finalHtml.replace(/<\/head>/i, `${lcpPreloadTag}\n</head>`);
     }
 
@@ -1224,12 +1234,11 @@ const heroImage = CONFIG.DEFAULT_OG_IMAGE;
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // 10. สไลด์ HOT Swiper (เพิ่ม High Priority & Async Decoding เพื่อเพิ่มคะแนน LCP)
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
       const slug = encodeURIComponent(p.slug || p.id);
-      const img = optimizeImg(p.imagePath || p.image_url || "", 400, 500);
+      const img = optimizeImg(p.imagePath || p.image_url || "", 300, 420);
       const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
       
       return `
