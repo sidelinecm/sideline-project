@@ -1,13 +1,34 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
+// 🟢 2. โหลด Supabase แบบ Dynamic Singleton (ป้องกันการสร้าง Client ซ้ำซ้อน 100%)
+let supabaseClient = null;
+let supabasePromise = null;
 
-// 🟢 1. โหลด GSAP แบบ Non-blocking Background (ไม่บล็อกหน้าเว็บแม้เน็ตช้า)
-let gsap = null;
-import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
-  .then(m => {
-    gsap = m.gsap;
-    window.gsap = gsap;
-  })
-  .catch(() => console.warn("GSAP loaded in fallback mode"));
+async function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  if (supabasePromise) return supabasePromise;
+
+  supabasePromise = (async () => {
+    try {
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.42.0");
+      supabaseClient = createClient(
+        "https://zxetzqwjaiumqhrpumln.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4",
+        {
+          auth: {
+            persistSession: false, // 🟢 ปิด Auth Storage ตัด Warning สีเหลืองทิ้ง 100%
+            autoRefreshToken: false
+          }
+        }
+      );
+      window.supabase = supabaseClient;
+      return supabaseClient;
+    } catch (e) {
+      console.warn("Supabase dynamic import fallback:", e);
+      return null;
+    }
+  })();
+
+  return supabasePromise;
+}
 
 (function () {
   "use strict";
@@ -342,7 +363,14 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
         <div class="vip-card-item ${idx === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
           <span class="vip-status-chip">🟢 ${statusLabel}</span>
           <span class="hot-rank-badge">${rankBadge}</span>
-          <img src="${imgSrc}" alt="${p.displayName}" width="150" height="210" loading="${idx < 2 ? "eager" : "lazy"}" onerror="this.src='${DEFAULT_FALLBACK_IMG}'">
+          <img src="${imgSrc}" 
+               alt="${p.displayName}" 
+               width="150" 
+               height="210" 
+               loading="${idx === 0 ? "eager" : "lazy"}" 
+               fetchpriority="${idx === 0 ? "high" : "auto"}" 
+               decoding="async" 
+               onerror="this.src='${DEFAULT_FALLBACK_IMG}'">
           <div class="vip-card-overlay"></div>
           <a href="/sideline/${slug}" class="card-link" aria-label="View ${p.displayName}"></a>
           <div class="vip-card-info">
@@ -1073,14 +1101,17 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
         return s === target || id === target || String(p.name || "").toLowerCase() === target;
       });
 
-      if (!foundProfile && supabaseClient) {
+      if (!foundProfile) {
         try {
-          const isNum = /^\d+$/.test(slugVal);
-          const condition = isNum ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
-          const { data: dbProfile } = await supabaseClient.from("profiles").select("*").or(condition).maybeSingle();
-          if (dbProfile) {
-            foundProfile = normalizeProfile(dbProfile);
-            if (foundProfile) appState.allProfiles.push(foundProfile);
+          const client = await getSupabaseClient();
+          if (client) {
+            const isNum = /^\d+$/.test(slugVal);
+            const condition = isNum ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
+            const { data: dbProfile } = await client.from("profiles").select("*").or(condition).maybeSingle();
+            if (dbProfile) {
+              foundProfile = normalizeProfile(dbProfile);
+              if (foundProfile) appState.allProfiles.push(foundProfile);
+            }
           }
         } catch (_) {}
       }
@@ -1136,15 +1167,9 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
     executeFilterAndRender(false);
   }
 
-  // 🟢 4. Main Init Engine (ตรวจสอบ readyState ป้องกัน Race Condition)
+
   async function initApplication() {
-    try {
-      supabaseClient = createClient(
-        "https://zxetzqwjaiumqhrpumln.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4"
-      );
-      window.supabase = supabaseClient;
-    } catch (_) {}
+    getSupabaseClient().catch(() => {});
 
     domCache.body = document.body;
     domCache.profilesDisplayArea = document.getElementById("profiles-display-area");
@@ -1451,11 +1476,12 @@ import("https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm")
           return true;
         }
 
-        if (!supabaseClient) throw new Error("Supabase client not initialized");
+      const client = await getSupabaseClient();
+        if (!client) throw new Error("Supabase client not initialized");
 
         const [provincesRes, profilesRes] = await Promise.all([
-          supabaseClient.from("provinces").select("*"),
-          supabaseClient.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false })
+          client.from("provinces").select("*"),
+          client.from("profiles").select("*").eq("active", true).order("isfeatured", { ascending: false }).order("created_at", { ascending: false })
         ]);
 
         if (provincesRes.data) {

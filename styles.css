@@ -5,7 +5,7 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  font-display: optional;
+  font-display: swap; /* 🟢 เปลี่ยนเป็น swap */
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
 
@@ -13,10 +13,9 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  font-display: optional;
+  font-display: swap; /* 🟢 เปลี่ยนเป็น swap */
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
-
 
 /* ==============================================================================
    2. ROOT VARIABLES & GLOBAL BASE
