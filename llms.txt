@@ -2,31 +2,28 @@
 
 > แพลตฟอร์มศูนย์รวมข้อมูลแนะนำโปรไฟล์เพื่อนเที่ยว เพื่อนร่วมทาง และผู้ดูแลระดับพรีเมียมอันดับ 1 ในเชียงใหม่และทั่วประเทศไทย คัดสรรเฉพาะโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างานเมื่อเจอตัวจริง ปราศจากการโอนเงินมัดจำล่วงหน้าทุกกรณี
 
----
-
-## 🚀 หน้าหลักและบริการสำคัญ (Main Directory & Services)
+## หน้าหลักและบริการสำคัญ (Main Directory & Services)
 
 - [หน้าแรก (Home Page)](https://firstmodelhub.com/): ศูนย์กลางค้นหาโปรไฟล์เพื่อนเที่ยว และข้อมูลพิกัดบริการล่าสุด
+- [English Version (EN)](https://firstmodelhub.com/index-en): Directory of verified VIP companions in Thailand
 - [รวมโปรไฟล์ทั้งหมด (All Profiles)](https://firstmodelhub.com/profiles): สารบัญคัดสรรโปรไฟล์น้องๆ VIP ยืนยันตัวตนจริง ตรงปก 100%
 - [พื้นที่ให้บริการ (Locations)](https://firstmodelhub.com/locations): ค้นหาและคัดกรองพิกัดรับงานตามโซนพื้นที่และจังหวัดทั่วประเทศ
-- [ระบบค้นหาและตัวกรอง (Search Engine)](https://firstmodelhub.com/search): ค้นหาโปรไฟล์ตามคีย์เวิร์ด สไตล์ หรือสถานะความพร้อมรับงาน
-- [เกี่ยวกับเรา (About Us)](https://firstmodelhub.com/about): ข้อมูลความโปร่งใส มาตรฐานความน่าเชื่อถือ (E-E-A-T) และทีมงานบริหาร
-- [คำถามที่พบบ่อย (FAQ)](https://firstmodelhub.com/faq): ไขข้อข้องใจ ขั้นตอนการนัดหมาย และกติกาการใช้งานระบบ
+- [เกี่ยวกับเรา (About Us)](https://firstmodelhub.com/about): ข้อมูลความโปร่งใส มาตรฐานความน่าเชื่อถือ และนโยบายความปลอดภัย
+- [คำถามที่พบบ่อย (FAQ)](https://firstmodelhub.com/faq): ขั้นตอนการนัดหมาย และกติกาการใช้งานระบบ
 
----
+## พื้นที่ให้บริการยอดนิยม (Major Locations)
 
-## 🛡️ มาตรฐานความปลอดภัย (Safe-Play Framework)
+- [สาวรับงานเชียงใหม่](https://firstmodelhub.com/location/chiangmai): โซนนิมมาน, เจ็ดยอด, สันติธรรม, ช้างเผือก
+- [สาวรับงานกรุงเทพฯ](https://firstmodelhub.com/location/bangkok): สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, สาทร
+- [สาวรับงานภูเก็ต](https://firstmodelhub.com/location/phuket): ป่าตอง, กะทู้, ฉลอง, ตัวเมืองภูเก็ต
+- [สาวรับงานชลบุรีและพัทยา](https://firstmodelhub.com/location/chonburi): พัทยา, บางแสน, ศรีราชา
+- [สาวรับงานขอนแก่น](https://firstmodelhub.com/location/khon-kaen): ในตัวเมืองขอนแก่น, กังสดาล, มข.
+- [สาวรับงานอุดรธานี](https://firstmodelhub.com/location/udonthani): ตัวเมืองอุดร, UD Town
+- [สาวรับงานลำปาง](https://firstmodelhub.com/location/lampang): ตัวเมืองลำปาง, สวนดอก, รอบเวียง
+- [สาวรับงานเชียงราย](https://firstmodelhub.com/location/chiangrai): ตัวเมืองเชียงราย, บ้านดู่, มฟล.
 
-1. **จ่ายหน้างาน 100% (No Deposit Required)**: ไม่มีนโยบายเรียกเก็บเงินมัดจำล่วงหน้า ชำระโดยตรงต่อน้องหลังพบหน้างานเรียบร้อยแล้วเท่านั้น
-2. **ยืนยันตัวตนตรงปก (Verified Profiles)**: ตรวจสอบรูปภาพและประวัติโดยทีมแอดมินก่อนแสดงผลในสารบัญ
-3. **รักษาความเป็นส่วนตัวสูงสุด (Privacy First)**: ปกป้องข้อมูลการนัดหมายและสิทธิ์ความเป็นส่วนตัวของผู้ใช้งาน
-4. **จำกัดอายุผู้ใช้งาน**: สื่อกลางข้อมูลนี้รองรับเฉพาะบุคคลที่มีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
+## มาตรฐานความปลอดภัย (Safe-Play Framework)
 
----
-
-## 📌 ช่องทางการติดต่อและข้อมูลเพิ่มเติม (Official Resources)
-
-- **LINE Official จองคิวด่วน**: `@firstmodelhub` (เจ้าหน้าที่สแตนบายดูแลระบบตลอด 24 ชั่วโมง)
-- [แผนผังเว็บไซต์ (Sitemap XML)](https://firstmodelhub.com/sitemap.xml): แผนผังเว็บไซต์อย่างเป็นทางการสำหรับระบบ Search Engine
-- [นโยบายความเป็นส่วนตัว (Privacy Policy)](https://firstmodelhub.com/privacy-policy)
-- [เงื่อนไขการให้บริการ (Terms & Conditions)](https://firstmodelhub.com/terms-of-service)
+- จ่ายหน้างาน 100% (No Deposit): ชำระโดยตรงกับน้องหลังพบหน้างาน ไม่มีโอนมัดจำก่อนทุกกรณี
+- ยืนยันตัวตนตรงปก (Verified Profiles): ตรวจสอบรูปถ่ายจริงตรงปก 100%
+- จำกัดอายุผู้ใช้งาน: รองรับเฉพาะบุคคลที่มีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น
