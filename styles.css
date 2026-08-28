@@ -2497,3 +2497,426 @@ footer.fmh-footer {
   color: #FFFFFF !important;
   transform: translateY(-1px) !important;
 }
+
+/* ==========================================================================
+   ✨ FIRST MODEL HUB - ULTRA-PREMIUM UI/UX & IMAGE ENHANCEMENT SUITE
+   ========================================================================== */
+
+:root {
+  --fmh-bg-deep: #07040d;
+  --fmh-surface: #120b1f;
+  --fmh-surface-glass: rgba(18, 11, 31, 0.75);
+  --fmh-border-glow: rgba(192, 132, 252, 0.25);
+  --fmh-pink-neon: #ec4899;
+  --fmh-purple-neon: #c084fc;
+  --fmh-green-glow: #10b981;
+  --fmh-gold-glow: #fbbf24;
+}
+
+/* 🌟 1. HERO SECTION & AMBIENT GLOW */
+.hero-section.fmh-hero-surface {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: radial-gradient(circle at 50% -20%, rgba(192, 132, 252, 0.15), transparent 70%), var(--fmh-bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: clamp(20px, 4vw, 40px);
+  margin-bottom: 30px;
+}
+
+.fmh-hero-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fmh-ambient-orb {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+}
+
+.fmh-ambient-orb-a {
+  top: -100px;
+  left: -100px;
+  background: var(--fmh-purple-neon);
+}
+
+.fmh-ambient-orb-b {
+  bottom: -100px;
+  right: -100px;
+  background: var(--fmh-pink-neon);
+}
+
+/* 🌟 2. CINEMATIC PROFILE CARDS (จุดขาย: รูปภาพทรงพลัง) */
+.profile-card, .vip-swiper-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--fmh-surface);
+  border: 1px solid var(--fmh-border-glow);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.profile-card:hover, .vip-swiper-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--fmh-pink-neon);
+  box-shadow: 0 16px 40px rgba(236, 72, 153, 0.25);
+}
+
+/* รูปภาพโปรไฟล์อัตราส่วน 4:5 คมชัดระดับ HD */
+.profile-card img, .vip-swiper-card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-card:hover img, .vip-swiper-card:hover img {
+  transform: scale(1.06);
+}
+
+/* 🌟 3. HOT SWIPER CONTAINER (สมูทและลื่นไหล) */
+.vip-swiper-wrapper {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 10px 4px 20px 4px;
+  scrollbar-width: none; /* ซ่อน scrollbar ใน Firefox */
+}
+
+.vip-swiper-wrapper::-webkit-scrollbar {
+  display: none; /* ซ่อน scrollbar ใน Chrome/Safari */
+}
+
+.vip-swiper-card {
+  flex: 0 0 160px;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .vip-swiper-card {
+    flex: 0 0 190px;
+  }
+}
+
+/* 🌟 4. GRID ALIGNMENT FOR PROFILES */
+.profile-grid, .profiles-grid-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+  .profile-grid, .profiles-grid-row {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
+}
+
+/* 🌟 5. FLOATING APP DOCK (UX มือถือระดับพรีเมียม) */
+.floating-app-dock {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-width: 480px;
+  background: rgba(18, 11, 31, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(192, 132, 252, 0.2);
+  border-radius: 99px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 16px;
+  z-index: 1000;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dock-item i {
+  font-size: 18px;
+}
+
+.dock-item.active, .dock-item:hover {
+  color: var(--fmh-purple-neon);
+  transform: translateY(-2px);
+}
+
+.dock-item-line {
+  color: #22c55e !important;
+  background: rgba(34, 197, 94, 0.12);
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.dock-item-line:hover {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+/* ==========================================================================
+   ✨ FIRST MODEL HUB - HERO & MOBILE LAYOUT COMPACT OVERHAUL
+   ========================================================================== */
+
+/* 1. ปรับขนาดและระยะ Margin/Padding ของโครงสร้างหลัก Hero ให้กระชับ */
+.hero-section,
+header + section,
+main > section:first-of-type {
+  padding: 16px 12px !important;
+  margin: 12px auto 20px auto !important;
+  border-radius: 20px !important;
+  background: radial-gradient(circle at 50% 0%, rgba(192, 132, 252, 0.12), transparent 75%), #0c0714 !important;
+  border: 1px solid rgba(192, 132, 252, 0.18) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  text-align: center !important;
+}
+
+/* 2. จัดระเบียบ Tag / Badge ด้านบนสุดของ Hero */
+.hero-section .badge,
+div[class*="verified"],
+div[class*="private-edit"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px !important;
+  padding: 4px 12px !important;
+  margin-bottom: 8px !important;
+  border-radius: 99px !important;
+  background: rgba(192, 132, 252, 0.08) !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+}
+
+/* 3. ปรับขนาด Typography หัวข้อหลัก ไม่ให้ใหญ่เทอะทะในหน้าจอมือถือ */
+.hero-section h1,
+.hero-section .title,
+h1.hero-title {
+  font-size: clamp(1.4rem, 5vw, 2.2rem) !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  margin: 8px 0 6px 0 !important;
+  letter-spacing: -0.02em !important;
+  background: linear-gradient(135deg, #ffffff 30%, #ec4899 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.hero-section h2,
+.hero-section .subtitle,
+p.hero-subtitle {
+  font-size: clamp(0.88rem, 3.5vw, 1.1rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  margin: 4px 0 12px 0 !important;
+  color: #f3e8ff !important;
+}
+
+/* 4. จัดเรียงป้าย "ปลอดภัย 100%" และ "ไม่โอนมัดจำ" ให้เป็น Flex Row สวยงาม ไม่แตกบรรทัด */
+div:has(> .badge-green),
+div[class*="safety-guarantee"],
+.trust-badges-wrapper {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px 10px !important;
+  margin: 10px auto !important;
+  padding: 6px 10px !important;
+  background: rgba(16, 185, 129, 0.06) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  border-radius: 12px !important;
+  max-width: fit-content !important;
+}
+
+div[class*="safety-guarantee"] span,
+.trust-badges-wrapper span {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+}
+
+/* 5. ปรับบล็อกข้อความบรรยาย (SEO Paragraph) ให้กระชับ อ่านง่าย และไม่กินพื้นที่ */
+.hero-section p.description,
+.hero-section div.desc-box,
+.hero-section p:not(.subtitle) {
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  margin: 12px 0 4px 0 !important;
+  text-align: center !important;
+}
+
+/* 6. แก้ปัญหา Floating Bottom Dock บังเนื้อหาด้านล่างสุด */
+body, 
+main, 
+#app {
+  padding-bottom: 95px !important;
+}
+
+/* 7. ปรับแต่ง Navigation Dock ให้มีความสูงสม่ำเสมอและไม่บดบังจอเกินไป */
+.floating-app-dock,
+div[class*="bottom-nav"],
+footer + div[class*="dock"] {
+  height: 60px !important;
+  padding: 0 12px !important;
+  background: rgba(12, 7, 20, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+}
+
+.floating-app-dock .dock-item i,
+div[class*="bottom-nav"] a i {
+  font-size: 16px !important;
+}
+
+.floating-app-dock .dock-item span,
+div[class*="bottom-nav"] a span {
+  font-size: 10px !important;
+}
+
+.dock-item-line,
+a[href*="line"] {
+  padding: 6px 12px !important;
+  font-size: 11px !important;
+}
+/* ==========================================================================
+   ✨ FIRST MODEL HUB - HERO TOP HIGHLIGHT & TYPOGRAPHY RE-DESIGN
+   ========================================================================== */
+
+/* 1. TOP EYEBROW TAG (FMH / 2026 | THE PRIVATE EDIT) */
+.hero-eyebrow,
+div[class*="private-edit"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2.5px !important;
+  text-transform: uppercase !important;
+  color: #c084fc !important;
+  margin-bottom: 10px !important;
+  opacity: 0.9 !important;
+}
+
+/* 2. VERIFIED BADGE (VERIFIED 2026 ★★★★★) */
+.hero-verified-badge,
+div[class*="verified-badge"],
+div:has(> .stars) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  background: rgba(192, 132, 252, 0.1) !important;
+  border: 1px solid rgba(192, 132, 252, 0.3) !important;
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.15) !important;
+  border-radius: 99px !important;
+  padding: 4px 14px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #f3e8ff !important;
+  margin-bottom: 12px !important;
+}
+
+/* ดาวคะแนนเรืองแสงสีทอง */
+.hero-verified-badge .stars,
+div[class*="verified"] span:has(> svg),
+.star-icon {
+  color: #fbbf24 !important;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)) !important;
+}
+
+/* 3. BRAND H1 TITLE (FirstModelHub 🌟) */
+.hero-title,
+h1[class*="brand-title"] {
+  font-size: clamp(2rem, 7vw, 2.8rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.5px !important;
+  margin: 6px 0 10px 0 !important;
+  background: linear-gradient(135deg, #ffffff 20%, #f472b6 60%, #c084fc 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 4px 15px rgba(236, 72, 153, 0.3)) !important;
+}
+
+/* 4. SUBTITLE LINES (รับงานทั่วไทย & สเปกฟิวแฟน) */
+.hero-subtitle-primary {
+  font-size: clamp(0.95rem, 3.8vw, 1.2rem) !important;
+  font-weight: 600 !important;
+  color: #e9d5ff !important;
+  margin-bottom: 4px !important;
+  letter-spacing: 0.2px !important;
+}
+
+.hero-subtitle-secondary {
+  font-size: clamp(1.05rem, 4.2vw, 1.35rem) !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  margin-bottom: 16px !important;
+}
+
+/* ไฮไลต์คำว่า "ตรงปก 100%" ด้วยสีชมพูนีออน */
+.hero-subtitle-secondary .highlight-pink,
+.hero-subtitle-secondary strong {
+  background: linear-gradient(90deg, #ec4899, #f43f5e) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 10px rgba(236, 72, 153, 0.4) !important;
+}
+
+/* 5. TRUST BADGE (ปลอดภัย 100% เจอตัวจริงค่อยจ่ายหน้างาน) */
+.hero-trust-pill,
+div[class*="safety-badge"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 99px !important;
+  padding: 6px 16px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #34d399 !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15) !important;
+  margin-top: 4px !important;
+}
+
+/* เน้นย้ำข้อความ "ไม่ต้องโอนมัดจำ" ให้เห็นชัดเจน */
+.hero-trust-pill span.no-deposit {
+  color: #38bdf8 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
