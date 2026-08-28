@@ -1,3 +1,4 @@
+
 /* ==============================================================================
    1. FONTS & DISPLAY RULES (Zero-CLS Metric Setup)
    ============================================================================== */
@@ -5,7 +6,7 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 400;
-  font-display: optional; /* 🟢 ป้องกัน FOUT และ Font Shift 100% */
+  font-display: optional;
   src: url('/fonts/prompt-v11-latin_thai-regular.woff2') format('woff2');
 }
 
@@ -13,7 +14,7 @@
   font-family: 'Prompt';
   font-style: normal;
   font-weight: 700;
-  font-display: optional; /* 🟢 ป้องกัน FOUT และ Font Shift 100% */
+  font-display: optional;
   src: url('/fonts/prompt-v11-latin_thai-700.woff2') format('woff2');
 }
 
@@ -67,11 +68,109 @@ img {
   max-width: 1050px !important; 
   margin-left: auto !important; 
   margin-right: auto !important; 
-  padding-left: 14px !important; 
-  padding-right: 14px !important; 
+  padding-left: 10px !important; 
+  padding-right: 10px !important; 
 }
 
 .hidden { display: none !important; }
+/* ==============================================================================
+   🌊 1. SMOOTH SCROLLING & GLOBAL PHYSICS (ให้การเลื่อนจอลื่นไหล ไม่สะดุด)
+   ============================================================================== */
+html {
+  scroll-behavior: smooth !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+body {
+  /* แสงไฟบรรยากาศ Aura ด้านหลังเว็บ ไม่ให้ดำสนิทจนแข็งกระด้าง */
+  background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.12) 0%, rgba(5, 3, 10, 1) 45%) fixed !important;
+}
+
+/* ==============================================================================
+   ✨ 2. ALIVE PROFILE CARDS (การ์ดมีมิติ ลอยนุ่มนวล และแสงนีออนมีชีวิต)
+   ============================================================================== */
+.profile-card-new {
+  /* ใช้ฟิสิกส์การเคลื่อนไหวแบบ Apple (Ease-Out Spring) */
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.3s ease !important;
+  will-change: transform, box-shadow;
+}
+
+/* ตอนเอานิ้วแตะ: การ์ดยุบตัวลงแบบนุ่มมือ + ขอบเปล่งแสงนีออน */
+.profile-card-new:active {
+  transform: scale(0.965) !important;
+  border-color: rgba(255, 20, 147, 0.8) !important;
+  box-shadow: 0 0 25px rgba(255, 20, 147, 0.5), 
+              0 10px 30px rgba(0, 0, 0, 0.9) !important;
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* รูปภาพด้านในซูม Cinematic ช้าๆ นุ่มตา ไม่กระตุก */
+.profile-card-img {
+  transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), 
+              filter 0.5s ease !important;
+}
+
+.profile-card-new:hover .profile-card-img,
+.profile-card-new:active .profile-card-img {
+  transform: scale(1.05) !important;
+}
+
+/* ==============================================================================
+   💎 3. SMOOTH CINEMATIC LIGHTBOX (เปิด-ปิดโปรไฟล์แบบลื่นละมุน ไม่กระตุก)
+   ============================================================================== */
+#lightbox {
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              backdrop-filter 0.3s ease !important;
+}
+
+/* เวลาเปิด Lightbox ให้เนื้อหาค่อยๆ ขยายซูมเข้ามาอย่างนุ่มนวล */
+#lightbox.active #lightbox-content-wrapper-el {
+  animation: modalSmoothIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes modalSmoothIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ==============================================================================
+   🔥 4. PULSING BUTTONS (ปุ่มและสเตตัสมีชีวิต มีแสงหายใจเบาๆ)
+   ============================================================================== */
+/* จุดเขียวสถานะ 'รับงาน' กะพริบหายใจนุ่มนวล */
+.badge-status.status-online .status-dot {
+  animation: pulseGreenDot 2s infinite ease-in-out !important;
+}
+
+@keyframes pulseGreenDot {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 4px #00E676;
+  }
+  50% {
+    transform: scale(1.35);
+    box-shadow: 0 0 10px #00E676, 0 0 16px rgba(0, 230, 118, 0.6);
+  }
+}
+
+/* ปุ่มแอดไลน์ใน Lightbox มีประกายแสงนีออนสะท้อนเป็นระลอก */
+.lightbox-line-cta {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.25s ease !important;
+}
+
+.lightbox-line-cta:active {
+  transform: scale(0.97) !important;
+}
 
 /* ==============================================================================
    3. COLOR-CODED TYPOGRAPHY & ACCENTS
@@ -104,36 +203,91 @@ img {
 }
 
 /* ==============================================================================
-   4. HEADER & NAVIGATION BAR
+   4. HEADER & NAVIGATION BAR (รวมสีนีออน + เมนูสมบูรณ์แบบ ไม่ตีกัน 100%)
    ============================================================================== */
+
+/* 🟢 1. บังคับโลโก้ FirstModelHub ทุกจุด (Header, Hero, Footer, Lightbox) เป็นนีออนชมพู-ขาว */
+.brand-logo-text,
+.brand-neon-text,
+#page-header .brand-logo-text,
+.brand-showcase-wrapper .brand-neon-text,
+footer.fmh-footer .brand-logo-text,
+.lightbox-top-brand .brand-logo-text {
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 10px rgba(255, 20, 147, 0.85)) drop-shadow(0 0 22px rgba(255, 20, 147, 0.45)) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  letter-spacing: -0.02em !important;
+  text-decoration: none !important;
+}
+
+/* 🟢 2. ปลดล็อคสีคำว่า Hub และตัวหนังสือข้างใน ไม่ให้มีสีอื่นมาทับนีออน */
+.brand-logo-text *,
+.brand-neon-text *,
+#page-header .brand-logo-text *,
+.brand-showcase-wrapper .brand-neon-text *,
+footer.fmh-footer .brand-logo-text *,
+.lightbox-top-brand .brand-logo-text * {
+  background: inherit !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* 🟢 3. ดาวสีทองเปล่งแสง (🌟) */
+.brand-logo-text .star,
+.brand-neon-text .star,
+.dancing-neon-star {
+  -webkit-text-fill-color: initial !important;
+  color: #FBBF24 !important;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.95)) !important;
+  margin-left: 3px !important;
+  display: inline-block !important;
+}
+
+/* 🟢 4. แถบ Header หลัก (ล็อกขนาด ไม่ให้เมนูทะลัก) */
 #page-header {
   position: fixed !important; 
   top: 8px !important; 
   left: 8px !important; 
   right: 8px !important;
   height: 52px !important; 
-  padding: 0 12px !important; 
+  padding: 0 14px !important; 
   display: flex !important; 
   justify-content: space-between !important;
   align-items: center !important; 
   z-index: 1000 !important;
-  background: rgba(14, 10, 26, 0.9) !important;
+  background: rgba(14, 10, 26, 0.95) !important;
   backdrop-filter: blur(25px) !important; 
   -webkit-backdrop-filter: blur(25px) !important;
   border-radius: 16px !important; 
   border: 1px solid rgba(192, 132, 252, 0.3) !important;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.9) !important;
+  overflow: hidden !important;
 }
 
-.brand-logo-text {
-  font-size: 15px !important; 
-  font-weight: 900 !important; 
-  color: #FFFFFF !important; 
-  white-space: nowrap !important;
+.header-logo-container {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
 }
-.brand-logo-text .hub-text { color: #C084FC !important; }
-.desktop-nav { display: none !important; }
-.nav-controls { display: flex !important; align-items: center !important; gap: 8px !important; }
+
+/* 🟢 5. บังคับซ่อนเมนู Desktop บนมือถือ 100% (แก้ปัญหาลิงก์หลุดมากองทับ) */
+.desktop-nav { 
+  display: none !important; 
+}
+
+.nav-controls { 
+  display: flex !important; 
+  align-items: center !important; 
+  gap: 8px !important; 
+  flex-shrink: 0 !important;
+}
 
 .circle-btn-el {
   width: 36px !important; 
@@ -150,29 +304,53 @@ img {
 }
 
 .lang-micro-toggle {
-  display: flex; 
-  align-items: center; 
-  gap: 6px; 
+  display: flex !important; 
+  align-items: center !important; 
+  gap: 6px !important; 
   text-decoration: none !important; 
   color: #FFFFFF !important;
-  background: rgba(255, 255, 255, 0.06); 
-  border: 1px solid rgba(192, 132, 252, 0.4); 
-  padding: 5px 12px;
-  border-radius: 30px; 
-  font-size: 11.5px; 
-  font-weight: 700; 
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.06) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.4) !important; 
+  padding: 5px 12px !important;
+  border-radius: 30px !important; 
+  font-size: 11.5px !important; 
+  font-weight: 700 !important; 
+  backdrop-filter: blur(10px) !important;
+  white-space: nowrap !important;
 }
 
+/* แสดงเมนูเต็มเฉพาะบนจอคอมพิวเตอร์ */
 @media (min-width: 1024px) {
-  #page-header { height: 60px !important; top: 14px !important; left: 16px !important; right: 16px !important; padding: 0 20px !important; }
-  .desktop-nav { display: flex !important; align-items: center !important; gap: 16px !important; margin-right: 8px; }
-  .desktop-nav a { font-size: 13px !important; font-weight: 700 !important; color: #A1A1AA !important; text-decoration: none !important; }
+  #page-header { 
+    height: 60px !important; 
+    top: 14px !important; 
+    left: 16px !important; 
+    right: 16px !important; 
+    padding: 0 20px !important; 
+  }
+  .desktop-nav { 
+    display: flex !important; 
+    align-items: center !important; 
+    gap: 16px !important; 
+    margin-right: 8px; 
+  }
+  .desktop-nav a { 
+    font-size: 13px !important; 
+    font-weight: 700 !important; 
+    color: #A1A1AA !important; 
+    text-decoration: none !important; 
+  }
+  .desktop-nav a:hover {
+    color: #C084FC !important;
+  }
+  .circle-btn-el { 
+    display: none !important; 
+  }
 }
-
 /* ==============================================================================
    5. MOBILE SIDEBAR DRAWER & BACKDROP
    ============================================================================== */
+   
 #sidebar-menu {
   position: fixed; 
   top: 0; 
@@ -296,9 +474,13 @@ img {
 }
 
 /* ==============================================================================
-   6. HERO SECTION & COMPACT GUARANTEE TAG
+   6. HERO SECTION & LUXURY GUARANTEE TAG (ความปลอดภัยและส่วนหัวแบบพรีเมียม)
    ============================================================================== */
-#main-content { padding-top: 68px !important; padding-bottom: 120px !important; }
+   
+#main-content { 
+  padding-top: 78px !important; 
+  padding-bottom: 120px !important; 
+}
 
 .hero-section { 
   position: relative !important;
@@ -308,11 +490,12 @@ img {
   flex-direction: column !important; 
   align-items: center !important; 
   gap: 6px !important; 
-  padding: 16px 8px 12px 8px !important; 
+  padding: 16px 10px 14px 10px !important; 
   max-width: 850px !important; 
   margin: 0 auto !important; 
 }
 
+/* แสงไฟบรรยากาศ Aura พื้นหลังส่วน Hero */
 .fmh-hero-ambient {
   position: absolute;
   inset: 0;
@@ -324,104 +507,300 @@ img {
 .fmh-ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.22;
+  filter: blur(65px);
+  opacity: 0.24;
 }
 
 .fmh-ambient-orb-a {
-  width: 220px;
-  height: 220px;
+  width: 240px;
+  height: 240px;
   background: #7C3AED;
   top: -40px;
   left: 10%;
 }
 
 .fmh-ambient-orb-b {
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
   background: #FF1493;
   top: 40px;
   right: 10%;
 }
 
+/* แถบดัชนี THE PRIVATE EDIT */
 .fmh-hero-index { 
-  display: flex; justify-content: center; align-items: center; flex-wrap: nowrap; 
-  gap: 8px; margin-top: 10px; margin-bottom: 8px; width: 100%; position: relative; z-index: 2;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  flex-wrap: nowrap; 
+  gap: 8px; 
+  margin-top: 6px; 
+  margin-bottom: 6px; 
+  width: 100%; 
+  position: relative; 
+  z-index: 2;
 }
 .fmh-hero-index span { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
 .fmh-hero-index span:first-child { color: #FBBF24; font-weight: 900; }
 .fmh-hero-index span:last-child { color: #D4D4D8; font-weight: 400; border-left: 1px solid rgba(255, 255, 255, 0.3); padding-left: 8px; }
 
+/* ชิปการันตี 5/5 Verified */
 .clutch-pill-compact {
-  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;
-  padding: 3px 12px !important; border-radius: 100px !important; height: 24px !important;
+  display: inline-flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 6px !important;
+  padding: 3px 12px !important; 
+  border-radius: 100px !important; 
+  height: 24px !important;
   background: rgba(42, 12, 75, 0.85) !important;
   border: 1px solid rgba(192, 132, 252, 0.5) !important;
-  margin: 0 auto 2px auto !important; position: relative; z-index: 2;
+  margin: 0 auto 2px auto !important; 
+  position: relative; 
+  z-index: 2;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.3) !important;
 }
 .pill-badge-tag { background: #7C3AED; color: #FFF; font-size: 9px; font-weight: 900; padding: 1.5px 6px; border-radius: 4px; }
 .stars-mini { display: flex; gap: 1.5px; color: #FBBF24; font-size: 8.5px; }
 .pill-badge-score { font-size: 9.5px; font-weight: 700; color: #E2E8F0; }
 
-.brand-showcase-wrapper { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; margin: 4px auto !important; position: relative; z-index: 2; }
-.brand-neon-text { font-size: clamp(26px, 6.5vw, 44px) !important; font-weight: 900 !important; letter-spacing: -0.03em !important; line-height: 1.1 !important; color: #FF1493 !important; }
-.hub-text-pink { color: #FFB3E6 !important; }
-.dancing-neon-star { font-size: clamp(20px, 5vw, 32px) !important; }
+/* โลโก้แบรนด์ส่วน Hero เปล่งแสงนีออน */
+.brand-showcase-wrapper { 
+  display: inline-flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 6px !important; 
+  margin: 4px auto !important; 
+  position: relative; 
+  z-index: 2; 
+}
+.brand-showcase-wrapper .brand-neon-text { 
+  font-size: clamp(26px, 6.5vw, 44px) !important; 
+  font-weight: 900 !important; 
+  letter-spacing: -0.03em !important; 
+  line-height: 1.1 !important; 
+}
 
-.seo-h1-title { font-size: clamp(16px, 4.2vw, 24px) !important; font-weight: 900 !important; line-height: 1.35 !important; text-align: center !important; margin: 4px auto 6px auto !important; position: relative; z-index: 2; }
-.seo-sub-headline { font-size: clamp(12px, 3vw, 15px) !important; font-weight: 800 !important; color: #E2E8F0 !important; }
-.seo-main-headline { font-size: clamp(16px, 4.5vw, 24px) !important; font-weight: 900 !important; color: #C084FC !important; }
+/* ==============================================================================
+   🌟 หัวข้อ SEO H1 (นีออนชมพู-ขาว หรูหรา คมกริบ ระดับ Luxury)
+   ============================================================================== */
+.seo-h1-title { 
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 3px !important;
+  margin: 4px auto 6px auto !important; 
+  position: relative; 
+  z-index: 2; 
+  text-align: center !important;
+}
 
+.seo-sub-headline { 
+  font-size: clamp(12px, 3.2vw, 14.5px) !important; 
+  font-weight: 700 !important; 
+  color: #E2E8F0 !important; 
+  letter-spacing: 0.8px !important;
+  opacity: 0.95;
+  white-space: nowrap !important;
+}
+
+/* 🟢 เปลี่ยนเป็นสีนีออนชมพู-ขาวประกายหรู แบบเดียวกับชื่อน้อง */
+.seo-main-headline { 
+  font-size: clamp(18px, 5.2vw, 28px) !important; 
+  font-weight: 900 !important; 
+  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.85)) drop-shadow(0 0 24px rgba(255, 20, 147, 0.4)) !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+}
+
+/* ==============================================================================
+   🛡️ แท็กความปลอดภัยระดับสากล (LUXURY TRUST CAPSULE บรรทัดเดียว คมชัด)
+   ============================================================================== */
+.luxury-trust-pill,
 .hero-guarantee-tag { 
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
-  background: rgba(0, 230, 118, 0.08) !important;
-  border: 1px solid rgba(0, 230, 118, 0.3) !important;
+  gap: 8px !important;
+  background: rgba(13, 9, 26, 0.9) !important;
+  border: 1px solid rgba(0, 230, 118, 0.35) !important;
   color: #E2E8F0 !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  padding: 4px 14px !important;
+  padding: 4px 14px 4px 5px !important;
   border-radius: 100px !important;
   margin: 8px auto 4px auto !important;
-  max-width: 95% !important;
+  max-width: 96% !important;
   width: auto !important;
-  text-align: center !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  box-shadow: 0 4px 12px rgba(0, 230, 118, 0.12) !important;
-  line-height: 1.4 !important;
-  position: relative; z-index: 2;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 14px rgba(0, 230, 118, 0.15) !important;
+  position: relative; 
+  z-index: 2;
+  white-space: nowrap !important;
 }
 
-.hero-guarantee-tag i { color: #00E676 !important; font-size: 12px !important; flex-shrink: 0 !important; }
-.hero-guarantee-tag .kw-green { color: #00E676 !important; font-weight: 800 !important; }
+.trust-pill-badge,
+.guarantee-shield-icon,
+.hero-guarantee-tag i {
+  width: auto !important;
+  height: 22px !important;
+  background: linear-gradient(135deg, #00E676 0%, #00B050 100%) !important;
+  border: none !important;
+  border-radius: 100px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  color: #000000 !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  padding: 0 9px !important;
+  box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4) !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+}
 
-.hero-subtitle-p { font-size: 11.5px !important; line-height: 1.65 !important; margin: 2px auto 8px auto !important; text-align: center !important; color: #CBD5E1 !important; max-width: 720px !important; position: relative; z-index: 2; }
+.trust-pill-text,
+.guarantee-text-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 11px !important;
+  color: #CBD5E1 !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+.guarantee-label {
+  color: #CBD5E1 !important;
+  font-weight: 600 !important;
+}
+
+.trust-pill-text strong,
+.guarantee-highlight,
+.hero-guarantee-tag .kw-green { 
+  color: #00E676 !important; 
+  font-weight: 900 !important; 
+  text-shadow: 0 0 8px rgba(0, 230, 118, 0.4) !important;
+}
 
 /* ==============================================================================
-   7. SPOTLIGHT SWIPER (HOT PROFILES) - 🟢 ZERO CLS RIGID CONTAINER
+   📝 คำอธิบาย Hero Subtitle
    ============================================================================== */
-.hot-section-header-centered {
-  display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;
-  text-align: center !important; margin: 18px auto 8px auto !important; gap: 4px !important; width: 100% !important; position: relative; z-index: 2;
+.hero-subtitle-p { 
+  font-size: 11.5px !important; 
+  line-height: 1.65 !important; 
+  margin: 4px auto 8px auto !important; 
+  text-align: center !important; 
+  color: #CBD5E1 !important; 
+  max-width: 720px !important; 
+  position: relative; 
+  z-index: 2; 
 }
 
-.hot-title-red-pink { font-size: clamp(20px, 5vw, 26px) !important; font-weight: 900 !important; color: #FF2E63 !important; line-height: 1.2 !important; margin: 0 !important; }
-.hot-sub-line { font-size: 13px !important; font-weight: 700 !important; color: #FFFFFF !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; }
-.hot-tag-badge-red { 
-  background: rgba(45, 6, 26, 0.9) !important; 
-  border: 1px solid #FF1493 !important; 
-  color: #FF85C0 !important;
-  font-size: 10.5px !important; 
-  font-weight: 800 !important; 
-  padding: 2px 8px !important; 
+/* ==============================================================================
+   📊 ชิปสถิติ 3 ช่อง (Bento Micro-chips)
+   ============================================================================== */
+.hero-stats-chips-row { 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 8px !important; 
+  flex-wrap: wrap !important; 
+  margin: 12px auto 6px auto !important; 
+  position: relative; 
+  z-index: 2; 
+}
+
+.stat-micro-chip { 
+  background: rgba(14, 10, 26, 0.88) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
   border-radius: 100px !important; 
+  padding: 5px 12px !important; 
+  font-size: 11px !important; 
+  font-weight: 700 !important; 
+  color: #E2E8F0 !important; 
+  display: inline-flex !important; 
+  align-items: center !important; 
+  gap: 6px !important; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important; 
 }
-.hot-swipe-hint-centered { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #CBD5E1 !important; font-size: 10.5px !important; font-weight: 600 !important; padding: 3px 14px !important; border-radius: 100px !important; margin-top: 4px !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; }
 
-/* 🟢 ล็อกขนาดความสูง Swiper คงที่ 230px ป้องกัน CLS 0.192 */
+/* ==============================================================================
+   7. SPOTLIGHT SWIPER (HOT PROFILES - SINGLE LINE NEON EDITION)
+   ============================================================================== */
+
+.hot-section-header-centered {
+  display: flex !important; 
+  flex-direction: column !important; 
+  align-items: center !important; 
+  justify-content: center !important;
+  text-align: center !important; 
+  margin: 18px auto 6px auto !important; 
+  gap: 6px !important; 
+  width: 100% !important; 
+  position: relative; 
+  z-index: 2;
+}
+
+/* 🟢 2. หัวข้อ HOT แสดงเป็นแถวเดียวในบรรทัดเดียว */
+.hot-single-line-header,
+.hot-sub-line { 
+  display: inline-flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 8px !important; 
+  flex-wrap: nowrap !important; 
+  white-space: nowrap !important; 
+}
+
+/* 🟢 3. สีตัวหนังสือ 'น้องๆ ที่ HOT' สีนีออนชมพู-ขาวแบบเดียวกับโลโก้ */
+.hot-title-neon,
+.hot-title-red-pink { 
+  font-size: clamp(17px, 4.8vw, 24px) !important; 
+  font-weight: 900 !important; 
+  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 10px rgba(255, 20, 147, 0.8)) !important;
+  line-height: 1.2 !important; 
+  margin: 0 !important; 
+  display: inline-flex !important; 
+  align-items: center !important; 
+}
+
+/* ป้ายชิป #ฟิวแฟน */
+.hot-badge-pill,
+.hot-tag-badge-red { 
+  background: rgba(255, 20, 147, 0.18) !important; 
+  border: 1px solid rgba(255, 20, 147, 0.45) !important; 
+  color: #FFB3E6 !important;
+  font-size: 10px !important; 
+  font-weight: 800 !important; 
+  padding: 3px 9px !important; 
+  border-radius: 100px !important; 
+  line-height: 1 !important;
+  box-shadow: 0 0 10px rgba(255, 20, 147, 0.3) !important;
+}
+
+/* คำแนะนำเลื่อนซ้าย-ขวา */
+.hot-swipe-hint-centered { 
+  background: rgba(255, 255, 255, 0.05) !important; 
+  border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+  color: #CBD5E1 !important; 
+  font-size: 10.5px !important; 
+  font-weight: 600 !important; 
+  padding: 3px 14px !important; 
+  border-radius: 100px !important; 
+  margin-top: 2px !important; 
+  display: inline-flex !important; 
+  align-items: center !important; 
+  gap: 6px !important; 
+}
+
+/* สไลด์แนวนอน Swiper Container */
 .vip-swiper-wrapper { 
   display: flex !important; 
   flex-direction: row !important; 
@@ -445,6 +824,7 @@ img {
 }
 .vip-swiper-wrapper::-webkit-scrollbar { display: none; }
 
+/* การ์ดสไลด์ HOT แต่ละใบ */
 .vip-card-item { 
   flex: 0 0 150px !important; 
   width: 150px !important; 
@@ -457,7 +837,14 @@ img {
   background-color: #0d0d12 !important; 
   border: 1.5px solid rgba(192, 132, 252, 0.35) !important; 
   flex-shrink: 0 !important; 
+  transition: transform 0.3s ease, border-color 0.3s ease !important;
 }
+
+.vip-card-item:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(255, 20, 147, 0.6) !important;
+}
+
 .vip-card-item img { 
   position: absolute !important; 
   inset: 0 !important; 
@@ -466,19 +853,88 @@ img {
   object-fit: cover !important; 
   object-position: top center !important; 
 }
-.vip-status-chip { position: absolute !important; top: 6px !important; left: 6px !important; background: rgba(9, 9, 11, 0.88) !important; border: 1px solid #00E676 !important; color: #00E676 !important; font-size: 9px !important; font-weight: 800 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important; }
-.hot-rank-badge { position: absolute !important; top: 6px !important; right: 6px !important; background: #FF9100 !important; color: #000 !important; font-size: 9px !important; font-weight: 900 !important; padding: 2px 6px !important; border-radius: 100px !important; z-index: 15 !important; }
-.vip-card-overlay { position: absolute !important; inset: 0 !important; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; z-index: 2 !important; }
-.vip-card-item .card-link { position: absolute !important; inset: 0 !important; z-index: 25 !important; }
-.vip-card-info { position: absolute !important; bottom: 8px !important; left: 8px !important; right: 8px !important; z-index: 10 !important; text-align: left !important; display: flex !important; flex-direction: column !important; gap: 1px !important; }
-.vip-name { color: #FFF !important; font-size: 12.5px !important; font-weight: 800 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
-.vip-location { color: #C084FC !important; font-size: 10.5px !important; font-weight: 700 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
 
-.hero-stats-chips-row { display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; flex-wrap: wrap !important; margin: 12px auto 6px auto !important; position: relative; z-index: 2; }
-.stat-micro-chip { background: rgba(14, 10, 26, 0.85) !important; border: 1px solid rgba(192, 132, 252, 0.25) !important; border-radius: 100px !important; padding: 5px 12px !important; font-size: 11px !important; font-weight: 700 !important; color: #E2E8F0 !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important; }
+/* ชิปสถานะ รับงาน มุมบนซ้าย */
+.vip-status-chip { 
+  position: absolute !important; 
+  top: 6px !important; 
+  left: 6px !important; 
+  background: rgba(9, 9, 11, 0.88) !important; 
+  border: 1px solid #00E676 !important; 
+  color: #00E676 !important; 
+  font-size: 9px !important; 
+  font-weight: 800 !important; 
+  padding: 2px 6px !important; 
+  border-radius: 100px !important; 
+  z-index: 15 !important; 
+  backdrop-filter: blur(6px) !important;
+}
 
+/* 🟢 4. ป้ายสถานะ #1 HOT ปรับเป็นเกรเดียนท์ชมพู-ส้มเรืองแสง (แบบเดียวกับการ์ดจังหวัด) */
+.hot-rank-badge { 
+  position: absolute !important; 
+  top: 6px !important; 
+  right: 6px !important; 
+  background: linear-gradient(135deg, #FF1493 0%, #FF5E3A 100%) !important; 
+  color: #FFFFFF !important; 
+  font-size: 9px !important; 
+  font-weight: 900 !important; 
+  padding: 3px 8px !important; 
+  border-radius: 100px !important; 
+  z-index: 15 !important; 
+  line-height: 1.1 !important;
+  box-shadow: 0 2px 10px rgba(255, 20, 147, 0.5) !important; 
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+/* เงาไล่ระดับด้านล่างการ์ดสไลด์ */
+.vip-card-overlay { 
+  position: absolute !important; 
+  inset: 0 !important; 
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; 
+  z-index: 2 !important; 
+  pointer-events: none !important;
+}
+
+.vip-card-item .card-link { 
+  position: absolute !important; 
+  inset: 0 !important; 
+  z-index: 25 !important; 
+}
+
+/* ข้อมูลชื่อและสถานที่ด้านล่างการ์ดสไลด์ */
+.vip-card-info { 
+  position: absolute !important; 
+  bottom: 8px !important; 
+  left: 8px !important; 
+  right: 8px !important; 
+  z-index: 10 !important; 
+  text-align: left !important; 
+  display: flex !important; 
+  flex-direction: column !important; 
+  gap: 1px !important; 
+  pointer-events: none !important;
+}
+
+.vip-name { 
+  color: #FFF !important; 
+  font-size: 12.5px !important; 
+  font-weight: 800 !important; 
+  overflow: hidden !important; 
+  text-overflow: ellipsis !important; 
+  white-space: nowrap !important; 
+}
+
+.vip-location { 
+  color: #C084FC !important; 
+  font-size: 10.5px !important; 
+  font-weight: 700 !important; 
+  overflow: hidden !important; 
+  text-overflow: ellipsis !important; 
+  white-space: nowrap !important; 
+}
 /* ==============================================================================
-   8. MASTER 2-COLUMN PROFILE GRID & ULTRA-CLEAN CARDS (🟢 3:4 LUXURY RATIO)
+   8. MASTER 2-COLUMN PROFILE GRID & ULTRA-CLEAN CARDS (NEON PURPLE & GOLD CHIP)
    ============================================================================== */
 .clean-section-wrapper { width: 100% !important; max-width: 1050px !important; margin: 16px auto 10px auto !important; }
 .clean-section-header { text-align: center !important; margin-bottom: 12px !important; padding: 0 10px !important; }
@@ -487,6 +943,7 @@ img {
 #profiles-display-area { min-height: 400px !important; margin-top: 14px; margin-bottom: 24px !important; }
 #featured-profiles { margin-bottom: 24px !important; }
 
+/* 🟢 GRID 2 คอลัมน์บนมือถือ */
 #featured-profiles-container,
 #profiles-display-area .profile-grid,
 .profiles-grid-row,
@@ -527,24 +984,17 @@ img {
   position: relative !important; 
 }
 
-/* 🟢 สัดส่วน 3/4 ทรงสูงสง่างาม ภาพใหญ่เต็มตา สอดคล้องกับ HTML 400x533 */
 .profile-card-new {
   aspect-ratio: 3 / 4 !important;
   width: 100% !important; 
   height: auto !important;
   position: relative !important; 
-  border-radius: 18px !important; 
+  border-radius: 16px !important; 
   overflow: hidden !important; 
-  background-color: #0d0d12 !important; 
-  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+  background-color: #0b0c12 !important; 
+  border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
   cursor: pointer; 
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease !important;
-}
-
-.profile-card-new:hover {
-  transform: translateY(-4px) !important;
-  border-color: rgba(192, 132, 252, 0.6) !important;
 }
 
 .profile-card-img { 
@@ -561,26 +1011,112 @@ img {
   inset: 0 !important; 
   background: linear-gradient(
     180deg, 
-    rgba(0, 0, 0, 0.45) 0%, 
-    transparent 22%, 
-    transparent 55%, 
-    rgba(0, 0, 0, 0.75) 80%, 
-    rgba(0, 0, 0, 0.98) 100%
+    rgba(0, 0, 0, 0.2) 0%, 
+    transparent 35%, 
+    rgba(5, 3, 10, 0.6) 72%, 
+    rgba(5, 3, 10, 0.96) 100%
   ) !important; 
   z-index: 10 !important; 
   pointer-events: none !important;
 }
 
+.profile-card-tags-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-bottom: 2px !important;
+}
+
+.card-vibe-pill {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  color: #FFB3E6 !important;
+  background: rgba(255, 20, 147, 0.18) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  border: 1px solid rgba(255, 20, 147, 0.35) !important;
+  padding: 1.5px 6px !important;
+  border-radius: 4px !important;
+  line-height: 1.1 !important;
+}
+
+.profile-card-name { 
+  font-size: 13.5px !important; 
+  font-weight: 800 !important; 
+  color: #FFFFFF !important; 
+  margin: 0 !important; 
+  line-height: 1.2 !important; 
+  white-space: nowrap !important; 
+  overflow: hidden !important; 
+  text-overflow: ellipsis !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+.profile-card-age-tag {
+  flex-shrink: 0 !important; 
+  font-size: 9px !important; 
+  color: #FF85C0 !important; 
+  font-weight: 800 !important;
+  background: rgba(255, 20, 147, 0.2) !important; 
+  border: 1px solid rgba(255, 20, 147, 0.4) !important;
+  padding: 1px 5px !important; 
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.profile-card-bottom-row { 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: space-between !important; 
+  gap: 6px !important; 
+  width: 100% !important; 
+  margin-top: 2px !important;
+}
+
+.profile-card-location { 
+  flex: 1 1 auto !important; 
+  min-width: 0 !important; 
+  display: inline-flex !important; 
+  align-items: center !important; 
+  gap: 3px !important; 
+  font-size: 10px !important; 
+  font-weight: 600 !important; 
+  color: #CBD5E1 !important;
+  white-space: nowrap !important; 
+  overflow: hidden !important; 
+  text-overflow: ellipsis !important; 
+}
+
+.profile-card-location i { 
+  color: #C084FC !important; 
+  font-size: 9px !important; 
+  flex-shrink: 0 !important; 
+}
+
+.profile-card-price { 
+  flex-shrink: 0 !important; 
+  color: #FDE047 !important; 
+  background: rgba(251, 191, 36, 0.18) !important;
+  border: 1px solid rgba(251, 191, 36, 0.4) !important;
+  padding: 1.5px 6px !important;
+  border-radius: 5px !important;
+  font-weight: 900 !important; 
+  font-size: 10.5px !important; 
+  white-space: nowrap !important; 
+  line-height: 1 !important;
+}
+
 .card-link { position: absolute; inset: 0; z-index: 25; }
 
+/* 🟢 แบดจ์มุมบน */
 .profile-card-badges-top {
   position: absolute !important;
-  top: 8px !important;
-  left: 8px !important;
-  right: 8px !important;
+  top: 6px !important;
+  left: 6px !important;
+  right: 6px !important;
   display: flex !important;
   justify-content: space-between !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   z-index: 20 !important;
   pointer-events: none !important;
 }
@@ -594,56 +1130,44 @@ img {
 .badge-status { 
   display: inline-flex !important; 
   align-items: center !important; 
-  gap: 5px !important; 
+  gap: 4px !important; 
   padding: 3px 8px !important; 
   border-radius: 100px !important; 
-  font-size: 10px !important; 
+  font-size: 9.5px !important; 
   font-weight: 700 !important; 
   background: rgba(14, 10, 26, 0.85) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6) !important;
   white-space: nowrap !important; 
   line-height: 1 !important;
 }
 
 .badge-status.status-online { 
   color: #00E676 !important; 
-  border: 1px solid rgba(0, 230, 118, 0.3) !important; 
+  border: 1px solid rgba(0, 230, 118, 0.4) !important; 
 }
 .badge-status.status-online .status-dot { 
-  width: 6px !important; height: 6px !important; border-radius: 50% !important; 
+  width: 5px !important; height: 5px !important; border-radius: 50% !important; 
   background-color: #00E676 !important; box-shadow: 0 0 6px #00E676 !important;
 }
 
 .badge-status.status-busy { 
   color: #FF1493 !important; 
-  border: 1px solid rgba(255, 20, 147, 0.3) !important; 
+  border: 1px solid rgba(255, 20, 147, 0.4) !important; 
 }
 .badge-status.status-busy .status-dot { 
-  width: 6px !important; height: 6px !important; border-radius: 50% !important; 
+  width: 5px !important; height: 5px !important; border-radius: 50% !important; 
   background-color: #FF1493 !important; box-shadow: 0 0 6px #FF1493 !important;
 }
 
-.badge-hot-tag {
-  display: inline-flex !important;
-  background: linear-gradient(135deg, #FF1493, #FF5E3A) !important;
-  color: #FFFFFF !important;
-  font-size: 9.5px !important;
-  font-weight: 900 !important;
-  padding: 3px 8px !important;
-  border-radius: 100px !important;
-  white-space: nowrap !important; 
-  line-height: 1 !important;
-  box-shadow: 0 4px 12px rgba(255, 20, 147, 0.4) !important;
-}
-
+/* 🟢 ป้ายตรงปก: โทนม่วงนีออนเรืองแสง (Neon Purple Glow) */
 .badge-verified-top {
   display: inline-flex !important;
-  background: rgba(14, 10, 26, 0.85) !important;
+  align-items: center !important;
+  background: rgba(45, 16, 77, 0.88) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(192, 132, 252, 0.5) !important;
+  border: 1px solid rgba(192, 132, 252, 0.6) !important;
   color: #E9D5FF !important;
   font-size: 9.5px !important;
   font-weight: 800 !important;
@@ -651,15 +1175,49 @@ img {
   border-radius: 100px !important;
   white-space: nowrap !important; 
   line-height: 1 !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.35) !important;
 }
 
+.badge-hot-tag {
+  display: inline-flex !important;
+  background: linear-gradient(135deg, #FF1493, #FF5E3A) !important;
+  color: #FFFFFF !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  padding: 3px 8px !important;
+  border-radius: 100px !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  box-shadow: 0 2px 10px rgba(255, 20, 147, 0.5) !important;
+}
+
+/* 🟢 ข้อมูลด้านล่างการ์ด */
 .profile-card-info-content { 
   position: absolute !important; 
   bottom: 0 !important; left: 0 !important; right: 0 !important; 
-  padding: 10px !important; 
+  padding: 6px 10px 10px 10px !important; 
   z-index: 20 !important; pointer-events: none !important; 
-  display: flex !important; flex-direction: column !important; gap: 4px !important; 
+  display: flex !important; flex-direction: column !important; gap: 3px !important; 
+}
+
+/* 🟢 แท็ก #สีม่วงนีออน มินิมอล ชิดล่างเหนือชื่อ */
+.profile-card-tags-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-bottom: 1px !important;
+}
+
+.card-vibe-pill {
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  color: #E9D5FF !important;
+  background: rgba(124, 58, 237, 0.3) !important;
+  border: 1px solid rgba(192, 132, 252, 0.5) !important;
+  padding: 1.5px 6px !important;
+  border-radius: 4px !important;
+  line-height: 1.2 !important;
+  box-shadow: 0 0 6px rgba(192, 132, 252, 0.25) !important;
 }
 
 .profile-card-title-row {
@@ -682,82 +1240,40 @@ img {
 
 .profile-card-bottom-row { 
   display: flex !important; align-items: center !important; justify-content: space-between !important; 
-  gap: 6px !important; width: 100% !important;
+  gap: 4px !important; width: 100% !important; margin-top: 1px !important;
 }
 
 .profile-card-location { 
   flex: 1 1 auto !important; min-width: 0 !important; 
-  display: inline-flex !important; align-items: center !important; gap: 4px !important; 
-  font-size: 11px !important; font-weight: 500 !important; color: #D4D4D8 !important;
+  display: inline-flex !important; align-items: center !important; gap: 3px !important; 
+  font-size: 10.5px !important; font-weight: 500 !important; color: #CBD5E1 !important;
   white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; 
 }
 
-.profile-card-location i { color: #C084FC !important; font-size: 10px !important; flex-shrink: 0 !important; }
+.profile-card-location i { color: #C084FC !important; font-size: 9.5px !important; flex-shrink: 0 !important; }
 
+/* 🟢 ป้ายชิปราคา 1.5k สีทองแชมเปญ ขนาดกะทัดรัด (11.5px) สวยงาม */
 .profile-card-price { 
   flex-shrink: 0 !important; 
-  color: #00E676 !important; font-weight: 900 !important; font-size: 13.5px !important; 
-  white-space: nowrap !important; line-height: 1 !important;
+  color: #FDE047 !important; 
+  background: rgba(251, 191, 36, 0.15) !important;
+  border: 1px solid rgba(251, 191, 36, 0.4) !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  font-weight: 900 !important; 
+  font-size: 11.5px !important; 
+  white-space: nowrap !important; 
+  line-height: 1 !important;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.2) !important;
 }
 
 /* ==============================================================================
-   9. LUXURY PROVINCE SECTION HEADER BAR
+   9. PROVINCE SECTION HEADER BAR
    ============================================================================== */
 .section-content-wrapper {
   margin-top: 24px !important;
   margin-bottom: 12px !important;
   width: 100% !important;
-}
-
-.luxury-section-header {
-  display: flex !important;
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  padding: 10px 4px 14px 4px !important;
-  border-bottom: 1px solid rgba(192, 132, 252, 0.12) !important;
-  margin-bottom: 14px !important;
-  gap: 12px !important;
-}
-
-.section-header-left {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-  text-align: left !important;
-}
-
-.section-tag-mini {
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-  color: #A855F7 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1.2px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-}
-
-.section-title-main {
-  font-size: clamp(17px, 4.2vw, 21px) !important;
-  font-weight: 900 !important;
-  color: #FFFFFF !important;
-  margin: 0 !important;
-  line-height: 1.2 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-}
-
-.section-title-main .province-highlight {
-  background: linear-gradient(135deg, #FFFFFF 20%, #E9D5FF 60%, #C084FC 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-}
-
-.section-header-right {
-  display: flex !important;
-  align-items: center !important;
-  flex-shrink: 0 !important;
 }
 
 .live-count-chip {
@@ -784,7 +1300,7 @@ img {
 }
 
 /* ==============================================================================
-   10. LUXURY BENTO CONCIERGE & SAFE PROTOCOL HUB
+   10. BENTO CONCIERGE & SAFE PROTOCOL HUB
    ============================================================================== */
 .concierge-luxury-section {
   width: 100% !important;
@@ -1128,7 +1644,7 @@ img {
 }
 
 /* ==============================================================================
-   13. FULL-SCREEN LUXURY IMMERSIVE LIGHTBOX
+   13. FULL-SCREEN LUXURY IMMERSIVE LIGHTBOX (ULTRA-POLISHED EDITION)
    ============================================================================== */
 #lightbox { 
   position: fixed !important; 
@@ -1141,15 +1657,18 @@ img {
   justify-content: center !important; 
   padding: 0 !important; 
   background-color: rgba(3, 2, 8, 0.96) !important; 
-  backdrop-filter: blur(30px) !important;
-  -webkit-backdrop-filter: blur(30px) !important;
+  backdrop-filter: blur(35px) !important;
+  -webkit-backdrop-filter: blur(35px) !important;
   box-sizing: border-box !important;
   pointer-events: none !important;
+  opacity: 0;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 #lightbox.active { 
   display: flex !important; 
   pointer-events: auto !important;
+  opacity: 1 !important;
 }
 
 #lightbox-content-wrapper-el { 
@@ -1168,67 +1687,85 @@ img {
 }
 
 @media (min-width: 900px) {
-  #lightbox { padding: 20px 16px !important; }
+  #lightbox { padding: 24px 16px !important; }
   #lightbox-content-wrapper-el {
-    width: 94vw !important;
-    max-width: 1150px !important;
-    height: 92vh !important;
-    max-height: 900px !important;
+    width: 92vw !important;
+    max-width: 1100px !important;
+    height: 88vh !important;
+    max-height: 860px !important;
     border-radius: 28px !important;
-    border: 1px solid rgba(192, 132, 252, 0.35) !important;
-    box-shadow: 0 30px 100px rgba(0, 0, 0, 0.98), 0 0 50px rgba(124, 58, 237, 0.25) !important;
+    border: 1px solid rgba(192, 132, 252, 0.3) !important;
+    box-shadow: 0 35px 120px rgba(0, 0, 0, 0.98), 0 0 50px rgba(124, 58, 237, 0.2) !important;
   }
 }
 
+/* 🟢 1. โลโก้แบรนด์นีออนลอยเด่น (เว้นระยะรองรับ Dynamic Island/Notch) */
 .lightbox-top-brand {
   position: absolute !important;
-  top: 16px !important;
+  top: calc(14px + env(safe-area-inset-top, 0px)) !important;
   left: 16px !important;
-  z-index: 60 !important;
-  display: flex !important;
-  align-items: center !important;
-  background: rgba(10, 6, 24, 0.8) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  padding: 6px 14px !important;
-  border-radius: 100px !important;
-  border: 1px solid rgba(192, 132, 252, 0.4) !important;
+  z-index: 70 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
   pointer-events: none !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
 }
 
+.lightbox-top-brand .brand-logo-text {
+  font-size: 16px !important;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 14px rgba(255, 20, 147, 0.85)) !important;
+}
+
+/* 🟢 2. ปุ่มปิด (X) สไตล์ Frosted Glass มินิมอลหรู */
 .lightbox-close-circle-btn {
   position: absolute !important;
-  top: 16px !important;
-  right: 16px !important;
-  z-index: 60 !important;
-  width: 40px !important;
-  height: 40px !important;
-  background: rgba(10, 6, 24, 0.8) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+  right: 14px !important;
+  z-index: 70 !important;
+  width: 38px !important;
+  height: 38px !important;
+  background: rgba(14, 10, 26, 0.6) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
   border-radius: 50% !important;
   color: #FFFFFF !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 16px !important;
-  transition: all 0.2s ease !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
-}
-.lightbox-close-circle-btn:hover {
-  background: rgba(255, 46, 99, 0.9) !important;
-  border-color: #FF2E63 !important;
-  transform: scale(1.08) !important;
+  font-size: 15px !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7) !important;
 }
 
+.lightbox-close-circle-btn:hover {
+  background: rgba(255, 46, 99, 0.85) !important;
+  border-color: #FF2E63 !important;
+  transform: scale(1.08) rotate(90deg) !important;
+}
+
+.lightbox-close-circle-btn:active {
+  transform: scale(0.92) !important;
+}
+
+/* 🟢 3. ตัว Scrollbar หลัก */
 .lightbox-scroll-body {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   height: 100% !important;
   width: 100% !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(192, 132, 252, 0.3) transparent !important;
+}
+
+.lightbox-scroll-body::-webkit-scrollbar {
+  width: 5px;
+}
+.lightbox-scroll-body::-webkit-scrollbar-thumb {
+  background: rgba(192, 132, 252, 0.25);
+  border-radius: 10px;
 }
 
 .lightbox-grid-layout { 
@@ -1240,11 +1777,12 @@ img {
 
 @media (min-width: 900px) { 
   .lightbox-grid-layout { 
-    grid-template-columns: 1.2fr 0.8fr !important; 
+    grid-template-columns: 1.15fr 0.85fr !important; 
     height: 100% !important;
   } 
 }
 
+/* 🟢 4. คอลัมน์แสดงรูปภาพหลัก */
 .lightbox-image-column {
   position: relative !important;
   display: flex !important;
@@ -1256,16 +1794,15 @@ img {
 @media (min-width: 900px) {
   .lightbox-image-column {
     height: 100% !important;
-    border-right: 1px solid rgba(192, 132, 252, 0.2) !important;
+    border-right: 1px solid rgba(192, 132, 252, 0.18) !important;
   }
 }
 
 .lightbox-hero-container { 
   position: relative !important;
   width: 100% !important; 
-  height: 75dvh !important; 
-  min-height: 500px !important;
-  max-height: 750px !important;
+  height: 66dvh !important;
+  min-height: 420px !important;
   background: #000000 !important;
   display: flex !important; 
   align-items: center !important; 
@@ -1273,27 +1810,41 @@ img {
   overflow: hidden !important;
 }
 
+@media (min-width: 900px) {
+  .lightbox-hero-container {
+    height: 100% !important;
+    min-height: 100% !important;
+  }
+}
+
+/* แสงเงาหัวรูป (Top Vignette) ให้อ่านโลโก้/ปุ่ม X ชัดเจน */
+.lightbox-hero-container::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 90px !important;
+  background: linear-gradient(180deg, rgba(5, 3, 12, 0.7) 0%, rgba(5, 3, 12, 0.25) 60%, transparent 100%) !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+}
+
+/* แสงเงาท้ายรูป (Bottom Fade) เชื่อมต่อกับเนื้อหาข้อมูล */
 .lightbox-hero-container::after {
   content: "" !important;
   position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  height: 80px !important;
-  background: linear-gradient(to bottom, transparent 0%, rgba(8, 5, 20, 0.95) 100%) !important;
-  pointer-events: none !important;
+  height: 60px !important;
+  background: linear-gradient(0deg, rgba(8, 5, 20, 0.95) 0%, transparent 100%) !important;
   z-index: 10 !important;
+  pointer-events: none !important;
 }
 
 @media (min-width: 900px) {
-  .lightbox-hero-container {
-    height: 100% !important;
-    min-height: 100% !important;
-    max-height: 100% !important;
-  }
-  .lightbox-hero-container::after {
-    display: none !important;
-  }
+  .lightbox-hero-container::after { display: none !important; }
 }
 
 #lightboxHeroImage { 
@@ -1302,15 +1853,16 @@ img {
   object-fit: cover !important; 
   object-position: top center !important; 
   display: block !important;
-  transition: opacity 0.25s ease, transform 0.35s ease !important;
+  transition: opacity 0.2s ease !important;
 }
 
+/* 🟢 5. แถบรูปขนาดย่อ (Thumbnails Strip) */
 #lightboxThumbnailStrip { 
   display: none; 
-  gap: 10px !important; 
+  gap: 8px !important; 
   overflow-x: auto !important; 
-  padding: 12px 18px !important; 
-  background: rgba(8, 4, 18, 0.9) !important; 
+  padding: 10px 14px !important; 
+  background: rgba(6, 3, 15, 0.95) !important; 
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
   scrollbar-width: none !important;
   -webkit-overflow-scrolling: touch !important;
@@ -1318,22 +1870,28 @@ img {
 #lightboxThumbnailStrip::-webkit-scrollbar { display: none; }
 
 .lightbox-thumb-item {
-  width: 58px !important;
-  height: 74px !important;
+  width: 52px !important;
+  height: 68px !important;
   border-radius: 12px !important;
   overflow: hidden !important;
-  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
   flex-shrink: 0 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
   background: #000 !important;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
-.lightbox-thumb-item.active,
+
 .lightbox-thumb-item:hover {
-  border-color: #C084FC !important;
-  box-shadow: 0 0 14px rgba(192, 132, 252, 0.8) !important;
-  transform: scale(1.06) !important;
+  transform: translateY(-2px) !important;
+  border-color: rgba(255, 20, 147, 0.6) !important;
 }
+
+.lightbox-thumb-item.active {
+  border-color: #FF1493 !important;
+  box-shadow: 0 0 14px rgba(255, 20, 147, 0.85) !important;
+  transform: scale(1.04) !important;
+}
+
 .lightbox-thumb-item img {
   width: 100% !important;
   height: 100% !important;
@@ -1341,78 +1899,98 @@ img {
   object-position: top center !important;
 }
 
+/* 🟢 6. คอลัมน์รายละเอียดโปรไฟล์ */
 .lightbox-details { 
-  padding: 24px 20px 40px 20px !important; 
+  padding: 16px 16px calc(32px + env(safe-area-inset-bottom, 0px)) 16px !important; 
   display: flex !important; 
   flex-direction: column !important; 
-  gap: 16px !important; 
+  gap: 12px !important; 
   text-align: left !important; 
-  background: rgba(10, 6, 22, 0.7) !important;
+  background: rgba(9, 6, 20, 0.98) !important;
 }
 
 @media (min-width: 900px) {
   .lightbox-details {
-    padding: 32px 28px !important;
+    padding: 32px 24px !important;
     overflow-y: auto !important;
     height: 100% !important;
+    background: rgba(10, 6, 22, 0.95) !important;
   }
 }
 
-.bento-stat-tile { 
-  background: rgba(255, 255, 255, 0.04) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
-  padding: 10px 6px !important; 
-  border-radius: 16px !important; 
-  text-align: center !important; 
-}
-
+/* กล่องคำโปรย (Quote Card) */
 .lightbox-quote-card {
-  font-size: 13px !important;
-  color: #F1F5F9 !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-left: 3.5px solid #C084FC !important;
+  font-size: 12.5px !important;
+  color: #F8FAFC !important;
+  background: linear-gradient(135deg, rgba(255, 20, 147, 0.08) 0%, rgba(124, 58, 237, 0.04) 100%) !important;
+  border-left: 3.5px solid #FF1493 !important;
+  border-radius: 4px 14px 14px 4px !important;
   padding: 10px 14px !important;
-  border-radius: 6px 14px 14px 6px !important;
-  line-height: 1.6 !important;
+  line-height: 1.55 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* แถบแท็กสไตล์ */
 .lightbox-tags-row {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 8px !important;
+  gap: 6px !important;
 }
 
 .lightbox-tag-pill { 
   background: rgba(124, 58, 237, 0.18) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.4) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.35) !important; 
   color: #E9D5FF !important; 
-  font-size: 11.5px !important; 
+  font-size: 11px !important; 
   font-weight: 700 !important; 
-  padding: 4px 12px !important; 
-  border-radius: 100px !important; 
+  padding: 3.5px 10px !important; 
+  border-radius: 100px !important;
+  backdrop-filter: blur(4px) !important;
 }
 
+/* กล่องสเปก 3 ช่อง Bento Stat Tile */
+.bento-stat-tile { 
+  background: rgba(255, 255, 255, 0.035) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.2) !important; 
+  padding: 9px 6px !important; 
+  border-radius: 14px !important; 
+  text-align: center !important; 
+  backdrop-filter: blur(6px) !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.bento-stat-tile:hover {
+  border-color: rgba(192, 132, 252, 0.45) !important;
+}
+
+/* 🟢 7. ปุ่มแอดไลน์จองคิว Luxury Glow CTA */
 .lightbox-line-cta { 
   display: flex !important; 
   align-items: center !important; 
   justify-content: center !important; 
   gap: 10px !important; 
-  background: linear-gradient(135deg, #00E676 0%, #00B050 100%) !important; 
+  background: linear-gradient(135deg, #00E676 0%, #00C853 100%) !important; 
   color: #000000 !important; 
-  padding: 15px 24px !important; 
+  padding: 14px 22px !important; 
   border-radius: 100px !important; 
   font-weight: 900 !important; 
-  font-size: 15px !important; 
+  font-size: 14.5px !important; 
   text-decoration: none !important; 
   cursor: pointer !important; 
-  box-shadow: 0 6px 25px rgba(0, 230, 118, 0.45) !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
-.lightbox-line-cta:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 30px rgba(0, 230, 118, 0.6) !important;
+  box-shadow: 0 6px 24px rgba(0, 230, 118, 0.45), 0 0 12px rgba(0, 230, 118, 0.2) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+.lightbox-line-cta:hover {
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow: 0 10px 30px rgba(0, 230, 118, 0.6) !important;
+}
+
+.lightbox-line-cta:active {
+  transform: scale(0.98) !important;
+}
 /* ==============================================================================
    14. FOOTER & SOCIAL ICONS
    ============================================================================== */
@@ -1894,3 +2472,28 @@ footer.fmh-footer {
 }
 #map-container { width: 100% !important; height: 180px !important; position: relative !important; }
 #google-map { width: 100% !important; height: 100% !important; border: 0 !important; }
+
+/* ==============================================================================
+   📱 TOUCH FEEDBACK FOR MOBILE (เอานิ้วแตะรูปแล้วตอบสนองนุ่มนวล)
+   ============================================================================== */
+
+/* เมื่อเอานิ้วจิ้ม/แตะที่การ์ด */
+.profile-card-new:active {
+  transform: scale(0.97) !important; /* การ์ดยุบตัวลงเล็กน้อยรับกับนิ้ว */
+  border-color: rgba(255, 20, 147, 0.9) !important;
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.6) !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+}
+
+/* รูปข้างในขยายรับแสงตอนแตะ */
+.profile-card-new:active .profile-card-img {
+  transform: scale(1.05) !important;
+}
+
+/* แท็ก (#) เรืองแสงขึ้นมาทันทีตอนนิ้วสัมผัส */
+.profile-card-new:active .card-vibe-pill {
+  background: rgba(255, 20, 147, 0.4) !important;
+  border-color: #FF1493 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+}

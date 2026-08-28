@@ -592,11 +592,10 @@ async function getSupabaseClient() {
       liveCounterEl.textContent = isAllOrNational ? `${totalCount}+` : `${totalCount}`;
     }
 
-    // 2. อัปเดตหัวข้อ H1 และ H2 ให้แสดงชื่อจังหวัดจริง
     const heroH1 = document.getElementById("hero-h1");
     if (heroH1) {
       heroH1.innerHTML = `
-        <span class="seo-sub-headline">รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}</span><br>
+        <span class="seo-sub-headline">รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}</span>
         <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
       `;
     }
@@ -730,89 +729,111 @@ async function getSupabaseClient() {
     }[tag] || tag)) : "";
   }
 
-  function createProfileCardDOM(p, index = 20) {
-    const container = document.createElement("div");
-    container.className = "profile-card-new-container";
-
-    const article = document.createElement("article");
-    article.className = "profile-card-new interactive-card";
-    article.setAttribute("data-profile-id", p.id);
-    article.setAttribute("data-profile-slug", p.slug || p.id);
-
-    const rawImg = p.imagePath || p.image_url || p.imageUrl || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
-    const imgSrc = optimizeImg(rawImg, 400, 533);
-    const cardSrcSet = `${optimizeImg(rawImg, 320, 427)} 320w, ${optimizeImg(rawImg, 400, 533)} 400w, ${optimizeImg(rawImg, 600, 800)} 600w`;
-    
-    const pKey = (p.provinceKey || "national").toLowerCase();
-    
-    let rawName = p.displayName || p.name || "Model";
-    const modelName = isEN
-      ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim())
-      : formatDisplayName(rawName);
-      
-    const ageDisplay = p.safeAge && p.safeAge !== "-" && p.safeAge !== "0" ? `${p.safeAge} ปี` : "";
-    const locName = isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย");
-    
-    const isOnline = p.isAvailable;
-    const statusClass = isOnline ? "status-online" : "status-busy";
-    const availText = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถามคิว");
-    const priceDisplay = isEN && p._price > 0 ? `${p._price.toLocaleString()} THB` : p.displayPrice;
-    const profileSlug = encodeURIComponent(p.slug || p.id);
-
-    let rightBadgeHtml = "";
-    if (index < 2) {
-      rightBadgeHtml = `<span class="badge-hot-tag">#${index + 1} HOT 🔥</span>`;
-    } else if (p.isfeatured) {
-      rightBadgeHtml = `<span class="badge-verified-top">✦ VERIFIED 100%</span>`;
-    } else {
-      rightBadgeHtml = `<span class="badge-verified-top">✓ ตรงปก</span>`;
-    }
-
-    article.innerHTML = `
-      <img src="${imgSrc}" 
-           srcset="${cardSrcSet}"
-           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-           alt="${modelName} ${locName}"
-           width="400"
-           height="533"
-           class="profile-card-img"
-           loading="${index < 4 ? "eager" : "lazy"}"
-           decoding="async"
-           onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
-           
-      <div class="profile-card-gradient-overlay"></div>
-
-      <div class="profile-card-badges-top">
-          <div class="badges-left">
-              <span class="badge-status ${statusClass}">
-                  <span class="status-dot"></span>
-                  <span>${availText}</span>
-              </span>
-          </div>
-          <div class="badges-right">
-              ${rightBadgeHtml}
-          </div>
-      </div>
-      
-      <a href="/sideline/${profileSlug}" class="card-link" aria-label="ดูโปรไฟล์ ${modelName}"></a>
-
-      <div class="profile-card-info-content">
-          <div class="profile-card-title-row">
-              <h3 class="profile-card-name">${modelName}</h3>
-              ${ageDisplay ? `<span class="profile-card-age-tag">${ageDisplay}</span>` : ""}
-          </div>
-          <div class="profile-card-bottom-row">
-              <span class="profile-card-location" title="${locName}">
-                  <i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${locName}
-              </span>
-              <span class="profile-card-price">${priceDisplay}</span>
-          </div>
-      </div>
-    `;
-
-    container.appendChild(article);
-    return container;
+  // 🟢 2.1 เพิ่มฟังก์ชันนี้ไว้ด้านบนของ main.js
+function formatLuxuryRate(rate) {
+  if (!rate) return "1.5k";
+  const num = parseInt(String(rate).replace(/\D/g, ""), 10);
+  if (isNaN(num) || num <= 0) return "1.5k";
+  if (num >= 1000) {
+    const kVal = num / 1000;
+    return (kVal % 1 === 0 ? kVal : kVal.toFixed(1)) + "k";
   }
+  return String(num);
+}
+
+function createProfileCardDOM(p, index = 20) {
+  const container = document.createElement("div");
+  container.className = "profile-card-new-container";
+
+  const article = document.createElement("article");
+  article.className = "profile-card-new interactive-card";
+  article.setAttribute("data-profile-id", p.id);
+  article.setAttribute("data-profile-slug", p.slug || p.id);
+
+  const rawImg = p.imagePath || p.image_url || p.imageUrl || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
+  const imgSrc = optimizeImg(rawImg, 400, 533);
+  const cardSrcSet = `${optimizeImg(rawImg, 320, 427)} 320w, ${optimizeImg(rawImg, 400, 533)} 400w, ${optimizeImg(rawImg, 600, 800)} 600w`;
+  
+  const pKey = (p.provinceKey || "national").toLowerCase();
+  let rawName = p.displayName || p.name || "Model";
+  const modelName = isEN ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim()) : formatDisplayName(rawName);
+  const ageDisplay = p.safeAge && p.safeAge !== "-" && p.safeAge !== "0" ? `${p.safeAge} ปี` : "";
+  
+  // 🟢 ทำความสะอาดและตัดชื่อพิกัดให้สั้น กระชับ ไม่ล้นการ์ด
+  let rawLoc = isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย");
+  let locName = rawLoc
+    .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
+    .split(/[,/]/)[0] // เอาเฉพาะชื่อโซนแรก เช่น "นิมมาน, เจ็ดยอด" -> ได้ "นิมมาน"
+    .trim();
+  if (!locName) locName = rawLoc;
+
+  const isOnline = p.isAvailable;
+  const statusClass = isOnline ? "status-online" : "status-busy";
+  const availText = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถาม");
+  const luxuryPrice = formatLuxuryRate(p.rate || p._price);
+  const profileSlug = encodeURIComponent(p.slug || p.id);
+
+  const rawTags = Array.isArray(p.styleTags) ? p.styleTags : [];
+  const cleanTags = rawTags
+    .map(t => String(t).replace(/^#/, "").trim())
+    .filter(t => t && !t.includes("รับงาน") && !t.includes("ไซด์ไลน์") && t.length <= 8);
+
+  const vibeTagsHtml = cleanTags.length > 0
+    ? cleanTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t)}</span>`).join("")
+    : `<span class="card-vibe-pill">#ฟิวแฟน</span>`;
+
+  let rightBadgeHtml = index < 2 
+    ? `<span class="badge-hot-tag">🔥 HOT</span>` 
+    : `<span class="badge-verified-top">✦ ตรงปก</span>`;
+
+  article.innerHTML = `
+    <img src="${imgSrc}" 
+         srcset="${cardSrcSet}"
+         sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+         alt="${modelName}"
+         width="400"
+         height="533"
+         class="profile-card-img"
+         loading="${index < 4 ? "eager" : "lazy"}"
+         decoding="async"
+         onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
+         
+    <div class="profile-card-gradient-overlay"></div>
+
+    <div class="profile-card-badges-top">
+        <div class="badges-left">
+            <span class="badge-status ${statusClass}">
+                <span class="status-dot"></span>
+                <span>${availText}</span>
+            </span>
+        </div>
+        <div class="badges-right">
+            ${rightBadgeHtml}
+        </div>
+    </div>
+    
+    <a href="/sideline/${profileSlug}" class="card-link" aria-label="ดูโปรไฟล์ ${modelName}"></a>
+
+    <div class="profile-card-info-content">
+        <div class="profile-card-tags-row">
+            ${vibeTagsHtml}
+        </div>
+        <div class="profile-card-title-row">
+            <h3 class="profile-card-name">${modelName}</h3>
+            ${ageDisplay ? `<span class="profile-card-age-tag">${ageDisplay}</span>` : ""}
+        </div>
+        <div class="profile-card-bottom-row">
+            <span class="profile-card-location" title="${rawLoc}">
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${escapeHTML(locName)}
+            </span>
+            <span class="profile-card-price">${luxuryPrice}</span>
+        </div>
+    </div>
+  `;
+
+  container.appendChild(article);
+  return container;
+}
 
   async function renderProfilesBatch(containerEl, profilesList, renderId) {
     if (!containerEl || !profilesList) return;
