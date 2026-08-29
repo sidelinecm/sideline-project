@@ -243,20 +243,46 @@ function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
   if (!text) return "";
   let formatted = sanitizeThaiText(text);
   const locationUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
-  
+
+  // 🟢 ฟังก์ชันช่วยแทนที่คำอย่างปลอดภัย (แทนที่เฉพาะครั้งแรกที่เจอ และไม่ไปทับแท็ก HTML เดิม)
+  const replaceFirstSafe = (content, pattern, template) => {
+    // ตรวจสอบว่าคำนั้นต้องไม่อยู่ในแท็ก HTML <...>, <a> หรือ <strong> ที่มีอยู่ก่อนแล้ว
+    const regex = new RegExp(`(${pattern})(?![^<]*>|[^<>]*<\\/a>|[^<>]*<\\/strong>)`, "i");
+    return content.replace(regex, template);
+  };
+
+  // 1. ทำลิงก์ Anchor ให้กับชื่อโซนสำคัญ (จำกัดสูงสุด 4 โซน และทำแค่ 1 ครั้งต่อโซน)
   if (zones && Array.isArray(zones) && zones.length > 0) {
-    zones.slice(0, 5).forEach(zone => {
+    zones.slice(0, 4).forEach(zone => {
       if (!zone || zone === "ทั้งหมด") return;
       const cleanZone = sanitizeThaiText(zone);
-      const regex = new RegExp(`(${cleanZone})(?![^<]*>|[^<>]*<\\/a>)`, "g");
-      formatted = formatted.replace(regex, `<a href="${locationUrl}" class="kw-zone">$1</a>`);
+      formatted = replaceFirstSafe(
+        formatted,
+        cleanZone,
+        `<a href="${locationUrl}" class="kw-zone">$1</a>`
+      );
     });
   }
-  
-  formatted = formatted.replace(/(สาวรับงาน|ไซด์ไลน์|เด็กเอ็น|เพื่อนเที่ยว|รับงาน|ฟิวแฟน|ฟีลแฟน)(?![^<]*>|[^<>]*<\/a>)/g, '<strong class="kw-purple">$1</strong>');
-  formatted = formatted.replace(/(ไม่โอนมัดจำ|จ่ายหน้างาน 100%|ตรงปก 100%|ความปลอดภัยสูงสุด|นัดเจอตัวจริง)(?![^<]*>|[^<>]*<\/a>)/g, '<strong class="kw-green">$1</strong>');
-  formatted = formatted.replace(/(ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี|ห้ามโอนเงินก่อน|ปราศจากการเรียกเก็บเงิน)(?![^<]*>|[^<>]*<\/a>)/g, '<strong class="kw-red">$1</strong>');
-  
+
+  // 2. เน้นคำค้นหาหลัก (Keywords) เพียง "1 ครั้งแรกต่อกลุ่มคำ" เพื่อความเป็นธรรมชาติของ SEO
+  formatted = replaceFirstSafe(
+    formatted,
+    "สาวรับงาน|ไซด์ไลน์|เด็กเอ็น|เพื่อนเที่ยว|ฟิวแฟน",
+    '<strong class="kw-purple">$1</strong>'
+  );
+
+  formatted = replaceFirstSafe(
+    formatted,
+    "ไม่โอนมัดจำ|จ่ายหน้างาน 100%|ตรงปก 100%|นัดเจอตัวจริง",
+    '<strong class="kw-green">$1</strong>'
+  );
+
+  formatted = replaceFirstSafe(
+    formatted,
+    "ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี|ห้ามโอนเงินก่อน",
+    '<strong class="kw-red">$1</strong>'
+  );
+
   return formatted;
 }
 
@@ -755,7 +781,6 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 🟢 3. แก้ไข HREFLANG ให้ถูกต้อง 100% (จุดที่แก้บั๊ก Canonical ซ้ำกับหน้าแรก)
     if (isNational) {
       finalHtml = finalHtml.replace(
         /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
@@ -764,16 +789,23 @@ export default async (req, context) => {
     } else {
       finalHtml = finalHtml.replace(
         /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
-        `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `
+        ""
       );
     }
 
-    // 🟢 4. แทนที่ H1 ให้ตรงกับจังหวัด (จุดที่แก้บั๊ก H1 ไม่เปลี่ยน)
-    const ssrH1Html = `
-        <span class="seo-sub-headline">รับงาน${escapeHTML(provinceNameThai)} • ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
+    // 🟢 แยก H1 ระหว่างหน้าแรก และหน้ารายจังหวัดให้ชัดเจน
+const ssrH1Html = isNational
+  ? `
+      <span class="seo-sub-headline">ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟน</span>
+      <span class="seo-main-headline">สาวรับงาน ไซด์ไลน์ทั่วไทย ตรงปก 100%</span>
+    `
+  : `
+      <span class="seo-sub-headline">เพื่อนเที่ยวฟิวแฟน • เด็กเอ็น${escapeHTML(provinceNameThai)}</span>
+      <span class="seo-main-headline">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
     `;
-    finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="hero-h1" class="seo-h1-title">${ssrH1Html}</h1>`);
+
+finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="hero-h1" class="seo-h1-title">${ssrH1Html}</h1>`);
+
 
     const ssrFeaturedH2 = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
