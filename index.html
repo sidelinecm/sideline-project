@@ -47,7 +47,7 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- ⚡ SPEED OPTIMIZATION: PRECONNECT & DNS-PREFETCH TO ALL CDNs (ตัด Critical Chains) -->
+  <!-- ⚡ SPEED OPTIMIZATION -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
   <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
@@ -59,15 +59,15 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
-  <!-- ⚡ PRELOAD CRITICAL CSS (ลด Render-Blocking 430ms) -->
+  <!-- ⚡ PRELOAD CRITICAL CSS -->
   <link rel="preload" href="/styles.css" as="style">
   <link rel="stylesheet" href="/styles.css">
 
-  <!-- ⚡ PRELOAD THAI FONTS (โหลดฟอนต์ Prompt ล่วงหน้า) -->
+  <!-- ⚡ PRELOAD THAI FONTS -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
-  <!-- ⚡ NON-BLOCKING ASYNC FONT AWESOME (โหลดไอคอนไม่ขวางการแสดงผลตัวหนังสือ) -->
+  <!-- ⚡ NON-BLOCKING ASYNC FONT AWESOME -->
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
@@ -147,7 +147,7 @@
   
   <div class="sidebar-links-wrapper">
     <a href="/"><i class="fas fa-home icon-purple" aria-hidden="true"></i> หน้าแรก</a>
-    <a href="/profiles"><i class="fas fa-user-check icon-green" aria-hidden="true"></i> น้องๆ  แนะนำ</a>
+    <a href="/profiles"><i class="fas fa-user-check icon-green" aria-hidden="true"></i> น้องๆ แนะนำ</a>
     <a href="/locations"><i class="fas fa-map-marked-alt icon-gold" aria-hidden="true"></i> พื้นที่บริการทั่วไทย</a>
     <a href="/nimman"><i class="fas fa-gem icon-pink" aria-hidden="true"></i> โซนนิมมาน เชียงใหม่</a>
     <a href="/blog"><i class="fas fa-newspaper icon-blue" aria-hidden="true"></i> บทความ & คู่มือนัดหมาย</a>
@@ -169,50 +169,61 @@
 <main id="main-content" tabindex="-1">
   <div class="container">
 
-    <!-- 🌟 1. HERO SECTION (ครบสมบูรณ์ทุกเนื้อหา + ดีไซน์หรูหรา) -->
-    <section class="hero-section fmh-hero-surface" aria-labelledby="hero-h1">
-      <div class="fmh-hero-ambient" aria-hidden="true">
-        <span class="fmh-ambient-orb fmh-ambient-orb-a"></span>
-        <span class="fmh-ambient-orb fmh-ambient-orb-b"></span>
-        <span class="fmh-hero-grid"></span>
-      </div>
+   <!-- 🌟 1. HERO SECTION (ULTRA-CLEAN & LUXURY EDITION) -->
+<section class="hero-section fmh-hero-surface" aria-labelledby="hero-h1">
+  <div class="fmh-hero-ambient" aria-hidden="true">
+    <span class="fmh-ambient-orb fmh-ambient-orb-a"></span>
+    <span class="fmh-ambient-orb fmh-ambient-orb-b"></span>
+  </div>
 
-      <div class="fmh-hero-index" aria-hidden="true">
-        <span>FMH / 2026</span>
-        <span>THE PRIVATE EDIT</span>
-      </div>
-      
-      <div class="clutch-pill-compact">
-        <span class="pill-badge-tag">VERIFIED 2026</span>
-        <div class="stars-mini" aria-hidden="true">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-        </div>
-        <span class="pill-badge-score">5/5 Verified Profiles</span>
-      </div>
+  <!-- 💎 ป้ายการันตีมินิมอลแถวเดียว (เอาชื่อเว็บและข้อความยาวๆ ออกแล้ว) -->
+  <div class="clutch-pill-compact">
+    <span class="pill-badge-tag">VERIFIED</span>
+    <div class="stars-mini" aria-hidden="true">
+      <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+    </div>
+    <span class="pill-badge-score">การันตีตัวจริง 100%</span>
+  </div>
 
-      
+  <!-- 🏆 H1 SEO KEYWORDS (นีออนชมพู-ขาว คมชัด) -->
+  <h1 id="hero-h1" class="seo-h1-title">
+    <span class="seo-sub-headline">รับงานทั่วไทย • ไซด์ไลน์ทั่วไทย</span>
+    <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
+  </h1>
+  
+  <!-- 🛡️ แถบความปลอดภัยแถวเดียว (ไม่ตกบรรทัด 100%) -->
+  <div class="luxury-trust-pill">
+    <span class="trust-pill-badge"><i class="fas fa-shield-alt"></i> ปลอดภัย</span>
+    <span class="trust-pill-text">เจอตัวจริงค่อยจ่ายหน้างาน <strong class="kw-green">ไม่โอนมัดจำ</strong></span>
+  </div>
+  
+  <!-- 📝 ข้อความบรรยายขนาดกะทัดรัด -->
+  <p id="hero-subtitle" class="hero-subtitle-p">
+    ศูนย์รวมลงประกาศ <strong class="kw-purple">รับงาน</strong>, <strong class="kw-purple">สาวรับงาน</strong>, <strong class="kw-purple">ไซด์ไลน์</strong> และเพื่อนเที่ยวสไตล์ <span class="kw-green">ฟิวแฟน (GFE)</span> ตัวจริงตรงปก นัดพบปลอดภัย จ่ายเงินหน้างาน ปราศจากความเสี่ยงด้วยนโยบาย <strong class="kw-red">ไม่โอนมัดจำล่วงหน้าทุกกรณี</strong>
+  </p>
 
-      <!-- 🌟 H1 HEADLINE (นีออนชมพู-ขาว) -->
-      <h1 id="hero-h1" class="seo-h1-title">
-        <span class="seo-sub-headline">รับงานทั่วไทย • ไซด์ไลน์ทั่วไทย</span>
-        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
-      </h1>
-      
-      <!-- 🛡️ แถบความปลอดภัยสไตล์ Capsule สากล -->
-      <div class="luxury-trust-pill">
-        <span class="trust-pill-badge"><i class="fas fa-shield-alt"></i> ปลอดภัย 100%</span>
-        <span class="trust-pill-text">เจอตัวจริงค่อยจ่ายหน้างาน <strong class="kw-green">ไม่โอนมัดจำ</strong></span>
-      </div>
-      
-      <!-- 📝 ข้อความบรรยายเนื้อหาหลัก (ดึงกลับมาครบสมบูรณ์) -->
-      <p id="hero-subtitle" class="hero-subtitle-p">
-        แพลตฟอร์มศูนย์รวมลงประกาศ <strong class="kw-purple">รับงาน</strong>, <strong class="kw-purple">สาวรับงาน</strong>, <strong class="kw-purple">เพื่อนเที่ยว</strong> ไซด์ไลน์ เด็กเอ็น ฟิวแฟน เพื่อนกินข้าว ดูหนัง ฟังเพลง ไปคาเฟ่ ปาร์ตี้ ยืนยันตัวตนจริง <span class="kw-green">ตรงปก 100%</span> ปราศจากความเสี่ยงด้วยนโยบาย <strong class="kw-red">ไม่โอนเงินมัดจำล่วงหน้าทุกกรณี</strong>
-      </p>
+  <!-- 📊 สถิติ 3 ช่อง แถวเดียวแบบ Micro-Chips เรียบหรู ไม่แตกแถว -->
+  <div class="hero-stats-chips-row num-en">
+    <span class="stat-micro-chip">
+      <i class="fas fa-users icon-purple"></i>
+      <span><strong id="live-profile-count" class="kw-green">76+</strong> โปรไฟล์</span>
+    </span>
+    <span class="stat-micro-chip">
+      <i class="fas fa-check-circle icon-gold"></i>
+      <span>การันตี <strong class="kw-gold">ตรงปก</strong></span>
+    </span>
+    <span class="stat-micro-chip">
+      <i class="fas fa-shield-alt icon-green"></i>
+      <span class="kw-green">จ่ายหน้างาน</span>
+    </span>
+  </div>
+</section>
 
-      <!-- 🔥 สไลด์ HOT แถวเดียว สีนีออนชมพู -->
+    <!-- 🔥 2. HOT PROFILES SECTION (แยกออกมาเป็น Section เฉพาะ) -->
+    <section id="hot-profiles-section" class="clean-section-wrapper" aria-labelledby="hot-profiles-heading">
       <div class="hot-section-header-centered">
         <div class="hot-single-line-header">
-          <h2 class="hot-title-neon">น้องๆ ที่ HOT 🔥</h2>
+          <h2 id="hot-profiles-heading" class="hot-title-neon">น้องๆ ที่ HOT 🔥</h2>
           <span class="hot-badge-pill">ประจำเดือน #ฟิวแฟน</span>
         </div>
         <div class="hot-swipe-hint-centered">
@@ -220,43 +231,26 @@
         </div>
       </div>
 
+      <!-- Container สำหรับให้ JS Render HOT Swiper -->
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ"></div>
-
-      <!-- 📊 สถิติ Bento Chips -->
-      <div class="hero-stats-chips-row num-en">
-        <span class="stat-micro-chip">
-          <i class="fas fa-users icon-purple" aria-hidden="true"></i>
-          <span><strong id="live-profile-count" class="kw-green">100+</strong> โปรไฟล์พร้อมนัด</span>
-        </span>
-        <span class="stat-micro-chip">
-          <i class="fas fa-check-circle icon-gold" aria-hidden="true"></i>
-          <span>การันตี <strong class="kw-gold">ตรงปก 100%</strong></span>
-        </span>
-        <span class="stat-micro-chip">
-          <i class="fas fa-shield-alt icon-green" aria-hidden="true"></i>
-          <span class="kw-green">จ่ายหน้างาน 100%</span>
-        </span>
-      </div>
     </section>
     
-<!-- ⭐ ปรับหัวข้อ Section 2: ตัด VIP ออก -->
-<section id="featured-profiles" class="clean-section-wrapper">
-  <div class="clean-section-header">
-    <span class="section-tag-mini"><i class="fas fa-check-circle"></i> โปรไฟล์แนะนำ</span>
-    <h2 id="featured-heading" class="clean-section-h2">
-      แนะนำน้องๆ รับงาน <span class="kw-purple">สไตล์ฟิวแฟน</span>
-    </h2>
-    <span class="text-gradient-sub">คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</span>
-  </div>
-  <div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading"></div>
-</section>
+    <!-- ⭐ 3. FEATURED PROFILES -->
+    <section id="featured-profiles" class="clean-section-wrapper" aria-labelledby="featured-heading">
+      <div class="clean-section-header">
+        <span class="section-tag-mini"><i class="fas fa-check-circle"></i> โปรไฟล์แนะนำ</span>
+        <h2 id="featured-heading" class="clean-section-h2">
+          แนะนำน้องๆ รับงาน <span class="kw-purple">สไตล์ฟิวแฟน</span>
+        </h2>
+        <span class="text-gradient-sub">คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</span>
+      </div>
+      <!-- Container สำหรับให้ JS Render การ์ดแนะนำ -->
+      <div id="featured-profiles-container" class="profile-grid" aria-labelledby="featured-heading"></div>
+    </section>
 
+    <div id="profiles-display-area" role="region" aria-label="โปรไฟล์น้องๆรับงาน sideline และเพื่อนเที่ยว"></div>
 
-
-    <!-- 📍 3. DISPLAY AREA -->
-    <div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผน้องๆรับงาน sideline และเพื่อนเที่ยว"></div>
-
-    <!-- 💎 4. LUXURY TRUST & BOOKING CONCIERGE -->
+    <!-- 💎 5. LUXURY TRUST & BOOKING CONCIERGE -->
     <section class="concierge-luxury-section" aria-label="ศูนย์รวมความปลอดภัยและคู่มือการนัดหมาย">
       <div class="luxury-bento-wrapper">
 
@@ -331,22 +325,22 @@
           </div>
         </div>
 
-        <div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin: 20px 0; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px;">
-          <div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;"></div>
-        </div>
-
-        <div id="reviews-wrapper-block" style="margin: 20px 0;">
-          <h3 style="color: #FFF; font-size: 14px; font-weight: 800; margin-bottom: 12px; text-align: center;">
+        <div id="reviews-wrapper-block">
+          <h3 class="section-title-mini">
             ⭐ รีวิวความประทับใจจากลูกค้าจริง
           </h3>
           <div id="reviews-container-grid" class="reviews-grid-wrapper"></div>
         </div>
 
-        <div id="faq-wrapper-block" style="margin: 20px 0; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px;">
-          <h3 style="color: #C084FC; font-size: 14px; font-weight: 800; margin-bottom: 12px; text-align: center;">
+        <div id="faq-wrapper-block">
+          <h3 class="section-title-mini" style="color: #C084FC;">
             ❓ คำถามที่พบบ่อย (FAQ)
           </h3>
           <div id="faq-container-list" class="faq-list-wrapper"></div>
+        </div>
+
+        <div id="seo-drawer-wrapper" class="seo-drawer-wrapper">
+          <div class="seo-content-inner"></div>
         </div>
 
         <div class="live-concierge-bar">
@@ -378,7 +372,7 @@
       </div>
     </section>
 
-    <!-- 🏆 5. AUTHENTICITY SEAL -->
+    <!-- 🏆 6. AUTHENTICITY SEAL -->
     <section id="verification-process" class="verification-section" aria-labelledby="verification-heading">
       <div class="verification-box">
         <i class="fas fa-award icon-purple" style="font-size: 26px; flex-shrink: 0;"></i>
@@ -388,23 +382,19 @@
       </div>
     </section>
 
-    <!-- 🗺️ 6. MAP -->
-<section id="map-section" aria-label="แผนที่พื้นที่ให้บริการ">
-  <figure id="map-container">
-    <iframe
-      id="google-map"
-      src="{{MAP_EMBED_URL}}"
-      title="แผนที่พื้นที่ให้บริการ First Model Hub"
-      loading="lazy"
-      allowfullscreen
-    ></iframe>
-  </figure>
-</section>
+  
+<!-- 🗺️ 7. MAP -->
+    <section id="map-section" aria-label="แผนที่พื้นที่ให้บริการ">
+      <figure id="map-container" style="width: 100%; height: 180px; margin: 0;">
+        <iframe id="google-map" src="{{MAP_EMBED_URL}}" title="แผนที่พื้นที่ให้บริการ First Model Hub" loading="lazy" allowfullscreen style="width: 100%; height: 100%; border: 0;"></iframe>
+      </figure>
+    </section>
 
   </div>
 </main>
+    
 
-<!-- 🔍 7. SEARCH BOTTOM SHEET -->
+<!-- 🔍 8. SEARCH BOTTOM SHEET -->
 <div id="search-drawer-overlay" class="drawer-backdrop"></div>
 
 <div id="search-bottom-sheet" class="search-bottom-sheet" role="dialog" aria-modal="true" aria-label="ตัวกรองค้นหาอัจฉริยะ">
@@ -473,6 +463,7 @@
   </div>
 </div>
 
+<!-- 🦶 9. FOOTER (พร้อม Official Social Media ครบ 100%) -->
 <footer role="contentinfo" class="fmh-footer">
   <div class="container">
     <div class="footer-top-grid">
@@ -523,6 +514,7 @@
             </a>
           </div>
         </div>
+      </div> <!-- 🟢 เติมปิด </div> ของ footer-brand-col ตรงนี้ -->
 
       <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
         <h3 class="footer-heading">เมนูหลัก</h3>
@@ -530,15 +522,15 @@
           <li><a href="/">หน้าแรก</a></li>
           <li><a href="/profiles">รวมโปรไฟล์</a></li>
           <li><a href="/locations">พื้นที่บริการ</a></li>
-          <li><a href="/nimman" style="color: var(--violet-main);">โซนนิมมาน</a></li>
+          <li><a href="/nimman" style="color: var(--primary-purple);">โซนนิมมาน</a></li>
           <li><a href="/blog">บทความ</a></li>
           <li><a href="/faq">คำถามที่พบบ่อย</a></li>
           <li><a href="/about">เกี่ยวกับเรา</a></li>
           <li><a href="/privacy-policy">นโยบายส่วนบุคคล</a></li>
         </ul>
       </nav>
-    </div>
-
+    </div> 
+    <!-- ปิด footer-top-grid -->
     <div class="footer-locations-block">
       <h4 class="footer-subheading">พื้นที่และย่านให้บริการยอดนิยม</h4>
       <ul id="popular-locations-footer" class="popular-locations-grid"></ul>
@@ -554,7 +546,7 @@
   </div>
 </footer>
 
-<!-- 🖼️ 8. LIGHTBOX MODAL -->
+<!-- 🖼️ 10. LIGHTBOX MODAL -->
 <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">
   <div id="lightbox-content-wrapper-el">
     <div class="lightbox-top-brand">

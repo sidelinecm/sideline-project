@@ -144,7 +144,7 @@ async function getSupabaseClient() {
   };
 
   const domCache = {};
-  let supabaseClient = null;
+ 
 
   function sanitizeThaiText(text) {
     if (!text || typeof text !== "string") return "";
