@@ -405,10 +405,11 @@ async function getSupabaseClient() {
 
       let results = [...appState.allProfiles];
 
-      if (activeProvince !== "all" && activeProvince !== "national") {
+     if (activeProvince !== "all" && activeProvince !== "national") {
+        const cleanActive = activeProvince.toLowerCase().replace(/[-_]/g, "");
         results = results.filter(p => {
-          const k = (p.provinceKey || p.province_slug || p.province || "").toString().toLowerCase();
-          return activeProvince === "chiangmai" ? (k === "chiangmai" || k === "chiang_mai") : k === activeProvince;
+          const cleanK = (p.provinceKey || p.province_slug || p.province || "").toString().toLowerCase().replace(/[-_]/g, "");
+          return cleanK === cleanActive;
         });
       }
 
