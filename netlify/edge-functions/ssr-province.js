@@ -794,17 +794,17 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-
+    // 🟢 3. Hreflang Tag ครอบคลุมทั้งหน้าแรกและหน้ารายจังหวัด
     const hreflangBlock = isNational
       ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
       : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
+    finalHtml = finalHtml.replace(
+      /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
+      hreflangBlock
+    );
 
-finalHtml = finalHtml.replace(
-  /<!-- (?:🌐 )?MULTILINGUAL SEO -->[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i,
-  hreflangBlock
-);
-
+    // 4. แยก H1 และ H2
     const ssrH1Html = isNational
       ? `
           <span class="seo-sub-headline">ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟน</span>
@@ -906,9 +906,23 @@ finalHtml = finalHtml.replace(
 
       for (const pKey of sortedProvinceKeys) {
         const pName = PROVINCE_SEO_DATA[pKey]?.name || pKey;
-        const pCount = groupedByProvince[pKey].length;
-        // 🟢 ส่ง false สำหรับการ์ดรายจังหวัดด้านล่าง เพื่อให้ Lazy Load 100%
-        const pCards = groupedByProvince[pKey].map((p) => renderCardHtml(p, false, pName)).join("");
+        const pList = groupedByProvince[pKey];
+        const pCount = pList.length;
+        
+        // 🟢 ตัดให้หน้าแรกแสดงเพียง 6 โปรไฟล์พรีวิว ไม่ดึงไปแสดงหมดทั้ง 49 คน
+        const previewLimit = 6;
+        const previewList = pList.slice(0, previewLimit);
+        const pCards = previewList.map((p) => renderCardHtml(p, false, pName)).join("");
+        
+        const hasMore = pCount > previewLimit;
+        const viewAllBtn = hasMore ? `
+          <div style="text-align: center; margin-top: 14px; width: 100%;">
+            <a href="/location/${pKey}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(192, 132, 252, 0.12); border: 1px solid rgba(192, 132, 252, 0.35); color: #E9D5FF; font-weight: 800; font-size: 12.5px; padding: 9px 20px; border-radius: 100px; text-decoration: none; transition: background 0.2s;">
+              ดูน้องๆ ในจังหวัด${pName} ทั้งหมด (${pCount} คน) <i class="fas fa-arrow-right" style="font-size: 11px; color: #C084FC;"></i>
+            </a>
+          </div>
+        ` : '';
+
         displayAreaHtml += `
           <div class="section-content-wrapper province-section" id="province-${pKey}" style="margin-top: 24px;">
             <div style="padding: 8px 4px 12px 4px;">
@@ -926,6 +940,7 @@ finalHtml = finalHtml.replace(
             <div class="profile-grid profiles-grid-row">
               ${pCards}
             </div>
+            ${viewAllBtn}
           </div>
         `;
       }
