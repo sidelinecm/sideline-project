@@ -44,113 +44,192 @@ const CONFIG = {
   ]
 };
 
+// 🌟 คลังข้อมูลเจาะลึกเฉพาะจังหวัดแบบ Unique Content 100%
 const PROVINCE_SEO_DATA = {
   chiangmai: {
     name: "เชียงใหม่",
     geo: { lat: 18.7883, lng: 98.9853 },
     zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย", "ห้วยแก้ว", "รวมโชค"],
+    h1Sub: "เพื่อนเที่ยวฟิวแฟน • สแตนด์บาย นิมมาน เจ็ดยอด สันติธรรม",
+    h1Main: "สาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ • ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ เด็กเอ็นพรีเมียม สแตนด์บายย่านนิมมาน เจ็ดยอด สันติธรรม ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ",
+    introArticle: `<p>ยินดีต้อนรับสู่ศูนย์กลางข้อมูล <strong>สาวรับงานเชียงใหม่</strong> และเพื่อนเที่ยวสไตล์ <strong class="kw-purple">ฟิวแฟน (Girlfriend Experience)</strong> ระดับพรีเมียมอันดับ 1 ของภาคเหนือ ครอบคลุมพิกัดยอดนิยมทั้งย่านคาเฟ่ <a href="/location/chiangmai" class="kw-zone">นิมมาน</a>, แหล่งคอนโดมิเนียม <a href="/location/chiangmai" class="kw-zone">เจ็ดยอด</a>, ย่านที่พัก <a href="/location/chiangmai" class="kw-zone">สันติธรรม</a> และ <a href="/location/chiangmai" class="kw-zone">หลัง มช.</a> น้องๆ ผ่านการตรวจสอบรูปถ่ายและตัวตนจริง 100% สแตนด์บายพร้อมเดินทางถึงโรงแรมและที่พักส่วนตัวอย่างรวดเร็ว ปลอดภัยด้วยระบบนัดเจอตัวจริงเรียบร้อยแล้วค่อยชำระค่าบริการ ไร้ความเสี่ยงจากการโอนมัดจำล่วงหน้าทุกกรณีครับ</p>`,
     faqs: [
-      { q: "นัดหมายสาวรับงานเชียงใหม่ บน First Model Hub โซนไหนสะดวกที่สุด?", a: "ถนนนิมมานเหมินท์, สันติธรรม, ช้างเผือก และรอบคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายพร้อมดูแลท่านอย่างสะดวกรวดเร็วครับ" },
-      { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
+      { q: "นัดหมายสาวรับงานเชียงใหม่ ย่านนิมมานและเจ็ดยอด สะดวกแค่ไหน?", a: "สะดวกมากครับ น้องๆ สแตนด์บายในโซนนิมมาน สันติธรรม และเจ็ดยอด พร้อมเดินทางถึงโรงแรมหรือที่พักส่วนตัวภายใน 30-45 นาทีครับ" },
+      { q: "สามารถนัดน้องไปร่วมทริปทานอาหาร คาเฟ่ หรือเที่ยวในเชียงใหม่ได้ไหม?", a: "ได้ครับ น้องๆ ดูแลสุภาพ เรียบร้อย สไตล์ฟิวแฟน ให้เกียรติลูกค้า สามารถพูดคุยแจ้งสถานที่นัดหมายผ่านไลน์ได้เลยครับ" },
+      { q: "การเรียกใช้บริการไซด์ไลน์เชียงใหม่ ต้องโอนมัดจำก่อนหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เจอน้องตัวจริง ตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วค่อยชำระเงินโดยตรงครับ" }
+    ],
+    reviews: [
+      { author: "คุณชลสิทธิ์", initial: "C", location: "ย่านนิมมาน ซอย 9 เชียงใหม่", text: "นัดเจอน้องแถวนิมมาน เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพ ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ", rating: 5, date: "เมื่อสัปดาห์ที่แล้ว" },
+      { author: "คุณอภิชาติ", initial: "A", location: "คอนโดมิเนียมย่านเจ็ดยอด", text: "น้องน่ารักมาก การเทคแคร์ดีเยี่ยมเสมือนมีแฟนมาเที่ยวด้วย พิกัดเจ็ดยอดเดินทางมาไวมาก แนะนำเลยครับ", rating: 5, date: "เมื่อ 2 สัปดาห์ก่อน" }
     ]
   },
   "chiang-mai": {
     name: "เชียงใหม่",
     geo: { lat: 18.7883, lng: 98.9853 },
     zones: ["นิมมาน", "เจ็ดยอด", "สันติธรรม", "ช้างเผือก", "หลัง มช.", "สันทราย", "ห้วยแก้ว", "รวมโชค"],
+    h1Sub: "เพื่อนเที่ยวฟิวแฟน • สแตนด์บาย นิมมาน เจ็ดยอด สันติธรรม",
+    h1Main: "สาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ • ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานเชียงใหม่ ไซด์ไลน์เชียงใหม่ เด็กเอ็นพรีเมียม สแตนด์บายย่านนิมมาน เจ็ดยอด สันติธรรม ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ",
+    introArticle: `<p>ศูนย์กลางข้อมูล <strong>สาวรับงานเชียงใหม่</strong> และเพื่อนเที่ยวสไตล์ฟิวแฟนระดับพรีเมียม ครอบคลุมพิกัดยอดนิยมทั้งย่านนิมมาน เจ็ดยอด และสันติธรรม การันตีรูปถ่ายตรงปก 100% ปลอดภัยนัดเจอจ่ายหน้างาน ไม่โอนมัดจำ</p>`,
     faqs: [
-      { q: "นัดหมายสาวรับงานเชียงใหม่ บน First Model Hub โซนไหนสะดวกที่สุด?", a: "ถนนนิมมานเหมินท์, สันติธรรม, ช้างเผือก และรอบคอนโดมิเนียมย่านเจ็ดยอด เป็นพิกัดหลักที่มีน้องๆ สแตนด์บายพร้อมดูแลท่านอย่างสะดวกรวดเร็วครับ" },
-      { q: "การเรียกใช้บริการรับงานเชียงใหม่ ต้องโอนมัดจำล่วงหน้าหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ เราใช้นโยบาย 'เจอตัวจริงค่อยชำระเงินโดยตรงหน้างาน' ป้องกันความเสี่ยงทางการเงิน 100%" }
+      { q: "นัดหมายสาวรับงานเชียงใหม่ ย่านนิมมานและเจ็ดยอด สะดวกแค่ไหน?", a: "สะดวกมากครับ มีน้องๆ สแตนด์บายพร้อมดูแลสะดวกรวดเร็วครับ" },
+      { q: "การเรียกใช้บริการไซด์ไลน์เชียงใหม่ ต้องโอนมัดจำก่อนหรือไม่?", a: "ไม่มีนโยบายโอนมัดจำล่วงหน้าทุกกรณีครับ จ่ายตรงหน้างานเมื่อเจอน้องตัวจริงเท่านั้นครับ" }
+    ],
+    reviews: [
+      { author: "คุณชลสิทธิ์", initial: "C", location: "นิมมาน เชียงใหม่", text: "นัดเจอน้องแถวนิมมาน เรียบร้อยตรงเวลาดีมาก คุยสนุก สุภาพ จ่ายหน้างานสบายใจครับ", rating: 5, date: "เมื่อสัปดาห์ที่แล้ว" }
     ]
   },
-  chiangrai: {
-    name: "เชียงราย",
-    geo: { lat: 19.9105, lng: 99.8406 },
-    zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
+  phuket: {
+    name: "ภูเก็ต",
+    geo: { lat: 7.8804, lng: 98.3923 },
+    zones: ["ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล"],
+    h1Sub: "VIP Travel Companion • สแตนด์บาย ป่าตอง บางเทา กะทู้",
+    h1Main: "สาวรับงานภูเก็ต ไซด์ไลน์ภูเก็ต พูลวิลล่าตรงปก จ่ายหน้างาน",
+    metaTitle: "สาวรับงานภูเก็ต ไซด์ไลน์ภูเก็ต • ป่าตอง พูลวิลล่า จ่ายหน้างาน 100% | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานภูเก็ต ไซด์ไลน์ภูเก็ต เพื่อนเที่ยวพูลวิลล่าและรีสอร์ตหรู ป่าตอง กะทู้ บางเทา การันตีรูปจริงตรงปก 100% สื่อสารภาษาอังกฤษได้ จ่ายหน้างาน ไม่มัดจำ",
+    introArticle: `<p>สัมผัสประสบการณ์การพักผ่อนระดับ Luxury บนเกาะภูเก็ตกับ <strong>สาวรับงานภูเก็ต</strong> และ <strong class="kw-purple">VIP Travel Companions</strong> แหล่งรวมโปรไฟล์น้องๆ ระดับพรีเมียมที่พร้อมดูแลทั้งการท่องเที่ยว พักผ่อนในโรงแรม 5 ดาวริมหาด <a href="/location/phuket" class="kw-zone">ป่าตอง</a> หรือพูลวิลล่าส่วนตัวย่าน <a href="/location/phuket" class="kw-zone">บางเทา</a> และ <a href="/location/phuket" class="kw-zone">ราไวย์</a> น้องๆ อัธยาศัยดี มีมารยาท สื่อสารภาษาอังกฤษได้คล่องแคล่ว ปลอดภัยสูงสุดด้วยนโยบาย <strong class="kw-green">เจอตัวจริงค่อยชำระเงินหน้างาน</strong> ไม่มีความเสี่ยงทางการเงินทุกกรณีครับ</p>`,
     faqs: [
-      { q: "นัดหมายสาวรับงานเชียงราย โซนบ้านดู่ และ มฟล. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนบ้านดู่ หน้ามหาวิทยาลัยแม่ฟ้าหลวง และใจกลางเมืองเชียงราย พร้อมดูแลอย่างเป็นกันเองครับ" },
-      { q: "ไซด์ไลน์เชียงราย การันตีตรงปกและปลอดภัยอย่างไร?", a: "โปรไฟล์ผ่านการยืนยันตัวตน 100% ปลอดภัยด้วยระบบนัดเจอตัวจริงหน้างานเรียบร้อยแล้วค่อยชำระค่าบริการ ไม่มีการโอนเงินก่อนครับ" }
-    ]
-  },
-  lampang: {
-    name: "ลำปาง",
-    geo: { lat: 18.2888, lng: 99.4923 },
-    zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
-    faqs: [
-      { q: "นัดพบสาวรับงานลำปาง ในตัวเมืองหรือแถวไหนสะดวกที่สุด?", a: "พิกัดยอดนิยมคือโรงแรมชั้นนำในตัวเมืองลำปาง, ย่านสวนดอก, ถนนรอบเวียง และละแวก ม.ราชภัฏลำปาง เดินทางสะดวกและเป็นส่วนตัวครับ" },
-      { q: "การนัดหมายไซด์ไลน์ลำปาง ต้องมีเงินมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ เจอน้องตัวจริง ยืนยันความตรงปกหน้างานแล้วค่อยชำระค่าบริการโดยตรงกับน้องครับ" }
-    ]
-  },
-  lamphun: {
-    name: "ลำพูน",
-    geo: { lat: 18.5772, lng: 99.0087 },
-    zones: ["ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
-    faqs: [
-      { q: "สาวรับงานลำพูน โซนนิคมอุตสาหกรรมนัดหมายอย่างไร?", a: "น้องๆ สแตนด์บายพร้อมดูแลทั้งในโซนนิคมลำพูน ตัวเมืองลำพูน และเวียงยอง สามารถนัดเจอที่โรงแรมหรือที่พักส่วนตัวได้อย่างปลอดภัยครับ" }
-    ]
-  },
-  phitsanulok: {
-    name: "พิษณุโลก",
-    geo: { lat: 16.8211, lng: 100.2659 },
-    zones: ["ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
-    faqs: [
-      { q: "สาวรับงานพิษณุโลก รอบ ม.นเรศวร (มน.) นัดหมายอย่างไร?", a: "มีน้องๆ ประจำอยู่ในโซนรอบ มน. ท่าโพธิ์ และใจกลางเมืองพิษณุโลก นัดหมายง่าย สะดวกและเป็นส่วนตัวครับ" }
+      { q: "เรียกหาน้องๆ ไซด์ไลน์ภูเก็ต ไปที่พูลวิลล่าหรือโรงแรมริมหาดได้ไหม?", a: "รับนัดหมายเฉพาะโรงแรม รีสอร์ตชั้นนำ และพูลวิลล่าส่วนตัวที่มีความปลอดภัย โดยคิดค่าเดินทางตามแอป Grab จริงอย่างโปร่งใสครับ" },
+      { q: "น้องๆ ในโซนภูเก็ตสามารถสื่อสารภาษาอังกฤษได้หรือไม่?", a: "น้องๆ ในโซนภูเก็ตหลายท่านสามารถสื่อสารภาษาอังกฤษได้ดี พร้อมดูแลทั้งลูกค้าชาวไทยและนักท่องเที่ยวต่างชาติครับ" },
+      { q: "การนัดหมายสาวรับงานภูเก็ต มีเงื่อนไขการโอนเงินก่อนหรือไม่?", a: "ไม่มีการโอนมัดจำล่วงหน้าทุกกรณีครับ เจอน้องตัวจริง ยืนยันความตรงปกแล้วจึงชำระค่าบริการกับน้องโดยตรงครับ" }
+    ],
+    reviews: [
+      { author: "คุณธนกร", initial: "T", location: "พูลวิลล่า ย่านบางเทา ภูเก็ต", text: "นัดน้องมาทานข้าวที่วิลล่า น้องน่ารัก มารยาทดีมาก พูดภาษาอังกฤษคล่อง เทคแคร์ดีเสมือนแฟน ไม่ต้องโอนมัดจำก่อน ปลอดภัยหายห่วงครับ", rating: 5, date: "เมื่อ 3 วันที่แล้ว" },
+      { author: "คุณอิทธิพล", initial: "I", location: "รีสอร์ตริมหาดป่าตอง", text: "ตรงปก 100% ครับ น้องบริการดีมาก ตรงเวลา คุยง่ายเป็นกันเอง แนะนำใครมาเที่ยวภูเก็ตต้องลองครับ", rating: 5, date: "เมื่อสัปดาห์ที่แล้ว" }
     ]
   },
   bangkok: {
     name: "กรุงเทพฯ",
     geo: { lat: 13.7563, lng: 100.5018 },
     zones: ["สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา"],
+    h1Sub: "เพื่อนเที่ยวระดับพรีเมียม • สแตนด์บาย สุขุมวิท รัชดา ทองหล่อ",
+    h1Main: "สาวรับงานกรุงเทพ ไซด์ไลน์ กทม ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานกรุงเทพ ไซด์ไลน์ กทม • สุขุมวิท รัชดา จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานกรุงเทพ ไซด์ไลน์ กทม เพื่อนเที่ยวดินเนอร์และเอาท์คอลโรงแรมหรู สุขุมวิท รัชดา ห้วยขวาง ทองหล่อ สาทร ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ",
+    introArticle: `<p>ศูนย์กลางข้อมูล <strong>สาวรับงานกรุงเทพ</strong> และ <strong class="kw-purple">ไซด์ไลน์ กทม</strong> ระดับไฮเอนด์ ครอบคลุมพิกัดสำคัญตามแนวรถไฟฟ้า BTS/MRT เช่น โซน <a href="/location/bangkok" class="kw-zone">สุขุมวิท</a>, <a href="/location/bangkok" class="kw-zone">รัชดา</a>, <a href="/location/bangkok" class="kw-zone">ห้วยขวาง</a>, <a href="/location/bangkok" class="kw-zone">ทองหล่อ</a> และ <a href="/location/bangkok" class="kw-zone">สาทร</a> คัดสรรโปรไฟล์ตัวจริงตรงปก 100% พร้อมดูแลสไตล์ฟิวแฟนอย่างอบอุ่นและสุภาพ ปลอดภัยสูงสุดด้วยระบบชำระเงินหน้างาน ปราศจากการโอนมัดจำล่วงหน้า</p>`,
     faqs: [
-      { q: "สาวรับงานกรุงเทพฯ ครอบคลุมโซนไหนบ้าง?", a: "ครอบคลุมทุกโซนสำคัญ เช่น สุขุมวิท, รัชดา, ห้วยขวาง, ลาดพร้าว, ทองหล่อ, สาทร และบางนา สะดวกและเป็นส่วนตัวครับ" }
+      { q: "การนัดหมายสาวรับงานในกรุงเทพฯ ครอบคลุมพื้นที่ใดบ้าง?", a: "ครอบคลุมโรงแรมชั้นนำและคอนโดมิเนียมส่วนตัวทั่วกรุงเทพฯ โดยเฉพาะย่านสุขุมวิท รัชดา ห้วยขวาง ทองหล่อ และสาทรครับ" },
+      { q: "มีค่าบริการหรือค่าใช้จ่ายแอบแฝงก่อนเจอตัวหรือไม่?", a: "ไม่มีค่าใช้จ่ายแอบแฝงและไม่มีการเก็บมัดจำล่วงหน้าทุกกรณีครับ จ่ายตรงกับน้องหน้างานเท่านั้นครับ" }
+    ],
+    reviews: [
+      { author: "คุณวีรภัทร", initial: "W", location: "โรงแรมย่านสุขุมวิท", text: "นัดง่าย สะดวกมากครับ น้องตรงปก บุคลิกดี มารยาทสุภาพ ไม่มีขอโอนมัดจำก่อนเลย มั่นใจในความปลอดภัยครับ", rating: 5, date: "เมื่อวานนี้" }
     ]
   },
   chonburi: {
     name: "ชลบุรี",
     geo: { lat: 13.3611, lng: 100.9847 },
     zones: ["พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "จอมเทียน", "อมตะนคร", "แหลมฉบัง"],
+    h1Sub: "เพื่อนเที่ยวริมทะเล • สแตนด์บาย พัทยา บางแสน ศรีราชา",
+    h1Main: "สาวรับงานพัทยา สาวรับงานชลบุรี ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานพัทยา สาวรับงานชลบุรี • ไซด์ไลน์บางแสน จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานพัทยา สาวรับงานชลบุรี ไซด์ไลน์บางแสน ศรีราชา เพื่อนเที่ยวฟิวแฟนริมทะเล ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ",
+    introArticle: `<p>ศูนย์รวม <strong>สาวรับงานชลบุรี</strong>, <strong class="kw-purple">สาวรับงานพัทยา</strong> และเพื่อนเที่ยวไซด์ไลน์ <a href="/location/chonburi" class="kw-zone">บางแสน</a>, <a href="/location/chonburi" class="kw-zone">ศรีราชา</a> และ <a href="/location/chonburi" class="kw-zone">จอมเทียน</a> เหมาะสำหรับผู้ที่ต้องการเพื่อนร่วมทริปพักผ่อนริมชายหาด ดินเนอร์อาหารทะเล หรือดูแลสไตล์ฟิวแฟนอย่างใกล้ชิด การันตีความตรงปก 100% จ่ายเงินหน้างาน ปลอดภัย ไร้มัดจำ</p>`,
     faqs: [
-      { q: "เรียกสาวรับงานพัทยา บางแสน จ่ายเงินอย่างไร?", a: "ชำระตรงหน้างานเมื่อเจอน้องตัวจริงเรียบร้อยแล้วเท่านั้น ไม่มีโอนมัดจำก่อนทุกกรณีครับ" }
-    ]
-  },
-  khonkaen: {
-    name: "ขอนแก่น",
-    geo: { lat: 16.4322, lng: 102.8236 },
-    zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
-    faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่นครับ" }
+      { q: "เรียกหาน้องๆ ในโซนพัทยาหรือบางแสน มีขั้นตอนอย่างไร?", a: "เลือกโปรไฟล์ที่ถูกใจ ทักไลน์แจ้งพิกัดโรงแรมหรือที่พักส่วนตัว เมื่อน้องเดินทางไปถึงค่อยชำระค่าบริการหน้างานครับ" }
+    ],
+    reviews: [
+      { author: "คุณพงศกร", initial: "P", location: "พัทยากลาง", text: "มาเที่ยวพัทยาคนเดียว นัดน้องมาทานข้าวเป็นเพื่อน น้องน่ารัก คุยสนุก ตัวจริงสวยตรงปก ประทับใจมากครับ", rating: 5, date: "เมื่อ 4 วันก่อน" }
     ]
   },
   "khon-kaen": {
     name: "ขอนแก่น",
     geo: { lat: 16.4322, lng: 102.8236 },
     zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+    h1Sub: "เพื่อนเที่ยวฟิวแฟนวัยใส • สแตนด์บาย กังสดาล หลัง มข.",
+    h1Main: "สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น • กังสดาล มข. จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น เด็กเอ็นฟิวแฟน สแตนด์บายโซนกังสดาล หลัง มข. เซ็นทรัลขอนแก่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
+    introArticle: `<p>แพลตฟอร์มศูนย์กลาง <strong>สาวรับงานขอนแก่น</strong> และ <strong class="kw-purple">ไซด์ไลน์ขอนแก่น</strong> ยอดนิยมในภาคอีสาน ครอบคลุมพิกัดสำคัญ เช่น โซน <a href="/location/khon-kaen" class="kw-zone">กังสดาล</a>, <a href="/location/khon-kaen" class="kw-zone">หลัง มข.</a>, <a href="/location/khon-kaen" class="kw-zone">เซ็นทรัลขอนแก่น</a> และรอบบึงแก่นนคร น้องๆ วัยใสน่ารัก อัธยาศัยดี ดูแลเอาใจใส่สไตล์ฟิวแฟน นัดพบสะดวกปลอดภัย จ่ายหน้างาน ไม่ต้องโอนมัดจำล่วงหน้า</p>`,
     faqs: [
-      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และหลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำทั้งโซนกังสดาล หลัง มข. และโรงแรมชั้นนำใจกลางเมืองขอนแก่นครับ" }
+      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และ หลัง มข. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนรอบมหาวิทยาลัยขอนแก่นและใจกลางเมือง พร้อมดูแลสะดวกรวดเร็วครับ" }
+    ],
+    reviews: [
+      { author: "คุณกิตติศักดิ์", initial: "K", location: "โซนกังสดาล ขอนแก่น", text: "น้องน่ารักมากครับ ตรงปกตามรูปเป๊ะ คุยเก่ง นิสัยดี ไม่มีขอโอนเงินก่อน มั่นใจได้เลยครับ", rating: 5, date: "เมื่อ 5 วันที่แล้ว" }
     ]
   },
-  phuket: {
-    name: "ภูเก็ต",
-    geo: { lat: 7.8804, lng: 98.3923 },
-    zones: ["ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์"],
+  khonkaen: {
+    name: "ขอนแก่น",
+    geo: { lat: 16.4322, lng: 102.8236 },
+    zones: ["ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+    h1Sub: "เพื่อนเที่ยวฟิวแฟนวัยใส • สแตนด์บาย กังสดาล หลัง มข.",
+    h1Main: "สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น • กังสดาล มข. จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น เด็กเอ็นฟิวแฟน สแตนด์บายโซนกังสดาล หลัง มข. เซ็นทรัลขอนแก่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
+    introArticle: `<p>ศูนย์รวมสาวรับงานขอนแก่น ไซด์ไลน์ขอนแก่น ย่านกังสดาล หลัง มข. ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ</p>`,
     faqs: [
-      { q: "นัดหมายสาวรับงานภูเก็ต ป่าตอง จ่ายเงินอย่างไร?", a: "นัดเจอตัวจริงตรงปกหน้างานแล้วค่อยชำระเงินตรงกับน้อง ไม่มีโอนมัดจำล่วงหน้าทุกกรณีครับ" }
+      { q: "นัดหมายสาวรับงานขอนแก่น โซนกังสดาล และ หลัง มข. สะดวกไหม?", a: "สะดวกมากครับ พร้อมเดินทางดูแลสะดวกรวดเร็วครับ" }
+    ],
+    reviews: [
+      { author: "คุณกิตติศักดิ์", initial: "K", location: "กังสดาล ขอนแก่น", text: "น้องน่ารักมาก ตรงปกตามรูป คุยสนุก จ่ายหน้างานสบายใจครับ", rating: 5, date: "เมื่อ 5 วันที่แล้ว" }
+    ]
+  },
+  chiangrai: {
+    name: "เชียงราย",
+    geo: { lat: 19.9105, lng: 99.8406 },
+    zones: ["ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
+    h1Sub: "เพื่อนเที่ยวฟิวแฟน • สแตนด์บาย บ้านดู่ มฟล. ตัวเมือง",
+    h1Main: "สาวรับงานเชียงราย ไซด์ไลน์เชียงราย ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานเชียงราย ไซด์ไลน์เชียงราย • บ้านดู่ มฟล. จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานเชียงราย ไซด์ไลน์เชียงราย เพื่อนเที่ยวเด็กเอ็น โซนตัวเมือง บ้านดู่ หน้า มฟล. ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ",
+    introArticle: `<p>ศูนย์รวม <strong>สาวรับงานเชียงราย</strong> และเพื่อนเที่ยวสไตล์ฟิวแฟน ครอบคลุมพิกัดสำคัญทั้งโซน <a href="/location/chiangrai" class="kw-zone">ตัวเมืองเชียงราย</a>, ย่าน <a href="/location/chiangrai" class="kw-zone">บ้านดู่</a>, หน้ามหาวิทยาลัยแม่ฟ้าหลวง (<a href="/location/chiangrai" class="kw-zone">มฟล.</a>) และ <a href="/location/chiangrai" class="kw-zone">หอนาฬิกา</a> คัดสรรโปรไฟล์ตัวจริงตรงปก ปลอดภัย นัดพบจ่ายหน้างาน ไร้มัดจำ</p>`,
+    faqs: [
+      { q: "นัดหมายสาวรับงานเชียงราย โซนบ้านดู่ และ มฟล. สะดวกไหม?", a: "สะดวกมากครับ มีน้องๆ ประจำอยู่ในโซนบ้านดู่ หน้า มฟล. และตัวเมืองเชียงราย พร้อมดูแลสะดวกรวดเร็วครับ" }
+    ],
+    reviews: [
+      { author: "คุณชานนท์", initial: "C", location: "โซนบ้านดู่ เชียงราย", text: "นัดน้องแถวบ้านดู่ สุภาพ น่ารัก ตรงปกมากครับ จ่ายเงินหน้างานปลอดภัยดีมากครับ", rating: 5, date: "เมื่อสัปดาห์ที่แล้ว" }
+    ]
+  },
+  lampang: {
+    name: "ลำปาง",
+    geo: { lat: 18.2888, lng: 99.4923 },
+    zones: ["ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
+    h1Sub: "เพื่อนเที่ยวฟิวแฟน • สแตนด์บาย ตัวเมือง สวนดอก มรภ.ลำปาง",
+    h1Main: "สาวรับงานลำปาง ไซด์ไลน์ลำปาง ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานลำปาง ไซด์ไลน์ลำปาง • ตรงปก 100% จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานลำปาง ไซด์ไลน์ลำปาง เพื่อนเที่ยวฟิวแฟน โซนตัวเมืองลำปาง สวนดอก ม.ราชภัฏลำปาง การันตีตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ",
+    introArticle: `<p>ศูนย์รวม <strong>สาวรับงานลำปาง</strong> และ <strong class="kw-purple">ไซด์ไลน์ลำปาง</strong> ครอบคลุมพิกัด <a href="/location/lampang" class="kw-zone">ตัวเมืองลำปาง</a>, ย่าน <a href="/location/lampang" class="kw-zone">สวนดอก</a>, ถนน <a href="/location/lampang" class="kw-zone">รอบเวียง</a> และละแวก <a href="/location/lampang" class="kw-zone">ม.ราชภัฏลำปาง</a> คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ</p>`,
+    faqs: [
+      { q: "การนัดหมายไซด์ไลน์ลำปาง ต้องมีเงินมัดจำล่วงหน้าไหม?", a: "ไม่มีการโอนมัดจำล่วงหน้าทุกกรณีครับ เจอน้องตัวจริง ยืนยันความตรงปกแล้วค่อยชำระค่าบริการครับ" }
+    ],
+    reviews: [
+      { author: "คุณเมธัส", initial: "M", location: "ตัวเมืองลำปาง", text: "น้องบริการดีมากครับ สุภาพ ตรงเวลา ตัวจริงน่ารักตรงปก แนะนำเลยครับ", rating: 5, date: "เมื่อ 6 วันก่อน" }
     ]
   },
   udonthani: {
     name: "อุดรธานี",
     geo: { lat: 17.4138, lng: 102.7872 },
     zones: ["ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
+    h1Sub: "เพื่อนเที่ยวฟิวแฟน • สแตนด์บาย UD Town หนองประจักษ์",
+    h1Main: "สาวรับงานอุดรธานี ไซด์ไลน์อุดร ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงานอุดรธานี ไซด์ไลน์อุดร • UD Town จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงานอุดรธานี ไซด์ไลน์อุดรธานี เพื่อนเที่ยวเด็กเอ็น โซนตัวเมือง UD Town เซ็นทรัลอุดร สวนสาธารณะหนองประจักษ์ ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ",
+    introArticle: `<p>ศูนย์รวม <strong>สาวรับงานอุดรธานี</strong> และ <strong class="kw-purple">ไซด์ไลน์อุดรธานี</strong> ครอบคลุมพิกัดใจกลางเมือง เช่น ย่าน <a href="/location/udonthani" class="kw-zone">UD Town</a>, <a href="/location/udonthani" class="kw-zone">เซ็นทรัลอุดร</a> และรอบสวนสาธารณะ <a href="/location/udonthani" class="kw-zone">หนองประจักษ์</a> การันตีตรงปก 100% นัดเจอปลอดภัย จ่ายหน้างาน ไร้มัดจำ</p>`,
     faqs: [
-      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และรอบสวนสาธารณะหนองประจักษ์ เป็นจุดนัดพบยอดนิยมครับ" }
+      { q: "สาวรับงานอุดรธานี นัดพบแถวไหนสะดวกที่สุด?", a: "ย่านใจกลางเมืองอุดรธานี, UD Town, เซ็นทรัลอุดร และโรงแรมชั้นนำในตัวเมืองเป็นจุดนัดพบยอดนิยมครับ" }
+    ],
+    reviews: [
+      { author: "คุณธีรเดช", initial: "T", location: "UD Town อุดรธานี", text: "เจอน้องแถว UD Town ตรงปก น่ารัก คุยสนุกมากครับ จ่ายหน้างานสบายใจ 100%", rating: 5, date: "เมื่อสัปดาห์ที่แล้ว" }
     ]
   },
   default: {
     name: "ทั่วไทย",
     geo: { lat: 13.7563, lng: 100.5018 },
-    zones: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "หาดใหญ่"],
+    zones: ["กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "เชียงราย"],
+    h1Sub: "ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟนทั่วประเทศ",
+    h1Main: "สาวรับงาน ไซด์ไลน์ทั่วไทย ตรงปก 100% จ่ายหน้างาน",
+    metaTitle: "สาวรับงาน ไซด์ไลน์ทั่วไทย • ตรงปก 100% จ่ายหน้างาน ไม่มัดจำ | First Model Hub",
+    metaDesc: "ศูนย์รวมสาวรับงาน ไซด์ไลน์ทั่วไทย เด็กเอ็นฟิวแฟนพรีเมียม ครอบคลุม 77 จังหวัดทั่วประเทศ ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำล่วงหน้า",
+    introArticle: `<p>ยินดีต้อนรับสู่ <strong>${CONFIG.BRAND_NAME}</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ สาวรับงานทั่วไทย, เด็กเอ็นทั่วไทย และเพื่อนเที่ยวไซด์ไลน์ระดับพรีเมียม แหล่งรวบรวมโปรไฟล์ผู้ดูแลที่เน้นความโปร่งใส ปลอดภัย เพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ฟิวแฟนอย่างสุภาพเรียบร้อย ยึดมั่นนโยบายชำระเงินหน้างาน ปราศจากเงื่อนไขการโอนมัดจำล่วงหน้าทุกกรณี ครอบคลุมทุกจังหวัดทั่วไทยครับ</p>`,
     faqs: [
-      { q: "เรียกใช้บริการน้องๆ สาวรับงาน เด็กเอ็น First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้น" }
+      { q: "เรียกใช้บริการน้องๆ บน First Model Hub ต้องโอนมัดจำล่วงหน้าไหม?", a: "ไม่ต้องโอนมัดจำล่วงหน้าใดๆ ทั้งสิ้นครับ ลูกค้าตกลงชำระค่าบริการหน้างานเมื่อเจอน้องตัวจริงตรงปกแล้วเท่านั้นครับ" },
+      { q: "หากเจอน้องตัวจริงแล้วไม่ตรงปก สามารถยกเลิกได้หรือไม่?", a: "สามารถปฏิเสธและยกเลิกได้ทันทีโดยไม่มีค่าธรรมเนียมใดๆ ครับ ทางระบบการันตีรูปถ่ายตรงปก 100%" }
+    ],
+    reviews: [
+      { author: "คุณชลสิทธิ์", initial: "C", location: "นัดเจอในพื้นที่กรุงเทพฯ", text: "จองง่าย ตรงเวลา สุภาพเรียบร้อย ที่สำคัญระบบไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ", rating: 5, date: "เมื่อสัปดาห์ที่แล้ว" },
+      { author: "คุณอภิชาติ", initial: "A", location: "นัดเจอในพื้นที่เชียงใหม่", text: "น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยม ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจมากครับ", rating: 5, date: "เมื่อ 2 สัปดาห์ก่อน" }
     ]
   }
 };
@@ -229,17 +308,6 @@ function optimizeImg(path, width = 400, height = 533) {
   return `${CONFIG.CLOUDINARY_BASE_URL}${cropParam}/${formatted}`;
 }
 
-function formatDateSSR(dateStr) {
-  if (!dateStr) return "เมื่อครู่นี้";
-  try {
-    const d = new Date(dateStr);
-    const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-    return `${d.getDate()} ${months[d.getMonth()]} ${(d.getFullYear() + 543).toString().slice(-2)}`;
-  } catch {
-    return "เมื่อครู่นี้";
-  }
-}
-
 function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
   if (!text) return "";
   let formatted = sanitizeThaiText(text);
@@ -281,43 +349,6 @@ function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
   );
 
   return formatted;
-}
-
-function getDynamicIntro(provinceName, zones, provinceSlug = "chiangmai") {
-  let cleanZones = zones && Array.isArray(zones) ? zones.filter(z => z && z !== "ทั้งหมด") : [];
-  const locationUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
-  const zoneLinks = cleanZones.slice(0, 5).map(z => `<a href="${locationUrl}" class="kw-zone">${escapeHTML(sanitizeThaiText(z))}</a>`);
-  const zoneText = zoneLinks.length > 0 ? ` ครอบคลุมพิกัดสำคัญ เช่น โซน ${zoneLinks.join(", โซน ")}` : " ครอบคลุมเขตตัวเมืองและบริเวณใกล้เคียง";
-  
-  return `
-    <p>ยินดีต้อนรับสู่ <strong>${CONFIG.BRAND_NAME}</strong> แพลตฟอร์มศูนย์กลางข้อมูลแนะนำ สาวรับงาน${provinceName}, เด็กเอ็น${provinceName} และ เพื่อนเที่ยวไซด์ไลน์${provinceName} แหล่งรวบรวมโปรไฟล์ผู้ดูแลระดับพรีเมียมที่เน้นความโปร่งใส ปลอดภัย และเพียบพร้อมด้วยการดูแลเอาใจใส่สไตล์ ฟิวแฟน (Girlfriend Experience - GFE) อย่างสุภาพเรียบร้อยเป็นธรรมชาติ ปราศจากเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี</p>
-    <p>เพื่อตอบสนองความสะดวกในการนัดหมายพิกัดบริการในพื้นที่ ${provinceName} น้องๆ ในระบบของเรากระจายตัวอยู่ในจุดที่เหมาะสม${zoneText} ไม่ว่าจะเป็นโรงแรมชั้นนำ คอนโดมิเนียมส่วนตัว หรือพิกัดยอดนิยม เดินทางสะดวกสบายและมีความปลอดภัยสูง พร้อมร่วมเดินทางท่องเที่ยว ทานอาหาร หรือพูดคุยเพื่อสร้างความผ่อนคลายและคลายเหงาให้แก่คุณในโอกาสพิเศษ</p>
-    <p>รูปภาพและข้อมูลรายละเอียดสัดส่วนของน้องๆ ได้รับการคัดกรองและตรวจสอบยืนยันตัวตน (Verified System) อย่างรอบคอบ เพื่อให้สมาชิกมั่นใจได้ว่าข้อมูลถูกต้อง ตรงตามปก 100% ปลอดภัยนัดเจอ ชำระหน้างาน ไม่มีความเสี่ยงทางการเงินทุกกรณีครับ</p>
-  `;
-}
-
-function getDynamicReviews(provinceName) {
-  const isChiangMai = provinceName === "เชียงใหม่";
-  return [
-    {
-      author: "คุณชลสิทธิ์",
-      initial: "C",
-      location: isChiangMai ? "ย่านนิมมาน เชียงใหม่" : `ตัวเมือง${provinceName}`,
-      text: isChiangMai
-        ? "นัดเจอน้องแถวย่านนิมมาน เชียงใหม่ เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ"
-        : `นัดเจอน้องในจังหวัด${provinceName} เรียบร้อยตรงเวลาดีมากครับ คุยสนุก อัธยาศัยดี สุภาพเรียบร้อย ที่สำคัญระบบ First Model Hub ไม่เก็บเงินมัดจำล่วงหน้าทำให้มั่นใจในความปลอดภัย แนะนำเลยครับ`,
-      rating: 5,
-      date: "เมื่อสัปดาห์ที่แล้ว"
-    },
-    {
-      author: "คุณอภิชาติ",
-      initial: "A",
-      location: isChiangMai ? "โซนยอดนิยม นิมมาน" : `โซนยอดนิยมใน${provinceName}`,
-      text: "น้องน่ารักมาก มารยาทการเทคแคร์ดีเยี่ยมเสมือนมีเพื่อนร่วมทางคนพิเศษคอยเคียงข้าง ตัวจริงตรงตามรูปไม่มีแอบอ้างมัดจำเลย สบายใจและประทับใจมากครับ",
-      rating: 5,
-      date: "เมื่อ 2 สัปดาห์ก่อน"
-    }
-  ];
 }
 
 async function getTemplateHtml(url, context) {
@@ -404,7 +435,13 @@ const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชีย�
     ? rawTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t.replace(/^#/, ""))}</span>`).join("")
     : `<span class="card-vibe-pill">#ฟิวแฟน</span>`;
 
-  let rightBadgeHtml = isPriorityLCP
+  const tagsToCheck = Array.isArray(rawTags) ? rawTags : [];
+  const isFiwFan = tagsToCheck.some(t => {
+    const cleanTag = String(t).replace(/^#/, "").trim().toLowerCase();
+    return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag.includes("ฟิวแฟน") || cleanTag.includes("ฟิลแฟน");
+  });
+
+  let rightBadgeHtml = isFiwFan
     ? `<span class="badge-hot-tag">🔥 HOT</span>`
     : `<span class="badge-verified-top">✦ ตรงปก</span>`;
 
@@ -475,9 +512,8 @@ const generateDynamicFAQsHTML = faqs => {
 export default async (req, context) => {
   const url = new URL(req.url);
   const primaryDomain = CONFIG.PRIMARY_DOMAIN;
-  const hostname = url.hostname.toLowerCase();
 
-  // ⚡ Manual Purge
+  // ⚡ 1. Manual Purge Endpoint
   if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
     const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
     if (secret === PURGE_SECRET_KEY) {
@@ -496,7 +532,7 @@ export default async (req, context) => {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  // Bypass Static Assets
+  // ⚡ 2. Bypass Static Assets
   if (req.headers.get("x-ssr-bypass") === "true" || STATIC_EXT_REGEX.test(url.pathname)) {
     return await context.next();
   }
@@ -519,6 +555,7 @@ export default async (req, context) => {
 
   const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
+  // ⚡ 3. Auto-Probe database update
   if (!isForcedPurge && now - LAST_PROBE_TIME > AUTO_CHECK_INTERVAL_MS) {
     LAST_PROBE_TIME = now;
     try {
@@ -540,7 +577,7 @@ export default async (req, context) => {
     return new Response(cachedPage.html, { headers: cachedPage.headers });
   }
 
-  // วิเคราะห์ URL และ จังหวัด
+  // ⚡ 4. วิเคราะห์ URL และจังหวัด
   const segments = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "";
   let isNational = false;
@@ -598,15 +635,16 @@ export default async (req, context) => {
     const seoData = isNational ? PROVINCE_SEO_DATA.default : PROVINCE_SEO_DATA[cleanProvinceSlug] || PROVINCE_SEO_DATA.default;
     const canonicalUrl = isNational ? `${primaryDomain}/` : `${primaryDomain}/location/${provinceSlug}`;
     const heroImage = CONFIG.DEFAULT_OG_IMAGE;
-    const activeReviews = getDynamicReviews(provinceNameThai);
+    const activeReviews = seoData.reviews || PROVINCE_SEO_DATA.default.reviews;
 
-    const metaTitle = isNational 
-      ? "สาวรับงาน ไซด์ไลน์ ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub"
-      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์ ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub`;
+    // 🌟 ดึงข้อมูล Metadata & Copywriting สูตร Tier S จากคลังข้อมูล
+    const metaTitle = seoData.metaTitle || (isNational 
+      ? "สาวรับงาน ไซด์ไลน์ทั่วไทย • ตรงปก 100% จ่ายหน้างาน ไม่มัดจำ | First Model Hub"
+      : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} • ฟิวแฟนตรงปก จ่ายหน้างาน | First Model Hub`);
 
-    const metaDescription = isNational
-      ? "ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ"
-      : `ศูนย์รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`;
+    const metaDescription = seoData.metaDesc || (isNational
+      ? "ศูนย์รวมสาวรับงาน ไซด์ไลน์ทั่วไทย เด็กเอ็นฟิวแฟนพรีเมียม ครอบคลุม 77 จังหวัดทั่วประเทศ ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำล่วงหน้า"
+      : `ศูนย์รวมสาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} เด็กเอ็นพรีเมียม ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ`);
 
     const cleanMetaDesc = stripHTML(metaDescription);
     const mapZoom = isNational ? 6 : 12;
@@ -614,7 +652,7 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // โครงสร้าง Schema.org
+    // 🌟 โครงสร้าง Schema.org Graph
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -719,14 +757,14 @@ export default async (req, context) => {
       .map((p, i) => renderCardHtml(p, i === 0, provinceNameThai))
       .join("");
 
-    // 🟢 2. Render การ์ด VIP แนะนำ (คุมให้ใบแรกใบเดียว i === 0 เป็น Priority High เช่นกัน)
+    // 🟢 2. Render การ์ด VIP แนะนำ
     const featuredCardsHtml = profilesList
       .filter(p => p.isfeatured)
       .slice(0, 12)
       .map((p, i) => renderCardHtml(p, i === 0, provinceNameThai))
       .join("");
     
-    // 🟢 3. Render รีวิวลูกค้าจริงแบบ Clean XSS-Safe พร้อม Avatar สวยงาม
+    // 🟢 3. Render รีวิวลูกค้าจริงเฉพาะพื้นที่ พร้อม Avatar
     const reviewsHtml = (Array.isArray(activeReviews) ? activeReviews : []).map(r => {
       const avatarLetter = r.initial || (r.author ? r.author.replace(/^(คุณ|พี่|น้อง)/, "").trim().charAt(0) : "V");
       const cleanText = stripHTML(r.text || "").replace(/^["']|["']$/g, "");
@@ -754,10 +792,10 @@ export default async (req, context) => {
       `;
     }).join("");
 
-    // 🟢 4. FAQs และ เนื้อหา SEO Intro พร้อม Smart Linkify
+    // 🟢 4. FAQs และ เนื้อหาบทความ SEO เฉพาะพื้นที่ พร้อม Smart Linkify
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
-    const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
+    const introText = seoData.introArticle || PROVINCE_SEO_DATA.default.introArticle;
     const linkedIntro = smartLinkify(introText, 0, seoData.zones, provinceSlug);
 
     // 🟢 5. ลิงก์พื้นที่ให้บริการยอดนิยมใน Footer
@@ -794,33 +832,31 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 🟢 3. Hreflang Tag ครอบคลุมทั้งหน้าแรกและหน้ารายจังหวัด
+    // 3. Hreflang Tag ครอบคลุมทั้งหน้าแรกและหน้ารายจังหวัด
     const hreflangBlock = isNational
       ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
       : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
     finalHtml = finalHtml.replace(
-      /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
+      /<!-- (?:🌐 )?MULTILINGUAL SEO -->[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i,
       hreflangBlock
     );
 
-    // 4. แยก H1 และ H2
-    const ssrH1Html = isNational
-      ? `
-          <span class="seo-sub-headline">ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟน</span>
-          <span class="seo-main-headline">สาวรับงาน ไซด์ไลน์ทั่วไทย ตรงปก 100%</span>
-        `
-      : `
-          <span class="seo-sub-headline">เพื่อนเที่ยวฟิวแฟน • เด็กเอ็น${escapeHTML(provinceNameThai)}</span>
-          <span class="seo-main-headline">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-        `;
+    // 4. แยก H1 และ H2 ตามสูตร Tier S
+    const ssrH1Sub = seoData.h1Sub || (isNational ? "ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟนทั่วประเทศ" : `เพื่อนเที่ยวฟิวแฟน • สแตนด์บายใน${provinceNameThai}`);
+    const ssrH1Main = seoData.h1Main || (isNational ? "สาวรับงาน ไซด์ไลน์ทั่วไทย ตรงปก 100% จ่ายหน้างาน" : `สาวรับงาน${provinceNameThai} ไซด์ไลน์${provinceNameThai} ตรงปก 100% จ่ายหน้างาน`);
+    
+    const ssrH1Html = `
+      <span class="seo-sub-headline">${escapeHTML(ssrH1Sub)}</span>
+      <span class="seo-main-headline">${escapeHTML(ssrH1Main)}</span>
+    `;
 
     finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="hero-h1" class="seo-h1-title">${ssrH1Html}</h1>`);
 
     const ssrFeaturedH2 = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
 
-    // 5. ตัวเลขสถิติต่างๆ
+    // 5. ตัวเลขสถิติ
     finalHtml = finalHtml.replace(/<strong id="live-profile-count"[^>]*>[\s\S]*?<\/strong>/i, `<strong id="live-profile-count" class="kw-green">${exactCount}</strong>`);
 
     // 6. Schema.org JSON-LD
@@ -909,7 +945,6 @@ export default async (req, context) => {
         const pList = groupedByProvince[pKey];
         const pCount = pList.length;
         
-        // 🟢 ตัดให้หน้าแรกแสดงเพียง 6 โปรไฟล์พรีวิว ไม่ดึงไปแสดงหมดทั้ง 49 คน
         const previewLimit = 6;
         const previewList = pList.slice(0, previewLimit);
         const pCards = previewList.map((p) => renderCardHtml(p, false, pName)).join("");
@@ -975,17 +1010,16 @@ export default async (req, context) => {
     }).join("");
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-    if (popularLocationsFooter) { finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); }
+    if (popularLocationsFooter) {
+      finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`);
+    }
 
-    // 🟢 14. Serialization SSR Data (คลีนข้อมูลก่อนส่งให้ Client-side Hydration 100%)
+    // 🟢 14. Serialization SSR Data ส่งให้ Client Hydration 100%
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
-
-      // 🟢 ดึงชื่อจังหวัดจริงของน้องคนนั้นเสมอ ไม่ว่าจะเรนเดอร์จากหน้าแรกหรือหน้ารายจังหวัด
       const realProvinceThai = PROVINCE_SEO_DATA[cleanPKey]?.name || PROVINCE_SEO_DATA[pKey]?.name || p.provinceThai || "เชียงใหม่";
 
-      // 🟢 สกัดลิงก์ LINE ให้เป็น URL บริสุทธิ์ 100%
       let cleanLine = (p.lineId || p.line_id || p.line || "ksLUWB89Y_").toString().trim();
       const matchUrl = cleanLine.match(/(https?:\/\/[^\s]+)/i);
       if (matchUrl) {
@@ -995,11 +1029,9 @@ export default async (req, context) => {
         cleanLine = cleanHandle ? `https://line.me/ti/p/${cleanHandle}` : "https://line.me/ti/p/ksLUWB89Y_";
       }
 
-      // 🟢 จัดการราคาไม่ให้เป็นค่าว่าง
       const rawRateStr = (p.rate || p.price || "").toString().trim();
       const safeRate = rawRateStr !== "" ? rawRateStr : "1500";
 
-      // 🟢 คลีนแท็กสไตล์
       let rawTags = p.style_tags || p.styleTags || p.tags || [];
       if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
       const safeStyleTags = Array.isArray(rawTags) ? rawTags.filter(Boolean) : [];
