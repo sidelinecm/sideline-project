@@ -15,12 +15,12 @@
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" id="canonical-link" href="https://firstmodelhub.com/">
 
-  <!-- MULTILINGUAL SEO -->
+  <!-- 🌐 MULTILINGUAL SEO -->
   <link rel="alternate" hreflang="th" href="https://firstmodelhub.com/" />
   <link rel="alternate" hreflang="en" href="https://firstmodelhub.com/index-en" />
   <link rel="alternate" hreflang="x-default" href="https://firstmodelhub.com/" />
 
-  <!-- OPEN GRAPH / FACEBOOK -->
+  <!-- 📱 OPEN GRAPH / FACEBOOK -->
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="First Model Hub">
   <meta property="og:type" content="website">
@@ -33,13 +33,13 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
-  <!-- TWITTER CARD -->
+  <!-- 🐦 TWITTER CARD -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="รับงาน ไซด์ไลน์ ฟิวแฟนตรงปก 100%">
   <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ">
   <meta name="twitter:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
 
-  <!-- ICONS & PWA -->
+  <!-- 🌟 ICONS & PWA -->
   <meta name="apple-mobile-web-app-title" content="First Model Hub">
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -47,34 +47,27 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- ⚡ SPEED OPTIMIZATION -->
+  <!-- ⚡ 1. SPEED OPTIMIZATION (คงไว้เฉพาะ CDN หลักเพื่อตัด TCP Handshake Overhead) -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
-  <link rel="preconnect" href="https://zxetzqwjaiumqhrpumln.supabase.co" crossorigin>
   <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
-  <link rel="preconnect" href="https://esm.sh" crossorigin>
-  <link rel="dns-prefetch" href="https://esm.sh">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
-  <!-- ⚡ PRELOAD CRITICAL CSS -->
-  <link rel="preload" href="/styles.css" as="style">
+  <!-- ⚡ 2. MAIN STYLESHEET (โหลดตรงทันที ไม่ต้อง preload ซ้ำซ้อน) -->
   <link rel="stylesheet" href="/styles.css">
 
-  <!-- ⚡ PRELOAD THAI FONTS -->
+  <!-- ⚡ 3. PRELOAD CRITICAL FONTS (ลดปัญหาตัวหนังสือกระพริบ FOUT) -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
-  <!-- ⚡ NON-BLOCKING ASYNC FONT AWESOME -->
+  <!-- ⚡ 4. NON-BLOCKING ASYNC ICONS -->
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
-  <!-- ⚡ MODULE PRELOAD FOR JS -->
+  <!-- ⚡ 5. MODULE PRELOAD (ซิงค์เวอร์ชัน 2.2 ตรงกับท้าย body 100%) -->
   <link rel="modulepreload" href="/main.js?v=2.2">
 
-  <!-- SCHEMA.ORG DYNAMIC CONTAINER -->
+  <!-- 📊 SCHEMA.ORG DYNAMIC CONTAINER -->
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -597,7 +590,7 @@
   window.profilesData = null;
 </script>
 
-<script type="module" src="/main.js?v=2.1"></script>
+<script type="module" src="/main.js?v=2.2"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {

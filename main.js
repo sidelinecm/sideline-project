@@ -583,59 +583,78 @@ async function getSupabaseClient() {
   }
 
   function replaceDomPlaceholders(provinceName, count, currentSlug) {
-    const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
-    const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
-    const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
+  const totalCount = typeof count === "number" ? count : appState.filteredProfiles?.length ?? appState.allProfiles?.length ?? 0;
+  const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
+  const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
 
-    // 1. อัปเดตตัวเลขจำนวนโปรไฟล์จริงจากฐานข้อมูล
-    const liveCounterEl = document.getElementById("live-profile-count");
-    if (liveCounterEl) {
-      liveCounterEl.textContent = isAllOrNational ? `${totalCount}+` : `${totalCount}`;
-    }
+  // 1. อัปเดตตัวเลขจำนวนโปรไฟล์สด
+  const liveCounterEl = document.getElementById("live-profile-count");
+  if (liveCounterEl) {
+    liveCounterEl.textContent = isAllOrNational ? `${totalCount}+` : `${totalCount}`;
+  }
 
-    const heroH1 = document.getElementById("hero-h1");
-    if (heroH1) {
+  // 🟢 2. อัปเดต H1 แยกภาษา TH / EN ให้ถูกต้อง 100%
+  const heroH1 = document.getElementById("hero-h1");
+  if (heroH1) {
+    if (isEN) {
+      const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
+      heroH1.innerHTML = `
+        <span class="seo-sub-headline">${escapeHTML(enLocName)} Escorts • VIP Travel Companions</span><br>
+        <span class="seo-main-headline">100% Real Photos • Girlfriend Experience</span>
+      `;
+    } else {
       heroH1.innerHTML = `
         <span class="seo-sub-headline">รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}</span>
         <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
       `;
     }
+  }
 
-    const featuredH2 = document.getElementById("featured-heading");
-    if (featuredH2) {
+  // 🟢 3. อัปเดต H2 Section แนะนำ แยกภาษา TH / EN
+  const featuredH2 = document.getElementById("featured-heading");
+  if (featuredH2) {
+    if (isEN) {
+      const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
+      featuredH2.innerHTML = `Featured Companions in <span class="kw-purple">${escapeHTML(enLocName)}</span>`;
+    } else {
       featuredH2.innerHTML = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(targetName)}</span>`;
     }
+  }
 
-    // 🟢 3. เพิ่มส่วนนี้: อัปเดตแผนที่ Google Map ให้ตรงกับจังหวัดที่เลือกทันที
-    const mapIframe = document.getElementById("google-map");
-    if (mapIframe) {
-      const zoom = isAllOrNational ? 6 : 12;
-      const query = isAllOrNational 
-        ? encodeURIComponent("ประเทศไทย") 
-        : encodeURIComponent(`จังหวัด${targetName}`);
-      
-      const newMapSrc = `https://maps.google.com/maps?q=${query}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
-      
-      // ป้องกันการรีโหลดซ้ำถ้าเป็นพิกัดเดิม
-      if (mapIframe.src !== newMapSrc) {
-        mapIframe.src = newMapSrc;
-      }
+  // 🟢 4. อัปเดตแผนที่ Google Map ให้ตรงกับภาษาและพื้นที่
+  const mapIframe = document.getElementById("google-map");
+  if (mapIframe) {
+    const zoom = isAllOrNational ? 6 : 12;
+    let query = "";
+    if (isEN) {
+      const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || "Thailand");
+      query = encodeURIComponent(enLocName);
+    } else {
+      query = isAllOrNational ? encodeURIComponent("ประเทศไทย") : encodeURIComponent(`จังหวัด${targetName}`);
     }
-
-    if (isEN) return;
-
-    try {
-      const resolvedKey = isAllOrNational ? "national" : currentSlug;
-      const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
-
-      const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
-      if (seoDrawerInner && (!seoDrawerInner.innerHTML || seoDrawerInner.innerHTML.trim() === "")) {
-        if (seoData.seoContent) seoDrawerInner.innerHTML = seoData.seoContent;
-      }
-    } catch (err) {
-      console.error("replaceDomPlaceholders error:", err);
+    
+    const newMapSrc = `https://maps.google.com/maps?q=${query}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+    if (mapIframe.src !== newMapSrc) {
+      mapIframe.src = newMapSrc;
     }
   }
+
+  // ถ้าเป็นหน้าภาษาอังกฤษ ให้จบการทำงานตรงนี้ (ไม่เขียนทับเนื้อหา SEO ภาษาไทยด้านล่าง)
+  if (isEN) return;
+
+  // 5. อัปเดตเนื้อหา SEO Drawer สำหรับภาษาไทย
+  try {
+    const resolvedKey = isAllOrNational ? "national" : currentSlug;
+    const seoData = SEO_PROVINCES_DATA[resolvedKey] || SEO_PROVINCES_DATA.national || {};
+
+    const seoDrawerInner = document.querySelector("#seo-drawer-wrapper .seo-content-inner");
+    if (seoDrawerInner && (!seoDrawerInner.innerHTML || seoDrawerInner.innerHTML.trim() === "")) {
+      if (seoData.seoContent) seoDrawerInner.innerHTML = seoData.seoContent;
+    }
+  } catch (err) {
+    console.error("replaceDomPlaceholders error:", err);
+  }
+}
 
   function showSearchSuggestions(inputVal) {
     const popover = document.getElementById("search-suggestions");
@@ -758,13 +777,17 @@ function createProfileCardDOM(p, index = 20) {
   const pKey = (p.provinceKey || "national").toLowerCase();
   let rawName = p.displayName || p.name || "Model";
   const modelName = isEN ? (p.name_en || rawName.replace(/^(น้อง|สาว|พี่)\s?/gi, "").trim()) : formatDisplayName(rawName);
-  const ageDisplay = p.safeAge && p.safeAge !== "-" && p.safeAge !== "0" ? `${p.safeAge} ปี` : "";
   
-  // 🟢 ทำความสะอาดและตัดชื่อพิกัดให้สั้น กระชับ ไม่ล้นการ์ด
+  // 🟢 จุดที่ 1: แสดงอายุแยกตามภาษา (21 ปี vs 21 yrs)
+  const ageDisplay = p.safeAge && p.safeAge !== "-" && p.safeAge !== "0" 
+    ? (isEN ? `${p.safeAge} yrs` : `${p.safeAge} ปี`) 
+    : "";
+  
+  // ทำความสะอาดและตัดชื่อพิกัดให้สั้น กระชับ ไม่ล้นการ์ด
   let rawLoc = isEN ? (PROVINCE_EN_MAP[pKey] || p.location || "Thailand") : (p.location || p.provinceNameThai || "ทั่วไทย");
   let locName = rawLoc
     .replace(/^(ในตัวเมือง|ตัวเมือง|โซน|ย่าน)\s*(\/|และ)?\s*/gi, "")
-    .split(/[,/]/)[0] // เอาเฉพาะชื่อโซนแรก เช่น "นิมมาน, เจ็ดยอด" -> ได้ "นิมมาน"
+    .split(/[,/]/)[0]
     .trim();
   if (!locName) locName = rawLoc;
 
@@ -774,18 +797,40 @@ function createProfileCardDOM(p, index = 20) {
   const luxuryPrice = formatLuxuryRate(p.rate || p._price);
   const profileSlug = encodeURIComponent(p.slug || p.id);
 
+  // 🟢 จุดที่ 2: ทำความสะอาดแท็กและแปลแท็กพื้นฐานสำหรับภาษาอังกฤษ
   const rawTags = Array.isArray(p.styleTags) ? p.styleTags : [];
   const cleanTags = rawTags
     .map(t => String(t).replace(/^#/, "").trim())
-    .filter(t => t && !t.includes("รับงาน") && !t.includes("ไซด์ไลน์") && t.length <= 8);
+    .filter(t => t && !t.includes("รับงาน") && !t.includes("ไซด์ไลน์") && t.length <= 8)
+    .map(t => {
+      if (!isEN) return t;
+      const tagMap = {
+        "น่ารัก": "Cute",
+        "ผิวขาว": "Fair",
+        "ตัวเล็ก": "Petite",
+        "ฟิวแฟน": "GFE",
+        "ฟิลแฟน": "GFE",
+        "เอาใจเก่ง": "Caring",
+        "คุยสนุก": "Friendly",
+        "สายฝอ": "Exotic",
+        "อวบ": "Curvy",
+        "ไม่เร่งรีบ": "Relaxed"
+      };
+      return tagMap[t] || t;
+    });
 
+  const defaultTag = isEN ? "#GFE" : "#ฟิวแฟน";
   const vibeTagsHtml = cleanTags.length > 0
     ? cleanTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t)}</span>`).join("")
-    : `<span class="card-vibe-pill">#ฟิวแฟน</span>`;
+    : `<span class="card-vibe-pill">${defaultTag}</span>`;
 
+  // 🟢 จุดที่ 3: ป้ายมุมบนขวา (🔥 HOT vs ✦ Verified / ✦ ตรงปก)
   let rightBadgeHtml = index < 2 
     ? `<span class="badge-hot-tag">🔥 HOT</span>` 
-    : `<span class="badge-verified-top">✦ ตรงปก</span>`;
+    : `<span class="badge-verified-top">${isEN ? "✦ Verified" : "✦ ตรงปก"}</span>`;
+
+  // 🟢 จุดที่ 4: Aria label แยกภาษา
+  const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
 
   article.innerHTML = `
     <img src="${imgSrc}" 
@@ -813,7 +858,7 @@ function createProfileCardDOM(p, index = 20) {
         </div>
     </div>
     
-    <a href="/sideline/${profileSlug}" class="card-link" aria-label="ดูโปรไฟล์ ${modelName}"></a>
+    <a href="/sideline/${profileSlug}" class="card-link" aria-label="${viewProfileAria}"></a>
 
     <div class="profile-card-info-content">
         <div class="profile-card-tags-row">
