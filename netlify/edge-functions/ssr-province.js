@@ -962,39 +962,61 @@ export default async (req, context) => {
 
     if (popularLocationsFooter) { finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); }
 
-    // 14. Serialization SSR Data
+    // 🟢 14. Serialization SSR Data (คลีนข้อมูลก่อนส่งให้ Client-side Hydration 100%)
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
-      const pKey = (p.provinceKey || p.province_slug || "chiangmai").toLowerCase();
-      const realProvinceThai = PROVINCE_SEO_DATA[pKey]?.name || p.provinceThai || (isNational ? "เชียงใหม่" : provinceNameThai);
+      const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
+      const cleanPKey = pKey.replace(/[-_]/g, "");
+
+      // 🟢 ดึงชื่อจังหวัดจริงของน้องคนนั้นเสมอ ไม่ว่าจะเรนเดอร์จากหน้าแรกหรือหน้ารายจังหวัด
+      const realProvinceThai = PROVINCE_SEO_DATA[cleanPKey]?.name || PROVINCE_SEO_DATA[pKey]?.name || p.provinceThai || "เชียงใหม่";
+
+      // 🟢 สกัดลิงก์ LINE ให้เป็น URL บริสุทธิ์ 100%
+      let cleanLine = (p.lineId || p.line_id || p.line || "ksLUWB89Y_").toString().trim();
+      const matchUrl = cleanLine.match(/(https?:\/\/[^\s]+)/i);
+      if (matchUrl) {
+        cleanLine = matchUrl[0];
+      } else {
+        const cleanHandle = cleanLine.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
+        cleanLine = cleanHandle ? `https://line.me/ti/p/${cleanHandle}` : "https://line.me/ti/p/ksLUWB89Y_";
+      }
+
+      // 🟢 จัดการราคาไม่ให้เป็นค่าว่าง
+      const rawRateStr = (p.rate || p.price || "").toString().trim();
+      const safeRate = rawRateStr !== "" ? rawRateStr : "1500";
+
+      // 🟢 คลีนแท็กสไตล์
+      let rawTags = p.style_tags || p.styleTags || p.tags || [];
+      if (typeof rawTags === "string") rawTags = rawTags.split(",").map(s => s.trim());
+      const safeStyleTags = Array.isArray(rawTags) ? rawTags.filter(Boolean) : [];
 
       return {
         id: p.id,
-        slug: p.slug || p.id,
-        name: p.name,
-        age: p.age,
+        slug: p.slug || String(p.id),
+        name: p.name || "น้อง",
+        age: p.age && String(p.age).trim() !== "-" ? p.age : null,
         height: p.height || "",
         weight: p.weight || "",
         stats: p.stats || "",
-        skinTone: p.skinTone || "",
+        skinTone: p.skinTone || p.skin_tone || "",
         bust: p.bust || "",
         waist: p.waist || "",
         hips: p.hips || "",
         cup_size: p.cup_size || "",
-        imagePath: p.imagePath || p.image_url || "",
-        galleryPaths: p.galleryPaths || [],
+        imagePath: p.imagePath || p.image_url || p.imageUrl || "",
+        galleryPaths: p.galleryPaths || p.gallery_paths || [],
         provinceKey: pKey,
         provinceThai: realProvinceThai,
         location: sanitizeThaiText(p.location || realProvinceThai),
-        rate: p.rate,
-        availability: p.availability,
-        lastUpdated: p.lastUpdated,
-        isfeatured: p.isfeatured,
-        verified: p.verified || p.isVerified,
-        hasVideo: p.hasVideo || false,
-        description: sanitizeThaiText(p.description) || "",
-        lineId: (p.lineId || "").replace(/^@/, "").trim(),
-        quote: sanitizeThaiText(p.quote || "") || "",
-        styleTags: p.styleTags || []
+        rate: safeRate,
+        availability: p.availability || "รับงาน",
+        lastUpdated: p.lastUpdated || p.created_at || null,
+        isfeatured: p.isfeatured === true || p.isFeatured === true,
+        verified: p.verified === true || p.isVerified === true,
+        hasVideo: p.hasVideo === true || p.has_video === true,
+        description: sanitizeThaiText(p.description || ""),
+        lineId: cleanLine,
+        quote: sanitizeThaiText(p.quote || p.slogan || ""),
+        styleTags: safeStyleTags
       };
     })).replace(/</g, "\\u003c");
 

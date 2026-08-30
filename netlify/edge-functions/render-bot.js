@@ -246,9 +246,20 @@ export default async (req, context) => {
     const heroImageSmall = optimizeImg(rawImage, 400, 533);
     const heroSrcSet = generateSrcSet(rawImage);
 
-    let lineId = profile.line_id || profile.lineId || profile.line || "ksLUWB89Y_";
-    if (!lineId.startsWith("http")) {
-      lineId = `https://line.me/ti/p/${lineId.replace(/^@/, "")}`;
+    // 🟢 1. สกัด URL ไลน์อย่างแม่นยำ (รองรับทั้ง URL ล้วน, URL ปนข้อความ, หรือ LINE ID ธรรมดา)
+    const rawLineInput = (profile.line_id || profile.lineId || profile.line || "").trim();
+    let lineId = "https://line.me/ti/p/ksLUWB89Y_"; // Fallback ปลอดภัย
+
+    const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
+    if (matchUrl) {
+      // ถ้ามี URL ไม่ว่าจะอยู่หน้า กลาง หรือหลัง ให้ดึงเฉพาะ URL มาใช้ 100%
+      lineId = matchUrl[0];
+    } else if (rawLineInput) {
+      // ถ้าเป็น LINE ID ให้ตัดอักขระพิเศษและตัวหนังสือไทยออก
+      const cleanHandle = rawLineInput.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
+      if (cleanHandle) {
+        lineId = `https://line.me/ti/p/${cleanHandle}`;
+      }
     }
 
     const age = profile.age || getDeterministicValue(20, 26, rawSlug, 1);
@@ -385,7 +396,7 @@ const schemaGraph = {
     const htmlResponse = `<!DOCTYPE html>
 <html lang="th" class="dark-theme dark">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>${escapeHTML(pageTitle)} | ${CONFIG.BRAND_NAME}</title>
     <meta name="description" content="${escapeHTML(metaDescription)}">
@@ -394,45 +405,67 @@ const schemaGraph = {
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     
+    <!-- ⚡ Performance & Resource Hints -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link rel="preload" as="image" href="${heroImageSmall}" ${heroSrcSet ? `imagesrcset="${heroSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ""} fetchpriority="high">
     <meta name="theme-color" content="#060411">
     
+    <!-- 🌐 Open Graph & Social Cards -->
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="${escapeHTML(pageTitle)}">
+    <meta property="og:description" content="${escapeHTML(metaDescription)}">
+    <meta property="og:image" content="${heroImageLarge}">
+    <meta property="og:image:secure_url" content="${heroImageLarge}">
+    <meta property="og:image:width" content="600">   
+    <meta property="og:image:height" content="800">
+    <meta property="og:url" content="${canonicalUrl}">
+
+    <!-- 🐦 Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
     <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
     <meta name="twitter:image" content="${heroImageLarge}">
-    <meta property="og:image" content="${heroImageLarge}">
-    <meta property="og:image:width" content="600">   
-    <meta property="og:image:height" content="800">
-    <meta property="og:url" content="${canonicalUrl}">
-    <meta property="og:type" content="website">
 
+    <!-- 📱 Icons & PWA -->
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.webmanifest">
     
+    <!-- 🎨 Stylesheets -->
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- 📊 Schema.org JSON-LD -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph)}<\/script>
 </head>
 <body>
     <div class="container" style="max-width: 680px; margin: 0 auto; padding: 1rem 1rem 5rem 1rem;">
         <header id="page-header" role="banner" style="position: relative; margin-bottom: 1rem;">
             <div class="header-logo-container">
-                <a href="/" aria-label="ไปที่หน้าแรก FirstModelHub">
+                <a href="/" aria-label="ไปที่หน้าแรก ${CONFIG.BRAND_NAME}">
                     <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
                 </a>
             </div>
         </header>
 
-        <nav aria-label="breadcrumb" style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a> &raquo; 
-            <a href="${provinceHubUrl}" style="color: var(--primary-purple); text-decoration: none;">สาวรับงาน${escapeHTML(provinceNameThai)}</a> &raquo; 
-            <span>${escapeHTML(displayName)}</span>
+        <!-- 🧭 Breadcrumb Semantic Navigation -->
+        <nav aria-label="breadcrumb">
+          <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
+            <li>
+              <a href="/" style="color: var(--text-gray, #e4e4e7); text-decoration: none;">หน้าแรก</a>
+            </li>
+            <li style="color: var(--text-muted, #94a3b8);" aria-hidden="true">&raquo;</li>
+            <li>
+              <a href="${provinceHubUrl}" style="color: var(--primary-purple, #c084fc); text-decoration: none;">สาวรับงาน${escapeHTML(provinceNameThai)}</a>
+            </li>
+            <li style="color: var(--text-muted, #94a3b8);" aria-hidden="true">&raquo;</li>
+            <li aria-current="page">
+              <span style="color: #FFF;">${escapeHTML(displayName)}</span>
+            </li>
+          </ol>
         </nav>
 
         <main class="main-content">
@@ -451,30 +484,30 @@ const schemaGraph = {
                     <h1 style="font-size: 20px; font-weight: 900; color: #FFF; line-height: 1.3;">${escapeHTML(pageTitle)}</h1>
                     <div style="display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;">
                         <span style="color: #FBBF24;">⭐ 5.0</span>
-                        <span style="color: var(--text-muted); font-size: 12px;">(การันตีตัวจริงตรงปก)</span>
+                        <span style="color: var(--text-muted, #94a3b8); font-size: 12px;">(การันตีตัวจริงตรงปก)</span>
                     </div>
                 </header>
 
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1.25rem;">
                     <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted); font-size: 11.5px;">สัดส่วน</span>
+                        <span style="color: var(--text-muted, #94a3b8); font-size: 11.5px;">สัดส่วน</span>
                         <strong style="color: #FFF;">${escapeHTML(stats)}</strong>
                     </div>
                     <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted); font-size: 11.5px;">ส่วนสูง / น้ำหนัก</span>
+                        <span style="color: var(--text-muted, #94a3b8); font-size: 11.5px;">ส่วนสูง / น้ำหนัก</span>
                         <strong style="color: #FFF;">${height} ซม. / ${weight} กก.</strong>
                     </div>
                     <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted); font-size: 11.5px;">อายุ</span>
+                        <span style="color: var(--text-muted, #94a3b8); font-size: 11.5px;">อายุ</span>
                         <strong style="color: #FFF;">${age} ปี</strong>
                     </div>
                     <div class="spec-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-muted); font-size: 11.5px;">พิกัดบริการ</span>
+                        <span style="color: var(--text-muted, #94a3b8); font-size: 11.5px;">พิกัดบริการ</span>
                         <strong style="color: #C084FC;">${escapeHTML(sanitizeThaiText(profile.location || provinceNameThai))}</strong>
                     </div>
                 </div>
 
-                <div class="description" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px; color: var(--text-gray); font-size: 12px; line-height: 1.6; margin-bottom: 1.25rem;">
+                <div class="description" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px; color: var(--text-gray, #e4e4e7); font-size: 12px; line-height: 1.6; margin-bottom: 1.25rem;">
                     ${escapeHTML(naturalDesc)}
                 </div>
 
@@ -493,34 +526,33 @@ const schemaGraph = {
                     </div>
                 </section>
 
+                <section style="margin-bottom: 1.5rem;">
+                    <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)}</h2>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
+                            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
+                            <p style="font-size: 11.5px; color: var(--text-gray, #e4e4e7); margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
+                        </div>
 
-<section style="margin-bottom: 1.5rem;">
-    <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)}</h2>
-    
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
-            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
-            <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
-        </div>
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
+                            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
+                            <p style="font-size: 11.5px; color: var(--text-gray, #e4e4e7); margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
+                        </div>
 
-        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
-            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
-            <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
-        </div>
-
-        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
-            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
-            <p style="font-size: 11.5px; color: var(--text-gray); margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
-        </div>
-    </div>
-</section>
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px;">
+                            <h3 style="font-size: 12px; color: #C084FC; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
+                            <p style="font-size: 11.5px; color: var(--text-gray, #e4e4e7); margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
+                        </div>
+                    </div>
+                </section>
 
                 <section style="margin-bottom: 1.5rem;">
                     <h2 style="color: #FFF; font-size: 13.5px; font-weight: 800; margin-bottom: 10px; text-align: center;">รีวิวจากลูกค้าจริง</h2>
                     ${reviewsList.map(r => `
                         <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; margin-bottom: 8px;">
                             <strong style="color: #FFF; font-size: 12px;">${escapeHTML(r.name)}</strong>
-                            <p style="font-size: 11.5px; color: var(--text-gray); margin: 4px 0 0 0;">${escapeHTML(r.text)}</p>
+                            <p style="font-size: 11.5px; color: var(--text-gray, #e4e4e7); margin: 4px 0 0 0;">${escapeHTML(r.text)}</p>
                         </div>
                     `).join("")}
                 </section>
@@ -541,14 +573,14 @@ const schemaGraph = {
                         }).join("")}
                     </div>
                     <div style="text-align: center;">
-                        <a href="${provinceHubUrl}" style="color: var(--primary-purple); font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(provinceNameThai)} ทั้งหมด &rarr;</a>
+                        <a href="${provinceHubUrl}" style="color: var(--primary-purple, #c084fc); font-size: 11.5px; font-weight: 800; text-decoration: none;">ดูน้องๆ รับงานโซน${escapeHTML(provinceNameThai)} ทั้งหมด &rarr;</a>
                     </div>
                 </section>
                 ` : ""}
 
                 <section style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem;">
-                    <h2 style="color: var(--primary-purple); font-size: 13.5px; font-weight: 800; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
-                    <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; font-size: 11px; color: var(--text-muted); line-height: 1.6;">
+                    <h2 style="color: var(--primary-purple, #c084fc); font-size: 13.5px; font-weight: 800; text-align: center; margin-bottom: 8px;">แนวทางปฏิบัติร่วมกันเพื่อความปลอดภัย</h2>
+                    <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; font-size: 11px; color: var(--text-muted, #94a3b8); line-height: 1.6;">
                         <p style="margin-bottom: 0.4rem;"><strong>✓ ข้อกำหนดอายุขั้นต่ำ</strong>: ผู้เข้าชมเพจและขอใช้สิทธิ์บริการจองคิวจะต้องมีอายุตั้งแต่ 20 ปีบริบูรณ์ขึ้นไปเท่านั้น</p>
                         <p style="margin-bottom: 0.4rem;"><strong>✓ มาตรการป้องกันมิจฉาชีพ</strong>: โปรดระมัดระวังการโอนเงินจองคิวมัดจำล่วงหน้า ทางระบบยึดมั่นนโยบายจ่ายหน้างานโดยตรงหลังเจอตัวน้องและตรวจสอบความถูกต้องตรงปกเท่านั้น</p>
                         <p><strong>✓ การรักษาความลับ (Zero-Log Policy)</strong>: ข้อมูลการติดต่อและการจองคิวทั้งหมดจะได้รับการดูแลภายใต้มาตรการความเป็นส่วนตัวสูงสุด</p>
@@ -557,11 +589,11 @@ const schemaGraph = {
             </article>
         </main>
         
-        <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 11px;">
+        <footer role="contentinfo" style="text-align: center; padding: 2rem 0; color: var(--text-muted, #94a3b8); font-size: 11px;">
             <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;">
-                <a href="/" style="color: var(--text-gray); text-decoration: none;">หน้าแรก</a>
-                <a href="/profiles" style="color: var(--text-gray); text-decoration: none;">รวมโปรไฟล์</a>
-                <a href="/locations" style="color: var(--text-gray); text-decoration: none;">พื้นที่บริการ</a>
+                <a href="/" style="color: var(--text-gray, #e4e4e7); text-decoration: none;">หน้าแรก</a>
+                <a href="/profiles" style="color: var(--text-gray, #e4e4e7); text-decoration: none;">รวมโปรไฟล์</a>
+                <a href="/locations" style="color: var(--text-gray, #e4e4e7); text-decoration: none;">พื้นที่บริการ</a>
             </div>
             © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
