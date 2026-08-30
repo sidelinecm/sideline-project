@@ -37,7 +37,7 @@ async function getSupabaseClient() {
   const DEFAULT_FALLBACK_IMG = "https://firstmodelhub.com/images/firstmodelhub.webp";
 
   const isEN = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
-  const PROVINCE_EN_MAP = {
+ const PROVINCE_EN_MAP = {
     chiangmai: "Chiang Mai",
     chiangrai: "Chiang Rai",
     lampang: "Lampang",
@@ -54,80 +54,80 @@ async function getSupabaseClient() {
     "surat-thani": "Surat Thani",
     suratthani: "Surat Thani",
     "ubon-ratchathani": "Ubon Ratchathani",
-    ubon: "Ubon Ratchathani",
+    ubon: "Udon Ratchathani",
     national: "Nationwide (Thailand)"
   };
 
   const SEO_PROVINCES_DATA = {
     chiangmai: {
-      zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานเชียงใหม่</strong> และ <strong>ไซด์ไลน์เชียงใหม่</strong> พรีเมียม คัดสรรตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมย่านนิมมาน สันติธรรม เจ็ดยอด</p>",
+      zones: ["ทั้งหมด", "นิมมาน", "สันติธรรม", "เจ็ดยอด", "หลัง มช.", "ช้างเผือก", "สันทราย", "ห้วยแก้ว", "รวมโชค"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานเชียงใหม่</strong> และ <strong>ไซด์ไลน์เชียงใหม่</strong> สไตล์ฟิวแฟนพรีเมียม สแตนด์บายย่านนิมมาน เจ็ดยอด สันติธรรม และหลัง มช. การันตีตัวจริงตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     chiangrai: {
-      zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานเชียงราย</strong> และ <strong>ไซด์ไลน์เชียงราย</strong> พรีเมียม คัดสรรโปรไฟล์ตรงปก 100% ปลอดภัย นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมโซนตัวเมือง บ้านดู่ มฟล.</p>",
+      zones: ["ทั้งหมด", "ตัวเมืองเชียงราย", "บ้านดู่", "มฟล.", "หอนาฬิกา", "แม่สาย", "รอบเวียง"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานเชียงราย</strong> และ <strong>ไซด์ไลน์เชียงราย</strong> เพื่อนเที่ยวเด็กเอ็น โซนตัวเมือง บ้านดู่ และหน้า มฟล. การันตีตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     lampang: {
-      zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานลำปาง</strong> และ <strong>ไซด์ไลน์ลำปาง</strong> พรีเมียม ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมตัวเมืองลำปาง สวนดอก รอบเวียง</p>",
+      zones: ["ทั้งหมด", "ตัวเมืองลำปาง", "สวนดอก", "รอบเวียง", "ม.ราชภัฏลำปาง", "สบตุ๋ย", "เซ็นทรัลลำปาง"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานลำปาง</strong> และ <strong>ไซด์ไลน์ลำปาง</strong> เพื่อนเที่ยวฟิวแฟน โซนตัวเมืองลำปาง สวนดอก และ ม.ราชภัฏลำปาง ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     lamphun: {
-      zones: ["ทั้งหมด", "ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานลำพูน</strong> และ <strong>ไซด์ไลน์ลำพูน</strong> พรีเมียม ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ ครอบคลุมนิคมลำพูน เวียงยอง ตัวเมืองลำพูน</p>",
+      zones: ["ทั้งหมด", "ตัวเมืองลำพูน", "นิคมลำพูน", "เวียงยอง", "ป่าซาง", "เหมืองง่า", "บ้านกลาง"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานลำพูน</strong> และ <strong>ไซด์ไลน์ลำพูน</strong> พรีเมียม ตรงปก 100% สแตนด์บายโซนนิคมลำพูนและตัวเมือง ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     phitsanulok: {
-      zones: ["ทั้งหมด", "ตัวเมืองพิษณุโลก", "รอบ มน.", "สมอแข"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานพิษณุโลก</strong> และ <strong>ไซด์ไลน์พิษณุโลก</strong> พรีเมียม ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</p>",
+      zones: ["ทั้งหมด", "ตัวเมืองพิษณุโลก", "รอบ มน.", "ท่าโพธิ์", "สมอแข", "ท็อปแลนด์", "เซ็นทรัลพิษณุโลก"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานพิษณุโลก</strong> และ <strong>ไซด์ไลน์พิษณุโลก</strong> เพื่อนเที่ยวฟิวแฟน โซนรอบ มน. และตัวเมืองพิษณุโลก ตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     bangkok: {
-      zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม</strong> ระดับพรีเมียม การันตีตรงปก 100% ปลอดภัยนัดเจอชำระหน้างาน ไม่โอนมัดจำ</p>",
+      zones: ["ทั้งหมด", "สุขุมวิท", "รัชดา", "ห้วยขวาง", "ลาดพร้าว", "ทองหล่อ", "เอกมัย", "สาทร", "บางนา"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานกรุงเทพ</strong> และ <strong>ไซด์ไลน์ กทม</strong> ระดับไฮเอนด์ เพื่อนเที่ยวดินเนอร์และเอาท์คอลโรงแรมหรู สุขุมวิท รัชดา ทองหล่อ สาทร ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ</p>",
       reviews: [],
       faqs: []
     },
     chonburi: {
-      zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานชลบุรี</strong> รับงานพัทยา และเพื่อนเที่ยวบางแสน พรีเมียม ปลอดภัยจ่ายหน้างาน ไม่โอนมัดจำ</p>",
+      zones: ["ทั้งหมด", "พัทยา", "บางแสน", "ศรีราชา", "ตัวเมืองชลบุรี", "จอมเทียน", "อมตะนคร", "แหลมฉบัง"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานพัทยา</strong> สาวรับงานชลบุรี และไซด์ไลน์บางแสน เพื่อนเที่ยวฟิวแฟนริมทะเล ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     "khon-kaen": {
-      zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานขอนแก่น</strong> และเพื่อนเที่ยวไซด์ไลน์ขอนแก่น พรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>",
+      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานขอนแก่น</strong> และ <strong>ไซด์ไลน์ขอนแก่น</strong> เด็กเอ็นฟิวแฟน สแตนด์บายโซนกังสดาล หลัง มข. เซ็นทรัลขอนแก่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     khonkaen: {
-      zones: ["ทั้งหมด", "ตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัล"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานขอนแก่น</strong> และเพื่อนเที่ยวไซด์ไลน์ขอนแก่น พรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>",
+      zones: ["ทั้งหมด", "ในตัวเมืองขอนแก่น", "กังสดาล", "หลัง มข.", "เซ็นทรัลขอนแก่น", "บึงแก่นนคร", "โนนม่วง"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานขอนแก่น</strong> และ <strong>ไซด์ไลน์ขอนแก่น</strong> เด็กเอ็นฟิวแฟน สแตนด์บายโซนกังสดาล หลัง มข. เซ็นทรัลขอนแก่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ</p>",
       reviews: [],
       faqs: []
     },
     phuket: {
-      zones: ["ทั้งหมด", "ตัวเมืองภูเก็ต", "ป่าตอง", "กะทู้", "ฉลอง"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานภูเก็ต</strong> ป่าตอง และเพื่อนเที่ยวพรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>",
+      zones: ["ทั้งหมด", "ป่าตอง", "กะทู้", "ฉลอง", "กะรน", "กะตะ", "บางเทา", "ราไวย์", "เชิงทะเล"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานภูเก็ต</strong> และ VIP Travel Companions พูลวิลล่าและโรงแรมหรูย่านป่าตอง กะทู้ บางเทา ราไวย์ การันตีตรงปก 100% สื่อสารภาษาอังกฤษได้ จ่ายหน้างาน ไม่มัดจำ</p>",
       reviews: [],
       faqs: []
     },
     udonthani: {
-      zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานอุดรธานี</strong> และเพื่อนเที่ยวพรีเมียม คัดสรรโปรไฟล์ตรงปก 100% จ่ายหน้างาน</p>",
+      zones: ["ทั้งหมด", "ตัวเมืองอุดร", "UD Town", "หนองประจักษ์", "เซ็นทรัลอุดร", "บ้านจาน", "โพศรี"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานอุดรธานี</strong> และ <strong>ไซด์ไลน์อุดรธานี</strong> เพื่อนเที่ยวเด็กเอ็น โซนตัวเมือง UD Town เซ็นทรัลอุดร สวนสาธารณะหนองประจักษ์ ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ</p>",
       reviews: [],
       faqs: []
     },
     national: {
-      zones: ["ทั้งหมด", "เชียงใหม่", "ขอนแก่น", "เชียงราย", "ลำปาง", "อุดรธานี", "ภูเก็ต"],
-      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานทั่วไทย</strong> พรีเมียม คัดสรรตรงปก 100% จ่ายหน้างาน ไม่โอนมัดจำ</p>",
+      zones: ["ทั้งหมด", "กรุงเทพฯ", "เชียงใหม่", "ชลบุรี", "พัทยา", "ภูเก็ต", "ขอนแก่น", "อุดรธานี", "เชียงราย"],
+      seoContent: "<p>ศูนย์รวม <strong>สาวรับงานทั่วไทย</strong> ไซด์ไลน์ทั่วไทย เด็กเอ็นฟิวแฟนพรีเมียม ครอบคลุม 77 จังหวัดทั่วประเทศ ตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่โอนมัดจำล่วงหน้า</p>",
       reviews: [],
       faqs: []
     }
@@ -593,19 +593,26 @@ async function getSupabaseClient() {
     liveCounterEl.textContent = isAllOrNational ? `${totalCount}+` : `${totalCount}`;
   }
 
-  // 🟢 2. อัปเดต H1 แยกภาษา TH / EN ให้ถูกต้อง 100%
+  // 🟢 2. อัปเดต H1 แยกภาษา TH / EN ตามสูตร Tier S ให้ตรงกับระบบ SSR 100%
   const heroH1 = document.getElementById("hero-h1");
   if (heroH1) {
     if (isEN) {
       const enLocName = isAllOrNational ? "Thailand" : (PROVINCE_EN_MAP[currentSlug] || currentSlug);
       heroH1.innerHTML = `
-        <span class="seo-sub-headline">${escapeHTML(enLocName)} Escorts • VIP Travel Companions</span><br>
-        <span class="seo-main-headline">100% Real Photos • Girlfriend Experience</span>
+        <span class="seo-sub-headline">${escapeHTML(enLocName)} Escorts • VIP Travel Companions</span>
+        <span class="seo-main-headline">Girlfriend Experience (GFE) • 100% Real Photos</span>
       `;
     } else {
+      const subTitle = isAllOrNational 
+        ? "ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟนทั่วประเทศ" 
+        : `เพื่อนเที่ยวฟิวแฟน • สาวรับงาน${escapeHTML(targetName)}`;
+      const mainTitle = isAllOrNational 
+        ? "สาวรับงาน ไซด์ไลน์ทั่วไทย ตรงปก 100% จ่ายหน้างาน" 
+        : `สาวรับงาน${escapeHTML(targetName)} ไซด์ไลน์${escapeHTML(targetName)} ตรงปก 100% จ่ายหน้างาน`;
+
       heroH1.innerHTML = `
-        <span class="seo-sub-headline">รับงาน${escapeHTML(targetName)} • ไซด์ไลน์${escapeHTML(targetName)}</span>
-        <span class="seo-main-headline">สาวรับงาน ฟิวแฟนตรงปก 100%</span>
+        <span class="seo-sub-headline">${escapeHTML(subTitle)}</span>
+        <span class="seo-main-headline">${escapeHTML(mainTitle)}</span>
       `;
     }
   }
@@ -804,7 +811,7 @@ function createProfileCardDOM(p, index = 20) {
     .filter(t => t && !t.includes("รับงาน") && !t.includes("ไซด์ไลน์") && t.length <= 8)
     .map(t => {
       if (!isEN) return t;
-      const tagMap = {
+const tagMap = {
   "ตรงปก": "Verified",
   "น่ารัก": "Cute",
   "ผิวขาว": "Fair",
@@ -825,8 +832,14 @@ function createProfileCardDOM(p, index = 20) {
     ? cleanTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t)}</span>`).join("")
     : `<span class="card-vibe-pill">${defaultTag}</span>`;
 
-  // 🟢 จุดที่ 3: ป้ายมุมบนขวา (🔥 HOT vs ✦ Verified / ✦ ตรงปก)
-  let rightBadgeHtml = index < 2 
+  // 🟢 จุดที่ 3: เช็กแท็ก #ฟิวแฟน จาก Supabase (มีฟิวแฟน = HOT / ไม่มี = ตรงปก)
+  const tagsToCheck = Array.isArray(p.styleTags) ? p.styleTags : (Array.isArray(p.style_tags) ? p.style_tags : []);
+  const isFiwFan = tagsToCheck.some(t => {
+    const cleanTag = String(t).replace(/^#/, "").trim().toLowerCase();
+    return cleanTag === "ฟิวแฟน" || cleanTag === "ฟิลแฟน" || cleanTag === "gfe" || cleanTag.includes("ฟิวแฟน") || cleanTag.includes("ฟิลแฟน");
+  });
+
+  let rightBadgeHtml = isFiwFan
     ? `<span class="badge-hot-tag">🔥 HOT</span>` 
     : `<span class="badge-verified-top">${isEN ? "✦ Verified" : "✦ ตรงปก"}</span>`;
 
