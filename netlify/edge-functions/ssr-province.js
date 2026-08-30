@@ -794,17 +794,17 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 🟢 3. Hreflang Tag ครอบคลุมทั้งหน้าแรกและหน้ารายจังหวัด
+
     const hreflangBlock = isNational
       ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
       : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
-    finalHtml = finalHtml.replace(
-      /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
-      hreflangBlock
-    );
 
-    // 4. แยก H1 และ H2
+finalHtml = finalHtml.replace(
+  /<!-- (?:🌐 )?MULTILINGUAL SEO -->[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i,
+  hreflangBlock
+);
+
     const ssrH1Html = isNational
       ? `
           <span class="seo-sub-headline">ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟน</span>
