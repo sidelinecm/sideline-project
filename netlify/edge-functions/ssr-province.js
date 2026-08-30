@@ -172,7 +172,7 @@ function sanitizeThaiText(text) {
     .replace(/ของแก่น/g, "ขอนแก่น")
     .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
-    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ") // 🟢 ตัดคำซ้ำที่ติดกันออก
+    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
     .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!/gi, "")
     .replace(/\s+/g, " ")
@@ -245,14 +245,11 @@ function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
   let formatted = sanitizeThaiText(text);
   const locationUrl = provinceSlug && provinceSlug !== "national" ? `/location/${provinceSlug}` : "/";
 
-  // 🟢 ฟังก์ชันช่วยแทนที่คำอย่างปลอดภัย (แทนที่เฉพาะครั้งแรกที่เจอ และไม่ไปทับแท็ก HTML เดิม)
   const replaceFirstSafe = (content, pattern, template) => {
-    // ตรวจสอบว่าคำนั้นต้องไม่อยู่ในแท็ก HTML <...>, <a> หรือ <strong> ที่มีอยู่ก่อนแล้ว
     const regex = new RegExp(`(${pattern})(?![^<]*>|[^<>]*<\\/a>|[^<>]*<\\/strong>)`, "i");
     return content.replace(regex, template);
   };
 
-  // 1. ทำลิงก์ Anchor ให้กับชื่อโซนสำคัญ (จำกัดสูงสุด 4 โซน และทำแค่ 1 ครั้งต่อโซน)
   if (zones && Array.isArray(zones) && zones.length > 0) {
     zones.slice(0, 4).forEach(zone => {
       if (!zone || zone === "ทั้งหมด") return;
@@ -265,7 +262,6 @@ function smartLinkify(text, total, zones, provinceSlug = "chiangmai") {
     });
   }
 
-  // 2. เน้นคำค้นหาหลัก (Keywords) เพียง "1 ครั้งแรกต่อกลุ่มคำ" เพื่อความเป็นธรรมชาติของ SEO
   formatted = replaceFirstSafe(
     formatted,
     "สาวรับงาน|ไซด์ไลน์|เด็กเอ็น|เพื่อนเที่ยว|ฟิวแฟน",
@@ -381,7 +377,7 @@ function formatLuxuryRate(rate) {
   return String(num);
 }
 
-const renderCardHtml = (p, index, total, provinceName) => {
+const renderCardHtml = (p, isPriorityLCP = false, provinceName = "เชียงใหม่") => {
   const cleanName = escapeHTML((p.name || "ไม่ระบุชื่อ").trim().replace(/^(น้อง\s?)+/gi, ""));
   let rawLoc = sanitizeThaiText(p.location) || provinceName;
   let loc = escapeHTML(
@@ -408,7 +404,7 @@ const renderCardHtml = (p, index, total, provinceName) => {
     ? rawTags.slice(0, 2).map(t => `<span class="card-vibe-pill">#${escapeHTML(t.replace(/^#/, ""))}</span>`).join("")
     : `<span class="card-vibe-pill">#ฟิวแฟน</span>`;
 
-  let rightBadgeHtml = index < 2
+  let rightBadgeHtml = isPriorityLCP
     ? `<span class="badge-hot-tag">🔥 HOT</span>`
     : `<span class="badge-verified-top">✦ ตรงปก</span>`;
 
@@ -421,8 +417,8 @@ const renderCardHtml = (p, index, total, provinceName) => {
                width="400"
                height="533"
                class="profile-card-img"
-               loading="${index < 2 ? "eager" : "lazy"}"
-               fetchpriority="${index === 0 ? "high" : "auto"}"
+               loading="${isPriorityLCP ? "eager" : "lazy"}"
+               fetchpriority="${isPriorityLCP ? "high" : "auto"}"
                decoding="async"
                onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';" />
                
@@ -618,7 +614,7 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // โครงสร้าง Schema.org ที่ถูกต้องตามกฎ Google Search (ตัด Self-serving Review ออกเพื่อความปลอดภัย 100%)
+    // โครงสร้าง Schema.org
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -718,40 +714,56 @@ export default async (req, context) => {
       });
     }
 
-    const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i, 0, provinceNameThai)).join("");
-    const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i, 0, provinceNameThai)).join("");
+    // 🟢 1. Render การ์ดทั้งหมด (ให้ใบแรกสุดใบเดียว i === 0 เป็น Priority High นอกนั้น Lazy Load)
+    const allCardsHtml = profilesList
+      .map((p, i) => renderCardHtml(p, i === 0, provinceNameThai))
+      .join("");
+
+    // 🟢 2. Render การ์ด VIP แนะนำ (คุมให้ใบแรกใบเดียว i === 0 เป็น Priority High เช่นกัน)
+    const featuredCardsHtml = profilesList
+      .filter(p => p.isfeatured)
+      .slice(0, 12)
+      .map((p, i) => renderCardHtml(p, i === 0, provinceNameThai))
+      .join("");
     
-    const reviewsHtml = activeReviews.map(r => {
-      const avatarLetter = r.initial || (r.author ? r.author.replace(/^คุณ/, "").trim().charAt(0) : "V");
-      const cleanText = stripHTML(r.text).replace(/^["']|["']$/g, "");
+    // 🟢 3. Render รีวิวลูกค้าจริงแบบ Clean XSS-Safe พร้อม Avatar สวยงาม
+    const reviewsHtml = (Array.isArray(activeReviews) ? activeReviews : []).map(r => {
+      const avatarLetter = r.initial || (r.author ? r.author.replace(/^(คุณ|พี่|น้อง)/, "").trim().charAt(0) : "V");
+      const cleanText = stripHTML(r.text || "").replace(/^["']|["']$/g, "");
+      const authorName = escapeHTML(r.author || "ลูกค้าประจำ");
+      const locationName = escapeHTML(r.location || provinceNameThai);
+      const dateText = escapeHTML(r.date || "เมื่อไม่นานมานี้");
+
       return `
         <div class="review-card-item">
             <div class="review-card-header">
               <div class="review-user-info">
                 <div class="review-avatar-circle">${escapeHTML(avatarLetter)}</div>
                 <div>
-                  <div class="review-username">${escapeHTML(r.author)}</div>
-                  <div class="review-user-loc">นัดเจอใน${escapeHTML(r.location)}</div>
+                  <div class="review-username">${authorName}</div>
+                  <div class="review-user-loc">นัดเจอใน${locationName}</div>
                 </div>
               </div>
               <div class="review-stars-list">
-                ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < r.rating ? "#FBBF24" : "#71717A"};"></i>`).join("")}
+                ${Array.from({ length: 5 }).map((_, i) => `<i class="fas fa-star" style="color: ${i < (r.rating || 5) ? "#FBBF24" : "#71717A"};"></i>`).join("")}
               </div>
             </div>
             <p class="review-comment-body">"${escapeHTML(cleanText)}"</p>
-            <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง • ${escapeHTML(r.date)}</span>
+            <span class="review-verified-badge"><i class="fas fa-check-circle"></i> ยืนยันการใช้บริการจริง • ${dateText}</span>
         </div>
       `;
     }).join("");
 
+    // 🟢 4. FAQs และ เนื้อหา SEO Intro พร้อม Smart Linkify
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
     const linkedIntro = smartLinkify(introText, 0, seoData.zones, provinceSlug);
 
+    // 🟢 5. ลิงก์พื้นที่ให้บริการยอดนิยมใน Footer
     const popularLocationsFooter = allProvincesRes.data
       ? allProvincesRes.data.map(p => {
-          const key = p.key || p.slug || p.id;
+          const key = (p.key || p.slug || p.id || "").toString().toLowerCase();
           const name = p.nameThai || p.name;
           const isActive = key === provinceSlug;
           let item = `<li><a href="/location/${key}" title="สาวรับงาน${name}" style="color: ${isActive ? "var(--primary-purple)" : "var(--text-gray)"}; text-decoration: none;" ${isActive ? 'class="active" aria-current="page"' : ""}>ไซด์ไลน์${name}</a></li>`;
@@ -782,31 +794,28 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    if (isNational) {
-      finalHtml = finalHtml.replace(
-        /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
-        `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
-      );
-    } else {
-      finalHtml = finalHtml.replace(
-        /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
-        ""
-      );
-    }
+    // 🟢 3. Hreflang Tag ครอบคลุมทั้งหน้าแรกและหน้ารายจังหวัด
+    const hreflangBlock = isNational
+      ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
+      : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
-    // 🟢 แยก H1 ระหว่างหน้าแรก และหน้ารายจังหวัดให้ชัดเจน
-const ssrH1Html = isNational
-  ? `
-      <span class="seo-sub-headline">ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟน</span>
-      <span class="seo-main-headline">สาวรับงาน ไซด์ไลน์ทั่วไทย ตรงปก 100%</span>
-    `
-  : `
-      <span class="seo-sub-headline">เพื่อนเที่ยวฟิวแฟน • เด็กเอ็น${escapeHTML(provinceNameThai)}</span>
-      <span class="seo-main-headline">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-    `;
+    finalHtml = finalHtml.replace(
+      /<!-- MULTILINGUAL SEO -->[\s\S]*?(?=<!-- OPEN GRAPH)/i,
+      hreflangBlock
+    );
 
-finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="hero-h1" class="seo-h1-title">${ssrH1Html}</h1>`);
+    // 4. แยก H1 และ H2
+    const ssrH1Html = isNational
+      ? `
+          <span class="seo-sub-headline">ศูนย์รวมเด็กเอ็น • เพื่อนเที่ยวฟิวแฟน</span>
+          <span class="seo-main-headline">สาวรับงาน ไซด์ไลน์ทั่วไทย ตรงปก 100%</span>
+        `
+      : `
+          <span class="seo-sub-headline">เพื่อนเที่ยวฟิวแฟน • เด็กเอ็น${escapeHTML(provinceNameThai)}</span>
+          <span class="seo-main-headline">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
+        `;
 
+    finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="hero-h1" class="seo-h1-title">${ssrH1Html}</h1>`);
 
     const ssrFeaturedH2 = `แนะนำน้องๆ รับงาน <span class="kw-purple">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
@@ -898,7 +907,8 @@ finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="
       for (const pKey of sortedProvinceKeys) {
         const pName = PROVINCE_SEO_DATA[pKey]?.name || pKey;
         const pCount = groupedByProvince[pKey].length;
-        const pCards = groupedByProvince[pKey].map((p, i) => renderCardHtml(p, i, 0, pName)).join("");
+        // 🟢 ส่ง false สำหรับการ์ดรายจังหวัดด้านล่าง เพื่อให้ Lazy Load 100%
+        const pCards = groupedByProvince[pKey].map((p) => renderCardHtml(p, false, pName)).join("");
         displayAreaHtml += `
           <div class="section-content-wrapper province-section" id="province-${pKey}" style="margin-top: 24px;">
             <div style="padding: 8px 4px 12px 4px;">
@@ -950,41 +960,43 @@ finalHtml = finalHtml.replace(/<h1 id="hero-h1"[^>]*>[\s\S]*?<\/h1>/i, `<h1 id="
     }).join("");
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-    // 13. ลิงก์ Footer
-    if (popularLocationsFooter) {
-      finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-gray);">${popularLocationsFooter}</ul>`);
-    }
+    if (popularLocationsFooter) { finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); }
 
-    // 14. Serialization SSR Data สำหรับ Client
-    const serializedProfilesJson = JSON.stringify(profilesList.map(p => ({
-      id: p.id,
-      slug: p.slug || p.id,
-      name: p.name,
-      age: p.age,
-      height: p.height || "",
-      weight: p.weight || "",
-      stats: p.stats || "",
-      skinTone: p.skinTone || "",
-      bust: p.bust || "",
-      waist: p.waist || "",
-      hips: p.hips || "",
-      cup_size: p.cup_size || "",
-      imagePath: p.imagePath || p.image_url || "",
-      galleryPaths: p.galleryPaths || [],
-      provinceKey: (p.provinceKey || "chiangmai").toLowerCase(),
-      provinceThai: p.provinceThai || provinceNameThai,
-      location: sanitizeThaiText(p.location || provinceNameThai),
-      rate: p.rate,
-      availability: p.availability,
-      lastUpdated: p.lastUpdated,
-      isfeatured: p.isfeatured,
-      verified: p.verified || p.isVerified,
-      hasVideo: p.hasVideo || false,
-      description: sanitizeThaiText(p.description) || "",
-      lineId: (p.lineId || "").replace(/^@/, "").trim(),
-      quote: sanitizeThaiText(p.quote || "") || "",
-      styleTags: p.styleTags || []
-    }))).replace(/</g, "\\u003c");
+    // 14. Serialization SSR Data
+    const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
+      const pKey = (p.provinceKey || p.province_slug || "chiangmai").toLowerCase();
+      const realProvinceThai = PROVINCE_SEO_DATA[pKey]?.name || p.provinceThai || (isNational ? "เชียงใหม่" : provinceNameThai);
+
+      return {
+        id: p.id,
+        slug: p.slug || p.id,
+        name: p.name,
+        age: p.age,
+        height: p.height || "",
+        weight: p.weight || "",
+        stats: p.stats || "",
+        skinTone: p.skinTone || "",
+        bust: p.bust || "",
+        waist: p.waist || "",
+        hips: p.hips || "",
+        cup_size: p.cup_size || "",
+        imagePath: p.imagePath || p.image_url || "",
+        galleryPaths: p.galleryPaths || [],
+        provinceKey: pKey,
+        provinceThai: realProvinceThai,
+        location: sanitizeThaiText(p.location || realProvinceThai),
+        rate: p.rate,
+        availability: p.availability,
+        lastUpdated: p.lastUpdated,
+        isfeatured: p.isfeatured,
+        verified: p.verified || p.isVerified,
+        hasVideo: p.hasVideo || false,
+        description: sanitizeThaiText(p.description) || "",
+        lineId: (p.lineId || "").replace(/^@/, "").trim(),
+        quote: sanitizeThaiText(p.quote || "") || "",
+        styleTags: p.styleTags || []
+      };
+    })).replace(/</g, "\\u003c");
 
     const serializedProvinces = (allProvincesRes?.data || []).map(p => ({
       key: (p.key || p.slug || p.id || "").toString().toLowerCase(),

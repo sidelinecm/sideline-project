@@ -390,6 +390,8 @@ const schemaGraph = {
     <title>${escapeHTML(pageTitle)} | ${CONFIG.BRAND_NAME}</title>
     <meta name="description" content="${escapeHTML(metaDescription)}">
     <link rel="canonical" href="${canonicalUrl}">
+    <link rel="alternate" hreflang="th" href="${canonicalUrl}">
+    <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
