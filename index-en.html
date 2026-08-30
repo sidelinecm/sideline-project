@@ -47,27 +47,27 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- ⚡ 1. PRECONNECT & DNS-PREFETCH (ปรับแต่งเพื่อความเร็วสูงสุดบนเครือข่ายมือถือ) -->
+  <!-- ⚡ 1. SPEED OPTIMIZATION -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
   <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
-  <!-- ⚡ 2. STYLESHEET (โหลดตรงทันที ไม่ต้อง preload ซ้ำซ้อน) -->
+  <!-- ⚡ 2. MAIN STYLESHEET -->
   <link rel="stylesheet" href="/styles.css">
 
-  <!-- ⚡ 3. PRELOAD FONTS -->
+  <!-- ⚡ 3. PRELOAD CRITICAL FONTS -->
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
   <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
   <!-- ⚡ 4. NON-BLOCKING ASYNC ICONS -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
-  <!-- ⚡ 5. MODULE PRELOAD (ซิงค์เวอร์ชัน 2.2 ตรงกับท้าย body 100%) -->
+  <!-- ⚡ 5. MODULE PRELOAD -->
   <link rel="modulepreload" href="/main.js?v=2.2">
 
-  <!-- 📊 SCHEMA.ORG DYNAMIC CONTAINER -->
+  <!-- 📊 SCHEMA.ORG DYNAMIC CONTAINER (ENGLISH GRAPH) -->
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -76,23 +76,59 @@
         "@type": "Organization",
         "@id": "https://firstmodelhub.com/#organization",
         "name": "FirstModelHub",
+        "legalName": "FirstModelHub Co., Ltd.",
         "url": "https://firstmodelhub.com",
-        "logo": "https://firstmodelhub.com/images/firstmodelhub.webp",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://firstmodelhub.com/images/firstmodelhub.webp"
+        },
+        "description": "Premier verified travel companions and VIP escorts across Thailand. 100% verified real photos, pay on arrival with zero advance deposit.",
         "sameAs": [
           "https://line.me/ti/p/ksLUWB89Y_",
-          "https://twitter.com/sidelinechiangmai",
           "https://tiktok.com/@sidelinecm",
+          "https://twitter.com/sidelinechiangmai",
+          "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
+          "https://bio.site/firstfiwfans.com",
+          "https://linktr.ee/kissmodel",
           "https://bsky.app/profile/sidelinechiangmai.bsky.social"
-        ]
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "telephone": "+66926997044",
+          "availableLanguage": ["en", "th"]
+        }
       },
       {
         "@type": "WebSite",
         "@id": "https://firstmodelhub.com/index-en#website",
         "url": "https://firstmodelhub.com/index-en",
         "name": "FirstModelHub Thailand",
-        "description": "Premier verified travel companions and VIP escorts across Thailand. 100% verified real photos, pay on arrival.",
+        "description": "Premier verified travel companions and VIP escorts in Thailand.",
         "inLanguage": "en-US",
         "publisher": { "@id": "https://firstmodelhub.com/#organization" }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://firstmodelhub.com/index-en#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Do I need to pay any advance deposit before meeting?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No advance deposit is required under any circumstances. You only pay in person upon meeting your companion and verifying 100% photo accuracy."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can the models communicate in English?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, our English-listed companions are friendly and communicative, and our 24/7 concierge team speaks fluent English to assist your booking smoothly."
+            }
+          }
+        ]
       }
     ]
   }
@@ -183,84 +219,74 @@
 <main id="main-content" tabindex="-1">
   <div class="container">
 
-    <!-- ==============================================================================
-         🌟 1. HERO & HOT SWIPER SECTION
-         ============================================================================== -->
+    <!-- 🌟 1. HERO SECTION (MATCHING INDEX.HTML EXACTLY) -->
     <section class="hero-section fmh-hero-surface" aria-labelledby="hero-h1">
       <div class="fmh-hero-ambient" aria-hidden="true">
         <span class="fmh-ambient-orb fmh-ambient-orb-a"></span>
         <span class="fmh-ambient-orb fmh-ambient-orb-b"></span>
-        <span class="fmh-hero-grid"></span>
       </div>
 
-      <div class="fmh-hero-index" aria-hidden="true">
-        <span>FMH / 2026</span>
-        <span>THE PRIVATE EDIT</span>
-      </div>
-      
+      <!-- 💎 VERIFIED BADGE -->
       <div class="clutch-pill-compact">
-        <span class="pill-badge-tag">VERIFIED 2026</span>
+        <span class="pill-badge-tag">VERIFIED</span>
         <div class="stars-mini" aria-hidden="true">
           <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
         </div>
-        <span class="pill-badge-score">5/5 Verified Profiles</span>
+        <span class="pill-badge-score">100% Real Photos</span>
       </div>
 
-      <div class="brand-showcase-wrapper">
-        <span class="brand-neon-text">
-          FirstModel<span class="hub-text-pink">Hub</span>
-        </span>
-        <span class="dancing-neon-star" aria-hidden="true">🌟</span>
-      </div>
-
+      <!-- 🏆 H1 SEO KEYWORDS -->
       <h1 id="hero-h1" class="seo-h1-title">
-        <span class="seo-sub-headline">Thailand Escorts • VIP Travel Companions</span><br>
-        <span class="seo-main-headline">100% Real Photos • Girlfriend Experience</span>
+        <span class="seo-sub-headline">Thailand Escorts • VIP Travel Companions</span>
+        <span class="seo-main-headline">Girlfriend Experience (GFE) • 100% Real Photos</span>
       </h1>
       
-      <div class="hero-guarantee-tag">
-        <i class="fas fa-shield-alt" aria-hidden="true"></i>
-        <span>Maximum Safety: <strong class="kw-green">Pay in person upon arrival • 0% Advance Deposit</strong></span>
+      <!-- 🛡️ TRUST PILL -->
+      <div class="luxury-trust-pill">
+        <span class="trust-pill-badge"><i class="fas fa-shield-alt"></i> Safe Booking</span>
+        <span class="trust-pill-text">Pay in person upon arrival <strong class="kw-green">0% Advance Deposit</strong></span>
       </div>
       
-      <p class="hero-subtitle-p">
-        Thailand's premier verified platform for <strong class="kw-purple">VIP escorts</strong>, <strong class="kw-purple">dinner dates</strong>, and <strong class="kw-purple">travel companions in Thailand</strong>. Guaranteed <span class="kw-green">100% real photos</span> with a strict <strong class="kw-red">zero-deposit policy</strong>. Covering <span class="kw-purple">Bangkok, Chiang Mai, Phuket, Pattaya, and major cities</span>.
+      <!-- 📝 SUBTITLE -->
+      <p id="hero-subtitle" class="hero-subtitle-p">
+        Thailand's premier verified directory for <strong class="kw-purple">VIP escorts</strong>, <strong class="kw-purple">dinner dates</strong>, and <strong class="kw-purple">travel companions</strong>. Guaranteed <span class="kw-green">100% real photos</span>, polite manners, and total financial safety with our strict <strong class="kw-red">zero advance deposit policy</strong>.
       </p>
 
-      <!-- 🌟 สไลด์การ์ด HOT สี่เหลี่ยมทรงสูง 155x225px -->
+      <!-- 📊 3 KPI MICRO-CHIPS -->
+      <div class="hero-stats-chips-row num-en">
+        <span class="stat-micro-chip">
+          <i class="fas fa-users icon-purple"></i>
+          <span><strong id="live-profile-count" class="kw-green">76+</strong> Models</span>
+        </span>
+        <span class="stat-micro-chip">
+          <i class="fas fa-check-circle icon-gold"></i>
+          <span><strong class="kw-gold">100% Verified</strong></span>
+        </span>
+        <span class="stat-micro-chip">
+          <i class="fas fa-shield-alt icon-green"></i>
+          <span class="kw-green">Pay on Arrival</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- 🔥 2. HOT PROFILES SECTION -->
+    <section id="hot-profiles-section" class="clean-section-wrapper" aria-labelledby="hot-profiles-heading">
       <div class="hot-section-header-centered">
-        <h2 class="hot-title-red-pink">Trending HOT 🔥</h2>
-        <div class="hot-sub-line">
-          Featured of the Month <span class="hot-tag-badge-red">#GFE</span>
+        <div class="hot-single-line-header">
+          <h2 id="hot-profiles-heading" class="hot-title-neon">Trending HOT 🔥</h2>
+          <span class="hot-badge-pill">Monthly Featured #GFE</span>
         </div>
         <div class="hot-swipe-hint-centered">
           <i class="fas fa-chevron-left"></i> Swipe left-right to explore <i class="fas fa-chevron-right"></i>
         </div>
       </div>
 
+      <!-- Container for JS HOT Swiper -->
       <div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="Trending Recommended Models"></div>
-
-      <!-- 🌟 กล่อง HUD 3 กล่องสถิติสไตล์ Bento -->
-      <div class="hero-stats-chips-row num-en">
-        <span class="stat-micro-chip">
-          <i class="fas fa-users icon-purple" aria-hidden="true"></i>
-          <span><strong id="live-profile-count" class="kw-green">100+</strong> Models Available</span>
-        </span>
-        <span class="stat-micro-chip">
-          <i class="fas fa-check-circle icon-gold" aria-hidden="true"></i>
-          <span>Guaranteed <strong class="kw-gold">100% Real Photos</strong></span>
-        </span>
-        <span class="stat-micro-chip">
-          <i class="fas fa-shield-alt icon-green" aria-hidden="true"></i>
-          <span class="kw-green">Pay on Arrival 100%</span>
-        </span>
-      </div>
     </section>
-
-    <!-- ==============================================================================
-         ⭐ 2. FEATURED VIP PROFILES SECTION
-         ============================================================================== -->
-    <section id="featured-profiles" class="clean-section-wrapper">
+    
+    <!-- ⭐ 3. FEATURED PROFILES -->
+    <section id="featured-profiles" class="clean-section-wrapper" aria-labelledby="featured-heading">
       <div class="clean-section-header">
         <span class="section-tag-mini"><i class="fas fa-crown"></i> VIP SELECTION</span>
         <h2 id="featured-heading" class="clean-section-h2">
@@ -268,24 +294,19 @@
         </h2>
         <span class="text-gradient-sub">Hand-picked premium selection • Verified photos • Romantic Girlfriend Experience</span>
       </div>
-
-      <div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading"></div>
+      <div id="featured-profiles-container" class="profile-grid" aria-labelledby="featured-heading"></div>
     </section>
 
-    <!-- ==============================================================================
-         📍 3. PROVINCE PROFILES DISPLAY AREA
-         ============================================================================== -->
+    <!-- 📍 4. PROVINCE DISPLAY AREA -->
     <div id="profiles-display-area" role="region" aria-label="Companion profiles in Thailand"></div>
 
-    <!-- ==============================================================================
-         💎 4. LUXURY TRUST & BOOKING CONCIERGE (COMPACT BENTO)
-         ============================================================================== -->
+    <!-- 💎 5. LUXURY TRUST & BOOKING CONCIERGE -->
     <section class="concierge-luxury-section" aria-label="Safety protocol and booking guide">
       <div class="luxury-bento-wrapper">
 
         <div class="bento-header-center">
           <span class="bento-tag-pill"><i class="fas fa-sparkles"></i> HOW IT WORKS</span>
-          <h2 class="bento-headline">
+          <h2 id="bento-headline" class="bento-headline">
             3 Simple Steps to Book a Companion in <span class="kw-purple">Thailand</span>
           </h2>
           <p class="bento-sub-desc">Fast, secure, and 100% confidential booking protocol</p>
@@ -355,30 +376,83 @@
         </div>
 
         <!-- 💬 SEO INTRO CONTAINER -->
-        <div id="seo-drawer-wrapper" class="seo-drawer-wrapper" style="margin: 20px 0; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px;">
-          <div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">
+        <div id="seo-drawer-wrapper" class="seo-drawer-wrapper">
+          <div class="seo-content-inner">
             <p>Welcome to <strong>FirstModelHub</strong>, Thailand's leading verified platform for VIP travel companions, dinner escorts, and Girlfriend Experience (GFE) services in Thailand. We offer a curated collection of verified models with guaranteed transparency, polite manners, and a strict zero-advance-deposit policy.</p>
             <p>Our companions are readily available across key destinations in Thailand, covering popular zones such as Bangkok, Chiang Mai, Phuket, Pattaya, and Koh Samui. Whether you require an elegant partner for dining, sightseeing, private parties, or relaxing companionship at your hotel, our verified members ensure safety, punctuality, and complete peace of mind.</p>
             <p>Every profile undergoes rigorous verification to guarantee 100% real photos. Experience authentic companionship with direct on-site payment upon arrival.</p>
           </div>
         </div>
 
-        <!-- รีวิวจากผู้ใช้จริงในพื้นที่ -->
-        <div id="reviews-wrapper-block" style="margin: 20px 0;">
-          <h3 style="color: #FFF; font-size: 14px; font-weight: 800; margin-bottom: 12px; text-align: center;">
+        <!-- ⭐ REVIEWS (PRE-RENDERED & BEAUTIFULLY POPULATED) -->
+        <div id="reviews-wrapper-block">
+          <h3 class="section-title-mini">
             ⭐ Verified Client Reviews (Thailand)
           </h3>
-          <div id="reviews-container-grid" class="reviews-grid-wrapper" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;"></div>
+          <div id="reviews-container-grid" class="reviews-grid-wrapper">
+            <div class="review-card-item">
+              <div class="review-card-header">
+                <div class="review-user-info">
+                  <div class="review-avatar-circle">M</div>
+                  <div>
+                    <div class="review-username">Michael S. (UK)</div>
+                    <div class="review-user-loc">Met in Nimman, Chiang Mai</div>
+                  </div>
+                </div>
+                <div class="review-stars-list">
+                  <i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i>
+                </div>
+              </div>
+              <p class="review-comment-body">"100% matched her photos! Very polite, great English communication, and zero deposit required. Highly recommended for travelers in Thailand."</p>
+              <span class="review-verified-badge"><i class="fas fa-check-circle"></i> Verified Booking • Last week</span>
+            </div>
+
+            <div class="review-card-item">
+              <div class="review-card-header">
+                <div class="review-user-info">
+                  <div class="review-avatar-circle">D</div>
+                  <div>
+                    <div class="review-username">David K. (Australia)</div>
+                    <div class="review-user-loc">Met in Bangkok Hotel</div>
+                  </div>
+                </div>
+                <div class="review-stars-list">
+                  <i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i><i class="fas fa-star" style="color: #FBBF24;"></i>
+                </div>
+              </div>
+              <p class="review-comment-body">"Amazing girlfriend experience. Punctual, sweet, and made my holiday in Thailand unforgettable. Paying in person gave me total peace of mind."</p>
+              <span class="review-verified-badge"><i class="fas fa-check-circle"></i> Verified Booking • 2 weeks ago</span>
+            </div>
+          </div>
         </div>
 
-        <!-- คำถามที่พบบ่อยประจำพื้นที่ (FAQ) -->
-        <div id="faq-wrapper-block" style="margin: 20px 0; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px;">
-          <h3 style="color: #C084FC; font-size: 14px; font-weight: 800; margin-bottom: 12px; text-align: center;">
+        <!-- ❓ FAQ (PRE-RENDERED & BEAUTIFULLY POPULATED) -->
+        <div id="faq-wrapper-block">
+          <h3 class="section-title-mini" style="color: #C084FC;">
             ❓ Frequently Asked Questions (FAQ Thailand)
           </h3>
-          <div id="faq-container-list" class="faq-list-wrapper" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          <div id="faq-container-list" class="faq-list-wrapper">
+            <div class="faq-item-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px;">
+              <div style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">
+                Q: Do I need to pay any advance deposit before meeting?
+              </div>
+              <div style="font-size: 12px; color: var(--text-gray); line-height: 1.5;">
+                No advance deposit is required. You only pay in person upon meeting your companion and verifying photo accuracy 100%.
+              </div>
+            </div>
+
+            <div class="faq-item-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px;">
+              <div style="font-size: 13px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">
+                Q: Can the models communicate in English?
+              </div>
+              <div style="font-size: 12px; color: var(--text-gray); line-height: 1.5;">
+                Yes, models listed on our English platform are communicative, friendly, and our concierge team speaks fluent English to assist your booking 24/7.
+              </div>
+            </div>
+          </div>
         </div>
 
+        <!-- 🛎️ CONCIERGE BAR -->
         <div class="live-concierge-bar">
           <div class="concierge-left-meta">
             <div class="concierge-status-badge">
@@ -408,9 +482,7 @@
       </div>
     </section>
 
-    <!-- ==============================================================================
-         🏆 5. EDITORIAL TRUST & AUTHENTICITY SEAL
-         ============================================================================== -->
+    <!-- 🏆 6. AUTHENTICITY SEAL -->
     <section id="verification-process" class="verification-section" aria-labelledby="verification-heading">
       <div class="verification-box">
         <i class="fas fa-award icon-purple" style="font-size: 26px; flex-shrink: 0;"></i>
@@ -420,28 +492,17 @@
       </div>
     </section>
 
-    <!-- ==============================================================================
-         🗺️ 6. GOOGLE MAP COVERAGE
-         ============================================================================== -->
-    <!-- 🗺️ 6. MAP -->
-<section id="map-section" aria-label="แผนที่พื้นที่ให้บริการ">
-  <figure id="map-container">
-    <iframe
-      id="google-map"
-      src="{{MAP_EMBED_URL}}"
-      title="แผนที่พื้นที่ให้บริการ First Model Hub"
-      loading="lazy"
-      allowfullscreen
-    ></iframe>
-  </figure>
-</section>
+    <!-- 🗺️ 7. MAP -->
+    <section id="map-section" aria-label="Map of service areas">
+      <figure id="map-container" style="width: 100%; height: 180px; margin: 0;">
+        <iframe id="google-map" src="https://maps.google.com/maps?q=Thailand&t=&z=6&ie=UTF8&iwloc=&output=embed" title="Service Map First Model Hub" loading="lazy" allowfullscreen style="width: 100%; height: 100%; border: 0;"></iframe>
+      </figure>
+    </section>
 
   </div>
 </main>
 
-<!-- ==============================================================================
-     🔍 7. SEARCH BOTTOM SHEET DRAWER
-     ============================================================================== -->
+<!-- 🔍 8. SEARCH BOTTOM SHEET -->
 <div id="search-drawer-overlay" class="drawer-backdrop"></div>
 
 <div id="search-bottom-sheet" class="search-bottom-sheet" role="dialog" aria-modal="true" aria-label="Smart Search & Filter">
@@ -510,9 +571,7 @@
   </div>
 </div>
 
-<!-- ==============================================================================
-     📌 8. FOOTER
-     ============================================================================== -->
+<!-- 🦶 9. FOOTER -->
 <footer role="contentinfo" class="fmh-footer">
   <div class="container">
     <div class="footer-top-grid">
@@ -551,13 +610,13 @@
             <a href="https://bio.site/firstfiwfans.com" target="_blank" rel="noopener nofollow" class="social-btn biosite" title="Bio.site" aria-label="Bio.site">
               <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             </a>
-           <!-- 🌲 Linktree -->
+            <!-- 🌲 Linktree -->
             <a href="https://linktr.ee/kissmodel" target="_blank" rel="noopener nofollow" class="social-btn linktree" title="Linktree" aria-label="Linktree">
               <svg viewBox="0 0 24 24"><path d="M13.736 5.853l4.005-4.117 2.325 2.38-4.2 4.317h5.924v3.307h-5.924l4.2 4.318-2.325 2.38-4.005-4.118v9.577h-3.472v-9.577l-4.005 4.118-2.325-2.38 4.2-4.318h-5.924v-3.307h5.924l-4.2-4.317 2.325-2.38 4.005 4.117v-5.853h3.472v5.853z"/></svg>
             </a>
           </div>
         </div>
-      </div> <!-- เติมปิด </div> ของ footer-brand-col ตรงนี้ -->
+      </div>
 
       <nav class="footer-nav-col" aria-label="Footer Navigation">
         <h3 class="footer-heading">Main Menu</h3>
@@ -580,7 +639,7 @@
       <ul id="popular-locations-footer" class="popular-locations-grid"></ul>
     </div>
 
-    <!-- ลิขสิทธิ์ล่างสุด -->
+    <!-- Bottom Copyright -->
     <div class="footer-bottom-bar">
       <p>© 2026 FirstModelHub Thailand. All Rights Reserved.</p>
       <div class="footer-legal-links">
@@ -591,9 +650,7 @@
   </div>
 </footer>
 
-<!-- ==============================================================================
-     🖼️ 9. LIGHTBOX MODAL
-     ============================================================================== -->
+<!-- 🖼️ 10. LIGHTBOX MODAL -->
 <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-profile-name-main" style="display: none;">
   <div id="lightbox-content-wrapper-el">
     <div class="lightbox-top-brand">

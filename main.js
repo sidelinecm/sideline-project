@@ -805,17 +805,18 @@ function createProfileCardDOM(p, index = 20) {
     .map(t => {
       if (!isEN) return t;
       const tagMap = {
-        "น่ารัก": "Cute",
-        "ผิวขาว": "Fair",
-        "ตัวเล็ก": "Petite",
-        "ฟิวแฟน": "GFE",
-        "ฟิลแฟน": "GFE",
-        "เอาใจเก่ง": "Caring",
-        "คุยสนุก": "Friendly",
-        "สายฝอ": "Exotic",
-        "อวบ": "Curvy",
-        "ไม่เร่งรีบ": "Relaxed"
-      };
+  "ตรงปก": "Verified",
+  "น่ารัก": "Cute",
+  "ผิวขาว": "Fair",
+  "ตัวเล็ก": "Petite",
+  "ฟิวแฟน": "GFE",
+  "ฟิลแฟน": "GFE",
+  "เอาใจเก่ง": "Caring",
+  "คุยสนุก": "Friendly",
+  "สายฝอ": "Exotic",
+  "อวบ": "Curvy",
+  "ไม่เร่งรีบ": "Relaxed"
+};
       return tagMap[t] || t;
     });
 
