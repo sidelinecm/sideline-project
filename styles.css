@@ -373,11 +373,11 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 /* ==============================================================================
-   6. HERO SECTION (ระยะพอดีหน้าจอ ไม่โดนเมนูล่างบัง)
+   6. HERO SECTION (FORCED SINGLE-ROW HORIZONTAL FIX)
    ============================================================================== */
 #main-content { 
   padding-top: 68px !important; 
-  padding-bottom: 110px !important; /* เว้นที่ให้แถบลอยข้างล่าง */
+  padding-bottom: 110px !important;
 }
 
 .hero-section.fmh-hero-surface { 
@@ -397,8 +397,41 @@ footer.fmh-footer .brand-logo-text *,
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
 }
 
+.fmh-hero-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fmh-ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(65px);
+  opacity: 0.24;
+}
+
+.fmh-ambient-orb-a {
+  width: 240px;
+  height: 240px;
+  background: #7C3AED;
+  top: -40px;
+  left: 10%;
+}
+
+.fmh-ambient-orb-b {
+  width: 220px;
+  height: 220px;
+  background: #FF1493;
+  top: 40px;
+  right: 10%;
+}
+
+/* 🟢 1. ป้าย VERIFIED แคปซูลแนวนอน แถวเดียว */
 .clutch-pill-compact {
   display: inline-flex !important; 
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center !important; 
   justify-content: center !important; 
   gap: 6px !important;
@@ -406,14 +439,42 @@ footer.fmh-footer .brand-logo-text *,
   border-radius: 100px !important; 
   background: rgba(124, 58, 237, 0.15) !important;
   border: 1px solid rgba(192, 132, 252, 0.35) !important;
-  margin-bottom: 4px !important; 
+  margin: 0 auto 4px auto !important; 
   position: relative; 
   z-index: 2;
+  white-space: nowrap !important;
+  width: fit-content !important;
 }
-.pill-badge-tag { background: #7C3AED !important; color: #FFF !important; font-size: 8.5px !important; font-weight: 900 !important; padding: 1.5px 5px !important; border-radius: 4px !important; line-height: 1 !important; }
-.stars-mini { display: flex !important; gap: 1.5px !important; color: #FBBF24 !important; font-size: 8px !important; }
-.pill-badge-score { font-size: 9.5px !important; font-weight: 700 !important; color: #E2E8F0 !important; white-space: nowrap !important; }
 
+.pill-badge-tag { 
+  background: #7C3AED !important; 
+  color: #FFFFFF !important; 
+  font-size: 8.5px !important; 
+  font-weight: 900 !important; 
+  padding: 1.5px 5px !important; 
+  border-radius: 4px !important; 
+  line-height: 1 !important; 
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+}
+
+.stars-mini { 
+  display: inline-flex !important; 
+  align-items: center !important;
+  gap: 1.5px !important; 
+  color: #FBBF24 !important; 
+  font-size: 8px !important; 
+  flex-shrink: 0 !important;
+}
+
+.pill-badge-score { 
+  font-size: 9.5px !important; 
+  font-weight: 700 !important; 
+  color: #E2E8F0 !important; 
+  white-space: nowrap !important; 
+}
+
+/* 🟢 2. H1 แนวนอนคมชัด */
 .seo-h1-title { 
   display: flex !important;
   flex-direction: column !important;
@@ -424,6 +485,7 @@ footer.fmh-footer .brand-logo-text *,
   z-index: 2; 
   text-align: center !important;
 }
+
 .seo-sub-headline { 
   font-size: clamp(12px, 3.4vw, 15px) !important; 
   font-weight: 700 !important; 
@@ -431,6 +493,7 @@ footer.fmh-footer .brand-logo-text *,
   letter-spacing: 0.5px !important;
   white-space: nowrap !important;
 }
+
 .seo-main-headline { 
   font-size: clamp(18px, 5.2vw, 26px) !important; 
   font-weight: 900 !important; 
@@ -442,21 +505,27 @@ footer.fmh-footer .brand-logo-text *,
   white-space: nowrap !important;
 }
 
+/* 🟢 3. ป้ายความปลอดภัยสีเขียว แนวนอน แถวเดียว */
 .luxury-trust-pill { 
   display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
   background: rgba(13, 9, 26, 0.85) !important;
-  border: 1px solid rgba(0, 230, 118, 0.35) !important;
+  border: 1px solid rgba(0, 230, 118, 0.4) !important;
   border-radius: 100px !important;
   padding: 3px 10px 3px 4px !important;
   margin: 4px auto 6px auto !important;
   position: relative; 
   z-index: 2;
   white-space: nowrap !important;
+  width: fit-content !important;
+  max-width: 100% !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important;
 }
+
 .trust-pill-badge {
   background: linear-gradient(135deg, #00E676 0%, #00B050 100%) !important;
   color: #000000 !important;
@@ -468,14 +537,20 @@ footer.fmh-footer .brand-logo-text *,
   align-items: center !important;
   gap: 3px !important;
   line-height: 1 !important;
+  flex-shrink: 0 !important;
 }
+
 .trust-pill-text {
-  font-size: clamp(9.5px, 2.7vw, 11.5px) !important;
+  font-size: clamp(9.5px, 2.7vw, 11px) !important;
   color: #CBD5E1 !important;
   font-weight: 600 !important;
   white-space: nowrap !important;
 }
-.trust-pill-text strong { color: #00E676 !important; font-weight: 800 !important; }
+
+.trust-pill-text strong { 
+  color: #00E676 !important; 
+  font-weight: 800 !important; 
+}
 
 .hero-subtitle-p { 
   font-size: 11px !important; 
@@ -492,37 +567,47 @@ footer.fmh-footer .brand-logo-text *,
   z-index: 2; 
 }
 
+/* 🟢 4. สถิติ 3 ช่อง แนวนอน แถวเดียวเป๊ะ ไม่ตกเป็น 2 แถว */
 .hero-stats-chips-row { 
-  display: flex !important; 
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center !important; 
-  justify-content: center !important; 
-  gap: 6px !important; 
-  flex-wrap: nowrap !important; 
+  justify-content: space-between !important; 
+  gap: 5px !important; 
+  width: 100% !important;
+  max-width: 360px !important;
   margin: 6px auto 2px auto !important; 
   position: relative; 
   z-index: 2; 
-  width: 100% !important;
 }
+
 .stat-micro-chip { 
-  background: rgba(14, 10, 26, 0.85) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.22) !important; 
+  flex: 1 1 0% !important;
+  background: rgba(14, 10, 26, 0.88) !important; 
+  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
   border-radius: 100px !important; 
-  padding: 4px 6px !important; 
-  font-size: clamp(9px, 2.5vw, 10.5px) !important; 
+  padding: 5px 2px !important; 
+  font-size: clamp(8.5px, 2.4vw, 10px) !important; 
   font-weight: 700 !important; 
   color: #E2E8F0 !important; 
   display: inline-flex !important; 
   align-items: center !important; 
   justify-content: center !important;
-  gap: 4px !important; 
+  gap: 3px !important; 
   white-space: nowrap !important;
-  flex: 1 1 0 !important;
-  max-width: 120px !important;
+  min-width: 0 !important;
 }
 
-/* ==============================================================================
-   6. HERO SECTION
-   ============================================================================== */
+.stat-micro-chip i {
+  font-size: 9px !important;
+  flex-shrink: 0 !important;
+}
+
+.stat-micro-chip span {
+  white-space: nowrap !important;
+}
+
 #main-content { 
   padding-top: 78px !important; 
 }
