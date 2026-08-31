@@ -79,7 +79,7 @@ function sanitizeThaiText(text) {
     .replace(/ของแก่น/g, "ขอนแก่น")
     .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
-    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
+    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ") // 🟢 ตัดคำซ้ำที่ติดกันออก
     .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
     .replace(/ฟรีถุงยาง!/gi, "")
     .replace(/\s+/g, " ")
@@ -246,14 +246,16 @@ export default async (req, context) => {
     const heroImageSmall = optimizeImg(rawImage, 400, 533);
     const heroSrcSet = generateSrcSet(rawImage);
 
-    // 🟢 สกัด URL ไลน์อย่างแม่นยำ
+    // 🟢 1. สกัด URL ไลน์อย่างแม่นยำ (รองรับทั้ง URL ล้วน, URL ปนข้อความ, หรือ LINE ID ธรรมดา)
     const rawLineInput = (profile.line_id || profile.lineId || profile.line || "").trim();
-    let lineId = "https://line.me/ti/p/ksLUWB89Y_";
+    let lineId = "https://line.me/ti/p/ksLUWB89Y_"; // Fallback ปลอดภัย
 
     const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
     if (matchUrl) {
+      // ถ้ามี URL ไม่ว่าจะอยู่หน้า กลาง หรือหลัง ให้ดึงเฉพาะ URL มาใช้ 100%
       lineId = matchUrl[0];
     } else if (rawLineInput) {
+      // ถ้าเป็น LINE ID ให้ตัดอักขระพิเศษและตัวหนังสือไทยออก
       const cleanHandle = rawLineInput.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
       if (cleanHandle) {
         lineId = `https://line.me/ti/p/${cleanHandle}`;
@@ -274,12 +276,11 @@ export default async (req, context) => {
 
     const localizedZone = getLocalizedZone(profile.location, provinceNameThai);
     const naturalDesc = getNaturalDescription(profile, displayName, age, stats, height, weight, localizedZone, priceDisplay);
-    
-    // 🌟 Title & Description สูตร Tier S เฉพาะตัว
-    const pageTitle = `${displayName} ไซด์ไลน์${provinceNameThai} • เพื่อนเที่ยวฟิวแฟน ตรงปก 100% จ่ายหน้างาน`;
-    const metaDescription = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น ตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำล่วงหน้าทุกกรณี`;
+    const pageTitle = `${displayName} ไซด์ไลน์${provinceNameThai} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก 100%`;
+    const metaDescription = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
+    // สร้างรีวิวพร้อม datePublished ตามเกณฑ์ Google Search Console
     const now = Date.now();
     const reviewsList = getDeterministicReviews(rawSlug, 3);
     const reviewsSchema = reviewsList.map((r, i) => ({
@@ -298,102 +299,102 @@ export default async (req, context) => {
       "reviewBody": stripHTML(r.text)
     }));
 
-    // 🌟 Schema.org Graph ผ่าน Rich Results Test 100%
-    const schemaGraph = {
-      "@context": "https://schema.org/",
-      "@graph": [
+// 🟢 [แก้ไขให้ผ่าน Google Rich Results Test 100%]
+const schemaGraph = {
+  "@context": "https://schema.org/",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${canonicalUrl}#person`,
+      "name": displayName,
+      "gender": "Female",
+      "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
+      "description": stripHTML(naturalDesc),
+      "image": heroImageLarge,
+      "url": canonicalUrl,
+      "height": `${height} cm`,
+      "weight": `${weight} kg`,
+      "knowsAbout": ["Girlfriend Experience (GFE)", "เพื่อนเที่ยวฟิวแฟน", `สาวรับงาน${provinceNameThai}`, `ไซด์ไลน์${provinceNameThai}`],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": profile.location || provinceNameThai,
+        "addressRegion": provinceNameThai,
+        "addressCountry": "TH"
+      }
+    },
+    {
+      "@type": "Product", /* 🌟 เปลี่ยนจาก Service เป็น Product เพื่อให้ Google รองรับ Review Snippet 100% */
+      "@id": `${canonicalUrl}#service`,
+      "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน - ${displayName}`,
+      "image": heroImageLarge,
+      "description": stripHTML(metaDescription),
+      "brand": {
+        "@type": "Brand",
+        "name": CONFIG.BRAND_NAME
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.0",
+        "reviewCount": reviewsList.length.toString(),
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": reviewsSchema,
+      "offers": {
+        "@type": "Offer",
+        "url": canonicalUrl,
+        "price": rateNumber,
+        "priceCurrency": "THB",
+        "priceValidUntil": "2027-12-31",
+        "availability": "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition",
+        "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
+        { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": provinceHubUrl },
+        { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${canonicalUrl}#faq`,
+      "mainEntity": [
         {
-          "@type": "Person",
-          "@id": `${canonicalUrl}#person`,
-          "name": displayName,
-          "gender": "Female",
-          "jobTitle": "ผู้ให้บริการเพื่อนเที่ยวและดูแลสไตล์ฟิวแฟน",
-          "description": stripHTML(naturalDesc),
-          "image": heroImageLarge,
-          "url": canonicalUrl,
-          "height": `${height} cm`,
-          "weight": `${weight} kg`,
-          "knowsAbout": ["Girlfriend Experience (GFE)", "เพื่อนเที่ยวฟิวแฟน", `สาวรับงาน${provinceNameThai}`, `ไซด์ไลน์${provinceNameThai}`],
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": profile.location || provinceNameThai,
-            "addressRegion": provinceNameThai,
-            "addressCountry": "TH"
+          "@type": "Question",
+          "name": `${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `${displayName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
           }
         },
         {
-          "@type": "Product",
-          "@id": `${canonicalUrl}#service`,
-          "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน - ${displayName}`,
-          "image": heroImageLarge,
-          "description": stripHTML(metaDescription),
-          "brand": {
-            "@type": "Brand",
-            "name": CONFIG.BRAND_NAME
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "reviewCount": reviewsList.length.toString(),
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "review": reviewsSchema,
-          "offers": {
-            "@type": "Offer",
-            "url": canonicalUrl,
-            "price": rateNumber,
-            "priceCurrency": "THB",
-            "priceValidUntil": "2027-12-31",
-            "availability": "https://schema.org/InStock",
-            "itemCondition": "https://schema.org/NewCondition",
-            "description": "นัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี"
+          "@type": "Question",
+          "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
           }
         },
         {
-          "@type": "BreadcrumbList",
-          "@id": `${canonicalUrl}#breadcrumb`,
-          "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": CONFIG.DOMAIN },
-            { "@type": "ListItem", "position": 2, "name": `สาวรับงาน${provinceNameThai}`, "item": provinceHubUrl },
-            { "@type": "ListItem", "position": 3, "name": displayName, "item": canonicalUrl }
-          ]
-        },
-        {
-          "@type": "FAQPage",
-          "@id": `${canonicalUrl}#faq`,
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": `${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `${displayName} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${localizedZone} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": `อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ`
-              }
-            },
-            {
-              "@type": "Question",
-              "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?`,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ"
-              }
-            }
-          ]
+          "@type": "Question",
+          "name": `สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ"
+          }
         }
       ]
-    };
+    }
+  ]
+};
 
     const htmlResponse = `<!DOCTYPE html>
-<html lang="th" class="dark-theme dark">
+<html lang="th" class="light-theme">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -408,7 +409,7 @@ export default async (req, context) => {
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link rel="preload" as="image" href="${heroImageSmall}" ${heroSrcSet ? `imagesrcset="${heroSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ""} fetchpriority="high">
-    <meta name="theme-color" content="#060411">
+    <meta name="theme-color" content="#F6F3FA">
     
     <!-- 🌐 Open Graph & Social Cards -->
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
@@ -471,11 +472,11 @@ export default async (req, context) => {
             <article class="interactive-card" style="padding: 1.25rem; border-radius: 20px; background: rgba(9, 9, 12, 0.95); border: 1px solid rgba(192, 132, 252, 0.2);">
                 <section class="hero-section">
                     <div style="position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 3/4; width: 100%;">
-                        <img src="${heroImageSmall}" 
+                       <img src="${heroImageSmall}" 
                              ${heroSrcSet ? `srcset="${heroSrcSet}" sizes="(max-width: 600px) 100vw, 400px"` : ""}
                              class="hero-img" alt="${escapeHTML(displayName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" 
                              loading="eager" fetchpriority="high" decoding="sync" 
-                             width="400" height="533" style="width: 100%; height: 100%; object-fit: cover;">
+                             width="400" height="560" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                 </section>
 
@@ -594,7 +595,7 @@ export default async (req, context) => {
                 <a href="/profiles" style="color: var(--text-gray, #e4e4e7); text-decoration: none;">รวมโปรไฟล์</a>
                 <a href="/locations" style="color: var(--text-gray, #e4e4e7); text-decoration: none;">พื้นที่บริการ</a>
             </div>
-            © 2026 ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
+            © ${new Date().getFullYear()} ${CONFIG.BRAND_NAME} - บริการด้วยความจริงใจ
         </footer>
     </div>
 </body>
@@ -603,7 +604,7 @@ export default async (req, context) => {
     return new Response(htmlResponse, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
+"Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "X-XSS-Protection": "1; mode=block",
