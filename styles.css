@@ -18,32 +18,51 @@
 }
 
 /* ==============================================================================
-   2. ROOT VARIABLES & GLOBAL BASE
+   2. ROOT VARIABLES & VIBRANT LUXURY SYSTEM
    ============================================================================== */
 :root {
-  --primary-purple: #C084FC;
-  --secondary-purple: #7C3AED;
-  --accent-pink: #FF1493;
-  --accent-green: #00E676;
-  --accent-red: #FF2E63;
-  --accent-gold: #FBBF24;
-  --body-bg: #000000;
-  --card-bg: rgba(14, 10, 24, 0.85);
-  --text-main: #FFFFFF;
-  --text-gray: #E4E4E7;
-  --text-muted: #94A3B8;
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-purple: rgba(192, 132, 252, 0.28);
+  --bg-pearl: #F6F3FA;
+  --surface-white: #FFFFFF;
+  --surface-subtle: #EFE9F8;
+  --surface-glass: rgba(255, 255, 255, 0.95);
+  
+  --text-main: #0D081B;
+  --text-sub: #362E47;
+  --text-muted: #716486;
+  
+  --crimson-main: #E11D48;
+  --crimson-light: #FFE4E6;
+  --violet-main: #7C3AED;
+  --violet-light: #EDE9FE;
+  --gold-star: #D97706;
+  --emerald-live: #059669;
+  --line-green: #06C755;
+  
+  --border-card: rgba(124, 58, 237, 0.12);
+  --border-hairline: rgba(13, 8, 27, 0.07);
+  --shadow-card-pop: 0 14px 34px -4px rgba(28, 10, 50, 0.1), 0 4px 12px -2px rgba(28, 10, 50, 0.04);
+  --shadow-hover: 0 24px 48px -6px rgba(225, 29, 72, 0.22), 0 8px 18px -2px rgba(124, 58, 237, 0.12);
+  --shadow-dock: 0 16px 45px rgba(13, 8, 27, 0.15);
 
-  /* Modern Design Tokens */
-  --fmh-bg-deep: #07040d;
-  --fmh-surface: #0b0c12;
-  --fmh-surface-glass: rgba(18, 11, 31, 0.75);
-  --fmh-border-glow: rgba(192, 132, 252, 0.25);
-  --fmh-pink-neon: #FF1493;
-  --fmh-purple-neon: #C084FC;
-  --fmh-green-glow: #00E676;
-  --fmh-gold-glow: #FBBF24;
+  --primary-purple: var(--violet-main);
+  --secondary-purple: #6D28D9;
+  --accent-pink: var(--crimson-main);
+  --accent-green: var(--emerald-live);
+  --accent-red: #DC2626;
+  --accent-gold: var(--gold-star);
+  --body-bg: var(--bg-pearl);
+  --card-bg: #FFFFFF;
+  --text-gray: var(--text-sub);
+  --border-light: var(--border-hairline);
+  --border-purple: var(--border-card);
+  --fmh-bg-deep: var(--bg-pearl);
+  --fmh-surface: var(--surface-white);
+  --fmh-surface-glass: var(--surface-glass);
+  --fmh-border-glow: var(--border-card);
+  --fmh-pink-neon: var(--crimson-main);
+  --fmh-purple-neon: var(--violet-main);
+  --fmh-green-glow: var(--emerald-live);
+  --fmh-gold-glow: var(--gold-star);
 }
 
 *, *::before, *::after {
@@ -51,6 +70,8 @@
   margin: 0;
   padding: 0;
 }
+
+.num-en { font-family: 'Outfit', 'Prompt', system-ui, sans-serif; }
 
 html {
   overflow-x: hidden;
@@ -61,13 +82,16 @@ html {
 }
 
 body {
-  background-color: #000000 !important;
-  background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.12) 0%, rgba(5, 3, 10, 1) 45%) fixed !important;
-  color: var(--text-gray);
+  background-color: var(--bg-pearl) !important;
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 100% 50%, rgba(225, 29, 72, 0.05) 0%, transparent 40%),
+    #F6F3FA !important;
+  color: var(--text-main);
   font-family: 'Prompt', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
   line-height: 1.6;
-  padding-bottom: 95px !important;
+  padding-bottom: 110px !important;
 }
 
 img {
@@ -90,54 +114,54 @@ img {
 /* ==============================================================================
    3. COLOR-CODED TYPOGRAPHY & ACCENTS
    ============================================================================== */
-.kw-purple { color: #C084FC !important; font-weight: 800 !important; }
-.kw-green { color: #00E676 !important; font-weight: 800 !important; }
-.kw-red { color: #FF2E63 !important; font-weight: 800 !important; }
-.kw-gold { color: #FBBF24 !important; font-weight: 800 !important; }
+.kw-purple { color: var(--violet-main) !important; font-weight: 800 !important; }
+.kw-green { color: var(--emerald-live) !important; font-weight: 800 !important; }
+.kw-red { color: var(--crimson-main) !important; font-weight: 800 !important; }
+.kw-gold { color: var(--gold-star) !important; font-weight: 800 !important; }
 
-.icon-purple { color: #C084FC !important; }
-.icon-green { color: #00E676 !important; }
-.icon-gold { color: #FBBF24 !important; }
-.icon-pink { color: #FF2E93 !important; }
-.icon-blue { color: #38BDF8 !important; }
-.icon-lightpurple { color: #E9D5FF !important; }
-.icon-red { color: #FF2E63 !important; }
-.icon-gray { color: #94A3B8 !important; }
+.icon-purple { color: var(--violet-main) !important; }
+.icon-green { color: var(--emerald-live) !important; }
+.icon-gold { color: var(--gold-star) !important; }
+.icon-pink { color: var(--crimson-main) !important; }
+.icon-blue { color: #0284C7 !important; }
+.icon-lightpurple { color: #8B5CF6 !important; }
+.icon-red { color: var(--crimson-main) !important; }
+.icon-gray { color: var(--text-muted) !important; }
 
 .text-gradient-main { 
-  background: linear-gradient(135deg, #FFFFFF 30%, #E4E4E7 60%, #C084FC 100%); 
+  background: linear-gradient(135deg, var(--crimson-main) 0%, var(--violet-main) 100%); 
   -webkit-background-clip: text; 
   -webkit-text-fill-color: transparent; 
 }
 .text-gradient-sub { 
   display: block !important; 
-  font-size: clamp(11.5px, 3.2vw, 13px) !important; 
-  font-weight: 500 !important; 
-  color: #CBD5E1 !important; 
+  font-size: clamp(12px, 3.2vw, 13.5px) !important; 
+  font-weight: 600 !important; 
+  color: var(--violet-main) !important; 
   line-height: 1.5 !important; 
 }
 
 /* ==============================================================================
-   4. HEADER & NAVIGATION BAR
+   4. HEADER & LOGO (VIBRANT PINK GRADIENT + GOLD STAR)
    ============================================================================== */
-   
 .brand-logo-text,
 .brand-neon-text,
 #page-header .brand-logo-text,
 .brand-showcase-wrapper .brand-neon-text,
 footer.fmh-footer .brand-logo-text,
 .lightbox-top-brand .brand-logo-text {
+  font-size: 20px !important;
   font-weight: 900 !important;
-  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
+  background: linear-gradient(135deg, #FF1493 0%, #FF69B4 45%, #7C3AED 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
   color: transparent !important;
-  filter: drop-shadow(0 0 10px rgba(255, 20, 147, 0.85)) drop-shadow(0 0 22px rgba(255, 20, 147, 0.45)) !important;
   display: inline-flex !important;
   align-items: center !important;
   letter-spacing: -0.02em !important;
   text-decoration: none !important;
+  filter: drop-shadow(0 2px 8px rgba(255, 20, 147, 0.3)) !important;
 }
 
 .brand-logo-text *,
@@ -149,7 +173,6 @@ footer.fmh-footer .brand-logo-text *,
   background: inherit !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  color: transparent !important;
 }
 
 .brand-logo-text .star,
@@ -157,29 +180,28 @@ footer.fmh-footer .brand-logo-text *,
 .dancing-neon-star {
   -webkit-text-fill-color: initial !important;
   color: #FBBF24 !important;
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.95)) !important;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.85)) !important;
   margin-left: 3px !important;
+  font-size: 13px !important;
   display: inline-block !important;
 }
 
 #page-header {
-  position: fixed !important; 
-  top: 8px !important; 
-  left: 8px !important; 
-  right: 8px !important;
-  height: 52px !important; 
-  padding: 0 14px !important; 
+  position: sticky !important; 
+  top: 0 !important; 
+  left: 0 !important; 
+  right: 0 !important;
+  height: 56px !important; 
+  padding: 0 16px !important; 
   display: flex !important; 
   justify-content: space-between !important;
   align-items: center !important; 
-  z-index: 1000 !important;
-  background: rgba(14, 10, 26, 0.95) !important;
-  backdrop-filter: blur(25px) !important; 
-  -webkit-backdrop-filter: blur(25px) !important;
-  border-radius: 16px !important; 
-  border: 1px solid rgba(192, 132, 252, 0.3) !important;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.9) !important;
-  overflow: hidden !important;
+  z-index: 120 !important;
+  background: var(--surface-glass) !important;
+  backdrop-filter: blur(24px) !important; 
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid var(--border-hairline) !important;
+  box-shadow: 0 4px 20px rgba(13, 8, 27, 0.04) !important;
 }
 
 .header-logo-container {
@@ -203,60 +225,52 @@ footer.fmh-footer .brand-logo-text *,
   display: flex !important; 
   align-items: center !important;
   justify-content: center !important; 
-  border-radius: 12px !important; 
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  background: rgba(255, 255, 255, 0.04) !important; 
-  color: #FFFFFF !important; 
-  font-size: 13px !important; 
+  border-radius: 50% !important; 
+  border: 1px solid var(--border-hairline) !important;
+  background: var(--surface-white) !important; 
+  color: var(--text-main) !important; 
+  font-size: 14px !important; 
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(13, 8, 27, 0.04) !important;
 }
 
 .lang-micro-toggle {
   display: flex !important; 
   align-items: center !important; 
-  gap: 6px !important; 
+  gap: 5px !important; 
   text-decoration: none !important; 
-  color: #FFFFFF !important;
-  background: rgba(255, 255, 255, 0.06) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.4) !important; 
+  color: var(--text-main) !important;
+  background: var(--surface-white) !important; 
+  border: 1px solid var(--border-hairline) !important; 
   padding: 5px 12px !important;
-  border-radius: 30px !important; 
+  border-radius: 100px !important; 
   font-size: 11.5px !important; 
   font-weight: 700 !important; 
-  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 2px 6px rgba(13, 8, 27, 0.03) !important;
   white-space: nowrap !important;
 }
 
 @media (min-width: 1024px) {
-  #page-header { 
-    height: 60px !important; 
-    top: 14px !important; 
-    left: 16px !important; 
-    right: 16px !important; 
-    padding: 0 20px !important; 
-  }
+  #page-header { height: 62px !important; padding: 0 24px !important; }
   .desktop-nav { 
     display: flex !important; 
     align-items: center !important; 
-    gap: 16px !important; 
-    margin-right: 8px; 
+    gap: 20px !important; 
+    margin-right: 12px; 
   }
   .desktop-nav a { 
-    font-size: 13px !important; 
+    font-size: 13.5px !important; 
     font-weight: 700 !important; 
-    color: #A1A1AA !important; 
+    color: var(--text-sub) !important; 
     text-decoration: none !important; 
+    transition: color 0.2s ease;
   }
-  .desktop-nav a:hover {
-    color: #C084FC !important;
-  }
-  .circle-btn-el { 
-    display: none !important; 
-  }
+  .desktop-nav a:hover { color: var(--crimson-main) !important; }
+  .circle-btn-el { display: none !important; }
 }
 
 /* ==============================================================================
-   5. MOBILE SIDEBAR DRAWER (บังคับซ่อนสนิท ไม่ให้โผล่ออกมากอง 100%)
+   5. MOBILE SIDEBAR DRAWER
    ============================================================================== */
 #sidebar-menu {
   position: fixed !important; 
@@ -267,19 +281,18 @@ footer.fmh-footer .brand-logo-text *,
   max-width: 320px !important; 
   min-width: 270px !important; 
   height: 100dvh !important;
-  background: rgba(10, 8, 18, 0.98) !important;
+  background: var(--surface-white) !important;
   backdrop-filter: blur(30px) !important; 
-  -webkit-backdrop-filter: blur(30px) !important;
-  border-left: 1px solid rgba(192, 132, 252, 0.3) !important; 
+  border-left: 1px solid var(--border-hairline) !important; 
   z-index: 3001 !important;
-  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.95) !important;
+  box-shadow: -15px 0 40px rgba(13, 8, 27, 0.1) !important;
   transform: translate3d(100%, 0, 0) !important; 
-  display: none !important; /* 🟢 บังคับซ่อน 100% ตอนไม่ได้กดเปิด */
+  display: none !important;
   flex-direction: column !important;
 }
 
 #sidebar-menu.active { 
-  display: flex !important; /* 🟢 โผล่มาเฉพาะตอนกดปุ่ม 3 ขีด */
+  display: flex !important; 
   transform: translate3d(0, 0, 0) !important; 
   pointer-events: auto !important;
 }
@@ -287,38 +300,27 @@ footer.fmh-footer .brand-logo-text *,
 .drawer-backdrop { 
   position: fixed !important; 
   inset: 0 !important; 
-  background: rgba(0, 0, 0, 0.85) !important; 
-  backdrop-filter: blur(12px) !important; 
-  -webkit-backdrop-filter: blur(12px) !important; 
+  background: rgba(13, 8, 27, 0.45) !important; 
+  backdrop-filter: blur(8px) !important; 
   z-index: 3000 !important; 
   display: none !important; 
   opacity: 0 !important; 
 }
-
-.drawer-backdrop.active { 
-  display: block !important; 
-  opacity: 1 !important; 
-}
+.drawer-backdrop.active { display: block !important; opacity: 1 !important; }
 
 .sidebar-header-div { 
   display: flex !important; 
   align-items: center !important; 
   justify-content: space-between !important; 
   padding: 16px 18px !important; 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; 
+  border-bottom: 1px solid var(--border-hairline) !important; 
 }
 
-.sidebar-title { 
-  color: #A1A1AA !important; 
-  font-size: 11.5px !important; 
-  font-weight: 800 !important; 
-  letter-spacing: 1.5px !important; 
-}
-
+.sidebar-title { color: var(--text-main) !important; font-size: 13px !important; font-weight: 800 !important; }
 .sidebar-close-btn { 
-  background: rgba(255, 255, 255, 0.06) !important; 
-  border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-  color: #FFFFFF !important; 
+  background: var(--surface-subtle) !important; 
+  border: 1px solid var(--border-hairline) !important; 
+  color: var(--text-main) !important; 
   width: 32px !important; 
   height: 32px !important; 
   border-radius: 50% !important; 
@@ -331,7 +333,7 @@ footer.fmh-footer .brand-logo-text *,
 .sidebar-links-wrapper { 
   flex-grow: 1 !important; 
   overflow-y: auto !important; 
-  padding: 12px 10px !important; 
+  padding: 12px 14px !important; 
   display: flex !important; 
   flex-direction: column !important; 
   gap: 6px !important; 
@@ -341,21 +343,24 @@ footer.fmh-footer .brand-logo-text *,
   display: flex !important; 
   align-items: center !important; 
   gap: 12px !important; 
-  min-height: 46px !important; 
+  min-height: 44px !important; 
   padding: 0 14px !important; 
   font-size: 13px !important; 
   font-weight: 700 !important;
-  color: #E4E4E7 !important; 
+  color: var(--text-sub) !important; 
   text-decoration: none !important; 
   border-radius: 12px !important;
-  background: rgba(255, 255, 255, 0.03) !important; 
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: var(--surface-subtle) !important; 
+  border: 1px solid var(--border-hairline) !important;
+  transition: all 0.2s ease !important;
 }
 
-.sidebar-footer-cta { 
-  padding: 14px !important; 
-  margin-top: auto !important; 
+.sidebar-links-wrapper a:hover {
+  background: var(--violet-light) !important;
+  color: var(--violet-main) !important;
 }
+
+.sidebar-footer-cta { padding: 14px !important; margin-top: auto !important; }
 
 .sidebar-line-btn {
   display: flex !important; 
@@ -363,23 +368,25 @@ footer.fmh-footer .brand-logo-text *,
   justify-content: center !important; 
   gap: 8px !important; 
   width: 100% !important;
-  background: #00E676 !important; 
-  color: #000000 !important; 
+  background: var(--line-green) !important; 
+  color: #FFFFFF !important; 
   padding: 12px 0 !important; 
   border-radius: 100px !important;
   font-weight: 800 !important; 
   text-decoration: none !important; 
   font-size: 13px !important;
+  box-shadow: 0 4px 14px rgba(6, 199, 85, 0.25) !important;
 }
 
 /* ==============================================================================
-   6. HERO SECTION (FORCED SINGLE-ROW HORIZONTAL FIX)
+   6. HERO SECTION
    ============================================================================== */
 #main-content { 
-  padding-top: 68px !important; 
+  padding-top: 14px !important; 
   padding-bottom: 110px !important;
 }
 
+.hero-section,
 .hero-section.fmh-hero-surface { 
   position: relative !important;
   overflow: hidden !important;
@@ -387,520 +394,251 @@ footer.fmh-footer .brand-logo-text *,
   display: flex !important; 
   flex-direction: column !important; 
   align-items: center !important; 
-  gap: 4px !important; 
-  padding: 14px 10px !important; 
-  margin: 6px auto 14px auto !important; 
+  gap: 6px !important; 
+  padding: 24px 14px 20px 14px !important; 
+  margin: 0 auto 30px auto !important; 
   max-width: 850px !important; 
-  border-radius: 20px !important;
-  background: radial-gradient(circle at 50% -20%, rgba(192, 132, 252, 0.15), transparent 70%), #07040d !important;
-  border: 1px solid rgba(192, 132, 252, 0.18) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 26px !important;
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-card) !important;
+  box-shadow: var(--shadow-card-pop) !important;
 }
 
 .fmh-hero-ambient {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  overflow: hidden;
+  border-radius: 26px;
   z-index: 0;
 }
 
-.fmh-ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(65px);
-  opacity: 0.24;
-}
-
 .fmh-ambient-orb-a {
-  width: 240px;
-  height: 240px;
-  background: #7C3AED;
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(225, 29, 72, 0.1) 0%, transparent 70%);
   top: -40px;
-  left: 10%;
+  left: 5%;
+  filter: blur(40px);
 }
 
 .fmh-ambient-orb-b {
-  width: 220px;
-  height: 220px;
-  background: #FF1493;
-  top: 40px;
-  right: 10%;
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+  top: 30px;
+  right: 5%;
+  filter: blur(50px);
 }
 
-/* 🟢 1. ป้าย VERIFIED แคปซูลแนวนอน แถวเดียว */
 .clutch-pill-compact {
   display: inline-flex !important; 
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
   align-items: center !important; 
   justify-content: center !important; 
   gap: 6px !important;
-  padding: 3px 10px !important; 
+  padding: 4px 14px !important; 
   border-radius: 100px !important; 
-  background: rgba(124, 58, 237, 0.15) !important;
-  border: 1px solid rgba(192, 132, 252, 0.35) !important;
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-card) !important;
+  color: var(--crimson-main) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
   margin: 0 auto 4px auto !important; 
   position: relative; 
   z-index: 2;
-  white-space: nowrap !important;
-  width: fit-content !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06) !important;
 }
 
 .pill-badge-tag { 
-  background: #7C3AED !important; 
+  background: var(--crimson-main) !important; 
   color: #FFFFFF !important; 
   font-size: 8.5px !important; 
   font-weight: 900 !important; 
-  padding: 1.5px 5px !important; 
+  padding: 2px 6px !important; 
   border-radius: 4px !important; 
-  line-height: 1 !important; 
-  display: inline-block !important;
-  flex-shrink: 0 !important;
 }
 
 .stars-mini { 
   display: inline-flex !important; 
-  align-items: center !important;
   gap: 1.5px !important; 
-  color: #FBBF24 !important; 
-  font-size: 8px !important; 
-  flex-shrink: 0 !important;
+  color: var(--gold-star) !important; 
+  font-size: 9px !important; 
 }
 
 .pill-badge-score { 
-  font-size: 9.5px !important; 
+  font-size: 11px !important; 
   font-weight: 700 !important; 
-  color: #E2E8F0 !important; 
-  white-space: nowrap !important; 
+  color: var(--text-main) !important; 
 }
 
-/* 🟢 2. H1 แนวนอนคมชัด */
 .seo-h1-title { 
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 2px !important;
-  margin: 2px auto 6px auto !important; 
-  position: relative; 
-  z-index: 2; 
+  gap: 4px !important;
+  margin: 6px auto !important; 
   text-align: center !important;
+  width: 100% !important;
 }
 
 .seo-sub-headline { 
-  font-size: clamp(12px, 3.4vw, 15px) !important; 
+  font-size: clamp(12px, 3.2vw, 14px) !important; 
   font-weight: 700 !important; 
-  color: #CBD5E1 !important; 
-  letter-spacing: 0.5px !important;
-  white-space: nowrap !important;
+  color: var(--violet-main) !important; 
+  letter-spacing: 0.3px !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
 }
 
 .seo-main-headline { 
-  font-size: clamp(18px, 5.2vw, 26px) !important; 
+  font-size: clamp(18px, 4.8vw, 26px) !important; 
   font-weight: 900 !important; 
-  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
+  background: linear-gradient(135deg, var(--crimson-main) 0%, var(--violet-main) 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 0 10px rgba(255, 20, 147, 0.8)) !important;
-  line-height: 1.25 !important;
-  white-space: nowrap !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+  padding: 0 4px !important;
 }
 
-/* 🟢 3. ป้ายความปลอดภัยสีเขียว แนวนอน แถวเดียว */
 .luxury-trust-pill { 
   display: inline-flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
-  background: rgba(13, 9, 26, 0.85) !important;
-  border: 1px solid rgba(0, 230, 118, 0.4) !important;
+  background: rgba(5, 150, 105, 0.08) !important;
+  border: 1px solid rgba(5, 150, 105, 0.25) !important;
   border-radius: 100px !important;
-  padding: 3px 10px 3px 4px !important;
-  margin: 4px auto 6px auto !important;
+  padding: 4px 14px !important;
+  margin: 6px auto !important;
   position: relative; 
   z-index: 2;
-  white-space: nowrap !important;
-  width: fit-content !important;
-  max-width: 100% !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important;
 }
 
 .trust-pill-badge {
-  background: linear-gradient(135deg, #00E676 0%, #00B050 100%) !important;
-  color: #000000 !important;
+  background: var(--emerald-live) !important;
+  color: #FFFFFF !important;
   font-size: 9px !important;
   font-weight: 900 !important;
-  padding: 2px 7px !important;
+  padding: 2px 6px !important;
   border-radius: 100px !important;
   display: inline-flex !important;
-  align-items: center !important;
-  gap: 3px !important;
-  line-height: 1 !important;
-  flex-shrink: 0 !important;
+  align-items: center;
+  gap: 3px;
 }
 
 .trust-pill-text {
-  font-size: clamp(9.5px, 2.7vw, 11px) !important;
-  color: #CBD5E1 !important;
-  font-weight: 600 !important;
-  white-space: nowrap !important;
-}
-
-.trust-pill-text strong { 
-  color: #00E676 !important; 
-  font-weight: 800 !important; 
+  font-size: clamp(10px, 2.7vw, 11.5px) !important;
+  color: var(--emerald-live) !important;
+  font-weight: 700 !important;
 }
 
 .hero-subtitle-p { 
-  font-size: 11px !important; 
-  line-height: 1.55 !important; 
-  margin: 4px auto !important; 
+  font-size: 12px !important; 
+  line-height: 1.65 !important; 
+  margin: 6px auto 14px auto !important; 
   text-align: center !important; 
-  color: #94A3B8 !important; 
+  color: var(--text-sub) !important; 
   max-width: 680px !important; 
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 12px !important;
-  padding: 8px 10px !important;
   position: relative; 
   z-index: 2; 
 }
 
-/* 🟢 4. สถิติ 3 ช่อง แนวนอน แถวเดียวเป๊ะ ไม่ตกเป็น 2 แถว */
 .hero-stats-chips-row { 
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important; 
-  justify-content: space-between !important; 
-  gap: 5px !important; 
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important; 
   width: 100% !important;
-  max-width: 360px !important;
-  margin: 6px auto 2px auto !important; 
+  max-width: 440px !important;
+  margin: 8px auto 2px auto !important; 
   position: relative; 
   z-index: 2; 
 }
 
 .stat-micro-chip { 
-  flex: 1 1 0% !important;
-  background: rgba(14, 10, 26, 0.88) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
-  border-radius: 100px !important; 
-  padding: 5px 2px !important; 
-  font-size: clamp(8.5px, 2.4vw, 10px) !important; 
-  font-weight: 700 !important; 
-  color: #E2E8F0 !important; 
-  display: inline-flex !important; 
-  align-items: center !important; 
-  justify-content: center !important;
-  gap: 3px !important; 
-  white-space: nowrap !important;
-  min-width: 0 !important;
-}
-
-.stat-micro-chip i {
-  font-size: 9px !important;
-  flex-shrink: 0 !important;
-}
-
-.stat-micro-chip span {
-  white-space: nowrap !important;
-}
-
-#main-content { 
-  padding-top: 78px !important; 
-}
-
-.hero-section.fmh-hero-surface { 
-  position: relative !important;
-  overflow: hidden !important;
-  text-align: center !important; 
-  display: flex !important; 
-  flex-direction: column !important; 
-  align-items: center !important; 
-  gap: 6px !important; 
-  padding: 16px 12px !important; 
-  margin: 12px auto 20px auto !important; 
-  max-width: 850px !important; 
-  border-radius: 24px !important;
-  background: radial-gradient(circle at 50% -20%, rgba(192, 132, 252, 0.15), transparent 70%), #07040d !important;
-  border: 1px solid rgba(192, 132, 252, 0.18) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-}
-
-.fmh-hero-ambient {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.fmh-ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(65px);
-  opacity: 0.24;
-}
-
-.fmh-ambient-orb-a {
-  width: 240px;
-  height: 240px;
-  background: #7C3AED;
-  top: -40px;
-  left: 10%;
-}
-
-.fmh-ambient-orb-b {
-  width: 220px;
-  height: 220px;
-  background: #FF1493;
-  top: 40px;
-  right: 10%;
-}
-
-.hero-eyebrow {
-  display: flex !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  gap: 8px !important; 
-  font-size: 10px !important; 
-  font-weight: 700 !important; 
-  letter-spacing: 2.5px !important; 
-  text-transform: uppercase !important; 
-  color: #C084FC !important; 
-  margin-bottom: 8px !important; 
-  position: relative; 
-  z-index: 2;
-}
-
-.hero-verified-badge {
-  display: inline-flex !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  gap: 6px !important; 
-  background: rgba(192, 132, 252, 0.1) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.3) !important; 
-  box-shadow: 0 0 12px rgba(192, 132, 252, 0.15) !important; 
-  border-radius: 99px !important; 
-  padding: 4px 14px !important; 
+  background: var(--surface-white) !important; 
+  border: 1px solid var(--border-card) !important; 
+  border-radius: 16px !important; 
+  padding: 10px 6px !important; 
   font-size: 11px !important; 
   font-weight: 600 !important; 
-  color: #F3E8FF !important; 
-  margin-bottom: 10px !important;
-  position: relative; 
-  z-index: 2;
-}
-
-.pill-badge-tag { background: #7C3AED; color: #FFF; font-size: 9px; font-weight: 900; padding: 1.5px 6px; border-radius: 4px; }
-.hero-verified-badge .stars { display: flex; gap: 1.5px; color: #FBBF24; font-size: 9px; filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)); }
-
-.hero-title {
-  font-size: clamp(2rem, 7vw, 2.8rem) !important;
-  font-weight: 900 !important;
-  line-height: 1.15 !important;
-  letter-spacing: -0.5px !important;
-  margin: 4px 0 8px 0 !important;
-  background: linear-gradient(135deg, #ffffff 20%, #f472b6 60%, #c084fc 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 4px 15px rgba(236, 72, 153, 0.3)) !important;
-  position: relative;
-  z-index: 2;
-}
-
-.star-icon {
-  -webkit-text-fill-color: initial !important;
-  color: #FBBF24 !important;
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.95)) !important;
-  margin-left: 3px !important;
-  display: inline-block !important;
-}
-
-/* 🟢 รองรับการแสดงผล H1 ทั้งหน้าแรกและหน้ารายจังหวัด (SSR & CSR) */
-.seo-h1-title { 
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 3px !important;
-  margin: 4px auto 6px auto !important; 
-  position: relative; 
-  z-index: 2; 
-  text-align: center !important;
-}
-
-.seo-sub-headline { 
-  font-size: clamp(12px, 3.2vw, 14.5px) !important; 
-  font-weight: 700 !important; 
-  color: #E2E8F0 !important; 
-  letter-spacing: 0.8px !important;
-  opacity: 0.95;
-  white-space: nowrap !important;
-}
-
-.seo-main-headline { 
-  font-size: clamp(18px, 5.2vw, 28px) !important; 
-  font-weight: 900 !important; 
-  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.85)) drop-shadow(0 0 24px rgba(255, 20, 147, 0.4)) !important;
-  line-height: 1.25 !important;
-  white-space: nowrap !important;
-}
-
-.hero-subtitle-primary {
-  font-size: clamp(0.95rem, 3.8vw, 1.2rem) !important;
-  font-weight: 600 !important;
-  color: #E9D5FF !important;
-  margin-bottom: 4px !important;
-  position: relative;
-  z-index: 2;
-}
-
-.hero-subtitle-secondary {
-  font-size: clamp(1.05rem, 4.2vw, 1.35rem) !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-  margin-bottom: 12px !important;
-  position: relative;
-  z-index: 2;
-}
-
-.hero-subtitle-secondary .highlight-pink {
-  background: linear-gradient(90deg, #ec4899, #f43f5e) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: 0 0 10px rgba(236, 72, 153, 0.4) !important;
-}
-
-.hero-trust-pill,
-.luxury-trust-pill {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  background: rgba(16, 185, 129, 0.12) !important;
-  border: 1px solid rgba(16, 185, 129, 0.35) !important;
-  border-radius: 99px !important;
-  padding: 6px 16px !important;
-  font-size: 11.5px !important;
-  font-weight: 700 !important;
-  color: #34D399 !important;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15) !important;
-  margin: 6px auto !important;
-  position: relative;
-  z-index: 2;
-}
-
-.hero-trust-pill .no-deposit {
-  color: #38BDF8 !important;
-  text-decoration: underline !important;
-  text-underline-offset: 3px !important;
-}
-
-.hero-section p.description,
-.hero-subtitle-p {
-  font-size: 12px !important;
-  line-height: 1.55 !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-  background: rgba(0, 0, 0, 0.25) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 12px !important;
-  padding: 10px 12px !important;
-  margin: 10px auto 4px auto !important;
-  text-align: center !important;
-  max-width: 720px;
-  position: relative;
-  z-index: 2;
-}
-
-.hero-stats-chips-row { 
+  color: var(--text-muted) !important; 
   display: flex !important; 
+  flex-direction: column !important;
   align-items: center !important; 
-  justify-content: center !important; 
-  gap: 8px !important; 
-  flex-wrap: wrap !important; 
-  margin: 10px auto 4px auto !important; 
-  position: relative; 
-  z-index: 2; 
+  justify-content: center !important;
+  gap: 2px !important; 
+  box-shadow: 0 4px 12px rgba(13, 8, 27, 0.03) !important;
 }
 
-.stat-micro-chip { 
-  background: rgba(14, 10, 26, 0.88) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
-  border-radius: 100px !important; 
-  padding: 5px 12px !important; 
-  font-size: 11px !important; 
-  font-weight: 700 !important; 
-  color: #E2E8F0 !important; 
-  display: inline-flex !important; 
-  align-items: center !important; 
-  gap: 6px !important; 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important; 
+.stat-micro-chip strong {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  color: var(--text-main) !important;
 }
 
 /* ==============================================================================
-   7. HOT PROFILES SECTION (Horizontal Carousel)
+   7. HOT PROFILES SECTION (BIGGER & TALLER HERO CARDS)
    ============================================================================== */
 .clean-section-wrapper { 
   width: 100% !important; 
   max-width: 1050px !important; 
-  margin: 20px auto 16px auto !important; 
+  margin: 32px auto 24px auto !important; 
 }
 
 .hot-section-header-centered {
   display: flex !important; 
-  flex-direction: column !important; 
+  flex-direction: column !important;
   align-items: center !important; 
   justify-content: center !important;
-  text-align: center !important; 
-  margin: 0 auto 8px auto !important; 
-  gap: 6px !important; 
+  text-align: center !important;
+  margin: 0 auto 14px auto !important; 
+  gap: 8px !important;
   width: 100% !important; 
 }
 
 .hot-single-line-header { 
   display: inline-flex !important; 
   align-items: center !important; 
-  justify-content: center !important; 
+  justify-content: center !important;
   gap: 8px !important; 
-  white-space: nowrap !important; 
+  flex-wrap: wrap !important;
 }
 
 .hot-title-neon { 
-  font-size: clamp(17px, 4.8vw, 24px) !important; 
+  font-size: clamp(19px, 5.2vw, 25px) !important; 
   font-weight: 900 !important; 
-  background: linear-gradient(135deg, #FFFFFF 0%, #FF85C0 35%, #FF1493 70%, #E02475 100%) !important;
-  -webkit-background-clip: text !important; 
-  -webkit-text-fill-color: transparent !important; 
-  filter: drop-shadow(0 0 10px rgba(255, 20, 147, 0.8)) !important;
-  line-height: 1.2 !important; 
+  background: linear-gradient(135deg, #FF1493 0%, #FF69B4 45%, #7C3AED 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
   margin: 0 !important; 
+  line-height: 1.2 !important;
 }
 
 .hot-badge-pill { 
-  background: rgba(255, 20, 147, 0.18) !important; 
-  border: 1px solid rgba(255, 20, 147, 0.45) !important; 
-  color: #FFB3E6 !important;
-  font-size: 10px !important; 
+  background: linear-gradient(135deg, var(--crimson-main), var(--violet-main)) !important; 
+  color: #FFFFFF !important;
+  font-size: 9.5px !important; 
   font-weight: 800 !important; 
-  padding: 3px 9px !important; 
+  padding: 3px 10px !important; 
   border-radius: 100px !important; 
-  box-shadow: 0 0 10px rgba(255, 20, 147, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3) !important;
 }
 
 .hot-swipe-hint-centered { 
-  background: rgba(255, 255, 255, 0.05) !important; 
-  border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-  color: #CBD5E1 !important; 
-  font-size: 10.5px !important; 
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-card) !important;
+  color: var(--text-muted) !important; 
+  font-size: 11px !important; 
   font-weight: 600 !important; 
-  padding: 3px 14px !important; 
-  border-radius: 100px !important; 
-  display: inline-flex !important; 
-  align-items: center !important; 
-  gap: 6px !important; 
+  padding: 3px 16px !important;
+  border-radius: 100px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 2px 6px rgba(13, 8, 27, 0.03) !important;
 }
 
 .vip-swiper-wrapper { 
@@ -908,37 +646,39 @@ footer.fmh-footer .brand-logo-text *,
   flex-direction: row !important; 
   flex-wrap: nowrap !important; 
   overflow-x: auto !important; 
-  overflow-y: hidden !important;
-  gap: 12px !important; 
+  gap: 14px !important; 
   width: 100% !important; 
-  margin: 8px auto 12px auto !important; 
-  padding: 8px 4px 16px 4px !important; 
+  margin: 8px auto 8px auto !important; 
+  padding: 6px 4px 16px 4px !important; 
   scroll-snap-type: x mandatory !important;
   -webkit-overflow-scrolling: touch !important; 
   scrollbar-width: none !important; 
 }
 .vip-swiper-wrapper::-webkit-scrollbar { display: none !important; }
 
+/* 🟢 ขยายขนาดการ์ด HOT ให้อลังการ กว้าง 175px สูงสัดส่วน 3:4.2 */
 .vip-card-item { 
-  flex: 0 0 160px !important; 
-  width: 160px !important; 
-  aspect-ratio: 3/4 !important;
+  flex: 0 0 175px !important; 
+  width: 175px !important; 
+  aspect-ratio: 3 / 4.2 !important;
   scroll-snap-align: start !important;
   position: relative !important; 
   overflow: hidden !important; 
   border-radius: 18px !important; 
-  background-color: #0d0d12 !important; 
-  border: 1.5px solid rgba(192, 132, 252, 0.35) !important; 
-  transition: transform 0.3s ease, border-color 0.3s ease !important;
+  background-color: #0E091C !important; 
+  border: 1.5px solid rgba(255, 255, 255, 0.9) !important; 
+  box-shadow: var(--shadow-card-pop) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease !important;
 }
 
 @media (min-width: 768px) {
-  .vip-card-item { flex: 0 0 190px !important; width: 190px !important; }
+  .vip-card-item { flex: 0 0 200px !important; width: 200px !important; }
 }
 
 .vip-card-item:hover {
-  transform: translateY(-4px) !important;
-  border-color: rgba(255, 20, 147, 0.6) !important;
+  transform: translateY(-5px) scale(1.02) !important;
+  box-shadow: var(--shadow-hover) !important;
+  border-color: var(--crimson-main) !important;
 }
 
 .vip-card-item img { 
@@ -950,25 +690,27 @@ footer.fmh-footer .brand-logo-text *,
   object-position: top center !important; 
 }
 
+/* 🟢 ป้ายสถานะแก้วรมดำ ตัดกับไฟเขียวนีออน ฉ่ำวาว */
 .vip-status-chip { 
   position: absolute !important; 
-  top: 6px !important; 
-  left: 6px !important; 
-  background: rgba(9, 9, 11, 0.88) !important; 
-  border: 1px solid #00E676 !important; 
+  top: 8px !important; 
+  left: 8px !important; 
+  background: rgba(13, 8, 27, 0.82) !important; 
+  border: 1px solid rgba(0, 230, 118, 0.4) !important; 
   color: #00E676 !important; 
-  font-size: 9px !important; 
+  font-size: 9.5px !important; 
   font-weight: 800 !important; 
-  padding: 2px 6px !important; 
+  padding: 3px 8px !important; 
   border-radius: 100px !important; 
   z-index: 15 !important; 
-  backdrop-filter: blur(6px) !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35) !important;
 }
 
 .hot-rank-badge { 
   position: absolute !important; 
-  top: 6px !important; 
-  right: 6px !important; 
+  top: 8px !important; 
+  right: 8px !important; 
   background: linear-gradient(135deg, #FF1493 0%, #FF5E3A 100%) !important; 
   color: #FFFFFF !important; 
   font-size: 9px !important; 
@@ -977,43 +719,48 @@ footer.fmh-footer .brand-logo-text *,
   border-radius: 100px !important; 
   z-index: 15 !important; 
   line-height: 1.1 !important;
-  box-shadow: 0 2px 10px rgba(255, 20, 147, 0.5) !important; 
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.45) !important; 
 }
 
 .vip-card-overlay { 
   position: absolute !important; 
   inset: 0 !important; 
-  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 50%, transparent 75%) !important; 
+  background: linear-gradient(
+    to top, 
+    rgba(10, 5, 20, 0.96) 0%, 
+    rgba(10, 5, 20, 0.35) 45%, 
+    transparent 75%
+  ) !important; 
   z-index: 2 !important; 
   pointer-events: none !important;
 }
 
 .vip-card-info { 
   position: absolute !important; 
-  bottom: 8px !important; 
-  left: 8px !important; 
-  right: 8px !important; 
+  bottom: 10px !important; 
+  left: 10px !important; 
+  right: 10px !important; 
   z-index: 10 !important; 
   text-align: left !important; 
   display: flex !important; 
   flex-direction: column !important; 
-  gap: 1px !important; 
+  gap: 2px !important; 
   pointer-events: none !important;
 }
 
 .vip-name { 
-  color: #FFF !important; 
-  font-size: 13px !important; 
-  font-weight: 800 !important; 
+  color: #FFFFFF !important; 
+  font-size: 14px !important; 
+  font-weight: 900 !important; 
   overflow: hidden !important; 
   text-overflow: ellipsis !important; 
   white-space: nowrap !important; 
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
 }
 
 .vip-location { 
-  color: #C084FC !important; 
-  font-size: 10.5px !important; 
+  color: #E9D5FF !important; 
+  font-size: 11px !important; 
   font-weight: 700 !important; 
   overflow: hidden !important; 
   text-overflow: ellipsis !important; 
@@ -1021,55 +768,207 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 /* ==============================================================================
-   8. MASTER 2-COLUMN PROFILE GRID & ULTRA-CLEAN CARDS (NEON EDITION)
+   7.1 PRAISED PILL FILTERS (ปุ่มแคปซูลสีสันสดใส กดได้จริงแบบรูปที่ 3)
    ============================================================================== */
-.clean-section-wrapper { 
-  width: 100% !important; 
-  max-width: 1050px !important; 
-  margin: 16px auto 10px auto !important; 
+.filter-pills-scroll-row {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding: 8px 4px 16px 4px !important;
+  margin: 16px 0 8px 0 !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.filter-pills-scroll-row::-webkit-scrollbar { display: none !important; }
+
+.filter-pill-tab {
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-hairline) !important;
+  color: var(--text-sub) !important;
+  padding: 7px 16px !important;
+  border-radius: 100px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  box-shadow: 0 3px 10px rgba(15, 9, 31, 0.04) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
+.filter-pill-tab:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(15, 9, 31, 0.08) !important;
+}
+
+.filter-pill-tab:active {
+  transform: scale(0.96) !important;
+}
+
+/* 🟢 สีปุ่มเมื่อ Active / ถูกเลือก */
+.filter-pill-tab.active {
+  background: linear-gradient(135deg, var(--crimson-main) 0%, var(--violet-main) 100%) !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.32) !important;
+}
+
+/* 🟢 สีปุ่มแยกตามหมวดหมู่แบบรูปที่ 3 */
+.filter-pill-tab.tag-nimman.active {
+  background: linear-gradient(135deg, #FF1493 0%, #C084FC 100%) !important;
+}
+.filter-pill-tab.tag-verified.active {
+  background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%) !important;
+}
+
+
+/* ==============================================================================
+   9. PROVINCE SECTION HEADER BAR (ดีไซน์ไร้กรอบ เรียบหรู คมชัด สไตล์สากล)
+   ============================================================================== */
+.section-content-wrapper {
+  margin-top: 36px !important;
+  margin-bottom: 14px !important;
+  width: 100% !important;
+}
+
+/* 🟢 แถวหัวข้อจังหวัด: ไม่มีกรอบสี่เหลี่ยมขังข้อความอีกต่อไป */
+.province-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding: 4px 4px 12px 4px !important;
+  border-bottom: 1px solid var(--border-hairline) !important;
+  margin-bottom: 16px !important;
+}
+
+.province-title-link {
+  text-decoration: none !important;
+  display: inline-block !important;
+}
+
+.province-clean-title {
+  font-size: clamp(17px, 4.8vw, 22px) !important;
+  font-weight: 900 !important;
+  color: #0F091F !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  letter-spacing: -0.2px !important;
+}
+
+.province-pin-icon {
+  color: var(--crimson-main) !important;
+  font-size: 18px !important;
+  filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.3)) !important;
+}
+
+.province-prefix {
+  color: #0F091F !important;
+}
+
+.province-name-highlight {
+  background: linear-gradient(135deg, var(--crimson-main) 0%, var(--violet-main) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 🟢 ป้ายนับจำนวนโปรไฟล์แบบโมเดิร์นแคปซูล */
+.province-count-pill {
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-card) !important;
+  border-radius: 100px !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--text-sub) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 8px rgba(15, 9, 31, 0.04) !important;
+  transition: all 0.2s ease !important;
+}
+
+.province-count-pill:hover {
+  border-color: var(--violet-main) !important;
+  color: var(--violet-main) !important;
+  transform: translateX(2px) !important;
+}
+
+.province-count-pill .pulse-dot-el {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background-color: var(--emerald-live) !important;
+  box-shadow: 0 0 6px var(--emerald-live) !important;
+}
+
+.province-count-pill .arrow-mini {
+  font-size: 9px !important;
+  color: var(--violet-main) !important;
+}
+
+/* ==============================================================================
+   8. MASTER 2-COLUMN PROFILE GRID & ULTRA-CLEAN LUXURY CARDS
+   ============================================================================== */
 .clean-section-header { 
-  text-align: center !important; 
-  margin-bottom: 14px !important; 
-  padding: 0 10px !important; 
+  text-align: left !important; 
+  margin-bottom: 16px !important; 
+  padding: 0 4px !important; 
+}
+
+.section-tag-mini {
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: var(--crimson-main) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  display: inline-block !important;
+  background: var(--crimson-light) !important;
+  padding: 2px 8px !important;
+  border-radius: 6px !important;
+  margin-bottom: 4px !important;
 }
 
 .clean-section-h2 { 
-  font-size: clamp(16px, 4.6vw, 21px) !important; 
-  font-weight: 800 !important; 
-  color: #FFFFFF !important; 
+  font-size: clamp(18px, 4.8vw, 23px) !important; 
+  font-weight: 900 !important; 
+  color: var(--text-main) !important; 
   line-height: 1.35 !important; 
-  margin: 0 auto 4px auto !important; 
+  margin: 0 0 2px 0 !important; 
 }
 
 #featured-profiles { 
-  margin-bottom: 24px !important; 
+  margin-top: 36px !important;
+  margin-bottom: 40px !important; 
 }
 
-/* 🟢 1. ตัวครอบรวมทุกจังหวัด (ต้องเป็น Flex Column เรียงจากบนลงล่าง ห้ามใส่ Grid) */
 #profiles-display-area { 
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
-  gap: 24px !important;
-  min-height: 300px !important; 
-  margin-top: 14px !important; 
-  margin-bottom: 24px !important; 
+  gap: 36px !important; 
+  min-height: 200px !important; 
+  margin-top: 24px !important; 
+  margin-bottom: 40px !important; 
 }
 
-/* 🟢 2. โครงสร้าง Grid สำหรับการ์ดน้องๆ (มือถือ 2 คอลัมน์ / แท็บเล็ต 3 / คอม 4) */
 #featured-profiles-container,
 .profile-grid,
 .profiles-grid-row { 
   display: grid !important; 
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important; 
+  gap: 10px !important; 
   width: 100% !important; 
   max-width: 1050px !important; 
   margin: 0 auto !important; 
   box-sizing: border-box !important;
-  padding: 0 2px !important;
+  padding: 0 !important;
 }
 
 @media (min-width: 768px) { 
@@ -1090,7 +989,6 @@ footer.fmh-footer .brand-logo-text *,
   } 
 }
 
-/* 🟢 3. กล่องการ์ดโปรไฟล์ (สัดส่วน 3:4 สวยงาม คมชัด) */
 .profile-card-new-container { 
   width: 100% !important; 
   min-width: 0 !important;
@@ -1098,31 +996,29 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 .profile-card-new {
-  aspect-ratio: 3 / 4 !important;
+  aspect-ratio: 3 / 4.2 !important;
   width: 100% !important; 
   height: auto !important;
   position: relative !important; 
-  border-radius: 16px !important; 
+  border-radius: 18px !important; 
   overflow: hidden !important; 
-  background-color: #0b0c12 !important; 
-  border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
+  background-color: #0E091C !important; 
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important; 
+  box-shadow: var(--shadow-card-pop) !important;
   cursor: pointer; 
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
-              box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.3s ease !important;
 }
 
 .profile-card-new:hover {
-  transform: translateY(-5px) !important;
-  border-color: rgba(255, 20, 147, 0.8) !important;
-  box-shadow: 0 12px 30px rgba(255, 20, 147, 0.3) !important;
+  transform: translateY(-5px) scale(1.015) !important;
+  box-shadow: var(--shadow-hover) !important;
+  border-color: var(--crimson-main) !important;
 }
 
 .profile-card-new:active {
-  transform: scale(0.965) !important;
-  border-color: rgba(255, 20, 147, 0.8) !important;
-  box-shadow: 0 0 25px rgba(255, 20, 147, 0.5) !important;
+  transform: scale(0.97) !important;
 }
 
 .profile-card-img { 
@@ -1132,45 +1028,42 @@ footer.fmh-footer .brand-logo-text *,
   height: 100% !important; 
   object-fit: cover !important; 
   object-position: top center !important; 
-  transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .profile-card-new:hover .profile-card-img {
   transform: scale(1.05) !important;
 }
 
-/* เงาไล่ระดับด้านล่างให้อ่านชื่อชัด */
 .profile-card-gradient-overlay { 
   position: absolute !important; 
   inset: 0 !important; 
   background: linear-gradient(
     180deg, 
-    rgba(0, 0, 0, 0.2) 0%, 
-    transparent 40%, 
-    rgba(5, 3, 10, 0.75) 75%, 
-    rgba(5, 3, 10, 0.98) 100%
+    rgba(0, 0, 0, 0.05) 0%, 
+    transparent 35%, 
+    rgba(10, 5, 20, 0.68) 68%, 
+    rgba(10, 5, 20, 0.96) 100%
   ) !important; 
-  z-index: 10 !important; 
+  z-index: 5 !important; 
   pointer-events: none !important;
 }
 
-/* ตัวคลุมลิงก์ให้กดได้เต็มใบการ์ด */
 .card-link { 
   position: absolute !important; 
   inset: 0 !important; 
   z-index: 25 !important; 
 }
 
-/* 🟢 4. แบดจ์มุมบน (ซ้าย-ขวา) */
 .profile-card-badges-top {
   position: absolute !important;
-  top: 6px !important;
-  left: 6px !important;
-  right: 6px !important;
+  top: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  z-index: 20 !important;
+  z-index: 10 !important;
   pointer-events: none !important;
 }
 
@@ -1185,165 +1078,161 @@ footer.fmh-footer .brand-logo-text *,
   display: inline-flex !important; 
   align-items: center !important; 
   gap: 4px !important; 
-  padding: 3px 7px !important; 
+  padding: 3px 8px !important; 
   border-radius: 100px !important; 
   font-size: 9px !important; 
-  font-weight: 700 !important; 
-  background: rgba(14, 10, 26, 0.88) !important;
+  font-weight: 800 !important; 
+  background: rgba(13, 8, 27, 0.82) !important; 
+  border: 1px solid rgba(0, 230, 118, 0.4) !important; 
+  color: #00E676 !important; 
   backdrop-filter: blur(8px) !important;
   line-height: 1 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35) !important;
 }
 
-.badge-status.status-online { 
-  color: #00E676 !important; 
-  border: 1px solid rgba(0, 230, 118, 0.4) !important; 
+.badge-status.status-busy { 
+  color: #FF1493 !important; 
+  border-color: rgba(255, 20, 147, 0.4) !important;
 }
 
-.badge-status.status-online .status-dot { 
+.badge-status .status-dot { 
   width: 5px !important; 
   height: 5px !important; 
   border-radius: 50% !important; 
   background-color: #00E676 !important; 
   box-shadow: 0 0 6px #00E676 !important;
+}
+
+.badge-status.status-online .status-dot {
   animation: pulseGreenDot 2s infinite ease-in-out !important;
 }
 
-.badge-status.status-busy { 
-  color: #FF1493 !important; 
-  border: 1px solid rgba(255, 20, 147, 0.4) !important; 
-}
-
 .badge-status.status-busy .status-dot { 
-  width: 5px !important; 
-  height: 5px !important; 
-  border-radius: 50% !important; 
   background-color: #FF1493 !important; 
   box-shadow: 0 0 6px #FF1493 !important;
 }
 
 @keyframes pulseGreenDot {
   0%, 100% { transform: scale(1); box-shadow: 0 0 4px #00E676; }
-  50% { transform: scale(1.35); box-shadow: 0 0 10px #00E676, 0 0 16px rgba(0, 230, 118, 0.6); }
+  50% { transform: scale(1.35); box-shadow: 0 0 10px #00E676; }
 }
 
 .badge-verified-top {
   display: inline-flex !important;
   align-items: center !important;
-  background: rgba(45, 16, 77, 0.9) !important;
-  backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(192, 132, 252, 0.6) !important;
-  color: #E9D5FF !important;
-  font-size: 9px !important;
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 8.5px !important;
   font-weight: 800 !important;
-  padding: 3px 7px !important;
+  padding: 3px 8px !important;
   border-radius: 100px !important;
-  box-shadow: 0 0 10px rgba(192, 132, 252, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4) !important;
 }
 
 .badge-hot-tag {
   display: inline-flex !important;
-  background: linear-gradient(135deg, #FF1493, #FF5E3A) !important;
+  background: linear-gradient(135deg, #FF1493 0%, #FF5E3A 100%) !important;
   color: #FFFFFF !important;
   font-size: 8.5px !important;
   font-weight: 900 !important;
-  padding: 3px 7px !important;
+  padding: 3px 8px !important;
   border-radius: 100px !important;
   line-height: 1 !important;
-  box-shadow: 0 2px 10px rgba(255, 20, 147, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.45) !important;
 }
 
-/* 🟢 5. ข้อมูลด้านล่างการ์ด (จัดเรียง 3 บรรทัด ไม่ชนกัน) */
 .profile-card-info-content { 
   position: absolute !important; 
   bottom: 0 !important; 
   left: 0 !important; 
   right: 0 !important; 
-  padding: 6px 8px 8px 8px !important; 
-  z-index: 20 !important; 
+  padding: 10px 10px 8px 10px !important; 
+  z-index: 10 !important; 
   pointer-events: none !important; 
   display: flex !important; 
   flex-direction: column !important; 
   gap: 2px !important; 
+  color: #FFFFFF !important;
 }
 
-/* แถบแท็ก #ฟิวแฟน มินิมอล */
 .profile-card-tags-row {
   display: flex !important;
   align-items: center !important;
   gap: 4px !important;
-  margin-bottom: 1px !important;
+  margin-bottom: 2px !important;
 }
 
 .card-vibe-pill {
   font-size: 8.5px !important; 
-  font-weight: 800 !important; 
-  color: #E9D5FF !important;
-  background: rgba(124, 58, 237, 0.35) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.5) !important;
-  padding: 1.5px 5px !important; 
+  font-weight: 700 !important; 
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.22) !important; 
+  backdrop-filter: blur(6px) !important;
+  padding: 1.5px 6px !important; 
   border-radius: 4px !important;
   line-height: 1.1 !important;
 }
 
-/* แถวชื่อ + อายุ */
 .profile-card-title-row {
   display: flex !important; 
   align-items: center !important; 
-  justify-content: flex-start !important; 
-  gap: 5px !important; 
+  justify-content: space-between !important; 
+  gap: 4px !important; 
   width: 100% !important;
 }
 
 .profile-card-name { 
   flex: 1 1 auto !important; 
   min-width: 0 !important; 
-  font-size: 13.5px !important; 
-  font-weight: 800 !important; 
+  font-size: 14.5px !important; 
+  font-weight: 900 !important; 
   color: #FFFFFF !important; 
   margin: 0 !important; 
   line-height: 1.2 !important; 
   white-space: nowrap !important; 
   overflow: hidden !important; 
   text-overflow: ellipsis !important; 
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
 }
 
 .profile-card-age-tag {
   flex-shrink: 0 !important; 
   font-size: 9.5px !important; 
-  color: #FF85C0 !important; 
-  font-weight: 700 !important;
-  background: rgba(255, 255, 255, 0.1) !important; 
-  padding: 1.5px 5px !important; 
+  color: #FFE4E6 !important; 
+  font-weight: 800 !important; 
+  background: rgba(225, 29, 72, 0.5) !important; 
+  padding: 1px 5px !important; 
   border-radius: 4px !important;
   line-height: 1 !important;
 }
 
-/* แถวล่างสุด: สถานที่ + ราคา */
 .profile-card-bottom-row { 
   display: flex !important; 
   align-items: center !important; 
   justify-content: space-between !important; 
-  gap: 4px !important; 
+  gap: 6px !important; 
   width: 100% !important; 
   margin-top: 1px !important;
+  font-size: 10.5px !important;
+  color: #E2E8F0 !important;
 }
 
 .profile-card-location { 
-  flex: 1 1 auto !important; 
+  flex: 1 1 0% !important; 
   min-width: 0 !important; 
   display: inline-flex !important; 
   align-items: center !important; 
   gap: 3px !important; 
-  font-size: 10px !important; 
-  font-weight: 500 !important; 
-  color: #CBD5E1 !important;
+  font-size: 10.5px !important; 
+  font-weight: 600 !important; 
+  color: #E2E8F0 !important;
   white-space: nowrap !important; 
   overflow: hidden !important; 
   text-overflow: ellipsis !important; 
 }
 
 .profile-card-location i { 
-  color: #C084FC !important; 
+  color: #FF85C0 !important; 
   font-size: 9px !important; 
   flex-shrink: 0 !important; 
 }
@@ -1351,46 +1240,103 @@ footer.fmh-footer .brand-logo-text *,
 .profile-card-price { 
   flex-shrink: 0 !important; 
   color: #FDE047 !important; 
-  background: rgba(251, 191, 36, 0.15) !important;
-  border: 1px solid rgba(251, 191, 36, 0.4) !important;
-  padding: 1.5px 5px !important;
-  border-radius: 5px !important;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.25) 0%, rgba(245, 158, 11, 0.35) 100%) !important;
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
   font-weight: 900 !important; 
-  font-size: 10.5px !important; 
+  font-size: 11.5px !important; 
   line-height: 1 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* ==============================================================================
-   9. PROVINCE SECTION HEADER BAR
+   9. PROVINCE SECTION HEADER BAR (LANDMARK BADGE ไร้กรอบ)
    ============================================================================== */
 .section-content-wrapper {
-  margin-top: 24px !important;
-  margin-bottom: 12px !important;
+  margin-top: 36px !important;
+  margin-bottom: 14px !important;
   width: 100% !important;
 }
 
-.live-count-chip {
-  background: rgba(14, 10, 26, 0.85) !important;
-  border: 1px solid rgba(192, 132, 252, 0.3) !important;
+.province-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding: 4px 4px 12px 4px !important;
+  border-bottom: 1px solid var(--border-hairline) !important;
+  margin-bottom: 16px !important;
+}
+
+.province-title-link {
+  text-decoration: none !important;
+  display: inline-block !important;
+}
+
+.province-clean-title {
+  font-size: clamp(17px, 4.8vw, 22px) !important;
+  font-weight: 900 !important;
+  color: #0F091F !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  letter-spacing: -0.2px !important;
+}
+
+.province-pin-icon {
+  color: var(--crimson-main) !important;
+  font-size: 18px !important;
+  filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.3)) !important;
+}
+
+.province-prefix {
+  color: #0F091F !important;
+}
+
+.province-name-highlight {
+  background: linear-gradient(135deg, var(--crimson-main) 0%, var(--violet-main) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.province-count-pill {
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-card) !important;
   border-radius: 100px !important;
-  padding: 4px 10px !important;
+  padding: 4px 12px !important;
   font-size: 11px !important;
   font-weight: 700 !important;
-  color: #E2E8F0 !important;
+  color: var(--text-sub) !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
   text-decoration: none !important;
+  box-shadow: 0 2px 8px rgba(15, 9, 31, 0.04) !important;
+  transition: all 0.2s ease !important;
 }
 
-.live-count-chip .pulse-dot-el {
+.province-count-pill:hover {
+  border-color: var(--violet-main) !important;
+  color: var(--violet-main) !important;
+  transform: translateX(2px) !important;
+}
+
+.province-count-pill .pulse-dot-el {
   width: 6px !important;
   height: 6px !important;
   border-radius: 50% !important;
-  background-color: #10B981 !important;
-  box-shadow: 0 0 6px #10B981 !important;
+  background-color: var(--emerald-live) !important;
+  box-shadow: 0 0 6px var(--emerald-live) !important;
 }
+
+.province-count-pill .arrow-mini {
+  font-size: 9px !important;
+  color: var(--violet-main) !important;
+}
+
 
 /* ==============================================================================
    10. BENTO CONCIERGE & SAFE PROTOCOL HUB
@@ -1398,436 +1344,282 @@ footer.fmh-footer .brand-logo-text *,
 .concierge-luxury-section {
   width: 100% !important;
   max-width: 1050px !important;
-  margin: 24px auto 16px auto !important;
+  margin: 44px auto 28px auto !important; 
   padding: 0 4px !important;
 }
 
 .luxury-bento-wrapper {
-  background: rgba(13, 9, 24, 0.9) !important;
-  border: 1.5px solid rgba(192, 132, 252, 0.28) !important;
-  border-radius: 24px !important;
-  padding: 24px 16px !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-card) !important;
+  border-radius: 26px !important;
+  padding: 28px 18px !important;
+  box-shadow: var(--shadow-card-pop) !important;
 }
 
 @media (min-width: 768px) {
-  .luxury-bento-wrapper { padding: 30px 24px !important; }
+  .luxury-bento-wrapper { padding: 36px 28px !important; }
 }
 
 .bento-header-center {
   text-align: center !important;
-  margin-bottom: 20px !important;
+  margin-bottom: 22px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 4px !important;
 }
 
 .bento-tag-pill {
-  background: rgba(192, 132, 252, 0.12) !important;
-  border: 1px solid rgba(192, 132, 252, 0.35) !important;
-  color: #E9D5FF !important;
+  background: var(--violet-light) !important;
+  color: var(--violet-main) !important;
   font-size: 10px !important;
   font-weight: 800 !important;
-  letter-spacing: 1.5px !important;
+  letter-spacing: 0.5px !important;
   padding: 3px 12px !important;
   border-radius: 100px !important;
+  display: inline-block !important;
 }
 
 .bento-headline {
   font-size: clamp(17px, 4.5vw, 22px) !important;
   font-weight: 900 !important;
-  color: #FFFFFF !important;
-  margin: 0 !important;
+  color: var(--text-main) !important;
+  margin: 6px 0 2px 0 !important;
 }
 
-.bento-sub-desc { font-size: 12px !important; color: #CBD5E1 !important; margin: 0 !important; }
+.bento-sub-desc { 
+  font-size: 11.5px !important; 
+  color: var(--text-muted) !important; 
+  margin: 0 !important; 
+}
 
 .steps-compact-grid {
   display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 10px !important;
-  margin-bottom: 16px !important;
-}
-
-@media (min-width: 768px) {
-  .steps-compact-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-bottom: 20px !important;
+  box-sizing: border-box !important;
 }
 
 .step-compact-card {
-  background: rgba(255, 255, 255, 0.025) !important;
-  border: 1px solid rgba(192, 132, 252, 0.18) !important;
-  border-radius: 16px !important;
-  padding: 14px 16px !important;
-  text-align: left !important;
-}
-
-.step-card-header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  margin-bottom: 8px !important;
+  background: var(--surface-subtle) !important;
+  border: 1px solid var(--border-hairline) !important;
+  border-radius: 14px !important;
+  padding: 12px 6px !important;
+  text-align: center !important;
+  min-width: 0 !important;
 }
 
 .step-number-tag {
-  font-size: 10.5px !important;
+  font-size: 8.5px !important;
   font-weight: 900 !important;
-  color: #FFFFFF !important;
-  background: #7C3AED !important;
-  padding: 2px 10px !important;
-  border-radius: 100px !important;
+  color: var(--crimson-main) !important;
+  display: block !important;
+  margin-bottom: 2px !important;
 }
 
-.step-icon-glow {
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 10px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 14px !important;
+.step-title { 
+  font-size: clamp(10.5px, 2.7vw, 12px) !important; 
+  font-weight: 800 !important; 
+  color: var(--text-main) !important; 
+  margin-bottom: 2px !important; 
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
-.step-icon-glow.icon-purple { background: rgba(192, 132, 252, 0.15); color: #C084FC; }
-.step-icon-glow.icon-pink { background: rgba(255, 20, 147, 0.15); color: #FF85C0; }
-.step-icon-glow.icon-green { background: rgba(0, 230, 118, 0.15); color: #00E676; }
 
-.step-title { font-size: 13.5px !important; font-weight: 800 !important; color: #FFFFFF !important; margin: 0 0 4px 0 !important; }
-.step-desc { font-size: 11.5px !important; color: #94A3B8 !important; line-height: 1.5 !important; margin: 0 !important; }
+.step-desc { 
+  font-size: clamp(8.5px, 2.3vw, 10px) !important; 
+  color: var(--text-muted) !important; 
+  line-height: 1.35 !important; 
+  margin: 0 !important; 
+}
 
 .trust-protocol-bento {
   display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 10px !important;
-  margin-bottom: 16px !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px !important;
+  margin-bottom: 20px !important;
 }
 
-@media (min-width: 768px) {
-  .trust-protocol-bento { grid-template-columns: repeat(2, 1fr) !important; }
+@media (max-width: 600px) {
+  .trust-protocol-bento { grid-template-columns: 1fr !important; }
 }
 
 .trust-bento-item {
-  background: rgba(19, 13, 35, 0.7) !important;
-  border: 1px solid rgba(192, 132, 252, 0.22) !important;
-  border-radius: 16px !important;
+  background: var(--surface-subtle) !important;
+  border: 1px solid var(--border-hairline) !important;
+  border-radius: 14px !important;
   padding: 12px 14px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 10px !important;
   text-align: left !important;
 }
 
 .trust-icon-box {
-  width: 36px !important;
-  height: 36px !important;
+  width: 34px !important;
+  height: 34px !important;
   border-radius: 50% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
   flex-shrink: 0 !important;
 }
-.check-green { background: rgba(0, 230, 118, 0.15); color: #00E676; }
-.check-purple { background: rgba(192, 132, 252, 0.15); color: #C084FC; }
-.check-gold { background: rgba(251, 191, 36, 0.15); color: #FBBF24; }
-.check-pink { background: rgba(255, 20, 147, 0.15); color: #FF85C0; }
 
-.trust-text-content h4 { font-size: 12.5px !important; font-weight: 800 !important; color: #FFFFFF !important; margin: 0 0 2px 0 !important; }
-.trust-text-content p { font-size: 11px !important; color: #A1A1AA !important; margin: 0 !important; line-height: 1.4 !important; }
+.check-green { background: rgba(5, 150, 105, 0.12) !important; color: var(--emerald-live) !important; }
+.check-purple { background: rgba(124, 58, 237, 0.12) !important; color: var(--violet-main) !important; }
+.check-gold { background: rgba(217, 119, 6, 0.12) !important; color: var(--gold-star) !important; }
+.check-pink { background: rgba(225, 29, 72, 0.12) !important; color: var(--crimson-main) !important; }
+
+.trust-text-content h4 { 
+  font-size: 12px !important; 
+  font-weight: 800 !important; 
+  color: var(--text-main) !important; 
+  margin: 0 !important; 
+}
+
+.trust-text-content p { 
+  font-size: 10.5px !important; 
+  color: var(--text-muted) !important; 
+  margin: 0 !important; 
+  line-height: 1.35 !important; 
+}
 
 /* ==============================================================================
-   11. REVIEWS & FAQ MODERN OLED GLASSMORPHISM
+   11. REVIEWS & FAQ
    ============================================================================== */
 #reviews-wrapper-block,
 #faq-wrapper-block {
-  background: rgba(13, 9, 24, 0.75) !important;
-  border: 1px solid rgba(192, 132, 252, 0.18) !important;
+  background: var(--surface-white) !important;
+  border: 1px solid var(--border-hairline) !important;
   border-radius: 20px !important;
-  padding: 18px 14px !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  margin-top: 16px !important;
+  padding: 20px 16px !important;
+  box-shadow: 0 4px 16px rgba(13, 8, 27, 0.03) !important;
+  margin-top: 20px !important;
   box-sizing: border-box !important;
-}
-
-@media (min-width: 768px) {
-  #reviews-wrapper-block,
-  #faq-wrapper-block {
-    padding: 24px 20px !important;
-  }
 }
 
 .section-title-mini { 
-  font-size: 14px !important; 
+  font-size: 13.5px !important; 
   font-weight: 800 !important; 
-  color: #FFF !important; 
-  text-align: center !important; 
-  margin-bottom: 16px !important; 
+  color: var(--text-main) !important; 
+  text-align: left !important; 
+  margin-bottom: 14px !important; 
 }
 
 .reviews-grid-wrapper {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
   width: 100% !important;
-  box-sizing: border-box !important;
 }
 
 @media (min-width: 768px) {
   .reviews-grid-wrapper {
+    display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 14px !important;
   }
 }
 
 .review-card-item {
-  background: rgba(255, 255, 255, 0.025) !important;
-  border: 1px solid rgba(192, 132, 252, 0.15) !important;
-  border-radius: 16px !important;
-  padding: 16px !important;
+  background: var(--surface-subtle) !important;
+  border: 1px solid var(--border-hairline) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
-  gap: 12px !important;
+  gap: 8px !important;
   text-align: left !important;
-  box-sizing: border-box !important;
-  transition: transform 0.25s ease, border-color 0.25s ease !important;
+  transition: transform 0.25s ease !important;
 }
 
-.review-card-item:hover {
-  transform: translateY(-2px) !important;
-  border-color: rgba(192, 132, 252, 0.4) !important;
-}
+.review-card-item:hover { transform: translateY(-2px) !important; }
 
 .review-card-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 10px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-  padding-bottom: 10px !important;
+  gap: 8px !important;
+  border-bottom: 1px solid var(--border-hairline) !important;
+  padding-bottom: 8px !important;
 }
 
-.review-user-info {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
-}
-
-.review-user-info > div {
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
-}
+.review-user-info { display: flex !important; align-items: center !important; gap: 8px !important; }
 
 .review-avatar-circle {
-  width: 36px !important;
-  height: 36px !important;
+  width: 34px !important;
+  height: 34px !important;
   border-radius: 50% !important;
-  background: linear-gradient(135deg, #7C3AED 0%, #C084FC 100%) !important;
+  background: linear-gradient(135deg, var(--crimson-main) 0%, var(--violet-main) 100%) !important;
   color: #FFFFFF !important;
   font-weight: 800 !important;
-  font-size: 13px !important;
+  font-size: 12.5px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  flex-shrink: 0 !important;
-  box-shadow: 0 0 12px rgba(124, 58, 237, 0.4) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
-.review-username {
-  font-size: 12.5px !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-  line-height: 1.2 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.review-user-loc {
-  font-size: 10.5px !important;
-  font-weight: 600 !important;
-  color: #C084FC !important;
-  margin-top: 2px !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.review-stars-list {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 2.5px !important;
-  color: #FBBF24 !important;
-  font-size: 10.5px !important;
-  flex-shrink: 0 !important;
-}
-
-.review-comment-body {
-  font-size: 11.5px !important;
-  color: #D4D4D8 !important;
-  line-height: 1.65 !important;
-  margin: 0 !important;
-  font-style: normal !important;
-  flex-grow: 1 !important;
-}
-
-.review-verified-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  font-size: 9.5px !important;
-  font-weight: 700 !important;
-  color: #00E676 !important;
-  background: rgba(0, 230, 118, 0.08) !important;
-  border: 1px solid rgba(0, 230, 118, 0.22) !important;
-  padding: 3px 9px !important;
-  border-radius: 100px !important;
-  width: fit-content !important;
-  margin-top: auto !important;
-}
+.review-username { font-size: 12.5px !important; font-weight: 800 !important; color: var(--text-main) !important; }
+.review-user-loc { font-size: 10px !important; font-weight: 600 !important; color: var(--violet-main) !important; }
+.review-stars-list { color: var(--gold-star) !important; font-size: 10px !important; }
+.review-comment-body { font-size: 11.5px !important; color: var(--text-sub) !important; line-height: 1.55 !important; }
 
 .live-concierge-bar {
-  background: linear-gradient(135deg, rgba(30, 14, 56, 0.9) 0%, rgba(14, 10, 26, 0.9) 100%) !important;
-  border: 1px solid rgba(192, 132, 252, 0.35) !important;
+  background: linear-gradient(135deg, var(--surface-subtle), var(--surface-white)) !important;
+  border: 1px solid var(--border-card) !important;
   border-radius: 18px !important;
   padding: 16px 18px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
-  text-align: left !important;
+  gap: 10px !important;
+  text-align: center !important;
+  margin-top: 18px !important;
 }
 
 @media (min-width: 768px) {
-  .live-concierge-bar { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
+  .live-concierge-bar { 
+    flex-direction: row !important; 
+    align-items: center !important; 
+    justify-content: space-between !important; 
+    text-align: left !important;
+  }
 }
-
-.concierge-status-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  background: rgba(0, 230, 118, 0.12) !important;
-  border: 1px solid rgba(0, 230, 118, 0.35) !important;
-  color: #00E676 !important;
-  font-size: 9.5px !important;
-  font-weight: 800 !important;
-  padding: 2px 8px !important;
-  border-radius: 100px !important;
-  margin-bottom: 4px !important;
-}
-
-.live-pulse-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: #00E676; box-shadow: 0 0 6px #00E676;
-}
-
-.concierge-title { font-size: 13.5px !important; font-weight: 800 !important; color: #FFFFFF !important; margin: 0 0 3px 0 !important; }
-.concierge-hours { font-size: 11.5px !important; color: #CBD5E1 !important; margin: 0 !important; }
-.concierge-hours strong { color: #00E676; font-weight: 800; }
 
 .btn-concierge-line {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  background: #00E676 !important;
-  color: #000000 !important;
-  padding: 11px 20px !important;
+  background: var(--line-green) !important;
+  color: #FFFFFF !important;
+  padding: 11px 22px !important;
   border-radius: 100px !important;
-  font-size: 12.5px !important;
-  font-weight: 900 !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
   text-decoration: none !important;
-  white-space: nowrap !important;
-  box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35) !important;
-}
-
-.hub-links-nav {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-  margin-top: 16px !important;
-  padding-top: 14px !important;
-  border-top: 1px dashed rgba(255, 255, 255, 0.08) !important;
-}
-
-.hub-nav-label { font-size: 11px !important; color: #A1A1AA !important; font-weight: 600 !important; }
-
-.hub-nav-chip {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #E2E8F0 !important;
-  padding: 4px 12px !important;
-  border-radius: 100px !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  text-decoration: none !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  transition: all 0.2s ease !important;
-}
-
-.hub-nav-chip:hover {
-  background: rgba(192, 132, 252, 0.15) !important;
-  border-color: rgba(192, 132, 252, 0.4) !important;
-  color: #FFF !important;
+  box-shadow: 0 4px 14px rgba(6, 199, 85, 0.25) !important;
 }
 
 /* ==============================================================================
    12. SEO CONTENT DRAWER & MAP
    ============================================================================== */
-.seo-bento-card {
-  background: rgba(13, 9, 24, 0.85) !important;
-  border: 1.5px solid rgba(192, 132, 252, 0.22) !important;
-  border-radius: 20px !important;
-  padding: 16px 14px !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8) !important;
-  margin-top: 20px !important;
-  margin-bottom: 16px !important;
-  box-sizing: border-box !important;
-}
-
-.seo-card-header {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-bottom: 12px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-  padding-bottom: 10px !important;
-}
-
-.seo-intro-heading {
-  font-size: clamp(14.5px, 3.8vw, 17px) !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-  margin: 0 !important;
-}
-
 .seo-drawer-wrapper {
   position: relative !important;
   overflow: hidden !important;
-  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  margin: 20px 0;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
+  margin: 18px 0;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-hairline);
   border-radius: 16px;
-  padding: 18px;
+  padding: 16px;
 }
 
-.seo-drawer-wrapper.collapsed {
-  max-height: 85px !important;
-}
-
-.seo-drawer-wrapper:not(.collapsed) {
-  max-height: 2500px !important;
-}
+.seo-drawer-wrapper.collapsed { max-height: 85px !important; }
+.seo-drawer-wrapper:not(.collapsed) { max-height: 2500px !important; }
 
 .seo-drawer-fade {
   display: none;
@@ -1836,75 +1628,35 @@ footer.fmh-footer .brand-logo-text *,
   left: 0 !important;
   right: 0 !important;
   height: 50px !important;
-  background: linear-gradient(to bottom, rgba(13, 9, 24, 0) 0%, rgba(13, 9, 24, 0.98) 100%) !important;
+  background: linear-gradient(to bottom, rgba(246, 243, 250, 0) 0%, rgba(246, 243, 250, 1) 100%) !important;
   pointer-events: none !important;
 }
 
-.seo-drawer-wrapper.collapsed .seo-drawer-fade {
-  display: block !important;
-}
+.seo-drawer-wrapper.collapsed .seo-drawer-fade { display: block !important; }
+.seo-content-inner { font-size: 12px; color: var(--text-sub); line-height: 1.65; }
+.seo-content-inner p { font-size: 12px !important; color: var(--text-sub) !important; line-height: 1.65 !important; margin-bottom: 10px !important; text-align: left !important; }
 
-.seo-content-inner {
-  font-size: 12.5px;
-  color: var(--text-gray, #94a3b8);
-  line-height: 1.7;
-}
-
-.seo-content-inner p {
-  font-size: 12px !important;
-  color: #CBD5E1 !important;
-  line-height: 1.7 !important;
-  margin-bottom: 10px !important;
-  text-align: left !important;
-}
-
-.kw-zone {
-  display: inline-flex !important;
-  align-items: center !important;
-  background: rgba(192, 132, 252, 0.12) !important;
-  border: 1px solid rgba(192, 132, 252, 0.35) !important;
-  color: #E9D5FF !important;
-  font-weight: 700 !important;
-  font-size: 11px !important;
-  padding: 1px 7px !important;
-  border-radius: 6px !important;
-  text-decoration: none !important;
-  margin: 0 1px !important;
-  transition: all 0.2s ease !important;
-}
-
-.kw-zone:hover {
-  background: rgba(192, 132, 252, 0.25) !important;
-  color: #FFF !important;
-}
-
-.verification-section { 
-  max-width: 850px; 
-  margin: 24px auto 0 auto; 
-  padding: 0 12px; 
-  box-sizing: border-box; 
-}
-
+.verification-section { max-width: 850px; margin: 28px auto 0 auto; padding: 0 4px; }
 .verification-box { 
-  padding: 14px 18px !important; 
-  background: rgba(14, 10, 24, 0.85) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
-  border-radius: 16px; 
+  padding: 14px 16px !important; 
+  background: var(--surface-white) !important; 
+  border: 1px solid var(--border-card) !important; 
+  border-radius: 16px !important; 
   display: flex; 
   align-items: center; 
-  gap: 14px; 
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8); 
+  gap: 12px; 
+  box-shadow: 0 4px 16px rgba(13, 8, 27, 0.04) !important; 
 }
 
 #map-section { 
   max-width: 1050px !important; 
-  margin: 20px auto 30px auto !important; 
-  border-radius: 18px !important; 
+  margin: 24px auto 32px auto !important; 
+  border-radius: 20px !important; 
   overflow: hidden !important; 
-  border: 1px solid rgba(192, 132, 252, 0.25) !important; 
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important; 
+  border: 1px solid var(--border-card) !important; 
+  box-shadow: var(--shadow-card-pop) !important; 
 }
-#map-container { width: 100% !important; height: 180px !important; position: relative !important; }
+#map-container { width: 100% !important; height: 180px !important; }
 #google-map { width: 100% !important; height: 100% !important; border: 0 !important; }
 
 /* ==============================================================================
@@ -1912,677 +1664,1698 @@ footer.fmh-footer .brand-logo-text *,
    ============================================================================== */
 .search-bottom-sheet {
   position: fixed !important;
-  bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-  left: 8px !important;
-  right: 8px !important;
-  max-width: 480px !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translate(-50%, 120%) !important;
+  width: 100% !important;
+  max-width: 500px !important;
   margin: 0 auto !important;
-  background: rgba(14, 9, 30, 0.98) !important;
+  background: var(--surface-white) !important;
   backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
-  border-radius: 24px !important;
-  border: 1.5px solid rgba(192, 132, 252, 0.4) !important;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95) !important;
+  border-radius: 26px 26px 0 0 !important;
+  border: 1px solid var(--border-hairline) !important;
+  box-shadow: 0 -10px 40px rgba(13, 8, 27, 0.12) !important;
   z-index: 3100 !important;
-  transform: translate3d(0, 120%, 0) !important;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease !important;
-  padding: 12px 14px 20px 14px !important;
+  padding: 16px 20px 30px 20px !important;
   max-height: 88dvh !important;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
 }
 
-.search-bottom-sheet.active { 
-  transform: translate3d(0, 0, 0) !important; 
-  pointer-events: auto !important;
-  visibility: visible !important;
-}
-
-.sheet-drag-handle { width: 36px; height: 4px; background: rgba(255, 255, 255, 0.25); border-radius: 10px; margin: 0 auto 8px auto; flex-shrink: 0; }
-.sheet-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 10px; flex-shrink: 0; }
-.sheet-close-btn { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: #FFF; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.search-bottom-sheet.active { transform: translate(-50%, 0) !important; pointer-events: auto !important; visibility: visible !important; }
+.sheet-drag-handle { width: 36px; height: 4px; background: #E2DDF0; border-radius: 10px; margin: 0 auto 12px auto; flex-shrink: 0; }
+.sheet-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-hairline); margin-bottom: 10px; flex-shrink: 0; }
+.sheet-close-btn { background: var(--surface-subtle); border: none; color: var(--text-muted); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .sheet-body-content { overflow-y: auto !important; -webkit-overflow-scrolling: touch; padding-bottom: 15px; flex-grow: 1; }
-
 .search-inputs-row { display: grid; grid-template-columns: 1fr; gap: 8px; }
-.search-control { position: relative !important; width: 100%; }
-
-.search-input-field {
-  width: 100% !important;
-  background-color: #0c081d !important;
-  border: 1.5px solid rgba(192, 132, 252, 0.3) !important;
-  color: #FFF !important;
-  padding: 10px 38px 10px 14px !important;
-  font-size: 13px !important;
-  border-radius: 12px !important;
-  outline: none !important;
-  height: 42px !important;
-  box-sizing: border-box !important;
-}
-
-.search-input-field:focus { border-color: #C084FC !important; box-shadow: 0 0 12px rgba(192, 132, 252, 0.35) !important; }
-
-.search-select-field {
-  width: 100%;
-  background-color: #0c081d !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #FFF;
-  padding: 8px 12px;
-  font-size: 12px;
-  border-radius: 10px !important;
-  outline: none;
-  height: 38px !important;
-}
-
-#clear-search-btn {
-  position: absolute !important; right: 10px !important; top: 50% !important; transform: translateY(-50%) !important;
-  background: rgba(255, 255, 255, 0.1) !important; border: none !important; color: #A1A1AA !important;
-  width: 22px !important; height: 22px !important; border-radius: 50% !important; cursor: pointer !important;
-  display: flex !important; align-items: center !important; justify-content: center !important; font-size: 11px !important; z-index: 10 !important;
-}
-
-#search-suggestions {
-  position: relative !important; top: auto !important; left: auto !important; right: auto !important; margin-top: 8px !important;
-  z-index: 50 !important; max-height: 280px !important; overflow-y: auto !important; border-radius: 14px !important;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8) !important;
-}
-
+.search-input-field { width: 100% !important; background-color: var(--surface-subtle) !important; border: 1px solid var(--border-hairline) !important; color: var(--text-main) !important; padding: 10px 38px 10px 14px !important; font-size: 13px !important; border-radius: 12px !important; outline: none !important; height: 42px !important; box-sizing: border-box !important; }
+.search-select-field { width: 100%; background-color: var(--surface-subtle) !important; border: 1px solid var(--border-hairline) !important; color: var(--text-main); padding: 8px 12px; font-size: 12px; border-radius: 10px !important; outline: none; height: 38px !important; }
+#clear-search-btn { position: absolute !important; right: 10px !important; top: 50% !important; transform: translateY(-50%) !important; background: var(--surface-subtle) !important; border: none !important; color: var(--text-muted) !important; width: 22px !important; height: 22px !important; border-radius: 50% !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 11px !important; z-index: 10 !important; }
+#search-suggestions { position: relative !important; top: auto !important; left: auto !important; right: auto !important; margin-top: 8px !important; z-index: 50 !important; max-height: 280px !important; overflow-y: auto !important; border-radius: 14px !important; box-shadow: 0 10px 30px rgba(13, 8, 27, 0.08) !important; }
 .sheet-region-tabs { display: flex; gap: 6px; justify-content: center; margin: 10px 0 6px 0; }
-.region-tab { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: #A1A1AA; padding: 5px 14px; border-radius: 100px; font-size: 11px; font-weight: 700; cursor: pointer; }
-.region-tab.active { background: var(--primary-purple); color: #000; font-weight: 800; }
+.region-tab { background: var(--surface-subtle); border: 1px solid var(--border-hairline); color: var(--text-muted); padding: 5px 14px; border-radius: 100px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.region-tab.active { background: linear-gradient(135deg, var(--crimson-main), var(--violet-main)); color: #FFFFFF; border-color: transparent; font-weight: 800; }
 .sheet-action-footer { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 10px; }
-.sheet-reset-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #F87171; border-radius: 100px; padding: 9px; font-size: 11.5px; font-weight: 800; cursor: pointer; }
-.sheet-apply-btn { background: linear-gradient(135deg, #7C3AED, #5A2CBE); border: none; color: #FFF; border-radius: 100px; padding: 9px; font-size: 12px; font-weight: 800; cursor: pointer; }
+.sheet-reset-btn { background: var(--surface-subtle); border: 1px solid var(--border-hairline); color: var(--crimson-main); border-radius: 100px; padding: 9px; font-size: 11.5px; font-weight: 800; cursor: pointer; }
+.sheet-apply-btn { background: linear-gradient(135deg, var(--crimson-main), var(--violet-main)); border: none; color: #FFFFFF; border-radius: 100px; padding: 9px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25); }
 
 /* ==============================================================================
-   14. FLOATING APP DOCK (Mobile Bottom Nav)
+   14. FLOATING APP DOCK
    ============================================================================== */
 .floating-app-dock { display: none; }
 @media (max-width: 768px) {
   .floating-app-dock { 
     display: flex !important; position: fixed !important; bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important; 
-    left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 20px) !important; max-width: 440px !important; 
-    height: 54px !important; background: rgba(13, 8, 30, 0.95) !important; backdrop-filter: blur(20px) !important; 
-    border: 1px solid rgba(192, 132, 252, 0.3) !important; border-radius: 100px !important; z-index: 2000 !important; 
-    justify-content: space-between !important; align-items: center !important; padding: 3px 6px !important; 
+    left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 24px) !important; max-width: 440px !important; 
+    height: 54px !important; background: rgba(255, 255, 255, 0.94) !important; backdrop-filter: blur(24px) !important; 
+    -webkit-backdrop-filter: blur(24px) !important; border: 1px solid var(--border-hairline) !important; border-radius: 100px !important; 
+    z-index: 2000 !important; box-shadow: var(--shadow-dock) !important; justify-content: space-between !important; 
+    align-items: center !important; padding: 3px 6px !important; 
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
   }
-  .floating-app-dock.dock-hidden {
-    transform: translate(-50%, 160%) !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-  .dock-item { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; flex: 1 1 0% !important; color: #A1A1AA !important; text-decoration: none !important; font-size: 9.5px !important; font-weight: 700 !important; gap: 2px !important; background: none; border: none; cursor: pointer; }
+  .floating-app-dock.dock-hidden { transform: translate(-50%, 160%) !important; opacity: 0 !important; pointer-events: none !important; }
+  .dock-item { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; flex: 1 1 0% !important; color: var(--text-muted) !important; text-decoration: none !important; font-size: 9.5px !important; font-weight: 700 !important; gap: 2px !important; background: none; border: none; cursor: pointer; }
   .dock-item i { font-size: 14px !important; }
-  .dock-item.active { color: #E9D5FF !important; }
-  nav.floating-app-dock a.dock-item.dock-item-line { background: linear-gradient(135deg, #11783B 0%, #00E676 100%) !important; color: #FFFFFF !important; border-radius: 100px !important; height: 40px !important; flex-direction: row !important; font-size: 11px !important; font-weight: 800 !important; padding: 0 12px !important; flex: 1.2 1 0% !important; }
+  .dock-item.active { color: var(--crimson-main) !important; }
+  nav.floating-app-dock a.dock-item.dock-item-line { background: var(--line-green) !important; color: #FFFFFF !important; border-radius: 100px !important; height: 40px !important; flex-direction: row !important; font-size: 11px !important; font-weight: 800 !important; padding: 0 12px !important; flex: 1.2 1 0% !important; }
 }
 
 /* ==============================================================================
    15. FULL-SCREEN LUXURY IMMERSIVE LIGHTBOX
    ============================================================================== */
 #lightbox { 
-  position: fixed !important; 
-  inset: 0 !important; 
-  width: 100vw !important; 
-  height: 100dvh !important; 
-  z-index: 9999 !important; 
-  display: none; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  padding: 0 !important; 
-  background-color: rgba(3, 2, 8, 0.96) !important; 
-  backdrop-filter: blur(35px) !important;
-  -webkit-backdrop-filter: blur(35px) !important;
-  box-sizing: border-box !important;
-  pointer-events: none !important;
-  opacity: 0;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 0.3s ease !important;
+  position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100dvh !important; z-index: 9999 !important; 
+  display: none; align-items: center !important; justify-content: center !important; padding: 0 !important; 
+  background-color: rgba(13, 8, 27, 0.6) !important; backdrop-filter: blur(25px) !important; box-sizing: border-box !important; 
+  pointer-events: none !important; opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 0.3s ease !important;
 }
-
-#lightbox.active { 
-  display: flex !important; 
-  pointer-events: auto !important;
-  opacity: 1 !important;
-}
-
-#lightbox.active #lightbox-content-wrapper-el {
-  animation: modalSmoothIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-}
-
-@keyframes modalSmoothIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
+#lightbox.active { display: flex !important; pointer-events: auto !important; opacity: 1 !important; }
 #lightbox-content-wrapper-el { 
-  position: relative !important; 
-  width: 100% !important; 
-  height: 100dvh !important; 
-  max-width: 100% !important; 
-  max-height: 100dvh !important; 
-  background: #080514 !important; 
-  border-radius: 0 !important; 
-  border: none !important;
-  overflow: hidden !important; 
-  margin: 0 !important; 
-  display: flex !important;
-  flex-direction: column !important;
+  position: relative !important; width: 100% !important; height: 100dvh !important; max-width: 100% !important; max-height: 100dvh !important; 
+  background: var(--surface-white) !important; border-radius: 0 !important; border: none !important; overflow: hidden !important; 
+  margin: 0 !important; display: flex !important; flex-direction: column !important;
 }
-
 @media (min-width: 900px) {
   #lightbox { padding: 24px 16px !important; }
-  #lightbox-content-wrapper-el {
-    width: 92vw !important;
-    max-width: 1100px !important;
-    height: 88vh !important;
-    max-height: 860px !important;
-    border-radius: 28px !important;
-    border: 1px solid rgba(192, 132, 252, 0.3) !important;
-    box-shadow: 0 35px 120px rgba(0, 0, 0, 0.98), 0 0 50px rgba(124, 58, 237, 0.2) !important;
-  }
+  #lightbox-content-wrapper-el { width: 92vw !important; max-width: 1100px !important; height: 88vh !important; max-height: 860px !important; border-radius: 28px !important; border: 1px solid var(--border-hairline) !important; box-shadow: 0 35px 120px rgba(20, 10, 40, 0.18) !important; }
 }
-
-.lightbox-top-brand {
-  position: absolute !important;
-  top: calc(14px + env(safe-area-inset-top, 0px)) !important;
-  left: 16px !important;
-  z-index: 70 !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  pointer-events: none !important;
-}
-
-.lightbox-top-brand .brand-logo-text {
-  font-size: 16px !important;
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 14px rgba(255, 20, 147, 0.85)) !important;
-}
-
-.lightbox-close-circle-btn {
-  position: absolute !important;
-  top: calc(12px + env(safe-area-inset-top, 0px)) !important;
-  right: 14px !important;
-  z-index: 70 !important;
-  width: 38px !important;
-  height: 38px !important;
-  background: rgba(14, 10, 26, 0.6) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  border-radius: 50% !important;
-  color: #FFFFFF !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 15px !important;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7) !important;
-}
-
-.lightbox-close-circle-btn:hover {
-  background: rgba(255, 46, 99, 0.85) !important;
-  border-color: #FF2E63 !important;
-  transform: scale(1.08) rotate(90deg) !important;
-}
-
-.lightbox-close-circle-btn:active {
-  transform: scale(0.92) !important;
-}
-
-.lightbox-scroll-body {
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  height: 100% !important;
-  width: 100% !important;
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(192, 132, 252, 0.3) transparent !important;
-}
-
-.lightbox-scroll-body::-webkit-scrollbar {
-  width: 5px;
-}
-.lightbox-scroll-body::-webkit-scrollbar-thumb {
-  background: rgba(192, 132, 252, 0.25);
-  border-radius: 10px;
-}
-
-.lightbox-grid-layout { 
-  display: grid !important; 
-  grid-template-columns: 1fr !important; 
-  width: 100% !important; 
-  min-height: 100% !important;
-}
-
-@media (min-width: 900px) { 
-  .lightbox-grid-layout { 
-    grid-template-columns: 1.15fr 0.85fr !important; 
-    height: 100% !important;
-  } 
-}
-
-.lightbox-image-column {
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
-  background-color: #04020a !important;
-  overflow: hidden !important;
-}
-
-@media (min-width: 900px) {
-  .lightbox-image-column {
-    height: 100% !important;
-    border-right: 1px solid rgba(192, 132, 252, 0.18) !important;
-  }
-}
-
-.lightbox-hero-container { 
-  position: relative !important;
-  width: 100% !important; 
-  height: 66dvh !important;
-  min-height: 420px !important;
-  background: #000000 !important;
-  display: flex !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  overflow: hidden !important;
-}
-
-@media (min-width: 900px) {
-  .lightbox-hero-container {
-    height: 100% !important;
-    min-height: 100% !important;
-  }
-}
-
-.lightbox-hero-container::before {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 90px !important;
-  background: linear-gradient(180deg, rgba(5, 3, 12, 0.7) 0%, rgba(5, 3, 12, 0.25) 60%, transparent 100%) !important;
-  z-index: 10 !important;
-  pointer-events: none !important;
-}
-
-.lightbox-hero-container::after {
-  content: "" !important;
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 60px !important;
-  background: linear-gradient(0deg, rgba(8, 5, 20, 0.95) 0%, transparent 100%) !important;
-  z-index: 10 !important;
-  pointer-events: none !important;
-}
-
-@media (min-width: 900px) {
-  .lightbox-hero-container::after { display: none !important; }
-}
-
-#lightboxHeroImage { 
-  width: 100% !important; 
-  height: 100% !important; 
-  object-fit: cover !important; 
-  object-position: top center !important; 
-  display: block !important;
-  transition: opacity 0.2s ease !important;
-}
-
-#lightboxThumbnailStrip { 
-  display: none; 
-  gap: 8px !important; 
-  overflow-x: auto !important; 
-  padding: 10px 14px !important; 
-  background: rgba(6, 3, 15, 0.95) !important; 
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  scrollbar-width: none !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-#lightboxThumbnailStrip::-webkit-scrollbar { display: none; }
-
-.lightbox-thumb-item {
-  width: 52px !important;
-  height: 68px !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
-  flex-shrink: 0 !important;
-  cursor: pointer !important;
-  background: #000 !important;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
-}
-
-.lightbox-thumb-item:hover {
-  transform: translateY(-2px) !important;
-  border-color: rgba(255, 20, 147, 0.6) !important;
-}
-
-.lightbox-thumb-item.active {
-  border-color: #FF1493 !important;
-  box-shadow: 0 0 14px rgba(255, 20, 147, 0.85) !important;
-  transform: scale(1.04) !important;
-}
-
-.lightbox-thumb-item img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: top center !important;
-}
-
-.lightbox-details { 
-  padding: 16px 16px calc(32px + env(safe-area-inset-bottom, 0px)) 16px !important; 
-  display: flex !important; 
-  flex-direction: column !important; 
-  gap: 12px !important; 
-  text-align: left !important; 
-  background: rgba(9, 6, 20, 0.98) !important;
-}
-
-@media (min-width: 900px) {
-  .lightbox-details {
-    padding: 32px 24px !important;
-    overflow-y: auto !important;
-    height: 100% !important;
-    background: rgba(10, 6, 22, 0.95) !important;
-  }
-}
-
-.lightbox-quote-card {
-  font-size: 12.5px !important;
-  color: #F8FAFC !important;
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.08) 0%, rgba(124, 58, 237, 0.04) 100%) !important;
-  border-left: 3.5px solid #FF1493 !important;
-  border-radius: 4px 14px 14px 4px !important;
-  padding: 10px 14px !important;
-  line-height: 1.55 !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-}
-
-.lightbox-tags-row {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-}
-
-.lightbox-tag-pill { 
-  background: rgba(124, 58, 237, 0.18) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.35) !important; 
-  color: #E9D5FF !important; 
-  font-size: 11px !important; 
-  font-weight: 700 !important; 
-  padding: 3.5px 10px !important; 
-  border-radius: 100px !important;
-  backdrop-filter: blur(4px) !important;
-}
-
-.bento-stat-tile { 
-  background: rgba(255, 255, 255, 0.035) !important; 
-  border: 1px solid rgba(192, 132, 252, 0.2) !important; 
-  padding: 9px 6px !important; 
-  border-radius: 14px !important; 
-  text-align: center !important; 
-  backdrop-filter: blur(6px) !important;
-  transition: border-color 0.2s ease !important;
-}
-
-.bento-stat-tile:hover {
-  border-color: rgba(192, 132, 252, 0.45) !important;
-}
-
-.lightbox-line-cta { 
-  display: flex !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  gap: 10px !important; 
-  background: linear-gradient(135deg, #00E676 0%, #00C853 100%) !important; 
-  color: #000000 !important; 
-  padding: 14px 22px !important; 
-  border-radius: 100px !important; 
-  font-weight: 900 !important; 
-  font-size: 14.5px !important; 
-  text-decoration: none !important; 
-  cursor: pointer !important; 
-  box-shadow: 0 6px 24px rgba(0, 230, 118, 0.45), 0 0 12px rgba(0, 230, 118, 0.2) !important;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  position: relative !important;
-  overflow: hidden !important;
-}
-
-.lightbox-line-cta:hover {
-  transform: translateY(-2px) scale(1.01) !important;
-  box-shadow: 0 10px 30px rgba(0, 230, 118, 0.6) !important;
-}
-
-.lightbox-line-cta:active {
-  transform: scale(0.97) !important;
-}
+.lightbox-top-brand { position: absolute !important; top: calc(14px + env(safe-area-inset-top, 0px)) !important; left: 16px !important; z-index: 70 !important; background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; pointer-events: none !important; }
+.lightbox-top-brand .brand-logo-text { font-size: 16px !important; }
+.lightbox-close-circle-btn { position: absolute !important; top: calc(12px + env(safe-area-inset-top, 0px)) !important; right: 14px !important; z-index: 70 !important; width: 38px !important; height: 38px !important; background: rgba(255, 255, 255, 0.85) !important; backdrop-filter: blur(16px) !important; border: 1px solid var(--border-hairline) !important; border-radius: 50% !important; color: var(--text-main) !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 15px !important; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease !important; box-shadow: 0 4px 12px rgba(13, 8, 27, 0.08) !important; }
+.lightbox-close-circle-btn:hover { background: var(--crimson-main) !important; color: #FFFFFF !important; transform: scale(1.08) rotate(90deg) !important; }
+.lightbox-scroll-body { overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; height: 100% !important; width: 100% !important; scrollbar-width: thin !important; }
+.lightbox-grid-layout { display: grid !important; grid-template-columns: 1fr !important; width: 100% !important; min-height: 100% !important; }
+@media (min-width: 900px) { .lightbox-grid-layout { grid-template-columns: 1.15fr 0.85fr !important; height: 100% !important; } }
+.lightbox-image-column { position: relative !important; display: flex !important; flex-direction: column !important; background-color: var(--surface-subtle) !important; overflow: hidden !important; }
+@media (min-width: 900px) { .lightbox-image-column { height: 100% !important; border-right: 1px solid var(--border-hairline) !important; } }
+.lightbox-hero-container { position: relative !important; width: 100% !important; height: 66dvh !important; min-height: 420px !important; background: var(--surface-subtle) !important; display: flex !important; align-items: center !important; justify-content: center !important; overflow: hidden !important; }
+@media (min-width: 900px) { .lightbox-hero-container { height: 100% !important; min-height: 100% !important; } }
+#lightboxHeroImage { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; display: block !important; }
+#lightboxThumbnailStrip { display: none; gap: 8px !important; overflow-x: auto !important; padding: 10px 14px !important; background: var(--surface-white) !important; border-top: 1px solid var(--border-hairline) !important; scrollbar-width: none !important; }
+.lightbox-thumb-item { width: 52px !important; height: 68px !important; border-radius: 12px !important; overflow: hidden !important; border: 1.5px solid var(--border-hairline) !important; flex-shrink: 0 !important; cursor: pointer !important; background: var(--surface-subtle) !important; }
+.lightbox-thumb-item:hover { border-color: var(--crimson-main) !important; }
+.lightbox-thumb-item.active { border-color: var(--crimson-main) !important; box-shadow: 0 0 10px rgba(225, 29, 72, 0.3) !important; transform: scale(1.04) !important; }
+.lightbox-thumb-item img { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: top center !important; }
+.lightbox-details { padding: 16px 16px calc(32px + env(safe-area-inset-bottom, 0px)) 16px !important; display: flex !important; flex-direction: column !important; gap: 12px !important; text-align: left !important; background: var(--surface-white) !important; }
+@media (min-width: 900px) { .lightbox-details { padding: 32px 24px !important; overflow-y: auto !important; height: 100% !important; background: var(--surface-white) !important; } }
+.lightbox-quote-card { font-size: 12.5px !important; color: var(--text-main) !important; background: var(--surface-subtle) !important; border-left: 3.5px solid var(--crimson-main) !important; border-radius: 4px 14px 14px 4px !important; padding: 10px 14px !important; line-height: 1.55 !important; box-shadow: var(--shadow-ambient) !important; }
+.lightbox-tags-row { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
+.lightbox-tag-pill { background: var(--violet-light) !important; border: 1px solid var(--border-card) !important; color: var(--violet-main) !important; font-size: 11px !important; font-weight: 700 !important; padding: 3.5px 10px !important; border-radius: 100px !important; }
+.bento-stat-tile { background: var(--surface-subtle) !important; border: 1px solid var(--border-hairline) !important; padding: 9px 6px !important; border-radius: 14px !important; text-align: center !important; }
+.lightbox-line-cta { display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; background: var(--line-green) !important; color: #FFFFFF !important; padding: 14px 22px !important; border-radius: 100px !important; font-weight: 900 !important; font-size: 14.5px !important; text-decoration: none !important; cursor: pointer !important; box-shadow: 0 6px 24px rgba(6, 199, 85, 0.3) !important; }
 
 /* ==============================================================================
-   16. FOOTER & SOCIAL ICONS
+   16. FOOTER & SOCIAL ICONS (LUXURY CONTRAST)
    ============================================================================== */
 footer.fmh-footer { 
-  background: #060411 !important; 
-  border-top: 1px solid rgba(192, 132, 252, 0.18) !important; 
-  padding: 32px 14px calc(24px + env(safe-area-inset-bottom, 0px)) 14px !important; 
+  background: var(--surface-white) !important; 
+  border-top: 1px solid var(--border-hairline) !important; 
+  padding: 36px 14px calc(24px + env(safe-area-inset-bottom, 0px)) 14px !important; 
   position: relative;
   z-index: 10;
 }
+@media (max-width: 768px) { footer.fmh-footer { padding-bottom: calc(115px + env(safe-area-inset-bottom, 0px)) !important; } }
+.footer-top-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+@media (min-width: 768px) { .footer-top-grid { grid-template-columns: 1.3fr 1fr; gap: 36px; } }
+.footer-brand-col { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.footer-brand-desc { font-size: 12.5px; line-height: 1.65; color: var(--text-sub); margin: 0; }
+.footer-social-wrapper { margin-top: 4px; display: flex; flex-direction: column; gap: 8px; }
+.footer-social-label { font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; }
+.footer-social-icons { display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 10px !important; margin-top: 4px !important; }
+.social-btn { width: 38px !important; height: 38px !important; border-radius: 50% !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: var(--surface-subtle) !important; border: 1px solid var(--border-hairline) !important; text-decoration: none !important; cursor: pointer !important; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important; }
+.social-btn svg { width: 18px !important; height: 18px !important; fill: currentColor !important; }
+.social-btn.line { color: #06C755 !important; border-color: rgba(6, 199, 85, 0.2) !important; }
+.social-btn.twitter { color: #0F1419 !important; border-color: rgba(15, 20, 25, 0.2) !important; }
+.social-btn.tiktok { color: #FE2C55 !important; border-color: rgba(254, 44, 85, 0.2) !important; }
+.social-btn:hover, .social-btn:active { transform: translateY(-3px) scale(1.08) !important; background: var(--surface-white) !important; box-shadow: 0 6px 16px rgba(15, 10, 28, 0.1) !important; }
+.footer-heading { font-size: 14px; font-weight: 900; color: var(--text-main); margin-bottom: 12px; text-align: left; }
+.footer-nav-links { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 12.5px; text-align: left; }
+.footer-nav-links a { color: var(--text-sub); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; min-height: 32px; transition: color 0.2s ease, transform 0.2s ease; }
+.footer-nav-links a:hover { color: var(--crimson-main); transform: translateX(2px); }
+.footer-locations-block { border-top: 1px solid var(--border-hairline); padding-top: 20px; margin-bottom: 18px; text-align: left; }
+.footer-subheading { font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; }
+.popular-locations-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 14px; font-size: 12px; }
+@media (min-width: 768px) { .popular-locations-grid { grid-template-columns: repeat(4, 1fr); } }
+.popular-locations-grid a { color: var(--text-sub); font-weight: 600; text-decoration: none; display: inline-block; transition: color 0.2s ease; }
+.popular-locations-grid a:hover { color: var(--crimson-main); }
+.popular-locations-grid a.active { color: var(--crimson-main) !important; font-weight: 800; }
+.footer-bottom-bar { border-top: 1px solid var(--border-hairline); padding-top: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 11.5px; color: var(--text-muted); }
+.footer-legal-links { display: flex; gap: 16px; align-items: center; }
+.footer-legal-links a { color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+.footer-legal-links a:hover { color: var(--crimson-main); }
 
-@media (max-width: 768px) { 
-  footer.fmh-footer { 
-    padding-bottom: calc(115px + env(safe-area-inset-bottom, 0px)) !important; 
-  } 
+/* ==============================================================================
+   🔥 1. HERO SECTION & TYPOGRAPHY UPGRADE (จัดระเบียบข้อความ + มิติแก้วหรูหรา)
+   ============================================================================== */
+.hero-section,
+.hero-section.fmh-hero-surface { 
+  position: relative !important;
+  overflow: hidden !important;
+  text-align: center !important; 
+  display: flex !important; 
+  flex-direction: column !important; 
+  align-items: center !important; 
+  gap: 8px !important; 
+  padding: 26px 16px 22px 16px !important; 
+  margin: 0 auto 26px auto !important; 
+  max-width: 850px !important; 
+  border-radius: 28px !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF8FD 100%) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.15) !important;
+  box-shadow: 0 20px 45px -10px rgba(124, 58, 237, 0.12), 0 4px 16px rgba(13, 8, 27, 0.03) !important;
 }
 
-.footer-top-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  margin-bottom: 24px;
+/* 🟢 ป้าย Verified บนสุด */
+.clutch-pill-compact {
+  display: inline-flex !important; 
+  align-items: center !important; 
+  gap: 6px !important;
+  padding: 4px 12px !important; 
+  border-radius: 100px !important; 
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(225, 29, 72, 0.2) !important;
+  color: var(--crimson-main) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08) !important;
 }
 
-@media (min-width: 768px) {
-  .footer-top-grid { 
-    grid-template-columns: 1.3fr 1fr; 
-    gap: 32px; 
-  }
+.pill-badge-tag { 
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 100%) !important; 
+  color: #FFFFFF !important; 
+  font-size: 9px !important; 
+  font-weight: 900 !important; 
+  padding: 2px 7px !important; 
+  border-radius: 6px !important; 
+  letter-spacing: 0.5px !important;
 }
 
-.footer-brand-col {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  text-align: left;
-}
-
-.footer-brand-desc {
-  font-size: 12px;
-  line-height: 1.65;
-  color: var(--text-muted, #94a3b8);
-  margin: 0;
-}
-
-.footer-social-wrapper {
-  margin-top: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.footer-social-label {
-  font-size: 10.5px;
-  font-weight: 800;
-  color: var(--text-muted, #94a3b8);
-  letter-spacing: 1px;
-}
-
-.footer-social-icons {
+/* 🟢 หัวข้อ H1: คุมการตัดคำภาษาไทยให้สวย ไม่หลุดบรรทัด */
+.seo-h1-title { 
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
-  flex-wrap: wrap !important;
-  gap: 10px !important;
-  margin-top: 4px !important;
+  gap: 4px !important;
+  margin: 6px auto !important; 
+  text-align: center !important;
+  width: 100% !important;
 }
 
-.social-btn {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
+.seo-sub-headline { 
+  font-size: clamp(12.5px, 3.5vw, 14.5px) !important; 
+  font-weight: 800 !important; 
+  color: #7C3AED !important; 
+  letter-spacing: 0.2px !important;
+  line-height: 1.4 !important;
+  word-break: keep-all !important;
+}
+
+.seo-main-headline { 
+  font-size: clamp(19px, 5.2vw, 26px) !important; 
+  font-weight: 900 !important; 
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 45%, #7C3AED 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+  padding: 0 4px !important;
+  text-shadow: 0 10px 20px rgba(225, 29, 72, 0.1) !important;
+}
+
+/* 🟢 ป้ายความปลอดภัยสีเขียวฉ่ำ */
+.luxury-trust-pill { 
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  gap: 8px !important;
+  background: rgba(5, 150, 105, 0.08) !important;
+  border: 1px solid rgba(5, 150, 105, 0.28) !important;
+  border-radius: 100px !important;
+  padding: 5px 14px !important;
+  margin: 4px auto 8px auto !important;
+}
+
+.trust-pill-badge {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  padding: 2px 8px !important;
+  border-radius: 100px !important;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3) !important;
+}
+
+.trust-pill-text {
+  font-size: 11.5px !important;
+  color: #065F46 !important;
+  font-weight: 700 !important;
+}
+
+/* 🟢 3 ก้อนสถิติ 3D Glossy Tiles มีมิติ นูนเด่น ไม่แบน */
+.hero-stats-chips-row { 
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important; 
+  width: 100% !important;
+  max-width: 460px !important;
+  margin: 10px auto 0 auto !important; 
+}
+
+.stat-micro-chip { 
+  background: #FFFFFF !important; 
+  border: 1.5px solid rgba(124, 58, 237, 0.12) !important; 
+  border-radius: 18px !important; 
+  padding: 12px 6px !important; 
+  display: flex !important; 
+  flex-direction: column !important;
+  align-items: center !important; 
+  justify-content: center !important;
+  gap: 2px !important; 
+  box-shadow: 0 8px 20px -4px rgba(13, 8, 27, 0.06), 0 2px 6px rgba(124, 58, 237, 0.04) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.stat-micro-chip:active {
+  transform: scale(0.96) !important;
+}
+
+.stat-micro-chip strong {
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+
+.stat-micro-chip span {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  color: #716486 !important;
+}
+
+/* ==============================================================================
+   🔥 2. SECTION HEADERS & PROVINCE BAR (แถบหัวข้อหรู แยกหมวดหมู่ชัดเจน)
+   ============================================================================== */
+
+/* 🟢 แถบหัวข้อจังหวัดแบบ Glass Ribbon Bar: ไม่จืด ไม่หลุดบรรทัด */
+.section-content-wrapper {
+  margin-top: 32px !important;
+  margin-bottom: 16px !important;
+  width: 100% !important;
+}
+
+.province-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(246, 243, 250, 0.8)) !important;
+  backdrop-filter: blur(12px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(124, 58, 237, 0.12) !important;
+  box-shadow: 0 4px 14px rgba(13, 8, 27, 0.04) !important;
+  margin-bottom: 14px !important;
+}
+
+.province-clean-title {
+  font-size: clamp(15px, 4.2vw, 19px) !important;
+  font-weight: 900 !important;
+  color: #0F091F !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
+
+.province-pin-icon {
+  color: #E11D48 !important;
+  font-size: 16px !important;
+  filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.4)) !important;
+}
+
+.province-name-highlight {
+  background: linear-gradient(135deg, #FF1493 0%, #7C3AED 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 🟢 ป้ายนับจำนวนโปรไฟล์สีเขียวนีออนกระพริบ */
+.province-count-pill {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(5, 150, 105, 0.3) !important;
+  border-radius: 100px !important;
+  padding: 4px 10px !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #059669 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.12) !important;
   text-decoration: none !important;
+}
+
+.province-count-pill .pulse-dot-el {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background-color: #00E676 !important;
+  box-shadow: 0 0 8px #00E676 !important;
+  animation: pulseGreen 1.8s infinite ease-in-out !important;
+}
+
+@keyframes pulseGreen {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
+/* ==============================================================================
+   🔥 3. VIBRANT FILTER PILLS (ปุ่มแคปซูลสีสันสดใส ไม่เรียบแบน)
+   ============================================================================== */
+.filter-pills-scroll-row {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding: 6px 4px 14px 4px !important;
+  margin: 14px 0 6px 0 !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.filter-pills-scroll-row::-webkit-scrollbar { display: none !important; }
+
+.filter-pill-tab {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.14) !important;
+  color: #362E47 !important;
+  padding: 8px 18px !important;
+  border-radius: 100px !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
   cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(15, 9, 31, 0.05) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  -webkit-tap-highlight-color: transparent !important;
 }
 
-.social-btn svg {
-  width: 17px !important;
-  height: 17px !important;
-  fill: currentColor !important;
-  display: block !important;
-  transition: transform 0.25s ease !important;
+.filter-pill-tab:hover {
+  transform: translateY(-2px) !important;
+  border-color: #7C3AED !important;
+  color: #7C3AED !important;
 }
 
-.social-btn.line { color: #06C755 !important; border-color: rgba(6, 199, 85, 0.3) !important; }
-.social-btn.twitter { color: #FFFFFF !important; border-color: rgba(255, 255, 255, 0.3) !important; }
-.social-btn.tiktok { color: #FF2E63 !important; border-color: rgba(255, 46, 99, 0.3) !important; }
-.social-btn.bluesky { color: #0285FF !important; border-color: rgba(2, 133, 255, 0.3) !important; }
-.social-btn.linkedin { color: #0A66C2 !important; border-color: rgba(10, 102, 194, 0.3) !important; }
-.social-btn.biosite { color: #C084FC !important; border-color: rgba(192, 132, 252, 0.3) !important; }
-.social-btn.linktree { color: #00E676 !important; border-color: rgba(0, 230, 118, 0.3) !important; }
-
-.social-btn:hover,
-.social-btn:active {
-  transform: translateY(-3px) scale(1.08) !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+.filter-pill-tab.active {
+  background: linear-gradient(135deg, #FF1493 0%, #7C3AED 100%) !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35) !important;
+  transform: scale(1.02) !important;
 }
 
-.footer-heading {
-  font-size: 13px;
-  font-weight: 800;
-  color: #FFFFFF;
-  margin-bottom: 12px;
-  text-align: left;
+/* ==============================================================================
+   🔥 4. PROFILE CARDS LUXURY UPGRADE (การ์ดคมชัด เงาลึก ป้ายราคาขอบทองนูน)
+   ============================================================================== */
+.profile-card-new {
+  aspect-ratio: 3 / 4.2 !important;
+  width: 100% !important; 
+  position: relative !important; 
+  border-radius: 20px !important; 
+  overflow: hidden !important; 
+  background-color: #0E091C !important; 
+  border: 1.5px solid rgba(255, 255, 255, 0.9) !important; 
+  box-shadow: 0 12px 30px -4px rgba(13, 8, 27, 0.12) !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.footer-nav-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 12px;
-  font-size: 12px;
-  text-align: left;
+.profile-card-new:hover {
+  transform: translateY(-5px) scale(1.02) !important;
+  box-shadow: 0 20px 40px -6px rgba(225, 29, 72, 0.25) !important;
+  border-color: #FF1493 !important;
 }
 
-.footer-nav-links a {
-  color: var(--text-gray, #e4e4e7);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  transition: color 0.2s ease, transform 0.2s ease;
+/* 🟢 ไล่เฉดเงาดำด้านล่างรูปให้เข้มเนียน อ่านตัวหนังสือออกชัด 100% */
+.profile-card-gradient-overlay { 
+  position: absolute !important; 
+  inset: 0 !important; 
+  background: linear-gradient(
+    180deg, 
+    rgba(0, 0, 0, 0.25) 0%, 
+    transparent 40%, 
+    rgba(10, 5, 20, 0.75) 70%, 
+    rgba(8, 4, 18, 0.98) 100%
+  ) !important; 
+  z-index: 5 !important; 
+  pointer-events: none !important;
 }
 
-.footer-nav-links a:hover { 
-  color: var(--primary-purple, #C084FC); 
-  transform: translateX(2px);
+/* 🟢 ป้ายแท็ก #ฟิวแฟน แก้วฝ้า Frosted Glass หรูหรา */
+.card-vibe-pill {
+  font-size: 9px !important; 
+  font-weight: 800 !important; 
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.25) !important; 
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+  padding: 2px 7px !important; 
+  border-radius: 6px !important;
+  line-height: 1.1 !important;
 }
 
-.footer-locations-block {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 18px;
-  margin-bottom: 18px;
-  text-align: left;
+/* 🟢 ป้ายอายุสีชมพูนีออน */
+.profile-card-age-tag {
+  font-size: 10px !important; 
+  color: #FFFFFF !important; 
+  font-weight: 900 !important; 
+  background: linear-gradient(135deg, #FF1493 0%, #FF5E3A 100%) !important; 
+  padding: 2px 6px !important; 
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(255, 20, 147, 0.4) !important;
 }
 
-.footer-subheading {
-  font-size: 11.5px;
-  font-weight: 800;
-  color: var(--text-muted, #94a3b8);
-  margin-bottom: 12px;
+/* 🟢 ป้ายราคา 1.5k ทองเมทัลลิกนูนหรูหรา (Metallic Gold Badge) */
+.profile-card-price { 
+  flex-shrink: 0 !important; 
+  color: #451A03 !important; 
+  background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%) !important;
+  border: 1px solid #FEF3C7 !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  font-weight: 900 !important; 
+  font-size: 12px !important; 
+  line-height: 1 !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4) !important;
 }
 
-.popular-locations-grid {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px 14px;
-  font-size: 12px;
+/* ==============================================================================
+   🌟 CYBER-LUXURY LIVE AURORA BACKGROUND & ULTRA-CRISP 3D GLASS SYSTEM
+   ============================================================================== */
+
+/* 🟢 1. พื้นหลังอนิเมชั่นคลื่นแสงออโรร่า เคลื่อนไหวลื่นไหลตลอดเวลา */
+body {
+  position: relative !important;
+  background-color: #F5F1FA !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
-@media (min-width: 768px) {
-  .popular-locations-grid {
-    grid-template-columns: repeat(4, 1fr);
+body::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: -50% !important;
+  width: 200% !important;
+  height: 200% !important;
+  z-index: -2 !important;
+  background: 
+    radial-gradient(circle at 20% 25%, rgba(255, 20, 147, 0.12) 0%, transparent 35%),
+    radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.14) 0%, transparent 40%),
+    radial-gradient(circle at 40% 75%, rgba(6, 199, 85, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(251, 191, 36, 0.1) 0%, transparent 40%) !important;
+  filter: blur(70px) !important;
+  animation: liveAuroraFlow 20s ease-in-out infinite alternate !important;
+  pointer-events: none !important;
+  will-change: transform !important;
+}
+
+/* 🟢 ลูกเล่นเส้นใย Grid ละเอียดระดับนาโน เพิ่มความลึกของมิติ */
+body::after {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background-image: 
+    radial-gradient(rgba(124, 58, 237, 0.04) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  opacity: 0.8 !important;
+}
+
+@keyframes liveAuroraFlow {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(-4%, 3%, 0) rotate(3deg) scale(1.08);
+  }
+  100% {
+    transform: translate3d(3%, -4%, 0) rotate(-3deg) scale(1.04);
   }
 }
 
-.popular-locations-grid a { 
-  color: var(--text-gray, #e4e4e7); 
-  text-decoration: none; 
-  display: inline-block;
-  transition: color 0.2s ease;
+/* ==============================================================================
+   🌟 2. HERO CARD: กระจกคริสตัลเงาแวววาว + แสงออร่าหมุนรอบตัว
+   ============================================================================== */
+.hero-section,
+.hero-section.fmh-hero-surface {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(124, 58, 237, 0.16),
+    0 0 0 1px rgba(124, 58, 237, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  border-radius: 30px !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
 }
 
-.popular-locations-grid a:hover,
-.popular-locations-grid a:active { 
-  color: var(--primary-purple, #C084FC); 
+/* 🟢 ลูกแก้วแสงลอยด้านหลัง Hero */
+.fmh-ambient-orb-a {
+  animation: orbFloatA 10s ease-in-out infinite alternate !important;
+}
+.fmh-ambient-orb-b {
+  animation: orbFloatB 12s ease-in-out infinite alternate !important;
 }
 
-.popular-locations-grid a.active { 
-  color: var(--primary-purple, #C084FC) !important; 
-  font-weight: 800; 
+@keyframes orbFloatA {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, 20px) scale(1.2); }
+}
+@keyframes orbFloatB {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-30px, -20px) scale(1.25); }
 }
 
-.footer-bottom-bar {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 11.5px;
-  color: var(--text-muted, #94a3b8);
+/* 🟢 3 ก้อนสถิติ: กระจกนูน 3D เงาตกกระทบสมจริง */
+.stat-micro-chip {
+  background: linear-gradient(145deg, #FFFFFF, #F8F5FD) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 
+    0 10px 22px -4px rgba(13, 8, 27, 0.08),
+    0 2px 6px rgba(124, 58, 237, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  border-radius: 20px !important;
 }
 
-.footer-legal-links { 
-  display: flex; 
-  gap: 16px; 
-  align-items: center; 
+.stat-micro-chip strong {
+  background: linear-gradient(135deg, #0D081B 0%, #7C3AED 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
 }
 
-.footer-legal-links a { 
-  color: var(--text-muted, #94a3b8); 
-  text-decoration: none; 
-  transition: color 0.2s ease;
+.stat-micro-chip:nth-child(1) strong {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
-.footer-legal-links a:hover,
-.footer-legal-links a:active { 
-  color: var(--primary-purple, #C084FC); 
+.stat-micro-chip:nth-child(3) strong {
+  background: linear-gradient(135deg, #E11D48 0%, #FF1493 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* ==============================================================================
+   🌟 3. HOT PROFILES SWIPER: การ์ดขอบไฟนีออน ลอยเด่นเหนือพื้นหลัง
+   ============================================================================== */
+.vip-card-item {
+  border-radius: 22px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 
+    0 15px 35px -5px rgba(13, 8, 27, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+}
+
+.vip-card-item:hover,
+.vip-card-item:active {
+  transform: translateY(-6px) scale(1.03) !important;
+  box-shadow: 
+    0 22px 45px -5px rgba(225, 29, 72, 0.35),
+    0 0 20px rgba(255, 20, 147, 0.3) !important;
+  border-color: #FF1493 !important;
+}
+
+/* 🟢 ป้ายสถานะแก้วรมดำ ไฟเขียว Radar Pulse */
+.vip-status-chip,
+.badge-status {
+  background: rgba(10, 5, 20, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(0, 230, 118, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 230, 118, 0.25) !important;
+}
+
+/* 🟢 ป้าย #HOT เปลวไฟสะท้อนแสง */
+.hot-rank-badge,
+.badge-hot-tag {
+  background: linear-gradient(135deg, #FF1493 0%, #FF3366 50%, #FF6B00 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 20, 147, 0.5) !important;
+  animation: hotBadgeShimmer 2.5s infinite linear !important;
+}
+
+/* ==============================================================================
+   🌟 4. PROVINCE RIBBON BAR: แถบแก้วหรูหรา แบ่งสัดส่วนชัดเจน
+   ============================================================================== */
+.province-header-row {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 
+    0 10px 25px -4px rgba(124, 58, 237, 0.08),
+    0 2px 6px rgba(13, 8, 27, 0.03) !important;
+  border-radius: 18px !important;
+  padding: 10px 14px !important;
+}
+
+.province-clean-title {
+  font-size: clamp(16px, 4.4vw, 20px) !important;
+  letter-spacing: -0.3px !important;
+}
+
+.province-count-pill {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(5, 150, 105, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15) !important;
+  padding: 5px 12px !important;
+}
+
+/* ==============================================================================
+   🌟 5. MASTER PROFILE CARDS: มิติการ์ด คมกริบ 100% ตัวหนังสือลอยเด่น
+   ============================================================================== */
+.profile-card-new {
+  border-radius: 22px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 
+    0 14px 34px -4px rgba(13, 8, 27, 0.12),
+    0 2px 8px rgba(124, 58, 237, 0.05) !important;
+  background: #0E091C !important;
+}
+
+.profile-card-new:hover {
+  transform: translateY(-6px) scale(1.025) !important;
+  border-color: #FF1493 !important;
+  box-shadow: 
+    0 24px 50px -6px rgba(225, 29, 72, 0.3),
+    0 0 25px rgba(225, 29, 72, 0.2) !important;
+}
+
+/* 🟢 ไล่ระดับเงามืดด้านล่างการ์ดให้อ่านตัวหนังสือชัด 100% */
+.profile-card-gradient-overlay {
+  background: linear-gradient(
+    180deg, 
+    rgba(0, 0, 0, 0.3) 0%, 
+    transparent 35%, 
+    rgba(10, 5, 20, 0.78) 65%, 
+    rgba(7, 3, 15, 0.98) 100%
+  ) !important;
+}
+
+.profile-card-name {
+  font-size: 15.5px !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* 🟢 ป้ายราคา 1.5k ทองคำเมทัลลิกประกายเพชร */
+.profile-card-price {
+  background: linear-gradient(135deg, #FFE259 0%, #FFA751 100%) !important;
+  color: #381A00 !important;
+  border: 1px solid #FFF5C0 !important;
+  font-weight: 900 !important;
+  font-size: 12.5px !important;
+  padding: 3px 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 3px 12px rgba(255, 167, 81, 0.5) !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ==============================================================================
+   🌟 6. FLOATING DOCK & CONCIERGE BENTO UPGRADE
+   ============================================================================== */
+.luxury-bento-wrapper {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 20px 50px -10px rgba(124, 58, 237, 0.12) !important;
+  border-radius: 30px !important;
+}
+
+.floating-app-dock {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 16px 45px rgba(13, 8, 27, 0.18), 0 0 20px rgba(124, 58, 237, 0.08) !important;
+}
+
+/* ==============================================================================
+   👑 ULTRA-MODERN CYBER-LUXURY HERO (2026 EDITION)
+   ============================================================================== */
+
+/* 🟢 การ์ด Hero หลัก: กระจกแก้วคริสตัลขอบสะท้อนแสง */
+.hero-section,
+.hero-section.fmh-hero-surface {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 1) !important;
+  border-radius: 32px !important;
+  padding: 24px 16px 22px 16px !important;
+  margin: 0 auto 28px auto !important;
+  max-width: 860px !important;
+  box-shadow: 
+    0 24px 60px -12px rgba(124, 58, 237, 0.14),
+    0 0 0 1px rgba(124, 58, 237, 0.06),
+    inset 0 2px 6px rgba(255, 255, 255, 1) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+/* 🟢 แถบสถานะบนสุด */
+.hero-top-status-bar {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: rgba(246, 243, 250, 0.9) !important;
+  border: 1px solid rgba(124, 58, 237, 0.12) !important;
+  padding: 4px 12px 4px 6px !important;
+  border-radius: 100px !important;
+  box-shadow: 0 4px 12px rgba(13, 8, 27, 0.04) !important;
+}
+
+.status-radar-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  padding: 3px 8px !important;
+  border-radius: 100px !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35) !important;
+}
+
+.radar-dot {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #FFFFFF !important;
+  animation: radarDotPulse 1.5s infinite ease-in-out !important;
+}
+
+@keyframes radarDotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.4; }
+}
+
+.stars-rating-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #362E47 !important;
+}
+
+.stars-gold {
+  color: #F59E0B !important;
+  font-size: 10px !important;
+  letter-spacing: 1px !important;
+}
+
+/* 🟢 หัวข้อ H1 ดีไซน์ 2 บรรทัดคมกริบ */
+.seo-h1-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 2px auto !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+.hero-kicker-tag {
+  font-size: clamp(11px, 3vw, 12.5px) !important;
+  font-weight: 800 !important;
+  color: #7C3AED !important;
+  letter-spacing: 0.5px !important;
+  background: rgba(124, 58, 237, 0.08) !important;
+  border: 1px solid rgba(124, 58, 237, 0.15) !important;
+  padding: 3px 12px !important;
+  border-radius: 100px !important;
+}
+
+.hero-main-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  line-height: 1.25 !important;
+  gap: 2px !important;
+}
+
+.title-line-1 {
+  font-size: clamp(20px, 5.8vw, 28px) !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 2px 8px rgba(255, 20, 147, 0.15)) !important;
+}
+
+.title-line-2 {
+  font-size: clamp(17px, 4.8vw, 24px) !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.hero-subtitle-p {
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  color: #4A4458 !important;
+  max-width: 620px !important;
+  margin: 0 auto !important;
+}
+
+/* 🟢 แถบความปลอดภัย Cyber-Lock Strip */
+.hero-security-strip {
+  width: 100% !important;
+  max-width: 480px !important;
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%) !important;
+  border: 1.5px solid rgba(5, 150, 105, 0.25) !important;
+  border-radius: 20px !important;
+  padding: 10px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  text-align: left !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.06) !important;
+}
+
+.sec-icon-circle {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35) !important;
+}
+
+.sec-text-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.sec-title {
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  color: #065F46 !important;
+}
+
+.sec-desc {
+  font-size: 10.5px !important;
+  color: #374151 !important;
+  line-height: 1.3 !important;
+}
+
+.sec-desc strong {
+  color: #059669 !important;
+}
+
+/* 🟢 เกาะสถิติแก้ว 3D Connected Island */
+.hero-stats-island {
+  width: 100% !important;
+  max-width: 480px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F9F6FD 100%) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.14) !important;
+  border-radius: 22px !important;
+  padding: 10px 6px !important;
+  box-shadow: 
+    0 12px 30px -6px rgba(13, 8, 27, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+.stat-island-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 1px !important;
+  flex: 1 !important;
+}
+
+.stat-num-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.stat-num {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+
+.stat-green {
+  background: linear-gradient(135deg, #059669, #10B981) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.stat-gold {
+  background: linear-gradient(135deg, #D97706, #F59E0B) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.stat-pink {
+  background: linear-gradient(135deg, #FF1493, #E11D48) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.stat-mini-pill {
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+  padding: 1px 4px !important;
+  border-radius: 4px !important;
+  line-height: 1 !important;
+}
+
+.live-pill { background: rgba(5, 150, 105, 0.15) !important; color: #059669 !important; }
+.real-pill { background: rgba(217, 119, 6, 0.15) !important; color: #D97706 !important; }
+.safe-pill { background: rgba(225, 29, 72, 0.15) !important; color: #E11D48 !important; }
+
+.stat-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #716486 !important;
+}
+
+.stat-island-divider {
+  width: 1px !important;
+  height: 28px !important;
+  background: rgba(124, 58, 237, 0.12) !important;
+}
+
+/* ==============================================================================
+   🔥 HOT SECTION HEADER UPGRADE
+   ============================================================================== */
+.hot-section-header-modern {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.hot-title-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+}
+
+.hot-icon-flame {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #FF1493 0%, #FF6B00 100%) !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  box-shadow: 0 4px 12px rgba(255, 20, 147, 0.4) !important;
+}
+
+.hot-title-gradient {
+  font-size: clamp(20px, 5.5vw, 24px) !important;
+  font-weight: 900 !important;
+  color: #0D081B !important;
+  margin: 0 !important;
+}
+
+.hot-tag-neon {
+  background: linear-gradient(135deg, #7C3AED 0%, #FF1493 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 100px !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3) !important;
+}
+
+.hot-swipe-capsule {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(124, 58, 237, 0.15) !important;
+  color: #716486 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 4px 16px !important;
+  border-radius: 100px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  box-shadow: 0 2px 8px rgba(13, 8, 27, 0.04) !important;
+}
+
+.hot-swipe-capsule .arrow-l { animation: bounceLeft 1.5s infinite ease-in-out !important; color: #FF1493 !important; }
+.hot-swipe-capsule .arrow-r { animation: bounceRight 1.5s infinite ease-in-out !important; color: #7C3AED !important; }
+
+@keyframes bounceLeft {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-3px); }
+}
+@keyframes bounceRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+
+/* ==============================================================================
+   👑 QUIET LUXURY / MINIMAL HIGH-END (แก้ปัญหาสีลิเก คุมโทนหรูหรา 100%)
+   ============================================================================== */
+
+/* 🟢 พื้นหลังเว็บ: สีขาวมุกสะอาดตา ตัดแสงแยงตาทิ้ง */
+body {
+  background: #F8F7FA !important;
+  color: #0F172A !important;
+}
+
+body::before {
+  display: none !important; /* ปิดเอฟเฟกต์สีรุ้งด้านหลังทิ้ง เพื่อความสะอาดตา */
+}
+
+/* 🟢 การ์ด Hero: สีขาวคลีน ขอบบางเฉียบ เงาเบาแบบผู้ดี */
+.hero-section,
+.hero-section.fmh-hero-surface {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 24px !important;
+  padding: 24px 16px 20px 16px !important;
+  margin: 0 auto 24px auto !important;
+  max-width: 820px !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+/* 🟢 1. ป้ายรับรองมินิมอล โทนดำ-ทองผู้ดี */
+.luxury-status-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  padding: 4px 12px !important;
+  border-radius: 100px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+}
+
+.status-dot-emerald {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: #10B981 !important;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6) !important;
+}
+
+.badge-text-main {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  color: #0F172A !important;
+}
+
+.badge-sep { color: #94A3B8 !important; }
+.badge-stars { color: #D97706 !important; font-size: 9.5px !important; letter-spacing: 1px !important; }
+.badge-text-sub { color: #475569 !important; font-size: 10.5px !important; }
+
+/* 🟢 2. หัวข้อ H1 สีเข้มคมชัด (Typography ชนะเลิศ ไม่อิงสีรุ้ง) */
+.hero-typography-block {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.hero-category-kicker {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  letter-spacing: 0.2px !important;
+}
+
+.seo-h1-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.headline-primary {
+  font-size: clamp(21px, 6vw, 28px) !important;
+  font-weight: 900 !important;
+  color: #0F172A !important; /* ดำเข้ม คมกริบ */
+  line-height: 1.25 !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+.headline-secondary {
+  font-size: clamp(17px, 4.8vw, 23px) !important;
+  font-weight: 900 !important;
+  color: #831843 !important; /* สีไวน์แดงหรูหรา (Deep Velvet Rose) สุภาพ ไม่ลิเก */
+  line-height: 1.25 !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+/* 🟢 3. คำโปรยสั้น สะอาดตา */
+.hero-subtitle-p {
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  color: #475569 !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+}
+
+.hero-subtitle-p strong {
+  color: #0F172A !important;
+  font-weight: 700 !important;
+}
+
+/* 🟢 4. แถบความปลอดภัยมินิมอล (Clean Trust Bar) */
+.clean-trust-bar {
+  width: 100% !important;
+  max-width: 480px !important;
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-size: 11px !important;
+  color: #334155 !important;
+}
+
+.clean-trust-bar .trust-icon {
+  color: #10B981 !important;
+  font-size: 13px !important;
+}
+
+.clean-trust-bar strong {
+  color: #0F172A !important;
+}
+
+/* 🟢 5. สถิติ 3 ช่อง คมชัด โทน Monochrome */
+.hero-stats-clean {
+  width: 100% !important;
+  max-width: 460px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 16px !important;
+  padding: 10px 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+
+.stat-clean-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 1px !important;
+  flex: 1 !important;
+}
+
+.stat-clean-number {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important; /* ดำเข้ม ชัดเจน */
+  line-height: 1.1 !important;
+}
+
+.stat-clean-label {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  color: #64748B !important;
+}
+
+.stat-clean-divider {
+  width: 1px !important;
+  height: 24px !important;
+  background: #E2E8F0 !important;
+}
+
+/* ==============================================================================
+   👑 LIVE AURORA PINK GLASS & 3D ELEVATED STATS (2026 EDITION)
+   ============================================================================== */
+
+/* 🟢 1. ความคมชัดของตัวหนังสือระดับพรีเมียม */
+body, h1, h2, h3, p, span, strong, a {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* 🟢 2. ผืนผ้าใบ HERO: กระจกฝ้า + อนิเมชั่นคลื่นแสงสีชมพูอ่อนวิ่งไหลวนตลอดเวลา */
+.hero-section,
+.hero-section.fmh-hero-surface {
+  position: relative !important;
+  overflow: hidden !important;
+  background: rgba(255, 255, 255, 0.90) !important;
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 1) !important;
+  border-radius: 28px !important;
+  padding: 22px 15px 20px 15px !important;
+  margin: 0 auto 24px auto !important;
+  max-width: 800px !important;
+  box-shadow: 
+    0 24px 60px -12px rgba(255, 20, 147, 0.18),
+    0 10px 30px -5px rgba(124, 58, 237, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.8),
+    inset 0 2px 4px rgba(255, 255, 255, 1) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 12px !important;
+  text-align: center !important;
+}
+
+/* 🌸 เอฟเฟกต์คลื่นกระจกฝ้าสีชมพูอ่อนวิ่งเคลื่อนไหวรอบ Hero (Smooth Pink Aurora Wave) */
+.hero-section.fmh-hero-surface::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -60% !important;
+  width: 220% !important;
+  height: 220% !important;
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(255, 20, 147, 0.20) 0%, transparent 40%),
+    radial-gradient(circle at 75% 65%, rgba(244, 63, 94, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(124, 58, 237, 0.14) 0%, transparent 40%) !important;
+  filter: blur(45px) !important;
+  animation: heroAuroraWave 12s ease-in-out infinite alternate !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+@keyframes heroAuroraWave {
+  0% { transform: translate3d(-10%, -10%, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(12%, 14%, 0) rotate(180deg) scale(1.15); }
+  100% { transform: translate3d(-6%, 6%, 0) rotate(360deg) scale(1.05); }
+}
+
+.hero-section > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* 🟢 3. ป้าย VERIFIED ด้านบนสุด */
+.hero-top-capsule {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  padding: 3px 12px 3px 4px !important;
+  border-radius: 100px !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12), inset 0 1px 0 #FFFFFF !important;
+}
+
+.capsule-tag {
+  background: #0F172A !important;
+  color: #FFFFFF !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  padding: 2.5px 8px !important;
+  border-radius: 100px !important;
+}
+
+.capsule-stars {
+  color: #D97706 !important;
+  font-size: 9.5px !important;
+  letter-spacing: 1px !important;
+}
+
+.capsule-trust {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+}
+
+/* 🟢 4. หัวข้อ H1: บรรทัดแรกดำเข้ม + บรรทัดสองชมพูนีออน */
+.hero-headings-block {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  width: 100% !important;
+}
+
+.hero-subheadline {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+}
+
+.seo-h1-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.h1-line-1 {
+  font-size: clamp(20px, 5.8vw, 26px) !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  line-height: 1.25 !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+  letter-spacing: -0.2px !important;
+}
+
+.h1-line-2 {
+  font-size: clamp(17px, 4.8vw, 23px) !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #FF1493 0%, #C026D3 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  line-height: 1.25 !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+/* 🟢 5. กล่องคำบรรยาย Inset Card กระจกฝ้า */
+.hero-description-inset {
+  width: 100% !important;
+  max-width: 510px !important;
+  background: rgba(248, 246, 252, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(124, 58, 237, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 10px 14px !important;
+}
+
+.hero-subtitle-p {
+  font-size: 11px !important;
+  line-height: 1.65 !important;
+  color: #475569 !important;
+  margin: 0 !important;
+  text-wrap: pretty !important;
+}
+
+.hero-subtitle-p strong {
+  color: #0F172A !important;
+  font-weight: 700 !important;
+}
+
+/* 🟢 6. แถบความปลอดภัยสีเขียว */
+.hero-safety-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  background: #F0FDF4 !important;
+  border: 1px solid #BBF7D0 !important;
+  padding: 3.5px 10px 3.5px 4px !important;
+  border-radius: 100px !important;
+  white-space: nowrap !important;
+  max-width: 95% !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08) !important;
+}
+
+.safety-badge-icon {
+  background: #10B981 !important;
+  color: #FFFFFF !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  padding: 2.5px 7px !important;
+  border-radius: 100px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.safety-badge-text {
+  font-size: 10.5px !important;
+  color: #166534 !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+}
+
+.safety-badge-text strong {
+  color: #15803D !important;
+  font-weight: 800 !important;
+}
+
+/* 🟢 7. กล่องสถิติ 3 ช่อง: กระจกฝ้าเข้มข้น + เงา 3D ลอยนูนเด่น */
+.hero-stats-pills-row {
+  width: 100% !important;
+  max-width: 510px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+  padding: 6px !important;
+  background: rgba(243, 238, 252, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+  border-radius: 18px !important;
+  box-shadow: inset 0 2px 6px rgba(124, 58, 237, 0.06) !important;
+}
+
+.stat-pill-item {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 14px !important;
+  padding: 9px 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  /* เงา 3 ชั้น นูนลอยเด่นชัดเจน */
+  box-shadow: 
+    0 8px 20px -3px rgba(13, 8, 27, 0.12),
+    0 2px 6px rgba(124, 58, 237, 0.06),
+    inset 0 1px 1px #FFFFFF !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.stat-pill-item:nth-child(1) {
+  background: linear-gradient(145deg, #FFFFFF 40%, #FAF5FF 100%) !important;
+  border-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+.stat-pill-item:nth-child(2) {
+  background: linear-gradient(145deg, #FFFFFF 40%, #F0FDF4 100%) !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.stat-pill-item:nth-child(3) {
+  background: linear-gradient(145deg, #FFFFFF 40%, #FFFBEB 100%) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.stat-icon-purple { color: #7C3AED !important; font-size: 13px !important; filter: drop-shadow(0 2px 4px rgba(124, 58, 237, 0.3)); }
+.stat-icon-green  { color: #059669 !important; font-size: 13px !important; filter: drop-shadow(0 2px 4px rgba(5, 150, 105, 0.3)); }
+.stat-icon-gold   { color: #D97706 !important; font-size: 13px !important; filter: drop-shadow(0 2px 4px rgba(217, 119, 6, 0.3)); }
+
+.stat-text-group {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  line-height: 1.15 !important;
+}
+
+.stat-number {
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+}
+
+.stat-label {
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+}
+
+/* ==============================================================================
+   🔥 8. FEATURED SECTION HEADER (แก้ปัญหาตัดคำขาด & ตกบรรทัด 100%)
+   ============================================================================== */
+.clean-section-wrapper {
+  width: 100% !important;
+  max-width: 1050px !important;
+  margin: 28px auto 18px auto !important;
+}
+
+.featured-header-clean-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(124, 58, 237, 0.1) !important;
+  box-shadow: 0 4px 14px rgba(13, 8, 27, 0.03) !important;
+  margin-bottom: 14px !important;
+}
+
+.featured-title-flex {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
+
+.clean-section-h2 {
+  font-size: clamp(15px, 4.2vw, 19px) !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+.section-tag-mini {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  color: #E11D48 !important;
+  background: #FFE4E6 !important;
+  padding: 2.5px 7px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  white-space: nowrap !important;
+}
+
+.province-name-highlight {
+  background: linear-gradient(135deg, #FF1493 0%, #7C3AED 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.province-count-pill {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(5, 150, 105, 0.3) !important;
+  border-radius: 100px !important;
+  padding: 3.5px 10px !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #059669 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.08) !important;
+}
+
+/* ==============================================================================
+   🔥 HOT HEADER ONLY (เฉพาะส่วนหัวข้อ HOT จุดเดียวเท่านั้น)
+   ============================================================================== */
+
+/* 1. จัดแถบหัวข้อเป็นแนวนอน ฝั่งซ้ายและขวา */
+.section-header-bar,
+.hot-header-bar-classic {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+  padding: 0 4px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 2. รวมหัวข้อ + ป้ายประจำเดือนให้อยู่ในบรรทัดเดียวกัน */
+.header-title-group,
+.hot-title-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+}
+
+/* 3. ข้อความ: น้องๆ ที่ HOT 🔥 */
+.hot-title-text,
+.hot-main-title {
+  font-size: 19px !important;
+  font-weight: 900 !important;
+  color: #0F172A !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* 4. ป้ายแคปซูล: ประจำเดือน #ฟิวแฟน */
+.hot-badge-pill,
+.hot-monthly-pill {
+  background: linear-gradient(135deg, #831843 0%, #9D174D 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  padding: 3.5px 8px !important;
+  border-radius: 6px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 6px rgba(131, 24, 67, 0.25) !important;
+}
+
+/* 5. ข้อความลูกศร: < เลื่อนดู > */
+.swiper-cue-text,
+.hot-swipe-cue {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  white-space: nowrap !important;
+}
+
+.swiper-cue-text i,
+.hot-swipe-cue i {
+  font-size: 9px !important;
+  color: #831843 !important;
 }
