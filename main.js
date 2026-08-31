@@ -328,7 +328,7 @@ async function getSupabaseClient() {
       });
       domCache.provinceSelect.appendChild(fragment);
     }
-
+initAgencyStories();
     const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
     const activeProvinceSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : window.currentProvinceSlug || "";
     if (domCache.provinceSelect && activeProvinceSlug && activeProvinceSlug !== "national") {
@@ -1563,7 +1563,7 @@ async function getSupabaseClient() {
           });
         }
 
-        if (profilesRes.data && profilesRes.data.length > 0) {
+      if (profilesRes.data && profilesRes.data.length > 0) {
           appState.allProfiles = profilesRes.data.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           return true;
@@ -1579,12 +1579,61 @@ async function getSupabaseClient() {
       }
     })();
 
+    // 🟢 เรียกใช้งานแถบวงกลม Story Highlights ทันทีที่ข้อมูลพร้อม
+    initAgencyStories();
+
     await handleUrlRouting(true);
     hideGlobalLoader();
 
     window.addEventListener("popstate", async () => {
       await handleUrlRouting(false);
     });
+  }
+
+  // 🟢 ฟังก์ชันสร้างแถบวงกลม Story Highlights วิ่งสไลด์อัตโนมัติ
+  function initAgencyStories() {
+    const trackEl = document.getElementById("agency-stories-track");
+    if (!trackEl) return;
+
+    const profiles = appState.allProfiles;
+    if (!profiles || profiles.length === 0) return;
+
+    const topModels = profiles.slice(0, 15);
+    let singleHtml = "";
+
+    topModels.forEach(p => {
+      const rawName = p.displayName || p.name || "โมเดล";
+      const name = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
+      const rawImg = p.imagePath || p.image_url || (p.images && p.images[0] ? p.images[0].src : "") || "https://firstmodelhub.com/images/firstmodelhub.webp";
+      const slug = encodeURIComponent(p.slug || p.id || name);
+      
+      const isOnline = p.isAvailable !== undefined 
+        ? Boolean(p.isAvailable) 
+        : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด", "busy", "off"].some(s => String(p.availability || "").toLowerCase().includes(s));
+      
+      const statusClass = isOnline ? "online" : "busy";
+
+      singleHtml += `
+        <div class="story-item-el interactive-card" onclick="window.location.href='/sideline/${slug}'">
+          <div class="story-ring-wrap">
+            <div class="story-ring-glow">
+              <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+            </div>
+            <span class="story-status-dot ${statusClass}"></span>
+          </div>
+          <span class="story-label">${escapeHTML(name)}</span>
+        </div>
+      `;
+    });
+
+    // 🟢 เบิ้ล 2 รอบเพื่อให้สไลด์วิ่งวนลูปแบบไร้รอยต่อ
+    trackEl.innerHTML = singleHtml + singleHtml;
+
+    function escapeHTML(str) {
+      return str ? String(str).replace(/[&<>'"]/g, tag => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      }[tag] || tag)) : "";
+    }
   }
 
   if (document.readyState === "loading") {

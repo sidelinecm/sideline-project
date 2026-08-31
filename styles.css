@@ -3359,3 +3359,413 @@ body, h1, h2, h3, p, span, strong, a {
   font-size: 9px !important;
   color: #831843 !important;
 }
+/* ==============================================================================
+   🧹 FORCE OVERWRITE: ล้างค่าสีดำ/ดาร์กที่อาจตกค้างทุกจุด ให้เป็น Light Mode 100%
+   ============================================================================== */
+.dark-theme, .dark {
+  color-scheme: light !important;
+}
+
+/* บังคับกล่องบทความและหน้าโปรไฟล์ย่อยให้เป็นสีขาวสะอาด */
+main .interactive-card, 
+article.interactive-card {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid rgba(124, 58, 237, 0.12) !important;
+}
+
+/* บังคับกล่องราคาบริการและกล่องข้อความย่อยในหน้าโปรไฟล์ */
+main section[style*="background: rgba(0,0,0"],
+div[style*="background: rgba(255,255,255,0.02)"] {
+  background: #F8F7FA !important;
+  border: 1px solid rgba(124, 58, 237, 0.1) !important;
+  color: #334155 !important;
+}
+
+main section[style*="background: rgba(0,0,0"] h2,
+div[style*="background: rgba(255,255,255,0.02)"] h3,
+div[style*="background: rgba(255,255,255,0.02)"] strong {
+  color: #0F172A !important;
+}
+
+/* ==============================================================================
+   🌟 ULTRA-CRISP & HIGH CONTRAST ENHANCEMENT (แก้วใส ขอบคมชัด 100%)
+   ============================================================================== */
+
+/* 1. บังคับความคมชัดของตัวหนังสือทุกตัวบนเว็บ (Anti-aliased) */
+body, h1, h2, h3, h4, h5, h6, p, span, a, strong, button, input, select {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* 2. ยกระดับความเข้มของข้อความสีเทา (แก้ปัญหาคอนทราสต์จาง อ่านยาก) */
+p, .hero-subtitle-p, .bento-sub-desc, .step-desc, .trust-text-content p, .footer-brand-desc {
+  color: #334155 !important; /* เปลี่ยนจากเทาอ่อน เป็นเทาเข้มคมชัด (Slate 700) */
+  font-weight: 500 !important;
+}
+
+.text-muted, [class*="text-muted"] {
+  color: #475569 !important; /* Slate 600 ชัดเจนขึ้น */
+}
+
+/* 3. ปรับแต่งป้ายสีเขียว (Safety / Status) ให้ตัดกับพื้นหลังขาวอย่างคมชัด */
+.hero-safety-pill, .luxury-trust-pill {
+  background: #ECFDF5 !important;
+  border: 1px solid #10B981 !important;
+}
+
+.safety-badge-text, .trust-pill-text {
+  color: #065F46 !important; /* เขียวเข้มคมชัด */
+  font-weight: 700 !important;
+}
+
+/* 4. ทำให้การ์ดและกล่องคอนเทนต์ดูคมชัด ไม่กลืนกับพื้นหลัง */
+.hero-section, .luxury-bento-wrapper, #reviews-wrapper-block, #faq-wrapper-block, .verification-box {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(124, 58, 237, 0.18) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* ==============================================================================
+   👑 FIRST MODEL HUB - MASTER SPELLBINDING LUXURY UPGRADE (2026)
+   ============================================================================== */
+
+/* 1. ยกระดับการ์ดโปรไฟล์ทั้งหมดให้มีความพรีเมียม เงาลึก และขอบกระจกสะท้อนแสง */
+.profile-card-new, .vip-card-item {
+  border-radius: 22px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  background-color: #0E091C !important;
+  box-shadow: 
+    0 16px 36px -6px rgba(15, 23, 42, 0.16),
+    0 0 0 1px rgba(124, 58, 237, 0.08) !important;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease !important;
+}
+
+.profile-card-new:hover, .vip-card-item:hover {
+  transform: translateY(-7px) scale(1.02) !important;
+  box-shadow: 
+    0 26px 50px -8px rgba(225, 29, 72, 0.28),
+    0 0 25px rgba(124, 58, 237, 0.2) !important;
+  border-color: #FF1493 !important;
+}
+
+/* 2. ทำให้รูปภาพซูมเข้าอย่างนุ่มนวลเวลาเอาเมาส์ชี้ (Smooth Zoom Effect) */
+.profile-card-new:hover .profile-card-img,
+.vip-card-item:hover img {
+  transform: scale(1.06) !important;
+}
+
+/* 3. ปรับแต่งกล่องข้อมูลบนการ์ด: คมชัด อ่านง่าย ตัวหนังสือพรีเมียม */
+.profile-card-name, .vip-name {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.2px !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* 4. ป้ายราคา (Price Badge): เมทัลลิกทองคำประกายเพชร นูนเด่นสะดุดตา */
+.profile-card-price {
+  background: linear-gradient(135deg, #FFE259 0%, #FFA751 100%) !important;
+  color: #381A00 !important;
+  border: 1px solid #FFF5C0 !important;
+  font-weight: 900 !important;
+  font-size: 12px !important;
+  padding: 2.5px 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45) !important;
+}
+
+/* 5. ป้ายสถานะ (Status Badge): เรดาร์พัลส์เขียวนีออน ฉ่ำวาว */
+.badge-status, .vip-status-chip {
+  background: rgba(10, 5, 20, 0.88) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(0, 230, 118, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 12px rgba(0, 230, 118, 0.2) !important;
+}
+
+/* 6. แถบหัวข้อจังหวัดและหมวดหมู่: กระจกแก้วไล่เฉด สวยสะดุดตา */
+.province-header-row {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 243, 250, 0.9) 100%) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.14) !important;
+  border-radius: 20px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.08) !important;
+}
+
+/* 7. ปุ่มแคปซูลกรองข้อมูล (Filter Pills): มีมิติ นูนเด่นเมื่อเลือก */
+.filter-pill-tab {
+  border-radius: 100px !important;
+  font-weight: 800 !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.filter-pill-tab.active {
+  background: linear-gradient(135deg, #FF1493 0%, #7C3AED 100%) !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35) !important;
+  transform: scale(1.03) !important;
+}
+
+/* 8. จัดการระยะห่าง (Whitespace) ของหน้าเว็บให้หายใจได้โล่งและพรีเมียมขึ้น */
+.clean-section-wrapper, .concierge-luxury-section {
+  margin-top: 40px !important;
+  margin-bottom: 32px !important;
+}
+
+/* ==============================================================================
+   🌟 PERFECT STICKY GLASS MARQUEE (ติดจอด้านบน คมชัด ไม่ทับเนื้อหา)
+   ============================================================================== */
+.sticky-glass-marquee-container {
+  position: fixed !important;
+  top: 56px !important; /* ล็อกติดใต้ Header มือถือพอดี */
+  left: 50% !important;
+  transform: translateX(-50%) translateY(0) !important;
+  width: calc(100% - 16px) !important;
+  max-width: 1050px !important;
+  z-index: 1100 !important;
+  display: flex !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.94) !important; /* ขาวกระจกฝ้าพรีเมียม */
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+  overflow: hidden !important;
+  height: 38px !important;
+  box-sizing: border-box !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
+}
+
+@media (min-width: 1024px) {
+  .sticky-glass-marquee-container { 
+    top: 62px !important; 
+    width: calc(100% - 32px) !important;
+  }
+}
+
+/* เอฟเฟกต์ตอนเลื่อนลงแล้วซ่อนขึ้นด้านบน */
+.sticky-glass-marquee-container.marquee-hidden {
+  transform: translateX(-50%) translateY(-200%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.marquee-badge-static {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: linear-gradient(135deg, #FF1493 0%, #E11D48 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  padding: 3px 9px !important;
+  border-radius: 6px !important;
+  flex-shrink: 0 !important;
+  z-index: 10 !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4) !important;
+  margin-left: 6px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.pulse-dot-live {
+  width: 5px !important; height: 5px !important; border-radius: 50% !important;
+  background: #FFFFFF !important; box-shadow: 0 0 6px #FFFFFF !important;
+  animation: pulseLiveDot 1.5s infinite ease-in-out !important;
+}
+
+@keyframes pulseLiveDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.5; }
+}
+
+.marquee-overflow-wrap {
+  width: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+.marquee-track {
+  display: flex !important;
+  gap: 35px !important;
+  white-space: nowrap !important;
+  width: max-content !important;
+  /* วิ่งช้าๆ นุ่มนวล 3 เท่า อ่านสบายตา */
+  animation: smoothMarquee 165s linear infinite !important; 
+}
+
+.marquee-track:hover {
+  animation-play-state: paused !important;
+}
+
+/* 🟢 ปรับแต่งตัวหนังสือให้คมชัดระดับ HD สีเข้ม อ่านง่ายทันที */
+.marquee-item {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #0F172A !important; /* สีดำเข้มคมกริบ */
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+.marquee-item strong {
+  color: #7C3AED !important; /* ชื่อเน้นด้วยสีม่วงพรีเมียม */
+  font-weight: 900 !important;
+}
+
+@keyframes smoothMarquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+/* 🟢 เพิ่มระยะห่างด้านบนของกล่องเนื้อหาหลัก (Main Content) เพื่อไม่ให้แถบ Ticker ไปบังเนื้อหาตอนเปิดเว็บ */
+#main-content {
+  padding-top: 18px !important;
+}
+
+/* ==============================================================================
+   🌟 HORIZONTAL GLASS STORIES WIDGET (กล่องกระจกฝ้าแนวนอน & วงกลมไซส์กะทัดรัด)
+   ============================================================================== */
+.luxury-stories-wrapper {
+  width: 100% !important;
+  max-width: 1050px !important;
+  margin: 16px auto 12px auto !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+}
+
+/* 🟢 กรอบกระจกฝ้าแนวนอนพรีเมียม */
+.luxury-glass-stories-box {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.15) !important;
+  border-radius: 22px !important;
+  padding: 10px 14px 12px 14px !important;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08) !important;
+}
+
+.stories-header-micro {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 2px 8px 2px !important;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.08) !important;
+  margin-bottom: 8px !important;
+}
+
+.stories-micro-title {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #0F172A !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  letter-spacing: 0.2px !important;
+  text-transform: uppercase;
+}
+
+.stories-micro-hint {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+}
+
+.stories-scroll-container {
+  width: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* แถบรางเลื่อนวิ่งสไลด์อัตโนมัติ */
+.stories-track-inner {
+  display: flex !important;
+  gap: 14px !important;
+  width: max-content !important;
+  animation: storyAutoScroll 45s linear infinite !important;
+}
+
+.stories-track-inner:hover {
+  animation-play-state: paused !important;
+}
+
+.story-item-el {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.25s ease !important;
+}
+
+.story-item-el:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+}
+
+.story-ring-wrap {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+/* 🟢 ปรับวงกลมให้เล็กลงกำลังดี (52px พรีเมียมกำลังน่ารัก) */
+.story-ring-glow {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  padding: 2.5px !important;
+  background: linear-gradient(135deg, #FF1493 0%, #7C3AED 50%, #F59E0B 100%) !important;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2) !important;
+}
+
+.story-ring-glow img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  border: 2px solid #FFFFFF !important;
+}
+
+/* 🟢 จุดสถานะรับงานขนาดพอดีกับวงกลม 52px */
+.story-status-dot {
+  position: absolute !important;
+  bottom: 2px !important;
+  right: 2px !important;
+  width: 11px !important;
+  height: 11px !important;
+  background-color: #00E676 !important;
+  border: 2px solid #FFFFFF !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 5px #00E676 !important;
+  z-index: 5 !important;
+}
+
+.story-status-dot.busy {
+  background-color: #FF1493 !important;
+  box-shadow: 0 0 5px #FF1493 !important;
+}
+
+.story-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+  white-space: nowrap !important;
+  max-width: 56px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@keyframes storyAutoScroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
