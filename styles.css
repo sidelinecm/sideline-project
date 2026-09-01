@@ -2199,3 +2199,27 @@ footer.fmh-footer {
 .footer-legal-links { display: flex; gap: 16px; align-items: center; }
 .footer-legal-links a { color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
 .footer-legal-links a:hover { color: var(--crimson-main); }
+
+/* ==============================================================================
+   🌟 GLOBAL CLEAR DARK OVERLAY & BRIGHTEN TEXT RULES
+   ============================================================================== */
+/* ล้างสีดำทึบในกล่องและเปลี่ยนเป็นกระจกฝ้า Obsidian Glass */
+.spec-box,
+.description,
+.faq-item-card,
+.review-card-item {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(192, 132, 252, 0.22) !important;
+  color: #E2E8F0 !important;
+}
+
+/* บังคับให้ตัวหนังสือทุกตัวในกล่องราคาและข้อมูลอ่านออกชัดเจน */
+.spec-box span,
+.spec-box strong {
+  color: #FFFFFF !important;
+}
+
+/* ป้องกันตัวหนังสือสีดำในกล่องอัตราค่าบริการ */
+section div strong {
+  font-weight: 900 !important;
+}
