@@ -2305,3 +2305,126 @@ footer.fmh-footer {
 section div strong {
   font-weight: 900 !important;
 }
+
+/* ==============================================================================
+   🚀 1. ZERO CLS FIX (ล็อกความสูงป้องกันหน้าจอดีดตัว 100%)
+   ============================================================================== */
+.luxury-stories-wrapper {
+  min-height: 96px !important;
+  contain: layout !important;
+}
+
+#hot-profiles-section {
+  min-height: 290px !important;
+  contain: layout !important;
+}
+
+#vip-swiper-container {
+  min-height: 220px !important;
+  contain: layout !important;
+}
+
+#profiles-display-area {
+  min-height: 380px !important;
+}
+
+.hero-safety-pill {
+  min-height: 32px !important;
+  contain: layout !important;
+}
+
+/* ==============================================================================
+   🎨 2. COLOR CONTRAST FIX (ปรับสีตัวหนังสือให้คมชัดตามเกณฑ์ Google)
+   ============================================================================== */
+/* 2.1 ปุ่มเขียวจองคิวลอยตัวด้านล่าง (ตัวหนังสือดำเข้ม คอนทราสต์ผ่านฉลุย) */
+nav.floating-app-dock a.dock-item.dock-item-line,
+nav.floating-app-dock a.dock-item.dock-item-line span,
+nav.floating-app-dock a.dock-item.dock-item-line i,
+.btn-concierge-line,
+.sidebar-line-btn {
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+/* 2.2 ป้ายจำนวนโปรไฟล์ "พบ 50 โปรไฟล์พร้อมรับงาน" (สีม่วงเข้ม คมชัดบนพื้นสว่าง) */
+.province-count-pill,
+.live-count-chip {
+  color: #581C87 !important;
+  font-weight: 800 !important;
+  background: rgba(124, 58, 237, 0.1) !important;
+  border: 1px solid rgba(124, 58, 237, 0.3) !important;
+}
+
+/* 2.3 ป้าย "ยืนยันการใช้บริการจริง" ในกล่องรีวิว */
+.review-verified-badge {
+  color: #065F46 !important;
+  background: rgba(5, 150, 105, 0.12) !important;
+  border: 1px solid rgba(5, 150, 105, 0.35) !important;
+  font-weight: 800 !important;
+}
+
+/* 2.4 คำถาม & คำตอบใน FAQ */
+.faq-question-text,
+#faq-wrapper-block h3,
+.faq-item-card div[style*="color: #C084FC"] {
+  color: #6D28D9 !important;
+  font-weight: 800 !important;
+}
+
+.faq-answer-text,
+.faq-item-card div[style*="color: var(--text-gray)"] {
+  color: #334155 !important;
+  line-height: 1.6 !important;
+}
+
+/* 2.5 ลิงก์โซนนิมมานใน Footer */
+.footer-locations-block a[style*="color: #C084FC"],
+.footer-locations-block a.active,
+#popular-locations-footer a[href="/nimman"] {
+  color: #7C3AED !important;
+  font-weight: 800 !important;
+}
+
+
+.fmh-ambient-orb {
+  filter: blur(45px) !important;
+  opacity: 0.55 !important;
+  will-change: transform;
+}
+
+.fmh-ambient-orb-a {
+  width: 240px !important;
+  height: 240px !important;
+  background: radial-gradient(circle, #a855f7 0%, #7c3aed 70%, transparent 100%) !important;
+  animation: floatOrbPurple 7s ease-in-out infinite alternate !important;
+}
+
+.fmh-ambient-orb-b {
+  width: 210px !important;
+  height: 210px !important;
+  background: radial-gradient(circle, #ff2e93 0%, #ec4899 70%, transparent 100%) !important;
+  animation: floatOrbPink 6s ease-in-out infinite alternate !important;
+}
+
+.dancing-neon-star {
+  display: inline-block !important;
+  animation: starFloatDance 3s ease-in-out infinite alternate !important;
+}
+
+@keyframes floatOrbPurple {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(60px, 35px) scale(1.18); }
+  100% { transform: translate(-30px, 50px) scale(0.95); }
+}
+
+@keyframes floatOrbPink {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-50px, 40px) scale(1.15); }
+  100% { transform: translate(25px, -20px) scale(0.92); }
+}
+
+@keyframes starFloatDance {
+  0% { transform: translateY(0px) rotate(0deg) scale(1); }
+  50% { transform: translateY(-5px) rotate(10deg) scale(1.1); }
+  100% { transform: translateY(2px) rotate(-6deg) scale(1); }
+}

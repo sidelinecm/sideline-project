@@ -7,48 +7,55 @@
   <meta name="theme-color" content="#F6F3FA">
   <meta name="color-scheme" content="light">
 
-  <!-- Google Fonts: Prompt & Outfit -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Prompt:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
-
-  <title>สาวรับงาน ไซด์ไลน์ทั่วไทย • ตรงปก 100% จ่ายหน้างาน ไม่มัดจำ | First Model Hub</title>
-  <meta name="description" content="ศูนย์รวมสาวรับงาน ไซด์ไลน์ เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย นัดเจอจ่ายหน้างาน ไม่มีโอนมัดจำ" />
-  <meta name="keywords" content="แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน" />
+  <title>สาวรับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} เด็กเอ็น ฟิวแฟนตรงปก 100% ปลอดภัย จ่ายหน้างาน | First Model Hub</title>
+  <meta name="description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียมสไตล์ฟิวแฟน ยืนยันตัวตนตรงปก 100% นัดเจอชำระหน้างาน ไม่โอนมัดจำ ครอบคลุมพิกัด{{PROVINCE_ZONES}}" />
+  <meta name="keywords" content="แฟนเช่า, รับงาน, สาวรับงาน, ไซด์ไลน์, เพื่อนเที่ยว, ฟิวแฟน, เด็กเอ็น, รับงานไม่มัดจำ, รับงานจ่ายหน้างาน, รับงานเชียงใหม่, รับงานลำปาง, รับงานกรุงเทพ" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-  <link rel="canonical" id="canonical-link" href="https://firstmodelhub.com/">
+  <link rel="canonical" id="canonical-link" href="{{SEO_CANONICAL}}">
 
-  <!-- 🌐 MULTILINGUAL SEO -->
-  <link rel="alternate" hreflang="th" href="https://firstmodelhub.com/" />
+  <!-- 🌐 MULTILINGUAL SEO (เชื่อมต่อภาษาอัตโนมัติ) -->
+  <link rel="alternate" hreflang="th" href="{{SEO_CANONICAL}}" />
   <link rel="alternate" hreflang="en" href="https://firstmodelhub.com/index-en" />
-  <link rel="alternate" hreflang="x-default" href="https://firstmodelhub.com/" />
+  <link rel="alternate" hreflang="x-default" href="{{SEO_CANONICAL}}" />
 
-  <!-- 📱 OPEN GRAPH -->
+  <!-- 📱 OPEN GRAPH (แชร์ลง Facebook / LINE สวยตามพื้นที่) -->
   <meta property="og:locale" content="th_TH">
   <meta property="og:site_name" content="First Model Hub">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="รับงาน ไซด์ไลน์ สาวรับงานฟิวแฟนตรงปก (100+ โปรไฟล์)">
-  <meta property="og:description" content="ศูนย์รวมสาวรับงาน และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%">
-  <meta property="og:url" content="https://firstmodelhub.com/">
-  <meta property="og:image" content="https://firstmodelhub.com/images/firstmodelhub.webp">
+  <meta property="og:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} สาวรับงานฟิวแฟนตรงปก ({{PROFILE_COUNT}}+ โปรไฟล์)">
+  <meta property="og:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} และเพื่อนเที่ยวไซด์ไลน์พรีเมียม จ่ายหน้างาน ไม่โอนมัดจำ ตัวจริงตรงปก 100%">
+  <meta property="og:url" content="{{SEO_CANONICAL}}">
+  <meta property="og:image" content="{{SEO_IMAGE}}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
-  <!-- 🌟 ICONS -->
+  <!-- 🐦 Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="รับงาน{{PROVINCE_NAME}} ไซด์ไลน์{{PROVINCE_NAME}} ฟิวแฟนตรงปก 100%">
+  <meta name="twitter:description" content="ศูนย์รวมสาวรับงาน{{PROVINCE_NAME}} ปลอดภัย จ่ายหน้างาน ไม่โอนมัดจำ">
+  <meta name="twitter:image" content="{{SEO_IMAGE}}">
+
+  <!-- 🌟 ICONS & MANIFEST -->
   <link rel="shortcut icon" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
 
   <!-- ⚡ SPEED & CDNs -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
   <link rel="dns-prefetch" href="https://zxetzqwjaiumqhrpumln.supabase.co">
 
+  <!-- 🟢 Preload ฟอนต์ป้องกันหน้าจอขยับ (CLS 0.00) -->
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high">
 
-  <link rel="stylesheet" href="/styles.css?v=2.0">
+  <!-- 🎨 Stylesheets & Module Preload (มี ?v=2.0 ล้างแคช) -->
+  <link rel="stylesheet" href="/styles.css?v=2.1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="modulepreload" href="/main.js?v=2.0">
+  <link rel="modulepreload" href="/main.js?v=2.01">
 
+  <!-- Schema.org Template -->
   <script type="application/ld+json" id="dynamic-schema">
   {
     "@context": "https://schema.org",
@@ -553,6 +560,6 @@
   window.profilesData = null;
 </script>
 
-<script type="module" src="/main.js?v=2.0"></script>
+<script type="module" src="/main.js?v=2.1"></script>
 </body>
 </html>
