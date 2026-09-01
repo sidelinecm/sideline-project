@@ -47,6 +47,145 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <link rel="modulepreload" href="/main.js">
+  <!-- 📊 STRUCTURED DATA & RICH SNIPPETS (ENGLISH SCHEMA) -->
+  <script type="application/ld+json" id="dynamic-schema">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://firstmodelhub.com/#organization",
+        "name": "FirstModelHub",
+        "legalName": "FirstModelHub Co., Ltd.",
+        "url": "https://firstmodelhub.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://firstmodelhub.com/images/firstmodelhub.webp"
+        },
+        "description": "Thailand's premier verified directory for VIP travel companions, escorts, and girlfriend experience (GFE). Pay in person on arrival with zero advance deposit.",
+        "sameAs": [
+          "https://line.me/ti/p/ksLUWB89Y_",
+          "https://tiktok.com/@sidelinecm",
+          "https://twitter.com/sidelinechiangmai",
+          "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
+          "https://bio.site/firstfiwfans.com",
+          "https://linktr.ee/kissmodel",
+          "https://bsky.app/profile/sidelinechiangmai.bsky.social"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "telephone": "+66926997044",
+          "availableLanguage": ["en", "th"]
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://firstmodelhub.com/#website",
+        "url": "https://firstmodelhub.com/index-en",
+        "name": "FirstModelHub Thailand",
+        "publisher": {
+          "@id": "https://firstmodelhub.com/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://firstmodelhub.com/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "CollectionPage",
+        "@id": "https://firstmodelhub.com/index-en#webpage",
+        "name": "Thailand Escorts & VIP Travel Companions • 100% Real Photos | First Model Hub",
+        "description": "Discover premier verified travel companions and VIP escorts across Thailand. 100% verified real photos, pay on arrival with 0% advance deposit.",
+        "url": "https://firstmodelhub.com/index-en",
+        "isPartOf": {
+          "@id": "https://firstmodelhub.com/#website"
+        },
+        "about": {
+          "@id": "https://firstmodelhub.com/index-en#business"
+        },
+        "mainEntity": {
+          "@id": "https://firstmodelhub.com/index-en#itemlist"
+        }
+      },
+      {
+        "@type": ["EntertainmentBusiness", "ProfessionalService"],
+        "@id": "https://firstmodelhub.com/index-en#business",
+        "name": "VIP Travel Companions & Escorts in Thailand - FirstModelHub",
+        "image": "https://firstmodelhub.com/images/firstmodelhub.webp",
+        "telephone": "+66926997044",
+        "priceRange": "฿฿",
+        "url": "https://firstmodelhub.com/index-en",
+        "description": "Verified directory for VIP escorts and travel companions in Thailand. 100% photo match guaranteed.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Bangkok",
+          "addressRegion": "Thailand",
+          "addressCountry": "TH"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 13.7563,
+          "longitude": 100.5018
+        },
+        "areaServed": [
+          { "@type": "Country", "name": "Thailand" },
+          { "@type": "AdministrativeArea", "name": "Bangkok" },
+          { "@type": "AdministrativeArea", "name": "Chiang Mai" },
+          { "@type": "AdministrativeArea", "name": "Phuket" },
+          { "@type": "AdministrativeArea", "name": "Pattaya" },
+          { "@type": "AdministrativeArea", "name": "Khon Kaen" }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://firstmodelhub.com/index-en#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home (EN)",
+            "item": "https://firstmodelhub.com/index-en"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://firstmodelhub.com/index-en#faq",
+        "isPartOf": {
+          "@id": "https://firstmodelhub.com/index-en#webpage"
+        },
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Do I need to pay any advance deposit before meeting the companion in Thailand?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No advance deposit is required under any circumstances. We strictly enforce a 'Pay in Person on Arrival' policy after meeting your companion and verifying photo accuracy."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are the companion photos 100% verified and real?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, every profile undergoes photographic and identity verification. You can decline the appointment immediately without fee if the person does not match their profile photos."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which locations in Thailand are covered by First Model Hub?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We provide verified companion and escort listings in Bangkok, Chiang Mai (Nimman/City), Phuket (Patong/City), Pattaya, Khon Kaen, Udon Thani, and Lampang."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body class="fmh-app-page">
