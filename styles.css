@@ -2201,6 +2201,88 @@ footer.fmh-footer {
 .footer-legal-links a:hover { color: var(--crimson-main); }
 
 /* ==============================================================================
+   🌟 ANIMATED FLOATING GLOW ORBS (ลูกแก้วแสงกลมลอยวิ่งด้านบน Hero)
+   ============================================================================== */
+.fmh-hero-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.fmh-ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(45px); /* ปรับความเบลอให้เห็นรูปทรงกลมสวยงาม */
+  opacity: 0.55 !important; /* เพิ่มความสว่างให้เห็นชัดเจนบนจอมืด */
+  will-change: transform;
+}
+
+/* ลูกแก้วกลมสีม่วงนีออน (ลอยวิ่งวนซ้าย-ขวา) */
+.fmh-ambient-orb-a {
+  width: 240px !important;
+  height: 240px !important;
+  background: radial-gradient(circle, #a855f7 0%, #7c3aed 70%, transparent 100%) !important;
+  top: -30px;
+  left: 5%;
+  animation: floatOrbPurple 7s ease-in-out infinite alternate !important;
+}
+
+/* ลูกแก้วกลมสีชมพูฟลามิงโก้ (ลอยวิ่งสวนทาง) */
+.fmh-ambient-orb-b {
+  width: 210px !important;
+  height: 210px !important;
+  background: radial-gradient(circle, #ff2e93 0%, #ec4899 70%, transparent 100%) !important;
+  top: 30px;
+  right: 5%;
+  animation: floatOrbPink 6s ease-in-out infinite alternate !important;
+}
+
+/* เอฟเฟกต์ไอคอนดาว 🌟 ให้ลอยดุ๊กดิ๊ก */
+.dancing-neon-star {
+  display: inline-block !important;
+  animation: starFloatDance 3s ease-in-out infinite alternate !important;
+}
+
+/* --- Keyframe Animations (การเคลื่อนไหวสมูท 60FPS) --- */
+@keyframes floatOrbPurple {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(60px, 35px) scale(1.18);
+  }
+  100% {
+    transform: translate(-30px, 50px) scale(0.95);
+  }
+}
+
+@keyframes floatOrbPink {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(-50px, 40px) scale(1.15);
+  }
+  100% {
+    transform: translate(25px, -20px) scale(0.92);
+  }
+}
+
+@keyframes starFloatDance {
+  0% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) rotate(10deg) scale(1.1);
+  }
+  100% {
+    transform: translateY(2px) rotate(-6deg) scale(1);
+  }
+}
+
+/* ==============================================================================
    🌟 GLOBAL CLEAR DARK OVERLAY & BRIGHTEN TEXT RULES
    ============================================================================== */
 /* ล้างสีดำทึบในกล่องและเปลี่ยนเป็นกระจกฝ้า Obsidian Glass */
