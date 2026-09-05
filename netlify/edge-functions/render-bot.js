@@ -1,5 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
+const PROFILE_PAGE_CACHE = new Map();
+let GLOBAL_PROFILE_VERSION = `v_${Date.now()}`;
+
 const CONFIG = {
   get SUPABASE_URL() {
     try {
@@ -15,20 +18,17 @@ const CONFIG = {
       return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
     }
   },
+  get PURGE_SECRET() {
+    try {
+      return Deno.env.get("PURGE_SECRET") || "fmh_secure_purge_2026";
+    } catch {
+      return "fmh_secure_purge_2026";
+    }
+  },
   DOMAIN: "https://firstmodelhub.com",
   BRAND_NAME: "FirstModelHub",
   CLOUDINARY_BASE_URL: "https://res.cloudinary.com/drffioary/image/upload/",
-  DEFAULT_TELEPHONE: "+66926997044",
-  DEFAULT_FALLBACK_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp",
-  SOCIAL_LINKS: {
-    line: "https://line.me/ti/p/ksLUWB89Y_",
-    tiktok: "https://tiktok.com/@sidelinecm",
-    twitter: "https://twitter.com/sidelinechiangmai",
-    linkedin: "https://www.linkedin.com/in/cuteti-sexythailand-398567280?trk=contact-info",
-    biosite: "https://bio.site/firstfiwfans.com",
-    linktree: "https://linktr.ee/kissmodel",
-    bluesky: "https://bsky.app/profile/sidelinechiangmai.bsky.social"
-  }
+  DEFAULT_FALLBACK_IMAGE: "https://firstmodelhub.com/images/firstmodelhub.webp"
 };
 
 const REVIEW_POOL = [
@@ -37,35 +37,20 @@ const REVIEW_POOL = [
   { name: "พี่โจ", rating: 5, text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ ครับ" },
   { name: "คุณกอล์ฟ", rating: 5, text: "คุยง่ายเป็นกันเองมากครับ น้องน่ารักสไตล์ผู้ดี แนะนำเลยคนนี้ไม่ผิดหวัง" },
   { name: "พี่ยอด", rating: 5, text: "ตรงเวลาดีครับ สุภาพเรียบร้อย นิสัยดีตรงตามรูปภาพในโปรไฟล์เลย" },
-  { name: "คุณเป้", rating: 5, text: "งานดีคุ้มราคามากครับ คุยเก่งเอาใจเก่ง ฟีลแฟนอบอุ่นมากครับ" },
-  { name: "พี่แม็กซ์", rating: 5, text: "น้องคุยสนุก ตลก น่ารักเป็นกันเอง ดูแลดีตั้งแต่เริ่มจนจบเลยครับ" },
-  { name: "คุณต้น", rating: 5, text: "บริการประทับใจมาก สุภาพเรียบร้อย ไม่มีเร่งงานเลย แนะนำเลยครับ" },
-  { name: "พี่แบงค์", rating: 5, text: "น้องหุ่นดี ผิวพรรณดีมาก ตรงปกไม่จกตา คุยไลน์นัดแนะก็ง่าย" },
-  { name: "คุณเจ", rating: 5, text: "ฟีลดีอบอุ่นมากครับ สุภาพเรียบร้อย ดูแลดีตลอดเวลาที่อยู่ด้วยกัน" }
+  { name: "คุณต้น", rating: 5, text: "บริการประทับใจมาก สุภาพเรียบร้อย ไม่มีเร่งงานเลย แนะนำเลยครับ" }
 ];
 
 const PROVINCE_NAME_MAP = {
   chiangmai: "เชียงใหม่",
   "chiang-mai": "เชียงใหม่",
   chiangrai: "เชียงราย",
-  "chiang-rai": "เชียงราย",
   lampang: "ลำปาง",
-  lamphun: "ลำพูน",
-  phitsanulok: "พิษณุโลก",
   bangkok: "กรุงเทพฯ",
   chonburi: "ชลบุรี",
   khonkaen: "ขอนแก่น",
   "khon-kaen": "ขอนแก่น",
   phuket: "ภูเก็ต",
-  udonthani: "อุดรธานี",
-  "udon-thani": "อุดรธานี",
-  udon: "อุดรธานี",
-  ayutthaya: "พระนครศรีอยุธยา",
-  "phra-nakhon-si-ayutthaya": "พระนครศรีอยุธยา",
-  suratthani: "สุราษฎร์ธานี",
-  "surat-thani": "สุราษฎร์ธานี",
-  ubon: "อุบลราชธานี",
-  "ubon-ratchathani": "อุบลราชธานี"
+  udonthani: "อุดรธานี"
 };
 
 function sanitizeThaiText(text) {
@@ -75,13 +60,7 @@ function sanitizeThaiText(text) {
     .replace(/เจ็+ดยอด/g, "เจ็ดยอด")
     .replace(/นิมาน|นิทาน/g, "นิมมาน")
     .replace(/ไกล้เคียง|ใกล้เครยง/g, "ใกล้เคียง")
-    .replace(/พาพับ/g, "พายัพ")
-    .replace(/ของแก่น/g, "ขอนแก่น")
-    .replace(/ฟื้นที่/g, "พื้นที่")
     .replace(/อมสด|จูบแลกลิ้น|แตกบนตัว|จู๋ทำ\+500|69|➏➒|เอาร่องนม|ดูดสด/gi, "บริการดูแลสไตล์ฟิวแฟน")
-    .replace(/(บริการดูแลสไตล์ฟิวแฟน\s*)+/g, "บริการดูแลสไตล์ฟิวแฟน ")
-    .replace(/1น้ำ\/1ชม/gi, "1 ชม.")
-    .replace(/ฟรีถุงยาง!/gi, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -105,24 +84,12 @@ function stripHTML(str) {
 function getDeterministicReviews(seedStr, count = 3) {
   const hash = String(seedStr || "default").split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const poolLen = REVIEW_POOL.length;
-  if (poolLen === 0) return [];
   const result = [];
-  const selectedIndices = new Set();
   for (let i = 0; i < count; i++) {
-    let index = (hash + i * 3) % poolLen;
-    while (selectedIndices.has(index) && selectedIndices.size < poolLen) {
-      index = (index + 1) % poolLen;
-    }
-    selectedIndices.add(index);
+    const index = (hash + i * 2) % poolLen;
     result.push(REVIEW_POOL[index]);
   }
   return result;
-}
-
-function getDeterministicValue(min, max, seedStr, salt = 0) {
-  const hash = String(seedStr || "seed").split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) + salt;
-  const range = Math.max(1, max - min + 1);
-  return Math.floor(min + (hash % range));
 }
 
 function extractCleanNumber(price) {
@@ -154,16 +121,7 @@ function optimizeImg(imagePath, width = 600, height = 800) {
     }
     return cleanPath;
   }
-  
-  if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
-    return cleanPath;
-  }
-  
-  let formatted = cleanPath.replace(/^\/+/, "");
-  if (!formatted.startsWith("images/")) {
-    formatted = `images/${formatted}`;
-  }
-  return `${CONFIG.CLOUDINARY_BASE_URL}${cropParam}/${formatted}`;
+  return cleanPath;
 }
 
 function generateSrcSet(imagePath) {
@@ -174,43 +132,36 @@ function generateSrcSet(imagePath) {
   }).join(", ");
 }
 
-function getLocalizedZone(loc, provinceName) {
-  if (!loc) return `โซนต่าง ๆ ในจังหวัด${provinceName}`;
-  const cleanLoc = sanitizeThaiText(loc).trim();
-  return cleanLoc.includes(provinceName) ? `ย่าน${cleanLoc}` : `ย่าน${cleanLoc} ในจังหวัด${provinceName}`;
-}
-
-function getNaturalDescription(profile, displayName, age, stats, height, weight, locZone, priceDisplay) {
-  const parts = [
-    stats ? `สัดส่วน ${stats}` : "",
-    height ? `ส่วนสูง ${height} ซม.` : "",
-    weight ? `น้ำหนัก ${weight} กก.` : "",
-    (profile.skinTone || profile.skin_tone || "").trim() ? `ผิวพรรณ${profile.skinTone || profile.skin_tone}` : "ผิวพรรณเนียนสวย"
-  ].filter(Boolean).join(" ");
-
-  return `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${locZone} อายุ ${age} ปี ${parts} พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย อัตราค่าขนมเริ่มต้น ${priceDisplay} การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
-}
-
 export default async (req, context) => {
   const url = new URL(req.url);
-  const userAgent = (req.headers.get("User-Agent") || "").toLowerCase();
-  
-  const isBot = /googlebot|bingbot|yandex|duckduckgo|facebookexternalhit|twitterbot|line|baiduspider|slurp|applebot/i.test(userAgent);
-  if (!isBot) {
+
+  // จุดรับคำสั่ง Purge
+  if (url.pathname === "/api/purge-cache" || url.pathname === "/api/clear-cache") {
+    const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
+    if (secret === CONFIG.PURGE_SECRET) {
+      PROFILE_PAGE_CACHE.clear();
+      GLOBAL_PROFILE_VERSION = `v_${Date.now()}`;
+    }
+  }
+
+  const segments = url.pathname.split("/").filter(Boolean);
+  if (segments[0] !== "sideline" || segments.length < 2) {
     return context.next();
   }
 
+  const rawSlug = decodeURIComponent(segments[segments.length - 1]);
+  if (["province", "category", "search", "app", "profiles"].includes(rawSlug)) {
+    return context.next();
+  }
+
+  // ตรวจสอบแคชใน Memory
+  const cacheKey = url.pathname.toLowerCase();
+  const cachedPage = PROFILE_PAGE_CACHE.get(cacheKey);
+  if (cachedPage && cachedPage.version === GLOBAL_PROFILE_VERSION) {
+    return new Response(cachedPage.html, { headers: cachedPage.headers });
+  }
+
   try {
-    const segments = url.pathname.split("/").filter(Boolean);
-    if (segments[0] !== "sideline" || segments.length < 2) {
-      return context.next();
-    }
-
-    const rawSlug = decodeURIComponent(segments[segments.length - 1]);
-    if (["province", "category", "search", "app", "profiles"].includes(rawSlug)) {
-      return context.next();
-    }
-
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     let query = supabase.from("profiles").select("*").eq("active", true);
     query = /^\d+$/.test(rawSlug) ? query.eq("id", rawSlug) : query.eq("slug", rawSlug);
@@ -221,7 +172,7 @@ export default async (req, context) => {
     }
 
     let relatedProfiles = [];
-    const provinceKey = profile.provinceKey || profile.province_key || profile.province_slug || "chiangmai";
+    const provinceKey = profile.provinceKey || profile.province_key || "chiangmai";
     if (provinceKey) {
       const { data: related } = await supabase
         .from("profiles")
@@ -233,71 +184,50 @@ export default async (req, context) => {
       relatedProfiles = related || [];
     }
 
-    const displayName = `น้อง${(profile.name || profile.displayName || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
+    const displayName = `น้อง${(profile.name || "สาวสวย").trim().replace(/^(น้อง\s?)+/gi, "")}`;
     const cleanProvinceKey = provinceKey.toLowerCase();
-    const provinceNameThai = profile.provinceThai || profile.province_thai || PROVINCE_NAME_MAP[cleanProvinceKey] || profile.location || "เชียงใหม่";
+    const provinceNameThai = profile.provinceThai || PROVINCE_NAME_MAP[cleanProvinceKey] || "เชียงใหม่";
     const provinceHubUrl = `${CONFIG.DOMAIN}/location/${cleanProvinceKey}`;
     
     const rateNumber = extractCleanNumber(profile.rate || profile.price);
     const priceDisplay = `${rateNumber.toLocaleString()}.-`;
     
-    const rawImage = profile.imagePath || profile.image_url || profile.imageUrl || profile.photo || profile.avatar || "";
+    const rawImage = profile.imagePath || profile.image_url || "";
     const heroImageLarge = optimizeImg(rawImage, 600, 800);
     const heroImageSmall = optimizeImg(rawImage, 400, 533);
     const heroSrcSet = generateSrcSet(rawImage);
 
-    // 🟢 สกัด URL ไลน์อย่างแม่นยำ
-    const rawLineInput = (profile.line_id || profile.lineId || profile.line || "").trim();
+    const rawLineInput = (profile.line_id || profile.lineId || "").trim();
     let lineId = "https://line.me/ti/p/ksLUWB89Y_";
-
     const matchUrl = rawLineInput.match(/(https?:\/\/[^\s]+)/i);
     if (matchUrl) {
       lineId = matchUrl[0];
     } else if (rawLineInput) {
       const cleanHandle = rawLineInput.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
-      if (cleanHandle) {
-        lineId = `https://line.me/ti/p/${cleanHandle}`;
-      }
+      if (cleanHandle) lineId = `https://line.me/ti/p/${cleanHandle}`;
     }
 
-    const age = profile.age || getDeterministicValue(20, 26, rawSlug, 1);
-    const height = profile.height || getDeterministicValue(158, 168, rawSlug, 2);
-    const weight = profile.weight || getDeterministicValue(44, 52, rawSlug, 3);
+    const age = profile.age || "22";
+    const height = profile.height || "162";
+    const weight = profile.weight || "48";
+    const stats = profile.stats || "35-24-35";
+
+    const localizedZone = profile.location ? `ย่าน${sanitizeThaiText(profile.location)} ในจังหวัด${provinceNameThai}` : `ในจังหวัด${provinceNameThai}`;
+    const naturalDesc = `ยินดีต้อนรับสู่โปรไฟล์แนะนำของ ${displayName} ผู้ให้บริการเพื่อนเที่ยวและนำเที่ยวระดับพรีเมียมในเขตพื้นที่ ${localizedZone} อายุ ${age} ปี สัดส่วน ${stats} ส่วนสูง ${height} ซม. น้ำหนัก ${weight} กก. พร้อมมอบการดูแลเอาใจใส่อย่างเป็นธรรมชาติในสไตล์ฟีลแฟนที่อบอุ่นและสุภาพเรียบร้อย อัตราค่าขนมเริ่มต้น ${priceDisplay} การันตีความปลอดภัยสูงสุดด้วยเงื่อนไขตกลงนัดพบเจอตัวจริงหน้างานเรียบร้อยแล้วจึงค่อยชำระค่าบริการ ปราศจากการเรียกเก็บเงินจองมัดจำล่วงหน้าทุกกรณี`;
     
-    let stats = profile.stats || profile.proportion || "";
-    if (!stats || stats === "-") {
-      const bust = profile.bust || getDeterministicValue(32, 36, rawSlug, 4);
-      const waist = profile.waist || getDeterministicValue(23, 26, rawSlug, 5);
-      const hips = profile.hips || getDeterministicValue(33, 37, rawSlug, 6);
-      stats = `${bust}-${waist}-${hips}`;
-    }
-
-    const localizedZone = getLocalizedZone(profile.location, provinceNameThai);
-    const naturalDesc = getNaturalDescription(profile, displayName, age, stats, height, weight, localizedZone, priceDisplay);
     const pageTitle = `${displayName} ไซด์ไลน์${provinceNameThai} เพื่อนเที่ยวสไตล์ฟิวแฟน ตรงปก 100%`;
     const metaDescription = `โปรไฟล์แนะนำของ ${displayName} สาวสวยไซด์ไลน์พิกัดบริการบริเวณ ${profile.location || provinceNameThai} อายุ ${age} ปี สัดส่วน ${stats} ดูแลเอาใจใส่เป็นกันเองสไตล์ฟิวแฟนอย่างสุภาพ ตรวจสอบประวัติจริงตรงปก ปลอดภัยสูงสุด ไร้เงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณี`;
     const canonicalUrl = `${CONFIG.DOMAIN}/sideline/${encodeURIComponent(profile.slug || profile.id)}`;
 
-    // สร้างรีวิวพร้อม datePublished ตามเกณฑ์ Google Search Console
-    const now = Date.now();
     const reviewsList = getDeterministicReviews(rawSlug, 3);
     const reviewsSchema = reviewsList.map((r, i) => ({
       "@type": "Review",
-      "datePublished": new Date(now - (i + 1) * 7 * 86400000).toISOString().split("T")[0],
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": r.rating.toString(),
-        "bestRating": "5",
-        "worstRating": "1"
-      },
-      "author": {
-        "@type": "Person",
-        "name": stripHTML(r.name)
-      },
+      "datePublished": new Date(Date.now() - (i + 1) * 7 * 86400000).toISOString().split("T")[0],
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5", "worstRating": "1" },
+      "author": { "@type": "Person", "name": stripHTML(r.name) },
       "reviewBody": stripHTML(r.text)
     }));
 
-    // 🟢 Schema.org รองรับ Google Rich Results Test 100%
     const schemaGraph = {
       "@context": "https://schema.org/",
       "@graph": [
@@ -326,10 +256,7 @@ export default async (req, context) => {
           "name": `บริการเพื่อนเที่ยวสไตล์ฟิวแฟน - ${displayName}`,
           "image": heroImageLarge,
           "description": stripHTML(metaDescription),
-          "brand": {
-            "@type": "Brand",
-            "name": CONFIG.BRAND_NAME
-          },
+          "brand": { "@type": "Brand", "name": CONFIG.BRAND_NAME },
           "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": "5.0",
@@ -403,40 +330,27 @@ export default async (req, context) => {
     <link rel="alternate" hreflang="x-default" href="${canonicalUrl}">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     
-    <!-- ⚡ Performance & Resource Hints -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link rel="preload" as="image" href="${heroImageSmall}" ${heroSrcSet ? `imagesrcset="${heroSrcSet}" imagesizes="(max-width: 600px) 100vw, 400px"` : ""} fetchpriority="high">
     <meta name="theme-color" content="#07040d">
     
-    <!-- 🌐 Open Graph & Social Cards -->
     <meta property="og:site_name" content="${CONFIG.BRAND_NAME}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="${escapeHTML(pageTitle)}">
     <meta property="og:description" content="${escapeHTML(metaDescription)}">
     <meta property="og:image" content="${heroImageLarge}">
-    <meta property="og:image:secure_url" content="${heroImageLarge}">
-    <meta property="og:image:width" content="600">   
-    <meta property="og:image:height" content="800">
     <meta property="og:url" content="${canonicalUrl}">
 
-    <!-- 🐦 Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHTML(pageTitle)}">
     <meta name="twitter:description" content="${escapeHTML(metaDescription)}">
     <meta name="twitter:image" content="${heroImageLarge}">
 
-    <!-- 📱 Icons & PWA -->
     <link rel="shortcut icon" href="/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.webmanifest">
-    
-    <!-- 🎨 Stylesheets -->
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- 📊 Schema.org JSON-LD -->
     <script type="application/ld+json">${JSON.stringify(schemaGraph)}<\/script>
 </head>
 <body style="background-color: #07040d; color: #FFFFFF; font-family: 'Prompt', sans-serif;">
@@ -449,20 +363,13 @@ export default async (req, context) => {
             </div>
         </header>
 
-        <!-- 🧭 Breadcrumb Semantic Navigation -->
         <nav aria-label="breadcrumb">
           <ol style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 1rem 0; font-size: 11.5px;">
-            <li>
-              <a href="/" style="color: #CBD5E1; text-decoration: none;">หน้าแรก</a>
-            </li>
+            <li><a href="/" style="color: #CBD5E1; text-decoration: none;">หน้าแรก</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li>
-              <a href="${provinceHubUrl}" style="color: #C084FC; text-decoration: none;">สาวรับงาน${escapeHTML(provinceNameThai)}</a>
-            </li>
+            <li><a href="${provinceHubUrl}" style="color: #C084FC; text-decoration: none;">สาวรับงาน${escapeHTML(provinceNameThai)}</a></li>
             <li style="color: #94A3B8;" aria-hidden="true">&raquo;</li>
-            <li aria-current="page">
-              <span style="color: #FFF; font-weight: 700;">${escapeHTML(displayName)}</span>
-            </li>
+            <li aria-current="page"><span style="color: #FFF; font-weight: 700;">${escapeHTML(displayName)}</span></li>
           </ol>
         </nav>
 
@@ -515,7 +422,7 @@ export default async (req, context) => {
                     </a>
                 </div>
 
-                <!-- 💎 กล่องราคาแบบกระจกหรู สว่างคมชัด 100% -->
+                <!-- 💰 อัตราค่าบริการ -->
                 <section style="margin-bottom: 1.5rem; background: rgba(18, 12, 30, 0.85); border-radius: 16px; padding: 16px; border: 1.5px solid rgba(192, 132, 252, 0.25); box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
                     <h2 style="color: #C084FC; text-align: center; font-weight: 900; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.5px;">💰 อัตราค่าบริการ (เรทมาตรฐาน)</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
@@ -534,23 +441,20 @@ export default async (req, context) => {
                     </div>
                 </section>
 
-                <!-- 💬 FAQ แบบสว่าง คมชัด -->
+                <!-- 💬 FAQ -->
                 <section style="margin-bottom: 1.5rem;">
                     <h2 style="color: #FFF; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">คำถามพบบ่อยเกี่ยวกับ ${escapeHTML(displayName)}</h2>
-                    
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(192, 132, 252, 0.18); border-radius: 14px; padding: 14px;">
                             <h3 style="font-size: 12.5px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">Q: ${escapeHTML(displayName)} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h3>
                             <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin: 0;">${escapeHTML(displayName)} อายุ ${age} ปี สัดส่วน ${escapeHTML(stats)} ส่วนสูง ${height} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${escapeHTML(localizedZone)} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
                         </div>
-
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(192, 132, 252, 0.18); border-radius: 14px; padding: 14px;">
                             <h3 style="font-size: 12.5px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${escapeHTML(displayName)} เป็นอย่างไร?</h3>
                             <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin: 0;">อัตราค่าบริการเริ่มต้น ${priceDisplay} นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
                         </div>
-
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(192, 132, 252, 0.18); border-radius: 14px; padding: 14px;">
-                            <h3 style="font-size: 12.5px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${escapeHTML(displayName)} ได้ทางใด?</h3>
+                            <h3 style="font-size: 12.5px; font-weight: 800; color: #C084FC; margin-bottom: 4px;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?</h3>
                             <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin: 0;">สามารถกดปุ่ม 'ทักไลน์จองคิว' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
                         </div>
                     </div>
@@ -575,8 +479,8 @@ export default async (req, context) => {
                     <h2 style="color: #C084FC; font-size: 14px; font-weight: 900; margin-bottom: 12px; text-align: center;">น้องๆ แนะนำเพิ่มเติมในโซน${escapeHTML(provinceNameThai)}</h2>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
                         ${relatedProfiles.map(p => {
-                          const relName = `น้อง${(p.name || p.displayName || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
-                          const relImg = p.imagePath || p.image_url || p.photo || "";
+                          const relName = `น้อง${(p.name || "สาวสวย").replace(/^(น้อง\s?)+/, "")}`;
+                          const relImg = p.imagePath || p.image_url || "";
                           return `
                             <a href="/sideline/${encodeURIComponent(p.slug || p.id)}" style="text-decoration: none; color: inherit; background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; border: 1px solid rgba(192, 132, 252, 0.2); display: block; text-align: center;">
                                 <img src="${optimizeImg(relImg, 300, 400)}" alt="${escapeHTML(relName)} สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)} ฟิวแฟน" loading="lazy" width="300" height="400" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
@@ -614,20 +518,21 @@ export default async (req, context) => {
 </body>
 </html>`;
 
-    return new Response(htmlResponse, {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=0, s-maxage=604800, stale-while-revalidate=86400",
-        "Netlify-CDN-Cache-Control": "public, max-age=604800, durable",
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
-        "X-XSS-Protection": "1; mode=block",
-        "Referrer-Policy": "strict-origin-when-cross-origin"
-      }
-    });
+    const responseHeaders = {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "ETag": `"${GLOBAL_PROFILE_VERSION}"`,
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    };
+
+    PROFILE_PAGE_CACHE.set(cacheKey, { html: htmlResponse, headers: responseHeaders, version: GLOBAL_PROFILE_VERSION });
+    return new Response(htmlResponse, { headers: responseHeaders });
 
   } catch (err) {
-    console.error("Bot rendering error:", err);
+    console.error("Profile rendering error:", err);
     return context.next();
   }
 };

@@ -1,14 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
 const PAGE_CACHE = new Map();
-const MAX_CACHE_SIZE = 300;
-let GLOBAL_LAST_TIMESTAMP = `init_${Date.now()}`;
-const PURGE_SECRET_KEY = "fmh_secure_purge_2026";
+let GLOBAL_VERSION = `v_${Date.now()}`;
 let TEMPLATE_HTML_CACHE = null;
-let TEMPLATE_CACHE_TIMESTAMP = 0;
-const TEMPLATE_CACHE_TTL_MS = 86400000; // แคช Template ไว้นาน 24 ชม.
 
-// 🟢 เพิ่มตัวแปร Regex ตรวจสอบไฟล์ Static ป้องกัน 500 Error
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
 
 const CONFIG = {
@@ -26,8 +21,14 @@ const CONFIG = {
       return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4ZXR6cXdqYWl1bXFocnB1bWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTMzMTIsImV4cCI6MjA4NzE4OTMxMn0.ZNJq1fF51rlKnfvIw-AZ65R1OpCmgA3-CkE2OtxpaX4";
     }
   },
+  get PURGE_SECRET() {
+    try {
+      return Deno.env.get("PURGE_SECRET") || "fmh_secure_purge_2026";
+    } catch {
+      return "fmh_secure_purge_2026";
+    }
+  },
   PRIMARY_DOMAIN: "https://firstmodelhub.com",
-  CLOUDINARY_CLOUD_NAME: "drffioary",
   CLOUDINARY_BASE_URL: "https://res.cloudinary.com/drffioary/image/upload/",
   BRAND_NAME: "FirstModelHub",
   BRAND_LEGAL_NAME: "FirstModelHub Co., Ltd.",
@@ -154,12 +155,6 @@ const PROVINCE_SEO_DATA = {
     ]
   }
 };
-
-Object.keys(PROVINCE_SEO_DATA).forEach(key => {
-  if (key !== "default") {
-    PROVINCE_SEO_DATA[key] = { ...PROVINCE_SEO_DATA.default, ...PROVINCE_SEO_DATA[key] };
-  }
-});
 
 function sanitizeThaiText(text) {
   if (!text || typeof text !== "string") return "";
@@ -310,44 +305,16 @@ function getDynamicReviews(provinceName) {
 }
 
 async function getTemplateHtml(url, context) {
-  const now = Date.now();
-  const fallbackHtml = `<!DOCTYPE html>
-<html lang="th" class="light-theme">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>First Model Hub</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <main id="main-content">
-    <div class="container" style="padding: 40px 16px; text-align: center;">
-      <h1 id="hero-h1">First Model Hub</h1>
-    </div>
-  </main>
-  <script type="module" src="/main.js"></script>
-</body>
-</html>`;
-
-  if (!TEMPLATE_HTML_CACHE || now - TEMPLATE_CACHE_TIMESTAMP > TEMPLATE_CACHE_TTL_MS) {
-    try {
-      const abortCtrl = new AbortController();
-      const timeoutId = setTimeout(() => abortCtrl.abort(), 3000);
-      const templateUrl = new URL("/index.html", url.origin);
-      const res = await fetch(templateUrl, {
-        headers: { "x-ssr-bypass": "true" },
-        signal: abortCtrl.signal
-      });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        TEMPLATE_HTML_CACHE = await res.text();
-        TEMPLATE_CACHE_TIMESTAMP = now;
-      }
-    } catch {
-      return fallbackHtml;
+  if (TEMPLATE_HTML_CACHE) return TEMPLATE_HTML_CACHE;
+  try {
+    const templateUrl = new URL("/index.html", url.origin);
+    const res = await fetch(templateUrl, { headers: { "x-ssr-bypass": "true" } });
+    if (res.ok) {
+      TEMPLATE_HTML_CACHE = await res.text();
+      return TEMPLATE_HTML_CACHE;
     }
-  }
-  return TEMPLATE_HTML_CACHE || fallbackHtml;
+  } catch {}
+  return "";
 }
 
 function generateCardSrcSet(rawImg) {
@@ -466,17 +433,17 @@ export default async (req, context) => {
     const url = new URL(req.url);
     const primaryDomain = CONFIG.PRIMARY_DOMAIN;
 
-    // ⚡ Manual Purge
+    // ⚡ 1. On-Demand Purge: ล้างแคชเมื่อหลังบ้านสั่งมาเท่านั้น
     if (url.pathname === "/api/clear-cache" || url.pathname === "/api/purge-cache") {
       const secret = url.searchParams.get("secret") || req.headers.get("x-purge-secret");
-      if (secret === PURGE_SECRET_KEY) {
+      if (secret === CONFIG.PURGE_SECRET) {
         PAGE_CACHE.clear();
         TEMPLATE_HTML_CACHE = null;
-        GLOBAL_LAST_TIMESTAMP = `manual_${Date.now()}`;
+        GLOBAL_VERSION = `v_${Date.now()}`;
         return new Response(JSON.stringify({
           success: true,
           message: "⚡ All Caches Purged Successfully!",
-          version: GLOBAL_LAST_TIMESTAMP
+          version: GLOBAL_VERSION
         }), {
           status: 200,
           headers: { "Content-Type": "application/json; charset=utf-8" }
@@ -499,25 +466,16 @@ export default async (req, context) => {
       return Response.redirect(`${primaryDomain}/`, 301);
     }
 
-    const now = Date.now();
-    const isForcedPurge = url.searchParams.has("refresh") || url.searchParams.has("purge");
-    if (isForcedPurge) {
-      PAGE_CACHE.clear();
-      GLOBAL_LAST_TIMESTAMP = `forced_${now}`;
-    }
-
-    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-
-    
-
- 
+    // ⚡ 2. ตรวจสอบแคชใน Memory (ถ้ามีแคชส่งทันที 0 Database Query)
     const cacheKey = `${req.method}:${cleanPath}`;
     const cachedPage = PAGE_CACHE.get(cacheKey);
-    if (!isForcedPurge && cachedPage && cachedPage.version === GLOBAL_LAST_TIMESTAMP) {
+    if (cachedPage && cachedPage.version === GLOBAL_VERSION) {
       return new Response(cachedPage.html, { headers: cachedPage.headers });
     }
     
-    // วิเคราะห์ URL และ จังหวัด
+    // ⚡ 3. ถ้าไม่มีแคช -> ยิง Supabase ดึงข้อมูล
+    const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
     const segments = url.pathname.split("/").filter(Boolean);
     let provinceSlug = "";
     let isNational = false;
@@ -590,7 +548,7 @@ export default async (req, context) => {
     const mapEmbedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=${mapZoom}&ie=UTF8&iwloc=&output=embed`;
     const cleanZonesList = (seoData.zones || []).map(sanitizeThaiText).filter(z => z && z !== "ทั้งหมด" && z !== "all");
 
-    // โครงสร้าง Schema.org
+    // Schema.org
     const schemaGraph = [
       {
         "@type": "Organization",
@@ -690,19 +648,9 @@ export default async (req, context) => {
       });
     }
 
-    // 🟢 1. Render การ์ดทั้งหมด
-    const allCardsHtml = profilesList
-      .map((p, i) => renderCardHtml(p, i === 0, provinceNameThai))
-      .join("");
+    const allCardsHtml = profilesList.map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
+    const featuredCardsHtml = profilesList.filter(p => p.isfeatured).slice(0, 12).map((p, i) => renderCardHtml(p, i === 0, provinceNameThai)).join("");
 
-    // 🟢 2. Render การ์ด VIP แนะนำ
-    const featuredCardsHtml = profilesList
-      .filter(p => p.isfeatured)
-      .slice(0, 12)
-      .map((p, i) => renderCardHtml(p, i === 0, provinceNameThai))
-      .join("");
-    
-    // 🟢 3. Render รีวิวลูกค้าจริง
     const reviewsHtml = (Array.isArray(activeReviews) ? activeReviews : []).map(r => {
       const avatarLetter = r.initial || (r.author ? r.author.replace(/^(คุณ|พี่|น้อง)/, "").trim().charAt(0) : "V");
       const cleanText = stripHTML(r.text || "").replace(/^["']|["']$/g, "");
@@ -730,13 +678,11 @@ export default async (req, context) => {
       `;
     }).join("");
 
-    // 🟢 4. FAQs และ เนื้อหา SEO Intro
     const faqsHtml = generateDynamicFAQsHTML(seoData.faqs);
     const zonesStr = (seoData.zones || []).filter(z => z !== "ทั้งหมด").slice(0, 4).map(sanitizeThaiText).join(", ");
     const introText = getDynamicIntro(provinceNameThai, seoData.zones, provinceSlug);
     const linkedIntro = smartLinkify(introText, 0, seoData.zones, provinceSlug);
 
-    // 🟢 5. ลิงก์ Footer
     const popularLocationsFooter = allProvincesRes.data
       ? allProvincesRes.data.map(p => {
           const key = (p.key || p.slug || p.id || "").toString().toLowerCase();
@@ -750,12 +696,11 @@ export default async (req, context) => {
         }).join("")
       : "";
 
-let finalHtml = await getTemplateHtml(url, context);
+    let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
     const exactCount = String(totalCount);
 
-    // 1. Meta Titles & Description
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -763,73 +708,43 @@ let finalHtml = await getTemplateHtml(url, context);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
 
-    // 2. Canonical & Open Graph
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
-    // 3. 🟢 Hreflang Block (Regex ใหม่ แมตช์ตรง 100% ป้องกัน {{SEO_CANONICAL}} หลุด)
     const hreflangBlock = isNational
       ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
       : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
-    finalHtml = finalHtml.replace(
-      /<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i,
-      hreflangBlock
-    );
-
-    // 🟢 สั่งแทนที่ตัวแปรสำรอง ป้องกันการหลุดค้างในแท็กอื่นๆ
+    finalHtml = finalHtml.replace(/<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i, hreflangBlock);
     finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
     finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
 
-    // 4. Headings (H1 & H2)
     const ssrH1Html = isNational
-      ? `
-          <span class="h1-line-1">สาวรับงาน ไซด์ไลน์ทั่วไทย</span>
-          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>
-        `
-      : `
-          <span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>
-          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>
-        `;
+      ? `<span class="h1-line-1">สาวรับงาน ไซด์ไลน์ทั่วไทย</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`
+      : `<span class="h1-line-1">สาวรับงาน${escapeHTML(provinceNameThai)} ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>\n          <span class="h1-line-2">& ฟิวแฟน ตรงปก 100%</span>`;
 
     finalHtml = finalHtml.replace(/<h1[^>]*id=["']hero-h1["'][^>]*>[\s\S]*?<\/h1>|<h1\s+class=["']seo-h1-title["'][^>]*>[\s\S]*?<\/h1>/i, `<h1 class="seo-h1-title" id="hero-h1">${ssrH1Html}</h1>`);
 
     const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
 
-    // 5. ตัวเลขสถิติต่างๆ
     const totalProvincesFromDb = allProvincesRes?.data ? allProvincesRes.data.length : 0;
+    finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`);
+    finalHtml = finalHtml.replace(/<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i, `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`);
 
-    finalHtml = finalHtml.replace(
-      /<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i,
-      `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`
-    );
-
-    finalHtml = finalHtml.replace(
-      /<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i,
-      `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`
-    );
-
-    // 6. Schema.org JSON-LD
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
-    const schemaTag = `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`;
-    finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, schemaTag);
+    finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`);
 
-    // 7. Placeholders & SEO Content
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", exactCount);
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
     finalHtml = replaceGlobal(finalHtml, "{{MAP_EMBED_URL}}", mapEmbedUrl);
 
-    finalHtml = finalHtml.replace(
-      /<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i,
-      `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`
-    );
+    finalHtml = finalHtml.replace(/<div\s+class=["']seo-content-inner["'][^>]*>[\s\S]*?<\/div>/i, `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`);
 
-    // 8. FAQs & Reviews
     if (faqsHtml) {
       finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     }
@@ -837,7 +752,6 @@ let finalHtml = await getTemplateHtml(url, context);
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // 9. Hot Profiles Swiper
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -871,13 +785,13 @@ let finalHtml = await getTemplateHtml(url, context);
       finalHtml = finalHtml.replace(/<div id="vip-swiper-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="vip-swiper-container" class="vip-swiper-wrapper" aria-label="สไลด์รายชื่อน้องๆ HOT แนะนำ">${hotSwiperCardsHtml}</div>`);
     }
 
+    // แก้ไข: ถ้าไม่ใช่หน้าทั่วไทย ให้คงแท็ก Section ไว้แต่ใส่ style="display: none;" ป้องกัน JS หาไม่เจอ
     if (isNational) {
       finalHtml = finalHtml.replace(/<div id="featured-profiles-container"[^>]*>[\s\S]*?<\/div>/i, `<div id="featured-profiles-container" class="profile-grid profiles-grid-row" aria-labelledby="featured-heading">${featuredCardsHtml || ""}</div>`);
     } else {
-      finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
+      finalHtml = finalHtml.replace(/<section id="featured-profiles"[^>]*>/i, `<section id="featured-profiles" class="clean-section-wrapper" aria-labelledby="featured-heading" style="display: none;">`);
     }
 
-    // 10. Profile Cards Display Area (ป้ายจำนวนโปรไฟล์สั้นกระชับ ไม่ทับชื่อจังหวัด 100%)
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -940,12 +854,8 @@ let finalHtml = await getTemplateHtml(url, context);
       `;
     }
 
-    finalHtml = finalHtml.replace(
-      /<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i,
-      `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`
-    );
+    finalHtml = finalHtml.replace(/<div id="profiles-display-area"[^>]*>[\s\S]*?<\/div>/i, `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`);
 
-    // 11. Dropdown ค้นหาจังหวัด
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
@@ -956,7 +866,6 @@ let finalHtml = await getTemplateHtml(url, context);
       finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
     }
 
-    // 12. Serialization SSR Data
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1027,19 +936,17 @@ let finalHtml = await getTemplateHtml(url, context);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
-    // 13. Cache-Control Header แคชระยะยาว 7 วัน (หยุดการกินเครดิต 100%)
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, s-maxage=604800, stale-while-revalidate=86400",
-      "Netlify-CDN-Cache-Control": "public, max-age=604800, durable",
-      "ETag": `"${GLOBAL_LAST_TIMESTAMP}"`,
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "ETag": `"${GLOBAL_VERSION}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
       "X-XSS-Protection": "1; mode=block",
       "Referrer-Policy": "strict-origin-when-cross-origin"
     };
 
-    PAGE_CACHE.set(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_LAST_TIMESTAMP });
+    PAGE_CACHE.set(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_VERSION });
     return new Response(finalHtml, { headers: responseHeaders });
 
   } catch (err) {
