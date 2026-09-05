@@ -3,12 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 const PAGE_CACHE = new Map();
 const MAX_CACHE_SIZE = 300;
 let GLOBAL_LAST_TIMESTAMP = `init_${Date.now()}`;
-let LAST_PROBE_TIME = 0;
-const PROBE_INTERVAL_MS = 60000;
 const PURGE_SECRET_KEY = "fmh_secure_purge_2026";
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
-const TEMPLATE_CACHE_TTL_MS = 3600000;
+const TEMPLATE_CACHE_TTL_MS = 86400000; // แคช Template ไว้นาน 24 ชม.
 
 // 🟢 เพิ่มตัวแปร Regex ตรวจสอบไฟล์ Static ป้องกัน 500 Error
 const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
@@ -510,23 +508,9 @@ export default async (req, context) => {
 
     const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-    // ตรวจสอบข้อมูลสั้นๆ (Micro-check)
-    if (!isForcedPurge && now - LAST_PROBE_TIME > PROBE_INTERVAL_MS) {
-      LAST_PROBE_TIME = now;
-      try {
-        const [{ count }, { data: latestProfile }] = await Promise.all([
-          supabase.from("profiles").select("*", { count: "exact", head: true }).eq("active", true),
-          supabase.from("profiles").select("lastUpdated, created_at").eq("active", true).order("lastUpdated", { ascending: false, nullsFirst: false }).limit(1).maybeSingle()
-        ]);
-        const latestTs = `${count || 0}_${latestProfile?.lastUpdated || latestProfile?.created_at || "v1"}`;
-        if (latestTs !== GLOBAL_LAST_TIMESTAMP) {
-          PAGE_CACHE.clear();
-          GLOBAL_LAST_TIMESTAMP = latestTs;
-        }
-      } catch {}
-    }
+    
 
-    // ถ้ามีแคชและข้อมูลไม่เปลี่ยน -> ส่ง HTML เดิมทันที
+ 
     const cacheKey = `${req.method}:${cleanPath}`;
     const cachedPage = PAGE_CACHE.get(cacheKey);
     if (!isForcedPurge && cachedPage && cachedPage.version === GLOBAL_LAST_TIMESTAMP) {
@@ -1043,10 +1027,11 @@ let finalHtml = await getTemplateHtml(url, context);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
-    // 13. Cache-Control Header ปลอดภัย ไม่ล็อกข้ามปี
+    // 13. Cache-Control Header แคชระยะยาว 7 วัน (หยุดการกินเครดิต 100%)
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=30",
+      "Cache-Control": "public, max-age=0, s-maxage=604800, stale-while-revalidate=86400",
+      "Netlify-CDN-Cache-Control": "public, max-age=604800, durable",
       "ETag": `"${GLOBAL_LAST_TIMESTAMP}"`,
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",

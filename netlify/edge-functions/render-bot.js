@@ -195,7 +195,7 @@ export default async (req, context) => {
   const url = new URL(req.url);
   const userAgent = (req.headers.get("User-Agent") || "").toLowerCase();
   
-  const isBot = /bot|google|spider|crawler|facebook|twitter|line|whatsapp|telegram|discord|curl|wget|inspectiontool|lighthouse|headless|bingbot|yandex|duckduckgo|applebot|gptbot|chatgpt|cohere|anthropic|perplexity|mediapartners-google/i.test(userAgent);
+  const isBot = /googlebot|bingbot|yandex|duckduckgo|facebookexternalhit|twitterbot|line|baiduspider|slurp|applebot/i.test(userAgent);
   if (!isBot) {
     return context.next();
   }
@@ -617,7 +617,8 @@ export default async (req, context) => {
     return new Response(htmlResponse, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
+        "Cache-Control": "public, max-age=0, s-maxage=604800, stale-while-revalidate=86400",
+        "Netlify-CDN-Cache-Control": "public, max-age=604800, durable",
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "X-XSS-Protection": "1; mode=block",
