@@ -992,7 +992,7 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 /* ==============================================================================
-   ✨ 8. FILTER PILLS & PROVINCE RIBBON (แก้ทับกัน 100% + ป้องกันจอเลื่อน)
+   ✨ 8. FILTER PILLS & PROVINCE RIBBON
    ============================================================================== */
 .filter-pills-scroll-row {
   display: flex !important;
@@ -1038,29 +1038,30 @@ footer.fmh-footer .brand-logo-text *,
   transform: scale(1.02) !important;
 }
 
-/* 🟢 แถบหัวข้อจังหวัด Glass Ribbon: จัดระบบ Flex ไม่ให้ทับกัน 100% */
 .section-content-wrapper {
   margin-top: 32px !important;
   margin-bottom: 16px !important;
   width: 100% !important;
 }
 
+/* 🟢 แถบหัวข้อจังหวัด Glass Ribbon: ป้องกันตัวหนังสือชนหรือทับกัน 100% */
 .province-header-row {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 8px !important;
-  padding: 8px 12px !important;
-  background: rgba(255, 255, 255, 0.94) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border-radius: 18px !important;
-  border: 1.5px solid rgba(255, 255, 255, 1) !important;
-  box-shadow: 0 6px 20px -4px rgba(124, 58, 237, 0.08) !important;
-  margin-bottom: 14px !important;
+  gap: 6px !important;
+  padding: 6px 10px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 4px 16px -2px rgba(124, 58, 237, 0.06), inset 0 1px 2px #FFFFFF !important;
+  margin-bottom: 12px !important;
   width: 100% !important;
   box-sizing: border-box !important;
   flex-wrap: nowrap !important;
+  overflow: hidden !important;
 }
 
 .province-title-link {
@@ -1073,7 +1074,7 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 .province-clean-title {
-  font-size: clamp(12.5px, 3.4vw, 16.5px) !important;
+  font-size: clamp(12px, 3.4vw, 15px) !important;
   font-weight: 900 !important;
   color: #0F172A !important;
   margin: 0 !important;
@@ -1083,17 +1084,19 @@ footer.fmh-footer .brand-logo-text *,
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
 }
 
 .province-pin-icon {
   color: #E11D48 !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
   filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.35)) !important;
   flex-shrink: 0 !important;
 }
 
 .province-prefix {
-  color: #0F172A !important;
+  color: #1E293B !important;
+  font-weight: 800 !important;
   white-space: nowrap !important;
 }
 
@@ -1101,24 +1104,25 @@ footer.fmh-footer .brand-logo-text *,
   background: linear-gradient(135deg, #FF1493 0%, #7C3AED 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
+  font-weight: 900 !important;
   white-space: nowrap !important;
 }
 
-/* 🟢 ป้ายนับจำนวนโปรไฟล์: อยู่ฝั่งขวาพอดีจอ ไม่ทับชื่อจังหวัด */
+/* 🟢 ป้ายจำนวนโปรไฟล์: กระชับ เรียบหรู ไม่เบียดตัวหนังสือฝั่งซ้าย */
 .province-count-pill {
-  background: #FFFFFF !important;
-  border: 1px solid rgba(5, 150, 105, 0.35) !important;
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.95) 0%, rgba(236, 253, 245, 0.95) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
   border-radius: 100px !important;
   padding: 3.5px 8px !important;
-  font-size: clamp(8.5px, 2.3vw, 10.5px) !important;
+  font-size: clamp(9px, 2.5vw, 10.5px) !important;
   font-weight: 800 !important;
-  color: #059669 !important;
+  color: #065F46 !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 4px !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.12) !important;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.1), inset 0 1px 1px #FFFFFF !important;
   text-decoration: none !important;
 }
 
@@ -1133,12 +1137,68 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 .province-count-pill .arrow-mini {
-  font-size: 8.5px !important;
-  color: var(--violet-main) !important;
+  font-size: 8px !important;
+  color: #059669 !important;
+  flex-shrink: 0 !important;
+}
+.province-pin-icon {
+  color: #E11D48 !important;
+  font-size: 14px !important;
+  filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.35)) !important;
   flex-shrink: 0 !important;
 }
 
-/* Featured Header */
+.province-prefix {
+  color: #1E293B !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+.province-name-highlight {
+  background: linear-gradient(135deg, #FF1493 0%, #7C3AED 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+}
+
+.province-count-pill {
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.95) 0%, rgba(236, 253, 245, 0.95) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 100px !important;
+  padding: 4px 9px !important;
+  font-size: clamp(9.5px, 2.6vw, 11px) !important;
+  font-weight: 800 !important;
+  color: #065F46 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.12), inset 0 1px 1px #FFFFFF !important;
+  text-decoration: none !important;
+  transition: transform 0.2s ease !important;
+}
+
+.province-count-pill:active { transform: scale(0.96) !important; }
+
+.province-count-pill .pulse-dot-el {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background-color: #00E676 !important;
+  box-shadow: 0 0 8px #00E676 !important;
+  animation: pulseGreen 1.8s infinite ease-in-out !important;
+  flex-shrink: 0 !important;
+}
+
+.province-count-pill .arrow-mini {
+  font-size: 8.5px !important;
+  color: #059669 !important;
+  flex-shrink: 0 !important;
+  margin-left: 1px !important;
+}
+
 .featured-header-clean-row {
   display: flex !important;
   align-items: center !important;
@@ -1184,7 +1244,7 @@ footer.fmh-footer .brand-logo-text *,
 }
 
 /* ==============================================================================
-   💎 9. MASTER PROFILE GRID & CONTRAST-PROOF BADGES (ฉบับสมบูรณ์ 100%)
+   💎 9. MASTER PROFILE GRID & CONTRAST-PROOF BADGES
    ============================================================================== */
 #featured-profiles { 
   margin-top: 32px !important;
@@ -1201,7 +1261,6 @@ footer.fmh-footer .brand-logo-text *,
   margin-bottom: 36px !important; 
 }
 
-/* 🟢 กริดการ์ด 2 คอลัมน์บนมือถือ / 3 คอลัมน์บนแท็บเล็ต / 4 คอลัมน์บนคอม */
 #featured-profiles-container,
 .profile-grid,
 .profiles-grid-row { 
@@ -1239,7 +1298,6 @@ footer.fmh-footer .brand-logo-text *,
   position: relative !important; 
 }
 
-/* 🟢 โครงสร้างตัวการ์ดหลัก สัดส่วน 3:4.2 */
 .profile-card-new {
   aspect-ratio: 3 / 4.2 !important;
   width: 100% !important; 
@@ -1251,20 +1309,25 @@ footer.fmh-footer .brand-logo-text *,
   border: 1.5px solid rgba(255, 255, 255, 0.95) !important; 
   box-shadow: var(--shadow-card-pop) !important;
   cursor: pointer; 
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
-              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.3s ease !important;
+  transform: translateZ(0) !important;
+  will-change: transform, box-shadow !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease !important;
 }
 
 .profile-card-new:hover {
-  transform: translateY(-6px) scale(1.025) !important;
-  box-shadow: 0 22px 45px -6px rgba(225, 29, 72, 0.26) !important;
-  border-color: rgba(255, 20, 147, 0.5) !important;
+  transform: translateY(-5px) scale(1.02) translateZ(0) !important;
+  box-shadow: 0 20px 42px -6px rgba(225, 29, 72, 0.24) !important;
+  border-color: rgba(255, 20, 147, 0.45) !important;
 }
 
-.profile-card-new:active { transform: scale(0.97) !important; }
+.profile-card-new:active { 
+  transform: scale(0.97) translateZ(0) !important; 
+}
 
-/* 🟢 อนิเมชั่นประกายแสงแก้ววิ่งผ่านรูปภาพ (Living Crystal Sheen) */
 .profile-card-new::before,
 .vip-card-item::before {
   content: "" !important;
@@ -1290,7 +1353,6 @@ footer.fmh-footer .brand-logo-text *,
   left: 150% !important;
 }
 
-/* 🟢 รูปโปรไฟล์สว่างสดใส ผิวผ่อง คมชัด (Living & Radiant Photo) */
 .profile-card-img { 
   position: absolute !important; 
   inset: 0 !important; 
@@ -1298,15 +1360,18 @@ footer.fmh-footer .brand-logo-text *,
   height: 100% !important; 
   object-fit: cover !important; 
   object-position: top center !important; 
-  filter: brightness(1.04) contrast(1.03) saturate(1.05) !important;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: crisp-edges !important;
+  filter: brightness(1.03) contrast(1.04) saturate(1.06) !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .profile-card-new:hover .profile-card-img {
-  transform: scale(1.05) !important;
+  transform: scale(1.04) translateZ(0) !important;
 }
 
-/* 🟢 เลเยอร์เงาบางเบาเฉพาะใต้ตัวหนังสือ (รูปสว่าง 80% ไม่โดนบัง) */
 .profile-card-gradient-overlay { 
   position: absolute !important; 
   inset: 0 !important; 
@@ -1327,7 +1392,6 @@ footer.fmh-footer .brand-logo-text *,
   z-index: 25 !important; 
 }
 
-/* 🟢 แถบป้ายด้านบนการ์ด */
 .profile-card-badges-top {
   position: absolute !important;
   top: 8px !important;
@@ -1347,22 +1411,22 @@ footer.fmh-footer .brand-logo-text *,
   gap: 4px !important; 
 }
 
-/* 🟢 1. ป้ายรับงาน (Available): แก้วรมดำ 78% + ไฟเขียวนีออนเรืองแสง */
 .badge-status { 
   display: inline-flex !important; 
   align-items: center !important; 
-  gap: 4px !important; 
-  padding: 3px 8px !important; 
+  gap: 4.5px !important; 
+  padding: 3.5px 8.5px !important; 
   border-radius: 100px !important; 
-  font-size: 9px !important; 
-  font-weight: 800 !important; 
-  background: rgba(10, 5, 22, 0.78) !important; 
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(0, 230, 118, 0.65) !important; 
+  font-size: 9.5px !important; 
+  font-weight: 900 !important; 
+  background: rgba(13, 8, 27, 0.85) !important; 
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1.2px solid rgba(0, 230, 118, 0.85) !important; 
   color: #00E676 !important; 
   line-height: 1 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 8px rgba(0, 230, 118, 0.3) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 230, 118, 0.35) !important;
+  letter-spacing: 0.2px !important;
 }
 
 .badge-status.status-busy { 
@@ -1394,38 +1458,37 @@ footer.fmh-footer .brand-logo-text *,
   50% { transform: scale(1.4); box-shadow: 0 0 10px #00E676; }
 }
 
-/* 💎 2. ป้ายตรงปก (Verified): ม่วงไพลิน-น้ำเงินนีออนโปร่งแสง คอนทราสต์คมชัด */
 .badge-verified-top {
   display: inline-flex !important;
   align-items: center !important;
-  background: linear-gradient(135deg, rgba(109, 40, 217, 0.90) 0%, rgba(37, 99, 235, 0.90) 100%) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  background: linear-gradient(135deg, #6D28D9 0%, #2563EB 100%) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
   color: #FFFFFF !important;
-  font-size: 8.5px !important;
-  font-weight: 800 !important;
-  padding: 3px 8px !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  padding: 3.5px 8.5px !important;
   border-radius: 100px !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
-  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.45) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 4px 15px rgba(109, 40, 217, 0.5) !important;
+  letter-spacing: 0.2px !important;
 }
 
-/* 🔥 3. ป้าย HOT: ชมพู-ส้มนีออนประกายไฟ */
 .badge-hot-tag {
   display: inline-flex !important;
   background: linear-gradient(135deg, #FF1493 0%, #FF5E3A 100%) !important;
   color: #FFFFFF !important;
-  font-size: 8.5px !important;
+  font-size: 9px !important;
   font-weight: 900 !important;
-  padding: 3px 8px !important;
+  padding: 3.5px 8.5px !important;
   border-radius: 100px !important;
   line-height: 1 !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 4px 15px rgba(225, 29, 72, 0.5) !important;
 }
 
-/* 🎀 4. ป้ายอายุ (Age Tag): แก้วฝ้าชมพูนีออนทึบ 78% ไม่กลืนกับเสื้อขาว */
 .profile-card-age-tag {
   flex-shrink: 0 !important; 
   font-size: 9px !important; 
@@ -1442,7 +1505,6 @@ footer.fmh-footer .brand-logo-text *,
   box-shadow: 0 2px 6px rgba(225, 29, 72, 0.35) !important;
 }
 
-/* 🏷️ ป้ายแท็ก #ฟิวแฟน แก้วฝ้า */
 .card-vibe-pill {
   font-size: 8.5px !important; 
   font-weight: 700 !important; 
@@ -1456,7 +1518,6 @@ footer.fmh-footer .brand-logo-text *,
   line-height: 1.1 !important;
 }
 
-/* 🟢 กล่องข้อความส่วนล่างของการ์ด */
 .profile-card-info-content { 
   position: absolute !important; 
   bottom: 0 !important; 
@@ -1531,7 +1592,6 @@ footer.fmh-footer .brand-logo-text *,
   flex-shrink: 0 !important; 
 }
 
-/* 💰 5. ป้ายราคาทอง: ตัวหนังสือสีน้ำตาลเข้ม คมชัด 100% ไม่กลืนกับสีทอง */
 .profile-card-price { 
   flex-shrink: 0 !important; 
   color: #381A00 !important; 
@@ -2427,4 +2487,376 @@ nav.floating-app-dock a.dock-item.dock-item-line i,
   0% { transform: translateY(0px) rotate(0deg) scale(1); }
   50% { transform: translateY(-5px) rotate(10deg) scale(1.1); }
   100% { transform: translateY(2px) rotate(-6deg) scale(1); }
+}
+
+/* ==========================================================================
+   ✨ LUXURY CONCIERGE & 3 ขั้นตอนนัดหมาย (HOW IT WORKS BENTO GRID)
+   ========================================================================== */
+
+/* 1. กล่องแม่ครอบทั้งหมด (Bento Container) */
+.concierge-luxury-section {
+  margin: 28px 0 20px 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.luxury-bento-wrapper {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+  border-radius: 24px !important;
+  padding: 24px 14px !important;
+  box-shadow: 0 12px 35px rgba(20, 10, 40, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02) !important;
+  box-sizing: border-box !important;
+}
+
+/* 2. หัวข้อใหญ่ HOW IT WORKS */
+.bento-header-center {
+  text-align: center !important;
+  margin-bottom: 20px !important;
+}
+
+.bento-tag-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: #FEF3C7 !important;
+  color: #D97706 !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.8px !important;
+  padding: 4px 12px !important;
+  border-radius: 100px !important;
+  border: 1px solid rgba(217, 119, 6, 0.2) !important;
+  margin-bottom: 8px !important;
+}
+
+.bento-headline {
+  font-size: clamp(17px, 4.5vw, 20px) !important;
+  font-weight: 900 !important;
+  color: #140F22 !important;
+  margin: 0 0 6px 0 !important;
+  line-height: 1.3 !important;
+}
+
+.bento-sub-desc {
+  font-size: 12px !important;
+  color: #716486 !important;
+  margin: 0 !important;
+}
+
+/* ==========================================================================
+   🎯 การ์ด 3 ขั้นตอนนัดหมาย (แก้ปัญหาข้อความตกหล่น & สวยหรู)
+   ========================================================================== */
+.steps-compact-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  margin-bottom: 20px !important;
+}
+
+.step-compact-card {
+  background: #FAF8FD !important;
+  border: 1px solid rgba(192, 132, 252, 0.28) !important;
+  border-radius: 16px !important;
+  padding: 12px 6px 14px 6px !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+  transition: all 0.25s ease !important;
+  box-sizing: border-box !important;
+}
+
+.step-compact-card:hover {
+  transform: translateY(-2px) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.08) !important;
+  border-color: #C084FC !important;
+}
+
+/* ป้าย STEP 01, 02, 03 */
+.step-number-tag {
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, #E11D48 0%, #9333EA 100%) !important;
+  padding: 3px 8px !important;
+  border-radius: 100px !important;
+  display: inline-block !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25) !important;
+}
+
+/* หัวข้อการ์ดขั้นตอน (แก้ไม่ให้ตัดคำเป็น ...) */
+.step-title {
+  font-size: clamp(11.5px, 3.2vw, 13px) !important;
+  font-weight: 800 !important;
+  color: #140F22 !important;
+  margin: 0 0 6px 0 !important;
+  line-height: 1.25 !important;
+  word-break: normal !important;
+  white-space: normal !important;
+  height: 32px !important; /* จัดระดับความสูงให้เท่ากันทั้ง 3 ใบ */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* คำอธิบายในการ์ดขั้นตอน */
+.step-desc {
+  font-size: 10px !important;
+  color: #716486 !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  padding: 0 2px !important;
+}
+
+/* ==========================================================================
+   🛡️ กล่องการันตีความปลอดภัย (TRUST PROTOCOL BENTO)
+   ========================================================================== */
+.trust-protocol-bento {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  margin-bottom: 20px !important;
+}
+
+.trust-bento-item {
+  background: #F5F2FA !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 16px !important;
+  padding: 14px 12px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+}
+
+.trust-icon-box {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  font-size: 15px !important;
+}
+
+.trust-icon-box.check-green {
+  background: #DCFCE7 !important;
+  color: #16A34A !important;
+}
+
+.trust-icon-box.check-purple {
+  background: #EDE9FE !important;
+  color: #7C3AED !important;
+}
+
+.trust-text-content h4 {
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  color: #140F22 !important;
+  margin: 0 0 3px 0 !important;
+  line-height: 1.3 !important;
+}
+
+.trust-text-content p {
+  font-size: 11px !important;
+  color: #716486 !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* ==========================================================================
+   📝 กล่องบทความ SEO และปุ่มคลี่ดูข้อมูล (SEO DRAWER)
+   ========================================================================== */
+.seo-drawer-wrapper {
+  background: #FAF8FE !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  margin-bottom: 12px !important;
+  position: relative !important;
+  transition: max-height 0.3s ease !important;
+}
+
+.seo-drawer-wrapper.collapsed {
+  max-height: 75px !important;
+  overflow: hidden !important;
+}
+
+.seo-drawer-fade {
+  display: none;
+}
+
+.seo-drawer-wrapper.collapsed .seo-drawer-fade {
+  display: block !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 45px !important;
+  background: linear-gradient(to bottom, rgba(250, 248, 254, 0) 0%, #FAF8FE 100%) !important;
+  pointer-events: none !important;
+}
+
+.seo-content-inner p {
+  font-size: 12.5px !important;
+  color: #4A4458 !important;
+  line-height: 1.65 !important;
+  margin: 0 0 10px 0 !important;
+}
+
+.seo-content-inner strong {
+  color: #140F22 !important;
+  font-weight: 800 !important;
+}
+
+.seo-content-inner .kw-purple {
+  color: #7C3AED !important;
+  font-weight: 800 !important;
+}
+
+.seo-content-inner .kw-zone {
+  color: #E11D48 !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  background: #FFE4E6 !important;
+  padding: 1px 6px !important;
+  border-radius: 6px !important;
+}
+
+/* ปุ่มกดดูข้อมูลพื้นที่ทั้งหมด */
+#toggle-seo-drawer-btn {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(124, 58, 237, 0.25) !important;
+  color: #7C3AED !important;
+  font-weight: 800 !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease !important;
+}
+
+#toggle-seo-drawer-btn:hover {
+  background: #7C3AED !important;
+  color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   ⭐ การ์ดรีวิวลูกค้าจริง (VERIFIED REVIEWS GRID)
+   ========================================================================== */
+.reviews-grid-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+  margin-bottom: 20px !important;
+}
+
+.review-card-item {
+  background: #FAF8FE !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+
+.review-card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 8px !important;
+}
+
+.review-user-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.review-avatar-circle {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7C3AED 0%, #E11D48 100%) !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 900 !important;
+  font-size: 14px !important;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.25) !important;
+}
+
+.review-username {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #140F22 !important;
+}
+
+.review-user-loc {
+  font-size: 11px !important;
+  color: #7C3AED !important;
+  font-weight: 700 !important;
+}
+
+.review-stars-list {
+  color: #F59E0B !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+}
+
+.review-comment-body {
+  font-size: 12px !important;
+  color: #332D41 !important;
+  line-height: 1.6 !important;
+  margin: 0 0 8px 0 !important;
+  font-style: italic !important;
+}
+
+.review-verified-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  color: #059669 !important;
+  background: #ECFDF5 !important;
+  padding: 3px 10px !important;
+  border-radius: 100px !important;
+  border: 1px solid rgba(5, 150, 105, 0.15) !important;
+}
+
+/* ==========================================================================
+   ❓ คำถามที่พบบ่อย (FAQ LIST)
+   ========================================================================== */
+.faq-list-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+}
+
+.faq-item-card {
+  background: #FAF8FE !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+}
+
+.faq-item-card div:first-child {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #7C3AED !important;
+  margin-bottom: 6px !important;
+  line-height: 1.4 !important;
+}
+
+.faq-item-card div:last-child {
+  font-size: 12px !important;
+  color: #4A4458 !important;
+  line-height: 1.6 !important;
 }

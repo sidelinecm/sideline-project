@@ -171,6 +171,23 @@ async function getSupabaseClient() {
     return isEN ? clean : `น้อง${clean}`;
   }
 
+  function escapeHTML(str) {
+    return str ? String(str).replace(/[&<>'"]/g, tag => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+    }[tag] || tag)) : "";
+  }
+
+  function formatLuxuryRate(rate) {
+    if (!rate) return "1.5k";
+    const num = parseInt(String(rate).replace(/\D/g, ""), 10);
+    if (isNaN(num) || num <= 0) return "1.5k";
+    if (num >= 1000) {
+      const kVal = num / 1000;
+      return (kVal % 1 === 0 ? kVal : kVal.toFixed(1)) + "k";
+    }
+    return String(num);
+  }
+
   function optimizeImg(imagePath, width = 400, height = null) {
     if (!imagePath) return DEFAULT_FALLBACK_IMG;
     if (Array.isArray(imagePath)) imagePath = imagePath[0];
@@ -328,7 +345,9 @@ async function getSupabaseClient() {
       });
       domCache.provinceSelect.appendChild(fragment);
     }
-initAgencyStories();
+    
+    initAgencyStories();
+
     const routeMatch = window.location.pathname.match(/^\/(?:location|province)\/([^/]+)/);
     const activeProvinceSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase() : window.currentProvinceSlug || "";
     if (domCache.provinceSelect && activeProvinceSlug && activeProvinceSlug !== "national") {
@@ -356,15 +375,15 @@ initAgencyStories();
       const locationText = isEN ? (PROVINCE_EN_MAP[pKey] || pKey) : (p.location || p.provinceNameThai || "ทั่วไทย");
       const slug = encodeURIComponent(p.slug || p.id);
       const imgSrc = p.images[0]?.src || DEFAULT_FALLBACK_IMG;
-      const isOnline = p.status === "รับงาน" || !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
+      const isOnline = p.isAvailable !== undefined ? p.isAvailable : !(p.availability || "").toLowerCase().includes("ไม่ว่าง");
       const statusLabel = isEN ? (isOnline ? "Available" : "Inquire") : (isOnline ? "รับงาน" : "สอบถาม");
 
       return `
         <div class="vip-card-item ${idx === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
-          <span class="vip-status-chip">🟢 ${statusLabel}</span>
+          <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${statusLabel}</span>
           <span class="hot-rank-badge">${rankBadge}</span>
           <img src="${imgSrc}" 
-               alt="${p.displayName}" 
+               alt="${escapeHTML(p.displayName)} สาวรับงาน${escapeHTML(p.provinceNameThai || '')} ฟิวแฟน ตรงปก 100%" 
                width="175" 
                height="245" 
                loading="${idx === 0 ? "eager" : "lazy"}" 
@@ -372,10 +391,10 @@ initAgencyStories();
                decoding="async" 
                onerror="this.src='${DEFAULT_FALLBACK_IMG}'">
           <div class="vip-card-overlay"></div>
-          <a href="/sideline/${slug}" class="card-link" aria-label="View ${p.displayName}"></a>
+          <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์ ${escapeHTML(p.displayName)}"></a>
           <div class="vip-card-info">
-            <div class="vip-name">${p.displayName}</div>
-            <div class="vip-location">${locationText}</div>
+            <h3 class="vip-name" style="margin:0; font-size:14px; font-weight:900;">${escapeHTML(p.displayName)}</h3>
+            <div class="vip-location">${escapeHTML(locationText)}</div>
           </div>
         </div>
       `;
@@ -548,8 +567,7 @@ initAgencyStories();
         sectionTitle = `✨ หมวดหมู่: <span class="province-name-highlight">#${escapeHTML(appState.activePillTag)}</span>`;
       }
 
-      const countBadgeText = `พบ ${profiles.length} โปรไฟล์พร้อมรับงาน`;
-
+    const countBadgeText = `${profiles.length} โปรไฟล์`;
       const wrapper = document.createElement("div");
       wrapper.className = "section-content-wrapper";
       wrapper.style.cssText = "margin-top: 24px; margin-bottom: 14px; width: 100%; box-sizing: border-box;";
@@ -606,16 +624,13 @@ initAgencyStories();
     const isAllOrNational = !currentSlug || currentSlug === "national" || currentSlug === "all";
     const targetName = isAllOrNational ? "ทั่วไทย" : (provinceName || "ทั่วไทย");
 
-    // 🟢 1. อัปเดตจำนวนโปรไฟล์จริง (ไม่ใส่เครื่องหมาย + ถ้าไม่ต้องการ)
     const liveCounterEl = document.getElementById("live-profile-count");
     if (liveCounterEl) {
       liveCounterEl.textContent = `${totalCount}`;
     }
 
-    // 🟢 2. อัปเดตจำนวนจังหวัดจริงที่มีอยู่ในฐานข้อมูล Supabase
     const liveProvinceEl = document.getElementById("live-province-count");
     if (liveProvinceEl) {
-      // ดึงจำนวนจังหวัดจริงจาก Map หรือ Array ที่โหลดมาจาก Supabase
       const totalProvincesCount = appState.provincesMap.size || (window.provincesData ? window.provincesData.length : 0);
       liveProvinceEl.textContent = isAllOrNational ? `${totalProvincesCount}` : "1";
     }
@@ -640,7 +655,6 @@ initAgencyStories();
         `;
       }
     }
- 
 
     const featuredH2 = document.getElementById("featured-heading");
     if (featuredH2) {
@@ -771,23 +785,6 @@ initAgencyStories();
     popover.style.display = "block";
   }
 
-  function escapeHTML(str) {
-    return str ? String(str).replace(/[&<>'"]/g, tag => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-    }[tag] || tag)) : "";
-  }
-
-  function formatLuxuryRate(rate) {
-    if (!rate) return "1.5k";
-    const num = parseInt(String(rate).replace(/\D/g, ""), 10);
-    if (isNaN(num) || num <= 0) return "1.5k";
-    if (num >= 1000) {
-      const kVal = num / 1000;
-      return (kVal % 1 === 0 ? kVal : kVal.toFixed(1)) + "k";
-    }
-    return String(num);
-  }
-
   function createProfileCardDOM(p, index = 20) {
     const container = document.createElement("div");
     container.className = "profile-card-new-container";
@@ -851,20 +848,22 @@ initAgencyStories();
     });
 
     let rightBadgeHtml = isFiwFan
-      ? `<span class="badge-hot-tag">🔥 HOT</span>` 
-      : `<span class="badge-verified-top">${isEN ? "✦ Verified" : "✦ ตรงปก"}</span>`;
+      ? `<span class="badge-hot-tag"><span aria-hidden="true">🔥</span> HOT</span>` 
+      : `<span class="badge-verified-top"><span aria-hidden="true">✦</span> ${isEN ? "Verified" : "ตรงปก"}</span>`;
 
     const viewProfileAria = isEN ? `View profile of ${modelName}` : `ดูโปรไฟล์ ${modelName}`;
+    const richAltText = `${modelName} สาวรับงาน${p.provinceNameThai || ''} ย่าน${locName} สไตล์ฟิวแฟน ตรงปก 100% - FirstModelHub`;
 
     article.innerHTML = `
       <img src="${imgSrc}" 
            srcset="${cardSrcSet}"
            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-           alt="${escapeHTML(modelName)}"
+           alt="${escapeHTML(richAltText)}"
            width="400"
            height="560"
            class="profile-card-img"
            loading="${index < 4 ? "eager" : "lazy"}"
+           fetchpriority="${index === 0 ? "high" : "auto"}"
            decoding="async"
            onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMG}';" />
            
@@ -894,7 +893,7 @@ initAgencyStories();
           </div>
           <div class="profile-card-bottom-row">
               <span class="profile-card-location" title="${escapeHTML(rawLoc)}">
-                  <i class="fas fa-map-marker-alt"></i> ${escapeHTML(locName)}
+                  <i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${escapeHTML(locName)}
               </span>
               <span class="profile-card-price">${luxuryPrice}</span>
           </div>
@@ -919,7 +918,6 @@ initAgencyStories();
     containerEl.appendChild(fragment);
   }
 
-  // 🟢 1. สร้างหัวข้อจังหวัดแบบใหม่ (ไร้กรอบครอบ สวยหรู สไตล์โมเดิร์น)
   function createProvinceSectionDOM(provinceKey, provinceName, profilesList) {
     const wrapper = document.createElement("div");
     wrapper.className = "section-content-wrapper province-section";
@@ -927,22 +925,22 @@ initAgencyStories();
     wrapper.style.cssText = "margin-top: 36px; margin-bottom: 16px; width: 100%; box-sizing: border-box;";
     
     const displayTitle = isEN ? (PROVINCE_EN_MAP[provinceKey] || provinceName) : provinceName;
-    const badgeText = `พบ ${profilesList.length} โปรไฟล์พร้อมรับงาน`;
+    const badgeText = `${profilesList.length} โปรไฟล์`;
     const headerPrefix = isEN ? `Models in` : `น้องๆ ในจังหวัด`;
 
     wrapper.innerHTML = `
       <div class="province-header-row">
           <a href="/location/${provinceKey}" class="province-title-link">
               <h2 class="province-clean-title">
-                  <span class="province-pin-icon"><i class="fas fa-map-marker-alt"></i></span>
+                  <span class="province-pin-icon"><i class="fas fa-map-marker-alt" aria-hidden="true"></i></span>
                   <span class="province-prefix">${headerPrefix}</span>
-                  <span class="province-name-highlight">${displayTitle}</span>
+                  <span class="province-name-highlight">${escapeHTML(displayTitle)}</span>
               </h2>
           </a>
           <a href="/location/${provinceKey}" class="province-count-pill">
               <span class="pulse-dot-el"></span>
               <span>${badgeText}</span>
-              <i class="fas fa-chevron-right arrow-mini"></i>
+              <i class="fas fa-chevron-right arrow-mini" aria-hidden="true"></i>
           </a>
       </div>
       <div class="profile-grid profiles-grid-row"></div>
@@ -1025,7 +1023,10 @@ initAgencyStories();
     }
 
     const quoteEl = document.getElementById("lightboxQuote");
-    if (quoteEl) quoteEl.textContent = profile.quote || profile.slogan || (isEN ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
+    if (quoteEl) {
+      quoteEl.textContent = profile.quote || profile.slogan || (isEN ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
+      quoteEl.style.display = "block";
+    }
 
     const tagsEl = document.getElementById("lightboxTags");
     if (tagsEl) {
@@ -1154,54 +1155,40 @@ initAgencyStories();
     if (loader) loader.style.display = "none";
   }
 
+  // 🟢 ฟังก์ชัน handleUrlRouting (ป้องกัน Re-render ทับ SSR + ไวยากรณ์ถูกต้องสมบูรณ์)
   async function handleUrlRouting(isInitial = false) {
-    let rawPath = window.location.pathname.replace(/\/+$/, "");
-    if (!rawPath) rawPath = "/";
+    let rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
+    // 1. ตรวจสอบ Sideline Lightbox Route
     const sidelineMatch = rawPath.match(/^\/(?:sideline|profile|app)\/([^/]+)/i);
     if (sidelineMatch) {
-      let slugVal = "";
-      try {
-        slugVal = decodeURIComponent(sidelineMatch[1]).trim();
-      } catch {
-        slugVal = sidelineMatch[1].trim();
-      }
-
+      let slugVal = decodeURIComponent(sidelineMatch[1]).trim();
       appState.currentProfileSlug = slugVal;
 
-      let foundProfile = appState.allProfiles.find(p => {
-        const s = String(p.slug || "").toLowerCase();
-        const id = String(p.id);
-        const target = slugVal.toLowerCase();
-        return s === target || id === target || String(p.name || "").toLowerCase() === target;
-      });
-
-      if (!foundProfile) {
-        try {
-          const client = await getSupabaseClient();
-          if (client) {
-            const isNum = /^\d+$/.test(slugVal);
-            const condition = isNum ? `slug.eq.${slugVal},id.eq.${slugVal}` : `slug.eq.${slugVal}`;
-            const { data: dbProfile } = await client.from("profiles").select("*").or(condition).maybeSingle();
-            if (dbProfile) {
-              foundProfile = normalizeProfile(dbProfile);
-              if (foundProfile) appState.allProfiles.push(foundProfile);
-            }
-          }
-        } catch (_) {}
-      }
+      let foundProfile = appState.allProfiles.find(p => 
+        String(p.slug || "").toLowerCase() === slugVal.toLowerCase() || 
+        String(p.id) === slugVal
+      );
 
       if (foundProfile) {
-        const provKey = foundProfile.provinceKey || "";
-        if (provKey && provKey !== "national" && provKey !== "all") {
-          window.currentProvinceSlug = provKey;
-          if (domCache.provinceSelect) domCache.provinceSelect.value = provKey;
-        }
         window.openLightboxModal(foundProfile);
       }
       return;
     }
 
+    // 2. ข้ามการ Re-render ซ้ำซ้อน หากหน้าเว็บมี SSR Render มาแล้ว
+    const hasExistingSSR = domCache.profilesDisplayArea && domCache.profilesDisplayArea.children.length > 0;
+    if (isInitial && hasExistingSSR) {
+      const routeMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
+      const locSlug = routeMatch ? decodeURIComponent(routeMatch[1]).toLowerCase().trim() : "national";
+      window.currentProvinceSlug = locSlug;
+      if (domCache.provinceSelect && locSlug !== "national") {
+        domCache.provinceSelect.value = locSlug;
+      }
+      return;
+    }
+
+    // 3. ตรวจสอบหน้ารายจังหวัด
     const locationMatch = rawPath.match(/^\/(?:location|province)\/([^/]+)/i);
     if (locationMatch) {
       let locSlug = "";
@@ -1221,6 +1208,7 @@ initAgencyStories();
       return;
     }
 
+    // 4. กรณีหน้าหลักทั่วไป (Default)
     appState.currentProfileSlug = null;
     window.currentProvinceSlug = "national";
     window.closeLightboxModal(false);
@@ -1230,8 +1218,6 @@ initAgencyStories();
   }
 
   async function initApplication() {
-    getSupabaseClient().catch(() => {});
-
     domCache.body = document.body;
     domCache.profilesDisplayArea = document.getElementById("profiles-display-area");
     domCache.noResultsMessage = document.getElementById("no-results-message");
@@ -1563,7 +1549,7 @@ initAgencyStories();
           });
         }
 
-      if (profilesRes.data && profilesRes.data.length > 0) {
+        if (profilesRes.data && profilesRes.data.length > 0) {
           appState.allProfiles = profilesRes.data.map(normalizeProfile).filter(Boolean);
           populateInitialComponents();
           return true;
@@ -1578,9 +1564,6 @@ initAgencyStories();
         hideGlobalLoader();
       }
     })();
-
-    // 🟢 เรียกใช้งานแถบวงกลม Story Highlights ทันทีที่ข้อมูลพร้อม
-    initAgencyStories();
 
     await handleUrlRouting(true);
     hideGlobalLoader();
@@ -1604,7 +1587,7 @@ initAgencyStories();
     topModels.forEach(p => {
       const rawName = p.displayName || p.name || "โมเดล";
       const name = rawName.replace(/^(น้อง\s?)+/gi, "").trim();
-      const rawImg = p.imagePath || p.image_url || (p.images && p.images[0] ? p.images[0].src : "") || "https://firstmodelhub.com/images/firstmodelhub.webp";
+      const rawImg = p.imagePath || p.image_url || (p.images && p.images[0] ? p.images[0].src : "") || DEFAULT_FALLBACK_IMG;
       const slug = encodeURIComponent(p.slug || p.id || name);
       
       const isOnline = p.isAvailable !== undefined 
@@ -1617,7 +1600,7 @@ initAgencyStories();
         <div class="story-item-el interactive-card" onclick="window.location.href='/sideline/${slug}'">
           <div class="story-ring-wrap">
             <div class="story-ring-glow">
-              <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" onerror="this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+              <img src="${rawImg}" alt="${escapeHTML(name)}" loading="lazy" onerror="this.src='${DEFAULT_FALLBACK_IMG}';">
             </div>
             <span class="story-status-dot ${statusClass}"></span>
           </div>
@@ -1628,12 +1611,6 @@ initAgencyStories();
 
     // 🟢 เบิ้ล 2 รอบเพื่อให้สไลด์วิ่งวนลูปแบบไร้รอยต่อ
     trackEl.innerHTML = singleHtml + singleHtml;
-
-    function escapeHTML(str) {
-      return str ? String(str).replace(/[&<>'"]/g, tag => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-      }[tag] || tag)) : "";
-    }
   }
 
   if (document.readyState === "loading") {
