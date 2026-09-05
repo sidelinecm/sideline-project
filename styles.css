@@ -1644,14 +1644,16 @@ footer.fmh-footer .brand-logo-text *,
 
 .bento-tag-pill {
   background: rgba(245, 158, 11, 0.12) !important;
-  color: #D97706 !important;
+  color: #78350F !important; /* 🟢 เปลี่ยนจุดนี้เป็นสีเข้ม (ผ่านเกณฑ์ Contrast ทันที) */
   border: 1px solid rgba(245, 158, 11, 0.25) !important;
   font-size: 10px !important;
   font-weight: 800 !important;
   letter-spacing: 0.5px !important;
   padding: 3px 12px !important;
   border-radius: 100px !important;
-  display: inline-block !important;
+  display: inline-flex !important; /* แนะนำใช้ inline-flex เพื่อให้ไอคอนกับตัวหนังสืออยู่กึ่งกลางสวยงาม */
+  align-items: center !important;
+  gap: 5px !important;
 }
 
 .bento-headline {
@@ -2417,10 +2419,23 @@ nav.floating-app-dock a.dock-item.dock-item-line i,
 
 /* 2.3 ป้าย "ยืนยันการใช้บริการจริง" ในกล่องรีวิว */
 .review-verified-badge {
-  color: #065F46 !important;
-  background: rgba(5, 150, 105, 0.12) !important;
-  border: 1px solid rgba(5, 150, 105, 0.35) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 10.5px !important;
   font-weight: 800 !important;
+  color: #064E3B !important; /* 🟢 เขียวฟอเรสต์เข้มมาก (Contrast Ratio > 7:1 ผ่านฉลุย) */
+  background: #DCFCE7 !important; /* พื้นหลังเขียวอ่อนพาสเทล */
+  border: 1px solid rgba(5, 150, 105, 0.35) !important;
+  padding: 3px 10px !important;
+  border-radius: 100px !important;
+}
+
+/* บังคับสีไอคอน/เครื่องหมายติ๊กถูกด้านในให้เข้มตามตัวหนังสือ */
+.review-verified-badge i,
+.review-verified-badge svg {
+  color: #064E3B !important;
+  fill: #064E3B !important;
 }
 
 /* 2.4 คำถาม & คำตอบใน FAQ */
