@@ -4,12 +4,12 @@ const PAGE_CACHE = new Map();
 const MAX_CACHE_SIZE = 300;
 let GLOBAL_LAST_TIMESTAMP = `init_${Date.now()}`;
 let LAST_PROBE_TIME = 0;
-const AUTO_CHECK_INTERVAL_MS = 30000;
+const PROBE_INTERVAL_MS = 60000; // เช็คสถานะฐานข้อมูลทุก 60 วิ (เช็คแค่ 50 Bytes)
 const PURGE_SECRET_KEY = "fmh_secure_purge_2026";
 let TEMPLATE_HTML_CACHE = null;
 let TEMPLATE_CACHE_TIMESTAMP = 0;
 const TEMPLATE_CACHE_TTL_MS = 3600000;
-const STATIC_EXT_REGEX = /\.(css|js|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest|map|woff|woff2|ttf|txt|xml)$/i;
+
 
 const CONFIG = {
   get SUPABASE_URL() {
@@ -502,7 +502,7 @@ export default async (req, context) => {
   }
 
   const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
-  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/index-en", "/offline", "/sideline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
+  if (["/about", "/faq", "/blog", "/contact", "/terms-of-service", "/privacy-policy", "/locations", "/nimman", "/offline", "/profile"].some(p => cleanPath === p || cleanPath.startsWith(p + "/"))) {
     return await context.next();
   }
 
@@ -519,7 +519,8 @@ export default async (req, context) => {
 
   const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
-  if (!isForcedPurge && now - LAST_PROBE_TIME > AUTO_CHECK_INTERVAL_MS) {
+  // ตรวจสอบข้อมูลสั้นๆ (Micro-check) ถ้าหลังบ้านไม่มีการเปลี่ยนแปลง จะไม่ดึงข้อมูลใหม่
+  if (!isForcedPurge && now - LAST_PROBE_TIME > PROBE_INTERVAL_MS) {
     LAST_PROBE_TIME = now;
     try {
       const [{ count }, { data: latestProfile }] = await Promise.all([
@@ -534,12 +535,13 @@ export default async (req, context) => {
     } catch {}
   }
 
-  const cacheKey = `${req.method}:${url.pathname}`;
+  // ถ้ามีแคชและข้อมูลไม่เปลี่ยน -> ส่ง HTML เดิมทันที (ไม่ยิง Supabase)
+  const cacheKey = `${req.method}:${cleanPath}`;
   const cachedPage = PAGE_CACHE.get(cacheKey);
   if (!isForcedPurge && cachedPage && cachedPage.version === GLOBAL_LAST_TIMESTAMP) {
     return new Response(cachedPage.html, { headers: cachedPage.headers });
   }
-
+  
   // วิเคราะห์ URL และ จังหวัด
   const segments = url.pathname.split("/").filter(Boolean);
   let provinceSlug = "";
@@ -824,11 +826,15 @@ finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, 
     const totalProvincesFromDb = allProvincesRes?.data ? allProvincesRes.data.length : 0;
 
     
-    finalHtml = finalHtml.replace(/<strong id="live-profile-count"[^>]*>[\s\S]*?<\/strong>/i, `<strong id="live-profile-count" class="stat-number">${exactCount}</strong>`);
+finalHtml = finalHtml.replace(
+  /<strong\b[^>]*\bid=["']live-profile-count["'][^>]*>[\s\S]*?<\/strong>/i,
+  `<strong class="stat-number" id="live-profile-count">${exactCount}</strong>`
+);
 
-    
-    finalHtml = finalHtml.replace(/<strong id="live-province-count"[^>]*>[\s\S]*?<\/strong>/i, `<strong id="live-province-count" class="stat-number">${isNational ? totalProvincesFromDb : 1}</strong>`);
-
+finalHtml = finalHtml.replace(
+  /<strong\b[^>]*\bid=["']live-province-count["'][^>]*>[\s\S]*?<\/strong>/i,
+  `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`
+);
 
 
     
@@ -865,25 +871,25 @@ finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, 
       const isAvail = !["ติดจอง", "not_available", "ไม่ว่าง", "พัก", "หยุด"].some(s => (p.availability || "").toLowerCase().includes(s));
       
       return `
-        <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
-          <span class="vip-status-chip">🟢 ${isAvail ? "รับงาน" : "สอบถาม"}</span>
-          <span class="hot-rank-badge">#${i + 1} HOT</span>
-          <img src="${img}" 
-               alt="น้อง${cleanName} รับงาน${provinceNameThai}" 
-               width="175" 
-               height="245" 
-               loading="${i === 0 ? "eager" : "lazy"}" 
-               fetchpriority="${i === 0 ? "high" : "auto"}" 
-               decoding="async"
-               onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
-          <div class="vip-card-overlay"></div>
-          <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
-          <div class="vip-card-info">
-            <div class="vip-name">น้อง${cleanName}</div>
-            <div class="vip-location">${loc}</div>
-          </div>
-        </div>
-      `;
+  <div class="vip-card-item ${i === 0 ? "active-glow" : ""}" data-profile-id="${p.id}" data-profile-slug="${slug}">
+    <span class="vip-status-chip"><span aria-hidden="true">🟢</span> ${isAvail ? "รับงาน" : "สอบถาม"}</span>
+    <span class="hot-rank-badge">#${i + 1} HOT</span>
+    <img src="${img}" 
+         alt="น้อง${cleanName} สาวรับงาน${provinceNameThai} ย่าน${loc} ฟิวแฟน ตรงปก 100% - FirstModelHub" 
+         width="175" 
+         height="245" 
+         loading="${i === 0 ? "eager" : "lazy"}" 
+         fetchpriority="${i === 0 ? "high" : "auto"}" 
+         decoding="async"
+         onerror="this.onerror=null; this.src='https://firstmodelhub.com/images/firstmodelhub.webp';">
+    <div class="vip-card-overlay"></div>
+    <a href="/sideline/${slug}" class="card-link" aria-label="ดูโปรไฟล์น้อง${cleanName}"></a>
+    <div class="vip-card-info">
+      <h3 class="vip-name" style="margin: 0; font-size: 14px; font-weight: 900;">น้อง${cleanName}</h3>
+      <div class="vip-location">${loc}</div>
+    </div>
+  </div>
+`;
     }).join("");
 
     if (hotSwiperCardsHtml) {
@@ -928,7 +934,7 @@ finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, 
                 </a>
                 <a href="/location/${pKey}" class="province-count-pill">
                     <span class="pulse-dot-el"></span>
-                    <span>พบ ${pCount} โปรไฟล์พร้อมรับงาน</span>
+                   <span>${pCount} โปรไฟล์</span>
                     <i class="fas fa-chevron-right arrow-mini"></i>
                 </a>
             </div>
@@ -949,7 +955,7 @@ finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, 
               </h2>
               <span class="province-count-pill">
                   <span class="pulse-dot-el"></span>
-                  <span>พบ ${totalCount} โปรไฟล์พร้อมรับงาน</span>
+                  <span>${totalCount} โปรไฟล์</span>
               </span>
           </div>
           <div class="profile-grid profiles-grid-row">
@@ -1049,15 +1055,18 @@ finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, 
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
-    const responseHeaders = {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=30",
-      "ETag": `"${GLOBAL_LAST_TIMESTAMP}"`,
-      "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
-      "X-XSS-Protection": "1; mode=block",
-      "Referrer-Policy": "strict-origin-when-cross-origin"
-    };
+  
+
+// 🟢 แก้ไขเป็น (แคชที่ Edge Server 60 วิ แต่ให้เบราว์เซอร์ Revalidate เสมอ):
+const responseHeaders = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=30",
+  "ETag": `"${GLOBAL_LAST_TIMESTAMP}"`,
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin"
+};
 
     PAGE_CACHE.set(cacheKey, { html: finalHtml, headers: responseHeaders, version: GLOBAL_LAST_TIMESTAMP });
     return new Response(finalHtml, { headers: responseHeaders });
