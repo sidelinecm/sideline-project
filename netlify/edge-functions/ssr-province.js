@@ -766,12 +766,12 @@ export default async (req, context) => {
         }).join("")
       : "";
 
-    let finalHtml = await getTemplateHtml(url, context);
+let finalHtml = await getTemplateHtml(url, context);
     if (!finalHtml) return await context.next();
 
     const exactCount = String(totalCount);
 
-    // Meta Titles & Description
+    // 1. Meta Titles & Description
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(metaTitle)}</title>`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="description" content="${escapeHTML(cleanMetaDesc)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHTML(metaTitle)}" />`);
@@ -779,22 +779,28 @@ export default async (req, context) => {
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHTML(metaTitle)}" />`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHTML(cleanMetaDesc)}" />`);
 
-    // Canonical & Open Graph
+    // 2. Canonical & Open Graph
     finalHtml = finalHtml.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" id="canonical-link" href="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:url" content="${canonicalUrl}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+property=["']og:image:secure_url["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta property="og:image:secure_url" content="${heroImage}">`);
     finalHtml = finalHtml.replace(/<meta\s+name=["']twitter:image["'][^>]*content=["'][^"']*["'][^>]*>/i, `<meta name="twitter:image" content="${heroImage}">`);
 
+    // 3. 🟢 Hreflang Block (Regex ใหม่ แมตช์ตรง 100% ป้องกัน {{SEO_CANONICAL}} หลุด)
     const hreflangBlock = isNational
       ? `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${primaryDomain}/" />\n  <link rel="alternate" hreflang="en" href="${primaryDomain}/index-en" />\n  <link rel="alternate" hreflang="x-default" href="${primaryDomain}/" />\n\n  `
       : `<!-- MULTILINGUAL SEO -->\n  <link rel="alternate" hreflang="th" href="${canonicalUrl}" />\n  <link rel="alternate" hreflang="x-default" href="${canonicalUrl}" />\n\n  `;
 
     finalHtml = finalHtml.replace(
-      /<!-- (?:🌐 )?MULTILINGUAL SEO -->[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i,
+      /<!-- (?:🌐 )?MULTILINGUAL SEO[\s\S]*?(?=<!-- (?:📱 )?OPEN GRAPH)/i,
       hreflangBlock
     );
 
+    // 🟢 สั่งแทนที่ตัวแปรสำรอง ป้องกันการหลุดค้างในแท็กอื่นๆ
+    finalHtml = replaceGlobal(finalHtml, "{{SEO_CANONICAL}}", canonicalUrl);
+    finalHtml = replaceGlobal(finalHtml, "{{SEO_IMAGE}}", heroImage);
+
+    // 4. Headings (H1 & H2)
     const ssrH1Html = isNational
       ? `
           <span class="h1-line-1">สาวรับงาน ไซด์ไลน์ทั่วไทย</span>
@@ -810,7 +816,7 @@ export default async (req, context) => {
     const ssrFeaturedH2 = `น้องๆ รับงาน <span class="province-name-highlight">ไซด์ไลน์${escapeHTML(provinceNameThai)}</span>`;
     finalHtml = finalHtml.replace(/<h2 id="featured-heading"[^>]*>[\s\S]*?<\/h2>/i, `<h2 id="featured-heading" class="clean-section-h2">${ssrFeaturedH2}</h2>`);
 
-    // ตัวเลขสถิติต่างๆ
+    // 5. ตัวเลขสถิติต่างๆ
     const totalProvincesFromDb = allProvincesRes?.data ? allProvincesRes.data.length : 0;
 
     finalHtml = finalHtml.replace(
@@ -823,11 +829,12 @@ export default async (req, context) => {
       `<strong class="stat-number" id="live-province-count">${isNational ? totalProvincesFromDb : 1}</strong>`
     );
 
+    // 6. Schema.org JSON-LD
     const schemaJsonStr = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }).replace(/</g, "\\u003c");
     const schemaTag = `<script type="application/ld+json" id="dynamic-schema">\n${schemaJsonStr}\n<\/script>`;
     finalHtml = finalHtml.replace(/<script type="application\/ld\+json" id="dynamic-schema">[\s\S]*?<\/script>/i, schemaTag);
 
-    // Placeholders & SEO Content
+    // 7. Placeholders & SEO Content
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_NAME}}", provinceNameThai);
     finalHtml = replaceGlobal(finalHtml, "{{PROFILE_COUNT}}", exactCount);
     finalHtml = replaceGlobal(finalHtml, "{{PROVINCE_ZONES}}", zonesStr || "ทุกพื้นที่");
@@ -838,6 +845,7 @@ export default async (req, context) => {
       `<div class="seo-content-inner" style="font-size: 12.5px; color: var(--text-gray, #94a3b8); line-height: 1.7;">${linkedIntro}</div>`
     );
 
+    // 8. FAQs & Reviews
     if (faqsHtml) {
       finalHtml = finalHtml.replace(/<div id="faq-container-list"[^>]*>[\s\S]*?<\/div>/i, `<div id="faq-container-list" class="faq-list-wrapper">${faqsHtml}</div>`);
     }
@@ -845,7 +853,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<div id="reviews-container-grid"[^>]*>[\s\S]*?<\/div>/i, `<div id="reviews-container-grid" class="reviews-grid-wrapper">${reviewsHtml}</div>`);
     }
 
-    // Hot Swiper
+    // 9. Hot Profiles Swiper
     const hotSwiperCardsHtml = profilesList.slice(0, 8).map((p, i) => {
       const cleanName = escapeHTML((p.name || "น้อง").trim().replace(/^(น้อง\s?)+/gi, ""));
       const loc = escapeHTML(sanitizeThaiText(p.location) || provinceNameThai);
@@ -885,7 +893,7 @@ export default async (req, context) => {
       finalHtml = finalHtml.replace(/<section id="featured-profiles"[\s\S]*?<\/section>/i, "");
     }
 
-    // Profile Cards Display Area
+    // 10. Profile Cards Display Area (ป้ายจำนวนโปรไฟล์สั้นกระชับ ไม่ทับชื่อจังหวัด 100%)
     let displayAreaHtml = "";
     if (isNational) {
       const groupedByProvince = profilesList.reduce((acc, p) => {
@@ -953,15 +961,18 @@ export default async (req, context) => {
       `<div id="profiles-display-area" role="region" aria-label="โปรไฟล์ผู้ดูแลและเพื่อนเที่ยว${provinceNameThai}">${displayAreaHtml}</div>`
     );
 
+    // 11. Dropdown ค้นหาจังหวัด
     const provinceSelectOptions = '<option value="">🗺️ เลือกจังหวัด (ทั้งหมด)</option>' + (allProvincesRes?.data || []).map(p => {
       const isSelected = p.key === provinceSlug ? "selected" : "";
       return `<option value="${p.key}" ${isSelected}>${p.nameThai}</option>`;
     }).join("");
     finalHtml = finalHtml.replace(/<select id="search-province"[^>]*>[\s\S]*?<\/select>/i, `<select id="search-province" name="province" class="search-select-field" aria-label="เลือกจังหวัดที่ต้องการค้นหา">${provinceSelectOptions}</select>`);
 
-    if (popularLocationsFooter) { finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); }
+    if (popularLocationsFooter) { 
+      finalHtml = finalHtml.replace(/<ul id="popular-locations-footer"[^>]*>[\s\S]*?<\/ul>/i, `<ul id="popular-locations-footer" class="popular-locations-grid">${popularLocationsFooter}</ul>`); 
+    }
 
-    // Serialization SSR Data
+    // 12. Serialization SSR Data
     const serializedProfilesJson = JSON.stringify(profilesList.map(p => {
       const pKey = (p.provinceKey || p.province_slug || "chiangmai").toString().toLowerCase().trim();
       const cleanPKey = pKey.replace(/[-_]/g, "");
@@ -1032,6 +1043,7 @@ export default async (req, context) => {
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_CARDS_HTML}}", "");
     finalHtml = replaceGlobal(finalHtml, "{{PROFILES_DISPLAY_AREA_HTML}}", "");
 
+    // 13. Cache-Control Header ปลอดภัย ไม่ล็อกข้ามปี
     const responseHeaders = {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=30",
@@ -1047,6 +1059,6 @@ export default async (req, context) => {
 
   } catch (err) {
     console.error("SSR Edge Function Error:", err);
-    return await context.next(); // 🟢 หากเกิดข้อผิดพลาด ให้ fallback ส่งหน้า static ปกติทันที จะไม่พังเป็น 500 อีกต่อไป
+    return await context.next();
   }
 };
