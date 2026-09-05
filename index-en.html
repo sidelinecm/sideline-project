@@ -486,10 +486,32 @@
     </div>
   </div>
 </div>
+<!-- Schema.org for EN -->
+<script type="application/ld+json" id="dynamic-schema-en">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "FirstModelHub Thailand",
+  "url": "https://firstmodelhub.com/index-en",
+  "inLanguage": "en-US"
+}
+</script>
+
 <script id="ssr-profiles-data">
   window.profilesData = null;
 </script>
 
 <script type="module" src="/main.js?v=2.0"></script>
+
+<!-- PWA Service Worker Registration for English Version -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('SW Registration failed: ', err);
+      });
+    });
+  }
+</script>
 </body>
 </html>
