@@ -2,13 +2,12 @@
 <html lang="th" class="light-theme">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#F6F3FA">
   <meta name="color-scheme" content="light">
 
-  <title>รวมทุกคำถามพบบ่อย กฎการนัดหมาย และคู่มือความปลอดภัย | First Model Hub</title>
-  <meta name="description" content="คลังคำตอบครบวงจร 15 ข้อ: วิธีจองคิวน้องๆ นโยบายจ่ายหน้างาน 100% กฎการนัดหมายนอกสถานที่ การเตรียมห้องพัก การยกเลิกกรณีไม่ตรงปก และเวลาทำการแอดมิน" />
+  <title>รวมคำถามพบบ่อย กฎการนัดหมาย และคู่มือความปลอดภัย | First Model Hub</title>
+  <meta name="description" content="คลังคำตอบครบวงจร: วิธีจองคิวน้องๆ นโยบายจ่ายหน้างาน 100% กฎการนัดหมายนอกสถานที่ การเตรียมห้องพัก การยกเลิกกรณีไม่ตรงปก และเวลาทำการแอดมิน" />
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="https://firstmodelhub.com/faq">
 
@@ -16,262 +15,232 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
 
-  <link rel="modulepreload" href="/main.js">
   <link rel="stylesheet" href="/styles.css">
-
-  <style>
-    body { background-color: #000000 !important; color: #E4E4E7; font-family: 'Prompt', sans-serif; }
-    .faq-page-wrapper { max-width: 900px; margin: 0 auto; padding: 90px 14px 60px 14px; }
-    .faq-hero-box { text-align: center; margin-bottom: 30px; }
-    .faq-category-title {
-      font-size: 15px; font-weight: 900; color: #C084FC; margin: 24px 0 10px 0;
-      display: flex; align-items: center; gap: 8px; border-left: 3px solid #C084FC; padding-left: 10px;
-    }
-    .faq-group-card {
-      background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px; padding: 8px 16px; backdrop-filter: blur(20px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8); margin-bottom: 20px;
-    }
-    .faq-item-clean { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-    .faq-item-clean:last-child { border-bottom: none; }
-    .faq-btn-trigger {
-      width: 100%; background: none; border: none; padding: 16px 0; color: #FFF;
-      font-size: 13.5px; font-weight: 800; text-align: left; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center; font-family: inherit;
-    }
-    .faq-content-box {
-      max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
-      color: #94A3B8; font-size: 12px; line-height: 1.7;
-    }
-    .faq-content-box.active { max-height: 500px; padding-bottom: 16px; }
-    .faq-content-box strong { color: #FFF; }
-  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 
-<body>
+<body class="fmh-app-page">
 
-  <!-- HEADER -->
-  <header id="page-header" role="banner">
-    <div class="header-logo-container">
-        <a href="/" aria-label="FirstModelHub">
-           <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
-        </a>
-    </div>
-    <div class="nav-controls">
-        <nav class="desktop-nav">
-            <a href="/profiles">รวมโปรไฟล์ VIP</a>
-            <a href="/locations">พื้นที่ให้บริการ</a>
-            <a href="/faq" style="color: #C084FC !important;">คำถามพบบ่อย</a>
-            <a href="/about">เกี่ยวกับเรา</a>
-        </nav>
-        <a href="/index-en" class="lang-micro-toggle"><span>🇬🇧</span> EN</a>
-        <button id="menu-toggle" class="circle-btn-el" type="button"><i class="fas fa-bars"></i></button>
-    </div>
-  </header>
+<!-- 📱 FLOATING APP DOCK -->
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <a href="/" class="dock-item">
+    <i class="fas fa-home"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-search"></i>
+    <span>ตัวกรอง</span>
+  </a>
+  <a href="/faq" class="dock-item active">
+    <i class="fas fa-question-circle"></i>
+    <span>FAQ</span>
+  </a>
+  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
+    <i class="fab fa-line"></i>
+    <span>จองคิว</span>
+  </a>
+</nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="faq-page-wrapper">
-    <div class="faq-hero-box">
-      <span style="font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #C084FC; text-transform: uppercase;">COMPLETE CONCIERGE KNOWLEDGE BASE</span>
-      <h1 style="font-size: clamp(22px, 5vw, 32px); font-weight: 900; color: #FFF; margin: 6px 0 10px 0;">ศูนย์รวมคำถาม ข้อสงสัย และคู่มือนัดหมาย</h1>
-      <p style="font-size: 12px; color: #94A3B8; max-width: 650px; margin: 0 auto; line-height: 1.6;">
-        รวบรวมทุกข้อสงสัยอย่างตรงไปตรงมา ทั้งเรื่องการเงิน สถานที่นัดพบ กฎเกณฑ์นอกสถานที่ และการรักษาความลับ เพื่อความสบายใจสูงสุดของคุณ
+<!-- 🧭 HEADER -->
+<header id="page-header" role="banner">
+  <div class="header-logo-container">
+    <a href="/" aria-label="FirstModelHub">
+      <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
+    </a>
+  </div>
+  <div class="nav-controls">
+    <nav class="desktop-nav">
+      <a href="/profiles">รวมโปรไฟล์ VIP</a>
+      <a href="/locations">พื้นที่ให้บริการ</a>
+      <a href="/faq" style="color: #7C3AED !important; font-weight: 800;">คำถามพบบ่อย</a>
+      <a href="/about">เกี่ยวกับเรา</a>
+    </nav>
+    <a href="/index-en" class="lang-micro-toggle"><span>🇬🇧</span> EN</a>
+    <button id="menu-toggle" class="circle-btn-el" type="button"><i class="fas fa-bars"></i></button>
+  </div>
+</header>
+
+<!-- 📱 SIDEBAR -->
+<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+  <div class="sidebar-header-div">
+    <span class="sidebar-title">Navigation Hub</span>
+    <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn" type="button">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <div class="sidebar-links-wrapper">
+    <a href="/"><i class="fas fa-home icon-purple"></i> หน้าแรก</a>
+    <a href="/profiles"><i class="fas fa-user-check icon-green"></i> น้องๆ VIP แนะนำ</a>
+    <a href="/locations"><i class="fas fa-map-marked-alt icon-gold"></i> พื้นที่บริการทั่วไทย</a>
+    <a href="/nimman"><i class="fas fa-gem icon-pink"></i> โซนนิมมาน เชียงใหม่</a>
+    <a href="/blog"><i class="fas fa-newspaper icon-blue"></i> บทความ & คู่มือนัดหมาย</a>
+    <a href="/about"><i class="fas fa-shield-alt icon-lightpurple"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
+    <a href="/faq" class="active"><i class="fas fa-question-circle icon-red"></i> คำถามที่พบบ่อย (FAQ)</a>
+    <a href="/privacy-policy"><i class="fas fa-user-lock icon-gray"></i> นโยบายความเป็นส่วนตัว</a>
+    <a href="/index-en" class="sidebar-lang-link"><i class="fas fa-globe icon-purple"></i> English Version (EN)</a>
+  </div>
+
+  <div class="sidebar-footer-cta">
+    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
+      <i class="fab fa-line"></i> แอดไลน์จองคิว VIP
+    </a>
+  </div>
+</aside>
+
+<div id="sidebar-overlay" class="drawer-backdrop"></div>
+
+<!-- 🌟 MAIN CONTENT -->
+<main id="main-content" style="padding-top: 14px; padding-bottom: 100px;">
+  <div class="container" style="max-width: 850px;">
+    
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span class="bento-tag-pill">CONCIERGE KNOWLEDGE BASE</span>
+      <h1 style="font-size: clamp(22px, 5vw, 30px); font-weight: 900; color: var(--text-main); margin: 6px 0 10px 0;">ศูนย์รวมคำถาม ข้อสงสัย และคู่มือนัดหมาย</h1>
+      <p style="font-size: 12.5px; color: var(--text-sub); max-width: 650px; margin: 0 auto; line-height: 1.6;">
+        รวบรวมทุกข้อสงสัยอย่างตรงไปตรงมา ทั้งเรื่องการเงิน สถานที่นัดพบ กฎเกณฑ์นอกสถานที่ และการรักษาความลับ
       </p>
     </div>
 
-    <!-- ================= หมวดที่ 1: การเงิน & ความปลอดภัย ================= -->
-    <h2 class="faq-category-title"><i class="fas fa-shield-alt text-emerald-400"></i> หมวดที่ 1: ความปลอดภัยและการชำระเงิน</h2>
-    <div class="faq-group-card">
+    <!-- หมวดที่ 1 -->
+    <h2 style="font-size: 15px; font-weight: 900; color: #7C3AED; margin: 20px 0 10px 0; display: flex; align-items: center; gap: 8px;">
+      <i class="fas fa-shield-alt" style="color: #059669;"></i> หมวดที่ 1: ความปลอดภัยและการชำระเงิน
+    </h2>
+    <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; padding: 8px 16px; box-shadow: var(--shadow-card-pop); margin-bottom: 20px;">
       
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
+      <div style="border-bottom: 1px solid rgba(0,0,0,0.06);">
+        <button class="faq-btn-trigger" type="button" style="width: 100%; background: none; border: none; padding: 14px 0; color: var(--text-main); font-size: 13.5px; font-weight: 800; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
           <span>01. การนัดหมายน้องๆ ต้องโอนเงินมัดจำล่วงหน้าก่อนไหม?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
+          <i class="fas fa-chevron-down" style="color: #7C3AED; font-size: 12px; transition: transform 0.25s;"></i>
         </button>
-        <div class="faq-content-box">
-          <strong style="color: #00E676;">ตอบ: ไม่มีนโยบายโอนเงินมัดจำค่าบริการล่วงหน้า 100% ครับ</strong> ลูกค้าจะชำระค่าขนมโดยตรงแก่น้องเมื่อพบตัวจริงหน้างานและตรวจสอบความตรงปกเรียบร้อยแล้วเท่านั้น เพื่อตัดปัญหาการโดนหลอกโอนเงินมัดจำในโลกออนไลน์อย่างสิ้นเชิง
+        <div class="faq-content-box" style="display: none; padding-bottom: 14px; font-size: 12px; color: var(--text-sub); line-height: 1.6;">
+          <strong style="color: #059669;">ตอบ: ไม่มีนโยบายโอนเงินมัดจำค่าบริการล่วงหน้า 100% ครับ</strong> ลูกค้าจะชำระค่าขนมโดยตรงแก่น้องเมื่อพบตัวจริงหน้างานและตรวจสอบความตรงปกเรียบร้อยแล้วเท่านั้น
         </div>
       </div>
 
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>02. ถ้าไปถึงหน้างานแล้วพบว่า "ไม่ตรงปก" หรือไม่ถูกใจ ทำอย่างไรได้บ้าง?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
+      <div style="border-bottom: 1px solid rgba(0,0,0,0.06);">
+        <button class="faq-btn-trigger" type="button" style="width: 100%; background: none; border: none; padding: 14px 0; color: var(--text-main); font-size: 13.5px; font-weight: 800; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+          <span>02. ถ้าไปถึงหน้างานแล้วพบว่า "ไม่ตรงปก" ทำอย่างไรได้บ้าง?</span>
+          <i class="fas fa-chevron-down" style="color: #7C3AED; font-size: 12px; transition: transform 0.25s;"></i>
         </button>
-        <div class="faq-content-box">
-          <strong>คุณมีสิทธิ์ปฏิเสธและขอยกเลิกนัดได้ทันทีอย่างสุภาพ ณ จุดนัดพบครับ</strong> โดยไม่มีค่าปรับหรือการหักเงินย้อนหลังใดๆ ทั้งสิ้น และสามารถแจ้งแอดมินเพื่อตรวจสอบประวัติผู้ลงประกาศได้ทันที
+        <div class="faq-content-box" style="display: none; padding-bottom: 14px; font-size: 12px; color: var(--text-sub); line-height: 1.6;">
+          <strong>คุณมีสิทธิ์ปฏิเสธและขอยกเลิกนัดได้ทันทีอย่างสุภาพ ณ จุดนัดพบครับ</strong> โดยไม่มีค่าปรับหรือการหักเงินย้อนหลังใดๆ ทั้งสิ้น
         </div>
       </div>
 
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
+      <div>
+        <button class="faq-btn-trigger" type="button" style="width: 100%; background: none; border: none; padding: 14px 0; color: var(--text-main); font-size: 13.5px; font-weight: 800; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
           <span>03. การชำระเงินหน้างาน ชำระด้วยวิธีใดได้บ้าง?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
+          <i class="fas fa-chevron-down" style="color: #7C3AED; font-size: 12px; transition: transform 0.25s;"></i>
         </button>
-        <div class="faq-content-box">
-          สามารถชำระด้วย <strong>เงินสด</strong> หรือ <strong>โอนเงินผ่าน Mobile Banking (พร้อมเพย์)</strong> ให้กับน้องโดยตรงหลังพบตัวจริงและตกลงเริ่มเวลาให้บริการครับ
+        <div class="faq-content-box" style="display: none; padding-bottom: 14px; font-size: 12px; color: var(--text-sub); line-height: 1.6;">
+          สามารถชำระด้วย <strong>เงินสด</strong> หรือ <strong>โอนเงินผ่าน Mobile Banking (พร้อมเพย์)</strong> ให้กับน้องโดยตรงหลังพบตัวจริงเรียบร้อยแล้วครับ
         </div>
       </div>
 
     </div>
 
-    <!-- ================= หมวดที่ 2: การนัดหมายนอกสถานที่ & ค่าเดินทาง ================= -->
-    <h2 class="faq-category-title"><i class="fas fa-car text-amber-400"></i> หมวดที่ 2: การนัดหมายนอกสถานที่ & นอกโซนบริการ</h2>
-    <div class="faq-group-card">
+    <!-- หมวดที่ 2 -->
+    <h2 style="font-size: 15px; font-weight: 900; color: #7C3AED; margin: 20px 0 10px 0; display: flex; align-items: center; gap: 8px;">
+      <i class="fas fa-heart" style="color: var(--crimson-main);"></i> หมวดที่ 2: ขอบเขตงาน & การรักษาความลับ
+    </h2>
+    <div style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; padding: 8px 16px; box-shadow: var(--shadow-card-pop); margin-bottom: 24px;">
       
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>04. กฎการนัดหมายนอกสถานที่ และ การเตรียมห้องพักเป็นอย่างไร?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
+      <div style="border-bottom: 1px solid rgba(0,0,0,0.06);">
+        <button class="faq-btn-trigger" type="button" style="width: 100%; background: none; border: none; padding: 14px 0; color: var(--text-main); font-size: 13.5px; font-weight: 800; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+          <span>04. ขอบเขตงานสไตล์ "ฟิวแฟน" (GFE) คืออะไร?</span>
+          <i class="fas fa-chevron-down" style="color: #7C3AED; font-size: 12px; transition: transform 0.25s;"></i>
         </button>
-        <div class="faq-content-box">
-          บริการนอกสถานที่รับนัดเฉพาะ <strong>โรงแรม, คอนโดมิเนียม, รีสอร์ต หรือที่พักส่วนตัว</strong> ที่มีพิกัดระบุชัดเจน โดยลูกค้าเป็นผู้จัดเตรียมสถานที่และส่งพิกัดให้น้องผ่านทาง LINE (งดรับนัดในสถานที่เปลี่ยวหรือพื้นที่เสี่ยงอันตรายทุกกรณี)
+        <div class="faq-content-box" style="display: none; padding-bottom: 14px; font-size: 12px; color: var(--text-sub); line-height: 1.6;">
+          เป็นการดูแลเอาใจใส่ที่อบอุ่น เป็นกันเอง สุภาพเรียบร้อย เสมือนมีคนพิเศษร่วมเดินทาง ทานข้าว ท่องเที่ยว คลายเหงา โดยเน้นการให้เกียรติซึ่งกันและกันครับ
         </div>
       </div>
 
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>05. ทำไมกรณีเดินทาง "นอกโซนทำงานหลัก" ลูกค้าต้องโอนค่าเดินทางก่อน?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
+      <div>
+        <button class="faq-btn-trigger" type="button" style="width: 100%; background: none; border: none; padding: 14px 0; color: var(--text-main); font-size: 13.5px; font-weight: 800; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+          <span>05. ข้อมูลการจองและการติดต่อของลูกค้าเป็นความลับแค่ไหน?</span>
+          <i class="fas fa-chevron-down" style="color: #7C3AED; font-size: 12px; transition: transform 0.25s;"></i>
         </button>
-        <div class="faq-content-box">
-          กรณีให้น้องเดินทางข้ามอำเภอ หรือออกนอกโซนบริการหลัก <strong>ลูกค้าต้องชำระเฉพาะค่าเดินทางล่วงหน้าตามระยะทางจริง (Grab / Bolt)</strong> เพื่อเป็นหลักประกันยืนยันการเดินทางและป้องกันน้องเสียเที่ยวจากการนัดทิ้ง ส่วน <strong>ค่าบริการหลัก (ค่าขนมน้อง) ยังคงชำระหน้างานเมื่อเจอตัวจริงตามเดิมครับ</strong>
-        </div>
-      </div>
-
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>06. ควรนัดหมายคิวล่วงหน้ากี่นาทีก่อนเวลาที่ต้องการ?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
-        </button>
-        <div class="faq-content-box">
-          แนะนำให้นัดหมายล่วงหน้าประมาณ <strong>30 – 60 นาที</strong> สำหรับพื้นที่ในเมือง หรือ <strong>1 – 2 ชั่วโมง</strong> สำหรับพื้นที่นอกโซน เพื่อให้น้องมีเวลาเตรียมตัวและเดินทางไปถึงสถานที่ได้อย่างตรงเวลา
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ================= หมวดที่ 3: ขอบเขตงาน & ความเป็นส่วนตัว ================= -->
-    <h2 class="faq-category-title"><i class="fas fa-heart text-pink-400"></i> หมวดที่ 3: ขอบเขตงานบริการ & การรักษาความลับ</h2>
-    <div class="faq-group-card">
-      
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>07. ขอบเขตงานสไตล์ "ฟิวแฟน" (Girlfriend Experience - GFE) คืออะไร?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
-        </button>
-        <div class="faq-content-box">
-          เป็นการดูแลเอาใจใส่ที่อบอุ่น เป็นกันเอง สุภาพเรียบร้อย เสมือนมีคนพิเศษร่วมเดินทาง ทานข้าว ท่องเที่ยว คลายเหงา หรือออกงานสังสรรค์ส่วนตัว โดยเน้นการให้เกียรติซึ่งกันและกัน
-        </div>
-      </div>
-
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>08. ข้อมูลการจองและการติดต่อของลูกค้าเป็นความลับแค่ไหน?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
-        </button>
-        <div class="faq-content-box">
-          <strong>รักษาความลับสูงสุดภายใต้นโยบาย Zero-Log ครับ</strong> ระบบไม่มีการบันทึกประวัติการแชท เบอร์โทรศัพท์ หรือข้อมูลส่วนบุคคลของลูกค้าลงในเซิร์ฟเวอร์ การติดต่อพูดคุยเป็นสิทธิส่วนบุคคลโดยสมบูรณ์
-        </div>
-      </div>
-
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>09. ผู้ใช้งานต้องมีอายุขั้นต่ำเท่าไหร่?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
-        </button>
-        <div class="faq-content-box">
-          ผู้ใช้งานสารบัญข้อมูล ตลอดจนผู้เรียกนัดหมาย จะต้องมีอายุครบ <strong>20 ปีบริบูรณ์ขึ้นไปเท่านั้น</strong>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ================= หมวดที่ 4: เวลาทำการ & การติดต่อแอดมิน ================= -->
-    <h2 class="faq-category-title"><i class="fas fa-headset text-blue-400"></i> หมวดที่ 4: เวลาทำการ & ศูนย์ดูแลลูกค้า</h2>
-    <div class="faq-group-card">
-      
-      <div class="faq-item-clean">
-        <button class="faq-btn-trigger" type="button">
-          <span>10. เวลาทำการของศูนย์ประสานงานแอดมินคือช่วงเวลาใด?</span>
-          <i class="fas fa-chevron-down text-purple-400"></i>
-        </button>
-        <div class="faq-content-box">
-          แอดมินสแตนด์บายดูแลและตอบข้อซักถามทุกวัน <strong>ตั้งแต่เวลา 10:00 น. – 04:00 น.</strong> หากต้องการสอบถามคิวงานด่วน หรือมีข้อสงสัยเรื่องพิกัด สามารถทักไลน์แอดมินได้ตลอดเวลาทำการครับ
+        <div class="faq-content-box" style="display: none; padding-bottom: 14px; font-size: 12px; color: var(--text-sub); line-height: 1.6;">
+          <strong>รักษาความลับสูงสุดภายใต้นโยบาย Zero-Log ครับ</strong> ระบบไม่มีการบันทึกประวัติการแชทหรือข้อมูลส่วนบุคคลของลูกค้าลงในเซิร์ฟเวอร์
         </div>
       </div>
 
     </div>
 
     <!-- กล่องทักแอดมินด่วน -->
-    <div class="concierge-support-card">
-      <div class="support-left-info">
-        <div class="support-status-pill">
-          <span class="live-status-dot"></span>
-          <span>LIVE CONCIERGE DESK</span>
-        </div>
-        <h4 class="support-main-title">ยังมีคำถามอื่นๆ หรือต้องการให้แอดมินช่วยคัดเลือกโปรไฟล์?</h4>
-        <div class="support-hours-line">
-          <i class="far fa-clock text-purple-400"></i>
-          <span>เวลาทำการ: <strong>10:00 น. – 04:00 น.</strong> (เปิดบริการทุกวัน)</span>
-        </div>
-      </div>
-      <div class="support-right-cta">
-        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="btn-contact-admin">
-          <i class="fab fa-line text-lg"></i>
-          <span>ทักไลน์ปรึกษาแอดมิน</span>
+    <div style="background: linear-gradient(135deg, #FAF8FE, #FFFFFF); border: 1.5px solid rgba(124, 58, 237, 0.2); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; text-align: center; box-shadow: var(--shadow-card-pop);">
+      <h4 style="font-size: 15px; font-weight: 900; color: var(--text-main); margin: 0;">ยังมีคำถามอื่นๆ หรือต้องการให้แอดมินช่วยคัดเลือกโปรไฟล์?</h4>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 0;"><i class="far fa-clock"></i> เวลาทำการ: <strong>10:00 น. – 04:00 น.</strong> (เปิดบริการทุกวัน)</p>
+      <div style="margin-top: 4px;">
+        <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn" style="max-width: 280px; margin: 0 auto;">
+          <i class="fab fa-line"></i> ทักไลน์ปรึกษาแอดมิน
         </a>
       </div>
     </div>
 
-  </main>
+  </div>
+</main>
 
-  <!-- FOOTER -->
-  <footer role="contentinfo" class="fmh-footer">
-    <div class="container">
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 11px; color: #94A3B8;">
-        <p style="margin: 0;">© 2026 FirstModelHub. All Rights Reserved.</p>
-        <div style="display: flex; gap: 14px;">
-          <a href="/privacy-policy" style="color: #94A3B8; text-decoration: none;">Privacy Policy</a>
-          <a href="/about" style="color: #94A3B8; text-decoration: none;">About Us</a>
-        </div>
+<!-- 🦶 FOOTER -->
+<footer role="contentinfo" class="fmh-footer">
+  <div class="container">
+    <div class="footer-top-grid">
+      <div class="footer-brand-col">
+        <span class="brand-logo-text">
+          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
+        </span>
+        <p class="footer-brand-desc">
+          <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 รูปถ่ายตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ
+        </p>
+      </div>
+
+      <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
+        <h3 class="footer-heading">เมนูหลัก</h3>
+        <ul class="footer-nav-links">
+          <li><a href="/">หน้าแรก</a></li>
+          <li><a href="/profiles">รวมโปรไฟล์</a></li>
+          <li><a href="/locations">พื้นที่บริการ</a></li>
+          <li><a href="/nimman">โซนนิมมาน</a></li>
+          <li><a href="/blog">บทความ</a></li>
+          <li><a href="/faq" style="color: var(--primary-purple);">คำถามที่พบบ่อย</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="footer-bottom-bar">
+      <p id="footer-copyright">© 2026 FirstModelHub. All Rights Reserved.</p>
+      <div class="footer-legal-links">
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/about">Terms & Safe Protocol</a>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
 
-  <script type="module" src="/main.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".faq-btn-trigger").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const content = btn.nextElementSibling;
-          const icon = btn.querySelector("i");
-          const isActive = content.classList.contains("active");
+<script>
+  document.querySelectorAll(".faq-btn-trigger").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const content = this.nextElementSibling;
+      const icon = this.querySelector("i");
+      const isVisible = content.style.display === "block";
 
-          if (!isActive) {
-            content.classList.add("active");
-            icon.style.transform = "rotate(180deg)";
-          } else {
-            content.classList.remove("active");
-            icon.style.transform = "rotate(0deg)";
-          }
-        });
-      });
-
-      const menuToggle = document.getElementById("menu-toggle");
-      const closeMenuBtn = document.getElementById("close-menu-btn");
-      const sidebarMenu = document.getElementById("sidebar-menu");
-      const sidebarOverlay = document.getElementById("sidebar-overlay");
-
-      if (menuToggle) menuToggle.onclick = () => { sidebarMenu?.classList.add("active"); sidebarOverlay?.classList.add("active"); };
-      if (closeMenuBtn) closeMenuBtn.onclick = () => { sidebarMenu?.classList.remove("active"); sidebarOverlay?.classList.remove("active"); };
-      if (sidebarOverlay) sidebarOverlay.onclick = () => { sidebarMenu?.classList.remove("active"); sidebarOverlay?.classList.remove("active"); };
+      content.style.display = isVisible ? "none" : "block";
+      icon.style.transform = isVisible ? "rotate(0deg)" : "rotate(180deg)";
     });
-  </script>
+  });
+
+  const menuToggle = document.getElementById("menu-toggle");
+  const closeMenuBtn = document.getElementById("close-menu-btn");
+  const sidebarMenu = document.getElementById("sidebar-menu");
+  const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+  if (menuToggle) menuToggle.onclick = () => { sidebarMenu?.classList.add("active"); sidebarOverlay?.classList.add("active"); };
+  if (closeMenuBtn) closeMenuBtn.onclick = () => { sidebarMenu?.classList.remove("active"); sidebarOverlay?.classList.remove("active"); };
+  if (sidebarOverlay) sidebarOverlay.onclick = () => { sidebarMenu?.classList.remove("active"); sidebarOverlay?.classList.remove("active"); };
+</script>
 </body>
 </html>

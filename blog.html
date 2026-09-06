@@ -2,11 +2,9 @@
 <html lang="th" class="light-theme">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#F6F3FA">
   <meta name="color-scheme" content="light">
- 
   
   <title>บทความและคู่มือท่องเที่ยวสไตล์ฟิวแฟน | First Model Hub</title>
   <meta name="description" content="ติดตามบทความ สาระน่ารู้ เคล็ดลับความปลอดภัย และคู่มือท่องเที่ยวเดทสไตล์ฟิวแฟนอย่างมีระดับจาก First Model Hub">
@@ -17,120 +15,182 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-700.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
+  <link rel="preload" href="/fonts/prompt-v11-latin_thai-regular.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
 
-  <link rel="modulepreload" href="/main.js">
   <link rel="stylesheet" href="/styles.css">
-
-  <style>
-    body { background-color: #000000 !important; color: #E4E4E7; font-family: 'Prompt', sans-serif; }
-    .blog-page-wrapper { max-width: 950px; margin: 0 auto; padding: 100px 14px 60px 14px; }
-    .blog-grid-luxury { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 24px; }
-    @media (min-width: 768px) { .blog-grid-luxury { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
-    .blog-card-item {
-      background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px; overflow: hidden; backdrop-filter: blur(20px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column;
-      transition: transform 0.3s ease, border-color 0.3s ease; text-decoration: none; color: inherit;
-    }
-    .blog-card-item:hover { transform: translateY(-4px); border-color: rgba(192, 132, 252, 0.4); }
-    .blog-thumb-box { aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #0d0d12; position: relative; }
-    .blog-thumb-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-    .blog-card-item:hover .blog-thumb-box img { transform: scale(1.05); }
-    .blog-content-body { padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
-    .blog-tag-badge { font-size: 9.5px; font-weight: 800; color: #C084FC; text-transform: uppercase; letter-spacing: 1px; }
-    .blog-post-title { font-size: 14px; font-weight: 800; color: #FFFFFF; line-height: 1.4; margin: 2px 0; }
-    .blog-post-snippet { font-size: 11.5px; color: #94A3B8; line-height: 1.55; margin: 0; }
-  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
-<body>
+<body class="fmh-app-page">
 
-  <!-- HEADER -->
-  <header id="page-header" role="banner">
-    <div class="header-logo-container">
-        <a href="/" aria-label="FirstModelHub">
-           <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
-        </a>
-    </div>
-    <div class="nav-controls">
-        <nav class="desktop-nav">
-            <a href="/profiles">รวมโปรไฟล์ VIP</a>
-            <a href="/locations">พื้นที่ให้บริการ</a>
-            <a href="/blog" style="color: #C084FC !important;">บทความ</a>
-            <a href="/faq">คำถามพบบ่อย</a>
-            <a href="/about">เกี่ยวกับเรา</a>
-        </nav>
-        <a href="/index-en" class="lang-micro-toggle"><span>🇬🇧</span> EN</a>
-        <button id="menu-toggle" class="circle-btn-el" type="button"><i class="fas fa-bars"></i></button>
-    </div>
-  </header>
+<!-- 📱 FLOATING APP DOCK -->
+<nav class="floating-app-dock" aria-label="แถบควบคุมลอยตัวสำหรับมือถือ">
+  <a href="/" class="dock-item">
+    <i class="fas fa-home"></i>
+    <span>หน้าแรก</span>
+  </a>
+  <a href="/profiles" class="dock-item">
+    <i class="fas fa-search"></i>
+    <span>ตัวกรอง</span>
+  </a>
+  <a href="/blog" class="dock-item active">
+    <i class="fas fa-newspaper"></i>
+    <span>บทความ</span>
+  </a>
+  <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="dock-item dock-item-line">
+    <i class="fab fa-line"></i>
+    <span>จองคิว</span>
+  </a>
+</nav>
 
-  <!-- MAIN BLOG CONTENT -->
-  <main class="blog-page-wrapper">
+<!-- 🧭 HEADER -->
+<header id="page-header" role="banner">
+  <div class="header-logo-container">
+    <a href="/" aria-label="FirstModelHub">
+      <span class="brand-logo-text">FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span></span>
+    </a>
+  </div>
+  <div class="nav-controls">
+    <nav class="desktop-nav">
+      <a href="/profiles">รวมโปรไฟล์ VIP</a>
+      <a href="/locations">พื้นที่ให้บริการ</a>
+      <a href="/blog" style="color: #7C3AED !important; font-weight: 800;">บทความ & รีวิว</a>
+      <a href="/faq">คำถามพบบ่อย</a>
+      <a href="/about">เกี่ยวกับเรา</a>
+    </nav>
+    <a href="/index-en" class="lang-micro-toggle"><span>🇬🇧</span> EN</a>
+    <button id="menu-toggle" class="circle-btn-el" type="button"><i class="fas fa-bars"></i></button>
+  </div>
+</header>
+
+<!-- 📱 SIDEBAR -->
+<aside id="sidebar-menu" aria-label="เมนูนำทางเคลื่อนที่">
+  <div class="sidebar-header-div">
+    <span class="sidebar-title">Navigation Hub</span>
+    <button id="close-menu-btn" aria-label="ปิดเมนูนำทาง" class="sidebar-close-btn" type="button">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <div class="sidebar-links-wrapper">
+    <a href="/"><i class="fas fa-home icon-purple"></i> หน้าแรก</a>
+    <a href="/profiles"><i class="fas fa-user-check icon-green"></i> น้องๆ VIP แนะนำ</a>
+    <a href="/locations"><i class="fas fa-map-marked-alt icon-gold"></i> พื้นที่บริการทั่วไทย</a>
+    <a href="/nimman"><i class="fas fa-gem icon-pink"></i> โซนนิมมาน เชียงใหม่</a>
+    <a href="/blog" class="active"><i class="fas fa-newspaper icon-blue"></i> บทความ & คู่มือนัดหมาย</a>
+    <a href="/about"><i class="fas fa-shield-alt icon-lightpurple"></i> เกี่ยวกับเรา & ความปลอดภัย</a>
+    <a href="/faq"><i class="fas fa-question-circle icon-red"></i> คำถามที่พบบ่อย (FAQ)</a>
+    <a href="/privacy-policy"><i class="fas fa-user-lock icon-gray"></i> นโยบายความเป็นส่วนตัว</a>
+    <a href="/index-en" class="sidebar-lang-link"><i class="fas fa-globe icon-purple"></i> English Version (EN)</a>
+  </div>
+
+  <div class="sidebar-footer-cta">
+    <a href="https://line.me/ti/p/ksLUWB89Y_" target="_blank" rel="noopener nofollow" class="sidebar-line-btn">
+      <i class="fab fa-line"></i> แอดไลน์จองคิว VIP
+    </a>
+  </div>
+</aside>
+
+<div id="sidebar-overlay" class="drawer-backdrop"></div>
+
+<!-- 🌟 MAIN BLOG CONTENT -->
+<main id="main-content" style="padding-top: 14px; padding-bottom: 100px;">
+  <div class="container" style="max-width: 900px;">
+    
     <div style="text-align: center; margin-bottom: 24px;">
-      <span style="font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #C084FC; text-transform: uppercase;">VIP CONCIERGE EDITORIAL</span>
-      <h1 style="font-size: clamp(22px, 5vw, 30px); font-weight: 900; color: #FFF; margin: 6px 0 10px 0;">บทความและคู่มือไลฟ์สไตล์ฟิวแฟน</h1>
-      <p style="font-size: 12px; color: #94A3B8; max-width: 600px; margin: 0 auto; line-height: 1.6;">รวมเกร็ดความรู้ มาตรฐานความปลอดภัย และไอเดียการจัดทริปท่องเที่ยวเดทอย่างมีระดับ</p>
+      <span class="bento-tag-pill">VIP CONCIERGE EDITORIAL</span>
+      <h1 style="font-size: clamp(22px, 5vw, 30px); font-weight: 900; color: var(--text-main); margin: 6px 0 10px 0;">บทความและคู่มือไลฟ์สไตล์ฟิวแฟน</h1>
+      <p style="font-size: 12.5px; color: var(--text-sub); max-width: 600px; margin: 0 auto; line-height: 1.6;">รวมเกร็ดความรู้ มาตรฐานความปลอดภัย และไอเดียการจัดทริปท่องเที่ยวเดทอย่างมีระดับ</p>
     </div>
 
-    <div class="blog-grid-luxury">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
       
       <!-- Article 1 -->
-      <a href="/blog" class="blog-card-item">
-        <div class="blog-thumb-box">
-          <img src="/images/firstmodelhub.webp" alt="5 เคล็ดลับความปลอดภัย">
+      <article style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-card-pop); display: flex; flex-direction: column;">
+        <div style="aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #EFE9F8;">
+          <img src="/images/firstmodelhub.webp" alt="5 เคล็ดลับความปลอดภัย" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <div class="blog-content-body">
-          <span class="blog-tag-badge">SAFETY & TRUST</span>
-          <h2 class="blog-post-title">5 เคล็ดลับความปลอดภัย เมื่อนัดหมายเพื่อนเที่ยวครั้งแรก</h2>
-          <p class="blog-post-snippet">สร้างความมั่นใจสูงสุดในการนัดพบ เรียนรู้วิธีป้องกันมิจฉาชีพ และการใช้สิทธิ์จ่ายหน้างาน 100%</p>
+        <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <span style="font-size: 10px; font-weight: 800; color: #7C3AED; text-transform: uppercase;">SAFETY & TRUST</span>
+          <h2 style="font-size: 14.5px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin: 2px 0;">5 เคล็ดลับความปลอดภัย เมื่อนัดหมายเพื่อนเที่ยวครั้งแรก</h2>
+          <p style="font-size: 12px; color: var(--text-sub); line-height: 1.55; margin: 0;">สร้างความมั่นใจสูงสุดในการนัดพบ เรียนรู้วิธีป้องกันมิจฉาชีพ และการใช้สิทธิ์จ่ายหน้างาน 100%</p>
         </div>
-      </a>
+      </article>
 
       <!-- Article 2 -->
-      <a href="/blog" class="blog-card-item">
-        <div class="blog-thumb-box">
-          <img src="/images/firstmodelhub.webp" alt="คู่มือเดทนิมมาน">
+      <article style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-card-pop); display: flex; flex-direction: column;">
+        <div style="aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #EFE9F8;">
+          <img src="/images/firstmodelhub.webp" alt="คู่มือเดทนิมมาน" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <div class="blog-content-body">
-          <span class="blog-tag-badge">LIFESTYLE & TRAVEL</span>
-          <h2 class="blog-post-title">คู่มือจัดทริปเที่ยวฉบับฟีลแฟน: ร้านอาหารและบาร์ลับนิมมาน</h2>
-          <p class="blog-post-snippet">แนะนำพิกัดร้านอาหารบรรยากาศดี คาเฟ่สวย และสถานที่แฮงก์เอาต์ส่วนตัวสำหรับเดทสุดพิเศษ</p>
+        <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <span style="font-size: 10px; font-weight: 800; color: var(--crimson-main); text-transform: uppercase;">LIFESTYLE & TRAVEL</span>
+          <h2 style="font-size: 14.5px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin: 2px 0;">คู่มือจัดทริปเที่ยวฉบับฟีลแฟน: ร้านอาหารและบาร์ลับนิมมาน</h2>
+          <p style="font-size: 12px; color: var(--text-sub); line-height: 1.55; margin: 0;">แนะนำพิกัดร้านอาหารบรรยากาศดี คาเฟ่สวย และสถานที่แฮงก์เอาต์ส่วนตัวสำหรับเดทสุดพิเศษ</p>
         </div>
-      </a>
+      </article>
 
       <!-- Article 3 -->
-      <a href="/blog" class="blog-card-item">
-        <div class="blog-thumb-box">
-          <img src="/images/firstmodelhub.webp" alt="ตรงปกคืออะไร">
+      <article style="background: #FFFFFF; border: 1.5px solid rgba(124, 58, 237, 0.15); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-card-pop); display: flex; flex-direction: column;">
+        <div style="aspect-ratio: 16/10; width: 100%; overflow: hidden; background-color: #EFE9F8;">
+          <img src="/images/firstmodelhub.webp" alt="ตรงปกคืออะไร" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <div class="blog-content-body">
-          <span class="blog-tag-badge">SERVICE STANDARD</span>
-          <h2 class="blog-post-title">ตรงปก 100% คืออะไร? เจาะลึกระบบ Verified ของ First Model Hub</h2>
-          <p class="blog-post-snippet">ทำความเข้าใจขั้นตอนการตรวจสอบรูปถ่ายและคลิปยืนยันตัวตน เพื่อความมั่นใจก่อนนัดหมาย</p>
+        <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <span style="font-size: 10px; font-weight: 800; color: #059669; text-transform: uppercase;">SERVICE STANDARD</span>
+          <h2 style="font-size: 14.5px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin: 2px 0;">ตรงปก 100% คืออะไร? เจาะลึกระบบ Verified ของ First Model Hub</h2>
+          <p style="font-size: 12px; color: var(--text-sub); line-height: 1.55; margin: 0;">ทำความเข้าใจขั้นตอนการตรวจสอบรูปถ่ายและคลิปยืนยันตัวตน เพื่อความมั่นใจก่อนนัดหมาย</p>
         </div>
-      </a>
+      </article>
 
     </div>
-  </main>
+  </div>
+</main>
 
-  <!-- FOOTER -->
-  <footer role="contentinfo" class="fmh-footer">
-    <div class="container">
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 11px; color: #94A3B8;">
-        <p style="margin: 0;">© 2026 FirstModelHub. All Rights Reserved.</p>
-        <div style="display: flex; gap: 14px;">
-          <a href="/privacy-policy" style="color: #94A3B8; text-decoration: none;">Privacy Policy</a>
-          <a href="/faq" style="color: #94A3B8; text-decoration: none;">FAQ</a>
-        </div>
+<!-- 🦶 FOOTER -->
+<footer role="contentinfo" class="fmh-footer">
+  <div class="container">
+    <div class="footer-top-grid">
+      <div class="footer-brand-col">
+        <span class="brand-logo-text">
+          FirstModel<span class="hub-text">Hub</span><span class="star">🌟</span>
+        </span>
+        <p class="footer-brand-desc">
+          <strong>FirstModelHub</strong> แพลตฟอร์มผู้ดูแลและเพื่อนเที่ยวระดับพรีเมียมอันดับ 1 รูปถ่ายตรงปก 100% ปลอดภัย จ่ายหน้างาน ไม่มัดจำ
+        </p>
+      </div>
+
+      <nav class="footer-nav-col" aria-label="ลิงก์ส่วนท้ายเว็บ">
+        <h3 class="footer-heading">เมนูหลัก</h3>
+        <ul class="footer-nav-links">
+          <li><a href="/">หน้าแรก</a></li>
+          <li><a href="/profiles">รวมโปรไฟล์</a></li>
+          <li><a href="/locations">พื้นที่บริการ</a></li>
+          <li><a href="/nimman">โซนนิมมาน</a></li>
+          <li><a href="/blog" style="color: var(--primary-purple);">บทความ</a></li>
+          <li><a href="/faq">คำถามที่พบบ่อย</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="footer-bottom-bar">
+      <p id="footer-copyright">© 2026 FirstModelHub. All Rights Reserved.</p>
+      <div class="footer-legal-links">
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/about">Terms & Safe Protocol</a>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
 
-  <script type="module" src="/main.js"></script>
+<script>
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebarMenu = document.getElementById('sidebar-menu');
+  const closeMenuBtn = document.getElementById('close-menu-btn');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+  if (menuToggle) menuToggle.onclick = () => { sidebarMenu?.classList.add('active'); sidebarOverlay?.classList.add('active'); };
+  if (closeMenuBtn) closeMenuBtn.onclick = () => { sidebarMenu?.classList.remove('active'); sidebarOverlay?.classList.remove('active'); };
+  if (sidebarOverlay) sidebarOverlay.onclick = () => { sidebarMenu?.classList.remove('active'); sidebarOverlay?.classList.remove('active'); };
+</script>
 </body>
 </html>

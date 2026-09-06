@@ -2120,7 +2120,15 @@ footer.fmh-footer .brand-logo-text *,
 .lightbox-top-brand .brand-logo-text { font-size: 16px !important; }
 .lightbox-close-circle-btn { position: absolute !important; top: calc(12px + env(safe-area-inset-top, 0px)) !important; right: 14px !important; z-index: 70 !important; width: 38px !important; height: 38px !important; background: rgba(255, 255, 255, 0.85) !important; backdrop-filter: blur(16px) !important; border: 1px solid var(--border-hairline) !important; border-radius: 50% !important; color: var(--text-main) !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 15px !important; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease !important; box-shadow: 0 4px 12px rgba(13, 8, 27, 0.08) !important; }
 .lightbox-close-circle-btn:hover { background: var(--crimson-main) !important; color: #FFFFFF !important; transform: scale(1.08) rotate(90deg) !important; }
-.lightbox-scroll-body { overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; height: 100% !important; width: 100% !important; scrollbar-width: thin !important; }
+.lightbox-scroll-body { 
+  overflow-y: auto !important; 
+  -webkit-overflow-scrolling: touch !important; 
+  overscroll-behavior: contain !important; /* 🟢 ป้องกัน Scroll ทะลุไปหน้าหลักบน iOS */
+  touch-action: pan-y !important;
+  height: 100% !important; 
+  width: 100% !important; 
+  scrollbar-width: thin !important; 
+}
 .lightbox-grid-layout { display: grid !important; grid-template-columns: 1fr !important; width: 100% !important; min-height: 100% !important; }
 @media (min-width: 900px) { .lightbox-grid-layout { grid-template-columns: 1.15fr 0.85fr !important; height: 100% !important; } }
 .lightbox-image-column { position: relative !important; display: flex !important; flex-direction: column !important; background-color: var(--surface-subtle) !important; overflow: hidden !important; }
