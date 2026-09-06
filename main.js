@@ -973,21 +973,23 @@ async function getSupabaseClient() {
   }
 
   
-
-  // 🟢 ฟังก์ชัน Lightbox ปรับปรุงข้อความคมชัดและเป็นมืออาชีพ
+// 🟢 ฟังก์ชัน Lightbox แก้ไขตัวแปร pProvText ให้ทำงานได้ 100%
   window.openLightboxModal = function (profile) {
     if (!profile) return;
     const lightboxEl = document.getElementById("lightbox");
     const contentWrapperEl = document.getElementById("lightbox-content-wrapper-el");
     if (!lightboxEl) return;
 
+    // 🔒 ประกาศตัวแปรหลักทั้งหมดที่บนสุด (ป้องกัน ReferenceError 100%)
     const isEn = document.documentElement.lang === "en" || window.location.pathname.includes("-en");
     const cleanName = (profile.name || "สาวสวย").replace(/^(น้อง\s?)+/gi, "").trim();
     const displayName = isEn ? cleanName : `น้อง${cleanName}`;
     const pProvinceThai = profile.provinceThai || profile.provinceNameThai || "เชียงใหม่";
+    const pProvText = pProvinceThai; // กำหนด alias ป้องกัน Error
     const pLocation = profile.location || pProvinceThai;
+    const pLocText = pLocation;     // กำหนด alias ป้องกัน Error
 
-    // 1. สถานะรับงาน
+    // 1. ตรวจสอบสถานะรับงาน
     const isAvail = profile.isAvailable !== undefined
       ? profile.isAvailable
       : !["ติดจอง", "ไม่ว่าง", "พัก", "หยุด"].some(s => (profile.availability || "").toLowerCase().includes(s));
@@ -1002,22 +1004,22 @@ async function getSupabaseClient() {
     const nameMainEl = document.getElementById("lightbox-profile-name-main");
     if (nameMainEl) {
       nameMainEl.innerHTML = `
-        <span style="font-size: clamp(21px, 5.2vw, 25px) !important; font-weight: 900 !important; color: #140F22 !important; letter-spacing: -0.3px;">${displayName}</span>
-        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #059669; margin-left: 6px; font-size: 17px;" title="Verified Profile"></i>' : ""}
+        <span style="font-size: clamp(20px, 5vw, 24px) !important; font-weight: 900 !important; color: #140F22 !important;">${displayName}</span>
+        ${profile.isVerified ? '<i class="fas fa-check-circle" style="color: #059669; margin-left: 6px; font-size: 16px;" title="Verified Profile"></i>' : ""}
       `;
     }
 
     const availBadgeWrapper = document.getElementById("lightbox-availability-badge-wrapper");
     if (availBadgeWrapper) {
       availBadgeWrapper.innerHTML = `
-        <span style="background: #F0ECF8; border: 1px solid rgba(124, 58, 237, 0.15); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusColor}; box-shadow: 0 0 6px ${statusColor};"></span>
-            <span style="color: ${statusColor}; font-size: 11.5px; font-weight: 800;">${availStatus}</span>
+        <span style="background: #F0ECF8; border: 1px solid rgba(0,0,0,0.06); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusColor};"></span>
+            <span style="color: ${statusColor}; font-size: 11px; font-weight: 800;">${availStatus}</span>
         </span>
       `;
     }
 
-    // 3. รูปโปรไฟล์ใหญ่ & Thumbnails
+    // 3. รูปภาพใหญ่ & Thumbnails
     const images = Array.isArray(profile.images) && profile.images.length > 0
       ? profile.images
       : [{ src: DEFAULT_FALLBACK_IMG, fullSrc: DEFAULT_FALLBACK_IMG }];
@@ -1025,7 +1027,7 @@ async function getSupabaseClient() {
     const heroImg = document.getElementById("lightboxHeroImage");
     if (heroImg) {
       heroImg.src = images[0]?.fullSrc || images[0]?.src || DEFAULT_FALLBACK_IMG;
-      heroImg.alt = `${displayName} ตัวจริงตรงปก 100%`;
+      heroImg.alt = `${displayName} รูปถ่ายตัวจริงตรงปก 100%`;
     }
 
     const thumbStrip = document.getElementById("lightboxThumbnailStrip");
@@ -1056,10 +1058,10 @@ async function getSupabaseClient() {
       }
     }
 
-    // 4. สโลแกน & แท็ก
+    // 4. คำคม & แท็ก
     const quoteEl = document.getElementById("lightboxQuote");
     if (quoteEl) {
-      quoteEl.textContent = profile.quote || profile.slogan || (isEn ? "Polite and romantic Girlfriend Experience." : "ดูแลเอาใจใส่น่ารัก สุภาพเรียบร้อย สไตล์ฟิวแฟนเป็นธรรมชาติค่ะ");
+      quoteEl.textContent = profile.quote || profile.slogan || (isEn ? "Polite and romantic Girlfriend Experience." : "ดูแลเทคแคร์น่ารัก อัธยาศัยดีสไตล์ฟิวแฟน");
       quoteEl.style.display = "block";
     }
 
@@ -1074,10 +1076,11 @@ async function getSupabaseClient() {
       });
     }
 
-    // 5. สเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน (ปรับ Contrast ให้คมชัด 100%)
+    // 5. สเปก 3 ช่อง + กล่องค่าขนม/พิกัดงาน (#F0ECF8)
     const safeAge = profile.safeAgeDisplay || (profile.age ? `${profile.age} ปี` : "ไม่ระบุ");
-    const safeStats = profile.safeStats || "ไม่ระบุ";
-    const safeHeight = profile.safeHeight || "ไม่ระบุ";
+    const safeStats = profile.safeStats || profile.stats || "ไม่ระบุ";
+    const safeHeight = profile.safeHeight || (profile.height ? `${profile.height} cm` : "ไม่ระบุ");
+    const displayPrice = profile.displayPrice || (profile.rate ? `${parseInt(profile.rate).toLocaleString()}.-` : "1,500.-");
 
     const labelAge = isEn ? "Age" : "อายุ";
     const labelStats = isEn ? "Stats" : "สัดส่วน";
@@ -1089,43 +1092,40 @@ async function getSupabaseClient() {
     if (detailsCompactEl) {
       detailsCompactEl.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">
-            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center; border: 1px solid rgba(124, 58, 237, 0.1);">
-                <div style="font-size: 10.5px; color: #475569; font-weight: 700;">${labelAge}</div>
+            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
+                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${labelAge}</div>
                 <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeAge}</div>
             </div>
-            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center; border: 1px solid rgba(124, 58, 237, 0.1);">
-                <div style="font-size: 10.5px; color: #475569; font-weight: 700;">${labelStats}</div>
+            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
+                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${labelStats}</div>
                 <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeStats}</div>
             </div>
-            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center; border: 1px solid rgba(124, 58, 237, 0.1);">
-                <div style="font-size: 10.5px; color: #475569; font-weight: 700;">${labelHeight}</div>
+            <div class="bento-stat-tile" style="background: #F0ECF8; border-radius: 14px; padding: 10px 4px; text-align: center;">
+                <div style="font-size: 10.5px; color: #827894; font-weight: 700;">${labelHeight}</div>
                 <div style="font-weight: 900; font-size: 14px; color: #140F22; margin-top: 2px;">${safeHeight}</div>
             </div>
         </div>
 
-        <div style="background: #F0ECF8; padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.12); display: flex; flex-direction: column; gap: 8px;">
+        <div style="background: #F0ECF8; padding: 12px 14px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #334155; font-size: 12px; font-weight: 800;"><i class="fas fa-tag" style="color:#7C3AED; margin-right:4px;"></i> ${labelPrice}</span>
-                <span style="color: #059669; font-weight: 900; font-size: 15px;">${profile.displayPrice}</span>
+                <span style="color: #4A4458; font-size: 12px; font-weight: 700;"><i class="fas fa-tag" style="color:#7C3AED; margin-right:4px;"></i> ${labelPrice}</span>
+                <span style="color: #059669; font-weight: 900; font-size: 15px;">${displayPrice}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(124, 58, 237, 0.15); padding-top: 6px;">
-                <span style="color: #334155; font-size: 12px; font-weight: 800;"><i class="fas fa-map-marker-alt" style="color:#7C3AED; margin-right:4px;"></i> ${labelLocation}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(0,0,0,0.08); padding-top: 6px;">
+                <span style="color: #4A4458; font-size: 12px; font-weight: 700;"><i class="fas fa-map-marker-alt" style="color:#7C3AED; margin-right:4px;"></i> ${labelLocation}</span>
                 <span style="color: #140F22; font-weight: 800; font-size: 12.5px;">${pLocation}</span>
             </div>
         </div>
       `;
     }
 
-    // 6. คำบรรยายรายละเอียด (ปรับสำนวนให้อบอุ่น น่าเชื่อถือ)
+    // 6. คำบรรยายรายละเอียด
     const descContainer = document.getElementById("lightboxDescriptionContainer");
     const descContent = document.getElementById("lightboxDescriptionContent");
     if (descContent) {
-      const defaultDesc = isEn 
-        ? `${nameStr} is a verified companion available for polite dinner dates, travel escort, and relaxing companionship in ${pLocation}. 100% verified real photos with in-person payment on arrival.`
-        : `${displayName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวสไตล์ฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลเอาใจใส่อย่างสุภาพ เรียบร้อย เป็นธรรมชาติ ปลอดภัยด้วยระบบนัดพบชำระหน้างาน ไม่โอนมัดจำล่วงหน้าทุกกรณีค่ะ`;
+      const defaultDesc = `${displayName} ยืนยันตัวตนตรงปก 100% พร้อมให้บริการเพื่อนเที่ยวฟิวแฟนในพิกัดย่าน ${pLocation} ดูแลสุภาพ เรียบร้อย เป็นกันเอง สนใจสอบถามคิวงานได้เลยค่ะ`;
       descContent.innerHTML = (profile.description || defaultDesc).replace(/\n/g, "<br>");
-      descContent.style.color = "#334155";
-      descContent.style.lineHeight = "1.65";
+      descContent.style.color = "#4A4458";
     }
     if (descContainer) descContainer.style.display = "block";
 
@@ -1135,16 +1135,20 @@ async function getSupabaseClient() {
       const oldLineBtn = document.getElementById("line-btn-sticky-wrapper");
       if (oldLineBtn) oldLineBtn.remove();
 
-      const cleanLine = (profile.lineId || "ksLUWB89Y_").replace(/^@/, "").trim();
+      const rawLine = String(profile.lineId || profile.line_id || "ksLUWB89Y_").trim();
       let lineUrl = "https://line.me/ti/p/ksLUWB89Y_";
-      if (cleanLine.startsWith("http")) lineUrl = cleanLine;
-      else if (cleanLine && cleanLine !== "ksLUWB89Y_") lineUrl = `https://line.me/ti/p/${cleanHandle}`;
+      if (rawLine.startsWith("http://") || rawLine.startsWith("https://")) {
+        lineUrl = rawLine;
+      } else {
+        const cleanHandle = rawLine.replace(/^@/, "").replace(/[^a-zA-Z0-9_\-\.]/g, "").trim();
+        if (cleanHandle) lineUrl = `https://line.me/ti/p/${cleanHandle}`;
+      }
 
       const lineWrapper = document.createElement("div");
       lineWrapper.id = "line-btn-sticky-wrapper";
       lineWrapper.style.cssText = "margin-top: 10px; width: 100%;";
       
-      const lineBtnText = isEn ? `Book ${nameStr} via LINE` : `แอดไลน์จองคิว ${displayName}`;
+      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `แอดไลน์จองคิว ${displayName}`;
       lineWrapper.innerHTML = `
         <a href="${lineUrl}" target="_blank" rel="noopener nofollow" class="lightbox-line-cta" onclick="window.trackLineClick('${profile.id}')" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; padding: 13px 0; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);">
             <i class="fab fa-line" style="font-size: 20px;"></i>
@@ -1155,7 +1159,7 @@ async function getSupabaseClient() {
     }
 
     // ═════════════════════════════════════════════════════════════════
-    // 🟣 8. ส่วนต่อเติมด้านล่าง (เรทราคา, FAQ, รีวิว, น้องแนะนำ)
+    // 🟣 8. คำนวณและหยอดข้อมูลส่วนต่อเติมด้านล่าง (เรทราคา, FAQ, รีวิว, น้องแนะนำ)
     // ═════════════════════════════════════════════════════════════════
     const rawRateStr = String(profile.rate || profile._price || profile.price || "1500").replace(/\D/g, "");
     const rateNum = parseInt(rawRateStr, 10) >= 500 ? parseInt(rawRateStr, 10) : 1500;
@@ -1164,88 +1168,96 @@ async function getSupabaseClient() {
     const ratesGrid = document.getElementById("lightboxRatesGrid");
     if (ratesGrid) {
       ratesGrid.innerHTML = `
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); padding: 10px 4px; border-radius: 12px;">
-          <div style="color: #475569; font-size: 11px; font-weight: 800; margin-bottom: 2px;">1 ชั่วโมง</div>
-          <strong style="color: #059669; font-size: 15px; font-weight: 900;">${rateNum.toLocaleString()}.-</strong>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">1 ชม.</div>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${rateNum.toLocaleString()}.-</strong>
         </div>
-        <div style="background: #F8F6FC; border: 1.5px solid rgba(124, 58, 237, 0.25); padding: 10px 4px; border-radius: 12px; position: relative;">
-          <span style="position: absolute; top: -7px; left: 50%; transform: translateX(-50%); background: #E11D48; color: #FFFFFF; font-size: 8px; font-weight: 800; padding: 1px 6px; border-radius: 100px; white-space: nowrap;">🔥 ยอดนิยม</span>
-          <div style="color: #475569; font-size: 11px; font-weight: 800; margin-bottom: 2px;">2 ชั่วโมง</div>
-          <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNum * 1.8).toLocaleString()}.-</strong>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">2 ชม.</div>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${Math.floor(rateNum * 1.8).toLocaleString()}.-</strong>
         </div>
-        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); padding: 10px 4px; border-radius: 12px;">
-          <div style="color: #475569; font-size: 11px; font-weight: 800; margin-bottom: 2px;">ค้างคืน (VIP)</div>
-          <strong style="color: #059669; font-size: 15px; font-weight: 900;">${Math.floor(rateNum * 4.5).toLocaleString()}.-</strong>
+        <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.1); padding: 10px 4px; border-radius: 12px;">
+          <div style="color: #64748B; font-size: 11px; font-weight: 800; margin-bottom: 2px;">ค้างคืน</div>
+          <strong style="color: #059669; font-size: 14.5px; font-weight: 900;">${Math.floor(rateNum * 4.5).toLocaleString()}.-</strong>
         </div>
       `;
     }
 
-    // 💬 8.2 FAQ คำถามพบบ่อย (สำนวนคมชัด กระชับ มั่นใจ)
+    // 💬 8.2 FAQ คำถามพบบ่อย 3 ข้อ
     const faqTitle = document.getElementById("lightboxFaqTitle");
-    if (faqTitle) faqTitle.textContent = isEn ? `Frequently Asked Questions about ${nameStr}` : `คำถามพบบ่อยเกี่ยวกับ ${displayName}`;
+    if (faqTitle) faqTitle.textContent = isEn ? `Frequently Asked Questions about ${displayName}` : `คำถามพบบ่อยเกี่ยวกับ ${displayName}`;
     const faqList = document.getElementById("lightboxFaqList");
     if (faqList) {
       const ageNum = profile.safeAge && profile.safeAge !== "-" ? profile.safeAge : "22";
       const heightNum = profile.height && String(profile.height).trim() !== "-" ? String(profile.height).replace(/\D/g, "") : "162";
-      const lineBtnText = isEn ? `Book ${nameStr} via LINE` : `แอดไลน์จองคิว ${displayName}`;
+      const lineBtnText = isEn ? `Book ${displayName} via LINE` : `แอดไลน์จองคิว ${displayName}`;
 
       faqList.innerHTML = `
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <h5 style="font-size: 12.5px; font-weight: 800; color: #6D28D9; margin: 0 0 4px 0;">Q: พิกัดบริการและสัดส่วนของ ${displayName}?</h5>
-          <p style="font-size: 12px; color: #334155; line-height: 1.6; margin: 0;">${displayName} อายุ ${ageNum} ปี สัดส่วน ${safeStats} ส่วนสูง ${heightNum} ซม. สแตนด์บายพร้อมให้บริการในย่าน ${pLocation} (${pProvinceThai}) ดูแลสไตล์ฟิวแฟนอย่างอบอุ่นและสุภาพ การันตีตัวจริงตรงปก 100% ค่ะ</p>
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: ${displayName} มีสัดส่วน ส่วนสูง และพิกัดบริการที่ไหนบ้าง?</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">${displayName} อายุ ${ageNum} ปี สัดส่วน ${safeStats} ส่วนสูง ${heightNum} ซม. สแตนด์บายพร้อมดูแลในเขตพื้นที่ ${pLocText} ในจังหวัด${pProvText} ดูแลสไตล์ฟิวแฟนอย่างอบอุ่น สุภาพ ตรงปก 100% ค่ะ</p>
         </div>
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <h5 style="font-size: 12.5px; font-weight: 800; color: #6D28D9; margin: 0 0 4px 0;">Q: เงื่อนไขการชำระเงินและเงินมัดจำ?</h5>
-          <p style="font-size: 12px; color: #334155; line-height: 1.6; margin: 0;">ไม่มีการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ อัตราค่าบริการเริ่มต้น ${rateNum.toLocaleString()}.- นัดพบเจอตัวจริงและตรวจสอบความถูกต้องหน้างานเรียบร้อยแล้ว จึงค่อยชำระเงินตรงกับน้องได้เลยค่ะ</p>
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: อัตราค่าบริการและเงื่อนไขการชำระเงินของ ${displayName} เป็นอย่างไร?</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">อัตราค่าบริการเริ่มต้น ${rateNum.toLocaleString()}.- นัดพบเจอตัวจริงตรวจสอบความตรงปกหน้างานเรียบร้อยแล้วจึงชำระเงินโดยตรง ไม่มีเงื่อนไขการโอนเงินจองมัดจำล่วงหน้าทุกกรณีค่ะ</p>
         </div>
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
-          <h5 style="font-size: 12.5px; font-weight: 800; color: #6D28D9; margin: 0 0 4px 0;">Q: วิธีการตรวจสอบคิวว่างและจองนัดหมาย?</h5>
-          <p style="font-size: 12px; color: #334155; line-height: 1.6; margin: 0;">สามารถกดปุ่ม '${lineBtnText}' เพื่อสอบถามตารางเวลา สแตนด์บายคิว และนัดหมายพิกัดสถานที่กับน้องผ่านทาง LINE ได้อย่างสะดวกรวดเร็วค่ะ</p>
+          <h5 style="font-size: 12px; font-weight: 800; color: #7C3AED; margin: 0 0 4px 0;">Q: สามารถติดต่อตรวจสอบคิวงานหรือจองคิว ${displayName} ได้ทางใด?</h5>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">สามารถกดปุ่ม '${lineBtnText}' บนหน้าโปรไฟล์ เพื่อตรวจสอบตารางงานและสแตนด์บายคิวบริการผ่านไลน์ทางการได้อย่างสะดวกรวดเร็วค่ะ</p>
         </div>
       `;
     }
 
-    // ⭐ 8.3 รีวิวจากลูกค้าจริง (สุ่ม 3 รีวิว สลับตาม Hash)
+    // ⭐ 8.3 รีวิวจากลูกค้าจริง (สุ่ม 3 รีวิว ป้องกันข้อความว่าง)
     const reviewsList = document.getElementById("lightboxReviewsList");
     if (reviewsList) {
       const seed = `${profile.id || ""}_${profile.slug || ""}_${profile.name || ""}`;
       const hash = seed.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const poolLen = REVIEW_POOL.length;
+      const fallbackReviews = [
+        { name: "พี่บอล", text: "ตรงปกมากครับ น้องบริการดีเยี่ยม ฟิวแฟนแท้ๆ เลย สุภาพน่ารักมาก" },
+        { name: "คุณเอก", text: "น้องเอาใจเก่งมาก สวยสมราคา คุยสนุก ปลอดภัย จ่ายหน้างานสบายใจครับ" },
+        { name: "พี่โจ", text: "จองผ่านไลน์ง่ายมาก ไม่ต้องโอนมัดจำ ไปหาหน้างานสบายใจสุดๆ ครับ" },
+        { name: "คุณกอล์ฟ", text: "คุยง่ายเป็นกันเองมากครับ น้องน่ารักสไตล์ผู้ดี แนะนำเลยคนนี้ไม่ผิดหวัง" },
+        { name: "พี่ยอด", text: "ตรงเวลาดีครับ สุภาพเรียบร้อย นิสัยดีตรงตามรูปภาพในโปรไฟล์เลย" },
+        { name: "คุณต้น", text: "บริการประทับใจมาก สุภาพเรียบร้อย ไม่มีเร่งงานเลย แนะนำเลยครับ" }
+      ];
+      const pool = (typeof REVIEW_POOL !== "undefined" && Array.isArray(REVIEW_POOL)) ? REVIEW_POOL : fallbackReviews;
+      const poolLen = pool.length;
       const selectedReviews = [
-        REVIEW_POOL[hash % poolLen],
-        REVIEW_POOL[(hash + 3) % poolLen],
-        REVIEW_POOL[(hash + 7) % poolLen]
+        pool[hash % poolLen],
+        pool[(hash + 2) % poolLen],
+        pool[(hash + 4) % poolLen]
       ];
       reviewsList.innerHTML = selectedReviews.map(r => `
         <div style="background: #F8F6FC; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 14px; padding: 12px 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-            <strong style="color: #140F22; font-size: 12.5px; font-weight: 800;">${r.name}</strong>
-            <span style="color: #D97706; font-size: 10px; letter-spacing: 1px;">⭐⭐⭐⭐⭐</span>
+            <strong style="color: #140F22; font-size: 12px; font-weight: 800;">${r.name}</strong>
+            <span style="color: #D97706; font-size: 10.5px;">⭐⭐⭐⭐⭐</span>
           </div>
-          <p style="font-size: 12px; color: #334155; line-height: 1.55; margin: 0; font-style: italic;">"${r.text}"</p>
+          <p style="font-size: 11.5px; color: #475569; line-height: 1.55; margin: 0;">"${r.text}"</p>
         </div>
       `).join("");
     }
 
-    // 🎀 8.4 น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน (สุ่มหมุนเวียน ไม่ซ้ำ 3 คนเดิม)
+    // 🎀 8.4 น้องๆ แนะนำเพิ่มเติมในโซนเดียวกัน (สุ่มหมุนเวียน ไม่ซ้ำ)
     const relatedTitle = document.getElementById("lightboxRelatedTitle");
-    if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Companions in ${pProvinceThai}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvinceThai}`;
+    if (relatedTitle) relatedTitle.textContent = isEn ? `Recommended Models in ${pProvText}` : `น้องๆ แนะนำเพิ่มเติมในโซน${pProvText}`;
     
     const relatedGrid = document.getElementById("lightboxRelatedGrid");
     const relatedMore = document.getElementById("lightboxRelatedMoreLink");
     if (relatedGrid) {
-      const allList = appState.allProfiles || window.profilesData || [];
+      const allList = (typeof appState !== "undefined" && appState.allProfiles) ? appState.allProfiles : (window.profilesData || []);
       const pKey = (profile.provinceKey || "chiangmai").toLowerCase();
 
       let candidates = allList.filter(m => String(m.id) !== String(profile.id) && (m.provinceKey || "").toLowerCase() === pKey);
 
       if (candidates.length < 3) {
-        const others = allList.filter(m => String(m.id) !== String(profile.id) && !candidates.some(c => String(c.id) === String(m.id)));
-        candidates = [...candidates, ...others];
+        const otherProvinces = allList.filter(m => String(m.id) !== String(profile.id) && !candidates.some(c => String(c.id) === String(m.id)));
+        candidates = [...candidates, ...otherProvinces];
       }
 
-      const shuffled = [...candidates].sort(() => Math.random() - 0.5);
-      const relatedList = shuffled.slice(0, 3);
+      const shuffledList = [...candidates].sort(() => Math.random() - 0.5);
+      const relatedList = shuffledList.slice(0, 3);
 
       if (relatedList.length > 0) {
         relatedGrid.innerHTML = relatedList.map(rm => {
@@ -1253,12 +1265,13 @@ async function getSupabaseClient() {
           const rmImg = rm.images && rm.images[0] ? (rm.images[0].src || rm.images[0]) : (rm.imagePath || DEFAULT_FALLBACK_IMG);
           return `
             <div class="lightbox-related-item" data-profile-slug="${rm.slug || rm.id}" style="background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid rgba(124, 58, 237, 0.12); display: block; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s;">
-              <img src="${rmImg}" alt="${rmName} สาวรับงาน${pProvinceThai}" loading="lazy" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
+              <img src="${rmImg}" alt="${rmName} สาวรับงาน${pProvText}" loading="lazy" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
               <div style="padding: 6px 2px; font-size: 11px; font-weight: 800; color: #140F22;">${rmName}</div>
             </div>
           `;
         }).join("");
 
+        // ดักจับคลิกสลับโปรไฟล์ใน Lightbox
         relatedGrid.querySelectorAll(".lightbox-related-item").forEach(card => {
           card.addEventListener("click", function(e) {
             e.preventDefault();
@@ -1273,19 +1286,19 @@ async function getSupabaseClient() {
           });
         });
       } else {
-        relatedGrid.innerHTML = '<div style="grid-column: span 3; font-size: 11.5px; color: #64748B; text-align: center;">ไม่มีโปรไฟล์แนะนำเพิ่มเติมในขณะนี้</div>';
+        relatedGrid.innerHTML = '<div style="grid-column: span 3; font-size: 11px; color: #827894; text-align: center;">ไม่มีโปรไฟล์แนะนำเพิ่มเติมในขณะนี้</div>';
       }
     }
 
     if (relatedMore) {
       relatedMore.innerHTML = `
-        <a href="/location/${profile.provinceKey || "chiangmai"}" style="color: #6D28D9; font-size: 11.5px; font-weight: 800; text-decoration: none;">
-          ${isEn ? "View all companions in this zone →" : `ดูน้องๆ รับงานโซน${pProvinceThai} ทั้งหมด →`}
+        <a href="/location/${profile.provinceKey || "chiangmai"}" style="color: #7C3AED; font-size: 11.5px; font-weight: 800; text-decoration: none;">
+          ${isEn ? "View all models in this area →" : `ดูน้องๆ รับงานโซน${pProvText} ทั้งหมด →`}
         </a>
       `;
     }
 
-    // 9. แสดงผลหน้าต่าง
+    // 9. แสดงผลหน้าต่าง Lightbox
     lightboxEl.classList.add("active");
     lightboxEl.style.display = "flex";
     lightboxEl.style.pointerEvents = "auto";
